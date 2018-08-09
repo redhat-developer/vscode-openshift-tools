@@ -1,5 +1,7 @@
 # vscode-openshift-tools README
 
+[![Build Status](https://travis-ci.org/redhat-developer/vscode-openshift-tools.svg?branch=master)](https://travis-ci.org/redhat-developer/vscode-openshift-tools)
+
 This is the README for your extension "vscode-openshift-tools". After writing up a brief description, we recommend including the following sections.
 
 ## Features
