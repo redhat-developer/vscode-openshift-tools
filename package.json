@@ -20,8 +20,33 @@
                 "command": "extension.sayHello",
                 "title": "Hello World"
             }
-        ]
+        ],
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "openshiftView",
+                    "title": "OpenShift",
+                    "icon": "images/logo.svg"
+                }
+            ]
+        },
+        "views": {
+            "openshiftView": [
+                {
+                    "id": "openshiftProjectExplorer",
+                    "name": "OpenShift Projects"
+                },
+                {
+                    "id": "extension.vsKubernetesExplorer",
+                    "name": "Clusters"
+                }
+            ]
+
+        }
     },
+    "extensionDependencies": [
+        "ms-kubernetes-tools.vscode-kubernetes-tools"
+    ],
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
