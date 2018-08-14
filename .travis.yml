@@ -24,3 +24,4 @@ install:
 
 script:
   - npm test --silent
+  - codecov -f coverage/coverage-final.json
