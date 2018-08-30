@@ -33,9 +33,11 @@ export interface OdoChannel {
 class OdoChannelImpl implements OdoChannel {
     private readonly channel: vscode.OutputChannel = vscode.window.createOutputChannel("OpenShift Do");
 
-    print(text: any) {
+    print(text: string) {
         this.channel.append(text);
-        this.channel.append('\n');
+        if(text.charAt(text.length-1) !== '\n') {
+            this.channel.append('\n');
+        }
         this.channel.show();
     }
 }
