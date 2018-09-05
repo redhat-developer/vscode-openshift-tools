@@ -15,7 +15,7 @@ export function create(odoctl: Odo) {
 
 export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject> {
 
-    constructor(private odoctl: Odo) {
+    constructor(private odoctl: Odo, ) {
     }
 
     private onDidChangeTreeDataEmitter: EventEmitter<OpenShiftObject | undefined> = new EventEmitter<OpenShiftObject | undefined>();
