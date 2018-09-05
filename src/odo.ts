@@ -1,7 +1,8 @@
 import * as cliInstance from './cli';
-import { TreeItem, ProviderResult, TreeItemCollapsibleState, OutputChannel, window, Terminal } from 'vscode';
+import { TreeItem, ProviderResult, TreeItemCollapsibleState, OutputChannel, window, Terminal, Uri } from 'vscode';
 import * as windowUtils from './windowUtils';
 import { CliExitData } from './cli';
+import * as path from 'path';
 
 export interface OpenShiftObject {
     getTreeItem() : TreeItem;
@@ -29,6 +30,14 @@ class OpenShiftObjectImpl implements OpenShiftObject {
 
     getTreeItem(): TreeItem {
         const item = new TreeItem(this.name, this.expandable);
+        if(this.context === 'project') {
+            item.iconPath = Uri.file(path.join(__dirname, "../../images/project.png"));
+        } else if(this.context === 'application') {
+            item.iconPath = Uri.file(path.join(__dirname, "../../images/application.png"));
+        } else {
+            item.iconPath = Uri.file(path.join(__dirname, "../../images/component.png"));
+        }
+        
         item.contextValue = this.context;
         return item;
     }
