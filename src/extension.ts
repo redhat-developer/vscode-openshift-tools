@@ -16,7 +16,7 @@ export namespace Openshift {
         };
     }
     export namespace Project {
-        export const create = async function createProjectCmd(cli: cli.Cli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
+        export const create = async function createProjectCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
             const value  = await vscode.window.showInputBox({prompt: "Project name"});
             await cli.execute(`odo project create ${value.trim()}`, {});
             await explorer.refresh();
@@ -26,7 +26,7 @@ export namespace Openshift {
         };
     }
     export namespace Application {
-        export const create = async function createApplicationCmd(cli: cli.Cli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
+        export const create = async function createApplicationCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
             vscode.window.showInputBox({prompt: "Application name"}).then(value=> {
                 cli.execute(`odo app create ${value.trim()}`, {}).then(()=>{
                     explorer.refresh();
@@ -37,7 +37,7 @@ export namespace Openshift {
             let project: odoctl.OpenShiftObject = context.getParent();
             odo.executeInTerminal(`odo project set ${project.getName()}; odo app describe ${context.getName()}`, 'c:\\');
         };
-        export const del = async function deleteApplication(cli: cli.Cli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
+        export const del = async function deleteApplication(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
             let project: odoctl.OpenShiftObject = context.getParent();
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete application '${context.getName()}\'`, 'Yes', 'Cancel');
             if(value === 'Yes') {
@@ -104,7 +104,7 @@ export namespace Openshift {
                 console.log(e);
             }
         };
-        export const del = async function deleteComponent(cli: cli.Cli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
+        export const del = async function deleteComponent(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
             let app: odoctl.OpenShiftObject = context.getParent();
             let project: odoctl.OpenShiftObject = app.getParent();
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete component '${context.getName()}\'`, 'Yes', 'Cancel');
@@ -172,7 +172,7 @@ export namespace Openshift {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    const cliExec: cli.Cli = cli.create();
+    const cliExec: cli.ICli = cli.create();
     const odoCli: odoctl.Odo = odoctl.create(cliExec);
     const explorer:explorerFactory.OpenShiftExplorer = explorerFactory.create(odoCli);
     let disposable = [ 

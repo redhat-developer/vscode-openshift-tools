@@ -6,7 +6,7 @@
 // The module 'assert' provides assertion methods from node
 import * as odo from '../src/odo';
 import { OpenShiftObject } from '../src/odo';
-import  { Cli, CliExitData, create } from '../src/cli';
+import  { ICli, CliExitData, create } from '../src/cli';
 import * as assert from 'assert';
 import { RSA_PKCS1_OAEP_PADDING } from 'constants';
 import { FunctionBreakpoint } from 'vscode';
@@ -30,7 +30,7 @@ suite("odo integration tests", function () {
         const nodejs = 'nodejs';    
         const python = 'python';    
     
-        const odoCatalogCli: Cli = create([
+        const odoCatalogCli: ICli = create([
             `NAME                           TAGS`,
             `${nodejs}                      1.0`,
             `${python}                      1.0,2.0`,
@@ -73,7 +73,7 @@ suite("odo integration tests", function () {
         const app2 = 'app2';  
         const app3 = 'app3';    
     
-        const odoAppCli: Cli = create([
+        const odoAppCli: ICli = create([
             `ACTIVE  NAME`,
             `  *     ${app1}`,
             `        ${app2}`,
@@ -99,7 +99,7 @@ suite("odo integration tests", function () {
         const proj2 = 'proj2';  
         const proj3 = 'proj3';    
     
-        const odoProjCli: Cli = create([
+        const odoProjCli: ICli = create([
             `ACTIVE  NAME`,
             `  *     ${proj1}`,
             `        ${proj2}`,
