@@ -17,6 +17,11 @@
   "contributes": {
     "commands": [
       {
+        "command": "openshift.about",
+        "title": "About",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.explorer.refresh",
         "title": "Refresh View",
         "category": "OpenShift",
@@ -122,6 +127,10 @@
         },
         {
           "command": "openshift.catalog.list",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.about",
           "when": "view == openshiftProjectExplorer"
         }
       ],

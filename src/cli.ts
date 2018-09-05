@@ -9,7 +9,7 @@ export interface CliExitData {
 }
 
 class Cli implements ICli {
-    execute(cmd: string, opts: any): Promise<CliExitData> {
+    execute(cmd: string, opts: any = {}): Promise<CliExitData> {
         return new Promise<CliExitData>((resolve, reject) => {
             odoChannel.print(cmd);
             shelljs.exec(cmd, opts, (code, stdout, stderr) => {
