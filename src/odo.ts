@@ -57,13 +57,13 @@ export interface Odo {
     execute(command: string, cwd?: string);
 }
 
-export function create(cli: cliInstance.Cli) : Odo {
+export function create(cli: cliInstance.ICli) : Odo {
     return new OdoImpl(cli);
 }
 
 class OdoImpl implements Odo {
 
-    constructor(private readonly cli: cliInstance.Cli ) {
+    constructor(private readonly cli: cliInstance.ICli ) {
 
     }
 

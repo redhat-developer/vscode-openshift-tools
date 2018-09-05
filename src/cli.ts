@@ -1,5 +1,6 @@
 import * as shelljs from 'shelljs';
 import * as vscode from 'vscode';
+import * as path from 'path';
 
 export interface CliExitData {
     readonly code: number;
@@ -7,23 +8,25 @@ export interface CliExitData {
     readonly stderr: string;
 }
 
-export function execute(cmd: string, opts: any): Promise<CliExitData> {
-    return new Promise<CliExitData>((resolve, reject) => {
-        odoChannel.print(cmd);
-        shelljs.exec(cmd, opts, (code, stdout, stderr) => {
-            odoChannel.print(stdout);
-            odoChannel.print(stderr);
-            resolve({code, stdout, stderr});
+class Cli implements ICli {
+    execute(cmd: string, opts: any): Promise<CliExitData> {
+        return new Promise<CliExitData>((resolve, reject) => {
+            odoChannel.print(cmd);
+            shelljs.exec(cmd, opts, (code, stdout, stderr) => {
+                odoChannel.print(stdout);
+                odoChannel.print(stderr);
+                resolve({code, stdout, stderr});
+            });
         });
-    });
+    }
 }
 
-export interface Cli {
+export interface ICli {
     execute(cmd: string, opts: any): Promise<CliExitData>;
 }
 
 export function create() {
-    return {execute};
+    return new Cli();
 }
 
 export interface OdoChannel {
