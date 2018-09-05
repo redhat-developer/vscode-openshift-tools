@@ -10,9 +10,13 @@ import * as git from './git';
 import * as path from 'path';
 
 export namespace Openshift {
+
+    export const about = async function (odo: odoctl.Odo) {
+        const result:CliExitData = await odo.executeInTerminal(`odo version`, process.cwd());
+    }
     export namespace Catalog {
         export const list = function listComponentTypes(odo: odoctl.Odo) {
-            odo.executeInTerminal(`odo catalog list`, 'c:\\');            
+            odo.executeInTerminal(`odo catalog list`, process.cwd());
         };
     }
     export namespace Project {
@@ -176,6 +180,7 @@ export function activate(context: vscode.ExtensionContext) {
     const odoCli: odoctl.Odo = odoctl.create(cliExec);
     const explorer:explorerFactory.OpenShiftExplorer = explorerFactory.create(odoCli);
     let disposable = [ 
+        vscode.commands.registerCommand('openshift.about', Openshift.about.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.explorer.refresh', Openshift.Explorer.refresh.bind(undefined, explorer)),
         vscode.commands.registerCommand('openshift.catalog.list', Openshift.Catalog.list.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.project.create', Openshift.Project.create.bind(undefined, cliExec, explorer)),
