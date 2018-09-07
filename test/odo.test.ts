@@ -17,7 +17,7 @@ suite("odo integration tests", function () {
         return {
             execute : function(cmd: string, env: any): Promise<CliExitData> {
                 return Promise.resolve({
-                    error: new Error("Message"),
+                    error: undefined,
                     stderr: '',
                     stdout
                 });
