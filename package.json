@@ -91,6 +91,11 @@
         "command": "openshift.catalog.list",
         "title": "List Component Types",
         "category": "OpenShift"
+      },
+      {
+        "command": "openshift.url.create",
+        "title": "Create URL",
+        "category": "OpenShift"
       }
     ],
     "viewsContainers": {
@@ -177,6 +182,10 @@
         },
         {
           "command": "openshift.component.watch",
+          "when": "view == openshiftProjectExplorer && viewItem == component"
+        },
+        {
+          "command": "openshift.url.create",
           "when": "view == openshiftProjectExplorer && viewItem == component"
         }
       ]
