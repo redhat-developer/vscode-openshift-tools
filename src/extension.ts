@@ -47,7 +47,7 @@ export namespace Openshift {
             if(value === 'Yes') {
                 cli.execute(`odo project set ${project.getName()}`, {}).then(()=>{
                     cli.execute(`odo app delete ${context.getName()} -f`, {}).then((value:CliExitData)=>{
-                        if(value.code) {
+                        if(value.error) {
                             vscode.window.showErrorMessage(`Failed to delete application!`);
                         } else {
                             explorer.refresh();
@@ -116,7 +116,7 @@ export namespace Openshift {
                 cli.execute(`odo project set ${project.getName()}`, {}).then(()=>{
                     cli.execute(`odo app set ${app.getName()}`, {}).then(()=>{
                         cli.execute(`odo delete ${context.getName()} -f`, {}).then((value:CliExitData)=> {
-                            if(value.code) {
+                            if(value.error) {
                                 vscode.window.showErrorMessage(`Failed to delete component!`);
                             } else {
                                 explorer.refresh();
@@ -146,7 +146,7 @@ export namespace Openshift {
                 odo.execute(`odo app set ${app.getName()}`).then(()=>{
                     odo.execute(`odo component set  ${context.getName()}`).then((value:CliExitData)=> {
                         odo.execute(`odo push ${context.getName()}`).then((value:CliExitData)=> {
-                            if(value.code) {
+                            if(value.error) {
                                 vscode.window.showErrorMessage(`Failed to push component!`);
                             }
                         });
@@ -164,8 +164,31 @@ export namespace Openshift {
         };
     }
     export namespace Url {
-        export const create = function createUrl(context) {
-            vscode.window.showInformationMessage('odo url create');
+        export const create = async function createUrl(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
+            const app: odoctl.OpenShiftObject = context.getParent();
+            const project: odoctl.OpenShiftObject = app.getParent();
+            const compName: string = context.getName();
+            const portsResult:CliExitData = await odo.execute(`oc get service springbootbooster1-app -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`);
+            let ports: string[] = portsResult.stdout.trim().split(',');
+            ports = ports.slice(0,ports.length-1);
+            let port: string = ports[0];
+            if(ports.length > 1) {
+                port = await vscode.window.showQuickPick(ports, {placeHolder: "Select port to expose"});
+            }
+
+            odo.execute(`odo project set ${project.getName()}`).then(()=>{
+                odo.execute(`odo app set ${app.getName()}`).then(()=>{
+                    odo.execute(`odo component set ${context.getName()}`).then((value:CliExitData)=> {
+                        odo.execute(`odo url create --port ${port}`).then((value:CliExitData)=> {
+                            if(value.error) {
+                                vscode.window.showErrorMessage(`Failed to create URL for component '${context.getName()}'!`);
+                            }
+                        });
+                    });
+                });
+            }).catch((err)=>{
+                vscode.window.showErrorMessage(`Failed to create URL for component '${context.getName()}'!`);
+            });
         };
     }
     export namespace Explorer {
@@ -194,6 +217,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.watch', Openshift.Component.watch.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.log', Openshift.Component.log.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.delete', Openshift.Component.del.bind(undefined, cliExec, explorer)),
+        vscode.commands.registerCommand('openshift.url.create', Openshift.Url.create.bind(undefined,cliExec)),
         vscode.window.registerTreeDataProvider('openshiftProjectExplorer', explorer)
     ];
     disposable.forEach(value=>context.subscriptions.push(value));

@@ -63,7 +63,7 @@ export interface Odo {
     executeInTerminal(command: string, cwd: string);
     getComponentTypes(): Promise<string[]>;
     getComponentTypeVersions(componentName: string): Promise<string[]>;
-    execute(command: string, cwd?: string);
+    execute(command: string, cwd?: string): Promise<CliExitData>;
 }
 
 export function create(cli: cliInstance.ICli) : Odo {
@@ -80,7 +80,7 @@ class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.cli.execute(
             'odo project list', {}
         );
-        if(result.code) {
+        if(result.error) {
             return [];
         }
         return result.stdout.trim().split("\n").slice(1).map<OpenShiftObject>(value => new OpenShiftObjectImpl(undefined, value.replace(/[\s|\\*]/g, ''), 'project', this));

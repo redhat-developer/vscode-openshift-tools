@@ -1,9 +1,9 @@
-import * as shelljs from 'shelljs';
+import * as childProcess from 'child_process';
 import * as vscode from 'vscode';
 import * as path from 'path';
 
 export interface CliExitData {
-    readonly code: number;
+    readonly error: Error;
     readonly stdout: string;
     readonly stderr: string;
 }
@@ -12,10 +12,10 @@ class Cli implements ICli {
     execute(cmd: string, opts: any = {}): Promise<CliExitData> {
         return new Promise<CliExitData>((resolve, reject) => {
             odoChannel.print(cmd);
-            shelljs.exec(cmd, opts, (code, stdout, stderr) => {
+            childProcess.exec(cmd, opts, (error: Error, stdout: string, stderr: string) => {
                 odoChannel.print(stdout);
                 odoChannel.print(stderr);
-                resolve({code, stdout, stderr});
+                resolve({error, stdout, stderr});
             });
         });
     }
