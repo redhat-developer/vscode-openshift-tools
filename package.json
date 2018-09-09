@@ -207,13 +207,13 @@
     "@types/mocha": "^2.2.42",
     "@types/node": "^7.0.43",
     "@types/shelljs": "^0.8.0",
-    "mocha-jenkins-reporter": "^0.3.12",
+    "mocha-jenkins-reporter": "^0.4.0",
     "tslint": "^5.8.0",
     "typescript": "^2.6.1",
     "vscode": "^1.1.21"
   },
   "dependencies": {
-    "decache":"^4.4.0",
+    "decache": "^4.4.0",
     "codecov": "^3.0.4",
     "file-url": "^2.0.2",
     "glob": "^7.1.2",
