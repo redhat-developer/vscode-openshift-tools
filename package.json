@@ -213,18 +213,21 @@
     "vscode": "^1.1.21"
   },
   "dependencies": {
-    "decache": "^4.4.0",
+    "@types/request": "^2.47.1",
+    "byline": "5.0.0",
     "codecov": "^3.0.4",
+    "decache": "^4.4.0",
+    "file-type": "9.0.0",
     "file-url": "^2.0.2",
+    "fs-extra": "^7.0.0",
     "glob": "^7.1.2",
+    "iconv-lite": "0.4.23",
     "istanbul": "^0.4.5",
+    "jschardet": "1.6.0",
+    "remap-istanbul": "^0.11.1",
+    "request-progress": "^3.0.0",
     "shelljs": "^0.8.2",
     "url-parse": "^1.4.3",
-    "which": "^1.3.1",
-    "jschardet": "1.6.0",
-    "iconv-lite": "0.4.23",
-    "file-type": "9.0.0",
-    "byline": "5.0.0",
-    "remap-istanbul": "^0.11.1"
+    "which": "^1.3.1"
   }
 }
