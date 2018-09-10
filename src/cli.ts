@@ -2,7 +2,10 @@ import * as childProcess from 'child_process';
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as download from './download';
-import * as fs from 'fs-extra';
+import * as fsex from 'fs-extra';
+import { platform } from 'os';
+import { which } from 'shelljs';
+import * as fs from 'fs';
 
 
 export interface CliExitData {
@@ -14,25 +17,9 @@ export interface CliExitData {
 class Cli implements ICli {
 
     async execute(cmd: string, opts: any = {}): Promise<CliExitData> {
-
-        const installed = await isToolInstalled(cmd.split(' ')[1]);
-        let finalCommand = cmd;
-        
-        if(!installed) {
-            const toFile = path.resolve('c:\\Users\\Eskimo\\.vs-openshift\\odo.exe');
-            await fs.ensureDir(path.dirname(toFile));
-            download.downloadFile(
-                "https://github.com/redhat-developer/odo/releases/download/v0.0.10/odo-windows-amd64.exe", 
-                toFile, 
-                function(error){
-                    console.log(error);
-                }, 
-                function(progress){
-                    console.log(progress);
-                }
-            );
-            finalCommand = cmd.replace("odo", toFile);
-        }
+        const cmdName = cmd.split(' ')[0];
+        const odoLocation = await getToolLocation(cmdName);
+        let finalCommand = cmd.replace("odo", odoLocation);
 
         return new Promise<CliExitData>((resolve, reject) => {
             odoChannel.print(finalCommand);
@@ -70,8 +57,32 @@ class OdoChannelImpl implements OdoChannel {
 }
 
 
- async function isToolInstalled(cmdName: string) {
-    return false;
+async function getToolLocation(cmd): Promise<string> {
+    
+    let toolLocation = getDownloadedLocation(cmd);
+    try {
+        fs.accessSync(toolLocation);
+    } catch(error) {
+        let pathTool = which(cmd);
+        if(pathTool === null) {
+            await fsex.ensureDir(path.dirname(toolLocation));
+            await download.downloadFile(
+                "https://github.com/redhat-developer/odo/releases/download/v0.0.10/odo-windows-amd64.exe", 
+                toolLocation, 
+                function(progress){
+                    console.log(progress + '%');
+                }
+            );
+        } else {
+            toolLocation = cmd;
+        }
+        
+    }
+    return toolLocation;
+}
+
+function getDownloadedLocation(cmd) {
+    return path.resolve('c:\\Users\\Eskimo\\.vs-openshift\\odo' + (platform()==='win32'?'.exe':'') );
 }
 
 export const odoChannel = new OdoChannelImpl();
