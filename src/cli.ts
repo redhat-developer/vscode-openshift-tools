@@ -131,7 +131,12 @@ async function getToolLocation(cmd): Promise<string> {
                     odoChannel.print(progress + '%');
                 }
             );
-            await unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), tools[cmd].prefix);
+            if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
+                await unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), tools[cmd].prefix);
+            }
+            if (process.platform !== 'win32') {
+                fs.chmodSync(toolLocation, 0o765);
+            }
         } else {
             toolLocation = cmd;
         }
