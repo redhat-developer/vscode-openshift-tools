@@ -15,8 +15,11 @@ export namespace Openshift {
         const result:CliExitData = await odo.executeInTerminal(`odo version`, process.cwd());
     }
     export namespace Catalog {
-        export const list = function listComponentTypes(odo: odoctl.Odo) {
-            odo.executeInTerminal(`odo catalog list`, process.cwd());
+        export const listComponents = function listComponentTypes(odo: odoctl.Odo) {
+            odo.executeInTerminal(`odo catalog list components`, process.cwd());
+        };
+        export const listServices = function listComponentTypes(odo: odoctl.Odo) {
+            odo.executeInTerminal(`odo catalog list services`, process.cwd());
         };
     }
     export namespace Project {
@@ -205,7 +208,8 @@ export function activate(context: vscode.ExtensionContext) {
     let disposable = [ 
         vscode.commands.registerCommand('openshift.about', Openshift.about.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.explorer.refresh', Openshift.Explorer.refresh.bind(undefined, explorer)),
-        vscode.commands.registerCommand('openshift.catalog.list', Openshift.Catalog.list.bind(undefined, odoCli)),
+        vscode.commands.registerCommand('openshift.catalog.list.components', Openshift.Catalog.listComponents.bind(undefined, odoCli)),
+        vscode.commands.registerCommand('openshift.catalog.list.services', Openshift.Catalog.listServices.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.project.create', Openshift.Project.create.bind(undefined, cliExec, explorer)),
         vscode.commands.registerCommand('openshift.project.delete', Openshift.Project.del),
         vscode.commands.registerCommand('openshift.app.describe', Openshift.Application.describe.bind(undefined, odoCli)),
