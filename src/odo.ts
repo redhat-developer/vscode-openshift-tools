@@ -111,7 +111,7 @@ class OdoImpl implements Odo {
 
     public async getComponentTypes(): Promise<string[]> {
         const result: cliInstance.CliExitData = await this.cli.execute(
-            `odo catalog list`, {}
+            `odo catalog list components`, {}
         );
         return result.stdout.trim().split('\n').slice(1).map(value => {
             let name = value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|');
@@ -121,13 +121,13 @@ class OdoImpl implements Odo {
 
     public async getComponentTypeVersions(componentName: string) {
         const result: cliInstance.CliExitData = await this.cli.execute(
-            `odo catalog list`, {}
+            `odo catalog list components`, {}
         );
         const versions = result.stdout.trim().split('\n').slice(1).filter(value => {
             const data = value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|');
             return data[0] === componentName;
             }).map(value => {
-            return value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|')[1];
+            return value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|')[2];
         });
         return  versions[0].split(',');
     }
