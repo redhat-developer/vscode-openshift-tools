@@ -88,8 +88,13 @@
         "category": "OpenShift"
       },
       {
-        "command": "openshift.catalog.list",
-        "title": "List Component Types",
+        "command": "openshift.catalog.list.components",
+        "title": "List Catalog Components ",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.catalog.list.services",
+        "title": "List Catalog Services",
         "category": "OpenShift"
       },
       {
@@ -128,15 +133,23 @@
         },
         {
           "command": "openshift.project.create",
-          "when": "view == openshiftProjectExplorer"
+          "when": "view == openshiftProjectExplorer",
+          "group": "a"
         },
         {
-          "command": "openshift.catalog.list",
-          "when": "view == openshiftProjectExplorer"
+          "command": "openshift.catalog.list.components",
+          "when": "view == openshiftProjectExplorer",
+          "group": "c@1"
+        },
+        {
+          "command": "openshift.catalog.list.services",
+          "when": "view == openshiftProjectExplorer",
+          "group": "c@2"
         },
         {
           "command": "openshift.about",
-          "when": "view == openshiftProjectExplorer"
+          "when": "view == openshiftProjectExplorer",
+          "group": "z"
         }
       ],
       "view/item/context": [
@@ -205,6 +218,7 @@
   },
   "devDependencies": {
     "@types/fs-extra": "^5.0.4",
+    "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^2.2.42",
     "@types/node": "^7.0.43",
     "@types/shelljs": "^0.8.0",
@@ -228,6 +242,8 @@
     "remap-istanbul": "^0.11.1",
     "request-progress": "^3.0.0",
     "shelljs": "^0.8.2",
+    "targz": "^1.0.1",
+    "unzip-stream": "^0.3.0",
     "url-parse": "^1.4.3",
     "which": "^1.3.1"
   }
