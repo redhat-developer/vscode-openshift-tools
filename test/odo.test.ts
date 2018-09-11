@@ -31,10 +31,10 @@ suite("odo integration tests", function () {
         const python = 'python';    
     
         const odoCatalogCli: ICli = create([
-            `NAME                           TAGS`,
-            `${nodejs}                      1.0`,
-            `${python}                      1.0,2.0`,
-            `${http}                        2.2,2.3,latest`
+            `NAME            PROJECT                 TAGS`,
+            `${nodejs}       openshift               1.0`,
+            `${python}       openshift               1.0,2.0`,
+            `${http}         openshift               2.2,2.3,latest`
         ].join('\n'));
         let result: string[];
 
