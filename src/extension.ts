@@ -98,7 +98,6 @@ export namespace Openshift {
                 const info = await git.findGit(pathHint, path => console.log(path));
                 const gitCli = new git.Git({ gitPath: info.path, version: info.version });
                 let repoLocation = await gitCli.clone(repoURI, vscode.workspace.rootPath, componentName);
-                repoLocation = repoLocation.replace('c:','').replace(/\\/g,'/');
                 const currentProject = context.getParent().getName();
                 await odo.execute(`odo project set ${currentProject}`);
                 await odo.execute(`odo app set ${context.getName()}`);
