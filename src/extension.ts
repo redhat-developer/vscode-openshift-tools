@@ -171,7 +171,7 @@ export namespace Openshift {
             const app: odoctl.OpenShiftObject = context.getParent();
             const project: odoctl.OpenShiftObject = app.getParent();
             const compName: string = context.getName();
-            const portsResult:CliExitData = await odo.execute(`oc get service springbootbooster1-app -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`);
+            const portsResult:CliExitData = await odo.execute(`oc get service ${context.getName()}-${app.getName()} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`);
             let ports: string[] = portsResult.stdout.trim().split(',');
             ports = ports.slice(0,ports.length-1);
             let port: string = ports[0];
