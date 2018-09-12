@@ -42,7 +42,7 @@ export namespace Openshift {
         };
         export const describe = async function describe(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             let project: odoctl.OpenShiftObject = context.getParent();
-            odo.executeInTerminal(`odo project set ${project.getName()}; odo app describe ${context.getName()}`, 'c:\\');
+            odo.executeInTerminal(`odo project set ${project.getName()}; odo app describe ${context.getName()}`, process.cwd());
         };
         export const del = async function deleteApplication(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
             let project: odoctl.OpenShiftObject = context.getParent();
@@ -133,12 +133,12 @@ export namespace Openshift {
         export const describe = async function componentDescribe(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             let app: odoctl.OpenShiftObject = context.getParent();
             let project: odoctl.OpenShiftObject = app.getParent();
-            odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo describe ${context.getName()}`, 'c:\\');
+            odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo describe ${context.getName()}`, process.cwd());
         };
         export const log = async function logComponent(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             let app: odoctl.OpenShiftObject = context.getParent();
             let project: odoctl.OpenShiftObject = app.getParent();
-            odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo log ${context.getName()};`, 'c:\\Temp');
+            odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo log ${context.getName()};`, process.cwd());
         };
         export const push = async function pushCmd(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             let app: odoctl.OpenShiftObject = context.getParent();
@@ -162,7 +162,7 @@ export namespace Openshift {
         export const watch = async function watchCmd(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             let app: odoctl.OpenShiftObject = context.getParent();
             let project: odoctl.OpenShiftObject = app.getParent();
-            odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo component set ${context.getName()}; odo watch ${context.getName()};`, 'c:\\');
+            odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo component set ${context.getName()}; odo watch ${context.getName()};`, process.cwd());
         };
     }
     export namespace Url {
