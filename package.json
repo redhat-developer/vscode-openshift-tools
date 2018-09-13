@@ -125,6 +125,56 @@
       ]
     },
     "menus": {
+      "commandPalette": [
+        {
+          "command": "openshift.project.delete",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.project.describe",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.app.describe",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.app.create",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.app.delete",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.describe",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.create",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.log",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.delete",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.push",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.watch",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.url.create",
+          "when": "view == openshiftProjectExplorer"
+        }
+      ],
       "view/title": [
         {
           "command": "openshift.explorer.refresh",
