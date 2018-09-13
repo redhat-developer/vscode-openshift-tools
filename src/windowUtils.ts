@@ -7,7 +7,8 @@ const toolsLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift');
 export function createTerminal(name: string, cwd: string, env: NodeJS.ProcessEnv = process.env): Terminal {
     let finalEnv: NodeJS.ProcessEnv = {};
     Object.assign(finalEnv, env);
-    finalEnv.PATH = `${toolsLocation}:${env.PATH}`;
+    const key = process.platform === 'win32' ? 'Path' : 'PATH';
+    finalEnv[key] = `${toolsLocation}${path.delimiter}${env[key]}`;
 
     const options: TerminalOptions = {
         cwd: cwd,
