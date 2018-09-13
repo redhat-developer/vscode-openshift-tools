@@ -28,8 +28,15 @@ export namespace Openshift {
             await cli.execute(`odo project create ${value.trim()}`, {});
             await explorer.refresh();
         };
-        export const del = function deleteProjectCmd(context) {
-            vscode.window.showInformationMessage('Delete project is not implemented yet!');
+        export const del = async function deleteProjectCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
+            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete project '${context.getName()}\'`, 'Yes', 'Cancel');
+            if(value === 'Yes') {
+                await cli.execute(`odo project delete ${context.getName()} -f`, {}).then(()=>{
+                    explorer.refresh();
+                }).catch((err)=>{
+                    vscode.window.showErrorMessage(`Project deletion failed with error '${err}'`);
+                });
+            }
         };
     }
     export namespace Application {
@@ -210,7 +217,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.catalog.list.components', Openshift.Catalog.listComponents.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.catalog.list.services', Openshift.Catalog.listServices.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.project.create', Openshift.Project.create.bind(undefined, cliExec, explorer)),
-        vscode.commands.registerCommand('openshift.project.delete', Openshift.Project.del),
+        vscode.commands.registerCommand('openshift.project.delete', Openshift.Project.del.bind(undefined, cliExec, explorer)),
         vscode.commands.registerCommand('openshift.app.describe', Openshift.Application.describe.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.app.create', Openshift.Application.create.bind(undefined, cliExec, explorer)),
         vscode.commands.registerCommand('openshift.app.delete', Openshift.Application.del.bind(undefined, cliExec, explorer)),
