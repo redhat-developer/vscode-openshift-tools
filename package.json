@@ -113,6 +113,11 @@
         "command": "openshift.url.create",
         "title": "Create URL",
         "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.openUrl",
+        "title": "Open URL",
+        "category": "OpenShift"
       }
     ],
     "viewsContainers": {
@@ -168,6 +173,10 @@
         },
         {
           "command": "openshift.component.log",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.openUrl",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -248,6 +257,10 @@
           "when": "view == openshiftProjectExplorer && viewItem == component"
         },
         {
+          "command": "openshift.component.openUrl",
+          "when": "view == openshiftProjectExplorer && viewItem == component"
+        },
+        {
           "command": "openshift.component.delete",
           "when": "view == openshiftProjectExplorer && viewItem == component"
         },
@@ -301,6 +314,7 @@
     "iconv-lite": "0.4.24",
     "istanbul": "^0.4.5",
     "jschardet": "1.6.0",
+    "opn": "^5.3.0",
     "remap-istanbul": "^0.12.0",
     "request-progress": "^3.0.0",
     "shelljs": "^0.8.2",

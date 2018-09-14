@@ -8,12 +8,14 @@ import * as odoctl from './odo';
 import { CliExitData } from './cli';
 import * as git from './git';
 import * as path from 'path';
+import * as opn from 'opn';
 
 export namespace Openshift {
 
     export const about = async function (odo: odoctl.Odo) {
         const result:CliExitData = await odo.executeInTerminal(`odo version`, process.cwd());
-    }
+    };
+
     export namespace Catalog {
         export const listComponents = function listComponentTypes(odo: odoctl.Odo) {
             odo.executeInTerminal(`odo catalog list components`, process.cwd());
@@ -22,6 +24,7 @@ export namespace Openshift {
             odo.executeInTerminal(`odo catalog list services`, process.cwd());
         };
     }
+
     export namespace Project {
         export const create = async function createProjectCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
             const value  = await vscode.window.showInputBox({prompt: "Project name"});
@@ -39,6 +42,7 @@ export namespace Openshift {
             }
         };
     }
+
     export namespace Application {
         export const create = async function createApplicationCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
             vscode.window.showInputBox({prompt: "Application name"}).then(value=> {
@@ -47,10 +51,12 @@ export namespace Openshift {
                 });
             });
         };
+
         export const describe = async function describe(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             let project: odoctl.OpenShiftObject = context.getParent();
             odo.executeInTerminal(`odo project set ${project.getName()}; odo app describe ${context.getName()}`, process.cwd());
         };
+
         export const del = async function deleteApplication(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
             let project: odoctl.OpenShiftObject = context.getParent();
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete application '${context.getName()}\'`, 'Yes', 'Cancel');
@@ -117,6 +123,7 @@ export namespace Openshift {
                 console.log(e);
             }
         };
+
         export const del = async function deleteComponent(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
             let app: odoctl.OpenShiftObject = context.getParent();
             let project: odoctl.OpenShiftObject = app.getParent();
@@ -137,16 +144,19 @@ export namespace Openshift {
                 });
             }
         };
+
         export const describe = async function componentDescribe(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             let app: odoctl.OpenShiftObject = context.getParent();
             let project: odoctl.OpenShiftObject = app.getParent();
             odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo describe ${context.getName()}`, process.cwd());
         };
+
         export const log = async function logComponent(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             let app: odoctl.OpenShiftObject = context.getParent();
             let project: odoctl.OpenShiftObject = app.getParent();
             odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo log ${context.getName()};`, process.cwd());
         };
+
         export const push = async function pushCmd(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             let app: odoctl.OpenShiftObject = context.getParent();
             let project: odoctl.OpenShiftObject = app.getParent();
@@ -170,6 +180,13 @@ export namespace Openshift {
             let app: odoctl.OpenShiftObject = context.getParent();
             let project: odoctl.OpenShiftObject = app.getParent();
             odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo component set ${context.getName()}; odo watch ${context.getName()};`, process.cwd());
+        };
+
+        export const openUrl = async function OpenUrlCmd(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
+            const hostName = await odo.execute(`oc get route -o jsonpath='{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=="${context.getName()}")]}{.spec.host}{\"\"}{end}'`);
+            const checkTls = await odo.execute(`oc get route -o jsonpath='{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=="${context.getName()}")]}{.spec.tls.termination}{\"\"}{end}'`);
+            const tls = checkTls ? "https://" : "http://";
+            opn(`${tls}${hostName.stdout}`);
         };
     }
     export namespace Url {
@@ -226,6 +243,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.push', Openshift.Component.push.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.watch', Openshift.Component.watch.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.log', Openshift.Component.log.bind(undefined, odoCli)),
+        vscode.commands.registerCommand('openshift.component.openUrl', Openshift.Component.openUrl.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.delete', Openshift.Component.del.bind(undefined, cliExec, explorer)),
         vscode.commands.registerCommand('openshift.url.create', Openshift.Url.create.bind(undefined,cliExec)),
         vscode.window.registerTreeDataProvider('openshiftProjectExplorer', explorer)
