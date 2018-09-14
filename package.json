@@ -1,14 +1,26 @@
 {
   "name": "vscode-openshift-tools",
-  "displayName": "vscode-openshift-tools",
+  "displayName": "OpenShift Connector",
   "description": "VSCode Extension for OpenShift",
   "version": "0.0.1",
-  "publisher": "RedHat",
+  "license": "MIT",
+  "publisher": "redhat",
+  "author": "Red Hat",
+  "preview": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/redhat-developer/vscode-openshift-tools.git"
+  },
   "engines": {
     "vscode": "^1.25.0"
   },
   "categories": [
     "Other"
+  ],
+  "keywords": [
+    "openshift",
+    "kubernetes",
+    "redhat"
   ],
   "activationEvents": [
     "onView:openshiftProjectExplorer"
@@ -269,27 +281,27 @@
   "devDependencies": {
     "@types/fs-extra": "^5.0.4",
     "@types/mkdirp": "^0.5.2",
-    "@types/mocha": "^2.2.42",
-    "@types/node": "^7.0.43",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.9.4",
     "@types/shelljs": "^0.8.0",
     "mocha-jenkins-reporter": "^0.4.0",
-    "tslint": "^5.8.0",
-    "typescript": "^2.6.1",
+    "tslint": "^5.11.0",
+    "typescript": "^3.0.3",
     "vscode": "^1.1.21"
   },
   "dependencies": {
     "@types/request": "^2.47.1",
     "byline": "5.0.0",
-    "codecov": "^3.0.4",
+    "codecov": "^3.1.0",
     "decache": "^4.4.0",
     "file-type": "9.0.0",
     "file-url": "^2.0.2",
     "fs-extra": "^7.0.0",
-    "glob": "^7.1.2",
-    "iconv-lite": "0.4.23",
+    "glob": "^7.1.3",
+    "iconv-lite": "0.4.24",
     "istanbul": "^0.4.5",
     "jschardet": "1.6.0",
-    "remap-istanbul": "^0.11.1",
+    "remap-istanbul": "^0.12.0",
     "request-progress": "^3.0.0",
     "shelljs": "^0.8.2",
     "targz": "^1.0.1",
