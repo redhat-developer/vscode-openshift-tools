@@ -183,12 +183,21 @@ export namespace Openshift {
         };
 
         export const openUrl = async function OpenUrlCmd(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
+            const app: odoctl.OpenShiftObject = context.getParent();
+            const routeCheck = await odo.execute(`oc get route`);
+            if (routeCheck.stdout === ''){
+                const value = await vscode.window.showInformationMessage(`No URL for component '${context.getName()}\' in application '${app.getName()}\'. Do you want to create a route and open it?`, 'Create', 'Cancel');
+                if(value === 'Create'){
+                    await odo.execute(`odo url create`);
+                }
+            }
             const hostName = await odo.execute(`oc get route -o jsonpath='{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=="${context.getName()}")]}{.spec.host}{\"\"}{end}'`);
             const checkTls = await odo.execute(`oc get route -o jsonpath='{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=="${context.getName()}")]}{.spec.tls.termination}{\"\"}{end}'`);
             const tls = checkTls ? "https://" : "http://";
             opn(`${tls}${hostName.stdout}`);
         };
     }
+
     export namespace Url {
         export const create = async function createUrl(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             const app: odoctl.OpenShiftObject = context.getParent();
@@ -217,6 +226,7 @@ export namespace Openshift {
             });
         };
     }
+
     export namespace Explorer {
         export const refresh = function refresh(explorer:explorerFactory.OpenShiftExplorer) {
             explorer.refresh();
