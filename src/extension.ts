@@ -138,7 +138,7 @@ export namespace Openshift {
                             }
                         });
                     }).catch((err)=>{
-                        vscode.window.showErrorMessage(`Failed to delete application with error '${err}'`);
+                        vscode.window.showErrorMessage(`Failed to delete component with error '${err}'`);
                     });
                 });
             }

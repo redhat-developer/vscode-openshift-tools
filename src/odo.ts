@@ -34,8 +34,10 @@ class OpenShiftObjectImpl implements OpenShiftObject {
             item.iconPath = Uri.file(path.join(__dirname, "../../images/project.png"));
         } else if(this.context === 'application') {
             item.iconPath = Uri.file(path.join(__dirname, "../../images/application.png"));
-        } else {
+        } else if(this.context === 'component') {
             item.iconPath = Uri.file(path.join(__dirname, "../../images/component.png"));
+        } else {
+            item.iconPath = Uri.file(path.join(__dirname, "../../images/storage.png"));
         }
         
         item.contextValue = this.context;
@@ -46,6 +48,8 @@ class OpenShiftObjectImpl implements OpenShiftObject {
             return this.odo.getApplications(this);
         } else if(this.context === 'application') {
             return this.odo.getComponents(this);
+        } else if(this.context === 'component'){
+            return this.odo.getStorageNames(this);
         } else {
             return [];
         }
@@ -62,6 +66,7 @@ export interface Odo {
     getComponents(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     executeInTerminal(command: string, cwd: string);
     getComponentTypes(): Promise<string[]>;
+    getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponentTypeVersions(componentName: string): Promise<string[]>;
     execute(command: string, cwd?: string): Promise<CliExitData>;
 }
@@ -105,7 +110,7 @@ class OdoImpl implements Odo {
         );
         return result.stdout.trim().split('\n').slice(1).map<OpenShiftObject>(value => {
         let name = value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|');
-            return new OpenShiftObjectImpl(application, `${name[0]}`, 'component', this, TreeItemCollapsibleState.None);
+            return new OpenShiftObjectImpl(application, `${name[0]}`, 'component', this, TreeItemCollapsibleState.Expanded);
         });
     }
 
@@ -117,6 +122,20 @@ class OdoImpl implements Odo {
             let name = value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|');
             return name[0];
         });
+    }
+
+    public async getStorageNames(component: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
+        const result: cliInstance.CliExitData = await this.cli.execute(
+            `odo storage list`, {}
+        );
+
+        return result.stdout.trim().split('\n').slice(2).map(value => {
+            //need to refactor this
+            if(value === "" || value === "No unmounted storage exists to mount") {return;}
+            let name = value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|');
+            return new OpenShiftObjectImpl(component, `${name[0]}`, 'storage', this, TreeItemCollapsibleState.None);
+        });
+
     }
 
     public async getComponentTypeVersions(componentName: string) {
