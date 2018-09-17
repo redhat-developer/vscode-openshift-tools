@@ -118,6 +118,11 @@
         "command": "openshift.component.openUrl",
         "title": "Open URL",
         "category": "OpenShift"
+      },
+      {
+        "command": "openshift.storage.create",
+        "title": "Create Storage",
+        "category": "OpenShift"
       }
     ],
     "viewsContainers": {
@@ -194,6 +199,10 @@
         {
           "command": "openshift.url.create",
           "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.storage.create",
+          "when": "view == openshiftProjectExplorer"
         }
       ],
       "view/title": [
@@ -258,7 +267,8 @@
         },
         {
           "command": "openshift.component.openUrl",
-          "when": "view == openshiftProjectExplorer && viewItem == component"
+          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "u@2"
         },
         {
           "command": "openshift.component.delete",
@@ -274,7 +284,13 @@
         },
         {
           "command": "openshift.url.create",
-          "when": "view == openshiftProjectExplorer && viewItem == component"
+          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "u@1"
+        },
+        {
+          "command": "openshift.storage.create",
+          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "z"
         }
       ]
     }
@@ -295,7 +311,7 @@
     "@types/fs-extra": "^5.0.4",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.5",
-    "@types/node": "^10.9.4",
+    "@types/node": "^10.10.0",
     "@types/shelljs": "^0.8.0",
     "mocha-jenkins-reporter": "^0.4.0",
     "tslint": "^5.11.0",

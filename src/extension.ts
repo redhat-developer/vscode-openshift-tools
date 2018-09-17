@@ -15,7 +15,6 @@ export namespace Openshift {
     export const about = async function (odo: odoctl.Odo) {
         const result:CliExitData = await odo.executeInTerminal(`odo version`, process.cwd());
     };
-
     export namespace Catalog {
         export const listComponents = function listComponentTypes(odo: odoctl.Odo) {
             odo.executeInTerminal(`odo catalog list components`, process.cwd());
@@ -232,6 +231,30 @@ export namespace Openshift {
             explorer.refresh();
         };
     }
+
+    export namespace Storage {
+        export const create = async function createStorage(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
+            let app: odoctl.OpenShiftObject = context.getParent();
+            let project: odoctl.OpenShiftObject = app.getParent();
+            const storageName = await vscode.window.showInputBox({prompt: "Specify the storage name", validateInput: (value:string) => {
+                if (value.trim().length === 0) {
+                    return 'Invalid storage name';
+                } 
+            }});
+            if(!storageName) { return; } 
+
+            const mountPath = await vscode.window.showInputBox({prompt: "Specify the mount path", validateInput: (value:string) => {
+                if (value.trim().length === 0) {
+                    return 'Invalid mount path';
+                } 
+            }});
+            if(!mountPath) { return; }
+
+            const storageSize = await vscode.window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the storage size'});
+            odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo component set ${context.getName()}; odo storage create ${storageName} --path=${mountPath} --size=${storageSize};`, process.cwd());
+        };
+
+    }
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -255,6 +278,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.log', Openshift.Component.log.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.openUrl', Openshift.Component.openUrl.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.delete', Openshift.Component.del.bind(undefined, cliExec, explorer)),
+        vscode.commands.registerCommand('openshift.storage.create', Openshift.Storage.create.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.url.create', Openshift.Url.create.bind(undefined,cliExec)),
         vscode.window.registerTreeDataProvider('openshiftProjectExplorer', explorer)
     ];
