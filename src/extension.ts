@@ -15,6 +15,7 @@ export namespace Openshift {
     export const about = async function (odo: odoctl.Odo) {
         const result:CliExitData = await odo.executeInTerminal(`odo version`, process.cwd());
     };
+
     export namespace Catalog {
         export const listComponents = function listComponentTypes(odo: odoctl.Odo) {
             odo.executeInTerminal(`odo catalog list components`, process.cwd());
