@@ -1,12 +1,12 @@
 # Visual Studio Code OpenShift Connector
 
-[![Build Status](https://travis-ci.org/redhat-developer/vscode-openshift-tools.svg?branch=master)](https://travis-ci.org/vscode-openshift-tools)
+[![Build Status](https://travis-ci.org/redhat-developer/vscode-openshift-tools.svg?branch=master)](https://travis-ci.org/redhat-developer/vscode-openshift-tools)
 
 A Visual Studio Code extension for interacting with OpenShift clusters.
 
 ## Features
 
-This extension supports a number of commands for interacting with server adapters; these are accessible via the command menu (`Cmd+Shift+P` on macOS or `Ctrl+Shift+P` on Windows and Linux) and may be bound to keys in the normal way.
+This extension supports a number of commands for interacting with OpenShift clusters; these are accessible via the command menu (`Cmd+Shift+P` on macOS or `Ctrl+Shift+P` on Windows and Linux) and may be bound to keys in the normal way.
 
 ### General Commands
 
