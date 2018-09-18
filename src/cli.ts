@@ -85,7 +85,7 @@ class Cli implements ICli {
             childProcess.exec(finalCommand, opts, (error: Error, stdout: string, stderr: string) => {
                 odoChannel.print(stdout);
                 odoChannel.print(stderr);
-                resolve({ error, stdout, stderr });
+                resolve({ error, stdout: stdout.replace(/---[\s\S]*---/g, '').trim(), stderr });
             });
         });
     }
