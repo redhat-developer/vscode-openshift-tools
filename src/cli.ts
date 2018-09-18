@@ -21,23 +21,23 @@ const toolsConfig = {
         "description": "OpenShift Do CLI client",
         "vendor": "Red Hat, Inc.",
         "name": "odo",
-        "version": "0.0.10",
+        "version": "0.0.11",
         "dlFileName": "odo",
         "cmdFileName": "odo",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.10/odo-windows-amd64.exe",
+                "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.11/odo-windows-amd64.exe",
                 "sha256sum": "",
                 "dlFileName": "odo.exe",
                 "cmdFileName": "odo.exe"
             },
             "darwin": {
-                "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.10/odo-darwin-amd64",
+                "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.11/odo-darwin-amd64",
                 "sha256sum": ""
             },
             "linux": {
-                "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.10/odo-linux-amd64",
+                "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.11/odo-linux-amd64",
                 "sha256sum": ""
             }
         }
