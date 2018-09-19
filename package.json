@@ -137,12 +137,12 @@
     "views": {
       "openshiftView": [
         {
-          "id": "openshiftProjectExplorer",
-          "name": "OpenShift Explorer"
-        },
-        {
           "id": "extension.vsKubernetesExplorer",
           "name": "Clusters"
+        },
+        {
+          "id": "openshiftProjectExplorer",
+          "name": "OpenShift Explorer"
         }
       ]
     },
