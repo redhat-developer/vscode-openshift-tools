@@ -281,7 +281,8 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.delete', Openshift.Component.del.bind(undefined, cliExec, explorer)),
         vscode.commands.registerCommand('openshift.storage.create', Openshift.Storage.create.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.url.create', Openshift.Url.create.bind(undefined,cliExec)),
-        vscode.window.registerTreeDataProvider('openshiftProjectExplorer', explorer)
+        vscode.window.registerTreeDataProvider('openshiftProjectExplorer', explorer),
+        explorer
     ];
     disposable.forEach(value=>context.subscriptions.push(value));
 }
