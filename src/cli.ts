@@ -66,8 +66,9 @@ const toolsConfig = {
                 "url": "https://github.com/openshift/origin/releases/download/v3.10.0/openshift-origin-client-tools-v3.10.0-dd10d17-linux-64bit.tar.gz",
                 "sha256sum": "",
                 "fileName": "oc.tar.gz",
-                "dlFileName": "oc.zip",
-                "cmdFileName": "oc"
+                "dlFileName": "oc.tar.gz",
+                "cmdFileName": "oc",
+                "filePrefix": "openshift-origin-client-tools-v3.10.0-dd10d17-linux-64bit"
             }
         }
     }
@@ -132,7 +133,7 @@ async function getToolLocation(cmd): Promise<string> {
                 }
             );
             if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
-                await unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), tools[cmd].prefix);
+                await unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), tools[cmd].filePrefix);
             }
             if (process.platform !== 'win32') {
                 fs.chmodSync(toolLocation, 0o765);
