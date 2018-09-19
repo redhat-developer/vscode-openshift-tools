@@ -36,31 +36,36 @@ class OpenShiftObjectImpl implements OpenShiftObject {
             item.iconPath = Uri.file(path.join(__dirname, "../../images/application.png"));
         } else if(this.context === 'component') {
             item.iconPath = Uri.file(path.join(__dirname, "../../images/component.png"));
-        } else {
+        } else if(this.context === 'storage') {
             item.iconPath = Uri.file(path.join(__dirname, "../../images/storage.png"));
+        } else {
+            item.iconPath = Uri.file(path.join(__dirname, "../../images/cluster.png"));
         }
         
         item.contextValue = this.context;
         return item;
     }
     getChildren(): ProviderResult<OpenShiftObject[]> {
-        if(this.context === 'project') {
+        if (this.context === 'project') {
             return this.odo.getApplications(this);
         } else if(this.context === 'application') {
             return this.odo.getComponents(this);
         } else if(this.context === 'component'){
             return this.odo.getStorageNames(this);
+        } if (this.context === 'cluster') {
+            return this.odo.getProjects();
         } else {
             return [];
         }
     }
-
+ 
     getParent(): OpenShiftObject {
         return this.parent;
     }
 }
 
 export interface Odo {
+    getClusters(): Promise<OpenShiftObject[]>;
     getProjects(): Promise<OpenShiftObject[]>;
     getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponents(application: OpenShiftObject): Promise<OpenShiftObject[]>;
@@ -149,6 +154,19 @@ class OdoImpl implements Odo {
             return value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|')[2];
         });
         return  versions[0].split(',');
+    }
+
+    public async getClusters(): Promise<OpenShiftObject[]> {
+        const result: cliInstance.CliExitData = await this.cli.execute(
+            `odo version`, {}
+        );
+        const clusters: OpenShiftObject[] = result.stdout.trim().split('\n').filter(value => {
+            return value.indexOf('Server:') !== -1;
+        }).map(value => {
+            let server: string = value.substr(value.indexOf(':')+1).trim();
+            return new OpenShiftObjectImpl(null, server, 'cluster', this, TreeItemCollapsibleState.Expanded);
+        });
+        return clusters;
     }
 
     public executeInTerminal(command: string, cwd: string, name: string = 'OpenShift') {
