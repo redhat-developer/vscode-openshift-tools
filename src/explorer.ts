@@ -29,7 +29,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject> {
         if(element) {
             return element.getChildren();
         }
-        return this.odoctl.getProjects();
+        return this.odoctl.getClusters();
     }
     
     getParent?(element: OpenShiftObject): OpenShiftObject {
