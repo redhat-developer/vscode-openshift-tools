@@ -28,7 +28,7 @@ node('rhel7'){
 
 	stage('Package') {
         def packageJson = readJSON file: 'package.json'
-        sh "vsce package -o openshift-${packageJson.version}-${env.BUILD_NUMBER}.vsix"
+        sh "vsce package -o openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix"
 	}
 
 	if(params.UPLOAD_LOCATION) {
