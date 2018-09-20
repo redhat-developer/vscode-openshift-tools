@@ -36,6 +36,8 @@ class OpenShiftObjectImpl implements OpenShiftObject {
             item.iconPath = Uri.file(path.join(__dirname, "../../images/application.png"));
         } else if(this.context === 'component') {
             item.iconPath = Uri.file(path.join(__dirname, "../../images/component.png"));
+        } else if(this.context === 'service') {
+            item.iconPath = Uri.file(path.join(__dirname, "../../images/service.png"));
         } else if(this.context === 'storage') {
             item.iconPath = Uri.file(path.join(__dirname, "../../images/storage.png"));
         } else {
@@ -49,7 +51,7 @@ class OpenShiftObjectImpl implements OpenShiftObject {
         if (this.context === 'project') {
             return this.odo.getApplications(this);
         } else if(this.context === 'application') {
-            return this.odo.getComponents(this);
+            return this.odo.getApplicationChildren(this);
         } else if(this.context === 'component'){
             return this.odo.getStorageNames(this);
         } if (this.context === 'cluster') {
@@ -73,6 +75,9 @@ export interface Odo {
     getComponentTypes(): Promise<string[]>;
     getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponentTypeVersions(componentName: string): Promise<string[]>;
+    getServiceTemplates(): Promise<string[]>;
+    getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
+    getApplicationChildren(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]>
     execute(command: string, cwd?: string): Promise<CliExitData>;
 }
 
@@ -107,6 +112,9 @@ class OdoImpl implements Odo {
     }
 
     public async getComponents(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
+        await this.cli.execute(
+            `odo project set ${application.getParent().getName()}`, {}
+        );
         await this.cli.execute(
             `odo app set ${application.name}`, {}
         );
@@ -167,6 +175,37 @@ class OdoImpl implements Odo {
             return new OpenShiftObjectImpl(null, server, 'cluster', this, TreeItemCollapsibleState.Expanded);
         });
         return clusters;
+    }
+
+    public async getServiceTemplates(): Promise<string[]> {
+        const result: cliInstance.CliExitData = await this.cli.execute(
+            `odo catalog list services`, {}
+        );
+
+        return result.stdout.trim().split('\n').slice(1).map(value => {
+            return value.replace('- ', '');
+        });
+    }
+
+    public async getServices(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
+        await this.cli.execute(
+            `odo project set ${application.getParent().getName()}`, {}
+        );
+        await this.cli.execute(
+            `odo app set ${application.name}`, {}
+        );
+        const result: cliInstance.CliExitData = await this.cli.execute(
+            `odo service list`, {}
+        );
+
+        return result.stdout.trim().split('\n').slice(1).map(value => {
+            const values: string[] = value.split(/\s+/);
+            return new OpenShiftObjectImpl(application, `${values[0]}`, 'service', this, TreeItemCollapsibleState.None);
+        });
+    }
+
+    public async getApplicationChildren(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
+        return [... await this.getComponents(application), ... await this.getServices(application)];
     }
 
     public executeInTerminal(command: string, cwd: string, name: string = 'OpenShift') {

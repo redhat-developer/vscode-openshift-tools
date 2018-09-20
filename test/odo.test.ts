@@ -116,4 +116,28 @@ suite("odo integration tests", function () {
             assert(result.length === 3);
         });
     });
+
+    suite("odo service integration", function() {
+        const svc1 = 'svc1';    
+        const svc2 = 'svc2';  
+        const svc3 = 'svc3';    
+    
+        const odoProjCli: ICli = create([
+            `The following services can be deployed:`,
+            `- ${svc1}`,
+            `- ${svc2}`,
+            `- ${svc3}`
+        ].join('\n'));
+        
+        let result: string[];
+
+        suiteSetup(async function() {
+            result = await odo.create(odoProjCli).getServiceTemplates();
+        });
+
+        test("Odo->getServiceTemplates() returns correct number of services", function() {
+            assert(result.length === 3);
+        });
+    });
+
 });
