@@ -7,8 +7,8 @@ import * as cli from './cli';
 import * as odoctl from './odo';
 import { CliExitData } from './cli';
 import * as git from './git';
-import * as path from 'path';
 import * as opn from 'opn';
+import * as isURL from 'validator/lib/isURL';
 
 export namespace Openshift {
 
@@ -234,7 +234,6 @@ export namespace Openshift {
         export const create = async function createUrl(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             const app: odoctl.OpenShiftObject = context.getParent();
             const project: odoctl.OpenShiftObject = app.getParent();
-            const compName: string = context.getName();
             const portsResult:CliExitData = await odo.execute(`oc get service ${context.getName()}-${app.getName()} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`);
             let ports: string[] = portsResult.stdout.trim().split(',');
             ports = ports.slice(0,ports.length-1);
@@ -260,6 +259,61 @@ export namespace Openshift {
     }
 
     export namespace Explorer {
+        export const login = async function loginCluster(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer) {
+            if(await odo.requireLogin()) {
+                const clusterURL = await vscode.window.showInputBox({
+                    ignoreFocusOut: true,
+                    prompt: "Provide URL of the cluster to connect",
+                    validateInput: (value:string) => {
+                        if(!isURL(value)) {
+                            return 'Invalid URL provided';
+                        }
+                    }
+                });
+                if(!clusterURL) { return; }
+                const loginMethod = await vscode.window.showQuickPick(['Credentials', 'Token'], {placeHolder: 'Select the way to login to the cluster.'});
+                if(loginMethod === "Credentials") {
+                    let username = await vscode.window.showInputBox({
+                        ignoreFocusOut: true,
+                        prompt: "Provide Username for basic authentication to the API server", 
+                        validateInput: (value:string) => {
+                            if (value.trim().length === 0) {
+                                return 'Invalid Username';
+                            }
+                        }
+                    });
+                    if (!username) { return; }
+                    let passwd  = await vscode.window.showInputBox({
+                        ignoreFocusOut: true,
+                        prompt: "Provide Password for basic authentication to the API server"
+                    });
+                    if(!passwd) { return; }
+                    odo.execute(`oc login ${clusterURL} -u ${username} -p ${passwd}`).then((result)=>{
+                        if(result.stderr === "") {
+                            vscode.window.showInformationMessage(`Successfully logged in to '${clusterURL}'`);
+                        } else {
+                            vscode.window.showErrorMessage(`Failed to login to cluster '${clusterURL}' with '${result.stderr}'!`);
+                        }
+                    });
+                } else {
+                    let ocToken  = await vscode.window.showInputBox({
+                        prompt: "Provide Bearer token for authentication to the API server",
+                        ignoreFocusOut: true
+                    });
+                    odo.execute(`oc login ${clusterURL} --token=${ocToken}`).then((result)=>{
+                        if(result.stderr === "") {
+                            vscode.window.showInformationMessage(`Successfully logged in to '${clusterURL}'`);
+                        } else {
+                            vscode.window.showErrorMessage(`Failed to login to cluster '${clusterURL}' with '${result.stderr}'!`);
+                        }
+                    });
+                }
+                explorer.refresh();
+            } else {
+                vscode.window.showInformationMessage(`You are already logged in the cluster.`);
+            }
+        };
+
         export const refresh = function refresh(explorer:explorerFactory.OpenShiftExplorer) {
             explorer.refresh();
         };
@@ -296,6 +350,7 @@ export function activate(context: vscode.ExtensionContext) {
     const explorer:explorerFactory.OpenShiftExplorer = explorerFactory.create(odoCli);
     let disposable = [ 
         vscode.commands.registerCommand('openshift.about', Openshift.about.bind(undefined, odoCli)),
+        vscode.commands.registerCommand('openshift.explorer.login', Openshift.Explorer.login.bind(undefined, odoCli, explorer)),
         vscode.commands.registerCommand('openshift.explorer.refresh', Openshift.Explorer.refresh.bind(undefined, explorer)),
         vscode.commands.registerCommand('openshift.catalog.list.components', Openshift.Catalog.listComponents.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.catalog.list.services', Openshift.Catalog.listServices.bind(undefined, odoCli)),
