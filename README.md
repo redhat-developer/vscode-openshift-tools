@@ -16,6 +16,7 @@ This extension supports a number of commands for interacting with OpenShift clus
 * `Create Storage`
 * `Create URL`
 * `Open URL in Browser`
+* `Log In to CLuster`
 
 -----------------------------------------------------------------------------------------------------------
 Contributing

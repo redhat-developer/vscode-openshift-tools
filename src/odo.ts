@@ -79,6 +79,7 @@ export interface Odo {
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getApplicationChildren(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]>
     execute(command: string, cwd?: string): Promise<CliExitData>;
+    requireLogin(): Promise<boolean>;
 }
 
 export function create(cli: cliInstance.ICli) : Odo {
@@ -216,5 +217,12 @@ class OdoImpl implements Odo {
 
     public async execute(command: string, cwd?: string): Promise<CliExitData> {
         return this.cli.execute(command, cwd ? {cwd} : { });
+    }
+
+    public async requireLogin(): Promise<boolean> {
+        const result: cliInstance.CliExitData = await this.cli.execute(
+            `odo version`, {}
+        );
+        return result.stdout.indexOf("Please log in to the cluster") > -1;
     }
 }
