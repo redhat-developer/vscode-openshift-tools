@@ -123,6 +123,16 @@
         "command": "openshift.storage.create",
         "title": "Create Storage",
         "category": "OpenShift"
+      },
+      {
+        "command": "openshift.service.create",
+        "title": "New Service",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.service.delete",
+        "title": "Delete",
+        "category": "OpenShift"
       }
     ],
     "viewsContainers": {
@@ -202,6 +212,14 @@
         },
         {
           "command": "openshift.storage.create",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.service.create",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.service.delete",
           "when": "view == openshiftProjectExplorer"
         }
       ],
@@ -302,6 +320,16 @@
           "command": "openshift.component.delete",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c4@1"
+        },
+        {
+          "command": "openshift.service.create",
+          "when": "view == openshiftProjectExplorer && viewItem == application",
+          "group": "a1"
+        },
+        {
+          "command": "openshift.service.delete",
+          "when": "view == openshiftProjectExplorer && viewItem == service",
+          "group": "s1"
         }
       ]
     }
@@ -324,6 +352,7 @@
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.10.1",
     "@types/shelljs": "^0.8.0",
+    "mocha": "^5.2.0",
     "mocha-jenkins-reporter": "^0.4.0",
     "tslint": "^5.11.0",
     "typescript": "^3.0.3",

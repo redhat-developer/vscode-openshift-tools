@@ -75,6 +75,38 @@ export namespace Openshift {
             }
         };
     }
+    export namespace Service {
+        export const create = async function createService(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject)  {
+            const serviceTemplateNames: string[] = await odo.getServiceTemplates();
+            const serviceTemplateName = await vscode.window.showQuickPick(serviceTemplateNames, {
+                placeHolder: "Service Template Name"
+            });
+            const serviceName = await vscode.window.showInputBox({
+                value: serviceTemplateName,
+                prompt: 'Service Name',
+                validateInput: (value:string) => {
+                    // required, because dc name is ${component}-${app}
+                    if (`${value.trim()}-${context.getName()}`.length > 63) {
+                        return 'Service name cannot be more that 63 characters';
+                    }
+                    return null;
+                }
+            });
+            await odo.execute(`odo project set ${context.getParent().getName()}`);
+            await odo.execute(`odo app set ${context.getName()}`);
+            await odo.execute(`odo service create ${serviceTemplateName} ${serviceName.trim()}`);
+            explorer.refresh();
+        };
+        export const del = async function deleteService(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer, service: odoctl.OpenShiftObject, ) {
+            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete service '${service.getName()}'`, 'Yes', 'Cancel');
+            if(value === 'Yes') {
+                await odo.execute(`odo project set ${service.getParent().getParent().getName()}`);
+                await odo.execute(`odo app set ${service.getParent().getName()}`);
+                await odo.execute(`odo service delete ${service.getName()} -f`);
+                explorer.refresh();
+            }
+        }
+    }
     export namespace Component {
         export const create = async function createComponent(odo: odoctl.Odo, context: odoctl.OpenShiftObject)  {
             try {
@@ -281,6 +313,8 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.delete', Openshift.Component.del.bind(undefined, cliExec, explorer)),
         vscode.commands.registerCommand('openshift.storage.create', Openshift.Storage.create.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.url.create', Openshift.Url.create.bind(undefined,cliExec)),
+        vscode.commands.registerCommand('openshift.service.create', Openshift.Service.create.bind(undefined,odoCli, explorer)),
+        vscode.commands.registerCommand('openshift.service.delete', Openshift.Service.del.bind(undefined,odoCli, explorer)),
         vscode.window.registerTreeDataProvider('openshiftProjectExplorer', explorer),
         explorer
     ];
