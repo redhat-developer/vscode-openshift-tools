@@ -1,5 +1,5 @@
 {
-  "name": "vscode-openshift-connector",
+  "name": "vscode-openshift-tools",
   "displayName": "OpenShift Connector",
   "description": "VSCode Extension for OpenShift",
   "version": "0.0.2",
@@ -22,7 +22,6 @@
     "kubernetes",
     "redhat"
   ],
-  "icon": "images/openshift-extension.png",
   "activationEvents": [
     "onView:openshiftProjectExplorer"
   ],
@@ -131,7 +130,7 @@
         {
           "id": "openshiftView",
           "title": "OpenShift",
-          "icon": "images/openshift-view.svg"
+          "icon": "images/logo.svg"
         }
       ]
     },
@@ -234,7 +233,7 @@
         }
       ],
       "view/item/context": [
-        {
+              {
           "command": "openshift.app.create",
           "when": "view == openshiftProjectExplorer && viewItem == project",
           "group": "p1"
