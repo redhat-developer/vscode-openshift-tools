@@ -14,7 +14,7 @@ import { Platform } from './platform';
 import * as path from 'path';
 
 import { Odo, OpenShiftObject } from './odo';
-
+import * as notifier from './watch';
 
 export function create(odoctl: Odo) {
     return new OpenShiftExplorer(odoctl);
@@ -23,13 +23,11 @@ export function create(odoctl: Odo) {
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
 export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Disposable {
-    private watcher: fs.FSWatcher;
+    private fsw: notifier.FileContentChangeNotifier;
     constructor(private odoctl: Odo, ) {
-        fsex.ensureDir(kubeConfigFolder);
-        this.watcher =  fsex.watch(kubeConfigFolder, (eventType, filename) => {
-            if (filename === 'config') {
-                this.refresh();
-            }
+        this.fsw = notifier.watchFileForContextChange(kubeConfigFolder, 'config');
+        this.fsw.emitter.on('file-changed', () => {
+            this.refresh();
         });
     }
 
@@ -56,7 +54,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     }
 
     dispose() {
-        this.watcher.close();
+        this.fsw.watcher.close();
     }
 
 }
