@@ -251,7 +251,7 @@
         }
       ],
       "view/item/context": [
-              {
+        {
           "command": "openshift.app.create",
           "when": "view == openshiftProjectExplorer && viewItem == project",
           "group": "p1"
@@ -360,7 +360,7 @@
   },
   "dependencies": {
     "@types/request": "^2.47.1",
-    "byline": "5.0.0",
+    "byline": "^5.0.0",
     "codecov": "^3.1.0",
     "decache": "^4.4.0",
     "file-type": "9.0.0",
