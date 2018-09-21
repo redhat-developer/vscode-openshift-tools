@@ -285,6 +285,7 @@ export namespace Openshift {
                     if (!username) { return; }
                     let passwd  = await vscode.window.showInputBox({
                         ignoreFocusOut: true,
+                        password: true,
                         prompt: "Provide Password for basic authentication to the API server"
                     });
                     if(!passwd) { return; }

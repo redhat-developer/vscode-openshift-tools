@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as fsex from 'fs-extra';
 import * as path from 'path';
-import { Platform } from './platform';
 import { EventEmitter } from 'events';
 import * as byline from 'byline';
 
@@ -17,8 +16,8 @@ export function watchFileForContextChange(location: string, filename: string): F
             }
             timer = setTimeout(async ()=> {
                 timer = undefined;
-                const newContext = await grep(path.join(location, filename), /current-context:.*/)
-                if(context != newContext) {
+                const newContext = await grep(path.join(location, filename), /current-context:.*/);
+                if(context !== newContext) {
                     emitter.emit('file-changed', eventType);
                     context = newContext;
                 }
