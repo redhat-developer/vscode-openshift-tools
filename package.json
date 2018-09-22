@@ -2,7 +2,7 @@
   "name": "vscode-openshift-tools",
   "displayName": "OpenShift Connector",
   "description": "VSCode Extension for OpenShift",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "MIT",
   "publisher": "redhat",
   "author": "Red Hat",
@@ -35,9 +35,15 @@
       },
       {
         "command": "openshift.explorer.login",
-        "title": "Log in to cluster",
+        "title": "Login to cluster",
         "category": "OpenShift",
-        "icon": "images/login.png"
+        "icon": "images/dark/sign-in.svg"
+      },
+      {
+        "command": "openshift.explorer.logout",
+        "title": "Logout of cluster",
+        "category": "OpenShift",
+        "icon": "images/dark/sign-out.svg"
       },
       {
         "command": "openshift.explorer.refresh",
@@ -232,6 +238,11 @@
       "view/title": [
         {
           "command": "openshift.explorer.login",
+          "when": "view == openshiftProjectExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "openshift.explorer.logout",
           "when": "view == openshiftProjectExplorer",
           "group": "navigation"
         },

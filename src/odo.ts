@@ -5,20 +5,17 @@ import { CliExitData } from './cli';
 import * as path from 'path';
 
 export interface OpenShiftObject {
-    getTreeItem() : TreeItem;
-    getChildren() : ProviderResult<OpenShiftObject[]>;
-    getParent() : OpenShiftObject;
+    getTreeItem(): TreeItem;
+    getChildren(): ProviderResult<OpenShiftObject[]>;
+    getParent(): OpenShiftObject;
     getName(): string;
 }
-
 export interface OpenShiftApplication extends OpenShiftObject {
-
 }
 
 export interface OpenShiftComponent extends OpenShiftObject {
     readonly url: string;
 }
-
 
 class OpenShiftObjectImpl implements OpenShiftObject {
     constructor(private parent:OpenShiftObject, public readonly name, private readonly context, private readonly odo: Odo, private readonly expandable: TreeItemCollapsibleState = TreeItemCollapsibleState.Collapsed) {
@@ -44,9 +41,14 @@ class OpenShiftObjectImpl implements OpenShiftObject {
             item.iconPath = Uri.file(path.join(__dirname, "../../images/cluster.png"));
         }
         
+        if(this.context === 'loginError') {
+            item.tooltip = 'Log in to cluster';
+            item.iconPath = '';
+        }
         item.contextValue = this.context;
         return item;
     }
+
     getChildren(): ProviderResult<OpenShiftObject[]> {
         if (this.context === 'project') {
             return this.odo.getApplications(this);
@@ -77,7 +79,7 @@ export interface Odo {
     getComponentTypeVersions(componentName: string): Promise<string[]>;
     getServiceTemplates(): Promise<string[]>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
-    getApplicationChildren(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]>
+    getApplicationChildren(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]>;
     execute(command: string, cwd?: string): Promise<CliExitData>;
     requireLogin(): Promise<boolean>;
 }
@@ -169,6 +171,10 @@ class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.cli.execute(
             `odo version`, {}
         );
+        if(result.stdout.indexOf("Please log in to the cluster") > -1) {
+            let error:string = 'Login to display clusters.';
+            return result.stdout.trim().split(`\n`).slice(1).map<OpenShiftObject>(value => new OpenShiftObjectImpl(null, error, 'loginError', this, TreeItemCollapsibleState.None));
+        }
         const clusters: OpenShiftObject[] = result.stdout.trim().split('\n').filter(value => {
             return value.indexOf('Server:') !== -1;
         }).map(value => {
