@@ -273,19 +273,18 @@ export namespace Openshift {
                     }
                 });
                 if(!clusterURL) { return; }
-                const loginMethod = await vscode.window.showQuickPick(['Credentials', 'Token'], {placeHolder: 'Select the way to login to the cluster.'});
+                const loginMethod = await vscode.window.showQuickPick(['Credentials', 'Token'], {placeHolder: 'Select the way to log in to the cluster.'});
                 if(loginMethod === "Credentials") {
-                    credentialsLogin(clusterURL, odo);
+                    credentialsLogin(clusterURL, odo, explorer);
                 } else {
-                    tokenLogin(clusterURL, odo);
+                    tokenLogin(clusterURL, odo, explorer);
                 }
-                explorer.refresh();
             } else {
                 vscode.window.showInformationMessage(`You are already logged in the cluster.`);
             }
         };
 
-        const credentialsLogin = async function(clusterURL, odo: odoctl.Odo) {
+        const credentialsLogin = async function(clusterURL, odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer) {
             let username = await vscode.window.showInputBox({
                 ignoreFocusOut: true,
                 prompt: "Provide Username for basic authentication to the API server",
@@ -303,26 +302,27 @@ export namespace Openshift {
             });
             if(!passwd) { return; }
             odo.execute(`oc login ${clusterURL} -u ${username} -p ${passwd}`).then((result)=>{
-                if(result.stderr === "") {
-                    vscode.window.showInformationMessage(`Successfully logged in to '${clusterURL}'`);
-                } else {
-                    vscode.window.showErrorMessage(`Failed to login to cluster '${clusterURL}' with '${result.stderr}'!`);
-                }
+                loginMessage(clusterURL, result, explorer);
             });
         };
 
-        const tokenLogin = async function(clusterURL, odo: odoctl.Odo) {
+        const tokenLogin = async function(clusterURL, odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer) {
             let ocToken  = await vscode.window.showInputBox({
                 prompt: "Provide Bearer token for authentication to the API server",
                 ignoreFocusOut: true
             });
             odo.execute(`oc login ${clusterURL} --token=${ocToken}`).then((result)=>{
-                if(result.stderr === "") {
-                    vscode.window.showInformationMessage(`Successfully logged in to '${clusterURL}'`);
-                } else {
-                    vscode.window.showErrorMessage(`Failed to login to cluster '${clusterURL}' with '${result.stderr}'!`);
-                }
+                loginMessage(clusterURL, result, explorer);
             });
+        };
+
+        const loginMessage = async function(clusterURL, result, explorer) {
+            if(result.stderr === "") {
+                explorer.refresh();
+                vscode.window.showInformationMessage(`Successfully logged in to '${clusterURL}'`);
+            } else {
+                vscode.window.showErrorMessage(`Failed to login to cluster '${clusterURL}' with '${result.stderr}'!`);
+            }
         };
 
         export const logout = async function logout(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer) {
@@ -330,11 +330,11 @@ export namespace Openshift {
             if(value === 'Logout') {
                 odo.execute(`oc logout`).then(async result =>{
                     if(result.stderr === "") {
+                        explorer.refresh();
                         const logoutInfo = await vscode.window.showInformationMessage(`Successfully logged out. Do you want to login to a new cluster`, 'Yes', 'Cancel');
                         if(logoutInfo === 'Yes') {
                             login(odo, explorer);
                         }
-                        explorer.refresh();
                     } else {
                         vscode.window.showErrorMessage(`Failed to logout of the current cluster with '${result.stderr}'!`);
                     }
