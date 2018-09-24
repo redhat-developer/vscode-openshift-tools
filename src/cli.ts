@@ -9,6 +9,7 @@ import { Platform } from './platform';
 import targz = require('targz');
 import unzipm = require('unzip-stream');
 import mkdirp = require('mkdirp');
+import * as zlib from 'zlib';
 
 export interface CliExitData {
     readonly error: Error;
@@ -134,14 +135,16 @@ async function getToolLocation(cmd): Promise<string> {
                         toolDlLocation,
                         function (dlProgress, increment) {
                             progress.report({
-                            increment   ,
+                            increment,
                             message: `${dlProgress}%`
                         });
                     }
                 );
             });            
-                if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
+            if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
                 await unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), tools[cmd].filePrefix);
+            } else if( toolDlLocation.endsWith('.gz')) {
+                await unzip(toolDlLocation, toolLocation, tools[cmd].filePrefix);
             }
             if (process.platform !== 'win32') {
                 fs.chmodSync(toolLocation, 0o765);
@@ -170,36 +173,49 @@ function loadMetadata(requirements, platform) {
 
 function unzip(zipFile, extractTo, prefix): Promise<any> {
     return new Promise((resolve, reject) => {
-
-      if(zipFile.endsWith('.tar.gz')) {
-        targz.decompress({
-          src: zipFile,
-          dest: extractTo,
-          tar: {
-            map: function(header) {
-              if (prefix && header.name.startsWith(prefix)) {
-                header.name = header.name.substring(prefix.length);
-              }
-              return header;
-            }
-          }
-        }, (err)=> {
-          if(err) {
-            reject(err);
-          } else {
-            resolve(true);
-          }
-        });
-      } else if(zipFile.endsWith('.zip')) {
-        fs.createReadStream(zipFile).pipe(unzipm.Extract({ path: extractTo })).on('error', (error) => {
-            reject(error);
-          }).on('close', () => {
-            resolve();
-          });
-      } else {
-        reject(`unsupported extension for ${zipFile}`);
-      }
+        if(zipFile.endsWith('.tar.gz')) {
+            targz.decompress({
+                src: zipFile,
+                dest: extractTo,
+                tar: {
+                    map: function(header) {
+                        if (prefix && header.name.startsWith(prefix)) {
+                            header.name = header.name.substring(prefix.length);
+                        }
+                        return header;
+                    }
+                }
+            }, (err)=> {
+                if(err) {
+                    reject(err);
+                } else {
+                    resolve(true);
+                }
+            });
+        } else if(zipFile.endsWith('.gz')) {
+            gunzip(zipFile, extractTo).then(resolve).catch(reject);
+        } else if(zipFile.endsWith('.zip')) {
+            fs.createReadStream(zipFile).pipe(unzipm.Extract({ path: extractTo })).on('error', (error) => {
+                reject(error);
+            }).on('close', () => {
+                resolve();
+            });
+        } else {
+            reject(`unsupported extension for ${zipFile}`);
+        }
     });
   }
 
+export function gunzip(source, destination): Promise<any> {
+    return new Promise((res, rej) => {
+        try {
+            var dest = fs.createWriteStream(destination);
+            fs.createReadStream(source).pipe(zlib.createGunzip()).pipe(dest);
+            dest.on('close', res);
+        } catch (err) {
+            rej(err)
+        }
+    });
+}
+    
 export const odoChannel = new OdoChannelImpl();
