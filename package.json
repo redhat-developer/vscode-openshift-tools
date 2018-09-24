@@ -34,6 +34,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.openshiftconsole",
+        "title": "Openshift console",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.explorer.login",
         "title": "Log in to cluster",
         "category": "OpenShift",
