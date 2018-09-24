@@ -191,6 +191,12 @@ export namespace Openshift {
             odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo log ${context.getName()};`, process.cwd());
         };
 
+        export const followLog = async function followLogComponent(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
+            let app: odoctl.OpenShiftObject = context.getParent();
+            let project: odoctl.OpenShiftObject = app.getParent();
+            odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo log ${context.getName()} -f;`, process.cwd());
+        };
+
         export const push = async function pushCmd(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             let app: odoctl.OpenShiftObject = context.getParent();
             let project: odoctl.OpenShiftObject = app.getParent();
@@ -393,6 +399,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.push', Openshift.Component.push.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.watch', Openshift.Component.watch.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.log', Openshift.Component.log.bind(undefined, odoCli)),
+        vscode.commands.registerCommand('openshift.component.followLog', Openshift.Component.followLog.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.openUrl', Openshift.Component.openUrl.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.delete', Openshift.Component.del.bind(undefined, cliExec, explorer)),
         vscode.commands.registerCommand('openshift.storage.create', Openshift.Storage.create.bind(undefined, odoCli)),

@@ -97,6 +97,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.followLog",
+        "title": "Follow Log",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.component.delete",
         "title": "Delete",
         "category": "OpenShift"
@@ -200,6 +205,10 @@
         },
         {
           "command": "openshift.component.log",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.followLog",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -324,19 +333,24 @@
           "group": "c2@2"
         },
         {
-          "command": "openshift.component.openUrl",
+          "command": "openshift.component.followLog",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c2@3"
         },
         {
-          "command": "openshift.component.push",
+          "command": "openshift.component.openUrl",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c3@1"
         },
         {
-          "command": "openshift.component.watch",
+          "command": "openshift.component.push",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c3@2"
+        },
+        {
+          "command": "openshift.component.watch",
+          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "c3@3"
         },
         {
           "command": "openshift.component.delete",
@@ -372,7 +386,7 @@
     "@types/fs-extra": "^5.0.4",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.5",
-    "@types/node": "^10.10.3",
+    "@types/node": "^10.11.0",
     "@types/shelljs": "^0.8.0",
     "@types/request": "^2.47.1",
     "@types/validator": "^9.4.2",
