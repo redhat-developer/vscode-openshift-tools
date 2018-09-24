@@ -78,10 +78,10 @@ const tools = loadMetadata(toolsConfig, process.platform);
 
 class Cli implements ICli {
     async execute(cmd: string, opts: any = {}): Promise<CliExitData> {
-        const cmdName = cmd.split(' ')[0];
-        const odoLocation = await getToolLocation(cmdName);
-        let finalCommand = cmd.replace(cmdName, odoLocation);
-        return new Promise<CliExitData>((resolve, reject) => {
+        return new Promise<CliExitData>(async (resolve, reject) => {
+            const cmdName = cmd.split(' ')[0];
+            const odoLocation = await getToolLocation(cmdName);
+            let finalCommand = cmd.replace(cmdName, odoLocation);
             odoChannel.print(finalCommand);
             childProcess.exec(finalCommand, opts, (error: Error, stdout: string, stderr: string) => {
                 odoChannel.print(stdout);
@@ -123,16 +123,24 @@ async function getToolLocation(cmd): Promise<string> {
     } catch (error) {
         let pathTool = which(cmd);
         if (pathTool === null) {
-            odoChannel.print(`Downloading '${cmd}' CLI tool`);
             await fsex.ensureDir(path.dirname(toolLocation));
-            await download.downloadFile(
-                tools[cmd].url,
-                toolDlLocation,
-                function (progress) {
-                    odoChannel.print(progress + '%');
-                }
-            );
-            if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
+            await vscode.window.withProgress({
+                cancellable:true,
+                location: vscode.ProgressLocation.Notification,
+                title: `Downloading '${cmd}' tool: `
+                }, (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
+                    return download.downloadFile(
+                        tools[cmd].url,
+                        toolDlLocation,
+                        function (dlProgress, increment) {
+                            progress.report({
+                            increment   ,
+                            message: `${dlProgress}%`
+                        });
+                    }
+                );
+            });            
+                if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
                 await unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), tools[cmd].filePrefix);
             }
             if (process.platform !== 'win32') {
