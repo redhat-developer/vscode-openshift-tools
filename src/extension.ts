@@ -38,7 +38,6 @@ export namespace Openshift {
             if (!projectName) return;
             await cli.execute(`odo project create ${projectName.trim()}`, {});
             await explorer.refresh();
-
         };
 
         export const del = async function deleteProjectCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
