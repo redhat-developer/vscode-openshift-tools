@@ -22,24 +22,26 @@ const toolsConfig = {
         "description": "OpenShift Do CLI client",
         "vendor": "Red Hat, Inc.",
         "name": "odo",
-        "version": "0.0.11",
+        "version": "0.0.12",
         "dlFileName": "odo",
         "cmdFileName": "odo",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.11/odo-windows-amd64.exe",
-                "sha256sum": "",
-                "dlFileName": "odo.exe",
+                "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.12/odo-windows-amd64.exe.gz",
+                "sha256sum": "4f7719ef1f11aac22474d36608996b016305c65afb6e9e3dcd4361c43fb54be1",
+                "dlFileName": "odo-windows-amd64.exe.gz",
                 "cmdFileName": "odo.exe"
             },
             "darwin": {
-                "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.11/odo-darwin-amd64",
-                "sha256sum": ""
+                "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.12/odo-darwin-amd64.gz",
+                "sha256sum": "3b77cf5d2a79f7484617715271b9f3c8da4a6e85afdf63f075ad09062f007861",
+                "dlFileName": "odo-darwin-amd64.gz"
             },
             "linux": {
-                "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.11/odo-linux-amd64",
-                "sha256sum": ""
+                "url": "https://github.com/redhat-developer/odo/releases/download/v0.0.12/odo-linux-amd64.gz",
+                "sha256sum": "848dae9a3ad109a6dc0f305c890dd1edba1c3b704e8e163285047d93d9f58062",
+                "dlFileName": "odo-linux-amd64.gz"
             }
         }
     },
