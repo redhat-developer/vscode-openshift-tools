@@ -272,7 +272,7 @@ export namespace Openshift {
             }
             const hostName = await odo.execute(`oc get route -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${context.getName()}')]}{.spec.host}{end}"`);
             const checkTls = await odo.execute(`oc get route -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${context.getName()}')]}{.spec.tls.termination}{end}"`);
-            const tls = checkTls ? "https://" : "http://";
+            const tls = checkTls.stdout.trim().length === 0  ? "http://" : "https://";
             opn(`${tls}${hostName.stdout}`);
         };
 
