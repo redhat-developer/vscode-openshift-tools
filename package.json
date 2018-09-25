@@ -62,11 +62,6 @@
         "category": "OpenShift"
       },
       {
-        "command": "openshift.project.describe",
-        "title": "Describe Project",
-        "category": "OpenShift"
-      },
-      {
         "command": "openshift.app.describe",
         "title": "Describe",
         "category": "OpenShift"
@@ -185,10 +180,6 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
-          "command": "openshift.project.describe",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
           "command": "openshift.app.describe",
           "when": "view == openshiftProjectExplorer"
         },
@@ -300,11 +291,6 @@
           "command": "openshift.app.create",
           "when": "view == openshiftProjectExplorer && viewItem == project",
           "group": "p1"
-        },
-        {
-          "command": "openshift.project.describe",
-          "when": "view == openshiftProjectExplorer && viewItem == project",
-          "group": "p2"
         },
         {
           "command": "openshift.project.delete",
