@@ -26,17 +26,33 @@ export namespace Openshift {
 
     export namespace Project {
         export const create = async function createProjectCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer) {
-            const value  = await vscode.window.showInputBox({prompt: "Project name"});
-            await cli.execute(`odo project create ${value.trim()}`, {});
+            const projectName = await vscode.window.showInputBox({
+                prompt: "Mention Project name",
+                validateInput: (value:string) => {
+                    if (value.trim().length === 0) {
+                        return 'Empty project name';
+                    }
+                }
+            });
+
+            if (!projectName) return;
+            await cli.execute(`odo project create ${projectName.trim()}`, {});
             await explorer.refresh();
+
         };
+
         export const del = async function deleteProjectCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
-            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete project '${context.getName()}\'`, 'Yes', 'Cancel');
+            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete project '${context.getName()}' ?`, 'Yes', 'Cancel');
             if(value === 'Yes') {
-                await cli.execute(`odo project delete ${context.getName()} -f`, {}).then(()=>{
-                    explorer.refresh();
-                }).catch((err)=>{
-                    vscode.window.showErrorMessage(`Project deletion failed with error '${err}'`);
+                cli.execute(`odo project delete ${context.getName()} -f`, {}).then((value:CliExitData)=>{
+                    if(value.error) {
+                        vscode.window.showErrorMessage(`Failed to delete project!`);
+                    } else {
+                        explorer.refresh();
+                        vscode.window.showInformationMessage(`Successfully deleted project '${context.getName()}'`);
+                    }
+                }).catch(err=>{
+                    vscode.window.showErrorMessage(`Failed to delete project with error '${err}'`);
                 });
             }
         };
@@ -44,11 +60,18 @@ export namespace Openshift {
 
     export namespace Application {
         export const create = async function createApplicationCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer) {
-            vscode.window.showInputBox({prompt: "Application name"}).then(value=> {
-                cli.execute(`odo app create ${value.trim()}`, {}).then(()=>{
-                    explorer.refresh();
-                });
+            const applicationName = await vscode.window.showInputBox({
+                prompt: "Mention Application name",
+                validateInput: (value:string) => {
+                    if (value.trim().length === 0) {
+                        return 'Empty application name';
+                    }
+                }
             });
+
+            if (!applicationName) return;
+            await cli.execute(`odo app create ${applicationName.trim()}`, {});
+            await explorer.refresh();
         };
 
         export const describe = async function describe(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
@@ -58,7 +81,7 @@ export namespace Openshift {
 
         export const del = async function deleteApplication(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
             let project: odoctl.OpenShiftObject = context.getParent();
-            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete application '${context.getName()}\'`, 'Yes', 'Cancel');
+            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete application '${context.getName()} ?`, 'Yes', 'Cancel');
             if(value === 'Yes') {
                 cli.execute(`odo project set ${project.getName()}`, {}).then(()=>{
                     cli.execute(`odo app delete ${context.getName()} -f`, {}).then((value:CliExitData)=>{
@@ -66,6 +89,7 @@ export namespace Openshift {
                             vscode.window.showErrorMessage(`Failed to delete application!`);
                         } else {
                             explorer.refresh();
+                            vscode.window.showInformationMessage(`Successfully deleted application '${context.getName()}'`);
                         }
                     }).catch(err=>{
                         vscode.window.showErrorMessage(`Failed to delete application with error '${err}'`);
@@ -209,6 +233,7 @@ export namespace Openshift {
                                 vscode.window.showErrorMessage(`Failed to delete component!`);
                             } else {
                                 explorer.refresh();
+                                vscode.window.showInformationMessage(`Successfully deleted component '${context.getName()}'`);
                             }
                         });
                     }).catch((err)=>{
