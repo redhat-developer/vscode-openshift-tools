@@ -2,7 +2,7 @@
   "name": "vscode-openshift-tools",
   "displayName": "OpenShift Connector",
   "description": "VSCode Extension for OpenShift",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "license": "MIT",
   "publisher": "redhat",
   "author": "Red Hat",
@@ -292,6 +292,11 @@
       ],
       "view/item/context": [
         {
+          "command": "openshift.component.openshiftConsole",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster",
+          "group": "console"
+        },
+        {
           "command": "openshift.app.create",
           "when": "view == openshiftProjectExplorer && viewItem == project",
           "group": "p1"
@@ -362,11 +367,6 @@
           "group": "c3@3"
         },
         {
-          "command": "openshift.component.openshiftConsole",
-          "when": "view == openshiftProjectExplorer && viewItem == cluster",
-          "group": "c3@4"
-        },
-        {
           "command": "openshift.component.delete",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c4@1"
@@ -428,7 +428,7 @@
     "targz": "^1.0.1",
     "unzip-stream": "^0.3.0",
     "url-parse": "^1.4.3",
-    "validator": "^10.7.1",
+    "validator": "^10.8.0",
     "which": "^1.3.1"
   }
 }
