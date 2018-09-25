@@ -15,11 +15,6 @@ export namespace Openshift {
         const result:CliExitData = await odo.executeInTerminal(`odo version`, process.cwd());
     };
 
-    export const openshiftconsole = async function (odo: odoctl.Odo) {
-        const result: any = await odo.getClusters();
-        opn(result[0].name);
-    };
-
     export namespace Catalog {
         export const listComponents = function listComponentTypes(odo: odoctl.Odo) {
             odo.executeInTerminal(`odo catalog list components`, process.cwd());
@@ -280,6 +275,11 @@ export namespace Openshift {
             const tls = checkTls ? "https://" : "http://";
             opn(`${tls}${hostName.stdout}`);
         };
+
+        export const openshiftConsole = async function (odo: odoctl.Odo) {
+            const result: any = await odo.getClusters();
+            opn(result[0].name);
+        };
     }
 
     export namespace Url {
@@ -428,7 +428,6 @@ export function activate(context: vscode.ExtensionContext) {
     const explorer:explorerFactory.OpenShiftExplorer = explorerFactory.create(odoCli);
     let disposable = [ 
         vscode.commands.registerCommand('openshift.about', Openshift.about.bind(undefined, odoCli)),
-        vscode.commands.registerCommand('openshift.openshiftconsole', Openshift.openshiftconsole.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.explorer.login', Openshift.Explorer.login.bind(undefined, odoCli, explorer)),
         vscode.commands.registerCommand('openshift.explorer.logout', Openshift.Explorer.logout.bind(undefined, odoCli, explorer)),
         vscode.commands.registerCommand('openshift.explorer.refresh', Openshift.Explorer.refresh.bind(undefined, explorer)),
@@ -446,6 +445,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.log', Openshift.Component.log.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.followLog', Openshift.Component.followLog.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.openUrl', Openshift.Component.openUrl.bind(undefined, odoCli)),
+        vscode.commands.registerCommand('openshift.component.openshiftConsole', Openshift.Component.openshiftConsole.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.delete', Openshift.Component.del.bind(undefined, cliExec, explorer)),
         vscode.commands.registerCommand('openshift.storage.create', Openshift.Storage.create.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.url.create', Openshift.Url.create.bind(undefined,cliExec)),
