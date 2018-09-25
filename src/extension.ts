@@ -6,7 +6,6 @@ import * as explorerFactory from './explorer';
 import * as cli from './cli';
 import * as odoctl from './odo';
 import { CliExitData } from './cli';
-import * as git from './git';
 import * as opn from 'opn';
 import * as isURL from 'validator/lib/isURL';
 
@@ -110,7 +109,44 @@ export namespace Openshift {
     }
 
     export namespace Component {
-        export const create = async function createComponent(odo: odoctl.Odo, context: odoctl.OpenShiftObject)  {
+        export const createLocal = async function createLocalComponent(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
+            try {
+                const folder = await vscode.window.showWorkspaceFolderPick({
+                    placeHolder:'Select the target workspace folder'
+                });
+
+                if (!folder) return;
+
+                const componentName = await vscode.window.showInputBox({
+                    prompt: "Component name",
+                    validateInput: (value:string) => {
+                        if (value.trim().length === 0) {
+                            return 'Empty component name';
+                        }
+                    }
+                });
+
+                if (!componentName) return;
+
+                const componentTypeName = await vscode.window.showQuickPick(odo.getComponentTypes(), {placeHolder: "Component type"});
+
+                if (!componentTypeName) return;
+
+                const componentTypeVersion = await vscode.window.showQuickPick(odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type Version"});
+
+                if (!componentTypeVersion) return;
+
+                await odo.execute(`odo project set ${context.getParent().getName()}`);
+                await odo.execute(`odo app set ${context.getName()}`);
+                await odo.execute(`odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --local ${folder.uri.fsPath}`);
+                await odo.execute(`odo push --local ${folder.uri.fsPath}`);
+
+            } catch(e) {
+                vscode.window.showErrorMessage(e);
+            }
+        }
+
+        export const createGit = async function createLocalComponent(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             try {
                 const repoURI = await vscode.window.showInputBox({prompt: 'Git repository URI', validateInput: 
                     (value:string) => {
@@ -120,7 +156,7 @@ export namespace Openshift {
                     }
                 });
                 
-                if (!repoURI) { return; }
+                if (!repoURI) return;
 
                 const componentName = await vscode.window.showInputBox({prompt: "Component name", validateInput: (value:string) => {
                     if (value.trim().length === 0) {
@@ -128,33 +164,36 @@ export namespace Openshift {
                     } 
                 }});
 
-                if (!componentName) { return; }
+                if (!componentName) return;
 
-                const componentTypeNames:string[] = await odo.getComponentTypes();
-                const componentTypeName = await vscode.window.showQuickPick(componentTypeNames, {placeHolder: "Component type"});
+                const componentTypeName = await vscode.window.showQuickPick(odo.getComponentTypes(), {placeHolder: "Component type"});
 
-                if (!componentTypeName) { return; }
+                if (!componentTypeName) return;
 
-                const versions: string[] = await odo.getComponentTypeVersions(componentTypeName);
-                const componentTypeVersion = await vscode.window.showQuickPick(versions, {placeHolder: "Component type Version"});
+                const componentTypeVersion = await vscode.window.showQuickPick(odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type Version"});
 
-                if (!componentTypeVersion) { return; }
+                if (!componentTypeVersion) return;
 
-                const createUrl = await vscode.window.showQuickPick(['Yes', 'No'], {placeHolder: 'Do you want to create route?'});
-                const pathHint = vscode.workspace.getConfiguration('git').get<string>('path');
-                const info = await git.findGit(pathHint, path => console.log(path));
-                const gitCli = new git.Git({ gitPath: info.path, version: info.version });
-                let repoLocation = await gitCli.clone(repoURI, vscode.workspace.rootPath, componentName);
-                const currentProject = context.getParent().getName();
-                await odo.execute(`odo project set ${currentProject}`);
+                const createUrl = await vscode.window.showQuickPick(['Yes', 'No'], {placeHolder: 'Do you want to clone repository to workspace?'});
+                await odo.execute(`odo project set ${context.getParent().getName()}`);
                 await odo.execute(`odo app set ${context.getName()}`);
-                await odo.execute(`odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --local ${repoLocation}`);
-                if( createUrl === 'Yes') {
-                    await odo.execute('odo url create'); 
-                }
-                await odo.execute(`odo push --local ${repoLocation}`);
-            }  catch(e) {
-                console.log(e);
+                await odo.execute(`odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --git ${repoURI}`);
+                await vscode.commands.executeCommand('git.clone', repoURI);
+            } catch(e) {
+                vscode.window.showErrorMessage(e);
+            }
+        };
+
+        export const create = async function createComponent(odo: odoctl.Odo, context: odoctl.OpenShiftObject)  {
+            // should use QuickPickItem witj label and description
+            const sourceTypes = ["git", "local"];
+            const componentSource = await vscode.window.showQuickPick(sourceTypes, {
+                placeHolder: "Select source type for component"
+            });
+            if (componentSource === 'git' ) {
+                createGit(odo, context);
+            } else {
+                createLocal(odo, context);
             }
         };
 
