@@ -103,7 +103,7 @@
       },
       {
         "command": "openshift.component.openshiftConsole",
-        "title": "Opwn Console",
+        "title": "Open Console",
         "category": "OpenShift"
       },
       {
