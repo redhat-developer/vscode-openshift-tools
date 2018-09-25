@@ -12,7 +12,7 @@ import * as isURL from 'validator/lib/isURL';
 export namespace Openshift {
 
     export const about = async function (odo: odoctl.Odo) {
-        const result:CliExitData = await odo.executeInTerminal(`odo version`, process.cwd());
+        await odo.executeInTerminal(`odo version`, process.cwd());
     };
 
     export namespace Catalog {
@@ -25,7 +25,7 @@ export namespace Openshift {
     }
 
     export namespace Project {
-        export const create = async function createProjectCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
+        export const create = async function createProjectCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer) {
             const value  = await vscode.window.showInputBox({prompt: "Project name"});
             await cli.execute(`odo project create ${value.trim()}`, {});
             await explorer.refresh();
@@ -43,7 +43,7 @@ export namespace Openshift {
     }
 
     export namespace Application {
-        export const create = async function createApplicationCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
+        export const create = async function createApplicationCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer) {
             vscode.window.showInputBox({prompt: "Application name"}).then(value=> {
                 cli.execute(`odo app create ${value.trim()}`, {}).then(()=>{
                     explorer.refresh();
@@ -144,7 +144,7 @@ export namespace Openshift {
             } catch(e) {
                 vscode.window.showErrorMessage(e);
             }
-        }
+        };
 
         export const createGit = async function createLocalComponent(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             try {
@@ -185,7 +185,7 @@ export namespace Openshift {
         };
 
         export const create = async function createComponent(odo: odoctl.Odo, context: odoctl.OpenShiftObject)  {
-            // should use QuickPickItem witj label and description
+            // should use QuickPickItem with label and description
             const sourceTypes = ["git", "local"];
             const componentSource = await vscode.window.showQuickPick(sourceTypes, {
                 placeHolder: "Select source type for component"
@@ -276,7 +276,7 @@ export namespace Openshift {
             opn(`${tls}${hostName.stdout}`);
         };
 
-        export const openshiftConsole = async function (odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
+        export const openshiftConsole = async function (context: odoctl.OpenShiftObject) {
             opn(context.getName());
         };
     }
@@ -312,24 +312,38 @@ export namespace Openshift {
     export namespace Explorer {
         export const login = async function loginCluster(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer) {
             if(await odo.requireLogin()) {
-                let clusterURL = await vscode.window.showInputBox({
-                    ignoreFocusOut: true,
-                    prompt: "Provide URL of the cluster to connect",
-                    validateInput: (value:string) => {
-                        if(!isURL(value)) {
-                            return 'Invalid URL provided';
-                        }
-                    }
-                });
-                if(!clusterURL) { return; }
-                const loginMethod = await vscode.window.showQuickPick(['Credentials', 'Token'], {placeHolder: 'Select the way to log in to the cluster.'});
-                if(loginMethod === "Credentials") {
-                    credentialsLogin(clusterURL, odo, explorer);
-                } else {
-                    tokenLogin(clusterURL, odo, explorer);
-                }
+                loginDialog(odo, explorer);
             } else {
-                vscode.window.showInformationMessage(`You are already logged in the cluster.`);
+                const value = await vscode.window.showInformationMessage(`You are already logged in the cluster. Do you want to login to a different cluster ?`, 'Yes', 'No');
+                if(value === 'Yes') {
+                    odo.execute(`oc logout`).then(async result =>{
+                        if(result.stderr === "") {
+                            loginDialog(odo, explorer);
+                        } else {
+                            vscode.window.showErrorMessage(`Failed to logout of the current cluster with '${result.stderr}'!`);
+                        }
+                    });
+                    
+                }
+            }
+        };
+
+        const loginDialog = async function(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer) {
+            let clusterURL = await vscode.window.showInputBox({
+                ignoreFocusOut: true,
+                prompt: "Provide URL of the cluster to connect",
+                validateInput: (value:string) => {
+                    if(!isURL(value)) {
+                        return 'Invalid URL provided';
+                    }
+                }
+            });
+            if(!clusterURL) { return; }
+            const loginMethod = await vscode.window.showQuickPick(['Credentials', 'Token'], {placeHolder: 'Select the way to log in to the cluster.'});
+            if(loginMethod === "Credentials") {
+                credentialsLogin(clusterURL, odo, explorer);
+            } else {
+                tokenLogin(clusterURL, odo, explorer);
             }
         };
 
@@ -343,13 +357,13 @@ export namespace Openshift {
                     }
                 }
             });
-            if (!username) { return; }
+            if (!username) return;
             let passwd  = await vscode.window.showInputBox({
                 ignoreFocusOut: true,
                 password: true,
                 prompt: "Provide Password for basic authentication to the API server"
             });
-            if(!passwd) { return; }
+            if(!passwd) return;
             odo.execute(`oc login ${clusterURL} -u ${username} -p ${passwd}`).then((result)=>{
                 loginMessage(clusterURL, result, explorer);
             });
@@ -380,7 +394,7 @@ export namespace Openshift {
                 odo.execute(`oc logout`).then(async result =>{
                     if(result.stderr === "") {
                         explorer.refresh();
-                        const logoutInfo = await vscode.window.showInformationMessage(`Successfully logged out. Do you want to login to a new cluster`, 'Yes', 'Cancel');
+                        const logoutInfo = await vscode.window.showInformationMessage(`Successfully logged out. Do you want to login to a new cluster`, 'Yes', 'No');
                         if(logoutInfo === 'Yes') {
                             login(odo, explorer);
                         }
@@ -405,19 +419,18 @@ export namespace Openshift {
                     return 'Invalid storage name';
                 } 
             }});
-            if(!storageName) { return; } 
+            if(!storageName) return;
 
             const mountPath = await vscode.window.showInputBox({prompt: "Specify the mount path", validateInput: (value:string) => {
                 if (value.trim().length === 0) {
                     return 'Invalid mount path';
                 } 
             }});
-            if(!mountPath) { return; }
+            if(!mountPath) return;
 
             const storageSize = await vscode.window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the storage size'});
             odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo component set ${context.getName()}; odo storage create ${storageName} --path=${mountPath} --size=${storageSize};`, process.cwd());
         };
-
     }
 }
 
@@ -444,7 +457,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.log', Openshift.Component.log.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.followLog', Openshift.Component.followLog.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.openUrl', Openshift.Component.openUrl.bind(undefined, odoCli)),
-        vscode.commands.registerCommand('openshift.component.openshiftConsole', Openshift.Component.openshiftConsole.bind(undefined, odoCli)),
+        vscode.commands.registerCommand('openshift.component.openshiftConsole', Openshift.Component.openshiftConsole.bind(undefined)),
         vscode.commands.registerCommand('openshift.component.delete', Openshift.Component.del.bind(undefined, cliExec, explorer)),
         vscode.commands.registerCommand('openshift.storage.create', Openshift.Storage.create.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.url.create', Openshift.Url.create.bind(undefined,cliExec)),
