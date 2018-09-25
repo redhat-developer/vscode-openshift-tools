@@ -191,19 +191,20 @@ function unzip(zipFile, extractTo, prefix): Promise<any> {
                 if(err) {
                     reject(err);
                 } else {
-                    resolve(true);
+                    resolve();
                 }
             });
         } else if(zipFile.endsWith('.gz')) {
-            gunzip(zipFile, extractTo).then(resolve).catch(reject);
+            gunzip(zipFile, extractTo)
+                .then(resolve)
+                .catch(reject);
         } else if(zipFile.endsWith('.zip')) {
-            fs.createReadStream(zipFile).pipe(unzipm.Extract({ path: extractTo })).on('error', (error) => {
-                reject(error);
-            }).on('close', () => {
-                resolve();
-            });
+            fs.createReadStream(zipFile)
+                .pipe(unzipm.Extract({ path: extractTo }))
+                .on('error', reject)
+                .on('close', resolve);
         } else {
-            reject(`unsupported extension for ${zipFile}`);
+            reject(`unsupported extension for '${zipFile}'`);
         }
     });
   }
