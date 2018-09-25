@@ -34,11 +34,6 @@
         "category": "OpenShift"
       },
       {
-        "command": "openshift.openshiftconsole",
-        "title": "Openshift console",
-        "category": "OpenShift"
-      },
-      {
         "command": "openshift.explorer.login",
         "title": "Log in to cluster",
         "category": "OpenShift",
@@ -104,6 +99,11 @@
       {
         "command": "openshift.component.followLog",
         "title": "Follow Log",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.openshiftConsole",
+        "title": "Openshift console",
         "category": "OpenShift"
       },
       {
@@ -214,6 +214,10 @@
         },
         {
           "command": "openshift.component.followLog",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.openshiftConsole",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -356,6 +360,11 @@
           "command": "openshift.component.watch",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c3@3"
+        },
+        {
+          "command": "openshift.component.openshiftConsole",
+          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "c3@4"
         },
         {
           "command": "openshift.component.delete",
