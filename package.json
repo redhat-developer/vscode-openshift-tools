@@ -103,7 +103,7 @@
       },
       {
         "command": "openshift.component.openshiftConsole",
-        "title": "Openshift console",
+        "title": "Opwn Console",
         "category": "OpenShift"
       },
       {
@@ -363,7 +363,7 @@
         },
         {
           "command": "openshift.component.openshiftConsole",
-          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster",
           "group": "c3@4"
         },
         {

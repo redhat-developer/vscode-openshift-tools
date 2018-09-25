@@ -276,9 +276,8 @@ export namespace Openshift {
             opn(`${tls}${hostName.stdout}`);
         };
 
-        export const openshiftConsole = async function (odo: odoctl.Odo) {
-            const result: any = await odo.getClusters();
-            opn(result[0].name);
+        export const openshiftConsole = async function (odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
+            opn(context.getName());
         };
     }
 
