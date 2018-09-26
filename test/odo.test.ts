@@ -68,55 +68,6 @@ suite("odo integration tests", function () {
         });
     });
 
-    suite("odo app integration", function() {
-        const app1 = 'app1';    
-        const app2 = 'app2';  
-        const app3 = 'app3';    
-    
-        const odoAppCli: ICli = create([
-            `ACTIVE  NAME`,
-            `  *     ${app1}`,
-            `        ${app2}`,
-            `        ${app3}`
-        ].join('\n'));
-        
-        let result: OpenShiftObject[];
-        const osProj = <OpenShiftObject> {
-            getName: () => "project1"
-        };
-
-        suiteSetup(async function() {
-            result = await odo.create(odoAppCli).getApplications(osProj);
-        });
-
-        test("Odo->getApplications(project) returns correct number of applications", function() {
-            assert(result.length === 3);
-        });
-    });
-
-    suite("odo project integration", function() {
-        const proj1 = 'proj1';    
-        const proj2 = 'proj2';  
-        const proj3 = 'proj3';    
-    
-        const odoProjCli: ICli = create([
-            `ACTIVE  NAME`,
-            `  *     ${proj1}`,
-            `        ${proj2}`,
-            `        ${proj3}`
-        ].join('\n'));
-        
-        let result: OpenShiftObject[];
-
-        suiteSetup(async function() {
-            result = await odo.create(odoProjCli).getProjects();
-        });
-
-        test("Odo->getProjects() returns correct number of projects", function() {
-            assert(result.length === 3);
-        });
-    });
-
     suite("odo service integration", function() {
         const svc1 = 'svc1';    
         const svc2 = 'svc2';  
