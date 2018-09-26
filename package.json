@@ -1,8 +1,8 @@
 {
-  "name": "vscode-openshift-tools",
+  "name": "vscode-openshift-connector",
   "displayName": "OpenShift Connector",
   "description": "VSCode Extension for OpenShift",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "MIT",
   "publisher": "redhat",
   "author": "Red Hat",
@@ -22,6 +22,7 @@
     "kubernetes",
     "redhat"
   ],
+  "icon": "images/openshift_extension.png",
   "activationEvents": [
     "onView:openshiftProjectExplorer"
   ],
@@ -156,7 +157,7 @@
         {
           "id": "openshiftView",
           "title": "OpenShift",
-          "icon": "images/logo.svg"
+          "icon": "images/openshift_view.svg"
         }
       ]
     },
