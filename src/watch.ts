@@ -39,7 +39,7 @@ export async function grep(fileLocation: string, rx: RegExp): Promise<string> {
 			}
         })
         .on('error', reject)
-		.on('end', () => reject(""));
+		.on('end', reject);
 	});
 }
 
