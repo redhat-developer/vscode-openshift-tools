@@ -23,9 +23,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     private fsw: notifier.FileContentChangeNotifier;
     constructor(private odoctl: Odo, ) {
         this.fsw = notifier.watchFileForContextChange(kubeConfigFolder, 'config');
-        this.fsw.emitter.on('file-changed', () => {
-            this.refresh();
-        });
+        this.fsw.emitter.on('file-changed', () => this.refresh());
     }
 
     private onDidChangeTreeDataEmitter: EventEmitter<OpenShiftObject | undefined> = new EventEmitter<OpenShiftObject | undefined>();
@@ -36,10 +34,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     }
 
     getChildren(element?: OpenShiftObject): ProviderResult<OpenShiftObject[]> {
-        if (element) {
-            return element.getChildren();
-        }
-        return this.odoctl.getClusters();
+        return element ? element.getChildren() : this.odoctl.getClusters();
     }
 
     getParent?(element: OpenShiftObject): OpenShiftObject {
