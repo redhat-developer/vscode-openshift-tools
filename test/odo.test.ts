@@ -11,11 +11,11 @@ import * as assert from 'assert';
 import { RSA_PKCS1_OAEP_PADDING } from 'constants';
 import { FunctionBreakpoint } from 'vscode';
 
-suite("odo integration tests", function () {
+suite("odo integration tests", () => {
 
-    function create(stdout: string){
+    function create(stdout: string) {
         return {
-            execute : function(cmd: string, env: any): Promise<CliExitData> {
+            execute : (cmd: string, env: any): Promise<CliExitData> => {
                 return Promise.resolve({
                     error: undefined,
                     stderr: '',
@@ -25,11 +25,11 @@ suite("odo integration tests", function () {
         };
     }
 
-    suite("odo catalog integration", function() {
-        const http = 'httpd';    
-        const nodejs = 'nodejs';    
-        const python = 'python';    
-    
+    suite("odo catalog integration", () => {
+        const http = 'httpd';
+        const nodejs = 'nodejs';
+        const python = 'python';
+
         const odoCatalogCli: ICli = create([
             `NAME            PROJECT                 TAGS`,
             `${nodejs}       openshift               1.0`,
@@ -38,22 +38,22 @@ suite("odo integration tests", function () {
         ].join('\n'));
         let result: string[];
 
-        suiteSetup(async function() {
+        suiteSetup(async () => {
             result = await odo.create(odoCatalogCli).getComponentTypes();
         });
 
-        test("Odo->getComponentTypes() returns correct number of component types", function() {
+        test("Odo->getComponentTypes() returns correct number of component types", () => {
             assert(result.length === 3);
         });
 
-        test("Odo->getComponentTypes() returns correct component type names", function() {
-            const resultArray = result.filter(function(element:string) {
+        test("Odo->getComponentTypes() returns correct component type names", () => {
+            const resultArray = result.filter((element: string) => {
                 return element === http || element === nodejs || element === python;
             });
             assert(resultArray.length === 3);
         });
 
-        test("Odo->getComponentTypeVersions() returns correct number of tags for component type", function() {
+        test("Odo->getComponentTypeVersions() returns correct number of tags for component type", () => {
             return Promise.all([
                 odo.create(odoCatalogCli).getComponentTypeVersions(nodejs).then((result)=> {
                     assert(result.length === 1);
@@ -68,25 +68,25 @@ suite("odo integration tests", function () {
         });
     });
 
-    suite("odo service integration", function() {
-        const svc1 = 'svc1';    
-        const svc2 = 'svc2';  
-        const svc3 = 'svc3';    
-    
+    suite("odo service integration", () => {
+        const svc1 = 'svc1';
+        const svc2 = 'svc2';
+        const svc3 = 'svc3';
+
         const odoProjCli: ICli = create([
             `The following services can be deployed:`,
             `- ${svc1}`,
             `- ${svc2}`,
             `- ${svc3}`
         ].join('\n'));
-        
+
         let result: string[];
 
-        suiteSetup(async function() {
+        suiteSetup(async () => {
             result = await odo.create(odoProjCli).getServiceTemplates();
         });
 
-        test("Odo->getServiceTemplates() returns correct number of services", function() {
+        test("Odo->getServiceTemplates() returns correct number of services", () => {
             assert(result.length === 3);
         });
     });

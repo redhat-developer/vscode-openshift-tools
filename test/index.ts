@@ -122,7 +122,7 @@ class CoverageRunner {
         // Create a match function - taken from the run-with-cover.js in istanbul.
         const decache = require('decache');
         const fileMap: any = {};
-        srcFiles.forEach(file => {
+        srcFiles.forEach((file) => {
             const fullPath = paths.join(sourceRoot, file);
             fileMap[fullPath] = true;
 
@@ -187,7 +187,7 @@ class CoverageRunner {
             // When instrumenting the code, istanbul will give each FunctionDeclaration a value of 1 in coverState.s,
             // presumably to compensate for function hoisting. We need to reset this, as the function was not hoisted,
             // as it was never loaded.
-            Object.keys(self.instrumenter.coverState.s).forEach(key => {
+            Object.keys(self.instrumenter.coverState.s).forEach((key) => {
                 self.instrumenter.coverState.s[key] = 0;
             });
 
