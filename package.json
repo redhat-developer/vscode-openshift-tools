@@ -34,16 +34,15 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.explorer.logout",
+        "title": "Log out",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.explorer.login",
         "title": "Log in to cluster",
         "category": "OpenShift",
-        "icon": "images/dark/sign-in.svg"
-      },
-      {
-        "command": "openshift.explorer.logout",
-        "title": "Log out of cluster",
-        "category": "OpenShift",
-        "icon": "images/dark/sign-out.svg"
+        "icon": "images/login.png"
       },
       {
         "command": "openshift.explorer.refresh",
@@ -253,7 +252,7 @@
         {
           "command": "openshift.explorer.logout",
           "when": "view == openshiftProjectExplorer",
-          "group": "navigation"
+          "group": "logout"
         },
         {
           "command": "openshift.explorer.refresh",

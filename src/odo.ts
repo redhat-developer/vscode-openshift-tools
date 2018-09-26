@@ -172,7 +172,7 @@ class OdoImpl implements Odo {
             `odo version`, {}
         );
         if(result.stdout.indexOf("Please log in to the cluster") > -1) {
-            let error:string = 'Login to display clusters.';
+            let error:string = 'Log in to display clusters.';
             return result.stdout.trim().split(`\n`).slice(1).map<OpenShiftObject>(value => new OpenShiftObjectImpl(null, error, 'loginError', this, TreeItemCollapsibleState.None));
         }
         const clusters: OpenShiftObject[] = result.stdout.trim().split('\n').filter(value => {
