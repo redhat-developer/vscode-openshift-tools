@@ -94,7 +94,7 @@ class OdoImpl implements Odo {
 
     }
 
-    public async getProjects() : Promise<OpenShiftObject[]> {
+    public async getProjects(): Promise<OpenShiftObject[]> {
         const result: cliInstance.CliExitData = await this.cli.execute(
             'odo project list', {}
         );
@@ -104,7 +104,7 @@ class OdoImpl implements Odo {
         return result.stdout.trim().split("\n").slice(1).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(undefined, value.replace(/[\s|\\*]/g, ''), 'project', this));
     }
 
-    public async getApplications(project: OpenShiftObjectImpl) : Promise<OpenShiftObject[]> {
+    public async getApplications(project: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
         await this.cli.execute(
             `odo project set ${project.name}`, {}
         );
@@ -134,7 +134,7 @@ class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.cli.execute(
             `odo catalog list components`, {}
         );
-        return result.stdout.trim().split('\n').slice(1).map(value => {
+        return result.stdout.trim().split('\n').slice(1).map((value) => {
             const name = value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|');
             return name[0];
         });
@@ -145,7 +145,7 @@ class OdoImpl implements Odo {
             `odo storage list`, {}
         );
 
-        return result.stdout.trim().split('\n').slice(2).map(value => {
+        return result.stdout.trim().split('\n').slice(2).map((value) => {
             // need to refactor this
             if (value === "" || value === "No unmounted storage exists to mount") return;
             const name = value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|');
@@ -171,11 +171,11 @@ class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.cli.execute(
             `odo version`, {}
         );
-        if(result.stdout.indexOf("Please log in to the cluster") > -1) {
+        if (result.stdout.indexOf("Please log in to the cluster") > -1) {
             const error: string = 'Log in to display clusters.';
-            return result.stdout.trim().split(`\n`).slice(1).map<OpenShiftObject>(value => new OpenShiftObjectImpl(null, error, 'loginError', this, TreeItemCollapsibleState.None));
+            return result.stdout.trim().split(`\n`).slice(1).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(null, error, 'loginError', this, TreeItemCollapsibleState.None));
         }
-        const clusters: OpenShiftObject[] = result.stdout.trim().split('\n').filter(value => {
+        const clusters: OpenShiftObject[] = result.stdout.trim().split('\n').filter((value) => {
             return value.indexOf('Server:') !== -1;
         }).map((value) => {
             const server: string = value.substr(value.indexOf(':')+1).trim();
