@@ -11,13 +11,13 @@ export function watchFileForContextChange(location: string, filename: string): F
     fsex.ensureDir(location);
     const watcher: fs.FSWatcher = fsex.watch(location, (eventType, changedFile) => {
         if (filename === changedFile) {
-            if(timer) {
+            if (timer) {
                 clearTimeout(timer);
             }
             timer = setTimeout(async ()=> {
                 timer = undefined;
                 const newContext = await grep(path.join(location, filename), /current-context:.*/);
-                if(context !== newContext) {
+                if (context !== newContext) {
                     emitter.emit('file-changed', eventType);
                     context = newContext;
                 }
@@ -47,4 +47,3 @@ export interface FileContentChangeNotifier {
     readonly watcher: fs.FSWatcher;
     readonly emitter: EventEmitter;
 }
-
