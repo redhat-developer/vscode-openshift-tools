@@ -11,7 +11,7 @@ import * as isURL from 'validator/lib/isURL';
 
 export namespace Openshift {
 
-    export const about = async function (odo: odoctl.Odo) {
+    export const about = async (odo: odoctl.Odo) => {
         await odo.executeInTerminal(`odo version`, process.cwd());
     };
 
@@ -28,7 +28,7 @@ export namespace Openshift {
         export const create = async function createProjectCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer) {
             const projectName = await vscode.window.showInputBox({
                 prompt: "Mention Project name",
-                validateInput: (value:string) => {
+                validateInput: (value: string) => {
                     if (value.trim().length === 0) {
                         return 'Empty project name';
                     }
@@ -43,15 +43,15 @@ export namespace Openshift {
 
         export const del = async function deleteProjectCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete project '${context.getName()}' ?`, 'Yes', 'Cancel');
-            if(value === 'Yes') {
-                cli.execute(`odo project delete ${context.getName()} -f`, {}).then((value:CliExitData)=>{
-                    if(value.error) {
+            if (value === 'Yes') {
+                cli.execute(`odo project delete ${context.getName()} -f`, {}).then((value: CliExitData)=> {
+                    if (value.error) {
                         vscode.window.showErrorMessage(`Failed to delete project!`);
                     } else {
                         explorer.refresh();
                         vscode.window.showInformationMessage(`Successfully deleted project '${context.getName()}'`);
                     }
-                }).catch(err=>{
+                }).catch((err) => {
                     vscode.window.showErrorMessage(`Failed to delete project with error '${err}'`);
                 });
             }
@@ -62,7 +62,7 @@ export namespace Openshift {
         export const create = async function createApplicationCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer) {
             const applicationName = await vscode.window.showInputBox({
                 prompt: "Mention Application name",
-                validateInput: (value:string) => {
+                validateInput: (value: string) => {
                     if (value.trim().length === 0) {
                         return 'Empty application name';
                     }
@@ -75,23 +75,23 @@ export namespace Openshift {
         };
 
         export const describe = async function describe(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
-            let project: odoctl.OpenShiftObject = context.getParent();
+            const project: odoctl.OpenShiftObject = context.getParent();
             odo.executeInTerminal(`odo project set ${project.getName()}; odo app describe ${context.getName()}`, process.cwd());
         };
 
         export const del = async function deleteApplication(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
-            let project: odoctl.OpenShiftObject = context.getParent();
+            const project: odoctl.OpenShiftObject = context.getParent();
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete application '${context.getName()} ?`, 'Yes', 'Cancel');
-            if(value === 'Yes') {
-                cli.execute(`odo project set ${project.getName()}`, {}).then(()=>{
-                    cli.execute(`odo app delete ${context.getName()} -f`, {}).then((value:CliExitData)=>{
-                        if(value.error) {
+            if (value === 'Yes') {
+                cli.execute(`odo project set ${project.getName()}`, {}).then(()=> {
+                    cli.execute(`odo app delete ${context.getName()} -f`, {}).then((value: CliExitData)=> {
+                        if (value.error) {
                             vscode.window.showErrorMessage(`Failed to delete application!`);
                         } else {
                             explorer.refresh();
                             vscode.window.showInformationMessage(`Successfully deleted application '${context.getName()}'`);
                         }
-                    }).catch(err=>{
+                    }).catch((err)=> {
                         vscode.window.showErrorMessage(`Failed to delete application with error '${err}'`);
                     });
                 });
@@ -108,7 +108,7 @@ export namespace Openshift {
             const serviceName = await vscode.window.showInputBox({
                 value: serviceTemplateName,
                 prompt: 'Service Name',
-                validateInput: (value:string) => {
+                validateInput: (value: string) => {
                     // required, because dc name is ${component}-${app}
                     if (`${value.trim()}-${context.getName()}`.length > 63) {
                         return 'Service name cannot be more that 63 characters';
@@ -123,7 +123,7 @@ export namespace Openshift {
         };
         export const del = async function deleteService(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer, service: odoctl.OpenShiftObject, ) {
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete service '${service.getName()}'`, 'Yes', 'Cancel');
-            if(value === 'Yes') {
+            if (value === 'Yes') {
                 await odo.execute(`odo project set ${service.getParent().getParent().getName()}`);
                 await odo.execute(`odo app set ${service.getParent().getName()}`);
                 await odo.execute(`odo service delete ${service.getName()} -f`);
@@ -136,14 +136,14 @@ export namespace Openshift {
         export const createLocal = async function createLocalComponent(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             try {
                 const folder = await vscode.window.showWorkspaceFolderPick({
-                    placeHolder:'Select the target workspace folder'
+                    placeHolder: 'Select the target workspace folder'
                 });
 
                 if (!folder) return;
 
                 const componentName = await vscode.window.showInputBox({
                     prompt: "Component name",
-                    validateInput: (value:string) => {
+                    validateInput: (value: string) => {
                         if (value.trim().length === 0) {
                             return 'Empty component name';
                         }
@@ -165,27 +165,27 @@ export namespace Openshift {
                 await odo.execute(`odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --local ${folder.uri.fsPath}`);
                 await odo.execute(`odo push --local ${folder.uri.fsPath}`);
 
-            } catch(e) {
+            } catch (e) {
                 vscode.window.showErrorMessage(e);
             }
         };
 
         export const createGit = async function createLocalComponent(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             try {
-                const repoURI = await vscode.window.showInputBox({prompt: 'Git repository URI', validateInput: 
-                    (value:string) => {
+                const repoURI = await vscode.window.showInputBox({prompt: 'Git repository URI', validateInput:
+                    (value: string) => {
                         if (value.trim().length === 0) {
                             return 'Empty Git repository URL';
-                        } 
+                        }
                     }
                 });
-                
+
                 if (!repoURI) return;
 
-                const componentName = await vscode.window.showInputBox({prompt: "Component name", validateInput: (value:string) => {
+                const componentName = await vscode.window.showInputBox({prompt: "Component name", validateInput: (value: string) => {
                     if (value.trim().length === 0) {
                         return 'Empty component name';
-                    } 
+                    }
                 }});
 
                 if (!componentName) return;
@@ -203,7 +203,7 @@ export namespace Openshift {
                 await odo.execute(`odo app set ${context.getName()}`);
                 await odo.execute(`odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --git ${repoURI}`);
                 await vscode.commands.executeCommand('git.clone', repoURI);
-            } catch(e) {
+            } catch (e) {
                 vscode.window.showErrorMessage(e);
             }
         };
@@ -222,21 +222,21 @@ export namespace Openshift {
         };
 
         export const del = async function deleteComponent(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
-            let app: odoctl.OpenShiftObject = context.getParent();
-            let project: odoctl.OpenShiftObject = app.getParent();
+            const app: odoctl.OpenShiftObject = context.getParent();
+            const project: odoctl.OpenShiftObject = app.getParent();
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete component '${context.getName()}\'`, 'Yes', 'Cancel');
-            if(value === 'Yes') {
-                cli.execute(`odo project set ${project.getName()}`, {}).then(()=>{
-                    cli.execute(`odo app set ${app.getName()}`, {}).then(()=>{
-                        cli.execute(`odo delete ${context.getName()} -f`, {}).then((value:CliExitData)=> {
-                            if(value.error) {
+            if (value === 'Yes') {
+                cli.execute(`odo project set ${project.getName()}`, {}).then(()=> {
+                    cli.execute(`odo app set ${app.getName()}`, {}).then(()=> {
+                        cli.execute(`odo delete ${context.getName()} -f`, {}).then((value: CliExitData)=> {
+                            if (value.error) {
                                 vscode.window.showErrorMessage(`Failed to delete component!`);
                             } else {
                                 explorer.refresh();
                                 vscode.window.showInformationMessage(`Successfully deleted component '${context.getName()}'`);
                             }
                         });
-                    }).catch((err)=>{
+                    }).catch((err)=> {
                         vscode.window.showErrorMessage(`Failed to delete component with error '${err}'`);
                     });
                 });
@@ -244,54 +244,54 @@ export namespace Openshift {
         };
 
         export const describe = async function componentDescribe(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
-            let app: odoctl.OpenShiftObject = context.getParent();
-            let project: odoctl.OpenShiftObject = app.getParent();
+            const app: odoctl.OpenShiftObject = context.getParent();
+            const project: odoctl.OpenShiftObject = app.getParent();
             odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo describe ${context.getName()}`, process.cwd());
         };
 
         export const log = async function logComponent(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
-            let app: odoctl.OpenShiftObject = context.getParent();
-            let project: odoctl.OpenShiftObject = app.getParent();
+            const app: odoctl.OpenShiftObject = context.getParent();
+            const project: odoctl.OpenShiftObject = app.getParent();
             odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo log ${context.getName()};`, process.cwd());
         };
 
         export const followLog = async function followLogComponent(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
-            let app: odoctl.OpenShiftObject = context.getParent();
-            let project: odoctl.OpenShiftObject = app.getParent();
+            const app: odoctl.OpenShiftObject = context.getParent();
+            const project: odoctl.OpenShiftObject = app.getParent();
             odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo log ${context.getName()} -f;`, process.cwd());
         };
 
         export const push = async function pushCmd(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
-            let app: odoctl.OpenShiftObject = context.getParent();
-            let project: odoctl.OpenShiftObject = app.getParent();
+            const app: odoctl.OpenShiftObject = context.getParent();
+            const project: odoctl.OpenShiftObject = app.getParent();
 
-            odo.execute(`odo project set ${project.getName()}`).then(()=>{
-                odo.execute(`odo app set ${app.getName()}`).then(()=>{
-                    odo.execute(`odo component set  ${context.getName()}`).then((value:CliExitData)=> {
-                        odo.execute(`odo push ${context.getName()}`).then((value:CliExitData)=> {
-                            if(value.error) {
+            odo.execute(`odo project set ${project.getName()}`).then(()=> {
+                odo.execute(`odo app set ${app.getName()}`).then(()=> {
+                    odo.execute(`odo component set  ${context.getName()}`).then((value: CliExitData)=> {
+                        odo.execute(`odo push ${context.getName()}`).then((value: CliExitData)=> {
+                            if (value.error) {
                                 vscode.window.showErrorMessage(`Failed to push component!`);
                             }
                         });
                     });
                 });
-            }).catch((err)=>{
+            }).catch((err)=> {
                 vscode.window.showErrorMessage(`Failed to push component with error '${err}'`);
             });
         };
 
         export const watch = async function watchCmd(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
-            let app: odoctl.OpenShiftObject = context.getParent();
-            let project: odoctl.OpenShiftObject = app.getParent();
+            const app: odoctl.OpenShiftObject = context.getParent();
+            const project: odoctl.OpenShiftObject = app.getParent();
             odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo component set ${context.getName()}; odo watch ${context.getName()};`, process.cwd());
         };
 
         export const openUrl = async function OpenUrlCmd(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             const app: odoctl.OpenShiftObject = context.getParent();
             const routeCheck = await odo.execute(`oc get route`);
-            if (routeCheck.stdout === ''){
+            if (routeCheck.stdout === '') {
                 const value = await vscode.window.showInformationMessage(`No URL for component '${context.getName()}\' in application '${app.getName()}\'. Do you want to create a route and open it?`, 'Create', 'Cancel');
-                if(value === 'Create'){
+                if (value === 'Create') {
                     await odo.execute(`odo url create`);
                 }
             }
@@ -301,7 +301,7 @@ export namespace Openshift {
             opn(`${tls}${hostName.stdout}`);
         };
 
-        export const openshiftConsole = async function (context: odoctl.OpenShiftObject) {
+        export const openshiftConsole = async (context: odoctl.OpenShiftObject)=> {
             opn(context.getName());
         };
     }
@@ -310,25 +310,25 @@ export namespace Openshift {
         export const create = async function createUrl(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             const app: odoctl.OpenShiftObject = context.getParent();
             const project: odoctl.OpenShiftObject = app.getParent();
-            const portsResult:CliExitData = await odo.execute(`oc get service ${context.getName()}-${app.getName()} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`);
+            const portsResult: CliExitData = await odo.execute(`oc get service ${context.getName()}-${app.getName()} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`);
             let ports: string[] = portsResult.stdout.trim().split(',');
-            ports = ports.slice(0,ports.length-1);
+            ports = ports.slice(0, ports.length-1);
             let port: string = ports[0];
-            if(ports.length > 1) {
+            if (ports.length > 1) {
                 port = await vscode.window.showQuickPick(ports, {placeHolder: "Select port to expose"});
             }
 
-            odo.execute(`odo project set ${project.getName()}`).then(()=>{
-                odo.execute(`odo app set ${app.getName()}`).then(()=>{
-                    odo.execute(`odo component set ${context.getName()}`).then((value:CliExitData)=> {
-                        odo.execute(`odo url create --port ${port}`).then((value:CliExitData)=> {
-                            if(value.error) {
+            odo.execute(`odo project set ${project.getName()}`).then(()=> {
+                odo.execute(`odo app set ${app.getName()}`).then(()=> {
+                    odo.execute(`odo component set ${context.getName()}`).then(()=> {
+                        odo.execute(`odo url create --port ${port}`).then((value: CliExitData)=> {
+                            if (value.error) {
                                 vscode.window.showErrorMessage(`Failed to create URL for component '${context.getName()}'!`);
                             }
                         });
                     });
                 });
-            }).catch((err)=>{
+            }).catch((err)=> {
                 vscode.window.showErrorMessage(`Failed to create URL for component '${context.getName()}'!`);
             });
         };
@@ -336,76 +336,75 @@ export namespace Openshift {
 
     export namespace Explorer {
         export const login = async function loginCluster(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer) {
-            if(await odo.requireLogin()) {
+            if (await odo.requireLogin()) {
                 loginDialog(odo, explorer);
             } else {
                 const value = await vscode.window.showInformationMessage(`You are already logged in the cluster. Do you want to login to a different cluster ?`, 'Yes', 'No');
-                if(value === 'Yes') {
-                    odo.execute(`oc logout`).then(async result =>{
-                        if(result.stderr === "") {
+                if (value === 'Yes') {
+                    odo.execute(`oc logout`).then(async (result)=> {
+                        if (result.stderr === "") {
                             loginDialog(odo, explorer);
                         } else {
                             vscode.window.showErrorMessage(`Failed to logout of the current cluster with '${result.stderr}'!`);
                         }
                     });
-                    
                 }
             }
         };
 
-        const loginDialog = async function(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer) {
-            let clusterURL = await vscode.window.showInputBox({
+        const loginDialog = async (odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer)=> {
+            const clusterURL = await vscode.window.showInputBox({
                 ignoreFocusOut: true,
                 prompt: "Provide URL of the cluster to connect",
-                validateInput: (value:string) => {
-                    if(!isURL(value)) {
+                validateInput: (value: string) => {
+                    if (!isURL(value)) {
                         return 'Invalid URL provided';
                     }
                 }
             });
-            if(!clusterURL) { return; }
+            if (!clusterURL) return;
             const loginMethod = await vscode.window.showQuickPick(['Credentials', 'Token'], {placeHolder: 'Select the way to log in to the cluster.'});
-            if(loginMethod === "Credentials") {
+            if (loginMethod === "Credentials") {
                 credentialsLogin(clusterURL, odo, explorer);
             } else {
                 tokenLogin(clusterURL, odo, explorer);
             }
         };
 
-        const credentialsLogin = async function(clusterURL, odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer) {
-            let username = await vscode.window.showInputBox({
+        const credentialsLogin = async (clusterURL, odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer)=> {
+            const username = await vscode.window.showInputBox({
                 ignoreFocusOut: true,
                 prompt: "Provide Username for basic authentication to the API server",
-                validateInput: (value:string) => {
+                validateInput: (value: string) => {
                     if (value.trim().length === 0) {
                         return 'Invalid Username';
                     }
                 }
             });
             if (!username) return;
-            let passwd  = await vscode.window.showInputBox({
+            const passwd  = await vscode.window.showInputBox({
                 ignoreFocusOut: true,
                 password: true,
                 prompt: "Provide Password for basic authentication to the API server"
             });
-            if(!passwd) return;
-            odo.execute(`oc login ${clusterURL} -u ${username} -p ${passwd}`).then((result)=>{
+            if (!passwd) return;
+            odo.execute(`oc login ${clusterURL} -u ${username} -p ${passwd}`).then((result)=> {
                 loginMessage(clusterURL, result, explorer);
             });
         };
 
-        const tokenLogin = async function(clusterURL, odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer) {
-            let ocToken  = await vscode.window.showInputBox({
+        const tokenLogin = async (clusterURL, odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer)=> {
+            const ocToken  = await vscode.window.showInputBox({
                 prompt: "Provide Bearer token for authentication to the API server",
                 ignoreFocusOut: true
             });
-            odo.execute(`oc login ${clusterURL} --token=${ocToken}`).then((result)=>{
+            odo.execute(`oc login ${clusterURL} --token=${ocToken}`).then((result)=> {
                 loginMessage(clusterURL, result, explorer);
             });
         };
 
-        const loginMessage = async function(clusterURL, result, explorer) {
-            if(result.stderr === "") {
+        const loginMessage = async (clusterURL, result, explorer)=> {
+            if (result.stderr === "") {
                 explorer.refresh();
                 vscode.window.showInformationMessage(`Successfully logged in to '${clusterURL}'`);
             } else {
@@ -415,12 +414,12 @@ export namespace Openshift {
 
         export const logout = async function logout(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer) {
             const value = await vscode.window.showWarningMessage(`Are you sure you want to logout of cluster`, 'Logout', 'Cancel');
-            if(value === 'Logout') {
-                odo.execute(`oc logout`).then(async result =>{
-                    if(result.stderr === "") {
+            if (value === 'Logout') {
+                odo.execute(`oc logout`).then(async (result)=> {
+                    if (result.stderr === "") {
                         explorer.refresh();
                         const logoutInfo = await vscode.window.showInformationMessage(`Successfully logged out. Do you want to login to a new cluster`, 'Yes', 'No');
-                        if(logoutInfo === 'Yes') {
+                        if (logoutInfo === 'Yes') {
                             login(odo, explorer);
                         }
                     } else {
@@ -430,28 +429,28 @@ export namespace Openshift {
             }
         };
 
-        export const refresh = function refresh(explorer:explorerFactory.OpenShiftExplorer) {
+        export const refresh = function refresh(explorer: explorerFactory.OpenShiftExplorer) {
             explorer.refresh();
         };
     }
 
     export namespace Storage {
         export const create = async function createStorage(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
-            let app: odoctl.OpenShiftObject = context.getParent();
-            let project: odoctl.OpenShiftObject = app.getParent();
-            const storageName = await vscode.window.showInputBox({prompt: "Specify the storage name", validateInput: (value:string) => {
+            const app: odoctl.OpenShiftObject = context.getParent();
+            const project: odoctl.OpenShiftObject = app.getParent();
+            const storageName = await vscode.window.showInputBox({prompt: "Specify the storage name", validateInput: (value: string) => {
                 if (value.trim().length === 0) {
                     return 'Invalid storage name';
-                } 
+                }
             }});
-            if(!storageName) return;
+            if (!storageName) return;
 
-            const mountPath = await vscode.window.showInputBox({prompt: "Specify the mount path", validateInput: (value:string) => {
+            const mountPath = await vscode.window.showInputBox({prompt: "Specify the mount path", validateInput: (value: string) => {
                 if (value.trim().length === 0) {
                     return 'Invalid mount path';
-                } 
+                }
             }});
-            if(!mountPath) return;
+            if (!mountPath) return;
 
             const storageSize = await vscode.window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the storage size'});
             odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo component set ${context.getName()}; odo storage create ${storageName} --path=${mountPath} --size=${storageSize};`, process.cwd());
@@ -462,8 +461,8 @@ export namespace Openshift {
 export function activate(context: vscode.ExtensionContext) {
     const cliExec: cli.ICli = cli.create();
     const odoCli: odoctl.Odo = odoctl.create(cliExec);
-    const explorer:explorerFactory.OpenShiftExplorer = explorerFactory.create(odoCli);
-    let disposable = [ 
+    const explorer: explorerFactory.OpenShiftExplorer = explorerFactory.create(odoCli);
+    const disposable = [
         vscode.commands.registerCommand('openshift.about', Openshift.about.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.explorer.login', Openshift.Explorer.login.bind(undefined, odoCli, explorer)),
         vscode.commands.registerCommand('openshift.explorer.logout', Openshift.Explorer.logout.bind(undefined, odoCli, explorer)),
@@ -485,13 +484,13 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.openshiftConsole', Openshift.Component.openshiftConsole.bind(undefined)),
         vscode.commands.registerCommand('openshift.component.delete', Openshift.Component.del.bind(undefined, cliExec, explorer)),
         vscode.commands.registerCommand('openshift.storage.create', Openshift.Storage.create.bind(undefined, odoCli)),
-        vscode.commands.registerCommand('openshift.url.create', Openshift.Url.create.bind(undefined,cliExec)),
-        vscode.commands.registerCommand('openshift.service.create', Openshift.Service.create.bind(undefined,odoCli, explorer)),
-        vscode.commands.registerCommand('openshift.service.delete', Openshift.Service.del.bind(undefined,odoCli, explorer)),
+        vscode.commands.registerCommand('openshift.url.create', Openshift.Url.create.bind(undefined, cliExec)),
+        vscode.commands.registerCommand('openshift.service.create', Openshift.Service.create.bind(undefined, odoCli, explorer)),
+        vscode.commands.registerCommand('openshift.service.delete', Openshift.Service.del.bind(undefined, odoCli, explorer)),
         vscode.window.registerTreeDataProvider('openshiftProjectExplorer', explorer),
         explorer
     ];
-    disposable.forEach(value=>context.subscriptions.push(value));
+    disposable.forEach((value)=> context.subscriptions.push(value));
 }
 
 // this method is called when your extension is deactivated

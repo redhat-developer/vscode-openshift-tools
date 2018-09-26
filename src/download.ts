@@ -1,13 +1,12 @@
 'use strict';
 
 import * as fs from 'fs-extra';
-import * as path from 'path';
-
 import request = require('request');
 import progress = require('request-progress');
 
-export async function downloadFile(fromUrl, toFile, progressCallBack = function(progress, icrement){}): Promise<any> {
-  return new Promise((resolve, reject)=>{
+// tslint:disable-next-line:only-arrow-functions
+export async function downloadFile(fromUrl, toFile, progressCallBack = function(progress, increment) {}): Promise<any> {
+  return new Promise((resolve, reject)=> {
     let previous = -1;
     progress(request(fromUrl), {
       throttle: 250,
@@ -17,8 +16,8 @@ export async function downloadFile(fromUrl, toFile, progressCallBack = function(
       if (previous === -1) {
         previous = 0;
       }
-      let current = Math.round(state.percent*100);
-      if(current !== previous) {
+      const current = Math.round(state.percent*100);
+      if (current !== previous) {
         progressCallBack(current, current-previous);
       }
       previous = current;
