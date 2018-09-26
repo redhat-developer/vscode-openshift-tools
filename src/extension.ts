@@ -25,15 +25,26 @@ export namespace Openshift {
     }
 
     export namespace Project {
-        export const create = async function createProjectCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer) {
-            const projectName = await vscode.window.showInputBox({
+
+        export const projectNameValidation = async function projectName() {
+            const characterRegex = /[a-z0-9]([-a-z0-9]*[a-z0-9])?/;
+            const lengthofCharacterRegex = /^[0-9A-Za-z!@\.;:'"?-]{1,63}$/;
+            return await vscode.window.showInputBox({
                 prompt: "Mention Project name",
                 validateInput: (value: string) => {
                     if (value.trim().length === 0) {
                         return 'Empty project name';
+                    } else if (characterRegex.test(value) === false) {
+                        return 'Project name should be alphanumeric';
+                    } else if (lengthofCharacterRegex.test(value) === false) {
+                        return 'Project name is to long';
                     }
                 }
             });
+        };
+
+        export const create = async function createProjectCmd(cli: cli.ICli, explorer: explorerFactory.OpenShiftExplorer) {
+            const projectName: any =  await projectNameValidation();
 
             if (!projectName) return;
             await cli.execute(`odo project create ${projectName.trim()}`, {});
