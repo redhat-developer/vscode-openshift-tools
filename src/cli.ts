@@ -8,8 +8,8 @@ import * as fs from 'fs';
 import { Platform } from './platform';
 import targz = require('targz');
 import unzipm = require('unzip-stream');
-import mkdirp = require('mkdirp');
 import * as zlib from 'zlib';
+import * as opn from 'opn';
 
 export interface CliExitData {
     readonly error: Error;
@@ -19,7 +19,7 @@ export interface CliExitData {
 
 const toolsConfig = {
     odo: {
-        description: "OpenShift Do CLI client",
+        description: "OpenShift Do CLI tool",
         vendor: "Red Hat, Inc.",
         name: "odo",
         version: "0.0.12",
@@ -46,10 +46,10 @@ const toolsConfig = {
         }
     },
     oc: {
-        description: "OpenShift CLI Client",
+        description: "OKD CLI client tool",
         vendor: "Red Hat, Inc.",
         name: "oc",
-        fileName: "oc",
+        cmdFileName: "oc",
         version: "0.0.10",
         filePrefix: "",
         platform: {
@@ -63,14 +63,12 @@ const toolsConfig = {
                 url: "https://github.com/openshift/origin/releases/download/v3.10.0/openshift-origin-client-tools-v3.10.0-dd10d17-mac.zip",
                 sha256sum: "",
                 dlFileName: "oc.zip",
-                cmdFileName: "oc"
             },
             linux: {
                 url: "https://github.com/openshift/origin/releases/download/v3.10.0/openshift-origin-client-tools-v3.10.0-dd10d17-linux-64bit.tar.gz",
                 sha256sum: "",
                 fileName: "oc.tar.gz",
                 dlFileName: "oc.tar.gz",
-                cmdFileName: "oc",
                 filePrefix: "openshift-origin-client-tools-v3.10.0-dd10d17-linux-64bit"
             }
         }
@@ -121,39 +119,41 @@ class OdoChannelImpl implements OdoChannel {
 async function getToolLocation(cmd): Promise<string> {
     let toolLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', tools[cmd].cmdFileName);
     const toolDlLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', tools[cmd].dlFileName);
-    try {
-        fs.accessSync(toolLocation);
-    } catch (error) {
-        const pathTool = which(cmd);
-        if (pathTool === null) {
-            await fsex.ensureDir(path.dirname(toolLocation));
-            await vscode.window.withProgress({
-                cancellable: true,
-                location: vscode.ProgressLocation.Notification,
-                title: `Downloading '${cmd}' tool: `
-                }, (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
-                    return download.downloadFile(
-                        tools[cmd].url,
-                        toolDlLocation,
-                        (dlProgress, increment) => {
-                            progress.report({
-                            increment,
-                            message: `${dlProgress}%`
-                        });
-                    }
-                );
-            });
-            if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
-                await unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), tools[cmd].filePrefix);
-            } else if ( toolDlLocation.endsWith('.gz')) {
-                await unzip(toolDlLocation, toolLocation, tools[cmd].filePrefix);
+    const pathTool = which(cmd);
+    if (pathTool === null) {
+        try {
+            fs.accessSync(toolLocation);
+        } catch (error) {
+            const response = await vscode.window.showInformationMessage(
+                `Cannot find ${tools[cmd].description}.`, 'Download and install', 'Help', 'Cancel');
+            if(response === 'Download and install') {
+                await fsex.ensureDir(path.dirname(toolLocation));
+                await vscode.window.withProgress({
+                    cancellable: true,
+                    location: vscode.ProgressLocation.Notification,
+                    title: `Downloading ${tools[cmd].description}: `
+                    },
+                    (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
+                        return download.downloadFile(
+                            tools[cmd].url,
+                            toolDlLocation,
+                            (dlProgress, increment) => progress.report({ increment, message: `${dlProgress}%`})
+                        );
+                });
+                if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
+                    await unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), tools[cmd].filePrefix);
+                } else if (toolDlLocation.endsWith('.gz')) {
+                    await unzip(toolDlLocation, toolLocation, tools[cmd].filePrefix);
+                }
+                if (process.platform !== 'win32') {
+                    fs.chmodSync(toolLocation, 0o765);
+                }
+            } else if(response === `Help`) {
+                opn('https://github.com/redhat-developer/vscode-openshift-tools#dependencies');
             }
-            if (process.platform !== 'win32') {
-                fs.chmodSync(toolLocation, 0o765);
-            }
-        } else {
-            toolLocation = cmd;
         }
+    } else {
+        toolLocation = cmd;
     }
     return toolLocation;
 }
@@ -180,19 +180,10 @@ function unzip(zipFile, extractTo, prefix): Promise<any> {
                 src: zipFile,
                 dest: extractTo,
                 tar: {
-                    map: (header) => {
-                        if (prefix && header.name.startsWith(prefix)) {
-                            header.name = header.name.substring(prefix.length);
-                        }
-                        return header;
-                    }
+                    map: (header) => prefix && header.name.startsWith(prefix) ? header.name = header.name.substring(prefix.length) : header
                 }
             }, (err)=> {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve();
-                }
+                err ? reject(err) : resolve();
             });
         } else if (zipFile.endsWith('.gz')) {
             gunzip(zipFile, extractTo)
