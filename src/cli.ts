@@ -10,6 +10,7 @@ import targz = require('targz');
 import unzipm = require('unzip-stream');
 import * as zlib from 'zlib';
 import * as opn from 'opn';
+import hasha = require('hasha');
 
 export interface CliExitData {
     readonly error: Error;
@@ -29,7 +30,7 @@ const toolsConfig = {
         platform: {
             win32: {
                 url: "https://github.com/redhat-developer/odo/releases/download/v0.0.12/odo-windows-amd64.exe.gz",
-                sha256sum: "4f7719ef1f11aac22474d36608996b016305c65afb6e9e3dcd4361c43fb54be1",
+                sha256sum: "4f7719ef1f11aac22474d36608996b016305c65afb6e9e3dcd4361c43fb54be12",
                 dlFileName: "odo-windows-amd64.exe.gz",
                 cmdFileName: "odo.exe"
             },
@@ -128,25 +129,40 @@ async function getToolLocation(cmd): Promise<string> {
                 `Cannot find ${tools[cmd].description}.`, 'Download and install', 'Help', 'Cancel');
             if(response === 'Download and install') {
                 await fsex.ensureDir(path.dirname(toolLocation));
-                await vscode.window.withProgress({
-                    cancellable: true,
-                    location: vscode.ProgressLocation.Notification,
-                    title: `Downloading ${tools[cmd].description}: `
-                    },
-                    (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
-                        return download.downloadFile(
-                            tools[cmd].url,
-                            toolDlLocation,
-                            (dlProgress, increment) => progress.report({ increment, message: `${dlProgress}%`})
-                        );
-                });
-                if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
-                    await unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), tools[cmd].filePrefix);
-                } else if (toolDlLocation.endsWith('.gz')) {
-                    await unzip(toolDlLocation, toolLocation, tools[cmd].filePrefix);
-                }
-                if (process.platform !== 'win32') {
-                    fs.chmodSync(toolLocation, 0o765);
+                let action: string = "Continue";
+                do {
+                    await vscode.window.withProgress({
+                        cancellable: true,
+                        location: vscode.ProgressLocation.Notification,
+                        title: `Downloading ${tools[cmd].description}: `
+                        },
+                        (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
+                            return download.downloadFile(
+                                tools[cmd].url,
+                                toolDlLocation,
+                                (dlProgress, increment) => progress.report({ increment, message: `${dlProgress}%`})
+                            );
+                    });
+                    if (tools[cmd].sha256sum && tools[cmd].sha256sum !== "") {
+                        const sha256sum: string = await hasha.fromFile(toolDlLocation, {algorithm: 'sha256'});
+                        if(sha256sum !== tools[cmd].sha256sum) {
+                            fsex.removeSync(toolDlLocation);
+                            action = await vscode.window.showInformationMessage(`Checksum for ownloaded ${tools[cmd].description} is not correct.`, 'Download again', 'Cancel');
+                        }
+                    } else {
+                        action = 'Continue';
+                    }
+                } while(action === 'Download again');
+
+                if (action === 'Continue') {
+                    if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
+                        await unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), tools[cmd].filePrefix);
+                    } else if (toolDlLocation.endsWith('.gz')) {
+                        await unzip(toolDlLocation, toolLocation, tools[cmd].filePrefix);
+                    }
+                    if (process.platform !== 'win32') {
+                        fs.chmodSync(toolLocation, 0o765);
+                    }
                 }
             } else if(response === `Help`) {
                 opn('https://github.com/redhat-developer/vscode-openshift-tools#dependencies');
