@@ -1,5 +1,5 @@
 import * as cliInstance from './cli';
-import { TreeItem, ProviderResult, TreeItemCollapsibleState, OutputChannel, window, Terminal, Uri } from 'vscode';
+import { TreeItem, ProviderResult, TreeItemCollapsibleState, OutputChannel, window, Terminal, Uri, commands } from 'vscode';
 import * as windowUtils from './windowUtils';
 import { CliExitData } from './cli';
 import * as path from 'path';
@@ -171,6 +171,7 @@ class OdoImpl implements Odo {
             const error: string = 'Log in to display clusters.';
             return result.stdout.trim().split(`\n`).slice(1).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(null, error, 'loginError', this, TreeItemCollapsibleState.None));
         }
+        commands.executeCommand('setContext', 'isLoggedIn', true);
         const clusters: OpenShiftObject[] = result.stdout.trim().split('\n').filter((value) => {
             return value.indexOf('Server:') !== -1;
         }).map((value) => {

@@ -415,6 +415,7 @@ export namespace Openshift {
         const loginMessage = async (clusterURL, result, explorer)=> {
             if (result.stderr === "") {
                 explorer.refresh();
+                vscode.commands.executeCommand('setContext', 'isLoggedIn', true);
                 vscode.window.showInformationMessage(`Successfully logged in to '${clusterURL}'`);
             } else {
                 vscode.window.showErrorMessage(`Failed to login to cluster '${clusterURL}' with '${result.stderr}'!`);
@@ -428,6 +429,7 @@ export namespace Openshift {
                     if (result.stderr === "") {
                         explorer.refresh();
                         const logoutInfo = await vscode.window.showInformationMessage(`Successfully logged out. Do you want to login to a new cluster`, 'Yes', 'No');
+                        vscode.commands.executeCommand('setContext', 'isLoggedIn', false);
                         if (logoutInfo === 'Yes') {
                             login(odo, explorer);
                         }
