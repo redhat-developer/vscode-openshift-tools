@@ -131,6 +131,7 @@ export namespace Openshift {
             await odo.execute(`odo service create ${serviceTemplateName} ${serviceName.trim()}`);
             explorer.refresh();
         };
+
         export const del = async function deleteService(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer, service: odoctl.OpenShiftObject, ) {
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete service '${service.getName()}'`, 'Yes', 'Cancel');
             if (value === 'Yes') {
@@ -465,6 +466,34 @@ export namespace Openshift {
             const storageSize = await vscode.window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the storage size'});
             odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo component set ${context.getName()}; odo storage create ${storageName} --path=${mountPath} --size=${storageSize};`, process.cwd());
         };
+
+        export const del = async function deleteStorage(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
+            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete storage '${context.getName()}' from component '${context.getParent().getName()}' ?`, 'Yes', 'Cancel');
+            if (value === 'Yes') {
+                await odo.execute(`odo storage delete ${context.getName()} --component ${context.getParent().getName()} -f`).then(async (result)=> {
+                    if (result.stderr === "") {
+                        explorer.refresh();
+                        vscode.window.showInformationMessage(`Successfully deleted storage '${context.getName()}' from component '${context.getParent().getName()}`);
+                    } else {
+                        vscode.window.showErrorMessage(`Failed to delete storage!`);
+                    }
+                });
+            }
+        };
+
+        export const unmount = async function unmountStorage(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
+            const value = await vscode.window.showWarningMessage(`Are you sure you want to unmount storage '${context.getName()}' from component '${context.getParent().getName()}' ?`, 'Yes', 'Cancel');
+            if (value === 'Yes') {
+                await odo.execute(`odo storage unmount ${context.getName()} --component ${context.getParent().getName()}`).then(async (result)=> {
+                    if (result.stderr === "") {
+                        explorer.refresh();
+                        vscode.window.showInformationMessage(`Successfully unmounted storage '${context.getName()}' from component '${context.getParent().getName()}`);
+                    } else {
+                        vscode.window.showErrorMessage(`Failed to unmount storage!`);
+                    }
+                });
+            }
+        };
     }
 }
 
@@ -494,6 +523,8 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.openshiftConsole', Openshift.Component.openshiftConsole.bind(undefined)),
         vscode.commands.registerCommand('openshift.component.delete', Openshift.Component.del.bind(undefined, cliExec, explorer)),
         vscode.commands.registerCommand('openshift.storage.create', Openshift.Storage.create.bind(undefined, odoCli)),
+        vscode.commands.registerCommand('openshift.storage.delete', Openshift.Storage.del.bind(undefined, odoCli, explorer)),
+        vscode.commands.registerCommand('openshift.storage.unmount', Openshift.Storage.unmount.bind(undefined, odoCli, explorer)),
         vscode.commands.registerCommand('openshift.url.create', Openshift.Url.create.bind(undefined, cliExec)),
         vscode.commands.registerCommand('openshift.service.create', Openshift.Service.create.bind(undefined, odoCli, explorer)),
         vscode.commands.registerCommand('openshift.service.delete', Openshift.Service.del.bind(undefined, odoCli, explorer)),

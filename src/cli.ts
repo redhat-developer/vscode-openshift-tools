@@ -126,7 +126,7 @@ async function getToolLocation(cmd): Promise<string> {
         } catch (error) {
             const response = await vscode.window.showInformationMessage(
                 `Cannot find ${tools[cmd].description}.`, 'Download and install', 'Help', 'Cancel');
-            if(response === 'Download and install') {
+            if (response === 'Download and install') {
                 await fsex.ensureDir(path.dirname(toolLocation));
                 await vscode.window.withProgress({
                     cancellable: true,
@@ -148,7 +148,7 @@ async function getToolLocation(cmd): Promise<string> {
                 if (process.platform !== 'win32') {
                     fs.chmodSync(toolLocation, 0o765);
                 }
-            } else if(response === `Help`) {
+            } else if (response === 'Help') {
                 opn('https://github.com/redhat-developer/vscode-openshift-tools#dependencies');
             }
         }

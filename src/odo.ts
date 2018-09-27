@@ -1,5 +1,5 @@
 import * as cliInstance from './cli';
-import { TreeItem, ProviderResult, TreeItemCollapsibleState, OutputChannel, window, Terminal, Uri } from 'vscode';
+import { TreeItem, ProviderResult, TreeItemCollapsibleState, Terminal, Uri } from 'vscode';
 import * as windowUtils from './windowUtils';
 import { CliExitData } from './cli';
 import * as path from 'path';
