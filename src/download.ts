@@ -5,21 +5,16 @@ import request = require('request');
 import progress = require('request-progress');
 
 // tslint:disable-next-line:only-arrow-functions
-export async function downloadFile(fromUrl, toFile, progressCallBack = function(progress, increment) {}): Promise<any> {
+export async function downloadFile(fromUrl: string, toFile: string, progressCallBack?: (current:number, increment:number) => void, throttle?: number ): Promise<any> {
   return new Promise((resolve, reject)=> {
-    let previous = -1;
+    let previous = 0;
     progress(request(fromUrl), {
-      throttle: 250,
+      throttle: throttle || 250,
       delay: 0,
       lengthHeader: 'content-length'
     }).on('progress', (state) => {
-      if (previous === -1) {
-        previous = 0;
-      }
       const current = Math.round(state.percent*100);
-      if (current !== previous) {
-        progressCallBack(current, current-previous);
-      }
+      current !== previous && progressCallBack && progressCallBack(current, current-previous);
       previous = current;
     }).on('error', reject)
     .on('end', ()=>progressCallBack(100, 100-previous))
