@@ -18,6 +18,15 @@ This extension supports a number of commands for interacting with OpenShift clus
 * `Open URL in Browser`
 * `Log In to CLuster`
 
+### Dependencies
+
+This extension uses two CLI tools to interact with OpenShift cluster:
+* OKD CLI client tool `oc` ([download page](https://github.com/openshift/origin/releases))
+* OpenShift Do tool `odo` ([download page](https://github.com/redhat-developer/odo/releases))
+
+If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
+If extension is not able to locate those tools it will ask you if they should be downloaded.
+
 -----------------------------------------------------------------------------------------------------------
 Contributing
 ===============
