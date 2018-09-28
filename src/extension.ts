@@ -210,12 +210,14 @@ export namespace Openshift {
 
                 if (!componentTypeVersion) return;
 
-                const createUrl = await vscode.window.showQuickPick(['Yes', 'No'], {placeHolder: 'Do you want to clone repository to workspace?'});
+                const clone = await vscode.window.showQuickPick(['Yes', 'No'], {placeHolder: 'Do you want to clone repository to workspace?'});
                 await odo.execute(`odo project set ${context.getParent().getName()}`);
                 await odo.execute(`odo app set ${context.getName()}`);
                 await odo.execute(`odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --git ${repoURI}`);
-                await vscode.commands.executeCommand('git.clone', repoURI);
                 explorer.refresh(context);
+                if(clone === 'Yes') {
+                    await vscode.commands.executeCommand('git.clone', repoURI);
+                }
             } catch (e) {
                 vscode.window.showErrorMessage(e);
             }
