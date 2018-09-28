@@ -41,8 +41,8 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         return element.getParent();
     }
 
-    refresh(): void {
-        this.onDidChangeTreeDataEmitter.fire();
+    refresh(target?: OpenShiftObject): void {
+        this.onDidChangeTreeDataEmitter.fire(target);
     }
 
     dispose() {

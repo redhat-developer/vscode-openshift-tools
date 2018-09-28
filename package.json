@@ -155,11 +155,6 @@
         "command": "openshift.storage.delete",
         "title": "Delete",
         "category": "OpenShift"
-      },
-      {
-        "command": "openshift.storage.unmount",
-        "title": "Unmount",
-        "category": "OpenShift"
       }
     ],
     "viewsContainers": {
@@ -255,10 +250,6 @@
         },
         {
           "command": "openshift.storage.delete",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.storage.unmount",
           "when": "view == openshiftProjectExplorer"
         }
       ],
@@ -383,11 +374,6 @@
         {
           "command": "openshift.service.delete",
           "when": "view == openshiftProjectExplorer && viewItem == service",
-          "group": "s1"
-        },
-        {
-          "command": "openshift.storage.unmount",
-          "when": "view == openshiftProjectExplorer && viewItem == storage",
           "group": "s1"
         },
         {
