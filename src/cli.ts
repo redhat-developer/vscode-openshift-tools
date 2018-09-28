@@ -147,7 +147,7 @@ async function getToolLocation(cmd): Promise<string> {
                         const sha256sum: string = await hasha.fromFile(toolDlLocation, {algorithm: 'sha256'});
                         if(sha256sum !== tools[cmd].sha256sum) {
                             fsex.removeSync(toolDlLocation);
-                            action = await vscode.window.showInformationMessage(`Checksum for ownloaded ${tools[cmd].description} is not correct.`, 'Download again', 'Cancel');
+                            action = await vscode.window.showInformationMessage(`Checksum for downloaded ${tools[cmd].description} is not correct.`, 'Download again', 'Cancel');
                         }
                     } else {
                         action = 'Continue';
