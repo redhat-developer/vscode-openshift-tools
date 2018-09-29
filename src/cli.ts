@@ -56,22 +56,22 @@ const toolsConfig = {
         filePrefix: "",
         platform: {
             win32: {
-                url: "https://github.com/openshift/origin/releases/download/v3.10.0/openshift-origin-client-tools-v3.10.0-dd10d17-windows.zip",
-                sha256sum: "",
+                url: "https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-windows.zip",
+                sha256sum: "705eb110587fdbd244fbb0f93146a643b24295cfe2410ff9fe67a0e880912663",
                 dlFileName: "oc.zip",
                 cmdFileName: "oc.exe"
             },
             darwin: {
-                url: "https://github.com/openshift/origin/releases/download/v3.10.0/openshift-origin-client-tools-v3.10.0-dd10d17-mac.zip",
-                sha256sum: "",
+                url: "https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-mac.zip",
+                sha256sum: "32bdd9464866c8e93d8cf4a3a7718b0bc9fa0f2881f045b97997fa014b52a40b",
                 dlFileName: "oc.zip",
             },
             linux: {
-                url: "https://github.com/openshift/origin/releases/download/v3.10.0/openshift-origin-client-tools-v3.10.0-dd10d17-linux-64bit.tar.gz",
-                sha256sum: "",
+                url: "https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-linux-64bit.tar.gz",
+                sha256sum: "6ed2fb1579b14b4557e4450a807c97cd1b68a6c727cd1e12deedc5512907222e",
                 fileName: "oc.tar.gz",
                 dlFileName: "oc.tar.gz",
-                filePrefix: "openshift-origin-client-tools-v3.10.0-dd10d17-linux-64bit"
+                filePrefix: "openshift-origin-client-tools-v3.9.0-191fece-linux-64bit"
             }
         }
     }
