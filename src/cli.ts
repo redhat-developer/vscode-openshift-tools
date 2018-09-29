@@ -24,7 +24,7 @@ const toolsConfig = {
         description: "OpenShift Do CLI tool",
         vendor: "Red Hat, Inc.",
         name: "odo",
-        version: "0.0.12",
+        version: "0.0.13",
         dlFileName: "odo",
         cmdFileName: "odo",
         filePrefix: "",
