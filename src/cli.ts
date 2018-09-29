@@ -11,9 +11,10 @@ import unzipm = require('unzip-stream');
 import * as zlib from 'zlib';
 import * as opn from 'opn';
 import hasha = require('hasha');
+import { ExecException } from 'child_process';
 
 export interface CliExitData {
-    readonly error: Error;
+    readonly error: ExecException;
     readonly stdout: string;
     readonly stderr: string;
 }
@@ -85,10 +86,18 @@ class Cli implements ICli {
             const odoLocation = await getToolLocation(cmdName);
             const finalCommand = cmd.replace(cmdName, odoLocation);
             odoChannel.print(finalCommand);
-            childProcess.exec(finalCommand, opts, (error: Error, stdout: string, stderr: string) => {
+            childProcess.exec(finalCommand, opts, (error: ExecException, stdout: string, stderr: string) => {
                 odoChannel.print(stdout);
                 odoChannel.print(stderr);
-                resolve({ error, stdout: stdout.replace(/---[\s\S]*---/g, '').trim(), stderr });
+                if(error) {
+                    if(error.code === 1 && cmdName ==='odo') {
+                        resolve({ error, stdout: stdout.replace(/---[\s\S]*---/g, '').trim(), stderr });
+                    } else {
+                        reject(error);
+                    }
+                } else {
+                    resolve({ error, stdout: stdout.replace(/---[\s\S]*---/g, '').trim(), stderr });
+                }
             });
         });
     }
