@@ -101,7 +101,7 @@ class OdoImpl implements Odo {
             'oc get project -o jsonpath="{range .items[*]}{.metadata.name}{\'\\n\'}{end}"', {}
         ).then((result) => {
             let projs: OpenShiftObject[] = [];
-            let stdout: string = result.stdout.trim();
+            const stdout: string = result.stdout.trim();
             if (stdout !== "" ) {
                 projs = stdout.split("\n").map<OpenShiftObject>((value) => new OpenShiftObjectImpl(undefined, value, 'project', this));
             }

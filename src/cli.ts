@@ -89,8 +89,8 @@ class Cli implements ICli {
             childProcess.exec(finalCommand, opts, (error: ExecException, stdout: string, stderr: string) => {
                 odoChannel.print(stdout);
                 odoChannel.print(stderr);
-                if(error) {
-                    if(error.code === 1 && cmdName ==='odo') {
+                if (error) {
+                    if (error.code === 1 && cmdName ==='odo') {
                         resolve({ error, stdout: stdout.replace(/---[\s\S]*---/g, '').trim(), stderr });
                     } else {
                         reject(error);
@@ -154,14 +154,14 @@ async function getToolLocation(cmd): Promise<string> {
                     });
                     if (tools[cmd].sha256sum && tools[cmd].sha256sum !== "") {
                         const sha256sum: string = await hasha.fromFile(toolDlLocation, {algorithm: 'sha256'});
-                        if(sha256sum !== tools[cmd].sha256sum) {
+                        if (sha256sum !== tools[cmd].sha256sum) {
                             fsex.removeSync(toolDlLocation);
                             action = await vscode.window.showInformationMessage(`Checksum for downloaded ${tools[cmd].description} is not correct.`, 'Download again', 'Cancel');
                         }
                     } else {
                         action = 'Continue';
                     }
-                } while(action === 'Download again');
+                } while (action === 'Download again');
 
                 if (action === 'Continue') {
                     if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
