@@ -1,5 +1,5 @@
 import * as cliInstance from './cli';
-import { TreeItem, ProviderResult, TreeItemCollapsibleState, Terminal, Uri } from 'vscode';
+import { TreeItem, ProviderResult, TreeItemCollapsibleState, Terminal, Uri, window } from 'vscode';
 import * as windowUtils from './windowUtils';
 import { CliExitData } from './cli';
 import * as path from 'path';
@@ -97,13 +97,19 @@ class OdoImpl implements Odo {
     }
 
     public async getProjects(): Promise<OpenShiftObject[]> {
-        const result: cliInstance.CliExitData = await this.cli.execute(
+        return this.cli.execute(
             'oc get project -o jsonpath="{range .items[*]}{.metadata.name}{\'\\n\'}{end}"', {}
-        );
-        if (result.error) {
+        ).then((result) => {
+            let projs: OpenShiftObject[] = [];
+            let stdout: string = result.stdout.trim();
+            if (stdout !== "" ) {
+                projs = stdout.split("\n").map<OpenShiftObject>((value) => new OpenShiftObjectImpl(undefined, value, 'project', this));
+            }
+            return projs;
+        }).catch((error) => {
+            window.showErrorMessage(`Cannot retrieve projects for current cluster. Error: ${error}`);
             return [];
-        }
-        return result.stdout.trim().split("\n").map<OpenShiftObject>((value) => new OpenShiftObjectImpl(undefined, value, 'project', this));
+        });
     }
 
     public async getApplications(project: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
