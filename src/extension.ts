@@ -49,7 +49,7 @@ export namespace Openshift {
             Promise.resolve()
                 .then(() => odo.execute(`odo project create ${projectName.trim()}`))
                 .then(() => explorer.refresh())
-                .catch((error) => vscode.window.showErrorMessage(`Failed to create project with error '${error}'`))
+                .catch((error) => vscode.window.showErrorMessage(`Failed to create project with error '${error}'`));
         };
 
         export const del = async function deleteProjectCmd(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
@@ -80,7 +80,7 @@ export namespace Openshift {
                 .then(() => odo.execute(`odo project set ${context.getName()}`))
                 .then(() => odo.execute(`odo app create ${applicationName.trim()}`))
                 .then(() => explorer.refresh(context))
-                .catch(error => vscode.window.showErrorMessage(`Failed to delete application with error '${error}'`));
+                .catch((error) => vscode.window.showErrorMessage(`Failed to delete application with error '${error}'`));
         };
 
         export const describe = async function describe(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
@@ -124,8 +124,8 @@ export namespace Openshift {
                 cancellable: false,
                 location: vscode.ProgressLocation.Notification,
                 title: `Creating new service '${serviceName}'`
-            },[{command: `odo project set ${context.getParent().getName()}`, increment: 25},
-                {command: `odo app set ${context.getName()}`,increment: 25},
+            }, [{command: `odo project set ${context.getParent().getName()}`, increment: 25},
+                {command: `odo app set ${context.getName()}`, increment: 25},
                 {command: `odo service create ${serviceTemplateName} ${serviceName.trim()}`, increment: 50}
             ], odo).then(() => explorer.refresh(context));
         };
@@ -179,7 +179,6 @@ export namespace Openshift {
                     {command: `odo push --local ${folder.uri.fsPath}`, increment: 30}
                 ], odo).then(()=>explorer.refresh(context));
 
-
             } catch (e) {
                 vscode.window.showErrorMessage(e);
             }
@@ -213,7 +212,7 @@ export namespace Openshift {
 
                 if (!componentTypeVersion) return;
 
-                vscode.window.showInformationMessage('Do you want to clone git repository for created component?', 'Yes', 'No').then(value => {
+                vscode.window.showInformationMessage('Do you want to clone git repository for created component?', 'Yes', 'No').then((value) => {
                     value === 'Yes' && vscode.commands.executeCommand('git.clone', repoURI);
                 });
 
@@ -225,7 +224,7 @@ export namespace Openshift {
                     {command: `odo app set ${context.getName()}`, increment: 10},
                     {command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --git ${repoURI}`, increment: 80}
                 ], odo).then(()=>explorer.refresh(context));
-                
+
             } catch (e) {
                 vscode.window.showErrorMessage(e);
             }
@@ -257,7 +256,7 @@ export namespace Openshift {
                         explorer.refresh(context.getParent());
                         vscode.window.showInformationMessage(`Successfully deleted component '${context.getName()}'`);
                     })
-                    .catch(err=> vscode.window.showErrorMessage(`Failed to delete component with error '${err}'`));
+                    .catch((err)=> vscode.window.showErrorMessage(`Failed to delete component with error '${err}'`));
             }
         };
 
@@ -355,7 +354,7 @@ export namespace Openshift {
                         } else {
                             vscode.window.showErrorMessage(`Failed to logout of the current cluster with '${result.stderr}'!`);
                         }
-                    }).catch(error => vscode.window.showErrorMessage(`Failed to logout of the current cluster with '${error}'!`));
+                    }).catch((error) => vscode.window.showErrorMessage(`Failed to logout of the current cluster with '${error}'!`));
                 }
             }
         };
@@ -399,7 +398,7 @@ export namespace Openshift {
             Promise.resolve()
                 .then(() => odo.execute(`oc login ${clusterURL} -u ${username} -p ${passwd}`))
                 .then((result) => loginMessage(clusterURL, result, explorer))
-                .catch(error => vscode.window.showErrorMessage(`Failed to login to cluster '${clusterURL}' with '${error}'!`));
+                .catch((error) => vscode.window.showErrorMessage(`Failed to login to cluster '${clusterURL}' with '${error}'!`));
         };
 
         const tokenLogin = async (clusterURL, odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer)=> {
@@ -410,7 +409,7 @@ export namespace Openshift {
             Promise.resolve()
                 .then(() => odo.execute(`oc login ${clusterURL} --token=${ocToken}`))
                 .then((result) => loginMessage(clusterURL, result, explorer))
-                .catch(error => vscode.window.showErrorMessage(`Failed to login to cluster '${clusterURL}' with '${error}'!`));
+                .catch((error) => vscode.window.showErrorMessage(`Failed to login to cluster '${clusterURL}' with '${error}'!`));
         };
 
         const loginMessage = async (clusterURL, result, explorer)=> {
@@ -433,7 +432,7 @@ export namespace Openshift {
                             login(odo, explorer);
                         }
                     }
-                }).catch(error =>{
+                }).catch((error) => {
                         vscode.window.showErrorMessage(`Failed to logout of the current cluster with '${error}'!`);
                 });
             }
@@ -466,7 +465,7 @@ export namespace Openshift {
             Promise.resolve()
                 .then(() => odo.execute(`odo project set ${project.getName()}`))
                 .then(() => odo.execute(`odo app set ${app.getName()}`))
-                .then(() => odo.execute(`odo component set ${context.getName()}`)) 
+                .then(() => odo.execute(`odo component set ${context.getName()}`))
                 .then(() => odo.execute(`odo storage create ${storageName} --path=${mountPath} --size=${storageSize}`))
                 .then(() => explorer.refresh(context))
                 .catch((e: Error) => vscode.window.showErrorMessage(`New Storage command failed with error: '${e}'!`));
@@ -499,7 +498,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.openUrl', Openshift.Component.openUrl.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.openshiftConsole', Openshift.Component.openshiftConsole.bind(undefined)),
         vscode.commands.registerCommand('openshift.component.delete', Openshift.Component.del.bind(undefined, odoCli, explorer)),
-        vscode.commands.registerCommand('openshift.storage.create', Openshift.Storage.create.bind(undefined, odoCli,explorer)),
+        vscode.commands.registerCommand('openshift.storage.create', Openshift.Storage.create.bind(undefined, odoCli, explorer)),
         vscode.commands.registerCommand('openshift.url.create', Openshift.Url.create.bind(undefined, cliExec)),
         vscode.commands.registerCommand('openshift.service.create', Openshift.Service.create.bind(undefined, odoCli, explorer)),
         vscode.commands.registerCommand('openshift.service.delete', Openshift.Service.del.bind(undefined, odoCli, explorer)),
