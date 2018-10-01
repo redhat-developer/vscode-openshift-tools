@@ -205,7 +205,10 @@ function unzip(zipFile, extractTo, prefix): Promise<any> {
                 src: zipFile,
                 dest: extractTo,
                 tar: {
-                    map: (header) => prefix && header.name.startsWith(prefix) ? header.name = header.name.substring(prefix.length) : header
+                    map: (header) => {
+                        prefix && header.name.startsWith(prefix) ? header.name = header.name.substring(prefix.length) : header;
+                        return header;
+                    }
                 }
             }, (err)=> {
                 err ? reject(err) : resolve();
