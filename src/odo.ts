@@ -194,10 +194,16 @@ class OdoImpl implements Odo {
     public async getServices(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
         const appName: string = application.getName();
         const projName: string = application.getParent().getName();
-        const result: cliInstance.CliExitData = await this.cli.execute(
-            `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app == '${appName}')]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{'\\n'}{end}" --namespace ${projName}`, {}
-        );
-        return result.stdout.trim().split('\n').filter((value)=>value!=='').map((value) => new OpenShiftObjectImpl(application, value, 'service', this, TreeItemCollapsibleState.None));
+        const apis: cliInstance.CliExitData = await this.cli.execute(`oc api-versions`, {});
+        let services: OpenShiftObject[] = [];
+        if(apis.stdout.indexOf('servicecatalog.k8s.io')>-1) {
+            const result: cliInstance.CliExitData = await this.cli.execute(
+                `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app == '${appName}')]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{'\\n'}{end}" --namespace ${projName}`, {}
+            );
+            
+            services = result.stdout.trim().split('\n').filter((value)=>value!=='').map((value) => new OpenShiftObjectImpl(application, value, 'service', this, TreeItemCollapsibleState.None));
+        }
+        return services;
     }
 
     public async getApplicationChildren(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
