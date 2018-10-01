@@ -271,17 +271,17 @@
         },
         {
           "command": "openshift.project.create",
-          "when": "view == openshiftProjectExplorer",
+          "when": "view == openshiftProjectExplorer && isLoggedIn",
           "group": "a"
         },
         {
           "command": "openshift.catalog.list.components",
-          "when": "view == openshiftProjectExplorer",
+          "when": "view == openshiftProjectExplorer && isLoggedIn",
           "group": "c@1"
         },
         {
           "command": "openshift.catalog.list.services",
-          "when": "view == openshiftProjectExplorer",
+          "when": "view == openshiftProjectExplorer && isLoggedIn",
           "group": "c@2"
         },
         {
@@ -402,7 +402,7 @@
     "@types/js-yaml": "^3.11.2",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.5",
-    "@types/node": "^10.11.2",
+    "@types/node": "^10.11.3",
     "@types/request": "^2.47.1",
     "@types/shelljs": "^0.8.0",
     "@types/validator": "^9.4.2",
