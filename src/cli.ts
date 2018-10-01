@@ -173,7 +173,7 @@ async function getToolLocation(cmd): Promise<string> {
                         fs.chmodSync(toolLocation, 0o765);
                     }
                 }
-            } else if (response === `Help`) {
+            } else if (response === 'Help') {
                 opn('https://github.com/redhat-developer/vscode-openshift-tools#dependencies');
             }
         }

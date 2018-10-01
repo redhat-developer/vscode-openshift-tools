@@ -150,6 +150,11 @@
         "command": "openshift.service.delete",
         "title": "Delete",
         "category": "OpenShift"
+      },
+      {
+        "command": "openshift.storage.delete",
+        "title": "Delete",
+        "category": "OpenShift"
       }
     ],
     "viewsContainers": {
@@ -241,6 +246,10 @@
         },
         {
           "command": "openshift.service.delete",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.storage.delete",
           "when": "view == openshiftProjectExplorer"
         }
       ],
@@ -366,6 +375,11 @@
           "command": "openshift.service.delete",
           "when": "view == openshiftProjectExplorer && viewItem == service",
           "group": "s1"
+        },
+        {
+          "command": "openshift.storage.delete",
+          "when": "view == openshiftProjectExplorer && viewItem == storage",
+          "group": "s2"
         }
       ]
     }

@@ -224,7 +224,6 @@ export namespace Openshift {
                     {command: `odo app set ${context.getName()}`, increment: 10},
                     {command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --git ${repoURI}`, increment: 80}
                 ], odo).then(()=>explorer.refresh(context));
-
             } catch (e) {
                 vscode.window.showErrorMessage(e);
             }
@@ -470,6 +469,18 @@ export namespace Openshift {
                 .then(() => explorer.refresh(context))
                 .catch((e: Error) => vscode.window.showErrorMessage(`New Storage command failed with error: '${e}'!`));
         };
+
+        export const del = async function deleteStorage(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
+            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete storage '${context.getName()}' from component '${context.getParent().getName()}' ?`, 'Yes', 'Cancel');
+            if (value === 'Yes') {
+                Promise.resolve()
+                    .then(() => odo.execute(`odo storage delete ${context.getName()} --component ${context.getParent().getName()} -f`))
+                    .then(() => {
+                        explorer.refresh(context);
+                        vscode.window.showInformationMessage(`Successfully deleted storage '${context.getName()}' from component '${context.getParent().getName()}`);
+                    }).catch((err) => vscode.window.showErrorMessage(`Failed to delete storage with error '${err}'`));
+            }
+        };
     }
 }
 
@@ -497,7 +508,8 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.followLog', Openshift.Component.followLog.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.openUrl', Openshift.Component.openUrl.bind(undefined, odoCli)),
         vscode.commands.registerCommand('openshift.component.openshiftConsole', Openshift.Component.openshiftConsole.bind(undefined)),
-        vscode.commands.registerCommand('openshift.component.delete', Openshift.Component.del.bind(undefined, odoCli, explorer)),
+        vscode.commands.registerCommand('openshift.component.delete', Openshift.Component.del.bind(undefined, cliExec, explorer)),
+        vscode.commands.registerCommand('openshift.storage.delete', Openshift.Storage.del.bind(undefined, odoCli, explorer)),
         vscode.commands.registerCommand('openshift.storage.create', Openshift.Storage.create.bind(undefined, odoCli, explorer)),
         vscode.commands.registerCommand('openshift.url.create', Openshift.Url.create.bind(undefined, cliExec)),
         vscode.commands.registerCommand('openshift.service.create', Openshift.Service.create.bind(undefined, odoCli, explorer)),

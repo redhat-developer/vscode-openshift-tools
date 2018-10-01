@@ -4,7 +4,6 @@ import * as fs from 'fs-extra';
 import request = require('request');
 import progress = require('request-progress');
 
-// tslint:disable-next-line:only-arrow-functions
 export async function downloadFile(fromUrl: string, toFile: string, progressCallBack?: (current: number, increment: number) => void, throttle?: number ): Promise<any> {
   return new Promise((resolve, reject)=> {
     let previous = 0;
