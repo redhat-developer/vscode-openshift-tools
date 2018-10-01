@@ -252,7 +252,7 @@
         },
         {
           "command": "openshift.explorer.logout",
-          "when": "view == openshiftProjectExplorer",
+          "when": "view == openshiftProjectExplorer && isLoggedIn",
           "group": "logout"
         },
         {
@@ -388,14 +388,14 @@
     "@types/js-yaml": "^3.11.2",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.5",
-    "@types/node": "^10.11.0",
+    "@types/node": "^10.11.2",
     "@types/request": "^2.47.1",
     "@types/shelljs": "^0.8.0",
     "@types/validator": "^9.4.2",
     "mocha": "^5.2.0",
     "mocha-jenkins-reporter": "^0.4.0",
     "tslint": "^5.11.0",
-    "typescript": "^3.0.3",
+    "typescript": "^3.1.1",
     "vscode": "^1.1.21"
   },
   "dependencies": {
