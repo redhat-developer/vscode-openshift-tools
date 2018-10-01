@@ -428,8 +428,8 @@ export namespace Openshift {
                 odo.execute(`oc logout`).then(async (result)=> {
                     if (result.stderr === "") {
                         explorer.refresh();
-                        const logoutInfo = await vscode.window.showInformationMessage(`Successfully logged out. Do you want to login to a new cluster`, 'Yes', 'No');
                         vscode.commands.executeCommand('setContext', 'isLoggedIn', false);
+                        const logoutInfo = await vscode.window.showInformationMessage(`Successfully logged out. Do you want to login to a new cluster`, 'Yes', 'No');
                         if (logoutInfo === 'Yes') {
                             login(odo, explorer);
                         }
