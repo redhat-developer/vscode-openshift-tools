@@ -49,15 +49,15 @@ A Visual Studio Code extension for interacting with OpenShift clusters.
    * `Storage -> Delete` - Delete storage from component
 
 #### Action Icons
-* ![Log in to cluster](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/login.png)
-* ![Refresh Cluster](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/dark/refresh.png)
+* ![Log in to cluster](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/dark/login.png) - Log in to Cluster
+* ![Refresh Cluster](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/dark/refresh.png) - Refresh Cluster
 
 
 ### Dependencies
 
 This extension uses two CLI tools to interact with OpenShift cluster:
-* OKD CLI client tool `oc` ([download page](https://github.com/openshift/origin/releases))
-* OpenShift Do tool `odo` ([download page](https://github.com/redhat-developer/odo/releases))
+* OKD CLI client tool - `oc` ([Download](https://github.com/openshift/origin/releases))
+* OpenShift Do tool - `odo` ([Download](https://github.com/redhat-developer/odo/releases))
 
 If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
 If extension is not able to locate those tools it will ask you if they should be downloaded.
@@ -68,7 +68,7 @@ If extension is not able to locate those tools it will ask you if they should be
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-**NOTE:** This extension is in PREVIEW mode and first release. So the extension support for OpenShift is strictly experimental - assumptions may break, and commands and behavior may change!
+**NOTE:** This extension is in Preview mode. So the extension support for OpenShift is strictly experimental - assumptions may break, and commands and behavior may change!
 
 Contributing
 ===============
