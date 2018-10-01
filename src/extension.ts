@@ -305,7 +305,7 @@ export namespace Openshift {
             if (routeCheck.stdout.trim() === '') {
                 const value = await vscode.window.showInformationMessage(`No URL for component '${context.getName()}\' in application '${app.getName()}\'. Do you want to create a route and open it?`, 'Create', 'Cancel');
                 if (value === 'Create') {
-                    await odo.execute(`odo url create`);
+                    await vscode.commands.executeCommand('openshift.url.create', context);
                 }
             }
             const hostName = await odo.execute(`oc get route -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${context.getName()}')]}{.spec.host}{end}"`);
@@ -330,7 +330,7 @@ export namespace Openshift {
             if (ports.length > 1) {
                 port = await vscode.window.showQuickPick(ports, {placeHolder: "Select port to expose"});
             }
-            Promise.resolve()
+            return Promise.resolve()
             .then(() => odo.execute(`odo project set ${project.getName()}`))
             .then(() => odo.execute(`odo app set ${app.getName()}`))
             .then(() => odo.execute(`odo component set ${context.getName()}`))
