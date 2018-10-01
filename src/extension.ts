@@ -472,10 +472,15 @@ export namespace Openshift {
         };
 
         export const del = async function deleteStorage(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
+            const app: odoctl.OpenShiftObject = context.getParent();
+            const project: odoctl.OpenShiftObject = app.getParent();
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete storage '${context.getName()}' from component '${context.getParent().getName()}' ?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 Promise.resolve()
-                    .then(() => odo.execute(`odo storage delete ${context.getName()} --component ${context.getParent().getName()} -f`))
+                .then(() => odo.execute(`odo project set ${project.getName()}`))
+                .then(() => odo.execute(`odo app set ${app.getName()}`))
+                .then(() => odo.execute(`odo component set ${context.getName()}`))
+                    .then(() => odo.execute(`odo storage delete ${context.getName()} -f`))
                     .then(() => {
                         explorer.refresh(context);
                         vscode.window.showInformationMessage(`Successfully deleted storage '${context.getName()}' from component '${context.getParent().getName()}`);
