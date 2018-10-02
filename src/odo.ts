@@ -29,26 +29,38 @@ class OpenShiftObjectImpl implements OpenShiftObject {
     }
 
     getTreeItem(): TreeItem {
-        const item = new TreeItem(this.name, this.expandable);
-        if (this.context === 'project') {
-            item.iconPath = Uri.file(path.join(__dirname, "../../images/project.png"));
-        } else if (this.context === 'application') {
-            item.iconPath = Uri.file(path.join(__dirname, "../../images/application.png"));
-        } else if (this.context === 'component') {
-            item.iconPath = Uri.file(path.join(__dirname, "../../images/component.png"));
-        } else if (this.context === 'service') {
-            item.iconPath = Uri.file(path.join(__dirname, "../../images/service.png"));
-        } else if (this.context === 'storage') {
-            item.iconPath = Uri.file(path.join(__dirname, "../../images/storage.png"));
-        } else {
-            item.iconPath = Uri.file(path.join(__dirname, "../../images/cluster.png"));
-        }
-
-        if (this.context === 'loginError') {
-            item.tooltip = 'Log in to cluster';
-            item.iconPath = '';
-        }
-        item.contextValue = this.context;
+		const item = new TreeItem(this.name, this.expandable);
+		const contextType = {
+			cluster: ()=> {
+				item.iconPath = Uri.file(path.join(__dirname, "../../images/cluster.png"));
+			},
+			project: ()=> {
+				item.iconPath = Uri.file(path.join(__dirname, "../../images/project.png"));
+				item.tooltip = `Project: ${this.name}`;
+			},
+			application: ()=> {
+				item.iconPath = Uri.file(path.join(__dirname, "../../images/application.png"));
+				item.tooltip = `Application: ${this.name}`;
+			},
+			component: ()=> {
+				item.iconPath = Uri.file(path.join(__dirname, "../../images/component.png"));
+				item.tooltip = `Component: ${this.name}`;
+			},
+			service: ()=> {
+				item.iconPath = Uri.file(path.join(__dirname, "../../images/service.png"));
+				item.tooltip = `Service: ${this.name}`;
+			},
+			storage: ()=> {
+				item.iconPath = Uri.file(path.join(__dirname, "../../images/storage.png"));
+				item.tooltip = `Storage: ${this.name}`;
+			},
+			loginError: ()=> {
+				item.tooltip = 'Log in to cluster';
+				item.iconPath = '';
+			}
+		};
+		(contextType[this.context])();
+		item.contextValue = this.context;
         return item;
     }
 
