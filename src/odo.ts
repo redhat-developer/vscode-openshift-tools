@@ -206,7 +206,6 @@ class OdoImpl implements Odo {
     public async getServices(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
         const appName: string = application.getName();
         const projName: string = application.getParent().getName();
-        const apis: cliInstance.CliExitData = await this.cli.execute(`oc api-versions`, {});
         let services: OpenShiftObject[] = [];
         try {
             const result: cliInstance.CliExitData = await this.cli.execute(
