@@ -2,7 +2,11 @@
 
 [![Build Status](https://travis-ci.org/redhat-developer/vscode-openshift-tools.svg?branch=master)](https://travis-ci.org/redhat-developer/vscode-openshift-tools)
 
-A Visual Studio Code extension for interacting with OpenShift clusters.
+## Overview
+
+A Visual Studio Code extension for interacting with OpenShift clusters. This extension is currently in Preview Mode and supports Node.js components only. We will be supporting other languages in the future releases.
+
+We currently only support local OpenShift cluster using [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/).
 
 ## Commands and features
 
@@ -43,14 +47,19 @@ A Visual Studio Code extension for interacting with OpenShift clusters.
    * `Component -> Describe` - Describe the given component in terminal window.
    * `Component -> Delete` - Delete an existing component.
 
-
 #### Actions available inside a storage for a component
 
    * `Storage -> Delete` - Delete storage from component
 
-#### Action Icons
+#### Icons Representation
 * ![Log in to cluster](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/dark/login.png) - Log in to Cluster
 * ![Refresh Cluster](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/dark/refresh.png) - Refresh Cluster
+* ![Cluster Resource](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/cluster.png) - Cluster Resource
+* ![Project Resource](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/project.png) - Project Resource
+* ![Application Resource](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/application.png) - Application Resource
+* ![Service Resource](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/service.png) - Service Resource
+* ![Component Resource](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/component.png) - Component Resource
+* ![Storage Resource](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/storage.png) - Storage Resource
 
 
 ### Dependencies
@@ -62,25 +71,23 @@ This extension uses two CLI tools to interact with OpenShift cluster:
 If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
 If extension is not able to locate those tools it will ask you if they should be downloaded.
 
-## Known Issues
-
-  * The component creation in an Application currently works only with Node.js components. We will be supporting other languages in the future releases.
-
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 **NOTE:** This extension is in Preview mode. So the extension support for OpenShift is strictly experimental - assumptions may break, and commands and behavior may change!
 
+
 Contributing
-===============
+============
 This is an open source project open to anyone. This project welcomes contributions and suggestions!!
 
 Download the most recent `openshift-connector-<version>.vsix` file and install it by following the instructions [here](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix). 
 
 
-Feedback
-===============
+Feedback & Questions
+====================
 * File a bug in [GitHub Issues](https://github.com/redhat-developer/vscode-openshift-tools/issues)
 * Chat with us on [Mattermost](https://chat.openshift.io/developers/channels/adapters)
+
 
 License
 ===============
