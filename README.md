@@ -6,7 +6,7 @@
 
 A Visual Studio Code extension for interacting with OpenShift clusters. This extension is currently in Preview Mode and supports Node.js components only. We will be supporting other languages in the future releases.
 
-* We currently only support local OpenShift cluster using [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/).
+We currently only support local OpenShift cluster using [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/).
 
 ## Commands and features
 
@@ -46,7 +46,6 @@ A Visual Studio Code extension for interacting with OpenShift clusters. This ext
    * `Component -> Watch` - Watch for changes, update component on change..
    * `Component -> Describe` - Describe the given component in terminal window.
    * `Component -> Delete` - Delete an existing component.
-
 
 #### Actions available inside a storage for a component
 
