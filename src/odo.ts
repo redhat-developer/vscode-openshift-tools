@@ -198,6 +198,9 @@ class OdoImpl implements Odo {
             `odo catalog list services`, {}
         );
 
+        if(result.error) {
+            throw new Error(result.stdout.trim());
+        }
         return result.stdout.trim().split('\n').slice(1).map((value) => {
             return value.replace('- ', '');
         });
