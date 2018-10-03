@@ -382,6 +382,18 @@
           "group": "s2"
         }
       ]
+    },
+    "configuration": {
+      "type": "object",
+      "title": "OpenShift Connector",
+      "properties": {
+        "openshiftConnector.showChannelOnOutput": {
+          "title": "Show channel on output",
+          "type": "boolean",
+          "default": false,
+          "description": "Show OpenShift Connector output channel when new text added to output stream."
+        }
+      }
     }
   },
   "extensionDependencies": [
