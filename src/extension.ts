@@ -140,8 +140,8 @@ export namespace Openshift {
                         ], odo).then(() => explorer.refresh(context));
                     }
                 }
-            } catch(e) {
-                vscode.window.showErrorMessage(e.message.replace(/\w/, c => c.toUpperCase()));
+            } catch (e) {
+                vscode.window.showErrorMessage(e.message.replace(/\w/, (c) => c.toUpperCase()));
             }
         };
 

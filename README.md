@@ -4,7 +4,7 @@
 
 ## Overview
 
-A Visual Studio Code extension for interacting with OpenShift clusters. This extension is currently in Preview Mode and supports Node.js components only. We will be supporting other languages in the future releases.
+A Visual Studio Code extension for interacting with Red Hat OpenShift using a local instance of OpenShift clusters providing a streamlined developer experience. This extension is currently in Preview Mode and supports Node.js components only. We will be supporting other languages in the future releases.
 
 We currently only support local OpenShift cluster using [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/).
 
@@ -69,9 +69,8 @@ This extension uses two CLI tools to interact with OpenShift cluster:
 * OpenShift Do tool - `odo` ([Download](https://github.com/redhat-developer/odo/releases))
 
 If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
-If extension is not able to locate those tools it will ask you if they should be downloaded.
-
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+The extension will detect these dependencies and prompt the user to download and install if not present.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 **NOTE:** This extension is in Preview mode. So the extension support for OpenShift is strictly experimental - assumptions may break, and commands and behavior may change!
 
@@ -82,6 +81,7 @@ This is an open source project open to anyone. This project welcomes contributio
 
 Download the most recent `openshift-connector-<version>.vsix` file and install it by following the instructions [here](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix). 
 
+Stable releases are archived under http://download.jboss.org/jbosstools/adapters/snapshots/vscode-openshift-tools/
 
 Feedback & Questions
 ====================
@@ -90,5 +90,5 @@ Feedback & Questions
 
 
 License
-===============
+=======
 MIT, See [LICENSE](LICENSE) for more information.
