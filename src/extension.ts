@@ -110,27 +110,32 @@ export namespace Openshift {
                 const serviceTemplateName = await vscode.window.showQuickPick(serviceTemplateNames, {
                     placeHolder: "Service Template Name"
                 });
-                const serviceName = await vscode.window.showInputBox({
-                    value: serviceTemplateName,
-                    prompt: 'Service Name',
-                    validateInput: (value: string) => {
-                        // required, because dc name is ${component}-${app}
-                        if (`${value.trim()}-${context.getName()}`.length > 63) {
-                            return 'Service name cannot be more that 63 characters';
+                if (serviceTemplateName) {
+                    const serviceName = await vscode.window.showInputBox({
+                        value: serviceTemplateName,
+                        prompt: 'Service Name',
+                        validateInput: (value: string) => {
+                            // required, because dc name is ${component}-${app}
+                            let message: string = null;
+                            if (`${value.trim()}-${context.getName()}`.length > 63) {
+                                message = 'Service name cannot be more that 63 characters';
+                            }
+                            return message;
                         }
-                        return null;
+                    });
+                    if (serviceName) {
+                        await progress.execWithProgress({
+                            cancellable: false,
+                            location: vscode.ProgressLocation.Notification,
+                            title: `Creating new service '${serviceName}'`
+                        }, [{command: `odo project set ${context.getParent().getName()}`, increment: 25},
+                            {command: `odo app set ${context.getName()}`, increment: 25},
+                            {command: `odo service create ${serviceTemplateName} ${serviceName.trim()}`, increment: 50}
+                        ], odo).then(() => explorer.refresh(context));
                     }
-                });
-                await progress.execWithProgress({
-                    cancellable: false,
-                    location: vscode.ProgressLocation.Notification,
-                    title: `Creating new service '${serviceName}'`
-                }, [{command: `odo project set ${context.getParent().getName()}`, increment: 25},
-                    {command: `odo app set ${context.getName()}`, increment: 25},
-                    {command: `odo service create ${serviceTemplateName} ${serviceName.trim()}`, increment: 50}
-                ], odo).then(() => explorer.refresh(context));
+                }
             } catch(e) {
-                vscode.window.showErrorMessage(e.message);
+                vscode.window.showErrorMessage(e.message.replace(/\w/, c => c.toUpperCase()));
             }
         };
 
