@@ -126,7 +126,8 @@ class OdoImpl implements Odo {
 
     public async getApplications(project: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
         const odoData = jsYaml.safeLoad(fs.readFileSync(path.join(Platform.getUserHomePath(), '.kube', 'odo'), 'utf8'));
-        const apps: string[] = odoData.activeApplications.filter((value) => value.project === project.getName()).map((value) => value.name);
+        let activeApps: any[] = odoData && odoData.activeApplications ? odoData.activeApplications : [];
+        const apps: string[] = activeApps.filter((value) => value.project === project.getName()).map((value) => value.name);
         return apps.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(project, value, 'application', this));
     }
 
