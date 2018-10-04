@@ -218,6 +218,10 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
+          "command": "openshift.project.create",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
           "command": "openshift.component.openUrl",
           "when": "view == openshiftProjectExplorer"
         },
@@ -293,9 +297,14 @@
       ],
       "view/item/context": [
         {
+          "command": "openshift.project.create",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster",
+          "group": "c1"
+        },
+        {
           "command": "openshift.component.openshiftConsole",
           "when": "view == openshiftProjectExplorer && viewItem == cluster",
-          "group": "console"
+          "group": "c2"
         },
         {
           "command": "openshift.app.create",
