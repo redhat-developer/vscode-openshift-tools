@@ -62,6 +62,9 @@ We currently only support local OpenShift cluster using [minishift](https://gith
 * ![Storage Resource](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/storage.png) - Storage Resource
 
 
+### Extension Configuration Settings
+   * `Openshift Connector: Show Channel On Output` - Show OpenShift Connector output channel when new text added to output stream.
+
 ### Dependencies
 
 This extension uses two CLI tools to interact with OpenShift cluster:
@@ -70,24 +73,20 @@ This extension uses two CLI tools to interact with OpenShift cluster:
 
 If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
 The extension will detect these dependencies and prompt the user to download and install if not present.
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------
 
 **NOTE:** This extension is in Preview mode. So the extension support for OpenShift is strictly experimental - assumptions may break, and commands and behavior may change!
-
 
 Contributing
 ============
 This is an open source project open to anyone. This project welcomes contributions and suggestions!!
 
-Download the most recent `openshift-connector-<version>.vsix` file and install it by following the instructions [here](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix). 
-
-Stable releases are archived under http://download.jboss.org/jbosstools/adapters/snapshots/vscode-openshift-tools/
+Download the most recent `openshift-connector-<version>.vsix` file and install it by following the instructions [here](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix). Stable releases are archived under http://download.jboss.org/jbosstools/adapters/snapshots/vscode-openshift-tools/
 
 Feedback & Questions
 ====================
 * File a bug in [GitHub Issues](https://github.com/redhat-developer/vscode-openshift-tools/issues)
 * Chat with us on [Mattermost](https://chat.openshift.io/developers/channels/adapters)
-
 
 License
 =======
