@@ -1,7 +1,7 @@
 # Change Log
-All notable changes to the "vscode-openshift-tools" extension will be documented in this file.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-- Initial release
+## 0.0.7 (October 4, 2018)
+* Add support for interactions with Red Hat OpenShift cluster
+* Supports only local openshift cluster via minishift/cdk
+* Allows to configure projects/applications/components/services/storages for a cluster
+* Interactive developer experience
