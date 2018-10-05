@@ -10,7 +10,7 @@ We currently only support local OpenShift cluster using [minishift](https://gith
 
 ## Commands and features
 
-![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-java/master/images/readme.gif)
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/vscode-openshift-tools-0.0.9.gif)
 
 `vs-openshift-connector` supports a number of commands & actions for interacting with OpenShift clusters; these are accessible via the command menu (`Cmd+Shift+P` <kbd>⌘⇧P</kbd> on macOS or `Ctrl+Shift+P` <kbd>⌃⇧P</kbd> on Windows and Linux) and may be bound to keys in the normal way.
 
