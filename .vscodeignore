@@ -1,5 +1,6 @@
 .vscode/**
 .vscode-test/**
+images/vscode-openshift-tools-0.0.9.gif
 out/test/**
 out/**/*.map
 src/**
