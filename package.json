@@ -1,7 +1,7 @@
 {
   "name": "vscode-openshift-connector",
   "displayName": "OpenShift Connector",
-  "description": "VSCode Extension for OpenShift",
+  "description": "A VSCode extension for interacting with Red Hat OpenShift clusters and providing a streamlined developer experience.",
   "version": "0.0.7",
   "license": "MIT",
   "publisher": "redhat",
@@ -20,7 +20,8 @@
   "keywords": [
     "openshift",
     "kubernetes",
-    "redhat"
+    "redhat",
+    "clusters"
   ],
   "icon": "images/openshift_extension.png",
   "activationEvents": [

@@ -54,14 +54,14 @@ We currently only support local OpenShift cluster using [minishift](https://gith
    * `Storage -> Delete` - Delete storage from component.
 
 #### Icons Representation
-* ![Log in to cluster](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/dark/login.png) - Log in to Cluster
-* ![Refresh Cluster](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/dark/refresh.png) - Refresh Cluster
-* ![Cluster Resource](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/cluster.png) - Cluster Resource
-* ![Project Resource](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/project.png) - Project Resource
-* ![Application Resource](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/application.png) - Application Resource
-* ![Service Resource](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/service.png) - Service Resource
-* ![Component Resource](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/component.png) - Component Resource
-* ![Storage Resource](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/storage.png) - Storage Resource
+* ![Log in to cluster](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/dark/login.png) - Log in to Cluster
+* ![Refresh Cluster](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/dark/refresh.png) - Refresh Cluster
+* ![Cluster Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/cluster.png) - Cluster Resource
+* ![Project Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/project.png) - Project Resource
+* ![Application Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/application.png) - Application Resource
+* ![Service Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/service.png) - Service Resource
+* ![Component Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/component.png) - Component Resource
+* ![Storage Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/storage.png) - Storage Resource
 
 
 ### Extension Configuration Settings
@@ -70,8 +70,8 @@ We currently only support local OpenShift cluster using [minishift](https://gith
 ### Dependencies
 
 This extension uses two CLI tools to interact with OpenShift cluster:
-* OKD CLI client tool - `oc` ([Download](https://github.com/openshift/origin/releases))
-* OpenShift Do tool - `odo` ([Download](https://github.com/redhat-developer/odo/releases))
+* OKD CLI client tool - [oc](https://github.com/openshift/origin/releases)
+* OpenShift Do tool - [odo](https://github.com/redhat-developer/odo/releases)
 
 > If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
 The extension will detect these dependencies and prompt the user to download and install if not present.
