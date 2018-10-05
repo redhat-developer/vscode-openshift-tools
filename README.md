@@ -30,7 +30,9 @@ We currently only support local OpenShift cluster using [minishift](https://gith
 
 #### Actions available for an Application inside a Project
 
-   * `Application ->  New Component` - Create a new component inside the selected application. 
+   * `Application ->  New Component` - Create a new component inside the selected application.
+        * git - Use a git repository as the source file for the component.
+        * local - Use local directory as a source file for the component.
    * `Application ->  New Service` - Perform service catalog operations.
    * `Application -> Describe` - Describe the given application in terminal window.
    * `Application -> Delete` - Delete an existing application.
@@ -39,17 +41,17 @@ We currently only support local OpenShift cluster using [minishift](https://gith
 
    * `Component -> Create URL` - Expose component to the outside world. The URLs that are generated using this command, can be used to access the deployed components from outside the cluster.
    * `Component -> Create Storage` - Create storage and mount to a component.
-   * `Component ->  Show Log` - Retrieve the log for the given component..
+   * `Component ->  Show Log` - Retrieve the log for the given component.
    * `Component ->  Follow Log` - Follow logs for the given component.
    * `Component -> Open in Browser` - Open the exposed URL in a browser.
    * `Component -> Push` - Push source code to a component.
-   * `Component -> Watch` - Watch for changes, update component on change..
+   * `Component -> Watch` - Watch for changes, update component on change.
    * `Component -> Describe` - Describe the given component in terminal window.
    * `Component -> Delete` - Delete an existing component.
 
 #### Actions available inside a storage for a component
 
-   * `Storage -> Delete` - Delete storage from component
+   * `Storage -> Delete` - Delete storage from component.
 
 #### Icons Representation
 * ![Log in to cluster](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/dark/login.png) - Log in to Cluster
@@ -71,15 +73,19 @@ This extension uses two CLI tools to interact with OpenShift cluster:
 * OKD CLI client tool - `oc` ([Download](https://github.com/openshift/origin/releases))
 * OpenShift Do tool - `odo` ([Download](https://github.com/redhat-developer/odo/releases))
 
-If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
+> If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
 The extension will detect these dependencies and prompt the user to download and install if not present.
+
 ----------------------------------------------------------------------------------------------------------------------------------------
 
 **NOTE:** This extension is in Preview mode. So the extension support for OpenShift is strictly experimental - assumptions may break, and commands and behavior may change!
 
+
 Contributing
 ============
 This is an open source project open to anyone. This project welcomes contributions and suggestions!!
+
+For information on getting started, refer to the [CONTRIBUTING instructions](CONTRIBUTING.md).
 
 Download the most recent `openshift-connector-<version>.vsix` file and install it by following the instructions [here](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix). Stable releases are archived under http://download.jboss.org/jbosstools/adapters/snapshots/vscode-openshift-tools/
 
