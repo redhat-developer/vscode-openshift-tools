@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.9 (October 5, 2018)
+* Add screencast for the features and commands
+
 ## 0.0.8 (October 5, 2018)
 * Fix missing icon path in README
 
