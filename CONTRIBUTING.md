@@ -33,6 +33,6 @@ There are only a few guidelines that we need contributors to follow.
 
 4. Once the extension is installed and reloaded, there will be an OpenShift Icon on the View Container, on the lines of snap mentioned below.
 
-* ![View Container OpenShift](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/view-container-icon.png) - View Container OpenShift
+![View Container OpenShift](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/view-container-icon.png)
 
-If you have any questions or run into any problems, please post an issue - we'll be very happy to help.
+> If you have any questions or run into any problems, please post an issue - we'll be very happy to help.
