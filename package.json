@@ -302,9 +302,29 @@
           "group": "c1"
         },
         {
+          "command": "openshift.catalog.list.components",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster",
+          "group": "c2@1"
+        },
+        {
+          "command": "openshift.catalog.list.services",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster",
+          "group": "c2@2"
+        },
+        {
           "command": "openshift.component.openshiftConsole",
           "when": "view == openshiftProjectExplorer && viewItem == cluster",
-          "group": "c2"
+          "group": "c3"
+        },
+        {
+          "command": "openshift.explorer.logout",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster",
+          "group": "c4"
+        },
+        {
+          "command": "openshift.about",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster",
+          "group": "c5"
         },
         {
           "command": "openshift.app.create",
