@@ -265,34 +265,9 @@
           "group": "navigation"
         },
         {
-          "command": "openshift.explorer.logout",
-          "when": "view == openshiftProjectExplorer && isLoggedIn",
-          "group": "logout"
-        },
-        {
           "command": "openshift.explorer.refresh",
           "when": "view == openshiftProjectExplorer",
           "group": "navigation"
-        },
-        {
-          "command": "openshift.project.create",
-          "when": "view == openshiftProjectExplorer && isLoggedIn",
-          "group": "a"
-        },
-        {
-          "command": "openshift.catalog.list.components",
-          "when": "view == openshiftProjectExplorer && isLoggedIn",
-          "group": "c@1"
-        },
-        {
-          "command": "openshift.catalog.list.services",
-          "when": "view == openshiftProjectExplorer && isLoggedIn",
-          "group": "c@2"
-        },
-        {
-          "command": "openshift.about",
-          "when": "view == openshiftProjectExplorer",
-          "group": "z"
         }
       ],
       "view/item/context": [
