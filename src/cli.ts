@@ -127,7 +127,7 @@ class OdoChannelImpl implements OdoChannel {
         if (text.charAt(text.length - 1) !== '\n') {
             this.channel.append('\n');
         }
-        if(vscode.workspace.getConfiguration('openshiftConnector').get<boolean>('showChannelOnOutput')) {
+        if (vscode.workspace.getConfiguration('openshiftConnector').get<boolean>('showChannelOnOutput')) {
             this.channel.show();
         }
     }
