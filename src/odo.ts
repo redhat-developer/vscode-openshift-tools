@@ -115,7 +115,7 @@ class OdoImpl implements Odo {
 
     public async getProjects(): Promise<OpenShiftObject[]> {
         return this.cli.execute(
-            `oc get project -o jsonpath="{range .items[*]}{.metadata.name}{\\"\\n\\"}{end}"`, {}
+            'oc get project -o jsonpath="{range .items[*]}{.metadata.name}{\\"\\n\\"}{end}"', {}
         ).then((result) => {
             let projs: OpenShiftObject[] = [];
             const stdout: string = result.stdout.trim();
