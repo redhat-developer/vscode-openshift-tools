@@ -59,7 +59,7 @@ export namespace Openshift {
         };
 
         export const del = async function deleteProjectCmd(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
-            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete project '${context.getName()}' ?`, 'Yes', 'Cancel');
+            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete project '${context.getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 Promise.resolve()
                     .then(() => odo.execute(`odo project delete ${context.getName()} -f`))
@@ -96,7 +96,7 @@ export namespace Openshift {
 
         export const del = async function deleteApplication(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
             const project: odoctl.OpenShiftObject = context.getParent();
-            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete application '${context.getName()} ?`, 'Yes', 'Cancel');
+            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete application '${context.getName()}?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 Promise.resolve()
                     .then(() => odo.execute(`odo project set ${project.getName()}`))
@@ -364,7 +364,7 @@ export namespace Openshift {
             if (await odo.requireLogin()) {
                 loginDialog(odo, explorer);
             } else {
-                const value = await vscode.window.showInformationMessage(`You are already logged in the cluster. Do you want to login to a different cluster ?`, 'Yes', 'No');
+                const value = await vscode.window.showInformationMessage(`You are already logged in the cluster. Do you want to login to a different cluster?`, 'Yes', 'No');
                 if (value === 'Yes') {
                     odo.execute(`oc logout`).then(async (result)=> {
                         if (result.stderr === "") {
@@ -495,7 +495,7 @@ export namespace Openshift {
             const component: odoctl.OpenShiftObject = context.getParent();
             const app: odoctl.OpenShiftObject = component.getParent();
             const project: odoctl.OpenShiftObject = app.getParent();
-            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete storage '${context.getName()}' from component '${component.getName()}' ?`, 'Yes', 'Cancel');
+            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete storage '${context.getName()}' from component '${component.getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 Promise.resolve()
                 .then(() => odo.execute(`odo project set ${project.getName()}`))
