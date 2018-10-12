@@ -83,15 +83,14 @@ export namespace Openshift {
             });
             if (!applicationName) return;
             Promise.resolve()
-                .then(() => odo.execute(`odo project set ${context.getName()}`))
-                .then(() => odo.execute(`odo app create ${applicationName.trim()}`))
+                .then(() => odo.execute(`odo app create ${applicationName.trim()} --project ${context.getName()}`))
                 .then(() => explorer.refresh(context))
                 .catch((error) => vscode.window.showErrorMessage(`Failed to delete application with error '${error}'`));
         };
 
         export const describe = async function describe(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             const project: odoctl.OpenShiftObject = context.getParent();
-            odo.executeInTerminal(`odo project set ${project.getName()}; odo app describe ${context.getName()}`, process.cwd());
+            odo.executeInTerminal(`odo app describe ${context.getName()} --project ${project.getName()}`, process.cwd());
         };
 
         export const del = async function deleteApplication(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject) {
@@ -99,8 +98,7 @@ export namespace Openshift {
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete application '${context.getName()}?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 Promise.resolve()
-                    .then(() => odo.execute(`odo project set ${project.getName()}`))
-                    .then(() => odo.execute(`odo app delete ${context.getName()} -f`))
+                    .then(() => odo.execute(`odo app delete ${context.getName()} --project ${project.getName()} -f`))
                     .then(() => {
                         explorer.refresh(context.getParent());
                         vscode.window.showInformationMessage(`Successfully deleted application '${context.getName()}'`);
@@ -188,10 +186,8 @@ export namespace Openshift {
                     cancellable: false,
                     location: vscode.ProgressLocation.Notification,
                     title: `Creating new component '${componentName}'`
-                }, [{command: `odo project set ${context.getParent().getName()}`, increment: 10},
-                    {command: `odo app set ${context.getName()}`, increment: 10},
-                    {command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --local ${folder.uri.fsPath}`, increment: 50},
-                    {command: `odo push --local ${folder.uri.fsPath}`, increment: 30}
+                }, [{command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --local ${folder.uri.fsPath} --project ${context.getParent().getName()} --application ${context.getName()}`, increment: 50},
+                    {command: `odo push --local ${folder.uri.fsPath}`, increment: 50}
                 ], odo).then(()=>explorer.refresh(context));
 
             } catch (e) {
@@ -235,9 +231,7 @@ export namespace Openshift {
                     cancellable: false,
                     location: vscode.ProgressLocation.Notification,
                     title: `Creating new component '${componentName}'`
-                }, [{command: `odo project set ${context.getParent().getName()}`, increment: 10},
-                    {command: `odo app set ${context.getName()}`, increment: 10},
-                    {command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --git ${repoURI}`, increment: 80}
+                }, [{command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --git ${repoURI} --project ${context.getParent().getName()} --application ${context.getName()}`, increment: 80}
                 ], odo).then(()=>explorer.refresh(context));
 
             } catch (e) {
@@ -264,9 +258,7 @@ export namespace Openshift {
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete component '${context.getName()}\'`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 Promise.resolve()
-                    .then(() => odo.execute(`odo project set ${project.getName()}`))
-                    .then(() => odo.execute(`odo app set ${app.getName()}`))
-                    .then(() => odo.execute(`odo delete ${context.getName()} -f`))
+                    .then(() => odo.execute(`odo delete ${context.getName()} -f --project ${project.getName()} --application ${app.getName()}`))
                     .then(() => {
                         explorer.refresh(context.getParent());
                         vscode.window.showInformationMessage(`Successfully deleted component '${context.getName()}'`);
@@ -278,19 +270,19 @@ export namespace Openshift {
         export const describe = async function componentDescribe(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             const app: odoctl.OpenShiftObject = context.getParent();
             const project: odoctl.OpenShiftObject = app.getParent();
-            odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo describe ${context.getName()}`, process.cwd());
+            odo.executeInTerminal(`odo describe ${context.getName()} --project ${project.getName()} --application  ${app.getName()}`, process.cwd());
         };
 
         export const log = async function logComponent(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             const app: odoctl.OpenShiftObject = context.getParent();
             const project: odoctl.OpenShiftObject = app.getParent();
-            odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo log ${context.getName()};`, process.cwd());
+            odo.executeInTerminal(`odo log ${context.getName()} --project ${project.getName()} --application  ${app.getName()};`, process.cwd());
         };
 
         export const followLog = async function followLogComponent(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             const app: odoctl.OpenShiftObject = context.getParent();
             const project: odoctl.OpenShiftObject = app.getParent();
-            odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo log ${context.getName()} -f;`, process.cwd());
+            odo.executeInTerminal(`odo log ${context.getName()} -f --project ${project.getName()} --application  ${app.getName()};`, process.cwd());
         };
 
         export const push = async function pushCmd(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
@@ -301,17 +293,14 @@ export namespace Openshift {
                 cancellable: false,
                 location: vscode.ProgressLocation.Notification,
                 title: `Pushing latest changes for component '${context.getName()}'`
-            }, [{command: `odo project set ${project.getName()}`, increment: 10},
-                {command: `odo app set ${app.getName()}`, increment: 10},
-                {command: `odo component set  ${context.getName()}`, increment: 10},
-                {command: `odo push ${context.getName()}`, increment: 70}
+            }, [{command: `odo push ${context.getName()} --project ${project.getName()} --application ${app.getName()} --component ${context.getName()}`, increment: 100}
             ], odo);
         };
 
         export const watch = async function watchCmd(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
             const app: odoctl.OpenShiftObject = context.getParent();
             const project: odoctl.OpenShiftObject = app.getParent();
-            odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo component set ${context.getName()}; odo watch ${context.getName()};`, process.cwd());
+            odo.executeInTerminal(`odo watch ${context.getName()} --project ${project.getName()} --application ${app.getName()} --component ${context.getName()}`, process.cwd());
         };
 
         export const openUrl = async function OpenUrlCmd(odo: odoctl.Odo, context: odoctl.OpenShiftObject) {
@@ -349,13 +338,10 @@ export namespace Openshift {
                 port = await vscode.window.showQuickPick(ports, {placeHolder: "Select port to expose"});
             }
             return Promise.resolve()
-            .then(() => odo.execute(`odo project set ${project.getName()}`))
-            .then(() => odo.execute(`odo app set ${app.getName()}`))
-            .then(() => odo.execute(`odo component set ${context.getName()}`))
-            .then(() => odo.execute(`odo url create --port ${port}`))
-            .catch((err) => {
-                vscode.window.showErrorMessage(`Failed to create URL for component '${context.getName()}'!`);
-            });
+                .then(() => odo.execute(`odo url create --port ${port} --project ${project.getName()} --application ${app.getName()} --component ${context.getName()}`))
+                .catch((err) => {
+                    vscode.window.showErrorMessage(`Failed to create URL for component '${context.getName()}'!`);
+                });
         };
     }
 
@@ -483,10 +469,7 @@ export namespace Openshift {
 
             const storageSize = await vscode.window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the storage size'});
             Promise.resolve()
-                .then(() => odo.execute(`odo project set ${project.getName()}`))
-                .then(() => odo.execute(`odo app set ${app.getName()}`))
-                .then(() => odo.execute(`odo component set ${context.getName()}`))
-                .then(() => odo.execute(`odo storage create ${storageName} --path=${mountPath} --size=${storageSize}`))
+                .then(() => odo.execute(`odo storage create ${storageName} --path=${mountPath} --size=${storageSize} --project ${project.getName()} --application ${app.getName()} --component ${context.getName()}`))
                 .then(() => explorer.refresh(context))
                 .catch((e: Error) => vscode.window.showErrorMessage(`New Storage command failed with error: '${e}'!`));
         };
@@ -498,10 +481,7 @@ export namespace Openshift {
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete storage '${context.getName()}' from component '${component.getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 Promise.resolve()
-                .then(() => odo.execute(`odo project set ${project.getName()}`))
-                .then(() => odo.execute(`odo app set ${app.getName()}`))
-                .then(() => odo.execute(`odo component set ${component.getName()}`))
-                    .then(() => odo.execute(`odo storage delete ${context.getName()} -f`))
+                    .then(() => odo.execute(`odo storage delete ${context.getName()} -f --project ${project.getName()} --application ${app.getName()} --component ${component.getName()}`))
                     .then(() => {
                         explorer.refresh(context);
                         vscode.window.showInformationMessage(`Successfully deleted storage '${context.getName()}' from component '${component.getName()}`);
