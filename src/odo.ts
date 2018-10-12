@@ -98,6 +98,7 @@ export interface Odo {
     getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponentTypeVersions(componentName: string): Promise<string[]>;
     getServiceTemplates(): Promise<string[]>;
+    getOdoVersion(): Promise<string>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getApplicationChildren(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]>;
     execute(command: string, cwd?: string): Promise<CliExitData>;
@@ -197,6 +198,19 @@ class OdoImpl implements Odo {
             return new OpenShiftObjectImpl(null, server, 'cluster', this, TreeItemCollapsibleState.Expanded);
         });
         return clusters;
+    }
+
+    public async getOdoVersion(): Promise<string> {
+        const  Versionregex = /[\d\.]+/;
+        const result = await this.cli.execute(
+            'odo version', {}
+        );
+        if (result) {
+            const odoVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
+                return value.match(Versionregex);
+            });
+            return odoVersion[0];
+        }
     }
 
     public async getServiceTemplates(): Promise<string[]> {
