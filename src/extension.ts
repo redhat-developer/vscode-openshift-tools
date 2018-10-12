@@ -132,9 +132,7 @@ export namespace Openshift {
                             cancellable: false,
                             location: vscode.ProgressLocation.Notification,
                             title: `Creating new service '${serviceName}'`
-                        }, [{command: `odo project set ${context.getParent().getName()}`, increment: 25},
-                            {command: `odo app set ${context.getName()}`, increment: 25},
-                            {command: `odo service create ${serviceTemplateName} ${serviceName.trim()}`, increment: 50}
+                        }, [{command: `odo service create ${serviceTemplateName} ${serviceName.trim()} --project ${context.getParent().getName()} --application ${context.getName()}`, increment: 100}
                         ], odo).then(() => explorer.refresh(context));
                     }
                 }
@@ -146,9 +144,7 @@ export namespace Openshift {
         export const del = async function deleteService(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer, service: odoctl.OpenShiftObject, ) {
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete service '${service.getName()}'`, 'Yes', 'Cancel');
             if (value === 'Yes') {
-                await odo.execute(`odo project set ${service.getParent().getParent().getName()}`);
-                await odo.execute(`odo app set ${service.getParent().getName()}`);
-                await odo.execute(`odo service delete ${service.getName()} -f`);
+                await odo.execute(`odo service delete ${service.getName()} -f --project ${service.getParent().getParent().getName()} --application ${service.getParent().getName()}`);
                 explorer.refresh(service.getParent());
             }
         };
