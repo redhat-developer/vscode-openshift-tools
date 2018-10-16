@@ -246,11 +246,19 @@ export namespace Openshift {
 
         export const create = async function createComponent(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject)  {
             // should use QuickPickItem with label and description
-            const sourceTypes = ["git", "local"];
+            const sourceTypes:vscode.QuickPickItem[] = [
+            {
+                label: 'Git Repository',
+                description: 'Use an existing git repository as a source for the component'
+            },
+            {
+                label: 'Workspace Directory',
+                description: 'Use workspace directory as a source for the component'
+            }];
             const componentSource = await vscode.window.showQuickPick(sourceTypes, {
                 placeHolder: "Select source type for component"
             });
-            if (componentSource === 'git' ) {
+            if (componentSource.label === 'Git Repository' ) {
                 createGit(odo, explorer, context);
             } else {
                 createLocal(odo, explorer, context);
