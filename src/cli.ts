@@ -91,6 +91,9 @@ class Cli implements ICli {
             const odoLocation = await getToolLocation(cmdName);
             const finalCommand = cmd.replace(cmdName, odoLocation);
             odoChannel.print(finalCommand);
+            if(opts.maxBuffer === undefined) {
+                opts.maxBuffer = 2*1024*1024;
+            }
             childProcess.exec(finalCommand, opts, (error: ExecException, stdout: string, stderr: string) => {
                 odoChannel.print(stdout);
                 odoChannel.print(stderr);
