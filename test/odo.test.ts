@@ -30,6 +30,26 @@ suite("odo integration tests", () => {
         };
     }
 
+    suite('odo commands', () => {
+        test('odo-getVersion() returns version number with expected output', async () => {
+            const odoVersionCli: ICli = create([
+               'odo v0.0.13 (65b5bed8)',
+               'Unable to connect to OpenShift cluster, is it down?'
+            ].join('\n'));
+            let result:string = await odo.create(odoVersionCli).getOdoVersion();
+            assert(result === '0.0.13');
+        });
+
+        test('odo-getVersion() returns version 0.0.0 for unexpected output', async () => {
+            const odoVersionCli: ICli = create([
+               'odounexpected v0.0.13 (65b5bed8)',
+               'Unable to connect to OpenShift cluster, is it down?'
+            ].join('\n'));
+            let result:string = await odo.create(odoVersionCli).getOdoVersion();
+            assert(result === '0.0.0');
+        });
+    });
+
     suite("odo catalog integration", () => {
         const http = 'httpd';
         const nodejs = 'nodejs';
