@@ -201,16 +201,21 @@ class OdoImpl implements Odo {
     }
 
     public async getOdoVersion(): Promise<string> {
-        const  Versionregex = /[\d\.]+/;
+        const  version = /odo v([\d\.]+)/;
         const result = await this.cli.execute(
             'odo version', {}
         );
-        if (result) {
+        let detectedVersion: string =  '0.0.0';
+        if (result.error === undefined) {
             const odoVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
-                return value.match(Versionregex);
-            });
-            return odoVersion[0];
+                return value.match(version);
+            }).map((value)=>version.exec(value)[1]);
+
+            if (odoVersion.length) {
+                detectedVersion = odoVersion[0];
+            }
         }
+        return detectedVersion;
     }
 
     public async getServiceTemplates(): Promise<string[]> {
