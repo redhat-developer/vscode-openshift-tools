@@ -236,7 +236,7 @@ export namespace Openshift {
 
         export const create = async function createComponent(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer, context: odoctl.OpenShiftObject)  {
             // should use QuickPickItem with label and description
-            const sourceTypes:vscode.QuickPickItem[] = [
+            const sourceTypes: vscode.QuickPickItem[] = [
             {
                 label: 'Git Repository',
                 description: 'Use an existing git repository as a source for the component'
