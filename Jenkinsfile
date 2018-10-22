@@ -3,7 +3,8 @@
 node('rhel7'){
 	stage('Checkout repo') {
 		deleteDir()
-		git url: 'https://github.com/redhat-developer/vscode-openshift-tools.git'
+		git url: 'https://github.com/redhat-developer/vscode-openshift-tools.git',
+			branch: "${BRANCH}"
 	}
 
 	stage('Install requirements') {
