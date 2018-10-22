@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.0.11 (October 22, 2018)
+* Minor fixes in README
+
+## 0.0.10 (October 22, 2018)
+* Add support to Java components
+* Support odo `v0.0.14` with supervisord fix
+* Fix `create service` command based on odo `v0.0.14` output changes
+
 ## 0.0.9 (October 5, 2018)
 * Add screencast for the features and commands
 
