@@ -113,33 +113,41 @@ export namespace Openshift {
                 const serviceTemplateName = await vscode.window.showQuickPick(serviceTemplateNames, {
                     placeHolder: "Service Template Name"
                 });
-                if (serviceTemplateName) {
-                    const serviceName = await vscode.window.showInputBox({
-                        value: serviceTemplateName,
-                        prompt: 'Service Name',
-                        validateInput: (value: string) => {
-                            // required, because dc name is ${component}-${app}
-                            let message: string = null;
-                            if (`${value.trim()}-${context.getName()}`.length > 63) {
-                                message = 'Service name cannot be more that 63 characters';
-                            }
-                            return message;
+
+                if (serviceTemplateName === undefined) return;
+
+                const serviceTemplatePlanNames: string[] = await odo.getServiceTemplatePlans(serviceTemplateName);
+                const serviceTemplatePlanName = await vscode.window.showQuickPick(serviceTemplatePlanNames, {
+                    placeHolder: "Service Template Plan Name"
+                });
+
+                if (serviceTemplatePlanName === undefined) return;
+
+                const serviceName = await vscode.window.showInputBox({
+                    value: serviceTemplateName,
+                    prompt: 'Service Name',
+                    validateInput: (value: string) => {
+                        // required, because dc name is ${component}-${app}
+                        let message: string = null;
+                        if (`${value.trim()}-${context.getName()}`.length > 63) {
+                            message = 'Service name cannot be more that 63 characters';
                         }
-                    });
-                    if (serviceName) {
-                        await progress.execWithProgress({
-                            cancellable: false,
-                            location: vscode.ProgressLocation.Notification,
-                            title: `Creating new service '${serviceName}'`
-                        }, [{command: `odo project set ${context.getParent().getName()} && odo app set ${context.getName()} && odo service create ${serviceTemplateName} ${serviceName.trim()}`, increment: 100}
-                        ], odo).then(() => explorer.refresh(context));
+                        return message;
                     }
+                });
+                if (serviceName) {
+                    await progress.execWithProgress({
+                        cancellable: false,
+                        location: vscode.ProgressLocation.Notification,
+                        title: `Creating new service '${serviceName}'`
+                    }, [{command: `odo project set ${context.getParent().getName()} && odo app set ${context.getName()} && odo service create ${serviceTemplateName} --plan ${serviceTemplatePlanName} ${serviceName.trim()}`, increment: 100}
+                    ], odo).then(() => explorer.refresh(context));
                 }
+
             } catch (e) {
                 vscode.window.showErrorMessage(e.message.replace(/\w/, (c) => c.toUpperCase()));
             }
         };
-
         export const del = async function deleteService(odo: odoctl.Odo, explorer: explorerFactory.OpenShiftExplorer, service: odoctl.OpenShiftObject, ) {
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete service '${service.getName()}'`, 'Yes', 'Cancel');
             if (value === 'Yes') {

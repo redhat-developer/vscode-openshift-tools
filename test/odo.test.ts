@@ -99,20 +99,26 @@ suite("odo integration tests", () => {
         const svc3 = 'svc3';
 
         const odoProjCli: ICli = create([
-            `The following services can be deployed:`,
-            `- ${svc1}`,
-            `- ${svc2}`,
-            `- ${svc3}`
+            `NAME      PLANS`,
+            `${svc1}   default,free,paid`,
+            `${svc2}   default,free`,
+            `${svc3}   default`
         ].join('\n'));
 
-        let result: string[];
-
-        suiteSetup(async () => {
-            result = await odo.create(odoProjCli).getServiceTemplates();
+        test("Odo->getServiceTemplates() returns correct number of services", async () => {
+            const result: string[] = await odo.create(odoProjCli).getServiceTemplates();
+            assert(result.length === 3);
+            assert(result[0] === svc1);
+            assert(result[1] === svc2);
+            assert(result[2] === svc3);
         });
 
-        test("Odo->getServiceTemplates() returns correct number of services", () => {
+        test("Odo->getServiceTemplatePlans(service) returns correct number of plans fro service", async () => {
+            const result: string[] = await odo.create(odoProjCli).getServiceTemplatePlans(svc1);
             assert(result.length === 3);
+            assert(result[0] === 'default');
+            assert(result[1] === 'free');
+            assert(result[2] === 'paid');
         });
     });
 
