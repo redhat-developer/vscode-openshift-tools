@@ -140,7 +140,7 @@ class OdoImpl implements Odo {
     public async getComponents(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
         const proj = application.getParent().getName();
         const result: cliInstance.CliExitData = await this.cli.execute(
-            `oc get dc --namespace ${proj} -o jsonpath="{range .items[?(.metadata.labels.app == '${application.getName()}')]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}"`, {}
+            `oc get dc --namespace ${proj} -o jsonpath="{range .items[?(.metadata.labels.app == \\"${application.getName()}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}"`, {}
         );
         return result.stdout.trim().split('\n').filter((value)=>value!=='').map<OpenShiftObject>((value) => new OpenShiftObjectImpl(application, value, 'component', this, TreeItemCollapsibleState.Collapsed));
     }
@@ -160,7 +160,7 @@ class OdoImpl implements Odo {
         const appName = app.getName();
         const projName = app.getParent().getName();
         const result: cliInstance.CliExitData = await this.cli.execute(
-            `oc get pvc -o jsonpath="{range .items[?(.metadata.labels.app == '${appName}')]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\" \\"}{.metadata.labels.app\\.kubernetes\\.io/storage-name}{\\"\\n\\"}{end}" --namespace ${projName}`, {}
+            `oc get pvc -o jsonpath="{range .items[?(.metadata.labels.app == \\"${appName}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\" \\"}{.metadata.labels.app\\.kubernetes\\.io/storage-name}{\\"\\n\\"}{end}" --namespace ${projName}`, {}
         );
 
         return result.stdout.trim().split('\n').filter((value) => value.trim().split(' ').length > 1 && value.trim().split(' ')[0] === component.getName()).map((value) => {
