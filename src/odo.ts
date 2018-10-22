@@ -98,6 +98,7 @@ export interface Odo {
     getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponentTypeVersions(componentName: string): Promise<string[]>;
     getServiceTemplates(): Promise<string[]>;
+    getServiceTemplatePlans(svc: string): Promise<string[]>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getApplicationChildren(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]>;
     execute(command: string, cwd?: string): Promise<CliExitData>;
@@ -131,7 +132,7 @@ class OdoImpl implements Odo {
 
     public async getApplications(project: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
         const odoData = jsYaml.safeLoad(fs.readFileSync(path.join(Platform.getUserHomePath(), '.kube', 'odo'), 'utf8'));
-        let activeApps: any[] = odoData && odoData.activeApplications ? odoData.activeApplications : [];
+        const activeApps: any[] = odoData && odoData.activeApplications ? odoData.activeApplications : [];
         const apps: string[] = activeApps.filter((value) => value.project === project.getName()).map((value) => value.name);
         return apps.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(project, value, 'application', this));
     }
@@ -204,12 +205,26 @@ class OdoImpl implements Odo {
             `odo catalog list services`, {}
         );
 
-        if(result.error) {
+        if (result.error) {
             throw new Error(result.stdout.trim());
         }
         return result.stdout.trim().split('\n').slice(1).map((value) => {
-            return value.replace('- ', '');
+            const name = value.trim().replace(/\s{1,}/g, '|').split('|');
+            return name[0];
         });
+    }
+
+    public async getServiceTemplatePlans(svcName: string): Promise<string[]> {
+        const result: cliInstance.CliExitData = await this.cli.execute(
+            `odo catalog list services`, {}
+        );
+        const plans = result.stdout.trim().split('\n').slice(1).filter((value) => {
+                const data = value.trim().replace(/\s{1,}/g, '|').split('|');
+                return data[0] === svcName;
+            }).map((value) => {
+            return value.trim().replace(/\s{1,}/g, '|').split('|')[1];
+        });
+        return plans[0].split(',');
     }
 
     public async getServices(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
