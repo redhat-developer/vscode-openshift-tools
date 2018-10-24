@@ -15,31 +15,36 @@ import {
 import { Platform } from './platform';
 import * as path from 'path';
 
-import { Odo, OpenShiftObject } from './odo';
+import { Odo, OpenShiftObject, OdoImpl } from './odo';
 import * as notifier from './watch';
-
-export function create(odoctl: Odo) {
-    return new OpenShiftExplorer(odoctl);
-}
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
 export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Disposable {
+    private static instance: OpenShiftExplorer;
+    private static odoctl: Odo = OdoImpl.getInstance();
     private fsw: notifier.FileContentChangeNotifier;
-    constructor(private odoctl: Odo, ) {
+    private onDidChangeTreeDataEmitter: EventEmitter<OpenShiftObject | undefined> = new EventEmitter<OpenShiftObject | undefined>();
+    readonly onDidChangeTreeData: Event<OpenShiftObject | undefined> = this.onDidChangeTreeDataEmitter.event;
+
+    private constructor() {
         this.fsw = notifier.watchFileForContextChange(kubeConfigFolder, 'config');
         this.fsw.emitter.on('file-changed', () => this.refresh());
     }
 
-    private onDidChangeTreeDataEmitter: EventEmitter<OpenShiftObject | undefined> = new EventEmitter<OpenShiftObject | undefined>();
-    readonly onDidChangeTreeData: Event<OpenShiftObject | undefined> = this.onDidChangeTreeDataEmitter.event;
+    static getInstance(): OpenShiftExplorer {
+        if (!OpenShiftExplorer.instance) {
+            OpenShiftExplorer.instance = new OpenShiftExplorer();
+        }
+        return OpenShiftExplorer.instance;
+    }
 
     getTreeItem(element: OpenShiftObject): TreeItem | Thenable<TreeItem> {
         return element.getTreeItem();
     }
 
     getChildren(element?: OpenShiftObject): ProviderResult<OpenShiftObject[]> {
-        return element ? element.getChildren() : this.odoctl.getClusters();
+        return element ? element.getChildren() : OpenShiftExplorer.odoctl.getClusters();
     }
 
     getParent?(element: OpenShiftObject): OpenShiftObject {
