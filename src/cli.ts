@@ -14,7 +14,7 @@ import { Platform } from './platform';
 import targz = require('targz');
 import unzipm = require('unzip-stream');
 import * as zlib from 'zlib';
-import * as opn from 'opn';
+import opn = require('opn');
 import hasha = require('hasha');
 import { ExecException } from 'child_process';
 
@@ -84,14 +84,25 @@ const toolsConfig = {
 
 const tools = loadMetadata(toolsConfig, process.platform);
 
-class Cli implements ICli {
+export class Cli implements ICli {
+    private static instance: Cli;
+
+    private constructor() {}
+
+    static getInstance(): Cli {
+        if (!Cli.instance) {
+            Cli.instance = new Cli();
+        }
+        return Cli.instance;
+    }
+
     async execute(cmd: string, opts: any = {}): Promise<CliExitData> {
         return new Promise<CliExitData>(async (resolve, reject) => {
             const cmdName = cmd.split(' ')[0];
             const odoLocation = await getToolLocation(cmdName);
-            const finalCommand = cmd.replace(cmdName, odoLocation);
+            const finalCommand = cmd.replace(new RegExp(cmdName, 'g'), odoLocation);
             odoChannel.print(finalCommand);
-            if(opts.maxBuffer === undefined) {
+            if (opts.maxBuffer === undefined) {
                 opts.maxBuffer = 2*1024*1024;
             }
             childProcess.exec(finalCommand, opts, (error: ExecException, stdout: string, stderr: string) => {
@@ -115,10 +126,6 @@ export interface ICli {
     execute(cmd: string, opts: any): Promise<CliExitData>;
 }
 
-export function create() {
-    return new Cli();
-}
-
 export interface OdoChannel {
     print(text: string);
 }
@@ -136,7 +143,7 @@ class OdoChannelImpl implements OdoChannel {
     }
 }
 
-async function getToolLocation(cmd): Promise<string> {
+async function getToolLocation(cmd: string): Promise<string> {
     let toolLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', tools[cmd].cmdFileName);
     const toolDlLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', tools[cmd].dlFileName);
     const pathTool = which(cmd);
