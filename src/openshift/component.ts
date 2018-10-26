@@ -46,19 +46,19 @@ export class Component extends OpenShiftItem {
     static describe(context: OpenShiftObject): void {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
-        Component.odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo describe ${context.getName()}`, process.cwd());
+        Component.odo.executeInTerminal(`odo project set ${project.getName()} && odo app set ${app.getName()} && odo describe ${context.getName()}`, process.cwd());
     }
 
     static log(context: OpenShiftObject): void {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
-        Component.odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo log ${context.getName()};`, process.cwd());
+        Component.odo.executeInTerminal(`odo project set ${project.getName()} && odo app set ${app.getName()} && odo log ${context.getName()}`, process.cwd());
     }
 
     static followLog(context: OpenShiftObject) {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
-        Component.odo.executeInTerminal(`odo project set ${project.getName()}; odo app set ${app.getName()}; odo log ${context.getName()} -f;`, process.cwd());
+        Component.odo.executeInTerminal(`odo project set ${project.getName()} && odo app set ${app.getName()} && odo log ${context.getName()} -f`, process.cwd());
     }
 
     static async push(context: OpenShiftObject): Promise<string> {
