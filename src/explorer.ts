@@ -12,23 +12,23 @@ import {
     Disposable
 } from 'vscode';
 
-import { Platform } from './platform';
+import { Platform } from './util/platform';
 import * as path from 'path';
 
 import { Odo, OpenShiftObject, OdoImpl } from './odo';
-import * as notifier from './watch';
+import { WatchUtil, FileContentChangeNotifier } from './util/watch';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
 export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Disposable {
     private static instance: OpenShiftExplorer;
     private static odoctl: Odo = OdoImpl.getInstance();
-    private fsw: notifier.FileContentChangeNotifier;
+    private fsw: FileContentChangeNotifier;
     private onDidChangeTreeDataEmitter: EventEmitter<OpenShiftObject | undefined> = new EventEmitter<OpenShiftObject | undefined>();
     readonly onDidChangeTreeData: Event<OpenShiftObject | undefined> = this.onDidChangeTreeDataEmitter.event;
 
     private constructor() {
-        this.fsw = notifier.watchFileForContextChange(kubeConfigFolder, 'config');
+        this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
         this.fsw.emitter.on('file-changed', () => this.refresh());
     }
 

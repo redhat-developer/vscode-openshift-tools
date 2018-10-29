@@ -1,7 +1,7 @@
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject } from '../odo';
 import * as vscode from 'vscode';
-import * as progress from '../progress';
+import { Progress } from '../util/progress';
 import opn = require('opn');
 import { ChildProcess } from 'child_process';
 
@@ -65,7 +65,7 @@ export class Component extends OpenShiftItem {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
 
-        return progress.execWithProgress({
+        return Progress.execWithProgress({
             cancellable: false,
             location: vscode.ProgressLocation.Notification,
             title: `Pushing latest changes for component '${context.getName()}'`
@@ -129,7 +129,7 @@ export class Component extends OpenShiftItem {
 
             if (!componentTypeVersion) return Promise.resolve(null);
 
-            return progress.execWithProgress({
+            return Progress.execWithProgress({
                 cancellable: false,
                 location: vscode.ProgressLocation.Notification,
                 title: `Creating new component '${componentName}'`
@@ -177,7 +177,7 @@ export class Component extends OpenShiftItem {
                 value === 'Yes' && vscode.commands.executeCommand('git.clone', repoURI);
             });
 
-            return progress.execWithProgress({
+            return Progress.execWithProgress({
                 cancellable: false,
                 location: vscode.ProgressLocation.Notification,
                 title: `Creating new component '${componentName}'`

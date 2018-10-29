@@ -5,11 +5,11 @@
 
 import * as cliInstance from './cli';
 import { TreeItem, ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands } from 'vscode';
-import * as windowUtils from './windowUtils';
+import { WindowUtil } from './util/windowUtils';
 import { CliExitData } from './cli';
 import * as path from 'path';
 import jsYaml = require('js-yaml');
-import { Platform } from './platform';
+import { Platform } from './util/platform';
 import * as fs from 'fs';
 
 export interface OpenShiftObject {
@@ -270,7 +270,7 @@ export class OdoImpl implements Odo {
     }
 
     public executeInTerminal(command: string, cwd: string, name: string = 'OpenShift') {
-        const terminal: Terminal = windowUtils.createTerminal(name, cwd);
+        const terminal: Terminal = WindowUtil.createTerminal(name, cwd);
         terminal.sendText(command, true);
         terminal.show();
     }
