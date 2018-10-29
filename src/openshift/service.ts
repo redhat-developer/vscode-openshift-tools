@@ -1,7 +1,7 @@
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject } from '../odo';
 import * as vscode from 'vscode';
-import * as progress from '../progress';
+import { Progress } from '../util/progress';
 
 export class Service extends OpenShiftItem {
     static async create(context: OpenShiftObject): Promise<string>  {
@@ -33,7 +33,7 @@ export class Service extends OpenShiftItem {
                 }
             });
             if (serviceName) {
-                await progress.execWithProgress({
+                await Progress.execWithProgress({
                     cancellable: false,
                     location: vscode.ProgressLocation.Notification,
                     title: `Creating new service '${serviceName}'`

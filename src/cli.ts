@@ -6,11 +6,11 @@
 import * as childProcess from 'child_process';
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as download from './download';
+import { DownloadUtil } from './util/download';
 import * as fsex from 'fs-extra';
 import { which } from 'shelljs';
 import * as fs from 'fs';
-import { Platform } from './platform';
+import { Platform } from './util/platform';
 import targz = require('targz');
 import unzipm = require('unzip-stream');
 import * as zlib from 'zlib';
@@ -163,7 +163,7 @@ async function getToolLocation(cmd: string): Promise<string> {
                         title: `Downloading ${tools[cmd].description}: `
                         },
                         (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
-                            return download.downloadFile(
+                            return DownloadUtil.downloadFile(
                                 tools[cmd].url,
                                 toolDlLocation,
                                 (dlProgress, increment) => progress.report({ increment, message: `${dlProgress}%`})
