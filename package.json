@@ -297,7 +297,7 @@
           "group": "c3"
         },
         {
-          "command": "openshift.project.delete",
+          "command": "openshift.project.delete.palette",
           "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
           "group": "c4"
         },
