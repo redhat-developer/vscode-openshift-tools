@@ -1,6 +1,7 @@
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject } from '../odo';
 import * as vscode from 'vscode';
+import { OpenShiftExplorer } from '../explorer';
 
 export class Project extends OpenShiftItem {
 
@@ -21,14 +22,25 @@ export class Project extends OpenShiftItem {
             .catch((error) => { return Promise.reject(`Failed to create project with error '${error}'`); });
     }
 
+    static async delProject () {
+        const projects: OpenShiftObject[] = await Project.odo.getProjects();
+        const projectsNames: string[] = projects.map((value)=> value.getName());
+        const selected = await vscode.window.showQuickPick(projectsNames, {placeHolder: "Select Project to delete"});
+        return Project.delProjectByName(selected);
+    }
+
     static async del(context: OpenShiftObject): Promise<string> {
-        const value = await vscode.window.showWarningMessage(`Are you sure you want to delete project '${context.getName()}'?`, 'Yes', 'Cancel');
+        return Project.delProjectByName(context.getName());
+    }
+
+    static async delProjectByName(name: string): Promise<string> {
+        const value = await vscode.window.showWarningMessage(`Are you sure you want to delete project '${name}'?`, 'Yes', 'Cancel');
         if (value === 'Yes') {
             return Promise.resolve()
-                .then(() => Project.odo.execute(`odo project delete ${context.getName()} -f`))
+                .then(() => Project.odo.execute(`odo project delete ${name} -f`))
                 .then(() => {
                     Project.explorer.refresh();
-                    return `Project '${context.getName()}' successfully deleted`;
+                    return `Project '${name}' successfully deleted`;
                 })
                 .catch((err) => { return Promise.reject(`Failed to delete project with error '${err}'`); });
         }

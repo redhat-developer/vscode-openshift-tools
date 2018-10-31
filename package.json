@@ -63,6 +63,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.project.delete.palette",
+        "title": "Delete Project",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.app.describe",
         "title": "Describe",
         "category": "OpenShift"
@@ -292,14 +297,19 @@
           "group": "c3"
         },
         {
-          "command": "openshift.explorer.logout",
+          "command": "openshift.project.delete",
           "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
           "group": "c4"
         },
         {
+          "command": "openshift.explorer.logout",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
+          "group": "c5"
+        },
+        {
           "command": "openshift.about",
           "when": "view == openshiftProjectExplorer && viewItem == cluster",
-          "group": "c5"
+          "group": "c6"
         },
         {
           "command": "openshift.app.create",
