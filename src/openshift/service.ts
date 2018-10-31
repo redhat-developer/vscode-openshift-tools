@@ -33,7 +33,7 @@ export class Service extends OpenShiftItem {
                 }
             });
             if (serviceName) {
-                await Progress.execWithProgress({
+                return Progress.execWithProgress({
                     cancellable: false,
                     location: vscode.ProgressLocation.Notification,
                     title: `Creating new service '${serviceName}'`

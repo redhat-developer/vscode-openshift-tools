@@ -14,7 +14,7 @@ export class Cluster {
         } else {
             const value = await vscode.window.showInformationMessage(`You are already logged in the cluster. Do you want to login to a different cluster?`, 'Yes', 'No');
             if (value === 'Yes') {
-                Cluster.odo.execute(`oc logout`).then(async (result)=> {
+                return Cluster.odo.execute(`oc logout`).then(async (result)=> {
                     if (result.stderr === "") {
                         return Cluster.loginDialog();
                     } else {
