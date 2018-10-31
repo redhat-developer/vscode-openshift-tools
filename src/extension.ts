@@ -27,6 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.catalog.list.services', (context) => executeSync(Catalog.listServices, context)),
         vscode.commands.registerCommand('openshift.project.create', (context) => execute(Project.create, context)),
         vscode.commands.registerCommand('openshift.project.delete', (context) => execute(Project.del, context)),
+        vscode.commands.registerCommand('openshift.project.delete.palette', (context) => execute(Project.delProject, context)),
         vscode.commands.registerCommand('openshift.app.describe', (context) => executeSync(Application.describe, context)),
         vscode.commands.registerCommand('openshift.app.create', (context) => execute(Application.create, context)),
         vscode.commands.registerCommand('openshift.app.delete', (context) => execute(Application.del, context)),

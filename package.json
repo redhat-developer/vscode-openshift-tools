@@ -59,6 +59,11 @@
       },
       {
         "command": "openshift.project.delete",
+        "title": "Delete",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.project.delete.palette",
         "title": "Delete Project",
         "category": "OpenShift"
       },
