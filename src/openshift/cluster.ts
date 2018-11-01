@@ -1,7 +1,7 @@
 import { Odo, OdoImpl } from "../odo";
 import { OpenShiftExplorer } from "../explorer";
 import * as vscode from 'vscode';
-import * as isURL from 'validator/lib/isURL';
+import * as validator from 'validator';
 import { CliExitData } from "../cli";
 
 export class Cluster {
@@ -59,7 +59,7 @@ export class Cluster {
             ignoreFocusOut: true,
             prompt: "Provide URL of the cluster to connect",
             validateInput: (value: string) => {
-                if (!isURL(value)) {
+                if (!validator.isURL(value)) {
                     return 'Invalid URL provided';
                 }
             }
@@ -78,7 +78,7 @@ export class Cluster {
             ignoreFocusOut: true,
             prompt: "Provide Username for basic authentication to the API server",
             validateInput: (value: string) => {
-                if (value.trim().length === 0) {
+                if (validator.isEmpty(value.trim())) {
                     return 'Invalid Username';
                 }
             }

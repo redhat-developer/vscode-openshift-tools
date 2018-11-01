@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import { Progress } from '../util/progress';
 import opn = require('opn');
 import { ChildProcess } from 'child_process';
+import * as validator from 'validator';
 
 export class Component extends OpenShiftItem {
     static async create(context: OpenShiftObject): Promise<string> {
@@ -113,7 +114,7 @@ export class Component extends OpenShiftItem {
             const componentName = await vscode.window.showInputBox({
                 prompt: "Component name",
                 validateInput: (value: string) => {
-                    if (value.trim().length === 0) {
+                    if (validator.isEmpty(value.trim())) {
                         return 'Empty component name';
                     }
                 }
@@ -149,8 +150,11 @@ export class Component extends OpenShiftItem {
         try {
             const repoURI = await vscode.window.showInputBox({prompt: 'Git repository URI', validateInput:
                 (value: string) => {
-                    if (value.trim().length === 0) {
+                    if (validator.isEmpty(value.trim())) {
                         return 'Empty Git repository URL';
+                    }
+                    if (!validator.isURL(value)) {
+                        return 'Invalid URL provided';
                     }
                 }
             });
@@ -158,7 +162,7 @@ export class Component extends OpenShiftItem {
             if (!repoURI) return Promise.resolve(null);
 
             const componentName = await vscode.window.showInputBox({prompt: "Component name", validateInput: (value: string) => {
-                if (value.trim().length === 0) {
+                if (validator.isEmpty(value.trim())) {
                     return 'Empty component name';
                 }
             }});
