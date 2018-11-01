@@ -60,7 +60,8 @@ suite('openshift connector Extension', () => {
         const registerTreeDataProviderStub = sandbox.stub(vscode.window, 'registerTreeDataProvider');
         await activate(context);
         expect(registerTreeDataProviderStub).calledOnce;
-	});
+    });
+
     test('should register all server commands', async () => {
         return await vscode.commands.getCommands(true).then((commands) => {
             const serverCommands = [];

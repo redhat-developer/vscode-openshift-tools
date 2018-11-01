@@ -436,7 +436,8 @@
     "sinon": "^7.0.0",
     "tslint": "^5.11.0",
     "typescript": "^3.1.1",
-    "vscode": "^1.1.21"
+    "vscode": "^1.1.21",
+    "sinon-chai": "^3.2.0"
   },
   "dependencies": {
     "byline": "^5.0.0",
@@ -446,8 +447,6 @@
     "opn": "^5.4.0",
     "request-progress": "^3.0.0",
     "shelljs": "^0.8.2",
-    "sinon": "^7.0.0",
-    "sinon-chai": "^3.2.0",
     "targz": "^1.0.1",
     "unzip-stream": "^0.3.0",
     "validator": "^10.8.0"
