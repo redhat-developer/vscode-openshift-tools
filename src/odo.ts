@@ -59,10 +59,14 @@ class OpenShiftObjectImpl implements OpenShiftObject {
 				item.iconPath = Uri.file(path.join(__dirname, "../../images/storage.png"));
 				item.tooltip = `Storage: ${this.name}`;
 			},
-			loginError: ()=> {
+			ClusterError: ()=> {
+				item.tooltip = 'Cannot connect to cluster';
+				item.iconPath = Uri.file(path.join(__dirname, "../../images/cluster-down.png"));
+            },
+            LoginError: ()=> {
 				item.tooltip = 'Log in to cluster';
 				item.iconPath = '';
-			}
+            }
 		};
 		(contextType[this.context])();
 		item.contextValue = this.context;
@@ -192,8 +196,12 @@ export class OdoImpl implements Odo {
             `odo version`, {}
         );
         if (result.stdout.indexOf("Please log in to the cluster") > -1) {
-            const error: string = 'Log in to display clusters.';
-            return result.stdout.trim().split(`\n`).slice(1).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(null, error, 'loginError', this, TreeItemCollapsibleState.None));
+            const loginErrorMsg: string = 'Log in to display clusters';
+            return result.stdout.trim().split(`\n`).slice(1).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(null, loginErrorMsg, 'loginError', this, TreeItemCollapsibleState.None));
+        }
+        if (result.stdout.indexOf("Unable to connect to OpenShift cluster, is it down?") > -1) {
+            const clusterDownMsg: string = 'Unable to connect to cluster, it might be down !!';
+            return result.stdout.trim().split(`\n`).slice(1).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(null, clusterDownMsg, 'ClusterError', this, TreeItemCollapsibleState.None));
         }
         commands.executeCommand('setContext', 'isLoggedIn', true);
         const clusters: OpenShiftObject[] = result.stdout.trim().split('\n').filter((value) => {
