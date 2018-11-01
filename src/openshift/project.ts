@@ -2,6 +2,7 @@ import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject } from '../odo';
 import * as vscode from 'vscode';
 import { OpenShiftExplorer } from '../explorer';
+import * as validator from 'validator';
 
 export class Project extends OpenShiftItem {
 
@@ -48,12 +49,11 @@ export class Project extends OpenShiftItem {
     }
 
     private static validateName(value: string) {
-        const characterRegex = /[a-z0-9]([-a-z0-9]*[a-z0-9])?/;
-        if (value.trim().length === 0) {
+        if (validator.isEmpty(value.trim())) {
             return 'Empty project name';
-        } else if (!characterRegex.test(value)) {
+        } else if (!validator.isAlphanumeric(value.trim())) {
             return 'Project name should be alphanumeric';
-        } else if (!(value.trim().length <= 63)) {
+        } else if (!validator.isLength(value.trim(), 0, 63)) {
             return 'Project name is to long';
         }
     }

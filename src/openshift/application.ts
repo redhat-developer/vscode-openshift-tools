@@ -1,13 +1,14 @@
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject } from '../odo';
 import * as vscode from 'vscode';
+import * as validator from 'validator';
 
 export class Application extends OpenShiftItem {
     static async create(context: OpenShiftObject): Promise<String> {
         const applicationName = await vscode.window.showInputBox({
             prompt: "Application name",
             validateInput: (value: string) => {
-                if (value.trim().length === 0) {
+                if (validator.isEmpty(value.trim())) {
                     return 'Empty application name';
                 }
             }

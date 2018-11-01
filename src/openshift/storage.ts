@@ -1,20 +1,21 @@
 import { OpenShiftItem } from "./openshiftItem";
 import { OpenShiftObject } from "../odo";
 import * as vscode from 'vscode';
+import * as validator from 'validator';
 
 export class Storage extends OpenShiftItem {
     static async create(context: OpenShiftObject): Promise<string> {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
         const storageName = await vscode.window.showInputBox({prompt: "Specify the storage name", validateInput: (value: string) => {
-            if (value.trim().length === 0) {
+            if (validator.isEmpty(value.trim())) {
                 return 'Invalid storage name';
             }
         }});
         if (!storageName) return Promise.resolve(null);
 
         const mountPath = await vscode.window.showInputBox({prompt: "Specify the mount path", validateInput: (value: string) => {
-            if (value.trim().length === 0) {
+            if (validator.isEmpty(value.trim())) {
                 return 'Invalid mount path';
             }
         }});
