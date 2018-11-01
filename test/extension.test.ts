@@ -8,20 +8,71 @@
 // Please refer to their documentation on https://mochajs.org/ for help.
 //
 
-// The module 'assert' provides assertion methods from node
 import * as assert from 'assert';
+import * as vscode from 'vscode';
+import * as chai from 'chai';
+import * as sinonChai from 'sinon-chai';
+import * as sinon from 'sinon';
+import { activate } from '../src/extension';
+import packagejson = require('../package.json');
 
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
-// import * as vscode from 'vscode';
-// import * as myExtension from '../extension';
+const expect = chai.expect;
+chai.use(sinonChai);
 
-// Defines a Mocha test suite to group tests of similar kind together
-suite("Extension Tests", () => {
+suite('openshift connector Extension', () => {
 
-    // Defines a Mocha unit test
-    test("Something 1", () => {
-        assert.equal(-1, [1, 2, 3].indexOf(5));
-        assert.equal(-1, [1, 2, 3].indexOf(0));
+    let sandbox: sinon.SinonSandbox;
+
+    class DummyMemento implements vscode.Memento {
+        get<T>(key: string): Promise<T|undefined> {
+          return Promise.resolve(undefined);
+        }
+
+        update(key: string, value: any): Promise<void> {
+          return Promise.resolve();
+        }
+    }
+
+    const context: vscode.ExtensionContext = {
+        extensionPath: 'path',
+        storagePath: 'string',
+        subscriptions: [],
+        workspaceState: new DummyMemento(),
+        globalState: new DummyMemento(),
+        asAbsolutePath(relativePath: string): string {
+            return '';
+          }
+    };
+
+    setup(() => {
+        sandbox = sinon.createSandbox();
+    });
+
+    teardown(() => {
+        sandbox.restore();
+    });
+
+    test('Extension should be present', () => {
+		assert.ok(vscode.extensions.getExtension('redhat.vscode-openshift-connector'));
+	});
+
+    test('should activate extension', async () => {
+        const registerTreeDataProviderStub = sandbox.stub(vscode.window, 'registerTreeDataProvider');
+        await activate(context);
+        expect(registerTreeDataProviderStub).calledOnce;
+    });
+
+    test('should register all server commands', async () => {
+        return await vscode.commands.getCommands(true).then((commands) => {
+            const serverCommands = [];
+            const reqs = JSON.parse(JSON.stringify(packagejson));
+            reqs.contributes.commands.forEach((value)=> {
+                serverCommands.push(value.command);
+            });
+            const foundServerCommands = commands.filter((value) => {
+                return serverCommands.indexOf(value) >= 0 || value.startsWith('openshift.');
+            });
+            assert.equal(foundServerCommands.length , serverCommands.length, 'Some openshift commands are not registered properly or a new command is not added to the test');
+        });
     });
 });
