@@ -28,15 +28,34 @@ export class Application extends OpenShiftItem {
         Application.odo.executeInTerminal(`odo project set ${project.getName()}; odo app describe ${treeItem.getName()}`, process.cwd());
     }
 
+    static async delApplication () {
+        const projects: OpenShiftObject[] = await Application.odo.getProjects();
+        const projectsNames: string[] = projects.map((value)=> value.getName());
+        const projectName = await vscode.window.showQuickPick(projectsNames, {placeHolder: "From which project you want to delete Application"});
+        projects.forEach(async (value)=> {
+            if (value.getName() === projectName ) {
+                const applications: OpenShiftObject[] = await Application.odo.getApplications(value);
+                const applicationsNames: string[] = applications.map((value)=> value.getName());
+                const applicationName = await vscode.window.showQuickPick(applicationsNames, {placeHolder: "Select Application to delete"});
+                if (applicationName) {
+                    return Application.delApplicationByName(applicationName, value);
+                }
+            }
+        });
+    }
+
     static async del(treeItem: OpenShiftObject): Promise<string> {
-        const project: OpenShiftObject = treeItem.getParent();
-        const value = await vscode.window.showWarningMessage(`Are you sure you want to delete application '${treeItem.getName()}?`, 'Yes', 'Cancel');
+        return Application.delApplicationByName(treeItem.getName(), treeItem.getParent());
+    }
+
+    static async delApplicationByName(name: string, project: OpenShiftObject): Promise<string> {
+        const value = await vscode.window.showWarningMessage(`Are you sure you want to delete application ${name}?`, 'Yes', 'Cancel');
         if (value === 'Yes') {
             return Promise.resolve()
-            .then(() => Application.odo.execute(`odo project set ${project.getName()} && odo app delete ${treeItem.getName()} -f`))
+            .then(() => Application.odo.execute(`odo project set ${project.getName()} && odo app delete ${name} -f`))
             .then(() => {
-                Application.explorer.refresh(treeItem.getParent());
-                return `Application '${treeItem.getName()}' successfully deleted`;
+                Application.explorer.refresh(project);
+                return `Application '${name}' successfully deleted`;
             })
             .catch((err)=> { return Promise.reject(`Failed to delete application with error '${err}'`); });
         }

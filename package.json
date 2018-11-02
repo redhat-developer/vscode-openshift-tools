@@ -68,6 +68,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.app.delete.palette",
+        "title": "Delete Application",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.app.describe",
         "title": "Describe",
         "category": "OpenShift"
