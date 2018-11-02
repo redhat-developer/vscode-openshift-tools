@@ -31,7 +31,7 @@ export const toolsConfig = {
         vendor: "Red Hat, Inc.",
         name: "oc",
         cmdFileName: "oc",
-        version: "0.0.10",
+        version: "3.9.0",
         filePrefix: "",
         platform: {
             win32: {
