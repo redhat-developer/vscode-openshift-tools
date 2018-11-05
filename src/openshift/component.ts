@@ -28,20 +28,35 @@ export class Component extends OpenShiftItem {
         }
     }
 
-    static async del(context: OpenShiftObject): Promise<string> {
-        const app: OpenShiftObject = context.getParent();
-        const project: OpenShiftObject = app.getParent();
-        const value = await vscode.window.showWarningMessage(`Are you sure you want to delete component '${context.getName()}\'`, 'Yes', 'Cancel');
-        if (value === 'Yes') {
-            return Promise.resolve()
-                .then(() => Component.odo.execute(`odo project set ${project.getName()} && odo app set ${app.getName()} && odo delete ${context.getName()} -f`))
-                .then(() => {
-                    Component.explorer.refresh(context.getParent());
-                    return `Component '${context.getName()}' successfully deleted`;
-                })
-                .catch((err) => { return Promise.reject(`Failed to delete component with error '${err}'`); });
+    static async del(treeItem: OpenShiftObject): Promise<string> {
+        let project: OpenShiftObject;
+        let component: OpenShiftObject;
+        let application: OpenShiftObject;
+        if (treeItem) {
+            component = treeItem;
+        } else {
+            project = await vscode.window.showQuickPick(Component.odo.getProjects(), {placeHolder: "From which project you want to delete Component"});
+            application = await vscode.window.showQuickPick(Component.odo.getApplications(project), {placeHolder: "From which application you want to delete Component"});
+            if (application) {
+                component = await vscode.window.showQuickPick(Component.odo.getComponents(application), {placeHolder: "Select Component to delete"});
+            }
         }
-        return Promise.resolve(null);
+        if (component) {
+            const app: OpenShiftObject = component.getParent();
+            const project: OpenShiftObject = app.getParent();
+            const name: string = component.getName();
+            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete component '${name}\'`, 'Yes', 'Cancel');
+            if (value === 'Yes') {
+                return Promise.resolve()
+                    .then(() => Component.odo.execute(`odo project set ${project.getName()} && odo app set ${app.getName()} && odo delete ${name} -f`))
+                    .then(() => {
+                        Component.explorer.refresh(app);
+                        return `Component '${name}' successfully deleted`;
+                    })
+                    .catch((err) => { return Promise.reject(`Failed to delete component with error '${err}'`); });
+            }
+            return Promise.resolve(null);
+        }
     }
 
     static describe(context: OpenShiftObject): void {
