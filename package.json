@@ -181,6 +181,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.storage.delete.palette",
+        "title": "Delete Storage",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.storage.delete",
         "title": "Delete",
         "category": "OpenShift"
@@ -332,12 +337,12 @@
         {
           "command": "openshift.explorer.logout",
           "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
-          "group": "c5"
+          "group": "c4"
         },
         {
           "command": "openshift.about",
           "when": "view == openshiftProjectExplorer && viewItem == cluster",
-          "group": "c6"
+          "group": "c5"
         },
         {
           "command": "openshift.app.create",
