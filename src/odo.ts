@@ -192,6 +192,29 @@ export class OdoImpl implements Odo {
     }
 
     public async getClusters(): Promise<OpenShiftObject[]> {
+        let clusters: OpenShiftObject[] = await this.getClustersWithOdo();
+        if (clusters.length === 0) {
+            clusters = await this.getClustersWithOc();
+        }
+        return clusters;
+    }
+
+    public async getClustersWithOc(): Promise<OpenShiftObject[]> {
+        let clusters: OpenShiftObject[] = [];
+        const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
+            `oc version`, {}
+        );
+        clusters = result.stdout.trim().split('\n').filter((value) => {
+            return value.indexOf('Server ') !== -1;
+        }).map((value) => {
+            const server: string = value.substr(value.indexOf(' ')+1).trim();
+            return new OpenShiftObjectImpl(null, server, 'cluster', this, TreeItemCollapsibleState.Expanded);
+        });
+        return clusters;
+    }
+
+    public async getClustersWithOdo(): Promise<OpenShiftObject[]> {
+        let clusters: OpenShiftObject[] = [];
         const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
             `odo version`, {}
         );
@@ -204,7 +227,7 @@ export class OdoImpl implements Odo {
             return result.stdout.trim().split(`\n`).slice(1).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(null, clusterDownMsg, 'ClusterError', this, TreeItemCollapsibleState.None));
         }
         commands.executeCommand('setContext', 'isLoggedIn', true);
-        const clusters: OpenShiftObject[] = result.stdout.trim().split('\n').filter((value) => {
+        clusters = result.stdout.trim().split('\n').filter((value) => {
             return value.indexOf('Server:') !== -1;
         }).map((value) => {
             const server: string = value.substr(value.indexOf(':')+1).trim();
