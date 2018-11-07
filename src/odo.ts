@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as cliInstance from './cli';
-import { TreeItem, ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands } from 'vscode';
+import { TreeItem, ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem } from 'vscode';
 import { WindowUtil } from './util/windowUtils';
 import { CliExitData } from './cli';
 import * as path from 'path';
@@ -12,7 +12,7 @@ import jsYaml = require('js-yaml');
 import { Platform } from './util/platform';
 import * as fs from 'fs';
 
-export interface OpenShiftObject {
+export interface OpenShiftObject extends QuickPickItem {
     getTreeItem(): TreeItem;
     getChildren(): ProviderResult<OpenShiftObject[]>;
     getParent(): OpenShiftObject;
@@ -27,6 +27,10 @@ export interface OpenShiftComponent extends OpenShiftObject {
 
 class OpenShiftObjectImpl implements OpenShiftObject {
     constructor(private parent: OpenShiftObject, public readonly name, private readonly context, private readonly odo: Odo, private readonly expandable: TreeItemCollapsibleState = TreeItemCollapsibleState.Collapsed) {
+    }
+
+    get label(): string {
+        return this.getName();
     }
 
     getName(): string {

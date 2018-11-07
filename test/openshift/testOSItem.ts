@@ -21,4 +21,8 @@ export class TestItem implements OpenShiftObject {
     getParent(): OpenShiftObject {
         return this.parent;
     }
+
+    get label(): string {
+        return this.name;
+    }
 }
