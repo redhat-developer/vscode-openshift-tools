@@ -8,7 +8,7 @@ export class Url {
     static async create(context: OpenShiftObject): Promise<string> {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
-        const portsResult: CliExitData = await Url.odo.execute(`oc get service ${context.getName()}-${app.getName()} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`);
+        const portsResult: CliExitData = await Url.odo.execute(`oc get service ${context.getName()}-${app.getName()} --namespace ${project.getName()} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`);
         let ports: string[] = portsResult.stdout.trim().split(',');
         ports = ports.slice(0, ports.length-1);
         let port: string = ports[0];
