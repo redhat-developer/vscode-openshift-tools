@@ -83,7 +83,8 @@ export class Component extends OpenShiftItem {
 
     static async openUrl(context: OpenShiftObject): Promise<ChildProcess> {
         const app: OpenShiftObject = context.getParent();
-        const routeCheck = await Component.odo.execute(`oc get route -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${context.getName()}')]}{.spec.host}{end}"`);
+        const namespace: string = app.getParent().getName();
+        const routeCheck = await Component.odo.execute(`oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${context.getName()}')]}{.spec.host}{end}"`);
         let value = 'Create';
         if (routeCheck.stdout.trim() === '') {
             value = await vscode.window.showInformationMessage(`No URL for component '${context.getName()}\' in application '${app.getName()}\'. Do you want to create a route and open it?`, 'Create', 'Cancel');
@@ -92,8 +93,8 @@ export class Component extends OpenShiftItem {
             }
         }
         if (value === 'Create') {
-            const hostName = await Component.odo.execute(`oc get route -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${context.getName()}')]}{.spec.host}{end}"`);
-            const checkTls = await Component.odo.execute(`oc get route -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${context.getName()}')]}{.spec.tls.termination}{end}"`);
+            const hostName = await Component.odo.execute(`oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${context.getName()}')]}{.spec.host}{end}"`);
+            const checkTls = await Component.odo.execute(`oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${context.getName()}')]}{.spec.tls.termination}{end}"`);
             const tls = checkTls.stdout.trim().length === 0  ? "http://" : "https://";
             return opn(`${tls}${hostName.stdout}`);
         }
