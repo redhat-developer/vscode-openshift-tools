@@ -78,7 +78,7 @@ export class Component extends OpenShiftItem {
     static watch(context: OpenShiftObject): void {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
-        Component.odo.executeInTerminal(`odo project set ${project.getName()} && odo app set ${app.getName()} && odo component set ${context.getName()} && odo watch ${context.getName()};`, process.cwd());
+        Component.odo.executeInTerminal(`odo project set ${project.getName()} && odo app set ${app.getName()} && odo component set ${context.getName()} && odo watch ${context.getName()}`, process.cwd());
     }
 
     static async openUrl(context: OpenShiftObject): Promise<ChildProcess> {
