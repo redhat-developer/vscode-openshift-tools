@@ -5,7 +5,7 @@ import * as validator from 'validator';
 
 export class Application extends OpenShiftItem {
     static async create(project: OpenShiftObject): Promise<String> {
-        const applicationName = await vscode.window.showInputBox({
+        const appName = await vscode.window.showInputBox({
             prompt: "Application name",
             validateInput: (value: string) => {
                 if (validator.isEmpty(value.trim())) {
@@ -13,48 +13,46 @@ export class Application extends OpenShiftItem {
                 }
             }
         });
-        if (!applicationName) return Promise.resolve(null);
-        return Promise.resolve()
-            .then(() => Application.odo.execute(`odo project set ${project.getName()} && odo app create ${applicationName.trim()}`))
-            .then(() => {
-                Application.explorer.refresh(project);
-                return `Application '${applicationName}' successfully created`;
-            })
-            .catch((error) => { return Promise.reject(`Failed to create application with error '${error}'`); });
+        if (appName) {
+            return Promise.resolve()
+                .then(() => Application.odo.execute(`odo project set ${project.getName()} && odo app create ${appName.trim()}`))
+                .then(() => Application.explorer.refresh(project))
+                .then(() => `Application '${appName}' successfully created`)
+                .catch((error) => Promise.reject(`Failed to create application with error '${error}'`));
+        }
+        return null;
     }
 
     static describe(treeItem: OpenShiftObject): void {
-        const project: OpenShiftObject = treeItem.getParent();
-        Application.odo.executeInTerminal(`odo project set ${project.getName()}; odo app describe ${treeItem.getName()}`, process.cwd());
-    }
-
-    static async delApplication () {
-        const projects: OpenShiftObject[] = await Application.odo.getProjects();
-        const project = await vscode.window.showQuickPick(projects, {placeHolder: "From which project you want to delete Application"});
-        const applications: OpenShiftObject[] = await Application.odo.getApplications(project);
-        const application = await vscode.window.showQuickPick(applications, {placeHolder: "Select Application to delete"});
-        if (application) {
-            return Application.delApplicationByName(application.getName(), project).then(() => Application.explorer.refresh());
-        }
+        const projName: string = treeItem.getParent().getName();
+        const appName: string = treeItem.getName();
+        Application.odo.executeInTerminal(`odo project set ${projName}; odo app describe ${appName}`, process.cwd());
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
-        return Application.delApplicationByName(treeItem.getName(), treeItem.getParent());
-    }
-
-    static async delApplicationByName(name: string, project: OpenShiftObject): Promise<string> {
-        const value = await vscode.window.showWarningMessage(`Are you sure you want to delete application '${name}?'`, 'Yes', 'Cancel');
-        if (value === 'Yes') {
-            return Promise.resolve()
-            .then(() => Application.odo.execute(`odo project set ${project.getName()} && odo app delete ${name} -f`))
-            .then(() => Application.explorer.refresh(project))
-            .then(() => `Application '${name}' successfully deleted`)
-            .catch((err) => Promise.reject(`Failed to delete application with error '${err}'`));
+        let application: OpenShiftObject;
+        let project: OpenShiftObject;
+        if (treeItem) {
+            project = treeItem.getParent();
+            application = treeItem;
+        } else {
+            project = await vscode.window.showQuickPick(Application.odo.getProjects(), {placeHolder: "From which project you want to delete Application"});
+            if (project) {
+                application = await vscode.window.showQuickPick(Application.odo.getApplications(project), {placeHolder: "Select Application to delete"});
+            }
         }
-        return Promise.resolve(null);
+        if (application) {
+            const appName = application.getName();
+            const projName = project.getName();
+            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete application '${appName}?'`, 'Yes', 'Cancel');
+            if (value === 'Yes') {
+                return Promise.resolve()
+                    .then(() => Application.odo.execute(`odo project set ${projName} && odo app delete ${appName} -f`))
+                    .then(() => Application.explorer.refresh(treeItem ? treeItem.getParent() : undefined))
+                    .then(() => `Application '${appName}' successfully deleted`)
+                    .catch((err) => Promise.reject(`Failed to delete application with error '${err}'`));
+            }
+        }
+        return null;
     }
-}
-
-interface OpenShiftQuickPickItem extends vscode.QuickPickItem {
-    data: OpenShiftObject;
 }
