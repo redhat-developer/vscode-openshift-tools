@@ -26,7 +26,7 @@ export class Application extends OpenShiftItem {
     static describe(treeItem: OpenShiftObject): void {
         const projName: string = treeItem.getParent().getName();
         const appName: string = treeItem.getName();
-        Application.odo.executeInTerminal(`odo project set ${projName}; odo app describe ${appName}`, process.cwd());
+        Application.odo.executeInTerminal(`odo project set ${projName} && odo app describe ${appName}`, process.cwd());
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
