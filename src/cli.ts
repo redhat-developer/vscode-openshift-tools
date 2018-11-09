@@ -43,7 +43,7 @@ export class Cli implements ICli {
         return new Promise<CliExitData>(async (resolve, reject) => {
             const cmdName = cmd.split(' ')[0];
             const odoLocation = await this.getToolLocation(cmdName);
-            const finalCommand = cmd.replace(new RegExp(cmdName, 'g'), odoLocation);
+            const finalCommand = cmd.replace(new RegExp(cmdName), odoLocation).replace(new RegExp(`&& ${cmdName}`, 'g'), `&& ${odoLocation}`);
             this.odoChannel.print(finalCommand);
             if (opts.maxBuffer === undefined) {
                 opts.maxBuffer = 2*1024*1024;
