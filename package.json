@@ -121,6 +121,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.delete.palette",
+        "title": "Delete Component",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.component.describe",
         "title": "Describe",
         "category": "OpenShift"

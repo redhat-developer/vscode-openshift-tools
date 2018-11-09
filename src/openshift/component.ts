@@ -28,20 +28,35 @@ export class Component extends OpenShiftItem {
         }
     }
 
-    static async del(context: OpenShiftObject): Promise<string> {
-        const app: OpenShiftObject = context.getParent();
-        const project: OpenShiftObject = app.getParent();
-        const value = await vscode.window.showWarningMessage(`Are you sure you want to delete component '${context.getName()}\'`, 'Yes', 'Cancel');
-        if (value === 'Yes') {
-            return Promise.resolve()
-                .then(() => Component.odo.execute(`odo project set ${project.getName()} && odo app set ${app.getName()} && odo delete ${context.getName()} -f`))
-                .then(() => {
-                    Component.explorer.refresh(context.getParent());
-                    return `Component '${context.getName()}' successfully deleted`;
-                })
-                .catch((err) => { return Promise.reject(`Failed to delete component with error '${err}'`); });
+    static async del(treeItem: OpenShiftObject): Promise<string> {
+        let project: OpenShiftObject;
+        let component: OpenShiftObject;
+        let application: OpenShiftObject;
+        if (treeItem) {
+            component = treeItem;
+        } else {
+            project = await vscode.window.showQuickPick(Component.odo.getProjects(), {placeHolder: "From which project you want to delete Component"});
+            if (project) {
+                application = await vscode.window.showQuickPick(Component.odo.getApplications(project), {placeHolder: "From which application you want to delete Component"});
+            }
+            if (application) {
+                component = await vscode.window.showQuickPick(Component.odo.getComponents(application), {placeHolder: "Select Component to delete"});
+            }
         }
-        return Promise.resolve(null);
+        if (component) {
+            const app: OpenShiftObject = component.getParent();
+            const project: OpenShiftObject = app.getParent();
+            const name: string = component.getName();
+            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete component '${name}\'`, 'Yes', 'Cancel');
+            if (value === 'Yes') {
+                return Promise.resolve()
+                    .then(() => Component.odo.execute(`odo project set ${project.getName()} && odo app set ${app.getName()} && odo delete ${name} -f`))
+                    .then(() => Component.explorer.refresh(treeItem ? app : undefined))
+                    .then(() => `Component '${name}' successfully deleted`)
+                    .catch((err) => { return Promise.reject(`Failed to delete component with error '${err}'`); });
+            }
+            return null;
+        }
     }
 
     static describe(context: OpenShiftObject): void {
@@ -132,15 +147,14 @@ export class Component extends OpenShiftItem {
             if (!componentTypeVersion) return Promise.resolve(null);
 
             return Progress.execWithProgress({
-                cancellable: false,
-                location: vscode.ProgressLocation.Notification,
-                title: `Creating new component '${componentName}'`
-            }, [{command: `odo project set ${context.getParent().getName()} && odo app set ${context.getName()} && odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --local ${folder.uri.fsPath}`, increment: 50},
-                {command: `odo project set ${context.getParent().getName()} && odo app set ${context.getName()} && odo component set ${componentName} && odo push --local ${folder.uri.fsPath}`, increment: 50}
-            ], Component.odo).then(() => {
-                Component.explorer.refresh(context);
-                return `Component '${componentName}' successfully created`;
-            });
+                    cancellable: false,
+                    location: vscode.ProgressLocation.Notification,
+                    title: `Creating new component '${componentName}'`
+                }, [{command: `odo project set ${context.getParent().getName()} && odo app set ${context.getName()} && odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --local ${folder.uri.fsPath}`, increment: 50},
+                    {command: `odo project set ${context.getParent().getName()} && odo app set ${context.getName()} && odo component set ${componentName} && odo push --local ${folder.uri.fsPath}`, increment: 50}
+                ], Component.odo)
+                .then(() => Component.explorer.refresh(context))
+                .then(() => `Component '${componentName}' successfully created`);
 
         } catch (e) {
             return Promise.reject(e);
@@ -187,10 +201,9 @@ export class Component extends OpenShiftItem {
                 location: vscode.ProgressLocation.Notification,
                 title: `Creating new component '${componentName}'`
             }, [{command: `odo project set ${context.getParent().getName()} && odo app set ${context.getName()} && odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --git ${repoURI}`, increment: 100}
-            ], Component.odo).then(() => {
-                Component.explorer.refresh(context);
-                return `Component '${componentName}' successfully created`;
-            });
+            ], Component.odo)
+            .then(() => Component.explorer.refresh(context))
+            .then(() => `Component '${componentName}' successfully created`);
 
         } catch (e) {
             return Promise.reject(e);
