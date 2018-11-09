@@ -199,6 +199,11 @@
         "command": "openshift.service.delete",
         "title": "Delete",
         "category": "OpenShift"
+      },
+      {
+        "command": "openshift.service.delete.palette",
+        "title": "Delete Service",
+        "category": "OpenShift"
       }
     ],
     "viewsContainers": {
