@@ -82,7 +82,7 @@ suite('Openshift/Application', () => {
         test('calls the appropriate odo command in terminal', () => {
             Application.describe(appItem);
 
-            expect(termStub).calledOnceWith(`odo project set ${projectItem.getName()}; odo app describe ${appItem.getName()}`, process.cwd());
+            expect(termStub).calledOnceWith(`odo project set ${projectItem.getName()} && odo app describe ${appItem.getName()}`, process.cwd());
         });
     });
 
