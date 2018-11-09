@@ -36,7 +36,9 @@ export class Component extends OpenShiftItem {
             component = treeItem;
         } else {
             project = await vscode.window.showQuickPick(Component.odo.getProjects(), {placeHolder: "From which project you want to delete Component"});
-            application = await vscode.window.showQuickPick(Component.odo.getApplications(project), {placeHolder: "From which application you want to delete Component"});
+            if (project) {
+                application = await vscode.window.showQuickPick(Component.odo.getApplications(project), {placeHolder: "From which application you want to delete Component"});
+            }
             if (application) {
                 component = await vscode.window.showQuickPick(Component.odo.getComponents(application), {placeHolder: "Select Component to delete"});
             }
@@ -49,13 +51,11 @@ export class Component extends OpenShiftItem {
             if (value === 'Yes') {
                 return Promise.resolve()
                     .then(() => Component.odo.execute(`odo project set ${project.getName()} && odo app set ${app.getName()} && odo delete ${name} -f`))
-                    .then(() => {
-                        Component.explorer.refresh(app);
-                        return `Component '${name}' successfully deleted`;
-                    })
+                    .then(() => Component.explorer.refresh(treeItem ? app : undefined))
+                    .then(() => `Component '${name}' successfully deleted`)
                     .catch((err) => { return Promise.reject(`Failed to delete component with error '${err}'`); });
             }
-            return Promise.resolve(null);
+            return null;
         }
     }
 
@@ -147,15 +147,14 @@ export class Component extends OpenShiftItem {
             if (!componentTypeVersion) return Promise.resolve(null);
 
             return Progress.execWithProgress({
-                cancellable: false,
-                location: vscode.ProgressLocation.Notification,
-                title: `Creating new component '${componentName}'`
-            }, [{command: `odo project set ${context.getParent().getName()} && odo app set ${context.getName()} && odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --local ${folder.uri.fsPath}`, increment: 50},
-                {command: `odo project set ${context.getParent().getName()} && odo app set ${context.getName()} && odo component set ${componentName} && odo push --local ${folder.uri.fsPath}`, increment: 50}
-            ], Component.odo).then(() => {
-                Component.explorer.refresh(context);
-                return `Component '${componentName}' successfully created`;
-            });
+                    cancellable: false,
+                    location: vscode.ProgressLocation.Notification,
+                    title: `Creating new component '${componentName}'`
+                }, [{command: `odo project set ${context.getParent().getName()} && odo app set ${context.getName()} && odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --local ${folder.uri.fsPath}`, increment: 50},
+                    {command: `odo project set ${context.getParent().getName()} && odo app set ${context.getName()} && odo component set ${componentName} && odo push --local ${folder.uri.fsPath}`, increment: 50}
+                ], Component.odo)
+                .then(() => Component.explorer.refresh(context))
+                .then(() => `Component '${componentName}' successfully created`);
 
         } catch (e) {
             return Promise.reject(e);
@@ -202,10 +201,9 @@ export class Component extends OpenShiftItem {
                 location: vscode.ProgressLocation.Notification,
                 title: `Creating new component '${componentName}'`
             }, [{command: `odo project set ${context.getParent().getName()} && odo app set ${context.getName()} && odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --git ${repoURI}`, increment: 100}
-            ], Component.odo).then(() => {
-                Component.explorer.refresh(context);
-                return `Component '${componentName}' successfully created`;
-            });
+            ], Component.odo)
+            .then(() => Component.explorer.refresh(context))
+            .then(() => `Component '${componentName}' successfully created`);
 
         } catch (e) {
             return Promise.reject(e);
