@@ -20,7 +20,7 @@ export class Application extends OpenShiftItem {
         });
         if (appName) {
             return Promise.resolve()
-                .then(() => Application.odo.execute(`odo project set ${project.getName()} && odo app create ${appName.trim()}`))
+                .then(() => Application.odo.execute(`odo app create ${appName.trim()} --project ${project.getName()}`))
                 .then(() => Application.explorer.refresh(project))
                 .then(() => `Application '${appName}' successfully created`)
                 .catch((error) => Promise.reject(`Failed to create application with error '${error}'`));
@@ -31,7 +31,7 @@ export class Application extends OpenShiftItem {
     static describe(treeItem: OpenShiftObject): void {
         const projName: string = treeItem.getParent().getName();
         const appName: string = treeItem.getName();
-        Application.odo.executeInTerminal(`odo project set ${projName} && odo app describe ${appName}`, process.cwd());
+        Application.odo.executeInTerminal(`odo app describe ${appName} --project ${projName}`, process.cwd());
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
@@ -52,7 +52,7 @@ export class Application extends OpenShiftItem {
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete application '${appName}?'`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 return Promise.resolve()
-                    .then(() => Application.odo.execute(`odo project set ${projName} && odo app delete ${appName} -f`))
+                    .then(() => Application.odo.execute(`odo app delete ${appName} --project ${projName} -f`))
                     .then(() => Application.explorer.refresh(treeItem ? treeItem.getParent() : undefined))
                     .then(() => `Application '${appName}' successfully deleted`)
                     .catch((err) => Promise.reject(`Failed to delete application with error '${err}'`));

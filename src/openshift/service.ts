@@ -36,11 +36,13 @@ export class Service extends OpenShiftItem {
                 }
             });
             if (serviceName) {
+                const app = context.getParent();
+                const project = app.getParent();
                 return Progress.execWithProgress({
                         cancellable: false,
                         location: vscode.ProgressLocation.Notification,
                         title: `Creating new service '${serviceName}'`
-                    }, [{command: `odo project set ${context.getParent().getName()} && odo app set ${context.getName()} && odo service create ${serviceTemplateName} --plan ${serviceTemplatePlanName} ${serviceName.trim()}`, increment: 100}
+                    }, [{command: `odo service create ${serviceTemplateName} --plan ${serviceTemplatePlanName} ${serviceName.trim()} --app ${app.getName()} --project ${project.getName()}`, increment: 100}
                     ], Service.odo)
                     .then(() => Service.explorer.refresh(context))
                     .then(() => `Service '${serviceName}' successfully created`);
