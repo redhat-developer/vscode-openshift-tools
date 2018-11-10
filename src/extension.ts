@@ -43,6 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.openshiftConsole', (context) => execute(Component.openshiftConsole, context)),
         vscode.commands.registerCommand('openshift.component.delete', (context) => execute(Component.del, context)),
         vscode.commands.registerCommand('openshift.storage.create', (context) => execute(Storage.create, context)),
+        vscode.commands.registerCommand('openshift.storage.delete.palette', (context) => execute(Storage.del, context)),
         vscode.commands.registerCommand('openshift.storage.delete', (context) => execute(Storage.del, context)),
         vscode.commands.registerCommand('openshift.url.create', (context) => execute(Url.create, context)),
         vscode.commands.registerCommand('openshift.service.create', (context) => execute(Service.create, context)),
