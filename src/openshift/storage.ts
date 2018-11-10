@@ -10,7 +10,7 @@ import * as validator from 'validator';
 
 export class Storage extends OpenShiftItem {
     static async create(context: OpenShiftObject): Promise<string> {
-        const component: OpenShiftObject = context.getParent();
+        const component: OpenShiftObject = context;
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
         const storageName = await vscode.window.showInputBox({prompt: "Specify the storage name", validateInput: (value: string) => {
