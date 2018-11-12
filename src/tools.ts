@@ -96,22 +96,26 @@ export class ToolsConfig {
         ToolsConfig.tools = ToolsConfig.loadMetadata(configData, Platform.OS);
     }
 
+    private static getpath(cmd, filename) {
+        return path.resolve(Platform.getUserHomePath(), '.vs-openshift', 'cache', this.tools[cmd].name, this.tools[cmd].version, filename);
+    }
+
     public static async detectOrDownload(cmd: string): Promise<string> {
 
         let toolLocation: string = ToolsConfig.tools[cmd].location;
 
         if (toolLocation === undefined) {
-            const toolCacheLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools[cmd].cmdFileName);
+            const toolCacheLocation = ToolsConfig.getpath(cmd, ToolsConfig.tools[cmd].cmdFileName);
             const whichLocation = which(cmd);
             const toolLocations: string[] = [whichLocation ? whichLocation.stdout : null, toolCacheLocation];
             toolLocation = await ToolsConfig.selectTool(toolLocations, ToolsConfig.tools[cmd].version);
 
             if (toolLocation === undefined) {
                 // otherwise request permission to download
-                const toolDlLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools[cmd].dlFileName);
+                const toolDlLocation = ToolsConfig.getpath(cmd, ToolsConfig.tools[cmd].dlFileName);
                 const response = await vscode.window.showInformationMessage(
                     `Cannot find ${ToolsConfig.tools[cmd].description} v${ToolsConfig.tools[cmd].version}.`, 'Download and install', 'Help', 'Cancel');
-                fsex.ensureDirSync(path.resolve(Platform.getUserHomePath(), '.vs-openshift'));
+                fsex.ensureDirSync(ToolsConfig.getpath(cmd, ''));
                 if (response === 'Download and install') {
                     let action: string;
                     do {
@@ -138,7 +142,7 @@ export class ToolsConfig {
 
                     if (action !== 'Cancel') {
                         if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
-                            await Archive.unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), ToolsConfig.tools[cmd].filePrefix);
+                            await Archive.unzip(toolDlLocation, ToolsConfig.getpath(cmd, ''), ToolsConfig.tools[cmd].filePrefix);
                         } else if (toolDlLocation.endsWith('.gz')) {
                             await Archive.unzip(toolDlLocation, toolCacheLocation, ToolsConfig.tools[cmd].filePrefix);
                         }

@@ -90,7 +90,7 @@ suite("tools configuration", () => {
             sb.stub(fs, 'existsSync').returns(true);
             sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools['odo'].version);
             const toolLocation = await ToolsConfig.detectOrDownload('odo');
-            assert.equal( toolLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools['odo'].cmdFileName));
+            assert.equal( toolLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift', 'cache', ToolsConfig.tools['odo'].name, ToolsConfig.tools['odo'].version, ToolsConfig.tools['odo'].cmdFileName));
         });
 
         test('ask to downloads tool if previously downloaded version is not correct and download if requested by user', async () => {
@@ -104,11 +104,11 @@ suite("tools configuration", () => {
             let toolLocation = await ToolsConfig.detectOrDownload('odo');
             assert.ok(showInfo.calledOnce);
             assert.ok(withProgress.calledOnce);
-            assert.equal( toolLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools['odo'].cmdFileName));
+            assert.equal( toolLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift', 'cache', ToolsConfig.tools['odo'].name, ToolsConfig.tools['odo'].version, ToolsConfig.tools['odo'].cmdFileName));
             toolLocation = await ToolsConfig.detectOrDownload('oc');
             assert.ok(showInfo.calledTwice);
             assert.ok(withProgress.calledTwice);
-            assert.equal( toolLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools['oc'].cmdFileName));
+            assert.equal( toolLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift',  'cache', ToolsConfig.tools['oc'].name, ToolsConfig.tools['oc'].version, ToolsConfig.tools['oc'].cmdFileName));
         });
 
         test('ask to downloads tool if previously downloaded version is not correct and skip download if canceled by user', async () => {
@@ -134,7 +134,7 @@ suite("tools configuration", () => {
             const toolLocation = await ToolsConfig.detectOrDownload('odo');
             assert.ok(withProgress.calledTwice);
             assert.ok(showInfo.calledTwice);
-            assert.equal( toolLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools['odo'].cmdFileName));
+            assert.equal( toolLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift', 'cache', ToolsConfig.tools['odo'].name, ToolsConfig.tools['odo'].version, ToolsConfig.tools['odo'].cmdFileName));
         });
 
         test('downloads tool, ask to download again if checksum does not match and exits if canceled', async () => {

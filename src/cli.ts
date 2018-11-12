@@ -14,6 +14,7 @@ export interface CliExitData {
 }
 
 export class Cli implements ICli {
+
     private static instance: Cli;
     private odoChannel: OdoChannel = new OdoChannelImpl();
 
