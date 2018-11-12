@@ -161,20 +161,19 @@ export class Cli implements ICli {
                     .on('error', reject)
                     .on('close', resolve);
             } else {
-                reject(`unsupported extension for '${zipFile}'`);
+                reject(`Unsupported extension for '${zipFile}'`);
             }
         });
     }
 
     private gunzip(source, destination): Promise<void> {
         return new Promise((res, rej) => {
-            try {
-                const dest = fs.createWriteStream(destination);
-                fs.createReadStream(source).pipe(zlib.createGunzip()).pipe(dest);
-                dest.on('close', res);
-            } catch (err) {
-                rej(err);
-            }
+            const src = fs.createReadStream(source);
+            const dest = fs.createWriteStream(destination);
+            src.pipe(zlib.createGunzip()).pipe(dest);
+            dest.on('close', res);
+            dest.on('error', rej);
+            src.on('error', rej);
         });
     }
 }
