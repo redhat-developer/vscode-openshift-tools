@@ -10,9 +10,10 @@ import { Progress } from '../util/progress';
 import opn = require('opn');
 import { ChildProcess } from 'child_process';
 import * as validator from 'validator';
+import { Url } from './url';
 
 export class Component extends OpenShiftItem {
-    static async create(context: OpenShiftObject): Promise<string> {
+    static async create(application: OpenShiftObject): Promise<string> {
         // should use QuickPickItem with label and description
         const sourceTypes: vscode.QuickPickItem[] = [
         {
@@ -26,11 +27,15 @@ export class Component extends OpenShiftItem {
         const componentSource = await vscode.window.showQuickPick(sourceTypes, {
             placeHolder: "Select source type for component"
         });
+        if (!componentSource) return null;
+
+        let command: Promise<string>;
         if (componentSource.label === 'Git Repository') {
-            return Component.createGit(context);
+            command = Component.createGit(application);
         } else {
-            return Component.createLocal(context);
+            command = Component.createLocal(application);
         }
+        return command.catch((err) => Promise.reject(`Failed to create component with error '${err}'`));
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
@@ -40,9 +45,9 @@ export class Component extends OpenShiftItem {
         if (treeItem) {
             component = treeItem;
         } else {
-            project = await vscode.window.showQuickPick(Component.odo.getProjects(), {placeHolder: "From which project you want to delete Component"});
+            project = await vscode.window.showQuickPick(Component.odo.getProjects(), {placeHolder: "From which project do you want to delete Component"});
             if (project) {
-                application = await vscode.window.showQuickPick(Component.odo.getApplications(project), {placeHolder: "From which application you want to delete Component"});
+                application = await vscode.window.showQuickPick(Component.odo.getApplications(project), {placeHolder: "From which application do you want to delete Component"});
             }
             if (application) {
                 component = await vscode.window.showQuickPick(Component.odo.getComponents(application), {placeHolder: "Select Component to delete"});
@@ -58,10 +63,10 @@ export class Component extends OpenShiftItem {
                     .then(() => Component.odo.execute(`odo delete ${name} -f --app ${app.getName()} --project ${project.getName()}`))
                     .then(() => Component.explorer.refresh(treeItem ? app : undefined))
                     .then(() => `Component '${name}' successfully deleted`)
-                    .catch((err) => { return Promise.reject(`Failed to delete component with error '${err}'`); });
+                    .catch((err) => Promise.reject(`Failed to delete component with error '${err}'`));
             }
-            return null;
         }
+        return null;
     }
 
     static describe(context: OpenShiftObject): void {
@@ -109,7 +114,7 @@ export class Component extends OpenShiftItem {
         if (routeCheck.stdout.trim() === '') {
             value = await vscode.window.showInformationMessage(`No URL for component '${context.getName()}' in application '${app.getName()}'. Do you want to create a route and open it?`, 'Create', 'Cancel');
             if (value === 'Create') {
-                await vscode.commands.executeCommand('openshift.url.create', context);
+                await Url.create(context);
             }
         }
         if (value === 'Create') {
@@ -118,99 +123,87 @@ export class Component extends OpenShiftItem {
             const tls = checkTls.stdout.trim().length === 0  ? "http://" : "https://";
             return opn(`${tls}${hostName.stdout}`);
         }
+        return null;
     }
 
-    private static async createLocal(context: OpenShiftObject): Promise<string> {
-        try {
-            const folder = await vscode.window.showWorkspaceFolderPick({
-                placeHolder: 'Select the target workspace folder'
-            });
+    private static async createLocal(application: OpenShiftObject): Promise<string> {
+        const folder = await vscode.window.showWorkspaceFolderPick({
+            placeHolder: 'Select the target workspace folder'
+        });
+        if (!folder) return null;
 
-            if (!folder) return Promise.resolve(null);
-
-            const componentName = await vscode.window.showInputBox({
-                prompt: "Component name",
-                validateInput: (value: string) => {
-                    if (validator.isEmpty(value.trim())) {
-                        return 'Empty component name';
-                    }
-                }
-            });
-
-            if (!componentName) return Promise.resolve(null);
-
-            const componentTypeName = await vscode.window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type"});
-
-            if (!componentTypeName) return Promise.resolve(null);
-
-            const componentTypeVersion = await vscode.window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type Version"});
-
-            if (!componentTypeVersion) return Promise.resolve(null);
-            const app = context.getParent();
-            const project = app.getParent();
-            return Progress.execWithProgress({
-                cancellable: false,
-                location: vscode.ProgressLocation.Notification,
-                title: `Creating new component '${componentName}'`
-            }, [{command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --local ${folder.uri.fsPath} --app ${app.getName()} --project ${project.getName()}`, increment: 50},
-                {command: `odo push ${componentName} --local ${folder.uri.fsPath} --app ${app.getName()} --project ${project.getName()}`, increment: 50}
-            ], Component.odo)
-            .then(() => Component.explorer.refresh(context))
-            .then(() => `Component '${componentName}' successfully created`);
-
-        } catch (e) {
-            return Promise.reject(e);
-        }
-    }
-
-    private static async createGit(context: OpenShiftObject): Promise<string> {
-        try {
-            const repoURI = await vscode.window.showInputBox({prompt: 'Git repository URI', validateInput:
-                (value: string) => {
-                    if (validator.isEmpty(value.trim())) {
-                        return 'Empty Git repository URL';
-                    }
-                    if (!validator.isURL(value)) {
-                        return 'Invalid URL provided';
-                    }
-                }
-            });
-
-            if (!repoURI) return Promise.resolve(null);
-
-            const componentName = await vscode.window.showInputBox({prompt: "Component name", validateInput: (value: string) => {
+        const componentName = await vscode.window.showInputBox({
+            prompt: "Component name",
+            validateInput: (value: string) => {
                 if (validator.isEmpty(value.trim())) {
                     return 'Empty component name';
                 }
-            }});
+            }
+        });
 
-            if (!componentName) return Promise.resolve(null);
+        if (!componentName) return null;
 
-            const componentTypeName = await vscode.window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type"});
+        const componentTypeName = await vscode.window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type"});
 
-            if (!componentTypeName) return Promise.resolve(null);
+        if (!componentTypeName) return null;
 
-            const componentTypeVersion = await vscode.window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type Version"});
+        const componentTypeVersion = await vscode.window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type Version"});
 
-            if (!componentTypeVersion) return Promise.resolve(null);
+        if (!componentTypeVersion) return null;
+        const project = application.getParent();
+        return Progress.execWithProgress({
+            cancellable: false,
+            location: vscode.ProgressLocation.Notification,
+            title: `Creating new component '${componentName}'`
+        }, [{command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --local ${folder.uri.fsPath} --app ${application.getName()} --project ${project.getName()}`, increment: 50},
+            {command: `odo push ${componentName} --local ${folder.uri.fsPath} --app ${application.getName()} --project ${project.getName()}`, increment: 50}
+        ], Component.odo)
+        .then(() => Component.explorer.refresh(application))
+        .then(() => `Component '${componentName}' successfully created`);
+    }
 
-            vscode.window.showInformationMessage('Do you want to clone git repository for created component?', 'Yes', 'No').then((value) => {
-                value === 'Yes' && vscode.commands.executeCommand('git.clone', repoURI);
-            });
+    private static async createGit(application: OpenShiftObject): Promise<string> {
+        const repoURI = await vscode.window.showInputBox({prompt: 'Git repository URI', validateInput:
+            (value: string) => {
+                if (validator.isEmpty(value.trim())) {
+                    return 'Empty Git repository URL';
+                }
+                if (!validator.isURL(value)) {
+                    return 'Invalid URL provided';
+                }
+            }
+        });
 
-            const app = context.getParent();
-            const project = app.getParent();
-            return Progress.execWithProgress({
-                cancellable: false,
-                location: vscode.ProgressLocation.Notification,
-                title: `Creating new component '${componentName}'`
-            }, [{command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --git ${repoURI} --app ${app.getName()} --project ${project.getName()}`, increment: 100}
-            ], Component.odo)
-            .then(() => Component.explorer.refresh(context))
-            .then(() => `Component '${componentName}' successfully created`);
+        if (!repoURI) return null;
 
-        } catch (e) {
-            return Promise.reject(e);
-        }
+        const componentName = await vscode.window.showInputBox({prompt: "Component name", validateInput: (value: string) => {
+            if (validator.isEmpty(value.trim())) {
+                return 'Empty component name';
+            }
+        }});
+
+        if (!componentName) return null;
+
+        const componentTypeName = await vscode.window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type"});
+
+        if (!componentTypeName) return null;
+
+        const componentTypeVersion = await vscode.window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type Version"});
+
+        if (!componentTypeVersion) return null;
+
+        await vscode.window.showInformationMessage('Do you want to clone git repository for created component?', 'Yes', 'No').then((value) => {
+            value === 'Yes' && vscode.commands.executeCommand('git.clone', repoURI);
+        });
+
+        const project = application.getParent();
+        return Progress.execWithProgress({
+            cancellable: false,
+            location: vscode.ProgressLocation.Notification,
+            title: `Creating new component '${componentName}'`
+        }, [{command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --git ${repoURI} --app ${application.getName()} --project ${project.getName()}`, increment: 100}
+        ], Component.odo)
+        .then(() => Component.explorer.refresh(application))
+        .then(() => `Component '${componentName}' successfully created`);
     }
 }
