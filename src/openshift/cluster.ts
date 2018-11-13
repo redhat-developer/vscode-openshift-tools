@@ -1,3 +1,8 @@
+/*-----------------------------------------------------------------------------------------------
+ *  Copyright (c) Red Hat, Inc. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE file in the project root for license information.
+ *-----------------------------------------------------------------------------------------------*/
+
 import { Odo, OdoImpl } from "../odo";
 import { OpenShiftExplorer } from "../explorer";
 import * as vscode from 'vscode';
