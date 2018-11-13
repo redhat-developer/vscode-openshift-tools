@@ -3,11 +3,13 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Odo, OdoImpl } from "../odo";
+import { Odo, OdoImpl, OpenShiftObject } from "../odo";
 import { OpenShiftExplorer } from "../explorer";
 import * as vscode from 'vscode';
 import * as validator from 'validator';
 import { CliExitData } from "../cli";
+import { ChildProcess } from "child_process";
+import opn = require("opn");
 
 export class Cluster {
     private static odo: Odo = OdoImpl.getInstance();
@@ -62,6 +64,10 @@ export class Cluster {
 
     static about(): void {
         Cluster.odo.executeInTerminal(`odo version`, process.cwd());
+    }
+
+    static openshiftConsole(context: OpenShiftObject): Promise<ChildProcess> {
+        return opn(context.getName());
     }
 
     private static async loginDialog(): Promise<string> {
