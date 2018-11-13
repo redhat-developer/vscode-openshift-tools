@@ -20,6 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
     const explorer: explorerFactory.OpenShiftExplorer = explorerFactory.OpenShiftExplorer.getInstance();
     const disposable = [
         vscode.commands.registerCommand('openshift.about', (context) => executeSync(Cluster.about, context)),
+        vscode.commands.registerCommand('openshift.openshiftConsole', (context) => execute(Cluster.openshiftConsole, context)),
         vscode.commands.registerCommand('openshift.explorer.login', (context) => execute(Cluster.login, context)),
         vscode.commands.registerCommand('openshift.explorer.logout', (context) => execute(Cluster.logout, context)),
         vscode.commands.registerCommand('openshift.explorer.refresh', (context) => executeSync(Cluster.refresh, context)),
@@ -40,7 +41,6 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.log', (context) => executeSync(Component.log, context)),
         vscode.commands.registerCommand('openshift.component.followLog', (context) => executeSync(Component.followLog, context)),
         vscode.commands.registerCommand('openshift.component.openUrl', (context) => execute(Component.openUrl, context)),
-        vscode.commands.registerCommand('openshift.component.openshiftConsole', (context) => execute(Component.openshiftConsole, context)),
         vscode.commands.registerCommand('openshift.component.delete', (context) => execute(Component.del, context)),
         vscode.commands.registerCommand('openshift.storage.create', (context) => execute(Storage.create, context)),
         vscode.commands.registerCommand('openshift.storage.delete.palette', (context) => execute(Storage.del, context)),

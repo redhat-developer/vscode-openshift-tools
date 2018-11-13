@@ -27,6 +27,7 @@
   "activationEvents": [
     "onView:openshiftProjectExplorer",
     "onCommand:openshift.about",
+    "onCommand:openshift.openshiftConsole",
     "onCommand:openshift.explorer.login",
     "onCommand:openshift.explorer.logout",
     "onCommand:openshift.explorer.refresh",
@@ -41,7 +42,6 @@
     "onCommand:openshift.component.describe",
     "onCommand:openshift.component.log",
     "onCommand:openshift.component.followLog",
-    "onCommand:openshift.component.openshiftConsole",
     "onCommand:openshift.component.delete",
     "onCommand:openshift.component.push",
     "onCommand:openshift.component.watch",
@@ -141,7 +141,7 @@
         "category": "OpenShift"
       },
       {
-        "command": "openshift.component.openshiftConsole",
+        "command": "openshift.openshiftConsole",
         "title": "Open Console",
         "category": "OpenShift"
       },
@@ -267,7 +267,7 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
-          "command": "openshift.component.openshiftConsole",
+          "command": "openshift.openshiftConsole",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -340,7 +340,7 @@
           "group": "c2@2"
         },
         {
-          "command": "openshift.component.openshiftConsole",
+          "command": "openshift.openshiftConsole",
           "when": "view == openshiftProjectExplorer && viewItem == cluster",
           "group": "c3"
         },

@@ -120,10 +120,6 @@ export class Component extends OpenShiftItem {
         }
     }
 
-    static openshiftConsole(context: OpenShiftObject): Promise<ChildProcess> {
-        return opn(context.getName());
-    }
-
     private static async createLocal(context: OpenShiftObject): Promise<string> {
         try {
             const folder = await vscode.window.showWorkspaceFolderPick({
