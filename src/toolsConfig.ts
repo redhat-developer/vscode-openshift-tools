@@ -20,14 +20,14 @@ export const toolsConfig = {
                 cmdFileName: "odo.exe"
             },
             darwin: {
-                url: "https://github.com/redhat-developer/odo/releases/download/v0.0.15/odo-darwin-amd64.gz",
-                sha256sum: "fc705718ce34867f850d7f6ac639b58d207ac1a9801cfed93e760628bf0623c9",
-                dlFileName: "odo-darwin-amd64.gz"
+                url: "https://github.com/redhat-developer/odo/releases/download/v0.0.15/odo-darwin-amd64",
+                sha256sum: "d4d910e5a82d7a9c4127616011b1a441be995b1cf4eabb2da3b221dcda61da71",
+                dlFileName: "odo"
             },
             linux: {
-                url: "https://github.com/redhat-developer/odo/releases/download/v0.0.15/odo-linux-amd64.gz",
-                sha256sum: "ee74b8a301245b98fce94954739df10cf0fbf1220a1167d2614205393d63c01b",
-                dlFileName: "odo-linux-amd64.gz"
+                url: "https://github.com/redhat-developer/odo/releases/download/v0.0.15/odo-linux-amd64",
+                sha256sum: "4908eaa54db055a38cf166298a08ab5a0a9169ea4b7818a34cfd2bd3fe209cb3",
+                dlFileName: "odo"
             }
         }
     },
