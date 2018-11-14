@@ -3,7 +3,19 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-export const toolsConfig = {
+import { Platform } from "./util/platform";
+import * as archive from "./util/archive";
+import { which } from "shelljs";
+import { DownloadUtil } from "./util/download";
+import hasha = require("hasha");
+import opn = require("opn");
+import * as vscode from 'vscode';
+import * as path from 'path';
+import * as fsex from 'fs-extra';
+import * as fs from 'fs';
+import { Cli } from './cli';
+
+const configData = {
     odo: {
         description: "OpenShift Do CLI tool",
         vendor: "Red Hat, Inc.",
@@ -60,3 +72,113 @@ export const toolsConfig = {
         }
     }
 };
+
+function loadMetadata(requirements, platform): object {
+    const reqs = JSON.parse(JSON.stringify(requirements));
+    for (const object in requirements) {
+        if (reqs[object].platform) {
+            if (reqs[object].platform[platform]) {
+                Object.assign(reqs[object], reqs[object].platform[platform]);
+                delete reqs[object].platform;
+            } else {
+                delete reqs[object];
+            }
+        }
+    }
+    return reqs;
+}
+
+const tools: object = loadMetadata(configData, process.platform);
+
+export class ToolsConfig {
+
+    public static tools: object = tools;
+
+    public static async detectOrDownload(cmd: string): Promise<string> {
+
+        // try to find tool in PATH locations
+        let toolLocation: string = which(cmd);
+        let toolVersion: string;
+        if (toolLocation) {
+            toolVersion = await ToolsConfig.getVersion(toolLocation);
+        }
+
+        // if found and has required version, return location
+        if (tools[cmd].version !== toolVersion) {
+            // otherwise verify previously downloaded tools, if present
+            toolLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', tools[cmd].cmdFileName);
+            if (fs.existsSync(toolLocation) ) {
+                toolVersion = await ToolsConfig.getVersion(toolLocation);
+            }
+            // if found and has required version, return location
+            if (tools[cmd].version !== toolVersion) {
+                // otherwise request permission to download
+                    const toolDlLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', tools[cmd].dlFileName);
+                    const response = await vscode.window.showInformationMessage(
+                        `Cannot find ${tools[cmd].description} v${tools[cmd].version}.`, 'Download and install', 'Help', 'Cancel');
+                if (response === 'Download and install') {
+
+                    let action: string;
+                    do {
+                        action = "Continue";
+                        await vscode.window.withProgress({
+                            cancellable: true,
+                            location: vscode.ProgressLocation.Notification,
+                            title: `Downloading ${tools[cmd].description}: `
+                            },
+                            (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
+                                return DownloadUtil.downloadFile(
+                                    tools[cmd].url,
+                                    toolDlLocation,
+                                    (dlProgress, increment) => progress.report({ increment, message: `${dlProgress}%`})
+                                );
+                        });
+                        if (tools[cmd].sha256sum && tools[cmd].sha256sum !== "") {
+                            const sha256sum: string = await hasha.fromFile(toolDlLocation, {algorithm: 'sha256'});
+                            if (sha256sum !== tools[cmd].sha256sum) {
+                                fsex.removeSync(toolDlLocation);
+                                action = await vscode.window.showInformationMessage(`Checksum for downloaded ${tools[cmd].description} is not correct.`, 'Download again', 'Cancel');
+                            }
+                        }
+                    } while (action === 'Download again');
+
+                    if (action === 'Continue') {
+                        if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
+                            await archive.unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), tools[cmd].filePrefix);
+                        } else if (toolDlLocation.endsWith('.gz')) {
+                            await archive.unzip(toolDlLocation, toolLocation, tools[cmd].filePrefix);
+                        }
+                        if (process.platform !== 'win32') {
+                            fs.chmodSync(toolLocation, 0o765);
+                        }
+                    }
+                } else if (response === `Help`) {
+                    opn('https://github.com/redhat-developer/vscode-openshift-tools#dependencies');
+                } else {
+                    throw new Error(`Cannot find ${tools[cmd].description} v${tools[cmd].version}.`);
+                }
+            }
+        }
+        return toolLocation;
+    }
+
+    public static async getVersion(name: string): Promise<string> {
+        let detectedVersion: string;
+        const version = new RegExp(`${name} v([\\d\\.]+)`);
+        try {
+            const result = await Cli.getInstance().execute(`${name} version`);
+            if (result.error === undefined) {
+                const toolVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
+                    return value.match(version);
+                }).map((value)=>version.exec(value)[1]);
+                if (toolVersion.length) {
+                    detectedVersion = toolVersion[0];
+                }
+            }
+        } catch (ignore) {
+            // if `${tool} version` failed, then there is no tool at specified location
+        }
+
+        return detectedVersion;
+    }
+}

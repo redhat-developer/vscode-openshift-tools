@@ -7,6 +7,8 @@ import * as odo from '../src/odo';
 import { CliExitData, Cli } from '../src/cli';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
+import { ToolsConfig } from '../src/toolsConfig';
+import * as shelljs from "shelljs";
 
 suite("odo integration tests", () => {
     const odoCli: odo.Odo = odo.OdoImpl.getInstance();
@@ -14,28 +16,12 @@ suite("odo integration tests", () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
+        sandbox.stub(shelljs, 'which').returns('odo');
+        sandbox.stub(ToolsConfig, 'getVersion').returns('0.0.15');
     });
 
     teardown(() => {
         sandbox.restore();
-    });
-
-    suite('odo commands', () => {
-        test('odo-getVersion() returns version number with expected output', async () => {
-            const testData: CliExitData = { stdout: 'odo v0.0.15 (2f7ed497) \n line two', stderr: undefined, error: undefined };
-            sandbox.stub(Cli.prototype, 'execute').resolves(testData);
-
-            const result: string = await odoCli.getOdoVersion();
-            assert.equal(result, '0.0.15');
-        });
-
-        test('odo-getVersion() returns version 0.0.0 for unexpected output', async () => {
-            const invalidData: CliExitData = { error: undefined, stderr: '', stdout: 'odounexpected v0.0.15 (2f7ed497) \n line two' };
-            sandbox.stub(Cli.prototype, 'execute').resolves(invalidData);
-
-            const result: string = await odoCli.getOdoVersion();
-            assert.equal(result, '0.0.0');
-        });
     });
 
     suite("odo catalog integration", () => {
@@ -57,7 +43,7 @@ suite("odo integration tests", () => {
         };
 
         setup(async () => {
-            sandbox.stub(Cli.prototype, 'execute').resolves(catalogData);
+            sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves(catalogData);
             result = await odoCli.getComponentTypes();
         });
 
@@ -101,7 +87,7 @@ suite("odo integration tests", () => {
         const data: CliExitData = { error: undefined, stderr: null, stdout: odoPlans };
 
         setup(() => {
-            sandbox.stub(Cli.prototype, 'execute').resolves(data);
+            sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves(data);
         });
 
         test("Odo->getServiceTemplates() returns correct number of services", async () => {
