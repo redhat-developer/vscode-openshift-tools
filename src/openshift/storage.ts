@@ -10,6 +10,7 @@ import * as validator from 'validator';
 
 export class Storage extends OpenShiftItem {
     static async create(context: OpenShiftObject): Promise<string> {
+        const component: OpenShiftObject = context;
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
         const storageName = await vscode.window.showInputBox({prompt: "Specify the storage name", validateInput: (value: string) => {
@@ -28,7 +29,7 @@ export class Storage extends OpenShiftItem {
         if (!mountPath) return null;
         const storageSize = await vscode.window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the storage size'});
         return Promise.resolve()
-            .then(() => Storage.odo.execute(`odo project set ${project.getName()} && odo app set ${app.getName()} && odo component set ${context.getName()} && odo storage create ${storageName} --path=${mountPath} --size=${storageSize}`))
+            .then(() => Storage.odo.execute(`odo storage create ${storageName} --path=${mountPath} --size=${storageSize} --project ${project.getName()} --app ${app.getName()} --component ${component.getName()}`))
             .then(() => Storage.explorer.refresh(context))
             .then(() => `Storage '${storageName}' successfully created for component '${context.getName()}'`)
             .catch((err) => Promise.reject(`New Storage command failed with error: '${err}'!`));
@@ -58,7 +59,7 @@ export class Storage extends OpenShiftItem {
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete storage '${storage.getName()}' from component '${component.getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 return Promise.resolve()
-                    .then(() => Storage.odo.execute(`odo project set ${project.getName()} && odo app set ${app.getName()} && odo component set ${component.getName()} && odo storage delete ${storage.getName()} -f`))
+                    .then(() => Storage.odo.execute(`odo storage delete ${storage.getName()} -f --project ${project.getName()} --app ${app.getName()} --component ${component.getName()}`))
                     .then(() => Storage.explorer.refresh(treeItem ? component : undefined))
                     .then(() => `Storage '${storage.getName()}' from component '${component.getName()}' successfully deleted`)
                     .catch((err) => Promise.reject(`Failed to delete storage with error '${err}'`));

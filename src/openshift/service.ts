@@ -36,11 +36,13 @@ export class Service extends OpenShiftItem {
                 }
             });
             if (serviceName) {
+                const app = context.getParent();
+                const project = app.getParent();
                 return Progress.execWithProgress({
                         cancellable: false,
                         location: vscode.ProgressLocation.Notification,
                         title: `Creating new service '${serviceName}'`
-                    }, [{command: `odo project set ${context.getParent().getName()} && odo app set ${context.getName()} && odo service create ${serviceTemplateName} --plan ${serviceTemplatePlanName} ${serviceName.trim()}`, increment: 100}
+                    }, [{command: `odo service create ${serviceTemplateName} --plan ${serviceTemplatePlanName} ${serviceName.trim()} --app ${app.getName()} --project ${project.getName()}`, increment: 100}
                     ], Service.odo)
                     .then(() => Service.explorer.refresh(context))
                     .then(() => `Service '${serviceName}' successfully created`);
@@ -63,9 +65,12 @@ export class Service extends OpenShiftItem {
             }
         }
         if (service) {
+            application = service.getParent();
+            project = application.getParent();
             const answer = await vscode.window.showWarningMessage(`Are you sure you want to delete service '${service.getName()}'`, 'Yes', 'Cancel');
             if (answer === 'Yes') {
-                return Service.odo.execute(`odo project set ${service.getParent().getParent().getName()} && odo app set ${service.getParent().getName()} && odo service delete ${service.getName()} -f`)
+                return Promise.resolve()
+                    .then(() => Service.odo.execute(`odo service delete ${service.getName()} -f --project ${project.getName()} --app ${application.getName()}`))
                     .then(() => Service.explorer.refresh(treeItem ? treeItem.getParent() : undefined))
                     .then(() => `Service '${service.getName()} successfully deleted'`)
                     .catch((err) => Promise.reject(`Failed to delete service with error '${err}'`));

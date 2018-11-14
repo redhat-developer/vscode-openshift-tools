@@ -22,7 +22,7 @@ export class Url {
         }
         return Promise.resolve()
         .then(async () => {
-            await Url.odo.execute(`odo project set ${project.getName()} && odo app set ${app.getName()} && odo component set ${context.getName()} && odo url create --port ${port}`);
+            await Url.odo.execute(`odo url create --port ${port} --project ${project.getName()} --app ${app.getName()} --component ${context.getName()}`);
             return `URL for component '${context.getName()}' successfully created`;
         })
         .catch((err) => {

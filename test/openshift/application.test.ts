@@ -44,7 +44,7 @@ suite('Openshift/Application', () => {
 
             await Application.create(projectItem);
 
-            expect(execStub).calledOnceWith(`odo project set ${projectItem.getName()} && odo app create name`);
+            expect(execStub).calledOnceWith(`odo app create name --project ${projectItem.getName()}`);
         });
 
         test('returns status when successful', async () => {
@@ -87,7 +87,7 @@ suite('Openshift/Application', () => {
         test('calls the appropriate odo command in terminal', () => {
             Application.describe(appItem);
 
-            expect(termStub).calledOnceWith(`odo project set ${projectItem.getName()} && odo app describe ${appItem.getName()}`, process.cwd());
+            expect(termStub).calledOnceWith(`odo app describe ${appItem.getName()} --project ${projectItem.getName()}`, process.cwd());
         });
     });
 
@@ -104,7 +104,7 @@ suite('Openshift/Application', () => {
 
             await Application.del(appItem);
 
-            expect(execStub).calledOnceWith(`odo project set ${projectItem.getName()} && odo app delete ${appItem.getName()} -f`);
+            expect(execStub).calledOnceWith(`odo app delete ${appItem.getName()} --project ${projectItem.getName()} -f`);
         });
 
         test('returns status when successful', async () => {
