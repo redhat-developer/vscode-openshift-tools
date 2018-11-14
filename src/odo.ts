@@ -207,7 +207,7 @@ export class OdoImpl implements Odo {
         return clusters;
     }
 
-    public async getClustersWithOc(): Promise<OpenShiftObject[]> {
+    private async getClustersWithOc(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
         const result: cliInstance.CliExitData = await this.execute(`oc version`);
         clusters = result.stdout.trim().split('\n').filter((value) => {
@@ -219,7 +219,7 @@ export class OdoImpl implements Odo {
         return clusters;
     }
 
-    public async getClustersWithOdo(): Promise<OpenShiftObject[]> {
+    private async getClustersWithOdo(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
         const result: cliInstance.CliExitData = await this.execute(
             `odo version && odo project list`
@@ -300,7 +300,13 @@ export class OdoImpl implements Odo {
         return OdoImpl.cli.execute(
             toolLocation ? command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`) : command,
             cwd ? {cwd} : { }
-        );
+        ).then(async (result) => {
+            if (result.error) {
+                return Promise.reject(result.error);
+            } else {
+                return result;
+            }
+        });
     }
 
     public async requireLogin(): Promise<boolean> {
