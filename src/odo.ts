@@ -109,7 +109,7 @@ export interface Odo {
     getOdoVersion(): Promise<string>;
     getServiceTemplatePlans(svc: string): Promise<string[]>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
-    getApplicationChildren(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]>;
+    getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     execute(command: string, cwd?: string): Promise<CliExitData>;
     requireLogin(): Promise<boolean>;
 }
