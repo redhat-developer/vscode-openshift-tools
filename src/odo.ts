@@ -222,7 +222,7 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
             `odo version`, {}
         );
-        if (result.stdout.indexOf("Please log in to the cluster") > -1) {
+        if (result.stdout.indexOf("the server has asked for the client to provide credentials") > -1) {
             const loginErrorMsg: string = 'Log in to display clusters';
             return result.stdout.trim().split(`\n`).slice(1).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(null, loginErrorMsg, 'loginError', this, TreeItemCollapsibleState.None));
         }
@@ -318,6 +318,6 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
             `odo version`, {}
         );
-        return result.stdout.indexOf("Please log in to the cluster") > -1;
+        return result.stdout.indexOf("the server has asked for the client to provide credentials") > -1;
     }
 }

@@ -22,15 +22,15 @@ suite("odo integration tests", () => {
 
     suite('odo commands', () => {
         test('odo-getVersion() returns version number with expected output', async () => {
-            const testData: CliExitData = { stdout: 'odo v0.0.13 (65b5bed8) \n line two', stderr: undefined, error: undefined };
+            const testData: CliExitData = { stdout: 'odo v0.0.15 (2f7ed497) \n line two', stderr: undefined, error: undefined };
             sandbox.stub(Cli.prototype, 'execute').resolves(testData);
 
             const result: string = await odoCli.getOdoVersion();
-            assert.equal(result, '0.0.13');
+            assert.equal(result, '0.0.15');
         });
 
         test('odo-getVersion() returns version 0.0.0 for unexpected output', async () => {
-            const invalidData: CliExitData = { error: undefined, stderr: '', stdout: 'odounexpected v0.0.13 (65b5bed8) \n line two' };
+            const invalidData: CliExitData = { error: undefined, stderr: '', stdout: 'odounexpected v0.0.15 (2f7ed497) \n line two' };
             sandbox.stub(Cli.prototype, 'execute').resolves(invalidData);
 
             const result: string = await odoCli.getOdoVersion();
