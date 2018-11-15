@@ -110,7 +110,7 @@ suite('Openshift/Cluster', () => {
                 const status = await Cluster.login();
 
                 expect(status).equals(`Successfully logged in to '${testUrl}'`);
-                expect(execStub).calledOnceWith(`oc login ${testUrl} -u ${testUser} -p ${password}`);
+                expect(execStub).calledOnceWith(`odo login ${testUrl} -u ${testUser} -p ${password}`);
                 expect(commandStub).calledOnceWith('setContext', 'isLoggedIn', true);
             });
 
@@ -150,7 +150,7 @@ suite('Openshift/Cluster', () => {
                 const status = await Cluster.login();
 
                 expect(status).equals(`Successfully logged in to '${testUrl}'`);
-                expect(execStub).calledOnceWith(`oc login ${testUrl} --token=${token}`);
+                expect(execStub).calledOnceWith(`odo login ${testUrl} --token=${token}`);
                 expect(commandStub).calledOnceWith('setContext', 'isLoggedIn', true);
             });
 

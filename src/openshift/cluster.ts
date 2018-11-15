@@ -107,7 +107,7 @@ export class Cluster {
         });
         if (!passwd) return Promise.resolve(null);
         return Promise.resolve()
-            .then(() => Cluster.odo.execute(`oc login ${clusterURL} -u ${username} -p ${passwd}`))
+            .then(() => Cluster.odo.execute(`odo login ${clusterURL} -u ${username} -p ${passwd}`))
             .then((result) => Cluster.loginMessage(clusterURL, result))
             .catch((error) => { return Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`); });
     }
@@ -119,7 +119,7 @@ export class Cluster {
         });
         if (!ocToken) return Promise.resolve(null);
         return Promise.resolve()
-            .then(() => Cluster.odo.execute(`oc login ${clusterURL} --token=${ocToken}`))
+            .then(() => Cluster.odo.execute(`odo login ${clusterURL} --token=${ocToken}`))
             .then((result) => Cluster.loginMessage(clusterURL, result))
             .catch((error) => { return Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`); });
     }
