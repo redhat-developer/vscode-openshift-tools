@@ -19,7 +19,7 @@ suite("tool tests", () => {
 
     setup(() => {
         sb = sinon.createSandbox();
-        sb.stub(fs, 'chmod');
+        sb.stub(fs, 'chmodSync');
     });
 
     teardown(() => {
