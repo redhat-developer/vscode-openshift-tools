@@ -81,7 +81,7 @@ suite('Openshift/Cluster', () => {
             loginStub.resolves(false);
             const status = await Cluster.login();
 
-            expect(execStub).calledWith('oc logout');
+            expect(execStub).calledWith('odo logout');
             expect(status).equals(`Successfully logged in to '${testUrl}'`);
         });
 
@@ -185,7 +185,7 @@ suite('Openshift/Cluster', () => {
             const status = await Cluster.logout();
 
             expect(status).null;
-            expect(execStub).calledOnceWith('oc logout');
+            expect(execStub).calledOnceWith('odo logout');
             expect(commandStub).calledOnceWith('setContext', 'isLoggedIn', false);
         });
 

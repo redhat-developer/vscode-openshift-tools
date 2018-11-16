@@ -21,7 +21,7 @@ export class Cluster {
         } else {
             const value = await vscode.window.showInformationMessage(`You are already logged in the cluster. Do you want to login to a different cluster?`, 'Yes', 'No');
             if (value === 'Yes') {
-                return Cluster.odo.execute(`oc logout`)
+                return Cluster.odo.execute(`odo logout`)
                 .catch((error) => { return Promise.reject(`Failed to logout of the current cluster with '${error}'!`); })
                 .then(async (result)=> {
                     if (result.stderr === "") {
@@ -38,7 +38,7 @@ export class Cluster {
     static async logout(): Promise<string> {
         const value = await vscode.window.showWarningMessage(`Are you sure you want to logout of cluster`, 'Logout', 'Cancel');
         if (value === 'Logout') {
-            return Cluster.odo.execute(`oc logout`).catch((error) => {
+            return Cluster.odo.execute(`odo logout`).catch((error) => {
                 return Promise.reject(`Failed to logout of the current cluster with '${error}'!`);
             }).then(async (result)=> {
                 if (result.stderr === "") {
