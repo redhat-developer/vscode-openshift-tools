@@ -18,16 +18,18 @@ export class Storage extends OpenShiftItem {
                 return 'Invalid storage name';
             }
         }});
-
         if (!storageName) return null;
+
         const mountPath = await vscode.window.showInputBox({prompt: "Specify the mount path", validateInput: (value: string) => {
             if (validator.isEmpty(value.trim())) {
                 return 'Invalid mount path';
             }
         }});
-
         if (!mountPath) return null;
+
         const storageSize = await vscode.window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the storage size'});
+        if (!storageSize) return null;
+
         return Promise.resolve()
             .then(() => Storage.odo.execute(`odo storage create ${storageName} --path=${mountPath} --size=${storageSize} --project ${project.getName()} --app ${app.getName()} --component ${component.getName()}`))
             .then(() => Storage.explorer.refresh(context))
@@ -64,7 +66,7 @@ export class Storage extends OpenShiftItem {
                     .then(() => `Storage '${storage.getName()}' from component '${component.getName()}' successfully deleted`)
                     .catch((err) => Promise.reject(`Failed to delete storage with error '${err}'`));
             }
-            return null;
         }
+        return null;
     }
 }
