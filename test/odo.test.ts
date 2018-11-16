@@ -7,7 +7,7 @@ import * as odo from '../src/odo';
 import { CliExitData, Cli } from '../src/cli';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
-import { ToolsConfig } from '../src/toolsConfig';
+import { ToolsConfig } from '../src/tools';
 import * as shelljs from "shelljs";
 
 suite("odo integration tests", () => {

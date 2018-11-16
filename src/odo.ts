@@ -11,7 +11,7 @@ import * as path from 'path';
 import jsYaml = require('js-yaml');
 import { Platform } from './util/platform';
 import * as fs from 'fs';
-import { ToolsConfig } from './toolsConfig';
+import { ToolsConfig } from './tools';
 
 export interface OpenShiftObject extends QuickPickItem {
     getTreeItem(): TreeItem;
