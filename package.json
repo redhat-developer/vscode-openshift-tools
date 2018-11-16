@@ -53,7 +53,6 @@
     "onCommand:openshift.storage.delete",
     "onCommand:openshift.service.create",
     "onCommand:openshift.service.delete"
-
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -473,13 +472,13 @@
     "@types/js-yaml": "^3.11.2",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.5",
-    "@types/node": "^10.12.2",
+    "@types/node": "^10.12.9",
     "@types/opn": "^5.1.0",
-    "@types/request": "^2.48.0",
+    "@types/request": "^2.48.1",
     "@types/shelljs": "^0.8.0",
     "@types/sinon": "^5.0.5",
     "@types/sinon-chai": "^3.2.0",
-    "@types/validator": "^9.4.2",
+    "@types/validator": "^9.4.3",
     "chai": "^4.2.0",
     "codecov": "^3.1.0",
     "decache": "^4.4.1",
@@ -496,14 +495,14 @@
   },
   "dependencies": {
     "byline": "^5.0.0",
-    "fs-extra": "^7.0.0",
+    "fs-extra": "^7.0.1",
     "hasha": "^3.0.0",
     "js-yaml": "^3.12.0",
     "opn": "^5.4.0",
     "request-progress": "^3.0.0",
-    "shelljs": "^0.8.2",
+    "shelljs": "^0.8.3",
     "targz": "^1.0.1",
     "unzip-stream": "^0.3.0",
-    "validator": "^10.8.0"
+    "validator": "^10.9.0"
   }
 }
