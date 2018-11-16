@@ -145,6 +145,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.openshiftConsole.palette",
+        "title": "Open Console",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.component.delete",
         "title": "Delete",
         "category": "OpenShift"

@@ -3,17 +3,15 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Odo, OdoImpl, OpenShiftObject } from "../odo";
-import { OpenShiftExplorer } from "../explorer";
+import { OpenShiftObject } from "../odo";
+import { OpenShiftItem } from './openshiftItem';
 import * as vscode from 'vscode';
 import * as validator from 'validator';
 import { CliExitData } from "../cli";
 import { ChildProcess } from "child_process";
 import opn = require("opn");
 
-export class Cluster {
-    private static odo: Odo = OdoImpl.getInstance();
-    private static explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
+export class Cluster extends OpenShiftItem {
 
     static async login(): Promise<string> {
         if (await Cluster.odo.requireLogin()) {
@@ -66,8 +64,13 @@ export class Cluster {
         Cluster.odo.executeInTerminal(`odo version`, process.cwd());
     }
 
-    static openshiftConsole(context: OpenShiftObject): Promise<ChildProcess> {
-        return opn(context.getName());
+    static async openshiftConsole(context: OpenShiftObject): Promise<ChildProcess> {
+        if (context) {
+            return opn(context.getName());
+        } else {
+            const result: any = await Cluster.odo.getClusters();
+            opn(result[0].getName());
+        }
     }
 
     private static async loginDialog(): Promise<string> {
