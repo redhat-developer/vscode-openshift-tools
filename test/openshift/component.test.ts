@@ -216,7 +216,7 @@ suite('Openshift/Component', () => {
 
                 expect(result).null;
             });
-        })
+        });
     });
 
     suite('del', () => {
