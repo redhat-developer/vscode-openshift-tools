@@ -4,8 +4,10 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
+import * as shelljs from 'shelljs';
 import { TestItem } from './testOSItem';
 import { OdoImpl } from '../../src/odo';
+import { ToolsConfig } from '../../src/tools';
 import { Component } from '../../src/openshift/component';
 import { Progress } from '../../src/util/progress';
 
@@ -24,6 +26,12 @@ suite('Openshift/Component', () => {
         sandbox = sinon.createSandbox();
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute');
+        sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+        sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
+        sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
+        sandbox.stub(shelljs, 'which').returns('odo');
+        sandbox.stub(ToolsConfig, 'getVersion').callsFake((cmd) => ToolsConfig.tools[cmd].version);
+
     });
 
     teardown(() => {
@@ -172,7 +180,7 @@ suite('Openshift/Component', () => {
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
             warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
-            execStub.resolves();
+            execStub.resolves({error: undefined, stdout: '', stderr: ''});
         });
 
         test('works from context menu', async () => {

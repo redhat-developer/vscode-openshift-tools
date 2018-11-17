@@ -466,7 +466,8 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "npm run compile && node ./node_modules/vscode/bin/test",
+    "clean": "rm -rf out || rmdir out /s /q",
+    "test": "npm run clean && npm run compile && node ./node_modules/vscode/bin/test",
     "update-deps": "node_modules/.bin/ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json"
   },
@@ -491,6 +492,7 @@
     "istanbul": "^0.4.5",
     "mocha": "^5.2.0",
     "mocha-jenkins-reporter": "^0.4.1",
+    "proxyquire": "^2.1.0",
     "remap-istanbul": "^0.12.0",
     "sinon": "^7.1.1",
     "sinon-chai": "^3.2.0",
