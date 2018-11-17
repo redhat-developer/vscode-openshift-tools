@@ -13,21 +13,23 @@ import * as fsex from 'fs-extra';
 import * as hasha from 'hasha';
 import opn = require('opn');
 
-suite("tool tests", () => {
+suite("tools configuration", () => {
     const odoCli: odo.Odo = odo.OdoImpl.getInstance();
     let sb: sinon.SinonSandbox;
+    let chmodSyncStub: sinon.SinonStub;
 
     setup(() => {
         sb = sinon.createSandbox();
-        sb.stub(fs, 'chmodSync');
+        chmodSyncStub = sb.stub(fs, 'chmodSync');
+        ToolsConfig.resetConfiguration();
     });
 
     teardown(() => {
         sb.restore();
     });
 
-    suite('tool getVersion()', () => {
-        test('odo-getVersion() returns version number with expected output', async () => {
+    suite('getVersion()', () => {
+        test('returns version number with expected output', async () => {
             const testData: CliExitData = { stdout: 'odo v0.0.13 (65b5bed8)\n line two', stderr: '', error: undefined };
             sb.stub(Cli.prototype, 'execute').resolves(testData);
             sb.stub(fs, 'existsSync').returns(true);
@@ -36,7 +38,7 @@ suite("tool tests", () => {
             assert.equal(result, '0.0.13');
         });
 
-        test('odo-getVersion() returns version undefined for unexpected output', async () => {
+        test('returns version undefined for unexpected output', async () => {
             const invalidData: CliExitData = { error: undefined, stderr: '', stdout: 'ocunexpected v0.0.13 (65b5bed8) \n line two' };
             sb.stub(Cli.prototype, 'execute').resolves(invalidData);
             sb.stub(fs, 'existsSync').returns(true);
@@ -45,7 +47,7 @@ suite("tool tests", () => {
             assert.equal(result, undefined);
         });
 
-        test('odo-getVersion() returns version undefined for not existing tool', async () => {
+        test('returns version undefined for not existing tool', async () => {
             const invalidData: CliExitData = { error: undefined, stderr: '', stdout: 'ocunexpected v0.0.13 (65b5bed8) \n line two' };
             sb.stub(Cli.prototype, 'execute').resolves(invalidData);
             sb.stub(fs, 'existsSync').returns(false);
@@ -54,7 +56,7 @@ suite("tool tests", () => {
             assert.equal(result, undefined);
         });
 
-        test('odo-getVersion() returns version undefined for tool that does not support version parameter', async () => {
+        test('returns version undefined for tool that does not support version parameter', async () => {
             const invalidData: CliExitData = { error: new Error('something bad happened'), stderr: '', stdout: 'ocunexpected v0.0.13 (65b5bed8) \n line two' };
             sb.stub(Cli.prototype, 'execute').resolves(invalidData);
             sb.stub(fs, 'existsSync').returns(true);
@@ -64,7 +66,7 @@ suite("tool tests", () => {
         });
     });
 
-    suite('tools detectOrDownload()', () => {
+    suite('detectOrDownload()', () => {
         let withProgress;
         setup(() => {
             withProgress = sb.stub(vscode.window, 'withProgress').resolves();
@@ -72,6 +74,7 @@ suite("tool tests", () => {
 
         test('returns path to tool detected form PATH locations if detected version is correct', async () => {
             sb.stub(shelljs, 'which').returns('odo');
+            sb.stub(fs, 'existsSync').returns(false);
             sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools['odo'].version);
             let toolLocation = await ToolsConfig.detectOrDownload('odo');
             assert.equal(toolLocation,'odo');
@@ -145,5 +148,72 @@ suite("tool tests", () => {
             assert.equal(toolLocation, undefined);
         });
 
+        
+        suite('on windows', () => {
+            setup(() => {
+                sb.stub(Platform, 'getOS').returns('win32');
+                sb.stub(Platform, 'getEnv').returns({
+                    USERPROFILE: 'profile'
+                });
+                ToolsConfig.resetConfiguration();
+            });
+            
+            test('does not set executable attribute for tool file', async () => {
+                sb.stub(shelljs, 'which');
+                sb.stub(fs, 'existsSync').returns(true);
+                sb.stub(ToolsConfig, 'getVersion').returns('0.0.0');
+                let showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
+                let stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
+                stub.onSecondCall().returns(ToolsConfig.tools['oc'].sha256sum);
+                sb.stub(archive, 'unzip').resolves();
+                let toolLocation = await ToolsConfig.detectOrDownload('odo');
+                assert.ok(!chmodSyncStub.called);
+            });
+        });
+
+        suite('on *nix', () => {
+            setup(() => {
+                sb.stub(Platform, 'getOS').returns('linux');
+                sb.stub(Platform, 'getEnv').returns({
+                    HOME: 'home'
+                });
+                ToolsConfig.resetConfiguration();
+            });
+            test('set executable attribute for tool file', async () => {
+                sb.stub(shelljs, 'which');
+                sb.stub(fs, 'existsSync').returns(false);
+                let showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
+                let stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
+                sb.stub(archive, 'unzip').resolves();
+                let toolLocation = await ToolsConfig.detectOrDownload('odo');
+                assert.ok(chmodSyncStub.called);
+            });
+        })
     });
+    suite('loadMetadata()', () => {
+        test('keeps tool configuration if there is no platform attribute', () => {
+            let config: object = {
+                odo: {
+                    name: 'OpenShift Do tool',
+                    version: '0.0.100'
+                }
+            };
+            config = ToolsConfig.loadMetadata(config, 'platform-name');
+            assert.ok(config['odo']);
+        })
+        test('removes tool configuration if platform is not supported', () => {
+            let config: object = {
+                odo: {
+                    name: 'OpenShift Do tool',
+                    version: '0.0.100',
+                    platform: {
+                        win32: {
+                        }
+                    }
+                }
+            };
+            config = ToolsConfig.loadMetadata(config, 'platform-name');
+            assert.ok(!config['odo']);
+        })
+    })
 });

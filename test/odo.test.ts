@@ -105,5 +105,5 @@ suite("odo integration tests", () => {
             assert.equal(result[1], 'free');
             assert.equal(result[2], 'paid');
         });
-    });
+    });    
 });

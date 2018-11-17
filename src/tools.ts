@@ -73,75 +73,85 @@ const configData = {
     }
 };
 
-function loadMetadata(requirements, platform): object {
-    const reqs = JSON.parse(JSON.stringify(requirements));
-    for (const object in requirements) {
-        if (reqs[object].platform) {
-            if (reqs[object].platform[platform]) {
-                Object.assign(reqs[object], reqs[object].platform[platform]);
-                delete reqs[object].platform;
-            } else {
-                delete reqs[object];
-            }
-        }
-    }
-    return reqs;
-}
-
-const tools: object = loadMetadata(configData, process.platform);
-
 export class ToolsConfig {
 
-    public static tools: object = tools;
+    public static tools: object = ToolsConfig.loadMetadata(configData, Platform.OS);
+
+    public static loadMetadata(requirements, platform): object {
+        const reqs = JSON.parse(JSON.stringify(requirements));
+        for (const object in requirements) {
+            if (reqs[object].platform) {
+                if (reqs[object].platform[platform]) {
+                    Object.assign(reqs[object], reqs[object].platform[platform]);
+                    delete reqs[object].platform;
+                } else {
+                    delete reqs[object];
+                }
+            }
+        }
+        return reqs;
+    }
+
+    public static resetConfiguration() {
+        ToolsConfig.tools = ToolsConfig.loadMetadata(configData, Platform.OS);
+    }
 
     public static async detectOrDownload(cmd: string): Promise<string> {
-        const toolCacheLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', tools[cmd].cmdFileName);
-        let toolLocations: string[] = [which(cmd), toolCacheLocation];
-        let toolLocation:string = await ToolsConfig.selectTool(toolLocations, tools[cmd].version);
 
-        if(toolLocation === undefined) {
-            // otherwise request permission to download
-            const toolDlLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', tools[cmd].dlFileName);
-            const response = await vscode.window.showInformationMessage(
-                `Cannot find ${tools[cmd].description} v${tools[cmd].version}.`, 'Download and install', 'Help', 'Cancel');
+        let toolLocation:string = ToolsConfig.tools[cmd].location;
 
-            if (response === 'Download and install') {
-                let action: string;
-                do {
-                    action = undefined;
-                    await vscode.window.withProgress({
-                        cancellable: true,
-                        location: vscode.ProgressLocation.Notification,
-                        title: `Downloading ${tools[cmd].description}: `
-                        },
-                        (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
-                            return DownloadUtil.downloadFile(
-                                tools[cmd].url,
-                                toolDlLocation,
-                                (dlProgress, increment) => progress.report({ increment, message: `${dlProgress}%`})
-                            );
-                    });
-                    const sha256sum: string = await hasha.fromFile(toolDlLocation, {algorithm: 'sha256'});
-                    if (sha256sum !== tools[cmd].sha256sum) {
-                        fsex.removeSync(toolDlLocation);
-                        action = await vscode.window.showInformationMessage(`Checksum for downloaded ${tools[cmd].description} v${tools[cmd].version} is not correct.`, 'Download again', 'Cancel');
-                    }
+        if (toolLocation === undefined) {
+            const toolCacheLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools[cmd].cmdFileName);
+            let toolLocations: string[] = [which(cmd), toolCacheLocation];
+            toolLocation = await ToolsConfig.selectTool(toolLocations, ToolsConfig.tools[cmd].version);
 
-                } while (action === 'Download again');
+            if(toolLocation === undefined) {
+                // otherwise request permission to download
+                const toolDlLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools[cmd].dlFileName);
+                const response = await vscode.window.showInformationMessage(
+                    `Cannot find ${ToolsConfig.tools[cmd].description} v${ToolsConfig.tools[cmd].version}.`, 'Download and install', 'Help', 'Cancel');
+                fsex.ensureDirSync(path.resolve(Platform.getUserHomePath(), '.vs-openshift'));
+                if (response === 'Download and install') {
+                    let action: string;
+                    do {
+                        action = undefined;
+                        await vscode.window.withProgress({
+                            cancellable: true,
+                            location: vscode.ProgressLocation.Notification,
+                            title: `Downloading ${ToolsConfig.tools[cmd].description}: `
+                            },
+                            (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
+                                return DownloadUtil.downloadFile(
+                                    ToolsConfig.tools[cmd].url,
+                                    toolDlLocation,
+                                    (dlProgress, increment) => progress.report({ increment, message: `${dlProgress}%`})
+                                );
+                        });
+                        const sha256sum: string = await hasha.fromFile(toolDlLocation, {algorithm: 'sha256'});
+                        if (sha256sum !== ToolsConfig.tools[cmd].sha256sum) {
+                            fsex.removeSync(toolDlLocation);
+                            action = await vscode.window.showInformationMessage(`Checksum for downloaded ${ToolsConfig.tools[cmd].description} v${ToolsConfig.tools[cmd].version} is not correct.`, 'Download again', 'Cancel');
+                        }
 
-                if (action !== 'Cancel') {
-                    if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
-                        await archive.unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), tools[cmd].filePrefix);
-                    } else if (toolDlLocation.endsWith('.gz')) {
-                        await archive.unzip(toolDlLocation, toolCacheLocation, tools[cmd].filePrefix);
-                    }
-                    if (Platform.OS !== 'win32') {
-                        fs.chmodSync(toolCacheLocation, 0o765);
-                    }
-                    toolLocation = toolCacheLocation;
+                    } while (action === 'Download again');
+
+                    if (action !== 'Cancel') {
+                        if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
+                            await archive.unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), ToolsConfig.tools[cmd].filePrefix);
+                        } else if (toolDlLocation.endsWith('.gz')) {
+                            await archive.unzip(toolDlLocation, toolCacheLocation, ToolsConfig.tools[cmd].filePrefix);
+                        }
+                        if (Platform.OS !== 'win32') {
+                            fs.chmodSync(toolCacheLocation, 0o765);  
+                        }
+                        toolLocation = toolCacheLocation;
+                    } 
+                } else if (response === `Help`) {
+                    opn('https://github.com/redhat-developer/vscode-openshift-tools#dependencies');
                 }
-            } else if (response === `Help`) {
-                opn('https://github.com/redhat-developer/vscode-openshift-tools#dependencies');
+            }
+            if(toolLocation) {
+                ToolsConfig.tools[cmd].location = toolLocation;
             }
         }
         return toolLocation;
@@ -153,7 +163,7 @@ export class ToolsConfig {
             const version = new RegExp(`${cmd} v([\\d\\.]+)`);
             try {
                 const result = await Cli.getInstance().execute(`${location} version`);
-                if (result.error === undefined) {
+                if (!result.error) { 
                     const toolVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
                         return value.match(version);
                     }).map((value)=>version.exec(value)[1]);

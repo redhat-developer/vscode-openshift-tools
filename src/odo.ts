@@ -12,6 +12,7 @@ import jsYaml = require('js-yaml');
 import { Platform } from './util/platform';
 import * as fs from 'fs';
 import { ToolsConfig } from './tools';
+import { create } from 'domain';
 
 export interface OpenShiftObject extends QuickPickItem {
     getTreeItem(): TreeItem;
@@ -114,10 +115,13 @@ export interface Odo {
     requireLogin(): Promise<boolean>;
 }
 
+export function getInstance(): Odo {
+    return OdoImpl.getInstance();
+}
+
 export class OdoImpl implements Odo {
     private static cli: cliInstance.ICli = cliInstance.Cli.getInstance();
     private static instance: OdoImpl;
-
     private constructor() {}
 
     public static getInstance(): OdoImpl {
@@ -292,8 +296,11 @@ export class OdoImpl implements Odo {
 
     public async execute(command: string, cwd?: string): Promise<CliExitData> {
         const cmd = command.split(' ')[0];
-        const toolLocation: string = await ToolsConfig.detectOrDownload(command.split(' ')[0]);
-        return OdoImpl.cli.execute(command.replace(`${cmd}`, toolLocation), cwd ? {cwd} : { });
+        const toolLocation = await ToolsConfig.detectOrDownload(cmd);
+        return OdoImpl.cli.execute(
+            toolLocation ? command.replace(`${cmd}`, toolLocation) : command,
+            cwd ? {cwd} : { }
+        );
     }
 
     public async requireLogin(): Promise<boolean> {
