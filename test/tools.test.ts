@@ -73,7 +73,7 @@ suite("tools configuration", () => {
         });
 
         test('returns path to tool detected form PATH locations if detected version is correct', async () => {
-            sb.stub(shelljs, 'which').returns('odo');
+            sb.stub(shelljs, 'which').returns({stdout: 'odo'});
             sb.stub(fs, 'existsSync').returns(false);
             sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools['odo'].version);
             let toolLocation = await ToolsConfig.detectOrDownload('odo');

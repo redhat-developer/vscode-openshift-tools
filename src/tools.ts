@@ -102,7 +102,8 @@ export class ToolsConfig {
 
         if (toolLocation === undefined) {
             const toolCacheLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools[cmd].cmdFileName);
-            let toolLocations: string[] = [which(cmd), toolCacheLocation];
+            const whichLocation = which(cmd);
+            let toolLocations: string[] = [whichLocation ? whichLocation.stdout : null, toolCacheLocation];
             toolLocation = await ToolsConfig.selectTool(toolLocations, ToolsConfig.tools[cmd].version);
 
             if(toolLocation === undefined) {
