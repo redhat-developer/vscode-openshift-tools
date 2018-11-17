@@ -71,7 +71,7 @@ class OpenShiftObjectImpl implements OpenShiftObject {
             },
             LoginError: ()=> {
 				item.tooltip = 'Log in to cluster';
-				item.iconPath = '';
+				item.iconPath = Uri.file(path.join(__dirname, "../../images/cluster-down.png"));
             }
 		};
 		(contextType[this.context])();
@@ -222,15 +222,15 @@ export class OdoImpl implements Odo {
     public async getClustersWithOdo(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
         const result: cliInstance.CliExitData = await this.execute(
-            `odo version`
+            `odo version && odo project list`
         );
-        if (result.stdout.indexOf("the server has asked for the client to provide credentials") > -1) {
-            const loginErrorMsg: string = 'Log in to display clusters';
-            return result.stdout.trim().split(`\n`).slice(1).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(null, loginErrorMsg, 'loginError', this, TreeItemCollapsibleState.None));
+        if (result.stdout.indexOf('Please log in to the cluster') > -1) {
+            const loginErrorMsg: string = 'Please log in to the cluster';
+            return[new OpenShiftObjectImpl(null, loginErrorMsg, 'LoginError', this, TreeItemCollapsibleState.None)];
         }
         if (result.stdout.indexOf("Unable to connect to OpenShift cluster, is it down?") > -1) {
-            const clusterDownMsg: string = 'Unable to connect to cluster, it might be down !!';
-            return result.stdout.trim().split(`\n`).slice(1).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(null, clusterDownMsg, 'ClusterError', this, TreeItemCollapsibleState.None));
+            const clusterDownMsg: string = 'Please start the cluster';
+            return [new OpenShiftObjectImpl(null, clusterDownMsg, 'ClusterError', this, TreeItemCollapsibleState.None)];
         }
         commands.executeCommand('setContext', 'isLoggedIn', true);
         clusters = result.stdout.trim().split('\n').filter((value) => {
@@ -298,13 +298,13 @@ export class OdoImpl implements Odo {
         const cmd = command.split(' ')[0];
         const toolLocation = await ToolsConfig.detectOrDownload(cmd);
         return OdoImpl.cli.execute(
-            toolLocation ? command.replace(`${cmd}`, toolLocation) : command,
+            toolLocation ? command.replace(cmd, toolLocation).replace(new RegExp(`&& ${cmd}`,'g'), `&& ${toolLocation}`) : command,
             cwd ? {cwd} : { }
         );
     }
 
     public async requireLogin(): Promise<boolean> {
-        const result: cliInstance.CliExitData = await this.execute(`odo version`);
+        const result: cliInstance.CliExitData = await this.execute(`odo version && odo list project`);
         return result.stdout.indexOf("Please log in to the cluster") > -1;
     }
 }
