@@ -10,7 +10,7 @@ import request = require('request');
 import progress = require('request-progress');
 
 export class DownloadUtil {
-  static downloadFile(fromUrl: string, toFile: string, progressCallBack?: (current: number, increment: number) => void, throttle?: number): Promise<any> {
+  static downloadFile(fromUrl: string, toFile: string, progressCallBack?: (current: number, increment: number) => void, throttle?: number): Promise<void> {
     return new Promise((resolve, reject) => {
       let previous = 0;
       progress(request(fromUrl), {
