@@ -226,7 +226,7 @@ export class OdoImpl implements Odo {
         );
         if (result.stdout.indexOf("the server has asked for the client to provide credentials") > -1) {
             const loginErrorMsg: string = 'Log in to display clusters';
-            return result.stdout.trim().split(`\n`).slice(1).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(null, loginErrorMsg, 'loginError', this, TreeItemCollapsibleState.None));
+            return result.stdout.trim().split(`\n`).slice(1).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(null, loginErrorMsg, 'LoginError', this, TreeItemCollapsibleState.None));
         }
         if (result.stdout.indexOf("Unable to connect to OpenShift cluster, is it down?") > -1) {
             const clusterDownMsg: string = 'Unable to connect to cluster, it might be down !!';
