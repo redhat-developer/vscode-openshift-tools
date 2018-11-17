@@ -27,7 +27,7 @@
   "activationEvents": [
     "onView:openshiftProjectExplorer",
     "onCommand:openshift.about",
-    "onCommand:openshift.openshiftConsole",
+    "onCommand:openshift.openshiftConsole.palette",
     "onCommand:openshift.explorer.login",
     "onCommand:openshift.explorer.logout",
     "onCommand:openshift.explorer.refresh",
@@ -142,6 +142,11 @@
       {
         "command": "openshift.openshiftConsole",
         "title": "Open Console",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.openshiftConsole.palette",
+        "title": "Open Console for Current Cluster",
         "category": "OpenShift"
       },
       {
