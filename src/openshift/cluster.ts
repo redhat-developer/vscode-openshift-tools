@@ -8,7 +8,6 @@ import { OpenShiftItem } from './openshiftItem';
 import * as vscode from 'vscode';
 import * as validator from 'validator';
 import { CliExitData } from "../cli";
-import { ChildProcess } from "child_process";
 import opn = require("opn");
 
 export class Cluster extends OpenShiftItem {
