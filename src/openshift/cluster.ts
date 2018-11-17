@@ -64,12 +64,16 @@ export class Cluster extends OpenShiftItem {
         Cluster.odo.executeInTerminal(`odo version`, process.cwd());
     }
 
-    static async openshiftConsole(context: OpenShiftObject): Promise<ChildProcess> {
+    static async openshiftConsole(context: OpenShiftObject): Promise<void> {
         if (context) {
-            return opn(context.getName());
+            opn(context.getName());
         } else {
-            const result: any = await Cluster.odo.getClusters();
-            opn(result[0].getName());
+            const result: OpenShiftObject[] = await Cluster.odo.getClusters();
+            if(result.length>0 && result[0].getName().startsWith('http')) {
+                opn(result[0].getName());
+            } else {
+                vscode.window.showErrorMessage(result[0].getName());
+            }
         }
     }
 

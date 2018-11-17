@@ -27,7 +27,7 @@
   "activationEvents": [
     "onView:openshiftProjectExplorer",
     "onCommand:openshift.about",
-    "onCommand:openshift.openshiftConsole",
+    "onCommand:openshift.openshiftConsole.palette",
     "onCommand:openshift.explorer.login",
     "onCommand:openshift.explorer.logout",
     "onCommand:openshift.explorer.refresh",
@@ -146,7 +146,7 @@
       },
       {
         "command": "openshift.openshiftConsole.palette",
-        "title": "Open Console",
+        "title": "Open Console for Current Cluster",
         "category": "OpenShift"
       },
       {
@@ -459,7 +459,6 @@
     }
   },
   "extensionDependencies": [
-    "ms-kubernetes-tools.vscode-kubernetes-tools"
   ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
