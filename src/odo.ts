@@ -11,6 +11,8 @@ import * as path from 'path';
 import jsYaml = require('js-yaml');
 import { Platform } from './util/platform';
 import * as fs from 'fs';
+import { ToolsConfig } from './tools';
+import { create } from 'domain';
 
 export interface OpenShiftObject extends QuickPickItem {
     getTreeItem(): TreeItem;
@@ -69,7 +71,7 @@ class OpenShiftObjectImpl implements OpenShiftObject {
             },
             LoginError: ()=> {
 				item.tooltip = 'Log in to cluster';
-				item.iconPath = '';
+				item.iconPath = Uri.file(path.join(__dirname, "../../images/cluster-down.png"));
             }
 		};
 		(contextType[this.context])();
@@ -106,7 +108,6 @@ export interface Odo {
     getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponentTypeVersions(componentName: string): Promise<string[]>;
     getServiceTemplates(): Promise<string[]>;
-    getOdoVersion(): Promise<string>;
     getServiceTemplatePlans(svc: string): Promise<string[]>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
@@ -114,10 +115,13 @@ export interface Odo {
     requireLogin(): Promise<boolean>;
 }
 
+export function getInstance(): Odo {
+    return OdoImpl.getInstance();
+}
+
 export class OdoImpl implements Odo {
     private static cli: cliInstance.ICli = cliInstance.Cli.getInstance();
     private static instance: OdoImpl;
-
     private constructor() {}
 
     public static getInstance(): OdoImpl {
@@ -128,8 +132,8 @@ export class OdoImpl implements Odo {
     }
 
     public async getProjects(): Promise<OpenShiftObject[]> {
-        return OdoImpl.cli.execute(
-            'oc get project -o jsonpath="{range .items[*]}{.metadata.name}{\\"\\n\\"}{end}"', {}
+        return this.execute(
+            'oc get project -o jsonpath="{range .items[*]}{.metadata.name}{\\"\\n\\"}{end}"'
         ).then((result) => {
             let projs: OpenShiftObject[] = [];
             const stdout: string = result.stdout.trim();
@@ -152,15 +156,15 @@ export class OdoImpl implements Odo {
 
     public async getComponents(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
         const proj = application.getParent().getName();
-        const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
-            `oc get dc --namespace ${proj} -o jsonpath="{range .items[?(.metadata.labels.app == \\"${application.getName()}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}"`, {}
+        const result: cliInstance.CliExitData = await this.execute(
+            `oc get dc --namespace ${proj} -o jsonpath="{range .items[?(.metadata.labels.app == \\"${application.getName()}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}"`
         );
         return result.stdout.trim().split('\n').filter((value)=>value!=='').map<OpenShiftObject>((value) => new OpenShiftObjectImpl(application, value, 'component', this, TreeItemCollapsibleState.Collapsed));
     }
 
     public async getComponentTypes(): Promise<string[]> {
-        const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
-            `odo catalog list components`, {}
+        const result: cliInstance.CliExitData = await this.execute(
+            `odo catalog list components`
         );
         return result.stdout.trim().split('\n').slice(1).map((value) => {
             const name = value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|');
@@ -172,8 +176,8 @@ export class OdoImpl implements Odo {
         const app = component.getParent();
         const appName = app.getName();
         const projName = app.getParent().getName();
-        const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
-            `oc get pvc -o jsonpath="{range .items[?(.metadata.labels.app == \\"${appName}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\" \\"}{.metadata.labels.app\\.kubernetes\\.io/storage-name}{\\"\\n\\"}{end}" --namespace ${projName}`, {}
+        const result: cliInstance.CliExitData = await this.execute(
+            `oc get pvc -o jsonpath="{range .items[?(.metadata.labels.app == \\"${appName}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\" \\"}{.metadata.labels.app\\.kubernetes\\.io/storage-name}{\\"\\n\\"}{end}" --namespace ${projName}`
         );
 
         return result.stdout.trim().split('\n').filter((value) => value.trim().split(' ').length > 1 && value.trim().split(' ')[0] === component.getName()).map((value) => {
@@ -183,8 +187,8 @@ export class OdoImpl implements Odo {
     }
 
     public async getComponentTypeVersions(componentName: string) {
-        const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
-            `odo catalog list components`, {}
+        const result: cliInstance.CliExitData = await this.execute(
+            `odo catalog list components`
         );
         const versions = result.stdout.trim().split('\n').slice(1).filter((value) => {
             const data = value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|');
@@ -205,9 +209,7 @@ export class OdoImpl implements Odo {
 
     public async getClustersWithOc(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
-        const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
-            `oc version`, {}
-        );
+        const result: cliInstance.CliExitData = await this.execute(`oc version`);
         clusters = result.stdout.trim().split('\n').filter((value) => {
             return value.indexOf('Server ') !== -1;
         }).map((value) => {
@@ -219,16 +221,16 @@ export class OdoImpl implements Odo {
 
     public async getClustersWithOdo(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
-        const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
-            `odo version`, {}
+        const result: cliInstance.CliExitData = await this.execute(
+            `odo version && odo project list`
         );
-        if (result.stdout.indexOf("the server has asked for the client to provide credentials") > -1) {
-            const loginErrorMsg: string = 'Log in to display clusters';
-            return result.stdout.trim().split(`\n`).slice(1).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(null, loginErrorMsg, 'loginError', this, TreeItemCollapsibleState.None));
+        if (result.stdout.indexOf('Please log in to the cluster') > -1) {
+            const loginErrorMsg: string = 'Please log in to the cluster';
+            return[new OpenShiftObjectImpl(null, loginErrorMsg, 'LoginError', this, TreeItemCollapsibleState.None)];
         }
         if (result.stdout.indexOf("Unable to connect to OpenShift cluster, is it down?") > -1) {
-            const clusterDownMsg: string = 'Unable to connect to cluster, it might be down !!';
-            return result.stdout.trim().split(`\n`).slice(1).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(null, clusterDownMsg, 'ClusterError', this, TreeItemCollapsibleState.None));
+            const clusterDownMsg: string = 'Please start the cluster';
+            return [new OpenShiftObjectImpl(null, clusterDownMsg, 'ClusterError', this, TreeItemCollapsibleState.None)];
         }
         commands.executeCommand('setContext', 'isLoggedIn', true);
         clusters = result.stdout.trim().split('\n').filter((value) => {
@@ -240,27 +242,9 @@ export class OdoImpl implements Odo {
         return clusters;
     }
 
-    public async getOdoVersion(): Promise<string> {
-        const version = /odo v([\d\.]+)/;
-        const result = await OdoImpl.cli.execute(
-            'odo version', {}
-        );
-        let detectedVersion: string =  '0.0.0';
-        if (result.error === undefined) {
-            const odoVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
-                return value.match(version);
-            }).map((value)=>version.exec(value)[1]);
-
-            if (odoVersion.length) {
-                detectedVersion = odoVersion[0];
-            }
-        }
-        return detectedVersion;
-    }
-
     public async getServiceTemplates(): Promise<string[]> {
-        const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
-            `odo catalog list services`, {}
+        const result: cliInstance.CliExitData = await this.execute(
+            `odo catalog list services`
         );
 
         if (result.error) {
@@ -273,8 +257,8 @@ export class OdoImpl implements Odo {
     }
 
     public async getServiceTemplatePlans(svcName: string): Promise<string[]> {
-        const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
-            `odo catalog list services`, {}
+        const result: cliInstance.CliExitData = await this.execute(
+            `odo catalog list services`
         );
         const plans = result.stdout.trim().split('\n').slice(1).filter((value) => {
                 const data = value.trim().replace(/\s{1,}/g, '|').split('|');
@@ -290,8 +274,8 @@ export class OdoImpl implements Odo {
         const projName: string = application.getParent().getName();
         let services: OpenShiftObject[] = [];
         try {
-            const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
-                `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app == \\"${appName}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}" --namespace ${projName}`, {}
+            const result: cliInstance.CliExitData = await this.execute(
+                `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app == \\"${appName}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}" --namespace ${projName}`
             );
             services = result.stdout.trim().split('\n').filter((value)=>value!=='').map((value) => new OpenShiftObjectImpl(application, value, 'service', this, TreeItemCollapsibleState.None));
         } catch (e) {
@@ -311,13 +295,16 @@ export class OdoImpl implements Odo {
     }
 
     public async execute(command: string, cwd?: string): Promise<CliExitData> {
-        return OdoImpl.cli.execute(command, cwd ? {cwd} : { });
+        const cmd = command.split(' ')[0];
+        const toolLocation = await ToolsConfig.detectOrDownload(cmd);
+        return OdoImpl.cli.execute(
+            toolLocation ? command.replace(cmd, toolLocation).replace(new RegExp(`&& ${cmd}`,'g'), `&& ${toolLocation}`) : command,
+            cwd ? {cwd} : { }
+        );
     }
 
     public async requireLogin(): Promise<boolean> {
-        const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
-            `odo version`, {}
-        );
-        return result.stdout.indexOf("the server has asked for the client to provide credentials") > -1;
+        const result: cliInstance.CliExitData = await this.execute(`odo version && odo list project`);
+        return result.stdout.indexOf("Please log in to the cluster") > -1;
     }
 }
