@@ -257,10 +257,6 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
-          "command": "openshift.app.create",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
           "command": "openshift.app.delete",
           "when": "view == openshiftProjectExplorer"
         },
