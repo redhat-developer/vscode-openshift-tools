@@ -16,8 +16,7 @@ suite("odo integration tests", () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        sandbox.stub(shelljs, 'which').returns('odo');
-        sandbox.stub(ToolsConfig, 'getVersion').returns('0.0.15');
+        sandbox.stub(ToolsConfig, 'getVersion').resolves('0.0.15');
     });
 
     teardown(() => {
@@ -105,5 +104,5 @@ suite("odo integration tests", () => {
             assert.equal(result[1], 'free');
             assert.equal(result[2], 'paid');
         });
-    });    
+    });
 });
