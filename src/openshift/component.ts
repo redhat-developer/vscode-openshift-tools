@@ -21,12 +21,12 @@ export class Component extends OpenShiftItem {
                 description: 'Use an existing git repository as a source for the component'
             },
             {
-                label: 'Workspace Directory',
-                description: 'Use workspace directory as a source for the component'
-            },
-            {
                 label: 'Binary File',
                 description: 'Use binary file as a source for the component'
+            },
+            {
+                label: 'Workspace Directory',
+                description: 'Use workspace directory as a source for the component'
             }
         ];
         const componentSource = await vscode.window.showQuickPick(sourceTypes, {
@@ -37,10 +37,10 @@ export class Component extends OpenShiftItem {
         let command: Promise<string>;
         if (componentSource.label === 'Git Repository') {
             command = Component.createFromGit(application);
-        } else if (componentSource.label === 'Workspace Directory') {
-            command = Component.createFromLocal(application);
-        } else {
+        } else if (componentSource.label === 'Binary File') {
             command = Component.createFromBinary(application);
+        } else {
+            command = Component.createFromLocal(application);
         }
         return command.catch((err) => Promise.reject(`Failed to create component with error '${err}'`));
     }
