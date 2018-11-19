@@ -68,7 +68,7 @@ export class Cluster extends OpenShiftItem {
             opn(context.getName());
         } else {
             const result: OpenShiftObject[] = await Cluster.odo.getClusters();
-            if(result.length>0 && result[0].getName().startsWith('http')) {
+            if (result.length>0 && result[0].getName().startsWith('http')) {
                 opn(result[0].getName());
             } else {
                 vscode.window.showErrorMessage(result[0].getName());

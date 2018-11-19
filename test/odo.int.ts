@@ -7,7 +7,6 @@ import { Cluster } from '../src/openshift/cluster';
 suite('odo integration', () => {
     const oi: odo.Odo = odo.getInstance();
     let sb: sinon.SinonSandbox;
-    
 
     setup(() => {
         sb = sinon.createSandbox();
@@ -19,7 +18,7 @@ suite('odo integration', () => {
     });
 
     suite('explorer', ()=> {
-        
+
         test('getClusters()', async () => {
             const clusters = await oi.getClusters();
             assert.ok(clusters.length > 0);
