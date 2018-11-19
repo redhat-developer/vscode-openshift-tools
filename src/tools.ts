@@ -98,15 +98,15 @@ export class ToolsConfig {
 
     public static async detectOrDownload(cmd: string): Promise<string> {
 
-        let toolLocation:string = ToolsConfig.tools[cmd].location;
+        let toolLocation: string = ToolsConfig.tools[cmd].location;
 
         if (toolLocation === undefined) {
             const toolCacheLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools[cmd].cmdFileName);
             const whichLocation = which(cmd);
-            let toolLocations: string[] = [whichLocation ? whichLocation.stdout : null, toolCacheLocation];
+            const toolLocations: string[] = [whichLocation ? whichLocation.stdout : null, toolCacheLocation];
             toolLocation = await ToolsConfig.selectTool(toolLocations, ToolsConfig.tools[cmd].version);
 
-            if(toolLocation === undefined) {
+            if (toolLocation === undefined) {
                 // otherwise request permission to download
                 const toolDlLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools[cmd].dlFileName);
                 const response = await vscode.window.showInformationMessage(
@@ -143,15 +143,15 @@ export class ToolsConfig {
                             await archive.unzip(toolDlLocation, toolCacheLocation, ToolsConfig.tools[cmd].filePrefix);
                         }
                         if (Platform.OS !== 'win32') {
-                            fs.chmodSync(toolCacheLocation, 0o765);  
+                            fs.chmodSync(toolCacheLocation, 0o765);
                         }
                         toolLocation = toolCacheLocation;
-                    } 
+                    }
                 } else if (response === `Help`) {
                     opn('https://github.com/redhat-developer/vscode-openshift-tools#dependencies');
                 }
             }
-            if(toolLocation) {
+            if (toolLocation) {
                 ToolsConfig.tools[cmd].location = toolLocation;
             }
         }
@@ -164,7 +164,7 @@ export class ToolsConfig {
             const version = new RegExp(`${cmd} v([\\d\\.]+)`);
             try {
                 const result = await Cli.getInstance().execute(`${location} version`);
-                if (!result.error) { 
+                if (!result.error) {
                     const toolVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
                         return value.match(version);
                     }).map((value)=>version.exec(value)[1]);
@@ -182,7 +182,7 @@ export class ToolsConfig {
     public static async selectTool(locations: string[], correctVersion: string): Promise<string> {
         let result;
         for (const location of locations) {
-            if(location && await ToolsConfig.getVersion(location) === correctVersion) {
+            if (location && await ToolsConfig.getVersion(location) === correctVersion) {
                 result = location;
                 break;
             }
