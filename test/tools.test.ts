@@ -68,12 +68,13 @@ suite("tools configuration", () => {
 
     suite('detectOrDownload()', () => {
         let withProgress;
+
         setup(() => {
             withProgress = sb.stub(vscode.window, 'withProgress').resolves();
         });
 
         test('returns path to tool detected form PATH locations if detected version is correct', async () => {
-            sb.stub(shelljs, 'which').returns({stdout: 'odo'});
+            sb.stub(shelljs, 'which').returns(<string & shelljs.ShellReturnValue>{stdout: 'odo'});
             sb.stub(fs, 'existsSync').returns(false);
             sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools['odo'].version);
             let toolLocation = await ToolsConfig.detectOrDownload('odo');
@@ -91,7 +92,7 @@ suite("tools configuration", () => {
         test('ask to downloads tool if previously downloaded version is not correct and download if requested by user', async () => {
             sb.stub(shelljs, 'which');
             sb.stub(fs, 'existsSync').returns(true);
-            sb.stub(ToolsConfig, 'getVersion').returns('0.0.0');
+            sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
             let showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
             let stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
             stub.onSecondCall().returns(ToolsConfig.tools['oc'].sha256sum);
@@ -109,7 +110,7 @@ suite("tools configuration", () => {
         test('ask to downloads tool if previously downloaded version is not correct and skip download if canceled by user', async () => {
             sb.stub(shelljs, 'which');
             sb.stub(fs, 'existsSync').returns(true);
-            sb.stub(ToolsConfig, 'getVersion').returns('0.0.0');
+            sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
             let showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Cancel');
             let toolLocation = await ToolsConfig.detectOrDownload('odo');
             assert.ok(showInfo.calledOnce);
@@ -119,10 +120,10 @@ suite("tools configuration", () => {
         test('downloads tool, ask to download again if checksum does not match and finish if consecutive download sucessful', async () => {
             sb.stub(shelljs, 'which');
             sb.stub(fs, 'existsSync').returns(true);
-            sb.stub(ToolsConfig, 'getVersion').returns('0.0.0');
+            sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
             let showInfo = sb.stub(vscode.window, 'showInformationMessage').onFirstCall().resolves('Download and install');
             showInfo.onSecondCall().resolves('Download again');
-            let fromFile = sb.stub(hasha, 'fromFile').onFirstCall().returns('not really sha256');
+            let fromFile = sb.stub(hasha, 'fromFile').onFirstCall().resolves('not really sha256');
             fromFile.onSecondCall().returns(ToolsConfig.tools['odo'].sha256sum);
             sb.stub(fsex, 'removeSync');
             sb.stub(archive, 'unzip').resolves();
@@ -135,10 +136,10 @@ suite("tools configuration", () => {
         test('downloads tool, ask to download again if checksum does not match and exits if canceled', async () => {
             sb.stub(shelljs, 'which');
             sb.stub(fs, 'existsSync').returns(true);
-            sb.stub(ToolsConfig, 'getVersion').returns('0.0.0');
+            sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
             let showInfo = sb.stub(vscode.window, 'showInformationMessage').onFirstCall().resolves('Download and install');
             showInfo.onSecondCall().resolves('Cancel');
-            let fromFile = sb.stub(hasha, 'fromFile').onFirstCall().returns('not really sha256');
+            let fromFile = sb.stub(hasha, 'fromFile').onFirstCall().resolves('not really sha256');
             fromFile.onSecondCall().returns(ToolsConfig.tools['odo'].sha256sum);
             sb.stub(fsex, 'removeSync');
             sb.stub(archive, 'unzip').resolves();
@@ -161,7 +162,7 @@ suite("tools configuration", () => {
             test('does not set executable attribute for tool file', async () => {
                 sb.stub(shelljs, 'which');
                 sb.stub(fs, 'existsSync').returns(true);
-                sb.stub(ToolsConfig, 'getVersion').returns('0.0.0');
+                sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
                 let showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
                 let stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
                 stub.onSecondCall().returns(ToolsConfig.tools['oc'].sha256sum);
