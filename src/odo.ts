@@ -304,7 +304,7 @@ export class OdoImpl implements Odo {
     }
 
     public async requireLogin(): Promise<boolean> {
-        const result: cliInstance.CliExitData = await this.execute(`odo version && odo list project`);
+        const result: cliInstance.CliExitData = await this.execute(`odo version && odo project list`);
         return result.stdout.indexOf("Please log in to the cluster") > -1;
     }
 }
