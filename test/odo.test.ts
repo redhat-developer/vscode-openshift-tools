@@ -105,4 +105,52 @@ suite("odo integration tests", () => {
             assert.equal(result[2], 'paid');
         });
     });
+
+    suite('odo and oc current cluster detection integration', () => {
+        const clusterUrl = 'https://localhost:8443';
+
+        const odoVersionOutLoggedIn = [
+            'odo v0.0.15 (2f7ed497)',
+            '',
+            `Server: ${clusterUrl}`,
+            'Kubernetes: v1.11.0+d4cacc0'
+        ];
+        const odoVersionOutLoggedOut = [
+            'odo v0.0.15 (2f7ed497)',
+            '',
+            'Kubernetes: v1.11.0+d4cacc0'
+        ];
+        const oc = [
+            'oc v3.9.0+191fece',
+            'kubernetes v1.9.1+a0ce1bc657',
+            'features: Basic-Auth',
+            '',
+            `Server ${clusterUrl}`,
+            'kubernetes v1.11.0+d4cacc0'
+        ];
+
+        test('extension first use odo version to get cluster url', async () => {
+            sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves({
+                error: undefined,
+                stdout: odoVersionOutLoggedIn.join('\n'),
+                stderr: undefined
+            });
+            const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
+            assert.equal(cluster[0].getName(), clusterUrl);
+        })
+
+        test('extension use oc verdion to get cluster url as a backup plan', async () => {
+            sandbox.stub(odo.OdoImpl.prototype, 'execute').onFirstCall().resolves({
+                error: undefined,
+                stdout: odoVersionOutLoggedOut.join('\n'),
+                stderr: undefined
+            }).onSecondCall().resolves({
+                error: undefined,
+                stdout: oc.join('\n'),
+                stderr: undefined
+            });
+            const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
+            assert.equal(cluster[0].getName(), clusterUrl);
+        })
+    })
 });
