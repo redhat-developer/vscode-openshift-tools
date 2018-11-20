@@ -113,7 +113,7 @@ export class Cluster extends OpenShiftItem {
         });
         if (!passwd) return Promise.resolve(null);
         return Promise.resolve()
-            .then(() => Cluster.odo.execute(`odo login ${clusterURL} -u ${username} -p ${passwd}`))
+            .then(() => Cluster.odo.execute(`odo login ${clusterURL} -u ${username} -p ${passwd} --insecure-skip-tls-verify`))
             .then((result) => Cluster.loginMessage(clusterURL, result))
             .catch((error) => { return Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`); });
     }
@@ -125,7 +125,7 @@ export class Cluster extends OpenShiftItem {
         });
         if (!ocToken) return Promise.resolve(null);
         return Promise.resolve()
-            .then(() => Cluster.odo.execute(`odo login ${clusterURL} --token=${ocToken}`))
+            .then(() => Cluster.odo.execute(`odo login ${clusterURL} --token=${ocToken} --insecure-skip-tls-verify`))
             .then((result) => Cluster.loginMessage(clusterURL, result))
             .catch((error) => { return Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`); });
     }
