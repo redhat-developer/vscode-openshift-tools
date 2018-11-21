@@ -119,7 +119,7 @@ export class ToolsConfig {
                         await vscode.window.withProgress({
                             cancellable: true,
                             location: vscode.ProgressLocation.Notification,
-                            title: `Downloading ${ToolsConfig.tools[cmd].description}: `
+                            title: `Downloading ${ToolsConfig.tools[cmd].description}`
                             },
                             (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
                                 return DownloadUtil.downloadFile(
