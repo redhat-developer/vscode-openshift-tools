@@ -87,6 +87,17 @@ export class Component extends OpenShiftItem {
         Component.odo.executeInTerminal(`odo log ${context.getName()} -f --app ${app.getName()} --project ${project.getName()}`, process.cwd());
     }
 
+    static async link(context: OpenShiftObject): Promise<void> {
+        const app: OpenShiftObject = context.getParent();
+        const project: OpenShiftObject = app.getParent();
+        const componentToLink = await vscode.window.showQuickPick(Component.odo.getComponents(app), {placeHolder: "Select the component to link"});
+        if (!componentToLink) return null;
+
+        return Promise.resolve()
+            .then(() => Component.odo.executeInTerminal(`odo link ${context.getName()} --app ${app.getName()} --project ${project.getName()} --component ${componentToLink.getName()}`, process.cwd()))
+            .catch((err) => Promise.reject(`Failed to link component with error '${err}'`));
+    }
+
     static async push(context: OpenShiftObject): Promise<string> {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();

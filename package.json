@@ -140,6 +140,16 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.link",
+        "title": "Link Component",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.service.link",
+        "title": "Link Component",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.openshiftConsole",
         "title": "Open Console",
         "category": "OpenShift"
@@ -268,6 +278,14 @@
         },
         {
           "command": "openshift.component.followLog",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.link",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.service.link",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -409,6 +427,11 @@
           "group": "c2@3"
         },
         {
+          "command": "openshift.component.link",
+          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "c2@3"
+        },
+        {
           "command": "openshift.component.openUrl",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c3@1"
@@ -435,6 +458,11 @@
         },
         {
           "command": "openshift.service.delete",
+          "when": "view == openshiftProjectExplorer && viewItem == service",
+          "group": "s1"
+        },
+        {
+          "command": "openshift.service.link",
           "when": "view == openshiftProjectExplorer && viewItem == service",
           "group": "s1"
         },
@@ -482,12 +510,12 @@
     "@types/opn": "^5.1.0",
     "@types/request": "^2.48.1",
     "@types/shelljs": "^0.8.0",
-    "@types/sinon": "^5.0.5",
-    "@types/sinon-chai": "^3.2.0",
+    "@types/sinon": "^5.0.6",
+    "@types/sinon-chai": "^3.2.1",
     "@types/validator": "^9.4.3",
     "chai": "^4.2.0",
     "codecov": "^3.1.0",
-    "decache": "^4.4.1",
+    "decache": "^4.5.0",
     "glob": "^7.1.3",
     "istanbul": "^0.4.5",
     "mocha": "^5.2.0",
