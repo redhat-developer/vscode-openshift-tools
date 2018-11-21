@@ -163,7 +163,7 @@ export class ToolsConfig {
         if (fs.existsSync(location)) {
             const version = new RegExp(`${cmd} v([\\d\\.]+)`);
             try {
-                const result = await Cli.getInstance().execute(`"${location}": version`);
+                const result = await Cli.getInstance().execute(`"${location}" version`);
                 if (!result.error) {
                     const toolVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
                         return value.match(version);
