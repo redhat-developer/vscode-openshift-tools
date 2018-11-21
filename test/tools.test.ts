@@ -31,7 +31,7 @@ suite("tools configuration", () => {
     suite('getVersion()', () => {
         test('returns version number with expected output', async () => {
             const testData: CliExitData = { stdout: 'odo v0.0.13 (65b5bed8)\n line two', stderr: '', error: undefined };
-            sb.stub(odo.OdoImpl.prototype, 'execute').resolves(testData);
+            sb.stub(Cli.prototype, 'execute').resolves(testData);
             sb.stub(fs, 'existsSync').returns(true);
 
             const result: string = await ToolsConfig.getVersion('odo');
