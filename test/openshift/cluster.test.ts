@@ -248,7 +248,7 @@ suite('Openshift/Cluster', () => {
             const stub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
             Cluster.about();
 
-            expect(stub).calledOnceWith('odo version', process.cwd());
+            expect(stub).calledOnceWith('odo version');
         });
     });
 

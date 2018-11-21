@@ -60,7 +60,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     static about(): void {
-        Cluster.odo.executeInTerminal(`odo version`, process.cwd());
+        Cluster.odo.executeInTerminal(`odo version`);
     }
 
     static async openshiftConsole(context: OpenShiftObject): Promise<void> {

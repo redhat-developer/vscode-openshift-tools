@@ -103,7 +103,7 @@ export interface Odo {
     getProjects(): Promise<OpenShiftObject[]>;
     getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponents(application: OpenShiftObject): Promise<OpenShiftObject[]>;
-    executeInTerminal(command: string, cwd: string): void;
+    executeInTerminal(command: string, cwd?: string): void;
     getComponentTypes(): Promise<string[]>;
     getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponentTypeVersions(componentName: string): Promise<string[]>;
@@ -288,7 +288,7 @@ export class OdoImpl implements Odo {
         return [... await this.getComponents(application), ... await this.getServices(application)];
     }
 
-    public executeInTerminal(command: string, cwd: string, name: string = 'OpenShift') {
+    public executeInTerminal(command: string, cwd: string = process.cwd(), name: string = 'OpenShift') {
         const terminal: Terminal = WindowUtil.createTerminal(name, cwd);
         terminal.sendText(command, true);
         terminal.show();
