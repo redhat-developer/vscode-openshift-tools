@@ -6,7 +6,7 @@ import { ToolsConfig } from '../src/tools';
 import * as vscode from 'vscode';
 import * as shelljs from 'shelljs';
 import { Platform } from '../src/util/platform';
-import * as archive from '../src/util/archive';
+import { Archive } from '../src/util/archive';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as fsex from 'fs-extra';
@@ -96,7 +96,7 @@ suite("tools configuration", () => {
             const showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
             const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
             stub.onSecondCall().returns(ToolsConfig.tools['oc'].sha256sum);
-            sb.stub(archive, 'unzip').resolves();
+            sb.stub(Archive, 'unzip').resolves();
             let toolLocation = await ToolsConfig.detectOrDownload('odo');
             assert.ok(showInfo.calledOnce);
             assert.ok(withProgress.calledOnce);
@@ -126,7 +126,7 @@ suite("tools configuration", () => {
             const fromFile = sb.stub(hasha, 'fromFile').onFirstCall().resolves('not really sha256');
             fromFile.onSecondCall().returns(ToolsConfig.tools['odo'].sha256sum);
             sb.stub(fsex, 'removeSync');
-            sb.stub(archive, 'unzip').resolves();
+            sb.stub(Archive, 'unzip').resolves();
             const toolLocation = await ToolsConfig.detectOrDownload('odo');
             assert.ok(withProgress.calledTwice);
             assert.ok(showInfo.calledTwice);
@@ -142,7 +142,7 @@ suite("tools configuration", () => {
             const fromFile = sb.stub(hasha, 'fromFile').onFirstCall().resolves('not really sha256');
             fromFile.onSecondCall().returns(ToolsConfig.tools['odo'].sha256sum);
             sb.stub(fsex, 'removeSync');
-            sb.stub(archive, 'unzip').resolves();
+            sb.stub(Archive, 'unzip').resolves();
             const toolLocation = await ToolsConfig.detectOrDownload('odo');
             assert.ok(withProgress.calledOnce);
             assert.ok(showInfo.calledTwice);
@@ -165,7 +165,7 @@ suite("tools configuration", () => {
                 const showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
                 const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
                 stub.onSecondCall().returns(ToolsConfig.tools['oc'].sha256sum);
-                sb.stub(archive, 'unzip').resolves();
+                sb.stub(Archive, 'unzip').resolves();
                 const toolLocation = await ToolsConfig.detectOrDownload('odo');
                 assert.ok(!chmodSyncStub.called);
             });
@@ -184,7 +184,7 @@ suite("tools configuration", () => {
                 sb.stub(fs, 'existsSync').returns(false);
                 const showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
                 const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
-                sb.stub(archive, 'unzip').resolves();
+                sb.stub(Archive, 'unzip').resolves();
                 const toolLocation = await ToolsConfig.detectOrDownload('odo');
                 assert.ok(chmodSyncStub.called);
             });
