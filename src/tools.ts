@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { Platform } from "./util/platform";
-import * as archive from "./util/archive";
+import { Archive } from "./util/archive";
 import { which } from "shelljs";
 import { DownloadUtil } from "./util/download";
 import hasha = require("hasha");
@@ -20,25 +20,25 @@ const configData = {
         description: "OpenShift Do CLI tool",
         vendor: "Red Hat, Inc.",
         name: "odo",
-        version: "0.0.15",
+        version: "0.0.16",
         dlFileName: "odo",
         cmdFileName: "odo",
         filePrefix: "",
         platform: {
             win32: {
-                url: "https://github.com/redhat-developer/odo/releases/download/v0.0.15/odo-windows-amd64.exe.gz",
-                sha256sum: "66b5b05e7257611209f875782c83883b8a979770cd5e336338b397d70d631348",
+                url: "https://github.com/redhat-developer/odo/releases/download/v0.0.16/odo-windows-amd64.exe.gz",
+                sha256sum: "928113563d5e27db2d1c9565e539230353c01a182c7e95f4f718dab2e1f24f37",
                 dlFileName: "odo-windows-amd64.exe.gz",
                 cmdFileName: "odo.exe"
             },
             darwin: {
-                url: "https://github.com/redhat-developer/odo/releases/download/v0.0.15/odo-darwin-amd64.gz",
-                sha256sum: "fc705718ce34867f850d7f6ac639b58d207ac1a9801cfed93e760628bf0623c9",
+                url: "https://github.com/redhat-developer/odo/releases/download/v0.0.16/odo-darwin-amd64.gz",
+                sha256sum: "854cea5e3bcc70aed43607fa227acacbb13dd39a5096c3f285508338bae7afac",
                 dlFileName: "odo-darwin-amd64.gz"
             },
             linux: {
-                url: "https://github.com/redhat-developer/odo/releases/download/v0.0.15/odo-linux-amd64.gz",
-                sha256sum: "ee74b8a301245b98fce94954739df10cf0fbf1220a1167d2614205393d63c01b",
+                url: "https://github.com/redhat-developer/odo/releases/download/v0.0.16/odo-linux-amd64.gz",
+                sha256sum: "e9ef7d553939f0ad8c70af9a0124766ada04c27b4923d7993db51e9a07a7ad32",
                 dlFileName: "odo-linux-amd64.gz"
             }
         }
@@ -98,15 +98,15 @@ export class ToolsConfig {
 
     public static async detectOrDownload(cmd: string): Promise<string> {
 
-        let toolLocation:string = ToolsConfig.tools[cmd].location;
+        let toolLocation: string = ToolsConfig.tools[cmd].location;
 
         if (toolLocation === undefined) {
             const toolCacheLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools[cmd].cmdFileName);
             const whichLocation = which(cmd);
-            let toolLocations: string[] = [whichLocation ? whichLocation.stdout : null, toolCacheLocation];
+            const toolLocations: string[] = [whichLocation ? whichLocation.stdout : null, toolCacheLocation];
             toolLocation = await ToolsConfig.selectTool(toolLocations, ToolsConfig.tools[cmd].version);
 
-            if(toolLocation === undefined) {
+            if (toolLocation === undefined) {
                 // otherwise request permission to download
                 const toolDlLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools[cmd].dlFileName);
                 const response = await vscode.window.showInformationMessage(
@@ -119,7 +119,7 @@ export class ToolsConfig {
                         await vscode.window.withProgress({
                             cancellable: true,
                             location: vscode.ProgressLocation.Notification,
-                            title: `Downloading ${ToolsConfig.tools[cmd].description}: `
+                            title: `Downloading ${ToolsConfig.tools[cmd].description}`
                             },
                             (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
                                 return DownloadUtil.downloadFile(
@@ -138,20 +138,20 @@ export class ToolsConfig {
 
                     if (action !== 'Cancel') {
                         if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
-                            await archive.unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), ToolsConfig.tools[cmd].filePrefix);
+                            await Archive.unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), ToolsConfig.tools[cmd].filePrefix);
                         } else if (toolDlLocation.endsWith('.gz')) {
-                            await archive.unzip(toolDlLocation, toolCacheLocation, ToolsConfig.tools[cmd].filePrefix);
+                            await Archive.unzip(toolDlLocation, toolCacheLocation, ToolsConfig.tools[cmd].filePrefix);
                         }
                         if (Platform.OS !== 'win32') {
-                            fs.chmodSync(toolCacheLocation, 0o765);  
+                            fs.chmodSync(toolCacheLocation, 0o765);
                         }
                         toolLocation = toolCacheLocation;
-                    } 
+                    }
                 } else if (response === `Help`) {
                     opn('https://github.com/redhat-developer/vscode-openshift-tools#dependencies');
                 }
             }
-            if(toolLocation) {
+            if (toolLocation) {
                 ToolsConfig.tools[cmd].location = toolLocation;
             }
         }
@@ -163,8 +163,8 @@ export class ToolsConfig {
         if (fs.existsSync(location)) {
             const version = new RegExp(`${cmd} v([\\d\\.]+)`);
             try {
-                const result = await Cli.getInstance().execute(`${location} version`);
-                if (!result.error) { 
+                const result = await Cli.getInstance().execute(`"${location}" version`);
+                if (!result.error) {
                     const toolVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
                         return value.match(version);
                     }).map((value)=>version.exec(value)[1]);
@@ -182,7 +182,7 @@ export class ToolsConfig {
     public static async selectTool(locations: string[], correctVersion: string): Promise<string> {
         let result;
         for (const location of locations) {
-            if(location && await ToolsConfig.getVersion(location) === correctVersion) {
+            if (location && await ToolsConfig.getVersion(location) === correctVersion) {
                 result = location;
                 break;
             }

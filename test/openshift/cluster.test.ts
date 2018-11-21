@@ -110,7 +110,7 @@ suite('Openshift/Cluster', () => {
                 const status = await Cluster.login();
 
                 expect(status).equals(`Successfully logged in to '${testUrl}'`);
-                expect(execStub).calledOnceWith(`odo login ${testUrl} -u ${testUser} -p ${password}`);
+                expect(execStub).calledOnceWith(`odo login ${testUrl} -u ${testUser} -p ${password} --insecure-skip-tls-verify`);
                 expect(commandStub).calledOnceWith('setContext', 'isLoggedIn', true);
             });
 
@@ -150,7 +150,7 @@ suite('Openshift/Cluster', () => {
                 const status = await Cluster.login();
 
                 expect(status).equals(`Successfully logged in to '${testUrl}'`);
-                expect(execStub).calledOnceWith(`odo login ${testUrl} --token=${token}`);
+                expect(execStub).calledOnceWith(`odo login ${testUrl} --token=${token} --insecure-skip-tls-verify`);
                 expect(commandStub).calledOnceWith('setContext', 'isLoggedIn', true);
             });
 
@@ -248,7 +248,7 @@ suite('Openshift/Cluster', () => {
             const stub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
             Cluster.about();
 
-            expect(stub).calledOnceWith('odo version', process.cwd());
+            expect(stub).calledOnceWith('odo version');
         });
     });
 

@@ -60,7 +60,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     static about(): void {
-        Cluster.odo.executeInTerminal(`odo version`, process.cwd());
+        Cluster.odo.executeInTerminal(`odo version`);
     }
 
     static async openshiftConsole(context: OpenShiftObject): Promise<void> {
@@ -68,7 +68,7 @@ export class Cluster extends OpenShiftItem {
             opn(context.getName());
         } else {
             const result: OpenShiftObject[] = await Cluster.odo.getClusters();
-            if(result.length>0 && result[0].getName().startsWith('http')) {
+            if (result.length>0 && result[0].getName().startsWith('http')) {
                 opn(result[0].getName());
             } else {
                 vscode.window.showErrorMessage(result[0].getName());
@@ -113,7 +113,7 @@ export class Cluster extends OpenShiftItem {
         });
         if (!passwd) return Promise.resolve(null);
         return Promise.resolve()
-            .then(() => Cluster.odo.execute(`odo login ${clusterURL} -u ${username} -p ${passwd}`))
+            .then(() => Cluster.odo.execute(`odo login ${clusterURL} -u ${username} -p ${passwd} --insecure-skip-tls-verify`))
             .then((result) => Cluster.loginMessage(clusterURL, result))
             .catch((error) => { return Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`); });
     }
@@ -125,7 +125,7 @@ export class Cluster extends OpenShiftItem {
         });
         if (!ocToken) return Promise.resolve(null);
         return Promise.resolve()
-            .then(() => Cluster.odo.execute(`odo login ${clusterURL} --token=${ocToken}`))
+            .then(() => Cluster.odo.execute(`odo login ${clusterURL} --token=${ocToken} --insecure-skip-tls-verify`))
             .then((result) => Cluster.loginMessage(clusterURL, result))
             .catch((error) => { return Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`); });
     }

@@ -6,7 +6,7 @@ import { ToolsConfig } from '../src/tools';
 import * as vscode from 'vscode';
 import * as shelljs from 'shelljs';
 import { Platform } from '../src/util/platform';
-import * as archive from '../src/util/archive';
+import { Archive } from '../src/util/archive';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as fsex from 'fs-extra';
@@ -77,15 +77,15 @@ suite("tools configuration", () => {
             sb.stub(shelljs, 'which').returns(<string & shelljs.ShellReturnValue>{stdout: 'odo'});
             sb.stub(fs, 'existsSync').returns(false);
             sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools['odo'].version);
-            let toolLocation = await ToolsConfig.detectOrDownload('odo');
-            assert.equal(toolLocation,'odo');
+            const toolLocation = await ToolsConfig.detectOrDownload('odo');
+            assert.equal(toolLocation, 'odo');
         });
 
         test('returns path to previously downloaded tool if detected version is correct', async () => {
             sb.stub(shelljs, 'which');
             sb.stub(fs, 'existsSync').returns(true);
             sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools['odo'].version);
-            let toolLocation = await ToolsConfig.detectOrDownload('odo');
+            const toolLocation = await ToolsConfig.detectOrDownload('odo');
             assert.equal( toolLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools['odo'].cmdFileName));
         });
 
@@ -93,10 +93,10 @@ suite("tools configuration", () => {
             sb.stub(shelljs, 'which');
             sb.stub(fs, 'existsSync').returns(true);
             sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-            let showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
-            let stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
+            const showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
+            const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
             stub.onSecondCall().returns(ToolsConfig.tools['oc'].sha256sum);
-            sb.stub(archive, 'unzip').resolves();
+            sb.stub(Archive, 'unzip').resolves();
             let toolLocation = await ToolsConfig.detectOrDownload('odo');
             assert.ok(showInfo.calledOnce);
             assert.ok(withProgress.calledOnce);
@@ -111,8 +111,8 @@ suite("tools configuration", () => {
             sb.stub(shelljs, 'which');
             sb.stub(fs, 'existsSync').returns(true);
             sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-            let showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Cancel');
-            let toolLocation = await ToolsConfig.detectOrDownload('odo');
+            const showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Cancel');
+            const toolLocation = await ToolsConfig.detectOrDownload('odo');
             assert.ok(showInfo.calledOnce);
             assert.equal(toolLocation, undefined);
         });
@@ -121,13 +121,13 @@ suite("tools configuration", () => {
             sb.stub(shelljs, 'which');
             sb.stub(fs, 'existsSync').returns(true);
             sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-            let showInfo = sb.stub(vscode.window, 'showInformationMessage').onFirstCall().resolves('Download and install');
+            const showInfo = sb.stub(vscode.window, 'showInformationMessage').onFirstCall().resolves('Download and install');
             showInfo.onSecondCall().resolves('Download again');
-            let fromFile = sb.stub(hasha, 'fromFile').onFirstCall().resolves('not really sha256');
+            const fromFile = sb.stub(hasha, 'fromFile').onFirstCall().resolves('not really sha256');
             fromFile.onSecondCall().returns(ToolsConfig.tools['odo'].sha256sum);
             sb.stub(fsex, 'removeSync');
-            sb.stub(archive, 'unzip').resolves();
-            let toolLocation = await ToolsConfig.detectOrDownload('odo');
+            sb.stub(Archive, 'unzip').resolves();
+            const toolLocation = await ToolsConfig.detectOrDownload('odo');
             assert.ok(withProgress.calledTwice);
             assert.ok(showInfo.calledTwice);
             assert.equal( toolLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools['odo'].cmdFileName));
@@ -137,19 +137,18 @@ suite("tools configuration", () => {
             sb.stub(shelljs, 'which');
             sb.stub(fs, 'existsSync').returns(true);
             sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-            let showInfo = sb.stub(vscode.window, 'showInformationMessage').onFirstCall().resolves('Download and install');
+            const showInfo = sb.stub(vscode.window, 'showInformationMessage').onFirstCall().resolves('Download and install');
             showInfo.onSecondCall().resolves('Cancel');
-            let fromFile = sb.stub(hasha, 'fromFile').onFirstCall().resolves('not really sha256');
+            const fromFile = sb.stub(hasha, 'fromFile').onFirstCall().resolves('not really sha256');
             fromFile.onSecondCall().returns(ToolsConfig.tools['odo'].sha256sum);
             sb.stub(fsex, 'removeSync');
-            sb.stub(archive, 'unzip').resolves();
-            let toolLocation = await ToolsConfig.detectOrDownload('odo');
+            sb.stub(Archive, 'unzip').resolves();
+            const toolLocation = await ToolsConfig.detectOrDownload('odo');
             assert.ok(withProgress.calledOnce);
             assert.ok(showInfo.calledTwice);
             assert.equal(toolLocation, undefined);
         });
 
-        
         suite('on windows', () => {
             setup(() => {
                 sb.stub(Platform, 'getOS').returns('win32');
@@ -158,16 +157,16 @@ suite("tools configuration", () => {
                 });
                 ToolsConfig.resetConfiguration();
             });
-            
+
             test('does not set executable attribute for tool file', async () => {
                 sb.stub(shelljs, 'which');
                 sb.stub(fs, 'existsSync').returns(true);
                 sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-                let showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
-                let stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
+                const showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
+                const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
                 stub.onSecondCall().returns(ToolsConfig.tools['oc'].sha256sum);
-                sb.stub(archive, 'unzip').resolves();
-                let toolLocation = await ToolsConfig.detectOrDownload('odo');
+                sb.stub(Archive, 'unzip').resolves();
+                const toolLocation = await ToolsConfig.detectOrDownload('odo');
                 assert.ok(!chmodSyncStub.called);
             });
         });
@@ -183,13 +182,13 @@ suite("tools configuration", () => {
             test('set executable attribute for tool file', async () => {
                 sb.stub(shelljs, 'which');
                 sb.stub(fs, 'existsSync').returns(false);
-                let showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
-                let stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
-                sb.stub(archive, 'unzip').resolves();
-                let toolLocation = await ToolsConfig.detectOrDownload('odo');
+                const showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
+                const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
+                sb.stub(Archive, 'unzip').resolves();
+                const toolLocation = await ToolsConfig.detectOrDownload('odo');
                 assert.ok(chmodSyncStub.called);
             });
-        })
+        });
     });
     suite('loadMetadata()', () => {
         test('keeps tool configuration if there is no platform attribute', () => {
@@ -201,7 +200,7 @@ suite("tools configuration", () => {
             };
             config = ToolsConfig.loadMetadata(config, 'platform-name');
             assert.ok(config['odo']);
-        })
+        });
         test('removes tool configuration if platform is not supported', () => {
             let config: object = {
                 odo: {
@@ -215,6 +214,6 @@ suite("tools configuration", () => {
             };
             config = ToolsConfig.loadMetadata(config, 'platform-name');
             assert.ok(!config['odo']);
-        })
-    })
+        });
+    });
 });
