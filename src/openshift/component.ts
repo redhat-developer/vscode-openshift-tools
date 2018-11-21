@@ -151,17 +151,15 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeVersion) return null;
         const project = application.getParent();
-        
         return Progress.execWithProgress({
             cancellable: false,
             location: vscode.ProgressLocation.Notification,
             title: `Creating new component '${componentName}'`
-        }, [{command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --local ${folder.uri.fsPath} --app ${application.getName()} --project ${project.getName()}`, increment: 100}
+        }, [{command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --local ${folder.uri.fsPath} --app ${application.getName()} --project ${project.getName()}`, increment: 50},
+            {command: `odo push ${componentName} --local ${folder.uri.fsPath} --app ${application.getName()} --project ${project.getName()}`, increment: 50}
         ], Component.odo)
         .then(() => Component.explorer.refresh(application))
-        .then(() => Component.odo.executeInTerminal(`odo push ${componentName} --local ${folder.uri.fsPath} --app ${application.getName()} --project ${project.getName()}`))
         .then(() => `Component '${componentName}' successfully created`);
-
     }
 
     private static async createGit(application: OpenShiftObject): Promise<string> {
