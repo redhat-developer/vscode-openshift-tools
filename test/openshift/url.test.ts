@@ -22,7 +22,6 @@ suite('Openshift/URL', () => {
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'app');
     const componentItem = new TestItem(appItem, 'component');
-    const errorMessage = 'FATAL ERROR';
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -33,10 +32,6 @@ suite('Openshift/URL', () => {
     });
 
     suite('create', () => {
-        let inputStub: sinon.SinonStub;
-
-        setup(() => {
-        });
 
         test('asks to select port if more that one exposed and returns message', async () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
@@ -53,6 +48,7 @@ suite('Openshift/URL', () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
             execStub.onFirstCall().resolves({error: null, stdout: 'port1', stderr: ''});
             execStub.onSecondCall().rejects();
+
             return Url.create(componentItem).catch((err) => {
                 expect(err).equals(`Failed to create URL for component '${componentItem.getName()}'`);
             });
