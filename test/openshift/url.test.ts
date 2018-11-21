@@ -43,7 +43,7 @@ suite('Openshift/URL', () => {
             expect(result).equals(`URL for component '${componentItem.getName()}' successfully created`);
             expect(execStub).calledTwice;
         });
-
+        
         test('rejects when fails to create Url', () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
             execStub.onFirstCall().resolves({error: null, stdout: 'port1', stderr: ''});
