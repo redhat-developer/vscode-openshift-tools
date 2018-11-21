@@ -13,7 +13,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fsex from 'fs-extra';
 import * as fs from 'fs';
-import { Cli } from './cli';
+import * as Odo from './odo';
 
 const configData = {
     odo: {
@@ -163,7 +163,7 @@ export class ToolsConfig {
         if (fs.existsSync(location)) {
             const version = new RegExp(`${cmd} v([\\d\\.]+)`);
             try {
-                const result = await Cli.getInstance().execute(`${location} version`);
+                const result = await Odo.getInstance().execute(`${location} version`);
                 if (!result.error) {
                     const toolVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
                         return value.match(version);
