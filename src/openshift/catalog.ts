@@ -9,10 +9,10 @@ export class Catalog {
     private static odo: Odo = OdoImpl.getInstance();
 
     static listComponents(): void {
-        Catalog.odo.executeInTerminal(`odo catalog list components`, process.cwd());
+        Catalog.odo.executeInTerminal(`odo catalog list components`);
     }
 
     static listServices(): void {
-        Catalog.odo.executeInTerminal(`odo catalog list services`, process.cwd());
+        Catalog.odo.executeInTerminal(`odo catalog list services`);
     }
 }

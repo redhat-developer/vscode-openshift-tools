@@ -72,19 +72,19 @@ export class Component extends OpenShiftItem {
     static describe(context: OpenShiftObject): void {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
-        Component.odo.executeInTerminal(`odo describe ${context.getName()} --app ${app.getName()} --project ${project.getName()}`, process.cwd());
+        Component.odo.executeInTerminal(`odo describe ${context.getName()} --app ${app.getName()} --project ${project.getName()}`);
     }
 
     static log(context: OpenShiftObject): void {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
-        Component.odo.executeInTerminal(`odo log ${context.getName()} --app ${app.getName()} --project ${project.getName()}`, process.cwd());
+        Component.odo.executeInTerminal(`odo log ${context.getName()} --app ${app.getName()} --project ${project.getName()}`);
     }
 
     static followLog(context: OpenShiftObject) {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
-        Component.odo.executeInTerminal(`odo log ${context.getName()} -f --app ${app.getName()} --project ${project.getName()}`, process.cwd());
+        Component.odo.executeInTerminal(`odo log ${context.getName()} -f --app ${app.getName()} --project ${project.getName()}`);
     }
 
     static async push(context: OpenShiftObject): Promise<string> {
@@ -103,7 +103,7 @@ export class Component extends OpenShiftItem {
     static watch(context: OpenShiftObject): void {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
-        Component.odo.executeInTerminal(`odo watch ${context.getName()} --app ${app.getName()} --project ${project.getName()}`, process.cwd());
+        Component.odo.executeInTerminal(`odo watch ${context.getName()} --app ${app.getName()} --project ${project.getName()}`);
     }
 
     static async openUrl(context: OpenShiftObject): Promise<ChildProcess> {

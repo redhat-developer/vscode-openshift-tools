@@ -229,19 +229,19 @@ suite('Openshift/Component', () => {
     test('describe calls the correct odo command in terminal', () => {
         Component.describe(componentItem);
 
-        expect(termStub).calledOnceWith(`odo describe ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`, process.cwd());
+        expect(termStub).calledOnceWith(`odo describe ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
     });
 
     test('log calls the correct odo command in terminal', () => {
         Component.log(componentItem);
 
-        expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`, process.cwd());
+        expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
     });
 
     test('followLog calls the correct odo command in terminal', () => {
         Component.followLog(componentItem);
 
-        expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`, process.cwd());
+        expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`);
     });
 
     test('push calls the correct odo command with progress', async () => {
@@ -259,6 +259,6 @@ suite('Openshift/Component', () => {
     test('watch calls the correct odo command in terminal', () => {
         Component.watch(componentItem);
 
-        expect(termStub).calledOnceWith(`odo watch ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`, process.cwd());
+        expect(termStub).calledOnceWith(`odo watch ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
     });
 });

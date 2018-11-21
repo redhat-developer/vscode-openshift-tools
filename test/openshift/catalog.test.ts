@@ -30,12 +30,12 @@ suite('Openshift/Catalog', () => {
     test('listComponents calls odo catalog list components', () => {
         Catalog.listComponents();
 
-        expect(execStub).calledOnceWith('odo catalog list components', process.cwd());
+        expect(execStub).calledOnceWith('odo catalog list components');
     });
 
     test('listServices calls odo catalog list services', () => {
         Catalog.listServices();
 
-        expect(execStub).calledOnceWith('odo catalog list services', process.cwd());
+        expect(execStub).calledOnceWith('odo catalog list services');
     });
 });
