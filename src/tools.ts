@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { Platform } from "./util/platform";
-import * as archive from "./util/archive";
+import { Archive } from "./util/archive";
 import { which } from "shelljs";
 import { DownloadUtil } from "./util/download";
 import hasha = require("hasha");
@@ -138,9 +138,9 @@ export class ToolsConfig {
 
                     if (action !== 'Cancel') {
                         if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
-                            await archive.unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), ToolsConfig.tools[cmd].filePrefix);
+                            await Archive.unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), ToolsConfig.tools[cmd].filePrefix);
                         } else if (toolDlLocation.endsWith('.gz')) {
-                            await archive.unzip(toolDlLocation, toolCacheLocation, ToolsConfig.tools[cmd].filePrefix);
+                            await Archive.unzip(toolDlLocation, toolCacheLocation, ToolsConfig.tools[cmd].filePrefix);
                         }
                         if (Platform.OS !== 'win32') {
                             fs.chmodSync(toolCacheLocation, 0o765);
