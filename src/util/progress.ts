@@ -40,7 +40,10 @@ export class Progress {
 
             return calls.reduce<Promise<any>>((previous: Promise<any>, current: ()=>Promise<any>, index: number, calls: (()=>Promise<any>)[])=> {
                 return previous.then(current);
-            }, Promise.resolve()).catch((error) => vscode.window.showErrorMessage(`${error}`));
+            }, Promise.resolve()).catch((error) => {
+                vscode.window.showErrorMessage(`${error}`);
+                return;
+            });
         });
     }
 }
