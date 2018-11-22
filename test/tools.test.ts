@@ -11,7 +11,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as fsex from 'fs-extra';
 import * as hasha from 'hasha';
-import opn = require('opn');
 
 suite("tools configuration", () => {
     const odoCli: odo.Odo = odo.OdoImpl.getInstance();
