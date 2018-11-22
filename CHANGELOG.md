@@ -1,5 +1,14 @@
 # Change Log
 
+## 0.0.12 (November 26, 2018)
+* Add actions to command palette
+* Fixed application name creation validation
+* Commands migrated from explorer view to cluster context
+* Activate extension on any command execution from UI
+* Add --namespace option to all oc calls invoked by 'Open in Browser'
+* Use `oc v3.9.0` and `odo v0.0.16`
+* Fixed unit tests and increase code coverage
+
 ## 0.0.11 (October 22, 2018)
 * Minor fixes in README
 
