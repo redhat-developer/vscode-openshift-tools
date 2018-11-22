@@ -14,10 +14,6 @@ export class Platform {
         return map['default'] ? map['default']() : undefined;
     }
 
-    static getHome() {
-        return '';
-    }
-
     static getOS(): string {
         return process.platform;
     }
