@@ -44,7 +44,6 @@ export class Component extends OpenShiftItem {
         } else {
             command = Component.createFromLocal(application);
         }
-        return command.catch((err) => Promise.reject(`Failed to create component with error '${err}'`));
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
