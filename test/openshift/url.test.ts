@@ -18,7 +18,7 @@ chai.use(sinonChai);
 
 suite('Openshift/URL', () => {
     let sandbox: sinon.SinonSandbox;
-    let execStub: sinon.SinonStub, quickPickStub: sinon.SinonStub;
+    let execStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'app');
     const componentItem = new TestItem(appItem, 'component');
@@ -43,7 +43,7 @@ suite('Openshift/URL', () => {
             expect(result).equals(`URL for component '${componentItem.getName()}' successfully created`);
             expect(execStub).calledTwice;
         });
-        
+
         test('rejects when fails to create Url', () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
             execStub.onFirstCall().resolves({error: null, stdout: 'port1', stderr: ''});

@@ -137,7 +137,7 @@ suite("odo integration tests", () => {
             });
             const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
             assert.equal(cluster[0].getName(), clusterUrl);
-        })
+        });
 
         test('extension use oc verdion to get cluster url as a backup plan', async () => {
             sandbox.stub(odo.OdoImpl.prototype, 'execute').onFirstCall().resolves({
@@ -151,6 +151,6 @@ suite("odo integration tests", () => {
             });
             const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
             assert.equal(cluster[0].getName(), clusterUrl);
-        })
-    })
+        });
+    });
 });
