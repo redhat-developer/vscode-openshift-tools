@@ -16,6 +16,9 @@ export class Application extends OpenShiftItem {
                 if (validator.isEmpty(value.trim())) {
                     return 'Empty application name';
                 }
+                if (!validator.matches(value.trim(), '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$')) {
+                    return 'Not a valid application name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character';
+                }
             }
         });
         if (appName) {
