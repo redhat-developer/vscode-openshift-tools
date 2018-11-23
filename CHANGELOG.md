@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.0.12 (November 26, 2018)
+## 0.0.12 (November 23, 2018)
 * Add actions to command palette
 * Fixed application name creation validation
 * Commands migrated from explorer view to cluster context
