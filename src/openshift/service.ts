@@ -10,37 +10,48 @@ import { Progress } from '../util/progress';
 
 export class Service extends OpenShiftItem {
     static async create(application: OpenShiftObject): Promise<string>  {
-        const serviceTemplateName = await vscode.window.showQuickPick(Service.odo.getServiceTemplates(), {
-            placeHolder: "Service Template Name"
-        });
-        if (!serviceTemplateName) return null;
-
-        const serviceTemplatePlanName = await vscode.window.showQuickPick(Service.odo.getServiceTemplatePlans(serviceTemplateName), {
-            placeHolder: "Service Template Plan Name"
-        });
-        if (!serviceTemplatePlanName) return null;
-
-        const serviceName = await vscode.window.showInputBox({
-            value: serviceTemplateName,
-            prompt: 'Service Name',
-            validateInput: (value: string) => {
-                // required, because dc name is ${component}-${app}
-                let message: string = null;
-                if (`${value.trim()}-${application.getName()}`.length > 63) {
-                    message = 'Service name cannot be more than 63 characters';
-                }
-                return message;
+        let applicationName: OpenShiftObject;
+        let project: OpenShiftObject;
+        if (application) {
+            applicationName = application;
+        } else {
+            project = await vscode.window.showQuickPick(Service.odo.getProjects(), {placeHolder: "In which project you want to create Service"});
+            if (project) {
+                applicationName = await vscode.window.showQuickPick(Service.odo.getApplications(project), {placeHolder: "In which application you want to create Service"});
             }
-        });
-        if (serviceName) {
-            const project = application.getParent();
-            return Progress.execCmdWithProgress(`Creating new service '${serviceName}'`,
-                Command.createService(project.getName(), application.getName(), serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))
-                .then(() => Service.explorer.refresh(application))
-                .then(() => `Service '${serviceName}' successfully created`)
-                .catch((err) => Promise.reject(`Failed to create service with error '${err}'`));
         }
-        return null;
+        if (applicationName) {
+            const serviceTemplateName = await vscode.window.showQuickPick(Service.odo.getServiceTemplates(), {
+                placeHolder: "Service Template Name"
+            });
+            if (!serviceTemplateName) return null;
+
+            const serviceTemplatePlanName = await vscode.window.showQuickPick(Service.odo.getServiceTemplatePlans(serviceTemplateName), {
+                placeHolder: "Service Template Plan Name"
+            });
+            if (!serviceTemplatePlanName) return null;
+
+            const serviceName = await vscode.window.showInputBox({
+                value: serviceTemplateName,
+                prompt: 'Service Name',
+                validateInput: (value: string) => {
+                    // required, because dc name is ${component}-${app}
+                    let message: string = null;
+                    if (`${value.trim()}-${applicationName.getName()}`.length > 63) {
+                        message = 'Service name cannot be more than 63 characters';
+                    }
+                    return message;
+                }
+            });
+            if (serviceName) {
+                const project = application.getParent();
+                return Progress.execCmdWithProgress(`Creating new service '${serviceName}'`,
+                    `odo service create ${serviceTemplateName} --plan ${serviceTemplatePlanName} ${serviceName.trim()} --app ${application.getName()} --project ${project.getName()}`)
+                    .then(() => Service.explorer.refresh(application))
+                    .then(() => `Service '${serviceName}' successfully created`)
+                    .catch((err) => Promise.reject(`Failed to create service with error '${err}'`));
+            }
+        }
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
