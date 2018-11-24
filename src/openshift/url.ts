@@ -21,12 +21,8 @@ export class Url {
             port = await vscode.window.showQuickPick(ports, {placeHolder: "Select port to expose"});
         }
         return Promise.resolve()
-        .then(async () => {
-            await Url.odo.execute(`odo url create --port ${port} --project ${project.getName()} --app ${app.getName()} --component ${context.getName()}`);
-            return `URL for component '${context.getName()}' successfully created`;
-        })
-        .catch((err) => {
-            return Promise.reject(`Failed to create URL for component '${context.getName()}'`);
-        });
+            .then(async () => Url.odo.execute(`odo url create --port ${port} --project ${project.getName()} --app ${app.getName()} --component ${context.getName()}`))
+            .then(() => `URL for component '${context.getName()}' successfully created`)
+            .catch((err) => Promise.reject(`Failed to create URL for component '${context.getName()}'`));
     }
 }
