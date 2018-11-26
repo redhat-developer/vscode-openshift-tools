@@ -257,6 +257,6 @@ suite('Openshift/Component', () => {
     test('watch calls the correct odo command in terminal', () => {
         Component.watch(componentItem);
 
-        expect(termStub).calledOnceWith(`odo watch ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+        expect(termStub).calledOnceWith(`odo watch ${componentItem.getName()} --ignore='.*\.class' --app ${appItem.getName()} --project ${projectItem.getName()}`);
     });
 });
