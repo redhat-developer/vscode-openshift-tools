@@ -7,6 +7,8 @@
 
 import * as vscode from 'vscode';
 import * as odoctl from '../odo';
+import { CliExitData } from '../cli';
+import { ExecException } from 'child_process';
 
 export interface Step {
     command: string;
@@ -20,30 +22,34 @@ export class Progress {
         (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
             const calls: (()=>Promise<any>)[] = [];
             steps.reduce((previous: Step, current: Step, currentIndex: number, steps: Step[])=> {
+                current.total = previous.total + current.increment;
                 calls.push(()=> {
-                    let result: Promise<any> = Promise.resolve();
-                    progress.report({
-                        increment: previous.increment,
-                        message: `${previous.total}%`
-                    });
-                    result = odo.execute(current.command);
-                    current.total = previous.total + current.increment;
-                    return currentIndex+1 === steps.length ? result.then(()=> {
+                    return new Promise<CliExitData>(async (resolve,reject) => {
                         progress.report({
                             increment: previous.increment,
                             message: `${previous.total}%`
                         });
-                    }) : result;
+
+                            const result: CliExitData = await odo.execute(current.command);
+                            if(result.error) {
+                                reject(result.error);
+                            } else {
+                                if (currentIndex+1 === steps.length) {
+                                    progress.report({
+                                        increment: current.increment,
+                                        message: `${current.total}%`
+                                    });
+                                }
+                                resolve();
+                            }
+                    });
                 });
                 return current;
             }, {increment: 0, command: "", total: 0});
 
             return calls.reduce<Promise<any>>((previous: Promise<any>, current: ()=>Promise<any>, index: number, calls: (()=>Promise<any>)[])=> {
                 return previous.then(current);
-            }, Promise.resolve()).catch((error) => {
-                vscode.window.showErrorMessage(`${error}`);
-                return;
-            });
+            }, Promise.resolve());
         });
     }
 }

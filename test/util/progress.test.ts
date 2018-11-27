@@ -30,7 +30,6 @@ suite('Progress Utility', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves();
     });
 
     teardown(() => {
@@ -38,6 +37,7 @@ suite('Progress Utility', () => {
     });
 
     test('calls cli commands in sequence', async () => {
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ error: undefined, stdout: "", stderr: "" });
         await Progress.execWithProgress(options, steps, OdoImpl.getInstance());
 
         expect(execStub).calledTwice;
@@ -46,6 +46,7 @@ suite('Progress Utility', () => {
     });
 
     test('calls progress with given options', async () => {
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ error: undefined, stdout: "", stderr: "" });
         const spy = sandbox.spy(vscode.window, 'withProgress');
         await Progress.execWithProgress(options, steps, OdoImpl.getInstance());
 
@@ -53,10 +54,13 @@ suite('Progress Utility', () => {
     });
 
     test('shows an error message if a command fails', async () => {
-        execStub.rejects(errorMessage);
+        let error = new Error(errorMessage);
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ error, stdout: "", stderr: "" });
         const spy = sandbox.spy(vscode.window, 'showErrorMessage');
-        await Progress.execWithProgress(options, steps, OdoImpl.getInstance());
-
-        expect(spy).calledOnceWith(errorMessage);
+        try {
+            await Progress.execWithProgress(options, steps, OdoImpl.getInstance());
+        } catch(err) {
+            expect(error).equals(error);
+        }
     });
 });
