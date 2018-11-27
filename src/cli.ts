@@ -36,7 +36,8 @@ export class Cli implements ICli {
             childProcess.exec(cmd, opts, (error: ExecException, stdout: string, stderr: string) => {
                 this.odoChannel.print(stdout);
                 this.odoChannel.print(stderr);
-                // we don't reject it here, because caller need in some cases access to error and streams
+                // do not reject it here, because caller in some cases need the error and the streams
+                // to make a decision
                 resolve({ error, stdout: stdout.replace(/---[\s\S]*---/g, '').trim(), stderr });
             });
         });
