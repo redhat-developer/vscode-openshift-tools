@@ -4,10 +4,8 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import * as shelljs from 'shelljs';
 import { TestItem } from './testOSItem';
 import { OdoImpl } from '../../src/odo';
-import { ToolsConfig } from '../../src/tools';
 import { Component } from '../../src/openshift/component';
 import { Progress } from '../../src/util/progress';
 

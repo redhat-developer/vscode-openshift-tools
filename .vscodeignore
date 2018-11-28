@@ -9,3 +9,10 @@ tsconfig.json
 vsc-extension-quickstart.md
 tslint.json
 *.vsix
+test/**
+coverage/**
+coverconfig.json
+Jenkinsfile
+.gitattributes
+.travis.yml
+CONTRIBUTING.md

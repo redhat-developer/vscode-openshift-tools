@@ -19,8 +19,8 @@ export class Cluster extends OpenShiftItem {
             const value = await vscode.window.showInformationMessage(`You are already logged in the cluster. Do you want to login to a different cluster?`, 'Yes', 'No');
             if (value === 'Yes') {
                 return Cluster.odo.execute(`odo logout`)
-                .catch((error) => { return Promise.reject(`Failed to logout of the current cluster with '${error}'!`); })
-                .then(async (result)=> {
+                .catch((error) => Promise.reject(`Failed to logout of the current cluster with '${error}'!`))
+                .then(async (result) => {
                     if (result.stderr === "") {
                         return Cluster.loginDialog();
                     } else {
@@ -28,16 +28,15 @@ export class Cluster extends OpenShiftItem {
                     }
                 });
             }
-            return Promise.resolve(null);
+            return null;
         }
     }
 
     static async logout(): Promise<string> {
         const value = await vscode.window.showWarningMessage(`Are you sure you want to logout of cluster`, 'Logout', 'Cancel');
         if (value === 'Logout') {
-            return Cluster.odo.execute(`odo logout`).catch((error) => {
-                return Promise.reject(`Failed to logout of the current cluster with '${error}'!`);
-            }).then(async (result)=> {
+            return Cluster.odo.execute(`odo logout`).catch((error) => Promise.reject(`Failed to logout of the current cluster with '${error}'!`))
+            .then(async (result) => {
                 if (result.stderr === "") {
                     Cluster.explorer.refresh();
                     vscode.commands.executeCommand('setContext', 'isLoggedIn', false);
@@ -45,14 +44,14 @@ export class Cluster extends OpenShiftItem {
                     if (logoutInfo === 'Yes') {
                         return Cluster.login();
                     } else {
-                        return Promise.resolve(null);
+                        return null;
                     }
                 } else {
                     return Promise.reject(`Failed to logout of the current cluster with '${result.stderr}'!`);
                 }
             });
         }
-        return Promise.resolve(null);
+        return null;
     }
 
     static refresh(): void {
@@ -86,7 +85,7 @@ export class Cluster extends OpenShiftItem {
                 }
             }
         });
-        if (!clusterURL) return Promise.resolve(null);
+        if (!clusterURL) return null;
         const loginMethod = await vscode.window.showQuickPick(['Credentials', 'Token'], {placeHolder: 'Select the way to log in to the cluster.'});
         if (loginMethod === "Credentials") {
             return Cluster.credentialsLogin(clusterURL);
@@ -105,17 +104,17 @@ export class Cluster extends OpenShiftItem {
                 }
             }
         });
-        if (!username) return Promise.resolve(null);
+        if (!username) return null;
         const passwd  = await vscode.window.showInputBox({
             ignoreFocusOut: true,
             password: true,
             prompt: "Provide Password for basic authentication to the API server"
         });
-        if (!passwd) return Promise.resolve(null);
+        if (!passwd) return null;
         return Promise.resolve()
             .then(() => Cluster.odo.execute(`odo login ${clusterURL} -u ${username} -p ${passwd} --insecure-skip-tls-verify`))
             .then((result) => Cluster.loginMessage(clusterURL, result))
-            .catch((error) => { return Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`); });
+            .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`));
     }
 
     private static async tokenLogin(clusterURL: string): Promise<string> {
@@ -123,18 +122,18 @@ export class Cluster extends OpenShiftItem {
             prompt: "Provide Bearer token for authentication to the API server",
             ignoreFocusOut: true
         });
-        if (!ocToken) return Promise.resolve(null);
+        if (!ocToken) return null;
         return Promise.resolve()
             .then(() => Cluster.odo.execute(`odo login ${clusterURL} --token=${ocToken} --insecure-skip-tls-verify`))
             .then((result) => Cluster.loginMessage(clusterURL, result))
-            .catch((error) => { return Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`); });
+            .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`));
     }
 
     private static async loginMessage(clusterURL: string, result: CliExitData): Promise<string> {
         if (result.stderr === "") {
             Cluster.explorer.refresh();
             return vscode.commands.executeCommand('setContext', 'isLoggedIn', true)
-            .then(() => `Successfully logged in to '${clusterURL}'`);
+                .then(() => `Successfully logged in to '${clusterURL}'`);
         } else {
             return Promise.reject(result.stderr);
         }

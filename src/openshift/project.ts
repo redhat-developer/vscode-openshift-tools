@@ -20,10 +20,8 @@ export class Project extends OpenShiftItem {
         if (!projectName) return null;
         return Promise.resolve()
             .then(() => Project.odo.execute(`odo project create ${projectName.trim()}`))
-            .then(() => {
-                Project.explorer.refresh();
-                return `Project '${projectName}' successfully created`;
-            })
+            .then(() => Project.explorer.refresh())
+            .then(() => `Project '${projectName}' successfully created`)
             .catch((error) => Promise.reject(`Failed to create project with error '${error}'`));
     }
 
@@ -39,10 +37,8 @@ export class Project extends OpenShiftItem {
         if (value === 'Yes') {
             return Promise.resolve()
                 .then(() => Project.odo.execute(`odo project delete ${project.getName()} -f`))
-                .then(() => {
-                    Project.explorer.refresh();
-                    return `Project '${project.getName()}' successfully deleted`;
-                })
+                .then(() => Project.explorer.refresh())
+                .then(() => `Project '${project.getName()}' successfully deleted`)
                 .catch((err) => Promise.reject(`Failed to delete project with error '${err}'`));
         }
         return null;
