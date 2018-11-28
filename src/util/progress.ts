@@ -19,37 +19,29 @@ export interface Step {
 export class Progress {
     static execWithProgress(options, steps: Step[], odo: odoctl.Odo): Thenable<void> {
         return vscode.window.withProgress(options,
-        (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
-            const calls: (()=>Promise<any>)[] = [];
-            steps.reduce((previous: Step, current: Step, currentIndex: number, steps: Step[])=> {
-                current.total = previous.total + current.increment;
-                calls.push(()=> {
-                    return new Promise<CliExitData>(async (resolve,reject) => {
-                        progress.report({
-                            increment: previous.increment,
-                            message: `${previous.total}%`
-                        });
-
-                            const result: CliExitData = await odo.execute(current.command);
-                            if(result.error) {
-                                reject(result.error);
-                            } else {
+            (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
+                const calls: (()=>Promise<any>)[] = [];
+                steps.reduce((previous: Step, current: Step, currentIndex: number, steps: Step[])=> {
+                    current.total = previous.total + current.increment;
+                    calls.push (() => {
+                        return Promise.resolve()
+                            .then(() => progress.report({increment: previous.increment, message: `${previous.total}%` }))
+                            .then(() => odo.execute(current.command))
+                            .then(() => {
                                 if (currentIndex+1 === steps.length) {
                                     progress.report({
                                         increment: current.increment,
                                         message: `${current.total}%`
                                     });
                                 }
-                                resolve();
-                            }
+                            });
                     });
-                });
-                return current;
-            }, {increment: 0, command: "", total: 0});
+                    return current;
+                }, {increment: 0, command: "", total: 0});
 
-            return calls.reduce<Promise<any>>((previous: Promise<any>, current: ()=>Promise<any>, index: number, calls: (()=>Promise<any>)[])=> {
-                return previous.then(current);
-            }, Promise.resolve());
-        });
+                return calls.reduce<Promise<any>>((previous: Promise<any>, current: ()=>Promise<any>, index: number, calls: (()=>Promise<any>)[])=> {
+                    return previous.then(current);
+                }, Promise.resolve());
+            });
     }
 }

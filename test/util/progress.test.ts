@@ -54,14 +54,18 @@ suite('Progress Utility', () => {
     });
 
     test('throw an error if a command fails', async () => {
-        let error = new Error(errorMessage);
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ error, stdout: "", stderr: "" });
+        const error = new Error(errorMessage);
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves(error);
         const spy = sandbox.spy(vscode.window, 'showErrorMessage');
+        let e;
         try {
             await Progress.execWithProgress(options, steps, OdoImpl.getInstance());
-            expect.fail(false,true, 'no errors were detected');
-        } catch(err) {
-            expect(err).equals(error);
+        } catch (err)  {
+            e = err;
+            expect(err.message).equals(errorMessage);
+        }
+        if (!e) {
+            expect.fail('no error thrown');
         }
     });
 });
