@@ -222,7 +222,7 @@ export class OdoImpl implements Odo {
     private async getClustersWithOdo(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
         const result: cliInstance.CliExitData = await this.execute(
-            `odo version && odo project list`
+            `odo version && odo project list`, process.cwd(), false
         );
         if (result.stdout.indexOf('Please log in to the cluster') > -1) {
             const loginErrorMsg: string = 'Please log in to the cluster';
