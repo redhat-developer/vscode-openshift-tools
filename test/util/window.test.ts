@@ -40,7 +40,6 @@ suite('Window Utility', () => {
         const env: NodeJS.ProcessEnv = {};
         const key = process.platform === 'win32' ? 'Path' : 'PATH';
         Object.assign(env, process.env);
-
         env[key] = `${toolLocationDir}${path.delimiter}${process.env[key]}`;
 
         const options: TerminalOptions = {
