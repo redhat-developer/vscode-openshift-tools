@@ -65,7 +65,7 @@ function execute<T>(command: (...args: T[]) => Promise<any>, ...params: T[]) {
     .then((result) => {
         displayResult(result);
     }).catch((err) => {
-        vscode.window.showErrorMessage(err);
+        vscode.window.showErrorMessage(err.message ? err.message : err);
     });
 }
 
