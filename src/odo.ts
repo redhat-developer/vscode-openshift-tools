@@ -111,7 +111,7 @@ export interface Odo {
     getServiceTemplatePlans(svc: string): Promise<string[]>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
-    execute(command: string, cwd?: string): Promise<CliExitData>;
+    execute(command: string, cwd?: string, fail?: boolean): Promise<CliExitData>;
     requireLogin(): Promise<boolean>;
 }
 
@@ -207,9 +207,9 @@ export class OdoImpl implements Odo {
         return clusters;
     }
 
-    public async getClustersWithOc(): Promise<OpenShiftObject[]> {
+    private async getClustersWithOc(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
-        const result: cliInstance.CliExitData = await this.execute(`oc version`);
+        const result: cliInstance.CliExitData = await this.execute(`oc version`, process.cwd(), false);
         clusters = result.stdout.trim().split('\n').filter((value) => {
             return value.indexOf('Server ') !== -1;
         }).map((value) => {
@@ -219,7 +219,7 @@ export class OdoImpl implements Odo {
         return clusters;
     }
 
-    public async getClustersWithOdo(): Promise<OpenShiftObject[]> {
+    private async getClustersWithOdo(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
         const result: cliInstance.CliExitData = await this.execute(
             `odo version && odo project list`
@@ -294,13 +294,19 @@ export class OdoImpl implements Odo {
         terminal.show();
     }
 
-    public async execute(command: string, cwd?: string): Promise<CliExitData> {
+    public async execute(command: string, cwd?: string, fail: boolean = true): Promise<CliExitData> {
         const cmd = command.split(' ')[0];
         const toolLocation = await ToolsConfig.detectOrDownload(cmd);
         return OdoImpl.cli.execute(
             toolLocation ? command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`) : command,
             cwd ? {cwd} : { }
-        );
+        ).then(async (result) => {
+            if (result.error && fail) {
+                return Promise.reject(result.error);
+            } else {
+                return result;
+            }
+        });
     }
 
     public async requireLogin(): Promise<boolean> {
