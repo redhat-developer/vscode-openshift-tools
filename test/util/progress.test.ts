@@ -55,7 +55,7 @@ suite('Progress Utility', () => {
 
     test('throw an error if a command fails', async () => {
         const error = new Error(errorMessage);
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves(error);
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').rejects(error);
         const spy = sandbox.spy(vscode.window, 'showErrorMessage');
         let e;
         try {
