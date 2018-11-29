@@ -15,12 +15,20 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { activate } from '../src/extension';
 import { Cluster } from '../src/openshift/cluster';
+import { Application } from '../src/openshift/application';
+import { Catalog } from '../src/openshift/catalog';
+import { Component} from '../src/openshift/component';
+import { Project} from '../src/openshift/project';
+import { Service} from '../src/openshift/service';
+import { Storage} from '../src/openshift/storage';
+import { Url} from '../src/openshift/url';
 import packagejson = require('../package.json');
+import { isContext } from 'vm';
 
 const expect = chai.expect;
 chai.use(sinonChai);
 
-suite('openshift connector Extension', () => {
+suite('openshift connector Extension', async () => {
 
     let sandbox: sinon.SinonSandbox;
 
@@ -57,10 +65,36 @@ suite('openshift connector Extension', () => {
 		assert.ok(vscode.extensions.getExtension('redhat.vscode-openshift-connector'));
 	});
 
+    async function getStaticMethosToStub(osc: string[]): Promise<string[]> {
+        let mths: Set<string> = new Set();
+        osc.forEach(name => {
+            name.replace('.palette', '');
+            let segs: string[] = name.split('.');
+            let methName: string = segs[segs.length-1];
+            methName = methName === 'delete'? 'del' : methName;
+            !mths.has(methName) && mths.add(methName);
+
+        });
+        return Array.from(mths);
+    }
+
     test('should activate extension', async () => {
         const registerTreeDataProviderStub = sandbox.stub(vscode.window, 'registerTreeDataProvider');
+        sandbox.stub(vscode.window, 'showErrorMessage');
         await activate(context);
+        let cmds:string[] = await vscode.commands.getCommands();
+        let osc:string[] = cmds.filter((item) => item.includes('openshift.'));
         expect(registerTreeDataProviderStub).calledOnce;
+        const mths: string[] = await getStaticMethosToStub(osc);
+        (<any>[Application, Catalog, Cluster, Component, Project, Service, Storage, Url]).forEach(async (item) => {
+            mths.forEach((name) => {
+                if (item[name]) {
+                    sandbox.stub(item, name);
+                }
+            });
+        })
+        osc.forEach((item) => vscode.commands.executeCommand(item));
+        expect(vscode.window.showErrorMessage).has.not.been.called;
     });
 
     test('should register all server commands', async () => {
@@ -71,7 +105,7 @@ suite('openshift connector Extension', () => {
                 serverCommands.push(value.command);
             });
             const foundServerCommands = commands.filter((value) => {
-                return serverCommands.indexOf(value) >= 0 || value.startsWith('openshift.');
+                return serverCommands.indexOf(value) >= 0;
             });
             assert.equal(foundServerCommands.length , serverCommands.length, 'Some openshift commands are not registered properly or a new command is not added to the test');
         });
@@ -107,6 +141,13 @@ suite('openshift connector Extension', () => {
         const simStub: sinon.SinonStub = sandbox.stub(vscode.window, 'showInformationMessage');
         await vscode.commands.executeCommand('openshift.about');
         expect(simStub).not.called;
-    })
+    });
 
+    test('sync command wrapper shows message returned from command', async () => {
+        const error = new Error('Message');
+        sandbox.stub(Cluster, 'refresh').throws(error);
+        const semStub: sinon.SinonStub = sandbox.stub(vscode.window, 'showErrorMessage');
+        await vscode.commands.executeCommand('openshift.explorer.refresh');
+        expect(semStub).calledWith(error);
+    });
 });
