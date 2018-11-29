@@ -463,7 +463,7 @@
         },
         {
           "command": "openshift.service.link",
-          "when": "view == openshiftProjectExplorer && viewItem == service",
+          "when": "view == openshiftProjectExplorer && viewItem == service && componentPresent",
           "group": "s1"
         },
         {

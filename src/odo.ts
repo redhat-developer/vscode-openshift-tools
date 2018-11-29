@@ -12,7 +12,6 @@ import jsYaml = require('js-yaml');
 import { Platform } from './util/platform';
 import * as fs from 'fs';
 import { ToolsConfig } from './tools';
-import { create } from 'domain';
 
 export interface OpenShiftObject extends QuickPickItem {
     getTreeItem(): TreeItem;
@@ -159,7 +158,13 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(
             `oc get dc --namespace ${proj} -o jsonpath="{range .items[?(.metadata.labels.app == \\"${application.getName()}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}"`
         );
-        return result.stdout.trim().split('\n').filter((value)=>value!=='').map<OpenShiftObject>((value) => new OpenShiftObjectImpl(application, value, 'component', this, TreeItemCollapsibleState.Collapsed));
+        const componentsList = result.stdout.trim().split('\n').filter((value)=>value!=='').map<OpenShiftObject>((value) => new OpenShiftObjectImpl(application, value, 'component', this, TreeItemCollapsibleState.Collapsed));
+        if (componentsList.length>0) {
+            commands.executeCommand('setContext', 'componentPresent', true);
+        } else {
+            commands.executeCommand('setContext', 'componentPresent', false);
+        }
+        return componentsList;
     }
 
     public async getComponentTypes(): Promise<string[]> {
