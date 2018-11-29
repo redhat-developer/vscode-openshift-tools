@@ -162,18 +162,14 @@ export class ToolsConfig {
         let detectedVersion: string;
         if (fs.existsSync(location)) {
             const version = new RegExp(`${cmd} v([\\d\\.]+)`);
-            try {
-                const result = await Cli.getInstance().execute(`"${location}" version`);
-                if (!result.error) {
-                    const toolVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
-                        return value.match(version);
-                    }).map((value)=>version.exec(value)[1]);
-                    if (toolVersion.length) {
-                        detectedVersion = toolVersion[0];
-                    }
+            const result = await Cli.getInstance().execute(`"${location}" version`);    
+            if (result.stdout) {
+                const toolVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
+                    return value.match(version);
+                }).map((value)=>version.exec(value)[1]);
+                if (toolVersion.length) {
+                    detectedVersion = toolVersion[0];
                 }
-            } catch (ignore) {
-                // if `${tool} version` failed, then there is no tool at specified location
             }
         }
         return detectedVersion;

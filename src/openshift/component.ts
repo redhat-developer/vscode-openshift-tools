@@ -99,17 +99,10 @@ export class Component extends OpenShiftItem {
             .catch((err) => Promise.reject(`Failed to link component with error '${err}'`));
     }
 
-    static async push(context: OpenShiftObject): Promise<string> {
+    static push(context: OpenShiftObject): void {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
-
-        return Progress.execWithProgress({
-            cancellable: false,
-            location: vscode.ProgressLocation.Notification,
-            title: `Pushing latest changes for component '${context.getName()}'`
-        }, [{command: `odo push ${context.getName()} --app ${app.getName()} --project ${project.getName()}`, increment: 100}
-        ], Component.odo)
-        .then(() => `Successfully pushed changes for '${context.getName()}'`);
+        Component.odo.executeInTerminal(`odo push ${context.getName()} --app ${app.getName()} --project ${project.getName()}`);
     }
 
     static watch(context: OpenShiftObject): void {

@@ -7,6 +7,8 @@
 
 import * as vscode from 'vscode';
 import * as odoctl from '../odo';
+import { CliExitData } from '../cli';
+import { ExecException } from 'child_process';
 
 export interface Step {
     command: string;
@@ -17,33 +19,43 @@ export interface Step {
 export class Progress {
     static execWithProgress(options, steps: Step[], odo: odoctl.Odo): Thenable<void> {
         return vscode.window.withProgress(options,
-        (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
-            const calls: (()=>Promise<any>)[] = [];
-            steps.reduce((previous: Step, current: Step, currentIndex: number, steps: Step[])=> {
-                calls.push(()=> {
-                    let result: Promise<any> = Promise.resolve();
-                    progress.report({
-                        increment: previous.increment,
-                        message: `${previous.total}%`
-                    });
-                    result = odo.execute(current.command);
+            (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
+                const calls: (()=>Promise<any>)[] = [];
+                steps.reduce((previous: Step, current: Step, currentIndex: number, steps: Step[])=> {
                     current.total = previous.total + current.increment;
-                    return currentIndex+1 === steps.length ? result.then(()=> {
-                        progress.report({
-                            increment: previous.increment,
-                            message: `${previous.total}%`
-                        });
-                    }) : result;
-                });
-                return current;
-            }, {increment: 0, command: "", total: 0});
+                    calls.push (() => {
+                        return Promise.resolve()
+                            .then(() => progress.report({increment: previous.increment, message: `${previous.total}%` }))
+                            .then(() => odo.execute(current.command))
+                            .then(() => {
+                                if (currentIndex+1 === steps.length) {
+                                    progress.report({
+                                        increment: current.increment,
+                                        message: `${current.total}%`
+                                    });
+                                }
+                            });
+                    });
+                    return current;
+                }, {increment: 0, command: "", total: 0});
 
-            return calls.reduce<Promise<any>>((previous: Promise<any>, current: ()=>Promise<any>, index: number, calls: (()=>Promise<any>)[])=> {
-                return previous.then(current);
-            }, Promise.resolve()).catch((error) => {
-                vscode.window.showErrorMessage(`${error}`);
-                return;
+                return calls.reduce<Promise<any>>((previous: Promise<any>, current: ()=>Promise<any>, index: number, calls: (()=>Promise<any>)[])=> {
+                    return previous.then(current);
+                }, Promise.resolve());
             });
+    }
+
+    static async execCmdWithProgress(title: string, cmd: string): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+            await vscode.window.withProgress({
+                cancellable: false,
+                location: vscode.ProgressLocation.Notification,
+                title},
+                async (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
+                    let result = await odoctl.getInstance().execute(cmd, process.cwd(), false);
+                    result.error ? reject(result.error) : resolve();
+                }
+            );
         });
     }
 }

@@ -14,6 +14,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { activate } from '../src/extension';
+import { Cluster } from '../src/openshift/cluster';
 import packagejson = require('../package.json');
 
 const expect = chai.expect;
@@ -75,4 +76,37 @@ suite('openshift connector Extension', () => {
             assert.equal(foundServerCommands.length , serverCommands.length, 'Some openshift commands are not registered properly or a new command is not added to the test');
         });
     });
+
+    test('async command wrapper shows message returned from command', async () => {
+        sandbox.stub(Cluster, 'login').resolves('message');
+        sandbox.stub(vscode.window, 'showErrorMessage');
+        const simStub: sinon.SinonStub = sandbox.stub(vscode.window, 'showInformationMessage');
+        await vscode.commands.executeCommand('openshift.explorer.login');
+        expect(simStub).calledWith('message');
+    });
+
+    test('async command wrapper shows error message from rejected command', async () => {
+        sandbox.stub(Cluster, 'login').returns(Promise.reject('message'));
+        const semStub: sinon.SinonStub = sandbox.stub(vscode.window, 'showErrorMessage');
+        sandbox.stub(vscode.window, 'showInformationMessage');
+        await vscode.commands.executeCommand('openshift.explorer.login');
+        expect(semStub).calledWith('message');
+    });
+
+    test('async command wrapper shows error.message from rejected command', async () => {
+        sandbox.stub(Cluster, 'login').returns(Promise.reject(new Error('message')));
+        const semStub: sinon.SinonStub = sandbox.stub(vscode.window, 'showErrorMessage');
+        sandbox.stub(vscode.window, 'showInformationMessage');
+        await vscode.commands.executeCommand('openshift.explorer.login');
+        expect(semStub).calledWith('message');
+    });
+
+    test('sync command wrapper shows message returned from command', async () => {
+        sandbox.stub(Cluster, 'about');
+        sandbox.stub(vscode.window, 'showErrorMessage');
+        const simStub: sinon.SinonStub = sandbox.stub(vscode.window, 'showInformationMessage');
+        await vscode.commands.executeCommand('openshift.about');
+        expect(simStub).not.called;
+    })
+
 });

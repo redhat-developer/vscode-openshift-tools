@@ -5,7 +5,7 @@
 
 import * as childProcess from 'child_process';
 import * as vscode from 'vscode';
-import { ExecException } from 'child_process';
+import { ExecException, ExecOptions } from 'child_process';
 
 export interface CliExitData {
     readonly error: ExecException;
@@ -26,9 +26,8 @@ export class Cli implements ICli {
         return Cli.instance;
     }
 
-    async execute(cmd: string, opts: any = {}): Promise<CliExitData> {
+    async execute(cmd: string, opts: ExecOptions = {}): Promise<CliExitData> {
         return new Promise<CliExitData>(async (resolve, reject) => {
-            const cmdName = cmd.split(' ')[0];
             this.odoChannel.print(cmd);
             if (opts.maxBuffer === undefined) {
                 opts.maxBuffer = 2*1024*1024;
@@ -36,22 +35,16 @@ export class Cli implements ICli {
             childProcess.exec(cmd, opts, (error: ExecException, stdout: string, stderr: string) => {
                 this.odoChannel.print(stdout);
                 this.odoChannel.print(stderr);
-                if (error) {
-                    if (error.code === 1 && stderr.trim().length === 0) {
-                        resolve({ error, stdout: stdout.replace(/---[\s\S]*---/g, '').trim(), stderr });
-                    } else {
-                        reject(error);
-                    }
-                } else {
-                    resolve({ error, stdout: stdout.replace(/---[\s\S]*---/g, '').trim(), stderr });
-                }
+                // do not reject it here, because caller in some cases need the error and the streams
+                // to make a decision
+                resolve({ error, stdout: stdout.replace(/---[\s\S]*---/g, '').trim(), stderr });
             });
         });
     }
 }
 
 export interface ICli {
-    execute(cmd: string, opts?: any): Promise<CliExitData>;
+    execute(cmd: string, opts?: ExecOptions): Promise<CliExitData>;
 }
 
 export interface OdoChannel {

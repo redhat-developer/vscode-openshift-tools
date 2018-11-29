@@ -27,7 +27,11 @@ export interface OpenShiftComponent extends OpenShiftObject {
 }
 
 class OpenShiftObjectImpl implements OpenShiftObject {
-    constructor(private parent: OpenShiftObject, public readonly name, private readonly context, private readonly odo: Odo, private readonly expandable: TreeItemCollapsibleState = TreeItemCollapsibleState.Collapsed) {
+    constructor(private parent: OpenShiftObject,
+         public readonly name: string,
+         private readonly context: string,
+         private readonly odo: Odo,
+         private readonly expandable: TreeItemCollapsibleState = TreeItemCollapsibleState.Collapsed) {
     }
 
     get label(): string {
@@ -110,7 +114,7 @@ export interface Odo {
     getServiceTemplatePlans(svc: string): Promise<string[]>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
-    execute(command: string, cwd?: string): Promise<CliExitData>;
+    execute(command: string, cwd?: string, fail?: boolean): Promise<CliExitData>;
     requireLogin(): Promise<boolean>;
 }
 
@@ -158,19 +162,21 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(
             `oc get dc --namespace ${proj} -o jsonpath="{range .items[?(.metadata.labels.app == \\"${application.getName()}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}"`
         );
-        const componentsList = result.stdout.trim().split('\n').filter((value)=>value!=='').map<OpenShiftObject>((value) => new OpenShiftObjectImpl(application, value, 'component', this, TreeItemCollapsibleState.Collapsed));
+
+        const componentsList = result.stdout.trim().split('\n')
+            .filter((value) => value !== '')
+            .map<OpenShiftObject>((value) => new OpenShiftObjectImpl(application, value, 'component', this, TreeItemCollapsibleState.Collapsed));
         if (componentsList.length>0) {
             commands.executeCommand('setContext', 'componentPresent', true);
         } else {
             commands.executeCommand('setContext', 'componentPresent', false);
         }
         return componentsList;
+
     }
 
     public async getComponentTypes(): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(
-            `odo catalog list components`
-        );
+        const result: cliInstance.CliExitData = await this.execute(`odo catalog list components`);
         return result.stdout.trim().split('\n').slice(1).map((value) => {
             const name = value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|');
             return name[0];
@@ -192,16 +198,14 @@ export class OdoImpl implements Odo {
     }
 
     public async getComponentTypeVersions(componentName: string) {
-        const result: cliInstance.CliExitData = await this.execute(
-            `odo catalog list components`
-        );
+        const result: cliInstance.CliExitData = await this.execute(`odo catalog list components`);
         const versions = result.stdout.trim().split('\n').slice(1).filter((value) => {
             const data = value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|');
             return data[0] === componentName;
-            }).map((value) => {
+        }).map((value) => {
             return value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|')[2];
         });
-        return  versions[0].split(',');
+        return versions[0].split(',');
     }
 
     public async getClusters(): Promise<OpenShiftObject[]> {
@@ -212,9 +216,9 @@ export class OdoImpl implements Odo {
         return clusters;
     }
 
-    public async getClustersWithOc(): Promise<OpenShiftObject[]> {
+    private async getClustersWithOc(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
-        const result: cliInstance.CliExitData = await this.execute(`oc version`);
+        const result: cliInstance.CliExitData = await this.execute(`oc version`, process.cwd(), false);
         clusters = result.stdout.trim().split('\n').filter((value) => {
             return value.indexOf('Server ') !== -1;
         }).map((value) => {
@@ -224,10 +228,10 @@ export class OdoImpl implements Odo {
         return clusters;
     }
 
-    public async getClustersWithOdo(): Promise<OpenShiftObject[]> {
+    private async getClustersWithOdo(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
         const result: cliInstance.CliExitData = await this.execute(
-            `odo version && odo project list`
+            `odo version && odo project list`, process.cwd(), false
         );
         if (result.stdout.indexOf('Please log in to the cluster') > -1) {
             const loginErrorMsg: string = 'Please log in to the cluster';
@@ -248,10 +252,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getServiceTemplates(): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(
-            `odo catalog list services`
-        );
-
+        const result: cliInstance.CliExitData = await this.execute(`odo catalog list services`, process.cwd(), false);
         if (result.error) {
             throw new Error(result.stdout.trim());
         }
@@ -262,9 +263,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getServiceTemplatePlans(svcName: string): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(
-            `odo catalog list services`
-        );
+        const result: cliInstance.CliExitData = await this.execute(`odo catalog list services`);
         const plans = result.stdout.trim().split('\n').slice(1).filter((value) => {
                 const data = value.trim().replace(/\s{1,}/g, '|').split('|');
                 return data[0] === svcName;
@@ -282,7 +281,9 @@ export class OdoImpl implements Odo {
             const result: cliInstance.CliExitData = await this.execute(
                 `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app == \\"${appName}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}" --namespace ${projName}`
             );
-            services = result.stdout.trim().split('\n').filter((value)=>value!=='').map((value) => new OpenShiftObjectImpl(application, value, 'service', this, TreeItemCollapsibleState.None));
+            services = result.stdout.trim().split('\n')
+                .filter((value) => value !== '')
+                .map((value) => new OpenShiftObjectImpl(application, value, 'service', this, TreeItemCollapsibleState.None));
         } catch (e) {
             // ignore error in case service catalog is not configured
         }
@@ -293,19 +294,30 @@ export class OdoImpl implements Odo {
         return [... await this.getComponents(application), ... await this.getServices(application)];
     }
 
-    public executeInTerminal(command: string, cwd: string = process.cwd(), name: string = 'OpenShift') {
-        const terminal: Terminal = WindowUtil.createTerminal(name, cwd);
+    public async executeInTerminal(command: string, cwd: string = process.cwd(), name: string = 'OpenShift') {
+        const cmd = command.split(' ')[0];
+        let toolLocation = await ToolsConfig.detectOrDownload(cmd);
+        if (toolLocation) {
+            toolLocation = path.dirname(toolLocation);
+        }
+        const terminal: Terminal = WindowUtil.createTerminal(name, cwd, toolLocation);
         terminal.sendText(command, true);
         terminal.show();
     }
 
-    public async execute(command: string, cwd?: string): Promise<CliExitData> {
+    public async execute(command: string, cwd?: string, fail: boolean = true): Promise<CliExitData> {
         const cmd = command.split(' ')[0];
         const toolLocation = await ToolsConfig.detectOrDownload(cmd);
         return OdoImpl.cli.execute(
             toolLocation ? command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`) : command,
             cwd ? {cwd} : { }
-        );
+        ).then(async (result) => {
+            if (result.error && fail) {
+                return Promise.reject(result.error);
+            } else {
+                return result;
+            }
+        });
     }
 
     public async requireLogin(): Promise<boolean> {

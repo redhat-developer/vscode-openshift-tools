@@ -37,7 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.describe', (context) => executeSync(Component.describe, context)),
         vscode.commands.registerCommand('openshift.component.create', (context) => execute(Component.create, context)),
         vscode.commands.registerCommand('openshift.component.delete.palette', (context) => execute(Component.del, context)),
-        vscode.commands.registerCommand('openshift.component.push', (context) => execute(Component.push, context)),
+        vscode.commands.registerCommand('openshift.component.push', (context) => executeSync(Component.push, context)),
         vscode.commands.registerCommand('openshift.component.watch', (context) => executeSync(Component.watch, context)),
         vscode.commands.registerCommand('openshift.component.log', (context) => executeSync(Component.log, context)),
         vscode.commands.registerCommand('openshift.component.followLog', (context) => executeSync(Component.followLog, context)),
@@ -67,7 +67,7 @@ function execute<T>(command: (...args: T[]) => Promise<any>, ...params: T[]) {
     .then((result) => {
         displayResult(result);
     }).catch((err) => {
-        vscode.window.showErrorMessage(err);
+        vscode.window.showErrorMessage(err.message ? err.message : err);
     });
 }
 

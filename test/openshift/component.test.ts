@@ -243,15 +243,9 @@ suite('Openshift/Component', () => {
     });
 
     test('push calls the correct odo command with progress', async () => {
-        const progressStub = sandbox.stub(Progress, 'execWithProgress').resolves();
         const status = await Component.push(componentItem);
-        const steps = [{
-            command: `odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`,
-            increment: 100
-        }];
 
-        expect(status).equals(`Successfully pushed changes for '${componentItem.getName()}'`);
-        expect(progressStub).calledOnceWith(sinon.match.object, steps);
+        expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
     });
 
     test('watch calls the correct odo command in terminal', () => {
