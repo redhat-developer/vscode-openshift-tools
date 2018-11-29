@@ -87,18 +87,18 @@ suite('openshift connector Extension', () => {
 
     test('async command wrapper shows error message from rejected command', async () => {
         sandbox.stub(Cluster, 'login').returns(Promise.reject('message'));
-        const simStub: sinon.SinonStub = sandbox.stub(vscode.window, 'showErrorMessage');
+        const semStub: sinon.SinonStub = sandbox.stub(vscode.window, 'showErrorMessage');
         sandbox.stub(vscode.window, 'showInformationMessage');
         await vscode.commands.executeCommand('openshift.explorer.login');
-        expect(simStub).calledWith('message');
+        expect(semStub).calledWith('message');
     });
 
     test('async command wrapper shows error.message from rejected command', async () => {
         sandbox.stub(Cluster, 'login').returns(Promise.reject(new Error('message')));
-        const simStub: sinon.SinonStub = sandbox.stub(vscode.window, 'showErrorMessage');
+        const semStub: sinon.SinonStub = sandbox.stub(vscode.window, 'showErrorMessage');
         sandbox.stub(vscode.window, 'showInformationMessage');
         await vscode.commands.executeCommand('openshift.explorer.login');
-        expect(simStub).calledWith('message');
+        expect(semStub).calledWith('message');
     });
 
     test('sync command wrapper shows message returned from command', async () => {
