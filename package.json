@@ -45,8 +45,8 @@
     "onCommand:openshift.component.delete",
     "onCommand:openshift.component.push",
     "onCommand:openshift.component.watch",
-    "onCommand:openshift.catalog.list.components",
-    "onCommand:openshift.catalog.list.services",
+    "onCommand:openshift.catalog.listComponents",
+    "onCommand:openshift.catalog.listServices",
     "onCommand:openshift.url.create",
     "onCommand:openshift.component.openUrl",
     "onCommand:openshift.storage.create",
@@ -165,12 +165,12 @@
         "category": "OpenShift"
       },
       {
-        "command": "openshift.catalog.list.components",
+        "command": "openshift.catalog.listComponents",
         "title": "List Catalog Components ",
         "category": "OpenShift"
       },
       {
-        "command": "openshift.catalog.list.services",
+        "command": "openshift.catalog.listCervices",
         "title": "List Catalog Services",
         "category": "OpenShift"
       },
@@ -334,12 +334,12 @@
           "group": "c1"
         },
         {
-          "command": "openshift.catalog.list.components",
+          "command": "openshift.catalog.listComponents",
           "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
           "group": "c2@1"
         },
         {
-          "command": "openshift.catalog.list.services",
+          "command": "openshift.catalog.listServices",
           "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
           "group": "c2@2"
         },
