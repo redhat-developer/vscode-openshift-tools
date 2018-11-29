@@ -244,7 +244,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getServiceTemplates(): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(`odo catalog list services`);
+        const result: cliInstance.CliExitData = await this.execute(`odo catalog list services`, process.cwd(), false);
         if (result.error) {
             throw new Error(result.stdout.trim());
         }

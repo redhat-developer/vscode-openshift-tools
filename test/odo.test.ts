@@ -178,6 +178,22 @@ suite("odo", () => {
             expect(result).empty;
         });
 
+        test('getServiceTemplates trows exception if service catalog is not enabled', async () => {
+            const stdout = 'error message';
+            execStub.resolves({error: new Error(), stdout, stderr: ''});
+            let e;
+            try {
+                const result = await odoCli.getServiceTemplates();
+            } catch(err) {
+                e = err;
+            }
+
+            expect(e, 'getServiceTemplates has not threw error').is.not.undefined;
+            expect(e.message, 'error has no message fiels').is.not.undefined;
+            expect(e.message, 'message is not equal stdout stream output').equals(stdout);
+
+        });
+
         test('getApplicationChildren returns both components and services for an application', async () => {
             const component = new TestItem(app, 'comp');
             const service = new TestItem(app, 'serv');
