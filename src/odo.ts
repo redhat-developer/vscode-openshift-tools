@@ -286,8 +286,13 @@ export class OdoImpl implements Odo {
         return [... await this.getComponents(application), ... await this.getServices(application)];
     }
 
-    public executeInTerminal(command: string, cwd: string = process.cwd(), name: string = 'OpenShift') {
-        const terminal: Terminal = WindowUtil.createTerminal(name, cwd);
+    public async executeInTerminal(command: string, cwd: string = process.cwd(), name: string = 'OpenShift') {
+        const cmd = command.split(' ')[0];
+        let toolLocation = await ToolsConfig.detectOrDownload(cmd);
+        if (toolLocation) {
+            toolLocation = path.dirname(toolLocation);
+        }
+        const terminal: Terminal = WindowUtil.createTerminal(name, cwd, toolLocation);
         terminal.sendText(command, true);
         terminal.show();
     }

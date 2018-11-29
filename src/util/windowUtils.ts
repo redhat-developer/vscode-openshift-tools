@@ -10,14 +10,15 @@ import * as path from 'path';
 import { Platform } from './platform';
 
 export class WindowUtil {
-    private static readonly toolsLocation: string = path.resolve(Platform.getUserHomePath(), '.vs-openshift');
 
-    static createTerminal(name: string, cwd: string, env: NodeJS.ProcessEnv = process.env): Terminal {
+    static createTerminal(name: string, cwd: string, toolLocation?: string, env: NodeJS.ProcessEnv = process.env): Terminal {
         const finalEnv: NodeJS.ProcessEnv = {};
         Object.assign(finalEnv, env);
         const key = process.platform === 'win32' ? 'Path' : 'PATH';
-        finalEnv[key] = `${this.toolsLocation}${path.delimiter}${env[key]}`;
 
+        if (toolLocation && env[key] && !env[key].includes(toolLocation)) {
+            finalEnv[key] = `${toolLocation}${path.delimiter}${env[key]}`;
+        }
         const options: TerminalOptions = {
             cwd: cwd,
             name: name,

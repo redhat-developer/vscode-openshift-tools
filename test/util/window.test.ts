@@ -12,6 +12,7 @@ import * as path from 'path';
 import { window, TerminalOptions } from 'vscode';
 import { WindowUtil } from '../../src/util/windowUtils';
 import { Platform } from '../../src/util/platform';
+import { ToolsConfig } from '../../src/tools';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -31,15 +32,15 @@ suite('Window Utility', () => {
 
     test('createTerminal creates a terminal object', () => {
         WindowUtil.createTerminal('name', process.cwd());
-
         expect(termStub).calledOnce;
     });
 
     test('createTerminal adds tools location and shell path to the environment', () => {
+        const toolLocationDir = path.dirname(path.join("dir", "where", "tool", "is", "located", "tool"));
         const env: NodeJS.ProcessEnv = {};
         const key = process.platform === 'win32' ? 'Path' : 'PATH';
         Object.assign(env, process.env);
-        env[key] = `${path.join(Platform.getUserHomePath(), '.vs-openshift')}${path.delimiter}${process.env[key]}`;
+        env[key] = `${toolLocationDir}${path.delimiter}${process.env[key]}`;
 
         const options: TerminalOptions = {
             cwd: process.cwd(),
@@ -47,7 +48,7 @@ suite('Window Utility', () => {
             shellPath: process.platform === 'win32' ? undefined : '/bin/bash',
             env: env
         };
-        WindowUtil.createTerminal('terminal', process.cwd());
+        WindowUtil.createTerminal('terminal', process.cwd(), toolLocationDir);
 
         expect(termStub).calledOnceWith(options);
     });
