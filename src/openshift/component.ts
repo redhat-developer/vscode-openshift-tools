@@ -11,8 +11,6 @@ import opn = require('opn');
 import { ChildProcess } from 'child_process';
 import * as validator from 'validator';
 import { Url } from './url';
-import { CliExitData } from '../cli';
-
 export class Component extends OpenShiftItem {
     static async create(application: OpenShiftObject): Promise<string> {
         // should use QuickPickItem with label and description
@@ -91,7 +89,8 @@ export class Component extends OpenShiftItem {
     static async link(context: OpenShiftObject): Promise<String> {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
-        const componentToLink = await vscode.window.showQuickPick(Component.odo.getComponents(app), {placeHolder: "Select the component to link"});
+        const componentPresent = await Component.odo.getComponents(app);
+        const componentToLink = await vscode.window.showQuickPick(componentPresent.filter((comp)=> comp.getName() !== context.getName()), {placeHolder: "Select the component to link"});
         if (!componentToLink) return null;
 
         return Promise.resolve()
