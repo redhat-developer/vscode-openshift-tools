@@ -68,4 +68,28 @@ suite('Progress Utility', () => {
             expect.fail('no error thrown');
         }
     });
+
+    test('execCmdWithProgress returned promice resolves in case of cmd finished sucessfully', () => {
+        const error = new Error(errorMessage);
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
+        let e;
+        Progress.execCmdWithProgress('title', 'cmd').catch(() => {
+            expect.fail(true, false, 'returned promise should not be rejected');
+        });
+    });
+
+    test('execCmdWithProgress returned promice rejects in case of cmd finished with failure', async () => {
+        const error = new Error(errorMessage);
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error, stdout: '', stderr: ''});
+        let e;
+        try {
+            await Progress.execCmdWithProgress('title', 'cmd');
+        } catch (err)  {
+            e = err;
+            expect(err.message).equals(errorMessage);
+        }
+        if (!e) {
+            expect.fail('no error thrown');
+        }
+    });
 });
