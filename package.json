@@ -183,11 +183,6 @@
         "category": "OpenShift"
       },
       {
-        "command": "openshift.component.push.palette",
-        "title": "Push",
-        "category": "OpenShift"
-      },
-      {
         "command": "openshift.component.watch",
         "title": "Watch",
         "category": "OpenShift"
@@ -318,10 +313,6 @@
         },
         {
           "command": "openshift.component.delete",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.component.push",
           "when": "view == openshiftProjectExplorer"
         },
         {
