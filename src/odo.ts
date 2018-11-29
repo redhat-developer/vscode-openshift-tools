@@ -166,11 +166,7 @@ export class OdoImpl implements Odo {
         const componentsList = result.stdout.trim().split('\n')
             .filter((value) => value !== '')
             .map<OpenShiftObject>((value) => new OpenShiftObjectImpl(application, value, 'component', this, TreeItemCollapsibleState.Collapsed));
-        if (componentsList.length>0) {
-            commands.executeCommand('setContext', 'componentPresent', true);
-        } else {
-            commands.executeCommand('setContext', 'componentPresent', false);
-        }
+        commands.executeCommand('setContext', 'componentPresent', componentsList.length>0);
         return componentsList;
 
     }
