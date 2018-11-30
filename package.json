@@ -402,16 +402,6 @@
           "group": "a3"
         },
         {
-          "command": "openshift.component.linkComponent",
-          "when": "view == openshiftProjectExplorer && viewItem == component && componentPresent",
-          "group": "c@1"
-        },
-        {
-          "command": "openshift.component.linkService",
-          "when": "view == openshiftProjectExplorer && viewItem == component && servicePresent",
-          "group": "c@2"
-        },
-        {
           "command": "openshift.url.create",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c1@1"
@@ -437,24 +427,34 @@
           "group": "c2@3"
         },
         {
+          "command": "openshift.component.linkComponent",
+          "when": "view == openshiftProjectExplorer && viewItem == component && componentPresent",
+          "group": "c3@1"
+        },
+        {
+          "command": "openshift.component.linkService",
+          "when": "view == openshiftProjectExplorer && viewItem == component && servicePresent",
+          "group": "c3@2"
+        },
+        {
           "command": "openshift.component.openUrl",
           "when": "view == openshiftProjectExplorer && viewItem == component",
-          "group": "c3@1"
+          "group": "c4@1"
         },
         {
           "command": "openshift.component.push",
           "when": "view == openshiftProjectExplorer && viewItem == component",
-          "group": "c3@2"
+          "group": "c4@2"
         },
         {
           "command": "openshift.component.watch",
           "when": "view == openshiftProjectExplorer && viewItem == component",
-          "group": "c3@3"
+          "group": "c4@3"
         },
         {
           "command": "openshift.component.delete",
           "when": "view == openshiftProjectExplorer && viewItem == component",
-          "group": "c4@1"
+          "group": "c5@1"
         },
         {
           "command": "openshift.service.create",
