@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { OpenShiftItem } from './openshiftItem';
-import { OpenShiftObject } from '../odo';
+import { OpenShiftObject, OdoImpl } from '../odo';
 import * as vscode from 'vscode';
 import { Progress } from '../util/progress';
 import opn = require('opn');
@@ -163,15 +163,10 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeVersion) return null;
         const project = application.getParent();
-        return Progress.execWithProgress({
-            cancellable: false,
-            location: vscode.ProgressLocation.Notification,
-            title: `Creating new component '${componentName}'`
-        }, [{command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --local ${folder.uri.fsPath} --app ${application.getName()} --project ${project.getName()}`, increment: 50},
-            {command: `odo push ${componentName} --local ${folder.uri.fsPath} --app ${application.getName()} --project ${project.getName()}`, increment: 50}
-        ], Component.odo)
-        .then(() => Component.explorer.refresh(application))
-        .then(() => `Component '${componentName}' successfully created`);
+        return Progress.execCmdWithProgress(`Creating new component '${componentName}'`, `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --local ${folder.uri.fsPath} --app ${application.getName()} --project ${project.getName()}`)
+            .then(() => Component.explorer.refresh(application))
+            .then(() => Component.odo.executeInTerminal(`odo push ${componentName} --local ${folder.uri.fsPath} --app ${application.getName()} --project ${project.getName()}`))
+            .then(() => `Component '${componentName}' successfully created`);
     }
 
     private static async createFromGit(application: OpenShiftObject): Promise<string> {
@@ -209,14 +204,11 @@ export class Component extends OpenShiftItem {
         });
 
         const project = application.getParent();
-        return Progress.execWithProgress({
-            cancellable: false,
-            location: vscode.ProgressLocation.Notification,
-            title: `Creating new component '${componentName}'`
-        }, [{command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --git ${repoURI} --app ${application.getName()} --project ${project.getName()}`, increment: 100}
-        ], Component.odo)
-        .then(() => Component.explorer.refresh(application))
-        .then(() => `Component '${componentName}' successfully created`);
+        return Promise.resolve()
+            .then(() => Component.odo.executeInTerminal(`odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --git ${repoURI} --app ${application.getName()} --project ${project.getName()}`))
+            .then(() => new Promise((res)=>setTimeout(res, 5000)))
+            .then(() => Component.explorer.refresh(application))
+            .then(() => `Component '${componentName}' successfully created`);
     }
 
     private static async createFromBinary(application: OpenShiftObject): Promise<string> {
@@ -243,13 +235,9 @@ export class Component extends OpenShiftItem {
         if (!componentTypeVersion) return null;
 
         const project = application.getParent();
-        return Progress.execWithProgress({
-            cancellable: false,
-            location: vscode.ProgressLocation.Notification,
-            title: `Creating new component '${componentName}'`
-        }, [{command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --binary ${binaryFile[0].fsPath} --app ${application.getName()} --project ${project.getName()}`, increment: 100}
-        ], Component.odo)
-        .then(() => Component.explorer.refresh(application))
-        .then(() => `Component '${componentName}' successfully created`);
+        return Progress.execCmdWithProgress(`Creating new component '${componentName}'`,
+            `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --binary ${binaryFile[0].fsPath} --app ${application.getName()} --project ${project.getName()}`)
+            .then(() => Component.explorer.refresh(application))
+            .then(() => `Component '${componentName}' successfully created`);
     }
 }
