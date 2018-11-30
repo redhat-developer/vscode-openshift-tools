@@ -180,7 +180,7 @@
         "category": "OpenShift"
       },
       {
-        "command": "openshift.catalog.listCervices",
+        "command": "openshift.catalog.listServices",
         "title": "List Catalog Services",
         "category": "OpenShift"
       },
