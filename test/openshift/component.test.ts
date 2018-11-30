@@ -183,13 +183,13 @@ suite('Openshift/Component', () => {
             });
 
             test('happy path works', async () => {
-                const steps = [
-                    {command: `odo create ${componentType}:${version} ${componentItem.getName()} --binary ${files[0].fsPath} --app ${appItem.getName()} --project ${projectItem.getName()}`, increment: 100}
-                ];
+                
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(progressStub).calledOnceWith(sinon.match.object, steps);
+                expect(progressCmdStub).calledOnceWith(
+                    `Creating new component '${componentItem.getName()}'`,
+                    `odo create ${componentType}:${version} ${componentItem.getName()} --binary ${files[0].fsPath} --app ${appItem.getName()} --project ${projectItem.getName()}`);
             });
 
             test('returns null when no binary file selected', async () => {
