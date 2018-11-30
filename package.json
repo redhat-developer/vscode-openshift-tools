@@ -140,13 +140,13 @@
         "category": "OpenShift"
       },
       {
-        "command": "openshift.component.link",
+        "command": "openshift.component.linkComponent",
         "title": "Link Component",
         "category": "OpenShift"
       },
       {
-        "command": "openshift.service.link",
-        "title": "Link Component",
+        "command": "openshift.component.linkService",
+        "title": "Link Service",
         "category": "OpenShift"
       },
       {
@@ -281,11 +281,11 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
-          "command": "openshift.component.link",
+          "command": "openshift.component.linkComponent",
           "when": "view == openshiftProjectExplorer"
         },
         {
-          "command": "openshift.service.link",
+          "command": "openshift.service.linkService",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -402,6 +402,16 @@
           "group": "a3"
         },
         {
+          "command": "openshift.component.linkComponent",
+          "when": "view == openshiftProjectExplorer && viewItem == component && componentPresent",
+          "group": "c@1"
+        },
+        {
+          "command": "openshift.component.linkService",
+          "when": "view == openshiftProjectExplorer && viewItem == component && servicePresent",
+          "group": "c@2"
+        },
+        {
           "command": "openshift.url.create",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c1@1"
@@ -423,11 +433,6 @@
         },
         {
           "command": "openshift.component.followLog",
-          "when": "view == openshiftProjectExplorer && viewItem == component",
-          "group": "c2@3"
-        },
-        {
-          "command": "openshift.component.link",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c2@3"
         },
@@ -459,11 +464,6 @@
         {
           "command": "openshift.service.delete",
           "when": "view == openshiftProjectExplorer && viewItem == service",
-          "group": "s1"
-        },
-        {
-          "command": "openshift.service.link",
-          "when": "view == openshiftProjectExplorer && viewItem == service && componentPresent",
           "group": "s1"
         },
         {
