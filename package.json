@@ -285,7 +285,7 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
-          "command": "openshift.service.linkService",
+          "command": "openshift.component.linkService",
           "when": "view == openshiftProjectExplorer"
         },
         {
