@@ -12,4 +12,5 @@ export abstract class OpenShiftItem {
 
     static create(context: OpenShiftObject): Promise<String> { return Promise.reject(); }
     static del(context: OpenShiftObject): Promise<String> { return Promise.reject(); }
+    static wait(timeout: number = 2500): Promise<void> { return  new Promise((res)=>setTimeout(res, timeout)); }
 }

@@ -33,13 +33,8 @@ export class Service extends OpenShiftItem {
         });
         if (serviceName) {
             const project = application.getParent();
-            return Promise.resolve().then(() =>
-                Progress.execWithProgress({
-                    cancellable: false,
-                    location: vscode.ProgressLocation.Notification,
-                    title: `Creating new service '${serviceName}'`
-                }, [{command: `odo service create ${serviceTemplateName} --plan ${serviceTemplatePlanName} ${serviceName.trim()} --app ${application.getName()} --project ${project.getName()}`, increment: 100}
-                ], Service.odo))
+            return Progress.execCmdWithProgress(`Creating new service '${serviceName}'`,
+                `odo service create ${serviceTemplateName} --plan ${serviceTemplatePlanName} ${serviceName.trim()} --app ${application.getName()} --project ${project.getName()}`)
                 .then(() => Service.explorer.refresh(application))
                 .then(() => `Service '${serviceName}' successfully created`)
                 .catch((err) => Promise.reject(`Failed to create service with error '${err}'`));
@@ -54,9 +49,9 @@ export class Service extends OpenShiftItem {
         if (!componentToLink) return null;
 
         return Promise.resolve()
-        .then(() => Service.odo.execute(`odo link ${context.getName()} --app ${app.getName()} --project ${project.getName()} --component ${componentToLink.getName()}`))
-        .then(() => `service '${context.getName()}' successfully linked with component '${componentToLink.getName()}'`)
-        .catch((err) => Promise.reject(`Failed to link service with error '${err}'`));
+            .then(() => Service.odo.execute(`odo link ${context.getName()} --app ${app.getName()} --project ${project.getName()} --component ${componentToLink.getName()}`))
+            .then(() => `service '${context.getName()}' successfully linked with component '${componentToLink.getName()}'`)
+            .catch((err) => Promise.reject(`Failed to link service with error '${err}'`));
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {

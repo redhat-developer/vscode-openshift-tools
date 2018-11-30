@@ -45,18 +45,15 @@ suite('Openshift/Service', () => {
             quickPickStub.onFirstCall().resolves(templateName);
             quickPickStub.onSecondCall().resolves(templatePlan);
             inputStub = sandbox.stub(vscode.window, 'showInputBox').resolves(serviceItem.getName());
-            progressStub = sandbox.stub(Progress, 'execWithProgress').resolves();
+            progressStub = sandbox.stub(Progress, 'execCmdWithProgress').resolves();
         });
 
         test('works with correct inputs', async () => {
             const result = await Service.create(appItem);
-            const steps = [{
-                command: `odo service create ${templateName} --plan ${templatePlan} ${serviceItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`,
-                increment: 100
-            }];
-
             expect(result).equals(`Service '${serviceItem.getName()}' successfully created`);
-            expect(progressStub).calledOnceWith(sinon.match.object, steps);
+            expect(progressStub).calledOnceWith(
+                `Creating new service '${serviceItem.getName()}'`,
+                `odo service create ${templateName} --plan ${templatePlan} ${serviceItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
         });
 
         test('returns null with no template selected', async () => {
