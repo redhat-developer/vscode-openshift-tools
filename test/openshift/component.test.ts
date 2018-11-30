@@ -174,17 +174,17 @@ suite('Openshift/Component', () => {
 
         suite('from binary file', () => {
             let fileStub: sinon.SinonStub;
-            const filePath = 'test/sample.war';
+            const files = [{ fsPath: 'test/sample.war' }];
 
             setup(() => {
                 quickPickStub.onFirstCall().resolves({ label: 'Binary File' });
-                fileStub = sandbox.stub(vscode.window, 'showOpenDialog').resolves(filePath);
+                fileStub = sandbox.stub(vscode.window, 'showOpenDialog').resolves(files);
                 inputStub.resolves(componentItem.getName());
             });
 
             test('happy path works', async () => {
                 const steps = [
-                    {command: `odo create ${componentType}:${version} ${componentItem.getName()} --binary ${filePath} --app ${appItem.getName()} --project ${projectItem.getName()}`, increment: 100}
+                    {command: `odo create ${componentType}:${version} ${componentItem.getName()} --binary ${files[0].fsPath} --app ${appItem.getName()} --project ${projectItem.getName()}`, increment: 100}
                 ];
                 const result = await Component.create(appItem);
 

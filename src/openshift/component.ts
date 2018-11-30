@@ -247,7 +247,7 @@ export class Component extends OpenShiftItem {
             cancellable: false,
             location: vscode.ProgressLocation.Notification,
             title: `Creating new component '${componentName}'`
-        }, [{command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --binary ${binaryFile} --app ${application.getName()} --project ${project.getName()}`, increment: 100}
+        }, [{command: `odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --binary ${binaryFile[0].fsPath} --app ${application.getName()} --project ${project.getName()}`, increment: 100}
         ], Component.odo)
         .then(() => Component.explorer.refresh(application))
         .then(() => `Component '${componentName}' successfully created`);
