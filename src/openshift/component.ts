@@ -89,6 +89,7 @@ export class Component extends OpenShiftItem {
     }
 
     static followLog(context: OpenShiftObject) {
+
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
         Component.odo.executeInTerminal(Command.showLogAndFollow(project.getName(), app.getName(), context.getName()));
