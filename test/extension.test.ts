@@ -23,7 +23,6 @@ import { Service} from '../src/openshift/service';
 import { Storage} from '../src/openshift/storage';
 import { Url} from '../src/openshift/url';
 import packagejson = require('../package.json');
-import { isContext } from 'vm';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -50,7 +49,7 @@ suite('openshift connector Extension', async () => {
         globalState: new DummyMemento(),
         asAbsolutePath(relativePath: string): string {
             return '';
-          }
+        }
     };
 
     setup(() => {
@@ -75,7 +74,7 @@ suite('openshift connector Extension', async () => {
             !mths.has(methName) && mths.add(methName);
 
         });
-        return Array.from(mths);
+        return [...mths];
     }
 
     test('should activate extension', async () => {
@@ -97,17 +96,11 @@ suite('openshift connector Extension', async () => {
         expect(vscode.window.showErrorMessage).has.not.been.called;
     });
 
-    test('should register all server commands', async () => {
+    test('should register all extension commands delared commands in package descriptor', async () => {
         return await vscode.commands.getCommands(true).then((commands) => {
-            const serverCommands = [];
-            const reqs = JSON.parse(JSON.stringify(packagejson));
-            reqs.contributes.commands.forEach((value)=> {
-                serverCommands.push(value.command);
+            packagejson.contributes.commands.forEach((value)=> {
+                expect(commands.indexOf(value.command) > -1, `Command '${value.command}' handler is not registered during activation`).true;
             });
-            const foundServerCommands = commands.filter((value) => {
-                return serverCommands.indexOf(value) >= 0;
-            });
-            assert.equal(foundServerCommands.length , serverCommands.length, 'Some openshift commands are not registered properly or a new command is not added to the test');
         });
     });
 
