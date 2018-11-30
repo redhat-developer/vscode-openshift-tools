@@ -140,6 +140,16 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.link",
+        "title": "Link Component",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.service.link",
+        "title": "Link Component",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.openshiftConsole",
         "title": "Open Console",
         "category": "OpenShift"
@@ -268,6 +278,14 @@
         },
         {
           "command": "openshift.component.followLog",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.link",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.service.link",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -409,6 +427,11 @@
           "group": "c2@3"
         },
         {
+          "command": "openshift.component.link",
+          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "c2@3"
+        },
+        {
           "command": "openshift.component.openUrl",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c3@1"
@@ -436,6 +459,11 @@
         {
           "command": "openshift.service.delete",
           "when": "view == openshiftProjectExplorer && viewItem == service",
+          "group": "s1"
+        },
+        {
+          "command": "openshift.service.link",
+          "when": "view == openshiftProjectExplorer && viewItem == service && componentPresent",
           "group": "s1"
         },
         {

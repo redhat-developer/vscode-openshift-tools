@@ -162,9 +162,13 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(
             `oc get dc --namespace ${proj} -o jsonpath="{range .items[?(.metadata.labels.app == \\"${application.getName()}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}"`
         );
-        return result.stdout.trim().split('\n')
+
+        const componentsList = result.stdout.trim().split('\n')
             .filter((value) => value !== '')
             .map<OpenShiftObject>((value) => new OpenShiftObjectImpl(application, value, 'component', this, TreeItemCollapsibleState.Collapsed));
+        commands.executeCommand('setContext', 'componentPresent', componentsList.length>0);
+        return componentsList;
+
     }
 
     public async getComponentTypes(): Promise<string[]> {
@@ -230,7 +234,7 @@ export class OdoImpl implements Odo {
             return[new OpenShiftObjectImpl(null, loginErrorMsg, 'LoginError', this, TreeItemCollapsibleState.None)];
         }
         if (result.stdout.indexOf("Unable to connect to OpenShift cluster, is it down?") > -1) {
-            const clusterDownMsg: string = 'Please start the cluster';
+            const clusterDownMsg: string = 'Please start the OpenShift cluster';
             return [new OpenShiftObjectImpl(null, clusterDownMsg, 'ClusterError', this, TreeItemCollapsibleState.None)];
         }
         commands.executeCommand('setContext', 'isLoggedIn', true);

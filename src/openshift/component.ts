@@ -11,7 +11,6 @@ import opn = require('opn');
 import { ChildProcess } from 'child_process';
 import * as validator from 'validator';
 import { Url } from './url';
-
 export class Component extends OpenShiftItem {
     static async create(application: OpenShiftObject): Promise<string> {
         // should use QuickPickItem with label and description
@@ -85,6 +84,19 @@ export class Component extends OpenShiftItem {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
         Component.odo.executeInTerminal(`odo log ${context.getName()} -f --app ${app.getName()} --project ${project.getName()}`);
+    }
+
+    static async link(context: OpenShiftObject): Promise<String> {
+        const app: OpenShiftObject = context.getParent();
+        const project: OpenShiftObject = app.getParent();
+        const componentPresent = await Component.odo.getComponents(app);
+        const componentToLink = await vscode.window.showQuickPick(componentPresent.filter((comp)=> comp.getName() !== context.getName()), {placeHolder: "Select the component to link"});
+        if (!componentToLink) return null;
+
+        return Promise.resolve()
+            .then(() => Component.odo.execute(`odo link ${context.getName()} --app ${app.getName()} --project ${project.getName()} --component ${componentToLink.getName()}`))
+            .then(() => `component '${context.getName()}' successfully linked with component '${componentToLink.getName()}'`)
+            .catch((err) => Promise.reject(`Failed to link component with error '${err}'`));
     }
 
     static push(context: OpenShiftObject): void {
