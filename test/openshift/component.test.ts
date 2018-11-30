@@ -92,6 +92,13 @@ suite('Openshift/Component', () => {
                 expect(result).null;
             });
 
+            test('returns null when no component name selected', async () => {
+                inputStub.resolves();
+                const result = await Component.create(appItem);
+
+                expect(result).null;
+            });
+
             test('returns null when no component type selected', async () => {
                 quickPickStub.onSecondCall().resolves();
                 const result = await Component.create(appItem);
@@ -162,6 +169,55 @@ suite('Openshift/Component', () => {
                 await Component.create(appItem);
 
                 expect(commandStub).calledOnceWith('git.clone', uri);
+            });
+        });
+
+        suite('from binary file', () => {
+            let fileStub: sinon.SinonStub;
+            const filePath = 'test/sample.war';
+
+            setup(() => {
+                quickPickStub.onFirstCall().resolves({ label: 'Binary File' });
+                fileStub = sandbox.stub(vscode.window, 'showOpenDialog').resolves(filePath);
+                inputStub.resolves(componentItem.getName());
+            });
+
+            test('happy path works', async () => {
+                const steps = [
+                    {command: `odo create ${componentType}:${version} ${componentItem.getName()} --binary ${filePath} --app ${appItem.getName()} --project ${projectItem.getName()}`, increment: 100}
+                ];
+                const result = await Component.create(appItem);
+
+                expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
+                expect(progressStub).calledOnceWith(sinon.match.object, steps);
+            });
+
+            test('returns null when no binary file selected', async () => {
+                fileStub.resolves();
+                const result = await Component.create(appItem);
+
+                expect(result).null;
+            });
+
+            test('returns null when no component name selected', async () => {
+                inputStub.resolves();
+                const result = await Component.create(appItem);
+
+                expect(result).null;
+            });
+
+            test('returns null when no component type selected', async () => {
+                quickPickStub.onSecondCall().resolves();
+                const result = await Component.create(appItem);
+
+                expect(result).null;
+            });
+
+            test('returns null when no component type version selected', async () => {
+                quickPickStub.onThirdCall().resolves();
+                const result = await Component.create(appItem);
+
+                expect(result).null;
             });
         });
     });
