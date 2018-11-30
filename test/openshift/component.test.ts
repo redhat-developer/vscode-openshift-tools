@@ -37,7 +37,10 @@ suite('Openshift/Component', () => {
         const componentType = 'nodejs';
         const version = 'latest';
         const folder = { uri: { fsPath: 'folder' } };
-        let quickPickStub: sinon.SinonStub, inputStub: sinon.SinonStub, progressStub: sinon.SinonStub;
+        let quickPickStub: sinon.SinonStub, 
+            inputStub: sinon.SinonStub, 
+            progressStub: sinon.SinonStub,
+            progressCmdStub: sinon.SinonStub;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -46,6 +49,7 @@ suite('Openshift/Component', () => {
             quickPickStub.onThirdCall().resolves(version);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
             progressStub = sandbox.stub(Progress, 'execWithProgress').resolves();
+            progressCmdStub = sandbox.stub(Progress, 'execCmdWithProgress').resolves();
         });
 
         test('returns null when cancelled', async () => {
@@ -75,14 +79,13 @@ suite('Openshift/Component', () => {
             });
 
             test('happy path works', async () => {
-                const steps = [
-                    {command: `odo create ${componentType}:${version} ${componentItem.getName()} --local ${folder.uri.fsPath} --app ${appItem.getName()} --project ${projectItem.getName()}`, increment: 50},
-                    {command: `odo push ${componentItem.getName()} --local ${folder.uri.fsPath} --app ${appItem.getName()} --project ${projectItem.getName()}`, increment: 50}
-                ];
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(progressStub).calledOnceWith(sinon.match.object, steps);
+                expect(progressCmdStub).calledOnceWith(
+                    `Creating new component '${componentItem.getName()}'`,
+                    `odo create ${componentType}:${version} ${componentItem.getName()} --local ${folder.uri.fsPath} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+                expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --local ${folder.uri.fsPath} --app ${appItem.getName()} --project ${projectItem.getName()}`);
             });
 
             test('returns null when no folder selected', async () => {
@@ -126,13 +129,10 @@ suite('Openshift/Component', () => {
             });
 
             test('happy path works', async () => {
-                const steps = [
-                    {command: `odo create ${componentType}:${version} ${componentItem.getName()} --git ${uri} --app ${appItem.getName()} --project ${projectItem.getName()}`, increment: 100}
-                ];
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(progressStub).calledOnceWith(sinon.match.object, steps);
+                expect(termStub).calledOnceWith(`odo create ${componentType}:${version} ${componentItem.getName()} --git ${uri} --app ${appItem.getName()} --project ${projectItem.getName()}`);
             });
 
             test('returns null when no git repo selected', async () => {
