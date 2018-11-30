@@ -206,7 +206,7 @@ export class Component extends OpenShiftItem {
         const project = application.getParent();
         return Promise.resolve()
             .then(() => Component.odo.executeInTerminal(`odo create ${componentTypeName}:${componentTypeVersion} ${componentName} --git ${repoURI} --app ${application.getName()} --project ${project.getName()}`))
-            .then(() => new Promise((res)=>setTimeout(res, 5000)))
+            .then(() => Component.wait())
             .then(() => Component.explorer.refresh(application))
             .then(() => `Component '${componentName}' successfully created`);
     }

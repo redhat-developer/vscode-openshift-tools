@@ -27,6 +27,7 @@ suite('Openshift/Component', () => {
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
         sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
+        sandbox.stub(Component, 'wait').resolves();
     });
 
     teardown(() => {
