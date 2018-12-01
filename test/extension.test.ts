@@ -88,7 +88,7 @@ suite('openshift connector Extension', async () => {
         (<any>[Application, Catalog, Cluster, Component, Project, Service, Storage, Url]).forEach(async (item) => {
             mths.forEach((name) => {
                 if (item[name]) {
-                    sandbox.stub(item, name);
+                    sandbox.stub(item, name).resolves();
                 }
             });
         })
