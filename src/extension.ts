@@ -51,8 +51,8 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.service.delete', (context) => execute(Service.del, context)),
         vscode.commands.registerCommand('openshift.service.delete.palette', (context) => execute(Service.del, context)),
         vscode.window.registerTreeDataProvider('openshiftProjectExplorer', explorer),
-        vscode.commands.registerCommand('openshift.component.link', (context) => execute(Component.link, context)),
-        vscode.commands.registerCommand('openshift.service.link', (context) => execute(Service.link, context)),
+        vscode.commands.registerCommand('openshift.component.linkComponent', (context) => execute(Component.linkComponent, context)),
+        vscode.commands.registerCommand('openshift.component.linkService', (context) => execute(Component.linkService, context)),
         explorer
     ];
     disposable.forEach((value)=> context.subscriptions.push(value));

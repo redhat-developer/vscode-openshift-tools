@@ -283,6 +283,7 @@ export class OdoImpl implements Odo {
         } catch (e) {
             // ignore error in case service catalog is not configured
         }
+        commands.executeCommand('setContext', 'servicePresent', services.length>0);
         return services;
     }
 

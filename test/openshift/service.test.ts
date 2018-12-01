@@ -53,7 +53,7 @@ suite('Openshift/Service', () => {
             expect(result).equals(`Service '${serviceItem.getName()}' successfully created`);
             expect(progressStub).calledOnceWith(
                 `Creating new service '${serviceItem.getName()}'`,
-                `odo service create ${templateName} --plan ${templatePlan} ${serviceItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+                `odo service create ${templateName} --plan ${templatePlan} ${serviceItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()} --wait`);
         });
 
         test('returns null with no template selected', async () => {
@@ -105,14 +105,14 @@ suite('Openshift/Service', () => {
             const result = await Service.del(serviceItem);
 
             expect(result).equals(`Service '${serviceItem.getName()}' successfully deleted`);
-            expect(execStub).calledOnceWith(`odo service delete ${serviceItem.getName()} -f --project ${projectItem.getName()} --app ${appItem.getName()}`);
+            expect(execStub).calledOnceWith(`odo service delete ${serviceItem.getName()} -f --project ${projectItem.getName()} --app ${appItem.getName()} --wait`);
         });
 
         test('works without context item', async () => {
             const result = await Service.del(null);
 
             expect(result).equals(`Service '${serviceItem.getName()}' successfully deleted`);
-            expect(execStub).calledOnceWith(`odo service delete ${serviceItem.getName()} -f --project ${projectItem.getName()} --app ${appItem.getName()}`);
+            expect(execStub).calledOnceWith(`odo service delete ${serviceItem.getName()} -f --project ${projectItem.getName()} --app ${appItem.getName()} --wait`);
         });
 
         test('returns null with no application selected', async () => {
