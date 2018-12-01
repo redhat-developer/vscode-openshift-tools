@@ -201,7 +201,7 @@ export class OdoImpl implements Odo {
         }).map((value) => {
             return value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|')[2];
         });
-        return versions[0].split(',');
+        return versions && versions.length > 0 ? versions[0].split(',') : [];
     }
 
     public async getClusters(): Promise<OpenShiftObject[]> {
