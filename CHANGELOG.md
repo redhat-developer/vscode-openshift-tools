@@ -1,5 +1,15 @@
 # Change Log
 
+## 0.0.13 (December 3,2018)
+* Add implementation of Linking component to a service or component [#425](https://github.com/redhat-developer/vscode-openshift-tools/pull/425).
+* Add support to create component with binary file [#347](https://github.com/redhat-developer/vscode-openshift-tools/pull/347).
+* Improve `push` command feature to show bbuild log directly into vscode terminal [#416](https://github.com/redhat-developer/vscode-openshift-tools/issues/416).
+* Improve progress representation for long running commands [#422](https://github.com/redhat-developer/vscode-openshift-tools/pull/422)
+* Add fix to stop downloading odo/oc when cluster is down [#406](https://github.com/redhat-developer/vscode-openshift-tools/pull/406).
+* Commands executed in vscode terminal always use odo from `~/.vs-openshift` directory [#305](https://github.com/redhat-developer/vscode-openshift-tools/pull/409)
+* Update packages and trans dependencies to fix security vulnerabilities.
+* Add more test scenarios and improve code coverage.
+
 ## 0.0.12 (November 23, 2018)
 * Add actions to command palette
 * Fixed application name creation validation
