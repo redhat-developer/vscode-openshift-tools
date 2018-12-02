@@ -52,7 +52,7 @@ export class Progress {
                 location: vscode.ProgressLocation.Notification,
                 title},
                 async (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
-                    let result = await odoctl.getInstance().execute(cmd, process.cwd(), false);
+                    const result = await odoctl.getInstance().execute(cmd, process.cwd(), false);
                     result.error ? reject(result.error) : resolve();
                 }
             );

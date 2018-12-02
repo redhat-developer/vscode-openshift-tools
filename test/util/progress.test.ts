@@ -56,7 +56,6 @@ suite('Progress Utility', () => {
     test('throw an error if a command fails', async () => {
         const error = new Error(errorMessage);
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').rejects(error);
-        const spy = sandbox.spy(vscode.window, 'showErrorMessage');
         let e;
         try {
             await Progress.execWithProgress(options, steps, OdoImpl.getInstance());
@@ -70,9 +69,7 @@ suite('Progress Utility', () => {
     });
 
     test('execCmdWithProgress returned promice resolves in case of cmd finished sucessfully', () => {
-        const error = new Error(errorMessage);
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
-        let e;
         Progress.execCmdWithProgress('title', 'cmd').catch(() => {
             expect.fail(true, false, 'returned promise should not be rejected');
         });

@@ -38,8 +38,8 @@ suite('Openshift/Component', () => {
         const componentType = 'nodejs';
         const version = 'latest';
         const folder = { uri: { fsPath: 'folder' } };
-        let quickPickStub: sinon.SinonStub, 
-            inputStub: sinon.SinonStub, 
+        let quickPickStub: sinon.SinonStub,
+            inputStub: sinon.SinonStub,
             progressStub: sinon.SinonStub,
             progressCmdStub: sinon.SinonStub;
 
@@ -184,7 +184,7 @@ suite('Openshift/Component', () => {
             });
 
             test('happy path works', async () => {
-                
+
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);

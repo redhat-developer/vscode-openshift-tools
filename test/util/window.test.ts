@@ -11,8 +11,6 @@ import * as sinon from 'sinon';
 import * as path from 'path';
 import { window, TerminalOptions } from 'vscode';
 import { WindowUtil } from '../../src/util/windowUtils';
-import { Platform } from '../../src/util/platform';
-import { ToolsConfig } from '../../src/tools';
 
 const expect = chai.expect;
 chai.use(sinonChai);
