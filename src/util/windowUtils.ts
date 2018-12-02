@@ -7,7 +7,6 @@
 
 import { window, Terminal, TerminalOptions } from 'vscode';
 import * as path from 'path';
-import { Platform } from './platform';
 
 export class WindowUtil {
 

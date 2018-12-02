@@ -17,11 +17,11 @@ import { activate } from '../src/extension';
 import { Cluster } from '../src/openshift/cluster';
 import { Application } from '../src/openshift/application';
 import { Catalog } from '../src/openshift/catalog';
-import { Component} from '../src/openshift/component';
-import { Project} from '../src/openshift/project';
-import { Service} from '../src/openshift/service';
-import { Storage} from '../src/openshift/storage';
-import { Url} from '../src/openshift/url';
+import { Component } from '../src/openshift/component';
+import { Project } from '../src/openshift/project';
+import { Service } from '../src/openshift/service';
+import { Storage } from '../src/openshift/storage';
+import { Url } from '../src/openshift/url';
 import packagejson = require('../package.json');
 
 const expect = chai.expect;
@@ -65,10 +65,10 @@ suite('openshift connector Extension', async () => {
 	});
 
     async function getStaticMethosToStub(osc: string[]): Promise<string[]> {
-        let mths: Set<string> = new Set();
-        osc.forEach(name => {
+        const mths: Set<string> = new Set();
+        osc.forEach((name) => {
             name.replace('.palette', '');
-            let segs: string[] = name.split('.');
+            const segs: string[] = name.split('.');
             let methName: string = segs[segs.length-1];
             methName = methName === 'delete'? 'del' : methName;
             !mths.has(methName) && mths.add(methName);
@@ -81,8 +81,8 @@ suite('openshift connector Extension', async () => {
         const registerTreeDataProviderStub = sandbox.stub(vscode.window, 'registerTreeDataProvider');
         sandbox.stub(vscode.window, 'showErrorMessage');
         await activate(context);
-        let cmds:string[] = await vscode.commands.getCommands();
-        let osc:string[] = cmds.filter((item) => item.includes('openshift.'));
+        const cmds: string[] = await vscode.commands.getCommands();
+        const osc: string[] = cmds.filter((item) => item.includes('openshift.'));
         expect(registerTreeDataProviderStub).calledOnce;
         const mths: string[] = await getStaticMethosToStub(osc);
         (<any>[Application, Catalog, Cluster, Component, Project, Service, Storage, Url]).forEach(async (item) => {
@@ -91,7 +91,7 @@ suite('openshift connector Extension', async () => {
                     sandbox.stub(item, name).resolves();
                 }
             });
-        })
+        });
         osc.forEach((item) => vscode.commands.executeCommand(item));
         expect(vscode.window.showErrorMessage).has.not.been.called;
     });

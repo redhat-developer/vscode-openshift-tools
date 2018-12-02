@@ -8,7 +8,6 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import * as path from 'path';
 import * as fs from 'fs-extra';
 import { WatchUtil } from '../../src/util/watch';
 

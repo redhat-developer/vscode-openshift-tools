@@ -101,7 +101,7 @@ suite("odo", () => {
             };
             toolsStub.restore();
             toolsStub = sandbox.stub(ToolsConfig, 'detectOrDownload').resolves(path.join('segment1', 'segment2'));
-            let ctStub = sandbox.stub(WindowUtil, 'createTerminal').returns(termFake);
+            const ctStub = sandbox.stub(WindowUtil, 'createTerminal').returns(termFake);
             await odoCli.executeInTerminal('cmd');
             expect(termFake.sendText).calledOnce;
             expect(termFake.show).calledOnce;
@@ -205,7 +205,7 @@ suite("odo", () => {
             let e;
             try {
                 const result = await odoCli.getServiceTemplates();
-            } catch(err) {
+            } catch (err) {
                 e = err;
             }
 
