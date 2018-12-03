@@ -57,7 +57,7 @@ node('rhel7'){
 
             stage "Promote the build to stable"
             def vsix = findFiles(glob: '**.vsix')
-            sh "rsync -Pzrlt --rsh=ssh --protocol=28 ${vsix[0].path} ${UPLOAD_LOCATION}/stable/vscode-openshift-tools"
+            sh "rsync -Pzrlt --rsh=ssh --protocol=28 ${vsix[0].path} ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
         }
 	}
 }
