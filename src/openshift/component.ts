@@ -114,7 +114,7 @@ export class Component extends OpenShiftItem {
         if (!serviceToLink) return null;
 
         return Promise.resolve()
-        .then(() => Service.odo.execute(`odo link ${serviceToLink.getName()} --app ${app.getName()} --project ${project.getName()} --component ${context.getName()}`))
+        .then(() => Service.odo.execute(`odo link ${serviceToLink.getName()} --app ${app.getName()} --project ${project.getName()} --component ${context.getName()} --wait`))
         .then(() => `service '${serviceToLink.getName()}' successfully linked with component '${context.getName()}'`)
         .catch((err) => Promise.reject(`Failed to link service with error '${err}'`));
     }

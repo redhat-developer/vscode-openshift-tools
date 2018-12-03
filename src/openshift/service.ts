@@ -34,7 +34,7 @@ export class Service extends OpenShiftItem {
         if (serviceName) {
             const project = application.getParent();
             return Progress.execCmdWithProgress(`Creating new service '${serviceName}'`,
-                `odo service create ${serviceTemplateName} --plan ${serviceTemplatePlanName} ${serviceName.trim()} --app ${application.getName()} --project ${project.getName()} --wait`)
+                `odo service create ${serviceTemplateName} --plan ${serviceTemplatePlanName} ${serviceName.trim()} --app ${application.getName()} --project ${project.getName()}`)
                 .then(() => Service.explorer.refresh(application))
                 .then(() => `Service '${serviceName}' successfully created`)
                 .catch((err) => Promise.reject(`Failed to create service with error '${err}'`));
@@ -59,7 +59,7 @@ export class Service extends OpenShiftItem {
             const answer = await vscode.window.showWarningMessage(`Are you sure you want to delete service '${service.getName()}'`, 'Yes', 'Cancel');
             if (answer === 'Yes') {
                 return Promise.resolve()
-                    .then(() => Service.odo.execute(`odo service delete ${service.getName()} -f --project ${project.getName()} --app ${application.getName()} --wait`))
+                    .then(() => Service.odo.execute(`odo service delete ${service.getName()} -f --project ${project.getName()} --app ${application.getName()}`))
                     .then(() => Service.explorer.refresh(treeItem ? treeItem.getParent() : undefined))
                     .then(() => `Service '${service.getName()}' successfully deleted`)
                     .catch((err) => Promise.reject(`Failed to delete service with error '${err}'`));
