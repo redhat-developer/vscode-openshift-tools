@@ -305,10 +305,6 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
-          "command": "openshift.url.create",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
           "command": "openshift.storage.create",
           "when": "view == openshiftProjectExplorer"
         },
