@@ -10,25 +10,36 @@ import * as validator from 'validator';
 
 export class Storage extends OpenShiftItem {
     static async create(context: OpenShiftObject): Promise<string> {
-        const component: OpenShiftObject = context;
-        const app: OpenShiftObject = context.getParent();
-        const project: OpenShiftObject = app.getParent();
-        const storageName = await vscode.window.showInputBox({prompt: "Specify the storage name", validateInput: (value: string) => {
-            if (validator.isEmpty(value.trim())) {
-                return 'Invalid storage name';
+        let component: OpenShiftObject;
+        let app: OpenShiftObject;
+        let project: OpenShiftObject;
+        if (context) {
+            component = context;
+            app = context.getParent();
+            project = app.getParent();
+        } else {
+            project = await vscode.window.showQuickPick(Storage.odo.getProjects(), {placeHolder: "In which project you want to create Storage"});
+            if (project) {
+                app = await vscode.window.showQuickPick(Storage.odo.getApplications(project), {placeHolder: "In which application you want to create Storage"});
             }
-        }});
-        if (!storageName) return null;
-
-        const mountPath = await vscode.window.showInputBox({prompt: "Specify the mount path", validateInput: (value: string) => {
-            if (validator.isEmpty(value.trim())) {
-                return 'Invalid mount path';
+            if (app) {
+                component = await vscode.window.showQuickPick(Storage.odo.getComponents(app), {placeHolder: "In which component you want to create Storage"});
             }
-        }});
-        if (!mountPath) return null;
+        }
+        if (component) {
+            const storageName = await vscode.window.showInputBox({prompt: "Specify the storage name", validateInput: (value: string) => {
+                if (validator.isEmpty(value.trim())) {
+                    return 'Invalid storage name';
+                }
+            }});
+            if (!storageName) return null;
 
-        const storageSize = await vscode.window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the storage size'});
-        if (!storageSize) return null;
+            const mountPath = await vscode.window.showInputBox({prompt: "Specify the mount path", validateInput: (value: string) => {
+                if (validator.isEmpty(value.trim())) {
+                    return 'Invalid mount path';
+                }
+            }});
+            if (!mountPath) return null;
 
         return Promise.resolve()
             .then(() => Storage.odo.execute(Command.createStorage(project.getName(), app.getName(), component.getName(), storageName, mountPath, storageSize)))
