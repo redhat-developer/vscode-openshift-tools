@@ -78,10 +78,26 @@ export class Component extends OpenShiftItem {
         return null;
     }
 
-    static describe(context: OpenShiftObject): void {
-        const app: OpenShiftObject = context.getParent();
-        const project: OpenShiftObject = app.getParent();
-        Component.odo.executeInTerminal(Command.describeComponent(project.getName(), app.getName(), context.getName()));
+    static async describe(context: OpenShiftObject) {
+        let comp: OpenShiftObject;
+        let app: OpenShiftObject;
+        let project: OpenShiftObject;
+        if (context) {
+            comp = context;
+            app = context.getParent();
+            project = app.getParent();
+        } else {
+            project = await vscode.window.showQuickPick(Component.odo.getProjects(), {placeHolder: "From which project you want to describe Application"});
+            if (project) {
+                app = await vscode.window.showQuickPick(Component.odo.getApplications(project), {placeHolder: "From which project you want to describe Component"});
+            }
+            if (app) {
+                comp = await vscode.window.showQuickPick(Component.odo.getComponents(app), {placeHolder: "Select Component you want to describe"});
+            }
+        }
+        if (comp) {
+            Component.odo.executeInTerminal(Command.describeComponent(project.getName(), app.getName(), comp.getName()));
+        }
     }
 
     static log(context: OpenShiftObject): void {

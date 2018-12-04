@@ -135,6 +135,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.describe.palette",
+        "title": "Describe Component",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.component.log",
         "title": "Show Log",
         "category": "OpenShift"
