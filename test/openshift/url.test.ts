@@ -53,5 +53,15 @@ suite('Openshift/URL', () => {
                 expect(err).equals(`Failed to create URL for component '${componentItem.getName()}'`);
             });
         });
+
+        test('rejects when component has no ports declared', () => {
+            execStub = sandbox.stub(OdoImpl.prototype, 'execute');
+            execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
+            execStub.onSecondCall().rejects();
+
+            return Url.create(componentItem).catch((err) => {
+                expect(err).equals(`Component '${componentItem.getName()}' has no ports decalred.`);
+            });
+        });
     });
 });

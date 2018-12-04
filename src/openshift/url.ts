@@ -16,11 +16,15 @@ export class Url {
         const portsResult: CliExitData = await Url.odo.execute(`oc get service ${context.getName()}-${app.getName()} --namespace ${project.getName()} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`);
         let ports: string[] = portsResult.stdout.trim().split(',');
         ports = ports.slice(0, ports.length-1);
-        let port: string = ports[0];
-        if (ports.length > 1) {
+        let port: string;
+        if (ports.length === 1) {
+            port = ports[0];
+        } else if (ports.length > 1) {
             port = await vscode.window.showQuickPick(ports, {placeHolder: "Select port to expose"});
+        } else {
+            return Promise.reject(`Component '${context.getName()}' has no ports decalred.`);
         }
-        return Promise.resolve()
+        return port === undefined ? undefined : Promise.resolve()
             .then(async () => Url.odo.execute(`odo url create --port ${port} --project ${project.getName()} --app ${app.getName()} --component ${context.getName()}`))
             .then(() => `URL for component '${context.getName()}' successfully created`)
             .catch((err) => Promise.reject(`Failed to create URL for component '${context.getName()}'`));
