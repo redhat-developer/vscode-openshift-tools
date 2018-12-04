@@ -17,6 +17,7 @@ const expect = chai.expect;
 chai.use(sinonChai);
 
 suite('Openshift/Application', () => {
+    let quickPickStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project');
@@ -158,10 +159,19 @@ suite('Openshift/Application', () => {
 
         setup(() => {
             termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal').resolves();
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
         });
 
         test('calls the appropriate odo command in terminal', () => {
             Application.describe(appItem);
+
+            expect(termStub).calledOnceWith(`odo app describe ${appItem.getName()} --project ${projectItem.getName()}`);
+        });
+
+        test('works with no context', async () => {
+            await Application.describe(null);
 
             expect(termStub).calledOnceWith(`odo app describe ${appItem.getName()} --project ${projectItem.getName()}`);
         });
