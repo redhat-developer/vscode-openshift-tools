@@ -35,7 +35,7 @@ suite('Openshift/URL', () => {
 
         test('asks to select port if more that one exposed and returns message', async () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.onFirstCall().resolves({error: null, stdout: 'port1,port2,port3', stderr: ''});
+            execStub.onFirstCall().resolves({error: null, stdout: 'port1,port2,port3,', stderr: ''});
             execStub.onSecondCall().resolves();
             sandbox.stub(vscode.window, 'showQuickPick').resolves('port1');
             const result = await Url.create(componentItem);
@@ -46,7 +46,7 @@ suite('Openshift/URL', () => {
 
         test('rejects when fails to create Url', () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.onFirstCall().resolves({error: null, stdout: 'port1', stderr: ''});
+            execStub.onFirstCall().resolves({error: null, stdout: 'port1,', stderr: ''});
             execStub.onSecondCall().rejects();
 
             return Url.create(componentItem).catch((err) => {
