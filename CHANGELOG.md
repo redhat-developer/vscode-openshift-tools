@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.0.14 (December 5,2018)
+* Implement port selection when linking component with multiple ports.
+* Fix linking of components using `odo link`.
+* Add Coverage and Debug test launchers.
+
 ## 0.0.13 (December 3,2018)
 * Add implementation of Linking component to a service or component [#425](https://github.com/redhat-developer/vscode-openshift-tools/pull/425).
 * Add support to create component with binary file [#347](https://github.com/redhat-developer/vscode-openshift-tools/pull/347).
