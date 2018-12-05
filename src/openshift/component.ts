@@ -12,6 +12,7 @@ import { ChildProcess } from 'child_process';
 import * as validator from 'validator';
 import { Url } from './url';
 import { Service } from './service';
+import { CliExitData } from '../cli';
 export class Component extends OpenShiftItem {
     static async create(application: OpenShiftObject): Promise<string> {
         // should use QuickPickItem with label and description
@@ -101,8 +102,20 @@ export class Component extends OpenShiftItem {
         const componentToLink = await vscode.window.showQuickPick(componentPresent.filter((comp)=> comp.getName() !== context.getName()), {placeHolder: "Select the component to link"});
         if (!componentToLink) return null;
 
+        const portsResult: CliExitData = await Component.odo.execute(`oc get service ${componentToLink.getName()}-${app.getName()} --namespace ${project.getName()} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`);
+        let ports: string[] = portsResult.stdout.trim().split(',');
+        ports = ports.slice(0, ports.length-1);
+        let port: string;
+        if (ports.length === 1) {
+            port = ports[0];
+        } else if (ports.length > 1) {
+            port = await vscode.window.showQuickPick(ports, {placeHolder: "Select port to link"});
+        } else {
+            return Promise.reject(`Component '${context.getName()}' has no ports decalred.`);
+        }
+
         return Promise.resolve()
-            .then(() => Component.odo.execute(`odo link ${componentToLink.getName()} --app ${app.getName()} --project ${project.getName()} --component ${context.getName()} --wait`))
+            .then(() => Component.odo.execute(`odo project set ${project.getName()} && odo application set ${app.getName()} && odo component set ${context.getName()} && odo link ${componentToLink.getName()}  --port ${port} --wait`))
             .then(() => `component '${componentToLink.getName()}' successfully linked with component '${context.getName()}'`)
             .catch((err) => Promise.reject(`Failed to link component with error '${err}'`));
     }
@@ -114,7 +127,7 @@ export class Component extends OpenShiftItem {
         if (!serviceToLink) return null;
 
         return Promise.resolve()
-        .then(() => Service.odo.execute(`odo link ${serviceToLink.getName()} --app ${app.getName()} --project ${project.getName()} --component ${context.getName()} --wait`))
+        .then(() => Service.odo.execute(`odo project set ${project.getName()} && odo application set ${app.getName()} && odo component set ${context.getName()} && odo link ${serviceToLink.getName()} --wait`))
         .then(() => `service '${serviceToLink.getName()}' successfully linked with component '${context.getName()}'`)
         .catch((err) => Promise.reject(`Failed to link service with error '${err}'`));
     }
