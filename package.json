@@ -526,7 +526,8 @@
     "sinon-chai": "^3.3.0",
     "tslint": "^5.11.0",
     "typescript": "^3.2.1",
-    "vscode": "^1.1.21"
+    "vscode": "^1.1.21",
+    "walker": "^1.0.7"
   },
   "dependencies": {
     "byline": "^5.0.0",
