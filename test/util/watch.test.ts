@@ -22,7 +22,7 @@ suite('File Watch Utility', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        ensureStub = sandbox.stub(fs, 'ensureDir');
+        ensureStub = sandbox.stub(fs, 'ensureDirSync');
         watchStub = sandbox.stub(fs, 'watch');
     });
 

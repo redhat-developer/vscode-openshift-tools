@@ -16,7 +16,7 @@ export class WatchUtil {
         const emitter: EventEmitter = new EventEmitter();
         let timer: NodeJS.Timer;
         let context = '';
-        fsex.ensureDir(location);
+        fsex.ensureDirSync(location);
         const watcher: fs.FSWatcher = fsex.watch(location, (eventType, changedFile) => {
             if (filename === changedFile) {
                 if (timer) {
