@@ -15,35 +15,76 @@ import { CliExitData } from '../cli';
 import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 
 export class Component extends OpenShiftItem {
-    static async create(application: OpenShiftObject): Promise<string> {
-        // should use QuickPickItem with label and description
-        const sourceTypes: vscode.QuickPickItem[] = [
-            {
-                label: 'Git Repository',
-                description: 'Use an existing git repository as a source for the component'
-            },
-            {
-                label: 'Binary File',
-                description: 'Use binary file as a source for the component'
-            },
-            {
-                label: 'Workspace Directory',
-                description: 'Use workspace directory as a source for the component'
-            }
-        ];
-        const componentSource = await vscode.window.showQuickPick(sourceTypes, {
-            placeHolder: "Select source type for component"
-        });
-        if (!componentSource) return null;
 
-        let command: Promise<string>;
-        if (componentSource.label === 'Git Repository') {
-            command = Component.createFromGit(application);
-        } else if (componentSource.label === 'Binary File') {
-            command = Component.createFromBinary(application);
-        } else {
-            command = Component.createFromLocal(application);
+    static async create(application: OpenShiftObject): Promise<string> {
+        const data: OpenShiftObject = await Component.getApplicationData(application);
+        if (data) {
+            const sourceTypes: vscode.QuickPickItem[] = [
+                {
+                    label: 'Git Repository',
+                    description: 'Use an existing git repository as a source for the component'
+                },
+                {
+                    label: 'Binary File',
+                    description: 'Use binary file as a source for the component'
+                },
+                {
+                    label: 'Workspace Directory',
+                    description: 'Use workspace directory as a source for the component'
+                }
+            ];
+            const componentSource = await vscode.window.showQuickPick(sourceTypes, {
+                placeHolder: "Select source type for component"
+            });
+            if (!componentSource) return null;
+
+            let command: Promise<string>;
+            if (componentSource.label === 'Git Repository') {
+                command = Component.createFromGit(data);
+            } else if (componentSource.label === 'Binary File') {
+                command = Component.createFromBinary(data);
+            } else {
+                command = Component.createFromLocal(data);
+            }
+            return command.catch((err) => Promise.reject(`Failed to create component with error '${err}'`));
         }
+    }
+
+    static async getApplicationData(application) {
+        let applicationName: OpenShiftObject  = application ? application : undefined;
+        let name: OpenShiftObject;
+        if (!applicationName) {
+            name = await Component.getProjectName();
+        }
+        if (applicationName) {
+            applicationName = application;
+        }
+        return name || applicationName ? name || applicationName : undefined;
+    }
+
+    static async getProjectName() {
+        let application: OpenShiftObject;
+        const project: OpenShiftObject = await vscode.window.showQuickPick(Component.getProjectNames(), {placeHolder: "In which Project you want to create an Application"});
+        if (project) {
+            application = await vscode.window.showQuickPick(Component.getApplicationNames(project), {placeHolder: "In which Project you want to create an Application"});
+        }
+        return application ? application: undefined;
+    }
+
+    static async getProjectNames() {
+        const projectList: Array<OpenShiftObject> = await Component.odo.getProjects();
+        if (projectList.length === 0) {
+           throw Error('You need at least one Project available to create an Component. Please create new OpenShift Project and try again.');
+        }
+        return projectList;
+    }
+
+    static async getApplicationNames(project) {
+        const ApplicationList: Array<OpenShiftObject> = await Component.odo.getApplications(project);
+        if (ApplicationList.length === 0) {
+           throw Error('You need at least one Application available to create an Component. Please create new OpenShift Application and try again.');
+        }
+        return ApplicationList;
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
