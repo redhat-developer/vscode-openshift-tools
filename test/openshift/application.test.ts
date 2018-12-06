@@ -137,8 +137,8 @@ suite('Openshift/Application', () => {
         });
 
         test('requests for project and exits if not provided', async () => {
-            let stub = sandbox.stub(vscode.window, 'showQuickPick');
-            stub.onFirstCall().resolves();            
+            const stub = sandbox.stub(vscode.window, 'showQuickPick');
+            stub.onFirstCall().resolves();
             warnStub.resolves('Yes');
             execStub.resolves();
             await Application.del(undefined);
@@ -146,10 +146,9 @@ suite('Openshift/Application', () => {
             expect(warnStub).is.not.called;
         });
 
-
         test('requests for project and application and exit if application is not provided', async () => {
-            let stub = sandbox.stub(vscode.window, 'showQuickPick');
-            stub.onFirstCall().resolves('selection');            
+            const stub = sandbox.stub(vscode.window, 'showQuickPick');
+            stub.onFirstCall().resolves('selection');
             stub.onSecondCall().resolves();
             warnStub.resolves('Yes');
             execStub.resolves();
