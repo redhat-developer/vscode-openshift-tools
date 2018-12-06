@@ -11,7 +11,6 @@ import opn = require('opn');
 import { ChildProcess } from 'child_process';
 import * as validator from 'validator';
 import { Url } from './url';
-import { Service } from './service';
 import { CliExitData } from '../cli';
 export class Component extends OpenShiftItem {
     static async create(application: OpenShiftObject): Promise<string> {
@@ -123,11 +122,11 @@ export class Component extends OpenShiftItem {
     static async linkService(context: OpenShiftObject): Promise<String> {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
-        const serviceToLink = await vscode.window.showQuickPick(Service.odo.getServices(app), {placeHolder: "Select the service to link"});
+        const serviceToLink = await vscode.window.showQuickPick(Component.odo.getServices(app), {placeHolder: "Select the service to link"});
         if (!serviceToLink) return null;
 
         return Promise.resolve()
-        .then(() => Service.odo.execute(`odo project set ${project.getName()} && odo application set ${app.getName()} && odo component set ${context.getName()} && odo link ${serviceToLink.getName()} --wait`))
+        .then(() => Component.odo.execute(`odo project set ${project.getName()} && odo application set ${app.getName()} && odo component set ${context.getName()} && odo link ${serviceToLink.getName()} --wait`))
         .then(() => `service '${serviceToLink.getName()}' successfully linked with component '${context.getName()}'`)
         .catch((err) => Promise.reject(`Failed to link service with error '${err}'`));
     }
