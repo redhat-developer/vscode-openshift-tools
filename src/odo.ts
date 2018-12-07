@@ -229,7 +229,7 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(
             `odo version && odo project list`, process.cwd(), false
         );
-        if (result.stdout.indexOf('Please log in to the cluster') > -1) {
+        if (result.stdout.indexOf('Please log in to the cluster') > -1 || result.stdout.indexOf('the server has asked for the client to provide credentials') > -1) {
             const loginErrorMsg: string = 'Please log in to the cluster';
             return[new OpenShiftObjectImpl(null, loginErrorMsg, 'LoginError', this, TreeItemCollapsibleState.None)];
         }
@@ -318,7 +318,7 @@ export class OdoImpl implements Odo {
     }
 
     public async requireLogin(): Promise<boolean> {
-        const result: cliInstance.CliExitData = await this.execute(`odo version && odo project list`);
-        return result.stdout.indexOf("Please log in to the cluster") > -1;
+        const result: cliInstance.CliExitData = await this.execute(`odo version && odo project list`, process.cwd(), false);
+        return result.stdout.indexOf("Please log in to the cluster") > -1 || result.stdout.indexOf('the server has asked for the client to provide credentials') > -1;
     }
 }
