@@ -77,26 +77,6 @@ suite('Openshift/Cluster', () => {
             }
         });
 
-        test('can log the user out if already logged in', async () => {
-            loginStub.resolves(false);
-            const status = await Cluster.login();
-
-            expect(execStub).calledWith('odo logout');
-            expect(status).equals(`Successfully logged in to '${testUrl}'`);
-        });
-
-        test('rejects if logout from existing cluster fails', async () => {
-            loginStub.resolves(false);
-            execStub.resolves(errorData);
-
-            try {
-                await Cluster.login();
-                expect.fail();
-            } catch (err) {
-                expect(err).equals(`Failed to logout of the current cluster with '${error}'!`);
-            }
-        });
-
         test('returns if the user refuses to log out of an existing cluster', async () => {
             loginStub.resolves(false);
             infoStub.resolves('No');
