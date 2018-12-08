@@ -38,7 +38,7 @@ export class WatchUtil {
     static grep(fileLocation: string, rx: RegExp): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             const fileStream = fs.createReadStream(fileLocation, {encoding: 'utf8'});
-            const stream = byline(fileStream)
+            byline(fileStream)
                 .on('data', (line: string) => {
                     if (rx.test(line)) {
                         fileStream.close();
