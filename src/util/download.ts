@@ -22,7 +22,7 @@ export class DownloadUtil {
         current !== previous && progressCallBack && progressCallBack(current, current - previous);
         previous = current;
       }).on('error', reject)
-        .on('end', () => progressCallBack(100, 100 - previous))
+        .on('end', () => progressCallBack && progressCallBack(100, 100 - previous))
         .pipe(fs.createWriteStream(toFile))
         .on('close', resolve)
         .on('error', reject);
