@@ -36,6 +36,56 @@ suite('Openshift/Service', () => {
         sandbox.restore();
     });
 
+    suite('create service with no context', () => {
+        let inputStub: sinon.SinonStub, progressStub: sinon.SinonStub;
+
+        setup(() => {
+            sandbox.stub(OdoImpl.prototype, 'getServiceTemplates').resolves([]);
+            sandbox.stub(OdoImpl.prototype, 'getServiceTemplatePlans').resolves([]);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onFirstCall().resolves(templatePlan);
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').resolves(serviceItem.getName());
+            progressStub = sandbox.stub(Progress, 'execCmdWithProgress').resolves();
+        });
+
+        test('works with correct inputs', async () => {
+            quickPickStub.resolves(templateName);
+            const result = await Service.create(null);
+            expect(result).equals(`Service '${serviceItem.getName()}' successfully created`);
+        });
+
+        test('returns null with no template selected', async () => {
+            quickPickStub.resolves();
+            const result = await Service.create(null);
+
+            expect(result).null;
+        });
+
+        test('returns null with no template plan selected', async () => {
+            quickPickStub.resolves();
+            const result = await Service.create(null);
+
+            expect(result).null;
+        });
+
+        test('returns null with no service name selected', async () => {
+            inputStub.resolves();
+            const result = await Service.create(null);
+
+            expect(result).null;
+        });
+
+        test('wraps odo errors in additional info', async () => {
+            progressStub.rejects(errorMessage);
+            try {
+                await Service.create(null);
+            } catch (err) {
+                expect(err).equals(`Failed to create service with error '${errorMessage}'`);
+            }
+        });
+    });
+
     suite('create', () => {
         let inputStub: sinon.SinonStub, progressStub: sinon.SinonStub;
 
