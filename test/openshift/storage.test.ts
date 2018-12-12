@@ -42,7 +42,6 @@ suite('Openshift/Storage', () => {
 
     suite('create', () => {
 
-
         setup(() => {
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
             inputStub.onFirstCall().resolves(storageItem.getName());
@@ -98,67 +97,66 @@ suite('Openshift/Storage', () => {
         setup(() => {
             inputStub.restore();
         });
-    
 
         function isThenable<T>(obj: any): obj is Thenable<T> {
             return obj && typeof (<Thenable<any>>obj).then === 'function';
         }
 
         test('validator returns undefinded for valid storage name', async () => {
-            let result:string | Thenable<string>;
-            inputStub = sandbox.stub(vscode.window,'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken) : Thenable<string> => {
+            let result: string | Thenable<string>;
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                 result = options.validateInput('goodvalue');
                 return Promise.resolve('goodvalue');
             });
             inputStub.onSecondCall().resolves();
             await Storage.create(componentItem);
-            
-            if(!isThenable(result)) {
+
+            if (!isThenable(result)) {
                 expect(result).is.undefined;
             }
-        })
+        });
 
         test('validator returns error message for empty storage', async () => {
-            let result:string | Thenable<string>;
-            inputStub = sandbox.stub(vscode.window,'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken) : Thenable<string> => {
+            let result: string | Thenable<string>;
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                 result = options.validateInput('');
                 return Promise.resolve('');
             });
             inputStub.onSecondCall().resolves();
             await Storage.create(componentItem);
-            
-            if(!isThenable(result)) {
+
+            if (!isThenable(result)) {
                 expect(result).equals('Invalid storage name');
             }
-        })
+        });
 
         test('validator returns undefinded for valid sotorage path', async () => {
-            let result:string | Thenable<string>;
-            inputStub = sandbox.stub(vscode.window,'showInputBox').onFirstCall().resolves('name');
-            inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken) : Thenable<string> => {
+            let result: string | Thenable<string>;
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().resolves('name');
+            inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                 result = options.validateInput('goodvalue');
                 return Promise.resolve('goodvalue');
             });
             await Storage.create(componentItem);
-            
-            if(!isThenable(result)) {
+
+            if (!isThenable(result)) {
                 expect(result).is.undefined;
             }
-        })
+        });
 
         test('validator returns error message for empty storage path', async () => {
-            let result:string | Thenable<string>;
-            inputStub = sandbox.stub(vscode.window,'showInputBox').onFirstCall().resolves('name');
-            inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken) : Thenable<string> => {
+            let result: string | Thenable<string>;
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().resolves('name');
+            inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                 result = options.validateInput('');
                 return Promise.resolve('');
             });
             await Storage.create(componentItem);
-            
-            if(!isThenable(result)) {
+
+            if (!isThenable(result)) {
                 expect(result).equals('Invalid mount path');
             }
-        })
+        });
 
         teardown(() => {
             sandbox.restore();
