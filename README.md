@@ -24,7 +24,7 @@ To run the instance of OpenShift cluster locally, developers can use [minishift]
     * Credentials : Log in to the given server with the given credentials.
     * Token : Login using bearer token for authentication to the API server.
 * `OpenShift: List catalog components` - List all available component types from OpenShift's Image Builder.
-* `OpenShift: List catalog services` - Lists all available services e.g. mysql
+* `OpenShift: List catalog services` - Lists all available services e.g. mysql-persistent.
 * `OpenShift: New Project` - Create new project inside the cluster.
 * `OpenShift: About` - Provides the information about the OpenShift tools.
 * `OpenShift: Log out` - Logs out of the current OpenShift cluster.
@@ -32,14 +32,15 @@ To run the instance of OpenShift cluster locally, developers can use [minishift]
 #### Actions available inside an OpenShift Cluster Project
 
    * `Project -> New Application` - Create a new application inside the selected project.
-   * `Project -> Delete` - Delete an existing project.
+   * `Project -> Delete` - Delete the selected project.
 
 #### Actions available for an Application inside a Project
 
-   * `Application ->  New Component` - Create a new component inside the selected application.
-        * git - Use a git repository as the source file for the component.
-        * local - Use local directory as a source file for the component.
-   * `Application ->  New Service` - Perform service catalog operations.
+   * `Application -> New Component` - Create a new component inside the selected application.
+        * git - Use a git repository as the source for the component.
+        * binary - Use binary file as a source for the component
+        * local - Use local directory as a source for the component.
+   * `Application -> New Service` - Perform service catalog operations when it is enabled.
    * `Application -> Describe` - Describe the given application in terminal window.
    * `Application -> Delete` - Delete an existing application.
 
@@ -82,9 +83,9 @@ This extension uses two CLI tools to interact with OpenShift cluster:
 * OpenShift Do tool - [odo](https://github.com/redhat-developer/odo/releases)
 
 > If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
-The extension will detect these dependencies and prompt the user to install if they are missing - choose `Download & Install` when you see an notification for the missing tool.
+The extension will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see an notification for the missing tool.
 
-**NOTE:** This extension is in Preview mode. So the extension support for OpenShift is strictly experimental - assumptions may break, and commands and behavior may change!
+**NOTE:** This extension is in Preview mode. The extension support for OpenShift is strictly experimental - assumptions may break, commands and behavior may change!
 
 ## Release notes
 
@@ -92,7 +93,7 @@ See the [change log](CHANGELOG.md).
 
 Contributing
 ============
-This is an open source project open to anyone. This project welcomes contributions and suggestions!!
+This is an open source project open to anyone. This project welcomes contributions and suggestions!
 
 For information on getting started, refer to the [CONTRIBUTING instructions](CONTRIBUTING.md).
 
@@ -100,8 +101,7 @@ Download the most recent `openshift-connector-<version>.vsix` file and install i
 
 Feedback & Questions
 ====================
-* File a bug in [GitHub Issues](https://github.com/redhat-developer/vscode-openshift-tools/issues)
-* Chat with us on [Mattermost](https://chat.openshift.io/developers/channels/adapters)
+File a bug in [GitHub Issues](https://github.com/redhat-developer/vscode-openshift-tools/issues) or chat with us on [Mattermost](https://chat.openshift.io/developers/channels/adapters).
 
 License
 =======
