@@ -482,9 +482,7 @@
       }
     }
   },
-  "extensionDependencies": [
-    "ms-kubernetes-tools.vscode-kubernetes-tools"
-  ],
+  "extensionDependencies": [],
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
@@ -508,6 +506,7 @@
     "@types/shelljs": "^0.8.0",
     "@types/sinon": "^5.0.7",
     "@types/sinon-chai": "^3.2.1",
+    "@types/string-format": "^2.0.0",
     "@types/validator": "^9.4.3",
     "chai": "^4.2.0",
     "codecov": "^3.1.0",
@@ -535,6 +534,7 @@
     "request": "^2.88.0",
     "request-progress": "^3.0.0",
     "shelljs": "^0.8.3",
+    "string-format": "^2.0.0",
     "targz": "^1.0.1",
     "unzip-stream": "^0.3.0",
     "validator": "^10.9.0"

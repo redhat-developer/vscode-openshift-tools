@@ -40,7 +40,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     }
 
     getTreeItem(element: OpenShiftObject): TreeItem | Thenable<TreeItem> {
-        return element.getTreeItem();
+        return element;
     }
 
     getChildren(element?: OpenShiftObject): ProviderResult<OpenShiftObject[]> {
