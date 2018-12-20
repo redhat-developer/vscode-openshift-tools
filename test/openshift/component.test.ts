@@ -303,7 +303,7 @@ suite('Openshift/Component', () => {
             expect(execStub).calledOnceWith(`odo project set ${projectItem.getName()} && odo application set ${appItem.getName()} && odo component set ${componentItem.getName()} && odo link ${serviceItem.getName()} --wait`);
         });
 
-        test('returns null when no service Link found', async () => {
+        test('returns null when no service type selected to link', async () => {
             quickPickStub.resolves();
             const result = await Component.linkService(componentItem);
 
@@ -311,13 +311,14 @@ suite('Openshift/Component', () => {
         });
 
         test('errors when a subcommand fails', async () => {
-            quickPickStub.resolves(serviceItem);
-            execStub.rejects(errorMessage);
+            quickPickStub.resolves(componentItem);
+            execStub.rejects('ERROR');
 
             try {
                 await Component.linkService(componentItem);
+                expect.fail();
             } catch (err) {
-                expect(err).equals(`Failed to link service with error '${errorMessage}'`);
+                expect(err).equals(`Failed to link service with error 'ERROR'`);
             }
         });
     });
