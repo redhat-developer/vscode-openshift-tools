@@ -312,14 +312,15 @@ suite('Openshift/Component', () => {
 
         test('errors when a subcommand fails', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.rejects('ERROR');
+            execStub.rejects(errorMessage);
+            let savedErr;
 
             try {
                 await Component.linkService(componentItem);
-                expect.fail();
             } catch (err) {
-                expect(err).equals(`Failed to link service with error 'ERROR'`);
+                savedErr = err;
             }
+            expect(savedErr).equals(`Failed to link service with error '${errorMessage}'`);
         });
     });
 
