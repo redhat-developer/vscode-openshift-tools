@@ -91,7 +91,7 @@ suite('Openshift/Component', () => {
                 expect(progressCmdStub).calledOnceWith(
                     `Creating new component '${componentItem.getName()}'`,
                     `odo create ${componentType}:${version} ${componentItem.getName()} --local ${folder.uri.fsPath} --app ${appItem.getName()} --project ${projectItem.getName()}`);
-                expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --local ${folder.uri.fsPath} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+                expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()} --local ${folder.uri.fsPath}`);
             });
 
             test('returns null when no folder selected', async () => {

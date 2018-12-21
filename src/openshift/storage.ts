@@ -61,7 +61,7 @@ export class Storage extends OpenShiftItem {
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete storage '${storage.getName()}' from component '${component.getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 return Promise.resolve()
-                    .then(() => Storage.odo.execute(`odo storage delete ${storage.getName()} -f --project ${project.getName()} --app ${app.getName()} --component ${component.getName()}`))
+                    .then(() => Storage.odo.execute(Command.deleteStorage(project.getName(), app.getName(), component.getName(), storage.getName())))
                     .then(() => Storage.explorer.refresh(treeItem ? component : undefined))
                     .then(() => `Storage '${storage.getName()}' from component '${component.getName()}' successfully deleted`)
                     .catch((err) => Promise.reject(`Failed to delete storage with error '${err}'`));
