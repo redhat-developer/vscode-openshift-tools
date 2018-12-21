@@ -60,7 +60,7 @@ class OpenShiftObjectImpl implements OpenShiftObject {
             getChildren: () => this.odo.getProjects()
         },
         project: {
-            icon: 'images/project.png',
+            icon: 'project.png',
             tooltip : 'Project: {label}',
             getChildren: () => this.odo.getApplications(this)
         },
