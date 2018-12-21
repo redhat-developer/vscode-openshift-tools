@@ -50,8 +50,8 @@ To run the instance of OpenShift cluster locally, developers can use [minishift]
    * `Component -> Create Storage` - Create storage and mount to a component.
    * `Component ->  Show Log` - Retrieve the log for the given component.
    * `Component ->  Follow Log` - Follow logs for the given component.
-   * `Component ->  Link` - Link component to a service or component.
-      * link adds the appropriate secret to the environment of the source component. The source component can then consume the entries of the secret as environment variables.
+   * `Component ->  Link Service` - Link component to a service.
+   * `Component ->  Link Component` - Link component to another component.
    * `Component -> Open in Browser` - Open the exposed URL in a browser.
    * `Component -> Push` - Push source code to a component.
    * `Component -> Watch` - Watch for changes, update component on change.
