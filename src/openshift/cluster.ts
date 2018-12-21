@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { OpenShiftObject } from "../odo";
+import { OpenShiftObject, Command } from "../odo";
 import { OpenShiftItem } from './openshiftItem';
 import * as vscode from 'vscode';
 import * as validator from 'validator';
@@ -27,7 +27,8 @@ export class Cluster extends OpenShiftItem {
     static async logout(): Promise<string> {
         const value = await vscode.window.showWarningMessage(`Are you sure you want to logout of cluster`, 'Logout', 'Cancel');
         if (value === 'Logout') {
-            return Cluster.odo.execute(`odo logout`).catch((error) => Promise.reject(`Failed to logout of the current cluster with '${error}'!`))
+            return Cluster.odo.execute(Command.odoLogout())
+            .catch((error) => Promise.reject(`Failed to logout of the current cluster with '${error}'!`))
             .then(async (result) => {
                 if (result.stderr === "") {
                     Cluster.explorer.refresh();
@@ -51,7 +52,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     static about(): void {
-        Cluster.odo.executeInTerminal(`odo version`);
+        Cluster.odo.executeInTerminal(Command.printOdoVersion());
     }
 
     static async openshiftConsole(context: OpenShiftObject): Promise<void> {
@@ -104,7 +105,7 @@ export class Cluster extends OpenShiftItem {
         });
         if (!passwd) return null;
         return Promise.resolve()
-            .then(() => Cluster.odo.execute(`odo login ${clusterURL} -u ${username} -p ${passwd} --insecure-skip-tls-verify`))
+            .then(() => Cluster.odo.execute(Command.odoLoginWithUsernamePassword(clusterURL,username,passwd)))
             .then((result) => Cluster.loginMessage(clusterURL, result))
             .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`));
     }
@@ -116,7 +117,7 @@ export class Cluster extends OpenShiftItem {
         });
         if (!ocToken) return null;
         return Promise.resolve()
-            .then(() => Cluster.odo.execute(`odo login ${clusterURL} --token=${ocToken} --insecure-skip-tls-verify`))
+            .then(() => Cluster.odo.execute(Command.odoLoginWithToken(clusterURL, ocToken)))
             .then((result) => Cluster.loginMessage(clusterURL, result))
             .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`));
     }

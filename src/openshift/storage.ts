@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { OpenShiftItem } from "./openshiftItem";
-import { OpenShiftObject } from "../odo";
+import { OpenShiftObject, Command } from "../odo";
 import * as vscode from 'vscode';
 import * as validator from 'validator';
 
@@ -31,7 +31,7 @@ export class Storage extends OpenShiftItem {
         if (!storageSize) return null;
 
         return Promise.resolve()
-            .then(() => Storage.odo.execute(`odo storage create ${storageName} --path=${mountPath} --size=${storageSize} --project ${project.getName()} --app ${app.getName()} --component ${component.getName()}`))
+            .then(() => Storage.odo.execute(Command.createStorage(project.getName(), app.getName(), component.getName(), storageName, mountPath, storageSize)))
             .then(() => Storage.explorer.refresh(context))
             .then(() => `Storage '${storageName}' successfully created for component '${context.getName()}'`)
             .catch((err) => Promise.reject(`New Storage command failed with error: '${err}'!`));
