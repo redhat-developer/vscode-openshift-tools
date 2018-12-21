@@ -49,7 +49,7 @@ export const Command = {
     odoLogout: () => `odo logout`,
     odoLoginWithUsernamePassword: (clusterURL: string, username: string, passwd: string) => `odo login ${clusterURL} -u ${username} -p ${passwd} --insecure-skip-tls-verify`,
     odoLoginWithToken: (clusterURL: string, ocToken: string) => `odo login ${clusterURL} --token=${ocToken} --insecure-skip-tls-verify`,
-
+    createStorage: (project: string, app: string, component: string, storageName: string, mountPath: string, storageSize: string) => `odo storage create ${storageName} --path=${mountPath} --size=${storageSize} --project ${project} --app ${app} --component ${component}`,
 }
 
 class OpenShiftObjectImpl implements OpenShiftObject {
