@@ -303,7 +303,7 @@ suite('Openshift/Component', () => {
             expect(execStub).calledOnceWith(`odo project set ${projectItem.getName()} && odo application set ${appItem.getName()} && odo component set ${componentItem.getName()} && odo link ${serviceItem.getName()} --wait`);
         });
 
-        test('returns null when no service type selected to link', async () => {
+        test('returns null when no service selected to link', async () => {
             quickPickStub.resolves();
             const result = await Component.linkService(componentItem);
 
