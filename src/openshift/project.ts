@@ -4,44 +4,45 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { OpenShiftItem } from './openshiftItem';
-import { OpenShiftObject } from '../odo';
+import { OpenShiftObject, Command } from '../odo';
 import * as vscode from 'vscode';
 import * as validator from 'validator';
+
 
 export class Project extends OpenShiftItem {
 
     static async create(): Promise<string> {
-        const projectName = await vscode.window.showInputBox({
+        let projectName = await vscode.window.showInputBox({
             prompt: "Mention Project name",
             validateInput: (value: string) => {
                 return Project.validateName(value);
             }
         });
         if (!projectName) return null;
-        return Promise.resolve()
-            .then(() => Project.odo.execute(`odo project create ${projectName.trim()}`))
+        projectName = projectName.trim();
+        return Project.odo.execute(Command.createProject(projectName))
             .then(() => Project.explorer.refresh())
             .then(() => `Project '${projectName}' successfully created`)
             .catch((error) => Promise.reject(`Failed to create project with error '${error}'`));
     }
 
     static async del(context: OpenShiftObject): Promise<string> {
-        let project: OpenShiftObject = context;
+        let project = context;
+        let result: Promise<string> = null;
         if (!project) {
             const projects: OpenShiftObject[] = await Project.odo.getProjects();
             project = await vscode.window.showQuickPick(projects, {placeHolder: "Select Project to delete"});
         }
-        if (!project) return null;
-
-        const value = await vscode.window.showWarningMessage(`Are you sure you want to delete project '${project.getName()}'?`, 'Yes', 'Cancel');
-        if (value === 'Yes') {
-            return Promise.resolve()
-                .then(() => Project.odo.execute(`odo project delete ${project.getName()} -f`))
-                .then(() => Project.explorer.refresh())
-                .then(() => `Project '${project.getName()}' successfully deleted`)
-                .catch((err) => Promise.reject(`Failed to delete project with error '${err}'`));
+        if (project) {
+            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete project '${project.getName()}'?`, 'Yes', 'Cancel');
+            if (value === 'Yes') {
+                result = Project.odo.execute(Command.deleteProject(project.getName()))
+                    .then(() => Project.explorer.refresh())
+                    .then(() => `Project '${project.getName()}' successfully deleted`)
+                    .catch((err) => Promise.reject(`Failed to delete project with error '${err}'`));
+            }
         }
-        return null;
+        return result;
     }
 
     private static validateName(value: string) {

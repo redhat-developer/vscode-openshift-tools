@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { OpenShiftObject, Odo, OdoImpl } from '../odo';
+import { OpenShiftObject, Odo, OdoImpl, Command } from '../odo';
 import * as vscode from 'vscode';
 import { CliExitData } from '../cli';
 
@@ -13,7 +13,7 @@ export class Url {
     static async create(context: OpenShiftObject): Promise<string> {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
-        const portsResult: CliExitData = await Url.odo.execute(`oc get service ${context.getName()}-${app.getName()} --namespace ${project.getName()} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`);
+        const portsResult: CliExitData = await Url.odo.execute(Command.listComponentPorts(project.getName(), app.getName(), context.getName()));
         let ports: string[] = portsResult.stdout.trim().split(',');
         ports = ports.slice(0, ports.length-1);
         let port: string;
@@ -25,7 +25,7 @@ export class Url {
             return Promise.reject(`Component '${context.getName()}' has no ports decalred.`);
         }
         return port === undefined ? undefined : Promise.resolve()
-            .then(async () => Url.odo.execute(`odo url create --port ${port} --project ${project.getName()} --app ${app.getName()} --component ${context.getName()}`))
+            .then(async () => Url.odo.execute(Command.createCompontentUrl(project.getName(), app.getName(), context.getName(), port)))
             .then(() => `URL for component '${context.getName()}' successfully created`)
             .catch((err) => Promise.reject(`Failed to create URL for component '${context.getName()}'`));
     }

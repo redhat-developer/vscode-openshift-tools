@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { OpenShiftItem } from './openshiftItem';
-import { OpenShiftObject } from '../odo';
+import { OpenShiftObject, Command } from '../odo';
 import * as vscode from 'vscode';
 import * as validator from 'validator';
 
@@ -23,7 +23,7 @@ export class Application extends OpenShiftItem {
         });
         if (appName) {
             return Promise.resolve()
-                .then(() => Application.odo.execute(`odo app create ${appName.trim()} --project ${project.getName()}`))
+                .then(() => Application.odo.execute(Command.createApplication(project.getName(), appName.trim())))
                 .then(() => Application.explorer.refresh(project))
                 .then(() => `Application '${appName}' successfully created`)
                 .catch((error) => Promise.reject(`Failed to create application with error '${error}'`));
@@ -34,7 +34,7 @@ export class Application extends OpenShiftItem {
     static describe(treeItem: OpenShiftObject): void {
         const projName: string = treeItem.getParent().getName();
         const appName: string = treeItem.getName();
-        Application.odo.executeInTerminal(`odo app describe ${appName} --project ${projName}`);
+        Application.odo.executeInTerminal(Command.describeApplication(projName, appName));
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
@@ -55,7 +55,7 @@ export class Application extends OpenShiftItem {
             const value = await vscode.window.showWarningMessage(`Are you sure you want to delete application '${appName}?'`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 return Promise.resolve()
-                    .then(() => Application.odo.execute(`odo app delete ${appName} --project ${projName} -f`))
+                    .then(() => Application.odo.execute(Command.deleteApplication(projName, appName)))
                     .then(() => Application.explorer.refresh(treeItem ? treeItem.getParent() : undefined))
                     .then(() => `Application '${appName}' successfully deleted`)
                     .catch((err) => Promise.reject(`Failed to delete application with error '${err}'`));

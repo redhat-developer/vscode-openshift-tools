@@ -31,45 +31,120 @@ export enum ContextType {
     LOGIN_REQUIRED = 'login_required'
 }
 
+export const Command = {
+    listProjects: () => 
+        'oc get project -o jsonpath="{range .items[*]}{.metadata.name}{\\"\\n\\"}{end}"',
+    deleteProject: (name: string) =>
+        `odo project delete ${name} -f`,
+    createProject: (name: string) =>
+        `odo project create ${name}`,
+    listComponents: (project: string, app: string) => 
+        `oc get dc --namespace ${project} -o jsonpath="{range .items[?(.metadata.labels.app == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}"`,
+    listCatalogComponents: () =>
+        `odo catalog list components`,
+    listCatalogSevices: () =>
+        `odo catalog list services`,
+    listStorageNames: (project: string, app: string) =>
+        `oc get pvc -o jsonpath="{range .items[?(.metadata.labels.app == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\" \\"}{.metadata.labels.app\\.kubernetes\\.io/storage-name}{\\"\\n\\"}{end}" --namespace ${project}`,
+    printOcVersion: () =>
+        'oc version',
+    printOdoVersionAndProjects: () =>
+        'odo version && odo project list',
+    listServiceInstanses: (project: string, app: string) =>
+        `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}" --namespace ${project}`,
+    createApplication: (project: string, app: string) =>
+        `odo app create ${app} --project ${project}`,
+    describeApplication: (project: string, app: string) =>
+        `odo app describe ${app} --project ${project}`,
+    deleteApplication: (project: string, app: string) =>
+        `odo app delete ${app} --project ${project} -f`,
+    printOdoVersion: () =>
+        'odo version',
+    odoLogout: () =>
+        `odo logout`,
+    odoLoginWithUsernamePassword: (clusterURL: string, username: string, passwd: string) => 
+        `odo login ${clusterURL} -u ${username} -p ${passwd} --insecure-skip-tls-verify`,
+    odoLoginWithToken: (clusterURL: string, ocToken: string) =>
+        `odo login ${clusterURL} --token=${ocToken} --insecure-skip-tls-verify`,
+    createStorage: (project: string, app: string, component: string, storageName: string, mountPath: string, storageSize: string) =>
+        `odo storage create ${storageName} --path=${mountPath} --size=${storageSize} --project ${project} --app ${app} --component ${component}`,
+    deleteStorage: (project: string, app: string, component: string, storage: string) =>
+        `odo storage delete ${storage} -f --project ${project} --app ${app} --component ${component}`,
+    deleteComponent: (project: string, app: string, component: string) =>
+        `odo delete ${component} -f --app ${app} --project ${project}`,
+    describeComponent: (project: string, app: string, component: string) =>
+        `odo describe ${component} --app ${app} --project ${project}`,
+    showLog: (project: string, app: string, component: string) =>
+        `odo log ${component} --app ${app} --project ${project}`,
+    showLogAndFollow: (project: string, app: string, component: string) =>
+        `odo log ${component} -f --app ${app} --project ${project}`,
+    listComponentPorts: (project: string, app: string, component: string) =>
+        `oc get service ${component}-${app} --namespace ${project} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`,
+    linkComponentTo: (project: string, app: string, component: string, componentToLink: string) => 
+        `odo project set ${project} && odo application set ${app} && odo component set ${context} && odo link ${componentToLink} --wait`,
+    pushComponent: (project: string, app: string, component: string) =>
+        `odo push ${component} --app ${app} --project ${project}`,
+    pushLocalComponent: (project: string, app: string, component: string, location: string) => 
+        `${Command.pushComponent(project, app, component)} --local ${location}`,
+    watchComponent: (project: string, app: string, component: string) =>
+        `odo watch ${component} --app ${app} --project ${project}`,
+    getRouteHostName: (namespace: string, component: string) => 
+        `oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${component}')]}{.spec.host}{end}"`,
+    getRouteTls: (namespace: string, component: string) => 
+        `oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${component}')]}{.spec.tls.termination}{end}"`,
+    createLocalComponent: (project: string, app: string, type: string, version: string, name: string, folder: string) =>
+        `odo create ${type}:${version} ${name} --local ${folder} --app ${app} --project ${project}`,
+    createGitComponent: (project: string, app: string, type: string, version: string, name: string, git: string) => 
+        `odo create ${type}:${version} ${name} --git ${git} --app ${app} --project ${project}`,
+    createBinaryComponent: (project: string, app: string, type: string, version: string, name: string, binary: string) => 
+        `odo create ${type}:${version} ${name} --binary ${binary} --app ${app} --project ${project}`,
+    createService: (project: string, app: string, template: string, plan: string, name: string) => 
+        `odo service create ${template} --plan ${plan} ${name} --app ${app} --project ${project}`,
+    deleteService: (project: string, app: string, name: string) => 
+        `odo service delete ${name} -f --project ${project} --app ${app}`,
+    createCompontentUrl: (project: string, app: string, component: string, port: string) => 
+        `odo url create --port ${port} --project ${project} --app ${app} --component ${component}`
+}
+
 class OpenShiftObjectImpl implements OpenShiftObject {
     private readonly CONTEXT_DATA = {
         cluster: {
-            iconPath: Uri.file(path.join(__dirname, "../../images/cluster.png")),
+            icon: 'cluster.png',
             tooltip: '',
             getChildren: () => this.odo.getProjects()
         },
         project: {
-            iconPath: Uri.file(path.join(__dirname, "../../images/project.png")),
+            icon: 'project.png',
             tooltip : 'Project: {label}',
             getChildren: () => this.odo.getApplications(this)
         },
         application: {
-            iconPath: Uri.file(path.join(__dirname, "../../images/application.png")),
+            icon: 'application.png',
             tooltip: 'Application: {label}',
             getChildren: () => this.odo.getApplicationChildren(this)
         },
         component: {
-            iconPath: Uri.file(path.join(__dirname, "../../images/component.png")),
+            icon: 'component.png',
             tooltip: 'Component: {label}',
             getChildren: () => this.odo.getStorageNames(this)
         },
         service: {
-            iconPath: Uri.file(path.join(__dirname, "../../images/service.png")),
+            icon: 'service.png',
             tooltip: 'Service: {label}',
             getChildren: () => []
         },
         storage: {
-            iconPath: Uri.file(path.join(__dirname, "../../images/storage.png")),
+            icon: 'storage.png',
             tooltip: 'Storage: {label}',
             getChildren: () => []
         },
         cluster_down: {
-            iconPath: Uri.file(path.join(__dirname, "../../images/cluster-down.png")),
+            icon: 'cluster-down.png"',
             tooltip: 'Cannot connect to cluster',
             getChildren: () => []
         },
         login_required: {
-            iconPath: Uri.file(path.join(__dirname, "../../images/cluster-down.png")),
+            icon: 'cluster-down.png',
             tooltip: 'Log in to cluster',
             getChildren: () => []
         }
@@ -84,7 +159,7 @@ class OpenShiftObjectImpl implements OpenShiftObject {
     }
 
     get iconPath(): Uri {
-        return this.CONTEXT_DATA[this.contextValue].iconPath;
+        return  Uri.file(path.join(__dirname, "../../images", this.CONTEXT_DATA[this.contextValue].icon));
     }
 
     get tooltip(): string {
@@ -142,9 +217,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getProjects(): Promise<OpenShiftObject[]> {
-        return this.execute(
-            'oc get project -o jsonpath="{range .items[*]}{.metadata.name}{\\"\\n\\"}{end}"'
-        ).then((result) => {
+        return this.execute(Command.listProjects()).then((result) => {
             let projs: OpenShiftObject[] = [];
             const stdout: string = result.stdout.trim();
             if (stdout !== "" ) {
@@ -165,11 +238,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getComponents(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
-        const proj = application.getParent().getName();
-        const result: cliInstance.CliExitData = await this.execute(
-            `oc get dc --namespace ${proj} -o jsonpath="{range .items[?(.metadata.labels.app == \\"${application.getName()}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}"`
-        );
-
+        const result: cliInstance.CliExitData = await this.execute(Command.listComponents(application.getParent().getName(), application.getName()));
         const componentsList = result.stdout.trim().split('\n')
             .filter((value) => value !== '')
             .map<OpenShiftObject>((value) => new OpenShiftObjectImpl(application, value, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed));
@@ -179,7 +248,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getComponentTypes(): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(`odo catalog list components`);
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
         return result.stdout.trim().split('\n').slice(1).map((value) => value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|')[0]);
     }
 
@@ -187,9 +256,7 @@ export class OdoImpl implements Odo {
         const app = component.getParent();
         const appName = app.getName();
         const projName = app.getParent().getName();
-        const result: cliInstance.CliExitData = await this.execute(
-            `oc get pvc -o jsonpath="{range .items[?(.metadata.labels.app == \\"${appName}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\" \\"}{.metadata.labels.app\\.kubernetes\\.io/storage-name}{\\"\\n\\"}{end}" --namespace ${projName}`
-        );
+        const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(projName, appName));
 
         return result.stdout.trim().split('\n').filter((value) => value.trim().split(' ').length > 1 && value.trim().split(' ')[0] === component.getName()).map((value) => {
             const name = value.split(' ');
@@ -198,7 +265,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getComponentTypeVersions(componentName: string) {
-        const result: cliInstance.CliExitData = await this.execute(`odo catalog list components`);
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
         const versions = result.stdout.trim().split('\n').slice(1).filter((value) => {
             const data = value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|');
             return data[0] === componentName;
@@ -216,7 +283,7 @@ export class OdoImpl implements Odo {
 
     private async getClustersWithOc(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
-        const result: cliInstance.CliExitData = await this.execute(`oc version`, process.cwd(), false);
+        const result: cliInstance.CliExitData = await this.execute(Command.printOcVersion(), process.cwd(), false);
         clusters = result.stdout.trim().split('\n').filter((value) => {
             return value.indexOf('Server ') !== -1;
         }).map((value) => {
@@ -229,7 +296,7 @@ export class OdoImpl implements Odo {
     private async getClustersWithOdo(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
         const result: cliInstance.CliExitData = await this.execute(
-            `odo version && odo project list`, process.cwd(), false
+            Command.printOdoVersionAndProjects(), process.cwd(), false
         );
         if (result.stdout.indexOf('Please log in to the cluster') > -1 || result.stdout.indexOf('the server has asked for the client to provide credentials') > -1) {
             const loginErrorMsg: string = 'Please log in to the cluster';
@@ -250,7 +317,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getServiceTemplates(): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(`odo catalog list services`, process.cwd(), false);
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogSevices(), process.cwd(), false);
         if (result.error) {
             throw new Error(result.stdout.trim());
         }
@@ -258,7 +325,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getServiceTemplatePlans(svcName: string): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(`odo catalog list services`);
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogSevices());
         const plans = result.stdout.trim().split('\n').slice(1).filter((value) => {
                 const data = value.trim().replace(/\s{1,}/g, '|').split('|');
                 return data[0] === svcName;
@@ -271,9 +338,7 @@ export class OdoImpl implements Odo {
         const projName: string = application.getParent().getName();
         let services: OpenShiftObject[] = [];
         try {
-            const result: cliInstance.CliExitData = await this.execute(
-                `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app == \\"${appName}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}" --namespace ${projName}`
-            );
+            const result: cliInstance.CliExitData = await this.execute(Command.listServiceInstanses(projName, appName));
             services = result.stdout.trim().split('\n')
                 .filter((value) => value !== '')
                 .map((value) => new OpenShiftObjectImpl(application, value, ContextType.SERVICE, this, TreeItemCollapsibleState.None));
@@ -309,7 +374,7 @@ export class OdoImpl implements Odo {
     }
 
     public async requireLogin(): Promise<boolean> {
-        const result: cliInstance.CliExitData = await this.execute(`odo version && odo project list`, process.cwd(), false);
+        const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersionAndProjects(), process.cwd(), false);
         return result.stdout.indexOf("Please log in to the cluster") > -1 || result.stdout.indexOf('the server has asked for the client to provide credentials') > -1;
     }
 }
