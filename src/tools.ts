@@ -142,6 +142,7 @@ export class ToolsConfig {
                         } else if (toolDlLocation.endsWith('.gz')) {
                             await Archive.unzip(toolDlLocation, toolCacheLocation, ToolsConfig.tools[cmd].filePrefix);
                         }
+                        fsex.removeSync(toolDlLocation);
                         if (Platform.OS !== 'win32') {
                             fs.chmodSync(toolCacheLocation, 0o765);
                         }
