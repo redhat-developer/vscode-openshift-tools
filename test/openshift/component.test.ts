@@ -23,12 +23,14 @@ suite('Openshift/Component', () => {
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'application');
     const componentItem = new TestItem(appItem, 'component');
+    const serviceItem = new TestItem(appItem, 'service');
     const errorMessage = 'FATAL ERROR';
 
     setup(() => {
         sandbox = sinon.createSandbox();
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute');
+        sandbox.stub(OdoImpl.prototype, 'getServices');
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
         sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
@@ -283,6 +285,42 @@ suite('Openshift/Component', () => {
             const result = await Component.del(null);
 
             expect(result).null;
+        });
+    });
+
+    suite('linkService', () => {
+        let quickPickStub: sinon.SinonStub;
+
+        setup(() => {
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+        });
+
+        test('works from context menu', async () => {
+            quickPickStub.resolves(serviceItem);
+            const result = await Component.linkService(componentItem);
+
+            expect(result).equals(`service '${serviceItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
+            expect(execStub).calledOnceWith(`odo project set ${projectItem.getName()} && odo application set ${appItem.getName()} && odo component set ${componentItem.getName()} && odo link ${serviceItem.getName()} --wait`);
+        });
+
+        test('returns null when no service type selected to link', async () => {
+            quickPickStub.resolves();
+            const result = await Component.linkService(componentItem);
+
+            expect(result).null;
+        });
+
+        test('errors when a subcommand fails', async () => {
+            quickPickStub.resolves(componentItem);
+            execStub.rejects(errorMessage);
+            let savedErr;
+
+            try {
+                await Component.linkService(componentItem);
+            } catch (err) {
+                savedErr = err;
+            }
+            expect(savedErr).equals(`Failed to link service with error '${errorMessage}'`);
         });
     });
 
