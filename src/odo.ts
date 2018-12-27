@@ -252,7 +252,6 @@ export class OdoImpl implements Odo {
             .map<OpenShiftObject>((value) => new OpenShiftObjectImpl(application, value, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed));
         commands.executeCommand('setContext', 'componentPresent', componentsList.length>0);
         return componentsList;
-
     }
 
     public async getComponentTypes(): Promise<string[]> {

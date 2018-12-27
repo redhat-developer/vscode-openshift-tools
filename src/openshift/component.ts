@@ -14,6 +14,14 @@ import { Url } from './url';
 import { CliExitData } from '../cli';
 import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 
+export const Validator = {
+    emptyName: (message: string, value: string) => {
+        if (validator.isEmpty(value)) {
+            return message;
+        }
+    }
+};
+
 export class Component extends OpenShiftItem {
 
     static async create(context: OpenShiftObject): Promise<string> {
@@ -184,11 +192,8 @@ export class Component extends OpenShiftItem {
 
     private static async validateComponentName(value: string, application: OpenShiftObject) {
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
-        return componentList.map((component) => {
-            if (component.getName().trim() === value) {
-                return `The Component '${component.getName()}' already exists. Please try some other component name`;
-            }
-        }).filter((component) => { return component; })[0];
+        const componentName =  componentList.find((component) =>  component.getName() === value);
+        return componentName && `This component name already exists. Please try some other component name`;
     }
 
     private static async createFromLocal(application: OpenShiftObject): Promise<string> {
@@ -200,8 +205,8 @@ export class Component extends OpenShiftItem {
         const componentName = await vscode.window.showInputBox({
             prompt: "Component name",
             validateInput: async (value: string) => {
-                if (validator.isEmpty(value.trim())) {
-                    return 'Empty component name';
+                if (!value.trim()) {
+                    return Validator.emptyName('Empty component name', value.trim());
                 }
                 return await Component.validateComponentName(value.trim(), application);
             }
@@ -227,8 +232,8 @@ export class Component extends OpenShiftItem {
         const repoURI = await vscode.window.showInputBox({
             prompt: 'Git repository URI',
             validateInput: (value: string) => {
-                if (validator.isEmpty(value.trim())) {
-                    return 'Empty Git repository URL';
+                if (!value.trim()) {
+                    return Validator.emptyName('Empty Git repository URL', value.trim());
                 }
                 if (!validator.isURL(value)) {
                     return 'Invalid URL provided';
@@ -241,11 +246,12 @@ export class Component extends OpenShiftItem {
         const componentName = await vscode.window.showInputBox({
             prompt: "Component name",
             validateInput: async (value: string) => {
-            if (validator.isEmpty(value.trim())) {
-                return 'Empty component name';
+                if (!value.trim()) {
+                    return Validator.emptyName('Empty component name', value.trim());
+                }
+                return await Component.validateComponentName(value.trim(), application);
             }
-            return await Component.validateComponentName(value.trim(), application);
-        }});
+        });
 
         if (!componentName) return null;
 
@@ -279,8 +285,8 @@ export class Component extends OpenShiftItem {
         const componentName = await vscode.window.showInputBox({
             prompt: "Component name",
             validateInput: async (value: string) => {
-                if (validator.isEmpty(value.trim())) {
-                    return 'Empty component name';
+                if (!value.trim()) {
+                    Validator.emptyName('Empty component name', value.trim());
                 }
                 return await Component.validateComponentName(value.trim(), application);
             }
