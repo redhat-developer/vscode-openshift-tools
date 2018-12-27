@@ -32,13 +32,13 @@ export enum ContextType {
 }
 
 export const Command = {
-    listProjects: () => 
+    listProjects: () =>
         'oc get project -o jsonpath="{range .items[*]}{.metadata.name}{\\"\\n\\"}{end}"',
     deleteProject: (name: string) =>
         `odo project delete ${name} -f`,
     createProject: (name: string) =>
         `odo project create ${name}`,
-    listComponents: (project: string, app: string) => 
+    listComponents: (project: string, app: string) =>
         `oc get dc --namespace ${project} -o jsonpath="{range .items[?(.metadata.labels.app == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}"`,
     listCatalogComponents: () =>
         `odo catalog list components`,
@@ -62,7 +62,7 @@ export const Command = {
         'odo version',
     odoLogout: () =>
         `odo logout`,
-    odoLoginWithUsernamePassword: (clusterURL: string, username: string, passwd: string) => 
+    odoLoginWithUsernamePassword: (clusterURL: string, username: string, passwd: string) =>
         `odo login ${clusterURL} -u ${username} -p ${passwd} --insecure-skip-tls-verify`,
     odoLoginWithToken: (clusterURL: string, ocToken: string) =>
         `odo login ${clusterURL} --token=${ocToken} --insecure-skip-tls-verify`,
@@ -80,31 +80,31 @@ export const Command = {
         `odo log ${component} -f --app ${app} --project ${project}`,
     listComponentPorts: (project: string, app: string, component: string) =>
         `oc get service ${component}-${app} --namespace ${project} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`,
-    linkComponentTo: (project: string, app: string, component: string, componentToLink: string) => 
+    linkComponentTo: (project: string, app: string, component: string, componentToLink: string) =>
         `odo project set ${project} && odo application set ${app} && odo component set ${component} && odo link ${componentToLink} --wait`,
     pushComponent: (project: string, app: string, component: string) =>
         `odo push ${component} --app ${app} --project ${project}`,
-    pushLocalComponent: (project: string, app: string, component: string, location: string) => 
+    pushLocalComponent: (project: string, app: string, component: string, location: string) =>
         `${Command.pushComponent(project, app, component)} --local ${location}`,
     watchComponent: (project: string, app: string, component: string) =>
         `odo watch ${component} --app ${app} --project ${project}`,
-    getRouteHostName: (namespace: string, component: string) => 
+    getRouteHostName: (namespace: string, component: string) =>
         `oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${component}')]}{.spec.host}{end}"`,
-    getRouteTls: (namespace: string, component: string) => 
+    getRouteTls: (namespace: string, component: string) =>
         `oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${component}')]}{.spec.tls.termination}{end}"`,
     createLocalComponent: (project: string, app: string, type: string, version: string, name: string, folder: string) =>
         `odo create ${type}:${version} ${name} --local ${folder} --app ${app} --project ${project}`,
-    createGitComponent: (project: string, app: string, type: string, version: string, name: string, git: string) => 
+    createGitComponent: (project: string, app: string, type: string, version: string, name: string, git: string) =>
         `odo create ${type}:${version} ${name} --git ${git} --app ${app} --project ${project}`,
-    createBinaryComponent: (project: string, app: string, type: string, version: string, name: string, binary: string) => 
+    createBinaryComponent: (project: string, app: string, type: string, version: string, name: string, binary: string) =>
         `odo create ${type}:${version} ${name} --binary ${binary} --app ${app} --project ${project}`,
-    createService: (project: string, app: string, template: string, plan: string, name: string) => 
+    createService: (project: string, app: string, template: string, plan: string, name: string) =>
         `odo service create ${template} --plan ${plan} ${name} --app ${app} --project ${project}`,
-    deleteService: (project: string, app: string, name: string) => 
+    deleteService: (project: string, app: string, name: string) =>
         `odo service delete ${name} -f --project ${project} --app ${app}`,
-    createCompontentUrl: (project: string, app: string, component: string, port: string) => 
+    createCompontentUrl: (project: string, app: string, component: string, port: string) =>
         `odo url create --port ${port} --project ${project} --app ${app} --component ${component}`
-}
+};
 
 class OpenShiftObjectImpl implements OpenShiftObject {
     private readonly CONTEXT_DATA = {
