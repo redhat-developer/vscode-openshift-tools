@@ -7,6 +7,7 @@ import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
 import * as vscode from 'vscode';
 import { Progress } from '../util/progress';
+
 export class Service extends OpenShiftItem {
     static async create(application: OpenShiftObject): Promise<string>  {
         const serviceTemplateName = await vscode.window.showQuickPick(Service.odo.getServiceTemplates(), {

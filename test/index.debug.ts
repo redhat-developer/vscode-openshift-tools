@@ -5,10 +5,9 @@
 
 import * as testRunner from 'vscode/lib/testrunner';
 
-process.on('unhandledRejection', err => {
+process.on('unhandledRejection', (err) => {
     console.log('Unhandled rejection:', err);
 });
-
 
 // See https://github.com/mochajs/mocha/wiki/Using-mocha-programmatically#set-options for more info
 testRunner.configure({

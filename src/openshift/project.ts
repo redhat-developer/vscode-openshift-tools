@@ -8,7 +8,6 @@ import { OpenShiftObject, Command } from '../odo';
 import * as vscode from 'vscode';
 import * as validator from 'validator';
 
-
 export class Project extends OpenShiftItem {
 
     static async create(): Promise<string> {

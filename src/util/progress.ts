@@ -7,8 +7,6 @@
 
 import * as vscode from 'vscode';
 import * as odoctl from '../odo';
-import { CliExitData } from '../cli';
-import { ExecException } from 'child_process';
 
 export interface Step {
     command: string;
