@@ -38,7 +38,7 @@ export class Service extends OpenShiftItem {
             if (serviceName) {
                 const project = applicationName.getParent();
                 return Progress.execCmdWithProgress(`Creating new service '${serviceName}'`,
-                    `odo service create ${serviceTemplateName} --plan ${serviceTemplatePlanName} ${serviceName.trim()} --app ${applicationName.getName()} --project ${project.getName()}`)
+                    Command.createService(project.getName(), applicationName.getName(), serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))
                     .then(() => Service.explorer.refresh())
                     .then(() => `Service '${serviceName}' successfully created`)
                     .catch((err) => Promise.reject(`Failed to create service with error '${err}'`));
