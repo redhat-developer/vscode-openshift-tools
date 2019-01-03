@@ -288,6 +288,64 @@ suite('Openshift/Component', () => {
         });
     });
 
+    suite('linkComponent', () => {
+        let quickPickStub: sinon.SinonStub;
+
+        setup(() => {
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+        });
+
+        test('works from context menu', async () => {
+            quickPickStub.resolves(componentItem);
+            execStub.resolves({error: null, stderr: "", stdout: '8080, '});
+            const result = await Component.linkComponent(componentItem);
+
+            expect(result).equals(`component '${componentItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
+        });
+
+        test('works from context menu if more than one ports is available', async () => {
+            quickPickStub.resolves(componentItem);
+            execStub.resolves({error: null, stderr: "", stdout: '8080, 8081, '});
+            const result = await Component.linkComponent(componentItem);
+
+            expect(result).equals(`component '${componentItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
+        });
+
+        test('returns null when no component selected to link', async () => {
+            quickPickStub.resolves();
+            const result = await Component.linkComponent(componentItem);
+
+            expect(result).null;
+        });
+
+        test('errors when no ports available', async () => {
+            quickPickStub.resolves(componentItem);
+            execStub.resolves({error: null, stderr: "", stdout: ""});
+            let savedErr;
+            try {
+                await Component.linkComponent(componentItem);
+            } catch (err) {
+                savedErr = err;
+            }
+
+            expect(savedErr).equals(`Component '${componentItem.getName()}' has no ports decalred.`);
+        });
+
+        test('errors when a subcommand fails', async () => {
+            quickPickStub.resolves(componentItem);
+            execStub.onFirstCall().resolves({error: null, stderr: "", stdout: '8080, '});
+            execStub.onSecondCall().rejects(errorMessage);
+            let savedErr;
+
+            try {
+                await Component.linkComponent(componentItem);
+            } catch (err) {
+                savedErr = err;
+            }
+            expect(savedErr).equals(`Failed to link component with error '${errorMessage}'`);
+        });
+    });
+
     suite('linkService', () => {
         let quickPickStub: sinon.SinonStub;
 
