@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { OpenShiftItem } from './openshiftItem';
-import { OpenShiftObject, OdoImpl, Command } from '../odo';
+import { OpenShiftObject, Command } from '../odo';
 import * as vscode from 'vscode';
 import { Progress } from '../util/progress';
 import opn = require('opn');
@@ -12,6 +12,7 @@ import { ChildProcess } from 'child_process';
 import * as validator from 'validator';
 import { Url } from './url';
 import { CliExitData } from '../cli';
+
 export class Component extends OpenShiftItem {
     static async create(application: OpenShiftObject): Promise<string> {
         // should use QuickPickItem with label and description

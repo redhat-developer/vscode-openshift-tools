@@ -12,7 +12,6 @@ import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
 import { OdoImpl } from '../../src/odo';
 import { Storage } from '../../src/openshift/storage';
-import { isString } from 'util';
 
 const expect = chai.expect;
 chai.use(sinonChai);
