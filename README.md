@@ -10,7 +10,7 @@
 
 A Visual Studio Code extension for interacting with Red Hat OpenShift using a local instance of OpenShift clusters providing a streamlined developer experience. This extension is currently in Preview Mode and supports only Java and Node.js components. We will be supporting other languages in the future releases.
 
-To run the instance of OpenShift cluster locally, developers can use [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/). Currently all clusters are supported, but with some limitations for OpenShift Online Pro where additional storage might be required to create more that two components.
+To run the instance of OpenShift cluster locally, developers can use [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/). Currently all clusters are supported, but with some limitations for OpenShift Online Pro where additional storage might be required to create more than two components.
 
 ## Commands and features
 
