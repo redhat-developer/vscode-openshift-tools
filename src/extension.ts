@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.project.delete.palette', (context) => execute(Project.del, context)),
         vscode.commands.registerCommand('openshift.app.delete.palette', (context) => execute(Application.del, context)),
         vscode.commands.registerCommand('openshift.app.describe', (context) => executeSync(Application.describe, context)),
-        vscode.commands.registerCommand('openshift.app.describe.palette', (context) => executeSync(Application.describe, context)),
+        vscode.commands.registerCommand('openshift.app.describe.palette', (context) => execute(Application.describe, context)),
         vscode.commands.registerCommand('openshift.app.create', (context) => execute(Application.create, context)),
         vscode.commands.registerCommand('openshift.app.delete', (context) => execute(Application.del, context)),
         vscode.commands.registerCommand('openshift.component.describe', (context) => executeSync(Component.describe, context)),

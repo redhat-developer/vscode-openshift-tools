@@ -49,7 +49,7 @@ export class Application extends OpenShiftItem {
     static async getProjectNames(): Promise<OpenShiftObject[]> {
         const projectList: Array<OpenShiftObject> = await Application.odo.getProjects();
         if (projectList.length === 0) {
-           throw Error('You need at least one Project available to create an Application. Please create new OpenShift Project and try again.');
+           throw Error('You need at least one Project available to (create or describe) an Application. Please create new OpenShift Project and try again.');
         }
         return projectList;
     }
@@ -68,10 +68,26 @@ export class Application extends OpenShiftItem {
         });
     }
 
-    static describe(treeItem: OpenShiftObject): void {
-        const projName: string = treeItem.getParent().getName();
-        const appName: string = treeItem.getName();
-        Application.odo.executeInTerminal(Command.describeApplication(projName, appName));
+    static async getgetApplicationNames(project): Promise<OpenShiftObject[]> {
+        const projectList: Array<OpenShiftObject> = await Application.odo.getApplications(project);
+        if (projectList.length === 0) {
+           throw Error('You need at least one Application available to describe Application. Please create new OpenShift Application and try again.');
+        }
+        return projectList;
+    }
+
+    static async describe(treeItem: OpenShiftObject) {
+        let project: OpenShiftObject;
+        let application: OpenShiftObject;
+        if (treeItem) {
+            project = treeItem.getParent();
+            application= treeItem;
+        } else {
+            project = await vscode.window.showQuickPick(Application.getProjectNames(), {placeHolder: "From which project you want to describe Application"});
+            application = await vscode.window.showQuickPick(Application.getgetApplicationNames(project), {placeHolder: "Select Application you want to describe"});
+
+        }
+        Application.odo.executeInTerminal(Command.describeApplication(project.getName(), application.getName()));
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
