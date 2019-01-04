@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { OpenShiftObject, Odo, OdoImpl, Command } from '../odo';
+import { OpenShiftItem } from "./openshiftItem";
+import { OpenShiftObject, Command } from '../odo';
 import * as vscode from 'vscode';
 import { CliExitData } from '../cli';
 
@@ -13,7 +14,7 @@ export class Url extends OpenShiftItem  {
         const data: OpenShiftObject = await Url.getUrlData(context);
         const app: OpenShiftObject = data.getParent();
         const project: OpenShiftObject = app.getParent();
-        const portsResult: CliExitData = await Url.odo.execute(Command.listComponentPorts(project.getName(), app.getName(), context.getName()));
+        const portsResult: CliExitData = await Url.odo.execute(Command.listComponentPorts(project.getName(), app.getName(), data.getName()));
         let ports: string[] = portsResult.stdout.trim().split(',');
         ports = ports.slice(0, ports.length-1);
         let port: string;
@@ -25,7 +26,7 @@ export class Url extends OpenShiftItem  {
             return Promise.reject(`Component '${data.getName()}' has no ports decalred.`);
         }
         return port === undefined ? undefined : Promise.resolve()
-            .then(async () => Url.odo.execute(`odo url create --port ${port} --project ${project.getName()} --app ${app.getName()} --component ${data.getName()}`))
+            .then(async () => Url.odo.execute(Command.createCompontentUrl(project.getName(), app.getName(), data.getName(), port)))
             .then(() => `URL for component '${data.getName()}' successfully created`)
             .catch((err) => Promise.reject(`Failed to create URL for component '${data.getName()}'`));
     }
