@@ -193,35 +193,15 @@ suite('Openshift/Application', () => {
         });
 
         test('calls the appropriate error message when no project found', async () => {
-            quickPickStub.onFirstCall().resolves();
+            quickPickStub.restore();
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
-            let savedErr;
             try {
                 await Application.describe(null);
             } catch (err) {
-                savedErr = err;
+                expect(err.message).equals('You need at least one Project available. Please create new OpenShift Project and try again.');
                 return;
             }
             expect.fail();
-            expect(savedErr.message).equals('You need at least one Project available to (create or describe) an Application. Please create new OpenShift Project and try again.');
-
-        });
-
-        test('calls the appropriate error message when no application found', async () => {
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves();
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
-            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
-
-            let savedErr;
-            try {
-                await Application.describe(null);
-            } catch (err) {
-                savedErr = err;
-                return;
-            }
-            expect.fail();
-            expect(savedErr.message).equals('You need at least one Application available to describe Application. Please create new OpenShift Application and try again.');
 
         });
     });
