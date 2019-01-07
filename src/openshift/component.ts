@@ -17,8 +17,12 @@ import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 export class Component extends OpenShiftItem {
 
     static async create(application: OpenShiftObject): Promise<string> {
-        const data: OpenShiftObject = await Component.getApplicationData(application);
-        if (data) {
+        let project: OpenShiftObject;
+        if (!application) {
+            project = await vscode.window.showQuickPick(Component.getProjectNames(), {placeHolder: "In which Project you want to create an Component"});
+            if (project) application = await vscode.window.showQuickPick(Component.getApplicationNames(project), {placeHolder: "In which Application you want to create an Component"});
+        }
+        if (application) {
             const sourceTypes: vscode.QuickPickItem[] = [
                 {
                     label: 'Git Repository',
@@ -40,51 +44,14 @@ export class Component extends OpenShiftItem {
 
             let command: Promise<string>;
             if (componentSource.label === 'Git Repository') {
-                command = Component.createFromGit(data);
+                command = Component.createFromGit(application);
             } else if (componentSource.label === 'Binary File') {
-                command = Component.createFromBinary(data);
+                command = Component.createFromBinary(application);
             } else {
-                command = Component.createFromLocal(data);
+                command = Component.createFromLocal(application);
             }
             return command.catch((err) => Promise.reject(`Failed to create component with error '${err}'`));
         }
-    }
-
-    static async getApplicationData(application) {
-        let applicationName: OpenShiftObject  = application ? application : undefined;
-        let name: OpenShiftObject;
-        if (!applicationName) {
-            name = await Component.getProjectName();
-        }
-        if (applicationName) {
-            applicationName = application;
-        }
-        return name || applicationName ? name || applicationName : undefined;
-    }
-
-    static async getProjectName() {
-        let application: OpenShiftObject;
-        const project: OpenShiftObject = await vscode.window.showQuickPick(Component.getProjectNames(), {placeHolder: "In which Project you want to create an Application"});
-        if (project) {
-            application = await vscode.window.showQuickPick(Component.getApplicationNames(project), {placeHolder: "In which Project you want to create an Application"});
-        }
-        return application ? application: undefined;
-    }
-
-    static async getProjectNames() {
-        const projectList: Array<OpenShiftObject> = await Component.odo.getProjects();
-        if (projectList.length === 0) {
-           throw Error('You need at least one Project available to create an Component. Please create new OpenShift Project and try again.');
-        }
-        return projectList;
-    }
-
-    static async getApplicationNames(project) {
-        const ApplicationList: Array<OpenShiftObject> = await Component.odo.getApplications(project);
-        if (ApplicationList.length === 0) {
-           throw Error('You need at least one Application available to create an Component. Please create new OpenShift Application and try again.');
-        }
-        return ApplicationList;
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
