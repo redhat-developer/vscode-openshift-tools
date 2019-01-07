@@ -11,8 +11,12 @@ import { Progress } from '../util/progress';
 export class Service extends OpenShiftItem {
 
     static async create(application: OpenShiftObject): Promise<string>  {
-        const applicationName: OpenShiftObject = await Service.getApplicationData(application);
-        if (applicationName) {
+        let project: OpenShiftObject;
+        if (!application) {
+            project = await vscode.window.showQuickPick(Service.getProjectNames(), {placeHolder: "In which Project you want to create an Service"});
+            if (project) application = await vscode.window.showQuickPick(Service.getApplicationNames(project), {placeHolder: "In which Application you want to create an Service"});
+        }
+        if (application) {
             const serviceTemplateName = await vscode.window.showQuickPick(Service.odo.getServiceTemplates(), {
                 placeHolder: "Service Template Name"
             });
@@ -29,59 +33,22 @@ export class Service extends OpenShiftItem {
                 validateInput: (value: string) => {
                     // required, because dc name is ${component}-${app}
                     let message: string = null;
-                    if (`${value.trim()}-${applicationName.getName()}`.length > 63) {
+                    if (`${value.trim()}-${application.getName()}`.length > 63) {
                         message = 'Service name cannot be more than 63 characters';
                     }
                     return message;
                 }
             });
             if (serviceName) {
-                const project = applicationName.getParent();
+                const project = application.getParent();
                 return Progress.execCmdWithProgress(`Creating new service '${serviceName}'`,
-                    Command.createService(project.getName(), applicationName.getName(), serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))
+                    Command.createService(project.getName(), application.getName(), serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))
                     .then(() => Service.explorer.refresh())
                     .then(() => `Service '${serviceName}' successfully created`)
                     .catch((err) => Promise.reject(`Failed to create service with error '${err}'`));
             }
             return null;
         }
-    }
-
-    static async getApplicationData(application) {
-        let applicationName: OpenShiftObject  = application ? application : undefined;
-        let name: OpenShiftObject;
-        if (!applicationName) {
-            name = await Service.getProjectName();
-        }
-        if (applicationName) {
-            applicationName = application;
-        }
-        return name || applicationName ? name || applicationName : undefined;
-    }
-
-    static async getProjectName() {
-        let application: OpenShiftObject;
-        const project: OpenShiftObject = await vscode.window.showQuickPick(Service.getProjectNames(), {placeHolder: "In which Project you want to create an Application"});
-        if (project) {
-            application = await vscode.window.showQuickPick(Service.getApplicationNames(project), {placeHolder: "In which Project you want to create an Application"});
-        }
-        return application ? application: undefined;
-    }
-
-    static async getProjectNames() {
-        const projectList: Array<OpenShiftObject> = await Service.odo.getProjects();
-        if (projectList.length === 0) {
-           throw Error('You need at least one Project available to create an Service. Please create new OpenShift Project and try again.');
-        }
-        return projectList;
-    }
-
-    static async getApplicationNames(project) {
-        const ApplicationList: Array<OpenShiftObject> = await Service.odo.getApplications(project);
-        if (ApplicationList.length === 0) {
-           throw Error('You need at least one Application available to create an Service. Please create new OpenShift Application and try again.');
-        }
-        return ApplicationList;
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {

@@ -50,6 +50,8 @@ suite('Openshift/Service', () => {
         });
 
         test('works with correct inputs', async () => {
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
+            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
             quickPickStub.resolves(templateName);
             const result = await Service.create(null);
             expect(result).equals(`Service '${serviceItem.getName()}' successfully created`);
@@ -60,6 +62,19 @@ suite('Openshift/Service', () => {
             const result = await Service.create(null);
 
             expect(result).null;
+        });
+
+        test('calls the appropriate error message if no project found', async () => {
+            quickPickStub.restore();
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+            sandbox.stub(vscode.window, 'showErrorMessage');
+            try {
+                await Service.create(null);
+            } catch (err) {
+                expect(err.message).equals('You need at least one Project available. Please create new OpenShift Project and try again.');
+                return;
+            }
+            expect.fail();
         });
 
         test('returns null with no template plan selected', async () => {
