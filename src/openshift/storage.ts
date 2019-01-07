@@ -9,12 +9,18 @@ import * as vscode from 'vscode';
 import * as validator from 'validator';
 
 export class Storage extends OpenShiftItem {
-    static async create(context: OpenShiftObject): Promise<string> {
-        const data: OpenShiftObject = await Storage.getComponentData(context);
-        const component: OpenShiftObject = data;
-        const app: OpenShiftObject = data.getParent();
-        const project: OpenShiftObject = app.getParent();
-        if (data) {
+    static async create(component: OpenShiftObject): Promise<string> {
+        let application: OpenShiftObject;
+        let project: OpenShiftObject;
+        if (component) {
+            application = component.getParent();
+            project = application.getParent();
+        } else {
+            project = await vscode.window.showQuickPick(Storage.getProjectNames(), {placeHolder: "In which Project you want to create an Storage"});
+            if (project) application = await vscode.window.showQuickPick(Storage.getApplicationNames(project), {placeHolder: "In which Application you want to create an Storage"});
+            if (application) component = await vscode.window.showQuickPick(Storage.getComponentNames(application), {placeHolder: "In which Component you want to create an Storage"});
+        }
+        if (component) {
             const storageName = await vscode.window.showInputBox({prompt: "Specify the storage name", validateInput: (value: string) => {
                 if (validator.isEmpty(value.trim())) {
                     return 'Invalid storage name';
@@ -33,61 +39,12 @@ export class Storage extends OpenShiftItem {
             if (!storageSize) return null;
 
             return Promise.resolve()
-                .then(() => Storage.odo.execute(Command.createStorage(project.getName(), app.getName(), component.getName(), storageName, mountPath, storageSize)))
+                .then(() => Storage.odo.execute(Command.createStorage(project.getName(), application.getName(), component.getName(), storageName, mountPath, storageSize)))
                 .then(() => Storage.explorer.refresh())
-                .then(() => `Storage '${storageName}' successfully created for component '${data.getName()}'`)
+                .then(() => `Storage '${storageName}' successfully created for component '${component.getName()}'`)
                 .catch((err) => Promise.reject(`New Storage command failed with error: '${err}'!`));
 
         }
-    }
-
-    static async getComponentData(component) {
-        let componentName: OpenShiftObject  = component ? component : undefined;
-        let name: OpenShiftObject;
-        if (!componentName) {
-            name = await Storage.getProjectName();
-        }
-        if (componentName) {
-            componentName = component;
-        }
-        return name || componentName ? name || componentName : undefined;
-    }
-
-    static async getProjectName() {
-        let application: OpenShiftObject;
-        let component: OpenShiftObject;
-        const project: OpenShiftObject = await vscode.window.showQuickPick(Storage.getProjectNames(), {placeHolder: "In which Project you want to create an Storage"});
-        if (project) {
-            application = await vscode.window.showQuickPick(Storage.getApplicationNames(project), {placeHolder: "In which Application you want to create an Storage"});
-        }
-        if (application) {
-            component = await vscode.window.showQuickPick(Storage.getComponentNames(application), {placeHolder: "In which Component you want to create an Storage"});
-        }
-        return component ? component: undefined;
-    }
-
-    static async getProjectNames() {
-        const projectList: Array<OpenShiftObject> = await Storage.odo.getProjects();
-        if (projectList.length === 0) {
-           throw Error('You need at least one Project available to create an Storage. Please create new OpenShift Project and try again.');
-        }
-        return projectList;
-    }
-
-    static async getApplicationNames(project) {
-        const applicationList: Array<OpenShiftObject> = await Storage.odo.getApplications(project);
-        if (applicationList.length === 0) {
-            throw Error('You need at least one Application available to create an Storage. Please create new OpenShift Project and try again.');
-         }
-         return applicationList;
-    }
-
-    static async getComponentNames(application) {
-        const applicationList: Array<OpenShiftObject> = await Storage.odo.getComponents(application);
-        if (applicationList.length === 0) {
-            throw Error('You need at least one Component available to create an Storage. Please create new OpenShift Project and try again.');
-        }
-         return applicationList;
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {

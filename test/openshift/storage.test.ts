@@ -62,22 +62,10 @@ suite('Openshift/Storage', () => {
             try {
                 await Storage.create(null);
             } catch (err) {
-                expect(err.message).equals('You need at least one Project available to create an Storage. Please create new OpenShift Project and try again.');
+                expect(err.message).equals('You need at least one Project available. Please create new OpenShift Project and try again.');
                 return;
             }
             expect.fail();
-        });
-
-        test('calls the appropriate error message if no application found', async () => {
-            quickPickStub.onFirstCall().resolves([projectItem]);
-            quickPickStub.onSecondCall().resolves([]);
-            sandbox.stub(vscode.window, 'showErrorMessage');
-            try {
-                await Storage.create(null);
-            } catch (err) {
-                expect(err.message).equals('You need at least one Application available to create an Storage. Please create new OpenShift Project and try again.');
-                return;
-            }
         });
 
         test('calls the appropriate error message if no application found', async () => {
@@ -94,6 +82,9 @@ suite('Openshift/Storage', () => {
         });
 
         test('works with valid inputs', async () => {
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
+            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
+            sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([componentItem]);
             const result = await Storage.create(null);
 
             expect(result).equals(`Storage '${storageItem.getName()}' successfully created for component '${componentItem.getName()}'`);
