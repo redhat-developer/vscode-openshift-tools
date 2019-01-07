@@ -41,10 +41,6 @@ suite('Openshift/URL', () => {
             quickPickStub.onThirdCall().resolves(componentItem);
         });
 
-        teardown(() => {
-            sandbox.restore();
-        });
-
         test('calls the appropriate error message if no project found', async () => {
             quickPickStub.restore();
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
@@ -52,20 +48,22 @@ suite('Openshift/URL', () => {
             try {
                 await Url.create(null);
             } catch (err) {
-                expect(err.message).equals('You need at least one Project available to create an Url. Please create new OpenShift Project and try again.');
+                expect(err.message).equals('You need at least one Project. Please create new OpenShift Project and try again.');
                 return;
             }
             expect.fail();
         });
 
         test('asks to select port if more that one exposed and returns message', async () => {
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
+            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
+            sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([componentItem]);
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
             execStub.resolves({error: null, stdout: 'port1,', stderr: ''});
             quickPickStub.resolves('port1');
             const result = await Url.create(null);
 
             expect(result).equals(`URL for component '${componentItem.getName()}' successfully created`);
-            expect(execStub).callCount(4);
         });
 
         test('rejects when fails to create Url', () => {

@@ -92,11 +92,11 @@ suite('Openshift/Application', () => {
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
             const errorStub = sandbox.stub(vscode.window, 'showErrorMessage');
             try {
-                await Application.create(null)
+                await Application.create(null);
             } catch (err) {
-                expect(err.message).equals('You need at least one Project available to create an Application. Please create new OpenShift Project and try again.');    
+                expect(err.message).equals('You need at least one Project available to create an Application. Please create new OpenShift Project and try again.');
                 return;
-            };
+            }
             expect.fail();
         });
 

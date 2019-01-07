@@ -13,4 +13,28 @@ export abstract class OpenShiftItem {
     static create(context: OpenShiftObject): Promise<String> { return Promise.reject(); }
     static del(context: OpenShiftObject): Promise<String> { return Promise.reject(); }
     static wait(timeout: number = 2500): Promise<void> { return  new Promise((res)=>setTimeout(res, timeout)); }
+
+    static async getProjectNames() {
+        const projectList: Array<OpenShiftObject> = await OpenShiftItem.odo.getProjects();
+        if (projectList.length === 0) {
+           throw Error('You need at least one Project. Please create new OpenShift Project and try again.');
+        }
+        return projectList;
+    }
+
+    static async getApplicationNames(project) {
+        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
+        if (applicationList.length === 0) {
+            throw Error('You need at least one Application available. Please create new OpenShift Application and try again.');
+         }
+         return applicationList;
+    }
+
+    static async getComponentNames(application) {
+        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application);
+        if (applicationList.length === 0) {
+            throw Error('You need at least one Component available. Please create new OpenShift Component and try again.');
+        }
+         return applicationList;
+    }
 }
