@@ -6,6 +6,8 @@
 import { OpenShiftObject, Odo, OdoImpl, Command } from '../odo';
 import * as vscode from 'vscode';
 import { CliExitData } from '../cli';
+import { Component} from '../openshift/component';
+import { V1ServicePort } from '@kubernetes/client-node';
 
 export class Url {
     private static odo: Odo = OdoImpl.getInstance();
@@ -13,19 +15,21 @@ export class Url {
     static async create(context: OpenShiftObject): Promise<string> {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
-        const portsResult: CliExitData = await Url.odo.execute(Command.listComponentPorts(project.getName(), app.getName(), context.getName()));
-        let ports: string[] = portsResult.stdout.trim().split(',');
-        ports = ports.slice(0, ports.length-1);
-        let port: string;
+        let ports: V1ServicePort[] = await Component.getComponentPorts(context);
+        let portItems: vscode.QuickPickItem[] = ports.map((item: any) => {
+            item['label'] = `${item.port}/${item.protocol}`;
+            return item;
+        });
+        let port: V1ServicePort | vscode.QuickPickItem;
         if (ports.length === 1) {
             port = ports[0];
         } else if (ports.length > 1) {
-            port = await vscode.window.showQuickPick(ports, {placeHolder: "Select port to expose"});
+            port = await vscode.window.showQuickPick(portItems, {placeHolder: "Select port to expose"});
         } else {
             return Promise.reject(`Component '${context.getName()}' has no ports decalred.`);
         }
         return port === undefined ? undefined : Promise.resolve()
-            .then(async () => Url.odo.execute(Command.createCompontentUrl(project.getName(), app.getName(), context.getName(), port)))
+            .then(async () => Url.odo.execute(Command.createCompontentUrl(project.getName(), app.getName(), context.getName(), `${port['port']}`)))
             .then(() => `URL for component '${context.getName()}' successfully created`)
             .catch((err) => Promise.reject(`Failed to create URL for component '${context.getName()}'`));
     }

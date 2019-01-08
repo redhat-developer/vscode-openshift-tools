@@ -12,6 +12,7 @@ import { ChildProcess } from 'child_process';
 import * as validator from 'validator';
 import { Url } from './url';
 import { CliExitData } from '../cli';
+import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 
 export class Component extends OpenShiftItem {
     static async create(application: OpenShiftObject): Promise<string> {
@@ -103,6 +104,7 @@ export class Component extends OpenShiftItem {
         if (!componentToLink) return null;
 
         const portsResult: CliExitData = await Component.odo.execute(Command.listComponentPorts(project.getName(), app.getName(), componentToLink.getName()));
+
         let ports: string[] = portsResult.stdout.trim().split(',');
         ports = ports.slice(0, ports.length-1);
         let port: string;
@@ -265,5 +267,13 @@ export class Component extends OpenShiftItem {
             Command.createBinaryComponent(project.getName(), application.getName(), componentTypeName, componentTypeVersion, componentName, binaryFile[0].fsPath))
             .then(() => Component.explorer.refresh(application))
             .then(() => `Component '${componentName}' successfully created`);
+    }
+
+    public static async getComponentPorts(context: OpenShiftObject): Promise<V1ServicePort[]> {
+        const app: OpenShiftObject = context.getParent();
+        const project: OpenShiftObject = app.getParent();
+        const portsResult: CliExitData = await Component.odo.execute(Command.getComponentJson(project.getName(), app.getName(), context.getName()));
+        const serviceOpj: V1Service = JSON.parse(portsResult.stdout) as V1Service;
+        return serviceOpj.spec.ports;
     }
 }
