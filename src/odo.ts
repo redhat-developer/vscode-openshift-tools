@@ -103,7 +103,9 @@ export const Command = {
     deleteService: (project: string, app: string, name: string) =>
         `odo service delete ${name} -f --project ${project} --app ${app}`,
     createCompontentUrl: (project: string, app: string, component: string, port: string) =>
-        `odo url create --port ${port} --project ${project} --app ${app} --component ${component}`
+        `odo url create --port ${port} --project ${project} --app ${app} --component ${component}`,
+    getComponentJson: (project: string, app: string, component: string) =>
+        `oc get service ${component}-${app} --namespace ${project} -o json`
 };
 
 class OpenShiftObjectImpl implements OpenShiftObject {
