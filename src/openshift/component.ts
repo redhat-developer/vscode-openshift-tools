@@ -100,6 +100,7 @@ export class Component extends OpenShiftItem {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
         const componentPresent = await Component.odo.getComponents(app);
+        if (componentPresent.length === 1) throw Error('You have no Components available to link, please create new OpenShift Component and try again.');
         const componentToLink = await vscode.window.showQuickPick(componentPresent.filter((comp)=> comp.getName() !== context.getName()), {placeHolder: "Select the component to link"});
         if (!componentToLink) return null;
 

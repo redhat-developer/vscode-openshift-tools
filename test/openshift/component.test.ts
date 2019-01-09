@@ -20,6 +20,7 @@ chai.use(sinonChai);
 suite('Openshift/Component', () => {
     let sandbox: sinon.SinonSandbox;
     let termStub: sinon.SinonStub, execStub: sinon.SinonStub;
+    let getProjectsStub: sinon.SinonStub, getApplicationsStub: sinon.SinonStub, getComponentsStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'application');
     const componentItem = new TestItem(appItem, 'component');
@@ -31,9 +32,9 @@ suite('Openshift/Component', () => {
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute');
         sandbox.stub(OdoImpl.prototype, 'getServices');
-        sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
-        sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
-        sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
+        getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+        getApplicationsStub = sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
+        getComponentsStub = sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
         sandbox.stub(Component, 'wait').resolves();
     });
 
@@ -316,6 +317,19 @@ suite('Openshift/Component', () => {
             const result = await Component.linkComponent(componentItem);
 
             expect(result).null;
+        });
+
+        test('calls the appropriate error message when only one component found', async () => {
+            quickPickStub.restore();
+            getComponentsStub.resolves([componentItem]);
+            try {
+                await Component.linkComponent(componentItem);
+            } catch (err) {
+                expect(err.message).equals('You have no Components available to link, please create new OpenShift Component and try again.');
+                return;
+            }
+            expect.fail();
+
         });
 
         test('errors when no ports available', async () => {
