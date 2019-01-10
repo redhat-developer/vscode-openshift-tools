@@ -14,14 +14,6 @@ import { Url } from './url';
 import { CliExitData } from '../cli';
 import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 
-export const Validator = {
-    emptyName: (message: string, value: string) => {
-        if (validator.isEmpty(value)) {
-            return message;
-        }
-    }
-};
-
 export class Component extends OpenShiftItem {
 
     static async create(context: OpenShiftObject): Promise<string> {
@@ -206,7 +198,7 @@ export class Component extends OpenShiftItem {
             prompt: "Component name",
             validateInput: async (value: string) => {
                 if (!value.trim()) {
-                    return Validator.emptyName('Empty component name', value.trim());
+                    return Component.emptyName('Empty component name', value.trim());
                 }
                 return await Component.validateComponentName(value.trim(), application);
             }
@@ -233,7 +225,7 @@ export class Component extends OpenShiftItem {
             prompt: 'Git repository URI',
             validateInput: (value: string) => {
                 if (!value.trim()) {
-                    return Validator.emptyName('Empty Git repository URL', value.trim());
+                    return Component.emptyName('Empty Git repository URL', value.trim());
                 }
                 if (!validator.isURL(value)) {
                     return 'Invalid URL provided';
@@ -247,7 +239,7 @@ export class Component extends OpenShiftItem {
             prompt: "Component name",
             validateInput: async (value: string) => {
                 if (!value.trim()) {
-                    return Validator.emptyName('Empty component name', value.trim());
+                    return Component.emptyName('Empty component name', value.trim());
                 }
                 return await Component.validateComponentName(value.trim(), application);
             }
@@ -286,7 +278,7 @@ export class Component extends OpenShiftItem {
             prompt: "Component name",
             validateInput: async (value: string) => {
                 if (!value.trim()) {
-                    Validator.emptyName('Empty component name', value.trim());
+                    Component.emptyName('Empty component name', value.trim());
                 }
                 return await Component.validateComponentName(value.trim(), application);
             }
