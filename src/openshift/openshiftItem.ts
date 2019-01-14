@@ -40,14 +40,16 @@ export abstract class OpenShiftItem {
     }
 
     static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder: string, compPlaceholder?: string) {
-        let project: OpenShiftObject;
-        let application: OpenShiftObject;
-        let component: OpenShiftObject;
-        if (!treeItem) {
-            project = await vscode.window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder});
-            if (project && appPlaceholder) application = await vscode.window.showQuickPick(OpenShiftItem.getApplicationNames(project), {placeHolder: appPlaceholder});
-            if (application && compPlaceholder) component = await vscode.window.showQuickPick(OpenShiftItem.getComponentNames(application), {placeHolder: compPlaceholder});
+        let context = treeItem;
+        if (!context) {
+            context = await vscode.window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder});
+            if (context && appPlaceholder) {
+                context = await vscode.window.showQuickPick(OpenShiftItem.getApplicationNames(context), {placeHolder: appPlaceholder});
+            }
+            if (context && compPlaceholder) {
+                context = await vscode.window.showQuickPick(OpenShiftItem.getComponentNames(context), {placeHolder: compPlaceholder});
+            }
         }
-        return component && application ? component : application && project && !compPlaceholder ? application : treeItem;
+        return context;
     }
 }
