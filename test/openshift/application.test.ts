@@ -71,10 +71,11 @@ suite('Openshift/Application', () => {
 
             try {
                 await Application.create(projectItem);
-                expect.fail();
             } catch (err) {
                 expect(err).equals(`Failed to create application with error 'ERROR'`);
+                return;
             }
+            expect.fail();
         });
     });
 
@@ -92,15 +93,13 @@ suite('Openshift/Application', () => {
             quickPickStub.restore();
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
             const errorStub = sandbox.stub(vscode.window, 'showErrorMessage');
-            let savedErr;
             try {
                 await Application.create(null);
             } catch (err) {
-                savedErr = err;
+                expect(err.message).equals('You need at least one Project available. Please create new OpenShift Project and try again.');
                 return;
             }
             expect.fail();
-            expect(savedErr.message).equals('You need at least one Project available to (create or describe) an Application. Please create new OpenShift Project and try again.');
 
         });
 
@@ -150,10 +149,11 @@ suite('Openshift/Application', () => {
 
             try {
                 await Application.create(null);
-                expect.fail();
             } catch (err) {
                 expect(err).equals(`Failed to create application with error 'ERROR'`);
+                return;
             }
+            expect.fail();
         });
     });
 
@@ -245,10 +245,11 @@ suite('Openshift/Application', () => {
 
             try {
                 await Application.del(appItem);
-                expect.fail();
             } catch (err) {
                 expect(err).equals(`Failed to delete Application with error 'ERROR'`);
+                return;
             }
+            expect.fail();
         });
 
         test('requests for project and exits if not provided', async () => {
