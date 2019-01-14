@@ -5,8 +5,7 @@
 
 import { OpenShiftObject, Odo, OdoImpl, Command } from '../odo';
 import * as vscode from 'vscode';
-import { CliExitData } from '../cli';
-import { Component} from '../openshift/component';
+import { Component } from '../openshift/component';
 import { V1ServicePort } from '@kubernetes/client-node';
 
 export class Url {
@@ -15,8 +14,8 @@ export class Url {
     static async create(context: OpenShiftObject): Promise<string> {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
-        let ports: V1ServicePort[] = await Component.getComponentPorts(context);
-        let portItems: vscode.QuickPickItem[] = ports.map((item: any) => {
+        const ports: V1ServicePort[] = await Component.getComponentPorts(context);
+        const portItems: vscode.QuickPickItem[] = ports.map((item: any) => {
             item['label'] = `${item.port}/${item.protocol}`;
             return item;
         });
