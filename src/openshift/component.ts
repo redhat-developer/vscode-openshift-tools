@@ -48,7 +48,7 @@ export class Component extends OpenShiftItem {
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
-        const component = await Component.getComponentCmdData(treeItem,
+        const component = await Component.getOpenShiftCmdData(treeItem,
             "From which project do you want to delete Component",
             "From which application you want to delete Component",
             "Select Component to delete");
@@ -68,21 +68,8 @@ export class Component extends OpenShiftItem {
         return null;
     }
 
-    static async getComponentCmdData(context: OpenShiftObject, projectPlaceholder: string, appPlaceholder: string, compPlaceholder: string) {
-        let project: OpenShiftObject;
-        let application: OpenShiftObject;
-        let component = context;
-        if (!component) {
-            project = await vscode.window.showQuickPick(Component.getProjectNames(), {placeHolder: projectPlaceholder});
-            if (project) application = await vscode.window.showQuickPick(Component.getApplicationNames(project), {placeHolder: appPlaceholder});
-            if (application) component = await vscode.window.showQuickPick(Component.getComponentNames(application), {placeHolder: compPlaceholder});
-
-        }
-        return component;
-    }
-
     static async describe(context: OpenShiftObject) {
-        const component = await Component.getComponentCmdData(context,
+        const component = await Component.getOpenShiftCmdData(context,
             "From which project you want to describe Component",
             "From which application you want to describe Component",
             "Select Component you want to describe");
