@@ -29,4 +29,12 @@ export abstract class OpenShiftItem {
         }
         return projectList;
     }
+
+    static async getComponentNames(application) {
+        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application);
+        if (applicationList.length === 0) {
+            throw Error('You need at least one Component available. Please create new OpenShift Component and try again.');
+        }
+         return applicationList;
+    }
 }

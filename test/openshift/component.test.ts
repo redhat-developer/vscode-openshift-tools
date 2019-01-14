@@ -396,7 +396,7 @@ suite('Openshift/Component', () => {
         });
     });
 
-    suite('del', () => {
+    suite('describe', () => {
         let quickPickStub: sinon.SinonStub;
 
         setup(() => {
@@ -406,9 +406,8 @@ suite('Openshift/Component', () => {
             quickPickStub.onThirdCall().resolves(componentItem);
         });
 
-        test('describe calls the correct odo command in terminal', () => {
-            Component.describe(componentItem);
-
+        test('describe calls the correct odo command in terminal', async () => {
+            await Component.describe(componentItem);
             expect(termStub).calledOnceWith(`odo describe ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
         });
 

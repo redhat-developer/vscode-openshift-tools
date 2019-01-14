@@ -48,20 +48,10 @@ export class Component extends OpenShiftItem {
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
-        let project: OpenShiftObject;
-        let component: OpenShiftObject;
-        let application: OpenShiftObject;
-        if (treeItem) {
-            component = treeItem;
-        } else {
-            project = await vscode.window.showQuickPick(Component.odo.getProjects(), {placeHolder: "From which project do you want to delete Component"});
-            if (project) {
-                application = await vscode.window.showQuickPick(Component.odo.getApplications(project), {placeHolder: "From which application do you want to delete Component"});
-            }
-            if (application) {
-                component = await vscode.window.showQuickPick(Component.odo.getComponents(application), {placeHolder: "Select Component to delete"});
-            }
-        }
+        const component = await Component.getComponentCmdData(treeItem,
+            "From which project do you want to delete Component",
+            "From which application you want to delete Component",
+            "Select Component to delete");
         if (component) {
             const app: OpenShiftObject = component.getParent();
             const project: OpenShiftObject = app.getParent();
@@ -78,26 +68,25 @@ export class Component extends OpenShiftItem {
         return null;
     }
 
-    static async describe(context: OpenShiftObject) {
-        let comp: OpenShiftObject;
-        let app: OpenShiftObject;
+    static async getComponentCmdData(context: OpenShiftObject, projectPlaceholder: string, appPlaceholder: string, compPlaceholder: string) {
         let project: OpenShiftObject;
-        if (context) {
-            comp = context;
-            app = context.getParent();
-            project = app.getParent();
-        } else {
-            project = await vscode.window.showQuickPick(Component.odo.getProjects(), {placeHolder: "From which project you want to describe Application"});
-            if (project) {
-                app = await vscode.window.showQuickPick(Component.odo.getApplications(project), {placeHolder: "From which project you want to describe Component"});
-            }
-            if (app) {
-                comp = await vscode.window.showQuickPick(Component.odo.getComponents(app), {placeHolder: "Select Component you want to describe"});
-            }
+        let application: OpenShiftObject;
+        let component = context;
+        if (!component) {
+            project = await vscode.window.showQuickPick(Component.getProjectNames(), {placeHolder: projectPlaceholder});
+            if (project) application = await vscode.window.showQuickPick(Component.getApplicationNames(project), {placeHolder: appPlaceholder});
+            if (application) component = await vscode.window.showQuickPick(Component.getComponentNames(application), {placeHolder: compPlaceholder});
+
         }
-        if (comp) {
-            Component.odo.executeInTerminal(Command.describeComponent(project.getName(), app.getName(), comp.getName()));
-        }
+        return component;
+    }
+
+    static async describe(context: OpenShiftObject) {
+        const component = await Component.getComponentCmdData(context,
+            "From which project you want to describe Component",
+            "From which application you want to describe Component",
+            "Select Component you want to describe");
+        if (component) Component.odo.executeInTerminal(Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
     }
 
     static log(context: OpenShiftObject): void {
