@@ -105,6 +105,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.app.describe.palette",
+        "title": "Describe Application",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.app.create",
         "title": "New Application",
         "category": "OpenShift"
