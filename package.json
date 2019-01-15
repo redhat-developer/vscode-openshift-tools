@@ -324,10 +324,6 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
-          "command": "openshift.service.create",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
           "command": "openshift.service.delete",
           "when": "view == openshiftProjectExplorer"
         }
