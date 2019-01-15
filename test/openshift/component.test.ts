@@ -18,6 +18,7 @@ const expect = chai.expect;
 chai.use(sinonChai);
 
 suite('Openshift/Component', () => {
+    let quickPickStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
     let termStub: sinon.SinonStub, execStub: sinon.SinonStub;
     let getProjectsStub: sinon.SinonStub, getApplicationsStub: sinon.SinonStub, getComponentsStub: sinon.SinonStub;
@@ -600,18 +601,38 @@ suite('Openshift/Component', () => {
     test('followLog calls the correct odo command in terminal', () => {
         Component.followLog(componentItem);
 
-        expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`);
+        test('followLog calls the correct odo command in terminal', async() => {
+            await Component.followLog(componentItem);
+            expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`);
+        });
+
+        test('followLog calls the correct odo command in terminal with no context', async () => {
+
+            await Component.followLog(null);
+            expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`);
+       });
     });
 
-    test('push calls the correct odo command with progress', async () => {
-        const status = await Component.push(componentItem);
+    suite('push', () => {
+        let quickPickStub: sinon.SinonStub;
 
-        expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
-    });
+        setup(() => {
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onThirdCall().resolves(componentItem);
+        });
 
-    test('watch calls the correct odo command in terminal', () => {
-        Component.watch(componentItem);
+        test('push calls the correct odo command with progress', async () => {
+            await Component.push(componentItem);
 
-        expect(termStub).calledOnceWith(`odo watch ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+            expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+        });
+
+        test('works with no context', async () => {
+            await Component.push(null);
+
+            expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+        });
     });
 });

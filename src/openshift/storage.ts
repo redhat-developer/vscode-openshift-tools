@@ -10,31 +10,35 @@ import * as validator from 'validator';
 
 export class Storage extends OpenShiftItem {
     static async create(context: OpenShiftObject): Promise<string> {
-        const component: OpenShiftObject = context;
-        const app: OpenShiftObject = context.getParent();
-        const project: OpenShiftObject = app.getParent();
-        const storageName = await vscode.window.showInputBox({prompt: "Specify the storage name", validateInput: (value: string) => {
-            if (validator.isEmpty(value.trim())) {
-                return 'Invalid storage name';
-            }
-        }});
-        if (!storageName) return null;
+        const component = await Storage.getOpenShiftCmdData(context,
+            "In which Project you want to create an Storage",
+            "In which Application you want to create an Storage",
+            "In which Component you want to create an Storage");
+        if (component) {
+            const storageName = await vscode.window.showInputBox({prompt: "Specify the storage name", validateInput: (value: string) => {
+                if (validator.isEmpty(value.trim())) {
+                    return 'Invalid storage name';
+                }
+            }});
+            if (!storageName) return null;
 
-        const mountPath = await vscode.window.showInputBox({prompt: "Specify the mount path", validateInput: (value: string) => {
-            if (validator.isEmpty(value.trim())) {
-                return 'Invalid mount path';
-            }
-        }});
-        if (!mountPath) return null;
+            const mountPath = await vscode.window.showInputBox({prompt: "Specify the mount path", validateInput: (value: string) => {
+                if (validator.isEmpty(value.trim())) {
+                    return 'Invalid mount path';
+                }
+            }});
+            if (!mountPath) return null;
 
-        const storageSize = await vscode.window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the storage size'});
-        if (!storageSize) return null;
+            const storageSize = await vscode.window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the storage size'});
+            if (!storageSize) return null;
 
-        return Promise.resolve()
-            .then(() => Storage.odo.execute(Command.createStorage(project.getName(), app.getName(), component.getName(), storageName, mountPath, storageSize)))
-            .then(() => Storage.explorer.refresh(context))
-            .then(() => `Storage '${storageName}' successfully created for component '${context.getName()}'`)
-            .catch((err) => Promise.reject(`New Storage command failed with error: '${err}'!`));
+            return Promise.resolve()
+                .then(() => Storage.odo.execute(Command.createStorage(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), storageName, mountPath, storageSize)))
+                .then(() => Storage.explorer.refresh())
+                .then(() => `Storage '${storageName}' successfully created for component '${component.getName()}'`)
+                .catch((err) => Promise.reject(`New Storage command failed with error: '${err}'!`));
+
+        }
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {

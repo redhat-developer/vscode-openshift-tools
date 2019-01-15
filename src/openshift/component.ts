@@ -17,7 +17,7 @@ import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 export class Component extends OpenShiftItem {
 
     static async create(context: OpenShiftObject): Promise<string> {
-        let application = await Component.getOpenShiftCmdData(context,
+        const application = await Component.getOpenShiftCmdData(context,
             "In which Project you want to create a Component",
             "In which Application you want to create a Component"
         );
@@ -90,10 +90,13 @@ export class Component extends OpenShiftItem {
         if (component) Component.odo.executeInTerminal(Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
     }
 
-    static followLog(context: OpenShiftObject) {
-        const app: OpenShiftObject = context.getParent();
-        const project: OpenShiftObject = app.getParent();
-        Component.odo.executeInTerminal(Command.showLogAndFollow(project.getName(), app.getName(), context.getName()));
+    static async followLog(context: OpenShiftObject) {
+        const component = await Component.getOpenShiftCmdData(context,
+            "In which project you want to see Follow Log",
+            "In which application you want to see Follow Log",
+            "For which component you want to see Follow Log"
+        );
+        if (component) Component.odo.executeInTerminal(Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
     }
 
     static async linkComponent(context: OpenShiftObject): Promise<String> {
@@ -135,34 +138,46 @@ export class Component extends OpenShiftItem {
         .catch((err) => Promise.reject(`Failed to link service with error '${err}'`));
     }
 
-    static push(context: OpenShiftObject): void {
-        const app: OpenShiftObject = context.getParent();
-        const project: OpenShiftObject = app.getParent();
-        Component.odo.executeInTerminal(Command.pushComponent(project.getName(), app.getName(), context.getName()));
+    static async push(context: OpenShiftObject) {
+        const component = await Component.getOpenShiftCmdData(context,
+            "In which project you want to push the changes",
+            "In which application you want to push the changes",
+            "For which component you want to push the changes");
+        if (component) Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
     }
 
-    static watch(context: OpenShiftObject): void {
-        const app: OpenShiftObject = context.getParent();
+    static async watch(context: OpenShiftObject): Promise<void> {
+        const component = await Component.getOpenShiftCmdData(context,
+            'Select a Project',
+            'Select an Application',
+            'Select a Component you want to watch'); 
+        const app: OpenShiftObject = component.getParent();
         const project: OpenShiftObject = app.getParent();
-        Component.odo.executeInTerminal(Command.watchComponent(project.getName(), app.getName(), context.getName()));
+        Component.odo.executeInTerminal(Command.watchComponent(project.getName(), app.getName(), component.getName()));
     }
 
     static async openUrl(context: OpenShiftObject): Promise<ChildProcess> {
-        const app: OpenShiftObject = context.getParent();
-        const namespace: string = app.getParent().getName();
-        const routeCheck = await Component.odo.execute(Command.getRouteHostName(namespace, context.getName()));
-        let value = 'Create';
-        if (routeCheck.stdout.trim() === '') {
-            value = await vscode.window.showInformationMessage(`No URL for component '${context.getName()}' in application '${app.getName()}'. Do you want to create a route and open it?`, 'Create', 'Cancel');
-            if (value === 'Create') {
-                await Url.create(context);
+        const component = await Component.getOpenShiftCmdData(context,
+            'Select a Project',
+            'Select an Application',
+            'Select a Component you want to open in browser');
+        if (component) {
+            const app: OpenShiftObject = component.getParent();
+            const namespace: string = app.getParent().getName();
+            const routeCheck = await Component.odo.execute(Command.getRouteHostName(namespace, component.getName()));
+            let value = 'Create';
+            if (routeCheck.stdout.trim() === '') {
+                value = await vscode.window.showInformationMessage(`No URL for component '${component.getName()}' in application '${app.getName()}'. Do you want to create a route and open it?`, 'Create', 'Cancel');
+                if (value === 'Create') {
+                    await Url.create(component);
+                }
             }
-        }
-        if (value === 'Create') {
-            const hostName = await Component.odo.execute(Command.getRouteHostName(namespace, context.getName()));
-            const checkTls = await Component.odo.execute(Command.getRouteTls(namespace, context.getName()));
-            const tls = checkTls.stdout.trim().length === 0  ? "http://" : "https://";
-            return opn(`${tls}${hostName.stdout}`);
+            if (value === 'Create') {
+                const hostName = await Component.odo.execute(Command.getRouteHostName(namespace, component.getName()));
+                const checkTls = await Component.odo.execute(Command.getRouteTls(namespace, component.getName()));
+                const tls = checkTls.stdout.trim().length === 0  ? "http://" : "https://";
+                return opn(`${tls}${hostName.stdout}`);
+            }
         }
         return null;
     }

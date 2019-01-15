@@ -46,10 +46,12 @@
     "onCommand:openshift.component.delete",
     "onCommand:openshift.component.push",
     "onCommand:openshift.component.watch",
+    "onCommand:openshift.component.watch.palette",
     "onCommand:openshift.catalog.listComponents",
     "onCommand:openshift.catalog.listServices",
     "onCommand:openshift.url.create",
     "onCommand:openshift.component.openUrl",
+    "onCommand:openshift.component.openUrl.palette",
     "onCommand:openshift.storage.create",
     "onCommand:openshift.storage.delete",
     "onCommand:openshift.service.create",
@@ -156,6 +158,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.followLog.palette",
+        "title": "Follow Component's Log",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.component.linkComponent",
         "title": "Link Component",
         "category": "OpenShift"
@@ -191,6 +198,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.watch.palette",
+        "title": "Watch Component",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.catalog.listComponents",
         "title": "List Catalog Components ",
         "category": "OpenShift"
@@ -208,6 +220,11 @@
       {
         "command": "openshift.component.openUrl",
         "title": "Open in Browser",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.openUrl.palette",
+        "title": "Open Component in Browser",
         "category": "OpenShift"
       },
       {
@@ -309,10 +326,6 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
-          "command": "openshift.component.push",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
           "command": "openshift.component.watch",
           "when": "view == openshiftProjectExplorer"
         },
@@ -321,15 +334,7 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
-          "command": "openshift.storage.create",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
           "command": "openshift.storage.delete",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.service.create",
           "when": "view == openshiftProjectExplorer"
         },
         {
