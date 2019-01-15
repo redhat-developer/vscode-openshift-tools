@@ -60,27 +60,15 @@ export class Application extends OpenShiftItem {
         });
     }
 
-    static async getApplicationCmdData (treeItem: OpenShiftObject, projectPlaceholder:string, appPlaceholder:string) {
-        let project: OpenShiftObject;
-        let application = treeItem
-        if (application) {
-            project = application.getParent();
-        } else {
-            project = await vscode.window.showQuickPick(Application.getProjectNames(), {placeHolder: projectPlaceholder});
-            if (project) application = await vscode.window.showQuickPick(Application.getApplicationNames(project), {placeHolder: appPlaceholder});
-        }
-        return application;
-    }
-
     static async describe(treeItem: OpenShiftObject) {
-        let application = await Application.getApplicationCmdData(treeItem, 
+        let application = await Application.getOpenShiftCmdData(treeItem, 
             "From which project you want to describe Application",
             "Select Application you want to describe");
         if (application) Application.odo.executeInTerminal(Command.describeApplication(application.getParent().getName(), application.getName()));
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
-        let application = await Application.getApplicationCmdData(treeItem,
+        let application = await Application.getOpenShiftCmdData(treeItem,
             "From which Project you want to delete Application",
             "Select Application to delete");
         if (application) {

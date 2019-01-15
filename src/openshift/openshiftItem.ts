@@ -5,6 +5,7 @@
 
 import { Odo, OdoImpl, OpenShiftObject } from '../odo';
 import { OpenShiftExplorer } from '../explorer';
+import * as vscode from 'vscode';
 
 export abstract class OpenShiftItem {
     protected static readonly odo: Odo = OdoImpl.getInstance();
@@ -28,5 +29,27 @@ export abstract class OpenShiftItem {
            throw Error('You need at least one Application available. Please create new OpenShift Application and try again.');
         }
         return projectList;
+    }
+
+    static async getComponentNames(application) {
+        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application);
+        if (applicationList.length === 0) {
+            throw Error('You need at least one Component available. Please create new OpenShift Component and try again.');
+        }
+         return applicationList;
+    }
+
+    static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder: string, compPlaceholder?: string) {
+        let context = treeItem;
+        if (!context) {
+            context = await vscode.window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder});
+            if (context && appPlaceholder) {
+                context = await vscode.window.showQuickPick(OpenShiftItem.getApplicationNames(context), {placeHolder: appPlaceholder});
+            }
+            if (context && compPlaceholder) {
+                context = await vscode.window.showQuickPick(OpenShiftItem.getComponentNames(context), {placeHolder: compPlaceholder});
+            }
+        }
+        return context;
     }
 }
