@@ -146,22 +146,29 @@ export class Component extends OpenShiftItem {
     }
 
     static async openUrl(context: OpenShiftObject): Promise<ChildProcess> {
-        const app: OpenShiftObject = context.getParent();
-        const namespace: string = app.getParent().getName();
-        const routeCheck = await Component.odo.execute(Command.getRouteHostName(namespace, context.getName()));
-        let value = 'Create';
-        if (routeCheck.stdout.trim() === '') {
-            value = await vscode.window.showInformationMessage(`No URL for component '${context.getName()}' in application '${app.getName()}'. Do you want to create a route and open it?`, 'Create', 'Cancel');
+        const component = await Component.getOpenShiftCmdData(context,
+            'Select a Project',
+            'Select an Application',
+            'Select a Component you want to open in browser');
+        if (component) {
+            const app: OpenShiftObject = component.getParent();
+            const namespace: string = app.getParent().getName();
+            const routeCheck = await Component.odo.execute(Command.getRouteHostName(namespace, component.getName()));
+            let value = 'Create';
+            if (routeCheck.stdout.trim() === '') {
+                value = await vscode.window.showInformationMessage(`No URL for component '${component.getName()}' in application '${app.getName()}'. Do you want to create a route and open it?`, 'Create', 'Cancel');
+                if (value === 'Create') {
+                    await Url.create(component);
+                }
+            }
             if (value === 'Create') {
-                await Url.create(context);
+                const hostName = await Component.odo.execute(Command.getRouteHostName(namespace, component.getName()));
+                const checkTls = await Component.odo.execute(Command.getRouteTls(namespace, component.getName()));
+                const tls = checkTls.stdout.trim().length === 0  ? "http://" : "https://";
+                return opn(`${tls}${hostName.stdout}`);
             }
         }
-        if (value === 'Create') {
-            const hostName = await Component.odo.execute(Command.getRouteHostName(namespace, context.getName()));
-            const checkTls = await Component.odo.execute(Command.getRouteTls(namespace, context.getName()));
-            const tls = checkTls.stdout.trim().length === 0  ? "http://" : "https://";
-            return opn(`${tls}${hostName.stdout}`);
-        }
+        return null;
     }
 
     private static async createFromLocal(application: OpenShiftObject): Promise<string> {

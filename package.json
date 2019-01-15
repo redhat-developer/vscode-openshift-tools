@@ -50,6 +50,7 @@
     "onCommand:openshift.catalog.listServices",
     "onCommand:openshift.url.create",
     "onCommand:openshift.component.openUrl",
+    "onCommand:openshift.component.openUrl.palette",
     "onCommand:openshift.storage.create",
     "onCommand:openshift.storage.delete",
     "onCommand:openshift.service.create",
@@ -206,6 +207,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.openUrl.palette",
+        "title": "Open Component in Browser",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.storage.create",
         "title": "Create Storage",
         "category": "OpenShift"
@@ -293,6 +299,10 @@
         },
         {
           "command": "openshift.openshiftConsole",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.openUrl",
           "when": "view == openshiftProjectExplorer"
         },
         {
