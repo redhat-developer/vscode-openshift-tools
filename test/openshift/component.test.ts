@@ -598,14 +598,14 @@ suite('Openshift/Component', () => {
         });
 
         test('push calls the correct odo command with progress', async () => {
-            const status = await Component.push(componentItem);
+            await Component.push(componentItem);
 
             expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
         });
 
         test('works with no context', async () => {
             await Component.push(null);
-    
+
             expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
         });
     });

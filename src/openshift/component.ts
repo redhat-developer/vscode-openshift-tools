@@ -133,10 +133,12 @@ export class Component extends OpenShiftItem {
         .catch((err) => Promise.reject(`Failed to link service with error '${err}'`));
     }
 
-    static push(context: OpenShiftObject): void {
-        const app: OpenShiftObject = context.getParent();
-        const project: OpenShiftObject = app.getParent();
-        Component.odo.executeInTerminal(Command.pushComponent(project.getName(), app.getName(), context.getName()));
+    static async push(context: OpenShiftObject) {
+        const component = await Component.getOpenShiftCmdData(context,
+            "In which project you want to push the changes",
+            "In which application you want to push the changes",
+            "For which component you want to push the changes");
+        if (component) Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
     }
 
     static async watch(context: OpenShiftObject): Promise<void> {
