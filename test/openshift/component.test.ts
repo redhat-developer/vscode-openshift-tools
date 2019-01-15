@@ -603,8 +603,8 @@ suite('Openshift/Component', () => {
             quickPickStub.onThirdCall().resolves(componentItem);
         });
 
-        test('watch calls the correct odo command in terminal', () => {
-            Component.watch(componentItem);
+        test('watch calls the correct odo command in terminal', async () => {
+            await Component.watch(componentItem);
 
             expect(termStub).calledOnceWith(`odo watch ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
         });
