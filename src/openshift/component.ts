@@ -21,21 +21,19 @@ export class Component extends OpenShiftItem {
             "In which Project you want to create a Component",
             "In which Application you want to create a Component"
         );
-        let project: OpenShiftObject;
-        
         if (application) {
             const sourceTypes: vscode.QuickPickItem[] = [
                 {
                     label: 'Git Repository',
-                    description: 'Use an existing git repository as a source for the Component'
+                    description: 'Use an existing git repository as a source for the component'
                 },
                 {
                     label: 'Binary File',
-                    description: 'Use binary file as a source for the Component'
+                    description: 'Use binary file as a source for the component'
                 },
                 {
                     label: 'Workspace Directory',
-                    description: 'Use workspace directory as a source for the Component'
+                    description: 'Use workspace directory as a source for the component'
                 }
             ];
             const componentSource = await vscode.window.showQuickPick(sourceTypes, {
@@ -51,26 +49,26 @@ export class Component extends OpenShiftItem {
             } else {
                 command = Component.createFromLocal(application);
             }
-            return command.catch((err) => Promise.reject(`Failed to create Component with error '${err}'`));
+            return command.catch((err) => Promise.reject(`Failed to create component with error '${err}'`));
         }
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(treeItem,
-            "From which project do you want to delete a Component",
-            "From which application you want to delete a Component",
+            "From which project do you want to delete Component",
+            "From which application you want to delete Component",
             "Select Component to delete");
         if (component) {
             const app: OpenShiftObject = component.getParent();
             const project: OpenShiftObject = app.getParent();
             const name: string = component.getName();
-            const value = await vscode.window.showWarningMessage(`Do you want to delete Component '${name}\'`, 'Yes', 'Cancel');
+            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete component '${name}\'`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 return Promise.resolve()
                     .then(() => Component.odo.execute(Command.deleteComponent(project.getName(), app.getName(), name)))
                     .then(() => Component.explorer.refresh(treeItem ? app : undefined))
                     .then(() => `Component '${name}' successfully deleted`)
-                    .catch((err) => Promise.reject(`Failed to delete Component with error '${err}'`));
+                    .catch((err) => Promise.reject(`Failed to delete component with error '${err}'`));
             }
         }
         return null;
@@ -78,9 +76,9 @@ export class Component extends OpenShiftItem {
 
     static async describe(context: OpenShiftObject) {
         const component = await Component.getOpenShiftCmdData(context,
-            "From which Project you want to describe a Component",
-            "From which Application you want to describe a Component",
-            "Select a Component you want to describe");
+            "From which project you want to describe Component",
+            "From which application you want to describe Component",
+            "Select Component you want to describe");
         if (component) Component.odo.executeInTerminal(Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
     }
 
@@ -112,26 +110,26 @@ export class Component extends OpenShiftItem {
         if (ports.length === 1) {
             port = ports[0];
         } else if (ports.length > 1) {
-            port = await vscode.window.showQuickPick(ports, {placeHolder: "Select a port to link"});
+            port = await vscode.window.showQuickPick(ports, {placeHolder: "Select port to link"});
         } else {
             return Promise.reject(`Component '${context.getName()}' has no ports decalred.`);
         }
 
         return Promise.resolve()
             .then(() => Component.odo.execute(Command.linkComponentTo(project.getName(), app.getName(), context.getName(), componentToLink.getName())))
-            .then(() => `Component '${componentToLink.getName()}' successfully linked with component '${context.getName()}'`)
-            .catch((err) => Promise.reject(`Failed to link a Component with error '${err}'`));
+            .then(() => `component '${componentToLink.getName()}' successfully linked with component '${context.getName()}'`)
+            .catch((err) => Promise.reject(`Failed to link component with error '${err}'`));
     }
 
     static async linkService(context: OpenShiftObject): Promise<String> {
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
-        const serviceToLink: OpenShiftObject = await vscode.window.showQuickPick(Component.odo.getServices(app), {placeHolder: "Select a Service to link"});
+        const serviceToLink: OpenShiftObject = await vscode.window.showQuickPick(Component.odo.getServices(app), {placeHolder: "Select the service to link"});
         if (!serviceToLink) return null;
 
         return Promise.resolve()
         .then(() => Component.odo.execute(Command.linkComponentTo(project.getName(), app.getName(), context.getName(), serviceToLink.getName())))
-        .then(() => `Service '${serviceToLink.getName()}' successfully linked with component '${context.getName()}'`)
+        .then(() => `service '${serviceToLink.getName()}' successfully linked with component '${context.getName()}'`)
         .catch((err) => Promise.reject(`Failed to link service with error '${err}'`));
     }
 
@@ -153,7 +151,7 @@ export class Component extends OpenShiftItem {
         const routeCheck = await Component.odo.execute(Command.getRouteHostName(namespace, context.getName()));
         let value = 'Create';
         if (routeCheck.stdout.trim() === '') {
-            value = await vscode.window.showInformationMessage(`No URL for Component '${context.getName()}' in Application '${app.getName()}'. Do you want to create a route and open it?`, 'Create', 'Cancel');
+            value = await vscode.window.showInformationMessage(`No URL for component '${context.getName()}' in application '${app.getName()}'. Do you want to create a route and open it?`, 'Create', 'Cancel');
             if (value === 'Create') {
                 await Url.create(context);
             }
@@ -177,7 +175,7 @@ export class Component extends OpenShiftItem {
             prompt: "Component name",
             validateInput: (value: string) => {
                 if (validator.isEmpty(value.trim())) {
-                    return 'Empty Component name';
+                    return 'Empty component name';
                 }
             }
         });
@@ -214,7 +212,7 @@ export class Component extends OpenShiftItem {
 
         const componentName = await vscode.window.showInputBox({prompt: "Component name", validateInput: (value: string) => {
             if (validator.isEmpty(value.trim())) {
-                return 'Empty Component name';
+                return 'Empty component name';
             }
         }});
 
@@ -224,11 +222,11 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeName) return null;
 
-        const componentTypeVersion = await vscode.window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
+        const componentTypeVersion = await vscode.window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type Version"});
 
         if (!componentTypeVersion) return null;
 
-        await vscode.window.showInformationMessage('Do you want to clone git repository for created Component?', 'Yes', 'No').then((value) => {
+        await vscode.window.showInformationMessage('Do you want to clone git repository for created component?', 'Yes', 'No').then((value) => {
             value === 'Yes' && vscode.commands.executeCommand('git.clone', repoURI);
         });
 
@@ -259,12 +257,12 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeName) return null;
 
-        const componentTypeVersion = await vscode.window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
+        const componentTypeVersion = await vscode.window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type Version"});
 
         if (!componentTypeVersion) return null;
 
         const project = application.getParent();
-        return Progress.execCmdWithProgress(`Creating a new Component '${componentName}'`,
+        return Progress.execCmdWithProgress(`Creating new component '${componentName}'`,
             Command.createBinaryComponent(project.getName(), application.getName(), componentTypeName, componentTypeVersion, componentName, binaryFile[0].fsPath))
             .then(() => Component.explorer.refresh(application))
             .then(() => `Component '${componentName}' successfully created`);
