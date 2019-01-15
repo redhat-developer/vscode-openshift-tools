@@ -9,17 +9,11 @@ import * as vscode from 'vscode';
 import * as validator from 'validator';
 
 export class Storage extends OpenShiftItem {
-    static async create(component: OpenShiftObject): Promise<string> {
-        let application: OpenShiftObject;
-        let project: OpenShiftObject;
-        if (component) {
-            application = component.getParent();
-            project = application.getParent();
-        } else {
-            project = await vscode.window.showQuickPick(Storage.getProjectNames(), {placeHolder: "In which Project you want to create an Storage"});
-            if (project) application = await vscode.window.showQuickPick(Storage.getApplicationNames(project), {placeHolder: "In which Application you want to create an Storage"});
-            if (application) component = await vscode.window.showQuickPick(Storage.getComponentNames(application), {placeHolder: "In which Component you want to create an Storage"});
-        }
+    static async create(context: OpenShiftObject): Promise<string> {
+        const component = await Storage.getOpenShiftCmdData(context,
+            "In which Project you want to create an Storage",
+            "In which Application you want to create an Storage",
+            "In which Component you want to create an Storage");
         if (component) {
             const storageName = await vscode.window.showInputBox({prompt: "Specify the storage name", validateInput: (value: string) => {
                 if (validator.isEmpty(value.trim())) {
@@ -39,7 +33,7 @@ export class Storage extends OpenShiftItem {
             if (!storageSize) return null;
 
             return Promise.resolve()
-                .then(() => Storage.odo.execute(Command.createStorage(project.getName(), application.getName(), component.getName(), storageName, mountPath, storageSize)))
+                .then(() => Storage.odo.execute(Command.createStorage(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), storageName, mountPath, storageSize)))
                 .then(() => Storage.explorer.refresh())
                 .then(() => `Storage '${storageName}' successfully created for component '${component.getName()}'`)
                 .catch((err) => Promise.reject(`New Storage command failed with error: '${err}'!`));
