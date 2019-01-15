@@ -146,7 +146,6 @@ export class Component extends OpenShiftItem {
     }
 
     static async openUrl(context: OpenShiftObject): Promise<ChildProcess> {
-<<<<<<< HEAD
         const app: OpenShiftObject = context.getParent();
         const namespace: string = app.getParent().getName();
         const routeCheck = await Component.odo.execute(Command.getRouteHostName(namespace, context.getName()));
@@ -162,40 +161,6 @@ export class Component extends OpenShiftItem {
             const checkTls = await Component.odo.execute(Command.getRouteTls(namespace, context.getName()));
             const tls = checkTls.stdout.trim().length === 0  ? "http://" : "https://";
             return opn(`${tls}${hostName.stdout}`);
-=======
-        let comp: OpenShiftObject;
-        let app: OpenShiftObject;
-        let project: OpenShiftObject;
-        if (context) {
-            comp = context;
-            app = context.getParent();
-            project = app.getParent();
-        } else {
-            project = await vscode.window.showQuickPick(Component.odo.getProjects(), {placeHolder: "Select the namespace"});
-            if (project) {
-                app = await vscode.window.showQuickPick(Component.odo.getApplications(project), {placeHolder: "Select the application"});
-            }
-            if (app) {
-                comp = await vscode.window.showQuickPick(Component.odo.getComponents(app), {placeHolder: "Select the component you would like to open in browser"});
-            }
-        }
-        if (comp) {
-            const routeCheck = await Component.odo.execute(`oc get route --namespace ${project.getName()} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${comp.getName()}')]}{.spec.host}{end}"`);
-            let value = 'Create';
-            if (routeCheck.stdout.trim() === '') {
-                value = await vscode.window.showInformationMessage(`No URL for component '${comp.getName()}' in application '${app.getName()}'. Do you want to create a route and open it?`, 'Create', 'Cancel');
-                if (value === 'Create') {
-                    await Url.create(comp);
-                }
-            }
-            if (value === 'Create') {
-                const hostName = await Component.odo.execute(`oc get route --namespace ${project.getName()} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${comp.getName()}')]}{.spec.host}{end}"`);
-                const checkTls = await Component.odo.execute(`oc get route --namespace ${project.getName()} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${comp.getName()}')]}{.spec.tls.termination}{end}"`);
-                const tls = checkTls.stdout.trim().length === 0  ? "http://" : "https://";
-                return opn(`${tls}${hostName.stdout}`);
-            }
-            return null;
->>>>>>> OpenShift: Open in Browser command to command palette
         }
     }
 
