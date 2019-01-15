@@ -153,6 +153,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.followLog.palette",
+        "title": "Follow Component's Log",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.component.linkComponent",
         "title": "Link Component",
         "category": "OpenShift"

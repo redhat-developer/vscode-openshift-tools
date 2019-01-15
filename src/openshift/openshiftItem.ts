@@ -30,7 +30,7 @@ export abstract class OpenShiftItem {
          }
          return applicationList;
     }
-    
+
     static async getComponentNames(application) {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application);
         if (applicationList.length === 0) {
