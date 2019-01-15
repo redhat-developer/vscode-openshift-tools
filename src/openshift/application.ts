@@ -46,14 +46,6 @@ export class Application extends OpenShiftItem {
         return project ? project.getName(): undefined;
     }
 
-    static async getProjectNames(): Promise<OpenShiftObject[]> {
-        const projectList: Array<OpenShiftObject> = await Application.odo.getProjects();
-        if (projectList.length === 0) {
-           throw Error('You need at least one Project available to create an Application. Please create new OpenShift Project and try again.');
-        }
-        return projectList;
-    }
-
     static async getApplicationName() {
         return await vscode.window.showInputBox({
             prompt: "Application name",
@@ -68,28 +60,21 @@ export class Application extends OpenShiftItem {
         });
     }
 
-    static describe(treeItem: OpenShiftObject): void {
-        const projName: string = treeItem.getParent().getName();
-        const appName: string = treeItem.getName();
-        Application.odo.executeInTerminal(Command.describeApplication(projName, appName));
+    static async describe(treeItem: OpenShiftObject) {
+        const application = await Application.getOpenShiftCmdData(treeItem, 
+            "From which project you want to describe Application",
+            "Select Application you want to describe");
+        if (application) Application.odo.executeInTerminal(Command.describeApplication(application.getParent().getName(), application.getName()));
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
-        let application: OpenShiftObject;
-        let project: OpenShiftObject;
-        if (treeItem) {
-            project = treeItem.getParent();
-            application = treeItem;
-        } else {
-            project = await vscode.window.showQuickPick(Application.odo.getProjects(), {placeHolder: "From which Project you want to delete Application"});
-            if (project) {
-                application = await vscode.window.showQuickPick(Application.odo.getApplications(project), {placeHolder: "Select Application to delete"});
-            }
-        }
+        const application = await Application.getOpenShiftCmdData(treeItem,
+            "From which Project you want to delete Application",
+            "Select Application to delete");
         if (application) {
             const appName = application.getName();
-            const projName = project.getName();
-            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete application '${appName}?'`, 'Yes', 'Cancel');
+            const projName = application.getParent().getName();
+            const value = await vscode.window.showWarningMessage(`Do you want to delete application '${appName}?'`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 return Promise.resolve()
                     .then(() => Application.odo.execute(Command.deleteApplication(projName, appName)))

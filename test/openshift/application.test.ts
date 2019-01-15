@@ -17,6 +17,7 @@ const expect = chai.expect;
 chai.use(sinonChai);
 
 suite('Openshift/Application', () => {
+    let quickPickStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project');
@@ -70,10 +71,11 @@ suite('Openshift/Application', () => {
 
             try {
                 await Application.create(projectItem);
-                expect.fail();
             } catch (err) {
                 expect(err).equals(`Failed to create application with error 'ERROR'`);
+                return;
             }
+            expect.fail();
         });
     });
 
@@ -94,10 +96,11 @@ suite('Openshift/Application', () => {
             try {
                 await Application.create(null);
             } catch (err) {
-                expect(err.message).equals('You need at least one Project available to create an Application. Please create new OpenShift Project and try again.');
+                expect(err.message).equals('You need at least one Project available. Please create new OpenShift Project and try again.');
                 return;
             }
             expect.fail();
+
         });
 
         test('calls the appropriate odo command', async () => {
@@ -146,10 +149,11 @@ suite('Openshift/Application', () => {
 
             try {
                 await Application.create(null);
-                expect.fail();
             } catch (err) {
                 expect(err).equals(`Failed to create application with error 'ERROR'`);
+                return;
             }
+            expect.fail();
         });
     });
 
@@ -158,12 +162,47 @@ suite('Openshift/Application', () => {
 
         setup(() => {
             termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal').resolves();
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
         });
 
-        test('calls the appropriate odo command in terminal', () => {
-            Application.describe(appItem);
+        test('calls the appropriate odo command in terminal', async () => {
+            await Application.describe(appItem);
 
             expect(termStub).calledOnceWith(`odo app describe ${appItem.getName()} --project ${projectItem.getName()}`);
+        });
+    });
+
+    suite('describe with no context', () => {
+        let termStub: sinon.SinonStub;
+
+        setup(() => {
+            termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal').resolves();
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+        });
+
+        test('calls the appropriate odo command in terminal', async () => {
+            quickPickStub.onFirstCall().resolves(projectItem);
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
+            quickPickStub.onSecondCall().resolves(appItem);
+            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
+            await Application.describe(null);
+
+            expect(termStub).calledOnceWith(`odo app describe ${appItem.getName()} --project ${projectItem.getName()}`);
+        });
+
+        test('calls the appropriate error message when no project found', async () => {
+            quickPickStub.restore();
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+            try {
+                await Application.describe(null);
+            } catch (err) {
+                expect(err.message).equals('You need at least one Project available. Please create new OpenShift Project and try again.');
+                return;
+            }
+            expect.fail();
+
         });
     });
 
@@ -206,10 +245,11 @@ suite('Openshift/Application', () => {
 
             try {
                 await Application.del(appItem);
-                expect.fail();
             } catch (err) {
                 expect(err).equals(`Failed to delete Application with error 'ERROR'`);
+                return;
             }
+            expect.fail();
         });
 
         test('requests for project and exits if not provided', async () => {

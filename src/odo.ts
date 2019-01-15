@@ -103,7 +103,9 @@ export const Command = {
     deleteService: (project: string, app: string, name: string) =>
         `odo service delete ${name} -f --project ${project} --app ${app}`,
     createCompontentUrl: (project: string, app: string, component: string, port: string) =>
-        `odo url create --port ${port} --project ${project} --app ${app} --component ${component}`
+        `odo url create --port ${port} --project ${project} --app ${app} --component ${component}`,
+    getComponentJson: (project: string, app: string, component: string) =>
+        `oc get service ${component}-${app} --namespace ${project} -o json`
 };
 
 class OpenShiftObjectImpl implements OpenShiftObject {
@@ -207,6 +209,12 @@ export function getInstance(): Odo {
 export class OdoImpl implements Odo {
     private static cli: cliInstance.ICli = cliInstance.Cli.getInstance();
     private static instance: OdoImpl;
+    private readonly odoLoginMessages = [
+        'Please log in to the cluster',
+        'the server has asked for the client to provide credentials',
+        'Please login to your server'
+    ];
+
     private constructor() {}
 
     public static getInstance(): OdoImpl {
@@ -298,7 +306,7 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(
             Command.printOdoVersionAndProjects(), process.cwd(), false
         );
-        if (result.stdout.indexOf('Please log in to the cluster') > -1 || result.stdout.indexOf('the server has asked for the client to provide credentials') > -1) {
+        if (this.odoLoginMessages.some((element) => { return result.stdout.indexOf(element) > -1; })) {
             const loginErrorMsg: string = 'Please log in to the cluster';
             return[new OpenShiftObjectImpl(null, loginErrorMsg, ContextType.LOGIN_REQUIRED, this, TreeItemCollapsibleState.None)];
         }
@@ -375,6 +383,6 @@ export class OdoImpl implements Odo {
 
     public async requireLogin(): Promise<boolean> {
         const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersionAndProjects(), process.cwd(), false);
-        return result.stdout.indexOf("Please log in to the cluster") > -1 || result.stdout.indexOf('the server has asked for the client to provide credentials') > -1;
+        return this.odoLoginMessages.some((element) => { return result.stdout.indexOf(element) > -1; });
     }
 }

@@ -40,15 +40,18 @@
     "onCommand:openshift.app.delete",
     "onCommand:openshift.component.create",
     "onCommand:openshift.component.describe",
+    "onCommand:openshift.component.describe.palette",
     "onCommand:openshift.component.log",
     "onCommand:openshift.component.followLog",
     "onCommand:openshift.component.delete",
     "onCommand:openshift.component.push",
     "onCommand:openshift.component.watch",
+    "onCommand:openshift.component.watch.palette",
     "onCommand:openshift.catalog.listComponents",
     "onCommand:openshift.catalog.listServices",
     "onCommand:openshift.url.create",
     "onCommand:openshift.component.openUrl",
+    "onCommand:openshift.component.openUrl.palette",
     "onCommand:openshift.storage.create",
     "onCommand:openshift.storage.delete",
     "onCommand:openshift.service.create",
@@ -105,6 +108,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.app.describe.palette",
+        "title": "Describe Application",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.app.create",
         "title": "New Application",
         "category": "OpenShift"
@@ -127,6 +135,11 @@
       {
         "command": "openshift.component.describe",
         "title": "Describe",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.describe.palette",
+        "title": "Describe Component",
         "category": "OpenShift"
       },
       {
@@ -175,6 +188,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.watch.palette",
+        "title": "Watch Component",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.catalog.listComponents",
         "title": "List Catalog Components ",
         "category": "OpenShift"
@@ -192,6 +210,11 @@
       {
         "command": "openshift.component.openUrl",
         "title": "Open in Browser",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.openUrl.palette",
+        "title": "Open Component in Browser",
         "category": "OpenShift"
       },
       {
@@ -265,10 +288,6 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
-          "command": "openshift.component.create",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
           "command": "openshift.component.log",
           "when": "view == openshiftProjectExplorer"
         },
@@ -310,10 +329,6 @@
         },
         {
           "command": "openshift.storage.delete",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.service.create",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -517,6 +532,7 @@
     "walker": "^1.0.7"
   },
   "dependencies": {
+    "@kubernetes/client-node": "0.7.0",
     "byline": "^5.0.0",
     "event-stream": "3.3.4",
     "fs-extra": "^7.0.1",

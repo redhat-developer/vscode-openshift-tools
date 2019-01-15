@@ -24,6 +24,132 @@ suite('Openshift/URL', () => {
     const appItem = new TestItem(projectItem, 'app');
     const componentItem = new TestItem(appItem, 'component');
 
+    const noPortsOutput = `{
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+            "annotations": {
+                "app.kubernetes.io/component-source-type": "git",
+                "app.kubernetes.io/url": "https://github.com/dgolovin/nodejs-ex"
+            },
+            "creationTimestamp": "2019-01-04T01:03:34Z",
+            "labels": {
+                "app": "app1",
+                "app.kubernetes.io/component-name": "node",
+                "app.kubernetes.io/component-type": "nodejs",
+                "app.kubernetes.io/component-version": "latest",
+                "app.kubernetes.io/name": "app1"
+            },
+            "name": "node-app1",
+            "namespace": "proj1",
+            "resourceVersion": "1580667",
+            "selfLink": "/api/v1/namespaces/proj1/services/node-app1",
+            "uid": "8f80c48b-0fbc-11e9-b2e1-00155d93400f"
+        },
+        "spec": {
+            "clusterIP": "172.30.156.161",
+            "ports": [ ],
+            "selector": {
+                "deploymentconfig": "node-app1"
+            },
+            "sessionAffinity": "None",
+            "type": "ClusterIP"
+        },
+        "status": {
+            "loadBalancer": {}
+        }
+    }`;
+    const portOutput = `{
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+            "annotations": {
+                "app.kubernetes.io/component-source-type": "git",
+                "app.kubernetes.io/url": "https://github.com/dgolovin/nodejs-ex"
+            },
+            "creationTimestamp": "2019-01-04T01:03:34Z",
+            "labels": {
+                "app": "app1",
+                "app.kubernetes.io/component-name": "node",
+                "app.kubernetes.io/component-type": "nodejs",
+                "app.kubernetes.io/component-version": "latest",
+                "app.kubernetes.io/name": "app1"
+            },
+            "name": "node-app1",
+            "namespace": "proj1",
+            "resourceVersion": "1580667",
+            "selfLink": "/api/v1/namespaces/proj1/services/node-app1",
+            "uid": "8f80c48b-0fbc-11e9-b2e1-00155d93400f"
+        },
+        "spec": {
+            "clusterIP": "172.30.156.161",
+            "ports": [
+                {
+                    "name": "8080-tcp",
+                    "port": 8080,
+                    "protocol": "TCP",
+                    "targetPort": 8080
+                }
+            ],
+            "selector": {
+                "deploymentconfig": "node-app1"
+            },
+            "sessionAffinity": "None",
+            "type": "ClusterIP"
+        },
+        "status": {
+            "loadBalancer": {}
+        }
+    }`;
+    const portsOutput = `{
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+            "annotations": {
+                "app.kubernetes.io/component-source-type": "git",
+                "app.kubernetes.io/url": "https://github.com/dgolovin/nodejs-ex"
+            },
+            "creationTimestamp": "2019-01-04T01:03:34Z",
+            "labels": {
+                "app": "app1",
+                "app.kubernetes.io/component-name": "node",
+                "app.kubernetes.io/component-type": "nodejs",
+                "app.kubernetes.io/component-version": "latest",
+                "app.kubernetes.io/name": "app1"
+            },
+            "name": "node-app1",
+            "namespace": "proj1",
+            "resourceVersion": "1580667",
+            "selfLink": "/api/v1/namespaces/proj1/services/node-app1",
+            "uid": "8f80c48b-0fbc-11e9-b2e1-00155d93400f"
+        },
+        "spec": {
+            "clusterIP": "172.30.156.161",
+            "ports": [
+                {
+                    "name": "8080-tcp",
+                    "port": 8080,
+                    "protocol": "TCP",
+                    "targetPort": 8080
+                },
+                {
+                    "name": "8081-tcp",
+                    "port": 8081,
+                    "protocol": "TCP",
+                    "targetPort": 8081
+                }
+            ],
+            "selector": {
+                "deploymentconfig": "node-app1"
+            },
+            "sessionAffinity": "None",
+            "type": "ClusterIP"
+        },
+        "status": {
+            "loadBalancer": {}
+        }
+    }`;
+
     setup(() => {
         sandbox = sinon.createSandbox();
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -48,7 +174,7 @@ suite('Openshift/URL', () => {
             try {
                 await Url.create(null);
             } catch (err) {
-                expect(err.message).equals('You need at least one Project. Please create new OpenShift Project and try again.');
+                expect(err.message).equals('You need at least one Project available. Please create new OpenShift Project and try again.');
                 return;
             }
             expect.fail();
@@ -59,7 +185,7 @@ suite('Openshift/URL', () => {
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([componentItem]);
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.resolves({error: null, stdout: 'port1,', stderr: ''});
+            execStub.resolves({error: null, stdout: portsOutput, stderr: ''});
             quickPickStub.resolves('port1');
             const result = await Url.create(null);
 
@@ -68,7 +194,7 @@ suite('Openshift/URL', () => {
 
         test('rejects when fails to create Url', () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.resolves({error: null, stdout: 'port1,', stderr: ''});
+            execStub.resolves({error: null, stdout: portsOutput, stderr: ''});
             execStub.onFirstCall().rejects();
 
             return Url.create(null).catch((err) => {
@@ -82,9 +208,14 @@ suite('Openshift/URL', () => {
 
         test('asks to select port if more that one exposed and returns message', async () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.onFirstCall().resolves({error: null, stdout: 'port1,port2,port3,', stderr: ''});
+            execStub.onFirstCall().resolves({error: null, stdout: portsOutput, stderr: ''});
             execStub.onSecondCall().resolves();
-            quickPickStub.resolves('port1');
+            quickPickStub.resolves({
+                "name": "8080-tcp",
+                "port": 8080,
+                "protocol": "TCP",
+                "targetPort": 8080
+            });
             const result = await Url.create(componentItem);
 
             expect(result).equals(`URL for component '${componentItem.getName()}' successfully created`);
@@ -93,7 +224,7 @@ suite('Openshift/URL', () => {
 
         test('rejects when fails to create Url', () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.onFirstCall().resolves({error: null, stdout: 'port1,', stderr: ''});
+            execStub.onFirstCall().resolves({error: null, stdout: portOutput, stderr: ''});
             execStub.onSecondCall().rejects();
 
             return Url.create(componentItem).catch((err) => {
@@ -103,7 +234,7 @@ suite('Openshift/URL', () => {
 
         test('rejects when component has no ports declared', () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
+            execStub.onFirstCall().resolves({error: null, stdout: noPortsOutput, stderr: ''});
             execStub.onSecondCall().rejects();
 
             return Url.create(componentItem).catch((err) => {

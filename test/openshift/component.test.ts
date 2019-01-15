@@ -20,6 +20,7 @@ chai.use(sinonChai);
 suite('Openshift/Component', () => {
     let sandbox: sinon.SinonSandbox;
     let termStub: sinon.SinonStub, execStub: sinon.SinonStub;
+    let getProjectsStub: sinon.SinonStub, getApplicationsStub: sinon.SinonStub, getComponentsStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'application');
     const componentItem = new TestItem(appItem, 'component');
@@ -31,14 +32,172 @@ suite('Openshift/Component', () => {
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute');
         sandbox.stub(OdoImpl.prototype, 'getServices');
-        sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
-        sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
-        sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
+        getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+        getApplicationsStub = sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
+        getComponentsStub = sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
         sandbox.stub(Component, 'wait').resolves();
     });
 
     teardown(() => {
         sandbox.restore();
+    });
+
+    suite('create component with no context', () => {
+        const componentType = 'nodejs';
+        const folder = { uri: { fsPath: 'folder' } };
+        let quickPickStub: sinon.SinonStub,
+            inputStub: sinon.SinonStub,
+            progressStub: sinon.SinonStub,
+            progressCmdStub: sinon.SinonStub;
+
+        setup(() => {
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onThirdCall().resolves('Workspace Directory');
+            inputStub = sandbox.stub(vscode.window, 'showInputBox');
+            progressStub = sandbox.stub(Progress, 'execWithProgress').resolves();
+            progressCmdStub = sandbox.stub(Progress, 'execCmdWithProgress').resolves();
+        });
+
+        test('errors when a subcommand fails', async () => {
+            sandbox.stub(vscode.window, 'showWorkspaceFolderPick').rejects(errorMessage);
+
+            try {
+                await Component.create(null);
+                expect.fail();
+            } catch (error) {
+                expect(error).equals(`Failed to create component with error '${errorMessage}'`);
+            }
+        });
+
+        suite('from local workspace', () => {
+            let folderStub: sinon.SinonStub;
+
+            setup(() => {
+                inputStub.resolves(componentItem.getName());
+                folderStub = sandbox.stub(vscode.window, 'showWorkspaceFolderPick').resolves(folder);
+            });
+
+            test('happy path works', async () => {
+                quickPickStub.resolves(componentType);
+                const result = await Component.create(null);
+
+                expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
+                expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()} --local ${folder.uri.fsPath}`);
+            });
+
+            test('returns null when no folder selected', async () => {
+                folderStub.resolves();
+                const result = await Component.create(null);
+
+                expect(result).null;
+            });
+
+            test('returns null when no component type selected', async () => {
+                quickPickStub.resolves();
+                const result = await Component.create(null);
+
+                expect(result).null;
+            });
+
+            test('returns null when no component type version selected', async () => {
+                quickPickStub.onThirdCall().resolves();
+                const result = await Component.create(null);
+
+                expect(result).null;
+            });
+        });
+
+        suite('from git repository', () => {
+            let infoStub: sinon.SinonStub;
+
+            setup(() => {
+                quickPickStub.onFirstCall().resolves(projectItem);
+                quickPickStub.onSecondCall().resolves(appItem);
+                quickPickStub.onThirdCall().resolves({ label: 'Git Repository' });
+                infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves();
+            });
+
+            test('happy path works', async () => {
+                inputStub.resolves(componentItem.getName());
+                quickPickStub.resolves(componentType);
+                const result = await Component.create(null);
+
+                expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
+            });
+
+            test('returns null when no git repo selected', async () => {
+                inputStub.onFirstCall().resolves();
+                const result = await Component.create(null);
+
+                expect(result).null;
+            });
+
+            test('returns null when no component name selected', async () => {
+                inputStub.onFirstCall().resolves();
+                const result = await Component.create(null);
+
+                expect(result).null;
+            });
+
+            test('returns null when no component type selected', async () => {
+                quickPickStub.resolves();
+                const result = await Component.create(null);
+
+                expect(result).null;
+            });
+
+            test('returns null when no component type version selected', async () => {
+                quickPickStub.onThirdCall().resolves();
+                const result = await Component.create(null);
+
+                expect(result).null;
+            });
+        });
+
+        suite('from binary file', () => {
+            let fileStub: sinon.SinonStub;
+            const files = [{ fsPath: 'test/sample.war' }];
+
+            setup(() => {
+                quickPickStub.onFirstCall().resolves(projectItem);
+                quickPickStub.onSecondCall().resolves(appItem);
+                quickPickStub.onThirdCall().resolves({ label: 'Binary File' });
+                fileStub = sandbox.stub(vscode.window, 'showOpenDialog').resolves(files);
+                inputStub.resolves(componentItem.getName());
+            });
+
+            test('happy path works', async () => {
+                inputStub.resolves(componentItem.getName());
+                quickPickStub.resolves(componentType);
+
+                const result = await Component.create(null);
+
+                expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
+            });
+
+            test('returns null when no binary file selected', async () => {
+                fileStub.resolves();
+                const result = await Component.create(null);
+
+                expect(result).null;
+            });
+
+            test('returns null when no component name selected', async () => {
+                inputStub.resolves();
+                const result = await Component.create(null);
+
+                expect(result).null;
+            });
+
+            test('returns null when no component type selected', async () => {
+                quickPickStub.resolves();
+                const result = await Component.create(null);
+
+                expect(result).null;
+            });
+        });
     });
 
     suite('create', () => {
@@ -318,6 +477,19 @@ suite('Openshift/Component', () => {
             expect(result).null;
         });
 
+        test('calls the appropriate error message when only one component found', async () => {
+            quickPickStub.restore();
+            getComponentsStub.resolves([componentItem]);
+            try {
+                await Component.linkComponent(componentItem);
+            } catch (err) {
+                expect(err.message).equals('You have no Components available to link, please create new OpenShift Component and try again.');
+                return;
+            }
+            expect.fail();
+
+        });
+
         test('errors when no ports available', async () => {
             quickPickStub.resolves(componentItem);
             execStub.resolves({error: null, stderr: "", stdout: ""});
@@ -382,10 +554,25 @@ suite('Openshift/Component', () => {
         });
     });
 
-    test('describe calls the correct odo command in terminal', () => {
-        Component.describe(componentItem);
+    suite('describe', () => {
+        let quickPickStub: sinon.SinonStub;
 
-        expect(termStub).calledOnceWith(`odo describe ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+        setup(() => {
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onThirdCall().resolves(componentItem);
+        });
+
+        test('describe calls the correct odo command in terminal', async () => {
+            await Component.describe(componentItem);
+            expect(termStub).calledOnceWith(`odo describe ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+        });
+
+        test('works with no context', async () => {
+            await Component.describe(null);
+            expect(termStub).calledOnceWith(`odo describe ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+        });
     });
 
     test('log calls the correct odo command in terminal', () => {
@@ -406,9 +593,26 @@ suite('Openshift/Component', () => {
         expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
     });
 
-    test('watch calls the correct odo command in terminal', () => {
-        Component.watch(componentItem);
+    suite('watch', () => {
+        let quickPickStub: sinon.SinonStub;
 
-        expect(termStub).calledOnceWith(`odo watch ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+        setup(() => {
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onThirdCall().resolves(componentItem);
+        });
+
+        test('watch calls the correct odo command in terminal', async () => {
+            await Component.watch(componentItem);
+
+            expect(termStub).calledOnceWith(`odo watch ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+        });
+
+        test('works with no context', async () => {
+            await Component.watch(null);
+
+            expect(termStub).calledOnceWith(`odo watch ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+        });
     });
 });
