@@ -10,12 +10,11 @@ import { Progress } from '../util/progress';
 
 export class Service extends OpenShiftItem {
 
-    static async create(application: OpenShiftObject): Promise<string>  {
-        let project: OpenShiftObject;
-        if (!application) {
-            project = await vscode.window.showQuickPick(Service.getProjectNames(), {placeHolder: "In which Project you want to create an Service"});
-            if (project) application = await vscode.window.showQuickPick(Service.getApplicationNames(project), {placeHolder: "In which Application you want to create an Service"});
-        }
+    static async create(context: OpenShiftObject): Promise<string>  {
+        const application = await Service.getOpenShiftCmdData(context,
+            "In which project you want to create an service",
+            "In which application you want to create an service"
+        );
         if (application) {
             const serviceTemplateName = await vscode.window.showQuickPick(Service.odo.getServiceTemplates(), {
                 placeHolder: "Service Template Name"
