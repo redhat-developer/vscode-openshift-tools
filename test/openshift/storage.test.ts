@@ -39,6 +39,89 @@ suite('Openshift/Storage', () => {
         sandbox.restore();
     });
 
+    suite('create Storage with no context', () => {
+
+        setup(() => {
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onThirdCall().resolves(componentItem);
+            inputStub = sandbox.stub(vscode.window, 'showInputBox');
+            inputStub.onFirstCall().resolves(storageItem.getName());
+            inputStub.onSecondCall().resolves(mountPath);
+            quickPickStub.resolves(size);
+        });
+
+        teardown(() => {
+            sandbox.restore();
+        });
+
+        test('calls the appropriate error message if no project found', async () => {
+            quickPickStub.restore();
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+            sandbox.stub(vscode.window, 'showErrorMessage');
+            try {
+                await Storage.create(null);
+            } catch (err) {
+                expect(err.message).equals('You need at least one Project available. Please create new OpenShift Project and try again.');
+                return;
+            }
+            expect.fail();
+        });
+
+        test('calls the appropriate error message if no application found', async () => {
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
+            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
+            sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
+            sandbox.stub(vscode.window, 'showErrorMessage');
+            try {
+                await Storage.create(null);
+            } catch (err) {
+                expect(err.message).equals('You need at least one Component available to create an Storage. Please create new OpenShift Project and try again.');
+                return;
+            }
+        });
+
+        test('works with valid inputs', async () => {
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
+            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
+            sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([componentItem]);
+            const result = await Storage.create(null);
+
+            expect(result).equals(`Storage '${storageItem.getName()}' successfully created for component '${componentItem.getName()}'`);
+        });
+
+        test('returns null when no storage name selected', async () => {
+            inputStub.onFirstCall().resolves();
+            const result = await Storage.create(null);
+
+            expect(result).null;
+        });
+
+        test('returns null when no mount path selected', async () => {
+            inputStub.onSecondCall().resolves();
+            const result = await Storage.create(null);
+
+            expect(result).null;
+        });
+
+        test('returns null when no storage size selected', async () => {
+            quickPickStub.resolves();
+            const result = await Storage.create(null);
+
+            expect(result).null;
+        });
+
+        test('wraps odo errors with additional info', async () => {
+            execStub.rejects(errorMessage);
+            try {
+                await Storage.create(null);
+                expect.fail();
+            } catch (err) {
+                expect(err).equals(`New Storage command failed with error: '${errorMessage}'!`);
+            }
+        });
+    });
+
     suite('create', () => {
 
         setup(() => {
