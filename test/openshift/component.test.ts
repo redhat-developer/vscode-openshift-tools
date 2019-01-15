@@ -587,13 +587,7 @@ suite('Openshift/Component', () => {
         expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`);
     });
 
-    test('push calls the correct odo command with progress', async () => {
-        const status = await Component.push(componentItem);
-
-        expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
-    });
-
-    suite('watch', () => {
+    suite('push', () => {
         let quickPickStub: sinon.SinonStub;
 
         setup(() => {
@@ -603,16 +597,16 @@ suite('Openshift/Component', () => {
             quickPickStub.onThirdCall().resolves(componentItem);
         });
 
-        test('watch calls the correct odo command in terminal', async () => {
-            await Component.watch(componentItem);
+        test('push calls the correct odo command with progress', async () => {
+            const status = await Component.push(componentItem);
 
-            expect(termStub).calledOnceWith(`odo watch ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+            expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
         });
 
         test('works with no context', async () => {
-            await Component.watch(null);
-
-            expect(termStub).calledOnceWith(`odo watch ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+            await Component.push(null);
+    
+            expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
         });
     });
 });

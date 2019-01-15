@@ -134,7 +134,6 @@ export class Component extends OpenShiftItem {
     }
 
     static push(context: OpenShiftObject): void {
-
         const app: OpenShiftObject = context.getParent();
         const project: OpenShiftObject = app.getParent();
         Component.odo.executeInTerminal(Command.pushComponent(project.getName(), app.getName(), context.getName()));
