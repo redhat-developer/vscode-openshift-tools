@@ -321,10 +321,6 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
-          "command": "openshift.component.push",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
           "command": "openshift.component.watch",
           "when": "view == openshiftProjectExplorer"
         },
