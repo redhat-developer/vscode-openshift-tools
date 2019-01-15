@@ -46,6 +46,7 @@
     "onCommand:openshift.component.delete",
     "onCommand:openshift.component.push",
     "onCommand:openshift.component.watch",
+    "onCommand:openshift.component.watch.palette",
     "onCommand:openshift.catalog.listComponents",
     "onCommand:openshift.catalog.listServices",
     "onCommand:openshift.url.create",
@@ -184,6 +185,11 @@
       {
         "command": "openshift.component.watch",
         "title": "Watch",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.watch.palette",
+        "title": "Watch Component",
         "category": "OpenShift"
       },
       {
