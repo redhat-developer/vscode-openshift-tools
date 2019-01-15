@@ -82,10 +82,12 @@ export class Component extends OpenShiftItem {
         if (component) Component.odo.executeInTerminal(Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
     }
 
-    static log(context: OpenShiftObject): void {
-        const app: OpenShiftObject = context.getParent();
-        const project: OpenShiftObject = app.getParent();
-        Component.odo.executeInTerminal(Command.showLog(project.getName(), app.getName(), context.getName()));
+    static async log(context: OpenShiftObject) {
+        const component = await Component.getOpenShiftCmdData(context,
+            "In which project you want to see Log",
+            "In which application you want to see Log",
+            "For which component you want to see Log");
+        if (component) Component.odo.executeInTerminal(Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
     }
 
     static async followLog(context: OpenShiftObject) {

@@ -43,6 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.watch', (context) => executeSync(Component.watch, context)),
         vscode.commands.registerCommand('openshift.component.watch.palette', (context) => executeSync(Component.watch, context)),
         vscode.commands.registerCommand('openshift.component.log', (context) => executeSync(Component.log, context)),
+        vscode.commands.registerCommand('openshift.component.log.palette', (context) => executeSync(Component.log, context)),
         vscode.commands.registerCommand('openshift.component.followLog', (context) => executeSync(Component.followLog, context)),
         vscode.commands.registerCommand('openshift.component.followLog.palette', (context) => executeSync(Component.followLog, context)),
         vscode.commands.registerCommand('openshift.component.openUrl', (context) => execute(Component.openUrl, context)),

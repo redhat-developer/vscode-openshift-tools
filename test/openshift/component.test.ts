@@ -576,19 +576,30 @@ suite('Openshift/Component', () => {
         });
     });
 
-    test('log calls the correct odo command in terminal', () => {
-        Component.log(componentItem);
+    suite('log', () => {
+        let quickPickStub: sinon.SinonStub;
 
-        expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
-    });
-
-    suite('followLog', () => {
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
         });
+
+        test('log calls the correct odo command in terminal', async() => {
+            await Component.log(componentItem);
+
+            expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+        });
+
+        test('works with no context', async () => {
+            await Component.log(null);
+
+            expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+        });
+    });
+    test('followLog calls the correct odo command in terminal', () => {
+        Component.followLog(componentItem);
 
         test('followLog calls the correct odo command in terminal', async() => {
             await Component.followLog(componentItem);
