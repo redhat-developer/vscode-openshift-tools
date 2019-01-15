@@ -42,9 +42,12 @@
     "onCommand:openshift.component.describe",
     "onCommand:openshift.component.describe.palette",
     "onCommand:openshift.component.log",
+    "onCommand:openshift.component.log.palette",
     "onCommand:openshift.component.followLog",
+    "onCommand:openshift.component.followLog.palette",
     "onCommand:openshift.component.delete",
     "onCommand:openshift.component.push",
+    "onCommand:openshift.component.push.palette",
     "onCommand:openshift.component.watch",
     "onCommand:openshift.component.watch.palette",
     "onCommand:openshift.catalog.listComponents",
@@ -193,6 +196,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.push.palette",
+        "title": "Push Component",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.component.watch",
         "title": "Watch",
         "category": "OpenShift"
@@ -327,6 +335,10 @@
         },
         {
           "command": "openshift.component.watch",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.push",
           "when": "view == openshiftProjectExplorer"
         },
         {
