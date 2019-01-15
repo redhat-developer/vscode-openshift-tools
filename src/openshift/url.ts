@@ -13,8 +13,8 @@ export class Url extends OpenShiftItem{
 
     static async create(context: OpenShiftObject): Promise<string> {
         const component = await Url.getOpenShiftCmdData(context,
-            'Select a Project',
-            'Select an Application',
+            'Select a Project to create Url',
+            'Select an Application to create Url',
             'Select a Component you want to create Url for');
         if (component) {
             const app: OpenShiftObject = component.getParent();
