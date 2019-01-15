@@ -582,21 +582,25 @@ suite('Openshift/Component', () => {
         expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
     });
 
-    test('followLog calls the correct odo command in terminal', () => {
-        Component.followLog(componentItem);
+    suite('followLog', () => {
+        setup(() => {
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onThirdCall().resolves(componentItem);
+        });
 
-        expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`);
+        test('followLog calls the correct odo command in terminal', async() => {
+            await Component.followLog(componentItem);
+            expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`);
+        });
+
+        test('followLog calls the correct odo command in terminal with no context', async () => {
+
+            await Component.followLog(null);
+            expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`);
+       });
     });
-
-    test('followLog calls the correct odo command in terminal with no context', async () => {
-        quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-        quickPickStub.onFirstCall().resolves(projectItem);
-        quickPickStub.onSecondCall().resolves(appItem);
-        quickPickStub.onThirdCall().resolves(componentItem);
-        await Component.followLog(null);
-
-        expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`);
-   });
 
     test('push calls the correct odo command with progress', async () => {
         const status = await Component.push(componentItem);

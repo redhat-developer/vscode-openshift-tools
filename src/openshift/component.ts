@@ -17,7 +17,7 @@ import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 export class Component extends OpenShiftItem {
 
     static async create(context: OpenShiftObject): Promise<string> {
-        let application = await Component.getOpenShiftCmdData(context,
+        const application = await Component.getOpenShiftCmdData(context,
             "In which Project you want to create a Component",
             "In which Application you want to create a Component"
         );
@@ -88,11 +88,13 @@ export class Component extends OpenShiftItem {
         Component.odo.executeInTerminal(Command.showLog(project.getName(), app.getName(), context.getName()));
     }
 
-    static followLog(context: OpenShiftObject) {
-
-        const app: OpenShiftObject = context.getParent();
-        const project: OpenShiftObject = app.getParent();
-        Component.odo.executeInTerminal(Command.showLogAndFollow(project.getName(), app.getName(), context.getName()));
+    static async followLog(context: OpenShiftObject) {
+        const component = await Component.getOpenShiftCmdData(context,
+            "In which project you want to see Follow Log",
+            "In which application you want to see Follow Log",
+            "For which component you want to see Follow Log"
+        );
+        if (component) Component.odo.executeInTerminal(Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
     }
 
     static async linkComponent(context: OpenShiftObject): Promise<String> {
