@@ -117,7 +117,7 @@ suite('Openshift/Service', () => {
             const result = await Service.create(appItem);
             expect(result).equals(`Service '${serviceItem.getName()}' successfully created`);
             expect(progressStub).calledOnceWith(
-                `Creating new service '${serviceItem.getName()}'`,
+                `Creating a new Service '${serviceItem.getName()}'`,
                 `odo service create ${templateName} --plan ${templatePlan} ${serviceItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
         });
 
@@ -147,7 +147,7 @@ suite('Openshift/Service', () => {
             try {
                 await Service.create(appItem);
             } catch (err) {
-                expect(err).equals(`Failed to create service with error '${errorMessage}'`);
+                expect(err).equals(`Failed to create Service with error '${errorMessage}'`);
             }
         });
     });

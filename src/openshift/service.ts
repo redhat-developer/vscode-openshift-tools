@@ -12,8 +12,8 @@ export class Service extends OpenShiftItem {
 
     static async create(context: OpenShiftObject): Promise<string>  {
         const application = await Service.getOpenShiftCmdData(context,
-            "In which project you want to create an service",
-            "In which application you want to create an service"
+            "In which Project you want to create a Service",
+            "In which Application you want to create a Service"
         );
         if (application) {
             const serviceTemplateName = await vscode.window.showQuickPick(Service.odo.getServiceTemplates(), {
@@ -40,11 +40,11 @@ export class Service extends OpenShiftItem {
             });
             if (serviceName) {
                 const project = application.getParent();
-                return Progress.execCmdWithProgress(`Creating new service '${serviceName}'`,
+                return Progress.execCmdWithProgress(`Creating a new Service '${serviceName}'`,
                     Command.createService(project.getName(), application.getName(), serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))
                     .then(() => Service.explorer.refresh())
                     .then(() => `Service '${serviceName}' successfully created`)
-                    .catch((err) => Promise.reject(`Failed to create service with error '${err}'`));
+                    .catch((err) => Promise.reject(`Failed to create Service with error '${err}'`));
             }
             return null;
         }
