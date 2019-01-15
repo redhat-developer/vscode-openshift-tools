@@ -81,7 +81,6 @@ suite('Openshift/Application', () => {
 
     suite('create application with no context', () => {
         let inputStub: sinon.SinonStub;
-        let quickPickStub: sinon.SinonStub;
 
         setup(() => {
             inputStub = sandbox.stub(vscode.window, 'showInputBox');

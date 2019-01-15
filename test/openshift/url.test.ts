@@ -211,10 +211,10 @@ suite('Openshift/URL', () => {
             execStub.onFirstCall().resolves({error: null, stdout: portsOutput, stderr: ''});
             execStub.onSecondCall().resolves();
             quickPickStub.resolves({
-                "name": "8080-tcp",
-                "port": 8080,
-                "protocol": "TCP",
-                "targetPort": 8080
+                name: "8080-tcp",
+                port: 8080,
+                protocol: "TCP",
+                targetPort: 8080
             });
             const result = await Url.create(componentItem);
 

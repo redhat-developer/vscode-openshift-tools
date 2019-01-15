@@ -61,7 +61,7 @@ export class Application extends OpenShiftItem {
     }
 
     static async describe(treeItem: OpenShiftObject) {
-        const application = await Application.getOpenShiftCmdData(treeItem, 
+        const application = await Application.getOpenShiftCmdData(treeItem,
             "From which project you want to describe Application",
             "Select Application you want to describe");
         if (application) Application.odo.executeInTerminal(Command.describeApplication(application.getParent().getName(), application.getName()));
