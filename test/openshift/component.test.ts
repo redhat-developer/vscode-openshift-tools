@@ -46,8 +46,7 @@ suite('Openshift/Component', () => {
     suite('create component with no context', () => {
         const componentType = 'nodejs';
         const folder = { uri: { fsPath: 'folder' } };
-        let quickPickStub: sinon.SinonStub,
-            inputStub: sinon.SinonStub,
+        let inputStub: sinon.SinonStub,
             progressStub: sinon.SinonStub,
             progressCmdStub: sinon.SinonStub;
 
@@ -205,8 +204,7 @@ suite('Openshift/Component', () => {
         const componentType = 'nodejs';
         const version = 'latest';
         const folder = { uri: { fsPath: 'folder' } };
-        let quickPickStub: sinon.SinonStub,
-            inputStub: sinon.SinonStub,
+        let inputStub: sinon.SinonStub,
             progressStub: sinon.SinonStub,
             progressCmdStub: sinon.SinonStub;
 
@@ -391,7 +389,7 @@ suite('Openshift/Component', () => {
     });
 
     suite('del', () => {
-        let quickPickStub: sinon.SinonStub, warnStub: sinon.SinonStub;
+        let warnStub: sinon.SinonStub;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -449,7 +447,6 @@ suite('Openshift/Component', () => {
     });
 
     suite('linkComponent', () => {
-        let quickPickStub: sinon.SinonStub;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -520,7 +517,6 @@ suite('Openshift/Component', () => {
     });
 
     suite('linkService', () => {
-        let quickPickStub: sinon.SinonStub;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -556,7 +552,6 @@ suite('Openshift/Component', () => {
     });
 
     suite('describe', () => {
-        let quickPickStub: sinon.SinonStub;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -577,7 +572,6 @@ suite('Openshift/Component', () => {
     });
 
     suite('log', () => {
-        let quickPickStub: sinon.SinonStub;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -598,6 +592,7 @@ suite('Openshift/Component', () => {
             expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
         });
     });
+
     test('followLog calls the correct odo command in terminal', () => {
         Component.followLog(componentItem);
 
@@ -614,7 +609,6 @@ suite('Openshift/Component', () => {
     });
 
     suite('push', () => {
-        let quickPickStub: sinon.SinonStub;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
