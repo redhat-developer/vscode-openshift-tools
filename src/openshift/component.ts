@@ -15,36 +15,42 @@ import { CliExitData } from '../cli';
 import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 
 export class Component extends OpenShiftItem {
-    static async create(application: OpenShiftObject): Promise<string> {
-        // should use QuickPickItem with label and description
-        const sourceTypes: vscode.QuickPickItem[] = [
-            {
-                label: 'Git Repository',
-                description: 'Use an existing git repository as a source for the component'
-            },
-            {
-                label: 'Binary File',
-                description: 'Use binary file as a source for the component'
-            },
-            {
-                label: 'Workspace Directory',
-                description: 'Use workspace directory as a source for the component'
-            }
-        ];
-        const componentSource = await vscode.window.showQuickPick(sourceTypes, {
-            placeHolder: "Select source type for component"
-        });
-        if (!componentSource) return null;
 
-        let command: Promise<string>;
-        if (componentSource.label === 'Git Repository') {
-            command = Component.createFromGit(application);
-        } else if (componentSource.label === 'Binary File') {
-            command = Component.createFromBinary(application);
-        } else {
-            command = Component.createFromLocal(application);
+    static async create(context: OpenShiftObject): Promise<string> {
+        let application = await Component.getOpenShiftCmdData(context,
+            "In which Project you want to create a Component",
+            "In which Application you want to create a Component"
+        );
+        if (application) {
+            const sourceTypes: vscode.QuickPickItem[] = [
+                {
+                    label: 'Git Repository',
+                    description: 'Use an existing git repository as a source for the component'
+                },
+                {
+                    label: 'Binary File',
+                    description: 'Use binary file as a source for the component'
+                },
+                {
+                    label: 'Workspace Directory',
+                    description: 'Use workspace directory as a source for the component'
+                }
+            ];
+            const componentSource = await vscode.window.showQuickPick(sourceTypes, {
+                placeHolder: "Select source type for component"
+            });
+            if (!componentSource) return null;
+
+            let command: Promise<string>;
+            if (componentSource.label === 'Git Repository') {
+                command = Component.createFromGit(application);
+            } else if (componentSource.label === 'Binary File') {
+                command = Component.createFromBinary(application);
+            } else {
+                command = Component.createFromLocal(application);
+            }
+            return command.catch((err) => Promise.reject(`Failed to create component with error '${err}'`));
         }
-        return command.catch((err) => Promise.reject(`Failed to create component with error '${err}'`));
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {

@@ -276,10 +276,6 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
-          "command": "openshift.component.create",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
           "command": "openshift.component.log",
           "when": "view == openshiftProjectExplorer"
         },

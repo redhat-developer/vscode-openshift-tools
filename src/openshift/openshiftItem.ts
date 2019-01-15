@@ -23,14 +23,14 @@ export abstract class OpenShiftItem {
         return projectList;
     }
 
-    static async getApplicationNames(project): Promise<OpenShiftObject[]> {
-        const projectList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
-        if (projectList.length === 0) {
-           throw Error('You need at least one Application available. Please create new OpenShift Application and try again.');
-        }
-        return projectList;
+    static async getApplicationNames(project) {
+        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
+        if (applicationList.length === 0) {
+            throw Error('You need at least one Application available. Please create new OpenShift Application and try again.');
+         }
+         return applicationList;
     }
-
+    
     static async getComponentNames(application) {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application);
         if (applicationList.length === 0) {
