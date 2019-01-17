@@ -33,7 +33,7 @@ export class Project extends OpenShiftItem {
             project = await vscode.window.showQuickPick(projects, {placeHolder: "Select Project to delete"});
         }
         if (project) {
-            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete project '${project.getName()}'?`, 'Yes', 'Cancel');
+            const value = await vscode.window.showWarningMessage(`Do you want to delete project '${project.getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 result = Project.odo.execute(Command.deleteProject(project.getName()))
                     .then(() => Project.explorer.refresh())

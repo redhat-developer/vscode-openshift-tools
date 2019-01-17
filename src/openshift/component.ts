@@ -62,7 +62,7 @@ export class Component extends OpenShiftItem {
             const app: OpenShiftObject = component.getParent();
             const project: OpenShiftObject = app.getParent();
             const name: string = component.getName();
-            const value = await vscode.window.showWarningMessage(`Are you sure you want to delete component '${name}\'`, 'Yes', 'Cancel');
+            const value = await vscode.window.showWarningMessage(`Do you want to delete component '${name}\'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 return Promise.resolve()
                     .then(() => Component.odo.execute(Command.deleteComponent(project.getName(), app.getName(), name)))
