@@ -64,7 +64,7 @@ export class Service extends OpenShiftItem {
         if (service) {
             application = service.getParent();
             project = application.getParent();
-            const answer = await vscode.window.showWarningMessage(`Are you sure you want to delete service '${service.getName()}'`, 'Yes', 'Cancel');
+            const answer = await vscode.window.showWarningMessage(`Do you want to delete service '${service.getName()}'?`, 'Yes', 'Cancel');
             if (answer === 'Yes') {
                 return Promise.resolve()
                     .then(() => Service.odo.execute(Command.deleteService(project.getName(), application.getName(), service.getName())))

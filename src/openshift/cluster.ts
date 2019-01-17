@@ -25,7 +25,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     static async logout(): Promise<string> {
-        const value = await vscode.window.showWarningMessage(`Are you sure you want to logout of cluster`, 'Logout', 'Cancel');
+        const value = await vscode.window.showWarningMessage(`Do you want to logout of cluster?`, 'Logout', 'Cancel');
         if (value === 'Logout') {
             return Cluster.odo.execute(Command.odoLogout())
             .catch((error) => Promise.reject(`Failed to logout of the current cluster with '${error}'!`))
