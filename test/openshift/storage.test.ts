@@ -87,7 +87,7 @@ suite('Openshift/Storage', () => {
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([componentItem]);
             const result = await Storage.create(null);
 
-            expect(result).equals(`Storage '${storageItem.getName()}' successfully created for component '${componentItem.getName()}'`);
+            expect(result).equals(`Storage '${storageItem.getName()}' successfully created for Component '${componentItem.getName()}'`);
         });
 
         test('returns null when no storage name selected', async () => {
@@ -138,7 +138,7 @@ suite('Openshift/Storage', () => {
         test('works with valid inputs', async () => {
             const result = await Storage.create(componentItem);
 
-            expect(result).equals(`Storage '${storageItem.getName()}' successfully created for component '${componentItem.getName()}'`);
+            expect(result).equals(`Storage '${storageItem.getName()}' successfully created for Component '${componentItem.getName()}'`);
             expect(execStub).calledOnceWith(`odo storage create ${storageItem.getName()} --path=${mountPath} --size=${size}` +
              ` --project ${projectItem.getName()} --app ${appItem.getName()} --component ${componentItem.getName()}`);
         });
@@ -264,7 +264,7 @@ suite('Openshift/Storage', () => {
         test('works with set tree item', async () => {
             const result = await Storage.del(storageItem);
 
-            expect(result).equals(`Storage '${storageItem.getName()}' from component '${componentItem.getName()}' successfully deleted`);
+            expect(result).equals(`Storage '${storageItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
             expect(execStub).calledOnceWith(`odo storage delete ${storageItem.getName()} -f` +
              ` --project ${projectItem.getName()} --app ${appItem.getName()} --component ${componentItem.getName()}`);
         });
@@ -272,7 +272,7 @@ suite('Openshift/Storage', () => {
         test('works without set tree item', async () => {
             const result = await Storage.del(null);
 
-            expect(result).equals(`Storage '${storageItem.getName()}' from component '${componentItem.getName()}' successfully deleted`);
+            expect(result).equals(`Storage '${storageItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
             expect(execStub).calledOnceWith(`odo storage delete ${storageItem.getName()} -f` +
              ` --project ${projectItem.getName()} --app ${appItem.getName()} --component ${componentItem.getName()}`);
         });
@@ -297,7 +297,7 @@ suite('Openshift/Storage', () => {
                 await Storage.del(storageItem);
                 expect.fail();
             } catch (err) {
-                expect(err).equals(`Failed to delete storage with error '${errorMessage}'`);
+                expect(err).equals(`Failed to delete Storage with error '${errorMessage}'`);
             }
         });
     });
