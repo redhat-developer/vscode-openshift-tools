@@ -26,12 +26,10 @@ export class Project extends OpenShiftItem {
     }
 
     static async del(context: OpenShiftObject): Promise<string> {
-        let project = context;
         let result: Promise<string> = null;
-        if (!project) {
-            const projects: OpenShiftObject[] = await Project.odo.getProjects();
-            project = await vscode.window.showQuickPick(projects, {placeHolder: "Select Project to delete"});
-        }
+        const project = await Project.getOpenShiftCmdData(context,
+            "Select Project to delete"
+        );
         if (project) {
             const value = await vscode.window.showWarningMessage(`Do you want to delete project '${project.getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
