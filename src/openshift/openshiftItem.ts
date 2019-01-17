@@ -39,7 +39,7 @@ export abstract class OpenShiftItem {
          return applicationList;
     }
 
-    static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder: string, compPlaceholder?: string) {
+    static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder?: string, compPlaceholder?: string) {
         let context = treeItem;
         if (!context) {
             context = await vscode.window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder});
