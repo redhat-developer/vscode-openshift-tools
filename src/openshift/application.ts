@@ -8,42 +8,21 @@ import { OpenShiftObject, Command } from '../odo';
 import * as vscode from 'vscode';
 import * as validator from 'validator';
 
-interface ApplicationData {
-    name: string;
-    projectName: string;
-}
-
 export class Application extends OpenShiftItem {
 
-    static async create(project: OpenShiftObject): Promise<String> {
-
-        const data = await Application.getApplicationData(project);
-
-        if (data) {
+    static async create(treeItem: OpenShiftObject): Promise<String> {
+        let name;
+        const project = await Application.getOpenShiftCmdData(treeItem,
+            "In which Project you want to create an Application");
+        if (project) name = await Application.getApplicationName();
+        if (name) {
             return Promise.resolve()
-                .then(() => Application.odo.execute(Command.createApplication(data.projectName, data.name)))
-                .then(() => Application.explorer.refresh(project ? project : undefined))
-                .then(() => `Application '${data.name}' successfully created`)
+                .then(() => Application.odo.execute(Command.createApplication(project.getName(), name)))
+                .then(() => Application.explorer.refresh(project))
+                .then(() => `Application '${name}' successfully created`)
                 .catch((error) => Promise.reject(`Failed to create application with error '${error}'`));
         }
         return null;
-    }
-
-    static async getApplicationData(project: OpenShiftObject): Promise <ApplicationData> {
-        let projectName: string  = project ? project.getName() : undefined;
-        let name: string;
-        if (!projectName) {
-            projectName = await Application.getProjectName();
-        }
-        if (projectName) {
-            name = await Application.getApplicationName();
-        }
-        return name && projectName ? {name, projectName} : undefined;
-    }
-
-    static async getProjectName(): Promise<string> {
-        const project: OpenShiftObject = await vscode.window.showQuickPick(Application.getProjectNames(), {placeHolder: "In which Project you want to create an Application"});
-        return project ? project.getName(): undefined;
     }
 
     static async getApplicationName() {
