@@ -13,6 +13,7 @@ import { TestItem } from './testOSItem';
 import { OdoImpl } from '../../src/odo';
 import { Component } from '../../src/openshift/component';
 import { Progress } from '../../src/util/progress';
+import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -37,6 +38,8 @@ suite('Openshift/Component', () => {
         getApplicationsStub = sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
         getComponentsStub = sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
         sandbox.stub(Component, 'wait').resolves();
+        sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
+        sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
     });
 
     teardown(() => {
