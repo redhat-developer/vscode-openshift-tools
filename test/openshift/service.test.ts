@@ -207,7 +207,7 @@ suite('Openshift/Service', () => {
             try {
                 await Service.del(serviceItem);
             } catch (err) {
-                expect(err).equals(`Failed to delete service with error '${errorMessage}'`);
+                expect(err).equals(`Failed to delete Service with error '${errorMessage}'`);
             }
         });
     });

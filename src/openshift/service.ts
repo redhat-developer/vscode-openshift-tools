@@ -55,22 +55,22 @@ export class Service extends OpenShiftItem {
         let application: OpenShiftObject;
         let service: OpenShiftObject = treeItem;
         if (!service) {
-            project = await vscode.window.showQuickPick(Service.odo.getProjects(), {placeHolder: "From which project you want to delete service"});
-            application = await vscode.window.showQuickPick(Service.odo.getApplications(project), {placeHolder: "From which application you want to delete service"});
+            project = await vscode.window.showQuickPick(Service.odo.getProjects(), {placeHolder: "From which Project you want to delete Service"});
+            application = await vscode.window.showQuickPick(Service.odo.getApplications(project), {placeHolder: "From which Application you want to delete Service"});
             if (application) {
-                service = await vscode.window.showQuickPick(Service.odo.getServices(application), {placeHolder: "Select service to delete"});
+                service = await vscode.window.showQuickPick(Service.odo.getServices(application), {placeHolder: "Select Service to delete"});
             }
         }
         if (service) {
             application = service.getParent();
             project = application.getParent();
-            const answer = await vscode.window.showWarningMessage(`Do you want to delete service '${service.getName()}'?`, 'Yes', 'Cancel');
+            const answer = await vscode.window.showWarningMessage(`Do you want to delete Service '${service.getName()}'?`, 'Yes', 'Cancel');
             if (answer === 'Yes') {
                 return Promise.resolve()
                     .then(() => Service.odo.execute(Command.deleteService(project.getName(), application.getName(), service.getName())))
                     .then(() => Service.explorer.refresh(treeItem ? treeItem.getParent() : undefined))
                     .then(() => `Service '${service.getName()}' successfully deleted`)
-                    .catch((err) => Promise.reject(`Failed to delete service with error '${err}'`));
+                    .catch((err) => Promise.reject(`Failed to delete Service with error '${err}'`));
             }
         }
         return null;
