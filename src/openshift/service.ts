@@ -50,25 +50,18 @@ export class Service extends OpenShiftItem {
         }
     }
 
-    static async del(treeItem: OpenShiftObject): Promise<string> {
-        let project: OpenShiftObject;
-        let application: OpenShiftObject;
-        let service: OpenShiftObject = treeItem;
-        if (!service) {
-            project = await vscode.window.showQuickPick(Service.odo.getProjects(), {placeHolder: "From which Project you want to delete Service"});
-            application = await vscode.window.showQuickPick(Service.odo.getApplications(project), {placeHolder: "From which Application you want to delete Service"});
-            if (application) {
-                service = await vscode.window.showQuickPick(Service.odo.getServices(application), {placeHolder: "Select Service to delete"});
-            }
-        }
+    static async del(service: OpenShiftObject): Promise<string> {
+        const application: OpenShiftObject = await Service.getOpenShiftCmdData(service,
+            "From which Project you want to delete Service",
+            "From which Application you want to delete Service"
+        );
+        if (!service && application) service = await vscode.window.showQuickPick(Service.getServiceNames(application), {placeHolder: "Select Service to delete"});
         if (service) {
-            application = service.getParent();
-            project = application.getParent();
             const answer = await vscode.window.showWarningMessage(`Do you want to delete Service '${service.getName()}'?`, 'Yes', 'Cancel');
             if (answer === 'Yes') {
                 return Promise.resolve()
-                    .then(() => Service.odo.execute(Command.deleteService(project.getName(), application.getName(), service.getName())))
-                    .then(() => Service.explorer.refresh(treeItem ? treeItem.getParent() : undefined))
+                    .then(() => Service.odo.execute(Command.deleteService(service.getParent().getParent().getName(), service.getParent().getName(), service.getName())))
+                    .then(() => Service.explorer.refresh(service.getParent()))
                     .then(() => `Service '${service.getName()}' successfully deleted`)
                     .catch((err) => Promise.reject(`Failed to delete Service with error '${err}'`));
             }
