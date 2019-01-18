@@ -51,7 +51,15 @@ export abstract class OpenShiftItem {
         if (applicationList.length === 0) {
             throw Error('You need at least one Component available. Please create new OpenShift Component and try again.');
         }
-         return applicationList;
+        return applicationList;
+    }
+
+    static async getServiceNames(application) {
+        const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(application);
+        if (serviceList.length === 0) {
+            throw Error('You need at least one Service available.');
+        }
+        return serviceList;
     }
 
     static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder?: string, compPlaceholder?: string) {
