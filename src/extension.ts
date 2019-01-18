@@ -42,7 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.push', (context) => executeSync(Component.push, context)),
         vscode.commands.registerCommand('openshift.component.push.palette', (context) => executeSync(Component.push, context)),
         vscode.commands.registerCommand('openshift.component.watch', (context) => executeSync(Component.watch, context)),
-        vscode.commands.registerCommand('openshift.component.watch.palette', (context) => executeSync(Component.watch, context)),
+        vscode.commands.registerCommand('openshift.component.watch.palette', (context) => execute(Component.watch, context)),
         vscode.commands.registerCommand('openshift.component.log', (context) => executeSync(Component.log, context)),
         vscode.commands.registerCommand('openshift.component.log.palette', (context) => executeSync(Component.log, context)),
         vscode.commands.registerCommand('openshift.component.followLog', (context) => executeSync(Component.followLog, context)),
