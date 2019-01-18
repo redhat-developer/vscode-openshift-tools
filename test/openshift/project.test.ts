@@ -12,6 +12,7 @@ import * as sinon from 'sinon';
 import { OdoImpl } from '../../src/odo';
 import { TestItem } from './testOSItem';
 import { Project } from '../../src/openshift/project';
+import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -19,12 +20,16 @@ chai.use(sinonChai);
 suite('Openshift/Project', () => {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
+        
     const projectItem = new TestItem(null, 'project');
+    const appItem = new TestItem(projectItem, 'app');
     const errorMessage = 'ERROR MESSAGE';
 
     setup(() => {
         sandbox = sinon.createSandbox();
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves();
+        sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
+        sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
     });
 
     teardown(() => {
