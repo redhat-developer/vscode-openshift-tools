@@ -12,6 +12,7 @@ import * as sinon from 'sinon';
 import { OdoImpl } from '../../src/odo';
 import { Application } from '../../src/openshift/application';
 import { TestItem } from './testOSItem';
+import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -20,12 +21,14 @@ suite('Openshift/Application', () => {
     let quickPickStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
+    let getProjectNamesStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'app');
 
     setup(() => {
         sandbox = sinon.createSandbox();
         execStub = sandbox.stub(OdoImpl.prototype, 'execute');
+        getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
     });
 
     teardown(() => {
@@ -90,6 +93,7 @@ suite('Openshift/Application', () => {
 
         test('calls the appropriate error message', async () => {
             quickPickStub.restore();
+            getProjectNamesStub.restore();
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
             const errorStub = sandbox.stub(vscode.window, 'showErrorMessage');
             try {
@@ -193,6 +197,7 @@ suite('Openshift/Application', () => {
 
         test('calls the appropriate error message when no project found', async () => {
             quickPickStub.restore();
+            getProjectNamesStub.restore();
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
             try {
                 await Application.describe(null);
@@ -263,10 +268,11 @@ suite('Openshift/Application', () => {
 
         test('requests for project and application and exit if application is not provided', async () => {
             const stub = sandbox.stub(vscode.window, 'showQuickPick');
-            stub.onFirstCall().resolves('selection');
+            stub.onFirstCall().resolves(appItem);
             stub.onSecondCall().resolves();
             warnStub.resolves('Yes');
             execStub.resolves();
+
             await Application.del(undefined);
             expect(stub).calledTwice;
             expect(warnStub).is.not.called;
