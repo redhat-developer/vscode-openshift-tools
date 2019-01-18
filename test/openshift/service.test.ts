@@ -13,6 +13,7 @@ import { OdoImpl } from '../../src/odo';
 import { TestItem } from './testOSItem';
 import { Progress } from '../../src/util/progress';
 import { Service } from '../../src/openshift/service';
+import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -20,6 +21,7 @@ chai.use(sinonChai);
 suite('Openshift/Service', () => {
     let sandbox: sinon.SinonSandbox;
     let quickPickStub: sinon.SinonStub;
+    let getProjectNamesStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'application');
     const serviceItem = new TestItem(appItem, 'service');
@@ -30,6 +32,8 @@ suite('Openshift/Service', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+        getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
+        sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
     });
 
     teardown(() => {
@@ -66,6 +70,7 @@ suite('Openshift/Service', () => {
 
         test('calls the appropriate error message if no project found', async () => {
             quickPickStub.restore();
+            getProjectNamesStub.restore();
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
             sandbox.stub(vscode.window, 'showErrorMessage');
             try {
