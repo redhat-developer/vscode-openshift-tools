@@ -75,7 +75,7 @@ suite('Openshift/Application', () => {
             try {
                 await Application.create(projectItem);
             } catch (err) {
-                expect(err).equals(`Failed to create application with error 'ERROR'`);
+                expect(err).equals(`Failed to create Application with error 'ERROR'`);
                 return;
             }
             expect.fail();
