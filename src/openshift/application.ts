@@ -20,7 +20,7 @@ export class Application extends OpenShiftItem {
                 .then(() => Application.odo.execute(Command.createApplication(project.getName(), name)))
                 .then(() => Application.explorer.refresh(project))
                 .then(() => `Application '${name}' successfully created`)
-                .catch((error) => Promise.reject(`Failed to create application with error '${error}'`));
+                .catch((error) => Promise.reject(`Failed to create Application with error '${error}'`));
         }
         return null;
     }
@@ -53,7 +53,7 @@ export class Application extends OpenShiftItem {
         if (application) {
             const appName = application.getName();
             const projName = application.getParent().getName();
-            const value = await vscode.window.showWarningMessage(`Do you want to delete application '${appName}?'`, 'Yes', 'Cancel');
+            const value = await vscode.window.showWarningMessage(`Do you want to delete Application '${appName}?'`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 return Promise.resolve()
                     .then(() => Application.odo.execute(Command.deleteApplication(projName, appName)))
