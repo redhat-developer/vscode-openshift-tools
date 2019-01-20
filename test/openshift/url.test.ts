@@ -12,6 +12,7 @@ import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
 import { OdoImpl } from '../../src/odo';
 import { Url } from '../../src/openshift/url';
+import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -20,6 +21,7 @@ suite('Openshift/URL', () => {
     let sandbox: sinon.SinonSandbox;
     let quickPickStub: sinon.SinonStub;
     let execStub: sinon.SinonStub;
+    let getProjectsNameStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'app');
     const componentItem = new TestItem(appItem, 'component');
@@ -150,9 +152,13 @@ suite('Openshift/URL', () => {
         }
     }`;
 
+    let getProjectNamesStub: sinon.SinonStub;
     setup(() => {
         sandbox = sinon.createSandbox();
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+        getProjectsNameStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
+        sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
+        sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([appItem]);
     });
 
     teardown(() => {
@@ -169,6 +175,7 @@ suite('Openshift/URL', () => {
 
         test('calls the appropriate error message if no project found', async () => {
             quickPickStub.restore();
+            getProjectsNameStub.restore();
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
             sandbox.stub(vscode.window, 'showErrorMessage');
             try {
@@ -194,10 +201,10 @@ suite('Openshift/URL', () => {
 
         test('rejects when fails to create Url', () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.resolves({error: null, stdout: portsOutput, stderr: ''});
-            execStub.onFirstCall().rejects();
+            execStub.resolves({error: "Error", stdout: portsOutput, stderr: ''});
 
             return Url.create(null).catch((err) => {
+                console.log(err);
                 expect(err).equals(`Failed to create URL for component '${componentItem.getName()}'`);
             });
         });
