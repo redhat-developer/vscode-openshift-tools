@@ -204,7 +204,6 @@ suite('Openshift/URL', () => {
             execStub.resolves({error: "Error", stdout: portsOutput, stderr: ''});
 
             return Url.create(null).catch((err) => {
-                console.log(err);
                 expect(err).equals(`Failed to create URL for component '${componentItem.getName()}'`);
             });
         });
