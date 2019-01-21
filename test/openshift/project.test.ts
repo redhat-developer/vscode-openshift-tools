@@ -20,7 +20,7 @@ chai.use(sinonChai);
 suite('Openshift/Project', () => {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
-        
+
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'app');
     const errorMessage = 'ERROR MESSAGE';

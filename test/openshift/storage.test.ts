@@ -14,7 +14,6 @@ import { OdoImpl } from '../../src/odo';
 import { Storage } from '../../src/openshift/storage';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 
-
 const expect = chai.expect;
 chai.use(sinonChai);
 
