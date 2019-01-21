@@ -253,7 +253,7 @@ suite('Openshift/Component', () => {
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
                 expect(progressCmdStub).calledOnceWith(
-                    `Creating new component '${componentItem.getName()}'`,
+                    `Creating new Component '${componentItem.getName()}'`,
                     `odo create ${componentType}:${version} ${componentItem.getName()} --local ${folder.uri.fsPath} --app ${appItem.getName()} --project ${projectItem.getName()}`);
                 expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()} --local ${folder.uri.fsPath}`);
             });
@@ -358,7 +358,7 @@ suite('Openshift/Component', () => {
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
                 expect(progressCmdStub).calledOnceWith(
-                    `Creating new component '${componentItem.getName()}'`,
+                    `Creating new Component '${componentItem.getName()}'`,
                     `odo create ${componentType}:${version} ${componentItem.getName()} --binary ${files[0].fsPath} --app ${appItem.getName()} --project ${projectItem.getName()}`);
             });
 
