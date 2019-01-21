@@ -32,7 +32,7 @@ suite('Openshift/Component', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute');
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({stdout:""});
         sandbox.stub(OdoImpl.prototype, 'getServices');
         getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
         getApplicationsStub = sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
@@ -40,6 +40,7 @@ suite('Openshift/Component', () => {
         sandbox.stub(Component, 'wait').resolves();
         sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
+        sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
     });
 
     teardown(() => {
