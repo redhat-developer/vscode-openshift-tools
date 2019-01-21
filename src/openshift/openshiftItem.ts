@@ -30,6 +30,12 @@ export abstract class OpenShiftItem {
         }
     }
 
+    static validateUrl(message: string, value: string) {
+        if (!validator.isURL(value)) {
+            return message;
+        }
+    }
+
     static async getProjectNames(): Promise<OpenShiftObject[]> {
         const projectList: Array<OpenShiftObject> = await OpenShiftItem.odo.getProjects();
         if (projectList.length === 0) {
