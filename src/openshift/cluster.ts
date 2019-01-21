@@ -73,9 +73,7 @@ export class Cluster extends OpenShiftItem {
             ignoreFocusOut: true,
             prompt: "Provide URL of the cluster to connect",
             validateInput: (value: string) => {
-                if (!validator.isURL(value)) {
-                    return 'Invalid URL provided';
-                }
+                return Cluster.validateUrl('Invalid URL provided', value);
             }
         });
         if (!clusterURL) return null;
@@ -92,9 +90,7 @@ export class Cluster extends OpenShiftItem {
             ignoreFocusOut: true,
             prompt: "Provide Username for basic authentication to the API server",
             validateInput: (value: string) => {
-                if (validator.isEmpty(value.trim())) {
-                    return 'Invalid Username';
-                }
+                return Cluster.emptyName('User name cannot be empty', value);
             }
         });
         if (!username) return null;
