@@ -152,7 +152,6 @@ suite('Openshift/URL', () => {
         }
     }`;
 
-    let getProjectNamesStub: sinon.SinonStub;
     setup(() => {
         sandbox = sinon.createSandbox();
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
