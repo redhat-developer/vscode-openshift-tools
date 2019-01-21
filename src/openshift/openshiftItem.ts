@@ -6,14 +6,29 @@
 import { Odo, OdoImpl, OpenShiftObject } from '../odo';
 import { OpenShiftExplorer } from '../explorer';
 import * as vscode from 'vscode';
+import * as validator from 'validator';
 
 export abstract class OpenShiftItem {
     protected static readonly odo: Odo = OdoImpl.getInstance();
     protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
 
-    static create(context: OpenShiftObject): Promise<String> { return Promise.reject(); }
-    static del(context: OpenShiftObject): Promise<String> { return Promise.reject(); }
-    static wait(timeout: number = 2500): Promise<void> { return  new Promise((res)=>setTimeout(res, timeout)); }
+    static create(context: OpenShiftObject): Promise<String> {
+        return Promise.reject();
+    }
+
+    static del(context: OpenShiftObject): Promise<String> {
+        return Promise.reject();
+    }
+
+    static wait(timeout: number = 2500): Promise<void> {
+        return  new Promise((res)=>setTimeout(res, timeout));
+    }
+
+    static emptyName(message: string, value: string) {
+        if (validator.isEmpty(value)) {
+            return message;
+        }
+    }
 
     static async getProjectNames(): Promise<OpenShiftObject[]> {
         const projectList: Array<OpenShiftObject> = await OpenShiftItem.odo.getProjects();

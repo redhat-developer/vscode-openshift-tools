@@ -167,7 +167,7 @@ export class Component extends OpenShiftItem {
             const routeCheck = await Component.odo.execute(Command.getRouteHostName(namespace, component.getName()));
             let value = 'Create';
             if (routeCheck.stdout.trim() === '') {
-                value = await vscode.window.showInformationMessage(`No URL for component '${component.getName()}' in application '${app.getName()}'. Do you want to create a route and open it?`, 'Create', 'Cancel');
+                value = await vscode.window.showInformationMessage(`No URL for Component '${component.getName()}' in application '${app.getName()}'. Do you want to create a URL and open it?`, 'Create', 'Cancel');
                 if (value === 'Create') {
                     await Url.create(component);
                 }
@@ -182,20 +182,30 @@ export class Component extends OpenShiftItem {
         return null;
     }
 
+    private static async validateComponentName(value: string, application: OpenShiftObject) {
+        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
+        const componentName =  componentList.find((component) =>  component.getName() === value);
+        return componentName && `This name is already used, please enter different name.`;
+    }
+
+    private static async getComponentName(application: OpenShiftObject) {
+        return await vscode.window.showInputBox({
+            prompt: "Component name",
+            validateInput: async (value: string) => {
+                let validationMessage = Component.emptyName('Empty Component name', value.trim());
+                if (!validationMessage) validationMessage = await Component.validateComponentName(value.trim(), application);
+                return validationMessage;
+            }
+        });
+    }
+
     private static async createFromLocal(application: OpenShiftObject): Promise<string> {
         const folder = await vscode.window.showWorkspaceFolderPick({
             placeHolder: 'Select the target workspace folder'
         });
         if (!folder) return null;
 
-        const componentName = await vscode.window.showInputBox({
-            prompt: "Component name",
-            validateInput: (value: string) => {
-                if (validator.isEmpty(value.trim())) {
-                    return 'Empty component name';
-                }
-            }
-        });
+        const componentName = await Component.getComponentName(application);
 
         if (!componentName) return null;
 
@@ -203,35 +213,28 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeName) return null;
 
-        const componentTypeVersion = await vscode.window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type Version"});
+        const componentTypeVersion = await vscode.window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
 
         if (!componentTypeVersion) return null;
         const project = application.getParent();
-        return Progress.execCmdWithProgress(`Creating new component '${componentName}'`, Command.createLocalComponent(project.getName(), application.getName(), componentTypeName, componentTypeVersion, componentName, folder.uri.fsPath))
+        return Progress.execCmdWithProgress(`Creating new Component '${componentName}'`, Command.createLocalComponent(project.getName(), application.getName(), componentTypeName, componentTypeVersion, componentName, folder.uri.fsPath))
             .then(() => Component.explorer.refresh(application))
             .then(() => Component.odo.executeInTerminal(Command.pushLocalComponent(project.getName(), application.getName(), componentName, folder.uri.fsPath)))
             .then(() => `Component '${componentName}' successfully created`);
     }
 
     private static async createFromGit(application: OpenShiftObject): Promise<string> {
-        const repoURI = await vscode.window.showInputBox({prompt: 'Git repository URI', validateInput:
-            (value: string) => {
-                if (validator.isEmpty(value.trim())) {
-                    return 'Empty Git repository URL';
-                }
-                if (!validator.isURL(value)) {
-                    return 'Invalid URL provided';
-                }
+        const repoURI = await vscode.window.showInputBox({
+            prompt: 'Git repository URI',
+            validateInput: (value: string) => {
+                if (!value.trim()) return 'Empty Git repository URL';
+                if (!validator.isURL(value)) return 'Invalid URL provided';
             }
         });
 
         if (!repoURI) return null;
 
-        const componentName = await vscode.window.showInputBox({prompt: "Component name", validateInput: (value: string) => {
-            if (validator.isEmpty(value.trim())) {
-                return 'Empty component name';
-            }
-        }});
+        const componentName = await Component.getComponentName(application);
 
         if (!componentName) return null;
 
@@ -239,11 +242,11 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeName) return null;
 
-        const componentTypeVersion = await vscode.window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type Version"});
+        const componentTypeVersion = await vscode.window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
 
         if (!componentTypeVersion) return null;
 
-        await vscode.window.showInformationMessage('Do you want to clone git repository for created component?', 'Yes', 'No').then((value) => {
+        await vscode.window.showInformationMessage('Do you want to clone git repository for created Component?', 'Yes', 'No').then((value) => {
             value === 'Yes' && vscode.commands.executeCommand('git.clone', repoURI);
         });
 
@@ -262,11 +265,7 @@ export class Component extends OpenShiftItem {
 
         if (!binaryFile) return null;
 
-        const componentName = await vscode.window.showInputBox({prompt: "Component name", validateInput: (value: string) => {
-            if (validator.isEmpty(value.trim())) {
-                return 'Empty component name';
-            }
-        }});
+        const componentName = await Component.getComponentName(application);
 
         if (!componentName) return null;
 
@@ -274,12 +273,12 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeName) return null;
 
-        const componentTypeVersion = await vscode.window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type Version"});
+        const componentTypeVersion = await vscode.window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
 
         if (!componentTypeVersion) return null;
 
         const project = application.getParent();
-        return Progress.execCmdWithProgress(`Creating new component '${componentName}'`,
+        return Progress.execCmdWithProgress(`Creating new Component '${componentName}'`,
             Command.createBinaryComponent(project.getName(), application.getName(), componentTypeName, componentTypeVersion, componentName, binaryFile[0].fsPath))
             .then(() => Component.explorer.refresh(application))
             .then(() => `Component '${componentName}' successfully created`);
