@@ -34,6 +34,7 @@ suite('Openshift/Service', () => {
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
         getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
+        sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
     });
 
     teardown(() => {
