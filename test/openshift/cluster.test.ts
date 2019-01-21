@@ -13,6 +13,8 @@ import { OdoImpl } from '../../src/odo';
 import { Cluster } from '../../src/openshift/cluster';
 import { OpenShiftExplorer } from '../../src/explorer';
 import { CliExitData } from '../../src/cli';
+import { TestItem } from './testOSItem';
+import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -36,6 +38,8 @@ suite('Openshift/Cluster', () => {
     const testUser = 'user';
     const password = 'password';
     const token = 'token';
+    const projectItem = new TestItem(null, 'project');
+    const appItem = new TestItem(projectItem, 'application');
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -45,6 +49,8 @@ suite('Openshift/Cluster', () => {
         infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves('Yes');
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick').resolves('Credentials');
         loginStub = sandbox.stub(OdoImpl.prototype, 'requireLogin').resolves(true);
+        sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
+        sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
     });
 
     teardown(() => {

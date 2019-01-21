@@ -29,6 +29,7 @@ suite('Openshift/Application', () => {
         sandbox = sinon.createSandbox();
         execStub = sandbox.stub(OdoImpl.prototype, 'execute');
         getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
+        sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
     });
 
     teardown(() => {
