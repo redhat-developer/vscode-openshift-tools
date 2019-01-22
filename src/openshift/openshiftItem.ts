@@ -21,7 +21,7 @@ export abstract class OpenShiftItem {
     }
 
     static wait(timeout: number = 2500): Promise<void> {
-        return  new Promise((res)=>setTimeout(res, timeout));
+        return new Promise((res)=>setTimeout(res, timeout));
     }
 
     static emptyName(message: string, value: string) {
@@ -44,7 +44,7 @@ export abstract class OpenShiftItem {
         return projectList;
     }
 
-    static async getApplicationNames(project) {
+    static async getApplicationNames(project: OpenShiftObject) {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
         if (applicationList.length === 0) {
             throw Error('You need at least one Application available. Please create new OpenShift Application and try again.');
@@ -52,7 +52,7 @@ export abstract class OpenShiftItem {
          return applicationList;
     }
 
-    static async getComponentNames(application) {
+    static async getComponentNames(application: OpenShiftObject) {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application);
         if (applicationList.length === 0) {
             throw Error('You need at least one Component available. Please create new OpenShift Component and try again.');
@@ -60,10 +60,10 @@ export abstract class OpenShiftItem {
         return applicationList;
     }
 
-    static async getServiceNames(application) {
+    static async getServiceNames(application: OpenShiftObject) {
         const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(application);
         if (serviceList.length === 0) {
-            throw Error('You need at least one Service available.');
+            throw Error('You need at least one Service available. Please create new OpenShift Service and try again.');
         }
         return serviceList;
     }
