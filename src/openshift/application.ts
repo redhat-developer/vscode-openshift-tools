@@ -6,7 +6,6 @@
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
 import * as vscode from 'vscode';
-import * as validator from 'validator';
 
 export class Application extends OpenShiftItem {
 
@@ -29,12 +28,9 @@ export class Application extends OpenShiftItem {
         return await vscode.window.showInputBox({
             prompt: "Application name",
             validateInput: (value: string) => {
-                if (validator.isEmpty(value.trim())) {
-                    return 'Empty application name';
-                }
-                if (!validator.matches(value.trim(), '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$')) {
-                    return 'Not a valid Application name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character';
-                }
+                const validationMessage = Application.emptyName('Empty application name', value.trim());
+                if (!validationMessage) return Application.validateMatches('Not a valid Application name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
+                return validationMessage;
             }
         });
     }

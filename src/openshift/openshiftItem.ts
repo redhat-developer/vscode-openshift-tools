@@ -39,6 +39,12 @@ export abstract class OpenShiftItem {
         return validator.isURL(value)? undefined : message;
     }
 
+    static validateMatches(message: string, value: string) {
+        if (!validator.matches(value, '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$')) {
+            return message;
+        }
+    }
+
     static async getProjectNames(): Promise<OpenShiftObject[]> {
         const projectList: Array<OpenShiftObject> = await OpenShiftItem.odo.getProjects();
         if (projectList.length === 0) throw Error(errorMessage.Project);
