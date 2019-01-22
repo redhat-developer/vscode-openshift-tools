@@ -16,7 +16,7 @@ suite('OpenShifItem', () => {
     const appItem = new TestItem(projectItem, 'application');
     const componentItem = new TestItem(appItem, 'component');
     const serviceItem = new TestItem(appItem, 'service');
-   
+
     setup(() => {
         sandbox = sinon.createSandbox();
     });
@@ -26,7 +26,7 @@ suite('OpenShifItem', () => {
     });
 
     suite('getProjectNames', ()=> {
-        
+
         test('returns an array of application names for the project if there is at least one project', async ()=> {
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
             const appNames = await OpenShiftItem.getProjectNames();
@@ -38,16 +38,16 @@ suite('OpenShifItem', () => {
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
             try {
                 await OpenShiftItem.getProjectNames();
-            } catch(err) {
+            } catch (err) {
                 expect(err.message).equals('You need at least one Project available. Please create new OpenShift Project and try again.');
                 return;
             }
-            fail('should throw error in case projects array is empty')
+            fail('should throw error in case projects array is empty');
         });
     });
 
     suite('getApplicationNames', ()=> {
-        
+
         test('returns an array of application names for the project if there is at least one application', async ()=> {
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
             const appNames = await OpenShiftItem.getApplicationNames(projectItem);
@@ -59,16 +59,16 @@ suite('OpenShifItem', () => {
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
             try {
                 const appNames = await OpenShiftItem.getApplicationNames(projectItem);
-            } catch(err) {
+            } catch (err) {
                 expect(err.message).equals('You need at least one Application available. Please create new OpenShift Application and try again.');
                 return;
             }
-            fail('should throw error in case applications array is empty')
+            fail('should throw error in case applications array is empty');
         });
     });
 
     suite('getComponentNames', ()=> {
-        
+
         test('returns an array of component names for the application if there is at least one component', async ()=> {
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([componentItem]);
             const componentNames = await OpenShiftItem.getComponentNames(appItem);
@@ -80,16 +80,16 @@ suite('OpenShifItem', () => {
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
             try {
                 const appNames = await OpenShiftItem.getComponentNames(projectItem);
-            } catch(err) {
+            } catch (err) {
                 expect(err.message).equals('You need at least one Component available. Please create new OpenShift Component and try again.');
                 return;
             }
-            fail('should throw error in case components array is empty')
+            fail('should throw error in case components array is empty');
         });
     });
 
     suite('getServiceNames', ()=> {
-        
+
         test('returns an array of service names for the application if there is at least one component', async ()=> {
             sandbox.stub(OdoImpl.prototype, 'getServices').resolves([serviceItem]);
             const serviceNames = await OpenShiftItem.getServiceNames(appItem);
@@ -101,11 +101,11 @@ suite('OpenShifItem', () => {
             sandbox.stub(OdoImpl.prototype, 'getServices').resolves([]);
             try {
                 await OpenShiftItem.getServiceNames(appItem);
-            } catch(err) {
+            } catch (err) {
                 expect(err.message).equals('You need at least one Service available. Please create new OpenShift Service and try again.');
                 return;
             }
-            fail('should throw error in case components array is empty')
+            fail('should throw error in case components array is empty');
         });
     });
-})
+});
