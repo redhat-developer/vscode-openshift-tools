@@ -8,6 +8,13 @@ import { OpenShiftExplorer } from '../explorer';
 import * as vscode from 'vscode';
 import * as validator from 'validator';
 
+const errorMessage = {
+    Project: 'You need at least one Project available. Please create new OpenShift Project and try again.',
+    Application: 'You need at least one Application available. Please create new OpenShift Application and try again.',
+    Component: 'You need at least one Component available. Please create new OpenShift Component and try again.',
+    Service: 'You need at least one Service available. Please create new OpenShift Service and try again.'
+};
+
 export abstract class OpenShiftItem {
     protected static readonly odo: Odo = OdoImpl.getInstance();
     protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
@@ -25,46 +32,34 @@ export abstract class OpenShiftItem {
     }
 
     static emptyName(message: string, value: string) {
-        if (validator.isEmpty(value)) {
-            return message;
-        }
+        if (validator.isEmpty(value)) return message;
     }
 
     static validateUrl(message: string, value: string) {
-        if (!validator.isURL(value)) {
-            return message;
-        }
+        if (!validator.isURL(value)) return message;
     }
 
     static async getProjectNames(): Promise<OpenShiftObject[]> {
         const projectList: Array<OpenShiftObject> = await OpenShiftItem.odo.getProjects();
-        if (projectList.length === 0) {
-           throw Error('You need at least one Project available. Please create new OpenShift Project and try again.');
-        }
+        if (!projectList.length) throw Error(errorMessage.Project);
         return projectList;
     }
 
     static async getApplicationNames(project: OpenShiftObject) {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
-        if (applicationList.length === 0) {
-            throw Error('You need at least one Application available. Please create new OpenShift Application and try again.');
-         }
-         return applicationList;
+        if (!applicationList.length) throw Error(errorMessage.Application);
+        return applicationList;
     }
 
     static async getComponentNames(application: OpenShiftObject) {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application);
-        if (applicationList.length === 0) {
-            throw Error('You need at least one Component available. Please create new OpenShift Component and try again.');
-        }
+        if (!applicationList.length) throw Error(errorMessage.Component);
         return applicationList;
     }
 
     static async getServiceNames(application: OpenShiftObject) {
         const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(application);
-        if (serviceList.length === 0) {
-            throw Error('You need at least one Service available. Please create new OpenShift Service and try again.');
-        }
+        if (!serviceList.length) throw Error(errorMessage.Service);
         return serviceList;
     }
 
@@ -72,12 +67,8 @@ export abstract class OpenShiftItem {
         let context = treeItem;
         if (!context) {
             context = await vscode.window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder});
-            if (context && appPlaceholder) {
-                context = await vscode.window.showQuickPick(OpenShiftItem.getApplicationNames(context), {placeHolder: appPlaceholder});
-            }
-            if (context && compPlaceholder) {
-                context = await vscode.window.showQuickPick(OpenShiftItem.getComponentNames(context), {placeHolder: compPlaceholder});
-            }
+            if (context && appPlaceholder) context = await vscode.window.showQuickPick(OpenShiftItem.getApplicationNames(context), {placeHolder: appPlaceholder});
+            if (context && compPlaceholder) context = await vscode.window.showQuickPick(OpenShiftItem.getComponentNames(context), {placeHolder: compPlaceholder});
         }
         return context;
     }
