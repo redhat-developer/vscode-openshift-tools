@@ -72,9 +72,7 @@ export class Cluster extends OpenShiftItem {
         const clusterURL = await vscode.window.showInputBox({
             ignoreFocusOut: true,
             prompt: "Provide URL of the cluster to connect",
-            validateInput: (value: string) => {
-                return Cluster.validateUrl('Invalid URL provided', value);
-            }
+            validateInput: (value: string) => Cluster.validateUrl('Invalid URL provided', value)
         });
         if (!clusterURL) return null;
         const loginMethod = await vscode.window.showQuickPick(['Credentials', 'Token'], {placeHolder: 'Select the way to log in to the cluster.'});
@@ -89,9 +87,7 @@ export class Cluster extends OpenShiftItem {
         const username = await vscode.window.showInputBox({
             ignoreFocusOut: true,
             prompt: "Provide Username for basic authentication to the API server",
-            validateInput: (value: string) => {
-                return Cluster.emptyName('User name cannot be empty', value);
-            }
+            validateInput: (value: string) => Cluster.emptyName('User name cannot be empty', value)
         });
         if (!username) return null;
         const passwd  = await vscode.window.showInputBox({
