@@ -1,6 +1,7 @@
 # Change Log
-## 0.0.15 (January 21, 2019)
+## 0.0.15 (January 23, 2019)
 * Provide the flexibility to use `commands` using command pallete [#269](https://github.com/redhat-developer/vscode-openshift-tools/issues/269)
+* Remove kubernetes clusters view from OpenShift Views Container
 * Fix security issues with `event-stream` module [#485](https://github.com/redhat-developer/vscode-openshift-tools/pull/485)
 * Add login handling for when ~/.kube is empty
 * Fix unhandled rejection errors in tests
