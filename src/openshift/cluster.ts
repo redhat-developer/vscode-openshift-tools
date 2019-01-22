@@ -6,7 +6,6 @@
 import { OpenShiftObject, Command } from "../odo";
 import { OpenShiftItem } from './openshiftItem';
 import * as vscode from 'vscode';
-import * as validator from 'validator';
 import { CliExitData } from "../cli";
 import opn = require("opn");
 
