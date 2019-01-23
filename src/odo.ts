@@ -80,8 +80,8 @@ export const Command = {
         `odo log ${component} -f --app ${app} --project ${project}`,
     listComponentPorts: (project: string, app: string, component: string) =>
         `oc get service ${component}-${app} --namespace ${project} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`,
-    linkComponentTo: (project: string, app: string, component: string, componentToLink: string) =>
-        `odo project set ${project} && odo application set ${app} && odo component set ${component} && odo link ${componentToLink} --wait`,
+    linkComponentTo: (project: string, app: string, component: string, componentToLink: string, port?: string) =>
+        `odo project set ${project} && odo application set ${app} && odo component set ${component} && odo link ${componentToLink} --wait${port ? ' --port ' + port : ''}`,
     pushComponent: (project: string, app: string, component: string) =>
         `odo push ${component} --app ${app} --project ${project}`,
     pushLocalComponent: (project: string, app: string, component: string, location: string) =>

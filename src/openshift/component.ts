@@ -121,7 +121,7 @@ export class Component extends OpenShiftItem {
         }
 
         return Promise.resolve()
-            .then(() => Component.odo.execute(Command.linkComponentTo(project.getName(), app.getName(), context.getName(), componentToLink.getName())))
+            .then(() => Component.odo.execute(Command.linkComponentTo(project.getName(), app.getName(), context.getName(), componentToLink.getName(), port)))
             .then(() => `component '${componentToLink.getName()}' successfully linked with component '${context.getName()}'`)
             .catch((err) => Promise.reject(`Failed to link component with error '${err}'`));
     }
