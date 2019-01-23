@@ -28,21 +28,19 @@ export abstract class OpenShiftItem {
     }
 
     static wait(timeout: number = 2500): Promise<void> {
-        return new Promise((res)=>setTimeout(res, timeout));
+        return new Promise((res) => setTimeout(res, timeout));
     }
 
     static emptyName(message: string, value: string) {
-        return validator.isEmpty(value)? message : undefined;
+        return validator.isEmpty(value) ? message : undefined;
     }
 
     static validateUrl(message: string, value: string) {
-        return validator.isURL(value)? undefined : message;
+        return validator.isURL(value) ? undefined : message;
     }
 
     static validateMatches(message: string, value: string) {
-        if (!validator.matches(value, '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$')) {
-            return message;
-        }
+        return (validator.matches(value, '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$')) ? undefined : message;
     }
 
     static async getProjectNames(): Promise<OpenShiftObject[]> {

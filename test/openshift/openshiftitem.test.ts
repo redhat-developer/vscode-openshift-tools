@@ -46,6 +46,22 @@ suite('OpenShifItem', () => {
         });
     });
 
+    suite('validateMatches', ()=> {
+
+        test('returns validation message if provided value is not in lower case alphanumeric characters or "-"', async ()=> {
+            const message = 'Not a valid Application name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character';
+            const appNames = await OpenShiftItem.validateMatches(message, 'Nodejs-app');
+            expect(appNames).equals(message);
+
+        });
+
+        test('returns undefined if provided value is in lower case alphanumeric characters', async ()=> {
+            const message = 'Not a valid Application name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character';
+            const validateMatches = await OpenShiftItem.validateMatches(message, 'nodejs-app');
+            expect(validateMatches).equals(undefined);
+        });
+    });
+
     suite('getApplicationNames', ()=> {
 
         test('returns an array of application names for the project if there is at least one application', async ()=> {
