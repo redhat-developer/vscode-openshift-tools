@@ -96,7 +96,7 @@ suite('Openshift/Application', () => {
             quickPickStub.restore();
             getProjectNamesStub.restore();
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
-            const errorStub = sandbox.stub(vscode.window, 'showErrorMessage');
+            sandbox.stub(vscode.window, 'showErrorMessage');
             try {
                 await Application.create(null);
             } catch (err) {

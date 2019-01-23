@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as odo from '../src/odo';
 import { CliExitData, Cli } from '../src/cli';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
@@ -18,7 +17,6 @@ import * as fsex from 'fs-extra';
 import * as hasha from 'hasha';
 
 suite("tools configuration", () => {
-    const odoCli: odo.Odo = odo.OdoImpl.getInstance();
     let sb: sinon.SinonSandbox;
     let chmodSyncStub: sinon.SinonStub;
 
@@ -166,11 +164,11 @@ suite("tools configuration", () => {
                 sb.stub(shelljs, 'which');
                 sb.stub(fs, 'existsSync').returns(true);
                 sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-                const showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
+                sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
                 const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
                 stub.onSecondCall().returns(ToolsConfig.tools['oc'].sha256sum);
                 sb.stub(Archive, 'unzip').resolves();
-                const toolLocation = await ToolsConfig.detectOrDownload('odo');
+                await ToolsConfig.detectOrDownload('odo');
                 assert.ok(!chmodSyncStub.called);
             });
         });
@@ -186,10 +184,10 @@ suite("tools configuration", () => {
             test('set executable attribute for tool file', async () => {
                 sb.stub(shelljs, 'which');
                 sb.stub(fs, 'existsSync').returns(false);
-                const showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
-                const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
+                sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
+                sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
                 sb.stub(Archive, 'unzip').resolves();
-                const toolLocation = await ToolsConfig.detectOrDownload('odo');
+                await ToolsConfig.detectOrDownload('odo');
                 assert.ok(chmodSyncStub.called);
             });
         });

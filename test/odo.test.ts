@@ -204,7 +204,7 @@ suite("odo", () => {
             execStub.resolves({error: new Error(), stdout, stderr: ''});
             let e;
             try {
-                const result = await odoCli.getServiceTemplates();
+                await odoCli.getServiceTemplates();
             } catch (err) {
                 e = err;
             }
