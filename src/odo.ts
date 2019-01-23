@@ -156,7 +156,7 @@ class OpenShiftObjectImpl implements OpenShiftObject {
          public readonly name: string,
          public readonly contextValue: ContextType,
          private readonly odo: Odo,
-         private readonly collapsibleState: TreeItemCollapsibleState = TreeItemCollapsibleState.Collapsed) {
+         public readonly collapsibleState: TreeItemCollapsibleState = TreeItemCollapsibleState.Collapsed) {
 
     }
 

@@ -58,7 +58,7 @@ suite('OpenShifItem', () => {
         test('throws error if there are no applications available', async ()=> {
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
             try {
-                const appNames = await OpenShiftItem.getApplicationNames(projectItem);
+                await OpenShiftItem.getApplicationNames(projectItem);
             } catch (err) {
                 expect(err.message).equals('You need at least one Application available. Please create new OpenShift Application and try again.');
                 return;
@@ -79,7 +79,7 @@ suite('OpenShifItem', () => {
         test('throws error if there are no components available', async ()=> {
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
             try {
-                const appNames = await OpenShiftItem.getComponentNames(projectItem);
+                await OpenShiftItem.getComponentNames(projectItem);
             } catch (err) {
                 expect(err.message).equals('You need at least one Component available. Please create new OpenShift Component and try again.');
                 return;

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { OpenShiftObject, Odo, OdoImpl, Command } from '../odo';
+import { OpenShiftObject, Command } from '../odo';
 import * as vscode from 'vscode';
 import { Component } from '../openshift/component';
 import { V1ServicePort } from '@kubernetes/client-node';

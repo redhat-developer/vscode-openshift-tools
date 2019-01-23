@@ -5,7 +5,6 @@
             true, "allow-declarations", "allow-named-functions"
         ],
         "no-var-keyword": true,
-        "no-unused-variable": true,
         "object-literal-key-quotes": [
             true, "as-needed"
         ],

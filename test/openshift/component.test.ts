@@ -22,7 +22,7 @@ suite('Openshift/Component', () => {
     let quickPickStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
     let termStub: sinon.SinonStub, execStub: sinon.SinonStub;
-    let getProjectsStub: sinon.SinonStub, getApplicationsStub: sinon.SinonStub, getComponentsStub: sinon.SinonStub;
+    let getComponentsStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'application');
     const componentItem = new TestItem(appItem, 'component');
@@ -34,8 +34,8 @@ suite('Openshift/Component', () => {
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({stdout: ""});
         sandbox.stub(OdoImpl.prototype, 'getServices');
-        getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
-        getApplicationsStub = sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
+        sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+        sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
         getComponentsStub = sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
         sandbox.stub(Component, 'wait').resolves();
         sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
@@ -50,9 +50,7 @@ suite('Openshift/Component', () => {
     suite('create component with no context', () => {
         const componentType = 'nodejs';
         const folder = { uri: { fsPath: 'folder' } };
-        let inputStub: sinon.SinonStub,
-            progressStub: sinon.SinonStub,
-            progressCmdStub: sinon.SinonStub;
+        let inputStub: sinon.SinonStub;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -60,8 +58,8 @@ suite('Openshift/Component', () => {
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves('Workspace Directory');
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
-            progressStub = sandbox.stub(Progress, 'execWithProgress').resolves();
-            progressCmdStub = sandbox.stub(Progress, 'execCmdWithProgress').resolves();
+            sandbox.stub(Progress, 'execWithProgress').resolves();
+            sandbox.stub(Progress, 'execCmdWithProgress').resolves();
         });
 
         test('errors when a subcommand fails', async () => {
@@ -114,13 +112,12 @@ suite('Openshift/Component', () => {
         });
 
         suite('from git repository', () => {
-            let infoStub: sinon.SinonStub;
 
             setup(() => {
                 quickPickStub.onFirstCall().resolves(projectItem);
                 quickPickStub.onSecondCall().resolves(appItem);
                 quickPickStub.onThirdCall().resolves({ label: 'Git Repository' });
-                infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves();
+                sandbox.stub(vscode.window, 'showInformationMessage').resolves();
             });
 
             test('happy path works', async () => {
@@ -209,7 +206,6 @@ suite('Openshift/Component', () => {
         const version = 'latest';
         const folder = { uri: { fsPath: 'folder' } };
         let inputStub: sinon.SinonStub,
-            progressStub: sinon.SinonStub,
             progressCmdStub: sinon.SinonStub;
 
         setup(() => {
@@ -218,7 +214,7 @@ suite('Openshift/Component', () => {
             quickPickStub.onSecondCall().resolves(componentType);
             quickPickStub.onThirdCall().resolves(version);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
-            progressStub = sandbox.stub(Progress, 'execWithProgress').resolves();
+            sandbox.stub(Progress, 'execWithProgress').resolves();
             progressCmdStub = sandbox.stub(Progress, 'execCmdWithProgress').resolves();
         });
 
@@ -393,14 +389,13 @@ suite('Openshift/Component', () => {
     });
 
     suite('del', () => {
-        let warnStub: sinon.SinonStub;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
-            warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+            sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
             execStub.resolves({error: undefined, stdout: '', stderr: ''});
         });
 
