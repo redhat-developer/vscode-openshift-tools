@@ -14,7 +14,9 @@ export class Project extends OpenShiftItem {
         let projectName = await vscode.window.showInputBox({
             prompt: "Mention Project name",
             validateInput: (value: string) => {
-                return Project.validateName(value);
+                const validationMessage = Project.validateName(value);
+                if (!validationMessage) return Project.validateMatches('Not a valid project name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
+                return validationMessage;
             }
         });
         if (!projectName) return null;
