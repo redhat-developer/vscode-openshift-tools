@@ -47,9 +47,9 @@ suite('Openshift/Storage', () => {
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
-            getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
-            sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
-            sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
+            getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem, projectItem]);
+            sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem, appItem]);
+            sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem, componentItem]);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
             inputStub.onFirstCall().resolves(storageItem.getName());
             inputStub.onSecondCall().resolves(mountPath);
@@ -256,10 +256,10 @@ suite('Openshift/Storage', () => {
         let warnStub: sinon.SinonStub;
 
         setup(() => {
-            getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
-            sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
-            sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
-            sandbox.stub(OpenShiftItem, 'getStorageNames').resolves([storageItem]);
+            getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem, projectItem]);
+            sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem, appItem]);
+            sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem, componentItem]);
+            sandbox.stub(OpenShiftItem, 'getStorageNames').resolves([storageItem, storageItem]);
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);

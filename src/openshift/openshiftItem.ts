@@ -77,9 +77,19 @@ export abstract class OpenShiftItem {
     static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder?: string, compPlaceholder?: string) {
         let context = treeItem;
         if (!context) {
-            context = await window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder});
-            if (context && appPlaceholder) context = await window.showQuickPick(OpenShiftItem.getApplicationNames(context), {placeHolder: appPlaceholder});
-            if (context && compPlaceholder) context = await window.showQuickPick(OpenShiftItem.getComponentNames(context), {placeHolder: compPlaceholder});
+            const project = await OpenShiftItem.getProjectNames();
+            if (project.length === 1) context = project[0];
+            else context = await window.showQuickPick(project, {placeHolder: projectPlaceholder});
+            if (context && appPlaceholder) {
+                const application = await OpenShiftItem.getApplicationNames(context);
+                if (application.length === 1) context = application[0];
+                else context = await window.showQuickPick(application, {placeHolder: appPlaceholder});
+            }
+            if (context && compPlaceholder) {
+                const component = await OpenShiftItem.getComponentNames(context);
+                if (component.length === 1) context = component[0];
+                else context = await window.showQuickPick(component, {placeHolder: compPlaceholder});
+            }
         }
         return context;
     }

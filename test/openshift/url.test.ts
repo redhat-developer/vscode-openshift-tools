@@ -155,9 +155,9 @@ suite('Openshift/URL', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-        getProjectsNameStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
-        sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
-        sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([appItem]);
+        getProjectsNameStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem, projectItem]);
+        sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem, appItem]);
+        sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem, componentItem]);
     });
 
     teardown(() => {

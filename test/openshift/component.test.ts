@@ -38,10 +38,9 @@ suite('Openshift/Component', () => {
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
         getComponentsStub = sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
         sandbox.stub(Component, 'wait').resolves();
-        sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
-        sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
-        sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
-        sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
+        sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem, projectItem]);
+        sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem, appItem]);
+        sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem, componentItem]);
     });
 
     teardown(() => {
@@ -407,13 +406,6 @@ suite('Openshift/Component', () => {
             expect(execStub).calledOnceWith(`odo delete ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`);
         });
 
-        test('works with no context', async () => {
-            const result = await Component.del(null);
-
-            expect(result).equals(`Component '${componentItem.getName()}' successfully deleted`);
-            expect(execStub).calledOnceWith(`odo delete ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`);
-        });
-
         test('wraps errors in additional info', async () => {
             execStub.rejects(errorMessage);
 
@@ -422,6 +414,26 @@ suite('Openshift/Component', () => {
             } catch (err) {
                 expect(err).equals(`Failed to delete component with error '${errorMessage}'`);
             }
+        });
+
+    });
+
+    suite('delete component with no context', () => {
+
+        setup(() => {
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onThirdCall().resolves(componentItem);
+            sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+            execStub.resolves({error: undefined, stdout: '', stderr: ''});
+        });
+
+        test('works with no context', async () => {
+            const result = await Component.del(null);
+
+            expect(result).equals(`Component '${componentItem.getName()}' successfully deleted`);
+            expect(execStub).calledOnceWith(`odo delete ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`);
         });
 
         test('returns null when no project is selected', async () => {
