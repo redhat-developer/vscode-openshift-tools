@@ -10,7 +10,8 @@
         "html",
         "text",
         "cobertura",
-        "json"
+        "json",
+        "lcov"
     ],
     "verbose": false
 }
