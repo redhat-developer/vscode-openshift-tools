@@ -95,7 +95,7 @@ suite("tools configuration", () => {
             sb.stub(shelljs, 'which');
             sb.stub(fs, 'existsSync').returns(true);
             sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-            const showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
+            const showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves(`Download and install v${ToolsConfig.tools['odo'].version}`);
             const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
             stub.onSecondCall().returns(ToolsConfig.tools['oc'].sha256sum);
             sb.stub(Archive, 'unzip').resolves();
@@ -103,6 +103,7 @@ suite("tools configuration", () => {
             assert.ok(showInfo.calledOnce);
             assert.ok(withProgress.calledOnce);
             assert.equal( toolLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools['odo'].cmdFileName));
+            showInfo.resolves(`Download and install v${ToolsConfig.tools['oc'].version}`);
             toolLocation = await ToolsConfig.detectOrDownload('oc');
             assert.ok(showInfo.calledTwice);
             assert.ok(withProgress.calledTwice);
@@ -123,7 +124,7 @@ suite("tools configuration", () => {
             sb.stub(shelljs, 'which');
             sb.stub(fs, 'existsSync').returns(true);
             sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-            const showInfo = sb.stub(vscode.window, 'showInformationMessage').onFirstCall().resolves('Download and install');
+            const showInfo = sb.stub(vscode.window, 'showInformationMessage').onFirstCall().resolves(`Download and install v${ToolsConfig.tools['odo'].version}`);
             showInfo.onSecondCall().resolves('Download again');
             const fromFile = sb.stub(hasha, 'fromFile').onFirstCall().resolves('not really sha256');
             fromFile.onSecondCall().returns(ToolsConfig.tools['odo'].sha256sum);
@@ -139,7 +140,7 @@ suite("tools configuration", () => {
             sb.stub(shelljs, 'which');
             sb.stub(fs, 'existsSync').returns(true);
             sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-            const showInfo = sb.stub(vscode.window, 'showInformationMessage').onFirstCall().resolves('Download and install');
+            const showInfo = sb.stub(vscode.window, 'showInformationMessage').onFirstCall().resolves(`Download and install v${ToolsConfig.tools['odo'].version}`);
             showInfo.onSecondCall().resolves('Cancel');
             const fromFile = sb.stub(hasha, 'fromFile').onFirstCall().resolves('not really sha256');
             fromFile.onSecondCall().returns(ToolsConfig.tools['odo'].sha256sum);
@@ -164,7 +165,7 @@ suite("tools configuration", () => {
                 sb.stub(shelljs, 'which');
                 sb.stub(fs, 'existsSync').returns(true);
                 sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-                sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
+                sb.stub(vscode.window, 'showInformationMessage').resolves(`Download and install v${ToolsConfig.tools['odo'].version}`);
                 const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
                 stub.onSecondCall().returns(ToolsConfig.tools['oc'].sha256sum);
                 sb.stub(Archive, 'unzip').resolves();
@@ -184,7 +185,7 @@ suite("tools configuration", () => {
             test('set executable attribute for tool file', async () => {
                 sb.stub(shelljs, 'which');
                 sb.stub(fs, 'existsSync').returns(false);
-                sb.stub(vscode.window, 'showInformationMessage').resolves('Download and install');
+                sb.stub(vscode.window, 'showInformationMessage').resolves(`Download and install v${ToolsConfig.tools['odo'].version}`);
                 sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
                 sb.stub(Archive, 'unzip').resolves();
                 await ToolsConfig.detectOrDownload('odo');
