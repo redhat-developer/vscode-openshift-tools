@@ -14,6 +14,7 @@ import * as path from 'path';
 import * as fsex from 'fs-extra';
 import * as fs from 'fs';
 import { Cli } from './cli';
+import semver = require('semver');
 
 const configData = {
     odo: {
@@ -21,6 +22,8 @@ const configData = {
         vendor: "Red Hat, Inc.",
         name: "odo",
         version: "0.0.16",
+        versionRange: "0.0.16",
+        versionRangeLabel: "v0.0.16",
         dlFileName: "odo",
         cmdFileName: "odo",
         filePrefix: "",
@@ -49,6 +52,8 @@ const configData = {
         name: "oc",
         cmdFileName: "oc",
         version: "3.9.0",
+        versionRange: "^3.9.0",
+        versionRangeLabel: "version >= 3.9.0 and < 4.0.0",
         filePrefix: "",
         platform: {
             win32: {
@@ -104,15 +109,16 @@ export class ToolsConfig {
             const toolCacheLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools[cmd].cmdFileName);
             const whichLocation = which(cmd);
             const toolLocations: string[] = [whichLocation ? whichLocation.stdout : null, toolCacheLocation];
-            toolLocation = await ToolsConfig.selectTool(toolLocations, ToolsConfig.tools[cmd].version);
+            toolLocation = await ToolsConfig.selectTool(toolLocations, ToolsConfig.tools[cmd].versionRange);
 
             if (toolLocation === undefined) {
                 // otherwise request permission to download
                 const toolDlLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools[cmd].dlFileName);
+                const installRequest = `Download and install v${ToolsConfig.tools[cmd].version}`;
                 const response = await vscode.window.showInformationMessage(
-                    `Cannot find ${ToolsConfig.tools[cmd].description} v${ToolsConfig.tools[cmd].version}.`, 'Download and install', 'Help', 'Cancel');
+                    `Cannot find ${ToolsConfig.tools[cmd].description} ${ToolsConfig.tools[cmd].versionRangeLabel}.`, installRequest, 'Help', 'Cancel');
                 fsex.ensureDirSync(path.resolve(Platform.getUserHomePath(), '.vs-openshift'));
-                if (response === 'Download and install') {
+                if (response === installRequest) {
                     let action: string;
                     do {
                         action = undefined;
@@ -176,10 +182,10 @@ export class ToolsConfig {
         return detectedVersion;
     }
 
-    public static async selectTool(locations: string[], correctVersion: string): Promise<string> {
+    public static async selectTool(locations: string[], versionRange: string): Promise<string> {
         let result;
         for (const location of locations) {
-            if (location && await ToolsConfig.getVersion(location) === correctVersion) {
+            if (location && semver.satisfies(await ToolsConfig.getVersion(location), versionRange)) {
                 result = location;
                 break;
             }
