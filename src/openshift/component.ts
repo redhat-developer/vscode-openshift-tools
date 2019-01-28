@@ -131,15 +131,19 @@ export class Component extends OpenShiftItem {
     }
 
     static async linkService(context: OpenShiftObject): Promise<String> {
-        const app: OpenShiftObject = context.getParent();
-        const project: OpenShiftObject = app.getParent();
-        const serviceToLink: OpenShiftObject = await vscode.window.showQuickPick(Component.odo.getServices(app), {placeHolder: "Select the service to link"});
-        if (!serviceToLink) return null;
+        const component = await Component.getOpenShiftCmdData(context,
+            'Select a Project',
+            'Select an Application',
+            'Select a Component');
+        if (component) {
+            const serviceToLink: OpenShiftObject = await vscode.window.showQuickPick(Component.getServiceNames(component.getParent()), {placeHolder: "Select the service to link"});
+            if (!serviceToLink) return null;
 
-        return Promise.resolve()
-        .then(() => Component.odo.execute(Command.linkComponentTo(project.getName(), app.getName(), context.getName(), serviceToLink.getName())))
-        .then(() => `service '${serviceToLink.getName()}' successfully linked with component '${context.getName()}'`)
-        .catch((err) => Promise.reject(`Failed to link service with error '${err}'`));
+            return Promise.resolve()
+            .then(() => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), serviceToLink.getName())))
+            .then(() => `service '${serviceToLink.getName()}' successfully linked with component '${component.getName()}'`)
+            .catch((err) => Promise.reject(`Failed to link service with error '${err}'`));
+        }
     }
 
     static async push(context: OpenShiftObject) {

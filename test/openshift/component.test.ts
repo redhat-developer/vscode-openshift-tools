@@ -610,6 +610,44 @@ suite('Openshift/Component', () => {
         });
     });
 
+    suite('linkService with no context', () => {
+
+        setup(() => {
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onThirdCall().resolves(componentItem);
+        });
+
+        test('works from context menu', async () => {
+            quickPickStub.resolves(serviceItem);
+            const result = await Component.linkService(null);
+
+            expect(result).equals(`service '${serviceItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
+            expect(execStub).calledOnceWith(`odo project set ${projectItem.getName()} && odo application set ${appItem.getName()} && odo component set ${componentItem.getName()} && odo link ${serviceItem.getName()} --wait`);
+        });
+
+        test('returns null when no service selected to link', async () => {
+            quickPickStub.resolves();
+            const result = await Component.linkService(null);
+
+            expect(result).null;
+        });
+
+        test('errors when a subcommand fails', async () => {
+            quickPickStub.resolves(componentItem);
+            execStub.rejects(errorMessage);
+            let savedErr;
+
+            try {
+                await Component.linkService(null);
+            } catch (err) {
+                savedErr = err;
+            }
+            expect(savedErr).equals(`Failed to link service with error '${errorMessage}'`);
+        });
+    });
+
     suite('describe', () => {
 
         setup(() => {
