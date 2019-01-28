@@ -310,10 +310,6 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
-          "command": "openshift.component.linkComponent",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
           "command": "openshift.component.linkService",
           "when": "view == openshiftProjectExplorer"
         },

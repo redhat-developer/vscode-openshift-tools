@@ -100,30 +100,34 @@ export class Component extends OpenShiftItem {
     }
 
     static async linkComponent(context: OpenShiftObject): Promise<String> {
-        const app: OpenShiftObject = context.getParent();
-        const project: OpenShiftObject = app.getParent();
-        const componentPresent = await Component.odo.getComponents(app);
-        if (componentPresent.length === 1) throw Error('You have no Components available to link, please create new OpenShift Component and try again.');
-        const componentToLink = await vscode.window.showQuickPick(componentPresent.filter((comp)=> comp.getName() !== context.getName()), {placeHolder: "Select the component to link"});
-        if (!componentToLink) return null;
+        const component = await Component.getOpenShiftCmdData(context,
+            'Select a Project',
+            'Select an Application',
+            'Select a Component');
+        if (component) {
+            const componentPresent = await Component.odo.getComponents(component.getParent());
+            if (componentPresent.length === 1) throw Error('You have no Components available to link, please create new OpenShift Component and try again.');
+            const componentToLink = await vscode.window.showQuickPick(componentPresent.filter((comp)=> comp.getName() !== component.getName()), {placeHolder: "Select the component to link"});
+            if (!componentToLink) return null;
 
-        const portsResult: CliExitData = await Component.odo.execute(Command.listComponentPorts(project.getName(), app.getName(), componentToLink.getName()));
+            const portsResult: CliExitData = await Component.odo.execute(Command.listComponentPorts(component.getParent().getParent().getName(), component.getParent().getName(), componentToLink.getName()));
 
-        let ports: string[] = portsResult.stdout.trim().split(',');
-        ports = ports.slice(0, ports.length-1);
-        let port: string;
-        if (ports.length === 1) {
-            port = ports[0];
-        } else if (ports.length > 1) {
-            port = await vscode.window.showQuickPick(ports, {placeHolder: "Select port to link"});
-        } else {
-            return Promise.reject(`Component '${context.getName()}' has no ports decalred.`);
+            let ports: string[] = portsResult.stdout.trim().split(',');
+            ports = ports.slice(0, ports.length-1);
+            let port: string;
+            if (ports.length === 1) {
+                port = ports[0];
+            } else if (ports.length > 1) {
+                port = await vscode.window.showQuickPick(ports, {placeHolder: "Select port to link"});
+            } else {
+                return Promise.reject(`Component '${component.getName()}' has no ports decalred.`);
+            }
+
+            return Promise.resolve()
+                .then(() => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), componentToLink.getName(), port)))
+                .then(() => `component '${componentToLink.getName()}' successfully linked with component '${component.getName()}'`)
+                .catch((err) => Promise.reject(`Failed to link component with error '${err}'`));
         }
-
-        return Promise.resolve()
-            .then(() => Component.odo.execute(Command.linkComponentTo(project.getName(), app.getName(), context.getName(), componentToLink.getName(), port)))
-            .then(() => `component '${componentToLink.getName()}' successfully linked with component '${context.getName()}'`)
-            .catch((err) => Promise.reject(`Failed to link component with error '${err}'`));
     }
 
     static async linkService(context: OpenShiftObject): Promise<String> {
