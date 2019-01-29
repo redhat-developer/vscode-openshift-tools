@@ -41,33 +41,19 @@ export class Storage extends OpenShiftItem {
         }
     }
 
-    static async del(treeItem: OpenShiftObject): Promise<string> {
-        let project: OpenShiftObject;
-        let component: OpenShiftObject;
-        let application: OpenShiftObject;
-        let storage: OpenShiftObject = treeItem;
-        if (!storage) {
-            project = await vscode.window.showQuickPick(Storage.odo.getProjects(), {placeHolder: "From which Project you want to delete Storage"});
-            if (project) {
-                application = await vscode.window.showQuickPick(Storage.odo.getApplications(project), {placeHolder: "From which Application you want to delete Storage"});
-            }
-            if (application) {
-                component = await vscode.window.showQuickPick(Storage.odo.getComponents(application), {placeHolder: "From which Component you want ot delete Storage"});
-            }
-            if (component) {
-                storage = await vscode.window.showQuickPick(Storage.odo.getStorageNames(component), {placeHolder: "Select Storage to delete"});
-            }
-        }
+    static async del(storage: OpenShiftObject): Promise<string> {
+        const component = await Storage.getOpenShiftCmdData(storage,
+            "From which Project you want to delete Storage",
+            "From which Application you want to delete Storage",
+            "From which Component you want to delete Storage");
+        if (!storage && component) storage = await vscode.window.showQuickPick(Storage.getStorageNames(component), {placeHolder: "Select Service to delete"});
         if (storage) {
-            const component: OpenShiftObject = storage.getParent();
-            const app: OpenShiftObject = component.getParent();
-            project = app.getParent();
-            const value = await vscode.window.showWarningMessage(`Do you want to delete Storage '${storage.getName()}' from Component '${component.getName()}'?`, 'Yes', 'Cancel');
+            const value = await vscode.window.showWarningMessage(`Do you want to delete Storage '${storage.getName()}' from Component '${storage.getParent().getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 return Promise.resolve()
-                    .then(() => Storage.odo.execute(Command.deleteStorage(project.getName(), app.getName(), component.getName(), storage.getName())))
-                    .then(() => Storage.explorer.refresh(treeItem ? component : undefined))
-                    .then(() => `Storage '${storage.getName()}' from Component '${component.getName()}' successfully deleted`)
+                    .then(() => Storage.odo.execute(Command.deleteStorage(storage.getParent().getParent().getParent().getName(), storage.getParent().getParent().getName(), storage.getParent().getName(), storage.getName())))
+                    .then(() => Storage.explorer.refresh())
+                    .then(() => `Storage '${storage.getName()}' from Component '${storage.getParent().getName()}' successfully deleted`)
                     .catch((err) => Promise.reject(`Failed to delete Storage with error '${err}'`));
             }
         }

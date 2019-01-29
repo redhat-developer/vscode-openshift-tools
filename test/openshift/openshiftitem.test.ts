@@ -23,6 +23,7 @@ suite('OpenShifItem', () => {
     const appItem = new TestItem(projectItem, 'application');
     const componentItem = new TestItem(appItem, 'component');
     const serviceItem = new TestItem(appItem, 'service');
+    const storageItem = new TestItem(componentItem, 'storage');
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -126,6 +127,27 @@ suite('OpenShifItem', () => {
                 await OpenShiftItem.getServiceNames(appItem);
             } catch (err) {
                 expect(err.message).equals('You need at least one Service available. Please create new OpenShift Service and try again.');
+                return;
+            }
+            fail('should throw error in case components array is empty');
+        });
+    });
+
+    suite('getStorageNames', ()=> {
+
+        test('returns an array of storage names for the component if there is at least one component', async ()=> {
+            sandbox.stub(OdoImpl.prototype, 'getStorageNames').resolves([storageItem]);
+            const storageNames = await OpenShiftItem.getStorageNames(componentItem);
+            expect(storageNames[0].getName()).equals('storage');
+
+        });
+
+        test('throws error if there are no components available', async ()=> {
+            sandbox.stub(OdoImpl.prototype, 'getStorageNames').resolves([]);
+            try {
+                await OpenShiftItem.getStorageNames(componentItem);
+            } catch (err) {
+                expect(err.message).equals('You need at least one Storage available. Please create new OpenShift Storage and try again.');
                 return;
             }
             fail('should throw error in case components array is empty');
