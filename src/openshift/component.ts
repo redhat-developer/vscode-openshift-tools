@@ -193,6 +193,7 @@ export class Component extends OpenShiftItem {
             prompt: "Component name",
             validateInput: async (value: string) => {
                 let validationMessage = Component.emptyName('Empty Component name', value.trim());
+                if (!validationMessage) validationMessage = Component.validateMatches('Not a valid Component name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
                 if (!validationMessage) validationMessage = await Component.validateComponentName(value.trim(), application);
                 return validationMessage;
             }
