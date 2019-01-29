@@ -125,7 +125,7 @@ suite("odo", () => {
             execStub.resolves({ stdout: odoProjects.join('\n'), stderr: '', error: null });
             const result = await odoCli.getProjects();
 
-            expect(execStub).calledOnceWith('oc get project -o jsonpath="{range .items[*]}{.metadata.name}{\\"\\n\\"}{end}"');
+            expect(execStub).calledOnceWith(odo.Command.listProjects());
             expect(result.length).equals(3);
             for (let i = 1; i < result.length; i++) {
                 expect(result[i].getName()).equals(odoProjects[i]);
