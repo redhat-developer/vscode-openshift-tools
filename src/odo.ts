@@ -33,7 +33,7 @@ export enum ContextType {
 
 export const Command = {
     listProjects: () =>
-        'oc get project -o jsonpath="{range .items[*]}{.metadata.name}{\\"\\n\\"}{end}"',
+        'oc get project -o jsonpath="{range .items[?(.status.phase == \\"Active\\" )]}{.metadata.name}{\\"\\n\\"}{end}"',
     deleteProject: (name: string) =>
         `odo project delete ${name} -f`,
     createProject: (name: string) =>
