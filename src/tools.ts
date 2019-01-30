@@ -21,27 +21,27 @@ const configData = {
         description: "OpenShift Do CLI tool",
         vendor: "Red Hat, Inc.",
         name: "odo",
-        version: "0.0.16",
-        versionRange: "0.0.16",
-        versionRangeLabel: "v0.0.16",
+        version: "0.0.18",
+        versionRange: "0.0.18",
+        versionRangeLabel: "v0.0.18",
         dlFileName: "odo",
         cmdFileName: "odo",
         filePrefix: "",
         platform: {
             win32: {
-                url: "https://github.com/redhat-developer/odo/releases/download/v0.0.16/odo-windows-amd64.exe.gz",
-                sha256sum: "928113563d5e27db2d1c9565e539230353c01a182c7e95f4f718dab2e1f24f37",
+                url: "https://github.com/redhat-developer/odo/releases/download/v0.0.18/odo-windows-amd64.exe.gz",
+                sha256sum: "c65773ce18583b8a4ff80be6e6c4ce2ff3b12435962b9935425e10d94a9843ab",
                 dlFileName: "odo-windows-amd64.exe.gz",
                 cmdFileName: "odo.exe"
             },
             darwin: {
-                url: "https://github.com/redhat-developer/odo/releases/download/v0.0.16/odo-darwin-amd64.gz",
-                sha256sum: "854cea5e3bcc70aed43607fa227acacbb13dd39a5096c3f285508338bae7afac",
+                url: "https://github.com/redhat-developer/odo/releases/download/v0.0.18/odo-darwin-amd64.gz",
+                sha256sum: "b0c786d24e5aa1fe61eaf60915d01e2f079e14b955c85faa455e80221278887c",
                 dlFileName: "odo-darwin-amd64.gz"
             },
             linux: {
-                url: "https://github.com/redhat-developer/odo/releases/download/v0.0.16/odo-linux-amd64.gz",
-                sha256sum: "e9ef7d553939f0ad8c70af9a0124766ada04c27b4923d7993db51e9a07a7ad32",
+                url: "https://github.com/redhat-developer/odo/releases/download/v0.0.18/odo-linux-amd64.gz",
+                sha256sum: "9127567c9fee8fd131509495b2888eb4bf7f12085c7932b783d7b18b32d99d11",
                 dlFileName: "odo-linux-amd64.gz"
             }
         }
