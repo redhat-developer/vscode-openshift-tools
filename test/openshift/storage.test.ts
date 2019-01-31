@@ -256,6 +256,10 @@ suite('Openshift/Storage', () => {
         let warnStub: sinon.SinonStub;
 
         setup(() => {
+            getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
+            sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
+            sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
+            sandbox.stub(OpenShiftItem, 'getStorageNames').resolves([storageItem]);
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
