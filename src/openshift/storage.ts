@@ -35,7 +35,7 @@ export class Storage extends OpenShiftItem {
 
             return Promise.resolve()
                 .then(() => Storage.odo.execute(Command.createStorage(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), storageName, mountPath, storageSize)))
-                .then(() => Storage.explorer.refresh())
+                .then(() => Storage.explorer.refresh(context ? context : undefined))
                 .then(() => `Storage '${storageName}' successfully created for Component '${component.getName()}'`)
                 .catch((err) => Promise.reject(`New Storage command failed with error: '${err}'!`));
 
