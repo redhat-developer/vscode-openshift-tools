@@ -104,6 +104,8 @@ export const Command = {
         `odo service create ${template} --plan ${plan} ${name} --app ${app} --project ${project}`,
     deleteService: (project: string, app: string, name: string) =>
         `odo service delete ${name} -f --project ${project} --app ${app}`,
+    waitForServiceToBeGone: (project: string, service: string) =>
+        `oc wait ServiceInstance/${service} --for delete --namespace ${project}`,
     createCompontentUrl: (project: string, app: string, component: string, port: string) =>
         `odo url create --port ${port} --project ${project} --app ${app} --component ${component}`,
     getComponentJson: (project: string, app: string, component: string) =>
