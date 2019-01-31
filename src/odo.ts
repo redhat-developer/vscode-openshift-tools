@@ -36,6 +36,8 @@ export const Command = {
         'oc get project -o jsonpath="{range .items[?(.status.phase == \\"Active\\" )]}{.metadata.name}{\\"\\n\\"}{end}"',
     deleteProject: (name: string) =>
         `odo project delete ${name} -f`,
+    waitForProjectToBeGone: (project: string) =>
+        `oc wait project/${project} --for delete`,
     createProject: (name: string) =>
         `odo project create ${name}`,
     listComponents: (project: string, app: string) =>
@@ -381,7 +383,7 @@ export class OdoImpl implements Odo {
         return OdoImpl.cli.execute(
             toolLocation ? command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`) : command,
             cwd ? {cwd} : { }
-        ).then(async (result) => result.error && fail ?  Promise.reject(result.error) : result);
+        ).then(async (result) => result.error && fail ?  Promise.reject(result.error) : result).catch((err) => fail ? Promise.reject(err) : Promise.resolve({error: null, stdout: '', stderr: ''}));
     }
 
     public async requireLogin(): Promise<boolean> {

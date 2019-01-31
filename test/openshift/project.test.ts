@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { OdoImpl } from '../../src/odo';
+import { OdoImpl, Command } from '../../src/odo';
 import { TestItem } from './testOSItem';
 import { Project } from '../../src/openshift/project';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
@@ -63,7 +63,7 @@ suite('Openshift/Project', () => {
                 await Project.create();
                 expect.fail();
             } catch (err) {
-                expect(err).equals(`Failed to create project with error '${errorMessage}'`);
+                expect(err).equals(`Failed to create Project with error '${errorMessage}'`);
             }
         });
     });
@@ -81,14 +81,16 @@ suite('Openshift/Project', () => {
             const result = await Project.del(projectItem);
 
             expect(result).equals(`Project '${projectItem.getName()}' successfully deleted`);
-            expect(execStub).calledOnceWith(`odo project delete ${projectItem.getName()} -f`);
+            expect(execStub.getCall(0).args[0]).equals(Command.deleteProject(projectItem.getName()));
+            expect(execStub.getCall(1).args[0]).equals(Command.waitForProjectToBeGone(projectItem.getName()));
         });
 
         test('works without context', async () => {
             const result = await Project.del(null);
 
             expect(result).equals(`Project '${projectItem.getName()}' successfully deleted`);
-            expect(execStub).calledOnceWith(`odo project delete ${projectItem.getName()} -f`);
+            expect(execStub.getCall(0).args[0]).equals(Command.deleteProject(projectItem.getName()));
+            expect(execStub.getCall(1).args[0]).equals(Command.waitForProjectToBeGone(projectItem.getName()));
         });
 
         test('returns null with no project selected', async () => {
@@ -111,7 +113,7 @@ suite('Openshift/Project', () => {
                 await Project.del(projectItem);
                 expect.fail();
             } catch (err) {
-                expect(err).equals(`Failed to delete project with error '${errorMessage}'`);
+                expect(err).equals(`Failed to delete Project with error '${errorMessage}'`);
             }
         });
     });
