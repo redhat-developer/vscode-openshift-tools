@@ -51,28 +51,28 @@ const configData = {
         vendor: "Red Hat, Inc.",
         name: "oc",
         cmdFileName: "oc",
-        version: "3.9.0",
-        versionRange: "^3.9.0",
-        versionRangeLabel: "version >= 3.9.0 and < 4.0.0",
+        version: "3.11.0",
+        versionRange: "^3.11.0",
+        versionRangeLabel: "version >= 3.11.0 and < 4.0.0",
         filePrefix: "",
         platform: {
             win32: {
-                url: "https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-windows.zip",
-                sha256sum: "705eb110587fdbd244fbb0f93146a643b24295cfe2410ff9fe67a0e880912663",
+                url: "https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-windows.zip",
+                sha256sum: "cdb84cc0000d0f0983120f903b2cad7114527ce2a9c4eb1988986eda7b877bfa",
                 dlFileName: "oc.zip",
                 cmdFileName: "oc.exe"
             },
             darwin: {
-                url: "https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-mac.zip",
-                sha256sum: "32bdd9464866c8e93d8cf4a3a7718b0bc9fa0f2881f045b97997fa014b52a40b",
+                url: "https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-mac.zip",
+                sha256sum: "75d58500aec1a2cee9473dfa826c81199669dbc0f49806e31a13626b5e4cfcf0",
                 dlFileName: "oc.zip",
             },
             linux: {
-                url: "https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-linux-64bit.tar.gz",
-                sha256sum: "6ed2fb1579b14b4557e4450a807c97cd1b68a6c727cd1e12deedc5512907222e",
+                url: "https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz",
+                sha256sum: "4b0f07428ba854174c58d2e38287e5402964c9a9355f6c359d1242efd0990da3",
                 fileName: "oc.tar.gz",
                 dlFileName: "oc.tar.gz",
-                filePrefix: "openshift-origin-client-tools-v3.9.0-191fece-linux-64bit"
+                filePrefix: "openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit"
             }
         }
     }

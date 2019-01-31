@@ -70,6 +70,8 @@ export const Command = {
         `odo storage create ${storageName} --path=${mountPath} --size=${storageSize} --project ${project} --app ${app} --component ${component}`,
     deleteStorage: (project: string, app: string, component: string, storage: string) =>
         `odo storage delete ${storage} -f --project ${project} --app ${app} --component ${component}`,
+    waitForStorageToBeGone: (project: string, app: string, storage: string) =>
+        `oc wait pvc/${storage}-${app}-pvc --for=delete --namespace ${project}`,
     deleteComponent: (project: string, app: string, component: string) =>
         `odo delete ${component} -f --app ${app} --project ${project}`,
     describeComponent: (project: string, app: string, component: string) =>
