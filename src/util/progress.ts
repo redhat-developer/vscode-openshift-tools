@@ -46,14 +46,30 @@ export class Progress {
     static async execCmdWithProgress(title: string, cmd: string): Promise<any> {
         return new Promise(async (resolve, reject) => {
             await vscode.window.withProgress({
-                cancellable: false,
-                location: vscode.ProgressLocation.Notification,
-                title},
+                    cancellable: false,
+                    location: vscode.ProgressLocation.Notification,
+                    title
+                },
                 async (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
                     const result = await odoctl.getInstance().execute(cmd, process.cwd(), false);
                     result.error ? reject(result.error) : resolve();
                 }
             );
         });
+    }
+
+    static async execFunctionWithProgress(title: string, func: (progress: vscode.Progress<{increment: number, message: string}>) => Promise<string> ): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            await vscode.window.withProgress({
+                    cancellable: false,
+                    location: vscode.ProgressLocation.Notification,
+                    title
+                },
+                async (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
+                    await func(progress).then(resolve).catch(reject);
+                }
+            );
+        });
+
     }
 }

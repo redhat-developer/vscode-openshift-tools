@@ -10,7 +10,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
-import { OdoImpl } from '../../src/odo';
+import { OdoImpl, Command } from '../../src/odo';
 import { Storage } from '../../src/openshift/storage';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 
@@ -271,16 +271,18 @@ suite('Openshift/Storage', () => {
             const result = await Storage.del(storageItem);
 
             expect(result).equals(`Storage '${storageItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
-            expect(execStub).calledOnceWith(`odo storage delete ${storageItem.getName()} -f` +
+            expect(execStub.getCall(0).args[0]).equals(`odo storage delete ${storageItem.getName()} -f` +
              ` --project ${projectItem.getName()} --app ${appItem.getName()} --component ${componentItem.getName()}`);
+            expect(execStub.getCall(1).args[0]).equals(Command.waitForStorageToBeGone(projectItem.getName(), appItem.getName(), storageItem.getName()));
         });
 
         test('works without set tree item', async () => {
             const result = await Storage.del(null);
 
             expect(result).equals(`Storage '${storageItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
-            expect(execStub).calledOnceWith(`odo storage delete ${storageItem.getName()} -f` +
+            expect(execStub.getCall(0).args[0]).equals(`odo storage delete ${storageItem.getName()} -f` +
              ` --project ${projectItem.getName()} --app ${appItem.getName()} --component ${componentItem.getName()}`);
+            expect(execStub.getCall(1).args[0]).equals(Command.waitForStorageToBeGone(projectItem.getName(), appItem.getName(), storageItem.getName()));
         });
 
         test('returns null with no storage selected', async () => {

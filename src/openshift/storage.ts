@@ -7,6 +7,7 @@ import { OpenShiftItem } from "./openshiftItem";
 import { OpenShiftObject, Command } from "../odo";
 import * as vscode from 'vscode';
 import * as validator from 'validator';
+import { Progress } from "../util/progress";
 
 export class Storage extends OpenShiftItem {
     static async create(context: OpenShiftObject): Promise<string> {
@@ -41,7 +42,8 @@ export class Storage extends OpenShiftItem {
         }
     }
 
-    static async del(storage: OpenShiftObject): Promise<string> {
+    static async del(treeItem: OpenShiftObject): Promise<string> {
+        let storage = treeItem;
         const component = await Storage.getOpenShiftCmdData(storage,
             "From which Project you want to delete Storage",
             "From which Application you want to delete Storage",
@@ -50,11 +52,13 @@ export class Storage extends OpenShiftItem {
         if (storage) {
             const value = await vscode.window.showWarningMessage(`Do you want to delete Storage '${storage.getName()}' from Component '${storage.getParent().getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
-                return Promise.resolve()
-                    .then(() => Storage.odo.execute(Command.deleteStorage(storage.getParent().getParent().getParent().getName(), storage.getParent().getParent().getName(), storage.getParent().getName(), storage.getName())))
-                    .then(() => Storage.explorer.refresh())
-                    .then(() => `Storage '${storage.getName()}' from Component '${storage.getParent().getName()}' successfully deleted`)
-                    .catch((err) => Promise.reject(`Failed to delete Storage with error '${err}'`));
+                return Progress.execFunctionWithProgress(`Deleting Storage ${storage.getName()} from Component ${component.getName()}`,
+                    (progress) => Storage.odo.execute(Command.deleteStorage(storage.getParent().getParent().getParent().getName(), storage.getParent().getParent().getName(), storage.getParent().getName(), storage.getName()))
+                        .then(() => Storage.odo.execute(Command.waitForStorageToBeGone(storage.getParent().getParent().getParent().getName(), storage.getParent().getParent().getName(), storage.getName()), process.cwd(), false))
+                        .then(() => Storage.explorer.refresh(treeItem ? treeItem.getParent() : undefined))
+                        .then(() => `Storage '${storage.getName()}' from Component '${storage.getParent().getName()}' successfully deleted`)
+                        .catch((err) => Promise.reject(`Failed to delete Storage with error '${err}'`))
+                );
             }
         }
         return null;
