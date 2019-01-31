@@ -41,6 +41,7 @@ suite('Openshift/Component', () => {
         sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
+        sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
     });
 
     teardown(() => {
