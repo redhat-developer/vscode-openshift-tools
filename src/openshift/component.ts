@@ -232,6 +232,30 @@ export class Component extends OpenShiftItem {
             .then(() => `Component '${componentName}' successfully created`);
     }
 
+    static async createFromFolder(folder: vscode.Uri): Promise<string> {
+        const application = await Component.getOpenShiftCmdData(undefined,
+            "In which Project you want to create a Component",
+            "In which Application you want to create a Component"
+        );
+
+        const componentName = await Component.getComponentName(application);
+
+        if (!componentName) return null;
+
+        const componentTypeName = await vscode.window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type"});
+
+        if (!componentTypeName) return null;
+
+        const componentTypeVersion = await vscode.window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
+
+        if (!componentTypeVersion) return null;
+        const project = application.getParent();
+        return Progress.execCmdWithProgress(`Creating new Component '${componentName}'`, Command.createLocalComponent(project.getName(), application.getName(), componentTypeName, componentTypeVersion, componentName, folder.fsPath))
+            .then(() => Component.explorer.refresh(application))
+            .then(() => Component.odo.executeInTerminal(Command.pushLocalComponent(project.getName(), application.getName(), componentName, folder.fsPath)))
+            .then(() => `Component '${componentName}' successfully created`);
+    }
+
     private static async createFromGit(application: OpenShiftObject): Promise<string> {
         const repoURI = await vscode.window.showInputBox({
             prompt: 'Git repository URI',

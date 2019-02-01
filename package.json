@@ -58,7 +58,8 @@
     "onCommand:openshift.storage.create",
     "onCommand:openshift.storage.delete",
     "onCommand:openshift.service.create",
-    "onCommand:openshift.service.delete"
+    "onCommand:openshift.service.delete",
+    "onCommand:openshift.component.folder.create"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -128,6 +129,11 @@
       {
         "command": "openshift.component.create",
         "title": "New Component",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.folder.create",
+        "title": "New OpenShift Component",
         "category": "OpenShift"
       },
       {
@@ -284,6 +290,12 @@
       ]
     },
     "menus": {
+      "explorer/context": [
+        {
+          "when": "explorerResourceIsFolder",
+          "command": "openshift.component.folder.create"
+        }
+    ],
       "commandPalette": [
         {
           "command": "openshift.project.delete",
@@ -296,6 +308,10 @@
         {
           "command": "openshift.app.delete",
           "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.folder.create",
+          "when": "never"
         },
         {
           "command": "openshift.component.describe",
