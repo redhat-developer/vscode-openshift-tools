@@ -284,60 +284,6 @@
       ]
     },
     "menus": {
-      "commandPalette": [
-        {
-          "command": "openshift.project.delete",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.app.describe",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.app.delete",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.component.describe",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.component.log",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.component.followLog",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.openshiftConsole",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.component.openUrl",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.component.delete",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.component.watch",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.component.push",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.storage.delete",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.service.delete",
-          "when": "view == openshiftProjectExplorer"
-        }
-      ],
       "view/title": [
         {
           "command": "openshift.explorer.login",
