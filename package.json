@@ -295,7 +295,7 @@
           "when": "explorerResourceIsFolder",
           "command": "openshift.component.folder.create"
         }
-    ],
+      ],
       "commandPalette": [
         {
           "command": "openshift.project.delete",
@@ -553,7 +553,7 @@
   "dependencies": {
     "@kubernetes/client-node": "0.7.0",
     "byline": "^5.0.0",
-    "event-stream": "4.0.1",
+    "event-stream": "3.3.4",
     "fs-extra": "^7.0.1",
     "hasha": "^3.0.0",
     "js-yaml": "^3.12.1",
