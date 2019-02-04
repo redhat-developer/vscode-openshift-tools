@@ -586,7 +586,7 @@ suite('Openshift/Component', () => {
             quickPickStub.resolves(serviceItem);
             const result = await Component.linkService(componentItem);
 
-            expect(result).equals(`service '${serviceItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
+            expect(result).equals(`Service '${serviceItem.getName()}' successfully linked with Component '${componentItem.getName()}'`);
             expect(execStub).calledOnceWith(`odo project set ${projectItem.getName()} && odo application set ${appItem.getName()} && odo component set ${componentItem.getName()} && odo link ${serviceItem.getName()} --wait`);
         });
 
@@ -624,7 +624,7 @@ suite('Openshift/Component', () => {
             quickPickStub.resolves(serviceItem);
             const result = await Component.linkService(null);
 
-            expect(result).equals(`service '${serviceItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
+            expect(result).equals(`Service '${serviceItem.getName()}' successfully linked with Component '${componentItem.getName()}'`);
             expect(execStub).calledOnceWith(`odo project set ${projectItem.getName()} && odo application set ${appItem.getName()} && odo component set ${componentItem.getName()} && odo link ${serviceItem.getName()} --wait`);
         });
 

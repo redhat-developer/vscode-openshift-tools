@@ -123,10 +123,11 @@ export class Component extends OpenShiftItem {
                 return Promise.reject(`Component '${component.getName()}' has no ports decalred.`);
             }
 
-            return Promise.resolve()
-                .then(() => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), componentToLink.getName(), port)))
-                .then(() => `component '${componentToLink.getName()}' successfully linked with component '${component.getName()}'`)
-                .catch((err) => Promise.reject(`Failed to link component with error '${err}'`));
+            return Progress.execFunctionWithProgress(`Link Component '${componentToLink.getName()}' with Component '${component.getName()}'`,
+                (progress) => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), componentToLink.getName(), port))
+                    .then(() => `component '${componentToLink.getName()}' successfully linked with component '${component.getName()}'`)
+                    .catch((err) => Promise.reject(`Failed to link component with error '${err}'`))
+            );
         }
     }
 
@@ -139,10 +140,11 @@ export class Component extends OpenShiftItem {
             const serviceToLink: OpenShiftObject = await vscode.window.showQuickPick(Component.getServiceNames(component.getParent()), {placeHolder: "Select the service to link"});
             if (!serviceToLink) return null;
 
-            return Promise.resolve()
-            .then(() => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), serviceToLink.getName())))
-            .then(() => `service '${serviceToLink.getName()}' successfully linked with component '${component.getName()}'`)
-            .catch((err) => Promise.reject(`Failed to link service with error '${err}'`));
+            return Progress.execFunctionWithProgress(`Link Service '${serviceToLink.getName()}' with Component '${component.getName()}'`,
+                (progress) => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), serviceToLink.getName()))
+                    .then(() => `Service '${serviceToLink.getName()}' successfully linked with Component '${component.getName()}'`)
+                    .catch((err) => Promise.reject(`Failed to link service with error '${err}'`))
+            );
         }
     }
 
