@@ -161,9 +161,7 @@ export class Component extends OpenShiftItem {
             'Select a Project',
             'Select an Application',
             'Select a Component you want to watch');
-        const app: OpenShiftObject = component.getParent();
-        const project: OpenShiftObject = app.getParent();
-        Component.odo.executeInTerminal(Command.watchComponent(project.getName(), app.getName(), component.getName()));
+        if (component) Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
     }
 
     static async openUrl(context: OpenShiftObject): Promise<ChildProcess> {
