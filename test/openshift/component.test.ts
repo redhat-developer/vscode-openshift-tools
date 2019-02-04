@@ -10,7 +10,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
-import { OdoImpl } from '../../src/odo';
+import { OdoImpl, Command } from '../../src/odo';
 import { Component } from '../../src/openshift/component';
 import { Progress } from '../../src/util/progress';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
@@ -737,16 +737,16 @@ suite('Openshift/Component', () => {
             quickPickStub.onThirdCall().resolves(componentItem);
         });
 
-        test('watch calls the correct odo command with progress', async () => {
+        test('calls the correct odo command w/ context', async () => {
             await Component.watch(componentItem);
 
-            expect(termStub).calledOnceWith(`odo watch ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+            expect(termStub).calledOnceWith(Command.watchComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
 
-        test('works with no context', async () => {
+        test('calls the correct odo command w/o context', async () => {
             await Component.watch(null);
 
-            expect(termStub).calledOnceWith(`odo watch ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+            expect(termStub).calledOnceWith(Command.watchComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
     });
 });
