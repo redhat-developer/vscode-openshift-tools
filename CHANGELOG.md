@@ -1,4 +1,12 @@
 # Change Log
+## 0.0.16 (February 5, 2019)
+* Update to use `odo v0.0.18`.
+* Allow to create multiple components directly from workspace view.
+* Add few more commands(linking Service/Component) to command pallete.
+* Add progress bar for delete operation (using `oc wait`).
+* Show indeterminate progress bar for linking commands.
+* Allow extension to use `oc ^3.11.0` if detected.
+
 ## 0.0.15 (January 23, 2019)
 * Provide the flexibility to use `commands` using command pallete [#269](https://github.com/redhat-developer/vscode-openshift-tools/issues/269)
 * Remove kubernetes clusters view from OpenShift Views Container
