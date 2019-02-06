@@ -78,6 +78,8 @@ export const Command = {
         `odo delete ${component} -f --app ${app} --project ${project}`,
     describeComponent: (project: string, app: string, component: string) =>
         `odo describe ${component} --app ${app} --project ${project}`,
+    describeService: (service: string) =>
+        `odo catalog describe service ${service}`,
     showLog: (project: string, app: string, component: string) =>
         `odo log ${component} --app ${app} --project ${project}`,
     showLogAndFollow: (project: string, app: string, component: string) =>
