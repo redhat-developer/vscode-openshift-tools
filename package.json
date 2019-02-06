@@ -60,6 +60,8 @@
     "onCommand:openshift.storage.delete",
     "onCommand:openshift.service.create",
     "onCommand:openshift.service.delete",
+    "onCommand:openshift.service.describe",
+    "onCommand:openshift.service.describe.palette",
     "onCommand:openshift.component.folder.create"
   ],
   "main": "./out/src/extension",
@@ -263,6 +265,16 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.service.describe",
+        "title": "Describe",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.service.describe.palette",
+        "title": "Describe Service",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.service.delete",
         "title": "Delete",
         "category": "OpenShift"
@@ -348,6 +360,10 @@
         },
         {
           "command": "openshift.storage.delete",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.service.describe",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -484,14 +500,19 @@
           "group": "a1"
         },
         {
-          "command": "openshift.service.delete",
+          "command": "openshift.service.describe",
           "when": "view == openshiftProjectExplorer && viewItem == service",
           "group": "s1"
         },
         {
+          "command": "openshift.service.delete",
+          "when": "view == openshiftProjectExplorer && viewItem == service",
+          "group": "s2"
+        },
+        {
           "command": "openshift.storage.delete",
           "when": "view == openshiftProjectExplorer && viewItem == storage",
-          "group": "s2"
+          "group": "s3"
         }
       ]
     },

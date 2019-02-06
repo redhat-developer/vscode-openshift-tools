@@ -76,4 +76,18 @@ export class Service extends OpenShiftItem {
         }
         return null;
     }
+
+    static async describe(context: OpenShiftObject) {
+        let service = context;
+
+        if (!service) {
+            const application: OpenShiftObject = await Service.getOpenShiftCmdData(context,
+                "From which project you want to describe Service",
+                "From which application you want to describe Service");
+            if (application) {
+                service = await vscode.window.showQuickPick(Service.getServiceNames(application), {placeHolder: "Select Service you want to describe"});
+            }
+        }
+        if (service) Service.odo.executeInTerminal(Command.describeService(service.getName()));
+    }
 }

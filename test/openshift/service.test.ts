@@ -19,6 +19,7 @@ const expect = chai.expect;
 chai.use(sinonChai);
 
 suite('Openshift/Service', () => {
+    let termStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
     let quickPickStub: sinon.SinonStub;
     let getProjectNamesStub: sinon.SinonStub;
@@ -31,6 +32,7 @@ suite('Openshift/Service', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
+        termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
         getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
@@ -217,6 +219,27 @@ suite('Openshift/Service', () => {
             } catch (err) {
                 expect(err).equals(`Failed to delete Service with error '${errorMessage}'`);
             }
+        });
+    });
+
+    suite('describe', () => {
+
+        setup(() => {
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onThirdCall().resolves(serviceItem);
+        });
+
+        test('calls the correct odo command w/ context', async () => {
+            await Service.describe(serviceItem);
+
+            expect(termStub).calledOnceWith(Command.describeService(serviceItem.getName()));
+        });
+
+        test('calls the correct odo command w/o context', async () => {
+            await Service.describe(null);
+
+            expect(termStub).calledOnceWith(Command.describeService(serviceItem.getName()));
         });
     });
 });
