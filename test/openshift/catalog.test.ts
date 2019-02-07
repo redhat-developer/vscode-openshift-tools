@@ -8,7 +8,7 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { OdoImpl } from '../../src/odo';
+import { OdoImpl, Command } from '../../src/odo';
 import { Catalog } from '../../src/openshift/catalog';
 
 const expect = chai.expect;
@@ -30,12 +30,12 @@ suite('Openshift/Catalog', () => {
     test('listComponents calls odo catalog list components', () => {
         Catalog.listComponents();
 
-        expect(execStub).calledOnceWith('odo catalog list components');
+        expect(execStub).calledOnceWith(Command.listCatalogComponents());
     });
 
     test('listServices calls odo catalog list services', () => {
         Catalog.listServices();
 
-        expect(execStub).calledOnceWith('odo catalog list services');
+        expect(execStub).calledOnceWith(Command.listCatalogSevices());
     });
 });

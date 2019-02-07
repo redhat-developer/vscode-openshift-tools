@@ -87,7 +87,7 @@ suite('Openshift/Component', () => {
                 const result = await Component.create(null);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()} --local ${folder.uri.fsPath}`);
+                expect(termStub).calledOnceWith(Command.pushLocalComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), folder.uri.fsPath));
             });
 
             test('returns null when no folder selected', async () => {
@@ -251,8 +251,8 @@ suite('Openshift/Component', () => {
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
                 expect(progressCmdStub).calledOnceWith(
                     `Creating new Component '${componentItem.getName()}'`,
-                    `odo create ${componentType}:${version} ${componentItem.getName()} --local ${folder.uri.fsPath} --app ${appItem.getName()} --project ${projectItem.getName()}`);
-                expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()} --local ${folder.uri.fsPath}`);
+                    Command.createLocalComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), folder.uri.fsPath));
+                expect(termStub).calledOnceWith(Command.pushLocalComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), folder.uri.fsPath));
             });
 
             test('returns null when no folder selected', async () => {
@@ -299,7 +299,7 @@ suite('Openshift/Component', () => {
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(termStub).calledOnceWith(`odo create ${componentType}:${version} ${componentItem.getName()} --git ${uri} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+                expect(termStub).calledOnceWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), uri));
             });
 
             test('returns null when no git repo selected', async () => {
@@ -356,7 +356,7 @@ suite('Openshift/Component', () => {
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
                 expect(progressCmdStub).calledOnceWith(
                     `Creating new Component '${componentItem.getName()}'`,
-                    `odo create ${componentType}:${version} ${componentItem.getName()} --binary ${files[0].fsPath} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+                    Command.createBinaryComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), files[0].fsPath));
             });
 
             test('returns null when no binary file selected', async () => {
@@ -404,14 +404,14 @@ suite('Openshift/Component', () => {
             const result = await Component.del(componentItem);
 
             expect(result).equals(`Component '${componentItem.getName()}' successfully deleted`);
-            expect(execStub).calledOnceWith(`odo delete ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`);
+            expect(execStub).calledOnceWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
 
         test('works with no context', async () => {
             const result = await Component.del(null);
 
             expect(result).equals(`Component '${componentItem.getName()}' successfully deleted`);
-            expect(execStub).calledOnceWith(`odo delete ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`);
+            expect(execStub).calledOnceWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
 
         test('wraps errors in additional info', async () => {
@@ -587,7 +587,7 @@ suite('Openshift/Component', () => {
             const result = await Component.linkService(componentItem);
 
             expect(result).equals(`Service '${serviceItem.getName()}' successfully linked with Component '${componentItem.getName()}'`);
-            expect(execStub).calledOnceWith(`odo project set ${projectItem.getName()} && odo application set ${appItem.getName()} && odo component set ${componentItem.getName()} && odo link ${serviceItem.getName()} --wait`);
+            expect(execStub).calledOnceWith(Command.linkComponentTo(projectItem.getName(), appItem.getName(), componentItem.getName(), serviceItem.getName()));
         });
 
         test('returns null when no service selected to link', async () => {
@@ -625,7 +625,7 @@ suite('Openshift/Component', () => {
             const result = await Component.linkService(null);
 
             expect(result).equals(`Service '${serviceItem.getName()}' successfully linked with Component '${componentItem.getName()}'`);
-            expect(execStub).calledOnceWith(`odo project set ${projectItem.getName()} && odo application set ${appItem.getName()} && odo component set ${componentItem.getName()} && odo link ${serviceItem.getName()} --wait`);
+            expect(execStub).calledOnceWith(Command.linkComponentTo(projectItem.getName(), appItem.getName(), componentItem.getName(), serviceItem.getName()));
         });
 
         test('returns null when no service selected to link', async () => {
@@ -660,12 +660,12 @@ suite('Openshift/Component', () => {
 
         test('describe calls the correct odo command in terminal', async () => {
             await Component.describe(componentItem);
-            expect(termStub).calledOnceWith(`odo describe ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+            expect(termStub).calledOnceWith(Command.describeComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
 
         test('works with no context', async () => {
             await Component.describe(null);
-            expect(termStub).calledOnceWith(`odo describe ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+            expect(termStub).calledOnceWith(Command.describeComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
     });
 
@@ -681,13 +681,13 @@ suite('Openshift/Component', () => {
         test('log calls the correct odo command in terminal', async() => {
             await Component.log(componentItem);
 
-            expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+            expect(termStub).calledOnceWith(Command.showLog(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
 
         test('works with no context', async () => {
             await Component.log(null);
 
-            expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+            expect(termStub).calledOnceWith(Command.showLog(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
     });
 
@@ -696,13 +696,13 @@ suite('Openshift/Component', () => {
 
         test('followLog calls the correct odo command in terminal', async() => {
             await Component.followLog(componentItem);
-            expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`);
+            expect(termStub).calledOnceWith(Command.showLogAndFollow(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
 
         test('followLog calls the correct odo command in terminal with no context', async () => {
 
             await Component.followLog(null);
-            expect(termStub).calledOnceWith(`odo log ${componentItem.getName()} -f --app ${appItem.getName()} --project ${projectItem.getName()}`);
+            expect(termStub).calledOnceWith(Command.showLogAndFollow(projectItem.getName(), appItem.getName(), componentItem.getName()));
        });
     });
 
@@ -718,13 +718,13 @@ suite('Openshift/Component', () => {
         test('push calls the correct odo command with progress', async () => {
             await Component.push(componentItem);
 
-            expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+            expect(termStub).calledOnceWith(Command.pushComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
 
         test('works with no context', async () => {
             await Component.push(null);
 
-            expect(termStub).calledOnceWith(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+            expect(termStub).calledOnceWith(Command.pushComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
     });
 
