@@ -5,6 +5,7 @@
 
 'use strict';
 
+import * as path from 'path';
 import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
@@ -386,6 +387,45 @@ suite('Openshift/Component', () => {
 
                 expect(result).null;
             });
+        });
+    });
+
+    suite('createFromFolder', () => {
+        let inputStub: sinon.SinonStub;
+        const pathOne: string = path.join('some', 'path');
+        const folder: vscode.Uri = vscode.Uri.file(pathOne);
+        setup(() => {
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            inputStub = sandbox.stub(vscode.window, 'showInputBox');
+        });
+
+        test('return null when no component type selected', async () => {
+            inputStub.resolves(componentItem.getName());
+            const result = await Component.createFromFolder(folder);
+            expect(result).null;
+        });
+
+        test('return null when no component name is provided', async () => {
+            inputStub.resolves();
+            const result = await Component.createFromFolder(folder);
+            expect(result).null;
+        });
+
+        test('return null when no component version selected', async () => {
+            inputStub.resolves(componentItem.getName());
+            quickPickStub.onThirdCall().resolves('nodejs');
+            const result = await Component.createFromFolder(folder);
+            expect(result).null;
+        });
+
+        test('happy path works', async () => {
+            inputStub.resolves(componentItem.getName());
+            quickPickStub.onThirdCall().resolves('nodejs');
+            quickPickStub.resolves('latest');
+            const result = await Component.createFromFolder(folder);
+            expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
         });
     });
 
