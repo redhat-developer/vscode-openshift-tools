@@ -126,7 +126,7 @@ suite('Openshift/Service', () => {
             expect(result).equals(`Service '${serviceItem.getName()}' successfully created`);
             expect(progressStub).calledOnceWith(
                 `Creating a new Service '${serviceItem.getName()}'`,
-                `odo service create ${templateName} --plan ${templatePlan} ${serviceItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
+                Command.createService(projectItem.getName(), appItem.getName(), templateName, templatePlan, serviceItem.getName()));
         });
 
         test('returns null with no template selected', async () => {

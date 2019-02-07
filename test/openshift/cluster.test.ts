@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { OdoImpl } from '../../src/odo';
+import { OdoImpl, Command } from '../../src/odo';
 import { Cluster } from '../../src/openshift/cluster';
 import { OpenShiftExplorer } from '../../src/explorer';
 import { CliExitData } from '../../src/cli';
@@ -96,7 +96,7 @@ suite('Openshift/Cluster', () => {
                 const status = await Cluster.login();
 
                 expect(status).equals(`Successfully logged in to '${testUrl}'`);
-                expect(execStub).calledOnceWith(`odo login ${testUrl} -u ${testUser} -p ${password} --insecure-skip-tls-verify`);
+                expect(execStub).calledOnceWith(Command.odoLoginWithUsernamePassword(testUrl, testUser, password));
                 expect(commandStub).calledOnceWith('setContext', 'isLoggedIn', true);
             });
 
@@ -136,7 +136,7 @@ suite('Openshift/Cluster', () => {
                 const status = await Cluster.login();
 
                 expect(status).equals(`Successfully logged in to '${testUrl}'`);
-                expect(execStub).calledOnceWith(`odo login ${testUrl} --token=${token} --insecure-skip-tls-verify`);
+                expect(execStub).calledOnceWith(Command.odoLoginWithToken(testUrl, token));
                 expect(commandStub).calledOnceWith('setContext', 'isLoggedIn', true);
             });
 
@@ -234,7 +234,7 @@ suite('Openshift/Cluster', () => {
             const stub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
             Cluster.about();
 
-            expect(stub).calledOnceWith('odo version');
+            expect(stub).calledOnceWith(Command.printOdoVersion());
         });
     });
 

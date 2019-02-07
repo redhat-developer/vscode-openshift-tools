@@ -47,7 +47,7 @@ suite('Openshift/Project', () => {
             const result = await Project.create();
 
             expect(result).equals(`Project '${projectItem.getName()}' successfully created`);
-            expect(execStub).calledOnceWith(`odo project create ${projectItem.getName()}`);
+            expect(execStub).calledOnceWith(Command.createProject(projectItem.getName()));
         });
 
         test('returns null with no project name selected', async () => {

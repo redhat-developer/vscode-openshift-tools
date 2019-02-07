@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { OdoImpl } from '../../src/odo';
+import { OdoImpl, Command } from '../../src/odo';
 import { Application } from '../../src/openshift/application';
 import { TestItem } from './testOSItem';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
@@ -49,7 +49,7 @@ suite('Openshift/Application', () => {
 
             await Application.create(projectItem);
 
-            expect(execStub).calledOnceWith(`odo app create name --project ${projectItem.getName()}`);
+            expect(execStub).calledOnceWith(Command.createApplication(projectItem.getName(), 'name'));
         });
 
         test('returns status when successful', async () => {
@@ -114,7 +114,7 @@ suite('Openshift/Application', () => {
 
             await Application.create(null);
 
-            expect(execStub).calledOnceWith(`odo app create name --project ${projectItem.getName()}`);
+            expect(execStub).calledOnceWith(Command.createApplication(projectItem.getName(), 'name'));
         });
 
         test('calls the appropriate odo command when there are more then one project', async () => {
@@ -124,7 +124,7 @@ suite('Openshift/Application', () => {
 
             await Application.create(null);
 
-            expect(execStub).calledOnceWith(`odo app create name --project ${projectItem.getName()}`);
+            expect(execStub).calledOnceWith(Command.createApplication(projectItem.getName(), 'name'));
         });
 
         test('returns status when successful', async () => {
@@ -174,7 +174,7 @@ suite('Openshift/Application', () => {
         test('calls the appropriate odo command in terminal', async () => {
             await Application.describe(appItem);
 
-            expect(termStub).calledOnceWith(`odo app describe ${appItem.getName()} --project ${projectItem.getName()}`);
+            expect(termStub).calledOnceWith(Command.describeApplication(projectItem.getName(), appItem.getName()));
         });
     });
 
@@ -193,7 +193,7 @@ suite('Openshift/Application', () => {
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
             await Application.describe(null);
 
-            expect(termStub).calledOnceWith(`odo app describe ${appItem.getName()} --project ${projectItem.getName()}`);
+            expect(termStub).calledOnceWith(Command.describeApplication(projectItem.getName(), appItem.getName()));
         });
 
         test('calls the appropriate error message when no project found', async () => {
@@ -224,7 +224,7 @@ suite('Openshift/Application', () => {
 
             await Application.del(appItem);
 
-            expect(execStub).calledOnceWith(`odo app delete ${appItem.getName()} --project ${projectItem.getName()} -f`);
+            expect(execStub).calledOnceWith(Command.deleteApplication(projectItem.getName(), appItem.getName()));
         });
 
         test('returns status when successful', async () => {
