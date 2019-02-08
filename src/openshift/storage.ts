@@ -16,11 +16,8 @@ export class Storage extends OpenShiftItem {
             "In which Application you want to create a Storage",
             "In which Component you want to create a Storage");
         if (component) {
-            const storageName = await vscode.window.showInputBox({prompt: "Specify the Storage name", validateInput: (value: string) => {
-                if (validator.isEmpty(value.trim())) {
-                    return 'Invalid storage name';
-                }
-            }});
+            const storageName = await Storage.getStorageName(component);
+
             if (!storageName) return null;
 
             const mountPath = await vscode.window.showInputBox({prompt: "Specify the mount path", validateInput: (value: string) => {
@@ -40,6 +37,23 @@ export class Storage extends OpenShiftItem {
                 .catch((err) => Promise.reject(`New Storage command failed with error: '${err}'!`));
 
         }
+    }
+
+    private static async getStorageName(component: OpenShiftObject) {
+        return await vscode.window.showInputBox({
+            prompt: "Specify the Storage name",
+            validateInput: async (value: string) => {
+                let validationMessage = Storage.emptyName('Empty Storage name', value.trim());
+                if (!validationMessage) validationMessage = Storage.validateMatches('Not a valid Storage name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
+                if (!validationMessage) validationMessage = Storage.lengthName('Storage name is to long', value);
+                if (!validationMessage) validationMessage = await Storage.validateStorageName(value.trim(), component);
+                return validationMessage;
+        }});
+    }
+
+    private static async validateStorageName(value: string, component: OpenShiftObject) {
+        const storageList: Array<OpenShiftObject> = await OpenShiftItem.odo.getStorageNames(component);
+        return Storage.openshiftData(storageList, value);
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {

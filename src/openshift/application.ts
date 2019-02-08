@@ -13,7 +13,7 @@ export class Application extends OpenShiftItem {
         let name;
         const project = await Application.getOpenShiftCmdData(treeItem,
             "In which Project you want to create an Application");
-        if (project) name = await Application.getApplicationName();
+        if (project) name = await Application.getApplicationName(project);
         if (name) {
             return Promise.resolve()
                 .then(() => Application.odo.execute(Command.createApplication(project.getName(), name)))
@@ -24,15 +24,22 @@ export class Application extends OpenShiftItem {
         return null;
     }
 
-    static async getApplicationName() {
+    static async getApplicationName(project) {
         return await vscode.window.showInputBox({
             prompt: "Application name",
-            validateInput: (value: string) => {
-                const validationMessage = Application.emptyName('Empty application name', value.trim());
-                if (!validationMessage) return Application.validateMatches('Not a valid Application name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
+            validateInput: async (value: string) => {
+                let validationMessage = Application.emptyName('Empty application name', value.trim());
+                if (!validationMessage) validationMessage = Application.validateMatches('Not a valid Application name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
+                if (!validationMessage) validationMessage = Application.lengthName('Storage name is to long', value);
+                if (!validationMessage) validationMessage = await Application.validateApplicationName(value.trim(), project);
                 return validationMessage;
             }
         });
+    }
+
+    private static async validateApplicationName(value: string, project: OpenShiftObject) {
+        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
+        return Application.openshiftData(applicationList, value);
     }
 
     static async describe(treeItem: OpenShiftObject) {

@@ -32,8 +32,21 @@ export abstract class OpenShiftItem {
         return new Promise((res) => setTimeout(res, timeout));
     }
 
+    static openshiftData(data, value) {
+        const openshiftObject =  data.find((openshiftObject) =>  openshiftObject.getName() === value);
+        return openshiftObject && `This name is already used, please enter different name.`;
+    }
+
     static emptyName(message: string, value: string) {
         return validator.isEmpty(value) ? message : undefined;
+    }
+
+    static lengthName(message: string, value: string) {
+        return validator.isLength(value, 0, 63) ? undefined : message;
+    }
+
+    static alphanumeric(message: string, value: string) {
+        return validator.isAlphanumeric(value) ? undefined: message;
     }
 
     static validateUrl(message: string, value: string) {

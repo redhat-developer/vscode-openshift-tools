@@ -25,29 +25,33 @@ export class Service extends OpenShiftItem {
                 placeHolder: "Service Template Plan Name"
             });
             if (!serviceTemplatePlanName) return null;
-
-            const serviceName = await vscode.window.showInputBox({
-                value: serviceTemplateName,
-                prompt: 'Service Name',
-                validateInput: (value: string) => {
-                    // required, because dc name is ${component}-${app}
-                    let message: string = null;
-                    if (`${value.trim()}-${application.getName()}`.length > 63) {
-                        message = 'Service name cannot be more than 63 characters';
-                    }
-                    return message;
-                }
-            });
-            if (serviceName) {
-                const project = application.getParent();
-                return Progress.execCmdWithProgress(`Creating a new Service '${serviceName}'`,
-                    Command.createService(project.getName(), application.getName(), serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))
-                    .then(() => Service.explorer.refresh(context ? context : undefined))
-                    .then(() => `Service '${serviceName}' successfully created`)
-                    .catch((err) => Promise.reject(`Failed to create Service with error '${err}'`));
-            }
-            return null;
+            const serviceName = await Service.getServiceName(application, serviceTemplateName);
+            if (!serviceName) return null;
+            const project = application.getParent();
+            return Progress.execCmdWithProgress(`Creating a new Service '${serviceName}'`,
+                Command.createService(project.getName(), application.getName(), serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))
+                .then(() => Service.explorer.refresh(context ? context : undefined))
+                .then(() => `Service '${serviceName}' successfully created`)
+                .catch((err) => Promise.reject(`Failed to create Service with error '${err}'`));
         }
+    }
+
+    private static async getServiceName(application: OpenShiftObject, serviceTemplateName: string) {
+        return await vscode.window.showInputBox({
+            value: serviceTemplateName,
+            prompt: "Service Name",
+            validateInput: async (value: string) => {
+                let validationMessage = Service.emptyName('Empty Service name', value.trim());
+                if (!validationMessage) validationMessage = Service.validateMatches('Not a valid Service name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
+                if (!validationMessage) validationMessage = Service.lengthName('Service name is to long', value);
+                if (!validationMessage) validationMessage = await Service.validateStorageName(value.trim(), application);
+                return validationMessage;
+        }});
+    }
+
+    private static async validateStorageName(value: string, component: OpenShiftObject) {
+        const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(component);
+        return Service.openshiftData(serviceList, value);
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {

@@ -191,8 +191,7 @@ export class Component extends OpenShiftItem {
 
     private static async validateComponentName(value: string, application: OpenShiftObject) {
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
-        const componentName =  componentList.find((component) =>  component.getName() === value);
-        return componentName && `This name is already used, please enter different name.`;
+        return Component.openshiftData(componentList, value);
     }
 
     private static async getComponentName(application: OpenShiftObject) {
@@ -201,6 +200,7 @@ export class Component extends OpenShiftItem {
             validateInput: async (value: string) => {
                 let validationMessage = Component.emptyName('Empty Component name', value.trim());
                 if (!validationMessage) validationMessage = Component.validateMatches('Not a valid Component name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
+                if (!validationMessage) validationMessage = Component.lengthName('Component name is to long', value);
                 if (!validationMessage) validationMessage = await Component.validateComponentName(value.trim(), application);
                 return validationMessage;
             }

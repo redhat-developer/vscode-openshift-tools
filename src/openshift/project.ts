@@ -6,26 +6,36 @@
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
 import * as vscode from 'vscode';
-import * as validator from 'validator';
 import { Progress } from '../util/progress';
 
 export class Project extends OpenShiftItem {
 
     static async create(): Promise<string> {
-        let projectName = await vscode.window.showInputBox({
-            prompt: "Mention Project name",
-            validateInput: (value: string) => {
-                const validationMessage = Project.validateName(value);
-                if (!validationMessage) return Project.validateMatches('Not a valid Project name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
-                return validationMessage;
-            }
-        });
+        let projectName = await Project.getProjectName();
         if (!projectName) return null;
         projectName = projectName.trim();
         return Project.odo.execute(Command.createProject(projectName))
             .then(() => Project.explorer.refresh())
             .then(() => `Project '${projectName}' successfully created`)
             .catch((error) => Promise.reject(`Failed to create Project with error '${error}'`));
+    }
+
+    private static async getProjectName() {
+        return await vscode.window.showInputBox({
+            prompt: "Mention Project name",
+            validateInput: async (value: string) => {
+                let validationMessage = Project.emptyName('Empty Project name', value.trim());
+                if (!validationMessage) validationMessage = Project.validateMatches('Not a valid Project name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
+                if (!validationMessage) validationMessage = Project.lengthName('Project name is to long', value);
+                if (!validationMessage) validationMessage = Project.alphanumeric('Project name should be alphanumeric', value);
+                if (!validationMessage) validationMessage = await Project.validateStorageName(value.trim());
+                return validationMessage;
+        }});
+    }
+
+    private static async validateStorageName(value: string) {
+        const projectList: Array<OpenShiftObject> = await OpenShiftItem.odo.getProjects();
+        return Project.openshiftData(projectList, value);
     }
 
     static async del(context: OpenShiftObject): Promise<string> {
@@ -46,15 +56,5 @@ export class Project extends OpenShiftItem {
             }
         }
         return result;
-    }
-
-    private static validateName(value: string) {
-        if (validator.isEmpty(value.trim())) {
-            return 'Empty project name';
-        } else if (!validator.isAlphanumeric(value.trim())) {
-            return 'Project name should be alphanumeric';
-        } else if (!validator.isLength(value.trim(), 0, 63)) {
-            return 'Project name is to long';
-        }
     }
 }
