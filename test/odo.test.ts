@@ -169,9 +169,7 @@ suite("odo", () => {
             execStub.resolves({ error: null, stderr: '', stdout: components.join('\n') });
             const result = await odoCli.getComponents(app);
 
-            expect(execStub).calledOnceWith(`oc get dc --namespace ${project.getName()} ` +
-                `-o jsonpath="{range .items[?(.metadata.labels.app == \\"${app.getName()}\\")]}` +
-                `{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}"`);
+            expect(execStub).calledOnceWith(odo.Command.listComponents(project.getName(), app.getName()));
             expect(result.length).equals(3);
             for (let i = 0; i < result.length; i++) {
                 expect(result[i].getName()).equals(components[i]);
@@ -183,9 +181,7 @@ suite("odo", () => {
             execStub.resolves({ error: null, stderr: '', stdout: services.join('\n') });
             const result = await odoCli.getServices(app);
 
-            expect(execStub).calledOnceWith(`oc get ServiceInstance -o ` +
-                `jsonpath="{range .items[?(.metadata.labels.app == \\"${app.getName()}\\")]}` +
-                `{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}" --namespace ${project.getName()}`);
+            expect(execStub).calledOnceWith(odo.Command.listServiceInstanses(project.getName(), app.getName()));
             expect(result.length).equals(3);
             for (let i = 0; i < result.length; i++) {
                 expect(result[i].getName()).equals(services[i]);
@@ -233,9 +229,7 @@ suite("odo", () => {
             execStub.resolves({ error: null, stderr: '', stdout: storageList.join('\n') });
             const result = await odoCli.getStorageNames(component);
 
-            expect(execStub).calledOnceWith(`oc get pvc -o jsonpath="{range .items[?(.metadata.labels.app == ` +
-                `\\"${app.getName()}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\" \\"}` +
-                `{.metadata.labels.app\\.kubernetes\\.io/storage-name}{\\"\\n\\"}{end}" --namespace ${project.getName()}`);
+            expect(execStub).calledOnceWith(odo.Command.listStorageNames(project.getName(), app.getName()));
             expect(result.length).equals(2);
             for (let i = 0; i < result.length; i++) {
                 expect(result[i].getName()).equals(storageList[i].split(' ')[1]);
@@ -377,7 +371,7 @@ suite("odo", () => {
             const stub = sandbox.stub(odoCli, 'execute').resolves({ error: null, stdout: 'logged in', stderr: ''});
             const result = await odoCli.requireLogin();
 
-            expect(stub).calledOnceWith(`odo version && odo project list`);
+            expect(stub).calledOnceWith(odo.Command.printOdoVersionAndProjects());
             expect(result).false;
         });
 
