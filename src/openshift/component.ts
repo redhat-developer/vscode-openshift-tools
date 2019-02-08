@@ -131,12 +131,15 @@ export class Component extends OpenShiftItem {
     }
 
     static async linkService(context: OpenShiftObject): Promise<String> {
+        let serviceToLink: OpenShiftObject;
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
             'Select a Component');
         if (component) {
-            const serviceToLink: OpenShiftObject = await vscode.window.showQuickPick(Component.getServiceNames(component.getParent()), {placeHolder: "Select the service to link"});
+            const service = await Component.getServiceNames(component.getParent());
+            if (service.length === 1) serviceToLink = service[0];
+            else serviceToLink = await vscode.window.showQuickPick(service, {placeHolder: 'Select the service to link'});
             if (!serviceToLink) return null;
 
             return Progress.execFunctionWithProgress(`Link Service '${serviceToLink.getName()}' with Component '${component.getName()}'`,
