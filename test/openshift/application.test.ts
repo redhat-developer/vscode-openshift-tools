@@ -27,7 +27,7 @@ suite('Openshift/Application', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute');
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: null, stdout: '', stderr: ''});
         getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
     });
@@ -45,7 +45,6 @@ suite('Openshift/Application', () => {
 
         test('calls the appropriate odo command', async () => {
             inputStub.resolves('name');
-            execStub.resolves();
 
             await Application.create(projectItem);
 
@@ -54,7 +53,6 @@ suite('Openshift/Application', () => {
 
         test('returns status when successful', async () => {
             inputStub.resolves('name1');
-            execStub.resolves();
 
             const result = await Application.create(projectItem);
 
@@ -110,7 +108,6 @@ suite('Openshift/Application', () => {
         test('calls the appropriate odo command', async () => {
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
             inputStub.resolves('name');
-            execStub.resolves();
 
             await Application.create(null);
 
@@ -120,7 +117,6 @@ suite('Openshift/Application', () => {
         test('calls the appropriate odo command when there are more then one project', async () => {
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem, projectItem]);
             inputStub.resolves('name');
-            execStub.resolves();
 
             await Application.create(null);
 
@@ -130,7 +126,6 @@ suite('Openshift/Application', () => {
         test('returns status when successful', async () => {
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
             inputStub.resolves('name1');
-            execStub.resolves();
 
             const result = await Application.create(null);
 
@@ -220,7 +215,6 @@ suite('Openshift/Application', () => {
 
         test('calls the appropriate odo command if confirmed', async () => {
             warnStub.resolves('Yes');
-            execStub.resolves();
 
             await Application.del(appItem);
 
@@ -229,7 +223,6 @@ suite('Openshift/Application', () => {
 
         test('returns status when successful', async () => {
             warnStub.resolves('Yes');
-            execStub.resolves();
 
             const result = await Application.del(appItem);
 
@@ -261,7 +254,6 @@ suite('Openshift/Application', () => {
             const stub = sandbox.stub(vscode.window, 'showQuickPick');
             stub.onFirstCall().resolves();
             warnStub.resolves('Yes');
-            execStub.resolves();
             await Application.del(undefined);
             expect(stub).calledOnce;
             expect(warnStub).is.not.called;
@@ -272,7 +264,6 @@ suite('Openshift/Application', () => {
             stub.onFirstCall().resolves(appItem);
             stub.onSecondCall().resolves();
             warnStub.resolves('Yes');
-            execStub.resolves();
 
             await Application.del(undefined);
             expect(stub).calledTwice;
