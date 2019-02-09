@@ -10,7 +10,6 @@ import { Progress } from '../util/progress';
 import opn = require('opn');
 import { ChildProcess } from 'child_process';
 import * as validator from 'validator';
-import { Url } from './url';
 import { CliExitData } from '../cli';
 import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 
@@ -177,7 +176,7 @@ export class Component extends OpenShiftItem {
             if (routeCheck.stdout.trim() === '') {
                 value = await vscode.window.showInformationMessage(`No URL for Component '${component.getName()}' in application '${app.getName()}'. Do you want to create a URL and open it?`, 'Create', 'Cancel');
                 if (value === 'Create') {
-                    await Url.create(component);
+                    await vscode.commands.executeCommand('openshift.url.create', component);
                 }
             }
             if (value === 'Create') {
