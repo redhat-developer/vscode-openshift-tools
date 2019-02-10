@@ -51,7 +51,7 @@ suite('Openshift/Application', () => {
                 expect(execStub).calledOnceWith(Command.createApplication(projectItem.getName(), 'name'));
             });
 
-            test('returns message text when successful', async () => {
+            test('returns a message when successful', async () => {
                 inputStub.resolves('name1');
                 execStub.resolves();
 
@@ -68,7 +68,7 @@ suite('Openshift/Application', () => {
                 expect(result).null;
             });
 
-            test('trows error messages', async () => {
+            test('throws an error messages', async () => {
                 inputStub.resolves('name1');
                 execStub.rejects('ERROR');
 
@@ -104,7 +104,7 @@ suite('Openshift/Application', () => {
 
             });
 
-            test('asks to select project first', async () => {
+            test('asks to select a project first', async () => {
                 const projects = Promise.resolve([projectItem, projectItem]);
                 inputStub.resolves('name');
                 execStub.resolves();
@@ -199,7 +199,7 @@ suite('Openshift/Application', () => {
             expect(result).null;
         });
 
-        test('trows an error message when odo command failed', async () => {
+        test('throws an error message when odo command failed', async () => {
             warnStub.resolves('Yes');
             execStub.rejects('ERROR');
 
