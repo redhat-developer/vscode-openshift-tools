@@ -13,6 +13,7 @@ import { TestItem } from './testOSItem';
 import { OdoImpl, Command } from '../../src/odo';
 import { Storage } from '../../src/openshift/storage';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
+import { isThenable } from '../../src/util/async';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -184,10 +185,6 @@ suite('Openshift/Storage', () => {
         setup(() => {
             inputStub.restore();
         });
-
-        function isThenable<T>(obj: any): obj is Thenable<T> {
-            return obj && typeof (<Thenable<any>>obj).then === 'function';
-        }
 
         test('validator returns undefinded for valid storage name', async () => {
             let result: string | Thenable<string>;

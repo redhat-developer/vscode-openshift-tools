@@ -13,6 +13,7 @@ import { OdoImpl, Command } from '../../src/odo';
 import { Application } from '../../src/openshift/application';
 import { TestItem } from './testOSItem';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
+import { isThenable } from '../../src/util/async';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -39,6 +40,42 @@ suite('Openshift/Application', () => {
     });
 
     suite('create command', () => {
+
+        suite('validation', () => {
+
+            setup(() => {
+                inputStub.restore();
+                execStub.resolves();
+            });
+
+            test('returns undefinded for valid application name', async () => {
+                let result: string | Thenable<string>;
+                inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                    result = options.validateInput('goodvalue');
+                    return Promise.resolve('goodvalue');
+                });
+
+                await Application.create(projectItem);
+
+                if (!isThenable(result)) {
+                    expect(result).is.undefined;
+                }
+            });
+
+            test('returns error message for empty application name', async () => {
+                let result: string | Thenable<string>;
+                inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                    result = options.validateInput('');
+                    return Promise.resolve('');
+                });
+
+                await Application.create(projectItem);
+
+                if (!isThenable(result)) {
+                    expect(result).is.equals('Empty application name');
+                }
+            });
+        });
 
         suite('called form \'OpenShift Application Explorer\'', () => {
 
