@@ -13,6 +13,7 @@ import { OdoImpl, Command } from '../../src/odo';
 import { TestItem } from './testOSItem';
 import { Project } from '../../src/openshift/project';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
+import { isThenable } from '../../src/util/async';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -64,6 +65,62 @@ suite('Openshift/Project', () => {
                 expect.fail();
             } catch (err) {
                 expect(err).equals(`Failed to create Project with error '${errorMessage}'`);
+            }
+        });
+
+        test('validator returns undefinded for valid project name', async () => {
+            let result: string | Thenable<string>;
+            inputStub.restore();
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                result = options.validateInput('goodvalue');
+                return Promise.resolve('goodvalue');
+            });
+            await Project.create();
+
+            if (!isThenable(result)) {
+                expect(result).is.undefined;
+            }
+        });
+
+        test('validator returns error message for empty project name', async () => {
+            let result: string | Thenable<string>;
+            inputStub.restore();
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                result = options.validateInput('');
+                return Promise.resolve('');
+            });
+            await Project.create();
+
+            if (!isThenable(result)) {
+                expect(result).equals('Empty project name');
+            }
+        });
+
+        test('validator returns error message for none alphanumeric project name', async () => {
+            let result: string | Thenable<string>;
+            inputStub.restore();
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                result = options.validateInput('name&name');
+                return Promise.resolve('name&name');
+            });
+            await Project.create();
+
+            if (!isThenable(result)) {
+                expect(result).equals('Project name should be alphanumeric');
+            }
+        });
+
+        test('validator returns error message for project name longer than 63 characters', async () => {
+            let result: string | Thenable<string>;
+            inputStub.restore();
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                result = options.validateInput('n123456789012345678901234567890123456789012345678901234567890123');
+                return Promise.resolve('n123456789012345678901234567890123456789012345678901234567890123');
+            });
+            await Project.create();
+
+            if (!isThenable(result)) {
+                expect(result).equals('Project name is to long');
             }
         });
     });
