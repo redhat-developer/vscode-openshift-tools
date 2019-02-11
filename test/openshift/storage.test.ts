@@ -13,7 +13,6 @@ import { TestItem } from './testOSItem';
 import { OdoImpl, Command } from '../../src/odo';
 import { Storage } from '../../src/openshift/storage';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
-import { isThenable } from '../../src/util/async';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -195,9 +194,7 @@ suite('Openshift/Storage', () => {
             inputStub.onSecondCall().resolves();
             await Storage.create(componentItem);
 
-            if (!isThenable(result)) {
-                expect(result).is.undefined;
-            }
+            expect(result).is.undefined;
         });
 
         test('validator returns error message for empty storage', async () => {
@@ -209,9 +206,7 @@ suite('Openshift/Storage', () => {
             inputStub.onSecondCall().resolves();
             await Storage.create(componentItem);
 
-            if (!isThenable(result)) {
-                expect(result).equals('Invalid storage name');
-            }
+            expect(result).equals('Invalid storage name');
         });
 
         test('validator returns undefinded for valid sotorage path', async () => {
@@ -223,9 +218,7 @@ suite('Openshift/Storage', () => {
             });
             await Storage.create(componentItem);
 
-            if (!isThenable(result)) {
-                expect(result).is.undefined;
-            }
+            expect(result).is.undefined;
         });
 
         test('validator returns error message for empty storage path', async () => {
@@ -237,9 +230,7 @@ suite('Openshift/Storage', () => {
             });
             await Storage.create(componentItem);
 
-            if (!isThenable(result)) {
-                expect(result).equals('Invalid mount path');
-            }
+            expect(result).equals('Invalid mount path');
         });
 
         teardown(() => {

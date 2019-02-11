@@ -13,7 +13,6 @@ import { OdoImpl, Command } from '../../src/odo';
 import { TestItem } from './testOSItem';
 import { Project } from '../../src/openshift/project';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
-import { isThenable } from '../../src/util/async';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -77,9 +76,7 @@ suite('Openshift/Project', () => {
             });
             await Project.create();
 
-            if (!isThenable(result)) {
-                expect(result).is.undefined;
-            }
+            expect(result).is.undefined;
         });
 
         test('validator returns error message for empty project name', async () => {
@@ -91,9 +88,7 @@ suite('Openshift/Project', () => {
             });
             await Project.create();
 
-            if (!isThenable(result)) {
-                expect(result).equals('Empty project name');
-            }
+            expect(result).equals('Empty project name');
         });
 
         test('validator returns error message for none alphanumeric project name', async () => {
@@ -105,9 +100,7 @@ suite('Openshift/Project', () => {
             });
             await Project.create();
 
-            if (!isThenable(result)) {
-                expect(result).equals('Project name should be alphanumeric');
-            }
+            expect(result).equals('Project name should be alphanumeric');
         });
 
         test('validator returns error message for project name longer than 63 characters', async () => {
@@ -119,9 +112,7 @@ suite('Openshift/Project', () => {
             });
             await Project.create();
 
-            if (!isThenable(result)) {
-                expect(result).equals('Project name is to long');
-            }
+            expect(result).equals('Project name is to long');
         });
     });
 

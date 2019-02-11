@@ -13,7 +13,6 @@ import { OdoImpl, Command } from '../../src/odo';
 import { Application } from '../../src/openshift/application';
 import { TestItem } from './testOSItem';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
-import { isThenable } from '../../src/util/async';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -57,9 +56,7 @@ suite('Openshift/Application', () => {
 
                 await Application.create(projectItem);
 
-                if (!isThenable(result)) {
-                    expect(result).is.undefined;
-                }
+                expect(result).is.undefined;
             });
 
             test('returns error message for empty application name', async () => {
@@ -71,9 +68,7 @@ suite('Openshift/Application', () => {
 
                 await Application.create(projectItem);
 
-                if (!isThenable(result)) {
-                    expect(result).is.equals('Empty application name');
-                }
+                expect(result).is.equals('Empty application name');
             });
         });
 
