@@ -32,7 +32,7 @@ export abstract class OpenShiftItem {
         return new Promise((res) => setTimeout(res, timeout));
     }
 
-    static openshiftData(data, value) {
+    static validateName(data: Array<OpenShiftObject>, value: string) {
         const openshiftObject =  data.find((openshiftObject) =>  openshiftObject.getName() === value);
         return openshiftObject && `This name is already used, please enter different name.`;
     }

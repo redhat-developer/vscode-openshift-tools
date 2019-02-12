@@ -191,7 +191,7 @@ export class Component extends OpenShiftItem {
 
     private static async validateComponentName(value: string, application: OpenShiftObject) {
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
-        return Component.openshiftData(componentList, value);
+        return Component.validateName(componentList, value);
     }
 
     private static async getComponentName(application: OpenShiftObject) {

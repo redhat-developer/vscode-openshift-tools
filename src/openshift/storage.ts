@@ -45,7 +45,7 @@ export class Storage extends OpenShiftItem {
             validateInput: async (value: string) => {
                 let validationMessage = Storage.emptyName('Empty Storage name', value.trim());
                 if (!validationMessage) validationMessage = Storage.validateMatches('Not a valid Storage name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
-                if (!validationMessage) validationMessage = Storage.lengthName('Storage name is to long', value);
+                if (!validationMessage) validationMessage = Storage.lengthName('Storage name is too long', value);
                 if (!validationMessage) validationMessage = await Storage.validateStorageName(value.trim(), component);
                 return validationMessage;
         }});
@@ -53,7 +53,7 @@ export class Storage extends OpenShiftItem {
 
     private static async validateStorageName(value: string, component: OpenShiftObject) {
         const storageList: Array<OpenShiftObject> = await OpenShiftItem.odo.getStorageNames(component);
-        return Storage.openshiftData(storageList, value);
+        return Storage.validateName(storageList, value);
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
