@@ -24,14 +24,13 @@ suite('Openshift/Component', () => {
     let sandbox: sinon.SinonSandbox;
     let termStub: sinon.SinonStub, execStub: sinon.SinonStub;
     let getComponentsStub: sinon.SinonStub;
-    let getServiceNamesStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'application');
     const componentItem = new TestItem(appItem, 'component');
     const serviceItem = new TestItem(appItem, 'service');
     const errorMessage = 'FATAL ERROR';
 
-    setup(async () => {
+    setup(() => {
         sandbox = sinon.createSandbox();
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({stdout: ""});
@@ -43,7 +42,7 @@ suite('Openshift/Component', () => {
         sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
-        getServiceNamesStub = sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
+        sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
     });
 
     teardown(() => {
@@ -623,16 +622,7 @@ suite('Openshift/Component', () => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
         });
 
-        test('works from context menu when there is only one service available', async () => {
-            quickPickStub.resolves(serviceItem);
-            const result = await Component.linkService(componentItem);
-
-            expect(result).equals(`Service '${serviceItem.getName()}' successfully linked with Component '${componentItem.getName()}'`);
-            expect(execStub).calledOnceWith(Command.linkComponentTo(projectItem.getName(), appItem.getName(), componentItem.getName(), serviceItem.getName()));
-        });
-
         test('works from context menu', async () => {
-            getServiceNamesStub.resolves([serviceItem, serviceItem]);
             quickPickStub.resolves(serviceItem);
             const result = await Component.linkService(componentItem);
 
@@ -641,7 +631,6 @@ suite('Openshift/Component', () => {
         });
 
         test('returns null when no service selected to link', async () => {
-            getServiceNamesStub.resolves([serviceItem, serviceItem]);
             quickPickStub.resolves();
             const result = await Component.linkService(componentItem);
 
@@ -672,15 +661,6 @@ suite('Openshift/Component', () => {
         });
 
         test('works from context menu', async () => {
-            getServiceNamesStub.resolves([serviceItem, serviceItem]);
-            quickPickStub.resolves(serviceItem);
-            const result = await Component.linkService(null);
-
-            expect(result).equals(`Service '${serviceItem.getName()}' successfully linked with Component '${componentItem.getName()}'`);
-            expect(execStub).calledOnceWith(Command.linkComponentTo(projectItem.getName(), appItem.getName(), componentItem.getName(), serviceItem.getName()));
-        });
-
-        test('works from context menu when there is only one service available', async () => {
             quickPickStub.resolves(serviceItem);
             const result = await Component.linkService(null);
 
@@ -689,7 +669,6 @@ suite('Openshift/Component', () => {
         });
 
         test('returns null when no service selected to link', async () => {
-            getServiceNamesStub.resolves([serviceItem, serviceItem]);
             quickPickStub.resolves();
             const result = await Component.linkService(null);
 
@@ -697,7 +676,6 @@ suite('Openshift/Component', () => {
         });
 
         test('errors when a subcommand fails', async () => {
-            getServiceNamesStub.resolves([serviceItem, serviceItem]);
             quickPickStub.resolves(componentItem);
             execStub.rejects(errorMessage);
             let savedErr;
