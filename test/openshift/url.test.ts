@@ -207,6 +207,11 @@ suite('Openshift/URL', () => {
             });
         });
 
+        test('returns null if canceled by user',  async () => {
+            sandbox.stub(Url, 'getOpenShiftCmdData').resolves(null);
+            const result = await Url.create(null);
+            expect(result).equals(null);
+        });
     });
 
     suite('create', () => {
