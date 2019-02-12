@@ -44,12 +44,12 @@ export class Service extends OpenShiftItem {
                 let validationMessage = Service.emptyName('Empty Service name', value.trim());
                 if (!validationMessage) validationMessage = Service.validateMatches('Not a valid Service name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
                 if (!validationMessage) validationMessage = Service.lengthName('Service name is too long', value);
-                if (!validationMessage) validationMessage = await Service.validateStorageName(value.trim(), application);
+                if (!validationMessage) validationMessage = await Service.validateServiceName(value.trim(), application);
                 return validationMessage;
         }});
     }
 
-    private static async validateStorageName(value: string, component: OpenShiftObject) {
+    private static async validateServiceName(value: string, component: OpenShiftObject) {
         const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(component);
         return Service.validateName(serviceList, value);
     }
