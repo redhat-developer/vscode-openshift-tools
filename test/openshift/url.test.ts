@@ -238,7 +238,7 @@ suite('Openshift/URL', () => {
             execStub.onSecondCall().rejects();
 
             return Url.create(componentItem).catch((err) => {
-                expect(err).equals(`Failed to create URL for component '${componentItem.getName()}'`);
+                expect(err).equals(`Failed to create URL for component '${componentItem.getName()}'. Error`);
             });
         });
 
