@@ -149,8 +149,23 @@ suite("odo", () => {
         });
 
         test('getApplications returns applications for a project', async () => {
-            const activeApps = [{ name: 'app1', project: 'project' }, { name: 'app2', project: 'project1'}];
-            yamlStub.returns({ activeApplications: activeApps });
+            const activeApps = [{ name: 'app1', project: 'project1' }, { name: 'app2', project: 'project1'}];
+            yamlStub.returns({ ActiveApplications: activeApps });
+            execStub.returns({
+                error: undefined,
+                stdout: JSON.stringify({
+                        items: [
+                            {
+                                metadata: {
+                                    name: 'app1',
+                                    namespace: 'project'
+                                }
+                            }
+                        ]
+                    }
+                ),
+                stderr: ''
+            });
             const result = await odoCli.getApplications(project);
 
             expect(result.length).equals(1);
@@ -158,7 +173,16 @@ suite("odo", () => {
         });
 
         test('getApplications returns empty list if no odo apps are present', async () => {
-            yamlStub.returns(null);
+            const activeApps = [{ name: 'app1', project: 'project1' }, { name: 'app2', project: 'project1'}];
+            yamlStub.returns({ ActiveApplications: activeApps });
+            execStub.returns({
+                error: undefined,
+                stdout: JSON.stringify({
+                        items: []
+                    }
+                ),
+                stderr: ''
+            });
             const result = await odoCli.getApplications(project);
 
             expect(result).empty;
