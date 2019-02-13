@@ -7,6 +7,9 @@ import { Odo, OdoImpl, OpenShiftObject } from '../odo';
 import { OpenShiftExplorer } from '../explorer';
 import { window } from 'vscode';
 import * as validator from 'validator';
+import * as path from 'path';
+// import { Platform } from '../util/platform';
+// import fs from 'fs';
 
 const errorMessage = {
     Project: 'You need at least one Project available. Please create new OpenShift Project and try again.',
@@ -53,6 +56,20 @@ export abstract class OpenShiftItem {
     static validateUrl(message: string, value: string) {
         return validator.isURL(value) ? null : message;
     }
+
+    static isAbsolute(message: string, value: string) {
+        return path.isAbsolute(value) ? null : message;
+    }
+
+    // static validateFormatWindows(message: string, value: string) {
+    //     const pathWindowsRegex = /^[a-zA-Z]:\\(?:[^#%\\/:*?"<>|\r\n\[\]{}]+\\)*[^#%\\/:*?"<>|\r\n\[\]{}]*$/;
+    //     return pathWindowsRegex.test(value);
+    // }
+
+    // static validateDisk(value) {
+    //     const stats = path.parse(value);
+    //     return fs.existsSync(stats.root);
+    // }
 
     static validateMatches(message: string, value: string) {
         return (validator.matches(value, '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$')) ? null : message;
