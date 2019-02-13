@@ -6,7 +6,6 @@
 import { OpenShiftItem } from "./openshiftItem";
 import { OpenShiftObject, Command } from "../odo";
 import * as vscode from 'vscode';
-import * as validator from 'validator';
 import { Progress } from "../util/progress";
 
 export class Storage extends OpenShiftItem {
@@ -21,11 +20,14 @@ export class Storage extends OpenShiftItem {
 
         if (!storageName) return null;
 
-        const mountPath = await vscode.window.showInputBox({prompt: "Specify the mount path", validateInput: (value: string) => {
-            if (validator.isEmpty(value.trim())) {
-                return 'Invalid mount path';
+        const mountPath = await vscode.window.showInputBox({
+            prompt: "Specify the mount path",
+            validateInput: (value: string) => {
+                let validationMessage = Storage.emptyName('Empty mount path', value.trim());
+                if (!validationMessage) validationMessage = Storage.isAbsolute('Invalid mount path', value.trim());
+                return validationMessage;
             }
-        }});
+        });
         if (!mountPath) return null;
 
         const storageSize = await vscode.window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the Storage size'});

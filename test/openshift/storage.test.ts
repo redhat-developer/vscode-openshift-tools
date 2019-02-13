@@ -189,6 +189,7 @@ suite('OpenShift/Storage', () => {
     });
 
     suite('validation', () => {
+
         setup(() => {
             inputStub.restore();
         });
@@ -226,7 +227,7 @@ suite('OpenShift/Storage', () => {
             });
             await Storage.create(componentItem);
 
-            expect(result).is.undefined;
+            expect(result).equals('Invalid mount path');
         });
 
         test('validator returns error message for empty storage path', async () => {
@@ -238,7 +239,7 @@ suite('OpenShift/Storage', () => {
             });
             await Storage.create(componentItem);
 
-            expect(result).equals('Invalid mount path');
+            expect(result).equals('Empty mount path');
         });
 
         test('validator returns error message for none alphanumeric storage name', async () => {
