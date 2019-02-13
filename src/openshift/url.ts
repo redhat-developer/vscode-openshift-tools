@@ -35,7 +35,7 @@ export class Url extends OpenShiftItem{
             return port === undefined ? undefined : Promise.resolve()
                 .then(async () => Url.odo.execute(Command.createCompontentUrl(project.getName(), app.getName(), component.getName(), `${port['port']}`)))
                 .then(() => `URL for component '${component.getName()}' successfully created`)
-                .catch((err) => Promise.reject(`Failed to create URL for component '${component.getName()}'`));
+                .catch((err) => Promise.reject(`Failed to create URL for component '${component.getName()}'. ${err.message}`));
         }
         return null;
     }
