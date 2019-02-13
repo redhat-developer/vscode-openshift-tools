@@ -34,6 +34,8 @@ export enum ContextType {
 export const Command = {
     listProjects: () =>
         'oc get project -o jsonpath="{range .items[?(.status.phase == \\"Active\\" )]}{.metadata.name}{\\"\\n\\"}{end}"',
+    listApplications: (project: string) =>
+        `odo application list --project ${project} -o json`,
     deleteProject: (name: string) =>
         `odo project delete ${name} -f`,
     waitForProjectToBeGone: (project: string) =>
@@ -247,9 +249,16 @@ export class OdoImpl implements Odo {
     }
 
     public async getApplications(project: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
-        const odoData = jsYaml.safeLoad(fs.readFileSync(path.join(Platform.getUserHomePath(), '.kube', 'odo'), 'utf8'));
-        const activeApps: any[] = odoData && odoData.activeApplications ? odoData.activeApplications : [];
-        const apps: string[] = activeApps.filter((value) => value.project === project.getName()).map((value) => value.name);
+        const oldConfigPath = path.join(Platform.getUserHomePath(), '.kube', 'odo');
+        const newConfigPath = path.join(Platform.getUserHomePath(), '.odo', 'odo-config.yaml');
+        const odoData = jsYaml.safeLoad(fs.readFileSync(newConfigPath, 'utf8'));
+        const activeApps: any[] = odoData && odoData.ActiveApplications ? odoData.ActiveApplications : [];
+        if (activeApps.length === 0 && fs.existsSync(oldConfigPath)) {
+            fs.copyFileSync(oldConfigPath, newConfigPath);
+        }
+        const result: cliInstance.CliExitData = await this.execute(Command.listApplications(project.getName()));
+        const data: any[] = JSON.parse(result.stdout).items;
+        const apps: string[] = data.map((value) => value.metadata.name);
         return apps.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(project, value, ContextType.APPLICATION, this));
     }
 
