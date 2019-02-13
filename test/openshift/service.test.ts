@@ -64,11 +64,44 @@ suite('Openshift/Service', () => {
             expect(result).equals(`Service '${serviceItem.getName()}' successfully created`);
         });
 
+        test('validation returns null for correct service name', async () => {
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
+            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
+            let result: string | Thenable<string>;
+            inputStub.callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                result = options.validateInput('goodvalue');
+                return Promise.resolve('goodvalue');
+            });
+            quickPickStub.resolves(templateName);
+            await Service.create(null);
+            expect(result).null;
+        });
+
+        test('validation returns message for long service name', async () => {
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
+            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
+            let result: string | Thenable<string>;
+            inputStub.callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                result = options.validateInput('goodvaluebutwaytolongtobeusedasservicenameincubernetescluster');
+                return Promise.resolve(null);
+            });
+            quickPickStub.resolves(templateName);
+            await Service.create(null);
+            expect(result).equals('Service name cannot be more than 63 characters');
+        });
+
         test('returns null with no template selected', async () => {
             quickPickStub.resolves();
             const result = await Service.create(null);
 
             expect(result).null;
+        });
+
+        test('returns undefined with no application selected', async () => {
+            sandbox.stub(Service, 'getOpenShiftCmdData').resolves(null);
+            const result = await Service.create(null);
+
+            expect(result).undefined;
         });
 
         test('calls the appropriate error message if no project found', async () => {
@@ -240,6 +273,12 @@ suite('Openshift/Service', () => {
             await Service.describe(null);
 
             expect(termStub).calledOnceWith(Command.describeService(serviceItem.getName()));
+        });
+
+        test('does not call the odo command if canceled', async () => {
+            sandbox.stub(Service, 'getOpenShiftCmdData').resolves(null);
+            await Service.describe(null);
+            expect(termStub).not.called;
         });
     });
 });
