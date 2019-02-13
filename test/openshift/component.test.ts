@@ -338,6 +338,41 @@ suite('Openshift/Component', () => {
 
                 expect(commandStub).calledOnceWith('git.clone', uri);
             });
+
+            test('allows to continue with valid git repository url', async () => {
+                let result: string | Thenable<string>;
+                inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                    result = options.validateInput('https://github.com/org/repo');
+                    return Promise.resolve('https://github.com/org/repo');
+                });
+
+                await Component.create(appItem);
+                expect(result).to.be.undefined;
+            });
+
+            test('shows error message for invalid git repository url', async () => {
+                let result: string | Thenable<string>;
+                inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                    result = options.validateInput('github');
+                    return Promise.resolve('github');
+                });
+
+                await Component.create(appItem);
+                expect(result).equals('Invalid URL provided');
+
+            });
+
+            test('shows error message for empty git repository url', async () => {
+                let result: string | Thenable<string>;
+                inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                    result = options.validateInput('');
+                    return Promise.resolve('');
+                });
+
+                await Component.create(appItem);
+                expect(result).equals('Empty Git repository URL');
+
+            });
         });
 
         suite('from binary file', () => {
@@ -531,7 +566,7 @@ suite('Openshift/Component', () => {
         test('errors when no ports available', async () => {
             quickPickStub.resolves(componentItem);
             execStub.resolves({error: null, stderr: "", stdout: ""});
-            let savedErr;
+            let savedErr: any;
             try {
                 await Component.linkComponent(componentItem);
             } catch (err) {
@@ -545,7 +580,7 @@ suite('Openshift/Component', () => {
             quickPickStub.resolves(componentItem);
             execStub.onFirstCall().resolves({error: null, stderr: "", stdout: '8080, '});
             execStub.onSecondCall().rejects(errorMessage);
-            let savedErr;
+            let savedErr: any;
 
             try {
                 await Component.linkComponent(componentItem);
@@ -591,7 +626,7 @@ suite('Openshift/Component', () => {
         test('errors when no ports available', async () => {
             quickPickStub.resolves(componentItem);
             execStub.resolves({error: null, stderr: "", stdout: ""});
-            let savedErr;
+            let savedErr: any;
             try {
                 await Component.linkComponent(null);
             } catch (err) {
@@ -605,7 +640,7 @@ suite('Openshift/Component', () => {
             quickPickStub.resolves(componentItem);
             execStub.onFirstCall().resolves({error: null, stderr: "", stdout: '8080, '});
             execStub.onSecondCall().rejects(errorMessage);
-            let savedErr;
+            let savedErr: any;
 
             try {
                 await Component.linkComponent(null);
@@ -640,7 +675,7 @@ suite('Openshift/Component', () => {
         test('errors when a subcommand fails', async () => {
             quickPickStub.resolves(componentItem);
             execStub.rejects(errorMessage);
-            let savedErr;
+            let savedErr: any;
 
             try {
                 await Component.linkService(componentItem);
@@ -678,7 +713,7 @@ suite('Openshift/Component', () => {
         test('errors when a subcommand fails', async () => {
             quickPickStub.resolves(componentItem);
             execStub.rejects(errorMessage);
-            let savedErr;
+            let savedErr: any;
 
             try {
                 await Component.linkService(null);
