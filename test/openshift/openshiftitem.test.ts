@@ -66,7 +66,7 @@ suite('OpenShifItem', () => {
         test('returns undefined if provided value is in lower case alphanumeric characters', async ()=> {
             const message = 'Not a valid Application name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character';
             const validateMatches = await OpenShiftItem.validateMatches(message, 'nodejs-app');
-            expect(validateMatches).equals(undefined);
+            expect(validateMatches).equals(null);
         });
     });
 

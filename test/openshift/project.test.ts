@@ -20,6 +20,7 @@ chai.use(sinonChai);
 suite('Openshift/Project', () => {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
+    let getProjectsStub: sinon.SinonStub;
 
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'app');
@@ -27,6 +28,7 @@ suite('Openshift/Project', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
+        getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves();
         sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
@@ -122,7 +124,7 @@ suite('Openshift/Project', () => {
         setup(() => {
             warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick').resolves(projectItem);
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+            getProjectsStub.resolves([]);
         });
 
         test('works with context', async () => {

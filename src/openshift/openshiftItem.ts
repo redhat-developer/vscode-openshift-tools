@@ -38,23 +38,23 @@ export abstract class OpenShiftItem {
     }
 
     static emptyName(message: string, value: string) {
-        return validator.isEmpty(value) ? message : undefined;
+        return validator.isEmpty(value) ? message : null;
     }
 
     static lengthName(message: string, value: string) {
-        return validator.isLength(value, 0, 63) ? undefined : message;
+        return validator.isLength(value, 0, 63) ? null : message;
     }
 
     static alphanumeric(message: string, value: string) {
-        return validator.isAlphanumeric(value) ? undefined: message;
+        return validator.isAlphanumeric(value) ? null: message;
     }
 
     static validateUrl(message: string, value: string) {
-        return validator.isURL(value) ? undefined : message;
+        return validator.isURL(value) ? null : message;
     }
 
     static validateMatches(message: string, value: string) {
-        return (validator.matches(value, '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$')) ? undefined : message;
+        return (validator.matches(value, '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$')) ? null : message;
     }
 
     static async getProjectNames(): Promise<OpenShiftObject[]> {

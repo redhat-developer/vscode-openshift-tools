@@ -24,22 +24,18 @@ export class Application extends OpenShiftItem {
         return null;
     }
 
-    static async getApplicationName(project) {
+    static async getApplicationName(project: OpenShiftObject) {
+        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
         return await vscode.window.showInputBox({
             prompt: "Application name",
-            validateInput: async (value: string) => {
+            validateInput: (value: string) => {
                 let validationMessage = Application.emptyName('Empty application name', value.trim());
                 if (!validationMessage) validationMessage = Application.validateMatches('Not a valid Application name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
-                if (!validationMessage) validationMessage = Application.lengthName('Application name is to long', value);
-                if (!validationMessage) validationMessage = await Application.validateApplicationName(value.trim(), project);
+                if (!validationMessage) validationMessage = Application.lengthName('Application name is too long', value);
+                if (!validationMessage) validationMessage = Application.validateName(applicationList, value);
                 return validationMessage;
             }
         });
-    }
-
-    private static async validateApplicationName(value: string, project: OpenShiftObject) {
-        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
-        return Application.validateName(applicationList, value);
     }
 
     static async describe(treeItem: OpenShiftObject) {

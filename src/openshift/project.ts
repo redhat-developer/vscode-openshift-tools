@@ -21,21 +21,16 @@ export class Project extends OpenShiftItem {
     }
 
     private static async getProjectName() {
+        const projectList: Array<OpenShiftObject> = await OpenShiftItem.odo.getProjects();
         return await vscode.window.showInputBox({
             prompt: "Mention Project name",
-            validateInput: async (value: string) => {
+            validateInput: (value: string) => {
                 let validationMessage = Project.emptyName('Empty Project name', value.trim());
                 if (!validationMessage) validationMessage = Project.validateMatches('Not a valid Project name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
                 if (!validationMessage) validationMessage = Project.lengthName('Project name is too long', value);
-                if (!validationMessage) validationMessage = Project.alphanumeric('Project name should be alphanumeric', value);
-                if (!validationMessage) validationMessage = await Project.validateProjectName(value.trim());
+                if (!validationMessage) validationMessage = Project.validateName(projectList, value);
                 return validationMessage;
         }});
-    }
-
-    private static async validateProjectName(value: string) {
-        const projectList: Array<OpenShiftObject> = await OpenShiftItem.odo.getProjects();
-        return Project.validateName(projectList, value);
     }
 
     static async del(context: OpenShiftObject): Promise<string> {

@@ -23,6 +23,7 @@ suite('Openshift/Storage', () => {
     let quickPickStub: sinon.SinonStub;
     let inputStub: sinon.SinonStub;
     let getProjectNamesStub: sinon.SinonStub;
+    let getStorageNamesStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'app');
     const componentItem = new TestItem(appItem, 'component');
@@ -33,6 +34,7 @@ suite('Openshift/Storage', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
+        getStorageNamesStub = sandbox.stub(OdoImpl.prototype, 'getStorageNames').resolves([storageItem]);
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves();
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
     });
@@ -250,7 +252,7 @@ suite('Openshift/Storage', () => {
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
-            sandbox.stub(OdoImpl.prototype, 'getStorageNames').resolves([]);
+            getStorageNamesStub.resolves([]);
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);

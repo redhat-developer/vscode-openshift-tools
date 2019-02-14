@@ -29,6 +29,7 @@ suite('Openshift/Application', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: null, stdout: '', stderr: ''});
+        sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
         getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         inputStub = sandbox.stub(vscode.window, 'showInputBox');
