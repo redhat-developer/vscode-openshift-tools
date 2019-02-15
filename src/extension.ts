@@ -16,7 +16,10 @@ import { Storage } from './openshift/storage';
 import { Url } from './openshift/url';
 import { Service } from './openshift/service';
 
+export let contextStoragePath: vscode.ExtensionContext;
+
 export function activate(context: vscode.ExtensionContext) {
+    contextStoragePath = context;
     const explorer: explorerFactory.OpenShiftExplorer = explorerFactory.OpenShiftExplorer.getInstance();
     const disposable = [
         vscode.commands.registerCommand('openshift.about', (context) => execute(Cluster.about, context)),

@@ -13,6 +13,7 @@ import { Platform } from './util/platform';
 import * as fs from 'fs';
 import { ToolsConfig } from './tools';
 import format =  require('string-format');
+import { contextStoragePath } from './extension';
 
 export interface OpenShiftObject extends QuickPickItem {
     getChildren(): ProviderResult<OpenShiftObject[]>;
@@ -370,7 +371,7 @@ export class OdoImpl implements Odo {
 
     public async executeInTerminal(command: string, cwd: string = process.cwd(), name: string = 'OpenShift') {
         const cmd = command.split(' ')[0];
-        let toolLocation = await ToolsConfig.detectOrDownload(cmd);
+        let toolLocation = await ToolsConfig.detectOrDownload(cmd, contextStoragePath.storagePath);
         if (toolLocation) {
             toolLocation = path.dirname(toolLocation);
         }
@@ -381,7 +382,7 @@ export class OdoImpl implements Odo {
 
     public async execute(command: string, cwd?: string, fail: boolean = true): Promise<CliExitData> {
         const cmd = command.split(' ')[0];
-        const toolLocation = await ToolsConfig.detectOrDownload(cmd);
+        const toolLocation = await ToolsConfig.detectOrDownload(cmd, contextStoragePath.storagePath);
         return OdoImpl.cli.execute(
             toolLocation ? command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`) : command,
             cwd ? {cwd} : { }

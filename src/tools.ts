@@ -101,23 +101,23 @@ export class ToolsConfig {
         ToolsConfig.tools = ToolsConfig.loadMetadata(configData, Platform.OS);
     }
 
-    public static async detectOrDownload(cmd: string): Promise<string> {
+    public static async detectOrDownload(cmd: string, storagePath: string): Promise<string> {
 
         let toolLocation: string = ToolsConfig.tools[cmd].location;
 
         if (toolLocation === undefined) {
-            const toolCacheLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools[cmd].cmdFileName);
+            const toolCacheLocation = path.resolve(storagePath, '.vs-openshift', ToolsConfig.tools[cmd].cmdFileName);
             const whichLocation = which(cmd);
             const toolLocations: string[] = [whichLocation ? whichLocation.stdout : null, toolCacheLocation];
             toolLocation = await ToolsConfig.selectTool(toolLocations, ToolsConfig.tools[cmd].versionRange);
 
             if (toolLocation === undefined) {
                 // otherwise request permission to download
-                const toolDlLocation = path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools[cmd].dlFileName);
+                const toolDlLocation = path.resolve(storagePath, '.vs-openshift', ToolsConfig.tools[cmd].dlFileName);
                 const installRequest = `Download and install v${ToolsConfig.tools[cmd].version}`;
                 const response = await vscode.window.showInformationMessage(
                     `Cannot find ${ToolsConfig.tools[cmd].description} ${ToolsConfig.tools[cmd].versionRangeLabel}.`, installRequest, 'Help', 'Cancel');
-                fsex.ensureDirSync(path.resolve(Platform.getUserHomePath(), '.vs-openshift'));
+                fsex.ensureDirSync(path.resolve(storagePath, '.vs-openshift'));
                 if (response === installRequest) {
                     let action: string;
                     do {
