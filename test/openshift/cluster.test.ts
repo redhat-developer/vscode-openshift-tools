@@ -124,6 +124,26 @@ suite('Openshift/Cluster', () => {
                     expect(err).equals(`Failed to login to cluster '${testUrl}' with '${error}'!`);
                 }
             });
+
+            test('checks cluster url name is valid url', async () => {
+                let result;
+                inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                    result = options.validateInput('http://127.0.0.1:9999');
+                    return Promise.resolve('http://127.0.0.1:9999');
+                });
+                await Cluster.login();
+                expect(result).is.undefined;
+            });
+
+            test('checks user name is not empty', async () => {
+                let result;
+                inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                    result = options.validateInput('goodvalue');
+                    return Promise.resolve('goodvalue');
+                });
+                await Cluster.login();
+                expect(result).is.undefined;
+            });
         });
 
         suite('token', () => {
