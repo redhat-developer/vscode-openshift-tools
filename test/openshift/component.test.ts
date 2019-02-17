@@ -29,18 +29,20 @@ suite('Openshift/Component', () => {
     const componentItem = new TestItem(appItem, 'component');
     const serviceItem = new TestItem(appItem, 'service');
     const errorMessage = 'FATAL ERROR';
+    let getApps;
+    let getProjects;
 
     setup(() => {
         sandbox = sinon.createSandbox();
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({stdout: ""});
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });
         sandbox.stub(OdoImpl.prototype, 'getServices');
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
         getComponentsStub = sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
         sandbox.stub(Component, 'wait').resolves();
-        sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
-        sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
+        getProjects = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
+        getApps = sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
         sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
     });
@@ -50,156 +52,18 @@ suite('Openshift/Component', () => {
     });
 
     suite('create component with no context', () => {
-        const componentType = 'nodejs';
-        const folder = { uri: { fsPath: 'folder' } };
-        let inputStub: sinon.SinonStub;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves('Workspace Directory');
-            inputStub = sandbox.stub(vscode.window, 'showInputBox');
-            sandbox.stub(Progress, 'execWithProgress').resolves();
-            sandbox.stub(Progress, 'execCmdWithProgress').resolves();
+            quickPickStub.onSecondCall().resolves(null);
         });
 
-        test('errors when a subcommand fails', async () => {
-            sandbox.stub(vscode.window, 'showWorkspaceFolderPick').rejects(errorMessage);
-
-            try {
-                await Component.create(null);
-                expect.fail();
-            } catch (error) {
-                expect(error).equals(`Failed to create component with error '${errorMessage}'`);
-            }
-        });
-
-        suite('from local workspace', () => {
-            let folderStub: sinon.SinonStub;
-
-            setup(() => {
-                inputStub.resolves(componentItem.getName());
-                folderStub = sandbox.stub(vscode.window, 'showWorkspaceFolderPick').resolves(folder);
-            });
-
-            test('happy path works', async () => {
-                quickPickStub.resolves(componentType);
-                const result = await Component.create(null);
-
-                expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(termStub).calledOnceWith(Command.pushLocalComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), folder.uri.fsPath));
-            });
-
-            test('returns null when no folder selected', async () => {
-                folderStub.resolves();
-                const result = await Component.create(null);
-
-                expect(result).null;
-            });
-
-            test('returns null when no component type selected', async () => {
-                quickPickStub.resolves();
-                const result = await Component.create(null);
-
-                expect(result).null;
-            });
-
-            test('returns null when no component type version selected', async () => {
-                quickPickStub.onThirdCall().resolves();
-                const result = await Component.create(null);
-
-                expect(result).null;
-            });
-        });
-
-        suite('from git repository', () => {
-
-            setup(() => {
-                quickPickStub.onFirstCall().resolves(projectItem);
-                quickPickStub.onSecondCall().resolves(appItem);
-                quickPickStub.onThirdCall().resolves({ label: 'Git Repository' });
-                sandbox.stub(vscode.window, 'showInformationMessage').resolves();
-            });
-
-            test('happy path works', async () => {
-                inputStub.resolves(componentItem.getName());
-                quickPickStub.resolves(componentType);
-                const result = await Component.create(null);
-
-                expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-            });
-
-            test('returns null when no git repo selected', async () => {
-                inputStub.onFirstCall().resolves();
-                const result = await Component.create(null);
-
-                expect(result).null;
-            });
-
-            test('returns null when no component name selected', async () => {
-                inputStub.onFirstCall().resolves();
-                const result = await Component.create(null);
-
-                expect(result).null;
-            });
-
-            test('returns null when no component type selected', async () => {
-                quickPickStub.resolves();
-                const result = await Component.create(null);
-
-                expect(result).null;
-            });
-
-            test('returns null when no component type version selected', async () => {
-                quickPickStub.onThirdCall().resolves();
-                const result = await Component.create(null);
-
-                expect(result).null;
-            });
-        });
-
-        suite('from binary file', () => {
-            let fileStub: sinon.SinonStub;
-            const files = [{ fsPath: 'test/sample.war' }];
-
-            setup(() => {
-                quickPickStub.onFirstCall().resolves(projectItem);
-                quickPickStub.onSecondCall().resolves(appItem);
-                quickPickStub.onThirdCall().resolves({ label: 'Binary File' });
-                fileStub = sandbox.stub(vscode.window, 'showOpenDialog').resolves(files);
-                inputStub.resolves(componentItem.getName());
-            });
-
-            test('happy path works', async () => {
-                inputStub.resolves(componentItem.getName());
-                quickPickStub.resolves(componentType);
-
-                const result = await Component.create(null);
-
-                expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-            });
-
-            test('returns null when no binary file selected', async () => {
-                fileStub.resolves();
-                const result = await Component.create(null);
-
-                expect(result).null;
-            });
-
-            test('returns null when no component name selected', async () => {
-                inputStub.resolves();
-                const result = await Component.create(null);
-
-                expect(result).null;
-            });
-
-            test('returns null when no component type selected', async () => {
-                quickPickStub.resolves();
-                const result = await Component.create(null);
-
-                expect(result).null;
-            });
+        test('asks for context and exits if not provided', async () => {
+            const result = await Component.create(null);
+            expect(result).is.undefined;
+            expect(getProjects).calledOnce;
+            expect(getApps).calledOnce;
         });
     });
 
@@ -472,7 +336,7 @@ suite('Openshift/Component', () => {
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
             sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
-            execStub.resolves({error: undefined, stdout: '', stderr: ''});
+            execStub.resolves({ error: undefined, stdout: '', stderr: '' });
         });
 
         test('works from context menu', async () => {
@@ -529,7 +393,7 @@ suite('Openshift/Component', () => {
 
         test('works from context menu', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.resolves({error: null, stderr: "", stdout: '8080, '});
+            execStub.resolves({ error: null, stderr: "", stdout: '8080, ' });
             const result = await Component.linkComponent(componentItem);
 
             expect(result).equals(`component '${componentItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
@@ -537,7 +401,7 @@ suite('Openshift/Component', () => {
 
         test('works from context menu if more than one ports is available', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.resolves({error: null, stderr: "", stdout: '8080, 8081, '});
+            execStub.resolves({ error: null, stderr: "", stdout: '8080, 8081, ' });
             const result = await Component.linkComponent(componentItem);
 
             expect(result).equals(`component '${componentItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
@@ -565,7 +429,7 @@ suite('Openshift/Component', () => {
 
         test('errors when no ports available', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.resolves({error: null, stderr: "", stdout: ""});
+            execStub.resolves({ error: null, stderr: "", stdout: "" });
             let savedErr: any;
             try {
                 await Component.linkComponent(componentItem);
@@ -578,7 +442,7 @@ suite('Openshift/Component', () => {
 
         test('errors when a subcommand fails', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.onFirstCall().resolves({error: null, stderr: "", stdout: '8080, '});
+            execStub.onFirstCall().resolves({ error: null, stderr: "", stdout: '8080, ' });
             execStub.onSecondCall().rejects(errorMessage);
             let savedErr: any;
 
@@ -602,7 +466,7 @@ suite('Openshift/Component', () => {
 
         test('works from context menu', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.resolves({error: null, stderr: "", stdout: '8080, '});
+            execStub.resolves({ error: null, stderr: "", stdout: '8080, ' });
             const result = await Component.linkComponent(null);
 
             expect(result).equals(`component '${componentItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
@@ -610,7 +474,7 @@ suite('Openshift/Component', () => {
 
         test('works from context menu if more than one ports is available', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.resolves({error: null, stderr: "", stdout: '8080, 8081, '});
+            execStub.resolves({ error: null, stderr: "", stdout: '8080, 8081, ' });
             const result = await Component.linkComponent(null);
 
             expect(result).equals(`component '${componentItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
@@ -625,7 +489,7 @@ suite('Openshift/Component', () => {
 
         test('errors when no ports available', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.resolves({error: null, stderr: "", stdout: ""});
+            execStub.resolves({ error: null, stderr: "", stdout: "" });
             let savedErr: any;
             try {
                 await Component.linkComponent(null);
@@ -638,7 +502,7 @@ suite('Openshift/Component', () => {
 
         test('errors when a subcommand fails', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.onFirstCall().resolves({error: null, stderr: "", stdout: '8080, '});
+            execStub.onFirstCall().resolves({ error: null, stderr: "", stdout: '8080, ' });
             execStub.onSecondCall().rejects(errorMessage);
             let savedErr: any;
 
@@ -753,7 +617,7 @@ suite('Openshift/Component', () => {
             quickPickStub.onThirdCall().resolves(componentItem);
         });
 
-        test('log calls the correct odo command in terminal', async() => {
+        test('log calls the correct odo command in terminal', async () => {
             await Component.log(componentItem);
 
             expect(termStub).calledOnceWith(Command.showLog(projectItem.getName(), appItem.getName(), componentItem.getName()));
@@ -769,7 +633,7 @@ suite('Openshift/Component', () => {
     test('followLog calls the correct odo command in terminal', () => {
         Component.followLog(componentItem);
 
-        test('followLog calls the correct odo command in terminal', async() => {
+        test('followLog calls the correct odo command in terminal', async () => {
             await Component.followLog(componentItem);
             expect(termStub).calledOnceWith(Command.showLogAndFollow(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
@@ -778,7 +642,7 @@ suite('Openshift/Component', () => {
 
             await Component.followLog(null);
             expect(termStub).calledOnceWith(Command.showLogAndFollow(projectItem.getName(), appItem.getName(), componentItem.getName()));
-       });
+        });
     });
 
     suite('push', () => {
