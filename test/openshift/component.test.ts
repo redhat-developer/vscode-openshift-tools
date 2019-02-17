@@ -35,7 +35,7 @@ suite('Openshift/Component', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({stdout: ""});
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });
         sandbox.stub(OdoImpl.prototype, 'getServices');
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
@@ -336,7 +336,7 @@ suite('Openshift/Component', () => {
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
             sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
-            execStub.resolves({error: undefined, stdout: '', stderr: ''});
+            execStub.resolves({ error: undefined, stdout: '', stderr: '' });
         });
 
         test('works from context menu', async () => {
@@ -393,7 +393,7 @@ suite('Openshift/Component', () => {
 
         test('works from context menu', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.resolves({error: null, stderr: "", stdout: '8080, '});
+            execStub.resolves({ error: null, stderr: "", stdout: '8080, ' });
             const result = await Component.linkComponent(componentItem);
 
             expect(result).equals(`component '${componentItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
@@ -401,7 +401,7 @@ suite('Openshift/Component', () => {
 
         test('works from context menu if more than one ports is available', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.resolves({error: null, stderr: "", stdout: '8080, 8081, '});
+            execStub.resolves({ error: null, stderr: "", stdout: '8080, 8081, ' });
             const result = await Component.linkComponent(componentItem);
 
             expect(result).equals(`component '${componentItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
@@ -429,7 +429,7 @@ suite('Openshift/Component', () => {
 
         test('errors when no ports available', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.resolves({error: null, stderr: "", stdout: ""});
+            execStub.resolves({ error: null, stderr: "", stdout: "" });
             let savedErr: any;
             try {
                 await Component.linkComponent(componentItem);
@@ -442,7 +442,7 @@ suite('Openshift/Component', () => {
 
         test('errors when a subcommand fails', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.onFirstCall().resolves({error: null, stderr: "", stdout: '8080, '});
+            execStub.onFirstCall().resolves({ error: null, stderr: "", stdout: '8080, ' });
             execStub.onSecondCall().rejects(errorMessage);
             let savedErr: any;
 
@@ -466,7 +466,7 @@ suite('Openshift/Component', () => {
 
         test('works from context menu', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.resolves({error: null, stderr: "", stdout: '8080, '});
+            execStub.resolves({ error: null, stderr: "", stdout: '8080, ' });
             const result = await Component.linkComponent(null);
 
             expect(result).equals(`component '${componentItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
@@ -474,7 +474,7 @@ suite('Openshift/Component', () => {
 
         test('works from context menu if more than one ports is available', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.resolves({error: null, stderr: "", stdout: '8080, 8081, '});
+            execStub.resolves({ error: null, stderr: "", stdout: '8080, 8081, ' });
             const result = await Component.linkComponent(null);
 
             expect(result).equals(`component '${componentItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
@@ -489,7 +489,7 @@ suite('Openshift/Component', () => {
 
         test('errors when no ports available', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.resolves({error: null, stderr: "", stdout: ""});
+            execStub.resolves({ error: null, stderr: "", stdout: "" });
             let savedErr: any;
             try {
                 await Component.linkComponent(null);
@@ -502,7 +502,7 @@ suite('Openshift/Component', () => {
 
         test('errors when a subcommand fails', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.onFirstCall().resolves({error: null, stderr: "", stdout: '8080, '});
+            execStub.onFirstCall().resolves({ error: null, stderr: "", stdout: '8080, ' });
             execStub.onSecondCall().rejects(errorMessage);
             let savedErr: any;
 
@@ -617,7 +617,7 @@ suite('Openshift/Component', () => {
             quickPickStub.onThirdCall().resolves(componentItem);
         });
 
-        test('log calls the correct odo command in terminal', async() => {
+        test('log calls the correct odo command in terminal', async () => {
             await Component.log(componentItem);
 
             expect(termStub).calledOnceWith(Command.showLog(projectItem.getName(), appItem.getName(), componentItem.getName()));
@@ -633,7 +633,7 @@ suite('Openshift/Component', () => {
     test('followLog calls the correct odo command in terminal', () => {
         Component.followLog(componentItem);
 
-        test('followLog calls the correct odo command in terminal', async() => {
+        test('followLog calls the correct odo command in terminal', async () => {
             await Component.followLog(componentItem);
             expect(termStub).calledOnceWith(Command.showLogAndFollow(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
@@ -642,7 +642,7 @@ suite('Openshift/Component', () => {
 
             await Component.followLog(null);
             expect(termStub).calledOnceWith(Command.showLogAndFollow(projectItem.getName(), appItem.getName(), componentItem.getName()));
-       });
+        });
     });
 
     suite('push', () => {
