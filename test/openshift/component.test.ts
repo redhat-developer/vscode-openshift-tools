@@ -12,9 +12,10 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
 import { OdoImpl, Command } from '../../src/odo';
-import { Component } from '../../src/openshift/component';
+
 import { Progress } from '../../src/util/progress';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
+import pq = require('proxyquire');
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -29,11 +30,17 @@ suite('Openshift/Component', () => {
     const componentItem = new TestItem(appItem, 'component');
     const serviceItem = new TestItem(appItem, 'service');
     const errorMessage = 'FATAL ERROR';
-    let getApps;
-    let getProjects;
-
+    let getProjects: sinon.SinonStub;
+    let getApps: sinon.SinonStub;
+    let Component;
+    let opnStub: sinon.SinonStub;
+    let infoStub: sinon.SinonStub;
     setup(() => {
         sandbox = sinon.createSandbox();
+        opnStub = sandbox.stub();
+        Component = pq('../../src/openshift/component', {
+            opn: opnStub
+        }).Component;
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });
         sandbox.stub(OdoImpl.prototype, 'getServices');
@@ -151,7 +158,6 @@ suite('Openshift/Component', () => {
 
         suite('from git repository', () => {
             const uri = 'git uri';
-            let infoStub: sinon.SinonStub;
 
             setup(() => {
                 quickPickStub.onFirstCall().resolves({ label: 'Git Repository' });
@@ -456,62 +462,17 @@ suite('Openshift/Component', () => {
     });
 
     suite('linkComponent with no context', () => {
-
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(componentItem);
+            quickPickStub.onThirdCall().resolves(null);
         });
 
-        test('works from context menu', async () => {
-            quickPickStub.resolves(componentItem);
-            execStub.resolves({ error: null, stderr: "", stdout: '8080, ' });
+        test('asks for context and exits if not provided', async () => {
             const result = await Component.linkComponent(null);
-
-            expect(result).equals(`component '${componentItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
-        });
-
-        test('works from context menu if more than one ports is available', async () => {
-            quickPickStub.resolves(componentItem);
-            execStub.resolves({ error: null, stderr: "", stdout: '8080, 8081, ' });
-            const result = await Component.linkComponent(null);
-
-            expect(result).equals(`component '${componentItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
-        });
-
-        test('returns null when no component selected to link', async () => {
-            quickPickStub.resolves();
-            const result = await Component.linkComponent(null);
-
-            expect(result).null;
-        });
-
-        test('errors when no ports available', async () => {
-            quickPickStub.resolves(componentItem);
-            execStub.resolves({ error: null, stderr: "", stdout: "" });
-            let savedErr: any;
-            try {
-                await Component.linkComponent(null);
-            } catch (err) {
-                savedErr = err;
-            }
-
-            expect(savedErr).equals(`Component '${componentItem.getName()}' has no ports decalred.`);
-        });
-
-        test('errors when a subcommand fails', async () => {
-            quickPickStub.resolves(componentItem);
-            execStub.onFirstCall().resolves({ error: null, stderr: "", stdout: '8080, ' });
-            execStub.onSecondCall().rejects(errorMessage);
-            let savedErr: any;
-
-            try {
-                await Component.linkComponent(null);
-            } catch (err) {
-                savedErr = err;
-            }
-            expect(savedErr).equals(`Failed to link component with error '${errorMessage}'`);
+            expect(result).is.undefined;
+            expect(quickPickStub).calledThrice;
         });
     });
 
@@ -687,5 +648,48 @@ suite('Openshift/Component', () => {
 
             expect(termStub).calledOnceWith(Command.watchComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
+    });
+
+    suite('openUrl', () => {
+        setup(() => {
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onThirdCall().resolves(componentItem);
+        });
+
+        test('ask for context when called from command bar and exits with null if canceled', async () => {
+            quickPickStub.onThirdCall().resolves(null);
+            const result = await Component.openUrl(null);
+            expect(quickPickStub).calledThrice;
+            expect(result).is.null;
+        });
+
+        test('gets url for component and opens it in browser', async () => {
+            execStub.onFirstCall().resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onSecondCall().resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onThirdCall().resolves({error: undefined, stdout: 'tlsEnabled', stderr: ''});
+            await Component.openUrl(null);
+            expect(opnStub).calledOnceWith('https://url');
+        });
+
+        test('request to create url for component if it does not exist, creates it if confirmed by user and opens in in browser.' , async () => {
+            infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves('Create');
+            sandbox.stub(vscode.commands, 'executeCommand').resolves();
+            execStub.onFirstCall().resolves({error: undefined, stdout: '', stderr: ''});
+            execStub.onSecondCall().resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onThirdCall().resolves({error: undefined, stdout: 'tlsEnabled', stderr: ''});
+            await Component.openUrl(null);
+            expect(opnStub).calledOnceWith('https://url');
+        });
+
+        test('request to create url for component if it does not exist and exits when not confirmed' , async () => {
+            infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves('Cancel');
+            sandbox.stub(vscode.commands, 'executeCommand').resolves();
+            execStub.onFirstCall().resolves({error: undefined, stdout: '', stderr: ''});
+            await Component.openUrl(null);
+            expect(opnStub).is.not.called;
+        });
+
     });
 });
