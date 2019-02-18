@@ -32,7 +32,6 @@ suite('Openshift/Component', () => {
     const errorMessage = 'FATAL ERROR';
     let getProjects: sinon.SinonStub;
     let getApps: sinon.SinonStub;
-    let getComponents: sinon.SinonStub;
     let Component;
     let opnStub: sinon.SinonStub;
     let infoStub: sinon.SinonStub;
@@ -51,7 +50,7 @@ suite('Openshift/Component', () => {
         sandbox.stub(Component, 'wait').resolves();
         getProjects = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         getApps = sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
-        getComponents = sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
+        sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
         sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
     });
 
