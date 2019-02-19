@@ -48,4 +48,14 @@ suite('File Watch Utility', () => {
         expect(result).has.ownProperty('watcher');
         expect(result).has.ownProperty('emitter');
     });
+
+    test('emitts change message when context changes', async () => {
+        ensureStub.restore();
+        watchStub.restore();
+        // create fake empty k8s config file
+        // fs.writeFileSync()
+        // start watching it
+        // modify current context
+        // check message is emitted
+    });
 });
