@@ -10,6 +10,8 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import * as fs from 'fs-extra';
 import { WatchUtil } from '../../src/util/watch';
+import tmp = require('tmp');
+import * as path from 'path';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -52,10 +54,16 @@ suite('File Watch Utility', () => {
     test('emitts change message when context changes', async () => {
         ensureStub.restore();
         watchStub.restore();
-        // create fake empty k8s config file
-        // fs.writeFileSync()
-        // start watching it
-        // modify current context
-        // check message is emitted
+        const fileToWatch = tmp.fileSync().name;
+        fs.ensureFileSync(fileToWatch);
+        const notifier = WatchUtil.watchFileForContextChange(path.dirname(fileToWatch), path.basename(fileToWatch));
+        return new Promise((res) => {
+            notifier.emitter.on('file-changed', (event, file) => {
+                expect(event).equals('change');
+                expect(file).equals(path.basename(fileToWatch));
+                res();
+            });
+            fs.writeFileSync(fileToWatch, 'current-context:test');
+        });
     });
 });
