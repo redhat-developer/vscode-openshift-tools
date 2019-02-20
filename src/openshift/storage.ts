@@ -16,7 +16,8 @@ export class Storage extends OpenShiftItem {
             "In which Application you want to create a Storage",
             "In which Component you want to create a Storage");
         if (component) {
-            const storageName = await Storage.getStorageName(component);
+            const storageList: Array<OpenShiftObject> = await OpenShiftItem.odo.getStorageNames(component);
+            const storageName = await Storage.getName('Storage name', storageList);
 
             if (!storageName) return null;
 
@@ -37,19 +38,6 @@ export class Storage extends OpenShiftItem {
                 .catch((err) => Promise.reject(`New Storage command failed with error: '${err}'!`));
 
         }
-    }
-
-    private static async getStorageName(component: OpenShiftObject) {
-        const storageList: Array<OpenShiftObject> = await OpenShiftItem.odo.getStorageNames(component);
-        return await vscode.window.showInputBox({
-            prompt: "Specify the Storage name",
-            validateInput: (value: string) => {
-                let validationMessage = Storage.emptyName('Empty Storage name', value.trim());
-                if (!validationMessage) validationMessage = Storage.validateMatches('Not a valid Storage name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
-                if (!validationMessage) validationMessage = Storage.lengthName('Storage name is too long', value);
-                if (!validationMessage) validationMessage = Storage.validateUniqueName(storageList, value);
-                return validationMessage;
-        }});
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {

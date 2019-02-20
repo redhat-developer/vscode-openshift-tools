@@ -189,27 +189,13 @@ export class Component extends OpenShiftItem {
         return null;
     }
 
-    private static async getComponentName(application: OpenShiftObject) {
-        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
-        return await vscode.window.showInputBox({
-            prompt: "Component name",
-            validateInput: async (value: string) => {
-                let validationMessage = Component.emptyName('Empty Component name', value.trim());
-                if (!validationMessage) validationMessage = Component.validateMatches('Not a valid Component name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
-                if (!validationMessage) validationMessage = Component.lengthName('Component name is too long', value);
-                if (!validationMessage) validationMessage = Component.validateUniqueName(componentList, value);
-                return validationMessage;
-            }
-        });
-    }
-
     private static async createFromLocal(application: OpenShiftObject): Promise<string> {
         const folder = await vscode.window.showWorkspaceFolderPick({
             placeHolder: 'Select the target workspace folder'
         });
         if (!folder) return null;
-
-        const componentName = await Component.getComponentName(application);
+        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
+        const componentName = await Component.getName('Component name', componentList);
 
         if (!componentName) return null;
 
@@ -233,7 +219,8 @@ export class Component extends OpenShiftItem {
             "In which Application you want to create a Component"
         );
 
-        const componentName = await Component.getComponentName(application);
+        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
+        const componentName = await Component.getName('Component name', componentList);
 
         if (!componentName) return null;
 
@@ -262,7 +249,8 @@ export class Component extends OpenShiftItem {
 
         if (!repoURI) return null;
 
-        const componentName = await Component.getComponentName(application);
+        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
+        const componentName = await Component.getName('Component name', componentList);
 
         if (!componentName) return null;
 
@@ -293,7 +281,8 @@ export class Component extends OpenShiftItem {
 
         if (!binaryFile) return null;
 
-        const componentName = await Component.getComponentName(application);
+        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
+        const componentName = await Component.getName('Component name', componentList);
 
         if (!componentName) return null;
 

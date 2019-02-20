@@ -37,6 +37,19 @@ export abstract class OpenShiftItem {
         return openshiftObject && `This name is already used, please enter different name.`;
     }
 
+    static async getName(message: string, data: Array<OpenShiftObject>) {
+        return await window.showInputBox({
+            prompt: `Please provide an ${message}`,
+            validateInput: (value: string) => {
+                let validationMessage = OpenShiftItem.emptyName(`Empty ${message}`, value.trim());
+                if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character`, value);
+                if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${message} is too long`, value);
+                if (!validationMessage) validationMessage = OpenShiftItem.validateUniqueName(data, value);
+                return validationMessage;
+            }
+        });
+    }
+
     static emptyName(message: string, value: string) {
         return validator.isEmpty(value) ? message : null;
     }

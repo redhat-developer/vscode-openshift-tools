@@ -11,26 +11,14 @@ import { Progress } from '../util/progress';
 export class Project extends OpenShiftItem {
 
     static async create(): Promise<string> {
-        let projectName = await Project.getProjectName();
+        const projectList: Array<OpenShiftObject> = await OpenShiftItem.odo.getProjects();
+        let projectName = await Project.getName('Project name', projectList);
         if (!projectName) return null;
         projectName = projectName.trim();
         return Project.odo.execute(Command.createProject(projectName))
             .then(() => Project.explorer.refresh())
             .then(() => `Project '${projectName}' successfully created`)
             .catch((error) => Promise.reject(`Failed to create Project with error '${error}'`));
-    }
-
-    private static async getProjectName() {
-        const projectList: Array<OpenShiftObject> = await OpenShiftItem.odo.getProjects();
-        return await vscode.window.showInputBox({
-            prompt: "Mention Project name",
-            validateInput: (value: string) => {
-                let validationMessage = Project.emptyName('Empty Project name', value.trim());
-                if (!validationMessage) validationMessage = Project.validateMatches('Not a valid Project name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
-                if (!validationMessage) validationMessage = Project.lengthName('Project name is too long', value);
-                if (!validationMessage) validationMessage = Project.validateUniqueName(projectList, value);
-                return validationMessage;
-        }});
     }
 
     static async del(context: OpenShiftObject): Promise<string> {

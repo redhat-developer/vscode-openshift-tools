@@ -13,7 +13,8 @@ export class Application extends OpenShiftItem {
         let name;
         const project = await Application.getOpenShiftCmdData(treeItem,
             "In which Project you want to create an Application");
-        if (project) name = await Application.getApplicationName(project);
+        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
+        if (project) name = await Application.getName('Application name', applicationList);
         if (name) {
             return Promise.resolve()
                 .then(() => Application.odo.execute(Command.createApplication(project.getName(), name)))
@@ -22,20 +23,6 @@ export class Application extends OpenShiftItem {
                 .catch((error) => Promise.reject(`Failed to create Application with error '${error}'`));
         }
         return null;
-    }
-
-    static async getApplicationName(project: OpenShiftObject) {
-        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
-        return await vscode.window.showInputBox({
-            prompt: "Application name",
-            validateInput: (value: string) => {
-                let validationMessage = Application.emptyName('Empty application name', value.trim());
-                if (!validationMessage) validationMessage = Application.validateMatches('Not a valid Application name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
-                if (!validationMessage) validationMessage = Application.lengthName('Application name is too long', value);
-                if (!validationMessage) validationMessage = Application.validateUniqueName(applicationList, value);
-                return validationMessage;
-            }
-        });
     }
 
     static async describe(treeItem: OpenShiftObject) {
