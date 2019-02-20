@@ -575,7 +575,7 @@
     "walker": "^1.0.7"
   },
   "dependencies": {
-    "@kubernetes/client-node": "0.7.0",
+    "@kubernetes/client-node": "^0.8.1",
     "byline": "^5.0.0",
     "event-stream": "3.3.4",
     "fs-extra": "^7.0.1",
