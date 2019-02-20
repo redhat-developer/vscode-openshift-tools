@@ -54,16 +54,17 @@ suite('File Watch Utility', () => {
     test('emitts change message when context changes', async () => {
         ensureStub.restore();
         watchStub.restore();
-        const fileToWatch = tmp.fileSync().name;
+        const fileToWatch = fs.realpathSync(tmp.fileSync().name);
         fs.ensureFileSync(fileToWatch);
         const notifier = WatchUtil.watchFileForContextChange(path.dirname(fileToWatch), path.basename(fileToWatch));
+        setTimeout(() => {
+            fs.writeFileSync(fileToWatch, 'current-context:test2');
+        }, 1000);
         return new Promise((res) => {
-            notifier.emitter.on('file-changed', (event, file) => {
-                expect(event).equals('change');
+            notifier.emitter.on('file-changed', (file) => {
                 expect(file).equals(path.basename(fileToWatch));
                 res();
             });
-            fs.writeFileSync(fileToWatch, 'current-context:test');
         });
     });
 });

@@ -22,14 +22,16 @@ export class WatchUtil {
                 if (timer) {
                     clearTimeout(timer);
                 }
+
                 timer = setTimeout(async () => {
                     timer = undefined;
                     const newContext = await WatchUtil.grep(path.join(location, filename), /current-context:.*/);
                     if (context !== newContext) {
-                        emitter.emit('file-changed', eventType, changedFile);
+                        emitter.emit('file-changed', changedFile);
                         context = newContext;
                     }
                 }, 500);
+
             }
         });
         return { watcher, emitter };
@@ -46,7 +48,7 @@ export class WatchUtil {
                     }
                 })
                 .on('error', reject)
-                .on('end', reject);
+                .on('end', resolve);
         });
     }
 }

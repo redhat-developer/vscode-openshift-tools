@@ -164,6 +164,7 @@ suite("tools configuration", () => {
             test('does not set executable attribute for tool file', async () => {
                 sb.stub(shelljs, 'which');
                 sb.stub(fs, 'existsSync').returns(true);
+                sb.stub(fsex, 'ensureDirSync').returns();
                 sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
                 sb.stub(vscode.window, 'showInformationMessage').resolves(`Download and install v${ToolsConfig.tools['odo'].version}`);
                 const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
@@ -185,6 +186,7 @@ suite("tools configuration", () => {
             test('set executable attribute for tool file', async () => {
                 sb.stub(shelljs, 'which');
                 sb.stub(fs, 'existsSync').returns(false);
+                sb.stub(fsex, 'ensureDirSync').returns();
                 sb.stub(vscode.window, 'showInformationMessage').resolves(`Download and install v${ToolsConfig.tools['odo'].version}`);
                 sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
                 sb.stub(Archive, 'unzip').resolves();
