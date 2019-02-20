@@ -28,7 +28,7 @@ export class Project extends OpenShiftItem {
                 let validationMessage = Project.emptyName('Empty Project name', value.trim());
                 if (!validationMessage) validationMessage = Project.validateMatches('Not a valid Project name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
                 if (!validationMessage) validationMessage = Project.lengthName('Project name is too long', value);
-                if (!validationMessage) validationMessage = Project.validateName(projectList, value);
+                if (!validationMessage) validationMessage = Project.validateUniqueName(projectList, value);
                 return validationMessage;
         }});
     }

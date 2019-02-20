@@ -189,19 +189,15 @@ export class Component extends OpenShiftItem {
         return null;
     }
 
-    private static async validateComponentName(value: string, application: OpenShiftObject) {
-        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
-        return Component.validateName(componentList, value);
-    }
-
     private static async getComponentName(application: OpenShiftObject) {
+        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
         return await vscode.window.showInputBox({
             prompt: "Component name",
             validateInput: async (value: string) => {
                 let validationMessage = Component.emptyName('Empty Component name', value.trim());
                 if (!validationMessage) validationMessage = Component.validateMatches('Not a valid Component name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
-                if (!validationMessage) validationMessage = Component.lengthName('Component name is to long', value);
-                if (!validationMessage) validationMessage = await Component.validateComponentName(value.trim(), application);
+                if (!validationMessage) validationMessage = Component.lengthName('Component name is too long', value);
+                if (!validationMessage) validationMessage = Component.validateUniqueName(componentList, value);
                 return validationMessage;
             }
         });

@@ -32,7 +32,7 @@ export class Application extends OpenShiftItem {
                 let validationMessage = Application.emptyName('Empty application name', value.trim());
                 if (!validationMessage) validationMessage = Application.validateMatches('Not a valid Application name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
                 if (!validationMessage) validationMessage = Application.lengthName('Application name is too long', value);
-                if (!validationMessage) validationMessage = Application.validateName(applicationList, value);
+                if (!validationMessage) validationMessage = Application.validateUniqueName(applicationList, value);
                 return validationMessage;
             }
         });

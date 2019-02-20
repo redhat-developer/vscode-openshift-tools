@@ -47,7 +47,7 @@ export class Storage extends OpenShiftItem {
                 let validationMessage = Storage.emptyName('Empty Storage name', value.trim());
                 if (!validationMessage) validationMessage = Storage.validateMatches('Not a valid Storage name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
                 if (!validationMessage) validationMessage = Storage.lengthName('Storage name is too long', value);
-                if (!validationMessage) validationMessage = Storage.validateName(storageList, value);
+                if (!validationMessage) validationMessage = Storage.validateUniqueName(storageList, value);
                 return validationMessage;
         }});
     }
