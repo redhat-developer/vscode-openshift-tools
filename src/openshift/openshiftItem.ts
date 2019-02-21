@@ -37,9 +37,9 @@ export abstract class OpenShiftItem {
         return openshiftObject && `This name is already used, please enter different name.`;
     }
 
-    static async getName(message: string, data: Array<OpenShiftObject>) {
+    static async getName(message: string, data: Array<OpenShiftObject>): Promise<string> {
         return await window.showInputBox({
-            prompt: `Please provide an ${message}`,
+            prompt: `Provide ${message}`,
             validateInput: (value: string) => {
                 let validationMessage = OpenShiftItem.emptyName(`Empty ${message}`, value.trim());
                 if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character`, value);
