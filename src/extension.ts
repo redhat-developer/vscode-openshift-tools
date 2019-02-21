@@ -15,8 +15,14 @@ import { Component } from './openshift/component';
 import { Storage } from './openshift/storage';
 import { Url } from './openshift/url';
 import { Service } from './openshift/service';
+import { Platform } from './util/platform';
+import path = require('path');
+import fsx = require('fs-extra');
 
 export function activate(context: vscode.ExtensionContext) {
+
+    migrateFromOdo018();
+
     const explorer: explorerFactory.OpenShiftExplorer = explorerFactory.OpenShiftExplorer.getInstance();
     const disposable = [
         vscode.commands.registerCommand('openshift.about', (context) => execute(Cluster.about, context)),
@@ -91,5 +97,15 @@ function execute<T>(command: (...args: T[]) => Promise<any> | void, ...params: T
 function displayResult(result?: any) {
     if (result && typeof result === 'string') {
         vscode.window.showInformationMessage(result);
+    }
+}
+
+function migrateFromOdo018 () {
+    const newCfgDir = path.join(Platform.getUserHomePath(), '.odo');
+    const newCfg = path.join(newCfgDir, 'odo-config.yaml');
+    const oldCfg = path.join(Platform.getUserHomePath(), '.kube', 'odo');
+    if (!fsx.existsSync(newCfg) && fsx.existsSync(oldCfg)) {
+        fsx.ensureDirSync(newCfgDir);
+        fsx.copyFileSync(oldCfg, newCfg);
     }
 }

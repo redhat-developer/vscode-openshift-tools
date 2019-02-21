@@ -8,9 +8,6 @@ import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, comman
 import { WindowUtil } from './util/windowUtils';
 import { CliExitData } from './cli';
 import * as path from 'path';
-import jsYaml = require('js-yaml');
-import { Platform } from './util/platform';
-import * as fs from 'fs';
 import { ToolsConfig } from './tools';
 import format =  require('string-format');
 
@@ -249,13 +246,6 @@ export class OdoImpl implements Odo {
     }
 
     public async getApplications(project: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
-        const oldConfigPath = path.join(Platform.getUserHomePath(), '.kube', 'odo');
-        const newConfigPath = path.join(Platform.getUserHomePath(), '.odo', 'odo-config.yaml');
-        const odoData = jsYaml.safeLoad(fs.readFileSync(newConfigPath, 'utf8'));
-        const activeApps: any[] = odoData && odoData.ActiveApplications ? odoData.ActiveApplications : [];
-        if (activeApps.length === 0 && fs.existsSync(oldConfigPath)) {
-            fs.copyFileSync(oldConfigPath, newConfigPath);
-        }
         const result: cliInstance.CliExitData = await this.execute(Command.listApplications(project.getName()));
         let data: any[] = [];
         try {
