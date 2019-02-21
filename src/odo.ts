@@ -257,7 +257,13 @@ export class OdoImpl implements Odo {
             fs.copyFileSync(oldConfigPath, newConfigPath);
         }
         const result: cliInstance.CliExitData = await this.execute(Command.listApplications(project.getName()));
-        const data: any[] = JSON.parse(result.stdout).items;
+        let data: any[] = [];
+        try {
+            data = JSON.parse(result.stdout).items;
+        } catch (ignore) {
+            // show no apps if output is not correct json
+            // see https://github.com/redhat-developer/odo/issues/1327
+        }
         const apps: string[] = data.map((value) => value.metadata.name);
         return apps.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(project, value, ContextType.APPLICATION, this));
     }
