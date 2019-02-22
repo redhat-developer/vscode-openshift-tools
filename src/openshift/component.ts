@@ -20,36 +20,35 @@ export class Component extends OpenShiftItem {
             "In which Project you want to create a Component",
             "In which Application you want to create a Component"
         );
-        if (application) {
-            const sourceTypes: vscode.QuickPickItem[] = [
-                {
-                    label: 'Git Repository',
-                    description: 'Use an existing git repository as a source for the component'
-                },
-                {
-                    label: 'Binary File',
-                    description: 'Use binary file as a source for the component'
-                },
-                {
-                    label: 'Workspace Directory',
-                    description: 'Use workspace directory as a source for the component'
-                }
-            ];
-            const componentSource = await vscode.window.showQuickPick(sourceTypes, {
-                placeHolder: "Select source type for component"
-            });
-            if (!componentSource) return null;
-
-            let command: Promise<string>;
-            if (componentSource.label === 'Git Repository') {
-                command = Component.createFromGit(application);
-            } else if (componentSource.label === 'Binary File') {
-                command = Component.createFromBinary(application);
-            } else {
-                command = Component.createFromLocal(application);
+        if (!application) return null;
+        const sourceTypes: vscode.QuickPickItem[] = [
+            {
+                label: 'Git Repository',
+                description: 'Use an existing git repository as a source for the component'
+            },
+            {
+                label: 'Binary File',
+                description: 'Use binary file as a source for the component'
+            },
+            {
+                label: 'Workspace Directory',
+                description: 'Use workspace directory as a source for the component'
             }
-            return command.catch((err) => Promise.reject(`Failed to create component with error '${err}'`));
+        ];
+        const componentSource = await vscode.window.showQuickPick(sourceTypes, {
+            placeHolder: "Select source type for component"
+        });
+        if (!componentSource) return null;
+
+        let command: Promise<string>;
+        if (componentSource.label === 'Git Repository') {
+            command = Component.createFromGit(application);
+        } else if (componentSource.label === 'Binary File') {
+            command = Component.createFromBinary(application);
+        } else {
+            command = Component.createFromLocal(application);
         }
+        return command.catch((err) => Promise.reject(`Failed to create component with error '${err}'`));
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
@@ -195,7 +194,7 @@ export class Component extends OpenShiftItem {
         });
         if (!folder) return null;
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
-        const componentName = await Component.getName('Component name', componentList);
+        const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
 
@@ -220,7 +219,7 @@ export class Component extends OpenShiftItem {
         );
 
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
-        const componentName = await Component.getName('Component name', componentList);
+        const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
 
@@ -250,7 +249,7 @@ export class Component extends OpenShiftItem {
         if (!repoURI) return null;
 
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
-        const componentName = await Component.getName('Component name', componentList);
+        const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
 
@@ -282,7 +281,7 @@ export class Component extends OpenShiftItem {
         if (!binaryFile) return null;
 
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
-        const componentName = await Component.getName('Component name', componentList);
+        const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
 

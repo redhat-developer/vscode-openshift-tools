@@ -68,7 +68,7 @@ suite('Openshift/Component', () => {
 
         test('asks for context and exits if not provided', async () => {
             const result = await Component.create(null);
-            expect(result).is.undefined;
+            expect(result).null;
             expect(getProjects).calledOnce;
             expect(getApps).calledOnce;
         });
