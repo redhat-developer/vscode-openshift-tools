@@ -20,6 +20,7 @@ chai.use(sinonChai);
 suite('Openshift/Project', () => {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
+    let getProjectsStub: sinon.SinonStub;
 
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'app');
@@ -27,6 +28,7 @@ suite('Openshift/Project', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
+        getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves();
         sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
@@ -88,7 +90,7 @@ suite('Openshift/Project', () => {
             });
             await Project.create();
 
-            expect(result).equals('Empty project name');
+            expect(result).equals('Empty Project name');
         });
 
         test('validator returns error message for none alphanumeric project name', async () => {
@@ -100,7 +102,19 @@ suite('Openshift/Project', () => {
             });
             await Project.create();
 
-            expect(result).equals('Project name should be alphanumeric');
+            expect(result).equals('Not a valid Project name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character');
+        });
+
+        test('validator returns error message if same name of project found', async () => {
+            let result: string | Thenable<string>;
+            inputStub.restore();
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                result = options.validateInput('project');
+                return Promise.resolve('project');
+            });
+            await Project.create();
+
+            expect(result).equals('This name is already used, please enter different name.');
         });
 
         test('validator returns error message for project name longer than 63 characters', async () => {
@@ -112,7 +126,7 @@ suite('Openshift/Project', () => {
             });
             await Project.create();
 
-            expect(result).equals('Project name is to long');
+            expect(result).equals('Project name is too long');
         });
     });
 
@@ -122,7 +136,7 @@ suite('Openshift/Project', () => {
         setup(() => {
             warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick').resolves(projectItem);
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+            getProjectsStub.resolves([]);
         });
 
         test('works with context', async () => {

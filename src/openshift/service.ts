@@ -15,39 +15,25 @@ export class Service extends OpenShiftItem {
             "In which Project you want to create a Service",
             "In which Application you want to create a Service"
         );
-        if (application) {
-            const serviceTemplateName = await vscode.window.showQuickPick(Service.odo.getServiceTemplates(), {
-                placeHolder: "Service Template Name"
-            });
-            if (!serviceTemplateName) return null;
+        if (!application) return null;
+        const serviceTemplateName = await vscode.window.showQuickPick(Service.odo.getServiceTemplates(), {
+            placeHolder: "Service Template Name"
+        });
+        if (!serviceTemplateName) return null;
 
-            const serviceTemplatePlanName = await vscode.window.showQuickPick(Service.odo.getServiceTemplatePlans(serviceTemplateName), {
-                placeHolder: "Service Template Plan Name"
-            });
-            if (!serviceTemplatePlanName) return null;
-
-            const serviceName = await vscode.window.showInputBox({
-                value: serviceTemplateName,
-                prompt: 'Service Name',
-                validateInput: (value: string) => {
-                    // required, because dc name is ${component}-${app}
-                    let message: string = null;
-                    if (`${value.trim()}-${application.getName()}`.length > 63) {
-                        message = 'Service name cannot be more than 63 characters';
-                    }
-                    return message;
-                }
-            });
-            if (serviceName) {
-                const project = application.getParent();
-                return Progress.execCmdWithProgress(`Creating a new Service '${serviceName}'`,
-                    Command.createService(project.getName(), application.getName(), serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))
-                    .then(() => Service.explorer.refresh(context ? context : undefined))
-                    .then(() => `Service '${serviceName}' successfully created`)
-                    .catch((err) => Promise.reject(`Failed to create Service with error '${err}'`));
-            }
-            return null;
-        }
+        const serviceTemplatePlanName = await vscode.window.showQuickPick(Service.odo.getServiceTemplatePlans(serviceTemplateName), {
+            placeHolder: "Service Template Plan Name"
+        });
+        if (!serviceTemplatePlanName) return null;
+        const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(application);
+        const serviceName = await Service.getName('Service name', serviceList, application.getName());
+        if (!serviceName) return null;
+        const project = application.getParent();
+        return Progress.execCmdWithProgress(`Creating a new Service '${serviceName}'`,
+            Command.createService(project.getName(), application.getName(), serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))
+            .then(() => Service.explorer.refresh(context ? context : undefined))
+            .then(() => `Service '${serviceName}' successfully created`)
+            .catch((err) => Promise.reject(`Failed to create Service with error '${err}'`));
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {

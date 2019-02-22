@@ -10,29 +10,17 @@ import * as vscode from 'vscode';
 export class Application extends OpenShiftItem {
 
     static async create(treeItem: OpenShiftObject): Promise<String> {
-        let name;
         const project = await Application.getOpenShiftCmdData(treeItem,
             "In which Project you want to create an Application");
-        if (project) name = await Application.getApplicationName();
-        if (name) {
-            return Promise.resolve()
-                .then(() => Application.odo.execute(Command.createApplication(project.getName(), name)))
-                .then(() => Application.explorer.refresh(project))
-                .then(() => `Application '${name}' successfully created`)
-                .catch((error) => Promise.reject(`Failed to create Application with error '${error}'`));
-        }
-        return null;
-    }
-
-    static async getApplicationName() {
-        return await vscode.window.showInputBox({
-            prompt: "Application name",
-            validateInput: (value: string) => {
-                const validationMessage = Application.emptyName('Empty application name', value.trim());
-                if (!validationMessage) return Application.validateMatches('Not a valid Application name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
-                return validationMessage;
-            }
-        });
+        if (!project) return null;
+        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
+        const applicationName = await Application.getName('Application name', applicationList);
+        if (!applicationName) return null;
+        return Promise.resolve()
+            .then(() => Application.odo.execute(Command.createApplication(project.getName(), applicationName)))
+            .then(() => Application.explorer.refresh(project))
+            .then(() => `Application '${applicationName}' successfully created`)
+            .catch((error) => Promise.reject(`Failed to create Application with error '${error}'`));
     }
 
     static async describe(treeItem: OpenShiftObject) {

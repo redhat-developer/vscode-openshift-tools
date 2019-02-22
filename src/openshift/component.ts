@@ -20,36 +20,35 @@ export class Component extends OpenShiftItem {
             "In which Project you want to create a Component",
             "In which Application you want to create a Component"
         );
-        if (application) {
-            const sourceTypes: vscode.QuickPickItem[] = [
-                {
-                    label: 'Git Repository',
-                    description: 'Use an existing git repository as a source for the component'
-                },
-                {
-                    label: 'Binary File',
-                    description: 'Use binary file as a source for the component'
-                },
-                {
-                    label: 'Workspace Directory',
-                    description: 'Use workspace directory as a source for the component'
-                }
-            ];
-            const componentSource = await vscode.window.showQuickPick(sourceTypes, {
-                placeHolder: "Select source type for component"
-            });
-            if (!componentSource) return null;
-
-            let command: Promise<string>;
-            if (componentSource.label === 'Git Repository') {
-                command = Component.createFromGit(application);
-            } else if (componentSource.label === 'Binary File') {
-                command = Component.createFromBinary(application);
-            } else {
-                command = Component.createFromLocal(application);
+        if (!application) return null;
+        const sourceTypes: vscode.QuickPickItem[] = [
+            {
+                label: 'Git Repository',
+                description: 'Use an existing git repository as a source for the component'
+            },
+            {
+                label: 'Binary File',
+                description: 'Use binary file as a source for the component'
+            },
+            {
+                label: 'Workspace Directory',
+                description: 'Use workspace directory as a source for the component'
             }
-            return command.catch((err) => Promise.reject(`Failed to create component with error '${err}'`));
+        ];
+        const componentSource = await vscode.window.showQuickPick(sourceTypes, {
+            placeHolder: "Select source type for component"
+        });
+        if (!componentSource) return null;
+
+        let command: Promise<string>;
+        if (componentSource.label === 'Git Repository') {
+            command = Component.createFromGit(application);
+        } else if (componentSource.label === 'Binary File') {
+            command = Component.createFromBinary(application);
+        } else {
+            command = Component.createFromLocal(application);
         }
+        return command.catch((err) => Promise.reject(`Failed to create component with error '${err}'`));
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
@@ -189,31 +188,13 @@ export class Component extends OpenShiftItem {
         return null;
     }
 
-    private static async validateComponentName(value: string, application: OpenShiftObject) {
-        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
-        const componentName =  componentList.find((component) =>  component.getName() === value);
-        return componentName && `This name is already used, please enter different name.`;
-    }
-
-    private static async getComponentName(application: OpenShiftObject) {
-        return await vscode.window.showInputBox({
-            prompt: "Component name",
-            validateInput: async (value: string) => {
-                let validationMessage = Component.emptyName('Empty Component name', value.trim());
-                if (!validationMessage) validationMessage = Component.validateMatches('Not a valid Component name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character', value);
-                if (!validationMessage) validationMessage = await Component.validateComponentName(value.trim(), application);
-                return validationMessage;
-            }
-        });
-    }
-
     private static async createFromLocal(application: OpenShiftObject): Promise<string> {
         const folder = await vscode.window.showWorkspaceFolderPick({
             placeHolder: 'Select the target workspace folder'
         });
         if (!folder) return null;
-
-        const componentName = await Component.getComponentName(application);
+        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
+        const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
 
@@ -237,7 +218,8 @@ export class Component extends OpenShiftItem {
             "In which Application you want to create a Component"
         );
 
-        const componentName = await Component.getComponentName(application);
+        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
+        const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
 
@@ -266,7 +248,8 @@ export class Component extends OpenShiftItem {
 
         if (!repoURI) return null;
 
-        const componentName = await Component.getComponentName(application);
+        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
+        const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
 
@@ -297,7 +280,8 @@ export class Component extends OpenShiftItem {
 
         if (!binaryFile) return null;
 
-        const componentName = await Component.getComponentName(application);
+        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
+        const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
 

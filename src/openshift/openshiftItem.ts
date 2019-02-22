@@ -32,16 +32,42 @@ export abstract class OpenShiftItem {
         return new Promise((res) => setTimeout(res, timeout));
     }
 
+    static validateUniqueName(data: Array<OpenShiftObject>, value: string) {
+        const openshiftObject =  data.find((openshiftObject) =>  openshiftObject.getName() === value);
+        return openshiftObject && `This name is already used, please enter different name.`;
+    }
+
+    static async getName(message: string, data: Array<OpenShiftObject>, offset?: string): Promise<string> {
+        return await window.showInputBox({
+            prompt: `Provide ${message}`,
+            validateInput: (value: string) => {
+                let validationMessage = OpenShiftItem.emptyName(`Empty ${message}`, value.trim());
+                if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character`, value);
+                if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${message} is too long`, value, offset ? offset.length : 0);
+                if (!validationMessage) validationMessage = OpenShiftItem.validateUniqueName(data, value);
+                return validationMessage;
+            }
+        });
+    }
+
     static emptyName(message: string, value: string) {
-        return validator.isEmpty(value) ? message : undefined;
+        return validator.isEmpty(value) ? message : null;
+    }
+
+    static lengthName(message: string, value: string, offset: number) {
+        return validator.isLength(value, 0, 63 - offset) ? null : message;
+    }
+
+    static alphanumeric(message: string, value: string) {
+        return validator.isAlphanumeric(value) ? null: message;
     }
 
     static validateUrl(message: string, value: string) {
-        return validator.isURL(value) ? undefined : message;
+        return validator.isURL(value) ? null : message;
     }
 
     static validateMatches(message: string, value: string) {
-        return (validator.matches(value, '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$')) ? undefined : message;
+        return (validator.matches(value, '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$')) ? null : message;
     }
 
     static async getProjectNames(): Promise<OpenShiftObject[]> {

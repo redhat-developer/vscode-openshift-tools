@@ -23,6 +23,9 @@ suite('Openshift/Service', () => {
     let sandbox: sinon.SinonSandbox;
     let quickPickStub: sinon.SinonStub;
     let getProjectNamesStub: sinon.SinonStub;
+    let getServicesStub: sinon.SinonStub;
+    let getProjectsStub: sinon.SinonStub;
+    let getApplicationsStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'application');
     const serviceItem = new TestItem(appItem, 'service');
@@ -32,6 +35,9 @@ suite('Openshift/Service', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
+        getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects');
+        getApplicationsStub = sandbox.stub(OdoImpl.prototype, 'getApplications');
+        getServicesStub = sandbox.stub(OdoImpl.prototype, 'getServices').resolves([serviceItem]);
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
         getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
@@ -57,16 +63,16 @@ suite('Openshift/Service', () => {
         });
 
         test('works with correct inputs', async () => {
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
-            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
+            getProjectsStub.resolves([projectItem]);
+            getApplicationsStub.resolves([appItem]);
             quickPickStub.resolves(templateName);
             const result = await Service.create(null);
             expect(result).equals(`Service '${serviceItem.getName()}' successfully created`);
         });
 
         test('validation returns null for correct service name', async () => {
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
-            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
+            getProjectsStub.resolves([projectItem]);
+            getApplicationsStub.resolves([appItem]);
             let result: string | Thenable<string>;
             inputStub.callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                 result = options.validateInput('goodvalue');
@@ -74,12 +80,12 @@ suite('Openshift/Service', () => {
             });
             quickPickStub.resolves(templateName);
             await Service.create(null);
-            expect(result).null;
+            expect(result).undefined;
         });
 
         test('validation returns message for long service name', async () => {
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
-            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
+            getProjectsStub.resolves([projectItem]);
+            getApplicationsStub.resolves([appItem]);
             let result: string | Thenable<string>;
             inputStub.callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                 result = options.validateInput('goodvaluebutwaytolongtobeusedasservicenameincubernetescluster');
@@ -87,7 +93,7 @@ suite('Openshift/Service', () => {
             });
             quickPickStub.resolves(templateName);
             await Service.create(null);
-            expect(result).equals('Service name cannot be more than 63 characters');
+            expect(result).equals('Service name is too long');
         });
 
         test('returns null with no template selected', async () => {
@@ -101,13 +107,13 @@ suite('Openshift/Service', () => {
             sandbox.stub(Service, 'getOpenShiftCmdData').resolves(null);
             const result = await Service.create(null);
 
-            expect(result).undefined;
+            expect(result).null;
         });
 
         test('calls the appropriate error message if no project found', async () => {
             quickPickStub.restore();
             getProjectNamesStub.restore();
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+            getProjectsStub.resolves([]);
             sandbox.stub(vscode.window, 'showErrorMessage');
             try {
                 await Service.create(null);
@@ -153,6 +159,65 @@ suite('Openshift/Service', () => {
             inputStub = sandbox.stub(vscode.window, 'showInputBox').resolves(serviceItem.getName());
             progressStub = sandbox.stub(Progress, 'execCmdWithProgress').resolves();
         });
+        test('validator returns undefinded for valid service name', async () => {
+            let result: string | Thenable<string>;
+            inputStub.restore();
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                result = options.validateInput('goodvalue');
+                return Promise.resolve('goodvalue');
+            });
+            await Service.create(appItem);
+
+            expect(result).is.undefined;
+        });
+
+        test('validator returns error message for empty service name', async () => {
+            let result: string | Thenable<string>;
+            inputStub.restore();
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                result = options.validateInput('');
+                return Promise.resolve('');
+            });
+            await Service.create(appItem);
+
+            expect(result).equals('Empty Service name');
+        });
+
+        test('validator returns error message for none alphanumeric service name', async () => {
+            let result: string | Thenable<string>;
+            inputStub.restore();
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                result = options.validateInput('name&name');
+                return Promise.resolve('name&name');
+            });
+            await Service.create(appItem);
+
+            expect(result).equals('Not a valid Service name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character');
+        });
+
+        test('validator returns error message if same name of service found', async () => {
+            let result: string | Thenable<string>;
+            inputStub.restore();
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                result = options.validateInput('service');
+                return Promise.resolve('service');
+            });
+            await Service.create(appItem);
+
+            expect(result).equals('This name is already used, please enter different name.');
+        });
+
+        test('validator returns error message for service name longer than 63 characters', async () => {
+            let result: string | Thenable<string>;
+            inputStub.restore();
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                result = options.validateInput('n123456789012345678901234567890123456789012345678901234567890123');
+                return Promise.resolve('n123456789012345678901234567890123456789012345678901234567890123');
+            });
+            await Service.create(appItem);
+
+            expect(result).equals('Service name is too long');
+        });
 
         test('works with correct inputs', async () => {
             const result = await Service.create(appItem);
@@ -197,9 +262,9 @@ suite('Openshift/Service', () => {
         let warnStub: sinon.SinonStub, execStub: sinon.SinonStub;
 
         setup(() => {
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
-            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
-            sandbox.stub(OdoImpl.prototype, 'getServices').resolves([]);
+            getProjectsStub.resolves([]);
+            getApplicationsStub.resolves([]);
+            getServicesStub.resolves([]);
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(serviceItem);

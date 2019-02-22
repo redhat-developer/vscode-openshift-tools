@@ -132,7 +132,7 @@ suite('Openshift/Cluster', () => {
                     return Promise.resolve('http://127.0.0.1:9999');
                 });
                 await Cluster.login();
-                expect(result).is.undefined;
+                expect(result).is.null;
             });
 
             test('checks user name is not empty', async () => {
@@ -142,7 +142,7 @@ suite('Openshift/Cluster', () => {
                     return Promise.resolve('goodvalue');
                 });
                 await Cluster.login();
-                expect(result).is.undefined;
+                expect(result).is.null;
             });
         });
 

@@ -29,6 +29,7 @@ suite('Openshift/Application', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: null, stdout: '', stderr: ''});
+        sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
         getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         inputStub = sandbox.stub(vscode.window, 'showInputBox');
@@ -68,7 +69,43 @@ suite('Openshift/Application', () => {
 
                 await Application.create(projectItem);
 
-                expect(result).is.equals('Empty application name');
+                expect(result).is.equals('Empty Application name');
+            });
+
+            test('validator returns error message for none alphanumeric application name', async () => {
+                let result: string | Thenable<string>;
+                inputStub.restore();
+                inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                    result = options.validateInput('name&name');
+                    return Promise.resolve('name&name');
+                });
+                await Application.create(projectItem);
+
+                expect(result).equals('Not a valid Application name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character');
+            });
+
+            test('validator returns error message if same name of application found', async () => {
+                let result: string | Thenable<string>;
+                inputStub.restore();
+                inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                    result = options.validateInput('app');
+                    return Promise.resolve('app');
+                });
+                await Application.create(projectItem);
+
+                expect(result).equals('This name is already used, please enter different name.');
+            });
+
+            test('validator returns error message for application name longer than 63 characters', async () => {
+                let result: string | Thenable<string>;
+                inputStub.restore();
+                inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                    result = options.validateInput('n123456789012345678901234567890123456789012345678901234567890123');
+                    return Promise.resolve('n123456789012345678901234567890123456789012345678901234567890123');
+                });
+                await Application.create(projectItem);
+
+                expect(result).equals('Application name is too long');
             });
         });
 
