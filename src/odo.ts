@@ -180,10 +180,6 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
         return this.name;
     }
 
-    get id(): string {
-        return this.contextValue + this.name;
-    }
-
     getName(): string {
         return this.name;
     }
