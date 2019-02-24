@@ -15,7 +15,6 @@ export interface OpenShiftObject extends QuickPickItem {
     getChildren(): ProviderResult<OpenShiftObject[]>;
     getParent(): OpenShiftObject;
     getName(): string;
-    id: string;
 }
 
 export enum ContextType {
@@ -178,6 +177,10 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
 
     get label(): string {
         return this.name;
+    }
+
+    get id(): string {
+        return this.contextValue + this.name;
     }
 
     getName(): string {
