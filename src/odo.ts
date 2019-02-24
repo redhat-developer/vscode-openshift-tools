@@ -115,7 +115,7 @@ export const Command = {
         `oc get service ${component}-${app} --namespace ${project} -o json`
 };
 
-class OpenShiftObjectImpl implements OpenShiftObject {
+export class OpenShiftObjectImpl implements OpenShiftObject {
     private readonly CONTEXT_DATA = {
         cluster: {
             icon: 'cluster.png',
@@ -179,6 +179,10 @@ class OpenShiftObjectImpl implements OpenShiftObject {
         return this.name;
     }
 
+    get id(): string {
+        return this.contextValue + this.name;
+    }
+
     getName(): string {
         return this.name;
     }
@@ -231,68 +235,6 @@ export class OdoImpl implements Odo {
         return OdoImpl.instance;
     }
 
-    public async getProjects(): Promise<OpenShiftObject[]> {
-        return this.execute(Command.listProjects()).then((result) => {
-            let projs: OpenShiftObject[] = [];
-            const stdout: string = result.stdout.trim();
-            if (stdout !== "" ) {
-                projs = stdout.split("\n").map<OpenShiftObject>((value) => new OpenShiftObjectImpl(undefined, value, ContextType.PROJECT, this));
-            }
-            return projs;
-        }).catch((error) => {
-            window.showErrorMessage(`Cannot retrieve projects for current cluster. Error: ${error}`);
-            return [];
-        });
-    }
-
-    public async getApplications(project: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listApplications(project.getName()));
-        let data: any[] = [];
-        try {
-            data = JSON.parse(result.stdout).items;
-        } catch (ignore) {
-            // show no apps if output is not correct json
-            // see https://github.com/redhat-developer/odo/issues/1327
-        }
-        const apps: string[] = data.map((value) => value.metadata.name);
-        return apps.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(project, value, ContextType.APPLICATION, this));
-    }
-
-    public async getComponents(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listComponents(application.getParent().getName(), application.getName()));
-        const componentsList = result.stdout.trim().split('\n')
-            .filter((value) => value !== '')
-            .map<OpenShiftObject>((value) => new OpenShiftObjectImpl(application, value, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed));
-        commands.executeCommand('setContext', 'componentPresent', componentsList.length>0);
-        return componentsList;
-    }
-
-    public async getComponentTypes(): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
-        return result.stdout.trim().split('\n').slice(1).map((value) => value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|')[0]);
-    }
-
-    public async getStorageNames(component: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
-        const app = component.getParent();
-        const appName = app.getName();
-        const projName = app.getParent().getName();
-        const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(projName, appName));
-
-        return result.stdout.trim().split('\n').filter((value) => value.trim().split(' ').length > 1 && value.trim().split(' ')[0] === component.getName()).map((value) => {
-            const name = value.split(' ');
-            return new OpenShiftObjectImpl(component, `${name[1]}`, ContextType.STORAGE, this, TreeItemCollapsibleState.None);
-        });
-    }
-
-    public async getComponentTypeVersions(componentName: string) {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
-        const versions = result.stdout.trim().split('\n').slice(1).filter((value) => {
-            const data = value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|');
-            return data[0] === componentName;
-        }).map((value) => value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|')[2]);
-        return versions && versions.length > 0 ? versions[0].split(',') : [];
-    }
-
     public async getClusters(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = await this.getClustersWithOdo();
         if (clusters.length === 0) {
@@ -336,6 +278,72 @@ export class OdoImpl implements Odo {
         return clusters;
     }
 
+    public async getProjects(): Promise<OpenShiftObject[]> {
+        return this.execute(Command.listProjects()).then((result) => {
+            let projs: OpenShiftObject[] = [];
+            const stdout: string = result.stdout.trim();
+            if (stdout !== "" ) {
+                projs = stdout.split("\n").map<OpenShiftObject>((value) => new OpenShiftObjectImpl(undefined, value, ContextType.PROJECT, this));
+            }
+            return projs;
+        }).catch((error) => {
+            window.showErrorMessage(`Cannot retrieve projects for current cluster. Error: ${error}`);
+            return [];
+        });
+    }
+
+    public async getApplications(project: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
+        const result: cliInstance.CliExitData = await this.execute(Command.listApplications(project.getName()));
+        let data: any[] = [];
+        try {
+            data = JSON.parse(result.stdout).items;
+        } catch (ignore) {
+            // show no apps if output is not correct json
+            // see https://github.com/redhat-developer/odo/issues/1327
+        }
+        const apps: string[] = data.map((value) => value.metadata.name);
+        return apps.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(project, value, ContextType.APPLICATION, this));
+    }
+
+    public async getApplicationChildren(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
+        return [... await this.getComponents(application), ... await this.getServices(application)];
+    }
+
+    public async getComponents(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
+        const result: cliInstance.CliExitData = await this.execute(Command.listComponents(application.getParent().getName(), application.getName()));
+        const componentsList = result.stdout.trim().split('\n')
+            .filter((value) => value !== '')
+            .map<OpenShiftObject>((value) => new OpenShiftObjectImpl(application, value, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed));
+        commands.executeCommand('setContext', 'componentPresent', componentsList.length>0);
+        return componentsList;
+    }
+
+    public async getComponentTypes(): Promise<string[]> {
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
+        return result.stdout.trim().split('\n').slice(1).map((value) => value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|')[0]);
+    }
+
+    public async getStorageNames(component: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
+        const app = component.getParent();
+        const appName = app.getName();
+        const projName = app.getParent().getName();
+        const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(projName, appName));
+
+        return result.stdout.trim().split('\n').filter((value) => value.trim().split(' ').length > 1 && value.trim().split(' ')[0] === component.getName()).map((value) => {
+            const name = value.split(' ');
+            return new OpenShiftObjectImpl(component, `${name[1]}`, ContextType.STORAGE, this, TreeItemCollapsibleState.None);
+        });
+    }
+
+    public async getComponentTypeVersions(componentName: string) {
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
+        const versions = result.stdout.trim().split('\n').slice(1).filter((value) => {
+            const data = value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|');
+            return data[0] === componentName;
+        }).map((value) => value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|')[2]);
+        return versions && versions.length > 0 ? versions[0].split(',') : [];
+    }
+
     public async getServiceTemplates(): Promise<string[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogSevices(), process.cwd(), false);
         if (result.error) {
@@ -367,10 +375,6 @@ export class OdoImpl implements Odo {
         }
         commands.executeCommand('setContext', 'servicePresent', services.length>0);
         return services;
-    }
-
-    public async getApplicationChildren(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
-        return [... await this.getComponents(application), ... await this.getServices(application)];
     }
 
     public async executeInTerminal(command: string, cwd: string = process.cwd(), name: string = 'OpenShift') {
