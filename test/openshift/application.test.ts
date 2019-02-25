@@ -158,6 +158,13 @@ suite('Openshift/Application', () => {
                 quickPickStub.onFirstCall().resolves(projectItem);
             });
 
+            test('returns null when cancelled', async () => {
+                quickPickStub.onFirstCall().resolves();
+                const result = await Application.create(null);
+
+                expect(result).null;
+            });
+
             test('returns the appropriate error message when no projects available', async () => {
                 quickPickStub.restore();
                 getProjectNamesStub.restore();
