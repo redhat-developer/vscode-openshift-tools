@@ -1,0 +1,33 @@
+{
+    "kind": "List",
+    "apiVersion": "odo.openshift.io/v1alpha1",
+    "metadata": {},
+    "items": [
+        {
+            "kind": "app",
+            "apiVersion": "odo.openshift.io/v1alpha1",
+            "metadata": {
+                "name": "app2",
+                "namespace": "myproject",
+                "creationTimestamp": null
+            },
+            "spec": {},
+            "status": {
+                "active": false
+            }
+        },
+        {
+            "kind": "app",
+            "apiVersion": "odo.openshift.io/v1alpha1",
+            "metadata": {
+                "name": "application",
+                "namespace": "myproject",
+                "creationTimestamp": null
+            },
+            "spec": {},
+            "status": {
+                "active": false
+            }
+        }
+    ]
+}

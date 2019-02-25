@@ -4,9 +4,10 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { OpenShiftItem } from './openshiftItem';
-import { OpenShiftObject, Command } from '../odo';
+import { OpenShiftObject, OpenShiftObjectImpl, Command, ContextType } from '../odo';
 import * as vscode from 'vscode';
 import { Progress } from '../util/progress';
+import { activate } from '../extension';
 
 export class Project extends OpenShiftItem {
 
@@ -15,9 +16,15 @@ export class Project extends OpenShiftItem {
         let projectName = await Project.getName('Project name', projectList);
         if (!projectName) return null;
         projectName = projectName.trim();
+        let obj;
         return Project.odo.execute(Command.createProject(projectName))
-            .then(() => Project.explorer.refresh())
+            .then(async () => {
+                const parent = await Project.explorer.getRoot();
+                obj = new OpenShiftObjectImpl(parent[0], projectName, ContextType.PROJECT, Project.odo);
+                Project.explorer.insert(undefined, obj);
+            })
             .then(() => `Project '${projectName}' successfully created`)
+            .then(() => activate['treeView'].reveal(obj, {expand: true}))
             .catch((error) => Promise.reject(`Failed to create Project with error '${error}'`));
     }
 

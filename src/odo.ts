@@ -15,6 +15,7 @@ export interface OpenShiftObject extends QuickPickItem {
     getChildren(): ProviderResult<OpenShiftObject[]>;
     getParent(): OpenShiftObject;
     getName(): string;
+    id: string;
 }
 
 export enum ContextType {

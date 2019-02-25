@@ -615,6 +615,7 @@
   "dependencies": {
     "@kubernetes/client-node": "^0.8.1",
     "byline": "^5.0.0",
+    "collections": "^5.1.8",
     "event-stream": "3.3.4",
     "fs-extra": "^7.0.1",
     "hasha": "^3.0.0",

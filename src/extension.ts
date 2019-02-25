@@ -19,11 +19,16 @@ import { Platform } from './util/platform';
 import path = require('path');
 import fsx = require('fs-extra');
 
+export const context = {
+
+};
+
 export function activate(context: vscode.ExtensionContext) {
 
     migrateFromOdo018();
 
     const explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
+    activate['treeView'] = vscode.window.createTreeView('openshiftProjectExplorer', {treeDataProvider: explorer});
     const disposable = [
         vscode.commands.registerCommand('openshift.about', (context) => execute(Cluster.about, context)),
         vscode.commands.registerCommand('openshift.openshiftConsole', (context) => execute(Cluster.openshiftConsole, context)),
@@ -73,8 +78,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.service.describe.palette', (context) => execute(Service.describe, context)),
         vscode.commands.registerCommand('openshift.component.linkComponent', (context) => execute(Component.linkComponent, context)),
         vscode.commands.registerCommand('openshift.component.linkService', (context) => execute(Component.linkService, context)),
-        vscode.window.registerTreeDataProvider('openshiftProjectExplorer', explorer),
-        explorer
+        this.treeView
     ];
     disposable.forEach((value)=> context.subscriptions.push(value));
 }
@@ -89,7 +93,6 @@ function execute<T>(command: (...args: T[]) => Promise<any> | void, ...params: T
         return res && res.then
             ? res.then((result: any) => {
                 displayResult(result);
-
             }).catch((err: any) => {
                 vscode.window.showErrorMessage(err.message ? err.message : err);
             })
