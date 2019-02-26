@@ -37,8 +37,9 @@ export abstract class OpenShiftItem {
         return openshiftObject && `This name is already used, please enter different name.`;
     }
 
-    static async getName(message: string, data: Array<OpenShiftObject>, offset?: string): Promise<string> {
+    static async getName(message: string, data: Array<OpenShiftObject>, offset?: string, serviceTemplateName?: string): Promise<string> {
         return await window.showInputBox({
+            value: serviceTemplateName,
             prompt: `Provide ${message}`,
             validateInput: (value: string) => {
                 let validationMessage = OpenShiftItem.emptyName(`Empty ${message}`, value.trim());

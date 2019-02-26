@@ -26,7 +26,7 @@ export class Service extends OpenShiftItem {
         });
         if (!serviceTemplatePlanName) return null;
         const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(application);
-        const serviceName = await Service.getName('Service name', serviceList, application.getName());
+        const serviceName = await Service.getName('Service name', serviceList, application.getName(), serviceTemplateName);
         if (!serviceName) return null;
         const project = application.getParent();
         return Progress.execCmdWithProgress(`Creating a new Service '${serviceName}'`,
