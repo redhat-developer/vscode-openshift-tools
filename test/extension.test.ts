@@ -13,7 +13,6 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { activate } from '../src/extension';
 import { Cluster } from '../src/openshift/cluster';
 import { Application } from '../src/openshift/application';
 import { Catalog } from '../src/openshift/catalog';
@@ -30,6 +29,7 @@ chai.use(sinonChai);
 suite('openshift connector Extension', async () => {
 
     let sandbox: sinon.SinonSandbox;
+    const registerTreeDataProviderStub = sinon.spy(vscode.window, 'registerTreeDataProvider');
 
     class DummyMemento implements vscode.Memento {
         get<T>(key: string): Promise<T|undefined> {
@@ -52,8 +52,11 @@ suite('openshift connector Extension', async () => {
         }
     };
 
-    setup(() => {
+    setup(async () => {
         sandbox = sinon.createSandbox();
+        const stub = sandbox.stub(Cluster, 'about');
+        await vscode.commands.executeCommand('openshift.about');
+        stub.restore();
     });
 
     teardown(() => {
@@ -78,9 +81,7 @@ suite('openshift connector Extension', async () => {
     }
 
     test('should activate extension', async () => {
-        const registerTreeDataProviderStub = sandbox.stub(vscode.window, 'registerTreeDataProvider');
         sandbox.stub(vscode.window, 'showErrorMessage');
-        await activate(context);
         const cmds: string[] = await vscode.commands.getCommands();
         const osc: string[] = cmds.filter((item) => item.includes('openshift.'));
         expect(registerTreeDataProviderStub).calledOnce;
