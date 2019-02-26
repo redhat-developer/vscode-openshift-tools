@@ -24,9 +24,7 @@ export const context = {
 };
 
 export function activate(context: vscode.ExtensionContext) {
-
     migrateFromOdo018();
-
     const explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
     activate['treeView'] = vscode.window.createTreeView('openshiftProjectExplorer', {treeDataProvider: explorer});
     const disposable = [

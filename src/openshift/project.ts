@@ -23,8 +23,8 @@ export class Project extends OpenShiftItem {
                 obj = new OpenShiftObjectImpl(parent[0], projectName, ContextType.PROJECT, Project.odo);
                 Project.explorer.insert(undefined, obj);
             })
-            .then(() => `Project '${projectName}' successfully created`)
             .then(() => activate['treeView'].reveal(obj, {expand: true}))
+            .then(() => `Project '${projectName}' successfully created`)
             .catch((error) => Promise.reject(`Failed to create Project with error '${error}'`));
     }
 

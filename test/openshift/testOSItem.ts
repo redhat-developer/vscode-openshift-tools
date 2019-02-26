@@ -31,4 +31,8 @@ export class TestItem implements OpenShiftObject {
     get label(): string {
         return this.name;
     }
+
+    get id(): string {
+        return this.name;
+    }
 }

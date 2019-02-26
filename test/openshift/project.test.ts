@@ -13,6 +13,7 @@ import { OdoImpl, Command } from '../../src/odo';
 import { TestItem } from './testOSItem';
 import { Project } from '../../src/openshift/project';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
+import { OpenShiftExplorer } from '../../src/explorer';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -22,16 +23,20 @@ suite('OpenShift/Project', () => {
     let execStub: sinon.SinonStub;
     let getProjectsStub: sinon.SinonStub;
 
+    const clusterItem = new TestItem(null, 'cluster');
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'app');
     const errorMessage = 'ERROR MESSAGE';
 
     setup(() => {
         sandbox = sinon.createSandbox();
+        sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([clusterItem]);
         getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves();
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
         sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
+        OpenShiftExplorer.getInstance().getChildren(null);
+        OpenShiftExplorer.getInstance().getChildren(clusterItem);
     });
 
     teardown(() => {
@@ -110,7 +115,7 @@ suite('OpenShift/Project', () => {
             inputStub.restore();
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                 result = options.validateInput('project');
-                return Promise.resolve('project');
+                return Promise.resolve(result);
             });
             await Project.create();
 

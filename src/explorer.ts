@@ -99,6 +99,6 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         }
         const children = this.model.get(key);
         children.push(child);
-        this.refresh(target);
+        this.onDidChangeTreeDataEmitter.fire(target);
     }
 }
