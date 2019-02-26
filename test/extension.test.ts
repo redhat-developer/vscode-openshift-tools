@@ -31,27 +31,6 @@ suite('openshift connector Extension', async () => {
     let sandbox: sinon.SinonSandbox;
     const registerTreeDataProviderStub = sinon.spy(vscode.window, 'registerTreeDataProvider');
 
-    class DummyMemento implements vscode.Memento {
-        get<T>(key: string): Promise<T|undefined> {
-          return Promise.resolve(undefined);
-        }
-
-        update(key: string, value: any): Promise<void> {
-          return Promise.resolve();
-        }
-    }
-
-    const context: vscode.ExtensionContext = {
-        extensionPath: 'path',
-        storagePath: 'string',
-        subscriptions: [],
-        workspaceState: new DummyMemento(),
-        globalState: new DummyMemento(),
-        asAbsolutePath(relativePath: string): string {
-            return '';
-        }
-    };
-
     setup(async () => {
         sandbox = sinon.createSandbox();
         const stub = sandbox.stub(Cluster, 'about');
