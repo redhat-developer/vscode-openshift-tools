@@ -1,8 +1,9 @@
 # Change Log
-## 0.0.17 (February 26, 2019)
+## 0.0.17 (February 27, 2019)
 * Update to use `odo v0.0.19`
 * Add duplicate resource name validation
-* Implement `Describe Service` command
+* Implement `Describe Service` command for component
+* Delete a Service from an Application
 
 ## 0.0.16 (February 5, 2019)
 * Update to use `odo v0.0.18`.
