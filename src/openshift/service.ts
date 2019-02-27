@@ -74,6 +74,18 @@ export class Service extends OpenShiftItem {
                 service = await vscode.window.showQuickPick(Service.getServiceNames(application), {placeHolder: "Select Service you want to describe"});
             }
         }
-        if (service) Service.odo.executeInTerminal(Command.describeService(service.getName()));
+        if (service) {
+            const template = await Service.getTemplate(service);
+            if (template) {
+                Service.odo.executeInTerminal(Command.describeService(template));
+            } else {
+                throw Error(`Cannot get Service Type name for Service \'${service.getName()}\'`);
+            }
+        }
+    }
+
+    static async getTemplate(service: OpenShiftObject): Promise<string> {
+        const result = await Service.odo.execute(Command.getServiceTemplate(service.getParent().getParent().getName(), service.getName()));
+        return result.stdout.trim();
     }
 }

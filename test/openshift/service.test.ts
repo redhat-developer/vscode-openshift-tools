@@ -321,29 +321,42 @@ suite('Openshift/Service', () => {
     });
 
     suite('describe', () => {
-
+        let execStub: sinon.SinonStub;
         setup(() => {
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(serviceItem);
+            execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves();
+            execStub.resolves({error: undefined, stdout: 'template_name', stderr: ''});
         });
 
         test('calls the correct odo command w/ context', async () => {
             await Service.describe(serviceItem);
 
-            expect(termStub).calledOnceWith(Command.describeService(serviceItem.getName()));
+            expect(termStub).calledOnceWith(Command.describeService('template_name'));
         });
 
         test('calls the correct odo command w/o context', async () => {
             await Service.describe(null);
 
-            expect(termStub).calledOnceWith(Command.describeService(serviceItem.getName()));
+            expect(termStub).calledOnceWith(Command.describeService('template_name'));
         });
 
         test('does not call the odo command if canceled', async () => {
             sandbox.stub(Service, 'getOpenShiftCmdData').resolves(null);
             await Service.describe(null);
             expect(termStub).not.called;
+        });
+
+        test('fails if cannot get Service Type for Service', async () => {
+            execStub.resolves({error: undefined, stdout: '', stderr: ''});
+            let err;
+            try {
+                await Service.describe(serviceItem);
+            } catch (error) {
+                err = error;
+            }
+            expect(err).is.not.undefined;
         });
     });
 });
