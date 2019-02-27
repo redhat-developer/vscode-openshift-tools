@@ -107,6 +107,8 @@ export const Command = {
         `odo service create ${template} --plan ${plan} ${name} --app ${app} --project ${project}`,
     deleteService: (project: string, app: string, name: string) =>
         `odo service delete ${name} -f --project ${project} --app ${app}`,
+    getServiceTemplate: (project: string, service: string) =>
+        `oc get ServiceInstance ${service} --namespace ${project} -o jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/component-type}"`,
     waitForServiceToBeGone: (project: string, service: string) =>
         `oc wait ServiceInstance/${service} --for delete --namespace ${project}`,
     createCompontentUrl: (project: string, app: string, component: string, port: string) =>
