@@ -23,44 +23,53 @@ To run the instance of OpenShift cluster locally, developers can use [minishift]
 * `OpenShift: Log in to cluster` - Log in to your server and save login for subsequent use.
     * Credentials : Log in to the given server with the given credentials.
     * Token : Login using bearer token for authentication to the API server.
-* `OpenShift: List catalog components` - List all available component types from OpenShift's Image Builder.
-* `OpenShift: List catalog services` - Lists all available services e.g. mysql-persistent.
-* `OpenShift: New Project` - Create new project inside the cluster.
+* `OpenShift: List catalog components` - List all available Component Types from OpenShift's Image Builder.
+* `OpenShift: List catalog services` - Lists all available Services e.g. mysql-persistent.
+* `OpenShift: New Project` - Create new project inside the OpenShift Cluster.
 * `OpenShift: About` - Provides the information about the OpenShift tools.
-* `OpenShift: Log out` - Logs out of the current OpenShift cluster.
+* `OpenShift: Log out` - Logs out of the current OpenShift Cluster.
 
-#### Actions available inside an OpenShift Cluster Project
+#### Actions available for an OpenShift Cluster Project
 
-   * `Project -> New Application` - Create a new application inside the selected project.
-   * `Project -> Delete` - Delete the selected project.
+   * `Project -> New Application` - Create a new Application inside the selected Project.
+   * `Project -> Delete` - Delete the selected Project.
 
-#### Actions available for an Application inside a Project
+#### Actions available for an Application in a Project
 
-   * `Application -> New Component` - Create a new component inside the selected application.
-        * git - Use a git repository as the source for the component.
-        * binary - Use binary file as a source for the component
-        * local - Use local directory as a source for the component.
-   * `Application -> New Service` - Perform service catalog operations when it is enabled.
-   * `Application -> Describe` - Describe the given application in terminal window.
-   * `Application -> Delete` - Delete an existing application.
+   * `Application -> New Component` - Create a new Component inside the selected Cpplication.
+        * git - Use a git repository as the source for the Component.
+        * binary - Use binary file as a source for the Component
+        * local - Use local directory as a source for the Component.
+   * `Application -> New Service` - Perform Service Catalog operations when it is enabled.
+   * `Application -> Describe` - Describe the given Application in terminal window.
+   * `Application -> Delete` - Delete an existing Application.
 
 #### Actions available for a Component in an Application
 
-   * `Component -> Create URL` - Expose component to the outside world. The URLs that are generated using this command, can be used to access the deployed components from outside the cluster.
-   * `Component -> Create Storage` - Create storage and mount to a component.
-   * `Component ->  Show Log` - Retrieve the log for the given component.
-   * `Component ->  Follow Log` - Follow logs for the given component.
-   * `Component ->  Link Service` - Link component to a service.
-   * `Component ->  Link Component` - Link component to another component.
+   * `Component -> Create URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster.
+   * `Component -> Create Storage` - Create Storage and mount to a Component.
+   * `Component -> Show Log` - Retrieve the log for the given Component.
+   * `Component -> Follow Log` - Follow logs for the given Component.
+   * `Component -> Link Service` - Link a Component to a Service.
+   * `Component -> Link Component` - Link Component to another Component.
    * `Component -> Open in Browser` - Open the exposed URL in a browser.
-   * `Component -> Push` - Push source code to a component.
-   * `Component -> Watch` - Watch for changes, update component on change.
-   * `Component -> Describe` - Describe the given component in terminal window.
-   * `Component -> Delete` - Delete an existing component.
+   * `Component -> Push` - Push source code to a Component.
+   * `Component -> Watch` - Watch for changes, update Component on change.
+   * `Component -> Describe` - Describe the given Component in terminal window.
+   * `Component -> Delete` - Delete an existing Component.
 
-#### Actions available inside a storage for a component
+#### Actions available for a Storage in a Component
 
-   * `Storage -> Delete` - Delete storage from component.
+   * `Storage -> Delete` - Delete a Storage from a Component.
+
+#### Actions available for a Service in an Application
+
+   * `Service -> Describe` - Describe a Service Type for a selected Component
+   * `Service -> Delete` - Delete a Service from an Application
+
+#### Actions available for a Folder in Explorer view
+
+   * `New OpenShift Component` - Create an OpenShift component from selected folder
 
 #### Icons Representation
 * ![Log in to cluster](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/dark/login.png) - Log in to Cluster
@@ -71,7 +80,6 @@ To run the instance of OpenShift cluster locally, developers can use [minishift]
 * ![Service Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/service.png) - Service Resource
 * ![Component Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/component.png) - Component Resource
 * ![Storage Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/storage.png) - Storage Resource
-
 
 ### Extension Configuration Settings
    * `Openshift Connector: Show Channel On Output` - Show OpenShift Connector output channel when new text added to output stream.
