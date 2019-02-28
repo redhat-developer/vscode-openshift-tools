@@ -406,6 +406,7 @@ suite('Openshift/Component', () => {
         });
 
         test('works from context menu if more than one ports is available', async () => {
+            getComponentsStub.resolves([componentItem, componentItem]);
             quickPickStub.resolves(componentItem);
             execStub.resolves({ error: null, stderr: "", stdout: '8080, 8081, ' });
             const result = await Component.linkComponent(componentItem);

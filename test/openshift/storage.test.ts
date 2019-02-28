@@ -89,6 +89,12 @@ suite('Openshift/Storage', () => {
             }
         });
 
+        test('exits without creating storage if canceled by user', async () => {
+            sandbox.stub(Storage, 'getOpenShiftCmdData').resolves(null);
+            const result = await Storage.create(null);
+            expect(result).is.null;
+        });
+
         test('works with valid inputs', async () => {
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
