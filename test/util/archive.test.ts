@@ -10,6 +10,9 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { Archive } from '../../src/util/archive';
 import targz = require('targz');
+import fs = require('fs-extra');
+import tmp = require('tmp');
+import path = require('path');
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -42,6 +45,24 @@ suite('Archive Utility', () => {
         });
     });
 
+    test('untars file correctly without prefix', () => {
+        sandbox.restore();
+        const tempDir = fs.realpathSync(tmp.dirSync().name);
+        const testArchive = path.join(__dirname, '..', '..', '..', 'test', 'fixtures', 'test.tar.gz');
+        return Archive.unzip(testArchive, tempDir).then(() => {
+            expect(fs.existsSync(path.join(tempDir, 'test', 'test.json'))).is.true;
+        });
+    });
+
+    test('untars file correctly with prefix', () => {
+        sandbox.restore();
+        const tempDir = fs.realpathSync(tmp.dirSync().name);
+        const testArchive = path.join(__dirname, '..', '..', '..', 'test', 'fixtures', 'test.tar.gz');
+        return Archive.unzip(testArchive, tempDir, 'test').then(() => {
+            expect(fs.existsSync(path.join(tempDir, 'test.json'))).is.true;
+        });
+    });
+
     test('untar rejects when error occurs', async () => {
         tarStub.yields(errorMessage);
         try {
@@ -64,6 +85,25 @@ suite('Archive Utility', () => {
         } catch (err) {
             expect(err).matches(new RegExp(errorMessage));
         }
+    });
+
+    test('gunzips file correctly', () => {
+        sandbox.restore();
+        const tempDir = tmp.dirSync().name;
+        const tempFile = path.join(tempDir, 'test.json');
+        const testArchive = path.join(__dirname, '..', '..', '..', 'test', 'fixtures', 'test.gz');
+        return Archive.gunzip(testArchive, tempFile).then(() => {
+            expect(fs.existsSync(tempFile)).is.true;
+        });
+    });
+
+    test('unzips file correctly', () => {
+        sandbox.restore();
+        const tempDir = tmp.dirSync().name;
+        const testArchive = path.join(__dirname, '..', '..', '..', 'test', 'fixtures', 'test.zip');
+        return Archive.unzip(testArchive, tempDir).then(() => {
+            expect(fs.existsSync(path.join(tempDir, 'test', 'test.json'))).is.true;
+        });
     });
 
     test('rejects if the file type in not supported', async () => {
