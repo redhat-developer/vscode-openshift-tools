@@ -20,14 +20,6 @@ export abstract class OpenShiftItem {
     protected static readonly odo: Odo = OdoImpl.getInstance();
     protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
 
-    static create(context: OpenShiftObject): Promise<String> {
-        return Promise.reject();
-    }
-
-    static del(context: OpenShiftObject): Promise<String> {
-        return Promise.reject();
-    }
-
     static wait(timeout: number = 2500): Promise<void> {
         return new Promise((res) => setTimeout(res, timeout));
     }
@@ -56,10 +48,6 @@ export abstract class OpenShiftItem {
 
     static lengthName(message: string, value: string, offset: number) {
         return validator.isLength(value, 0, 63 - offset) ? null : message;
-    }
-
-    static alphanumeric(message: string, value: string) {
-        return validator.isAlphanumeric(value) ? null: message;
     }
 
     static validateUrl(message: string, value: string) {

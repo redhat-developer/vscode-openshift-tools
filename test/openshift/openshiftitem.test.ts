@@ -33,6 +33,10 @@ suite('OpenShifItem', () => {
         sandbox.restore();
     });
 
+    test('Wait eventually exits', async () => {
+        return OpenShiftItem.wait();
+    });
+
     suite('getProjectNames', ()=> {
 
         test('returns an array of application names for the project if there is at least one project', async ()=> {
