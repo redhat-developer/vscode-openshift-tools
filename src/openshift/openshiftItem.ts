@@ -35,7 +35,7 @@ export abstract class OpenShiftItem {
             validateInput: (value: string) => {
                 let validationMessage = OpenShiftItem.emptyName(`Empty ${message}`, value.trim());
                 if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character`, value);
-                if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${message} is too long`, value, offset ? offset.length : 0);
+                if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${message} should be betweeen 2-64 characters`, value, offset ? offset.length : 0);
                 if (!validationMessage) validationMessage = OpenShiftItem.validateUniqueName(data, value);
                 return validationMessage;
             }
@@ -47,7 +47,7 @@ export abstract class OpenShiftItem {
     }
 
     static lengthName(message: string, value: string, offset: number) {
-        return validator.isLength(value, 0, 63 - offset) ? null : message;
+        return validator.isLength(value, 2, 63 - offset) ? null : message;
     }
 
     static validateUrl(message: string, value: string) {
