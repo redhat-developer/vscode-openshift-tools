@@ -15,6 +15,7 @@ import { OpenShiftExplorer } from '../../src/explorer';
 import { CliExitData } from '../../src/cli';
 import { TestItem } from './testOSItem';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
+import pq = require('proxyquire');
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -22,7 +23,7 @@ chai.use(sinonChai);
 suite('Openshift/Cluster', () => {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub, commandStub: sinon.SinonStub, inputStub: sinon.SinonStub,
-      infoStub: sinon.SinonStub, loginStub: sinon.SinonStub, quickPickStub: sinon.SinonStub;
+        infoStub: sinon.SinonStub, loginStub: sinon.SinonStub, quickPickStub: sinon.SinonStub;
     const testData: CliExitData = {
         error: undefined,
         stderr: '',
@@ -65,7 +66,7 @@ suite('Openshift/Cluster', () => {
             inputStub.onThirdCall().resolves(password);
         });
 
-        test('returns with no url set', async () => {
+        test('exits if canceled by user on cluster URL request', async () => {
             inputStub.onFirstCall().resolves();
             const status = await Cluster.login();
 
@@ -83,12 +84,19 @@ suite('Openshift/Cluster', () => {
             }
         });
 
-        test('returns if the user refuses to log out of an existing cluster', async () => {
+        test('exits if the user refuses to log out of an existing cluster', async () => {
             loginStub.resolves(false);
             infoStub.resolves('No');
             const status = await Cluster.login();
-
             expect(status).null;
+        });
+
+        test('logins to new cluster if user answer yes to a warning', async () => {
+            loginStub.resolves(false);
+            infoStub.resolves('Yes');
+            const status = await Cluster.login();
+
+            expect(status).equals(`Successfully logged in to '${testUrl}'`);
         });
 
         suite('credentials', () => {
@@ -265,5 +273,37 @@ suite('Openshift/Cluster', () => {
 
             expect(stub).calledOnce;
         });
+    });
+
+    suite('open console', () => {
+        const openStub: sinon.SinonStub = sinon.stub();
+        let clusterMock;
+        setup(() => {
+            clusterMock = pq('../../src/openshift/cluster', {
+                opn: openStub
+            }).Cluster;
+        });
+
+        test('opens URL from cluster\'s tree item label if called from cluster\'s context menu', () => {
+            const cluster = new TestItem(null, 'http://localhost');
+            clusterMock.openshiftConsole(cluster);
+            openStub.calledOnceWith('http://localhost');
+        });
+
+        test('opens URL from first cluster label', () => {
+            const cluster = new TestItem(null, 'http://localhost');
+            sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
+            clusterMock.openshiftConsole();
+            openStub.calledOnceWith('http://localhost');
+        });
+
+        test('shows error message if node lable is not URL', () => {
+            const cluster = new TestItem(null, 'localhost');
+            sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
+            const errMsgStub = sandbox.stub(vscode.window, 'showErrorMessage');
+            clusterMock.openshiftConsole();
+            errMsgStub.calledOnceWith('localhost', undefined);
+        });
+
     });
 });

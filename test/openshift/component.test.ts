@@ -32,7 +32,7 @@ suite('Openshift/Component', () => {
     const errorMessage = 'FATAL ERROR';
     let getProjects: sinon.SinonStub;
     let getApps: sinon.SinonStub;
-    let Component;
+    let Component: any;
     let opnStub: sinon.SinonStub;
     let infoStub: sinon.SinonStub;
     setup(() => {
