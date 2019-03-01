@@ -62,7 +62,7 @@ suite('File Watch Utility', () => {
         }, 1000);
         return new Promise((res) => {
             notifier.emitter.on('file-changed', (file) => {
-                expect(file).equals(path.basename(fileToWatch));
+                expect(file).equals(undefined);
                 res();
             });
         });

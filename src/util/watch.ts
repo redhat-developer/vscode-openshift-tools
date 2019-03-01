@@ -27,7 +27,7 @@ export class WatchUtil {
                     timer = undefined;
                     const newContext = await WatchUtil.grep(path.join(location, filename), /current-context:.*/);
                     if (context !== newContext) {
-                        emitter.emit('file-changed', changedFile);
+                        emitter.emit('file-changed');
                         context = newContext;
                     }
                 }, 500);
