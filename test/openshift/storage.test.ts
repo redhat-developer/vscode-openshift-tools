@@ -274,7 +274,7 @@ suite('Openshift/Storage', () => {
             });
             await Storage.create(componentItem);
 
-            expect(result).equals('Storage name is too long');
+            expect(result).equals('Storage name should be betweeen 2-63 characters');
         });
 
         teardown(() => {

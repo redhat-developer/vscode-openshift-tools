@@ -126,7 +126,7 @@ suite('Openshift/Project', () => {
             });
             await Project.create();
 
-            expect(result).equals('Project name is too long');
+            expect(result).equals('Project name should be betweeen 2-63 characters');
         });
     });
 
