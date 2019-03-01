@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------------------------
+  /*-----------------------------------------------------------------------------------------------
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
@@ -17,7 +17,7 @@ export class DownloadUtil {
         throttle: throttle || 250,
         delay: 0,
         lengthHeader: 'content-length'
-      }).on('progress', (state) => {
+      }).on('progress', (state: { percent: number; }) => {
         const current = Math.round(state.percent * 100);
         current !== previous && progressCallBack && progressCallBack(current, current - previous);
         previous = current;

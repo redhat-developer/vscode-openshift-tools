@@ -23,7 +23,6 @@
         "switch-final-break": [true, "always"],
         "prefer-template": [true, "allow-single-concat"],
         "semicolon": [true, "always"],
-        "arrow-parens": true,
         "no-consecutive-blank-lines": true,
         "no-boolean-literal-compare": true,
         "whitespace": [
