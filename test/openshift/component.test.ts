@@ -158,6 +158,7 @@ suite('Openshift/Component', () => {
 
         suite('from git repository', () => {
             const uri = 'git uri';
+            const ref = 'master';
 
             setup(() => {
                 quickPickStub.onFirstCall().resolves({ label: 'Git Repository' });
@@ -170,7 +171,7 @@ suite('Openshift/Component', () => {
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(termStub).calledOnceWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), uri));
+                expect(termStub).calledOnceWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), uri, ref));
             });
 
             test('returns null when no git repo selected', async () => {
