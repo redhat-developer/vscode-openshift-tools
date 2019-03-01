@@ -77,6 +77,7 @@ suite('Openshift/Component', () => {
     suite('create', () => {
         const componentType = 'nodejs';
         const version = 'latest';
+        const ref = 'master';
         const folder = { uri: { fsPath: 'folder' } };
         let inputStub: sinon.SinonStub,
             progressCmdStub: sinon.SinonStub;
@@ -158,12 +159,12 @@ suite('Openshift/Component', () => {
 
         suite('from git repository', () => {
             const uri = 'git uri';
-            const ref = 'master';
 
             setup(() => {
                 quickPickStub.onFirstCall().resolves({ label: 'Git Repository' });
                 inputStub.onFirstCall().resolves(uri);
-                inputStub.onSecondCall().resolves(componentItem.getName());
+                inputStub.onSecondCall().resolves(ref);
+                inputStub.onThirdCall().resolves(componentItem.getName());
                 infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves();
             });
 
@@ -182,14 +183,14 @@ suite('Openshift/Component', () => {
             });
 
             test('returns null when no component name selected', async () => {
-                inputStub.onSecondCall().resolves();
+                inputStub.onThirdCall().resolves();
                 const result = await Component.create(appItem);
 
                 expect(result).null;
             });
 
             test('returns null when no component type selected', async () => {
-                quickPickStub.onSecondCall().resolves();
+                quickPickStub.onThirdCall().resolves();
                 const result = await Component.create(appItem);
 
                 expect(result).null;
