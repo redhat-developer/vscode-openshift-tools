@@ -99,8 +99,8 @@ export const Command = {
         `oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${component}')]}{.spec.tls.termination}{end}"`,
     createLocalComponent: (project: string, app: string, type: string, version: string, name: string, folder: string) =>
         `odo create ${type}:${version} ${name} --local ${folder} --app ${app} --project ${project}`,
-    createGitComponent: (project: string, app: string, type: string, version: string, name: string, git: string) =>
-        `odo create ${type}:${version} ${name} --git ${git} --app ${app} --project ${project}`,
+    createGitComponent: (project: string, app: string, type: string, version: string, name: string, git: string, ref: string) =>
+        `odo create ${type}:${version} ${name} --git ${git} --ref ${ref} --app ${app} --project ${project}`,
     createBinaryComponent: (project: string, app: string, type: string, version: string, name: string, binary: string) =>
         `odo create ${type}:${version} ${name} --binary ${binary} --app ${app} --project ${project}`,
     createService: (project: string, app: string, template: string, plan: string, name: string) =>

@@ -248,6 +248,14 @@ export class Component extends OpenShiftItem {
 
         if (!repoURI) return null;
 
+        const gitRef = await vscode.window.showInputBox({
+            value: 'master',
+            prompt: 'Specify git reference (branch/tags/commits | default: master)',
+            validateInput: (value: string) => {
+                if (!value.trim()) return 'Empty reference, specify master if no reference needed.';
+            }
+        });
+
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
@@ -267,7 +275,7 @@ export class Component extends OpenShiftItem {
 
         const project = application.getParent();
         return Promise.resolve()
-            .then(() => Component.odo.executeInTerminal(Command.createGitComponent(project.getName(), application.getName(), componentTypeName, componentTypeVersion, componentName, repoURI)))
+            .then(() => Component.odo.executeInTerminal(Command.createGitComponent(project.getName(), application.getName(), componentTypeName, componentTypeVersion, componentName, repoURI, gitRef)))
             .then(() => Component.wait())
             .then(() => Component.explorer.refresh(application))
             .then(() => `Component '${componentName}' successfully created`);
