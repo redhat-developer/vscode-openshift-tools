@@ -8,7 +8,8 @@ import { OpenShiftObject } from "../../src/odo";
 export class TestItem implements OpenShiftObject {
     constructor(
         private parent: OpenShiftObject,
-        private name) {
+        private name,
+        private children = []) {
     }
 
     getName(): string {
@@ -20,7 +21,7 @@ export class TestItem implements OpenShiftObject {
     }
 
     getChildren() {
-        return [];
+        return this.children;
     }
 
     getParent(): OpenShiftObject {

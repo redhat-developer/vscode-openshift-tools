@@ -6,7 +6,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as explorerFactory from './explorer';
+import { OpenShiftExplorer } from './explorer';
 import { Cluster } from './openshift/cluster';
 import { Catalog } from './openshift/catalog';
 import { Project } from './openshift/project';
@@ -23,7 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     migrateFromOdo018();
 
-    const explorer: explorerFactory.OpenShiftExplorer = explorerFactory.OpenShiftExplorer.getInstance();
+    const explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
     const disposable = [
         vscode.commands.registerCommand('openshift.about', (context) => execute(Cluster.about, context)),
         vscode.commands.registerCommand('openshift.openshiftConsole', (context) => execute(Cluster.openshiftConsole, context)),

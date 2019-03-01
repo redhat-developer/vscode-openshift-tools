@@ -29,7 +29,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
 
     private constructor() {
         this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
-        this.fsw.emitter.on('file-changed', () => this.refresh());
+        this.fsw.emitter.on('file-changed', this.refresh.bind(this));
     }
 
     static getInstance(): OpenShiftExplorer {
