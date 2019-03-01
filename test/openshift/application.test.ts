@@ -105,7 +105,7 @@ suite('Openshift/Application', () => {
                 });
                 await Application.create(projectItem);
 
-                expect(result).equals('Application name is too long');
+                expect(result).equals('Application name should be betweeen 2-63 characters');
             });
         });
 

@@ -93,7 +93,7 @@ suite('Openshift/Service', () => {
             });
             quickPickStub.resolves(templateName);
             await Service.create(null);
-            expect(result).equals('Service name is too long');
+            expect(result).equals('Service name should be betweeen 2-63 characters');
         });
 
         test('returns null with no template selected', async () => {
@@ -216,7 +216,7 @@ suite('Openshift/Service', () => {
             });
             await Service.create(appItem);
 
-            expect(result).equals('Service name is too long');
+            expect(result).equals('Service name should be betweeen 2-63 characters');
         });
 
         test('works with correct inputs', async () => {
