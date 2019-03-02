@@ -245,6 +245,29 @@ suite('Openshift/Component', () => {
                 expect(result).equals('Empty Git repository URL');
 
             });
+
+            test('allows to continue with valid git reference', async () => {
+                let result: string | Thenable<string>;
+                inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                    result = options.validateInput('master');
+                    return Promise.resolve('master');
+                });
+
+                await Component.create(appItem);
+                expect(result).to.be.undefined;
+            });
+
+            test('shows error message for empty git reference input', async () => {
+                let result: string | Thenable<string>;
+                inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                    result = options.validateInput('');
+                    return Promise.resolve('');
+                });
+
+                await Component.create(appItem);
+                expect(result).equals('Empty reference, specify master if no reference needed.');
+
+            });
         });
 
         suite('from binary file', () => {
