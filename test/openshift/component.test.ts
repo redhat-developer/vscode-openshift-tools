@@ -190,7 +190,7 @@ suite('Openshift/Component', () => {
             });
 
             test('returns null when no component type selected', async () => {
-                quickPickStub.onThirdCall().resolves();
+                quickPickStub.onSecondCall().resolves();
                 const result = await Component.create(appItem);
 
                 expect(result).null;
@@ -497,7 +497,7 @@ suite('Openshift/Component', () => {
 
         test('asks for context and exits if not provided', async () => {
             const result = await Component.linkComponent(null);
-            expect(result).is.undefined;
+            expect(result).null;
             expect(quickPickStub).calledThrice;
         });
     });
@@ -506,6 +506,13 @@ suite('Openshift/Component', () => {
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+        });
+
+        test('returns null when cancelled', async () => {
+            quickPickStub.resolves();
+            const result = await Component.linkService(null);
+
+            expect(result).null;
         });
 
         test('works from context menu', async () => {
@@ -584,6 +591,13 @@ suite('Openshift/Component', () => {
             quickPickStub.onThirdCall().resolves(componentItem);
         });
 
+        test('returns null when cancelled', async () => {
+            quickPickStub.onFirstCall().resolves();
+            const result = await Component.describe(null);
+
+            expect(result).null;
+        });
+
         test('describe calls the correct odo command in terminal', async () => {
             await Component.describe(componentItem);
             expect(termStub).calledOnceWith(Command.describeComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
@@ -604,6 +618,13 @@ suite('Openshift/Component', () => {
             quickPickStub.onThirdCall().resolves(componentItem);
         });
 
+        test('returns null when cancelled', async () => {
+            quickPickStub.onFirstCall().resolves();
+            const result = await Component.log(null);
+
+            expect(result).null;
+        });
+
         test('log calls the correct odo command in terminal', async () => {
             await Component.log(componentItem);
 
@@ -617,17 +638,31 @@ suite('Openshift/Component', () => {
         });
     });
 
-    test('followLog calls the correct odo command in terminal', () => {
-        Component.followLog(componentItem);
+    suite('followLog', () => {
 
-        test('followLog calls the correct odo command in terminal', async () => {
+        setup(() => {
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onThirdCall().resolves(componentItem);
+        });
+
+        test('returns null when cancelled', async () => {
+            quickPickStub.onFirstCall().resolves();
+            const result = await Component.followLog(null);
+
+            expect(result).null;
+        });
+
+        test('followLog calls the correct odo command in terminal  w/ context', async () => {
             await Component.followLog(componentItem);
+
             expect(termStub).calledOnceWith(Command.showLogAndFollow(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
 
-        test('followLog calls the correct odo command in terminal with no context', async () => {
-
+        test('works with no context', async () => {
             await Component.followLog(null);
+
             expect(termStub).calledOnceWith(Command.showLogAndFollow(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
     });
@@ -639,6 +674,13 @@ suite('Openshift/Component', () => {
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
+        });
+
+        test('returns null when cancelled', async () => {
+            quickPickStub.onFirstCall().resolves();
+            const result = await Component.push(null);
+
+            expect(result).null;
         });
 
         test('push calls the correct odo command with progress', async () => {
@@ -661,6 +703,13 @@ suite('Openshift/Component', () => {
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
+        });
+
+        test('returns null when cancelled', async () => {
+            quickPickStub.onFirstCall().resolves();
+            const result = await Component.watch(null);
+
+            expect(result).null;
         });
 
         test('calls the correct odo command w/ context', async () => {
@@ -700,7 +749,7 @@ suite('Openshift/Component', () => {
         });
 
         test('request to create url for component if it does not exist, creates it if confirmed by user and opens in in browser.' , async () => {
-            infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves('Create');
+            sandbox.stub(vscode.window, 'showInformationMessage').resolves('Create');
             sandbox.stub(vscode.commands, 'executeCommand').resolves();
             execStub.onFirstCall().resolves({error: undefined, stdout: '', stderr: ''});
             execStub.onSecondCall().resolves({error: undefined, stdout: 'url', stderr: ''});
@@ -710,7 +759,7 @@ suite('Openshift/Component', () => {
         });
 
         test('request to create url for component if it does not exist and exits when not confirmed' , async () => {
-            infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves('Cancel');
+            sandbox.stub(vscode.window, 'showInformationMessage').resolves('Cancel');
             sandbox.stub(vscode.commands, 'executeCommand').resolves();
             execStub.onFirstCall().resolves({error: undefined, stdout: '', stderr: ''});
             await Component.openUrl(null);
