@@ -40,6 +40,9 @@
     "onCommand:openshift.app.create",
     "onCommand:openshift.app.delete",
     "onCommand:openshift.component.create",
+    "onCommand:openshift.component.create.local",
+    "onCommand:openshift.component.create.git",
+    "onCommand:openshift.component.create.binary",
     "onCommand:openshift.component.describe",
     "onCommand:openshift.component.describe.palette",
     "onCommand:openshift.component.log",
@@ -132,6 +135,21 @@
       {
         "command": "openshift.component.create",
         "title": "New Component",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.create.local",
+        "title": "New Component from local folder",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.create.git",
+        "title": "New Component from Git repository",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.create.binary",
+        "title": "New Component form binary",
         "category": "OpenShift"
       },
       {
@@ -312,6 +330,10 @@
       "commandPalette": [
         {
           "command": "openshift.project.delete",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.create",
           "when": "view == openshiftProjectExplorer"
         },
         {
