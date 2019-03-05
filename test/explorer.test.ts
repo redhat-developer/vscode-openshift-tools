@@ -9,7 +9,6 @@ import { OpenShiftExplorer } from '../src/explorer';
 import { OdoImpl } from '../src/odo';
 import { TestItem } from './openshift/testOSItem';
 import sinon = require('sinon');
-import * as fs from 'fs-extra';
 
 const expect = chai.expect;
 chai.use(sinonChai);
