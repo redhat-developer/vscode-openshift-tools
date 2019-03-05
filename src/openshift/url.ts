@@ -19,6 +19,11 @@ export class Url extends OpenShiftItem{
         if (component) {
             const app: OpenShiftObject = component.getParent();
             const project: OpenShiftObject = app.getParent();
+            const namespace: string = app.getParent().getName();
+            const routeCheck = await Component.odo.execute(Command.getRouteHostName(namespace, component.getName()));
+            if (routeCheck.stdout.trim() !== '') {
+                return vscode.window.showInformationMessage(`The route is already created for the component '${component.getName()}'. You can open it in browser.`);
+            }
             const ports: V1ServicePort[] = await Component.getComponentPorts(component);
             const portItems: vscode.QuickPickItem[] = ports.map((item: any) => {
                 item['label'] = `${item.port}/${item.protocol}`;
@@ -30,7 +35,7 @@ export class Url extends OpenShiftItem{
             } else if (ports.length > 1) {
                 port = await vscode.window.showQuickPick(portItems, {placeHolder: "Select port to expose"});
             } else {
-                return Promise.reject(`Component '${component.getName()}' has no ports decalred.`);
+                return Promise.reject(`Component '${component.getName()}' has no ports declared.`);
             }
             return port === undefined ? undefined : Promise.resolve()
                 .then(async () => Url.odo.execute(Command.createCompontentUrl(project.getName(), app.getName(), component.getName(), `${port['port']}`)))
