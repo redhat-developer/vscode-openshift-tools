@@ -100,6 +100,27 @@ suite('Openshift/Cluster', () => {
         });
 
         suite('credentials', () => {
+
+            test('logins to new cluster if user answer yes to a warning', async () => {
+                loginStub.resolves(false);
+                infoStub.resolves('Yes');
+                const result = await Cluster.credentialsLogin(null);
+                expect(result).equals(`Successfully logged in to '${testUrl}'`);
+            });
+
+            test('should able to login from command palette', async () => {
+                loginStub.resolves(true);
+                const result = await Cluster.tokenLogin(null);
+                expect(result).equals(`Successfully logged in to '${testUrl}'`);
+            });
+
+            test('exits if the user refuses to login to new cluster', async () => {
+                loginStub.resolves(false);
+                infoStub.resolves('No');
+                const result = await Cluster.credentialsLogin(null);
+                expect(result).null;
+            });
+
             test('happy path works', async () => {
                 const status = await Cluster.login();
 
@@ -158,6 +179,26 @@ suite('Openshift/Cluster', () => {
             setup(() => {
                 quickPickStub.resolves('Token');
                 inputStub.onSecondCall().resolves('token');
+            });
+
+            test('logins to new cluster if user answer yes to a warning', async () => {
+                loginStub.resolves(false);
+                infoStub.resolves('Yes');
+                const result = await Cluster.tokenLogin(null);
+                expect(result).equals(`Successfully logged in to '${testUrl}'`);
+            });
+
+            test('should able to login from command palette', async () => {
+                loginStub.resolves(true);
+                const result = await Cluster.tokenLogin(null);
+                expect(result).equals(`Successfully logged in to '${testUrl}'`);
+            });
+
+            test('exits if the user refuses to login to new cluster', async () => {
+                loginStub.resolves(false);
+                infoStub.resolves('No');
+                const result = await Cluster.tokenLogin(null);
+                expect(result).null;
             });
 
             test('happy path works', async () => {

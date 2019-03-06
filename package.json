@@ -30,6 +30,8 @@
     "onCommand:openshift.about",
     "onCommand:openshift.openshiftConsole.palette",
     "onCommand:openshift.explorer.login",
+    "onCommand:openshift.explorer.login.credentialsLogin",
+    "onCommand:openshift.explorer.login.tokenLogin",
     "onCommand:openshift.explorer.logout",
     "onCommand:openshift.explorer.refresh",
     "onCommand:openshift.project.create",
@@ -85,6 +87,16 @@
         "title": "Log in to cluster",
         "category": "OpenShift",
         "icon": "images/login.png"
+      },
+      {
+        "command": "openshift.explorer.login.tokenLogin",
+        "title": "Login into Cluster with token",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.explorer.login.credentialsLogin",
+        "title": "Login into Cluster with credentials",
+        "category": "OpenShift"
       },
       {
         "command": "openshift.explorer.refresh",
@@ -338,6 +350,10 @@
         },
         {
           "command": "openshift.app.describe",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.explorer.login",
           "when": "view == openshiftProjectExplorer"
         },
         {
