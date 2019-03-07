@@ -193,7 +193,7 @@ suite('Openshift/Storage', () => {
             inputStub.restore();
         });
 
-        test('validator returns undefinded for valid storage name', async () => {
+        test('validator returns undefined for valid storage name', async () => {
             let result: string | Thenable<string>;
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                 result = options.validateInput('goodvalue');
@@ -217,7 +217,7 @@ suite('Openshift/Storage', () => {
             expect(result).equals('Empty Storage name');
         });
 
-        test('validator returns undefinded for valid sotorage path', async () => {
+        test('validator returns undefined for valid storage path', async () => {
             let result: string | Thenable<string>;
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().resolves('name');
             inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
@@ -274,7 +274,7 @@ suite('Openshift/Storage', () => {
             });
             await Storage.create(componentItem);
 
-            expect(result).equals('Storage name should be betweeen 2-63 characters');
+            expect(result).equals('Storage name should be between 2-63 characters');
         });
 
         teardown(() => {

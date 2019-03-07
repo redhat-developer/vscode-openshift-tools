@@ -297,7 +297,7 @@ suite('Openshift/Cluster', () => {
             openStub.calledOnceWith('http://localhost');
         });
 
-        test('shows error message if node lable is not URL', () => {
+        test('shows error message if node label is not URL', () => {
             const cluster = new TestItem(null, 'localhost');
             sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
             const errMsgStub = sandbox.stub(vscode.window, 'showErrorMessage');

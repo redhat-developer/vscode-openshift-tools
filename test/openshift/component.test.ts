@@ -469,7 +469,7 @@ suite('Openshift/Component', () => {
                 savedErr = err;
             }
 
-            expect(savedErr).equals(`Component '${componentItem.getName()}' has no Ports decalred.`);
+            expect(savedErr).equals(`Component '${componentItem.getName()}' has no Ports declared.`);
         });
 
         test('errors when a subcommand fails', async () => {

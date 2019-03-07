@@ -48,7 +48,7 @@ suite('Openshift/Application', () => {
                 execStub.resolves();
             });
 
-            test('returns undefinded for valid application name', async () => {
+            test('returns undefined for valid application name', async () => {
                 let result: string | Thenable<string>;
                 inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                     result = options.validateInput('goodvalue');
@@ -105,7 +105,7 @@ suite('Openshift/Application', () => {
                 });
                 await Application.create(projectItem);
 
-                expect(result).equals('Application name should be betweeen 2-63 characters');
+                expect(result).equals('Application name should be between 2-63 characters');
             });
         });
 

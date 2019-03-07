@@ -49,7 +49,7 @@ suite('Download Util', () => {
         });
     });
 
-    test('fails when downloda fails', () => {
+    test('fails when download fails', () => {
         const result = progressMock.downloadFile('url', 'toFile');
         requestEmitter.emit('error', new Error('failure'));
         return result.then(() => {

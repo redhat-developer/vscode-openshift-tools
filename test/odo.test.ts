@@ -230,7 +230,7 @@ suite("odo", () => {
             }
 
             expect(e, 'getServiceTemplates has not threw error').is.not.undefined;
-            expect(e.message, 'error has no message fiels').is.not.undefined;
+            expect(e.message, 'error has no message fields').is.not.undefined;
             expect(e.message, 'message is not equal stdout stream output').equals(stdout);
 
         });
