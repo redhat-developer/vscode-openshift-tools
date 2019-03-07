@@ -4,6 +4,6 @@
 	"recommendations": [
 		"eg2.tslint",
 		"eg2.vscode-npm-script",
-		"ryanluker.vscode-coverage-gutters"
-	]
+		"ryanluker.vscode-coverage-gutters",
+		"streetsidesoftware.code-spell-checker"]
 }
