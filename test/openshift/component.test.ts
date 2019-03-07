@@ -106,7 +106,7 @@ suite('Openshift/Component', () => {
                 await Component.create(appItem);
                 expect.fail();
             } catch (error) {
-                expect(error).equals(`Failed to create component with error '${errorMessage}'`);
+                expect(error).equals(`Failed to create Component with error '${errorMessage}'`);
             }
         });
 
@@ -390,7 +390,7 @@ suite('Openshift/Component', () => {
             try {
                 await Component.del(componentItem);
             } catch (err) {
-                expect(err).equals(`Failed to delete component with error '${errorMessage}'`);
+                expect(err).equals(`Failed to delete Component with error '${errorMessage}'`);
             }
         });
 
@@ -427,7 +427,7 @@ suite('Openshift/Component', () => {
             execStub.resolves({ error: null, stderr: "", stdout: '8080, ' });
             const result = await Component.linkComponent(componentItem);
 
-            expect(result).equals(`component '${componentItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
+            expect(result).equals(`Component '${componentItem.getName()}' successfully linked with Component '${componentItem.getName()}'`);
         });
 
         test('works from context menu if more than one ports is available', async () => {
@@ -436,7 +436,7 @@ suite('Openshift/Component', () => {
             execStub.resolves({ error: null, stderr: "", stdout: '8080, 8081, ' });
             const result = await Component.linkComponent(componentItem);
 
-            expect(result).equals(`component '${componentItem.getName()}' successfully linked with component '${componentItem.getName()}'`);
+            expect(result).equals(`Component '${componentItem.getName()}' successfully linked with Component '${componentItem.getName()}'`);
         });
 
         test('returns null when no component selected to link', async () => {
@@ -469,7 +469,7 @@ suite('Openshift/Component', () => {
                 savedErr = err;
             }
 
-            expect(savedErr).equals(`Component '${componentItem.getName()}' has no ports decalred.`);
+            expect(savedErr).equals(`Component '${componentItem.getName()}' has no Ports decalred.`);
         });
 
         test('errors when a subcommand fails', async () => {
@@ -540,7 +540,7 @@ suite('Openshift/Component', () => {
             } catch (err) {
                 savedErr = err;
             }
-            expect(savedErr).equals(`Failed to link service with error '${errorMessage}'`);
+            expect(savedErr).equals(`Failed to link Service with error '${errorMessage}'`);
         });
     });
 
@@ -578,7 +578,7 @@ suite('Openshift/Component', () => {
             } catch (err) {
                 savedErr = err;
             }
-            expect(savedErr).equals(`Failed to link service with error '${errorMessage}'`);
+            expect(savedErr).equals(`Failed to link Service with error '${errorMessage}'`);
         });
     });
 
