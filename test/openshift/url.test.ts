@@ -191,7 +191,8 @@ suite('Openshift/URL', () => {
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([componentItem]);
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.resolves({error: null, stdout: portsOutput, stderr: ''});
+            execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
+            execStub.onSecondCall().resolves({error: null, stdout: portsOutput, stderr: ''});
             quickPickStub.resolves('port1');
             const result = await Url.create(null);
 
@@ -200,7 +201,8 @@ suite('Openshift/URL', () => {
 
         test('rejects when fails to create Url', () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.resolves({error: "Error", stdout: portsOutput, stderr: ''});
+            execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
+            execStub.onSecondCall().resolves({error: "Error", stdout: portsOutput, stderr: ''});
 
             return Url.create(null).catch((err) => {
                 expect(err).equals(`Failed to create URL for component '${componentItem.getName()}'`);
@@ -218,8 +220,9 @@ suite('Openshift/URL', () => {
 
         test('asks to select port if more that one exposed and returns message', async () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.onFirstCall().resolves({error: null, stdout: portsOutput, stderr: ''});
-            execStub.onSecondCall().resolves();
+            execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
+            execStub.onSecondCall().resolves({error: null, stdout: portsOutput, stderr: ''});
+            execStub.onThirdCall().resolves();
             quickPickStub.resolves({
                 name: "8080-tcp",
                 port: 8080,
@@ -229,13 +232,14 @@ suite('Openshift/URL', () => {
             const result = await Url.create(componentItem);
 
             expect(result).equals(`URL for component '${componentItem.getName()}' successfully created`);
-            expect(execStub).calledTwice;
+            expect(execStub).calledThrice;
         });
 
         test('rejects when fails to create Url', () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.onFirstCall().resolves({error: null, stdout: portOutput, stderr: ''});
-            execStub.onSecondCall().rejects();
+            execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
+            execStub.onSecondCall().resolves({error: null, stdout: portOutput, stderr: ''});
+            execStub.onThirdCall().rejects();
 
             return Url.create(componentItem).catch((err) => {
                 expect(err).equals(`Failed to create URL for component '${componentItem.getName()}'. Error`);
@@ -244,11 +248,12 @@ suite('Openshift/URL', () => {
 
         test('rejects when component has no ports declared', () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.onFirstCall().resolves({error: null, stdout: noPortsOutput, stderr: ''});
-            execStub.onSecondCall().rejects();
+            execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
+            execStub.onSecondCall().resolves({error: null, stdout: noPortsOutput, stderr: ''});
+            execStub.onThirdCall().rejects();
 
             return Url.create(componentItem).catch((err) => {
-                expect(err).equals(`Component '${componentItem.getName()}' has no ports decalred.`);
+                expect(err).equals(`Component '${componentItem.getName()}' has no ports declared.`);
             });
         });
     });
