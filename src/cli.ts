@@ -37,7 +37,8 @@ export class Cli implements ICli {
                 this.odoChannel.print(stderr);
                 // do not reject it here, because caller in some cases need the error and the streams
                 // to make a decision
-                resolve({ error, stdout: stdout.replace(/---[\s\S]*---/g, '').trim(), stderr });
+                // Filter update message text which starts with `---`
+                resolve({ error, stdout: stdout.replace(/---[\s\S]*$/g, '').trim(), stderr });
             });
         });
     }
