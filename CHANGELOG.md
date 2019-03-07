@@ -1,4 +1,7 @@
 # Change Log
+
+## 0.0.18 (March 18, 2019)
+
 ## 0.0.17 (February 27, 2019)
 * Update to use `odo v0.0.19`
 * Add duplicate resource name validation
@@ -6,15 +9,15 @@
 * Delete a Service from an Application
 
 ## 0.0.16 (February 5, 2019)
-* Update to use `odo v0.0.18`.
-* Allow to create multiple components directly from workspace view.
-* Add few more commands(linking Service/Component) to command pallete.
-* Add progress bar for delete operation (using `oc wait`).
-* Show indeterminate progress bar for linking commands.
-* Allow extension to use `oc ^3.11.0` if detected.
+* Update to use `odo v0.0.18`
+* Allow to create multiple components directly from workspace view
+* Add few more commands(linking Service/Component) to command palette
+* Add progress bar for delete operation (using `oc wait`)
+* Show indeterminate progress bar for linking commands
+* Allow extension to use `oc ^3.11.0` if detected
 
 ## 0.0.15 (January 23, 2019)
-* Provide the flexibility to use `commands` using command pallete [#269](https://github.com/redhat-developer/vscode-openshift-tools/issues/269)
+* Provide the flexibility to use `commands` using command palette [#269](https://github.com/redhat-developer/vscode-openshift-tools/issues/269)
 * Remove kubernetes clusters view from OpenShift Views Container
 * Fix security issues with `event-stream` module [#485](https://github.com/redhat-developer/vscode-openshift-tools/pull/485)
 * Add login handling for when ~/.kube is empty
@@ -61,6 +64,6 @@
 
 ## 0.0.7 (October 5, 2018)
 * Add support for interactions with Red Hat OpenShift cluster
-* Supports only local openshift cluster via minishift/cdk
+* Supports only local OpenShift cluster via minishift/cdk
 * Allows to configure projects/applications/components/services/storages for a cluster
 * Interactive developer experience

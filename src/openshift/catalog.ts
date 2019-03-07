@@ -13,6 +13,6 @@ export class Catalog {
     }
 
     static listServices(): void {
-        Catalog.odo.executeInTerminal(Command.listCatalogSevices());
+        Catalog.odo.executeInTerminal(Command.listCatalogServices());
     }
 }
