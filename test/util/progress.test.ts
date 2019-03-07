@@ -68,14 +68,14 @@ suite('Progress Utility', () => {
         }
     });
 
-    test('execCmdWithProgress returned promice resolves in case of cmd finished sucessfully', () => {
+    test('execCmdWithProgress returned promise resolves in case of cmd finished successfully', () => {
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
         Progress.execCmdWithProgress('title', 'cmd').catch(() => {
             expect.fail(true, false, 'returned promise should not be rejected');
         });
     });
 
-    test('execCmdWithProgress returned promice rejects in case of cmd finished with failure', async () => {
+    test('execCmdWithProgress returned promise rejects in case of cmd finished with failure', async () => {
         const error = new Error(errorMessage);
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error, stdout: '', stderr: ''});
         let e;

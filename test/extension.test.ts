@@ -76,7 +76,7 @@ suite('openshift connector Extension', async () => {
         expect(vscode.window.showErrorMessage).has.not.been.called;
     });
 
-    test('should register all extension commands delared commands in package descriptor', async () => {
+    test('should register all extension commands declared commands in package descriptor', async () => {
         return await vscode.commands.getCommands(true).then((commands) => {
             packagejson.contributes.commands.forEach((value)=> {
                 expect(commands.indexOf(value.command) > -1, `Command '${value.command}' handler is not registered during activation`).true;

@@ -16,7 +16,7 @@ import { fail } from 'assert';
 const expect = chai.expect;
 chai.use(sinonChai);
 
-suite('OpenShifItem', () => {
+suite('OpenShiftItem', () => {
 
     let sandbox: sinon.SinonSandbox;
     const projectItem = new TestItem(null, 'project');

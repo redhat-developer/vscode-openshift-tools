@@ -123,7 +123,7 @@ export class Component extends OpenShiftItem {
         } else if (ports.length > 1) {
             port = await vscode.window.showQuickPick(ports, {placeHolder: "Select Port to link"});
         } else {
-            return Promise.reject(`Component '${component.getName()}' has no Ports decalred.`);
+            return Promise.reject(`Component '${component.getName()}' has no Ports declared.`);
         }
 
         return Progress.execFunctionWithProgress(`Link Component '${componentToLink.getName()}' with Component '${component.getName()}'`,

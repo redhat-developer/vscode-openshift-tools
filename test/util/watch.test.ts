@@ -51,7 +51,7 @@ suite('File Watch Utility', () => {
         expect(result).has.ownProperty('emitter');
     });
 
-    test('emitts change message when context changes', async () => {
+    test('emits change message when context changes', async () => {
         ensureStub.restore();
         watchStub.restore();
         const fileToWatch = fs.realpathSync(tmp.fileSync().name);

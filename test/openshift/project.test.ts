@@ -69,7 +69,7 @@ suite('Openshift/Project', () => {
             }
         });
 
-        test('validator returns undefinded for valid project name', async () => {
+        test('validator returns undefined for valid project name', async () => {
             let result: string | Thenable<string>;
             inputStub.restore();
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
@@ -126,7 +126,7 @@ suite('Openshift/Project', () => {
             });
             await Project.create();
 
-            expect(result).equals('Project name should be betweeen 2-63 characters');
+            expect(result).equals('Project name should be between 2-63 characters');
         });
     });
 

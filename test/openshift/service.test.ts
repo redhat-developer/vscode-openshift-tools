@@ -93,7 +93,7 @@ suite('Openshift/Service', () => {
             });
             quickPickStub.resolves(templateName);
             await Service.create(null);
-            expect(result).equals('Service name should be betweeen 2-63 characters');
+            expect(result).equals('Service name should be between 2-63 characters');
         });
 
         test('returns null with no template selected', async () => {
@@ -159,7 +159,7 @@ suite('Openshift/Service', () => {
             inputStub = sandbox.stub(vscode.window, 'showInputBox').resolves(serviceItem.getName());
             progressStub = sandbox.stub(Progress, 'execCmdWithProgress').resolves();
         });
-        test('validator returns undefinded for valid service name', async () => {
+        test('validator returns undefined for valid service name', async () => {
             let result: string | Thenable<string>;
             inputStub.restore();
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
@@ -216,7 +216,7 @@ suite('Openshift/Service', () => {
             });
             await Service.create(appItem);
 
-            expect(result).equals('Service name should be betweeen 2-63 characters');
+            expect(result).equals('Service name should be between 2-63 characters');
         });
 
         test('works with correct inputs', async () => {

@@ -120,7 +120,7 @@ suite("tools configuration", () => {
             assert.equal(toolLocation, undefined);
         });
 
-        test('downloads tool, ask to download again if checksum does not match and finish if consecutive download sucessful', async () => {
+        test('downloads tool, ask to download again if checksum does not match and finish if consecutive download successful', async () => {
             sb.stub(shelljs, 'which');
             sb.stub(fs, 'existsSync').returns(true);
             sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');

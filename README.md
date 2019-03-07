@@ -37,7 +37,7 @@ To run the instance of OpenShift cluster locally, developers can use [minishift]
 
 #### Actions available for an Application in a Project
 
-   * `Application -> New Component` - Create a new Component inside the selected Cpplication.
+   * `Application -> New Component` - Create a new Component inside the selected Application.
         * git - Use a git repository as the source for the Component.
         * binary - Use binary file as a source for the Component
         * local - Use local directory as a source for the Component.

@@ -30,7 +30,7 @@ export class Url extends OpenShiftItem{
             } else if (ports.length > 1) {
                 port = await vscode.window.showQuickPick(portItems, {placeHolder: "Select port to expose"});
             } else {
-                return Promise.reject(`Component '${component.getName()}' has no ports decalred.`);
+                return Promise.reject(`Component '${component.getName()}' has no ports declared.`);
             }
             return port === undefined ? undefined : Promise.resolve()
                 .then(async () => Url.odo.execute(Command.createCompontentUrl(project.getName(), app.getName(), component.getName(), `${port['port']}`)))
