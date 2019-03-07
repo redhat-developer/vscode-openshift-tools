@@ -20,7 +20,7 @@ import pq = require('proxyquire');
 const expect = chai.expect;
 chai.use(sinonChai);
 
-suite('Openshift/Component', () => {
+suite('OpenShift/Component', () => {
     let quickPickStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
     let termStub: sinon.SinonStub, execStub: sinon.SinonStub;

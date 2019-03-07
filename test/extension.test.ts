@@ -46,7 +46,7 @@ suite('openshift connector Extension', async () => {
 		assert.ok(vscode.extensions.getExtension('redhat.vscode-openshift-connector'));
 	});
 
-    async function getStaticMethosToStub(osc: string[]): Promise<string[]> {
+    async function getStaticMethodsToStub(osc: string[]): Promise<string[]> {
         const mths: Set<string> = new Set();
         osc.forEach((name) => {
             name.replace('.palette', '');
@@ -64,7 +64,7 @@ suite('openshift connector Extension', async () => {
         const cmds: string[] = await vscode.commands.getCommands();
         const osc: string[] = cmds.filter((item) => item.includes('openshift.'));
         expect(registerTreeDataProviderStub).calledOnce;
-        const mths: string[] = await getStaticMethosToStub(osc);
+        const mths: string[] = await getStaticMethodsToStub(osc);
         (<any>[Application, Catalog, Cluster, Component, Project, Service, Storage, Url]).forEach(async (item) => {
             mths.forEach((name) => {
                 if (item[name]) {

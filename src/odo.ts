@@ -43,7 +43,7 @@ export const Command = {
         `oc get dc --namespace ${project} -o jsonpath="{range .items[?(.metadata.labels.app == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}"`,
     listCatalogComponents: () =>
         `odo catalog list components`,
-    listCatalogSevices: () =>
+    listCatalogServices: () =>
         `odo catalog list services`,
     listStorageNames: (project: string, app: string) =>
         `oc get pvc -o jsonpath="{range .items[?(.metadata.labels.app == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\" \\"}{.metadata.labels.app\\.kubernetes\\.io/storage-name}{\\"\\n\\"}{end}" --namespace ${project}`,
@@ -51,7 +51,7 @@ export const Command = {
         'oc version',
     printOdoVersionAndProjects: () =>
         'odo version && odo project list',
-    listServiceInstanses: (project: string, app: string) =>
+    listServiceInstances: (project: string, app: string) =>
         `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}" --namespace ${project}`,
     createApplication: (project: string, app: string) =>
         `odo app create ${app} --project ${project}`,
@@ -111,7 +111,7 @@ export const Command = {
         `oc get ServiceInstance ${service} --namespace ${project} -o jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/component-type}"`,
     waitForServiceToBeGone: (project: string, service: string) =>
         `oc wait ServiceInstance/${service} --for delete --namespace ${project}`,
-    createCompontentUrl: (project: string, app: string, component: string, port: string) =>
+    createComponentUrl: (project: string, app: string, component: string, port: string) =>
         `odo url create --port ${port} --project ${project} --app ${app} --component ${component}`,
     getComponentJson: (project: string, app: string, component: string) =>
         `oc get service ${component}-${app} --namespace ${project} -o json`
@@ -343,7 +343,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getServiceTemplates(): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogSevices(), process.cwd(), false);
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices(), process.cwd(), false);
         if (result.error) {
             throw new Error(result.stdout.trim());
         }
@@ -351,7 +351,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getServiceTemplatePlans(svcName: string): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogSevices());
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices());
         const plans = result.stdout.trim().split('\n').slice(1).filter((value) => {
                 const data = value.trim().replace(/\s{1,}/g, '|').split('|');
                 return data[0] === svcName;
@@ -364,7 +364,7 @@ export class OdoImpl implements Odo {
         const projName: string = application.getParent().getName();
         let services: OpenShiftObject[] = [];
         try {
-            const result: cliInstance.CliExitData = await this.execute(Command.listServiceInstanses(projName, appName));
+            const result: cliInstance.CliExitData = await this.execute(Command.listServiceInstances(projName, appName));
             services = result.stdout.trim().split('\n')
                 .filter((value) => value !== '')
                 .map((value) => new OpenShiftObjectImpl(application, value, ContextType.SERVICE, this, TreeItemCollapsibleState.None));

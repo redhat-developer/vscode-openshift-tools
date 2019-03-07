@@ -17,7 +17,7 @@ import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 const expect = chai.expect;
 chai.use(sinonChai);
 
-suite('Openshift/Application', () => {
+suite('OpenShift/Application', () => {
     let quickPickStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;

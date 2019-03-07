@@ -14,7 +14,7 @@ import { Catalog } from '../../src/openshift/catalog';
 const expect = chai.expect;
 chai.use(sinonChai);
 
-suite('Openshift/Catalog', () => {
+suite('OpenShift/Catalog', () => {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
 
@@ -36,6 +36,6 @@ suite('Openshift/Catalog', () => {
     test('listServices calls odo catalog list services', () => {
         Catalog.listServices();
 
-        expect(execStub).calledOnceWith(Command.listCatalogSevices());
+        expect(execStub).calledOnceWith(Command.listCatalogServices());
     });
 });
