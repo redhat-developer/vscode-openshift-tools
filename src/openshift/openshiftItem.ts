@@ -55,8 +55,8 @@ export abstract class OpenShiftItem {
         return validator.isURL(value) ? null : message;
     }
 
-    static isAbsolute(message: string, value: string) {
-        return path.isAbsolute(value) ? null : message;
+    static isPosixAbsolute(message: string, value: string) {
+        return path.posix.isAbsolute(value) ? null : message;
     }
 
     static validateMatches(message: string, value: string) {

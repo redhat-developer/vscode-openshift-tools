@@ -13,6 +13,7 @@ import { TestItem } from './testOSItem';
 import { OdoImpl, Command } from '../../src/odo';
 import { Storage } from '../../src/openshift/storage';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
+import { Platform } from '../../src/util/platform';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -228,6 +229,19 @@ suite('OpenShift/Storage', () => {
             await Storage.create(componentItem);
 
             expect(result).equals('Invalid mount path');
+        });
+
+        test('validator returns null for valid sotorage path for mac', async () => {
+            sandbox.stub(Platform, 'getOS').returns('darwin');
+            let result: string | Thenable<string>;
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().resolves('name');
+            inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                result = options.validateInput('/goodvalue');
+                return Promise.resolve('/goodvalue');
+            });
+            await Storage.create(componentItem);
+
+            expect(result).is.null;
         });
 
         test('validator returns error message for empty storage path', async () => {

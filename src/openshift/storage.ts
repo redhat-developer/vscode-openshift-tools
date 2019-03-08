@@ -24,7 +24,7 @@ export class Storage extends OpenShiftItem {
             prompt: "Specify the mount path",
             validateInput: (value: string) => {
                 let validationMessage = Storage.emptyName('Empty mount path', value.trim());
-                if (!validationMessage) validationMessage = Storage.isAbsolute('Invalid mount path', value.trim());
+                if (!validationMessage) validationMessage = Storage.isPosixAbsolute('Invalid mount path', value.trim());
                 return validationMessage;
             }
         });
