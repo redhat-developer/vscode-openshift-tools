@@ -157,7 +157,7 @@ suite('OpenShift/URL', () => {
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
         getProjectsNameStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
-        sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([appItem]);
+        sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
     });
 
     teardown(() => {
@@ -255,6 +255,16 @@ suite('OpenShift/URL', () => {
             return Url.create(componentItem).catch((err) => {
                 expect(err).equals(`Component '${componentItem.getName()}' has no ports declared.`);
             });
+        });
+
+        test('show info message when component already has url created', async () => {
+            execStub = sandbox.stub(OdoImpl.prototype, 'execute');
+            execStub.resolves({error: null, stdout: 'hostname', stderr: ''});
+            const infoStub = sandbox.stub(vscode.window, 'showInformationMessage');
+            const result = await Url.create(componentItem);
+
+            expect(infoStub).calledOnceWith(`The route is already created for the component '${componentItem.getName()}'. You can open it in browser.`);
+            expect(result).is.undefined;
         });
     });
 });
