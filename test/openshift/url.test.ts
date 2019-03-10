@@ -257,7 +257,7 @@ suite('OpenShift/URL', () => {
             });
         });
 
-        test('show info message when component already has url created', async () => {
+        test('shows info message when component already has url created', async () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
             execStub.resolves({error: null, stdout: 'hostname', stderr: ''});
             const infoStub = sandbox.stub(vscode.window, 'showInformationMessage');
