@@ -16,7 +16,9 @@ export class Cluster extends OpenShiftItem {
             return Cluster.loginDialog();
         } else {
             const value = await vscode.window.showInformationMessage(`You are already logged in the cluster. Do you want to login to a different cluster?`, 'Yes', 'No');
-            if (value === 'Yes') return Cluster.loginDialog();
+            if (value === 'Yes') {
+                return Cluster.loginDialog();
+            }
             return null;
         }
     }
@@ -65,7 +67,7 @@ export class Cluster extends OpenShiftItem {
         }
     }
 
-    static async getUrl() {
+    static async getUrl(): Promise<string> {
         return await vscode.window.showInputBox({
             ignoreFocusOut: true,
             prompt: "Provide URL of the cluster to connect",
@@ -74,18 +76,16 @@ export class Cluster extends OpenShiftItem {
     }
 
     private static async loginDialog(): Promise<string> {
-        const clusterURL = await Cluster.getUrl();
-        if (!clusterURL) return null;
         const loginMethod = await vscode.window.showQuickPick(['Credentials', 'Token'], {placeHolder: 'Select the way to log in to the cluster.'});
         if (loginMethod === "Credentials") {
-            return Cluster.credentialsLogin(clusterURL);
+            return Cluster.credentialsLogin('do not check login status');
         } else {
-            return Cluster.tokenLogin(clusterURL);
+            return Cluster.tokenLogin('do not check login status');
         }
     }
 
-    private static async getRequireLogin() {
-        if (!await Cluster.odo.requireLogin()) {
+    private static async getClusterUrl(message: string): Promise<string> {
+        if (!await Cluster.odo.requireLogin() && !message) {
             const value = await vscode.window.showInformationMessage(`You are already logged in the cluster. Do you want to login to a different cluster?`, 'Yes', 'No');
             if (value === 'Yes') return await Cluster.getUrl();
             return null;
@@ -94,8 +94,8 @@ export class Cluster extends OpenShiftItem {
         }
     }
 
-    static async credentialsLogin(clusterURL: string): Promise<string> {
-        if (!clusterURL) clusterURL = await Cluster.getRequireLogin();
+    static async credentialsLogin(message: string): Promise<string> {
+        const clusterURL = await Cluster.getClusterUrl(message);
         if (!clusterURL) return null;
         const username = await vscode.window.showInputBox({
             ignoreFocusOut: true,
@@ -115,8 +115,8 @@ export class Cluster extends OpenShiftItem {
             .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`));
     }
 
-    static async tokenLogin(clusterURL: string): Promise<string> {
-        if (!clusterURL) clusterURL = await Cluster.getRequireLogin();
+    static async tokenLogin(message: string): Promise<string> {
+        const clusterURL = await Cluster.getClusterUrl(message);
         if (!clusterURL) return null;
         const ocToken = await vscode.window.showInputBox({
             prompt: "Provide Bearer token for authentication to the API server",
