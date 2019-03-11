@@ -66,8 +66,9 @@ suite('Openshift/Cluster', () => {
             inputStub.onThirdCall().resolves(password);
         });
 
-        test('exits if canceled by user on cluster URL request', async () => {
-            inputStub.onFirstCall().resolves();
+        test('exits if login confirmation declined', async () => {
+            infoStub.resolves('No');
+            loginStub.resolves(false);
             const status = await Cluster.login();
 
             expect(status).null;
@@ -100,6 +101,28 @@ suite('Openshift/Cluster', () => {
         });
 
         suite('credentials', () => {
+
+            test('logins to new cluster if user answer yes to a warning', async () => {
+                loginStub.resolves(false);
+                infoStub.resolves('Yes');
+                const result = await Cluster.credentialsLogin();
+                expect(result).equals(`Successfully logged in to '${testUrl}'`);
+            });
+
+            test('exits if the user cancels url input box', async () => {
+                loginStub.resolves(false);
+                inputStub.onFirstCall().resolves(null);
+                const result = await Cluster.credentialsLogin();
+                expect(result).null;
+            });
+
+            test('exits if the user refuses to login to new cluster', async () => {
+                loginStub.resolves(false);
+                infoStub.resolves('No');
+                const result = await Cluster.credentialsLogin();
+                expect(result).null;
+            });
+
             test('happy path works', async () => {
                 const status = await Cluster.login();
 
@@ -158,6 +181,27 @@ suite('Openshift/Cluster', () => {
             setup(() => {
                 quickPickStub.resolves('Token');
                 inputStub.onSecondCall().resolves('token');
+            });
+
+            test('logins to new cluster if user answer yes to a warning', async () => {
+                loginStub.resolves(false);
+                infoStub.resolves('Yes');
+                const result = await Cluster.tokenLogin();
+                expect(result).equals(`Successfully logged in to '${testUrl}'`);
+            });
+
+            test('exits if the user cancels url input box', async () => {
+                loginStub.resolves(false);
+                inputStub.onFirstCall().resolves(null);
+                const result = await Cluster.tokenLogin();
+                expect(result).null;
+            });
+
+            test('exits if the user refuses to login to new cluster', async () => {
+                loginStub.resolves(false);
+                infoStub.resolves('No');
+                const result = await Cluster.tokenLogin();
+                expect(result).null;
             });
 
             test('happy path works', async () => {
