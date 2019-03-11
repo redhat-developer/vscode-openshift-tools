@@ -105,6 +105,18 @@
         "icon": "images/dark/refresh.svg"
       },
       {
+        "command": "uhc.open",
+        "title": "New Openshift Cluster",
+        "category": "OpenShift",
+        "icon": "images/add_uhc.svg"
+      },
+      {
+        "command": "uhc.login",
+        "title": "Login to cloud.openshift.com",
+        "category": "OpenShift",
+        "icon": "images/login.png"
+      },
+      {
         "command": "openshift.project.create",
         "title": "New Project",
         "category": "OpenShift"
@@ -313,7 +325,13 @@
         "command": "openshift.service.delete.palette",
         "title": "Delete Service",
         "category": "OpenShift"
+      },
+      {
+        "command": "uhc.cluster.add",
+        "title": "Use Managed Cluster",
+        "category": "OpenShift"
       }
+
     ],
     "viewsContainers": {
       "activitybar": [
@@ -329,6 +347,10 @@
         {
           "id": "openshiftProjectExplorer",
           "name": "OpenShift Application Explorer"
+        },
+        {
+          "id": "uhcExplorer",
+          "name": "cloud.openshift.com"
         }
       ]
     },
@@ -419,9 +441,22 @@
           "command": "openshift.explorer.refresh",
           "when": "view == openshiftProjectExplorer",
           "group": "navigation"
+        },
+        {
+          "command": "uhc.open",
+          "when": "view == uhcExplorer",
+          "group": "navigation"
         }
       ],
       "view/item/context": [
+        {
+          "command": "uhc.cluster.add",
+          "when": "view == uhcExplorer && viewItem == uhc.cluster"
+        },
+        {
+          "command": "uhc.login",
+          "when": "view== uhcExplorer && viewItem == uhc.notLoggedIn"
+        },
         {
           "command": "openshift.project.create",
           "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
@@ -613,7 +648,8 @@
     "walker": "^1.0.7"
   },
   "dependencies": {
-    "@kubernetes/client-node": "^0.8.1",
+    "@kubernetes/client-node": "0.7.0",
+    "axios": "^0.18.0",
     "byline": "^5.0.0",
     "event-stream": "3.3.4",
     "fs-extra": "^7.0.1",

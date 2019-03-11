@@ -15,6 +15,7 @@ import { Component } from './openshift/component';
 import { Storage } from './openshift/storage';
 import { Url } from './openshift/url';
 import { Service } from './openshift/service';
+import { UHCExplorer } from './cloud-openshift/uhc-explorer';
 import { Platform } from './util/platform';
 import path = require('path');
 import fsx = require('fs-extra');
@@ -24,6 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
     migrateFromOdo018();
 
     const explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
+    const clusterView: UHCExplorer = new UHCExplorer();
     const disposable = [
         vscode.commands.registerCommand('openshift.about', (context) => execute(Cluster.about, context)),
         vscode.commands.registerCommand('openshift.openshiftConsole', (context) => execute(Cluster.openshiftConsole, context)),
@@ -73,8 +75,13 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.service.describe.palette', (context) => execute(Service.describe, context)),
         vscode.commands.registerCommand('openshift.component.linkComponent', (context) => execute(Component.linkComponent, context)),
         vscode.commands.registerCommand('openshift.component.linkService', (context) => execute(Component.linkService, context)),
+        vscode.commands.registerCommand('uhc.open', (context) =>  vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('http://cloud.openshift.com'))),
+        vscode.commands.registerCommand('uhc.cluster.add', (context) => clusterView.addClusterToContext(context)),
+        vscode.commands.registerCommand('uhc.login', (context) => clusterView.login()),
         vscode.window.registerTreeDataProvider('openshiftProjectExplorer', explorer),
-        explorer
+        explorer,
+        vscode.window.registerTreeDataProvider('uhcExplorer', clusterView),
+        clusterView
     ];
     disposable.forEach((value)=> context.subscriptions.push(value));
 }
