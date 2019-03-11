@@ -83,7 +83,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     static async credentialsLogin(skipConfirmation: boolean = false): Promise<string> {
-        const response = await this.requestLoginConfirmation(skipConfirmation);
+        const response = await Cluster.requestLoginConfirmation(skipConfirmation);
         if (response !== 'Yes') return null;
         const clusterURL = await Cluster.getUrl();
         if (!clusterURL) return null;
@@ -106,7 +106,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     static async tokenLogin(skipConfirmation: boolean = false): Promise<string> {
-        const response = await this.requestLoginConfirmation(skipConfirmation);
+        const response = await Cluster.requestLoginConfirmation(skipConfirmation);
         if (response !== 'Yes') return null;
         const clusterURL = await Cluster.getUrl();
         if (!clusterURL) return null;
