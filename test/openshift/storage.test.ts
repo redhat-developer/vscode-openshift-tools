@@ -228,7 +228,7 @@ suite('OpenShift/Storage', () => {
             });
             await Storage.create(componentItem);
 
-            expect(result).equals('Invalid mount path');
+            expect(result).equals('Not absolute mount path');
         });
 
         test('validator returns null for valid sotorage path for mac', async () => {

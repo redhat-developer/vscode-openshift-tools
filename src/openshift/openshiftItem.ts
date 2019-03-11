@@ -8,6 +8,7 @@ import { OpenShiftExplorer } from '../explorer';
 import { window } from 'vscode';
 import * as validator from 'validator';
 import * as path from 'path';
+import { Platform } from '../util/platform';
 
 const errorMessage = {
     Project: 'You need at least one Project available. Please create new OpenShift Project and try again.',
@@ -57,6 +58,13 @@ export abstract class OpenShiftItem {
 
     static isPosixAbsolute(message: string, value: string) {
         return path.posix.isAbsolute(value) ? null : message;
+    }
+
+    static pathValidation(message: string, value: string) {
+        const pathValidator = /^((?!\\).)*$/;
+        if (Platform.OS === 'darwin' || Platform.OS === 'linux') {
+            return pathValidator.test(value) ? null : message;
+        }
     }
 
     static validateMatches(message: string, value: string) {
