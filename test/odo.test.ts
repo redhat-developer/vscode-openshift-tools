@@ -371,7 +371,7 @@ suite("odo", () => {
             sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves({
                 error: undefined,
                 stdout: odoVersionOutLoggedIn.join('\n'),
-                stderr: undefined
+                stderr: ''
             });
             const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
             assert.equal(cluster[0].getName(), clusterUrl);
@@ -381,11 +381,11 @@ suite("odo", () => {
             sandbox.stub(odo.OdoImpl.prototype, 'execute').onFirstCall().resolves({
                 error: undefined,
                 stdout: odoVersionOutLoggedOut.join('\n'),
-                stderr: undefined
+                stderr: ''
             }).onSecondCall().resolves({
                 error: undefined,
                 stdout: oc.join('\n'),
-                stderr: undefined
+                stderr: ''
             });
             const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
             assert.equal(cluster[0].getName(), clusterUrl);
@@ -400,7 +400,7 @@ suite("odo", () => {
         });
 
         test('requireLogin returns true if odo is not logged in to the cluster', async () => {
-            sandbox.stub(odoCli, 'execute').resolves({ error: null, stdout: 'Please log in to the cluster', stderr: ''});
+            sandbox.stub(odoCli, 'execute').resolves({ error: null, stdout: '', stderr: 'Please log in to the cluster'});
             const result = await odoCli.requireLogin();
 
             expect(result).true;
