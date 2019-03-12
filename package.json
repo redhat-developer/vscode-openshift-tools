@@ -619,6 +619,7 @@
     "fs-extra": "^7.0.1",
     "hasha": "^3.0.0",
     "js-yaml": "^3.12.1",
+    "keytar": "^4.4.1",
     "opn": "^5.4.0",
     "request": "^2.88.0",
     "request-progress": "^3.0.0",
