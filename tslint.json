@@ -52,6 +52,7 @@
             }
         ],
         "no-trailing-whitespace": true,
-        "no-debugger": true
+        "no-debugger": true,
+        "no-unused-variable": true
     }
 }
