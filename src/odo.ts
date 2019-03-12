@@ -119,46 +119,57 @@ export const Command = {
 };
 
 export class OpenShiftObjectImpl implements OpenShiftObject {
+    description?: string;
+    detail?: string;
+    picked?: boolean;
     private readonly CONTEXT_DATA = {
         cluster: {
             icon: 'cluster.png',
             tooltip: '',
-            getChildren: () => this.odo.getProjects()
+            getChildren: () => this.odo.getProjects(),
+            getId: () => this.name
         },
         project: {
             icon: 'project.png',
             tooltip : 'Project: {label}',
-            getChildren: () => this.odo.getApplications(this)
+            getChildren: () => this.odo.getApplications(this),
+            getId: () => this.odo.getClusters()[0].id + this.name
         },
         application: {
             icon: 'application.png',
             tooltip: 'Application: {label}',
-            getChildren: () => this.odo.getApplicationChildren(this)
+            getChildren: () => this.odo.getApplicationChildren(this),
+            getId: () => this.getParent().id + this.id
         },
         component: {
             icon: 'component.png',
             tooltip: 'Component: {label}',
-            getChildren: () => this.odo.getStorageNames(this)
+            getChildren: () => this.odo.getStorageNames(this),
+            getId: () => this.getParent().id + this.id
         },
         service: {
             icon: 'service.png',
             tooltip: 'Service: {label}',
-            getChildren: () => []
+            getChildren: () => [],
+            getId: () => this.getParent().id + this.id
         },
         storage: {
             icon: 'storage.png',
             tooltip: 'Storage: {label}',
-            getChildren: () => []
+            getChildren: () => [],
+            getId: () => this.getParent().id + this.id
         },
         cluster_down: {
             icon: 'cluster-down.png"',
             tooltip: 'Cannot connect to cluster',
-            getChildren: () => []
+            getChildren: () => [],
+            getId: () => 'clusterDown'
         },
         login_required: {
             icon: 'cluster-down.png',
             tooltip: 'Log in to cluster',
-            getChildren: () => []
+            getChildren: () => [],
+            getId: () => "loginRequired"
         }
     };
 
@@ -180,6 +191,10 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
 
     get label(): string {
         return this.name;
+    }
+
+    get id(): string {
+        return this.CONTEXT_DATA[this.contextValue].getId();
     }
 
     getName(): string {
