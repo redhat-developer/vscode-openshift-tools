@@ -593,6 +593,7 @@
   "devDependencies": {
     "@types/byline": "^4.2.31",
     "@types/chai": "^4.1.7",
+    "@types/collections": "^5.0.0",
     "@types/fs-extra": "^5.0.4",
     "@types/hasha": "^3.0.0",
     "@types/js-yaml": "^3.12.0",

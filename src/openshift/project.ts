@@ -15,8 +15,7 @@ export class Project extends OpenShiftItem {
         let projectName = await Project.getName('Project name', projectList);
         if (!projectName) return null;
         projectName = projectName.trim();
-        return Project.odo.execute(Command.createProject(projectName))
-            .then(() => Project.explorer.refresh())
+        return Project.odo.createProject(projectName)
             .then(() => `Project '${projectName}' successfully created`)
             .catch((error) => Promise.reject(`Failed to create Project with error '${error}'`));
     }

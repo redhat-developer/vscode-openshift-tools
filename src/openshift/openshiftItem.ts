@@ -17,7 +17,7 @@ const errorMessage = {
 };
 
 export abstract class OpenShiftItem {
-    protected static readonly odo: Odo = OdoImpl.getInstance();
+    protected static readonly odo: Odo = OdoImpl.Instance;
     protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
 
     static wait(timeout: number = 2500): Promise<void> {

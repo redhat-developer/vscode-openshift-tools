@@ -22,7 +22,7 @@ const expect = chai.expect;
 chai.use(sinonChai);
 
 suite("odo", () => {
-    const odoCli: odo.Odo = odo.OdoImpl.getInstance();
+    const odoCli: odo.Odo = odo.OdoImpl.Instance;
     let sandbox: sinon.SinonSandbox;
     const errorMessage = 'Error';
 
@@ -117,6 +117,7 @@ suite("odo", () => {
             execStub = sandbox.stub(odoCli, 'execute');
             yamlStub = sandbox.stub(jsYaml, 'safeLoad');
             sandbox.stub(fs, 'readFileSync');
+            odoCli.clearCache();
         });
 
         test('getProjects returns items created from oc get project', async () => {
@@ -124,7 +125,7 @@ suite("odo", () => {
             execStub.resolves({ stdout: odoProjects.join('\n'), stderr: '', error: null });
             const result = await odoCli.getProjects();
 
-            expect(execStub).calledOnceWith(odo.Command.listProjects());
+            expect(execStub).calledWith(odo.Command.listProjects());
             expect(result.length).equals(3);
             for (let i = 1; i < result.length; i++) {
                 expect(result[i].getName()).equals(odoProjects[i]);
@@ -140,6 +141,7 @@ suite("odo", () => {
 
         test('getProjects returns empty list if an error occurs', async () => {
             const errorStub = sandbox.stub(window, 'showErrorMessage');
+            sandbox.stub(odoCli, 'getClusters').resolves([new TestItem(undefined, 'cluster')]);
             execStub.rejects(errorMessage);
             const result = await odoCli.getProjects();
 
@@ -192,7 +194,7 @@ suite("odo", () => {
             execStub.resolves({ error: null, stderr: '', stdout: components.join('\n') });
             const result = await odoCli.getComponents(app);
 
-            expect(execStub).calledOnceWith(odo.Command.listComponents(project.getName(), app.getName()));
+            expect(execStub).calledWith(odo.Command.listComponents(project.getName(), app.getName()));
             expect(result.length).equals(3);
             for (let i = 0; i < result.length; i++) {
                 expect(result[i].getName()).equals(components[i]);
@@ -204,7 +206,7 @@ suite("odo", () => {
             execStub.resolves({ error: null, stderr: '', stdout: services.join('\n') });
             const result = await odoCli.getServices(app);
 
-            expect(execStub).calledOnceWith(odo.Command.listServiceInstances(project.getName(), app.getName()));
+            expect(execStub).calledWith(odo.Command.listServiceInstances(project.getName(), app.getName()));
             expect(result.length).equals(3);
             for (let i = 0; i < result.length; i++) {
                 expect(result[i].getName()).equals(services[i]);
@@ -212,7 +214,8 @@ suite("odo", () => {
         });
 
         test('getServices returns an empty list if an error occurs', async () => {
-            execStub.rejects(errorMessage);
+            execStub.onFirstCall().resolves({error: undefined, stdout: '', stderr: ''});
+            execStub.onSecondCall().rejects(errorMessage);
             const result = await odoCli.getServices(app);
 
             expect(result).empty;
@@ -237,13 +240,12 @@ suite("odo", () => {
         test('getApplicationChildren returns both components and services for an application', async () => {
             const component = new TestItem(app, 'comp');
             const service = new TestItem(app, 'serv');
-            const compStub = sandbox.stub(odoCli, 'getComponents').resolves([component]);
-            const servStub = sandbox.stub(odoCli, 'getServices').resolves([service]);
+            execStub.onFirstCall().resolves({error: undefined, stdout: 'comp', stderr: ''});
+            execStub.onSecondCall().resolves({error: undefined, stdout: 'serv', stderr: ''});
             const result = await odoCli.getApplicationChildren(app);
 
-            expect(compStub).calledOnceWith(app);
-            expect(servStub).calledOnceWith(app);
-            expect(result).deep.equals([component, service]);
+            expect(result[0].getName()).deep.equals('comp');
+            expect(result[1].getName()).deep.equals('serv');
         });
 
         test('getStorageNames returns storage items for an application', async () => {
