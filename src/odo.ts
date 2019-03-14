@@ -11,6 +11,7 @@ import * as path from 'path';
 import { ToolsConfig } from './tools';
 import format =  require('string-format');
 import { OpenShiftExplorer } from './explorer';
+import { fstatSync, statSync, Stats } from 'fs-extra';
 
 export interface OpenShiftObject extends QuickPickItem {
     getChildren(): ProviderResult<OpenShiftObject[]>;
@@ -216,6 +217,8 @@ export interface Odo {
     createProject(name: string): Promise<OpenShiftObject>;
     createApplication(project: OpenShiftObject, name: string): Promise<OpenShiftObject>;
     deleteApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
+    createComponent(application: OpenShiftObject, componentName: string, componentType: string, componentVersion: string, repoUri: string, ref: string);
+    createComponent(application: OpenShiftObject, componentName: string, componentType: string, componentVersion: string, path: string);
 }
 
 export function getInstance(): Odo {
@@ -488,6 +491,23 @@ export class OdoImpl implements Odo {
         apps.push(newApplication);
         OpenShiftExplorer.getInstance().reveal(newApplication);
         return newApplication;
+    }
+
+    public async createComponent(application: OpenShiftObject, name: string, component: string, version: string, location: string, ref: string = master) {
+        let componentInstance: OpenShiftObject;
+        if (location.indexOf("https://") > 0 || location.indexOf("http://") > 0 ) {
+
+        } else {
+            const stats: Stats = statSync(location);
+            if (stats.isDirectory()) {
+                // creating component from local folder
+            } else if (stats.isFile) {
+                // creating component from binary
+            } else {
+                // failure
+            }
+        }
+        return componentInstance;
     }
 
     clearCache() {
