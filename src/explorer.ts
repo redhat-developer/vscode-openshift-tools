@@ -68,6 +68,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     }
 
     async reveal(newProject: OpenShiftObjectImpl): Promise<void> {
+        this.refresh(newProject.getParent());
         await this.treeView.reveal(newProject);
     }
 }
