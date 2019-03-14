@@ -29,6 +29,7 @@ suite("odo", () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         sandbox.stub(ToolsConfig, 'getVersion').resolves('0.0.15');
+        odoCli.clearCache();
     });
 
     teardown(() => {
@@ -117,7 +118,6 @@ suite("odo", () => {
             execStub = sandbox.stub(odoCli, 'execute');
             yamlStub = sandbox.stub(jsYaml, 'safeLoad');
             sandbox.stub(fs, 'readFileSync');
-            odoCli.clearCache();
         });
 
         test('getProjects returns items created from oc get project', async () => {
