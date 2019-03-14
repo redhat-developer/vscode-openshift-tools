@@ -748,7 +748,7 @@ suite('OpenShift/Component', () => {
             expect(opnStub).calledOnceWith('https://url');
         });
 
-        test('request to create url for component if it does not exist, creates it if confirmed by user and opens in in browser.' , async () => {
+        test('request to create url for component if it does not exist, creates the route if confirmed by user and opens it in browser.' , async () => {
             sandbox.stub(vscode.window, 'showInformationMessage').resolves('Create');
             sandbox.stub(vscode.commands, 'executeCommand').resolves();
             execStub.onFirstCall().resolves({error: undefined, stdout: '', stderr: ''});
