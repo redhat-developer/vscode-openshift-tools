@@ -262,7 +262,7 @@ export class OdoImpl implements Odo {
             const loginErrorMsg: string = 'Please log in to the cluster';
             return[new OpenShiftObjectImpl(null, loginErrorMsg, ContextType.LOGIN_REQUIRED, this, TreeItemCollapsibleState.None)];
         }
-        if (result.stdout.indexOf("Unable to connect to OpenShift cluster, is it down?") > -1) {
+        if (result.stderr.indexOf("Unable to connect to OpenShift cluster, is it down?") > -1) {
             const clusterDownMsg: string = 'Please start the OpenShift cluster';
             return [new OpenShiftObjectImpl(null, clusterDownMsg, ContextType.CLUSTER_DOWN, this, TreeItemCollapsibleState.None)];
         }
