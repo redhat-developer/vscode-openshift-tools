@@ -14,6 +14,7 @@ import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 import { isURL } from 'validator';
 import { Refs, Ref, Type } from '../util/refs';
 
+import isGitRemote from 'is-git-remote';
 export class Component extends OpenShiftItem {
 
     static async getOpenshiftData(context: OpenShiftObject): Promise<OpenShiftObject> {
@@ -265,6 +266,7 @@ export class Component extends OpenShiftItem {
             validateInput: (value: string) => {
                 if (!value.trim()) return 'Empty Git repository URL';
                 if (!isURL(value)) return 'Invalid URL provided';
+                if (!isGitRemote(value)) return 'No git repository exists. Please provide a valid git repository.';
             }
         });
 

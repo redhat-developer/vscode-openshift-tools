@@ -225,23 +225,23 @@ suite('OpenShift/Component', () => {
             test('allows to continue with valid git repository url', async () => {
                 let result: string | Thenable<string>;
                 inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
-                    result = options.validateInput('https://github.com/org/repo');
-                    return Promise.resolve('https://github.com/org/repo');
+                    result = options.validateInput('https://github.com/redhat-developer/vscode-openshift-tools');
+                    return Promise.resolve('https://github.com/redhat-developer/vscode-openshift-tools');
                 });
 
                 await Component.create(appItem);
                 expect(result).to.be.undefined;
             });
 
-            test('shows error message for invalid git repository url', async () => {
+            test('shows error message when repo does not exist', async () => {
                 let result: string | Thenable<string>;
                 inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
-                    result = options.validateInput('github');
-                    return Promise.resolve('github');
+                    result = options.validateInput('username/repo-that-not-exists');
+                    return Promise.resolve('username/repo-that-not-exists');
                 });
 
                 await Component.create(appItem);
-                expect(result).equals('Invalid URL provided');
+                expect(result).equals('No git repository exists. Please provide a valid git repository.');
 
             });
 

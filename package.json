@@ -633,6 +633,7 @@
     "git-fetch-pack": "^0.1.1",
     "git-transport-protocol": "^0.1.0",
     "hasha": "^3.0.0",
+    "is-git-remote": "^1.0.1",
     "js-yaml": "^3.12.1",
     "opn": "^5.4.0",
     "request": "^2.88.0",
