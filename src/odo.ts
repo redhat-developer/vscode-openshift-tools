@@ -212,7 +212,10 @@ export interface Odo {
     executeInTerminal(command: string, cwd?: string): void;
     requireLogin(): Promise<boolean>;
     clearCache?(): void;
+    deleteProject(project: OpenShiftObject): Promise<OpenShiftObject>;
     createProject(name: string): Promise<OpenShiftObject>;
+    createApplication(project: OpenShiftObject, name: string): Promise<OpenShiftObject>;
+    deleteApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
 }
 
 export function getInstance(): Odo {
@@ -292,17 +295,17 @@ export class OdoImpl implements Odo {
     async getProjects(): Promise<OpenShiftObject[]> {
         const clusters = await this.getClusters();
         if (!this.cache.has(clusters[0])) {
-            this.cache.set(clusters[0], await this._getProjects());
+            this.cache.set(clusters[0], await this._getProjects(clusters[0]));
         }
         return this.cache.get(clusters[0]);
     }
 
-    public async _getProjects(): Promise<OpenShiftObject[]> {
+    public async _getProjects(cluster: OpenShiftObject): Promise<OpenShiftObject[]> {
         return this.execute(Command.listProjects()).then((result) => {
             let projs: OpenShiftObject[] = [];
             const stdout: string = result.stdout.trim();
             if (stdout !== "" ) {
-                projs = stdout.split("\n").map<OpenShiftObject>((value) => new OpenShiftObjectImpl(undefined, value, ContextType.PROJECT, OdoImpl.instance));
+                projs = stdout.split("\n").map<OpenShiftObject>((value) => new OpenShiftObjectImpl(cluster, value, ContextType.PROJECT, OdoImpl.instance));
             }
             return projs;
         }).catch((error) => {
@@ -450,6 +453,14 @@ export class OdoImpl implements Odo {
         return this.odoLoginMessages.some((element) => { return result.stderr.indexOf(element) > -1; });
     }
 
+    public async deleteProject(project: OpenShiftObject): Promise<OpenShiftObject> {
+        await this.execute(Command.deleteProject(project.getName()));
+        const projects = await this.getProjects();
+        projects.splice(projects.indexOf(project));
+        OpenShiftExplorer.getInstance().refresh(project.getParent());
+        return project;
+    }
+
     public async createProject(projectName: string): Promise<OpenShiftObject> {
         await OdoImpl.instance.execute(Command.createProject(projectName));
         const clusters = await OdoImpl.instance.getClusters();
@@ -459,6 +470,24 @@ export class OdoImpl implements Odo {
         OpenShiftExplorer.getInstance().refresh(OdoImpl.instance.getClusters()[0]);
         OpenShiftExplorer.getInstance().reveal(newProject);
         return newProject;
+    }
+
+    public async deleteApplication(app: OpenShiftObject): Promise<OpenShiftObject> {
+        const project = app.getParent();
+        await this.execute(Command.deleteApplication(app.getParent().getName(), app.getName()));
+        const apps = await this.getApplications(project);
+        apps.splice(apps.indexOf(app));
+        OpenShiftExplorer.getInstance().refresh(project);
+        return app;
+    }
+
+    public async createApplication(project: OpenShiftObject, applicationName: string): Promise<OpenShiftObject> {
+        await this.execute(Command.createApplication(project.getName(), applicationName));
+        const apps = await this.getApplications(project);
+        const newApplication = new OpenShiftObjectImpl(project, applicationName, ContextType.PROJECT, this);
+        apps.push(newApplication);
+        OpenShiftExplorer.getInstance().reveal(newApplication);
+        return newApplication;
     }
 
     clearCache() {

@@ -39,9 +39,7 @@ export class Application extends OpenShiftItem {
             const projName = application.getParent().getName();
             const value = await window.showWarningMessage(`Do you want to delete Application '${appName}?'`, 'Yes', 'Cancel');
             if (value === 'Yes') {
-                return Promise.resolve()
-                    .then(() => Application.odo.execute(Command.deleteApplication(projName, appName)))
-                    .then(() => Application.explorer.refresh(treeItem ? treeItem.getParent() : undefined))
+                return Application.odo.deleteApplication(application)
                     .then(() => `Application '${appName}' successfully deleted`)
                     .catch((err) => Promise.reject(`Failed to delete Application with error '${err}'`));
             }
