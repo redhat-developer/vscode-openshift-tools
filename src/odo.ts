@@ -104,7 +104,7 @@ export const Command = {
     createBinaryComponent: (project: string, app: string, type: string, version: string, name: string, binary: string) =>
         `odo create ${type}:${version} ${name} --binary ${binary} --app ${app} --project ${project}`,
     createService: (project: string, app: string, template: string, plan: string, name: string) =>
-        `odo service create ${template} --plan ${plan} ${name} --app ${app} --project ${project}`,
+        `odo service create ${template} --plan ${plan} ${name} --app ${app} --project ${project} -w`,
     deleteService: (project: string, app: string, name: string) =>
         `odo service delete ${name} -f --project ${project} --app ${app}`,
     getServiceTemplate: (project: string, service: string) =>
