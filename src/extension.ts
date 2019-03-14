@@ -28,6 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
     const explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
     const disposable = [
         vscode.commands.registerCommand('openshift.about', (context) => execute(Cluster.about, context)),
+        vscode.commands.registerCommand('openshift.output', (context) => execute(Cluster.showOpenShiftOutput, context)),
         vscode.commands.registerCommand('openshift.openshiftConsole', (context) => execute(Cluster.openshiftConsole, context)),
         vscode.commands.registerCommand('openshift.openshiftConsole.palette', (context) => execute(Cluster.openshiftConsole, context)),
         vscode.commands.registerCommand('openshift.explorer.login', (context) => execute(Cluster.login, context)),
