@@ -15,6 +15,8 @@ import { isURL } from 'validator';
 import { Refs, Ref, Type } from '../util/refs';
 
 import isGitRemote from 'is-git-remote';
+import { Delayer } from '../util/async';
+
 export class Component extends OpenShiftItem {
 
     static async getOpenshiftData(context: OpenShiftObject): Promise<OpenShiftObject> {
