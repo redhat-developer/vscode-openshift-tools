@@ -16,9 +16,12 @@ import { CliExitData } from '../../src/cli';
 import { TestItem } from './testOSItem';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
+import { getVscodeModule } from '../../src/util/credentialManager';
 
 const expect = chai.expect;
 chai.use(sinonChai);
+
+const keytar: any = getVscodeModule('keytar');
 
 suite('Openshift/Cluster', () => {
     let sandbox: sinon.SinonSandbox;
@@ -133,6 +136,7 @@ suite('Openshift/Cluster', () => {
 
             test('returns with no username set', async () => {
                 inputStub.onSecondCall().resolves();
+                sandbox.stub(keytar, 'getPassword').returns(undefined);
                 const status = await Cluster.login();
 
                 expect(status).null;

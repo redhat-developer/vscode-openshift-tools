@@ -8,13 +8,13 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import * as keytar from 'keytar';
 import { contextGlobalState } from '../../src/extension';
-import { TokenStore } from '../../src/util/credentialManager';
+import { TokenStore, getVscodeModule } from '../../src/util/credentialManager';
 
 const expect = chai.expect;
 chai.use(sinonChai);
 
+const keytar: any = getVscodeModule('keytar');
 suite('TokenStore', () => {
     let sandbox: sinon.SinonSandbox;
 
