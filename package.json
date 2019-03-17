@@ -261,7 +261,7 @@
       },
       {
         "command": "openshift.url.create",
-        "title": "Create URL",
+        "title": "New URL",
         "category": "OpenShift"
       },
       {
@@ -276,7 +276,7 @@
       },
       {
         "command": "openshift.storage.create",
-        "title": "Create Storage",
+        "title": "New Storage",
         "category": "OpenShift"
       },
       {

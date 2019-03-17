@@ -47,8 +47,8 @@ To run the instance of OpenShift cluster locally, developers can use [minishift]
 
 #### Actions available for a Component in an Application
 
-   * `Component -> Create URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster.
-   * `Component -> Create Storage` - Create Storage and mount to a Component.
+   * `Component -> New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster.
+   * `Component -> New Storage` - Create Storage and mount to a Component.
    * `Component -> Show Log` - Retrieve the log for the given Component.
    * `Component -> Follow Log` - Follow logs for the given Component.
    * `Component -> Link Service` - Link a Component to a Service.
