@@ -13,11 +13,11 @@ const keytar: any = getVscodeModule('keytar');
 export class TokenStore {
 
     static setItem(key: string, login: string, value: string): Promise<void> {
-        return keytar.setPassword(key, login, value);
+        return keytar ? keytar.setPassword(key, login, value) : '';
     }
 
     static getItem(key: string, login: string): Promise<string> {
-        return keytar.getPassword(key, login);
+        return keytar ? keytar.getPassword(key, login) : '';
     }
 
     static setUserName(username: string): Thenable<void> {
