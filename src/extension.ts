@@ -19,8 +19,10 @@ import { Platform } from './util/platform';
 import path = require('path');
 import fsx = require('fs-extra');
 
-export function activate(context: vscode.ExtensionContext) {
+export let contextGlobalState: vscode.ExtensionContext;
 
+export function activate(context: vscode.ExtensionContext) {
+    contextGlobalState = context;
     migrateFromOdo018();
 
     const explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();

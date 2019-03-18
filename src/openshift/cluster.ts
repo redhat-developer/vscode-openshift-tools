@@ -8,6 +8,7 @@ import { OpenShiftItem } from './openshiftItem';
 import * as vscode from 'vscode';
 import { CliExitData } from "../cli";
 import opn = require("opn");
+import { TokenStore } from "../util/credentialManager";
 
 export class Cluster extends OpenShiftItem {
 
@@ -77,30 +78,46 @@ export class Cluster extends OpenShiftItem {
     private static async requestLoginConfirmation(skipConfirmation: boolean = false): Promise<string> {
         let response = 'Yes';
         if (!skipConfirmation && !await Cluster.odo.requireLogin()) {
-             response = await vscode.window.showInformationMessage(`You are already logged in the cluster. Do you want to login to a different cluster?`, 'Yes', 'No');
+            response = await vscode.window.showInformationMessage(`You are already logged in the cluster. Do you want to login to a different cluster?`, 'Yes', 'No');
         }
         return response;
     }
 
+    private static async save(username: string, password: string, checkpassword: string, result: CliExitData) {
+        if (password === checkpassword) return result;
+        const response = await vscode.window.showInformationMessage(`Do you want to save username and password?`, 'Yes', 'No');
+        if (response) {
+            await TokenStore.setUserName(username);
+            await TokenStore.setItem('login', username, password);
+        }
+        return result;
+    }
+
     static async credentialsLogin(skipConfirmation: boolean = false): Promise<string> {
+        let password: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
         if (response !== 'Yes') return null;
         const clusterURL = await Cluster.getUrl();
         if (!clusterURL) return null;
+        const getUserName = await TokenStore.getUserName();
         const username = await vscode.window.showInputBox({
             ignoreFocusOut: true,
             prompt: "Provide Username for basic authentication to the API server",
+            value: getUserName,
             validateInput: (value: string) => Cluster.emptyName('User name cannot be empty', value)
         });
+        if (getUserName) password = await TokenStore.getItem('login', username);
         if (!username) return null;
         const passwd  = await vscode.window.showInputBox({
             ignoreFocusOut: true,
             password: true,
-            prompt: "Provide Password for basic authentication to the API server"
+            prompt: "Provide Password for basic authentication to the API server",
+            value: password
         });
         if (!passwd) return null;
         return Promise.resolve()
             .then(() => Cluster.odo.execute(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd)))
+            .then((result) => Cluster.save(username, passwd, password, result))
             .then((result) => Cluster.loginMessage(clusterURL, result))
             .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`));
     }
