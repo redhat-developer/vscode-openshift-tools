@@ -7,16 +7,17 @@
 
 import { contextGlobalState } from '../extension';
 import { env } from 'vscode';
+import { V1PersistentVolumeClaimSpec } from '@kubernetes/client-node';
 
 const keytar: any = getVscodeModule('keytar');
 
 export class TokenStore {
 
-    static setItem(key: string, login: string, value: string): Promise<void> {
-        return keytar ? keytar.setPassword(key, login, value) : '';
+    static async setItem(key: string, login: string, value: string): Promise<void> {
+        return keytar ? keytar.setPassword(key, login, value) : undefined;
     }
 
-    static getItem(key: string, login: string): Promise<string> {
+    static async getItem(key: string, login: string): Promise<string> {
         return keytar ? keytar.getPassword(key, login) : '';
     }
 
