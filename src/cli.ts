@@ -54,32 +54,23 @@ export interface ICli {
 
 export interface OdoChannel {
     print(text: string): void;
-    show(): Promise<void>;
+    show(): void;
 }
 
 class OdoChannelImpl implements OdoChannel {
+    private readonly channel: vscode.OutputChannel = vscode.window.createOutputChannel("OpenShift");
 
-    private openShiftOutputChannel: Map<string, vscode.OutputChannel> = new Map<string, vscode.OutputChannel>();
-
-    async show() {
-        const channel: vscode.OutputChannel = this.openShiftOutputChannel.get("OpenShift");
-        if (channel) {
-            channel.show();
-        }
+    show(): void {
+        this.channel.show();
     }
 
-    async print(text: string) {
-        let channel: vscode.OutputChannel = this.openShiftOutputChannel.get("OpenShift");
-        if (channel === undefined) {
-            channel = vscode.window.createOutputChannel("OpenShift");
-            this.openShiftOutputChannel.set("OpenShift", channel);
-        }
-        channel.append(text);
+    print(text: string): void {
+        this.channel.append(text);
         if (text.charAt(text.length - 1) !== '\n') {
-            channel.append('\n');
+            this.channel.append('\n');
         }
         if (vscode.workspace.getConfiguration('openshiftConnector').get<boolean>('showChannelOnOutput')) {
-            channel.show();
+            this.channel.show();
         }
     }
 }
