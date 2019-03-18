@@ -26,6 +26,10 @@ export class Cli implements ICli {
         return Cli.instance;
     }
 
+    async showOutputChannel() {
+        this.odoChannel.show();
+    }
+
     async execute(cmd: string, opts: ExecOptions = {}): Promise<CliExitData> {
         return new Promise<CliExitData>(async (resolve, reject) => {
             this.odoChannel.print(cmd);
@@ -50,10 +54,16 @@ export interface ICli {
 
 export interface OdoChannel {
     print(text: string): void;
+    show(): void;
 }
 
 class OdoChannelImpl implements OdoChannel {
     private readonly channel: vscode.OutputChannel = vscode.window.createOutputChannel("OpenShift");
+
+    show(): void {
+        this.channel.show();
+    }
+
     print(text: string): void {
         this.channel.append(text);
         if (text.charAt(text.length - 1) !== '\n') {

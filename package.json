@@ -28,6 +28,7 @@
   "activationEvents": [
     "onView:openshiftProjectExplorer",
     "onCommand:openshift.about",
+    "onCommand:openshift.output",
     "onCommand:openshift.openshiftConsole.palette",
     "onCommand:openshift.explorer.login",
     "onCommand:openshift.explorer.login.credentialsLogin",
@@ -75,6 +76,11 @@
       {
         "command": "openshift.about",
         "title": "About",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.output",
+        "title": "Show Output Channel",
         "category": "OpenShift"
       },
       {
@@ -451,6 +457,11 @@
           "command": "openshift.about",
           "when": "view == openshiftProjectExplorer && viewItem == cluster",
           "group": "c5"
+        },
+        {
+          "command": "openshift.output",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster",
+          "group": "c6"
         },
         {
           "command": "openshift.app.create",

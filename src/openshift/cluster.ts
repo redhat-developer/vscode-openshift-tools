@@ -6,7 +6,7 @@
 import { OpenShiftObject, Command } from "../odo";
 import { OpenShiftItem } from './openshiftItem';
 import * as vscode from 'vscode';
-import { CliExitData } from "../cli";
+import { CliExitData, Cli } from "../cli";
 import opn = require("opn");
 import { TokenStore } from "../util/credentialManager";
 
@@ -41,6 +41,10 @@ export class Cluster extends OpenShiftItem {
 
     static about(): void {
         Cluster.odo.executeInTerminal(Command.printOdoVersion());
+    }
+
+    static async showOpenShiftOutput() {
+        Cli.getInstance().showOutputChannel();
     }
 
     static async openshiftConsole(context: OpenShiftObject): Promise<void> {
