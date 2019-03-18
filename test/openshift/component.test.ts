@@ -741,19 +741,21 @@ suite('OpenShift/Component', () => {
         });
 
         test('gets url for component and opens it in browser', async () => {
-            execStub.onFirstCall().resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onSecondCall().resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onThirdCall().resolves({error: undefined, stdout: 'tlsEnabled', stderr: ''});
+            execStub.onCall(0).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(2).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(3).resolves({error: undefined, stdout: 'tlsEnabled', stderr: ''});
             await Component.openUrl(null);
             expect(opnStub).calledOnceWith('https://url');
         });
 
-        test('request to create url for component if it does not exist, creates it if confirmed by user and opens in in browser.' , async () => {
+        test('request to create url for component if it does not exist, creates the route if confirmed by user and opens it in browser.' , async () => {
             sandbox.stub(vscode.window, 'showInformationMessage').resolves('Create');
             sandbox.stub(vscode.commands, 'executeCommand').resolves();
-            execStub.onFirstCall().resolves({error: undefined, stdout: '', stderr: ''});
-            execStub.onSecondCall().resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onThirdCall().resolves({error: undefined, stdout: 'tlsEnabled', stderr: ''});
+            execStub.onCall(0).resolves({error: undefined, stdout: '', stderr: ''});
+            execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(2).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(3).resolves({error: undefined, stdout: 'tlsEnabled', stderr: ''});
             await Component.openUrl(null);
             expect(opnStub).calledOnceWith('https://url');
         });

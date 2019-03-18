@@ -175,20 +175,24 @@ export class Component extends OpenShiftItem {
         if (!component) return null;
         const app: OpenShiftObject = component.getParent();
         const namespace: string = app.getParent().getName();
-        const routeCheck = await Component.odo.execute(Command.getRouteHostName(namespace, component.getName()));
-        let value = 'Create';
-        if (routeCheck.stdout.trim() === '') {
-            value = await vscode.window.showInformationMessage(`No URL for Component '${component.getName()}' in Application '${app.getName()}'. Do you want to create a URL and open it?`, 'Create', 'Cancel');
+        if (await Component.checkRouteCreated(namespace, component)) {
+            const value = await vscode.window.showInformationMessage(`No URL for Component '${component.getName()}' in Application '${app.getName()}'. Do you want to create a URL and open it?`, 'Create', 'Cancel');
             if (value === 'Create') {
                 await vscode.commands.executeCommand('openshift.url.create', component);
             }
         }
-        if (value === 'Create') {
+
+        if (! await Component.checkRouteCreated(namespace, component)) {
             const hostName = await Component.odo.execute(Command.getRouteHostName(namespace, component.getName()));
             const checkTls = await Component.odo.execute(Command.getRouteTls(namespace, component.getName()));
             const tls = checkTls.stdout.trim().length === 0  ? "http://" : "https://";
             return opn(`${tls}${hostName.stdout}`);
         }
+    }
+
+    static async checkRouteCreated(namespace: string, component: OpenShiftObject): Promise<boolean> {
+        const routeCheck = await Component.odo.execute(Command.getRouteHostName(namespace, component.getName()));
+        return routeCheck.stdout.trim() === '';
     }
 
     static async createFromLocal(context: OpenShiftObject): Promise<string> {
