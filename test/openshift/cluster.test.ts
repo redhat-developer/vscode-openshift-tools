@@ -47,6 +47,7 @@ suite('Openshift/Cluster', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
+        sandbox.stub(keytar);
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves(testData);
         inputStub = sandbox.stub(vscode.window, 'showInputBox');
         commandStub = sandbox.stub(vscode.commands, 'executeCommand').resolves();
@@ -136,7 +137,6 @@ suite('Openshift/Cluster', () => {
 
             (keytar ? test : test.skip)('returns with no username set', async () => {
                 inputStub.onSecondCall().resolves();
-                sandbox.stub(keytar, 'getPassword').returns(undefined);
                 const status = await Cluster.login();
 
                 expect(status).null;
