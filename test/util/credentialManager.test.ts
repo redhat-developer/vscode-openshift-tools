@@ -15,6 +15,7 @@ const expect = chai.expect;
 chai.use(sinonChai);
 
 const keytar: any = getVscodeModule('keytar');
+
 suite('TokenStore', () => {
     let sandbox: sinon.SinonSandbox;
 
