@@ -134,14 +134,13 @@ suite('Openshift/Cluster', () => {
                 expect(commandStub).calledOnceWith('setContext', 'isLoggedIn', true);
             });
 
-            const t = test('returns with no username set', async () => {
+            (keytar ? test : test.skip)('returns with no username set', async () => {
                 inputStub.onSecondCall().resolves();
                 sandbox.stub(keytar, 'getPassword').returns(undefined);
                 const status = await Cluster.login();
 
                 expect(status).null;
             });
-            if (!keytar) t.skip();
 
             test('returns with no password set', async () => {
                 inputStub.onThirdCall().resolves();

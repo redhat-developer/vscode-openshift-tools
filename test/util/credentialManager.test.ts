@@ -28,22 +28,20 @@ suite('TokenStore', () => {
     });
 
     suite('setItem', () => {
-        const t = test('should set user\'s credentials', async () => {
+        (keytar ? test : test.skip)('should set user\'s credentials', async () => {
             sandbox.stub(keytar, 'setPassword').resolves();
             await TokenStore.setItem('login', 'username', 'password');
             expect(keytar.setPassword).calledWith('login', 'username', 'password');
         });
-        if (!keytar) t.skip();
     });
 
     suite('getItem', () => {
-        const t = test('should call keytar.getPassword and return promise', async () => {
+        (keytar ? test : test.skip)('should call keytar.getPassword and return promise', async () => {
             sandbox.stub(keytar, 'getPassword').resolves('password');
             const result = await TokenStore.getItem('login', 'username');
             expect(keytar.getPassword).calledWith('login', 'username');
             expect(result).equal('password');
         });
-        if (!keytar) t.skip();
     });
 
     suite('setUserName', () => {
