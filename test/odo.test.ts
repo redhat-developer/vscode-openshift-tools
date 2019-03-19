@@ -219,10 +219,10 @@ suite("odo", () => {
             expect(result).empty;
         });
 
-        test('getServiceTemplates trows exception if service catalog is not enabled', async () => {
-            const stdout = 'error message';
-            execStub.resolves({error: new Error(), stdout, stderr: ''});
-            let e;
+        test('getServiceTemplates throws exception if service catalog is not enabled', async () => {
+            const stderr = 'error message';
+            execStub.resolves({error: new Error(), stdout: '', stderr});
+            let e: Error;
             try {
                 await odoCli.getServiceTemplates();
             } catch (err) {
@@ -231,7 +231,7 @@ suite("odo", () => {
 
             expect(e, 'getServiceTemplates has not threw error').is.not.undefined;
             expect(e.message, 'error has no message fields').is.not.undefined;
-            expect(e.message, 'message is not equal stdout stream output').equals(stdout);
+            expect(e.message, 'message is not equal stdout stream output').equals(stderr);
 
         });
 
