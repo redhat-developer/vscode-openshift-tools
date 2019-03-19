@@ -72,6 +72,7 @@ export class Cluster extends OpenShiftItem {
         const response = await Cluster.requestLoginConfirmation();
         if (response !== 'Yes') return null;
         const loginMethod = await vscode.window.showQuickPick(['Credentials', 'Token'], {placeHolder: 'Select the way to log in to the cluster.'});
+        if (!loginMethod) return null;
         if (loginMethod === "Credentials") {
             return Cluster.credentialsLogin(true);
         } else {
