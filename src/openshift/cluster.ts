@@ -90,7 +90,7 @@ export class Cluster extends OpenShiftItem {
     private static async save(username: string, password: string, checkpassword: string, result: CliExitData) {
         if (password === checkpassword) return result;
         const response = await vscode.window.showInformationMessage(`Do you want to save username and password?`, 'Yes', 'No');
-        if (response) {
+        if (response === 'Yes') {
             await TokenStore.setUserName(username);
             await TokenStore.setItem('login', username, password);
         }
