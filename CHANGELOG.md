@@ -1,6 +1,13 @@
 # Change Log
 
-## 0.0.18 (March 18, 2019)
+## 0.0.18 (March 21, 2019)
+* Update to use `odo v0.0.20`
+* Support `reference` option for creating components from git repository
+* Add feature to store passwords in Credential Manager
+* Use '-wait' flag when creating service to wait until it is provisioned 
+* Add `OpenShift: Show Output Channel` to command palette
+* Allow user to directly create components with 3 different options using command palette
+* Split `OpenShift: Login into Cluster` to two commands
 
 ## 0.0.17 (February 27, 2019)
 * Update to use `odo v0.0.19`
