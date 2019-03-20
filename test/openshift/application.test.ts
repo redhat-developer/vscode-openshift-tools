@@ -81,7 +81,7 @@ suite('OpenShift/Application', () => {
                 });
                 await Application.create(projectItem);
 
-                expect(result).equals('Not a valid Application name. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character');
+                expect(result).equals('Not a valid Application name. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character');
             });
 
             test('validator returns error message if same name of application found', async () => {
