@@ -164,8 +164,8 @@ suite('OpenShift/Component', () => {
             setup(() => {
                 quickPickStub.onFirstCall().resolves({ label: 'Git Repository' });
                 inputStub.onFirstCall().resolves(uri);
-                inputStub.onSecondCall().resolves(ref);
-                inputStub.onThirdCall().resolves(componentItem.getName());
+                quickPickStub.onSecondCall().resolves('master');
+                inputStub.onSecondCall().resolves(componentItem.getName());
                 infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves();
             });
 
@@ -183,22 +183,29 @@ suite('OpenShift/Component', () => {
                 expect(result).null;
             });
 
-            test('returns null when no component name selected', async () => {
-                inputStub.onThirdCall().resolves();
-                const result = await Component.create(appItem);
-
-                expect(result).null;
-            });
-
-            test('returns null when no component type selected', async () => {
+            test('returns null when no git reference selected', async () => {
                 quickPickStub.onSecondCall().resolves();
                 const result = await Component.create(appItem);
 
                 expect(result).null;
             });
 
+            test('returns null when no component name selected', async () => {
+                inputStub.onSecondCall().resolves();
+                const result = await Component.create(appItem);
+
+                expect(result).null;
+            });
+
+            test('returns null when no component type selected', async () => {
+                quickPickStub.onCall(2).resolves();
+                const result = await Component.create(appItem);
+
+                expect(result).null;
+            });
+
             test('returns null when no component type version selected', async () => {
-                quickPickStub.onThirdCall().resolves();
+                quickPickStub.onCall(3).resolves();
                 const result = await Component.create(appItem);
 
                 expect(result).null;
@@ -244,29 +251,6 @@ suite('OpenShift/Component', () => {
 
                 await Component.create(appItem);
                 expect(result).equals('Empty Git repository URL');
-
-            });
-
-            test('allows to continue with valid git reference', async () => {
-                let result: string | Thenable<string>;
-                inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
-                    result = options.validateInput('master');
-                    return Promise.resolve('master');
-                });
-
-                await Component.create(appItem);
-                expect(result).to.be.undefined;
-            });
-
-            test('shows error message for empty git reference input', async () => {
-                let result: string | Thenable<string>;
-                inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
-                    result = options.validateInput('');
-                    return Promise.resolve('');
-                });
-
-                await Component.create(appItem);
-                expect(result).equals('Empty reference, specify master if no reference needed.');
 
             });
         });

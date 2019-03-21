@@ -12,6 +12,7 @@ import { ChildProcess } from 'child_process';
 import { CliExitData } from '../cli';
 import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 import { isURL } from 'validator';
+import { Refs } from '../util/refs';
 
 export class Component extends OpenShiftItem {
 
@@ -269,13 +270,8 @@ export class Component extends OpenShiftItem {
 
         if (!repoURI) return null;
 
-        const gitRef = await window.showInputBox({
-            value: 'master',
-            prompt: 'Specify git reference (branch/tags/commits | default: master)',
-            validateInput: (value: string) => {
-                if (!value.trim()) return 'Empty reference, specify master if no reference needed.';
-            }
-        });
+        const references = await Refs.fetchTag(repoURI);
+        const gitRef = await vscode.window.showQuickPick([ ...references.keys()], {placeHolder: "Specify git reference (branch/tags)"});
 
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
         const componentName = await Component.getName('Component name', componentList, application.getName());
