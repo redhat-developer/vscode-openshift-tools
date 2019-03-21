@@ -89,7 +89,7 @@ To run the instance of OpenShift cluster locally, developers can use [minishift]
 
 This extension uses two CLI tools to interact with OpenShift cluster:
 * OKD CLI client tool - [oc](https://github.com/openshift/origin/releases)
-* OpenShift Do tool - [odo](https://github.com/redhat-developer/odo/releases)
+* OpenShift Do tool - [odo](https://github.com/openshift/odo/releases)
 
 > If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
 The extension will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see an notification for the missing tool.
