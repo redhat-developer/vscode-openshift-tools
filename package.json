@@ -620,7 +620,7 @@
     "tmp": "0.0.33",
     "tslint": "^5.13.1",
     "typescript": "^3.3.1",
-    "vscode": "^1.1.28",
+    "vscode": "1.1.30",
     "walker": "^1.0.7"
   },
   "dependencies": {
