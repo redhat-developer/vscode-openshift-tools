@@ -1,5 +1,6 @@
 /*-----------------------------------------------------------------------------------------------
- *  Licensed under the MIT License. See LICENSE file in the project root for license information.
+ * Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+ * Licensed under the MIT License. See ./refs.license.txt for license information.
  *-----------------------------------------------------------------------------------------------*/
 //  Inspired by https://github.com/sindresorhus/remote-git-tags
 
