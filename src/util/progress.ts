@@ -58,7 +58,7 @@ export class Progress {
         });
     }
 
-    static async execFunctionWithProgress(title: string, func: (progress: vscode.Progress<{increment: number, message: string}>) => Promise<string> ): Promise<string> {
+    static async execFunctionWithProgress(title: string, func: (progress: vscode.Progress<{increment: number, message: string}>) => Promise<any> ): Promise<string> {
         return new Promise(async (resolve, reject) => {
             await vscode.window.withProgress({
                     cancellable: false,

@@ -6,6 +6,7 @@
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
 import { window } from 'vscode';
+import { Progress } from '../util/progress';
 
 export class Application extends OpenShiftItem {
 
@@ -39,7 +40,7 @@ export class Application extends OpenShiftItem {
             const projName = application.getParent().getName();
             const value = await window.showWarningMessage(`Do you want to delete Application '${appName}?'`, 'Yes', 'Cancel');
             if (value === 'Yes') {
-                return Application.odo.deleteApplication(application)
+                return Progress.execFunctionWithProgress(`Deleting the Application '${appName}'`, () => Application.odo.deleteApplication(application))
                     .then(() => `Application '${appName}' successfully deleted`)
                     .catch((err) => Promise.reject(`Failed to delete Application with error '${err}'`));
             }

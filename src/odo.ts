@@ -12,6 +12,7 @@ import { ToolsConfig } from './tools';
 import format =  require('string-format');
 import { OpenShiftExplorer } from './explorer';
 import { fstatSync, statSync, Stats } from 'fs-extra';
+import { wait } from './util/async';
 
 export interface OpenShiftObject extends QuickPickItem {
     getChildren(): ProviderResult<OpenShiftObject[]>;
@@ -213,12 +214,18 @@ export interface Odo {
     executeInTerminal(command: string, cwd?: string): void;
     requireLogin(): Promise<boolean>;
     clearCache?(): void;
-    deleteProject(project: OpenShiftObject): Promise<OpenShiftObject>;
     createProject(name: string): Promise<OpenShiftObject>;
+    deleteProject(project: OpenShiftObject): Promise<OpenShiftObject>;
     createApplication(project: OpenShiftObject, name: string): Promise<OpenShiftObject>;
     deleteApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
-    createComponent(application: OpenShiftObject, componentName: string, componentType: string, componentVersion: string, repoUri: string, ref: string);
-    createComponent(application: OpenShiftObject, componentName: string, componentType: string, componentVersion: string, path: string);
+    createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, repoUri: string, ref: string): Promise<OpenShiftObject>;
+    createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, path: string): Promise<OpenShiftObject>;
+    createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, path: string): Promise<OpenShiftObject>;
+    deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
+    createStorage(component: OpenShiftObject, name: string, mountPath: string, size: string): Promise<OpenShiftObject>;
+    deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject>;
+    createService(application: OpenShiftObject, templateName: string, planName: string, name: string): Promise<OpenShiftObject>;
+    deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
 }
 
 export function getInstance(): Odo {
@@ -456,58 +463,84 @@ export class OdoImpl implements Odo {
         return this.odoLoginMessages.some((element) => { return result.stderr.indexOf(element) > -1; });
     }
 
+    private insertAndReveal(array: OpenShiftObject[], item: OpenShiftObject): OpenShiftObject {
+        array.push(item);
+        OpenShiftExplorer.getInstance().reveal(item);
+        return item;
+    }
+
+    private deleteAndRefresh(array: OpenShiftObject[], item: OpenShiftObject): OpenShiftObject {
+        array.splice(array.indexOf(item), 1);
+        OpenShiftExplorer.getInstance().refresh(item.getParent());
+        return item;
+    }
+
     public async deleteProject(project: OpenShiftObject): Promise<OpenShiftObject> {
         await this.execute(Command.deleteProject(project.getName()));
-        const projects = await this.getProjects();
-        projects.splice(projects.indexOf(project));
-        OpenShiftExplorer.getInstance().refresh(project.getParent());
-        return project;
+        return this.deleteAndRefresh(await this.getProjects(), project);
     }
 
     public async createProject(projectName: string): Promise<OpenShiftObject> {
         await OdoImpl.instance.execute(Command.createProject(projectName));
-        const clusters = await OdoImpl.instance.getClusters();
-        const newProject = new OpenShiftObjectImpl(clusters[0], projectName, ContextType.PROJECT, OdoImpl.instance);
-        const projects = await OdoImpl.instance.getProjects();
-        projects.push(newProject);
-        OpenShiftExplorer.getInstance().refresh(OdoImpl.instance.getClusters()[0]);
-        OpenShiftExplorer.getInstance().reveal(newProject);
-        return newProject;
+        const clusters = await this.getClusters();
+        return this.insertAndReveal(await this.getProjects(), new OpenShiftObjectImpl(clusters[0], projectName, ContextType.PROJECT, this))
     }
 
     public async deleteApplication(app: OpenShiftObject): Promise<OpenShiftObject> {
         const project = app.getParent();
         await this.execute(Command.deleteApplication(app.getParent().getName(), app.getName()));
-        const apps = await this.getApplications(project);
-        apps.splice(apps.indexOf(app));
-        OpenShiftExplorer.getInstance().refresh(project);
-        return app;
+        return this.deleteAndRefresh(await this.getApplications(project), app);
     }
 
     public async createApplication(project: OpenShiftObject, applicationName: string): Promise<OpenShiftObject> {
         await this.execute(Command.createApplication(project.getName(), applicationName));
-        const apps = await this.getApplications(project);
-        const newApplication = new OpenShiftObjectImpl(project, applicationName, ContextType.PROJECT, this);
-        apps.push(newApplication);
-        OpenShiftExplorer.getInstance().reveal(newApplication);
-        return newApplication;
+        return this.insertAndReveal(await this.getApplications(project), new OpenShiftObjectImpl(project, applicationName, ContextType.PROJECT, this));
     }
 
-    public async createComponent(application: OpenShiftObject, name: string, component: string, version: string, location: string, ref: string = master) {
-        let componentInstance: OpenShiftObject;
-        if (location.indexOf("https://") > 0 || location.indexOf("http://") > 0 ) {
+    public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: string, ref: string = 'master'): Promise<OpenShiftObject> {
+        await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location));
+        this.executeInTerminal(Command.pushLocalComponent(application.getParent().getName(), application.getName(), name, location));
+        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this));;
+    }
 
-        } else {
-            const stats: Stats = statSync(location);
-            if (stats.isDirectory()) {
-                // creating component from local folder
-            } else if (stats.isFile) {
-                // creating component from binary
-            } else {
-                // failure
-            }
-        }
-        return componentInstance;
+    public async createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, location: string, ref: string = 'master'): Promise<OpenShiftObject> {
+        this.executeInTerminal(Command.createGitComponent(application.getParent().getName(), application.getName(), type, version, name, location, ref ? ref : 'master'));
+        await wait();
+        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this));
+    }
+
+    public async createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, location: string, ref: string = 'master'): Promise<OpenShiftObject> {
+        await this.execute(Command.createBinaryComponent(application.getParent().getName(), application.getName(), type, version, name, location));
+        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this));
+    }
+
+    public async deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
+        const app = component.getParent();
+        await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()));
+        return this.deleteAndRefresh(await this.getApplicationChildren(app), component);
+    }
+
+    public async createService(application: OpenShiftObject, templateName: string, planName: string, name: string): Promise<OpenShiftObject> {
+        await this.execute(Command.createService(application.getParent().getName(), application.getName(), templateName, planName, name.trim()));
+        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.SERVICE, this));
+    }
+
+    public async deleteService(service: OpenShiftObject): Promise<OpenShiftObject> {
+        const app = service.getParent();
+        await this.execute(Command.deleteService(app.getParent().getName(), app.getName(), service.getName()));
+        return this.deleteAndRefresh(await this.getApplicationChildren(app), service);
+    }
+
+    public async createStorage(component: OpenShiftObject, name: string, mountPath: string, size: string): Promise<OpenShiftObject> {
+        await this.execute(Command.createStorage(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), name, mountPath, size));
+        return this.insertAndReveal(await this.getApplicationChildren(component), new OpenShiftObjectImpl(component, name, ContextType.STORAGE, this));
+    }
+
+    public async deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject> {
+        const component = storage.getParent();
+        await this.execute(Command.deleteStorage(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), storage.getName()));
+        await this .execute(Command.waitForStorageToBeGone(storage.getParent().getParent().getParent().getName(), storage.getParent().getParent().getName(), storage.getName()), process.cwd(), false);
+        return this.deleteAndRefresh(await this.getStorageNames(component), storage);
     }
 
     clearCache() {

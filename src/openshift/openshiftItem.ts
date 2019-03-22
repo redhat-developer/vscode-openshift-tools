@@ -20,13 +20,9 @@ export abstract class OpenShiftItem {
     protected static readonly odo: Odo = OdoImpl.Instance;
     protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
 
-    static wait(timeout: number = 2500): Promise<void> {
-        return new Promise((res) => setTimeout(res, timeout));
-    }
-
-    static validateUniqueName(data: Array<OpenShiftObject>, value: string): string {
+    static validateUniqueName(data: Array<OpenShiftObject>, value: string) {
         const openshiftObject =  data.find((openshiftObject) =>  openshiftObject.getName() === value);
-        return openshiftObject ? `This name is already used, please enter different name.` : undefined;
+        return openshiftObject && `This name is already used, please enter different name.`;
     }
 
     static async getName(message: string, data: Array<OpenShiftObject>, offset?: string): Promise<string> {
@@ -34,7 +30,7 @@ export abstract class OpenShiftItem {
             prompt: `Provide ${message}`,
             validateInput: (value: string) => {
                 let validationMessage = OpenShiftItem.emptyName(`Empty ${message}`, value.trim());
-                if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character`, value);
+                if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or "-", and must start and end with an alphanumeric character`, value);
                 if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${message} should be between 2-63 characters`, value, offset ? offset.length : 0);
                 if (!validationMessage) validationMessage = OpenShiftItem.validateUniqueName(data, value);
                 return validationMessage;
@@ -42,20 +38,20 @@ export abstract class OpenShiftItem {
         });
     }
 
-    static emptyName(message: string, value: string): string {
+    static emptyName(message: string, value: string) {
         return validator.isEmpty(value) ? message : null;
     }
 
-    static lengthName(message: string, value: string, offset: number): string {
+    static lengthName(message: string, value: string, offset: number) {
         return validator.isLength(value, 2, 63 - offset) ? null : message;
     }
 
-    static validateUrl(message: string, value: string): string {
+    static validateUrl(message: string, value: string) {
         return validator.isURL(value) ? null : message;
     }
 
-    static validateMatches(message: string, value: string): string {
-        return (validator.matches(value, '^[a-z]([-a-z0-9]*[a-z0-9])*$')) ? null : message;
+    static validateMatches(message: string, value: string) {
+        return (validator.matches(value, '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$')) ? null : message;
     }
 
     static async getProjectNames(): Promise<OpenShiftObject[]> {
@@ -64,31 +60,31 @@ export abstract class OpenShiftItem {
         return projectList;
     }
 
-    static async getApplicationNames(project: OpenShiftObject): Promise<OpenShiftObject[]> {
+    static async getApplicationNames(project: OpenShiftObject) {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
         if (applicationList.length === 0) throw Error(errorMessage.Application);
         return applicationList;
     }
 
-    static async getComponentNames(application: OpenShiftObject): Promise<OpenShiftObject[]> {
+    static async getComponentNames(application: OpenShiftObject) {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application);
         if (applicationList.length === 0) throw Error(errorMessage.Component);
         return applicationList;
     }
 
-    static async getServiceNames(application: OpenShiftObject): Promise<OpenShiftObject[]> {
+    static async getServiceNames(application: OpenShiftObject) {
         const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(application);
         if (serviceList.length === 0) throw Error(errorMessage.Service);
         return serviceList;
     }
 
-    static async getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
+    static async getStorageNames(component: OpenShiftObject) {
         const storageList: Array<OpenShiftObject> = await OpenShiftItem.odo.getStorageNames(component);
         if (storageList.length === 0) throw Error(errorMessage.Storage);
         return storageList;
     }
 
-    static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder?: string, compPlaceholder?: string): Promise<OpenShiftObject> {
+    static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder?: string, compPlaceholder?: string) {
         let context = treeItem;
         if (!context) {
             context = await window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder});

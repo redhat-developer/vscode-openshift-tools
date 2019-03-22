@@ -66,10 +66,9 @@ export class Component extends OpenShiftItem {
         const name: string = component.getName();
         const value = await window.showWarningMessage(`Do you want to delete Component '${name}\'?`, 'Yes', 'Cancel');
         if (value === 'Yes') {
-            return Promise.resolve()
-                .then(() => Component.odo.execute(Command.deleteComponent(project.getName(), app.getName(), name)))
-                .then(() => Component.explorer.refresh(treeItem ? app : undefined))
-                .then(() => `Component '${name}' successfully deleted`)
+            return Progress.execFunctionWithProgress(`Deleteing the Component '${treeItem.getName()} '`, () => {
+                return Component.odo.deleteComponent(component);
+            }).then(() => `Component '${name}' successfully deleted`)
                 .catch((err) => Promise.reject(`Failed to delete Component with error '${err}'`));
         }
     }
@@ -216,10 +215,8 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeVersion) return null;
         const project = application.getParent();
-        return Progress.execCmdWithProgress(`Creating new Component '${componentName}'`, Command.createLocalComponent(project.getName(), application.getName(), componentTypeName, componentTypeVersion, componentName, folder.uri.fsPath))
-            .then(() => Component.explorer.refresh(application))
-            .then(() => Component.odo.executeInTerminal(Command.pushLocalComponent(project.getName(), application.getName(), componentName, folder.uri.fsPath)))
-            .then(() => `Component '${componentName}' successfully created`);
+        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.uri.fsPath));
+        return `Component '${componentName}' successfully created`;
     }
 
     static async createFromFolder(folder: Uri): Promise<string> {
@@ -240,11 +237,9 @@ export class Component extends OpenShiftItem {
         const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
 
         if (!componentTypeVersion) return null;
-        const project = application.getParent();
-        return Progress.execCmdWithProgress(`Creating new Component '${componentName}'`, Command.createLocalComponent(project.getName(), application.getName(), componentTypeName, componentTypeVersion, componentName, folder.fsPath))
-            .then(() => Component.explorer.refresh(application))
-            .then(() => Component.odo.executeInTerminal(Command.pushLocalComponent(project.getName(), application.getName(), componentName, folder.fsPath)))
-            .then(() => `Component '${componentName}' successfully created`);
+
+        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.fsPath));
+        return `Component '${componentName}' successfully created`;
     }
 
     static async createFromGit(context: OpenShiftObject): Promise<string> {
@@ -286,11 +281,8 @@ export class Component extends OpenShiftItem {
             value === 'Yes' && commands.executeCommand('git.clone', repoURI);
         });
 
-        return Promise.resolve()
-            .then(() => Component.odo.executeInTerminal(Command.createGitComponent(application.getParent().getName(), application.getName(), componentTypeName, componentTypeVersion, componentName, repoURI, gitRef)))
-            .then(() => Component.wait())
-            .then(() => Component.explorer.refresh(application))
-            .then(() => `Component '${componentName}' successfully created`);
+        await Component.odo.createComponentFromGit(application, componentTypeName, componentTypeVersion, componentName, repoURI, gitRef);
+        return `Component '${componentName}' successfully created`;
     }
 
     static async createFromBinary(context: OpenShiftObject): Promise<string> {
@@ -317,10 +309,9 @@ export class Component extends OpenShiftItem {
         if (!componentTypeVersion) return null;
 
         const project = application.getParent();
-        return Progress.execCmdWithProgress(`Creating new Component '${componentName}'`,
-            Command.createBinaryComponent(project.getName(), application.getName(), componentTypeName, componentTypeVersion, componentName, binaryFile[0].fsPath))
-            .then(() => Component.explorer.refresh(application))
-            .then(() => `Component '${componentName}' successfully created`);
+
+        await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, binaryFile[0].fsPath);
+        return `Component '${componentName}' successfully created`;
     }
 
     public static async getComponentPorts(context: OpenShiftObject): Promise<V1ServicePort[]> {
