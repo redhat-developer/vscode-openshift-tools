@@ -22,15 +22,15 @@ export class Platform {
         return Platform.getOS();
     }
 
-    static get ENV() {
+    static get ENV(): NodeJS.ProcessEnv {
         return Platform.getEnv();
     }
 
-    static getEnv() {
+    static getEnv(): NodeJS.ProcessEnv {
         return process.env;
     }
 
-    static getUserHomePath() {
+    static getUserHomePath(): string {
         return Platform.identify({
             win32: () => Platform.ENV.USERPROFILE,
             default: () => Platform.ENV.HOME

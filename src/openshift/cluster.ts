@@ -43,7 +43,7 @@ export class Cluster extends OpenShiftItem {
         Cluster.odo.executeInTerminal(Command.printOdoVersion());
     }
 
-    static async showOpenShiftOutput() {
+    static async showOpenShiftOutput(): Promise<void> {
         Cli.getInstance().showOutputChannel();
     }
 
@@ -88,7 +88,7 @@ export class Cluster extends OpenShiftItem {
         return response;
     }
 
-    private static async save(username: string, password: string, checkpassword: string, result: CliExitData) {
+    private static async save(username: string, password: string, checkpassword: string, result: CliExitData): Promise<CliExitData> {
         if (password === checkpassword) return result;
         const response = await vscode.window.showInformationMessage(`Do you want to save username and password?`, 'Yes', 'No');
         if (response === 'Yes') {

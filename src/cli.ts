@@ -26,7 +26,7 @@ export class Cli implements ICli {
         return Cli.instance;
     }
 
-    async showOutputChannel() {
+    async showOutputChannel(): Promise<void> {
         this.odoChannel.show();
     }
 

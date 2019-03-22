@@ -63,7 +63,7 @@ export class Service extends OpenShiftItem {
         return null;
     }
 
-    static async describe(context: OpenShiftObject) {
+    static async describe(context: OpenShiftObject): Promise<void> {
         let service = context;
 
         if (!service) {
