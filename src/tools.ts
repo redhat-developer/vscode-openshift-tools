@@ -97,7 +97,7 @@ export class ToolsConfig {
         return reqs;
     }
 
-    public static resetConfiguration() {
+    public static resetConfiguration(): void {
         ToolsConfig.tools = ToolsConfig.loadMetadata(configData, Platform.OS);
     }
 

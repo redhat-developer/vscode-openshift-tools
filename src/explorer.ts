@@ -55,7 +55,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         this.onDidChangeTreeDataEmitter.fire(target);
     }
 
-    dispose() {
+    dispose(): void {
         this.fsw.watcher.close();
     }
 

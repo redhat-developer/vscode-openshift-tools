@@ -23,7 +23,7 @@ export class Application extends OpenShiftItem {
             .catch((error) => Promise.reject(`Failed to create Application with error '${error}'`));
     }
 
-    static async describe(treeItem: OpenShiftObject) {
+    static async describe(treeItem: OpenShiftObject): Promise<void> {
         const application = await Application.getOpenShiftCmdData(treeItem,
             "From which project you want to describe Application",
             "Select Application you want to describe");
