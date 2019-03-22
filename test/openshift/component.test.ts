@@ -17,10 +17,7 @@ import * as Util from '../../src/util/async';
 import { Refs } from '../../src/util/refs';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
-import url = require('url');
-import net = require('net');
-import gitclient = require('git-fetch-pack');
-import transport = require('git-transport-protocol');
+import { stringify } from 'querystring';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -43,6 +40,7 @@ suite('OpenShift/Component', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         opnStub = sandbox.stub();
+        sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>());
         Component = pq('../../src/openshift/component', {
             opn: opnStub
         }).Component;
@@ -166,15 +164,11 @@ suite('OpenShift/Component', () => {
         suite('from git repository', () => {
             const uri = 'git uri';
             setup(() => {
-                const tcp = net.connect({
-                    host: url.parse(uri).host,
-                    port: 9418
-                });
-                const client = gitclient(uri);
-                client.pipe(transport(tcp));
                 quickPickStub.onFirstCall().resolves({ label: 'Git Repository' });
                 inputStub.onFirstCall().resolves(uri);
                 quickPickStub.onSecondCall().resolves('master');
+                quickPickStub.onThirdCall().resolves(componentType);
+                quickPickStub.onCall(3).resolves(version);
                 inputStub.onSecondCall().resolves(componentItem.getName());
                 infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves();
             });

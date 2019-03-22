@@ -273,6 +273,8 @@ export class Component extends OpenShiftItem {
         const references = await Refs.fetchTag(repoURI);
         const gitRef = await vscode.window.showQuickPick([ ...references.keys()], {placeHolder: "Select git reference (branch/tag)"});
 
+        if (!gitRef) return null;
+        
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
