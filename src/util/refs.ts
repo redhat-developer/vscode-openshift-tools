@@ -1,9 +1,14 @@
+/*-----------------------------------------------------------------------------------------------
+ *  Licensed under the MIT License. See LICENSE file in the project root for license information.
+ *-----------------------------------------------------------------------------------------------*/
+//  Inspired by https://github.com/sindresorhus/remote-git-tags
+
 'use strict';
 
-const url = require('url');
-const net = require('net');
-const gitclient = require('git-fetch-pack');
-const transport = require('git-transport-protocol');
+import url = require('url');
+import net = require('net');
+import gitclient = require('git-fetch-pack');
+import transport = require('git-transport-protocol');
 
 export class Refs {
 

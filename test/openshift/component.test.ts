@@ -14,8 +14,13 @@ import { TestItem } from './testOSItem';
 import { OdoImpl, Command } from '../../src/odo';
 import { Progress } from '../../src/util/progress';
 import * as Util from '../../src/util/async';
+import { Refs } from '../../src/util/refs';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
+import url = require('url');
+import net = require('net');
+import gitclient = require('git-fetch-pack');
+import transport = require('git-transport-protocol');
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -160,8 +165,13 @@ suite('OpenShift/Component', () => {
 
         suite('from git repository', () => {
             const uri = 'git uri';
-
             setup(() => {
+                const tcp = net.connect({
+                    host: url.parse(uri).host,
+                    port: 9418
+                });
+                const client = gitclient(uri);
+                client.pipe(transport(tcp));
                 quickPickStub.onFirstCall().resolves({ label: 'Git Repository' });
                 inputStub.onFirstCall().resolves(uri);
                 quickPickStub.onSecondCall().resolves('master');
