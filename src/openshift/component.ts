@@ -176,7 +176,7 @@ export class Component extends OpenShiftItem {
         const app: OpenShiftObject = component.getParent();
         const namespace: string = app.getParent().getName();
         if (await Component.checkRouteCreated(namespace, component)) {
-            const value = await vscode.window.showInformationMessage(`No URL for Component '${component.getName()}' in Application '${app.getName()}'. Do you want to create a URL and open it?`, 'Create', 'Cancel');
+            const value = await vscode.window.showInformationMessage(`No URL for Component '${component.getName()}' in Application '${app.getName()}'. Do you want to create an URL and open it?`, 'Create', 'Cancel');
             if (value === 'Create') {
                 await vscode.commands.executeCommand('openshift.url.create', component);
             }
