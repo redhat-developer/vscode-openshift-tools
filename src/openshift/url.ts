@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { OpenShiftObject, Command } from '../odo';
-import * as vscode from 'vscode';
+import { window, QuickPickItem } from 'vscode';
 import { Component } from '../openshift/component';
 import { V1ServicePort } from '@kubernetes/client-node';
 import { OpenShiftItem } from './openshiftItem';
@@ -22,18 +22,18 @@ export class Url extends OpenShiftItem{
             const namespace: string = app.getParent().getName();
             const routeCheck = await Component.odo.execute(Command.getRouteHostName(namespace, component.getName()));
             if (routeCheck.stdout.trim() !== '') {
-                return vscode.window.showInformationMessage(`The route is already created for the component '${component.getName()}'. You can open it in browser.`);
+                return window.showInformationMessage(`The route is already created for the component '${component.getName()}'. You can open it in browser.`);
             }
             const ports: V1ServicePort[] = await Component.getComponentPorts(component);
-            const portItems: vscode.QuickPickItem[] = ports.map((item: any) => {
+            const portItems: QuickPickItem[] = ports.map((item: any) => {
                 item['label'] = `${item.port}/${item.protocol}`;
                 return item;
             });
-            let port: V1ServicePort | vscode.QuickPickItem;
+            let port: V1ServicePort | QuickPickItem;
             if (ports.length === 1) {
                 port = ports[0];
             } else if (ports.length > 1) {
-                port = await vscode.window.showQuickPick(portItems, {placeHolder: "Select port to expose"});
+                port = await window.showQuickPick(portItems, {placeHolder: "Select port to expose"});
             } else {
                 return Promise.reject(`Component '${component.getName()}' has no ports declared.`);
             }

@@ -7,7 +7,6 @@
 
 import { contextGlobalState } from '../extension';
 import { env } from 'vscode';
-import { V1PersistentVolumeClaimSpec } from '@kubernetes/client-node';
 
 const keytar: any = getVscodeModule('keytar');
 

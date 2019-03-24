@@ -5,9 +5,9 @@
 
 import { OpenShiftItem } from "./openshiftItem";
 import { OpenShiftObject, Command } from "../odo";
-import * as vscode from 'vscode';
-import * as validator from 'validator';
+import { window } from 'vscode';
 import { Progress } from "../util/progress";
+import { isEmpty } from "validator";
 
 export class Storage extends OpenShiftItem {
     static async create(context: OpenShiftObject): Promise<string> {
@@ -21,14 +21,14 @@ export class Storage extends OpenShiftItem {
 
         if (!storageName) return null;
 
-        const mountPath = await vscode.window.showInputBox({prompt: "Specify the mount path", validateInput: (value: string) => {
-            if (validator.isEmpty(value.trim())) {
+        const mountPath = await window.showInputBox({prompt: "Specify the mount path", validateInput: (value: string) => {
+            if (isEmpty(value.trim())) {
                 return 'Invalid mount path';
             }
         }});
         if (!mountPath) return null;
 
-        const storageSize = await vscode.window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the Storage size'});
+        const storageSize = await window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the Storage size'});
         if (!storageSize) return null;
 
         return Promise.resolve()
@@ -44,9 +44,9 @@ export class Storage extends OpenShiftItem {
             "From which Project you want to delete Storage",
             "From which Application you want to delete Storage",
             "From which Component you want to delete Storage");
-        if (!storage && component) storage = await vscode.window.showQuickPick(Storage.getStorageNames(component), {placeHolder: "Select Service to delete"});
+        if (!storage && component) storage = await window.showQuickPick(Storage.getStorageNames(component), {placeHolder: "Select Service to delete"});
         if (storage) {
-            const value = await vscode.window.showWarningMessage(`Do you want to delete Storage '${storage.getName()}' from Component '${storage.getParent().getName()}'?`, 'Yes', 'Cancel');
+            const value = await window.showWarningMessage(`Do you want to delete Storage '${storage.getName()}' from Component '${storage.getParent().getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 return Progress.execFunctionWithProgress(`Deleting Storage ${storage.getName()} from Component ${component.getName()}`,
                     (progress) => Storage.odo.execute(Command.deleteStorage(storage.getParent().getParent().getParent().getName(), storage.getParent().getParent().getName(), storage.getParent().getName(), storage.getName()))

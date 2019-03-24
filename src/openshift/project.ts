@@ -5,8 +5,8 @@
 
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
-import * as vscode from 'vscode';
 import { Progress } from '../util/progress';
+import { window } from 'vscode';
 
 export class Project extends OpenShiftItem {
 
@@ -27,7 +27,7 @@ export class Project extends OpenShiftItem {
             "Select Project to delete"
         );
         if (project) {
-            const value = await vscode.window.showWarningMessage(`Do you want to delete Project '${project.getName()}'?`, 'Yes', 'Cancel');
+            const value = await window.showWarningMessage(`Do you want to delete Project '${project.getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 result = Progress.execFunctionWithProgress(`Deleting Project '${project.getName()}'`,
                     (progress) => Project.odo.execute(Command.deleteProject(project.getName()))

@@ -5,7 +5,7 @@
 
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
-import * as vscode from 'vscode';
+import { window } from 'vscode';
 
 export class Application extends OpenShiftItem {
 
@@ -37,7 +37,7 @@ export class Application extends OpenShiftItem {
         if (application) {
             const appName = application.getName();
             const projName = application.getParent().getName();
-            const value = await vscode.window.showWarningMessage(`Do you want to delete Application '${appName}?'`, 'Yes', 'Cancel');
+            const value = await window.showWarningMessage(`Do you want to delete Application '${appName}?'`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 return Promise.resolve()
                     .then(() => Application.odo.execute(Command.deleteApplication(projName, appName)))
