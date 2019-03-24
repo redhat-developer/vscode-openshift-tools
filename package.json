@@ -591,6 +591,7 @@
     "build": "npm run clean && tslint -p tslint.json && npm run compile"
   },
   "devDependencies": {
+    "@types/byline": "^4.2.31",
     "@types/chai": "^4.1.7",
     "@types/fs-extra": "^5.0.4",
     "@types/hasha": "^3.0.0",

@@ -5,7 +5,7 @@
 
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
-import * as vscode from 'vscode';
+import { window } from 'vscode';
 import { Progress } from '../util/progress';
 
 export class Service extends OpenShiftItem {
@@ -16,12 +16,12 @@ export class Service extends OpenShiftItem {
             "In which Application you want to create a Service"
         );
         if (!application) return null;
-        const serviceTemplateName = await vscode.window.showQuickPick(Service.odo.getServiceTemplates(), {
+        const serviceTemplateName = await window.showQuickPick(Service.odo.getServiceTemplates(), {
             placeHolder: "Service Template Name"
         });
         if (!serviceTemplateName) return null;
 
-        const serviceTemplatePlanName = await vscode.window.showQuickPick(Service.odo.getServiceTemplatePlans(serviceTemplateName), {
+        const serviceTemplatePlanName = await window.showQuickPick(Service.odo.getServiceTemplatePlans(serviceTemplateName), {
             placeHolder: "Service Template Plan Name"
         });
         if (!serviceTemplatePlanName) return null;
@@ -45,11 +45,11 @@ export class Service extends OpenShiftItem {
                 "From which Application you want to delete Service"
             );
             if (application) {
-                service = await vscode.window.showQuickPick(Service.getServiceNames(application), {placeHolder: "Select Service to delete"});
+                service = await window.showQuickPick(Service.getServiceNames(application), {placeHolder: "Select Service to delete"});
             }
         }
         if (service) {
-            const answer = await vscode.window.showWarningMessage(`Do you want to delete Service '${service.getName()}'?`, 'Yes', 'Cancel');
+            const answer = await window.showWarningMessage(`Do you want to delete Service '${service.getName()}'?`, 'Yes', 'Cancel');
             if (answer === 'Yes') {
                 return Progress.execFunctionWithProgress(`Deleting Service '${service.getName()}' from Application '${service.getParent().getName()}'`,
                     (progress) => Service.odo.execute(Command.deleteService(service.getParent().getParent().getName(), service.getParent().getName(), service.getName()))
@@ -71,7 +71,7 @@ export class Service extends OpenShiftItem {
                 "From which project you want to describe Service",
                 "From which application you want to describe Service");
             if (application) {
-                service = await vscode.window.showQuickPick(Service.getServiceNames(application), {placeHolder: "Select Service you want to describe"});
+                service = await window.showQuickPick(Service.getServiceNames(application), {placeHolder: "Select Service you want to describe"});
             }
         }
         if (service) {

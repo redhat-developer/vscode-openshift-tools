@@ -5,7 +5,7 @@
 
 import { OpenShiftObject, Command } from "../odo";
 import { OpenShiftItem } from './openshiftItem';
-import * as vscode from 'vscode';
+import { window, commands } from 'vscode';
 import { CliExitData, Cli } from "../cli";
 import opn = require("opn");
 import { TokenStore } from "../util/credentialManager";
@@ -13,15 +13,15 @@ import { TokenStore } from "../util/credentialManager";
 export class Cluster extends OpenShiftItem {
 
     static async logout(): Promise<string> {
-        const value = await vscode.window.showWarningMessage(`Do you want to logout of cluster?`, 'Logout', 'Cancel');
+        const value = await window.showWarningMessage(`Do you want to logout of cluster?`, 'Logout', 'Cancel');
         if (value === 'Logout') {
             return Cluster.odo.execute(Command.odoLogout())
             .catch((error) => Promise.reject(`Failed to logout of the current cluster with '${error}'!`))
             .then(async (result) => {
                 if (result.stderr === "") {
                     Cluster.explorer.refresh();
-                    vscode.commands.executeCommand('setContext', 'isLoggedIn', false);
-                    const logoutInfo = await vscode.window.showInformationMessage(`Successfully logged out. Do you want to login to a new cluster`, 'Yes', 'No');
+                    commands.executeCommand('setContext', 'isLoggedIn', false);
+                    const logoutInfo = await window.showInformationMessage(`Successfully logged out. Do you want to login to a new cluster`, 'Yes', 'No');
                     if (logoutInfo === 'Yes') {
                         return Cluster.login();
                     } else {
@@ -55,13 +55,13 @@ export class Cluster extends OpenShiftItem {
             if (result.length>0 && result[0].getName().startsWith('http')) {
                 opn(result[0].getName());
             } else {
-                vscode.window.showErrorMessage(result[0].getName());
+                window.showErrorMessage(result[0].getName());
             }
         }
     }
 
     static async getUrl(): Promise<string | null> {
-        return await vscode.window.showInputBox({
+        return await window.showInputBox({
             ignoreFocusOut: true,
             prompt: "Provide URL of the cluster to connect",
             validateInput: (value: string) => Cluster.validateUrl('Invalid URL provided', value)
@@ -71,7 +71,7 @@ export class Cluster extends OpenShiftItem {
     static async login(): Promise<string> {
         const response = await Cluster.requestLoginConfirmation();
         if (response !== 'Yes') return null;
-        const loginMethod = await vscode.window.showQuickPick(['Credentials', 'Token'], {placeHolder: 'Select the way to log in to the cluster.'});
+        const loginMethod = await window.showQuickPick(['Credentials', 'Token'], {placeHolder: 'Select the way to log in to the cluster.'});
         if (!loginMethod) return null;
         if (loginMethod === "Credentials") {
             return Cluster.credentialsLogin(true);
@@ -83,14 +83,14 @@ export class Cluster extends OpenShiftItem {
     private static async requestLoginConfirmation(skipConfirmation: boolean = false): Promise<string> {
         let response = 'Yes';
         if (!skipConfirmation && !await Cluster.odo.requireLogin()) {
-            response = await vscode.window.showInformationMessage(`You are already logged in the cluster. Do you want to login to a different cluster?`, 'Yes', 'No');
+            response = await window.showInformationMessage(`You are already logged in the cluster. Do you want to login to a different cluster?`, 'Yes', 'No');
         }
         return response;
     }
 
     private static async save(username: string, password: string, checkpassword: string, result: CliExitData): Promise<CliExitData> {
         if (password === checkpassword) return result;
-        const response = await vscode.window.showInformationMessage(`Do you want to save username and password?`, 'Yes', 'No');
+        const response = await window.showInformationMessage(`Do you want to save username and password?`, 'Yes', 'No');
         if (response === 'Yes') {
             await TokenStore.setUserName(username);
             await TokenStore.setItem('login', username, password);
@@ -105,7 +105,7 @@ export class Cluster extends OpenShiftItem {
         const clusterURL = await Cluster.getUrl();
         if (!clusterURL) return null;
         const getUserName = await TokenStore.getUserName();
-        const username = await vscode.window.showInputBox({
+        const username = await window.showInputBox({
             ignoreFocusOut: true,
             prompt: "Provide Username for basic authentication to the API server",
             value: getUserName,
@@ -113,7 +113,7 @@ export class Cluster extends OpenShiftItem {
         });
         if (getUserName) password = await TokenStore.getItem('login', username);
         if (!username) return null;
-        const passwd  = await vscode.window.showInputBox({
+        const passwd  = await window.showInputBox({
             ignoreFocusOut: true,
             password: true,
             prompt: "Provide Password for basic authentication to the API server",
@@ -132,7 +132,7 @@ export class Cluster extends OpenShiftItem {
         if (response !== 'Yes') return null;
         const clusterURL = await Cluster.getUrl();
         if (!clusterURL) return null;
-        const ocToken = await vscode.window.showInputBox({
+        const ocToken = await window.showInputBox({
             prompt: "Provide Bearer token for authentication to the API server",
             ignoreFocusOut: true
         });
@@ -146,7 +146,7 @@ export class Cluster extends OpenShiftItem {
     private static async loginMessage(clusterURL: string, result: CliExitData): Promise<string> {
         if (result.stderr === "") {
             Cluster.explorer.refresh();
-            return vscode.commands.executeCommand('setContext', 'isLoggedIn', true)
+            return commands.executeCommand('setContext', 'isLoggedIn', true)
                 .then(() => `Successfully logged in to '${clusterURL}'`);
         } else {
             return Promise.reject(result.stderr);
