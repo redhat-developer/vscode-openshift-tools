@@ -29,6 +29,7 @@ To run the instance of OpenShift cluster locally, developers can use [minishift]
 * `OpenShift: New Project` - Create new project inside the OpenShift Cluster.
 * `OpenShift: About` - Provides the information about the OpenShift tools.
 * `OpenShift: Log out` - Logs out of the current OpenShift Cluster.
+* `OpenShift: Show Output Channel` - Shows commands running under the hood and their output.
 
 #### Actions available for an OpenShift Cluster Project
 
