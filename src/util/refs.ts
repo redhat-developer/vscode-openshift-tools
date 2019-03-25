@@ -13,7 +13,7 @@ import transport = require('git-transport-protocol');
 
 export class Refs {
 
-    static async fetchTag(input: string): Promise<Map<any, any>> {
+    static async fetchTag(input: string): Promise<Map<string, string>> {
         return new Promise((resolve, reject) => {
             input = input.replace(/^(?!(?:https|git):\/\/)/, 'https://');
 
@@ -24,7 +24,7 @@ export class Refs {
             const client = gitclient(input);
             const tags = new Map();
 
-            client.refs.on('data', ref => {
+            client.refs.on('data', (ref: { name: string; hash: any; }) => {
 
                 if (/^refs\/heads/.test(ref.name)) {
                     tags.set(ref.name.split('/')[2].replace(/\^\{\}$/, ''), ref.hash);
