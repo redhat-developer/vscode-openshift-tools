@@ -183,7 +183,7 @@ export class Component extends OpenShiftItem {
         }
 
         if (! await Component.checkRouteCreated(namespace, component)) {
-            const UrlDetails = await Component.odo.execute(Command.getComponentUrl(app.getName(), component.getName()));
+            const UrlDetails = await Component.odo.execute(Command.getComponentUrl(namespace, app.getName(), component.getName()));
             let result: any[] = [];
             let selectRoute: string;
             try {

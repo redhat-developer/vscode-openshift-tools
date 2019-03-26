@@ -20,8 +20,7 @@ export class Url extends OpenShiftItem{
             const app: OpenShiftObject = component.getParent();
             const project: OpenShiftObject = app.getParent();
             const urlName = await window.showInputBox({
-                value: 'master',
-                prompt: `Specify custom url name for the route for component ${component.getName}`,
+                prompt: `Specify custom url name for component ${component.getName()}`,
                 validateInput: (value: string) => {
                     if (!value.trim()) return 'Empty url name';
                 }

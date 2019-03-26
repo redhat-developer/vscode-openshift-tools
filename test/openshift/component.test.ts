@@ -12,7 +12,6 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
 import { OdoImpl, Command } from '../../src/odo';
-import jsYaml = require('js-yaml');
 import { Progress } from '../../src/util/progress';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
@@ -726,10 +725,8 @@ suite('OpenShift/Component', () => {
     });
 
     suite('openUrl', () => {
-        let yamlStub: sinon.SinonStub;
         const route = 'https://url';
         setup(() => {
-            yamlStub = sandbox.stub(jsYaml, 'safeLoad');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
@@ -747,8 +744,17 @@ suite('OpenShift/Component', () => {
         test('gets url for component and opens it in browser', async () => {
             execStub.onCall(0).resolves({error: undefined, stdout: 'url', stderr: ''});
             execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(2).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(3).resolves({error: undefined, stdout: 'tlsEnabled', stderr: ''});
+            execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        spec: {
+                            path: 'url',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }
+                ]
+            }), stderr: ''});
             await Component.openUrl(null);
             expect(opnStub).calledOnceWith('https://url');
         });
@@ -758,8 +764,17 @@ suite('OpenShift/Component', () => {
             sandbox.stub(vscode.commands, 'executeCommand').resolves();
             execStub.onCall(0).resolves({error: undefined, stdout: '', stderr: ''});
             execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(2).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(3).resolves({error: undefined, stdout: 'tlsEnabled', stderr: ''});
+            execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        spec: {
+                            path: 'url',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }
+                ]
+            }), stderr: ''});
             await Component.openUrl(null);
             expect(opnStub).calledOnceWith('https://url');
         });
@@ -773,27 +788,19 @@ suite('OpenShift/Component', () => {
         });
 
         test('getComponentUrl returns url list for a component', async () => {
-            const activeApps = [{ app: 'app1', component: 'component1' }, { app: 'app2', component: 'component2'}];
-            yamlStub.returns({ ActiveApplications: activeApps });
-            execStub.returns({
-                error: undefined,
-                stdout: JSON.stringify({
-                        items: [
-                            {
-                                spec: {
-                                    path: 'url1',
-                                    protocol: 'http',
-                                    port: 8080
-                                }
-                            }
-                        ]
+            execStub.onCall(0).resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        spec: {
+                            path: 'url',
+                            protocol: 'https',
+                            port: 8080
+                        }
                     }
-                ),
-                stderr: ''
-            });
-            const result = await Command.getComponentUrl(appItem.getName(), componentItem.getName());
-
-            expect(result.length).equals(60);
+                ]
+            }), stderr: ''});
+            const result = await Command.getComponentUrl(projectItem.getName(), appItem.getName(), componentItem.getName());
+            expect(result.length).equals(78);
         });
     });
 });

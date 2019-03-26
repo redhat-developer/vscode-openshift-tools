@@ -20,6 +20,7 @@ chai.use(sinonChai);
 suite('OpenShift/URL', () => {
     let sandbox: sinon.SinonSandbox;
     let quickPickStub: sinon.SinonStub;
+    let inputStub: sinon.SinonStub;
     let execStub: sinon.SinonStub;
     let getProjectsNameStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project');
@@ -155,6 +156,7 @@ suite('OpenShift/URL', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+        inputStub = sandbox.stub(vscode.window, 'showInputBox');
         getProjectsNameStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
@@ -167,9 +169,11 @@ suite('OpenShift/URL', () => {
     suite('create Url with no context', () => {
 
         setup(() => {
+            const urlName = 'customName';
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
+            inputStub.onFirstCall().resolves(urlName);
         });
 
         test('calls the appropriate error message if no project found', async () => {
@@ -190,6 +194,7 @@ suite('OpenShift/URL', () => {
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([componentItem]);
+            inputStub.onFirstCall().resolves();
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
             execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
             execStub.onSecondCall().resolves({error: null, stdout: portsOutput, stderr: ''});
@@ -200,10 +205,10 @@ suite('OpenShift/URL', () => {
         });
 
         test('rejects when fails to create Url', () => {
+            inputStub.onFirstCall().resolves();
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
             execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
             execStub.onSecondCall().resolves({error: "Error", stdout: portsOutput, stderr: ''});
-
             return Url.create(null).catch((err) => {
                 expect(err).equals(`Failed to create URL for component '${componentItem.getName()}'`);
             });
@@ -219,6 +224,7 @@ suite('OpenShift/URL', () => {
     suite('create', () => {
 
         test('asks to select port if more that one exposed and returns message', async () => {
+            inputStub.onFirstCall().resolves();
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
             execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
             execStub.onSecondCall().resolves({error: null, stdout: portsOutput, stderr: ''});
@@ -240,6 +246,7 @@ suite('OpenShift/URL', () => {
             execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
             execStub.onSecondCall().resolves({error: null, stdout: portOutput, stderr: ''});
             execStub.onThirdCall().rejects();
+            inputStub.onFirstCall().resolves();
 
             return Url.create(componentItem).catch((err) => {
                 expect(err).equals(`Failed to create URL for component '${componentItem.getName()}'. Error`);
@@ -255,16 +262,6 @@ suite('OpenShift/URL', () => {
             return Url.create(componentItem).catch((err) => {
                 expect(err).equals(`Component '${componentItem.getName()}' has no ports declared.`);
             });
-        });
-
-        test('shows info message when component already has url created', async () => {
-            execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.resolves({error: null, stdout: 'hostname', stderr: ''});
-            const infoStub = sandbox.stub(vscode.window, 'showInformationMessage');
-            const result = await Url.create(componentItem);
-
-            expect(infoStub).calledOnceWith(`The route is already created for the component '${componentItem.getName()}'. You can open it in browser.`);
-            expect(result).is.undefined;
         });
     });
 });
