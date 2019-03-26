@@ -35,7 +35,7 @@ suite('OpenShift/Storage', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         getStorageNamesStub = sandbox.stub(OdoImpl.prototype, 'getStorageNames').resolves([storageItem]);
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves();
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: '', stdout: '', stderr: ''});
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
     });
 

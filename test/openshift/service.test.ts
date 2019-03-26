@@ -270,6 +270,7 @@ suite('OpenShift/Service', () => {
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(serviceItem);
             warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+            sandbox.stub(Progress, 'execFunctionWithProgress').yields();
         });
 
         test('works with context item', async () => {

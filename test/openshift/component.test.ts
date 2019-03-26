@@ -92,8 +92,7 @@ suite('OpenShift/Component', () => {
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
             sandbox.stub(Progress, 'execWithProgress').resolves();
             progressCmdStub = sandbox.stub(Progress, 'execCmdWithProgress').resolves();
-            progressFunctionStub = sandbox.stub(Progress, 'execFunctionWithProgress');
-            progressFunctionStub.yields();
+            progressFunctionStub = sandbox.stub(Progress, 'execFunctionWithProgress').yields();
         });
 
         test('returns null when cancelled', async () => {
