@@ -12,7 +12,7 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
 import { OdoImpl, Command } from '../../src/odo';
-
+import jsYaml = require('js-yaml');
 import { Progress } from '../../src/util/progress';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
@@ -726,11 +726,15 @@ suite('OpenShift/Component', () => {
     });
 
     suite('openUrl', () => {
+        let yamlStub: sinon.SinonStub;
+        const route = 'https://url';
         setup(() => {
+            yamlStub = sandbox.stub(jsYaml, 'safeLoad');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
+            quickPickStub.onCall(3).resolves(route);
         });
 
         test('ask for context when called from command bar and exits with null if canceled', async () => {
@@ -768,5 +772,28 @@ suite('OpenShift/Component', () => {
             expect(opnStub).is.not.called;
         });
 
+        test('getComponentUrl returns url list for a component', async () => {
+            const activeApps = [{ app: 'app1', component: 'component1' }, { app: 'app2', component: 'component2'}];
+            yamlStub.returns({ ActiveApplications: activeApps });
+            execStub.returns({
+                error: undefined,
+                stdout: JSON.stringify({
+                        items: [
+                            {
+                                spec: {
+                                    path: 'url1',
+                                    protocol: 'http',
+                                    port: 8080
+                                }
+                            }
+                        ]
+                    }
+                ),
+                stderr: ''
+            });
+            const result = await Command.getComponentUrl(appItem.getName(), componentItem.getName());
+
+            expect(result.length).equals(60);
+        });
     });
 });
