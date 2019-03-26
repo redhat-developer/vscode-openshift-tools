@@ -40,7 +40,7 @@ export const Command = {
     createProject: (name: string) =>
         `odo project create ${name}`,
     listComponents: (project: string, app: string) =>
-        `oc get dc --namespace ${project} -o jsonpath="{range .items[?(.metadata.labels.app == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}"`,
+        `odo list --app ${app} --project ${project} -o json`,
     listCatalogComponents: () =>
         `odo catalog list components`,
     listCatalogServices: () =>
@@ -309,11 +309,15 @@ export class OdoImpl implements Odo {
 
     public async getComponents(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listComponents(application.getParent().getName(), application.getName()));
-        const componentsList = result.stdout.trim().split('\n')
-            .filter((value) => value !== '')
-            .map<OpenShiftObject>((value) => new OpenShiftObjectImpl(application, value, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed));
-        commands.executeCommand('setContext', 'componentPresent', componentsList.length>0);
-        return componentsList;
+        let data: any[] = [];
+        try {
+            data = JSON.parse(result.stdout).items;
+        } catch (ignore) {
+            // show no apps if output is not correct json
+            // see https://github.com/openshift/odo/issues/1521
+        }
+        const apps: string[] = data.map((value) => value.metadata.name);
+        return apps.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(application, value, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed));
     }
 
     public async getComponentTypes(): Promise<string[]> {
