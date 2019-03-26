@@ -66,7 +66,7 @@ export class Component extends OpenShiftItem {
         const name: string = component.getName();
         const value = await window.showWarningMessage(`Do you want to delete Component '${name}\'?`, 'Yes', 'Cancel');
         if (value === 'Yes') {
-            return Progress.execFunctionWithProgress(`Deleteing the Component '${treeItem.getName()} '`, () => {
+            return Progress.execFunctionWithProgress(`Deleteing the Component '${component.getName()} '`, () => {
                 return Component.odo.deleteComponent(component);
             }).then(() => `Component '${name}' successfully deleted`)
                 .catch((err) => Promise.reject(`Failed to delete Component with error '${err}'`));

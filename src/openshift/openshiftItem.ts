@@ -51,7 +51,7 @@ export abstract class OpenShiftItem {
     }
 
     static validateMatches(message: string, value: string) {
-        return (validator.matches(value, '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$')) ? null : message;
+        return (validator.matches(value, '^[a-z]([-a-z0-9]*[a-z0-9])*$')) ? null : message;
     }
 
     static async getProjectNames(): Promise<OpenShiftObject[]> {

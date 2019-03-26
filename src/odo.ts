@@ -477,6 +477,7 @@ export class OdoImpl implements Odo {
 
     public async deleteProject(project: OpenShiftObject): Promise<OpenShiftObject> {
         await this.execute(Command.deleteProject(project.getName()));
+        await this.execute(Command.waitForProjectToBeGone(project.getName()));
         return this.deleteAndRefresh(await this.getProjects(), project);
     }
 
@@ -528,6 +529,7 @@ export class OdoImpl implements Odo {
     public async deleteService(service: OpenShiftObject): Promise<OpenShiftObject> {
         const app = service.getParent();
         await this.execute(Command.deleteService(app.getParent().getName(), app.getName(), service.getName()));
+        await this.execute(Command.waitForServiceToBeGone(app.getParent().getName(),service.getName()));
         return this.deleteAndRefresh(await this.getApplicationChildren(app), service);
     }
 

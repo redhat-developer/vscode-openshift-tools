@@ -26,6 +26,7 @@ suite('OpenShift/Service', () => {
     let getServicesStub: sinon.SinonStub;
     let getProjectsStub: sinon.SinonStub;
     let getApplicationsStub: sinon.SinonStub;
+    let execStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'application');
     const serviceItem = new TestItem(appItem, 'service');
@@ -43,6 +44,7 @@ suite('OpenShift/Service', () => {
         getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });
     });
 
     teardown(() => {
@@ -50,7 +52,8 @@ suite('OpenShift/Service', () => {
     });
 
     suite('create service with no context', () => {
-        let inputStub: sinon.SinonStub, progressStub: sinon.SinonStub;
+        let inputStub: sinon.SinonStub;
+        let progressStub: sinon.SinonStub;
 
         setup(() => {
             sandbox.stub(OdoImpl.prototype, 'getServiceTemplates').resolves([]);
@@ -59,7 +62,7 @@ suite('OpenShift/Service', () => {
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onFirstCall().resolves(templatePlan);
             inputStub = sandbox.stub(vscode.window, 'showInputBox').resolves(serviceItem.getName());
-            progressStub = sandbox.stub(Progress, 'execCmdWithProgress').resolves();
+            progressStub = sandbox.stub(Progress, 'execFunctionWithProgress').resolves();
         });
 
         test('works with correct inputs', async () => {
@@ -157,7 +160,7 @@ suite('OpenShift/Service', () => {
             quickPickStub.onFirstCall().resolves(templateName);
             quickPickStub.onSecondCall().resolves(templatePlan);
             inputStub = sandbox.stub(vscode.window, 'showInputBox').resolves(serviceItem.getName());
-            progressStub = sandbox.stub(Progress, 'execCmdWithProgress').resolves();
+            progressStub = sandbox.stub(Progress, 'execFunctionWithProgress').yields();
         });
         test('validator returns undefined for valid service name', async () => {
             let result: string | Thenable<string>;
@@ -222,9 +225,7 @@ suite('OpenShift/Service', () => {
         test('works with correct inputs', async () => {
             const result = await Service.create(appItem);
             expect(result).equals(`Service '${serviceItem.getName()}' successfully created`);
-            expect(progressStub).calledOnceWith(
-                `Creating a new Service '${serviceItem.getName()}'`,
-                Command.createService(projectItem.getName(), appItem.getName(), templateName, templatePlan, serviceItem.getName()));
+            expect(execStub).calledOnceWith(Command.createService(projectItem.getName(), appItem.getName(), templateName, templatePlan, serviceItem.getName()));
         });
 
         test('returns null with no template selected', async () => {
@@ -259,7 +260,7 @@ suite('OpenShift/Service', () => {
     });
 
     suite('del', () => {
-        let warnStub: sinon.SinonStub, execStub: sinon.SinonStub;
+        let warnStub: sinon.SinonStub;
 
         setup(() => {
             getProjectsStub.resolves([]);
@@ -269,7 +270,6 @@ suite('OpenShift/Service', () => {
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(serviceItem);
             warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
-            execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves();
         });
 
         test('works with context item', async () => {
@@ -321,12 +321,10 @@ suite('OpenShift/Service', () => {
     });
 
     suite('describe', () => {
-        let execStub: sinon.SinonStub;
         setup(() => {
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(serviceItem);
-            execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves();
             execStub.resolves({error: undefined, stdout: 'template_name', stderr: ''});
         });
 
