@@ -111,8 +111,10 @@ export const Command = {
         `oc get ServiceInstance ${service} --namespace ${project} -o jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/component-type}"`,
     waitForServiceToBeGone: (project: string, service: string) =>
         `oc wait ServiceInstance/${service} --for delete --namespace ${project}`,
-    createComponentUrl: (project: string, app: string, component: string, port: string) =>
-        `odo url create --port ${port} --project ${project} --app ${app} --component ${component}`,
+    createComponentCustomUrl: (project: string, app: string, component: string, name: string, port: string) =>
+        `odo url create ${name} --port ${port} --project ${project} --app ${app} --component ${component}`,
+    getComponentUrl: (app: string, component: string) =>
+        `odo url list --component ${component} --app ${app} -o json`,
     getComponentJson: (project: string, app: string, component: string) =>
         `oc get service ${component}-${app} --namespace ${project} -o json`
 };

@@ -19,11 +19,14 @@ export class Url extends OpenShiftItem{
         if (component) {
             const app: OpenShiftObject = component.getParent();
             const project: OpenShiftObject = app.getParent();
-            const namespace: string = app.getParent().getName();
-            const routeCheck = await Component.odo.execute(Command.getRouteHostName(namespace, component.getName()));
-            if (routeCheck.stdout.trim() !== '') {
-                return window.showInformationMessage(`The route is already created for the component '${component.getName()}'. You can open it in browser.`);
-            }
+            const urlName = await window.showInputBox({
+                value: 'master',
+                prompt: `Specify custom url name for the route for component ${component.getName}`,
+                validateInput: (value: string) => {
+                    if (!value.trim()) return 'Empty url name';
+                }
+            });
+            if (!urlName) return null;
             const ports: V1ServicePort[] = await Component.getComponentPorts(component);
             const portItems: QuickPickItem[] = ports.map((item: any) => {
                 item['label'] = `${item.port}/${item.protocol}`;
@@ -38,9 +41,9 @@ export class Url extends OpenShiftItem{
                 return Promise.reject(`Component '${component.getName()}' has no ports declared.`);
             }
             return port === undefined ? undefined : Promise.resolve()
-                .then(async () => Url.odo.execute(Command.createComponentUrl(project.getName(), app.getName(), component.getName(), `${port['port']}`)))
-                .then(() => `URL for component '${component.getName()}' successfully created`)
-                .catch((err) => Promise.reject(`Failed to create URL for component '${component.getName()}'. ${err.message}`));
+                .then(async () => Url.odo.execute(Command.createComponentCustomUrl(project.getName(), app.getName(), component.getName(), `${urlName}`, `${port['port']}`)))
+                .then(() => `URL '${urlName}' for component '${component.getName()}' successfully created`)
+                .catch((err) => Promise.reject(`Failed to create URL '${urlName}' for component '${component.getName()}'. ${err.message}`));
         }
         return null;
     }

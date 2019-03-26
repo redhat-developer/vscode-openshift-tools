@@ -5,7 +5,7 @@
 
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
-import { window, commands, QuickPickItem, Uri} from 'vscode';
+import { window, commands, QuickPickItem, Uri } from 'vscode';
 import { Progress } from '../util/progress';
 import opn = require('opn');
 import { ChildProcess } from 'child_process';
@@ -183,10 +183,23 @@ export class Component extends OpenShiftItem {
         }
 
         if (! await Component.checkRouteCreated(namespace, component)) {
-            const hostName = await Component.odo.execute(Command.getRouteHostName(namespace, component.getName()));
-            const checkTls = await Component.odo.execute(Command.getRouteTls(namespace, component.getName()));
-            const tls = checkTls.stdout.trim().length === 0  ? "http://" : "https://";
-            return opn(`${tls}${hostName.stdout}`);
+            const UrlDetails = await Component.odo.execute(Command.getComponentUrl(app.getName(), component.getName()));
+            let result: any[] = [];
+            let selectRoute: string;
+            try {
+                result = JSON.parse(UrlDetails.stdout).items;
+            } catch (ignore) {
+                // should give emoty list if no url configured
+                // see https://github.com/openshift/odo/issues/1515
+            }
+            const hostName: string[] = result.map((value) =>`${value.spec.protocol}://${value.spec.path}`);
+            if (hostName.length >1) {
+                selectRoute = await window.showQuickPick(hostName, {placeHolder: "This component has multiple routes enabled. Select the desired route to Open in Browser."});
+                if (!selectRoute) return null;
+                return opn(`${selectRoute}`);
+            } else {
+                return opn(`${hostName}`);
+            }
         }
     }
 
