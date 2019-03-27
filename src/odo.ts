@@ -95,8 +95,6 @@ export const Command = {
         `odo watch ${component} --app ${app} --project ${project}`,
     getRouteHostName: (namespace: string, component: string) =>
         `oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${component}')]}{.spec.host}{end}"`,
-    getRouteTls: (namespace: string, component: string) =>
-        `oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${component}')]}{.spec.tls.termination}{end}"`,
     createLocalComponent: (project: string, app: string, type: string, version: string, name: string, folder: string) =>
         `odo create ${type}:${version} ${name} --local ${folder} --app ${app} --project ${project}`,
     createGitComponent: (project: string, app: string, type: string, version: string, name: string, git: string, ref: string) =>
@@ -111,8 +109,10 @@ export const Command = {
         `oc get ServiceInstance ${service} --namespace ${project} -o jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/component-type}"`,
     waitForServiceToBeGone: (project: string, service: string) =>
         `oc wait ServiceInstance/${service} --for delete --namespace ${project}`,
-    createComponentUrl: (project: string, app: string, component: string, port: string) =>
-        `odo url create --port ${port} --project ${project} --app ${app} --component ${component}`,
+    createComponentCustomUrl: (project: string, app: string, component: string, name: string, port: string) =>
+        `odo url create ${name} --port ${port} --project ${project} --app ${app} --component ${component}`,
+    getComponentUrl: (project: string, app: string, component: string) =>
+        `odo url list --component ${component} --app ${app} --project ${project} -o json`,
     getComponentJson: (project: string, app: string, component: string) =>
         `oc get service ${component}-${app} --namespace ${project} -o json`
 };

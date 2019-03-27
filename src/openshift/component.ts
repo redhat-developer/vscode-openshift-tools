@@ -5,7 +5,7 @@
 
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
-import { window, commands, QuickPickItem, Uri} from 'vscode';
+import { window, commands, QuickPickItem, Uri } from 'vscode';
 import { Progress } from '../util/progress';
 import opn = require('opn');
 import { ChildProcess } from 'child_process';
@@ -176,17 +176,30 @@ export class Component extends OpenShiftItem {
         const app: OpenShiftObject = component.getParent();
         const namespace: string = app.getParent().getName();
         if (await Component.checkRouteCreated(namespace, component)) {
-            const value = await window.showInformationMessage(`No URL for Component '${component.getName()}' in Application '${app.getName()}'. Do you want to create an URL and open it?`, 'Create', 'Cancel');
+            const value = await window.showInformationMessage(`No URL for Component '${component.getName()}' in Application '${app.getName()}'. Do you want to create a URL and open it?`, 'Create', 'Cancel');
             if (value === 'Create') {
                 await commands.executeCommand('openshift.url.create', component);
             }
         }
 
         if (! await Component.checkRouteCreated(namespace, component)) {
-            const hostName = await Component.odo.execute(Command.getRouteHostName(namespace, component.getName()));
-            const checkTls = await Component.odo.execute(Command.getRouteTls(namespace, component.getName()));
-            const tls = checkTls.stdout.trim().length === 0  ? "http://" : "https://";
-            return opn(`${tls}${hostName.stdout}`);
+            const UrlDetails = await Component.odo.execute(Command.getComponentUrl(namespace, app.getName(), component.getName()));
+            let result: any[] = [];
+            let selectRoute: string;
+            try {
+                result = JSON.parse(UrlDetails.stdout).items;
+            } catch (ignore) {
+                // should give emoty list if no url configured
+                // see https://github.com/openshift/odo/issues/1515
+            }
+            const hostName: string[] = result.map((value) =>`${value.spec.protocol}://${value.spec.path}`);
+            if (hostName.length >1) {
+                selectRoute = await window.showQuickPick(hostName, {placeHolder: "This Component has multiple URLs. Select the desired URL to open in browser."});
+                if (!selectRoute) return null;
+                return opn(`${selectRoute}`);
+            } else {
+                return opn(`${hostName}`);
+            }
         }
     }
 

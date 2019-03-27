@@ -12,7 +12,6 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
 import { OdoImpl, Command } from '../../src/odo';
-
 import { Progress } from '../../src/util/progress';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
@@ -740,13 +739,72 @@ suite('OpenShift/Component', () => {
             expect(result).is.null;
         });
 
-        test('gets url for component and opens it in browser', async () => {
+        test('gets URLs for component and if there is only one opens it in browser', async () => {
             execStub.onCall(0).resolves({error: undefined, stdout: 'url', stderr: ''});
             execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(2).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(3).resolves({error: undefined, stdout: 'tlsEnabled', stderr: ''});
+            execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        spec: {
+                            path: 'url',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }
+                ]
+            }), stderr: ''});
             await Component.openUrl(null);
             expect(opnStub).calledOnceWith('https://url');
+        });
+
+        test('gets URLs for the component and if there is more than one asks which one to open it in browser and opens selected', async () => {
+            quickPickStub.onCall(3).resolves('https://url1');
+            execStub.onCall(0).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        spec: {
+                            path: 'url1',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }, {
+                        spec: {
+                            path: 'url2',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }
+                ]
+            }), stderr: ''});
+            await Component.openUrl(null);
+            expect(opnStub).calledOnceWith('https://url1');
+        });
+
+        test('gets URLs for the component, if there is more than one asks which one to open it in browser and exits if selection is canceled', async () => {
+            quickPickStub.onCall(3).resolves(null);
+            execStub.onCall(0).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        spec: {
+                            path: 'url1',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }, {
+                        spec: {
+                            path: 'url2',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }
+                ]
+            }), stderr: ''});
+            await Component.openUrl(null);
+            expect(opnStub.callCount).equals(0);
         });
 
         test('request to create url for component if it does not exist, creates the route if confirmed by user and opens it in browser.' , async () => {
@@ -754,8 +812,17 @@ suite('OpenShift/Component', () => {
             sandbox.stub(vscode.commands, 'executeCommand').resolves();
             execStub.onCall(0).resolves({error: undefined, stdout: '', stderr: ''});
             execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(2).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(3).resolves({error: undefined, stdout: 'tlsEnabled', stderr: ''});
+            execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        spec: {
+                            path: 'url',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }
+                ]
+            }), stderr: ''});
             await Component.openUrl(null);
             expect(opnStub).calledOnceWith('https://url');
         });
@@ -768,5 +835,20 @@ suite('OpenShift/Component', () => {
             expect(opnStub).is.not.called;
         });
 
+        test('getComponentUrl returns url list for a component', async () => {
+            execStub.onCall(0).resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        spec: {
+                            path: 'url',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }
+                ]
+            }), stderr: ''});
+            const result = await Command.getComponentUrl(projectItem.getName(), appItem.getName(), componentItem.getName());
+            expect(result.length).equals(78);
+        });
     });
 });
