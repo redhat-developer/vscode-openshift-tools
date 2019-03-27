@@ -250,13 +250,20 @@ suite("odo", () => {
         });
 
         test('getApplicationChildren returns both components and services for an application', async () => {
-            const component = new TestItem(app, 'comp');
-            const service = new TestItem(app, 'serv');
-            execStub.onFirstCall().resolves({error: undefined, stdout: 'comp', stderr: ''});
+            execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        metadata: {
+                            name: 'component1',
+                            namespace: 'project'
+                        }
+                    }
+                ]
+            }), stderr: ''});
             execStub.onSecondCall().resolves({error: undefined, stdout: 'serv', stderr: ''});
             const result = await odoCli.getApplicationChildren(app);
 
-            expect(result[0].getName()).deep.equals('comp');
+            expect(result[0].getName()).deep.equals('component1');
             expect(result[1].getName()).deep.equals('serv');
         });
 
