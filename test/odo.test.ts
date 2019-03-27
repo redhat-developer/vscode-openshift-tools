@@ -189,7 +189,7 @@ suite("odo", () => {
             expect(result).empty;
         });
 
-        test('getComponents returns components list sfor an application', async () => {
+        test('getComponents returns components list for an application', async () => {
             const activeApps = [{ name: 'app1', project: 'project1' }, { name: 'app2', project: 'project1'}];
             yamlStub.returns({ ActiveApplications: activeApps });
             execStub.returns({
