@@ -13,16 +13,16 @@ export class Url extends OpenShiftItem{
 
     static async create(context: OpenShiftObject): Promise<string> {
         const component = await Url.getOpenShiftCmdData(context,
-            'Select a Project to create Url',
-            'Select an Application to create Url',
-            'Select a Component you want to create Url for');
+            'Select a Project to create a URL',
+            'Select an Application to create a URL',
+            'Select a Component you want to create a URL for');
         if (component) {
             const app: OpenShiftObject = component.getParent();
             const project: OpenShiftObject = app.getParent();
             const urlName = await window.showInputBox({
-                prompt: `Specify custom url name for component ${component.getName()}`,
+                prompt: `Provide a name for a URL`,
                 validateInput: (value: string) => {
-                    if (!value.trim()) return 'Empty url name';
+                    if (!value.trim()) return 'A name cannot be empty';
                 }
             });
             if (!urlName) return null;
