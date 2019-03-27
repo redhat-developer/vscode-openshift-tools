@@ -593,6 +593,7 @@
   "devDependencies": {
     "@types/byline": "^4.2.31",
     "@types/chai": "^4.1.7",
+    "@types/collections": "^5.0.0",
     "@types/fs-extra": "^5.0.4",
     "@types/hasha": "^3.0.0",
     "@types/js-yaml": "^3.12.0",
@@ -629,6 +630,8 @@
     "byline": "^5.0.0",
     "event-stream": "3.3.4",
     "fs-extra": "^7.0.1",
+    "git-fetch-pack": "^0.1.1",
+    "git-transport-protocol": "^0.1.0",
     "hasha": "^3.0.0",
     "js-yaml": "^3.12.1",
     "opn": "^5.4.0",

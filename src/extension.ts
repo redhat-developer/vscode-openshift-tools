@@ -25,7 +25,6 @@ export function activate(context: vscode.ExtensionContext) {
     contextGlobalState = context;
     migrateFromOdo018();
 
-    const explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
     const disposable = [
         vscode.commands.registerCommand('openshift.about', (context) => execute(Cluster.about, context)),
         vscode.commands.registerCommand('openshift.output', (context) => execute(Cluster.showOpenShiftOutput, context)),
@@ -76,8 +75,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.service.describe.palette', (context) => execute(Service.describe, context)),
         vscode.commands.registerCommand('openshift.component.linkComponent', (context) => execute(Component.linkComponent, context)),
         vscode.commands.registerCommand('openshift.component.linkService', (context) => execute(Component.linkService, context)),
-        vscode.window.registerTreeDataProvider('openshiftProjectExplorer', explorer),
-        explorer
+        OpenShiftExplorer.getInstance()
     ];
     disposable.forEach((value)=> context.subscriptions.push(value));
 }

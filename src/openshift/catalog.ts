@@ -6,7 +6,7 @@
 import { Odo, OdoImpl, Command } from "../odo";
 
 export class Catalog {
-    private static odo: Odo = OdoImpl.getInstance();
+    private static odo: Odo = OdoImpl.Instance;
 
     static listComponents(): void {
         Catalog.odo.executeInTerminal(Command.listCatalogComponents());

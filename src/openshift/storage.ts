@@ -31,9 +31,7 @@ export class Storage extends OpenShiftItem {
         const storageSize = await window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the Storage size'});
         if (!storageSize) return null;
 
-        return Promise.resolve()
-            .then(() => Storage.odo.execute(Command.createStorage(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), storageName, mountPath, storageSize)))
-            .then(() => Storage.explorer.refresh(context ? context : undefined))
+        return Progress.execFunctionWithProgress(`Creating the Storage '${component.getName()}'`, () => Storage.odo.createStorage(component, storageName, mountPath, storageSize))
             .then(() => `Storage '${storageName}' successfully created for Component '${component.getName()}'`)
             .catch((err) => Promise.reject(`New Storage command failed with error: '${err}'!`));
     }
@@ -48,13 +46,9 @@ export class Storage extends OpenShiftItem {
         if (storage) {
             const value = await window.showWarningMessage(`Do you want to delete Storage '${storage.getName()}' from Component '${storage.getParent().getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
-                return Progress.execFunctionWithProgress(`Deleting Storage ${storage.getName()} from Component ${component.getName()}`,
-                    (progress) => Storage.odo.execute(Command.deleteStorage(storage.getParent().getParent().getParent().getName(), storage.getParent().getParent().getName(), storage.getParent().getName(), storage.getName()))
-                        .then(() => Storage.odo.execute(Command.waitForStorageToBeGone(storage.getParent().getParent().getParent().getName(), storage.getParent().getParent().getName(), storage.getName()), process.cwd(), false))
-                        .then(() => Storage.explorer.refresh(treeItem ? treeItem.getParent() : undefined))
-                        .then(() => `Storage '${storage.getName()}' from Component '${storage.getParent().getName()}' successfully deleted`)
-                        .catch((err) => Promise.reject(`Failed to delete Storage with error '${err}'`))
-                );
+                return Progress.execFunctionWithProgress(`Deleting Storage ${storage.getName()} from Component ${component.getName()}`, () => Storage.odo.deleteStorage(storage))
+                    .then(() => `Storage '${storage.getName()}' from Component '${storage.getParent().getName()}' successfully deleted`)
+                    .catch((err) => Promise.reject(`Failed to delete Storage with error '${err}'`));
             }
         }
         return null;

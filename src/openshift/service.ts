@@ -29,9 +29,7 @@ export class Service extends OpenShiftItem {
         const serviceName = await Service.getName('Service name', serviceList, application.getName());
         if (!serviceName) return null;
         const project = application.getParent();
-        return Progress.execCmdWithProgress(`Creating a new Service '${serviceName}'`,
-            Command.createService(project.getName(), application.getName(), serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))
-            .then(() => Service.explorer.refresh(context ? context : undefined))
+        return Progress.execFunctionWithProgress(`Creating a new Service '${serviceName}'`, () => Service.odo.createService(application, serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))
             .then(() => `Service '${serviceName}' successfully created`)
             .catch((err) => Promise.reject(`Failed to create Service with error '${err}'`));
     }
@@ -51,13 +49,9 @@ export class Service extends OpenShiftItem {
         if (service) {
             const answer = await window.showWarningMessage(`Do you want to delete Service '${service.getName()}'?`, 'Yes', 'Cancel');
             if (answer === 'Yes') {
-                return Progress.execFunctionWithProgress(`Deleting Service '${service.getName()}' from Application '${service.getParent().getName()}'`,
-                    (progress) => Service.odo.execute(Command.deleteService(service.getParent().getParent().getName(), service.getParent().getName(), service.getName()))
-                        .then(() => Service.odo.execute(Command.waitForServiceToBeGone(service.getParent().getParent().getName(), service.getName()), process.cwd(), false))
-                        .then(() => Service.explorer.refresh(treeItem ? treeItem.getParent() : undefined))
-                        .then(() => `Service '${service.getName()}' successfully deleted`)
-                        .catch((err) => Promise.reject(`Failed to delete Service with error '${err}'`))
-                );
+                return Progress.execFunctionWithProgress(`Deleting Service '${service.getName()}' from Application '${service.getParent().getName()}'`, (progress) => Service.odo.deleteService(service))
+                    .then(() => `Service '${service.getName()}' successfully deleted`)
+                    .catch((err) => Promise.reject(`Failed to delete Service with error '${err}'`))
             }
         }
         return null;

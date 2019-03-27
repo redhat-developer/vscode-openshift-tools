@@ -49,11 +49,11 @@ export class Cluster extends OpenShiftItem {
 
     static async openshiftConsole(context: OpenShiftObject): Promise<void> {
         if (context) {
-            opn(context.getName());
+            opn(`${context.getName()}/console`);
         } else {
             const result: OpenShiftObject[] = await Cluster.odo.getClusters();
             if (result.length>0 && result[0].getName().startsWith('http')) {
-                opn(result[0].getName());
+                opn(`${result[0].getName()}/console`);
             } else {
                 window.showErrorMessage(result[0].getName());
             }

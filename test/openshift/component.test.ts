@@ -12,8 +12,9 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
 import { OdoImpl, Command } from '../../src/odo';
-
 import { Progress } from '../../src/util/progress';
+import * as Util from '../../src/util/async';
+import { Refs } from '../../src/util/refs';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
 
@@ -38,6 +39,7 @@ suite('OpenShift/Component', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         opnStub = sandbox.stub();
+        sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>());
         Component = pq('../../src/openshift/component', {
             opn: opnStub
         }).Component;
@@ -47,7 +49,7 @@ suite('OpenShift/Component', () => {
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
         getComponentsStub = sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
-        sandbox.stub(Component, 'wait').resolves();
+        sandbox.stub(Util, 'wait').resolves();
         getProjects = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         getApps = sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
@@ -80,7 +82,8 @@ suite('OpenShift/Component', () => {
         const ref = 'master';
         const folder = { uri: { fsPath: 'folder' } };
         let inputStub: sinon.SinonStub,
-            progressCmdStub: sinon.SinonStub;
+        progressCmdStub: sinon.SinonStub,
+        progressFunctionStub: sinon.SinonStub;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -90,6 +93,7 @@ suite('OpenShift/Component', () => {
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
             sandbox.stub(Progress, 'execWithProgress').resolves();
             progressCmdStub = sandbox.stub(Progress, 'execCmdWithProgress').resolves();
+            progressFunctionStub = sandbox.stub(Progress, 'execFunctionWithProgress').yields();
         });
 
         test('returns null when cancelled', async () => {
@@ -122,9 +126,8 @@ suite('OpenShift/Component', () => {
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(progressCmdStub).calledOnceWith(
-                    `Creating new Component '${componentItem.getName()}'`,
-                    Command.createLocalComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), folder.uri.fsPath));
+                expect(progressFunctionStub).calledOnceWith(
+                    `Creating new Component '${componentItem.getName()}'`);
                 expect(termStub).calledOnceWith(Command.pushLocalComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), folder.uri.fsPath));
             });
 
@@ -159,12 +162,13 @@ suite('OpenShift/Component', () => {
 
         suite('from git repository', () => {
             const uri = 'git uri';
-
             setup(() => {
                 quickPickStub.onFirstCall().resolves({ label: 'Git Repository' });
                 inputStub.onFirstCall().resolves(uri);
-                inputStub.onSecondCall().resolves(ref);
-                inputStub.onThirdCall().resolves(componentItem.getName());
+                quickPickStub.onSecondCall().resolves('master');
+                quickPickStub.onThirdCall().resolves(componentType);
+                quickPickStub.onCall(3).resolves(version);
+                inputStub.onSecondCall().resolves(componentItem.getName());
                 infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves();
             });
 
@@ -182,22 +186,29 @@ suite('OpenShift/Component', () => {
                 expect(result).null;
             });
 
-            test('returns null when no component name selected', async () => {
-                inputStub.onThirdCall().resolves();
-                const result = await Component.create(appItem);
-
-                expect(result).null;
-            });
-
-            test('returns null when no component type selected', async () => {
+            test('returns null when no git reference selected', async () => {
                 quickPickStub.onSecondCall().resolves();
                 const result = await Component.create(appItem);
 
                 expect(result).null;
             });
 
+            test('returns null when no component name selected', async () => {
+                inputStub.onSecondCall().resolves();
+                const result = await Component.create(appItem);
+
+                expect(result).null;
+            });
+
+            test('returns null when no component type selected', async () => {
+                quickPickStub.onCall(2).resolves();
+                const result = await Component.create(appItem);
+
+                expect(result).null;
+            });
+
             test('returns null when no component type version selected', async () => {
-                quickPickStub.onThirdCall().resolves();
+                quickPickStub.onCall(3).resolves();
                 const result = await Component.create(appItem);
 
                 expect(result).null;
@@ -245,29 +256,6 @@ suite('OpenShift/Component', () => {
                 expect(result).equals('Empty Git repository URL');
 
             });
-
-            test('allows to continue with valid git reference', async () => {
-                let result: string | Thenable<string>;
-                inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
-                    result = options.validateInput('master');
-                    return Promise.resolve('master');
-                });
-
-                await Component.create(appItem);
-                expect(result).to.be.undefined;
-            });
-
-            test('shows error message for empty git reference input', async () => {
-                let result: string | Thenable<string>;
-                inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
-                    result = options.validateInput('');
-                    return Promise.resolve('');
-                });
-
-                await Component.create(appItem);
-                expect(result).equals('Empty reference, specify master if no reference needed.');
-
-            });
         });
 
         suite('from binary file', () => {
@@ -285,9 +273,7 @@ suite('OpenShift/Component', () => {
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(progressCmdStub).calledOnceWith(
-                    `Creating new Component '${componentItem.getName()}'`,
-                    Command.createBinaryComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), files[0].fsPath));
+                expect(execStub).calledWith(Command.createBinaryComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), files[0].fsPath));
             });
 
             test('returns null when no binary file selected', async () => {
@@ -740,13 +726,72 @@ suite('OpenShift/Component', () => {
             expect(result).is.null;
         });
 
-        test('gets url for component and opens it in browser', async () => {
+        test('gets URLs for component and if there is only one opens it in browser', async () => {
             execStub.onCall(0).resolves({error: undefined, stdout: 'url', stderr: ''});
             execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(2).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(3).resolves({error: undefined, stdout: 'tlsEnabled', stderr: ''});
+            execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        spec: {
+                            path: 'url',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }
+                ]
+            }), stderr: ''});
             await Component.openUrl(null);
             expect(opnStub).calledOnceWith('https://url');
+        });
+
+        test('gets URLs for the component and if there is more than one asks which one to open it in browser and opens selected', async () => {
+            quickPickStub.onCall(3).resolves('https://url1');
+            execStub.onCall(0).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        spec: {
+                            path: 'url1',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }, {
+                        spec: {
+                            path: 'url2',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }
+                ]
+            }), stderr: ''});
+            await Component.openUrl(null);
+            expect(opnStub).calledOnceWith('https://url1');
+        });
+
+        test('gets URLs for the component, if there is more than one asks which one to open it in browser and exits if selection is canceled', async () => {
+            quickPickStub.onCall(3).resolves(null);
+            execStub.onCall(0).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        spec: {
+                            path: 'url1',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }, {
+                        spec: {
+                            path: 'url2',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }
+                ]
+            }), stderr: ''});
+            await Component.openUrl(null);
+            expect(opnStub.callCount).equals(0);
         });
 
         test('request to create url for component if it does not exist, creates the route if confirmed by user and opens it in browser.' , async () => {
@@ -754,8 +799,17 @@ suite('OpenShift/Component', () => {
             sandbox.stub(vscode.commands, 'executeCommand').resolves();
             execStub.onCall(0).resolves({error: undefined, stdout: '', stderr: ''});
             execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(2).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(3).resolves({error: undefined, stdout: 'tlsEnabled', stderr: ''});
+            execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        spec: {
+                            path: 'url',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }
+                ]
+            }), stderr: ''});
             await Component.openUrl(null);
             expect(opnStub).calledOnceWith('https://url');
         });
@@ -768,5 +822,20 @@ suite('OpenShift/Component', () => {
             expect(opnStub).is.not.called;
         });
 
+        test('getComponentUrl returns url list for a component', async () => {
+            execStub.onCall(0).resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        spec: {
+                            path: 'url',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }
+                ]
+            }), stderr: ''});
+            const result = await Command.getComponentUrl(projectItem.getName(), appItem.getName(), componentItem.getName());
+            expect(result.length).equals(78);
+        });
     });
 });
