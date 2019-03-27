@@ -250,15 +250,26 @@ suite("odo", () => {
 
         test('getStorageNames returns storage items for an application', async () => {
             const component = new TestItem(app, 'comp');
-            const storageList = ['comp storage1', 'comp storage2', 'foo storage3'];
-            execStub.resolves({ error: null, stderr: '', stdout: storageList.join('\n') });
+            execStub.returns({
+                error: undefined,
+                stdout: JSON.stringify({
+                        items: [
+                            {
+                                metadata: {
+                                    name: 'comp',
+                                    namespace: 'project'
+                                },
+                                spec: {
+                                    storage: ['storage1', 'storage2']
+                                }
+                            }
+                        ]
+                    }
+                ),
+                stderr: ''
+            });
             const result = await odoCli.getStorageNames(component);
-
-            expect(execStub).calledOnceWith(odo.Command.listStorageNames(project.getName(), app.getName()));
             expect(result.length).equals(2);
-            for (let i = 0; i < result.length; i++) {
-                expect(result[i].getName()).equals(storageList[i].split(' ')[1]);
-            }
         });
     });
 

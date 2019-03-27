@@ -50,7 +50,7 @@ export const Command = {
     listCatalogServices: () =>
         `odo catalog list services`,
     listStorageNames: (project: string, app: string) =>
-        `oc get pvc -o jsonpath="{range .items[?(.metadata.labels.app == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\" \\"}{.metadata.labels.app\\.kubernetes\\.io/storage-name}{\\"\\n\\"}{end}" --namespace ${project}`,
+        `odo list --app ${app} --project ${project} -o json`,
     printOcVersion: () =>
         'oc version',
     printOdoVersionAndProjects: () =>
@@ -386,10 +386,14 @@ export class OdoImpl implements Odo {
         const projName = app.getParent().getName();
         const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(projName, appName));
 
-        return result.stdout.trim().split('\n').filter((value) => value.trim().split(' ').length > 1 && value.trim().split(' ')[0] === component.getName()).map((value) => {
-            const name = value.split(' ');
-            return new OpenShiftObjectImpl(component, `${name[1]}`, ContextType.STORAGE, OdoImpl.instance, TreeItemCollapsibleState.None);
-        });
+        let data: any[] = [];
+        try {
+            data = JSON.parse(result.stdout).items;
+        } catch (ignore) {
+        }
+        const storageObject: any[] = data.filter((value) => value.metadata.name === component.getName());
+        const storage: any[] = storageObject[0].spec.storage;
+        return storage.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(component, value, ContextType.STORAGE, OdoImpl.instance, TreeItemCollapsibleState.None));
     }
 
     public async getComponentTypeVersions(componentName: string) {
