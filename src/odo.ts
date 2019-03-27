@@ -484,7 +484,7 @@ export class OdoImpl implements Odo {
     public async createProject(projectName: string): Promise<OpenShiftObject> {
         await OdoImpl.instance.execute(Command.createProject(projectName));
         const clusters = await this.getClusters();
-        return this.insertAndReveal(await this.getProjects(), new OpenShiftObjectImpl(clusters[0], projectName, ContextType.PROJECT, this))
+        return this.insertAndReveal(await this.getProjects(), new OpenShiftObjectImpl(clusters[0], projectName, ContextType.PROJECT, this));
     }
 
     public async deleteApplication(app: OpenShiftObject): Promise<OpenShiftObject> {
@@ -501,7 +501,7 @@ export class OdoImpl implements Odo {
     public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: string, ref: string = 'master'): Promise<OpenShiftObject> {
         await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location));
         this.executeInTerminal(Command.pushLocalComponent(application.getParent().getName(), application.getName(), name, location));
-        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this));;
+        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this));
     }
 
     public async createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, location: string, ref: string = 'master'): Promise<OpenShiftObject> {
@@ -529,7 +529,7 @@ export class OdoImpl implements Odo {
     public async deleteService(service: OpenShiftObject): Promise<OpenShiftObject> {
         const app = service.getParent();
         await this.execute(Command.deleteService(app.getParent().getName(), app.getName(), service.getName()));
-        await this.execute(Command.waitForServiceToBeGone(app.getParent().getName(),service.getName()));
+        await this.execute(Command.waitForServiceToBeGone(app.getParent().getName(), service.getName()));
         return this.deleteAndRefresh(await this.getApplicationChildren(app), service);
     }
 

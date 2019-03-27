@@ -51,7 +51,7 @@ export class Service extends OpenShiftItem {
             if (answer === 'Yes') {
                 return Progress.execFunctionWithProgress(`Deleting Service '${service.getName()}' from Application '${service.getParent().getName()}'`, (progress) => Service.odo.deleteService(service))
                     .then(() => `Service '${service.getName()}' successfully deleted`)
-                    .catch((err) => Promise.reject(`Failed to delete Service with error '${err}'`))
+                    .catch((err) => Promise.reject(`Failed to delete Service with error '${err}'`));
             }
         }
         return null;
