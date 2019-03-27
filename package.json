@@ -630,6 +630,8 @@
     "byline": "^5.0.0",
     "event-stream": "3.3.4",
     "fs-extra": "^7.0.1",
+    "git-fetch-pack": "^0.1.1",
+    "git-transport-protocol": "^0.1.0",
     "hasha": "^3.0.0",
     "js-yaml": "^3.12.1",
     "opn": "^5.4.0",

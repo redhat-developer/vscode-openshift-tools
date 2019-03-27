@@ -14,6 +14,7 @@ import { TestItem } from './testOSItem';
 import { OdoImpl, Command } from '../../src/odo';
 import { Progress } from '../../src/util/progress';
 import * as Util from '../../src/util/async';
+import { Refs } from '../../src/util/refs';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
 
@@ -38,6 +39,7 @@ suite('OpenShift/Component', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         opnStub = sandbox.stub();
+        sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>());
         Component = pq('../../src/openshift/component', {
             opn: opnStub
         }).Component;
@@ -160,12 +162,13 @@ suite('OpenShift/Component', () => {
 
         suite('from git repository', () => {
             const uri = 'git uri';
-
             setup(() => {
                 quickPickStub.onFirstCall().resolves({ label: 'Git Repository' });
                 inputStub.onFirstCall().resolves(uri);
-                inputStub.onSecondCall().resolves(ref);
-                inputStub.onThirdCall().resolves(componentItem.getName());
+                quickPickStub.onSecondCall().resolves('master');
+                quickPickStub.onThirdCall().resolves(componentType);
+                quickPickStub.onCall(3).resolves(version);
+                inputStub.onSecondCall().resolves(componentItem.getName());
                 infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves();
             });
 
@@ -183,22 +186,29 @@ suite('OpenShift/Component', () => {
                 expect(result).null;
             });
 
-            test('returns null when no component name selected', async () => {
-                inputStub.onThirdCall().resolves();
-                const result = await Component.create(appItem);
-
-                expect(result).null;
-            });
-
-            test('returns null when no component type selected', async () => {
+            test('returns null when no git reference selected', async () => {
                 quickPickStub.onSecondCall().resolves();
                 const result = await Component.create(appItem);
 
                 expect(result).null;
             });
 
+            test('returns null when no component name selected', async () => {
+                inputStub.onSecondCall().resolves();
+                const result = await Component.create(appItem);
+
+                expect(result).null;
+            });
+
+            test('returns null when no component type selected', async () => {
+                quickPickStub.onCall(2).resolves();
+                const result = await Component.create(appItem);
+
+                expect(result).null;
+            });
+
             test('returns null when no component type version selected', async () => {
-                quickPickStub.onThirdCall().resolves();
+                quickPickStub.onCall(3).resolves();
                 const result = await Component.create(appItem);
 
                 expect(result).null;
@@ -244,29 +254,6 @@ suite('OpenShift/Component', () => {
 
                 await Component.create(appItem);
                 expect(result).equals('Empty Git repository URL');
-
-            });
-
-            test('allows to continue with valid git reference', async () => {
-                let result: string | Thenable<string>;
-                inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
-                    result = options.validateInput('master');
-                    return Promise.resolve('master');
-                });
-
-                await Component.create(appItem);
-                expect(result).to.be.undefined;
-            });
-
-            test('shows error message for empty git reference input', async () => {
-                let result: string | Thenable<string>;
-                inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
-                    result = options.validateInput('');
-                    return Promise.resolve('');
-                });
-
-                await Component.create(appItem);
-                expect(result).equals('Empty reference, specify master if no reference needed.');
 
             });
         });
