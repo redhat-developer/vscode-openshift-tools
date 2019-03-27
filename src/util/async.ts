@@ -7,3 +7,7 @@
 export function isThenable<T>(candidate: any): candidate is Thenable<T> {
     return candidate && typeof (<Thenable<any>>candidate).then === 'function';
 }
+
+export function wait(timeout: number = 2500): Promise<void> {
+    return new Promise((res) => setTimeout(res, timeout));
+}

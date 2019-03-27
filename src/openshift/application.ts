@@ -6,6 +6,7 @@
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
 import { window } from 'vscode';
+import { Progress } from '../util/progress';
 
 export class Application extends OpenShiftItem {
 
@@ -16,11 +17,11 @@ export class Application extends OpenShiftItem {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
         const applicationName = await Application.getName('Application name', applicationList);
         if (!applicationName) return null;
-        return Promise.resolve()
-            .then(() => Application.odo.execute(Command.createApplication(project.getName(), applicationName)))
-            .then(() => Application.explorer.refresh(project))
-            .then(() => `Application '${applicationName}' successfully created`)
-            .catch((error) => Promise.reject(`Failed to create Application with error '${error}'`));
+        return Progress.execFunctionWithProgress(`Deleting the Application '${applicationName}'.`, () =>
+            Application.odo.createApplication(project, applicationName)
+                .then(() => Application.explorer.refresh(project))
+                .then(() => `Application '${applicationName}' successfully created`)
+                .catch((error) => Promise.reject(`Failed to create Application with error '${error}'`)));
     }
 
     static async describe(treeItem: OpenShiftObject): Promise<void> {
@@ -39,9 +40,7 @@ export class Application extends OpenShiftItem {
             const projName = application.getParent().getName();
             const value = await window.showWarningMessage(`Do you want to delete Application '${appName}?'`, 'Yes', 'Cancel');
             if (value === 'Yes') {
-                return Promise.resolve()
-                    .then(() => Application.odo.execute(Command.deleteApplication(projName, appName)))
-                    .then(() => Application.explorer.refresh(treeItem ? treeItem.getParent() : undefined))
+                return Progress.execFunctionWithProgress(`Deleting the Application '${appName}'`, () => Application.odo.deleteApplication(application))
                     .then(() => `Application '${appName}' successfully deleted`)
                     .catch((err) => Promise.reject(`Failed to delete Application with error '${err}'`));
             }

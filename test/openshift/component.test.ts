@@ -13,6 +13,7 @@ import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
 import { OdoImpl, Command } from '../../src/odo';
 import { Progress } from '../../src/util/progress';
+import * as Util from '../../src/util/async';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
 
@@ -46,7 +47,7 @@ suite('OpenShift/Component', () => {
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
         getComponentsStub = sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
-        sandbox.stub(Component, 'wait').resolves();
+        sandbox.stub(Util, 'wait').resolves();
         getProjects = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         getApps = sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
@@ -79,7 +80,8 @@ suite('OpenShift/Component', () => {
         const ref = 'master';
         const folder = { uri: { fsPath: 'folder' } };
         let inputStub: sinon.SinonStub,
-            progressCmdStub: sinon.SinonStub;
+        progressCmdStub: sinon.SinonStub,
+        progressFunctionStub: sinon.SinonStub;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -89,6 +91,7 @@ suite('OpenShift/Component', () => {
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
             sandbox.stub(Progress, 'execWithProgress').resolves();
             progressCmdStub = sandbox.stub(Progress, 'execCmdWithProgress').resolves();
+            progressFunctionStub = sandbox.stub(Progress, 'execFunctionWithProgress').yields();
         });
 
         test('returns null when cancelled', async () => {
@@ -121,9 +124,8 @@ suite('OpenShift/Component', () => {
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(progressCmdStub).calledOnceWith(
-                    `Creating new Component '${componentItem.getName()}'`,
-                    Command.createLocalComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), folder.uri.fsPath));
+                expect(progressFunctionStub).calledOnceWith(
+                    `Creating new Component '${componentItem.getName()}'`);
                 expect(termStub).calledOnceWith(Command.pushLocalComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), folder.uri.fsPath));
             });
 
@@ -284,9 +286,7 @@ suite('OpenShift/Component', () => {
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(progressCmdStub).calledOnceWith(
-                    `Creating new Component '${componentItem.getName()}'`,
-                    Command.createBinaryComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), files[0].fsPath));
+                expect(execStub).calledWith(Command.createBinaryComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), files[0].fsPath));
             });
 
             test('returns null when no binary file selected', async () => {

@@ -10,6 +10,7 @@ import * as sinonChai from 'sinon-chai';
 import sinon = require('sinon');
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import { OdoImpl } from '../../src/odo';
+import { wait } from '../../src/util/async';
 import { TestItem } from './testOSItem';
 import { fail } from 'assert';
 
@@ -34,7 +35,7 @@ suite('OpenShiftItem', () => {
     });
 
     test('Wait eventually exits', async () => {
-        return OpenShiftItem.wait();
+        return wait();
     });
 
     suite('getProjectNames', ()=> {

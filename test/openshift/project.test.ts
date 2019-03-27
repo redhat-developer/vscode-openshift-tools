@@ -29,7 +29,7 @@ suite('OpenShift/Project', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves();
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
         sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
     });
@@ -49,7 +49,7 @@ suite('OpenShift/Project', () => {
             const result = await Project.create();
 
             expect(result).equals(`Project '${projectItem.getName()}' successfully created`);
-            expect(execStub).calledOnceWith(Command.createProject(projectItem.getName()));
+            expect(execStub).calledWith(Command.createProject(projectItem.getName()));
         });
 
         test('returns null with no project name selected', async () => {
