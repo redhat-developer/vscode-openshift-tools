@@ -495,7 +495,7 @@ export class OdoImpl implements Odo {
 
     public async createApplication(project: OpenShiftObject, applicationName: string): Promise<OpenShiftObject> {
         await this.execute(Command.createApplication(project.getName(), applicationName));
-        return this.insertAndReveal(await this.getApplications(project), new OpenShiftObjectImpl(project, applicationName, ContextType.PROJECT, this));
+        return this.insertAndReveal(await this.getApplications(project), new OpenShiftObjectImpl(project, applicationName, ContextType.APPLICATION, this));
     }
 
     public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: string, ref: string = 'master'): Promise<OpenShiftObject> {
