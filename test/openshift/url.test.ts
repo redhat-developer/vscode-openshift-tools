@@ -194,14 +194,15 @@ suite('OpenShift/URL', () => {
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([componentItem]);
-            inputStub.onFirstCall().resolves();
+            inputStub.onFirstCall().resolves('urlName');
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
-            execStub.onSecondCall().resolves({error: null, stdout: portsOutput, stderr: ''});
+            execStub.onFirstCall().resolves({error: null, stdout: portsOutput, stderr: ''});
+            execStub.onSecondCall().resolves({error: null, stdout: '', stderr: ''});
             quickPickStub.resolves('port1');
             const result = await Url.create(null);
 
-            expect(result).equals(`URL for component '${componentItem.getName()}' successfully created`);
+            expect(result).equals(`URL 'urlName' for component '${componentItem.getName()}' successfully created`);
+            expect(execStub).calledTwice;
         });
 
         test('rejects when fails to create Url', () => {
@@ -224,11 +225,10 @@ suite('OpenShift/URL', () => {
     suite('create', () => {
 
         test('asks to select port if more that one exposed and returns message', async () => {
-            inputStub.onFirstCall().resolves();
+            inputStub.onFirstCall().resolves('urlName');
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
-            execStub.onSecondCall().resolves({error: null, stdout: portsOutput, stderr: ''});
-            execStub.onThirdCall().resolves();
+            execStub.onFirstCall().resolves({error: null, stdout: portsOutput, stderr: ''});
+            execStub.onSecondCall().resolves({error: null, stdout: '', stderr: ''});
             quickPickStub.resolves({
                 name: "8080-tcp",
                 port: 8080,
@@ -237,8 +237,8 @@ suite('OpenShift/URL', () => {
             });
             const result = await Url.create(componentItem);
 
-            expect(result).equals(`URL for component '${componentItem.getName()}' successfully created`);
-            expect(execStub).calledThrice;
+            expect(result).equals(`URL 'urlName' for component '${componentItem.getName()}' successfully created`);
+            expect(execStub).calledTwice;
         });
 
         test('rejects when fails to create Url', () => {
