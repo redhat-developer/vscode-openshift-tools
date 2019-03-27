@@ -54,6 +54,16 @@ export abstract class OpenShiftItem {
         return (validator.matches(value, '^[a-z]([-a-z0-9]*[a-z0-9])*$')) ? null : message;
     }
 
+    static ocLoginCommandMatches(value: string) {
+        const ocloginRegex = /oc login (http|https):(.*?) --token=(.*)/;
+        return ocloginRegex.test(value) ? value : null;
+    }
+
+    static clusterURL(value: string) {
+        const urlRegex = value.match('(https?:\/\/[^ ]*)');
+        return (urlRegex) ? urlRegex[0] : null;
+    }
+
     static async getProjectNames(): Promise<OpenShiftObject[]> {
         const projectList: Array<OpenShiftObject> = await OpenShiftItem.odo.getProjects();
         if (projectList.length === 0) throw Error(errorMessage.Project);
