@@ -104,6 +104,7 @@ suite('OpenShift/URL', () => {
             "loadBalancer": {}
         }
     }`;
+
     const portsOutput = `{
         "apiVersion": "v1",
         "kind": "Service",
@@ -241,27 +242,32 @@ suite('OpenShift/URL', () => {
             expect(execStub).calledTwice;
         });
 
-        test('rejects when fails to create Url', () => {
+        test('rejects when fails to create Url', async () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
-            execStub.onSecondCall().resolves({error: null, stdout: portOutput, stderr: ''});
-            execStub.onThirdCall().rejects();
-            inputStub.onFirstCall().resolves();
+            execStub.onFirstCall().resolves({error: null, stdout: portOutput, stderr: ''});
+            execStub.onSecondCall().rejects(Error('Error'));
+            inputStub.onFirstCall().resolves('urlName');
+            try {
+                await Url.create(componentItem);
+            } catch (error) {
+                expect(error).equals(`Failed to create URL 'urlName' for component '${componentItem.getName()}'. Error`);
+                return;
+            }
 
-            return Url.create(componentItem).catch((err) => {
-                expect(err).equals(`Failed to create URL for component '${componentItem.getName()}'. Error`);
-            });
+            expect.fail(false, true, 'No exception thrown');
         });
 
-        test('rejects when component has no ports declared', () => {
+        test('rejects when component has no ports declared', async () => {
             execStub = sandbox.stub(OdoImpl.prototype, 'execute');
-            execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
-            execStub.onSecondCall().resolves({error: null, stdout: noPortsOutput, stderr: ''});
-            execStub.onThirdCall().rejects();
-
-            return Url.create(componentItem).catch((err) => {
-                expect(err).equals(`Component '${componentItem.getName()}' has no ports declared.`);
-            });
+            execStub.onFirstCall().resolves({error: null, stdout: noPortsOutput, stderr: ''});
+            inputStub.onFirstCall().resolves('urlName');
+            try {
+                await Url.create(componentItem);
+            } catch (error) {
+                expect(error).equals(`Component '${componentItem.getName()}' has no ports declared.`);
+                return;
+            }
+            expect.fail(false, true, 'No exception thrown');
         });
     });
 });
