@@ -176,7 +176,7 @@ export class Component extends OpenShiftItem {
         const app: OpenShiftObject = component.getParent();
         const namespace: string = app.getParent().getName();
         if (await Component.checkRouteCreated(namespace, component)) {
-            const value = await window.showInformationMessage(`No URL for Component '${component.getName()}' in Application '${app.getName()}'. Do you want to create an URL and open it?`, 'Create', 'Cancel');
+            const value = await window.showInformationMessage(`No URL for Component '${component.getName()}' in Application '${app.getName()}'. Do you want to create a URL and open it?`, 'Create', 'Cancel');
             if (value === 'Create') {
                 await commands.executeCommand('openshift.url.create', component);
             }
@@ -194,7 +194,7 @@ export class Component extends OpenShiftItem {
             }
             const hostName: string[] = result.map((value) =>`${value.spec.protocol}://${value.spec.path}`);
             if (hostName.length >1) {
-                selectRoute = await window.showQuickPick(hostName, {placeHolder: "This component has multiple routes enabled. Select the desired route to Open in Browser."});
+                selectRoute = await window.showQuickPick(hostName, {placeHolder: "This Component has multiple URLs. Select the desired URL to open in browser."});
                 if (!selectRoute) return null;
                 return opn(`${selectRoute}`);
             } else {
