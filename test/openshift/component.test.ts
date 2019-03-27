@@ -725,13 +725,11 @@ suite('OpenShift/Component', () => {
     });
 
     suite('openUrl', () => {
-        const route = 'https://url';
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
-            quickPickStub.onCall(3).resolves(route);
         });
 
         test('ask for context when called from command bar and exits with null if canceled', async () => {
@@ -741,7 +739,7 @@ suite('OpenShift/Component', () => {
             expect(result).is.null;
         });
 
-        test('gets url for component and opens it in browser', async () => {
+        test('gets URLs for component and if there is only one opens it in browser', async () => {
             execStub.onCall(0).resolves({error: undefined, stdout: 'url', stderr: ''});
             execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
             execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
@@ -757,6 +755,56 @@ suite('OpenShift/Component', () => {
             }), stderr: ''});
             await Component.openUrl(null);
             expect(opnStub).calledOnceWith('https://url');
+        });
+
+        test('gets URLs for the component and if there is more than one asks which one to open it in browser and opens selected', async () => {
+            quickPickStub.onCall(3).resolves('https://url1');
+            execStub.onCall(0).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        spec: {
+                            path: 'url1',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }, {
+                        spec: {
+                            path: 'url2',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }
+                ]
+            }), stderr: ''});
+            await Component.openUrl(null);
+            expect(opnStub).calledOnceWith('https://url1');
+        });
+
+        test('gets URLs for the component, if there is more than one asks which one to open it in browser and exits if selection is canceled', async () => {
+            quickPickStub.onCall(3).resolves(null);
+            execStub.onCall(0).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
+            execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        spec: {
+                            path: 'url1',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }, {
+                        spec: {
+                            path: 'url2',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }
+                ]
+            }), stderr: ''});
+            await Component.openUrl(null);
+            expect(opnStub.callCount).equals(0);
         });
 
         test('request to create url for component if it does not exist, creates the route if confirmed by user and opens it in browser.' , async () => {
