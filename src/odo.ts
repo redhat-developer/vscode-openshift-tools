@@ -11,7 +11,6 @@ import * as path from 'path';
 import { ToolsConfig } from './tools';
 import format =  require('string-format');
 import { OpenShiftExplorer } from './explorer';
-import { fstatSync, statSync, Stats } from 'fs-extra';
 import { wait } from './util/async';
 
 export interface OpenShiftObject extends QuickPickItem {
