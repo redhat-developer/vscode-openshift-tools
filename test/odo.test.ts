@@ -189,16 +189,28 @@ suite("odo", () => {
             expect(result).empty;
         });
 
-        test('getComponents returns components for an applications', async () => {
-            const components = ['comp1', 'comp2', 'comp3'];
-            execStub.resolves({ error: null, stderr: '', stdout: components.join('\n') });
-            const result = await odoCli.getComponents(app);
+        test('getComponents returns components list for an application', async () => {
+            const activeApps = [{ name: 'app1', project: 'project1' }, { name: 'app2', project: 'project1'}];
+            yamlStub.returns({ ActiveApplications: activeApps });
+            execStub.returns({
+                error: undefined,
+                stdout: JSON.stringify({
+                        items: [
+                            {
+                                metadata: {
+                                    name: 'component1',
+                                    namespace: 'project'
+                                }
+                            }
+                        ]
+                    }
+                ),
+                stderr: ''
+            });
+            const result = await odoCli.getApplications(app);
 
-            expect(execStub).calledWith(odo.Command.listComponents(project.getName(), app.getName()));
-            expect(result.length).equals(3);
-            for (let i = 0; i < result.length; i++) {
-                expect(result[i].getName()).equals(components[i]);
-            }
+            expect(result.length).equals(1);
+            expect(result[0].getName()).equals('component1');
         });
 
         test('getServices returns services for an application', async () => {
@@ -238,13 +250,20 @@ suite("odo", () => {
         });
 
         test('getApplicationChildren returns both components and services for an application', async () => {
-            const component = new TestItem(app, 'comp');
-            const service = new TestItem(app, 'serv');
-            execStub.onFirstCall().resolves({error: undefined, stdout: 'comp', stderr: ''});
+            execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        metadata: {
+                            name: 'component1',
+                            namespace: 'project'
+                        }
+                    }
+                ]
+            }), stderr: ''});
             execStub.onSecondCall().resolves({error: undefined, stdout: 'serv', stderr: ''});
             const result = await odoCli.getApplicationChildren(app);
 
-            expect(result[0].getName()).deep.equals('comp');
+            expect(result[0].getName()).deep.equals('component1');
             expect(result[1].getName()).deep.equals('serv');
         });
 
