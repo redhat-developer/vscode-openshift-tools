@@ -154,7 +154,7 @@ export class Cluster extends OpenShiftItem {
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
         if (response !== 'Yes') return null;
         const oclogin = Cluster.ocLoginCommandMatches(await clipboardy.readSync());
-        if (!oclogin) return null;
+        if (!oclogin) throw Error('oc login command not found in clipboard');
         const clusterURL = Cluster.clusterURL(oclogin);
         if (!clusterURL) return null;
         return Promise.resolve()
