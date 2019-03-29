@@ -38,7 +38,7 @@ suite('Openshift/Cluster', () => {
         stderr: error,
         stdout: 'output'
     };
-    const testUrl = 'url';
+    const testUrl = 'https://162.165.64.43:8443';
     const testUser = 'user';
     const password = 'password';
     const token = 'token';
@@ -182,7 +182,9 @@ suite('Openshift/Cluster', () => {
         });
 
         suite('token', () => {
+            let readTextStub;
             setup(() => {
+                readTextStub = sandbox.stub(vscode.env.clipboard, 'readText').resolves();
                 quickPickStub.resolves('Token');
                 inputStub.onSecondCall().resolves('token');
             });
@@ -190,27 +192,35 @@ suite('Openshift/Cluster', () => {
             test('logins to new cluster if user answer yes to a warning', async () => {
                 loginStub.resolves(false);
                 infoStub.resolves('Yes');
-                const result = await Cluster.tokenLogin();
+                const result = await Cluster.clipboardLogin();
                 expect(result).equals(`Successfully logged in to '${testUrl}'`);
             });
 
             test('exits if the user cancels url input box', async () => {
                 loginStub.resolves(false);
                 inputStub.onFirstCall().resolves(null);
-                const result = await Cluster.tokenLogin();
+                const result = await Cluster.clipboardLogin();
                 expect(result).null;
             });
 
             test('exits if the user refuses to login to new cluster', async () => {
                 loginStub.resolves(false);
                 infoStub.resolves('No');
-                const result = await Cluster.tokenLogin();
+                const result = await Cluster.clipboardLogin();
                 expect(result).null;
+            });
+
+            test('logins to new cluster if user answer No to a warning of clipboard', async () => {
+                readTextStub.resolves('oc login https://162.165.64.43:8443 --token=bX6eP0d4IRgXwWuCKq2856h5fyK9c2U5tOKCwFeEmQA');
+                loginStub.resolves(false);
+                infoStub.onFirstCall().resolves('Yes');
+                infoStub.onSecondCall().resolves('No');
+                const result = await Cluster.clipboardLogin();
+                expect(result).equals(`Successfully logged in to '${testUrl}'`);
             });
 
             test('happy path works', async () => {
                 const status = await Cluster.login();
-
                 expect(status).equals(`Successfully logged in to '${testUrl}'`);
                 expect(execStub).calledOnceWith(Command.odoLoginWithToken(testUrl, token));
                 expect(commandStub).calledOnceWith('setContext', 'isLoggedIn', true);
@@ -221,6 +231,50 @@ suite('Openshift/Cluster', () => {
                 const status = await Cluster.login();
 
                 expect(status).null;
+            });
+
+            test('handles incoming errors the same way as credentials login', async () => {
+                execStub.rejects(error);
+                try {
+                    await Cluster.login();
+                    expect.fail();
+                } catch (err) {
+                    expect(err).equals(`Failed to login to cluster '${testUrl}' with '${error}'!`);
+                }
+            });
+        });
+
+        suite('clipboard login', () => {
+            let readTextStub;
+            setup(() => {
+                readTextStub = sandbox.stub(vscode.env.clipboard, 'readText').resolves('oc login https://162.165.64.43:8443 --token=bX6eP0d4IRgXwWuCKq2856h5fyK9c2U5tOKCwFeEmQA');
+                quickPickStub.resolves('Token');
+                inputStub.onSecondCall().resolves('token');
+            });
+
+            test('logins to new cluster if user answer yes to a warning', async () => {
+                loginStub.resolves(false);
+                infoStub.onFirstCall().resolves('Yes');
+                infoStub.onSecondCall().resolves('Yes');
+                const result = await Cluster.clipboardLogin();
+                expect(result).equals(`Successfully logged in to '${testUrl}'`);
+            });
+
+            test('return null if user cancel login from cliboard', async () => {
+                loginStub.resolves(false);
+                infoStub.onFirstCall().resolves('Yes');
+                infoStub.onSecondCall().resolves(undefined);
+                const result = await Cluster.clipboardLogin();
+                expect(result).null;
+            });
+
+            test('return null if cluster url not found', async () => {
+                readTextStub.resolves('oc login https:/162.165 --token=bX6eP0d4IRgXwWuCKq2856h5fyK9c2U5tOKCwFeEmQA');
+                loginStub.resolves(false);
+                infoStub.onFirstCall().resolves('Yes');
+                infoStub.onSecondCall().resolves('Yes');
+                const result = await Cluster.clipboardLogin();
+                expect(result).null;
             });
 
             test('handles incoming errors the same way as credentials login', async () => {

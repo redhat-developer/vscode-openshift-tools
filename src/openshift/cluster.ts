@@ -5,10 +5,9 @@
 
 import { OpenShiftObject, Command } from "../odo";
 import { OpenShiftItem } from './openshiftItem';
-import { window, commands } from 'vscode';
+import { window, commands, env } from 'vscode';
 import { CliExitData, Cli } from "../cli";
 import opn = require("opn");
-const clipboardy = require('clipboardy');
 import { TokenStore } from "../util/credentialManager";
 
 export class Cluster extends OpenShiftItem {
@@ -72,14 +71,12 @@ export class Cluster extends OpenShiftItem {
     static async login(): Promise<string> {
         const response = await Cluster.requestLoginConfirmation();
         if (response !== 'Yes') return null;
-        const loginMethod = await window.showQuickPick(['Credentials', 'Token', 'ocLogin'], {placeHolder: 'Select the way to log in to the cluster.'});
+        const loginMethod = await window.showQuickPick(['Credentials', 'Token'], {placeHolder: 'Select the way to log in to the cluster.'});
         if (!loginMethod) return null;
         if (loginMethod === "Credentials") {
             return Cluster.credentialsLogin(true);
-        } else if (loginMethod === "Token") {
-            return Cluster.tokenLogin(true);
         } else {
-            return Cluster.ocLogin(true);
+            return Cluster.clipboardLogin(true);
         }
     }
 
@@ -130,9 +127,7 @@ export class Cluster extends OpenShiftItem {
             .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`));
     }
 
-    static async tokenLogin(skipConfirmation: boolean = false): Promise<string> {
-        const response = await Cluster.requestLoginConfirmation(skipConfirmation);
-        if (response !== 'Yes') return null;
+    static async tokenLogin(): Promise<string> {
         const clusterURL = await Cluster.getUrl();
         if (!clusterURL) return null;
         const ocToken = await window.showInputBox({
@@ -147,18 +142,22 @@ export class Cluster extends OpenShiftItem {
     }
 
     static async readFromClipboard() {
-        return await clipboardy.readSync();
+        return await env.clipboard.readText();
     }
 
-    static async ocLogin(skipConfirmation: boolean = false): Promise<string> {
+    static async clipboardLogin(skipConfirmation: boolean = false): Promise<string> {
+        let userResponse: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
         if (response !== 'Yes') return null;
-        const oclogin = Cluster.ocLoginCommandMatches(await clipboardy.readSync());
-        if (!oclogin) throw Error('oc login command not found in clipboard');
-        const clusterURL = Cluster.clusterURL(oclogin);
+        const clipboardLogin = Cluster.ocLoginCommandMatches(await Cluster.readFromClipboard());
+        if (clipboardLogin) userResponse = await window.showInformationMessage(`Detected url and token from clipboard. Do you want to login?`, 'Yes', 'No');
+        if (!clipboardLogin) return Cluster.tokenLogin();
+        if (userResponse === 'No') return Cluster.tokenLogin();
+        if (userResponse === undefined) return null;
+        const clusterURL = Cluster.clusterURL(clipboardLogin);
         if (!clusterURL) return null;
         return Promise.resolve()
-            .then(() => Cluster.odo.execute(oclogin)
+            .then(() => Cluster.odo.execute(clipboardLogin)
             .then((result) => Cluster.loginMessage(clusterURL, result))
             .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`)));
     }

@@ -13,7 +13,7 @@
   },
   "bugs": "https://github.com/redhat-developer/vscode-openshift-tools/issues",
   "engines": {
-    "vscode": "^1.25.0"
+    "vscode": "^1.30.0"
   },
   "categories": [
     "Other"
@@ -32,8 +32,7 @@
     "onCommand:openshift.openshiftConsole.palette",
     "onCommand:openshift.explorer.login",
     "onCommand:openshift.explorer.login.credentialsLogin",
-    "onCommand:openshift.explorer.login.tokenLogin",
-    "onCommand:openshift.explorer.login.ocLogin",
+    "onCommand:openshift.explorer.login.clipboardLogin",
     "onCommand:openshift.explorer.logout",
     "onCommand:openshift.explorer.refresh",
     "onCommand:openshift.project.create",
@@ -96,13 +95,8 @@
         "icon": "images/title/login.png"
       },
       {
-        "command": "openshift.explorer.login.tokenLogin",
+        "command": "openshift.explorer.login.clipboardLogin",
         "title": "Login into Cluster with token",
-        "category": "OpenShift"
-      },
-      {
-        "command": "openshift.explorer.login.ocLogin",
-        "title": "Login from oc command line",
         "category": "OpenShift"
       },
       {
@@ -634,7 +628,6 @@
   "dependencies": {
     "@kubernetes/client-node": "^0.8.1",
     "byline": "^5.0.0",
-    "clipboardy": "^1.2.3",
     "event-stream": "3.3.4",
     "fs-extra": "^7.0.1",
     "git-fetch-pack": "^0.1.1",
