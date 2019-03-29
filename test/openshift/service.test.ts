@@ -57,10 +57,11 @@ suite('OpenShift/Service', () => {
 
         setup(() => {
             sandbox.stub(OdoImpl.prototype, 'getServiceTemplates').resolves([]);
-            sandbox.stub(OdoImpl.prototype, 'getServiceTemplatePlans').resolves([]);
+            sandbox.stub(OdoImpl.prototype, 'getServiceTemplatePlans').resolves(['default', 'free', 'paid']);
             quickPickStub.onFirstCall().resolves(appItem);
             quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onFirstCall().resolves(templatePlan);
+            quickPickStub.onThirdCall().resolves(templatePlan);
+            quickPickStub.onCall(3).resolves('default');
             inputStub = sandbox.stub(vscode.window, 'showInputBox').resolves(serviceItem.getName());
             progressStub = sandbox.stub(Progress, 'execFunctionWithProgress').resolves();
         });
@@ -68,7 +69,6 @@ suite('OpenShift/Service', () => {
         test('works with correct inputs', async () => {
             getProjectsStub.resolves([projectItem]);
             getApplicationsStub.resolves([appItem]);
-            quickPickStub.resolves(templateName);
             const result = await Service.create(null);
             expect(result).equals(`Service '${serviceItem.getName()}' successfully created`);
         });
@@ -100,7 +100,7 @@ suite('OpenShift/Service', () => {
         });
 
         test('returns null with no template selected', async () => {
-            quickPickStub.resolves();
+            quickPickStub.onThirdCall().resolves();
             const result = await Service.create(null);
 
             expect(result).null;
@@ -128,7 +128,7 @@ suite('OpenShift/Service', () => {
         });
 
         test('returns null with no template plan selected', async () => {
-            quickPickStub.resolves();
+            quickPickStub.onThirdCall().resolves();
             const result = await Service.create(null);
 
             expect(result).null;
@@ -146,7 +146,7 @@ suite('OpenShift/Service', () => {
             try {
                 await Service.create(null);
             } catch (err) {
-                expect(err).equals(`Failed to create service with error '${errorMessage}'`);
+                expect(err).equals(`Failed to create Service with error '${errorMessage}'`);
             }
         });
     });
@@ -156,16 +156,16 @@ suite('OpenShift/Service', () => {
 
         setup(() => {
             sandbox.stub(OdoImpl.prototype, 'getServiceTemplates').resolves([]);
-            sandbox.stub(OdoImpl.prototype, 'getServiceTemplatePlans').resolves([]);
+            sandbox.stub(OdoImpl.prototype, 'getServiceTemplatePlans').resolves(['default', 'free', 'paid']);
             quickPickStub.onFirstCall().resolves(templateName);
             quickPickStub.onSecondCall().resolves(templatePlan);
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').resolves(serviceItem.getName());
+            inputStub = sandbox.stub(vscode.window, 'showInputBox');
             progressStub = sandbox.stub(Progress, 'execFunctionWithProgress').yields();
         });
+
         test('validator returns undefined for valid service name', async () => {
             let result: string | Thenable<string>;
-            inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                 result = options.validateInput('goodvalue');
                 return Promise.resolve('goodvalue');
             });
@@ -176,8 +176,7 @@ suite('OpenShift/Service', () => {
 
         test('validator returns error message for empty service name', async () => {
             let result: string | Thenable<string>;
-            inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                 result = options.validateInput('');
                 return Promise.resolve('');
             });
@@ -188,8 +187,7 @@ suite('OpenShift/Service', () => {
 
         test('validator returns error message for none alphanumeric service name', async () => {
             let result: string | Thenable<string>;
-            inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                 result = options.validateInput('name&name');
                 return Promise.resolve('name&name');
             });
@@ -200,8 +198,7 @@ suite('OpenShift/Service', () => {
 
         test('validator returns error message if same name of service found', async () => {
             let result: string | Thenable<string>;
-            inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                 result = options.validateInput('service');
                 return Promise.resolve('service');
             });
@@ -212,8 +209,7 @@ suite('OpenShift/Service', () => {
 
         test('validator returns error message for service name longer than 63 characters', async () => {
             let result: string | Thenable<string>;
-            inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                 result = options.validateInput('n123456789012345678901234567890123456789012345678901234567890123');
                 return Promise.resolve('n123456789012345678901234567890123456789012345678901234567890123');
             });
@@ -223,12 +219,14 @@ suite('OpenShift/Service', () => {
         });
 
         test('works with correct inputs', async () => {
+            inputStub.resolves('service');
             const result = await Service.create(appItem);
             expect(result).equals(`Service '${serviceItem.getName()}' successfully created`);
             expect(execStub).calledOnceWith(Command.createService(projectItem.getName(), appItem.getName(), templateName, templatePlan, serviceItem.getName()));
         });
 
         test('returns null with no template selected', async () => {
+            inputStub.resolves();
             quickPickStub.onFirstCall().resolves();
             const result = await Service.create(appItem);
 
@@ -236,6 +234,7 @@ suite('OpenShift/Service', () => {
         });
 
         test('returns null with no template plan selected', async () => {
+            inputStub.resolves();
             quickPickStub.onSecondCall().resolves();
             const result = await Service.create(appItem);
 

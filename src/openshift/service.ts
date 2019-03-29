@@ -20,10 +20,17 @@ export class Service extends OpenShiftItem {
             placeHolder: "Service Template Name"
         });
         if (!serviceTemplateName) return null;
-
-        const serviceTemplatePlanName = await window.showQuickPick(Service.odo.getServiceTemplatePlans(serviceTemplateName), {
-            placeHolder: "Service Template Plan Name"
-        });
+        const plans: string[] = await Service.odo.getServiceTemplatePlans(serviceTemplateName);
+        let serviceTemplatePlanName: string;
+        if (plans.length === 1) {
+            serviceTemplatePlanName = plans[0];
+        } else if (plans.length > 1) {
+            serviceTemplatePlanName = await window.showQuickPick(plans, {
+                placeHolder: "Service Template Plan Name"
+            });
+        } else {
+            window.showErrorMessage('No Service Plans available for selected Service Template');
+        }
         if (!serviceTemplatePlanName) return null;
         const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(application);
         const serviceName = await Service.getName('Service name', serviceList, application.getName());
