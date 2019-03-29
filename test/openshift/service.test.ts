@@ -152,11 +152,13 @@ suite('OpenShift/Service', () => {
     });
 
     suite('create', () => {
-        let inputStub: sinon.SinonStub, progressStub: sinon.SinonStub;
+        let inputStub: sinon.SinonStub,
+            progressStub: sinon.SinonStub,
+            getSvcTemplatePlansStub: sinon.SinonStub;
 
         setup(() => {
             sandbox.stub(OdoImpl.prototype, 'getServiceTemplates').resolves([]);
-            sandbox.stub(OdoImpl.prototype, 'getServiceTemplatePlans').resolves(['default', 'free', 'paid']);
+            getSvcTemplatePlansStub = sandbox.stub(OdoImpl.prototype, 'getServiceTemplatePlans').resolves(['default', 'free', 'paid']);
             quickPickStub.onFirstCall().resolves(templateName);
             quickPickStub.onSecondCall().resolves(templatePlan);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
@@ -223,6 +225,24 @@ suite('OpenShift/Service', () => {
             const result = await Service.create(appItem);
             expect(result).equals(`Service '${serviceItem.getName()}' successfully created`);
             expect(execStub).calledOnceWith(Command.createService(projectItem.getName(), appItem.getName(), templateName, templatePlan, serviceItem.getName()));
+        });
+
+        test('does not ask to select service plan if there is only one plan available', async () => {
+            getSvcTemplatePlansStub.resolves(['default']);
+            inputStub.resolves('service');
+            const result = await Service.create(appItem);
+            expect(result).equals(`Service '${serviceItem.getName()}' successfully created`);
+            expect(quickPickStub).calledOnce;
+            expect(execStub).calledOnceWith(Command.createService(projectItem.getName(), appItem.getName(), templateName, 'default', serviceItem.getName()));
+        });
+
+        test('show error message if no service plans are available', async () => {
+            getSvcTemplatePlansStub.resolves([]);
+            inputStub.resolves('service');
+            const stub = sandbox.stub(vscode.window, 'showErrorMessage');
+            const result = await Service.create(appItem);
+            expect(result).null;
+            expect(stub).calledOnce;
         });
 
         test('returns null with no template selected', async () => {
