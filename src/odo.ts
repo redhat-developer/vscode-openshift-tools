@@ -283,7 +283,7 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(
             Command.printOdoVersionAndProjects(), process.cwd(), false
         );
-        if (this.odoLoginMessages.some((element) => { return result.stderr.indexOf(element) > -1; })) {
+        if (this.odoLoginMessages.some((element) => result.stderr ? result.stderr.indexOf(element) > -1 : false)) {
             const loginErrorMsg: string = 'Please log in to the cluster';
             return[new OpenShiftObjectImpl(null, loginErrorMsg, ContextType.LOGIN_REQUIRED, OdoImpl.instance, TreeItemCollapsibleState.None)];
         }
