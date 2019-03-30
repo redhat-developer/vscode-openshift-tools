@@ -277,7 +277,7 @@ suite('OpenShift/URL', () => {
             inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                 result = options.validateInput('');
                 expect(result).equal('A name cannot be empty');
-                result = options.validateInput('notNull');                
+                result = options.validateInput('notNull');
                 expect(result).is.undefined;
                 return Promise.resolve('');
             });
