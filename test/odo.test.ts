@@ -256,6 +256,9 @@ suite("odo", () => {
                         metadata: {
                             name: 'component1',
                             namespace: 'project'
+                        },
+                        spec: {
+                            source: 'https://'
                         }
                     }
                 ]
