@@ -52,4 +52,10 @@ export class Archive {
             src.on('error', rej);
         });
     }
+
+    static endsWithAny(suffixes: string[], str: string) {
+        return suffixes.some((suffix) => {
+            return str.endsWith(suffix);
+        });
+    }
 }
