@@ -108,7 +108,7 @@
         "command": "openshift.explorer.refresh",
         "title": "Refresh View",
         "category": "OpenShift",
-        "icon": "images/dark/refresh.svg"
+        "icon": "images/refresh.png"
       },
       {
         "command": "openshift.project.create",

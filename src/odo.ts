@@ -12,6 +12,7 @@ import { ToolsConfig } from './tools';
 import format =  require('string-format');
 import { OpenShiftExplorer } from './explorer';
 import { wait } from './util/async';
+import { Archive } from "./util/archive";
 
 export interface OpenShiftObject extends QuickPickItem {
     getChildren(): ProviderResult<OpenShiftObject[]>;
@@ -177,11 +178,11 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
     get iconPath(): Uri {
         if (this.contextValue === 'component') {
             if (this.comptype === 'git') {
-                return Uri.file(path.join(__dirname, "../../images", 'git.png'));
+                return Uri.file(path.join(__dirname, "../../images/component", 'git.png'));
             } else if (this.comptype === 'folder') {
-                return Uri.file(path.join(__dirname, "../../images", 'workspace.png'));
+                return Uri.file(path.join(__dirname, "../../images/component", 'workspace.png'));
             } else if (this.comptype === 'binary') {
-                return Uri.file(path.join(__dirname, "../../images", 'binary.png'));
+                return Uri.file(path.join(__dirname, "../../images/component", 'binary.png'));
             }
         } else {
             return Uri.file(path.join(__dirname, "../../images", this.CONTEXT_DATA[this.contextValue].icon));
@@ -373,19 +374,20 @@ export class OdoImpl implements Odo {
     public async _getComponents(application: OpenShiftObject): Promise<OpenShiftObject[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listComponents(application.getParent().getName(), application.getName()));
         let data: any[] = [];
-        let compSource = '';
         try {
             data = JSON.parse(result.stdout).items;
         } catch (ignore) {
             // show no apps if output is not correct json
             // see https://github.com/openshift/odo/issues/1521
         }
-        const apps = data.map(value => ({ name: value.metadata.name, source: value.spec.source }));
-        return apps.map<OpenShiftObject>((value) =>
+        const componentObject = data.map(value => ({ name: value.metadata.name, source: value.spec.source }));
+
+        return componentObject.map<OpenShiftObject>((value) =>
             {
+                let compSource: string = '';
                 if (value.source.startsWith('https://')) {
                     compSource = 'git';
-                } else if (value.source.endsWith('.jar|')) {
+                } else if (Archive.endsWithAny([".tar", ".jar", ".iso", ".tar.gz", ".zip"], value.source)) {
                     compSource = 'binary';
                 } else if (value.source.startsWith('file:///')) {
                     compSource = 'folder';
