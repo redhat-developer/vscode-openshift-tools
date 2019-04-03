@@ -125,7 +125,7 @@ export const Command = {
 export class OpenShiftObjectImpl implements OpenShiftObject {
     private readonly CONTEXT_DATA = {
         cluster: {
-            icon: 'openshift_extension.png',
+            icon: 'cluster-node.png',
             tooltip: '',
             getChildren: () => this.odo.getProjects()
         },
@@ -135,7 +135,7 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
             getChildren: () => this.odo.getApplications(this)
         },
         application: {
-            icon: 'apps.png',
+            icon: 'application-node.png',
             tooltip: 'Application: {label}',
             getChildren: () => this.odo.getApplicationChildren(this)
         },
@@ -145,7 +145,7 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
             getChildren: () => this.odo.getStorageNames(this)
         },
         service: {
-            icon: 'service.png',
+            icon: 'service-node.png',
             tooltip: 'Service: {label}',
             getChildren: () => []
         },
@@ -155,13 +155,13 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
             getChildren: () => []
         },
         cluster_down: {
-            icon: 'cluster-down.png"',
-            tooltip: 'Cannot connect to cluster',
+            icon: 'cluster-down.png',
+            tooltip: 'Cannot connect to the cluster',
             getChildren: () => []
         },
         login_required: {
             icon: 'cluster-down.png',
-            tooltip: 'Log in to cluster',
+            tooltip: 'Please Log in to the cluster',
             getChildren: () => []
         }
     };
@@ -185,7 +185,7 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
                 return Uri.file(path.join(__dirname, "../../images/component", 'binary.png'));
             }
         } else {
-            return Uri.file(path.join(__dirname, "../../images", this.CONTEXT_DATA[this.contextValue].icon));
+            return Uri.file(path.join(__dirname, "../../images/context", this.CONTEXT_DATA[this.contextValue].icon));
         }
     }
 
