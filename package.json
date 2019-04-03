@@ -92,7 +92,7 @@
         "command": "openshift.explorer.login",
         "title": "Log in to cluster",
         "category": "OpenShift",
-        "icon": "images/login.png"
+        "icon": "images/title/login.png"
       },
       {
         "command": "openshift.explorer.login.tokenLogin",
@@ -108,7 +108,7 @@
         "command": "openshift.explorer.refresh",
         "title": "Refresh View",
         "category": "OpenShift",
-        "icon": "images/refresh.png"
+        "icon": "images/title/refresh.png"
       },
       {
         "command": "openshift.project.create",

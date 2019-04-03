@@ -74,16 +74,16 @@ To run the instance of OpenShift cluster locally, developers can use [minishift]
    * `New OpenShift Component` - Create an OpenShift component from selected folder
 
 #### Icons Representation
-* ![Log in to cluster](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/login.png) - Log in to Cluster
-* ![Refresh Cluster](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/refresh.png) - Refresh Cluster
-* ![Cluster Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/openshift-cluster.png) - Cluster Resource
-* ![Project Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/project-node.png) - Project Resource
-* ![Application Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/apps.png) - Application Resource
-* ![Service Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/service.png) - Service Resource
-* ![Git Component Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/git.png) - Git Component Resource
-* ![Local Workspace Component Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/folder.png) - Git Component Resource
-* ![Binary Component Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/binary.png) - Git Component Resource
-* ![Storage Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/storage-node.png) - Storage Resource
+* ![Log in to cluster](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/title/login.png) - Log in to Cluster
+* ![Refresh Cluster](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/title/refresh.png) - Refresh Cluster
+* ![Cluster Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/openshift-cluster.png) - Cluster Resource
+* ![Project Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/project-node.png) - Project Resource
+* ![Application Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/application-node.png) - Application Resource
+* ![Service Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/service-node.png) - Service Resource
+* ![Git Component Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/component/git.png) - Git Component Resource
+* ![Local Workspace Component Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/component/workspace.png) - Local Workspace Component Resource
+* ![Binary Component Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/component/binary.png) - Binary File Component Resource
+* ![Storage Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/storage-node.png) - Storage Resource
 
 ### Extension Configuration Settings
    * `Openshift Connector: Show Channel On Output` - Show OpenShift Connector output channel when new text added to output stream.
