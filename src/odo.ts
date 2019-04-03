@@ -12,7 +12,7 @@ import { ToolsConfig } from './tools';
 import format =  require('string-format');
 import { OpenShiftExplorer } from './explorer';
 import { wait } from './util/async';
-import { Archive } from "./util/archive";
+import { statSync } from 'fs';
 
 export interface OpenShiftObject extends QuickPickItem {
     getChildren(): ProviderResult<OpenShiftObject[]>;
@@ -387,9 +387,9 @@ export class OdoImpl implements Odo {
                 let compSource: string = '';
                 if (value.source.startsWith('https://')) {
                     compSource = 'git';
-                } else if (Archive.endsWithAny([".tar", ".jar", ".iso", ".tar.gz", ".zip"], value.source)) {
+                } else if (statSync(Uri.parse(value.source).fsPath).isFile()) {
                     compSource = 'binary';
-                } else if (value.source.startsWith('file:///')) {
+                } else if (statSync(Uri.parse(value.source).fsPath).isDirectory()) {
                     compSource = 'folder';
                 }
                 return new OpenShiftObjectImpl(application, value.name, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed, compSource);
