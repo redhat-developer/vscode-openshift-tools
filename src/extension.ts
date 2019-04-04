@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.openshiftConsole', (context) => execute(Cluster.openshiftConsole, context)),
         vscode.commands.registerCommand('openshift.openshiftConsole.palette', (context) => execute(Cluster.openshiftConsole, context)),
         vscode.commands.registerCommand('openshift.explorer.login', (context) => execute(Cluster.login, context)),
-        vscode.commands.registerCommand('openshift.explorer.login.clipboardLogin', (context) => execute(Cluster.clipboardLogin, context)),
+        vscode.commands.registerCommand('openshift.explorer.login.tokenLogin', (context) => execute(Cluster.tokenLogin, context)),
         vscode.commands.registerCommand('openshift.explorer.login.credentialsLogin', (context) => execute(Cluster.credentialsLogin, context)),
         vscode.commands.registerCommand('openshift.explorer.logout', (context) => execute(Cluster.logout, context)),
         vscode.commands.registerCommand('openshift.explorer.refresh', (context) => execute(Cluster.refresh, context)),

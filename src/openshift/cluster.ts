@@ -61,7 +61,9 @@ export class Cluster extends OpenShiftItem {
     }
 
     static async getUrl(): Promise<string | null> {
+        const clusterURl = await Cluster.getUrlFromClipboard();
         return await window.showInputBox({
+            value: clusterURl,
             ignoreFocusOut: true,
             prompt: "Provide URL of the cluster to connect",
             validateInput: (value: string) => Cluster.validateUrl('Invalid URL provided', value)
@@ -76,7 +78,7 @@ export class Cluster extends OpenShiftItem {
         if (loginMethod === "Credentials") {
             return Cluster.credentialsLogin(true);
         } else {
-            return Cluster.clipboardLogin(true);
+            return Cluster.tokenLogin(true);
         }
     }
 
@@ -127,10 +129,28 @@ export class Cluster extends OpenShiftItem {
             .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`));
     }
 
-    static async tokenLogin(): Promise<string> {
+    static async readFromClipboard() {
+        return await env.clipboard.readText();
+    }
+
+    static async getUrlFromClipboard() {
+        const clipboard = await Cluster.readFromClipboard();
+        if (await Cluster.ocLoginCommandMatches(clipboard)) return await Cluster.clusterURL(clipboard);
+        return null;
+    }
+
+    static async tokenLogin(skipConfirmation: boolean = false): Promise<string> {
+        let token: string;
+        const response = await Cluster.requestLoginConfirmation(skipConfirmation);
+        if (response !== 'Yes') return null;
         const clusterURL = await Cluster.getUrl();
         if (!clusterURL) return null;
+        const clusterUrlFromClipboard = await Cluster.getUrlFromClipboard();
+        if (clusterUrlFromClipboard === clusterURL.trim()) {
+            token = Cluster.getToken(await Cluster.readFromClipboard());
+        }
         const ocToken = await window.showInputBox({
+            value: token,
             prompt: "Provide Bearer token for authentication to the API server",
             ignoreFocusOut: true
         });
@@ -139,27 +159,6 @@ export class Cluster extends OpenShiftItem {
             .then(() => Cluster.odo.execute(Command.odoLoginWithToken(clusterURL, ocToken)))
             .then((result) => Cluster.loginMessage(clusterURL, result))
             .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`));
-    }
-
-    static async readFromClipboard() {
-        return await env.clipboard.readText();
-    }
-
-    static async clipboardLogin(skipConfirmation: boolean = false): Promise<string> {
-        let userResponse: string;
-        const response = await Cluster.requestLoginConfirmation(skipConfirmation);
-        if (response !== 'Yes') return null;
-        const clipboardLogin = Cluster.ocLoginCommandMatches(await Cluster.readFromClipboard());
-        if (clipboardLogin) userResponse = await window.showInformationMessage(`Detected url and token from clipboard. Do you want to login?`, 'Yes', 'No');
-        if (!clipboardLogin) return Cluster.tokenLogin();
-        if (userResponse === 'No') return Cluster.tokenLogin();
-        if (userResponse === undefined) return null;
-        const clusterURL = Cluster.clusterURL(clipboardLogin);
-        if (!clusterURL) return null;
-        return Promise.resolve()
-            .then(() => Cluster.odo.execute(clipboardLogin)
-            .then((result) => Cluster.loginMessage(clusterURL, result))
-            .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`)));
     }
 
     private static async loginMessage(clusterURL: string, result: CliExitData): Promise<string> {

@@ -32,7 +32,7 @@
     "onCommand:openshift.openshiftConsole.palette",
     "onCommand:openshift.explorer.login",
     "onCommand:openshift.explorer.login.credentialsLogin",
-    "onCommand:openshift.explorer.login.clipboardLogin",
+    "onCommand:openshift.explorer.login.tokenLogin",
     "onCommand:openshift.explorer.logout",
     "onCommand:openshift.explorer.refresh",
     "onCommand:openshift.project.create",
@@ -95,7 +95,7 @@
         "icon": "images/title/login.png"
       },
       {
-        "command": "openshift.explorer.login.clipboardLogin",
+        "command": "openshift.explorer.login.tokenLogin",
         "title": "Login into Cluster with token",
         "category": "OpenShift"
       },
