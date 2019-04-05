@@ -10,7 +10,6 @@ import url = require('url');
 import net = require('net');
 import gitClient = require('git-fetch-pack');
 import transport = require('git-transport-protocol');
-import { stringify } from 'querystring';
 
 export enum Type {
     TAG,
