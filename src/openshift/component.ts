@@ -14,7 +14,7 @@ import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 import { isURL } from 'validator';
 import { Refs, Ref, Type } from '../util/refs';
 
-import isGitRemote from 'is-git-remote';
+import * as refs from '../util/refs';
 import { Delayer } from '../util/async';
 
 export class Component extends OpenShiftItem {
@@ -263,12 +263,16 @@ export class Component extends OpenShiftItem {
         let application: OpenShiftObject = context;
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
+        const delayer = new Delayer<string>(500);
         const repoURI = await window.showInputBox({
             prompt: 'Git repository URI',
             validateInput: (value: string) => {
-                if (!value.trim()) return 'Empty Git repository URL';
-                if (!isURL(value)) return 'Invalid URL provided';
-                if (!isGitRemote(value)) return 'No git repository exists. Please provide a valid git repository.';
+                return delayer.trigger(async () => {
+                    if (!value.trim()) return 'Empty Git repository URL';
+                    if (!isURL(value)) return 'Invalid URL provided';
+                    const references = await refs.Refs.fetchTag(value);
+                    if (!references.get('HEAD')) return 'There is no git repository at provided URL.';
+                });
             }
         });
 
