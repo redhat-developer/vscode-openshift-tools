@@ -12,7 +12,7 @@ import { ChildProcess } from 'child_process';
 import { CliExitData } from '../cli';
 import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 import { isURL } from 'validator';
-import { Refs } from '../util/refs';
+import { Refs, Ref, Type } from '../util/refs';
 
 export class Component extends OpenShiftItem {
 
@@ -270,8 +270,8 @@ export class Component extends OpenShiftItem {
 
         if (!repoURI) return null;
 
-        const references = await Refs.fetchTag(repoURI);
-        const gitRef = await window.showQuickPick([ ...references.keys()], {placeHolder: "Select git reference (branch/tag)"});
+        const references: Map<string, Ref> = await Refs.fetchTag(repoURI);
+        const gitRef = await window.showQuickPick([...references.values()].map(value => ({label: value.name, description: value.type === Type.TAG? `Tag at ${value.hash}` : value.hash })) , {placeHolder: "Select git reference (branch/tag)"});
 
         if (!gitRef) return null;
 
@@ -292,7 +292,7 @@ export class Component extends OpenShiftItem {
             value === 'Yes' && commands.executeCommand('git.clone', repoURI);
         });
 
-        await Component.odo.createComponentFromGit(application, componentTypeName, componentTypeVersion, componentName, repoURI, gitRef);
+        await Component.odo.createComponentFromGit(application, componentTypeName, componentTypeVersion, componentName, repoURI, gitRef.label);
         return `Component '${componentName}' successfully created`;
     }
 
