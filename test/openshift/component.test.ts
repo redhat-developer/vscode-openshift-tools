@@ -37,10 +37,11 @@ suite('OpenShift/Component', () => {
     let Component: any;
     let opnStub: sinon.SinonStub;
     let infoStub: sinon.SinonStub;
+    let fetchTag: sinon.SinonStub;
     setup(() => {
         sandbox = sinon.createSandbox();
         opnStub = sandbox.stub();
-        sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>([['HEAD', 'shanumb']]));
+        fetchTag = sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>([['HEAD', 'shanumb']]));
         Component = pq('../../src/openshift/component', {
             opn: opnStub
         }).Component;
@@ -235,6 +236,7 @@ suite('OpenShift/Component', () => {
             });
 
             test('shows error message when repo does not exist', async () => {
+                fetchTag.resolves (new Map<string, string>());
                 let result: string | Thenable<string>;
                 inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Promise<string> => {
                     result = await options.validateInput('https://github.com');
