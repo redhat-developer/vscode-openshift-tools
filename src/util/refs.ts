@@ -51,9 +51,7 @@ export class Refs {
                 .on('error', reject)
                 .pipe(client)
                 .on('error', reject)
-                .once('end', () => {
-                    resolve(tags);
-                });
+                .once('end', () => resolve(tags));
         });
     }
 }

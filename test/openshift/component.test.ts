@@ -40,7 +40,7 @@ suite('OpenShift/Component', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         opnStub = sandbox.stub();
-        sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>());
+        sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>([['HEAD', 'shanumb']]));
         Component = pq('../../src/openshift/component', {
             opn: opnStub
         }).Component;
@@ -226,7 +226,7 @@ suite('OpenShift/Component', () => {
             test('allows to continue with valid git repository url', async () => {
                 let result: string | Thenable<string>;
                 inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Promise<string> => {
-                    result = await(async () => options.validateInput('https://github.com/redhat-developer/vscode-openshift-tools'))();
+                    result = await options.validateInput('https://github.com/redhat-developer/vscode-openshift-tools');
                     return Promise.resolve('https://github.com/redhat-developer/vscode-openshift-tools');
                 });
 
@@ -237,14 +237,12 @@ suite('OpenShift/Component', () => {
             test('shows error message when repo does not exist', async () => {
                 let result: string | Thenable<string>;
                 inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Promise<string> => {
-                    result = options.validateInput('username/repo-that-not-exists');
-                    expect(isThenable(result)).to.be.true;
-                    result = await (async () => result = options.validateInput('username/repo-that-not-exists-again'))();
-                    return Promise.resolve('username/repo-that-not-exists');
+                    result = await options.validateInput('https://github.com');
+                    return Promise.resolve('https://github.com');
                 });
 
                 await Component.create(appItem);
-                expect(result).equals('No git repository exists. Please provide a valid git repository.');
+                expect(result).equals('There is no git repository at provided URL.');
             });
 
             test('shows error message for empty git repository url', async () => {
