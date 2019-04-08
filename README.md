@@ -13,7 +13,7 @@ A Visual Studio Code extension for interacting with Red Hat OpenShift cluster. T
 
 To run the instance of OpenShift cluster locally, developers can use [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/). Currently all clusters are supported, but with some limitations for OpenShift Online Pro where additional storage might be required to create more than two components.
 
-For detail analysis of how to setup and run local OpenShift Cluster, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
+For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
 
 ## Commands and features
 
@@ -89,7 +89,7 @@ For detail analysis of how to setup and run local OpenShift Cluster, please foll
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/storage-node.png" width="15" height="15" /><span style="margin: 20px">Storage Resource</span></div>
 
 ### Extension Configuration Settings
-   * `Openshift Connector: Show Channel On Output` - Show OpenShift Connector output channel when new text added to output stream.
+   * `OpenShift Connector: Show Channel On Output` - Show OpenShift Connector output channel when new text added to output stream.
 
 ### Dependencies
 
