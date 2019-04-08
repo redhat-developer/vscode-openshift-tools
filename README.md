@@ -76,16 +76,17 @@ For detail analysis of how to setup and run local OpenShift Cluster, please foll
    * `New OpenShift Component` - Create an OpenShift component from selected folder
 
 #### Icons Representation
-* ![Log in to cluster](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/title/login.png) - Log in to Cluster
-* ![Refresh Cluster](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/title/refresh.png) - Refresh Cluster
-* ![Cluster Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/openshift-cluster.png) - Cluster Resource
-* ![Project Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/project-node.png) - Project Resource
-* ![Application Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/application-node.png) - Application Resource
-* ![Service Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/service-node.png) - Service Resource
-* ![Git Component Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/component/git.png) - Git Component Resource
-* ![Local Workspace Component Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/component/workspace.png) - Local Workspace Component Resource
-* ![Binary Component Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/component/binary.png) - Binary File Component Resource
-* ![Storage Resource](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/storage-node.png) - Storage Resource
+
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/title/login.png" width="15" height="15" /><span style="margin: 10px">Log in to Cluster</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/title/refresh.png" width="15" height="15" /><span style="margin: 10px">Refresh Cluster</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/cluster-node.png" width="15" height="15" /><span style="margin: 10px">Cluster Resource Node</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/project-node.png" width="15" height="15" /><span style="margin: 10px">Project Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/application-node.png" width="15" height="15" /><span style="margin: 10px">Application Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/component/git.png" width="15" height="15" /><span style="margin: 10px">Git Component Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/component/workspace.png" width="15" height="15" /><span style="margin: 10px">Local Workspace Component Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/component/binary.png" width="15" height="15" /><span style="margin: 10px">Binary File Component Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/service-node.png" width="15" height="15" /><span style="margin: 10px">Service Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/storage-node.png" width="15" height="15" /><span style="margin: 10px">Storage Resource</span></div>
 
 ### Extension Configuration Settings
    * `Openshift Connector: Show Channel On Output` - Show OpenShift Connector output channel when new text added to output stream.
