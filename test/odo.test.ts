@@ -274,12 +274,13 @@ suite("odo", () => {
                 stdout: JSON.stringify({
                         items: [
                             {
-                                metadata: {
-                                    name: 'comp',
-                                    namespace: 'project'
-                                },
-                                spec: {
-                                    storage: ['storage1', 'storage2']
+                                "metadata": {
+                                    "name": "storage1"
+                                }
+                            },
+                            {
+                                "metadata": {
+                                    "name": "storage2"
                                 }
                             }
                         ]
