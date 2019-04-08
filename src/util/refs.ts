@@ -36,7 +36,10 @@ export class Refs {
             const tags = new Map<string, Ref>();
 
             client.refs.on('data', (ref: { name: string; hash: string; }) => {
-                if(ref.name.indexOf('/') < 0) return;
+                if (ref.name.indexOf('/') < 0) {
+                    tags.set(ref.name, { name: ref.name, type: Type.BRANCH, hash: ref.hash.substr(0, 7) });
+                    return;
+                }
                 const name = ref.name.split('/')[2].replace(/\^\{\}$/, '');
                 if (/^refs\/heads/.test(ref.name)) {
                    tags.set(name, { name, type: Type.BRANCH, hash: ref.hash.substr(0, 7) });
