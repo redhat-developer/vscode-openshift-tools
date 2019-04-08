@@ -38,7 +38,7 @@ suite('Openshift/Cluster', () => {
         stderr: error,
         stdout: 'output'
     };
-    const testUrl = 'url';
+    const testUrl = 'https://162.165.64.43:8443';
     const testUser = 'user';
     const password = 'password';
     const token = 'token';
@@ -183,6 +183,7 @@ suite('Openshift/Cluster', () => {
 
         suite('token', () => {
             setup(() => {
+                sandbox.stub(vscode.env.clipboard, 'readText').resolves('oc login https://162.165.64.43:8443 --token=bX6eP0d4IRgXwWuCKq2856h5fyK9c2U5tOKCwFeEmQA');
                 quickPickStub.resolves('Token');
                 inputStub.onSecondCall().resolves('token');
             });

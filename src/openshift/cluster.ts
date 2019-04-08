@@ -5,7 +5,7 @@
 
 import { OpenShiftObject, Command } from "../odo";
 import { OpenShiftItem } from './openshiftItem';
-import { window, commands } from 'vscode';
+import { window, commands, env } from 'vscode';
 import { CliExitData, Cli } from "../cli";
 import opn = require("opn");
 import { TokenStore } from "../util/credentialManager";
@@ -61,7 +61,9 @@ export class Cluster extends OpenShiftItem {
     }
 
     static async getUrl(): Promise<string | null> {
+        const clusterURl = await Cluster.getUrlFromClipboard();
         return await window.showInputBox({
+            value: clusterURl,
             ignoreFocusOut: true,
             prompt: "Provide URL of the cluster to connect",
             validateInput: (value: string) => Cluster.validateUrl('Invalid URL provided', value)
@@ -127,12 +129,28 @@ export class Cluster extends OpenShiftItem {
             .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`));
     }
 
+    static async readFromClipboard() {
+        return await env.clipboard.readText();
+    }
+
+    static async getUrlFromClipboard() {
+        const clipboard = await Cluster.readFromClipboard();
+        if (await Cluster.ocLoginCommandMatches(clipboard)) return await Cluster.clusterURL(clipboard);
+        return null;
+    }
+
     static async tokenLogin(skipConfirmation: boolean = false): Promise<string> {
+        let token: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
         if (response !== 'Yes') return null;
         const clusterURL = await Cluster.getUrl();
         if (!clusterURL) return null;
+        const clusterUrlFromClipboard = await Cluster.getUrlFromClipboard();
+        if (clusterUrlFromClipboard === clusterURL.trim()) {
+            token = Cluster.getToken(await Cluster.readFromClipboard());
+        }
         const ocToken = await window.showInputBox({
+            value: token,
             prompt: "Provide Bearer token for authentication to the API server",
             ignoreFocusOut: true
         });
