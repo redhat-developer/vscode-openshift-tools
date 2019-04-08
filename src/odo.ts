@@ -50,8 +50,8 @@ export const Command = {
         `odo catalog list components`,
     listCatalogServices: () =>
         `odo catalog list services`,
-    listStorageNames: (project: string, app: string) =>
-        `odo list --app ${app} --project ${project} -o json`,
+    listStorageNames: (project: string, app: string, component: string) =>
+        `odo storage list --app ${app} --project ${project} --component ${component} -o json`,
     printOcVersion: () =>
         'oc version',
     printOdoVersionAndProjects: () =>
@@ -296,7 +296,7 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(
             Command.printOdoVersionAndProjects(), process.cwd(), false
         );
-        if (this.odoLoginMessages.some((element) => { return result.stderr.indexOf(element) > -1; })) {
+        if (this.odoLoginMessages.some((element) => result.stderr ? result.stderr.indexOf(element) > -1 : false)) {
             const loginErrorMsg: string = 'Please log in to the cluster';
             return[new OpenShiftObjectImpl(null, loginErrorMsg, ContextType.LOGIN_REQUIRED, OdoImpl.instance, TreeItemCollapsibleState.None)];
         }
@@ -412,16 +412,16 @@ export class OdoImpl implements Odo {
         const app = component.getParent();
         const appName = app.getName();
         const projName = app.getParent().getName();
-        const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(projName, appName));
+        const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(projName, appName, component.getName()));
 
         let data: any[] = [];
         try {
-            data = JSON.parse(result.stdout).items;
+            const items = JSON.parse(result.stdout).items;
+            if (items) data = items;
         } catch (ignore) {
         }
-        const storageObject: any[] = data.filter((value) => value.metadata.name === component.getName());
-        const storage: any[] = storageObject[0].spec.storage;
-        return storage.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(component, value, ContextType.STORAGE, OdoImpl.instance, TreeItemCollapsibleState.None));
+
+        return data.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(component, value.metadata.name, ContextType.STORAGE, OdoImpl.instance, TreeItemCollapsibleState.None));
     }
 
     public async getComponentTypeVersions(componentName: string) {

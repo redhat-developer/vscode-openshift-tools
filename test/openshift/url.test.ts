@@ -269,5 +269,21 @@ suite('OpenShift/URL', () => {
             }
             expect.fail(false, true, 'No exception thrown');
         });
+
+        test('checks if URL name is not empty', async () => {
+            execStub = sandbox.stub(OdoImpl.prototype, 'execute');
+            execStub.onFirstCall().resolves({error: null, stdout: noPortsOutput, stderr: ''});
+            let result: string | Thenable<string>;
+            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                result = options.validateInput('');
+                expect(result).equal('A name cannot be empty');
+                result = options.validateInput('notNull');
+                expect(result).is.undefined;
+                return Promise.resolve('');
+            });
+
+            await Url.create(componentItem);
+
+        });
     });
 });

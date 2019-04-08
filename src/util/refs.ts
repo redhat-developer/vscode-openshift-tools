@@ -8,12 +8,24 @@
 
 import url = require('url');
 import net = require('net');
-import gitclient = require('git-fetch-pack');
+import gitClient = require('git-fetch-pack');
 import transport = require('git-transport-protocol');
+import { stringify } from 'querystring';
+
+export enum Type {
+    TAG,
+    BRANCH
+}
+
+export class Ref {
+    name: string;
+    type: Type;
+    hash: string;
+}
 
 export class Refs {
 
-    static async fetchTag(input: string): Promise<Map<string, string>> {
+    static async fetchTag(input: string): Promise<Map<string, Ref>> {
         return new Promise((resolve, reject) => {
             input = input.replace(/^(?!(?:https|git):\/\/)/, 'https://');
 
@@ -21,17 +33,18 @@ export class Refs {
                 host: url.parse(input).host,
                 port: 9418
             });
-            const client = gitclient(input);
-            const tags = new Map();
+            const client = gitClient(input);
+            const tags = new Map<string, Ref>();
 
-            client.refs.on('data', (ref: { name: string; hash: any; }) => {
-
+            client.refs.on('data', (ref: { name: string; hash: string; }) => {
+                if(ref.name.indexOf('/') < 0) return;
+                const name = ref.name.split('/')[2].replace(/\^\{\}$/, '');
                 if (/^refs\/heads/.test(ref.name)) {
-                    tags.set(ref.name.split('/')[2].replace(/\^\{\}$/, ''), ref.hash);
+                   tags.set(name, { name, type: Type.BRANCH, hash: ref.hash.substr(0, 7) });
                 }
 
                 if (/^refs\/tags/.test(ref.name)) {
-                    tags.set(ref.name.split('/')[2].replace(/\^\{\}$/, ''), ref.hash);
+                    tags.set(name, { name, type: Type.TAG, hash: ref.hash.substr(0, 7) });
                 }
             });
             client
