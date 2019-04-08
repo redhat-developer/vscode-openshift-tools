@@ -17,6 +17,7 @@ import * as Util from '../../src/util/async';
 import { Refs } from '../../src/util/refs';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
+import { isThenable } from '../../src/util/async';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -36,10 +37,11 @@ suite('OpenShift/Component', () => {
     let Component: any;
     let opnStub: sinon.SinonStub;
     let infoStub: sinon.SinonStub;
+    let fetchTag: sinon.SinonStub;
     setup(() => {
         sandbox = sinon.createSandbox();
         opnStub = sandbox.stub();
-        sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>());
+        fetchTag = sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>([['HEAD', 'shanumb']]));
         Component = pq('../../src/openshift/component', {
             opn: opnStub
         }).Component;
@@ -224,37 +226,36 @@ suite('OpenShift/Component', () => {
 
             test('allows to continue with valid git repository url', async () => {
                 let result: string | Thenable<string>;
-                inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
-                    result = options.validateInput('https://github.com/org/repo');
-                    return Promise.resolve('https://github.com/org/repo');
+                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Promise<string> => {
+                    result = await options.validateInput('https://github.com/redhat-developer/vscode-openshift-tools');
+                    return Promise.resolve('https://github.com/redhat-developer/vscode-openshift-tools');
                 });
 
                 await Component.create(appItem);
                 expect(result).to.be.undefined;
             });
 
-            test('shows error message for invalid git repository url', async () => {
+            test('shows error message when repo does not exist', async () => {
+                fetchTag.resolves (new Map<string, string>());
                 let result: string | Thenable<string>;
-                inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
-                    result = options.validateInput('github');
-                    return Promise.resolve('github');
+                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Promise<string> => {
+                    result = await options.validateInput('https://github.com');
+                    return Promise.resolve('https://github.com');
                 });
 
                 await Component.create(appItem);
-                expect(result).equals('Invalid URL provided');
-
+                expect(result).equals('There is no git repository at provided URL.');
             });
 
             test('shows error message for empty git repository url', async () => {
                 let result: string | Thenable<string>;
-                inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
-                    result = options.validateInput('');
+                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Promise<string> => {
+                    result =  await (async () => options.validateInput(''))();
                     return Promise.resolve('');
                 });
 
                 await Component.create(appItem);
                 expect(result).equals('Empty Git repository URL');
-
             });
         });
 
