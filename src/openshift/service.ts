@@ -35,7 +35,6 @@ export class Service extends OpenShiftItem {
         const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(application);
         const serviceName = await Service.getName('Service name', serviceList, application.getName());
         if (!serviceName) return null;
-        const project = application.getParent();
         return Progress.execFunctionWithProgress(`Creating a new Service '${serviceName}'`, () => Service.odo.createService(application, serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))
             .then(() => `Service '${serviceName}' successfully created`)
             .catch((err) => Promise.reject(`Failed to create Service with error '${err}'`));
