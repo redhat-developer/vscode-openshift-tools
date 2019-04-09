@@ -8,6 +8,7 @@ import { window, QuickPickItem } from 'vscode';
 import { Component } from '../openshift/component';
 import { V1ServicePort } from '@kubernetes/client-node';
 import { OpenShiftItem } from './openshiftItem';
+import { Progress } from "../util/progress";
 
 export class Url extends OpenShiftItem{
 
@@ -39,9 +40,14 @@ export class Url extends OpenShiftItem{
             } else {
                 return Promise.reject(`Component '${component.getName()}' has no ports declared.`);
             }
-            return port && Url.odo.execute(Command.createComponentCustomUrl(project.getName(), app.getName(), component.getName(), `${urlName}`, `${port['port']}`))
-                .then(() => `URL '${urlName}' for component '${component.getName()}' successfully created`)
-                .catch((err) => Promise.reject(`Failed to create URL '${urlName}' for component '${component.getName()}'. ${err.message}`));
+
+            if (port) {
+                return Progress.execFunctionWithProgress(`Creating a URL '${urlName}' for the Component '${component.getName()}'`, 
+                    () => Url.odo.execute(Command.createComponentCustomUrl(project.getName(), app.getName(), component.getName(), `${urlName}`, `${port['port']}`))
+                        .then(() => `URL '${urlName}' for component '${component.getName()}' successfully created`)
+                        .catch((err) => Promise.reject(`Failed to create URL '${urlName}' for component '${component.getName()}'. ${err.message}`))
+                );
+            }
         }
         return null;
     }
