@@ -68,7 +68,9 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     }
 
     async reveal(item: OpenShiftObject): Promise<void> {
-       this.refresh(item.getParent());
+        this.refresh(item.getParent());
+        // double call of reveal is workaround for possible upstream issue
+        // https://github.com/redhat-developer/vscode-openshift-tools/issues/762
         await this.treeView.reveal(item);
         this.treeView.reveal(item);
     }
