@@ -247,6 +247,17 @@ suite('OpenShift/Component', () => {
                 expect(result).equals('There is no git repository at provided URL.');
             });
 
+            test('shows error message when invalid URL provided', async () => {
+                let result: string | Thenable<string>;
+                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Promise<string> => {
+                    result = await options.validateInput('github');
+                    return Promise.resolve('github');
+                });
+
+                await Component.create(appItem);
+                expect(result).equals('Invalid URL provided');
+            });
+
             test('shows error message for empty git repository url', async () => {
                 let result: string | Thenable<string>;
                 inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Promise<string> => {
