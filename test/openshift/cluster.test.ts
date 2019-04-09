@@ -96,6 +96,13 @@ suite('Openshift/Cluster', () => {
             expect(status).null;
         });
 
+        test('exits if the user refuses to select the way to log in to the cluster', async () => {
+            loginStub.resolves('Yes');
+            quickPickStub.resolves(undefined);
+            const status = await Cluster.login();
+            expect(status).null;
+        });
+
         test('logins to new cluster if user answer yes to a warning', async () => {
             loginStub.resolves(false);
             infoStub.resolves('Yes');
