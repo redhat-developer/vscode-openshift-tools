@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.0.19 (April 9, 2019)
+* Cache OpenShift Application Explorer nodes to avoid extra `odo` calls
+* Reveal new created objects directly in the Explorer View
+* Add `tags`, `branches` list for a git reference within QuickPick item
+* Support `Open in browser` when a component has several routes configured
+* Enable user to create multiple routes for a component
+* Add token to login from oc command line
+* Validation if git repository exists when creating component
+* Update the icons for nodes representation for the cluster in Explorer View
+* Differentiate components with different icons based on the type
+
 ## 0.0.18 (March 21, 2019)
 * Update to use `odo v0.0.20`
 * Support `reference` option for creating components from git repository
