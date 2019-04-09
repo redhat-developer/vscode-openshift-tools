@@ -94,7 +94,7 @@ export const Command = {
     linkComponentTo: (project: string, app: string, component: string, componentToLink: string, port?: string) =>
         `odo project set ${project} && odo application set ${app} && odo component set ${component} && odo link ${componentToLink} --wait${port ? ' --port ' + port : ''}`,
     pushComponent: (project: string, app: string, component: string) =>
-        `odo push ${component} --app ${app} --project ${project}`,
+        `odo push ${component} --app ${app} --project ${project} -v 9`,
     pushLocalComponent: (project: string, app: string, component: string, location: string) =>
         `${Command.pushComponent(project, app, component)} --local ${location}`,
     watchComponent: (project: string, app: string, component: string) =>
