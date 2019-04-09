@@ -65,8 +65,6 @@ export class Component extends OpenShiftItem {
             "From which Application you want to delete Component",
             "Select Component to delete");
         if (!component) return null;
-        const app: OpenShiftObject = component.getParent();
-        const project: OpenShiftObject = app.getParent();
         const name: string = component.getName();
         const value = await window.showWarningMessage(`Do you want to delete Component '${name}\'?`, 'Yes', 'Cancel');
         if (value === 'Yes') {
@@ -326,8 +324,6 @@ export class Component extends OpenShiftItem {
         const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
 
         if (!componentTypeVersion) return null;
-
-        const project = application.getParent();
 
         await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, binaryFile[0].fsPath);
         return `Component '${componentName}' successfully created`;

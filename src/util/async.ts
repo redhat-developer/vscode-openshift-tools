@@ -4,8 +4,6 @@
  * Taken from https://www.github.com/microsoft/vscode/src/vs/common/async.ts
  */
 
-import * as vscode from 'vscode';
-
 export function isThenable<T>(candidate: any): candidate is Thenable<T> {
     return candidate && typeof (<Thenable<any>>candidate).then === 'function';
 }
