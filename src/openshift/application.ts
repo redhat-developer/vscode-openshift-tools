@@ -17,9 +17,8 @@ export class Application extends OpenShiftItem {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
         const applicationName = await Application.getName('Application name', applicationList);
         if (!applicationName) return null;
-        return Progress.execFunctionWithProgress(`Deleting the Application '${applicationName}'.`, () =>
+        return Progress.execFunctionWithProgress(`Creating the Application '${applicationName}'.`, () =>
             Application.odo.createApplication(project, applicationName)
-                .then(() => Application.explorer.refresh(project))
                 .then(() => `Application '${applicationName}' successfully created`)
                 .catch((error) => Promise.reject(`Failed to create Application with error '${error}'`)));
     }

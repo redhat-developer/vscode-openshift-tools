@@ -117,7 +117,7 @@ suite('OpenShift/Application', () => {
 
                 await Application.create(projectItem);
 
-                expect(execStub).calledOnceWith(Command.createApplication(projectItem.getName(), 'name'));
+                expect(execStub).calledWith(Command.createApplication(projectItem.getName(), 'name'));
             });
 
             test('returns a message when successful', async () => {
