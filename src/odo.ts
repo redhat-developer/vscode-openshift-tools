@@ -509,7 +509,7 @@ export class OdoImpl implements Odo {
 
     public async deleteProject(project: OpenShiftObject): Promise<OpenShiftObject> {
         await this.execute(Command.deleteProject(project.getName()));
-        await this.execute(Command.waitForProjectToBeGone(project.getName()));
+        await this.execute(Command.waitForProjectToBeGone(project.getName()), process.cwd(), false);
         return this.deleteAndRefresh(await this.getProjects(), project);
     }
 
