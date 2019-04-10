@@ -382,9 +382,9 @@ export class OdoImpl implements Odo {
         }
         const componentObject = data.map(value => ({ name: value.metadata.name, source: value.spec.source }));
 
-        return componentObject.map<OpenShiftObject>((value) =>
-            {
-                let compSource: string = '';
+        return componentObject.map<OpenShiftObject>((value) => {
+            let compSource: string = '';
+            try {
                 if (value.source.startsWith('https://')) {
                     compSource = 'git';
                 } else if (statSync(Uri.parse(value.source).fsPath).isFile()) {
@@ -392,8 +392,13 @@ export class OdoImpl implements Odo {
                 } else if (statSync(Uri.parse(value.source).fsPath).isDirectory()) {
                     compSource = 'folder';
                 }
-                return new OpenShiftObjectImpl(application, value.name, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed, compSource);
-            });
+            } catch (ignore) {
+                // treat component as local in case of error when calling statSync
+                // for not existing file or folder
+                compSource = 'folder';
+            }
+            return new OpenShiftObjectImpl(application, value.name, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed, compSource);
+        });
     }
 
     public async getComponentTypes(): Promise<string[]> {
