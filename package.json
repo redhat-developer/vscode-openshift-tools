@@ -53,6 +53,7 @@
     "onCommand:openshift.component.followLog",
     "onCommand:openshift.component.followLog.palette",
     "onCommand:openshift.component.delete",
+    "onCommand:openshift.component.verbosity",
     "onCommand:openshift.component.push",
     "onCommand:openshift.component.push.palette",
     "onCommand:openshift.component.watch",
@@ -239,6 +240,11 @@
       {
         "command": "openshift.component.push",
         "title": "Push",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.verbosity",
+        "title": "Set Output Verbosity Level",
         "category": "OpenShift"
       },
       {
@@ -530,19 +536,24 @@
           "group": "c3@2"
         },
         {
-          "command": "openshift.component.openUrl",
+          "command": "openshift.component.push",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c4@1"
         },
         {
-          "command": "openshift.component.push",
+          "command": "openshift.component.watch",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c4@2"
         },
         {
-          "command": "openshift.component.watch",
+          "command": "openshift.component.openUrl",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c4@3"
+        },
+        {
+          "command": "openshift.component.verbosity",
+          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "c4@4"
         },
         {
           "command": "openshift.component.delete",

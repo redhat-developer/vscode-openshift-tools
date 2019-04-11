@@ -93,10 +93,10 @@ export const Command = {
         `oc get service ${component}-${app} --namespace ${project} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`,
     linkComponentTo: (project: string, app: string, component: string, componentToLink: string, port?: string) =>
         `odo project set ${project} && odo application set ${app} && odo component set ${component} && odo link ${componentToLink} --wait${port ? ' --port ' + port : ''}`,
-    pushComponent: (project: string, app: string, component: string) =>
-        `odo push ${component} --app ${app} --project ${project} -v 9`,
-    pushLocalComponent: (project: string, app: string, component: string, location: string) =>
-        `${Command.pushComponent(project, app, component)} --local ${location}`,
+    pushComponent: (project: string, app: string, component: string, level: number) =>
+        `odo push ${component} --app ${app} --project ${project} -v ${level}`,
+    pushLocalComponent: (project: string, app: string, component: string, location: string, level: number) =>
+        `${Command.pushComponent(project, app, component, level)} --local ${location}`,
     watchComponent: (project: string, app: string, component: string) =>
         `odo watch ${component} --app ${app} --project ${project}`,
     getRouteHostName: (namespace: string, component: string) =>
@@ -241,7 +241,7 @@ export interface Odo {
     createApplication(project: OpenShiftObject, name: string): Promise<OpenShiftObject>;
     deleteApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, repoUri: string, ref: string): Promise<OpenShiftObject>;
-    createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, path: string): Promise<OpenShiftObject>;
+    createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, path: string, level: number): Promise<OpenShiftObject>;
     createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, path: string): Promise<OpenShiftObject>;
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     createStorage(component: OpenShiftObject, name: string, mountPath: string, size: string): Promise<OpenShiftObject>;
@@ -585,9 +585,9 @@ export class OdoImpl implements Odo {
         return this.insertAndReveal(await this.getApplications(project), new OpenShiftObjectImpl(project, applicationName, ContextType.APPLICATION, this));
     }
 
-    public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: string, ref: string = 'master'): Promise<OpenShiftObject> {
+    public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: string, level: number, ref: string = 'master'): Promise<OpenShiftObject> {
         await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location));
-        this.executeInTerminal(Command.pushLocalComponent(application.getParent().getName(), application.getName(), name, location));
+        this.executeInTerminal(Command.pushLocalComponent(application.getParent().getName(), application.getName(), name, location, level));
         return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this, null, 'folder'));
     }
 

@@ -150,13 +150,44 @@ export class Component extends OpenShiftItem {
         );
     }
 
+    static async verbosityLevel() {
+        const level = [];
+        for (let i = 0; i <= 9; i++) {
+            level.push(i.toString());
+        }
+        return level;
+    }
+
+    static async showInformationMessage() {
+        return await window.showInformationMessage(`Do you want change verbosity level (Default value 0)`, 'Yes', 'No');
+    }
+
+    static async getVerbosityLevel() {
+        if (await Component.showInformationMessage() === 'Yes') {
+            const level = await window.showQuickPick(Component.verbosityLevel(), {placeHolder: "Select verbosity level"});
+            return level ? level : 0;
+        }
+        return 0;
+    }
+
+    static async verbosity(context: OpenShiftObject): Promise<string> {
+        const component = await Component.getOpenShiftCmdData(context,
+            "In which Project you want to changes the verbosity level",
+            "In which Application you want to changes the verbosity level",
+            "For which Component you want to changes the verbosity level");
+        if (!component) return null;
+        const level = await Component.getVerbosityLevel();
+        Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), level));
+    }
+
     static async push(context: OpenShiftObject): Promise<string> {
+        let level: number;
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to push the changes",
             "In which Application you want to push the changes",
             "For which Component you want to push the changes");
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
+        Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), level = 0));
     }
 
     static async watch(context: OpenShiftObject): Promise<void> {
@@ -210,6 +241,7 @@ export class Component extends OpenShiftItem {
     }
 
     static async createFromLocal(context: OpenShiftObject): Promise<string> {
+        let level: number;
         let application: OpenShiftObject = context;
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
@@ -229,17 +261,16 @@ export class Component extends OpenShiftItem {
         const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
 
         if (!componentTypeVersion) return null;
-        const project = application.getParent();
-        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.uri.fsPath));
+        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.uri.fsPath, level = 0));
         return `Component '${componentName}' successfully created`;
     }
 
     static async createFromFolder(folder: Uri): Promise<string> {
+        let level: number;
         const application = await Component.getOpenShiftCmdData(undefined,
             "In which Project you want to create a Component",
             "In which Application you want to create a Component"
         );
-
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
@@ -252,8 +283,7 @@ export class Component extends OpenShiftItem {
         const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
 
         if (!componentTypeVersion) return null;
-
-        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.fsPath));
+        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.fsPath, level= 0));
         return `Component '${componentName}' successfully created`;
     }
 

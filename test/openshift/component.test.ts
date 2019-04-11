@@ -119,6 +119,7 @@ suite('OpenShift/Component', () => {
             let folderStub: sinon.SinonStub;
 
             setup(() => {
+                infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves('No');
                 inputStub.resolves(componentItem.getName());
                 folderStub = sandbox.stub(vscode.window, 'showWorkspaceFolderPick').resolves(folder);
             });
@@ -129,7 +130,7 @@ suite('OpenShift/Component', () => {
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
                 expect(progressFunctionStub).calledOnceWith(
                     `Creating new Component '${componentItem.getName()}'`);
-                expect(termStub).calledOnceWith(Command.pushLocalComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), folder.uri.fsPath));
+                expect(termStub).calledOnceWith(Command.pushLocalComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), folder.uri.fsPath, 0));
             });
 
             test('returns null when no folder selected', async () => {
@@ -323,6 +324,7 @@ suite('OpenShift/Component', () => {
         const folder: vscode.Uri = vscode.Uri.file(pathOne);
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            infoStub = sandbox.stub(Component, 'showInformationMessage').resolves('No');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
@@ -667,6 +669,7 @@ suite('OpenShift/Component', () => {
     suite('push', () => {
 
         setup(() => {
+            infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves('No');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
@@ -683,13 +686,20 @@ suite('OpenShift/Component', () => {
         test('push calls the correct odo command with progress', async () => {
             await Component.push(componentItem);
 
-            expect(termStub).calledOnceWith(Command.pushComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.pushComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), 0));
         });
 
         test('works with no context', async () => {
             await Component.push(null);
 
-            expect(termStub).calledOnceWith(Command.pushComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.pushComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), 0));
+        });
+
+        test('should able to work from different level of verbosity', async () => {
+            infoStub.resolves('Yes');
+            await Component.push(null);
+
+            expect(termStub).calledOnceWith(Command.pushComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), 0));
         });
     });
 

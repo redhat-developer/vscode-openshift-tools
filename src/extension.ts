@@ -53,6 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.create.git', (context) => execute(Component.createFromGit, context)),
         vscode.commands.registerCommand('openshift.component.create.binary', (context) => execute(Component.createFromBinary, context)),
         vscode.commands.registerCommand('openshift.component.delete.palette', (context) => execute(Component.del, context)),
+        vscode.commands.registerCommand('openshift.component.verbosity', (context) => execute(Component.verbosity, context)),
         vscode.commands.registerCommand('openshift.component.push', (context) => execute(Component.push, context)),
         vscode.commands.registerCommand('openshift.component.push.palette', (context) => execute(Component.push, context)),
         vscode.commands.registerCommand('openshift.component.watch', (context) => execute(Component.watch, context)),
