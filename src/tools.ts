@@ -16,7 +16,7 @@ import * as fs from 'fs';
 import { Cli } from './cli';
 import semver = require('semver');
 
-const configData = {
+export let configData = {
     odo: {
         description: "OpenShift Do CLI tool",
         vendor: "Red Hat, Inc.",
