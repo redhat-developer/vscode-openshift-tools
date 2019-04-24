@@ -18,10 +18,12 @@ import { Service } from './openshift/service';
 import { Platform } from './util/platform';
 import path = require('path');
 import fsx = require('fs-extra');
+import * as k8s from 'vscode-kubernetes-tools-api';
+import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 
 export let contextGlobalState: vscode.ExtensionContext;
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
     contextGlobalState = context;
     migrateFromOdo018();
 
@@ -78,9 +80,73 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.service.describe.palette', (context) => execute(Service.describe, context)),
         vscode.commands.registerCommand('openshift.component.linkComponent', (context) => execute(Component.linkComponent, context)),
         vscode.commands.registerCommand('openshift.component.linkService', (context) => execute(Component.linkService, context)),
+        vscode.commands.registerCommand('openshift.useProject', (context) => vscode.commands.executeCommand('extension.vsKubernetesUseNamespace', context)),
         OpenShiftExplorer.getInstance()
     ];
-    disposable.forEach((value)=> context.subscriptions.push(value));
+    disposable.forEach((value) => context.subscriptions.push(value));
+
+    const clusterExplorer = await k8s.extension.clusterExplorer.v1;
+
+    if (clusterExplorer.available) {
+        const nodeContributors = [
+            clusterExplorer.api.nodeSources.resourceFolder("Projects", "Projects", "Project", "project").if(isOpenShift).at(undefined),
+            clusterExplorer.api.nodeSources.resourceFolder("Templates", "Templates", "Template", "template").if(isOpenShift).at(undefined),
+            clusterExplorer.api.nodeSources.resourceFolder("ImageStreams", "ImageStreams", "ImageStream", "ImageStream").if(isOpenShift).at("Workloads"),
+            clusterExplorer.api.nodeSources.resourceFolder("Images", "Images", "Image", "image").if(isOpenShift).at("Workloads"),
+            clusterExplorer.api.nodeSources.resourceFolder("Routes", "Routes", "Route", "route").if(isOpenShift).at("Network"),
+            clusterExplorer.api.nodeSources.resourceFolder("DeploymentConfigs", "DeploymentConfigs", "DeploymentConfig", "dc").if(isOpenShift).at("Workloads")
+        ];
+        nodeContributors.forEach(element => {
+            clusterExplorer.api.registerNodeContributor(element);
+        });
+        clusterExplorer.api.registerNodeUICustomizer({customize});
+    }
+}
+
+let lastNamespace = '';
+
+function customize(node: ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): void | Thenable<void> {
+    return customizeAsync(node, treeItem);
+}
+
+async function initNamespaceName(node: ClusterExplorerV1.ClusterExplorerResourceNode) {
+    const kubectl = await k8s.extension.kubectl.v1;
+    if (kubectl.available) {
+        const result = await kubectl.api.invokeCommand('config view -o json');
+        const config = JSON.parse(result.stdout);
+        const ctxName = config["current-context"];
+        const currentContext = (config.contexts || []).find((ctx) => ctx.name === node.name);
+        if (!currentContext) {
+            return "";
+        }
+        return currentContext.context.namespace || "default";
+    }
+}
+
+async function customizeAsync(node: ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): Promise<void> {
+    if ((node as any).nodeType === 'context') {
+        lastNamespace = await initNamespaceName(node);
+    }
+    if (node.nodeType as unknown === 'resource' && node.resourceKind.manifestKind === 'Project') {
+        // assuming now that it’s a project node
+        const projectName = node.name;
+        if (projectName === lastNamespace) {
+            treeItem.label = `* ${treeItem.label}`;
+        } else {
+            treeItem.contextValue = `${treeItem.contextValue || ''}.openshift.inactiveProject`;
+        }
+    }
+}
+
+async function isOpenShift(): Promise<boolean> {
+    const kubectl = await k8s.extension.kubectl.v1;
+    if (kubectl.available) {
+        const sr = await kubectl.api.invokeCommand('api-versions');
+        if (!sr || sr.code !== 0) {
+            return false;
+        }
+        return sr.stdout.includes("apps.openshift.io/v1");  // Naive check to keep example simple!
+    }
 }
 
 // this method is called when your extension is deactivated
@@ -109,7 +175,7 @@ function displayResult(result?: any) {
     }
 }
 
-function migrateFromOdo018 () {
+function migrateFromOdo018() {
     const newCfgDir = path.join(Platform.getUserHomePath(), '.odo');
     const newCfg = path.join(newCfgDir, 'odo-config.yaml');
     const oldCfg = path.join(Platform.getUserHomePath(), '.kube', 'odo');
