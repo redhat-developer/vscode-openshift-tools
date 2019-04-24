@@ -757,7 +757,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('gets URLs for the component and if there is more than one asks which one to open it in browser and opens selected', async () => {
-            quickPickStub.onCall(3).resolves('https://url1');
+            quickPickStub.onCall(3).resolves({label: 'https://url1'});
             execStub.onCall(0).resolves({error: undefined, stdout: 'url', stderr: ''});
             execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
             execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
