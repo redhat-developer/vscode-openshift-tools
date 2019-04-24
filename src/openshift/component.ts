@@ -186,20 +186,20 @@ export class Component extends OpenShiftItem {
         if (! await Component.checkRouteCreated(namespace, component)) {
             const UrlDetails = await Component.odo.execute(Command.getComponentUrl(namespace, app.getName(), component.getName()));
             let result: any[] = [];
-            let selectRoute: string;
+            let selectRoute: QuickPickItem;
             try {
                 result = JSON.parse(UrlDetails.stdout).items;
             } catch (ignore) {
-                // should give emoty list if no url configured
+                // should give empty list if no url configured
                 // see https://github.com/openshift/odo/issues/1515
             }
-            const hostName: string[] = result.map((value) =>`${value.spec.protocol}://${value.spec.path}`);
+            const hostName: QuickPickItem[] = result.map((value) => ({ label: `${value.spec.protocol}://${value.spec.path}`, description: `Target Port is ${value.spec.port}`}));
             if (hostName.length >1) {
                 selectRoute = await window.showQuickPick(hostName, {placeHolder: "This Component has multiple URLs. Select the desired URL to open in browser."});
                 if (!selectRoute) return null;
-                return opn(`${selectRoute}`);
+                return opn(`${selectRoute.label}`);
             } else {
-                return opn(`${hostName}`);
+                return opn(`${hostName[0].label}`);
             }
         }
     }
