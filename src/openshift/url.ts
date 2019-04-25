@@ -23,7 +23,9 @@ export class Url extends OpenShiftItem{
             const urlName = await window.showInputBox({
                 prompt: `Provide a name for a URL`,
                 validateInput: (value: string) => {
-                    if (!value.trim()) return 'A name cannot be empty';
+                    let validationMessage = OpenShiftItem.emptyName(`Empty URL name`, value.trim());
+                    if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid URL name. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character`, value);
+                    return validationMessage;
                 }
             });
             if (!urlName) return null;
