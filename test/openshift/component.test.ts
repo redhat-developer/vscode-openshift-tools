@@ -37,6 +37,7 @@ suite('OpenShift/Component', () => {
     let opnStub: sinon.SinonStub;
     let infoStub: sinon.SinonStub;
     let fetchTag: sinon.SinonStub;
+
     setup(() => {
         sandbox = sinon.createSandbox();
         opnStub = sandbox.stub();
@@ -663,6 +664,27 @@ suite('OpenShift/Component', () => {
             await Component.followLog(null);
 
             expect(termStub).calledOnceWith(Command.showLogAndFollow(projectItem.getName(), appItem.getName(), componentItem.getName()));
+        });
+    });
+
+    suite('verbosity', () => {
+
+        setup(() => {
+            infoStub = sandbox.stub(vscode.window, 'showInformationMessage');
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+        });
+
+        test('return  null if user reject', async () => {
+            infoStub.resolves('No');
+            const result = await Component.verbosity();
+            expect(result).equals(null);
+        });
+
+        test('set verbosity level', async () => {
+            infoStub.resolves('Yes');
+            quickPickStub.resolves(0);
+            const result = await Component.verbosity();
+            expect(result).equals('Verbosity level: 0 successfully set');
         });
     });
 

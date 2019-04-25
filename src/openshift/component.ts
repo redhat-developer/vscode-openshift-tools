@@ -5,7 +5,7 @@
 
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
-import { window, commands, QuickPickItem, Uri } from 'vscode';
+import { window, commands, QuickPickItem, Uri, workspace } from 'vscode';
 import { Progress } from '../util/progress';
 import open = require('open');
 import { ChildProcess } from 'child_process';
@@ -150,44 +150,37 @@ export class Component extends OpenShiftItem {
         );
     }
 
-    static async verbosityLevel() {
-        const level = [];
-        for (let i = 0; i <= 9; i++) {
-            level.push(i.toString());
-        }
-        return level;
-    }
-
     static async showInformationMessage() {
         return await window.showInformationMessage(`Do you want change verbosity level (Default value 0)`, 'Yes', 'No');
     }
 
     static async getVerbosityLevel() {
-        if (await Component.showInformationMessage() === 'Yes') {
-            const level = await window.showQuickPick(Component.verbosityLevel(), {placeHolder: "Select verbosity level"});
-            return level ? level : 0;
-        }
-        return 0;
+        const option = await Component.showInformationMessage();
+        if (!option || option === 'No') return null;
+        const level = option === 'Yes' && await window.showQuickPick(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], {placeHolder: "Select verbosity level"});
+        return level || 0;
     }
 
-    static async verbosity(context: OpenShiftObject): Promise<string> {
-        const component = await Component.getOpenShiftCmdData(context,
-            "In which Project you want to changes the verbosity level",
-            "In which Application you want to changes the verbosity level",
-            "For which Component you want to changes the verbosity level");
-        if (!component) return null;
-        const level = await Component.getVerbosityLevel();
-        Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), level));
+    static async verbosity() {
+        const verbosityLevel = await Component.getVerbosityLevel();
+        if (verbosityLevel === null) return null;
+        workspace.getConfiguration().update('VERBOSITY_LEVEL', verbosityLevel);
+        return `Verbosity level: ${verbosityLevel} successfully set`;
+    }
+
+    static async getVerbosityLevelFromConfig(): Promise<any> {
+        const verbosityLevel = workspace.getConfiguration().get('VERBOSITY_LEVEL');
+        return verbosityLevel? verbosityLevel: 0;
     }
 
     static async push(context: OpenShiftObject): Promise<string> {
-        let level: number;
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to push the changes",
             "In which Application you want to push the changes",
             "For which Component you want to push the changes");
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), level = 0));
+        const level = await Component.getVerbosityLevelFromConfig();
+        Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), level));
     }
 
     static async watch(context: OpenShiftObject): Promise<void> {
@@ -241,7 +234,6 @@ export class Component extends OpenShiftItem {
     }
 
     static async createFromLocal(context: OpenShiftObject): Promise<string> {
-        let level: number;
         let application: OpenShiftObject = context;
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
@@ -261,12 +253,12 @@ export class Component extends OpenShiftItem {
         const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
 
         if (!componentTypeVersion) return null;
-        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.uri.fsPath, level = 0));
+        const level = await Component.getVerbosityLevelFromConfig();
+        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.uri.fsPath, level));
         return `Component '${componentName}' successfully created`;
     }
 
     static async createFromFolder(folder: Uri): Promise<string> {
-        let level: number;
         const application = await Component.getOpenShiftCmdData(undefined,
             "In which Project you want to create a Component",
             "In which Application you want to create a Component"
@@ -283,7 +275,8 @@ export class Component extends OpenShiftItem {
         const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
 
         if (!componentTypeVersion) return null;
-        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.fsPath, level= 0));
+        const level = await Component.getVerbosityLevelFromConfig();
+        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.fsPath, level));
         return `Component '${componentName}' successfully created`;
     }
 

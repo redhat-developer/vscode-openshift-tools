@@ -596,7 +596,8 @@
           "type": "boolean",
           "default": false,
           "description": "Show OpenShift Connector output channel when new text added to output stream."
-        }
+        },
+        "VERBOSITY_LEVEL": {}
       }
     }
   },
