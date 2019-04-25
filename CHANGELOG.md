@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.0.20
+
+* Update to use `odo v1.0.0-beta1`
+
+
 ## 0.0.19 (April 10, 2019)
 * Cache OpenShift Application Explorer nodes to avoid extra `odo` calls
 * Reveal new created objects directly in the Explorer View
