@@ -276,9 +276,9 @@ suite('OpenShift/URL', () => {
             let result: string | Thenable<string>;
             inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                 result = options.validateInput('');
-                expect(result).equal('A name cannot be empty');
-                result = options.validateInput('notNull');
-                expect(result).is.undefined;
+                expect(result).equal('Empty URL name');
+                result = options.validateInput('Urlname');
+                expect(result).equal('Not a valid URL name. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character');
                 return Promise.resolve('');
             });
 
