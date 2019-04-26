@@ -10,7 +10,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
-import { OdoImpl } from '../../src/odo';
+import { OdoImpl, Command } from '../../src/odo';
 import { Url } from '../../src/openshift/url';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 
@@ -23,9 +23,12 @@ suite('OpenShift/URL', () => {
     let inputStub: sinon.SinonStub;
     let execStub: sinon.SinonStub;
     let getProjectsNameStub: sinon.SinonStub;
+    let getRouteNameStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project');
     const appItem = new TestItem(projectItem, 'app');
     const componentItem = new TestItem(appItem, 'component');
+    const routeItem = new TestItem(componentItem, 'route');
+    const errorMessage = 'ERROR';
 
     const noPortsOutput = `{
         "apiVersion": "v1",
@@ -159,6 +162,7 @@ suite('OpenShift/URL', () => {
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
         inputStub = sandbox.stub(vscode.window, 'showInputBox');
         getProjectsNameStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
+        getRouteNameStub = sandbox.stub(OpenShiftItem, 'getRoutes').resolves([routeItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
     });
@@ -284,6 +288,60 @@ suite('OpenShift/URL', () => {
 
             await Url.create(componentItem);
 
+        });
+    });
+
+    suite('del', () => {
+        let warnStub: sinon.SinonStub;
+
+        setup(() => {
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
+            sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
+            getRouteNameStub.resolves([]);
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onThirdCall().resolves(componentItem);
+            quickPickStub.onCall(3).resolves(routeItem);
+            warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+        });
+
+        test('works with set tree item', async () => {
+            const result = await Url.del(routeItem);
+
+            expect(result).equals(`Route '${routeItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
+            expect(execStub.getCall(0).args[0]).equals(Command.deleteComponentUrl(projectItem.getName(), appItem.getName(), componentItem.getName(), routeItem.getName()));
+        });
+
+        test('works without set tree item', async () => {
+            const result = await Url.del(null);
+
+            expect(result).equals(`Route '${routeItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
+            expect(execStub.getCall(0).args[0]).equals(Command.deleteComponentUrl(projectItem.getName(), appItem.getName(), componentItem.getName(), routeItem.getName()));
+        });
+
+        test('returns null with no route selected', async () => {
+            quickPickStub.onCall(3).resolves();
+            const result = await Url.del(null);
+
+            expect(result).null;
+        });
+
+        test('returns null when cancelled', async () => {
+            warnStub.resolves('Cancel');
+            const result = await Url.del(null);
+
+            expect(result).null;
+        });
+
+        test('wraps odo errors in additional info', async () => {
+            execStub.rejects(errorMessage);
+            try {
+                await Url.del(routeItem);
+                expect.fail();
+            } catch (err) {
+                expect(err).equals(`Failed to delete Route with error '${errorMessage}'`);
+            }
         });
     });
 });

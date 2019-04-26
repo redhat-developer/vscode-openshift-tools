@@ -60,6 +60,7 @@
     "onCommand:openshift.catalog.listComponents",
     "onCommand:openshift.catalog.listServices",
     "onCommand:openshift.url.create",
+    "onCommand:openshift.url.delete",
     "onCommand:openshift.component.openUrl",
     "onCommand:openshift.component.openUrl.palette",
     "onCommand:openshift.storage.create",
@@ -271,6 +272,16 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.url.delete",
+        "title": "Delete Route",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.url.delete.palette",
+        "title": "Delete Route",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.component.openUrl",
         "title": "Open in Browser",
         "category": "OpenShift"
@@ -404,6 +415,10 @@
         },
         {
           "command": "openshift.storage.delete",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.url.delete",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -561,6 +576,11 @@
         {
           "command": "openshift.storage.delete",
           "when": "view == openshiftProjectExplorer && viewItem == storage",
+          "group": "s3"
+        },
+        {
+          "command": "openshift.url.delete",
+          "when": "view == openshiftProjectExplorer && viewItem == component_route",
           "group": "s3"
         }
       ]

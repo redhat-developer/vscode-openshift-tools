@@ -17,6 +17,7 @@ import { TestItem } from './openshift/testOSItem';
 import { ExecException } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Component } from '../src/openshift/component';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -270,7 +271,7 @@ suite("odo", () => {
             expect(result[1].getName()).deep.equals('serv');
         });
 
-        test('getStorageNames returns storage items for an application', async () => {
+        test('getStorageNames returns storage items for a component', async () => {
             const component = new TestItem(app, 'comp');
             execStub.returns({
                 error: undefined,
@@ -293,6 +294,67 @@ suite("odo", () => {
             });
             const result = await odoCli.getStorageNames(component);
             expect(result.length).equals(2);
+        });
+
+        test('getRoutes returns route list items for a component', async () => {
+            const component = new TestItem(app, 'comp');
+            execStub.returns({
+                error: undefined,
+                stdout: JSON.stringify({
+                        items: [
+                            {
+                                metadata: {
+                                    name: "route1"
+                                }
+                            },
+                            {
+                                metadata: {
+                                    name: "route2"
+                                }
+                            }
+                        ]
+                    }
+                ),
+                stderr: ''
+            });
+            const result = await odoCli.getRoutes(component);
+            expect(result.length).equals(2);
+        });
+
+        test('getComponentChildren returns both routes and storage for a component', async () => {
+            const component = new TestItem(app, 'comp');
+            execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        metadata: {
+                            name: "route1"
+                        }
+                    },
+                    {
+                        metadata: {
+                            name: "route2"
+                        }
+                    }
+                ]
+            }), stderr: ''});
+            execStub.onSecondCall().resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        metadata: {
+                            name: "storage1"
+                        }
+                    },
+                    {
+                        metadata: {
+                            name: "storage2"
+                        }
+                    }
+                ]
+            }), stderr: ''});
+            const result = await odoCli.getComponentChildren(component);
+
+            expect(result[0].getName()).deep.equals('route1');
+            expect(result[2].getName()).deep.equals('storage1');
         });
     });
 

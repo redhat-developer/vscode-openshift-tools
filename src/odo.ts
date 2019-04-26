@@ -30,7 +30,8 @@ export enum ContextType {
     SERVICE = 'service',
     STORAGE = 'storage',
     CLUSTER_DOWN = 'cluster_down',
-    LOGIN_REQUIRED = 'login_required'
+    LOGIN_REQUIRED = 'login_required',
+    COMPONENT_ROUTE = 'component_route'
 }
 
 export const Command = {
@@ -118,6 +119,8 @@ export const Command = {
         `odo url create ${name} --port ${port} --project ${project} --app ${app} --component ${component}`,
     getComponentUrl: (project: string, app: string, component: string) =>
         `odo url list --component ${component} --app ${app} --project ${project} -o json`,
+    deleteComponentUrl: (project: string, app: string, component: string, name: string) =>
+        `odo url delete -f ${name} --project ${project} --app ${app} --component ${component}`,
     getComponentJson: (project: string, app: string, component: string) =>
         `oc get service ${component}-${app} --namespace ${project} -o json`
 };
@@ -142,7 +145,7 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
         component: {
             icon: '',
             tooltip: 'Component: {label}',
-            getChildren: () => this.odo.getStorageNames(this)
+            getChildren: () => this.odo.getComponentChildren(this)
         },
         service: {
             icon: 'service-node.png',
@@ -162,6 +165,11 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
         login_required: {
             icon: 'cluster-down.png',
             tooltip: 'Please Log in to the cluster',
+            getChildren: () => []
+        },
+        component_route: {
+            icon: 'url-node.png',
+            tooltip: 'URL: {label}',
             getChildren: () => []
         }
     };
@@ -217,6 +225,8 @@ export interface Odo {
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponents(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponentTypes(): Promise<string[]>;
+    getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]>;
+    getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponentTypeVersions(componentName: string): Promise<string[]>;
     getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getServiceTemplates(): Promise<string[]>;
@@ -238,6 +248,7 @@ export interface Odo {
     deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject>;
     createService(application: OpenShiftObject, templateName: string, planName: string, name: string): Promise<OpenShiftObject>;
     deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
+    deleteRoute(url: OpenShiftObject): Promise<OpenShiftObject>;
 }
 
 export function getInstance(): Odo {
@@ -404,6 +415,44 @@ export class OdoImpl implements Odo {
     public async getComponentTypes(): Promise<string[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
         return result.stdout.trim().split('\n').slice(1).map((value) => value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|')[0]);
+    }
+
+    public async getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]> {
+        if (!this.cache.has(component)) {
+            this.cache.set(component, [... await this._getRoutes(component), ...await this._getStorageNames(component)]);
+        }
+        return this.cache.get(component);
+    }
+
+    async _getComponentChildren(component: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
+        return [... await this._getStorageNames(component), ... await this._getRoutes(component)];
+    }
+
+    async getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
+        if (!this.cache.has(component)) {
+            this.cache.set(component, await this._getRoutes(component));
+        }
+        return this.cache.get(component);
+    }
+
+    public async _getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
+        const app = component.getParent();
+        const result: cliInstance.CliExitData = await this.execute(Command.getComponentUrl(app.getParent().getName(), app.getName(), component.getName()));
+
+        let data: any[] = [];
+        try {
+            const items = JSON.parse(result.stdout).items;
+            if (items) data = items;
+        } catch (ignore) {
+        }
+
+        return data.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(component, value.metadata.name, ContextType.COMPONENT_ROUTE, OdoImpl.instance, TreeItemCollapsibleState.None));
+    }
+
+    public async deleteRoute(route: OpenShiftObject): Promise<OpenShiftObject> {
+        const component = route.getParent();
+        await this.execute(Command.deleteComponentUrl(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), route.getName()));
+        return this.deleteAndRefresh(await this.getRoutes(component), route);
     }
 
     async getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
