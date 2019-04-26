@@ -249,6 +249,7 @@ export interface Odo {
     createService(application: OpenShiftObject, templateName: string, planName: string, name: string): Promise<OpenShiftObject>;
     deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
     deleteRoute(url: OpenShiftObject): Promise<OpenShiftObject>;
+    createComponentCustomUrl(component: OpenShiftObject, name: string, port: string): Promise<OpenShiftObject>;
 }
 
 export function getInstance(): Odo {
@@ -621,7 +622,7 @@ export class OdoImpl implements Odo {
 
     public async createStorage(component: OpenShiftObject, name: string, mountPath: string, size: string): Promise<OpenShiftObject> {
         await this.execute(Command.createStorage(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), name, mountPath, size));
-        return this.insertAndReveal(await this.getApplicationChildren(component), new OpenShiftObjectImpl(component, name, ContextType.STORAGE, this));
+        return this.insertAndReveal(await this.getComponentChildren(component), new OpenShiftObjectImpl(component, name, ContextType.STORAGE, this));
     }
 
     public async deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject> {
@@ -629,6 +630,11 @@ export class OdoImpl implements Odo {
         await this.execute(Command.deleteStorage(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), storage.getName()));
         await this .execute(Command.waitForStorageToBeGone(storage.getParent().getParent().getParent().getName(), storage.getParent().getParent().getName(), storage.getName()), process.cwd(), false);
         return this.deleteAndRefresh(await this.getStorageNames(component), storage);
+    }
+
+    public async createComponentCustomUrl(component: OpenShiftObject, name: string, port: string): Promise<OpenShiftObject> {
+        await this.execute(Command.createComponentCustomUrl(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), name, port));
+        return this.insertAndReveal(await this.getComponentChildren(component), new OpenShiftObjectImpl(component, name, ContextType.COMPONENT_ROUTE, this));
     }
 
     clearCache() {
