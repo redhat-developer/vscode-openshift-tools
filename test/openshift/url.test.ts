@@ -165,6 +165,7 @@ suite('OpenShift/URL', () => {
         getRouteNameStub = sandbox.stub(OpenShiftItem, 'getRoutes').resolves([routeItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: '', stdout: '', stderr: ''});
     });
 
     teardown(() => {
@@ -200,7 +201,6 @@ suite('OpenShift/URL', () => {
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([componentItem]);
             inputStub.onFirstCall().resolves('urlName');
-            execStub = sandbox.stub(OdoImpl.prototype, 'execute');
             execStub.onFirstCall().resolves({error: null, stdout: portsOutput, stderr: ''});
             execStub.onSecondCall().resolves({error: null, stdout: '', stderr: ''});
             quickPickStub.resolves('port1');
@@ -212,7 +212,6 @@ suite('OpenShift/URL', () => {
 
         test('rejects when fails to create Url', () => {
             inputStub.onFirstCall().resolves();
-            execStub = sandbox.stub(OdoImpl.prototype, 'execute');
             execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
             execStub.onSecondCall().resolves({error: "Error", stdout: portsOutput, stderr: ''});
             return Url.create(null).catch((err) => {
@@ -231,7 +230,6 @@ suite('OpenShift/URL', () => {
 
         test('asks to select port if more that one exposed and returns message', async () => {
             inputStub.onFirstCall().resolves('urlName');
-            execStub = sandbox.stub(OdoImpl.prototype, 'execute');
             execStub.onFirstCall().resolves({error: null, stdout: portsOutput, stderr: ''});
             execStub.onSecondCall().resolves({error: null, stdout: '', stderr: ''});
             quickPickStub.resolves({
@@ -247,7 +245,6 @@ suite('OpenShift/URL', () => {
         });
 
         test('rejects when fails to create Url', async () => {
-            execStub = sandbox.stub(OdoImpl.prototype, 'execute');
             execStub.onFirstCall().resolves({error: null, stdout: portOutput, stderr: ''});
             execStub.onSecondCall().rejects(Error('Error'));
             inputStub.onFirstCall().resolves('urlName');
@@ -262,7 +259,6 @@ suite('OpenShift/URL', () => {
         });
 
         test('rejects when component has no ports declared', async () => {
-            execStub = sandbox.stub(OdoImpl.prototype, 'execute');
             execStub.onFirstCall().resolves({error: null, stdout: noPortsOutput, stderr: ''});
             inputStub.onFirstCall().resolves('urlName');
             try {
@@ -275,7 +271,6 @@ suite('OpenShift/URL', () => {
         });
 
         test('checks if URL name is not empty', async () => {
-            execStub = sandbox.stub(OdoImpl.prototype, 'execute');
             execStub.onFirstCall().resolves({error: null, stdout: noPortsOutput, stderr: ''});
             let result: string | Thenable<string>;
             inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
