@@ -7,7 +7,7 @@ import { OpenShiftObject, Command } from "../odo";
 import { OpenShiftItem } from './openshiftItem';
 import { window, commands, env } from 'vscode';
 import { CliExitData, Cli } from "../cli";
-import opn = require("opn");
+import open = require("open");
 import { TokenStore } from "../util/credentialManager";
 
 export class Cluster extends OpenShiftItem {
@@ -49,11 +49,11 @@ export class Cluster extends OpenShiftItem {
 
     static async openshiftConsole(context: OpenShiftObject): Promise<void> {
         if (context) {
-            opn(`${context.getName()}/console`);
+            open(`${context.getName()}/console`);
         } else {
             const result: OpenShiftObject[] = await Cluster.odo.getClusters();
             if (result.length>0 && result[0].getName().startsWith('http')) {
-                opn(`${result[0].getName()}/console`);
+                open(`${result[0].getName()}/console`);
             } else {
                 window.showErrorMessage(result[0].getName());
             }

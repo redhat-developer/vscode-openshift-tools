@@ -157,6 +157,49 @@ suite('OpenShift/URL', () => {
         }
     }`;
 
+    const routesOutput = `{
+    "kind": "List",
+    "apiVersion": "odo.openshift.io/v1alpha1",
+    "metadata": {},
+    "items": [
+        {
+            "kind": "url",
+            "apiVersion": "odo.openshift.io/v1alpha1",
+            "metadata": {
+                "name": "url1",
+                "creationTimestamp": null
+            },
+            "spec": {
+                "path": "url1-app-myproject.10.0.0.46.nip.io",
+                "protocol": "http",
+                "port": 8080
+            }
+        }
+    ]}`;
+
+    const storagesOutput = `{
+        "kind": "List",
+        "apiVersion": "odo.openshift.io/v1aplha1",
+        "metadata": {},
+        "items": [
+            {
+                "kind": "Storage",
+                "apiVersion": "odo.openshift.io/v1alpha1",
+                "metadata": {
+                    "name": "s2",
+                    "creationTimestamp": null
+                },
+                "spec": {
+                    "size": "1Gi",
+                    "path": "C:/Program Files/Git/mnt/s2"
+                },
+                "status": {
+                    "mounted": true
+                }
+            }
+        ]
+    }`;
+
     setup(() => {
         sandbox = sinon.createSandbox();
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -201,13 +244,15 @@ suite('OpenShift/URL', () => {
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([componentItem]);
             inputStub.onFirstCall().resolves('urlName');
-            execStub.onFirstCall().resolves({error: null, stdout: portsOutput, stderr: ''});
-            execStub.onSecondCall().resolves({error: null, stdout: '', stderr: ''});
+            execStub.onFirstCall().resolves({error: null, stdout: routesOutput, stderr: ''});
+            execStub.onSecondCall().resolves({error: null, stdout: storagesOutput, stderr: ''});
+            execStub.onThirdCall().resolves({error: null, stdout: portsOutput, stderr: ''});
+            execStub.onCall(3).resolves({error: null, stdout: '', stderr: ''});
             quickPickStub.resolves('port1');
             const result = await Url.create(null);
 
             expect(result).equals(`URL 'urlName' for component '${componentItem.getName()}' successfully created`);
-            expect(execStub).calledTwice;
+            expect(execStub.callCount).equals(4);
         });
 
         test('rejects when fails to create Url', () => {
@@ -304,18 +349,18 @@ suite('OpenShift/URL', () => {
         test('works with set tree item', async () => {
             const result = await Url.del(routeItem);
 
-            expect(result).equals(`Route '${routeItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
+            expect(result).equals(`URL '${routeItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
             expect(execStub.getCall(0).args[0]).equals(Command.deleteComponentUrl(projectItem.getName(), appItem.getName(), componentItem.getName(), routeItem.getName()));
         });
 
         test('works without set tree item', async () => {
             const result = await Url.del(null);
 
-            expect(result).equals(`Route '${routeItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
+            expect(result).equals(`URL '${routeItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
             expect(execStub.getCall(0).args[0]).equals(Command.deleteComponentUrl(projectItem.getName(), appItem.getName(), componentItem.getName(), routeItem.getName()));
         });
 
-        test('returns null with no route selected', async () => {
+        test('returns null with no URL selected', async () => {
             quickPickStub.onCall(3).resolves();
             const result = await Url.del(null);
 
@@ -335,7 +380,7 @@ suite('OpenShift/URL', () => {
                 await Url.del(routeItem);
                 expect.fail();
             } catch (err) {
-                expect(err).equals(`Failed to delete Route with error '${errorMessage}'`);
+                expect(err).equals(`Failed to delete URL with error '${errorMessage}'`);
             }
         });
     });

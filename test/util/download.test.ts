@@ -25,9 +25,9 @@ suite('Download Util', () => {
         streamEmitter = new EventEmitter();
         requestEmitter['pipe'] = () => streamEmitter;
         progressMock = pq('../../src/util/download', {
-            'request-progress': _ => requestEmitter,
-            request: _ => _
-          }
+            'request-progress': (_: any) => requestEmitter,
+            request: (_: any) => _
+            }
         ).DownloadUtil;
     });
 

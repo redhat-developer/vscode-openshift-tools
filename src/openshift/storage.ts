@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { OpenShiftItem } from "./openshiftItem";
-import { OpenShiftObject, Command } from "../odo";
+import { OpenShiftObject } from "../odo";
 import { window } from 'vscode';
 import { Progress } from "../util/progress";
 import { isEmpty } from "validator";

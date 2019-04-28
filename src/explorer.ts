@@ -17,7 +17,7 @@ import {
 import { Platform } from './util/platform';
 import * as path from 'path';
 
-import { Odo, OpenShiftObject, OdoImpl, OpenShiftObjectImpl } from './odo';
+import { Odo, OpenShiftObject, OdoImpl } from './odo';
 import { WatchUtil, FileContentChangeNotifier } from './util/watch';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');

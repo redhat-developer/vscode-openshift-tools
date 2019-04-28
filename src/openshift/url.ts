@@ -9,6 +9,7 @@ import { Component } from '../openshift/component';
 import { V1ServicePort } from '@kubernetes/client-node';
 import { OpenShiftItem } from './openshiftItem';
 import { Progress } from "../util/progress";
+import { URL } from 'url';
 
 export class Url extends OpenShiftItem{
 
@@ -20,14 +21,7 @@ export class Url extends OpenShiftItem{
         if (component) {
             const app: OpenShiftObject = component.getParent();
             const project: OpenShiftObject = app.getParent();
-            const urlName = await window.showInputBox({
-                prompt: `Provide a name for a URL`,
-                validateInput: (value: string) => {
-                    let validationMessage = OpenShiftItem.emptyName(`Empty URL name`, value.trim());
-                    if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid URL name. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character`, value);
-                    return validationMessage;
-                }
-            });
+            const urlName = await Url.getName('URL name', await Url.odo.getRoutes(component));
             if (!urlName) return null;
             const ports: V1ServicePort[] = await Component.getComponentPorts(component);
             const portItems: QuickPickItem[] = ports.map((item: any) => {
@@ -45,7 +39,7 @@ export class Url extends OpenShiftItem{
 
             if (port) {
                 return Progress.execFunctionWithProgress(`Creating a URL '${urlName}' for the Component '${component.getName()}'`,
-                    () => Url.odo.execute(Command.createComponentCustomUrl(project.getName(), app.getName(), component.getName(), `${urlName}`, `${port['port']}`))
+                    () => Url.odo.createComponentCustomUrl(component, `${urlName}`, `${port['port']}`)
                         .then(() => `URL '${urlName}' for component '${component.getName()}' successfully created`)
                         .catch((err) => Promise.reject(`Failed to create URL '${urlName}' for component '${component.getName()}'. ${err.message}`))
                 );
@@ -57,18 +51,18 @@ export class Url extends OpenShiftItem{
     static async del(treeItem: OpenShiftObject): Promise<string> {
         let url = treeItem;
         const component = await Url.getOpenShiftCmdData(url,
-            "From which Project you want to delete Route",
-            "From which Application you want to delete Route",
-            "From which Component you want to delete Route");
+            "From which Project you want to delete URL",
+            "From which Application you want to delete URL",
+            "From which Component you want to delete URL");
         if (!url && component) {
             url = await window.showQuickPick(Url.odo.getRoutes(component), {placeHolder: `Select the desired URL to delete from the component ${component.getName()}`});
         }
         if (url) {
-            const value = await window.showWarningMessage(`Do you want to delete Route '${url.getName()}' from Component '${url.getParent().getName()}'?`, 'Yes', 'Cancel');
+            const value = await window.showWarningMessage(`Do you want to delete URL '${url.getName()}' from Component '${url.getParent().getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
-                return Progress.execFunctionWithProgress(`Deleting Route ${url.getName()} from Component ${component.getName()}`, () => Url.odo.deleteRoute(url))
-                    .then(() => `Route '${url.getName()}' from Component '${url.getParent().getName()}' successfully deleted`)
-                    .catch((err) => Promise.reject(`Failed to delete Route with error '${err}'`));
+                return Progress.execFunctionWithProgress(`Deleting URL ${url.getName()} from Component ${component.getName()}`, () => Url.odo.deleteURL(url))
+                    .then(() => `URL '${url.getName()}' from Component '${url.getParent().getName()}' successfully deleted`)
+                    .catch((err) => Promise.reject(`Failed to delete URL with error '${err}'`));
             }
         }
         return null;

@@ -8,7 +8,7 @@ import { Archive } from "./util/archive";
 import { which } from "shelljs";
 import { DownloadUtil } from "./util/download";
 import hasha = require("hasha");
-import opn = require("opn");
+import open = require("open");
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fsex from 'fs-extra';
@@ -155,7 +155,7 @@ export class ToolsConfig {
                         toolLocation = toolCacheLocation;
                     }
                 } else if (response === `Help`) {
-                    opn('https://github.com/redhat-developer/vscode-openshift-tools#dependencies');
+                    open('https://github.com/redhat-developer/vscode-openshift-tools#dependencies');
                 }
             }
             if (toolLocation) {

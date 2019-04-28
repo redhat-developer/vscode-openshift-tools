@@ -29,7 +29,6 @@ chai.use(sinonChai);
 suite('openshift connector Extension', async () => {
 
     let sandbox: sinon.SinonSandbox;
-    const registerTreeDataProviderStub = sinon.spy(vscode.window, 'registerTreeDataProvider');
 
     setup(async () => {
         sandbox = sinon.createSandbox();

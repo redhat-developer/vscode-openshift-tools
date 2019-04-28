@@ -1,7 +1,7 @@
 .vscode/**
 .vscode-test/**
 images/vscode-openshift-tools.gif
-out/test/**
+out/**
 out/**/*.map
 src/**
 .gitignore
@@ -16,3 +16,8 @@ Jenkinsfile
 .gitattributes
 .travis.yml
 CONTRIBUTING.md
+dist/**/*.map
+webpack.*.json
+node_modules
+.editorconfig
+webpack.config.js

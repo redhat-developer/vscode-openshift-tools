@@ -9,7 +9,7 @@ export class TestItem implements OpenShiftObject {
     public readonly contextValue: ContextType;
     constructor(
         private parent: OpenShiftObject,
-        private name,
+        private name: string,
         private children = []) {
     }
 

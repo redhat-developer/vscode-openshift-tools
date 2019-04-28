@@ -17,7 +17,6 @@ import * as Util from '../../src/util/async';
 import { Refs } from '../../src/util/refs';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
-import { isThenable } from '../../src/util/async';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -43,7 +42,7 @@ suite('OpenShift/Component', () => {
         opnStub = sandbox.stub();
         fetchTag = sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>([['HEAD', 'shanumb']]));
         Component = pq('../../src/openshift/component', {
-            opn: opnStub
+            open: opnStub
         }).Component;
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });
@@ -806,7 +805,7 @@ suite('OpenShift/Component', () => {
             expect(opnStub.callCount).equals(0);
         });
 
-        test('request to create url for component if it does not exist, creates the route if confirmed by user and opens it in browser.' , async () => {
+        test('request to create url for component if it does not exist, creates the URL if confirmed by user and opens it in browser.' , async () => {
             sandbox.stub(vscode.window, 'showInformationMessage').resolves('Create');
             sandbox.stub(vscode.commands, 'executeCommand').resolves();
             execStub.onCall(0).resolves({error: undefined, stdout: '', stderr: ''});
