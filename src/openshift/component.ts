@@ -7,7 +7,7 @@ import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
 import { window, commands, QuickPickItem, Uri } from 'vscode';
 import { Progress } from '../util/progress';
-import opn = require('opn');
+import open = require('open');
 import { ChildProcess } from 'child_process';
 import { CliExitData } from '../cli';
 import { V1ServicePort, V1Service } from '@kubernetes/client-node';
@@ -197,9 +197,9 @@ export class Component extends OpenShiftItem {
             if (hostName.length >1) {
                 selectRoute = await window.showQuickPick(hostName, {placeHolder: "This Component has multiple URLs. Select the desired URL to open in browser."});
                 if (!selectRoute) return null;
-                return opn(`${selectRoute.label}`);
+                return open(`${selectRoute.label}`);
             } else {
-                return opn(`${hostName[0].label}`);
+                return open(`${hostName[0].label}`);
             }
         }
     }

@@ -14,7 +14,7 @@ import { Archive } from '../src/util/archive';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as fsex from 'fs-extra';
-import * as hasha from 'hasha';
+import hasha = require("hasha");
 
 suite("tools configuration", () => {
     let sb: sinon.SinonSandbox;

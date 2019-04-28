@@ -17,7 +17,6 @@ import * as Util from '../../src/util/async';
 import { Refs } from '../../src/util/refs';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
-import { isThenable } from '../../src/util/async';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -43,7 +42,7 @@ suite('OpenShift/Component', () => {
         opnStub = sandbox.stub();
         fetchTag = sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>([['HEAD', 'shanumb']]));
         Component = pq('../../src/openshift/component', {
-            opn: opnStub
+            open: opnStub
         }).Component;
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });

@@ -336,7 +336,7 @@ suite('Openshift/Cluster', () => {
         let clusterMock;
         setup(() => {
             clusterMock = pq('../../src/openshift/cluster', {
-                opn: openStub
+                open: openStub
             }).Cluster;
         });
 
