@@ -17,7 +17,6 @@ import { TestItem } from './openshift/testOSItem';
 import { ExecException } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Component } from '../src/openshift/component';
 
 const expect = chai.expect;
 chai.use(sinonChai);
