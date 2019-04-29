@@ -430,10 +430,7 @@ export class OdoImpl implements Odo {
     }
 
     async getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        if (!this.cache.has(component)) {
-            this.cache.set(component, await this._getRoutes(component));
-        }
-        return this.cache.get(component);
+        return (await this.getComponentChildren(component)).filter((value) => value.contextValue === ContextType.COMPONENT_ROUTE);
     }
 
     public async _getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
