@@ -304,18 +304,18 @@ suite('OpenShift/URL', () => {
         test('works with set tree item', async () => {
             const result = await Url.del(routeItem);
 
-            expect(result).equals(`Route '${routeItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
+            expect(result).equals(`URL '${routeItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
             expect(execStub.getCall(0).args[0]).equals(Command.deleteComponentUrl(projectItem.getName(), appItem.getName(), componentItem.getName(), routeItem.getName()));
         });
 
         test('works without set tree item', async () => {
             const result = await Url.del(null);
 
-            expect(result).equals(`Route '${routeItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
+            expect(result).equals(`URL '${routeItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
             expect(execStub.getCall(0).args[0]).equals(Command.deleteComponentUrl(projectItem.getName(), appItem.getName(), componentItem.getName(), routeItem.getName()));
         });
 
-        test('returns null with no route selected', async () => {
+        test('returns null with no URL selected', async () => {
             quickPickStub.onCall(3).resolves();
             const result = await Url.del(null);
 
@@ -335,7 +335,7 @@ suite('OpenShift/URL', () => {
                 await Url.del(routeItem);
                 expect.fail();
             } catch (err) {
-                expect(err).equals(`Failed to delete Route with error '${errorMessage}'`);
+                expect(err).equals(`Failed to delete URL with error '${errorMessage}'`);
             }
         });
     });
