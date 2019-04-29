@@ -61,6 +61,7 @@
     "onCommand:openshift.catalog.listServices",
     "onCommand:openshift.url.create",
     "onCommand:openshift.url.delete",
+    "onCommand:openshift.url.delete.palette",
     "onCommand:openshift.component.openUrl",
     "onCommand:openshift.component.openUrl.palette",
     "onCommand:openshift.storage.create",
@@ -273,6 +274,11 @@
       },
       {
         "command": "openshift.url.delete",
+        "title": "Delete",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.url.delete.palette",
         "title": "Delete URL",
         "category": "OpenShift"
       },
@@ -410,6 +416,10 @@
         },
         {
           "command": "openshift.storage.delete",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.url.delete",
           "when": "view == openshiftProjectExplorer"
         },
         {
