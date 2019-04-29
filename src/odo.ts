@@ -435,7 +435,7 @@ export class OdoImpl implements Odo {
 
     public async _getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         const app = component.getParent();
-        const result: cliInstance.CliExitData = await this.execute(Command.getComponentUrl(app.getParent().getName(), app.getName(), component.getName()));
+        const result: cliInstance.CliExitData = await this.execute(Command.getComponentUrl(app.getParent().getName(), app.getName(), component.getName()), undefined, false);
 
         let data: any[] = [];
         try {
@@ -631,7 +631,7 @@ export class OdoImpl implements Odo {
 
     public async createComponentCustomUrl(component: OpenShiftObject, name: string, port: string): Promise<OpenShiftObject> {
         await this.execute(Command.createComponentCustomUrl(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), name, port));
-        return this.insertAndReveal(await this.getComponentChildren(component), new OpenShiftObjectImpl(component, name, ContextType.COMPONENT_ROUTE, this));
+        return this.insertAndReveal(await this.getComponentChildren(component), new OpenShiftObjectImpl(component, name, ContextType.COMPONENT_ROUTE, this, TreeItemCollapsibleState.None));
     }
 
     clearCache() {
