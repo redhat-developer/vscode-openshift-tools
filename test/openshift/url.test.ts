@@ -207,7 +207,7 @@ suite('OpenShift/URL', () => {
             const result = await Url.create(null);
 
             expect(result).equals(`URL 'urlName' for component '${componentItem.getName()}' successfully created`);
-            expect(execStub).calledTwice;
+            expect(execStub.callCount).equals(4);
         });
 
         test('rejects when fails to create Url', () => {
