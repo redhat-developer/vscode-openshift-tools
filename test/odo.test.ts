@@ -295,7 +295,7 @@ suite("odo", () => {
             expect(result.length).equals(2);
         });
 
-        test('getRoutes returns route list items for a component', async () => {
+        test('getRoutes returns URL list items for a component', async () => {
             const component = new TestItem(app, 'comp');
             execStub.returns({
                 error: undefined,

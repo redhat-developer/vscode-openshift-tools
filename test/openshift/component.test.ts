@@ -805,7 +805,7 @@ suite('OpenShift/Component', () => {
             expect(opnStub.callCount).equals(0);
         });
 
-        test('request to create url for component if it does not exist, creates the route if confirmed by user and opens it in browser.' , async () => {
+        test('request to create url for component if it does not exist, creates the URL if confirmed by user and opens it in browser.' , async () => {
             sandbox.stub(vscode.window, 'showInformationMessage').resolves('Create');
             sandbox.stub(vscode.commands, 'executeCommand').resolves();
             execStub.onCall(0).resolves({error: undefined, stdout: '', stderr: ''});

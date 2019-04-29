@@ -162,7 +162,7 @@ suite('OpenShiftItem', () => {
 
     suite('getRoutes', ()=> {
 
-        test('returns list of route names for the component if there is at least one component', async ()=> {
+        test('returns list of URL names for the component if there is at least one component', async ()=> {
             sandbox.stub(OdoImpl.prototype, 'getRoutes').resolves([routeItem]);
             const routeNames = await OpenShiftItem.getRoutes(componentItem);
             expect(routeNames[0].getName()).equals('route');

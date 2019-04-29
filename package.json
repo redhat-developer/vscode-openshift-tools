@@ -273,7 +273,7 @@
       },
       {
         "command": "openshift.url.delete",
-        "title": "Delete Route",
+        "title": "Delete URL",
         "category": "OpenShift"
       },
       {

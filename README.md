@@ -62,9 +62,9 @@ For detail analysis of how to setup and run local OpenShift Cluster using minish
    * `Component -> Describe` - Describe the given Component in terminal window.
    * `Component -> Delete` - Delete an existing Component.
 
-#### Actions available for a URL Route in a Component
+#### Actions available for a URL in a Component
 
-   * `Route -> Delete` - Delete a Route from a Component.
+   * `URL -> Delete` - Delete a URL from a Component.
 
 #### Actions available for a Storage in a Component
 
@@ -91,7 +91,7 @@ For detail analysis of how to setup and run local OpenShift Cluster using minish
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/component/binary.png" width="15" height="15" /><span style="margin: 20px">Binary File Component Resource</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/service-node.png" width="15" height="15" /><span style="margin: 20px">Service Resource</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/storage-node.png" width="15" height="15" /><span style="margin: 20px">Storage Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/url-node.png" width="15" height="15" /><span style="margin: 20px">Route Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/url-node.png" width="15" height="15" /><span style="margin: 20px">URL Resource</span></div>
 
 ### Extension Configuration Settings
    * `OpenShift Connector: Show Channel On Output` - Show OpenShift Connector output channel when new text added to output stream.

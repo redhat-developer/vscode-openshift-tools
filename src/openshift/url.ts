@@ -57,18 +57,18 @@ export class Url extends OpenShiftItem{
     static async del(treeItem: OpenShiftObject): Promise<string> {
         let url = treeItem;
         const component = await Url.getOpenShiftCmdData(url,
-            "From which Project you want to delete Route",
-            "From which Application you want to delete Route",
-            "From which Component you want to delete Route");
+            "From which Project you want to delete URL",
+            "From which Application you want to delete URL",
+            "From which Component you want to delete URL");
         if (!url && component) {
             url = await window.showQuickPick(Url.odo.getRoutes(component), {placeHolder: `Select the desired URL to delete from the component ${component.getName()}`});
         }
         if (url) {
-            const value = await window.showWarningMessage(`Do you want to delete Route '${url.getName()}' from Component '${url.getParent().getName()}'?`, 'Yes', 'Cancel');
+            const value = await window.showWarningMessage(`Do you want to delete URL '${url.getName()}' from Component '${url.getParent().getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
-                return Progress.execFunctionWithProgress(`Deleting Route ${url.getName()} from Component ${component.getName()}`, () => Url.odo.deleteRoute(url))
-                    .then(() => `Route '${url.getName()}' from Component '${url.getParent().getName()}' successfully deleted`)
-                    .catch((err) => Promise.reject(`Failed to delete Route with error '${err}'`));
+                return Progress.execFunctionWithProgress(`Deleting URL ${url.getName()} from Component ${component.getName()}`, () => Url.odo.deleteURL(url))
+                    .then(() => `URL '${url.getName()}' from Component '${url.getParent().getName()}' successfully deleted`)
+                    .catch((err) => Promise.reject(`Failed to delete URL with error '${err}'`));
             }
         }
         return null;

@@ -248,7 +248,7 @@ export interface Odo {
     deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject>;
     createService(application: OpenShiftObject, templateName: string, planName: string, name: string): Promise<OpenShiftObject>;
     deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
-    deleteRoute(url: OpenShiftObject): Promise<OpenShiftObject>;
+    deleteURL(url: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentCustomUrl(component: OpenShiftObject, name: string, port: string): Promise<OpenShiftObject>;
 }
 
@@ -450,7 +450,7 @@ export class OdoImpl implements Odo {
         return data.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(component, value.metadata.name, ContextType.COMPONENT_ROUTE, OdoImpl.instance, TreeItemCollapsibleState.None));
     }
 
-    public async deleteRoute(route: OpenShiftObject): Promise<OpenShiftObject> {
+    public async deleteURL(route: OpenShiftObject): Promise<OpenShiftObject> {
         const component = route.getParent();
         await this.execute(Command.deleteComponentUrl(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), route.getName()));
         return this.deleteAndRefresh(await this.getRoutes(component), route);
