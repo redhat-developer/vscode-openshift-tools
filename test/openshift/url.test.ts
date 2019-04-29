@@ -157,6 +157,49 @@ suite('OpenShift/URL', () => {
         }
     }`;
 
+    const routesOutput = `{
+    "kind": "List",
+    "apiVersion": "odo.openshift.io/v1alpha1",
+    "metadata": {},
+    "items": [
+        {
+            "kind": "url",
+            "apiVersion": "odo.openshift.io/v1alpha1",
+            "metadata": {
+                "name": "url1",
+                "creationTimestamp": null
+            },
+            "spec": {
+                "path": "url1-app-myproject.10.0.0.46.nip.io",
+                "protocol": "http",
+                "port": 8080
+            }
+        }
+    ]}`;
+
+    const storagesOutput = `{
+        "kind": "List",
+        "apiVersion": "odo.openshift.io/v1aplha1",
+        "metadata": {},
+        "items": [
+            {
+                "kind": "Storage",
+                "apiVersion": "odo.openshift.io/v1alpha1",
+                "metadata": {
+                    "name": "s2",
+                    "creationTimestamp": null
+                },
+                "spec": {
+                    "size": "1Gi",
+                    "path": "C:/Program Files/Git/mnt/s2"
+                },
+                "status": {
+                    "mounted": true
+                }
+            }
+        ]
+    }`;
+
     setup(() => {
         sandbox = sinon.createSandbox();
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -201,8 +244,10 @@ suite('OpenShift/URL', () => {
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([componentItem]);
             inputStub.onFirstCall().resolves('urlName');
-            execStub.onFirstCall().resolves({error: null, stdout: portsOutput, stderr: ''});
-            execStub.onSecondCall().resolves({error: null, stdout: '', stderr: ''});
+            execStub.onFirstCall().resolves({error: null, stdout: routesOutput, stderr: ''});
+            execStub.onSecondCall().resolves({error: null, stdout: storagesOutput, stderr: ''});
+            execStub.onThirdCall().resolves({error: null, stdout: portsOutput, stderr: ''});
+            execStub.onCall(3).resolves({error: null, stdout: '', stderr: ''});
             quickPickStub.resolves('port1');
             const result = await Url.create(null);
 
