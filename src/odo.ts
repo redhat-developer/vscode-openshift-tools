@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as cliInstance from './cli';
-import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem } from 'vscode';
+import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace } from 'vscode';
 import { WindowUtil } from './util/windowUtils';
 import { CliExitData } from './cli';
 import * as path from 'path';
@@ -34,95 +34,167 @@ export enum ContextType {
     COMPONENT_ROUTE = 'component_route'
 }
 
-export const Command = {
-    listProjects: () =>
-        'oc get project -o jsonpath="{range .items[?(.status.phase == \\"Active\\" )]}{.metadata.name}{\\"\\n\\"}{end}"',
-    listApplications: (project: string) =>
-        `odo application list --project ${project} -o json`,
-    deleteProject: (name: string) =>
-        `odo project delete ${name} -f`,
-    waitForProjectToBeGone: (project: string) =>
-        `oc wait project/${project} --for delete`,
-    createProject: (name: string) =>
-        `odo project create ${name}`,
-    listComponents: (project: string, app: string) =>
-        `odo list --app ${app} --project ${project} -o json`,
-    listCatalogComponents: () =>
-        `odo catalog list components`,
-    listCatalogServices: () =>
-        `odo catalog list services`,
-    listStorageNames: (project: string, app: string, component: string) =>
-        `odo storage list --app ${app} --project ${project} --component ${component} -o json`,
-    printOcVersion: () =>
-        'oc version',
-    printOdoVersionAndProjects: () =>
-        'odo version && odo project list',
-    listServiceInstances: (project: string, app: string) =>
-        `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}" --namespace ${project}`,
-    createApplication: (project: string, app: string) =>
-        `odo app create ${app} --project ${project}`,
-    describeApplication: (project: string, app: string) =>
-        `odo app describe ${app} --project ${project}`,
-    deleteApplication: (project: string, app: string) =>
-        `odo app delete ${app} --project ${project} -f`,
-    printOdoVersion: () =>
-        'odo version',
-    odoLogout: () =>
-        `odo logout`,
-    odoLoginWithUsernamePassword: (clusterURL: string, username: string, passwd: string) =>
-        `odo login ${clusterURL} -u ${username} -p ${passwd} --insecure-skip-tls-verify`,
-    odoLoginWithToken: (clusterURL: string, ocToken: string) =>
-        `odo login ${clusterURL} --token=${ocToken} --insecure-skip-tls-verify`,
-    createStorage: (project: string, app: string, component: string, storageName: string, mountPath: string, storageSize: string) =>
-        `odo storage create ${storageName} --path=${mountPath} --size=${storageSize} --project ${project} --app ${app} --component ${component}`,
-    deleteStorage: (project: string, app: string, component: string, storage: string) =>
-        `odo storage delete ${storage} -f --project ${project} --app ${app} --component ${component}`,
-    waitForStorageToBeGone: (project: string, app: string, storage: string) =>
-        `oc wait pvc/${storage}-${app}-pvc --for=delete --namespace ${project}`,
-    deleteComponent: (project: string, app: string, component: string) =>
-        `odo delete ${component} -f --app ${app} --project ${project}`,
-    describeComponent: (project: string, app: string, component: string) =>
-        `odo describe ${component} --app ${app} --project ${project}`,
-    describeService: (service: string) =>
-        `odo catalog describe service ${service}`,
-    showLog: (project: string, app: string, component: string) =>
-        `odo log ${component} --app ${app} --project ${project}`,
-    showLogAndFollow: (project: string, app: string, component: string) =>
-        `odo log ${component} -f --app ${app} --project ${project}`,
-    listComponentPorts: (project: string, app: string, component: string) =>
-        `oc get service ${component}-${app} --namespace ${project} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`,
-    linkComponentTo: (project: string, app: string, component: string, componentToLink: string, port?: string) =>
-        `odo project set ${project} && odo application set ${app} && odo component set ${component} && odo link ${componentToLink} --wait${port ? ' --port ' + port : ''}`,
-    pushComponent: (project: string, app: string, component: string) =>
-        `odo push ${component} --app ${app} --project ${project}`,
-    pushLocalComponent: (project: string, app: string, component: string, location: string) =>
-        `${Command.pushComponent(project, app, component)} --local ${location}`,
-    watchComponent: (project: string, app: string, component: string) =>
-        `odo watch ${component} --app ${app} --project ${project}`,
-    getRouteHostName: (namespace: string, component: string) =>
-        `oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${component}')]}{.spec.host}{end}"`,
-    createLocalComponent: (project: string, app: string, type: string, version: string, name: string, folder: string) =>
-        `odo create ${type}:${version} ${name} --local ${folder} --app ${app} --project ${project}`,
-    createGitComponent: (project: string, app: string, type: string, version: string, name: string, git: string, ref: string) =>
-        `odo create ${type}:${version} ${name} --git ${git} --ref ${ref} --app ${app} --project ${project}`,
-    createBinaryComponent: (project: string, app: string, type: string, version: string, name: string, binary: string) =>
-        `odo create ${type}:${version} ${name} --binary ${binary} --app ${app} --project ${project}`,
-    createService: (project: string, app: string, template: string, plan: string, name: string) =>
-        `odo service create ${template} --plan ${plan} ${name} --app ${app} --project ${project} -w`,
-    deleteService: (project: string, app: string, name: string) =>
-        `odo service delete ${name} -f --project ${project} --app ${app}`,
-    getServiceTemplate: (project: string, service: string) =>
-        `oc get ServiceInstance ${service} --namespace ${project} -o jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/component-type}"`,
-    waitForServiceToBeGone: (project: string, service: string) =>
-        `oc wait ServiceInstance/${service} --for delete --namespace ${project}`,
-    createComponentCustomUrl: (project: string, app: string, component: string, name: string, port: string) =>
-        `odo url create ${name} --port ${port} --project ${project} --app ${app} --component ${component}`,
-    getComponentUrl: (project: string, app: string, component: string) =>
-        `odo url list --component ${component} --app ${app} --project ${project} -o json`,
-    deleteComponentUrl: (project: string, app: string, component: string, name: string) =>
-        `odo url delete -f ${name} --project ${project} --app ${app} --component ${component}`,
-    getComponentJson: (project: string, app: string, component: string) =>
-        `oc get service ${component}-${app} --namespace ${project} -o json`
+function verbose(_target: any, key: string, descriptor: any) {
+	let fnKey: string | undefined;
+	let fn: Function | undefined;
+
+	if (typeof descriptor.value === 'function') {
+		fnKey = 'value';
+		fn = descriptor.value;
+	} else {
+		throw new Error('not supported');
+	}
+
+	descriptor[fnKey] = function (...args: any[]) {
+        const v = workspace.getConfiguration('openshiftConnector').get('outputVerbosityLevel');
+        const command = fn!.apply(this, args);
+        return command + (v > 0 ? ` -v ${v}` : '');
+	};
+}
+
+export class Command {
+    static listProjects() {
+        return 'oc get project -o jsonpath="{range .items[?(.status.phase == \\"Active\\" )]}{.metadata.name}{\\"\\n\\"}{end}"';
+    }
+    @verbose
+    static listApplications(project: string) {
+        return `odo application list --project ${project} -o json`;
+    }
+    static deleteProject(name: string) {
+        return `odo project delete ${name} -f`;
+    }
+    static waitForProjectToBeGone(project: string) {
+        return `oc wait project/${project} --for delete`;
+    }
+    static createProject(name: string) {
+        return `odo project create ${name}`;
+    }
+    static listComponents(project: string, app: string) {
+        return `odo list --app ${app} --project ${project} -o json`;
+    }
+    static listCatalogComponents() {
+        return `odo catalog list components`;
+    }
+    static listCatalogServices () {
+        return `odo catalog list services`;
+    }
+    static listStorageNames(project: string, app: string, component: string) {
+        return `odo storage list --app ${app} --project ${project} --component ${component} -o json`;
+    }
+    static printOcVersion() {
+        return 'oc version';
+    }
+    static printOdoVersionAndProjects() {
+        return 'odo version && odo project list';
+    }
+    static listServiceInstances(project: string, app: string) {
+        return `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}" --namespace ${project}`;
+    }
+    @verbose
+    static createApplication(project: string, app: string) {
+        return `odo app create ${app} --project ${project}`;
+    }
+    static describeApplication(project: string, app: string) {
+        return `odo app describe ${app} --project ${project}`;
+    }
+    static deleteApplication(project: string, app: string) {
+        return `odo app delete ${app} --project ${project} -f`;
+    }
+    static printOdoVersion() {
+        return 'odo version';
+    }
+    static odoLogout() {
+        return `odo logout`;
+    }
+    static odoLoginWithUsernamePassword(clusterURL: string, username: string, passwd: string) {
+        return `odo login ${clusterURL} -u ${username} -p ${passwd} --insecure-skip-tls-verify`;
+    }
+    static odoLoginWithToken(clusterURL: string, ocToken: string) {
+        return `odo login ${clusterURL} --token=${ocToken} --insecure-skip-tls-verify`;
+    }
+    @verbose
+    static createStorage(project: string, app: string, component: string, storageName: string, mountPath: string, storageSize: string) {
+        return `odo storage create ${storageName} --path=${mountPath} --size=${storageSize} --project ${project} --app ${app} --component ${component}`;
+    }
+    static deleteStorage(project: string, app: string, component: string, storage: string) {
+        return `odo storage delete ${storage} -f --project ${project} --app ${app} --component ${component}`;
+    }
+    static waitForStorageToBeGone(project: string, app: string, storage: string) {
+        return `oc wait pvc/${storage}-${app}-pvc --for=delete --namespace ${project}`;
+    }
+    static deleteComponent(project: string, app: string, component: string) {
+        return `odo delete ${component} -f --app ${app} --project ${project}`;
+    }
+    static describeComponent(project: string, app: string, component: string) {
+        return `odo describe ${component} --app ${app} --project ${project}`;
+    }
+    static describeService(service: string) {
+        return `odo catalog describe service ${service}`;
+    }
+    static showLog(project: string, app: string, component: string) {
+        return `odo log ${component} --app ${app} --project ${project}`;
+    }
+    static showLogAndFollow(project: string, app: string, component: string) {
+        return `odo log ${component} -f --app ${app} --project ${project}`;
+    }
+    static listComponentPorts(project: string, app: string, component: string) {
+        return `oc get service ${component}-${app} --namespace ${project} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`;
+    }
+    static linkComponentTo(project: string, app: string, component: string, componentToLink: string, port?: string) {
+        return `odo project set ${project} && odo application set ${app} && odo component set ${component} && odo link ${componentToLink} --wait${port ? ' --port ' + port : ''}`;
+    }
+    @verbose
+    static pushComponent(project: string, app: string, component: string) {
+        return `odo push ${component} --app ${app} --project ${project}`;
+    }
+    static pushLocalComponent(project: string, app: string, component: string, location: string) {
+        return `${Command.pushComponent(project, app, component)} --local ${location}`;
+    }
+    @verbose
+    static watchComponent(project: string, app: string, component: string) {
+        return `odo watch ${component} --app ${app} --project ${project}`;
+    }
+    static getRouteHostName(namespace: string, component: string) {
+        return `oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${component}')]}{.spec.host}{end}"`;
+    }
+    @verbose
+    static createLocalComponent(project: string, app: string, type: string, version: string, name: string, folder: string) {
+        return `odo create ${type}:${version} ${name} --local ${folder} --app ${app} --project ${project}`;
+    }
+    @verbose
+    static createGitComponent(project: string, app: string, type: string, version: string, name: string, git: string, ref: string) {
+        return `odo create ${type}:${version} ${name} --git ${git} --ref ${ref} --app ${app} --project ${project}`;
+    }
+    @verbose
+    static createBinaryComponent(project: string, app: string, type: string, version: string, name: string, binary: string) {
+        return `odo create ${type}:${version} ${name} --binary ${binary} --app ${app} --project ${project}`;
+    }
+    @verbose
+    static createService(project: string, app: string, template: string, plan: string, name: string) {
+        return `odo service create ${template} --plan ${plan} ${name} --app ${app} --project ${project} -w`;
+    }
+    static deleteService(project: string, app: string, name: string) {
+        return `odo service delete ${name} -f --project ${project} --app ${app}`;
+    }
+    static getServiceTemplate(project: string, service: string) {
+        return `oc get ServiceInstance ${service} --namespace ${project} -o jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/component-type}"`;
+    }
+    static waitForServiceToBeGone(project: string, service: string) {
+        return `oc wait ServiceInstance/${service} --for delete --namespace ${project}`;
+    }
+    @verbose
+    static createComponentCustomUrl(project: string, app: string, component: string, name: string, port: string) {
+        return `odo url create ${name} --port ${port} --project ${project} --app ${app} --component ${component}`;
+    }
+    static getComponentUrl(project: string, app: string, component: string) {
+        return `odo url list --component ${component} --app ${app} --project ${project} -o json`;
+    }
+    static deleteComponentUrl(project: string, app: string, component: string, name: string) {
+        return `odo url delete -f ${name} --project ${project} --app ${app} --component ${component}`;
+    }
+    static getComponentJson(project: string, app: string, component: string) {
+        return `oc get service ${component}-${app} --namespace ${project} -o json`;
+    }
 };
 
 export class OpenShiftObjectImpl implements OpenShiftObject {

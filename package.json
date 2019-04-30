@@ -595,6 +595,12 @@
           "type": "boolean",
           "default": false,
           "description": "Show OpenShift Connector output channel when new text added to output stream."
+        },
+        "openshiftConnector.outputVerbosityLevel": {
+          "title": "OpenShift commands output verbosity level",
+          "type": "number",
+          "default": 0,
+          "description": "Configure output verbosity level (value between 0 and 9) for OpenShift create, push and watch commands in output channel and terminal view"
         }
       }
     }
