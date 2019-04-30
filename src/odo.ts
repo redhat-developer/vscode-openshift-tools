@@ -66,6 +66,7 @@ export class Command {
     static waitForProjectToBeGone(project: string) {
         return `oc wait project/${project} --for delete`;
     }
+    @verbose
     static createProject(name: string) {
         return `odo project create ${name}`;
     }
