@@ -196,7 +196,7 @@ export class Command {
     static getComponentJson(project: string, app: string, component: string) {
         return `oc get service ${component}-${app} --namespace ${project} -o json`;
     }
-};
+}
 
 export class OpenShiftObjectImpl implements OpenShiftObject {
     private readonly CONTEXT_DATA = {
@@ -649,18 +649,18 @@ export class OdoImpl implements Odo {
     public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: string, ref: string = 'master'): Promise<OpenShiftObject> {
         await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location));
         this.executeInTerminal(Command.pushLocalComponent(application.getParent().getName(), application.getName(), name, location));
-        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this, null, 'folder'));
+        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed, 'folder'));
     }
 
     public async createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, location: string, ref: string = 'master'): Promise<OpenShiftObject> {
         this.executeInTerminal(Command.createGitComponent(application.getParent().getName(), application.getName(), type, version, name, location, ref ? ref : 'master'));
         await wait();
-        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this, null, 'git'));
+        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed, 'git'));
     }
 
     public async createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, location: string, ref: string = 'master'): Promise<OpenShiftObject> {
         await this.execute(Command.createBinaryComponent(application.getParent().getName(), application.getName(), type, version, name, location));
-        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this, null, 'binary'));
+        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed, 'binary'));
     }
 
     public async deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
