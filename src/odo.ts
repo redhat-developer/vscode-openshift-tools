@@ -443,12 +443,12 @@ export class OdoImpl implements Odo {
 
     public async getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]> {
         if (!this.cache.has(application)) {
-            this.cache.set(application, [...await this._getComponents(application), ... await this._getServices(application)]);
+            this.cache.set(application,  await this._getApplicationChildren(application));
         }
         return this.cache.get(application);
     }
 
-    async _getApplicationChildren(application: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
+    async _getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]> {
         return [... await this._getComponents(application), ... await this._getServices(application)];
     }
 
@@ -493,12 +493,12 @@ export class OdoImpl implements Odo {
 
     public async getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         if (!this.cache.has(component)) {
-            this.cache.set(component, [... await this._getRoutes(component), ...await this._getStorageNames(component)]);
+            this.cache.set(component, await this._getComponentChildren(component));
         }
         return this.cache.get(component);
     }
 
-    async _getComponentChildren(component: OpenShiftObjectImpl): Promise<OpenShiftObject[]> {
+    async _getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         return [... await this._getStorageNames(component), ... await this._getRoutes(component)];
     }
 
@@ -520,17 +520,8 @@ export class OdoImpl implements Odo {
         return data.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(component, value.metadata.name, ContextType.COMPONENT_ROUTE, OdoImpl.instance, TreeItemCollapsibleState.None));
     }
 
-    public async deleteURL(route: OpenShiftObject): Promise<OpenShiftObject> {
-        const component = route.getParent();
-        await this.execute(Command.deleteComponentUrl(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), route.getName()));
-        return this.deleteAndRefresh(await this.getRoutes(component), route);
-    }
-
     async getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        if (!this.cache.has(component)) {
-            this.cache.set(component, await this._getStorageNames(component));
-        }
-        return this.cache.get(component);
+        return (await this.getComponentChildren(component)).filter((value) => value.contextValue === ContextType.STORAGE);
     }
 
     public async _getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
@@ -698,13 +689,19 @@ export class OdoImpl implements Odo {
     public async deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject> {
         const component = storage.getParent();
         await this.execute(Command.deleteStorage(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), storage.getName()));
-        await this .execute(Command.waitForStorageToBeGone(storage.getParent().getParent().getParent().getName(), storage.getParent().getParent().getName(), storage.getName()), process.cwd(), false);
-        return this.deleteAndRefresh(await this.getStorageNames(component), storage);
+        await this.execute(Command.waitForStorageToBeGone(storage.getParent().getParent().getParent().getName(), storage.getParent().getParent().getName(), storage.getName()), process.cwd(), false);
+        return this.deleteAndRefresh(await this.getComponentChildren(component), storage);
     }
 
     public async createComponentCustomUrl(component: OpenShiftObject, name: string, port: string): Promise<OpenShiftObject> {
         await this.execute(Command.createComponentCustomUrl(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), name, port));
         return this.insertAndReveal(await this.getComponentChildren(component), new OpenShiftObjectImpl(component, name, ContextType.COMPONENT_ROUTE, this, TreeItemCollapsibleState.None));
+    }
+
+    public async deleteURL(route: OpenShiftObject): Promise<OpenShiftObject> {
+        const component = route.getParent();
+        await this.execute(Command.deleteComponentUrl(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), route.getName()));
+        return this.deleteAndRefresh(await this.getComponentChildren(component), route);
     }
 
     clearCache() {
