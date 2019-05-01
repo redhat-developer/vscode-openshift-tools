@@ -283,6 +283,12 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.url.open",
+        "title": "Open URL",
+        "category": "OpenShift",
+        "icon": "images/context/url-node-open.png"
+      },
+      {
         "command": "openshift.component.openUrl",
         "title": "Open in Browser",
         "category": "OpenShift"
@@ -583,6 +589,11 @@
           "command": "openshift.url.delete",
           "when": "view == openshiftProjectExplorer && viewItem == component_route",
           "group": "s3"
+        },
+        {
+          "command": "openshift.url.open",
+          "when": "view == openshiftProjectExplorer && viewItem == component_route",
+          "group": "inline"
         }
       ]
     },
@@ -660,7 +671,7 @@
     "git-transport-protocol": "^0.1.0",
     "hasha": "^5.0.0",
     "js-yaml": "^3.13.1",
-    "open": "^6.0.0",
+    "open": "^6.2.0",
     "request": "^2.88.0",
     "request-progress": "^3.0.0",
     "semver": "^6.0.0",

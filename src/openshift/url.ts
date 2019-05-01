@@ -10,6 +10,8 @@ import { V1ServicePort } from '@kubernetes/client-node';
 import { OpenShiftItem } from './openshiftItem';
 import { Progress } from "../util/progress";
 import { URL } from 'url';
+import open = require('open');
+import { ChildProcess } from 'child_process';
 
 export class Url extends OpenShiftItem{
 
@@ -19,8 +21,6 @@ export class Url extends OpenShiftItem{
             'Select an Application to create a URL',
             'Select a Component you want to create a URL for');
         if (component) {
-            const app: OpenShiftObject = component.getParent();
-            const project: OpenShiftObject = app.getParent();
             const urlName = await Url.getName('URL name', await Url.odo.getRoutes(component));
             if (!urlName) return null;
             const ports: V1ServicePort[] = await Component.getComponentPorts(component);
@@ -66,5 +66,18 @@ export class Url extends OpenShiftItem{
             }
         }
         return null;
+    }
+
+    static async open(treeItem: OpenShiftObject): Promise<ChildProcess> {
+        const component = treeItem.getParent();
+        const app = component.getParent();
+        const namespace = app.getParent();
+        const UrlDetails = await Url.odo.execute(Command.getComponentUrl(namespace.getName(), app.getName(), component.getName()));
+        let result: any[] = [];
+        try {
+            result = JSON.parse(UrlDetails.stdout).items;
+        } catch (ignore) {}
+        const urlObject = result.filter((value) => (value.metadata.name === treeItem.getName()));
+        return open(`${urlObject[0].spec.protocol}://${urlObject[0].spec.path}`);
     }
 }

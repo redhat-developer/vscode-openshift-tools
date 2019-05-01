@@ -13,8 +13,6 @@ import { CliExitData } from '../cli';
 import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 import { isURL } from 'validator';
 import { Refs, Ref, Type } from '../util/refs';
-
-import * as refs from '../util/refs';
 import { Delayer } from '../util/async';
 
 export class Component extends OpenShiftItem {
@@ -229,7 +227,6 @@ export class Component extends OpenShiftItem {
         const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
 
         if (!componentTypeVersion) return null;
-        const project = application.getParent();
         await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.uri.fsPath));
         return `Component '${componentName}' successfully created`;
     }
@@ -268,7 +265,7 @@ export class Component extends OpenShiftItem {
                 return delayer.trigger(async () => {
                     if (!value.trim()) return 'Empty Git repository URL';
                     if (!isURL(value)) return 'Invalid URL provided';
-                    const references = await refs.Refs.fetchTag(value);
+                    const references = await Refs.fetchTag(value);
                     if (!references.get('HEAD')) return 'There is no git repository at provided URL.';
                 });
             }
