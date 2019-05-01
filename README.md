@@ -56,7 +56,7 @@ For detail analysis of how to setup and run local OpenShift Cluster using minish
    * `Component -> Follow Log` - Follow logs for the given Component.
    * `Component -> Link Service` - Link a Component to a Service.
    * `Component -> Link Component` - Link Component to another Component.
-   * `Component -> Open in Browser` - Open the exposed URL in a browser.
+   * `Component -> Open in Browser` - Open the exposed URL in browser.
    * `Component -> Push` - Push source code to a Component.
    * `Component -> Watch` - Watch for changes, update Component on change.
    * `Component -> Describe` - Describe the given Component in terminal window.
@@ -65,6 +65,7 @@ For detail analysis of how to setup and run local OpenShift Cluster using minish
 #### Actions available for a URL in a Component
 
    * `URL -> Delete` - Delete a URL from a Component.
+   * `URL -> Open URL` - Click on the icon opens the specific URL in Browser.
 
 #### Actions available for a Storage in a Component
 
@@ -92,6 +93,7 @@ For detail analysis of how to setup and run local OpenShift Cluster using minish
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/service-node.png" width="15" height="15" /><span style="margin: 20px">Service Resource</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/storage-node.png" width="15" height="15" /><span style="margin: 20px">Storage Resource</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/url-node.png" width="15" height="15" /><span style="margin: 20px">URL Resource</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/url-node-open.png" width="15" height="15" /><span style="margin: 20px">Open URL</span></div>
 
 ### Extension Configuration Settings
    * `OpenShift Connector: Show Channel On Output` - Show OpenShift Connector output channel when new text added to output stream
