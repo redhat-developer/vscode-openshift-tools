@@ -1,5 +1,15 @@
 # Change Log
 
+## 0.0.20 (May 2, 2019)
+* URL management for a component in Application Explorer
+    * Showcase URL names as child nodes inside a component in Application Explorer
+    * Allow Delete and Open in Browser for an individual URL
+    * Display hostname and port information when selecting the URL to open in browser
+* Add `OpenShift Connector: Output verbosity level` setting. This helps to configure Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and terminal view
+* Remove deprecated `opn` module with `open` npm module
+* Nodes are sorted alphabetically in Explorer view
+* `.vsix` files are added to the release builds
+
 ## 0.0.19 (April 10, 2019)
 * Cache OpenShift Application Explorer nodes to avoid extra `odo` calls
 * Reveal new created objects directly in the Explorer View
