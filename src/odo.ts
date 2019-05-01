@@ -13,6 +13,7 @@ import format =  require('string-format');
 import { OpenShiftExplorer } from './explorer';
 import { wait } from './util/async';
 import { statSync } from 'fs';
+import bs = require('binary-search');
 
 export interface OpenShiftObject extends QuickPickItem {
     getChildren(): ProviderResult<OpenShiftObject[]>;
@@ -329,6 +330,13 @@ export function getInstance(): Odo {
     return OdoImpl.Instance;
 }
 
+function compareNodes(a, b): number {
+    if (!a.contextValue) return -1;
+    if (!b.contextValue) return 1;
+    const t = a.contextValue.localeCompare(b.contextValue);
+    return t ? t : a.label.localeCompare(b.label);
+}
+
 export class OdoImpl implements Odo {
     private ROOT: OpenShiftObject = new OpenShiftObjectImpl(undefined, 'root', undefined, undefined);
     private cache: Map<OpenShiftObject, OpenShiftObject[]> = new Map();
@@ -414,7 +422,7 @@ export class OdoImpl implements Odo {
             if (stdout !== "" ) {
                 projs = stdout.split("\n").map<OpenShiftObject>((value) => new OpenShiftObjectImpl(cluster, value, ContextType.PROJECT, OdoImpl.instance));
             }
-            return projs;
+            return projs.sort(compareNodes);
         }).catch((error) => {
             window.showErrorMessage(`Cannot retrieve projects for current cluster. Error: ${error}`);
             return [];
@@ -438,7 +446,7 @@ export class OdoImpl implements Odo {
             // see https://github.com/redhat-developer/odo/issues/1327
         }
         const apps: string[] = data.map((value) => value.metadata.name);
-        return apps.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(project, value, ContextType.APPLICATION, OdoImpl.instance));
+        return apps.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(project, value, ContextType.APPLICATION, OdoImpl.instance)).sort(compareNodes);
     }
 
     public async getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]> {
@@ -449,7 +457,7 @@ export class OdoImpl implements Odo {
     }
 
     async _getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]> {
-        return [... await this._getComponents(application), ... await this._getServices(application)];
+        return [... await this._getComponents(application), ... await this._getServices(application)].sort(compareNodes);
     }
 
     async getComponents(application: OpenShiftObject): Promise<OpenShiftObject[]> {
@@ -499,7 +507,7 @@ export class OdoImpl implements Odo {
     }
 
     async _getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        return [... await this._getStorageNames(component), ... await this._getRoutes(component)];
+        return [... await this._getStorageNames(component), ... await this._getRoutes(component)].sort(compareNodes);
     }
 
     async getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
@@ -612,7 +620,8 @@ export class OdoImpl implements Odo {
     }
 
     private insertAndReveal(array: OpenShiftObject[], item: OpenShiftObject): OpenShiftObject {
-        array.push(item);
+        const i = bs(array, item, compareNodes);
+        array.splice(Math.abs(i)-1, 0, item);
         OpenShiftExplorer.getInstance().reveal(item);
         return item;
     }

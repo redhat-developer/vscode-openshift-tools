@@ -352,8 +352,8 @@ suite("odo", () => {
             }), stderr: ''});
             const result = await odoCli.getComponentChildren(component);
 
-            expect(result[0].getName()).deep.equals('route1');
-            expect(result[2].getName()).deep.equals('storage1');
+            expect(result[2].getName()).deep.equals('route1');
+            expect(result[0].getName()).deep.equals('storage1');
         });
     });
 
