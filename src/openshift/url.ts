@@ -55,7 +55,7 @@ export class Url extends OpenShiftItem{
             "From which Application you want to delete URL",
             "From which Component you want to delete URL");
         if (!url && component) {
-            url = await window.showQuickPick(Url.odo.getRoutes(component), {placeHolder: `Select the desired URL to delete from the component ${component.getName()}`});
+            url = await window.showQuickPick(Url.odo.getRoutes(component), {placeHolder: `Select the URL to delete from the component ${component.getName()}`});
         }
         if (url) {
             const value = await window.showWarningMessage(`Do you want to delete URL '${url.getName()}' from Component '${url.getParent().getName()}'?`, 'Yes', 'Cancel');
