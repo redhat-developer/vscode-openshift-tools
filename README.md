@@ -94,7 +94,8 @@ For detail analysis of how to setup and run local OpenShift Cluster using minish
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/url-node.png" width="15" height="15" /><span style="margin: 20px">URL Resource</span></div>
 
 ### Extension Configuration Settings
-   * `OpenShift Connector: Show Channel On Output` - Show OpenShift Connector output channel when new text added to output stream.
+   * `OpenShift Connector: Show Channel On Output` - Show OpenShift Connector output channel when new text added to output stream
+   * `OpenShift Connector: Output verbosity level` - Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and terminal view
 
 ### Dependencies
 
