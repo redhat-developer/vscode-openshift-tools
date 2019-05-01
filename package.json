@@ -608,10 +608,10 @@
           "description": "Show OpenShift Connector output channel when new text added to output stream."
         },
         "openshiftConnector.outputVerbosityLevel": {
-          "title": "OpenShift commands output verbosity level",
+          "title": "Output Verbosity Level",
           "type": "number",
           "default": 0,
-          "description": "Configure output verbosity level (value between 0 and 9) for OpenShift create, push and watch commands in output channel and terminal view"
+          "description": "Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and integrated terminal."
         }
       }
     }
@@ -663,6 +663,7 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.8.2",
+    "binary-search": "^1.3.5",
     "byline": "^5.0.0",
     "event-stream": "3.3.4",
     "fs-extra": "^7.0.1",
