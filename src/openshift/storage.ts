@@ -42,7 +42,7 @@ export class Storage extends OpenShiftItem {
             "From which Project you want to delete Storage",
             "From which Application you want to delete Storage",
             "From which Component you want to delete Storage");
-        if (!storage && component) storage = await window.showQuickPick(Storage.getStorageNames(component), {placeHolder: "Select Service to delete"});
+        if (!storage && component) storage = await window.showQuickPick(Storage.getStorageNames(component), {placeHolder: "Select Storage to delete"});
         if (storage) {
             const value = await window.showWarningMessage(`Do you want to delete Storage '${storage.getName()}' from Component '${storage.getParent().getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
