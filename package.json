@@ -345,6 +345,23 @@
         "category": "OpenShift"
       }
     ],
+    "keybindings": [
+      {
+        "command": "openshift.explorer.login",
+        "key": "ctrl+shift+l",
+        "mac": "cmd+shift+l"
+      },
+      {
+        "command": "openshift.explorer.refresh",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r"
+      },
+      {
+        "command": "openshift.component.push.palette",
+        "key": "ctrl+shift+p",
+        "mac": "cmd+shift+p"
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {
