@@ -632,6 +632,7 @@
   },
   "extensionDependencies": [],
   "scripts": {
+    "verify": "node ./build/verify-tools.ts",
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
@@ -640,7 +641,7 @@
     "test": "npm run clean && npm run compile && node ./node_modules/vscode/bin/test",
     "update-deps": "node_modules/.bin/ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
-    "build": "npm run clean && tslint -p tslint.json && npm run compile"
+    "build": "npm run clean && tslint -p tslint.json && npm run compile && npm run verify"
   },
   "devDependencies": {
     "@types/byline": "^4.2.31",
@@ -685,6 +686,7 @@
     "git-transport-protocol": "^0.1.0",
     "hasha": "^5.0.0",
     "js-yaml": "^3.13.1",
+    "mkdirp": "^0.5.1",
     "open": "^6.2.0",
     "request": "^2.88.0",
     "request-progress": "^3.0.0",

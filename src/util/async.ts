@@ -32,6 +32,7 @@ export class Delayer<T> {
 		this.timeout = null;
 		this.completionPromise = null;
 		this.doResolve = null;
+		this.doReject;
 		this.task = null;
 	}
 
