@@ -445,7 +445,8 @@ export class OdoImpl implements Odo {
             // show no apps if output is not correct json
             // see https://github.com/redhat-developer/odo/issues/1327
         }
-        const apps: string[] = data.map((value) => value.metadata.name);
+        let apps: string[] = data.map((value) => value.metadata.name);
+        apps = [...new Set(apps)]; // remove duplicates form array
         return apps.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(project, value, ContextType.APPLICATION, OdoImpl.instance)).sort(compareNodes);
     }
 
