@@ -17,7 +17,8 @@ export class Service extends OpenShiftItem {
         );
         if (!application) return null;
         const serviceTemplateName = await window.showQuickPick(Service.odo.getServiceTemplates(), {
-            placeHolder: "Service Template Name"
+            placeHolder: "Service Template Name",
+            ignoreFocusOut: true
         });
         if (!serviceTemplateName) return null;
         const plans: string[] = await Service.odo.getServiceTemplatePlans(serviceTemplateName);

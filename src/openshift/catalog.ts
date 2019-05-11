@@ -4,6 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { Odo, OdoImpl, Command } from "../odo";
+import { Platform } from "../util/platform";
 
 export class Catalog {
     private static odo: Odo = OdoImpl.Instance;
@@ -13,6 +14,6 @@ export class Catalog {
     }
 
     static listServices(): void {
-        Catalog.odo.executeInTerminal(Command.listCatalogServices());
+        Catalog.odo.executeInTerminal(Command.listCatalogServices(), Platform.getUserHomePath());
     }
 }

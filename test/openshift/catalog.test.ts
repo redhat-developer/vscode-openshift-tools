@@ -10,6 +10,7 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { OdoImpl, Command } from '../../src/odo';
 import { Catalog } from '../../src/openshift/catalog';
+import { Platform } from '../../src/util/platform';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -36,6 +37,6 @@ suite('OpenShift/Catalog', () => {
     test('listServices calls odo catalog list services', () => {
         Catalog.listServices();
 
-        expect(execStub).calledOnceWith(Command.listCatalogServices());
+        expect(execStub).calledOnceWith(Command.listCatalogServices(), Platform.getUserHomePath());
     });
 });
