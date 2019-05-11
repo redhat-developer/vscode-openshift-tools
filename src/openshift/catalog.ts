@@ -10,7 +10,7 @@ export class Catalog {
     private static odo: Odo = OdoImpl.Instance;
 
     static listComponents(): void {
-        Catalog.odo.executeInTerminal(Command.listCatalogComponents());
+        Catalog.odo.executeInTerminal(Command.listCatalogComponents(), Platform.getUserHomePath());
     }
 
     static listServices(): void {
