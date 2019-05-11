@@ -14,6 +14,7 @@ import { OpenShiftExplorer } from './explorer';
 import { wait } from './util/async';
 import { statSync } from 'fs';
 import bs = require('binary-search');
+import { Platform } from './util/platform';
 
 export interface OpenShiftObject extends QuickPickItem {
     getChildren(): ProviderResult<OpenShiftObject[]>;
@@ -466,7 +467,7 @@ export class OdoImpl implements Odo {
     }
 
     public async _getComponents(application: OpenShiftObject): Promise<OpenShiftObject[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listComponents(application.getParent().getName(), application.getName()));
+        const result: cliInstance.CliExitData = await this.execute(Command.listComponents(application.getParent().getName(), application.getName()), Platform.getUserHomePath());
         let data: any[] = [];
         try {
             data = JSON.parse(result.stdout).items;
@@ -517,7 +518,7 @@ export class OdoImpl implements Odo {
 
     public async _getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         const app = component.getParent();
-        const result: cliInstance.CliExitData = await this.execute(Command.getComponentUrl(app.getParent().getName(), app.getName(), component.getName()), undefined, false);
+        const result: cliInstance.CliExitData = await this.execute(Command.getComponentUrl(app.getParent().getName(), app.getName(), component.getName()), Platform.getUserHomePath(), false);
 
         let data: any[] = [];
         try {
@@ -537,7 +538,7 @@ export class OdoImpl implements Odo {
         const app = component.getParent();
         const appName = app.getName();
         const projName = app.getParent().getName();
-        const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(projName, appName, component.getName()));
+        const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(projName, appName, component.getName()), Platform.getUserHomePath());
 
         let data: any[] = [];
         try {
@@ -559,7 +560,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getServiceTemplates(): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices(), process.cwd(), false);
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices(), Platform.getUserHomePath(), false);
         if (result.error) {
             throw new Error(result.stderr.trim());
         }
@@ -567,7 +568,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getServiceTemplatePlans(svcName: string): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices());
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices(), Platform.getUserHomePath());
         const plans = result.stdout.trim().split('\n').slice(1).filter((value) => {
                 const data = value.trim().replace(/\s{1,}/g, '|').split('|');
                 return data[0] === svcName;
@@ -680,7 +681,7 @@ export class OdoImpl implements Odo {
     }
 
     public async createService(application: OpenShiftObject, templateName: string, planName: string, name: string): Promise<OpenShiftObject> {
-        await this.execute(Command.createService(application.getParent().getName(), application.getName(), templateName, planName, name.trim()));
+        await this.execute(Command.createService(application.getParent().getName(), application.getName(), templateName, planName, name.trim()), Platform.getUserHomePath());
         return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.SERVICE, this));
     }
 
