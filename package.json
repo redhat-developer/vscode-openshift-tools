@@ -359,6 +359,10 @@
         {
           "id": "openshiftProjectExplorer",
           "name": "OpenShift Application Explorer"
+        },
+        {
+          "id": "extension.vsKubernetesExplorer",
+          "name": "Clusters"
         }
       ]
     },
