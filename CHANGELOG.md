@@ -1,5 +1,7 @@
 # Change Log
 
+## 0.0.22 (May 27, 2019)
+
 ## 0.0.21 (May 16, 2019)
 * Add dependency to [Kubernetes extension from Microsoft](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools)
 * Extend Kubernetes Clusters tree view
