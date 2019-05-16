@@ -2,7 +2,7 @@
   "name": "vscode-openshift-connector",
   "displayName": "OpenShift Connector",
   "description": "Interacting with Red Hat OpenShift clusters and providing a streamlined developer experience using Visual Studio Code",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "license": "MIT",
   "publisher": "redhat",
   "author": "Red Hat",
