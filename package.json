@@ -668,6 +668,7 @@
     "tmp": "0.0.33",
     "tslint": "^5.16.0",
     "typescript": "^3.4.5",
+    "vscode": "^1.1.33",
     "walker": "^1.0.7"
   },
   "dependencies": {
@@ -687,7 +688,6 @@
     "shelljs": "^0.8.3",
     "string-format": "^2.0.0",
     "targz": "^1.0.1",
-    "vscode": "^1.1.33",
     "unzip-stream": "^0.3.0",
     "validator": "^10.11.0",
     "vscode-kubernetes-tools-api": "0.0.7"
