@@ -357,6 +357,10 @@
     "views": {
       "openshiftView": [
         {
+          "id": "extension.vsKubernetesExplorer",
+          "name": "Clusters"
+        },
+        {
           "id": "openshiftProjectExplorer",
           "name": "OpenShift Application Explorer"
         }
