@@ -348,18 +348,18 @@
     "keybindings": [
       {
         "command": "openshift.explorer.login",
-        "key": "ctrl+shift+l",
-        "mac": "cmd+shift+l"
+        "key": "alt+shift+l",
+        "mac": "ctrl+shift+l"
       },
       {
         "command": "openshift.explorer.refresh",
-        "key": "ctrl+shift+r",
-        "mac": "cmd+shift+r"
+        "key": "alt+shift+r",
+        "mac": "ctrl+shift+r"
       },
       {
-        "command": "openshift.component.push.palette",
-        "key": "ctrl+shift+p",
-        "mac": "cmd+shift+p"
+        "command": "openshift.component.push",
+        "key": "alt+shift+p",
+        "mac": "ctrl+shift+p"
       }
     ],
     "viewsContainers": {

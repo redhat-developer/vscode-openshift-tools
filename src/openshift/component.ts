@@ -14,6 +14,7 @@ import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 import { isURL } from 'validator';
 import { Refs, Ref, Type } from '../util/refs';
 import { Delayer } from '../util/async';
+import { contextGlobalState } from '../extension';
 
 export class Component extends OpenShiftItem {
 
@@ -148,13 +149,27 @@ export class Component extends OpenShiftItem {
         );
     }
 
+    static getPushCmd(): Thenable< string | undefined> {
+        return contextGlobalState.globalState.get('PUSH');
+    }
+
+    static setPushCmd(component, application, project): Thenable<void> {
+        return contextGlobalState.globalState.update('PUSH', `odo push ${component} --app ${application} --project ${project}`);
+    }
+
     static async push(context: OpenShiftObject): Promise<string> {
-        const component = await Component.getOpenShiftCmdData(context,
-            "In which Project you want to push the changes",
-            "In which Application you want to push the changes",
-            "For which Component you want to push the changes");
-        if (!component) return null;
-        Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
+        const getPushCmd = await Component.getPushCmd();
+        if (getPushCmd && !context) {
+            Component.odo.executeInTerminal(getPushCmd);
+        } else {
+            const component = await Component.getOpenShiftCmdData(context,
+                "In which Project you want to push the changes",
+                "In which Application you want to push the changes",
+                "For which Component you want to push the changes");
+            if (!component) return null;
+            Component.setPushCmd(component.getName(), component.getParent().getName(), component.getParent().getParent().getName());
+            Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
+        }
     }
 
     static async watch(context: OpenShiftObject): Promise<void> {
