@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.0.21 (May 6, 2019)
+## 0.0.21 (May 16, 2019)
 * Add dependency to [Kubernetes extension from Microsoft](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools)
 * Extend Kubernetes Clusters tree view
     * [#853](https://github.com/redhat-developer/vscode-openshift-tools/issues/853) Show OpenShift icon for OpenShift clusters
