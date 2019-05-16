@@ -626,7 +626,7 @@
       }
     }
   },
-  "extensionDependencies": ["ms-kubernetes-tools.vscode-kubernetes-tools"],
+  "extensionDependencies": [],
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
