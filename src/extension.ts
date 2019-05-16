@@ -92,7 +92,6 @@ export async function activate(context: vscode.ExtensionContext) {
             clusterExplorer.api.nodeSources.resourceFolder("Projects", "Projects", "Project", "project").if(isOpenShift).at(undefined),
             clusterExplorer.api.nodeSources.resourceFolder("Templates", "Templates", "Template", "template").if(isOpenShift).at(undefined),
             clusterExplorer.api.nodeSources.resourceFolder("ImageStreams", "ImageStreams", "ImageStream", "ImageStream").if(isOpenShift).at("Workloads"),
-            clusterExplorer.api.nodeSources.resourceFolder("Images", "Images", "Image", "image").if(isOpenShift).at("Workloads"),
             clusterExplorer.api.nodeSources.resourceFolder("Routes", "Routes", "Route", "route").if(isOpenShift).at("Network"),
             clusterExplorer.api.nodeSources.resourceFolder("DeploymentConfigs", "DeploymentConfigs", "DeploymentConfig", "dc").if(isOpenShift).at("Workloads")
         ];
@@ -126,6 +125,9 @@ async function initNamespaceName(node: ClusterExplorerV1.ClusterExplorerResource
 async function customizeAsync(node: ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): Promise<void> {
     if ((node as any).nodeType === 'context') {
         lastNamespace = await initNamespaceName(node);
+        if(isOpenShift()) {
+            treeItem.iconPath = vscode.Uri.file(path.join(__dirname, "../../images/context/cluster-node.png"));
+        }
     }
     if (node.nodeType as unknown === 'resource' && node.resourceKind.manifestKind === 'Project') {
         // assuming now that it’s a project node
