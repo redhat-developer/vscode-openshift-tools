@@ -101,12 +101,23 @@ For detail analysis of how to setup and run local OpenShift Cluster using minish
 
 ### Dependencies
 
+#### CLI Tools
+
 This extension uses two CLI tools to interact with OpenShift cluster:
 * OKD CLI client tool - [oc](https://github.com/openshift/origin/releases)
 * OpenShift Do tool - [odo](https://github.com/openshift/odo/releases)
 
 > If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
 The extension will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see an notification for the missing tool.
+
+#### Extensions
+
+This extension depends on Kubernetes Extension form Microsoft which is going to be installed automatically along with OpenShift Connector Extension. Latter is using Kubernetes Extension public API to show
+OpenShift specific resources like Projects, Routes, Deployment Configs, Image Streams and Templates in Kubernetes Clusters View. Those resources are visible only for OpenShift clusters. 
+
+OpenShift Connector extension also provides ```Use Project``` command to switch between OpenShift Projects in Kubernetes Clusters View.
+
+![ useproject ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/use-project.png)
 
 **NOTE:** This extension is in Preview mode. The extension support for OpenShift is strictly experimental - assumptions may break, commands and behavior may change!
 
