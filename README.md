@@ -112,7 +112,7 @@ The extension will detect these dependencies and prompt the user to install if t
 
 #### Extensions
 
-This extension depends on [Kubernetes extension from Microsoft](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools). OpenShift Connector extension is using Kubernetes extension public API to add OpenShift resources like Projects, Routes, Deployment Configs, Image Streams and Templates io Kubernetes Clusters View. OpenShift resources are visible only for OpenShift clusters.
+This extension depends on [Kubernetes extension from Microsoft](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools). OpenShift Connector extension is using Kubernetes extension public API to add OpenShift resources like Projects, Routes, Deployment Configs, Image Streams and Templates in Kubernetes Clusters View. OpenShift resources are visible only for OpenShift clusters.
 
 OpenShift Connector extension provides ```Use Project``` command to switch between OpenShift Projects in Kubernetes Clusters View.
 
@@ -126,7 +126,7 @@ See the [change log](CHANGELOG.md).
 
 Contributing
 ============
-This is an open source project open to anyone. This project welcomes contributions and suggestions!
+This is an open source project. This project welcomes contributions and suggestions!
 
 For information on getting started, refer to the [CONTRIBUTING instructions](CONTRIBUTING.md).
 
