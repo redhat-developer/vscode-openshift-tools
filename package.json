@@ -547,12 +547,12 @@
         },
         {
           "command": "openshift.component.linkComponent",
-          "when": "view == openshiftProjectExplorer && viewItem == component && componentPresent",
+          "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c3@1"
         },
         {
           "command": "openshift.component.linkService",
-          "when": "view == openshiftProjectExplorer && viewItem == component && servicePresent",
+          "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c3@2"
         },
         {
