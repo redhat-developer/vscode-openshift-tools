@@ -1,16 +1,17 @@
 # Change Log
 
-## 0.0.21 (May 16, 2019)
-* Add dependency to [Kubernetes extension from Microsoft](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools)
-* Extend Kubernetes Clusters tree view
+## 0.0.21 (May 17, 2019)
+* Added dependency to [Kubernetes extension from Microsoft](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools)
+* Extend Kubernetes Clusters tree view 
     * [#853](https://github.com/redhat-developer/vscode-openshift-tools/issues/853) Show OpenShift icon for OpenShift clusters
     * [#851](https://github.com/redhat-developer/vscode-openshift-tools/issues/851) Show OpenShift resources
         * Projects
         * Templates
-        * Deployment Configs
-        * Image Streams
-        * Routes
+        * Deployment Configs under Workloads node
+        * Image Streams under Workloads node
+        * Routes under Network node
     * [#852](https://github.com/redhat-developer/vscode-openshift-tools/issues/852) Add `Use Project` command for switching between Projects
+* Added Kubernetes Clusters view back to the OpenShift views container
 
 ## 0.0.20 (May 2, 2019)
 * URL management for a component in Application Explorer
