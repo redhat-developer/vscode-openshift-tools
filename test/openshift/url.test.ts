@@ -13,6 +13,7 @@ import { TestItem } from './testOSItem';
 import { OdoImpl, Command } from '../../src/odo';
 import { Url } from '../../src/openshift/url';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
+import pq = require('proxyquire');
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -382,6 +383,44 @@ suite('OpenShift/URL', () => {
             } catch (err) {
                 expect(err).equals(`Failed to delete URL with error '${errorMessage}'`);
             }
+        });
+    });
+
+    suite('open', () => {
+
+        const openStub: sinon.SinonStub = sinon.stub();
+        let UrlMock;
+
+        setup(() => {
+            UrlMock = pq('../../src/openshift/url', {
+                open: openStub
+            }).Url;
+
+            execStub.resolves({error: undefined, stdout: JSON.stringify({
+                kind: "List",
+                apiVersion: "odo.openshift.io/v1alpha1",
+                metadata: {},
+                items: [
+                    {
+                        kind: "url",
+                        apiVersion: "odo.openshift.io/v1alpha1",
+                        metadata: {
+                            name: "route",
+                            creationTimestamp: null
+                        },
+                        spec: {
+                            path: "route-nodejs-app-myproject.192.168.64.59.nip.io",
+                            protocol: "http",
+                            port: 8080
+                        }
+                    }
+                ]
+            }), stderr: ''});
+        });
+
+        test('open url in browser', async () => {
+            await UrlMock.open(routeItem);
+            openStub.calledOnceWith('http://route-nodejs-app-myproject.192.168.64.59.nip.io');
         });
     });
 });
