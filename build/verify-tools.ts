@@ -10,6 +10,7 @@ const mkdirp = require('mkdirp');
 const request = require('request');
 const fs = require('fs-extra');
 const path = require("path");
+const { exec } = require('child_process');
 const progress = require('request-progress');
 const configData = require('../src/tools.json');
 const os = require('os');
@@ -34,7 +35,7 @@ async function downloadFileAndCreateSha256(targetFolder, fileName, reqURL, sha25
   if (currentSHA256 === sha256sum) {
     console.log( `[INFO] ${currentFile} is downloaded and sha256 is correct`);
   } else {
-    throw console.log(`[Error] ${currentFile} is downloaded and sha256 is not correct`);
+    throw Error(`${currentFile} is downloaded and sha256 is not correct`);
   }
 
 }
@@ -77,4 +78,16 @@ async function downloadFile(fromUrl, toFile) {
   });
 }
 
-verifyTools();
+function checkToolFile() {
+  const fileCheckRegex = /\w*tools.json/;
+  exec('git diff --name-only master..HEAD', async (error, stdout, stderr) => {
+    if (error) {
+      throw Error(error);
+    }
+    if (fileCheckRegex.test(stdout)) {
+      await verifyTools();
+    }
+  });
+}
+
+checkToolFile();

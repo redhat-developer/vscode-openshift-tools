@@ -638,10 +638,10 @@
     "watch": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "clean": "rm -rf out || rmdir out /s /q",
-    "test": "npm run clean && npm run compile && node ./node_modules/vscode/bin/test",
+    "test": "npm run clean && npm run verify && npm run compile && node ./node_modules/vscode/bin/test",
     "update-deps": "node_modules/.bin/ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
-    "build": "npm run clean && tslint -p tslint.json && npm run compile && npm run verify"
+    "build": "npm run clean && tslint -p tslint.json && npm run compile"
   },
   "devDependencies": {
     "@types/byline": "^4.2.31",
