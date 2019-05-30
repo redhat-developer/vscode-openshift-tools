@@ -20,6 +20,7 @@ import path = require('path');
 import fsx = require('fs-extra');
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
+import { DeploymentConfigNodeContributor } from './k8s/deployment';
 
 export let contextGlobalState: vscode.ExtensionContext;
 
@@ -93,7 +94,9 @@ export async function activate(context: vscode.ExtensionContext) {
             clusterExplorer.api.nodeSources.resourceFolder("Templates", "Templates", "Template", "template").if(isOpenShift).at(undefined),
             clusterExplorer.api.nodeSources.resourceFolder("ImageStreams", "ImageStreams", "ImageStream", "ImageStream").if(isOpenShift).at("Workloads"),
             clusterExplorer.api.nodeSources.resourceFolder("Routes", "Routes", "Route", "route").if(isOpenShift).at("Network"),
-            clusterExplorer.api.nodeSources.resourceFolder("DeploymentConfigs", "DeploymentConfigs", "DeploymentConfig", "dc").if(isOpenShift).at("Workloads")
+            clusterExplorer.api.nodeSources.resourceFolder("DeploymentConfigs", "DeploymentConfigs", "DeploymentConfig", "dc").if(isOpenShift).at("Workloads"),
+            clusterExplorer.api.nodeSources.resourceFolder("BuildConfigs", "BuildConfigs", "BuildConfig", "bc").if(isOpenShift).at("Workloads"),
+            new DeploymentConfigNodeContributor()
         ];
         nodeContributors.forEach(element => {
             clusterExplorer.api.registerNodeContributor(element);
@@ -129,7 +132,7 @@ async function customizeAsync(node: ClusterExplorerV1.ClusterExplorerResourceNod
             treeItem.iconPath = vscode.Uri.file(path.join(__dirname, "../../images/context/cluster-node.png"));
         }
     }
-    if (node.nodeType as unknown === 'resource' && node.resourceKind.manifestKind === 'Project') {
+    if (node.nodeType === 'resource' && node.resourceKind.manifestKind === 'Project') {
         // assuming now that it’s a project node
         const projectName = node.name;
         if (projectName === lastNamespace) {
@@ -137,6 +140,9 @@ async function customizeAsync(node: ClusterExplorerV1.ClusterExplorerResourceNod
         } else {
             treeItem.contextValue = `${treeItem.contextValue || ''}.openshift.inactiveProject`;
         }
+    }
+    if (node.nodeType === 'resource' && node.resourceKind.manifestKind === 'BuildConfig') {
+        treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
     }
 }
 
