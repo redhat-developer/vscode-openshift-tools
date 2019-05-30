@@ -10,10 +10,10 @@ export class DeploymentConfigNodeContributor implements ClusterExplorerV1.NodeCo
     async getChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): Promise<ClusterExplorerV1.Node[]> {
         const kubectl = await k8s.extension.kubectl.v1;
         if(kubectl.available) {
-            const result = await kubectl.api.invokeCommand(`get build -o jsonpath="{range .items[?(.metadata.labels.buildconfig=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{\\"\\n\\"}{end}"`);
+            const result = await kubectl.api.invokeCommand(`get build -o jsonpath="{range .items[?(.metadata.labels.buildconfig=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/build\\.number}{\\"\\n\\"}{end}"`);
             const builds = result.stdout.split('\n')
                 .filter((value) => value !== '')
-                .map<Build>((item: string) => new Build(item.split(',')[0], item.split(',')[1]));
+                .map<Build>((item: string) => new Build(item.split(',')[0], item.split(',')[1], Number.parseInt(item.split(',')[2])));
             return builds;
         }
         return [];
@@ -25,10 +25,11 @@ class Build implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorer
     readonly resourceKind: ClusterExplorerV1.ResourceKind = {
         manifestKind: 'Build',
         abbreviation: 'build'
-    }
-    id: string;
-    resourceId: string;
-    constructor(readonly namespace: string, readonly name: string,  readonly metadata?: any) {
+    };
+    readonly kind: ClusterExplorerV1.ResourceKind = this.resourceKind;
+    public id: string;
+    public resourceId: string;
+    constructor(readonly namespace: string, readonly name: string, readonly number: number, readonly metadata?: any) {
         this.id = this.resourceId = `build/${this.name}`;
     }
 
@@ -37,7 +38,7 @@ class Build implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorer
     }
 
     getTreeItem(): vscode.TreeItem {
-        const item = new vscode.TreeItem(this.name);
+        const item = new vscode.TreeItem(`#${this.number} ${this.name}`);
         item.contextValue = 'vsKubernetes.resource.build';
         item.command = {
             arguments: [this],
