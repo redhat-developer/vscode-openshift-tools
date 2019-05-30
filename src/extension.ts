@@ -113,7 +113,6 @@ async function initNamespaceName(node: ClusterExplorerV1.ClusterExplorerResource
     if (kubectl.available) {
         const result = await kubectl.api.invokeCommand('config view -o json');
         const config = JSON.parse(result.stdout);
-        const ctxName = config["current-context"];
         const currentContext = (config.contexts || []).find((ctx) => ctx.name === node.name);
         if (!currentContext) {
             return "";
@@ -125,7 +124,7 @@ async function initNamespaceName(node: ClusterExplorerV1.ClusterExplorerResource
 async function customizeAsync(node: ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): Promise<void> {
     if ((node as any).nodeType === 'context') {
         lastNamespace = await initNamespaceName(node);
-        if(isOpenShift()) {
+        if (isOpenShift()) {
             treeItem.iconPath = vscode.Uri.file(path.join(__dirname, "../../images/context/cluster-node.png"));
         }
     }

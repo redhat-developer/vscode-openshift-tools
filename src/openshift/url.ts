@@ -9,7 +9,6 @@ import { Component } from '../openshift/component';
 import { V1ServicePort } from '@kubernetes/client-node';
 import { OpenShiftItem } from './openshiftItem';
 import { Progress } from "../util/progress";
-import { URL } from 'url';
 import open = require('open');
 import { ChildProcess } from 'child_process';
 
