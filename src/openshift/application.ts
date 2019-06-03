@@ -36,7 +36,6 @@ export class Application extends OpenShiftItem {
             "Select Application to delete");
         if (application) {
             const appName = application.getName();
-            const projName = application.getParent().getName();
             const value = await window.showWarningMessage(`Do you want to delete Application '${appName}?'`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 return Progress.execFunctionWithProgress(`Deleting the Application '${appName}'`, () => Application.odo.deleteApplication(application))

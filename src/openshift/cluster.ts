@@ -152,7 +152,8 @@ export class Cluster extends OpenShiftItem {
         const ocToken = await window.showInputBox({
             value: token,
             prompt: "Provide Bearer token for authentication to the API server",
-            ignoreFocusOut: true
+            ignoreFocusOut: true,
+            password: true
         });
         if (!ocToken) return null;
         return Promise.resolve()

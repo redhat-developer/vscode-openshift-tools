@@ -83,7 +83,6 @@ suite('OpenShift/Component', () => {
         const ref = 'master';
         const folder = { uri: { fsPath: 'folder' } };
         let inputStub: sinon.SinonStub,
-        progressCmdStub: sinon.SinonStub,
         progressFunctionStub: sinon.SinonStub;
 
         setup(() => {
@@ -93,7 +92,7 @@ suite('OpenShift/Component', () => {
             quickPickStub.onThirdCall().resolves(version);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
             sandbox.stub(Progress, 'execWithProgress').resolves();
-            progressCmdStub = sandbox.stub(Progress, 'execCmdWithProgress').resolves();
+            sandbox.stub(Progress, 'execCmdWithProgress').resolves();
             progressFunctionStub = sandbox.stub(Progress, 'execFunctionWithProgress').yields();
         });
 

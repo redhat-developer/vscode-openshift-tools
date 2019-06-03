@@ -12,7 +12,7 @@ walker('.').filterDir((dir: string) => dir !== 'node_modules' && dir !== '.vscod
   if (file.endsWith('.ts')) {
     const result = await WatchUtil.grep(file, /Copyright \(c\)/);
     if (!result) {
-      if(!failed) {
+      if (!failed) {
         failed = true;
         console.log('Files without copyright comment:');
       }
