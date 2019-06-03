@@ -16,10 +16,16 @@ import { Storage } from './openshift/storage';
 import { Url } from './openshift/url';
 import { Service } from './openshift/service';
 import { Platform } from './util/platform';
+import { ReactPanel } from './openshift/webview';
+
 import path = require('path');
 import fsx = require('fs-extra');
 
 export let contextGlobalState: vscode.ExtensionContext;
+
+function loadScript(context: vscode.ExtensionContext, path: string) {
+    return `<script src="${vscode.Uri.file(context.asAbsolutePath(path)).with({ scheme: 'vscode-resource'}).toString()}"></script>`;
+}
 
 export function activate(context: vscode.ExtensionContext) {
     contextGlobalState = context;
@@ -78,6 +84,28 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.service.describe.palette', (context) => execute(Service.describe, context)),
         vscode.commands.registerCommand('openshift.component.linkComponent', (context) => execute(Component.linkComponent, context)),
         vscode.commands.registerCommand('openshift.component.linkService', (context) => execute(Component.linkService, context)),
+        vscode.commands.registerCommand('openshift.explorer.help', () => {
+            const panel = vscode.window.createWebviewPanel('openshift', "OpenShift Help", vscode.ViewColumn.Active, {
+                enableScripts: true,
+                retainContextWhenHidden: true,
+                localResourceRoots: [ vscode.Uri.file(path.join(context.extensionPath, 'out')) ]
+            });
+
+            panel.webview.html = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                </head>
+                <body>
+                    <div id="root"></div>
+                    ${loadScript(context, 'out/vendor.js')}
+                    ${loadScript(context, 'out/openshift.js')}
+                </body>
+                </html>
+            `;
+        }),
         OpenShiftExplorer.getInstance()
     ];
     disposable.forEach((value)=> context.subscriptions.push(value));

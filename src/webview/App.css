@@ -1,0 +1,130 @@
+.App {
+  text-align: center;
+}
+
+.ux-band-container {
+  width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 4em 0;
+}
+
+.ux-card {
+  border: 1px solid #d2d3d5;
+  border-top: 0;
+  padding: 30px;
+  width: 31.6198445906%;
+  float: left;
+  margin-right: 2.5702331142%;
+  border-radius: 3px;
+  flex-direction: column;
+}
+
+.ux-card-header {
+  margin: 0 0 30px;
+  width: 100%;
+}
+
+.card {
+  background-color: #fff!important;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-clip: border-box;
+  border: 0 solid transparent;
+  border-radius: 3px;
+  margin-bottom: 20px;
+  width: 30%;
+  float: left;
+  margin-right: 2.5%;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  transition: all 0.3s ease-out;
+  box-shadow: 20px 20px 40px 0px rgba(0,0,0,0.5);
+}
+  
+.bg-teal-dark {
+  background-color: #00586d!important;
+  padding: 1.875rem;
+  border-bottom: 0 solid transparent;
+}
+
+.card-heading {
+  text-transform: uppercase;
+  font-size: 1.125rem;
+  margin-top: 0;
+}
+
+hr {
+  width: 50%!important;
+  border-color: #fff!important;
+}
+
+h4 {
+  margin-bottom: 0!important;
+  line-height: 1.5;
+}
+
+.row-fuild {
+  display: flex;
+}
+
+.px-lg-4 {
+  padding-left: 2.5rem!important;
+  padding: 1.875rem;
+  text-align: left;
+}
+
+.btn.btn-primary {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5;
+  transition: all .3s cubic-bezier(.5,0,.5,1)!important;
+  color: #fff;
+  background-color: #e00;
+  padding: 10px 20px;
+  border-radius: 3px;
+  text-decoration: none;
+}
+
+p {
+  color: #222;
+  display: block;
+  font-size: 1.125rem;
+}
+
+.app-body {
+  background-image: url('https://www.openshift.com/hubfs/images/bgs/bg_teal-honeycomb.svg');
+  height: 1046px;
+}
+
+.text-white {
+  margin-bottom: 20px!important;
+  text-align: left;
+}
+
+.text-heading {
+  max-width: 50%;
+  text-align: left;
+}
+
+.button-text {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: #fff;
+  text-decoration: none;
+  transition: all .3s cubic-bezier(.5,0,.5,1)!important;
+  background-color: #e00;
+  border-radius: 3px;
+  margin: 0 40px 0 20px;
+  padding: 10px 50px 15px 50px;
+}
+
+a:hover {
+  text-decoration: none;
+  color: white
+}
