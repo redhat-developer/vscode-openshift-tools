@@ -10,19 +10,6 @@ import { Progress } from '../util/progress';
 
 export class Application extends OpenShiftItem {
 
-    static async create(treeItem: OpenShiftObject): Promise<String> {
-        const project = await Application.getOpenShiftCmdData(treeItem,
-            "In which Project you want to create an Application");
-        if (!project) return null;
-        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
-        const applicationName = await Application.getName('Application name', applicationList);
-        if (!applicationName) return null;
-        return Progress.execFunctionWithProgress(`Creating the Application '${applicationName}'.`, () =>
-            Application.odo.createApplication(project, applicationName)
-                .then(() => `Application '${applicationName}' successfully created`)
-                .catch((error) => Promise.reject(`Failed to create Application with error '${error}'`)));
-    }
-
     static async describe(treeItem: OpenShiftObject): Promise<void> {
         const application = await Application.getOpenShiftCmdData(treeItem,
             "From which project you want to describe Application",

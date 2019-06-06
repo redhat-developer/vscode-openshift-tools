@@ -144,11 +144,6 @@
         "category": "OpenShift"
       },
       {
-        "command": "openshift.app.create",
-        "title": "New Application",
-        "category": "OpenShift"
-      },
-      {
         "command": "openshift.app.delete",
         "title": "Delete",
         "category": "OpenShift"
@@ -494,11 +489,6 @@
           "command": "openshift.output",
           "when": "view == openshiftProjectExplorer && viewItem == cluster",
           "group": "c6"
-        },
-        {
-          "command": "openshift.app.create",
-          "when": "view == openshiftProjectExplorer && viewItem == project",
-          "group": "p1"
         },
         {
           "command": "openshift.project.delete",
