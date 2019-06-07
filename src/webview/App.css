@@ -68,26 +68,11 @@ h4 {
   line-height: 1.5;
 }
 
-.row-fuild {
-  display: flex;
-}
-
-.px-lg-4 {
+.card-body {
   padding-left: 2.5rem!important;
   padding: 1.875rem;
   text-align: left;
-}
-
-.btn.btn-primary {
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.5;
-  transition: all .3s cubic-bezier(.5,0,.5,1)!important;
-  color: #fff;
-  background-color: #e00;
-  padding: 10px 20px;
-  border-radius: 3px;
-  text-decoration: none;
+  margin-left: 15px;
 }
 
 p {
@@ -118,10 +103,12 @@ p {
   color: #fff;
   text-decoration: none;
   transition: all .3s cubic-bezier(.5,0,.5,1)!important;
-  background-color: #e00;
   border-radius: 3px;
-  margin: 0 40px 0 20px;
-  padding: 10px 50px 15px 50px;
+  background-color:#EE2737;
+  margin-left: 50px;
+  margin-right: 50px;
+  padding: 12px;
+  display: block;
 }
 
 a:hover {
