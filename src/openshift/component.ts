@@ -15,6 +15,7 @@ import { isURL } from 'validator';
 import { Refs, Ref, Type } from '../util/refs';
 import { Delayer } from '../util/async';
 import { contextGlobalState } from '../extension';
+import { Platform } from '../util/platform';
 
 export class Component extends OpenShiftItem {
 
@@ -322,11 +323,19 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeVersion) return null;
 
+        const folder = await window.showOpenDialog({
+            canSelectFiles: false,
+            canSelectFolders: true,
+            canSelectMany: false,
+            defaultUri: Uri.file(Platform.getUserHomePath()),
+            openLabel: "Select Repository Location"
+        });
+
         await window.showInformationMessage('Do you want to clone git repository for created Component?', 'Yes', 'No').then((value) => {
             value === 'Yes' && commands.executeCommand('git.clone', repoURI);
         });
 
-        await Component.odo.createComponentFromGit(application, componentTypeName, componentTypeVersion, componentName, repoURI, gitRef.label);
+        await Component.odo.createComponentFromGit(application, componentTypeName, componentTypeVersion, componentName, repoURI, folder[0].fsPath, gitRef.label);
         return `Component '${componentName}' successfully created`;
     }
 

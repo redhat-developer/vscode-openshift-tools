@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Odo, OdoImpl, OpenShiftObject } from '../odo';
+import { Odo, OdoImpl, OpenShiftObject, ContextType, OpenShiftObjectImpl } from '../odo';
 import { OpenShiftExplorer } from '../explorer';
-import { window } from 'vscode';
+import { window, QuickPick, QuickPickItem, TreeItemCollapsibleState } from 'vscode';
 import * as validator from 'validator';
 
 const errorMessage = {
@@ -16,6 +16,22 @@ const errorMessage = {
     Storage: 'You need at least one Storage available. Please create new OpenShift Storage and try again.',
     Route: 'You need to add one URL to the component. Please create a new URL and try again.'
 };
+
+export class QuickPickCommand implements QuickPickItem {
+    constructor (public label: string,
+        public command: () => Promise<string>,
+        public description?: string,
+        public detail?: string,
+        public picked?: boolean,
+        public alwaysShow?: boolean
+    ) {
+
+    }
+}
+
+function isCommand(item: QuickPickItem | QuickPickCommand): item is QuickPickCommand {
+    return item['command'];
+}
 
 export abstract class OpenShiftItem {
     protected static readonly odo: Odo = OdoImpl.Instance;
@@ -76,10 +92,11 @@ export abstract class OpenShiftItem {
         return projectList;
     }
 
-    static async getApplicationNames(project: OpenShiftObject) {
+    static async getApplicationNames(project: OpenShiftObject, createCommand: boolean = false): Promise<(OpenShiftObject | QuickPickCommand)[]> {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
-        if (applicationList.length === 0) throw Error(errorMessage.Application);
-        return applicationList;
+        return createCommand ? [...applicationList, new QuickPickCommand('Create new Application...', async () => {
+            return await OpenShiftItem.getName('Application name', applicationList);
+        })] : applicationList;
     }
 
     static async getComponentNames(application: OpenShiftObject) {
@@ -107,12 +124,17 @@ export abstract class OpenShiftItem {
     }
 
     static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder?: string, compPlaceholder?: string) {
-        let context = treeItem;
-        if (!context) {
-            context = await window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder});
-            if (context && appPlaceholder) context = await window.showQuickPick(OpenShiftItem.getApplicationNames(context), {placeHolder: appPlaceholder});
-            if (context && compPlaceholder) context = await window.showQuickPick(OpenShiftItem.getComponentNames(context), {placeHolder: compPlaceholder});
+        let context: OpenShiftObject | QuickPickCommand = treeItem;
+        let project: OpenShiftObject;
+        if (!context) context = await window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder});
+        if (context && appPlaceholder) {
+            project = context as OpenShiftObject;
+            context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(OpenShiftItem.getApplicationNames(context as OpenShiftObject, appPlaceholder && compPlaceholder === undefined), {placeHolder: appPlaceholder});
+            if (context && isCommand(context)) {
+                context = new OpenShiftObjectImpl(project, await context.command(), ContextType.APPLICATION, OdoImpl.Instance, TreeItemCollapsibleState.Collapsed )
+            }
         }
-        return context;
+        if (context && compPlaceholder) context = await window.showQuickPick(OpenShiftItem.getComponentNames(context as OpenShiftObject), {placeHolder: compPlaceholder});
+        return context as OpenShiftObject;
     }
 }

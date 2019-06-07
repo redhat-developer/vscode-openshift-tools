@@ -322,7 +322,7 @@ export interface Odo {
     deleteProject(project: OpenShiftObject): Promise<OpenShiftObject>;
     createApplication(project: OpenShiftObject, name: string): Promise<OpenShiftObject>;
     deleteApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
-    createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, repoUri: string, ref: string): Promise<OpenShiftObject>;
+    createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, repoUri: string, context: string, ref: string): Promise<OpenShiftObject>;
     createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, path: string): Promise<OpenShiftObject>;
     createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, path: string): Promise<OpenShiftObject>;
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
@@ -660,7 +660,6 @@ export class OdoImpl implements Odo {
     }
 
     public async createApplication(project: OpenShiftObject, applicationName: string): Promise<OpenShiftObject> {
-        await this.execute(Command.createApplication(project.getName(), applicationName));
         return this.insertAndReveal(await this.getApplications(project), new OpenShiftObjectImpl(project, applicationName, ContextType.APPLICATION, this));
     }
 
@@ -670,9 +669,11 @@ export class OdoImpl implements Odo {
         return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed, 'folder'));
     }
 
-    public async createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, location: string, ref: string = 'master'): Promise<OpenShiftObject> {
-        this.executeInTerminal(Command.createGitComponent(application.getParent().getName(), application.getName(), type, version, name, location, ref ? ref : 'master'));
+    public async createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, location: string, context: string, ref: string = 'master'): Promise<OpenShiftObject> {
+        this.executeInTerminal(Command.createGitComponent(application.getParent().getName(), application.getName(), type, version, name, location, ref ? ref : 'master'), context);
         await wait();
+        let targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
+        if (!targetApplication) targetApplication =  this.insertAndReveal(await this.getApplications(application.getParent()), application);
         return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed, 'git'));
     }
 

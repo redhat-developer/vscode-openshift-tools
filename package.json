@@ -537,7 +537,12 @@
         },
         {
           "command": "openshift.component.create",
-          "when": "view == openshiftProjectExplorer && viewItem == application",
+          "when": "view == openshiftProjectExplorer && viewItem == project ",
+          "group": "p2"
+        },
+        {
+          "command": "openshift.component.create",
+          "when": "view == openshiftProjectExplorer && viewItem == application ",
           "group": "a1"
         },
         {
