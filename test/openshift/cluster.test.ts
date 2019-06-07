@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { OdoImpl, Command } from '../../src/odo';
+import { OdoImpl, Command, ContextType } from '../../src/odo';
 import { Cluster } from '../../src/openshift/cluster';
 import { OpenShiftExplorer } from '../../src/explorer';
 import { CliExitData } from '../../src/cli';
@@ -24,13 +24,14 @@ chai.use(sinonChai);
 const keytar: any = getVscodeModule('keytar');
 
 suite('Openshift/Cluster', () => {
-    let sandbox: sinon.SinonSandbox;
-    let execStub: sinon.SinonStub,
+    let sandbox: sinon.SinonSandbox,
+        execStub: sinon.SinonStub,
         commandStub: sinon.SinonStub,
         inputStub: sinon.SinonStub,
         infoStub: sinon.SinonStub,
         loginStub: sinon.SinonStub,
         quickPickStub: sinon.SinonStub;
+
     const testData: CliExitData = {
         error: undefined,
         stderr: '',
@@ -46,8 +47,8 @@ suite('Openshift/Cluster', () => {
     const testUser = 'user';
     const password = 'password';
     const token = 'token';
-    const projectItem = new TestItem(null, 'project');
-    const appItem = new TestItem(projectItem, 'application');
+    const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
+    const appItem = new TestItem(projectItem, 'application', ContextType.APPLICATION);
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -355,20 +356,20 @@ suite('Openshift/Cluster', () => {
         });
 
         test('opens URL from cluster\'s tree item label if called from cluster\'s context menu', () => {
-            const cluster = new TestItem(null, 'http://localhost');
+            const cluster = new TestItem(null, 'http://localhost', ContextType.CLUSTER);
             clusterMock.openshiftConsole(cluster);
             openStub.calledOnceWith('http://localhost');
         });
 
         test('opens URL from first cluster label', () => {
-            const cluster = new TestItem(null, 'http://localhost');
+            const cluster = new TestItem(null, 'http://localhost', ContextType.CLUSTER);
             sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
             clusterMock.openshiftConsole();
             openStub.calledOnceWith('http://localhost');
         });
 
         test('shows error message if node label is not URL', () => {
-            const cluster = new TestItem(null, 'localhost');
+            const cluster = new TestItem(null, 'localhost', ContextType.CLUSTER);
             sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
             const errMsgStub = sandbox.stub(vscode.window, 'showErrorMessage');
             clusterMock.openshiftConsole();

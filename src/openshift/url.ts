@@ -71,12 +71,16 @@ export class Url extends OpenShiftItem{
         const component = treeItem.getParent();
         const app = component.getParent();
         const namespace = app.getParent();
-        const UrlDetails = await Url.odo.execute(Command.getComponentUrl(namespace.getName(), app.getName(), component.getName()));
+        const UrlDetails = await Url.odo.execute(Command.getComponentUrl(namespace.getName(), app.getName(), component.getName()), component.contextPath.fsPath);
         let result: any[] = [];
         try {
             result = JSON.parse(UrlDetails.stdout).items;
         } catch (ignore) {}
-        const urlObject = result.filter((value) => (value.metadata.name === treeItem.getName()));
-        return open(`${urlObject[0].spec.protocol}://${urlObject[0].spec.path}`);
+        if (!result) {
+            window.showInformationMessage('Selected URL is not created in cluster. Use \'Push\' command before opening URL in browser.');
+        } else {
+            const urlObject = result.filter((value) => (value.metadata.name === treeItem.getName()));
+            return open(`${urlObject[0].spec.protocol}://${urlObject[0].spec.host}`);
+        }
     }
 }

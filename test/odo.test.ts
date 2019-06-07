@@ -17,6 +17,7 @@ import { TestItem } from './openshift/testOSItem';
 import { ExecException } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import { ContextType } from '../src/odo';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -111,8 +112,8 @@ suite("odo", () => {
 
     suite('item listings', () => {
         let execStub: sinon.SinonStub, yamlStub: sinon.SinonStub;
-        const project = new TestItem(null, 'project');
-        const app = new TestItem(project, 'app');
+        const project = new TestItem(null, 'project', ContextType.PROJECT);
+        const app = new TestItem(project, 'app', ContextType.APPLICATION);
 
         setup(() => {
             execStub = sandbox.stub(odoCli, 'execute');
@@ -120,20 +121,51 @@ suite("odo", () => {
             sandbox.stub(fs, 'readFileSync');
         });
 
-        test('getProjects returns items created from oc get project', async () => {
-            const odoProjects = ['project1', 'project2', 'project3'];
-            execStub.resolves({ stdout: odoProjects.join('\n'), stderr: '', error: null });
+        test('getProjects returns projects under a given cluster', async () => {
+            const activeProjs = [{ name: 'project1' }, { name: 'project2'}];
+            yamlStub.returns({ ActiveApplications: activeProjs });
+            execStub.onFirstCall().resolves({
+                error: undefined,
+                stdout: 'Server https://172.17.185.52:8443',
+                stderr: ''
+            });
+            execStub.onSecondCall().resolves({
+                error: undefined,
+                stdout: 'Server https://172.17.185.52:8443',
+                stderr: ''
+            });
+            execStub.onThirdCall().resolves({
+                error: undefined,
+                stdout: JSON.stringify({
+                        items: [
+                            {
+                                metadata: {
+                                    name: 'project1'
+                                }
+                            }
+                        ]
+                    }
+                ),
+                stderr: ''
+            });
             const result = await odoCli.getProjects();
 
-            expect(execStub).calledWith(odo.Command.listProjects());
-            expect(result.length).equals(3);
-            for (let i = 1; i < result.length; i++) {
-                expect(result[i].getName()).equals(odoProjects[i]);
-            }
+            expect(result.length).equals(1);
+            expect(result[0].getName()).equals('project1');
         });
 
-        test('getProjects returns empty list if oc produces no output', async () => {
-            execStub.resolves({ stdout: '', stderr: '', error: null });
+        test('getProjects returns empty list if no projects present', async () => {
+            execStub.onFirstCall().resolves({
+                error: undefined,
+                stdout: 'Server https://172.17.185.52:8443',
+                stderr: ''
+            });
+            execStub.onSecondCall().resolves({
+                error: undefined,
+                stdout: 'Server https://172.17.185.52:8443',
+                stderr: ''
+            });
+            execStub.onThirdCall().resolves({ stdout: '', stderr: '', error: null });
             const result = await odoCli.getProjects();
 
             expect(result).empty;
@@ -141,7 +173,7 @@ suite("odo", () => {
 
         test('getProjects returns empty list if an error occurs', async () => {
             const errorStub = sandbox.stub(window, 'showErrorMessage');
-            sandbox.stub(odoCli, 'getClusters').resolves([new TestItem(undefined, 'cluster')]);
+            sandbox.stub(odoCli, 'getClusters').resolves([new TestItem(undefined, 'cluster', ContextType.CLUSTER)]);
             execStub.rejects(errorMessage);
             const result = await odoCli.getProjects();
 
@@ -271,7 +303,7 @@ suite("odo", () => {
         });
 
         test('getStorageNames returns storage items for a component', async () => {
-            const component = new TestItem(app, 'comp');
+            const component = new TestItem(app, 'comp', ContextType.COMPONENT);
             execStub.returns({
                 error: undefined,
                 stdout: JSON.stringify({
@@ -296,7 +328,7 @@ suite("odo", () => {
         });
 
         test('getRoutes returns URL list items for a component', async () => {
-            const component = new TestItem(app, 'comp');
+            const component = new TestItem(app, 'comp', ContextType.COMPONENT);
             execStub.returns({
                 error: undefined,
                 stdout: JSON.stringify({
@@ -321,7 +353,7 @@ suite("odo", () => {
         });
 
         test('getComponentChildren returns both routes and storage for a component', async () => {
-            const component = new TestItem(app, 'comp');
+            const component = new TestItem(app, 'comp', ContextType.COMPONENT);
             execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({
                 items: [
                     {

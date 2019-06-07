@@ -10,7 +10,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
-import { OdoImpl, Command } from '../../src/odo';
+import { OdoImpl, Command, ContextType } from '../../src/odo';
 import { Storage } from '../../src/openshift/storage';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 
@@ -24,10 +24,10 @@ suite('OpenShift/Storage', () => {
     let inputStub: sinon.SinonStub;
     let getProjectNamesStub: sinon.SinonStub;
     let getStorageNamesStub: sinon.SinonStub;
-    const projectItem = new TestItem(null, 'project');
-    const appItem = new TestItem(projectItem, 'app');
-    const componentItem = new TestItem(appItem, 'component');
-    const storageItem = new TestItem(componentItem, 'storage');
+    const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
+    const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
+    const componentItem = new TestItem(appItem, 'component', ContextType.COMPONENT);
+    const storageItem = new TestItem(componentItem, 'storage', ContextType.STORAGE);
     const mountPath = '/mnt';
     const size = '1Gi';
     const errorMessage = 'FATAL ERROR';

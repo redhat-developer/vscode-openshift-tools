@@ -10,7 +10,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
-import { OdoImpl, Command } from '../../src/odo';
+import { OdoImpl, Command, ContextType } from '../../src/odo';
 import { Url } from '../../src/openshift/url';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
@@ -25,10 +25,10 @@ suite('OpenShift/URL', () => {
     let execStub: sinon.SinonStub;
     let getProjectsNameStub: sinon.SinonStub;
     let getRouteNameStub: sinon.SinonStub;
-    const projectItem = new TestItem(null, 'project');
-    const appItem = new TestItem(projectItem, 'app');
-    const componentItem = new TestItem(appItem, 'component');
-    const routeItem = new TestItem(componentItem, 'route');
+    const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
+    const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
+    const componentItem = new TestItem(appItem, 'component', ContextType.COMPONENT);
+    const routeItem = new TestItem(componentItem, 'route', ContextType.COMPONENT_ROUTE);
     const errorMessage = 'ERROR';
 
     const noPortsOutput = `{
