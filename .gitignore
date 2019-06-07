@@ -4,9 +4,6 @@ node_modules
 *.vsix
 coverage/
 toFile
-<<<<<<< HEAD
 dist/
 public/
-=======
 cache
->>>>>>> 0146d70fa4459e7407fb23788bb489f9876cbe13
