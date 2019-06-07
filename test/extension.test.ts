@@ -23,23 +23,45 @@ import { Storage } from '../src/openshift/storage';
 import { Url } from '../src/openshift/url';
 import packagejson = require('../package.json');
 import { OpenShiftExplorer } from '../src/explorer';
+import path = require('path');
+import { OdoImpl, ContextType, OpenShiftObjectImpl } from '../src/odo';
+import { TestItem } from './openshift/testOSItem';
 
 const expect = chai.expect;
 chai.use(sinonChai);
 
 suite('openshift connector Extension', async () => {
-
     let sandbox: sinon.SinonSandbox;
+
+    const clusterItem = new OpenShiftObjectImpl(OdoImpl.ROOT, 'cluster', ContextType.CLUSTER, false, OdoImpl.Instance);
+    const projectItem = new OpenShiftObjectImpl(clusterItem, 'myproject', ContextType.PROJECT, false, OdoImpl.Instance);
+    const appItem = new OpenShiftObjectImpl(projectItem, 'app1', ContextType.APPLICATION, false, OdoImpl.Instance);
+    const fixtureFolder = path.join(__dirname, '..', '..', 'test', 'fixtures').normalize();
+    const comp2Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp2'));
 
     setup(async () => {
         sandbox = sinon.createSandbox();
+        sandbox.stub(vscode.workspace, 'workspaceFolders').value([{
+            uri: vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp1')), index: 0, name: 'comp1'
+        }, {
+            uri: comp2Uri, index: 1, name: 'comp2'
+        }]);
         const stub = sandbox.stub(Cluster, 'about');
-        await vscode.commands.executeCommand('openshift.about');
-        stub.restore();
+        try {
+            await vscode.commands.executeCommand('openshift.about');
+        } catch (ignore) {
+        } finally {
+            stub.restore();
+        }
+        sandbox.stub(OdoImpl.prototype, '_getClusters').resolves([clusterItem]);
+        sandbox.stub(OdoImpl.prototype, '_getProjects').resolves([projectItem]);
+        sandbox.stub(OdoImpl.prototype, '_getApplications').resolves([appItem]);
+        sandbox.stub(OdoImpl.prototype, '_getServices').resolves([]);
     });
 
     teardown(() => {
         sandbox.restore();
+        OdoImpl.Instance.clearCache();
     });
 
     test('Extension should be present', () => {
@@ -73,6 +95,36 @@ suite('openshift connector Extension', async () => {
         });
         osc.forEach((item) => vscode.commands.executeCommand(item));
         expect(vscode.window.showErrorMessage).has.not.been.called;
+    });
+
+    test('should load components from workspace folders', async () => {
+        sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
+        const components = await OdoImpl.Instance.getApplicationChildren(appItem);
+        expect(components.length).is.equals(2);
+    });
+
+    test('should load components from added folders', async () => {
+        sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
+        OdoImpl.Instance.loadWorkspaceComponents({
+            added: [{
+                uri: vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp3')), index: 0, name: 'comp3'
+            }],
+            removed: undefined
+        });
+        const components = await OdoImpl.Instance.getApplicationChildren(appItem);
+        expect(components.length).is.equals(3);
+    });
+
+    test.skip('should remove components loaded from removed folders', async () => {
+        sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
+        OdoImpl.Instance.loadWorkspaceComponents({
+            removed: [{
+                uri: comp2Uri, index: 0, name: 'comp2'
+            }],
+            added: undefined
+        });
+        const components = await OdoImpl.Instance.getApplicationChildren(appItem);
+        expect(components.length).is.equals(1);
     });
 
     test('should register all extension commands declared commands in package descriptor', async () => {

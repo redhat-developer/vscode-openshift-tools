@@ -24,6 +24,7 @@ import { DeploymentConfigNodeContributor } from './k8s/deployment';
 import open = require("open");
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined = undefined;
+import { Odo, OdoImpl } from './odo';
 
 export let contextGlobalState: vscode.ExtensionContext;
 
@@ -49,11 +50,9 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.app.delete.palette', (context) => execute(Application.del, context)),
         vscode.commands.registerCommand('openshift.app.describe', (context) => execute(Application.describe, context)),
         vscode.commands.registerCommand('openshift.app.describe.palette', (context) => execute(Application.describe, context)),
-        vscode.commands.registerCommand('openshift.app.create', (context) => execute(Application.create, context)),
         vscode.commands.registerCommand('openshift.app.delete', (context) => execute(Application.del, context)),
         vscode.commands.registerCommand('openshift.component.describe', (context) => execute(Component.describe, context)),
         vscode.commands.registerCommand('openshift.component.describe.palette', (context) => execute(Component.describe, context)),
-        vscode.commands.registerCommand('openshift.component.folder.create', (context) => execute(Component.createFromFolder, context)),
         vscode.commands.registerCommand('openshift.component.create', (context) => execute(Component.create, context)),
         vscode.commands.registerCommand('clusters.openshift.build.start', (context) => execute(Component.startBuild, context)),
         vscode.commands.registerCommand('openshift.component.createFromLocal', (context) => execute(Component.createFromLocal, context)),
@@ -111,6 +110,10 @@ export async function activate(context: vscode.ExtensionContext) {
         });
         clusterExplorer.registerNodeUICustomizer({customize});
     }
+    vscode.workspace.onDidChangeWorkspaceFolders((event: vscode.WorkspaceFoldersChangeEvent) => {
+        OdoImpl.Instance.loadWorkspaceComponents(event);
+    });
+    OdoImpl.Instance.loadWorkspaceComponents(null);
 }
 
 let lastNamespace = '';

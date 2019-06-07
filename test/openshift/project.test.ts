@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { OdoImpl, Command } from '../../src/odo';
+import { OdoImpl, Command, ContextType } from '../../src/odo';
 import { TestItem } from './testOSItem';
 import { Project } from '../../src/openshift/project';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
@@ -22,12 +22,14 @@ suite('OpenShift/Project', () => {
     let execStub: sinon.SinonStub;
     let getProjectsStub: sinon.SinonStub;
 
-    const projectItem = new TestItem(null, 'project');
-    const appItem = new TestItem(projectItem, 'app');
+    const cluster = new TestItem(null, 'cluster', ContextType.CLUSTER);
+    const projectItem = new TestItem(cluster, 'project', ContextType.PROJECT);
+    const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
     const errorMessage = 'ERROR MESSAGE';
 
     setup(() => {
         sandbox = sinon.createSandbox();
+        sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
         getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
         sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);

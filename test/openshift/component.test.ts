@@ -11,7 +11,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
-import { OdoImpl, Command } from '../../src/odo';
+import { OdoImpl, Command, ContextType } from '../../src/odo';
 import { Progress } from '../../src/util/progress';
 import * as Util from '../../src/util/async';
 import { Refs } from '../../src/util/refs';
@@ -26,10 +26,11 @@ suite('OpenShift/Component', () => {
     let sandbox: sinon.SinonSandbox;
     let termStub: sinon.SinonStub, execStub: sinon.SinonStub;
     let getComponentsStub: sinon.SinonStub;
-    const projectItem = new TestItem(null, 'project');
-    const appItem = new TestItem(projectItem, 'application');
-    const componentItem = new TestItem(appItem, 'component');
-    const serviceItem = new TestItem(appItem, 'service');
+    const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
+    const projectItem = new TestItem(clusterItem, 'project', ContextType.PROJECT);
+    const appItem = new TestItem(projectItem, 'application', ContextType.APPLICATION);
+    const componentItem = new TestItem(appItem, 'component', ContextType.COMPONENT);
+    const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
     const errorMessage = 'FATAL ERROR';
     let getProjects: sinon.SinonStub;
     let getApps: sinon.SinonStub;
@@ -128,7 +129,7 @@ suite('OpenShift/Component', () => {
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
                 expect(progressFunctionStub).calledOnceWith(
                     `Creating new Component '${componentItem.getName()}'`);
-                expect(termStub).calledOnceWith(Command.pushLocalComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), folder.uri.fsPath));
+                expect(termStub).calledOnceWith(Command.pushComponent());
             });
 
             test('returns null when no folder selected', async () => {
@@ -172,13 +173,15 @@ suite('OpenShift/Component', () => {
                 quickPickStub.onCall(3).resolves(version);
                 inputStub.onSecondCall().resolves(componentItem.getName());
                 infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves();
+                sandbox.stub(vscode.window, 'showOpenDialog').resolves([vscode.Uri.parse('file:///c%3A/Temp')]);
+                sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
             });
 
             test('happy path works', async () => {
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(termStub).calledWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), uri, ref));
+                expect(execStub).calledWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), uri, ref));
             });
 
             test('returns null when no git repo selected', async () => {
@@ -885,20 +888,20 @@ suite('OpenShift/Component', () => {
         test('push calls the correct odo command with progress', async () => {
             await Component.push(componentItem);
 
-            expect(termStub).calledOnceWith(Command.pushComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.pushComponent());
         });
 
         test('works with no context', async () => {
             await Component.push(null);
 
-            expect(termStub).calledOnceWith(Command.pushComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.pushComponent());
         });
 
         test('works from keybinding', async () => {
             getpushStub.resolves(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
             await Component.push(null);
 
-            expect(termStub).calledOnceWith(Command.pushComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.pushComponent());
         });
     });
 
@@ -953,7 +956,7 @@ suite('OpenShift/Component', () => {
                 items: [
                     {
                         spec: {
-                            path: 'url',
+                            host: 'url',
                             protocol: 'https',
                             port: 8080
                         }
@@ -972,13 +975,13 @@ suite('OpenShift/Component', () => {
                 items: [
                     {
                         spec: {
-                            path: 'url1',
+                            host: 'url1',
                             protocol: 'https',
                             port: 8080
                         }
                     }, {
                         spec: {
-                            path: 'url2',
+                            host: 'url2',
                             protocol: 'https',
                             port: 8080
                         }
@@ -997,13 +1000,13 @@ suite('OpenShift/Component', () => {
                 items: [
                     {
                         spec: {
-                            path: 'url1',
+                            host: 'url1',
                             protocol: 'https',
                             port: 8080
                         }
                     }, {
                         spec: {
-                            path: 'url2',
+                            host: 'url2',
                             protocol: 'https',
                             port: 8080
                         }
@@ -1023,7 +1026,7 @@ suite('OpenShift/Component', () => {
                 items: [
                     {
                         spec: {
-                            path: 'url',
+                            host: 'url',
                             protocol: 'https',
                             port: 8080
                         }
@@ -1042,20 +1045,5 @@ suite('OpenShift/Component', () => {
             expect(opnStub).is.not.called;
         });
 
-        test('getComponentUrl returns url list for a component', async () => {
-            execStub.onCall(0).resolves({error: undefined, stdout: JSON.stringify({
-                items: [
-                    {
-                        spec: {
-                            path: 'url',
-                            protocol: 'https',
-                            port: 8080
-                        }
-                    }
-                ]
-            }), stderr: ''});
-            const result = await Command.getComponentUrl(projectItem.getName(), appItem.getName(), componentItem.getName());
-            expect(result.length).equals(78);
-        });
     });
 });

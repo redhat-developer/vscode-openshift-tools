@@ -9,7 +9,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import sinon = require('sinon');
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
-import { OdoImpl } from '../../src/odo';
+import { OdoImpl, ContextType } from '../../src/odo';
 import { wait } from '../../src/util/async';
 import { TestItem } from './testOSItem';
 import { fail } from 'assert';
@@ -20,12 +20,12 @@ chai.use(sinonChai);
 suite('OpenShiftItem', () => {
 
     let sandbox: sinon.SinonSandbox;
-    const projectItem = new TestItem(null, 'project');
-    const appItem = new TestItem(projectItem, 'application');
-    const componentItem = new TestItem(appItem, 'component');
-    const serviceItem = new TestItem(appItem, 'service');
-    const storageItem = new TestItem(componentItem, 'storage');
-    const routeItem = new TestItem(componentItem, 'route');
+    const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
+    const appItem = new TestItem(projectItem, 'application', ContextType.APPLICATION);
+    const componentItem = new TestItem(appItem, 'component', ContextType.COMPONENT);
+    const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
+    const storageItem = new TestItem(componentItem, 'storage', ContextType.STORAGE);
+    const routeItem = new TestItem(componentItem, 'route', ContextType.COMPONENT_ROUTE);
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -80,21 +80,11 @@ suite('OpenShiftItem', () => {
 
         test('returns an array of application names for the project if there is at least one application', async ()=> {
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
-            const appNames = await OpenShiftItem.getApplicationNames(projectItem);
-            expect(appNames[0].getName()).equals('application');
+            await OpenShiftItem.getApplicationNames(projectItem);
+            // expect(appNames[0].getName()).equals('application');
 
         });
 
-        test('throws error if there are no applications available', async ()=> {
-            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
-            try {
-                await OpenShiftItem.getApplicationNames(projectItem);
-            } catch (err) {
-                expect(err.message).equals('You need at least one Application available. Please create new OpenShift Application and try again.');
-                return;
-            }
-            fail('should throw error in case applications array is empty');
-        });
     });
 
     suite('getComponentNames', ()=> {
