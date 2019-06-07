@@ -158,17 +158,21 @@ export class Component extends OpenShiftItem {
     }
 
     static async push(context: OpenShiftObject): Promise<string> {
+        const component = await Component.getOpenShiftCmdData(context,
+            "In which Project you want to push the changes",
+            "In which Application you want to push the changes",
+            "For which Component you want to push the changes");
+        if (!component) return null;
+        Component.setPushCmd(component.getName(), component.getParent().getName(), component.getParent().getParent().getName());
+        Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()))
+    }
+
+    static async lastPush() {
         const getPushCmd = await Component.getPushCmd();
-        if (getPushCmd && !context) {
+        if (getPushCmd) {
             Component.odo.executeInTerminal(getPushCmd);
         } else {
-            const component = await Component.getOpenShiftCmdData(context,
-                "In which Project you want to push the changes",
-                "In which Application you want to push the changes",
-                "For which Component you want to push the changes");
-            if (!component) return null;
-            Component.setPushCmd(component.getName(), component.getParent().getName(), component.getParent().getParent().getName());
-            Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
+            throw Error('No existing push command found');
         }
     }
 

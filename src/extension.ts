@@ -56,6 +56,7 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.create.binary', (context) => execute(Component.createFromBinary, context)),
         vscode.commands.registerCommand('openshift.component.delete.palette', (context) => execute(Component.del, context)),
         vscode.commands.registerCommand('openshift.component.push', (context) => execute(Component.push, context)),
+        vscode.commands.registerCommand('openshift.component.last.push', (context) => execute(Component.lastPush, context)),
         vscode.commands.registerCommand('openshift.component.push.palette', (context) => execute(Component.push, context)),
         vscode.commands.registerCommand('openshift.component.watch', (context) => execute(Component.watch, context)),
         vscode.commands.registerCommand('openshift.component.watch.palette', (context) => execute(Component.watch, context)),
