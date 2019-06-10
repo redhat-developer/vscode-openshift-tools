@@ -64,9 +64,20 @@ class OdoChannelImpl implements OdoChannel {
         this.channel.show();
     }
 
+    isJson(str: string) {
+        let jsonData: string;
+        try {
+            jsonData = JSON.stringify(JSON.parse(str), null, 2);
+        } catch (e) {
+            return str;
+        }
+        return jsonData;
+    }
+
     print(text: string): void {
-        this.channel.append(text);
-        if (text.charAt(text.length - 1) !== '\n') {
+        const textData = this.isJson(text);
+        this.channel.append(textData);
+        if (textData.charAt(textData.length - 1) !== '\n') {
             this.channel.append('\n');
         }
         if (vscode.workspace.getConfiguration('openshiftConnector').get<boolean>('showChannelOnOutput')) {
