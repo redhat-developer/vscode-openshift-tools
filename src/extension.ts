@@ -21,6 +21,7 @@ import fsx = require('fs-extra');
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { DeploymentConfigNodeContributor } from './k8s/deployment';
+import { Odo, OdoImpl } from './odo';
 
 export let contextGlobalState: vscode.ExtensionContext;
 
@@ -104,6 +105,11 @@ export async function activate(context: vscode.ExtensionContext) {
         });
         clusterExplorer.api.registerNodeUICustomizer({customize});
     }
+    vscode.workspace.onDidChangeWorkspaceFolders((event: vscode.WorkspaceFoldersChangeEvent) => {
+        OdoImpl.Instance.loadWorkspaceComponents(event);
+    });
+    OdoImpl.Instance.loadWorkspaceComponents(null);
+
 }
 
 let lastNamespace = '';
