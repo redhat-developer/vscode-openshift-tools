@@ -153,8 +153,8 @@ export class Component extends OpenShiftItem {
         return contextGlobalState.globalState.get('PUSH');
     }
 
-    static setPushCmd(component, application, project): Thenable<void> {
-        return contextGlobalState.globalState.update('PUSH', `odo push ${component} --app ${application} --project ${project}`);
+    static setPushCmd(component: string, application: string, project: string): Thenable<void> {
+        return contextGlobalState.globalState.update('PUSH',  Command.pushComponent(project, application, component));
     }
 
     static async push(context: OpenShiftObject): Promise<string> {
