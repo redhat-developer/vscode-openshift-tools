@@ -37,12 +37,13 @@ export class Cli implements ICli {
                 opts.maxBuffer = 2*1024*1024;
             }
             childProcess.exec(cmd, opts, (error: ExecException, stdout: string, stderr: string) => {
-                this.odoChannel.print(stdout);
+                const stdoutFiltered = stdout.replace(/---[\s\S]*$/g, '').trim()
+                this.odoChannel.print(stdoutFiltered);
                 this.odoChannel.print(stderr);
                 // do not reject it here, because caller in some cases need the error and the streams
                 // to make a decision
                 // Filter update message text which starts with `---`
-                resolve({ error, stdout: stdout.replace(/---[\s\S]*$/g, '').trim(), stderr });
+                resolve({ error, stdout: stdoutFiltered, stderr });
             });
         });
     }
@@ -64,18 +65,18 @@ class OdoChannelImpl implements OdoChannel {
         this.channel.show();
     }
 
-    isJson(str: string) {
+    prettifyJson(str: string) {
         let jsonData: string;
         try {
             jsonData = JSON.stringify(JSON.parse(str), null, 2);
-        } catch (e) {
+        } catch (ignore) {
             return str;
         }
         return jsonData;
     }
 
     print(text: string): void {
-        const textData = this.isJson(text);
+        const textData = this.prettifyJson(text);
         this.channel.append(textData);
         if (textData.charAt(textData.length - 1) !== '\n') {
             this.channel.append('\n');
