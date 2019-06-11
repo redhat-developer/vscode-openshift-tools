@@ -36,14 +36,16 @@
   margin-bottom: 20px;
   width: 30%;
   float: left;
-  margin-right: 2.5%;
+  margin-right: 3.3%;
   position: relative;
   overflow: hidden;
+  transform: scale(0.95);
+  transition: box-shadow 0.5s, transform 0.5s;
 }
 
 .card:hover {
-  transition: all 0.3s ease-out;
-  box-shadow: 20px 20px 40px 0px rgba(0,0,0,0.5);
+  transform: scale(1);
+  box-shadow: 5px 20px 30px rgba(0,0,0,0.2);
 }
   
 .bg-teal-dark {

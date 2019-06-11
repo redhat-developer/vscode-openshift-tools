@@ -71,7 +71,8 @@
     "onCommand:openshift.service.delete",
     "onCommand:openshift.service.describe",
     "onCommand:openshift.service.describe.palette",
-    "onCommand:openshift.component.folder.create"
+    "onCommand:openshift.component.folder.create",
+    "onCommand:openshift.explorer.help"
   ],
   "main": "./out/src/extension",
   "contributes": {
