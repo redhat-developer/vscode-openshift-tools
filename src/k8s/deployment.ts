@@ -39,7 +39,7 @@ class Build implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorer
 
     getTreeItem(): vscode.TreeItem {
         const item = new vscode.TreeItem(`#${this.number} ${this.name}`);
-        item.contextValue = 'vsKubernetes.resource.build';
+        item.contextValue = 'openShift.resource.build';
         item.command = {
             arguments: [this],
             command: 'extension.vsKubernetesLoad',
