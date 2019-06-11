@@ -55,6 +55,7 @@
     "onCommand:openshift.component.followLog.palette",
     "onCommand:openshift.component.delete",
     "onCommand:openshift.component.push",
+    "onCommand:openshift.component.last.push",
     "onCommand:openshift.component.push.palette",
     "onCommand:openshift.component.watch",
     "onCommand:openshift.component.watch.palette",
@@ -249,6 +250,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.last.push",
+        "title": "Repeat last push command",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.component.watch",
         "title": "Watch",
         "category": "OpenShift"
@@ -343,6 +349,23 @@
         "command": "openshift.useProject",
         "title": "Use Project",
         "category": "OpenShift"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "openshift.explorer.login",
+        "key": "alt+shift+l",
+        "mac": "ctrl+shift+l"
+      },
+      {
+        "command": "openshift.explorer.refresh",
+        "key": "alt+shift+r",
+        "mac": "ctrl+shift+r"
+      },
+      {
+        "command": "openshift.component.last.push",
+        "key": "alt+shift+p",
+        "mac": "ctrl+shift+p"
       }
     ],
     "viewsContainers": {

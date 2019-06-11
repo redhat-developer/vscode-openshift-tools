@@ -17,6 +17,7 @@ import * as Util from '../../src/util/async';
 import { Refs } from '../../src/util/refs';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
+import { contextGlobalState } from '../../src/extension';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -664,12 +665,15 @@ suite('OpenShift/Component', () => {
     });
 
     suite('push', () => {
+        let getpushStub;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
+            getpushStub = sandbox.stub(Component, 'getPushCmd').resolves(undefined);
+            sandbox.stub(Component, 'setPushCmd');
         });
 
         test('returns null when cancelled', async () => {
@@ -686,6 +690,13 @@ suite('OpenShift/Component', () => {
         });
 
         test('works with no context', async () => {
+            await Component.push(null);
+
+            expect(termStub).calledOnceWith(Command.pushComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+        });
+
+        test('works from keybinding', async () => {
+            getpushStub.resolves(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
             await Component.push(null);
 
             expect(termStub).calledOnceWith(Command.pushComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));

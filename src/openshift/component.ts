@@ -14,6 +14,7 @@ import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 import { isURL } from 'validator';
 import { Refs, Ref, Type } from '../util/refs';
 import { Delayer } from '../util/async';
+import { contextGlobalState } from '../extension';
 
 export class Component extends OpenShiftItem {
 
@@ -148,13 +149,31 @@ export class Component extends OpenShiftItem {
         );
     }
 
+    static getPushCmd(): Thenable< string | undefined> {
+        return contextGlobalState.globalState.get('PUSH');
+    }
+
+    static setPushCmd(component: string, application: string, project: string): Thenable<void> {
+        return contextGlobalState.globalState.update('PUSH',  Command.pushComponent(project, application, component));
+    }
+
     static async push(context: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to push the changes",
             "In which Application you want to push the changes",
             "For which Component you want to push the changes");
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
+        Component.setPushCmd(component.getName(), component.getParent().getName(), component.getParent().getParent().getName());
+        Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()))
+    }
+
+    static async lastPush() {
+        const getPushCmd = await Component.getPushCmd();
+        if (getPushCmd) {
+            Component.odo.executeInTerminal(getPushCmd);
+        } else {
+            throw Error('No existing push command found');
+        }
     }
 
     static async watch(context: OpenShiftObject): Promise<void> {
