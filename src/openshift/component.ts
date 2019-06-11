@@ -177,7 +177,7 @@ export class Component extends OpenShiftItem {
             "For which Component you want to push the changes");
         if (!component) return null;
         Component.setPushCmd(component.getName(), component.getParent().getName(), component.getParent().getParent().getName());
-        Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
+        Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), context.contextPath.fsPath);
     }
 
     static async lastPush() {
@@ -328,14 +328,14 @@ export class Component extends OpenShiftItem {
             canSelectFolders: true,
             canSelectMany: false,
             defaultUri: Uri.file(Platform.getUserHomePath()),
-            openLabel: "Select Repository Location"
+            openLabel: "Select Context Folder Location"
         });
 
-        await window.showInformationMessage('Do you want to clone git repository for created Component?', 'Yes', 'No').then((value) => {
+        window.showInformationMessage('Do you want to clone git repository for created Component?', 'Yes', 'No').then((value) => {
             value === 'Yes' && commands.executeCommand('git.clone', repoURI);
         });
 
-        await Component.odo.createComponentFromGit(application, componentTypeName, componentTypeVersion, componentName, repoURI, folder[0].fsPath, gitRef.label);
+        await Component.odo.createComponentFromGit(application, componentTypeName, componentTypeVersion, componentName, repoURI, folder[0], gitRef.label);
         return `Component '${componentName}' successfully created`;
     }
 
