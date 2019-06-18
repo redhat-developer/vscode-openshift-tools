@@ -3,7 +3,6 @@
 [![Build Status](https://travis-ci.org/redhat-developer/vscode-openshift-tools.svg?branch=master)](https://travis-ci.org/redhat-developer/vscode-openshift-tools)
 [![Unit Tests Code Coverage](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/README.md)
-[![Chat](https://img.shields.io/badge/chat-on%20mattermost-brightgreen.svg)](https://chat.openshift.io/developers/channels/adapters)
 [![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version/redhat.vscode-openshift-connector.svg)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector)
 
 
@@ -105,7 +104,7 @@ For detail analysis of how to setup and run local OpenShift Cluster using minish
 
 This extension uses two CLI tools to interact with OpenShift cluster:
 * OKD CLI client tool - [oc](https://github.com/openshift/origin/releases)
-* OpenShift Do tool - [odo](https://github.com/openshift/odo/releases)
+* OpenShift Do tool - [odo](https://github.com/openshift/odo/releases/tag/v0.0.20)
 
 > If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
 The extension will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see an notification for the missing tool.
@@ -135,7 +134,7 @@ Download the most recent `openshift-connector-<version>.vsix` file and install i
 
 Feedback & Questions
 ====================
-File a bug in [GitHub Issues](https://github.com/redhat-developer/vscode-openshift-tools/issues) or chat with us on [Mattermost](https://chat.openshift.io/developers/channels/adapters).
+If you discover an issue please file a bug and we will fix it as soon as possible. File a bug in [GitHub Issues](https://github.com/redhat-developer/vscode-openshift-tools/issues).
 
 License
 =======

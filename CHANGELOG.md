@@ -1,6 +1,10 @@
 # Change Log
 
-## 0.0.22 (May 27, 2019)
+## 0.0.22 (June 18, 2019)
+* [#888](https://github.com/redhat-developer/vscode-openshift-tools/pull/888) Prettify json in OpenShift Output Channel
+* [#882](https://github.com/redhat-developer/vscode-openshift-tools/pull/882) Add BuildConfig and Builds to Clusters View
+* [#835](https://github.com/redhat-developer/vscode-openshift-tools/pull/835) Provide keybinding for Login, push and refresh commands
+* [#873](https://github.com/redhat-developer/vscode-openshift-tools/pull/873) Hide session token when used for log in to the cluster
 
 ## 0.0.21 (May 16, 2019)
 * Add dependency to [Kubernetes extension from Microsoft](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools)

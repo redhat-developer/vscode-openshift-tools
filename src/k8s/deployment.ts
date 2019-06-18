@@ -9,7 +9,7 @@ export class DeploymentConfigNodeContributor implements ClusterExplorerV1.NodeCo
 
     async getChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): Promise<ClusterExplorerV1.Node[]> {
         const kubectl = await k8s.extension.kubectl.v1;
-        if(kubectl.available) {
+        if (kubectl.available) {
             const result = await kubectl.api.invokeCommand(`get build -o jsonpath="{range .items[?(.metadata.labels.buildconfig=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/build\\.number}{\\"\\n\\"}{end}"`);
             const builds = result.stdout.split('\n')
                 .filter((value) => value !== '')
