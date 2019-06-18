@@ -356,9 +356,39 @@ suite('OpenShift/Component', () => {
         });
     });
 
+    suite('unlinkComponent', () => {
+        const mockData = `{
+            "kind": "Component",
+            "apiVersion": "odo.openshift.io/v1alpha1",
+            "metadata": {
+                "name": "comp2",
+                "creationTimestamp": null
+            },
+            "spec": {
+                "type": "nodejs",
+                "source": "file:///Users/sudhirverma/nodejs-ex"
+            },
+            "status": {
+                "active": false,
+                "linkedComponents": {
+                    "comp1": ["8080"]
+                }
+            }
+        }`;
+        setup(() => {
+            execStub.resolves({ error: undefined, stdout: mockData, stderr: '' });
+        });
+
+        test('Should able to unlink the component', async () => {
+            await Component.unlinkComponent(componentItem);
+            execStub.calledOnce;
+        });
+    });
+
     suite('del', () => {
 
         setup(() => {
+            sandbox.stub(Component, 'unlinkComponent');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
