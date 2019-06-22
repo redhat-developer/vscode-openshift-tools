@@ -29,6 +29,7 @@ class Build implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorer
     readonly kind: ClusterExplorerV1.ResourceKind = this.resourceKind;
     public id: string;
     public resourceId: string;
+    // tslint:disable-next-line:variable-name
     constructor(readonly namespace: string, readonly name: string, readonly number: number, readonly metadata?: any) {
         this.id = this.resourceId = `build/${this.name}`;
     }

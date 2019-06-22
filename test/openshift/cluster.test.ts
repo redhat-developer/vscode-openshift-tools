@@ -26,6 +26,7 @@ const keytar: any = getVscodeModule('keytar');
 suite('Openshift/Cluster', () => {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub, commandStub: sinon.SinonStub, inputStub: sinon.SinonStub,
+        quickPickItemStub: sinon.SinonStub,
         infoStub: sinon.SinonStub, loginStub: sinon.SinonStub, quickPickStub: sinon.SinonStub;
     const testData: CliExitData = {
         error: undefined,
@@ -50,6 +51,7 @@ suite('Openshift/Cluster', () => {
         sandbox.stub(keytar);
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves(testData);
         inputStub = sandbox.stub(vscode.window, 'showInputBox');
+        quickPickItemStub = sandbox.stub(vscode.window, 'showQuickPick');
         commandStub = sandbox.stub(vscode.commands, 'executeCommand').resolves();
         infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves('Yes');
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick').resolves('Credentials');
@@ -65,8 +67,8 @@ suite('Openshift/Cluster', () => {
     suite('login', () => {
 
         setup(() => {
-            inputStub.onFirstCall().resolves(testUrl);
-            inputStub.onSecondCall().resolves(testUser);
+            quickPickItemStub.onFirstCall().resolves(testUrl);
+            quickPickItemStub.onSecondCall().resolves(testUser);
             inputStub.onThirdCall().resolves(password);
         });
 
@@ -168,7 +170,7 @@ suite('Openshift/Cluster', () => {
             });
 
             test('checks cluster url name is valid url', async () => {
-                let result;
+                let result: string | Thenable<string>;
                 inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                     result = options.validateInput('http://127.0.0.1:9999');
                     return Promise.resolve('http://127.0.0.1:9999');
@@ -178,7 +180,7 @@ suite('Openshift/Cluster', () => {
             });
 
             test('checks user name is not empty', async () => {
-                let result;
+                let result: string | Thenable<string>;
                 inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                     result = options.validateInput('goodvalue');
                     return Promise.resolve('goodvalue');
