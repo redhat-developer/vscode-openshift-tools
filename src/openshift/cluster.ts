@@ -83,7 +83,7 @@ export class Cluster extends OpenShiftItem {
         const createUrl = new CreateUrlItem();
         const clusterItems = await getClusters();
         const choice = await window.showQuickPick([createUrl, ...clusterItems], {placeHolder: "Provide Cluster URL to connect"});
-        return (choice === createUrl) ?
+        return (choice.label === createUrl.label) ?
             await window.showInputBox({
                 value: clusterURl,
                 ignoreFocusOut: true,
@@ -139,7 +139,7 @@ export class Cluster extends OpenShiftItem {
 
         if (!choice) return null;
 
-        const username =  (choice === addUser) ?
+        const username =  (choice.label === addUser.label) ?
             await window.showInputBox({
                 ignoreFocusOut: true,
                 prompt: "Provide Username for basic authentication to the API server",
