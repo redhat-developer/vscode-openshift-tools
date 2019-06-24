@@ -1,0 +1,78 @@
+# -----------------------------------------------------------------------------------------------
+#  Copyright (c) Red Hat, Inc. All rights reserved.
+#  Licensed under the MIT License. See LICENSE file in the project root for license information.
+# ----------------------------------------------------------------------------------------------- 
+
+jobs:
+  - job: Windows
+    pool:
+      name: Hosted VS2017
+      demands: npm
+    steps:
+      - task: NodeTool@0
+        displayName: 'Use Node 10.x'
+        inputs:
+          versionSpec: 10.16.0
+      - task: Npm@1
+        displayName: 'Install dependencies'
+        inputs:
+          verbose: false
+      - script: |
+          npm install -g typescript --save-dev
+          npm install
+          npm run vscode:prepublish
+        displayName: 'npm install, run prepublish'
+      - script: |
+          npm test --silent
+          npm run coverage:upload
+        displayName: 'Run tests and coverage'
+  - job: macOS
+    pool:
+      name: Hosted macOS
+      demands: npm
+    steps:
+      - task: NodeTool@0
+        displayName: 'Use Node 10.x'
+        inputs:
+          versionSpec: 10.16.0
+      - task: Npm@1
+        displayName: 'Install dependencies'
+        inputs:
+          verbose: true
+      - script: |
+          npm run vscode:prepublish
+        displayName: 'npm install, run prepublish'
+      - script: |
+          npm test --silent
+        displayName: 'Run tests'
+      - script: |
+          npm run coverage:upload
+        displayName: 'Run code coverage'
+  - job: Linux
+    pool:
+      name: Hosted Ubuntu 1604
+    steps:
+      - task: NodeTool@0
+        displayName: 'Use Node 10.x'
+        inputs:
+          versionSpec: 10.16.0
+      - task: Npm@1
+        displayName: 'Install dependencies'
+        inputs:
+          verbose: true
+      - script: |
+          npm run vscode:prepublish
+        displayName: 'npm install, run prepublish'
+      - script: |
+          set -e
+          /usr/bin/Xvfb :10 -ac >> /tmp/Xvfb.out 2>&1 &
+          disown -ar
+        displayName: 'Start xvfb'
+      - script: |
+          npm test --silent
+        displayName: 'Run tests'
+        env:
+          DISPLAY: :10
+      - script: |
+          npm run coverage:upload
+        displayName: 'Run code coverage'
