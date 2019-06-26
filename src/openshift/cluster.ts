@@ -5,11 +5,30 @@
 
 import { OpenShiftObject, Command } from "../odo";
 import { OpenShiftItem } from './openshiftItem';
-import { window, commands, env } from 'vscode';
+import { window, commands, env, QuickPickItem } from 'vscode';
 import { CliExitData, Cli } from "../cli";
 import open = require("open");
 import { TokenStore } from "../util/credentialManager";
+import { KubeConfigUtils } from '../util/kubeUtils';
 
+
+class CreateUrlItem implements QuickPickItem {
+
+	constructor() { }
+
+	get label(): string { return `$(plus) Provide new URL...`; }
+    get description(): string { return ''; }
+
+}
+
+class CreateUserItem implements QuickPickItem {
+
+	constructor() { }
+
+	get label(): string { return `$(plus) Add new user...`; }
+    get description(): string { return ''; }
+
+}
 export class Cluster extends OpenShiftItem {
 
     static async logout(): Promise<string> {
@@ -61,13 +80,18 @@ export class Cluster extends OpenShiftItem {
     }
 
     static async getUrl(): Promise<string | null> {
+        const k8sConfig = new KubeConfigUtils();
         const clusterURl = await Cluster.getUrlFromClipboard();
-        return await window.showInputBox({
-            value: clusterURl,
-            ignoreFocusOut: true,
-            prompt: "Provide URL of the cluster to connect",
-            validateInput: (value: string) => Cluster.validateUrl('Invalid URL provided', value)
-        });
+        const createUrl = new CreateUrlItem();
+        const clusterItems = await k8sConfig.getServers();
+        const choice = await window.showQuickPick([createUrl, ...clusterItems], {placeHolder: "Provide Cluster URL to connect"});
+        return (choice.label === createUrl.label) ?
+            await window.showInputBox({
+                value: clusterURl,
+                ignoreFocusOut: true,
+                prompt: "Provide new Cluster URL to connect",
+                validateInput: (value: string) => Cluster.validateUrl('Invalid URL provided', value)
+            }) : choice.label;
     }
 
     static async login(): Promise<string> {
@@ -103,25 +127,42 @@ export class Cluster extends OpenShiftItem {
     static async credentialsLogin(skipConfirmation: boolean = false): Promise<string> {
         let password: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
+
         if (response !== 'Yes') return null;
+
         const clusterURL = await Cluster.getUrl();
+
         if (!clusterURL) return null;
+
         const getUserName = await TokenStore.getUserName();
-        const username = await window.showInputBox({
-            ignoreFocusOut: true,
-            prompt: "Provide Username for basic authentication to the API server",
-            value: getUserName,
-            validateInput: (value: string) => Cluster.emptyName('User name cannot be empty', value)
-        });
+        const k8sConfig = new KubeConfigUtils();
+        const users = await k8sConfig.getClusterUsers(clusterURL);
+        const addUser = new CreateUserItem();
+        const choice = await window.showQuickPick([addUser, ...users], {placeHolder: "Select username for basic authentication to the API server"});
+
+        if (!choice) return null;
+
+        const username =  (choice.label === addUser.label) ?
+            await window.showInputBox({
+                ignoreFocusOut: true,
+                prompt: "Provide Username for basic authentication to the API server",
+                value: "",
+                validateInput: (value: string) => Cluster.emptyName('User name cannot be empty', value)
+            }) : choice.label;
+
         if (getUserName) password = await TokenStore.getItem('login', username);
+
         if (!username) return null;
+
         const passwd  = await window.showInputBox({
             ignoreFocusOut: true,
             password: true,
             prompt: "Provide Password for basic authentication to the API server",
             value: password
         });
+
         if (!passwd) return null;
+
         return Promise.resolve()
             .then(() => Cluster.odo.execute(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd)))
             .then((result) => Cluster.save(username, passwd, password, result))

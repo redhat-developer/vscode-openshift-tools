@@ -65,9 +65,8 @@ suite('Openshift/Cluster', () => {
     suite('login', () => {
 
         setup(() => {
-            inputStub.onFirstCall().resolves(testUrl);
-            inputStub.onSecondCall().resolves(testUser);
-            inputStub.onThirdCall().resolves(password);
+            quickPickStub.onFirstCall().resolves({description: "Current Context", label: testUrl});
+            quickPickStub.onSecondCall().resolves({description: "Current Context", label: testUser});
         });
 
         test('exits if login confirmation declined', async () => {
@@ -79,6 +78,10 @@ suite('Openshift/Cluster', () => {
         });
 
         test('wraps incoming errors', async () => {
+            quickPickStub.resolves('Credentials');
+            quickPickStub.onSecondCall().resolves({description: "Current Context", label: testUrl});
+            quickPickStub.onThirdCall().resolves({description: "Current Context", label: testUser});
+            inputStub.resolves(password);
             commandStub.rejects(error);
 
             try {
@@ -103,15 +106,11 @@ suite('Openshift/Cluster', () => {
             expect(status).null;
         });
 
-        test('logins to new cluster if user answer yes to a warning', async () => {
-            loginStub.resolves(false);
-            infoStub.resolves('Yes');
-            const status = await Cluster.login();
-
-            expect(status).equals(`Successfully logged in to '${testUrl}'`);
-        });
-
         suite('credentials', () => {
+
+            setup(() => {
+                inputStub.resolves(password);
+            });
 
             test('logins to new cluster if user answer yes to a warning', async () => {
                 loginStub.resolves(false);
@@ -135,7 +134,7 @@ suite('Openshift/Cluster', () => {
             });
 
             test('happy path works', async () => {
-                const status = await Cluster.login();
+                const status = await Cluster.credentialsLogin();
 
                 expect(status).equals(`Successfully logged in to '${testUrl}'`);
                 expect(execStub).calledOnceWith(Command.odoLoginWithUsernamePassword(testUrl, testUser, password));
@@ -143,15 +142,15 @@ suite('Openshift/Cluster', () => {
             });
 
             (keytar ? test : test.skip)('returns with no username set', async () => {
-                inputStub.onSecondCall().resolves();
-                const status = await Cluster.login();
+                quickPickStub.onSecondCall().resolves({description: "Current Context", label: undefined});
+                const status = await Cluster.credentialsLogin();
 
                 expect(status).null;
             });
 
             test('returns with no password set', async () => {
-                inputStub.onThirdCall().resolves();
-                const status = await Cluster.login();
+                inputStub.resolves();
+                const status = await Cluster.credentialsLogin();
 
                 expect(status).null;
             });
@@ -160,7 +159,7 @@ suite('Openshift/Cluster', () => {
                 execStub.resolves(errorData);
 
                 try {
-                    await Cluster.login();
+                    await Cluster.credentialsLogin();
                     expect.fail();
                 } catch (err) {
                     expect(err).equals(`Failed to login to cluster '${testUrl}' with '${error}'!`);
@@ -168,22 +167,25 @@ suite('Openshift/Cluster', () => {
             });
 
             test('checks cluster url name is valid url', async () => {
-                let result;
+                let result: string | Thenable<string>;
+                quickPickStub.onFirstCall().resolves({description: "Current Context", label: `$(plus) Provide new URL...`});
                 inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                     result = options.validateInput('http://127.0.0.1:9999');
                     return Promise.resolve('http://127.0.0.1:9999');
                 });
-                await Cluster.login();
+                await Cluster.credentialsLogin();
                 expect(result).is.null;
             });
 
             test('checks user name is not empty', async () => {
-                let result;
-                inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+                let result: string | Thenable<string>;
+                quickPickStub.onFirstCall().resolves({description: "Current Context", label: testUrl});
+                quickPickStub.onSecondCall().resolves({description: "Current Context", label: `$(plus) Add new user...`});
+                inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
                     result = options.validateInput('goodvalue');
                     return Promise.resolve('goodvalue');
                 });
-                await Cluster.login();
+                await Cluster.credentialsLogin();
                 expect(result).is.null;
             });
         });
@@ -192,7 +194,7 @@ suite('Openshift/Cluster', () => {
             setup(() => {
                 sandbox.stub(vscode.env.clipboard, 'readText').resolves('oc login https://162.165.64.43:8443 --token=bX6eP0d4IRgXwWuCKq2856h5fyK9c2U5tOKCwFeEmQA');
                 quickPickStub.resolves('Token');
-                inputStub.onSecondCall().resolves('token');
+                inputStub.resolves('token');
             });
 
             test('logins to new cluster if user answer yes to a warning', async () => {
@@ -217,16 +219,23 @@ suite('Openshift/Cluster', () => {
             });
 
             test('happy path works', async () => {
-                const status = await Cluster.login();
+                const status = await Cluster.tokenLogin();
 
                 expect(status).equals(`Successfully logged in to '${testUrl}'`);
                 expect(execStub).calledOnceWith(Command.odoLoginWithToken(testUrl, token));
                 expect(commandStub).calledOnceWith('setContext', 'isLoggedIn', true);
             });
 
+            test('returns with no url set', async () => {
+                quickPickStub.onFirstCall().resolves({description: "Current Context", label: undefined});
+                const status = await Cluster.tokenLogin();
+
+                expect(status).null;
+            });
+
             test('returns with no token set', async () => {
-                inputStub.onSecondCall().resolves();
-                const status = await Cluster.login();
+                inputStub.onFirstCall().resolves();
+                const status = await Cluster.tokenLogin();
 
                 expect(status).null;
             });
@@ -234,7 +243,7 @@ suite('Openshift/Cluster', () => {
             test('handles incoming errors the same way as credentials login', async () => {
                 execStub.rejects(error);
                 try {
-                    await Cluster.login();
+                    await Cluster.tokenLogin();
                     expect.fail();
                 } catch (err) {
                     expect(err).equals(`Failed to login to cluster '${testUrl}' with '${error}'!`);
@@ -299,10 +308,11 @@ suite('Openshift/Cluster', () => {
 
         test('throws errors from subsequent login', async () => {
             execStub.onSecondCall().resolves(errorData);
-            infoStub.onFirstCall().resolves('Yes');
-            inputStub.onFirstCall().resolves(testUrl);
-            inputStub.onSecondCall().resolves(testUser);
-            inputStub.onThirdCall().resolves(password);
+            infoStub.resolves('Yes');
+            quickPickStub.onFirstCall().resolves('Credentials');
+            quickPickStub.onSecondCall().resolves({description: "Current Context", label: testUrl});
+            quickPickStub.onThirdCall().resolves({description: "Current Context", label: testUrl});
+            inputStub.resolves(password);
 
             try {
                 await Cluster.logout();
