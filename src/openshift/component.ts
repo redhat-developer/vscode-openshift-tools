@@ -68,20 +68,20 @@ export class Component extends OpenShiftItem {
         const value = await window.showWarningMessage(`Do you want to delete Component '${name}\'?`, 'Yes', 'Cancel');
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Deleting the Component '${component.getName()} '`, async () => {
-                await Component.unlinkComponent(component);
+                await Component.unlinkAllCOmponents(component);
                 return Component.odo.deleteComponent(component);
             }).then(() => `Component '${name}' successfully deleted`)
                 .catch((err) => Promise.reject(`Failed to delete Component with error '${err}'`));
         }
     }
 
-    static async unlinkComponent(component: OpenShiftObject) {
-        const compData = await Component.odo.execute(Command.getdescribeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
+    static async unlinkAllCOmponents(component: OpenShiftObject) {
+        const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
         const compObj: JSON = JSON.parse(compData.stdout);
         const linkComponent = compObj['status'].linkedComponents;
         if (linkComponent) {
             Object.keys(linkComponent).forEach(async key => {
-                await Component.odo.execute(Command.unlinkComponentTo(key, component.getName()));
+                await Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), key, component.getName()));
             });
         }
     }

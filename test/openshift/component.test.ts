@@ -380,7 +380,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('Should able to unlink the component', async () => {
-            await Component.unlinkComponent(componentItem);
+            await Component.unlinkAllCOmponents(componentItem);
             execStub.calledOnce;
         });
     });
@@ -388,7 +388,7 @@ suite('OpenShift/Component', () => {
     suite('del', () => {
 
         setup(() => {
-            sandbox.stub(Component, 'unlinkComponent');
+            sandbox.stub(Component, 'unlinkAllCOmponents');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
