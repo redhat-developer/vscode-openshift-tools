@@ -143,7 +143,7 @@ export class Cluster extends OpenShiftItem {
             await window.showInputBox({
                 ignoreFocusOut: true,
                 prompt: "Provide Username for basic authentication to the API server",
-                value: getUserName,
+                value: "",
                 validateInput: (value: string) => Cluster.emptyName('User name cannot be empty', value)
             }) : choice.label;
 
