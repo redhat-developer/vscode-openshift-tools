@@ -26,7 +26,6 @@ const keytar: any = getVscodeModule('keytar');
 suite('Openshift/Cluster', () => {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub, commandStub: sinon.SinonStub, inputStub: sinon.SinonStub,
-        quickPickItemStub: sinon.SinonStub,
         infoStub: sinon.SinonStub, loginStub: sinon.SinonStub, quickPickStub: sinon.SinonStub;
     const testData: CliExitData = {
         error: undefined,
