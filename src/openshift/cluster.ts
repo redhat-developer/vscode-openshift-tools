@@ -9,7 +9,8 @@ import { window, commands, env, QuickPickItem } from 'vscode';
 import { CliExitData, Cli } from "../cli";
 import open = require("open");
 import { TokenStore } from "../util/credentialManager";
-import { getClusters, getUsers } from '../util/kubeUtils';
+import { KubeConfigUtils } from '../util/kubeUtils';
+
 
 class CreateUrlItem implements QuickPickItem {
 
@@ -79,9 +80,10 @@ export class Cluster extends OpenShiftItem {
     }
 
     static async getUrl(): Promise<string | null> {
+        const k8sConfig = new KubeConfigUtils();
         const clusterURl = await Cluster.getUrlFromClipboard();
         const createUrl = new CreateUrlItem();
-        const clusterItems = await getClusters();
+        const clusterItems = await k8sConfig.getServers();
         const choice = await window.showQuickPick([createUrl, ...clusterItems], {placeHolder: "Provide Cluster URL to connect"});
         return (choice.label === createUrl.label) ?
             await window.showInputBox({
@@ -133,7 +135,8 @@ export class Cluster extends OpenShiftItem {
         if (!clusterURL) return null;
 
         const getUserName = await TokenStore.getUserName();
-        const users = await getUsers(clusterURL);
+        const k8sConfig = new KubeConfigUtils();
+        const users = await k8sConfig.getClusterUsers(clusterURL);
         const addUser = new CreateUserItem();
         const choice = await window.showQuickPick([addUser, ...users], {placeHolder: "Select username for basic authentication to the API server"});
 

@@ -2,34 +2,34 @@ import { QuickPickItem } from "vscode";
 import { KubeConfig } from '@kubernetes/client-node';
 import { User, Cluster } from "@kubernetes/client-node/dist/config_types";
 
-export async function getClusters(): Promise<QuickPickItem[]> {
-    const kubectlConfig = new KubeConfig();
-    kubectlConfig.loadFromDefault();
-    const currentCluster = kubectlConfig.getCurrentCluster();
-    const clusters = kubectlConfig.clusters || [];
-    return clusters.map((c) => ({
+export class KubeConfigUtils extends KubeConfig {
+
+    constructor() {
+        super();
+        this.loadFromDefault();
+    };
+
+    async getServers(): Promise<QuickPickItem[]> {
+        const currentCluster = this.getCurrentCluster();
+        const clusters = this.clusters || [];
+        return clusters.map((c: any) => ({
             label: c.server,
             description: currentCluster && c.name === currentCluster.name ? 'Current Context' : ''
-        })
-    );
-}
+        }));
+    }
 
-export async function getUsers(clusterServer: string): Promise<QuickPickItem[]> {
-    const kubectlConfig = new KubeConfig();
-    kubectlConfig.loadFromDefault();
-    const currentUser = kubectlConfig.getCurrentUser();
-    const cluster = findCluster(kubectlConfig, clusterServer);
-    return kubectlConfig.getUsers().filter((item) => cluster && item.name.indexOf(cluster.name) > -1).map((u) => newUserQuickPickItem(u, currentUser));
-}
+    async getClusterUsers(clusterServer: string): Promise<QuickPickItem[]> {
+        const currentUser = this.getCurrentUser();
+        const cluster = this.findCluster(clusterServer);
+        const users = this.getUsers();
+        const clusterUsers = users.filter((item) => cluster && item.name.indexOf(cluster.name) > -1);
+        return clusterUsers.map((u: User) => ({
+            label: u.name.split('/')[0],
+            description: u === currentUser ? 'Current Context' : ''
+        }));
+    }
 
-function newUserQuickPickItem(u: User, ccu: User): QuickPickItem {
-    const username = u.name.split('/')[0];
-    return {
-        label: username,
-        description: u === ccu ? 'Current Context' : ''
-    };
-}
-
-function findCluster(config: KubeConfig, clusterServer: string): Cluster {
-    return config.getClusters().find((cluster: Cluster) => cluster.server === clusterServer);
+    findCluster(clusterServer: string): Cluster {
+        return this.getClusters().find((cluster: Cluster) => cluster.server === clusterServer);
+    }
 }
