@@ -28,9 +28,9 @@ async function downloadFileAndCreateSha256(targetFolder: string, fileName: strin
     await mkdirp.sync(targetFolder);
   }
   const currentFile = path.join(targetFolder, fileName);
-  console.log(`${currentFile} download started from ${reqURL}`)
+  console.log(`${currentFile} download started from ${reqURL}`);
   await DownloadUtil.downloadFile(reqURL, currentFile, (current) => console.log(current + '%'));
-  const currentSHA256 = await hasha.fromFile(currentFile, {algorithm: 'sha256'});;
+  const currentSHA256 = await hasha.fromFile(currentFile, {algorithm: 'sha256'});
   if (currentSHA256 === sha256sum) {
     console.log( `[INFO] ${currentFile} is downloaded and sha256 is correct`);
   } else {
@@ -46,9 +46,9 @@ cp.exec('git diff --name-only master..HEAD', async (error, stdout, stderr) => {
   console.log('The changed files:');
   console.log(stdout);
   if (fileCheckRegex.test(stdout)) {
-    console.log('tools.json is changed, starting download verification')
+    console.log('tools.json is changed, starting download verification');
     await verifyTools();
   } else {
-    console.log('tools.json is not changed, skipping download verification')
+    console.log('tools.json is not changed, skipping download verification');
   }
 });

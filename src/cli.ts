@@ -37,7 +37,7 @@ export class Cli implements ICli {
                 opts.maxBuffer = 2*1024*1024;
             }
             childProcess.exec(cmd, opts, (error: ExecException, stdout: string, stderr: string) => {
-                const stdoutFiltered = stdout.replace(/---[\s\S]*$/g, '').trim()
+                const stdoutFiltered = stdout.replace(/---[\s\S]*$/g, '').trim();
                 this.odoChannel.print(stdoutFiltered);
                 this.odoChannel.print(stderr);
                 // do not reject it here, because caller in some cases need the error and the streams
