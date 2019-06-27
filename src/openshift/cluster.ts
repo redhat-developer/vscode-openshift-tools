@@ -11,7 +11,6 @@ import open = require("open");
 import { TokenStore } from "../util/credentialManager";
 import { KubeConfigUtils } from '../util/kubeUtils';
 
-
 class CreateUrlItem implements QuickPickItem {
 
 	constructor() { }

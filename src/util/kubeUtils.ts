@@ -7,7 +7,7 @@ export class KubeConfigUtils extends KubeConfig {
     constructor() {
         super();
         this.loadFromDefault();
-    };
+    }
 
     async getServers(): Promise<QuickPickItem[]> {
         const currentCluster = this.getCurrentCluster();
