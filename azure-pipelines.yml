@@ -24,8 +24,10 @@ jobs:
         displayName: 'npm install, run prepublish'
       - script: |
           npm test --silent
+        displayName: 'Run tests'  
+      - script: |
           npm run coverage:upload -t $(CODECOV_TOKEN)
-        displayName: 'Run tests and coverage'
+        displayName: 'Upload coverage to codecov.io'
   - job: macOS
     pool:
       name: Hosted macOS
@@ -47,7 +49,7 @@ jobs:
         displayName: 'Run tests'
       - script: |
           npm run coverage:upload -t $(CODECOV_TOKEN)
-        displayName: 'Run code coverage'
+        displayName: 'Upload coverage to codecov.io'
   - job: Linux
     pool:
       name: Hosted Ubuntu 1604
@@ -75,4 +77,4 @@ jobs:
           DISPLAY: :10
       - script: |
           npm run coverage:upload -t $(CODECOV_TOKEN)
-        displayName: 'Run code coverage'
+        displayName: 'Upload coverage to codecov.io'
