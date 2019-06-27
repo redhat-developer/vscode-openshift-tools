@@ -194,7 +194,7 @@ suite('Openshift/Cluster', () => {
             setup(() => {
                 sandbox.stub(vscode.env.clipboard, 'readText').resolves('oc login https://162.165.64.43:8443 --token=bX6eP0d4IRgXwWuCKq2856h5fyK9c2U5tOKCwFeEmQA');
                 quickPickStub.resolves({label: 'Token', description: 'Log in to the given server using bearer token'});
-                inputStub.onSecondCall().resolves('token');
+                inputStub.resolves('token');
             });
 
             test('logins to new cluster if user answer yes to a warning', async () => {
