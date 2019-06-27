@@ -52,7 +52,7 @@ suite('Openshift/Cluster', () => {
         inputStub = sandbox.stub(vscode.window, 'showInputBox');
         commandStub = sandbox.stub(vscode.commands, 'executeCommand').resolves();
         infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves('Yes');
-        quickPickStub = sandbox.stub(vscode.window, 'showQuickPick').resolves('Credentials');
+        quickPickStub = sandbox.stub(vscode.window, 'showQuickPick').resolves({label: 'Credentials', description: 'Log in to the given server using credentials'});
         loginStub = sandbox.stub(OdoImpl.prototype, 'requireLogin').resolves(true);
         sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
@@ -193,7 +193,7 @@ suite('Openshift/Cluster', () => {
         suite('token', () => {
             setup(() => {
                 sandbox.stub(vscode.env.clipboard, 'readText').resolves('oc login https://162.165.64.43:8443 --token=bX6eP0d4IRgXwWuCKq2856h5fyK9c2U5tOKCwFeEmQA');
-                quickPickStub.resolves('Token');
+                quickPickStub.resolves({label: 'Token', description: 'Log in to the given server using bearer token'});
                 inputStub.resolves('token');
             });
 

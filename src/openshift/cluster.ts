@@ -95,14 +95,20 @@ export class Cluster extends OpenShiftItem {
 
     static async login(): Promise<string> {
         const response = await Cluster.requestLoginConfirmation();
+        const loginActions = [
+            {
+                label: 'Credentials',
+                description: 'Log in to the given server using credentials'
+            },
+            {
+                label: 'Token',
+                description: 'Log in to the given server using bearer token'
+            }
+        ];
         if (response !== 'Yes') return null;
-        const loginMethod = await window.showQuickPick(['Credentials', 'Token'], {placeHolder: 'Select the way to log in to the cluster.'});
-        if (!loginMethod) return null;
-        if (loginMethod === "Credentials") {
-            return Cluster.credentialsLogin(true);
-        } else {
-            return Cluster.tokenLogin(true);
-        }
+        const loginActionSelected = await window.showQuickPick(loginActions, {placeHolder: 'Select the way to log in to the cluster.'});
+        if (!loginActionSelected) return null;
+        return loginActionSelected.label === 'Credentials' ? Cluster.credentialsLogin(true) : Cluster.tokenLogin(true);
     }
 
     private static async requestLoginConfirmation(skipConfirmation: boolean = false): Promise<string> {
