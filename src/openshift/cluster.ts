@@ -79,7 +79,7 @@ export class Cluster extends OpenShiftItem {
             },
             {
                 label: 'Token',
-                description: 'Login using bearer token for authentication to the API server'
+                description: 'Log in to the given server using bearer token'
             }
         ];
         if (response !== 'Yes') return null;
