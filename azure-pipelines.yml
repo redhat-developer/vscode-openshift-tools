@@ -76,5 +76,5 @@ jobs:
         env:
           DISPLAY: :10
       - script: |
-          npm run coverage:upload
+          bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
         displayName: 'Upload coverage to codecov.io'
