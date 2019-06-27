@@ -46,7 +46,7 @@ jobs:
           npm test --silent
         displayName: 'Run tests'
       - script: |
-          npm run coverage:upload -t $(CODECOV_TOKEN)
+          codecov -f coverage/coverage-final.json -t $(CODECOV_TOKEN)
         displayName: 'Run code coverage'
   - job: Linux
     pool:
