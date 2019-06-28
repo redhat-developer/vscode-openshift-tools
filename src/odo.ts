@@ -11,7 +11,6 @@ import * as path from 'path';
 import { ToolsConfig } from './tools';
 import format =  require('string-format');
 import { OpenShiftExplorer } from './explorer';
-import { wait } from './util/async';
 import { statSync } from 'fs';
 import bs = require('binary-search');
 import { Platform } from './util/platform';
@@ -25,6 +24,7 @@ export interface OpenShiftObject extends QuickPickItem {
     contextValue: string;
     comptype ?: string;
     contextPath ?: Uri;
+    deployed: boolean;
 }
 
 export enum ContextType {
@@ -154,7 +154,7 @@ export class Command {
     }
     @verbose
     static pushComponent(project: string, app: string, component: string) {
-        return `odo push ${component} --app ${app} --project ${project}`;
+        return `odo push`;
     }
     static pushLocalComponent(project: string, app: string, component: string, location: string) {
         return `${Command.pushComponent(project, app, component)} --local ${location}`;
@@ -262,11 +262,11 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
     constructor(private parent: OpenShiftObject,
          public readonly name: string,
          public readonly contextValue: ContextType,
+         public deployed: boolean,
          private readonly odo: Odo,
          public readonly collapsibleState: TreeItemCollapsibleState = TreeItemCollapsibleState.Collapsed,
          public contextPath?: Uri,
          public readonly comptype?: string) {
-
     }
 
     get iconPath(): Uri {
@@ -352,7 +352,7 @@ function compareNodes(a, b): number {
 
 export class OdoImpl implements Odo {
 
-    private ROOT: OpenShiftObject = new OpenShiftObjectImpl(undefined, 'root', undefined, undefined);
+    private ROOT: OpenShiftObject = new OpenShiftObjectImpl(undefined, 'root', undefined, false, undefined);
     private cache: Map<OpenShiftObject, OpenShiftObject[]> = new Map();
     private static cli: cliInstance.ICli = cliInstance.Cli.getInstance();
     private static instance: Odo;
@@ -395,7 +395,7 @@ export class OdoImpl implements Odo {
             return value.indexOf('Server ') !== -1;
         }).map((value) => {
             const server: string = value.substr(value.indexOf(' ')+1).trim();
-            return new OpenShiftObjectImpl(null, server, ContextType.CLUSTER, OdoImpl.instance, TreeItemCollapsibleState.Expanded);
+            return new OpenShiftObjectImpl(null, server, ContextType.CLUSTER, false, OdoImpl.instance, TreeItemCollapsibleState.Expanded);
         });
         return clusters;
     }
@@ -407,18 +407,18 @@ export class OdoImpl implements Odo {
         );
         if (this.odoLoginMessages.some((element) => result.stderr ? result.stderr.indexOf(element) > -1 : false)) {
             const loginErrorMsg: string = 'Please log in to the cluster';
-            return[new OpenShiftObjectImpl(null, loginErrorMsg, ContextType.LOGIN_REQUIRED, OdoImpl.instance, TreeItemCollapsibleState.None)];
+            return[new OpenShiftObjectImpl(null, loginErrorMsg, ContextType.LOGIN_REQUIRED, false, OdoImpl.instance, TreeItemCollapsibleState.None)];
         }
         if (result.stderr.indexOf("Unable to connect to OpenShift cluster, is it down?") > -1) {
             const clusterDownMsg: string = 'Please start the OpenShift cluster';
-            return [new OpenShiftObjectImpl(null, clusterDownMsg, ContextType.CLUSTER_DOWN, OdoImpl.instance, TreeItemCollapsibleState.None)];
+            return [new OpenShiftObjectImpl(null, clusterDownMsg, ContextType.CLUSTER_DOWN, false, OdoImpl.instance, TreeItemCollapsibleState.None)];
         }
         commands.executeCommand('setContext', 'isLoggedIn', true);
         clusters = result.stdout.trim().split('\n').filter((value) => {
             return value.indexOf('Server:') !== -1;
         }).map((value) => {
             const server: string = value.substr(value.indexOf(':')+1).trim();
-            return new OpenShiftObjectImpl(null, server, ContextType.CLUSTER, OdoImpl.instance, TreeItemCollapsibleState.Expanded);
+            return new OpenShiftObjectImpl(null, server, ContextType.CLUSTER, false, OdoImpl.instance, TreeItemCollapsibleState.Expanded);
         });
         return clusters;
     }
@@ -436,7 +436,7 @@ export class OdoImpl implements Odo {
             let projs: OpenShiftObject[] = [];
             const stdout: string = result.stdout.trim();
             if (stdout !== "" ) {
-                projs = stdout.split("\n").map<OpenShiftObject>((value) => new OpenShiftObjectImpl(cluster, value, ContextType.PROJECT, OdoImpl.instance));
+                projs = stdout.split("\n").map<OpenShiftObject>((value) => new OpenShiftObjectImpl(cluster, value, ContextType.PROJECT, false, OdoImpl.instance));
             }
             // TODO: load projects form workspace folders and add missing ones to the model even they
             // are not created in cluster they should be visible in OpenShift Application Tree
@@ -471,7 +471,7 @@ export class OdoImpl implements Odo {
                 apps.push(component.ComponentSettings.Application);
             }
         });
-        return apps.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(project, value, ContextType.APPLICATION, OdoImpl.instance)).sort(compareNodes);
+        return apps.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(project, value, ContextType.APPLICATION, false, OdoImpl.instance)).sort(compareNodes);
     }
 
     public async getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]> {
@@ -515,10 +515,10 @@ export class OdoImpl implements Odo {
                 // for not existing file or folder
                 compSource = 'local';
             }
-            return new OpenShiftObjectImpl(application, value.name, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed, undefined, compSource);
+            return new OpenShiftObjectImpl(application, value.name, ContextType.COMPONENT, true, this, TreeItemCollapsibleState.Collapsed, undefined, compSource);
         });
 
-        // this is temporary fix until 
+        // this is temporary fix until
         const undeployedComponents: any[] = [...this.wsComponents];
         deployedComponents.forEach((component) => {
             const index: any = this.wsComponents.findIndex((comp) => comp.ComponentSettings.Name === component.getName() && comp.ComponentSettings.Application === component.getParent().getName() && comp.ComponentSettings.Project === component.getParent().getParent().getName());
@@ -529,7 +529,7 @@ export class OdoImpl implements Odo {
         });
 
         undeployedComponents.filter((component) => component.ComponentSettings.Application === application.getName() && component.ComponentSettings.Project === application.getParent().getName()).forEach((component) => {
-            deployedComponents.push( new OpenShiftObjectImpl(application, component.ComponentSettings.Name, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed, component.contextPath, component.ComponentSettings.SourceType));
+            deployedComponents.push( new OpenShiftObjectImpl(application, component.ComponentSettings.Name, ContextType.COMPONENT, false, this, TreeItemCollapsibleState.Collapsed, component.contextPath, component.ComponentSettings.SourceType));
         });
 
         return deployedComponents;
@@ -566,7 +566,7 @@ export class OdoImpl implements Odo {
         } catch (ignore) {
         }
 
-        return data.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(component, value.metadata.name, ContextType.COMPONENT_ROUTE, OdoImpl.instance, TreeItemCollapsibleState.None));
+        return data.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(component, value.metadata.name, ContextType.COMPONENT_ROUTE, false, OdoImpl.instance, TreeItemCollapsibleState.None));
     }
 
     async getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
@@ -586,7 +586,7 @@ export class OdoImpl implements Odo {
         } catch (ignore) {
         }
 
-        return data.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(component, value.metadata.name, ContextType.STORAGE, OdoImpl.instance, TreeItemCollapsibleState.None));
+        return data.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(component, value.metadata.name, ContextType.STORAGE, false, OdoImpl.instance, TreeItemCollapsibleState.None));
     }
 
     public async getComponentTypeVersions(componentName: string) {
@@ -627,7 +627,7 @@ export class OdoImpl implements Odo {
             const result: cliInstance.CliExitData = await this.execute(Command.listServiceInstances(projName, appName));
             services = result.stdout.trim().split('\n')
                 .filter((value) => value !== '')
-                .map((value) => new OpenShiftObjectImpl(application, value, ContextType.SERVICE, OdoImpl.instance, TreeItemCollapsibleState.None));
+                .map((value) => new OpenShiftObjectImpl(application, value, ContextType.SERVICE, true, OdoImpl.instance, TreeItemCollapsibleState.None));
         } catch (ignore) {
             // ignore error in case service catalog is not configured
         }
@@ -682,7 +682,7 @@ export class OdoImpl implements Odo {
     public async createProject(projectName: string): Promise<OpenShiftObject> {
         await OdoImpl.instance.execute(Command.createProject(projectName));
         const clusters = await this.getClusters();
-        return this.insertAndReveal(await this.getProjects(), new OpenShiftObjectImpl(clusters[0], projectName, ContextType.PROJECT, this));
+        return this.insertAndReveal(await this.getProjects(), new OpenShiftObjectImpl(clusters[0], projectName, ContextType.PROJECT, false, this));
     }
 
     public async deleteApplication(app: OpenShiftObject): Promise<OpenShiftObject> {
@@ -692,23 +692,27 @@ export class OdoImpl implements Odo {
     }
 
     public async createApplication(project: OpenShiftObject, applicationName: string): Promise<OpenShiftObject> {
-        return this.insertAndReveal(await this.getApplications(project), new OpenShiftObjectImpl(project, applicationName, ContextType.APPLICATION, this));
+        return this.insertAndReveal(await this.getApplications(project), new OpenShiftObjectImpl(project, applicationName, ContextType.APPLICATION, false, this));
     }
 
     public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: string, ref: string = 'master'): Promise<OpenShiftObject> {
         await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location));
         this.executeInTerminal(Command.pushLocalComponent(application.getParent().getName(), application.getName(), name, location));
-        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed, undefined, 'folder'));
+        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, TreeItemCollapsibleState.Collapsed, undefined, 'folder'));
     }
 
     public async createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, location: string, context: Uri, ref: string = 'master'): Promise<OpenShiftObject> {
-        this.execute(Command.createGitComponent(application.getParent().getName(), application.getName(), type, version, name, location, ref ? ref : 'master'), context.fsPath);
+        await this.execute(Command.createGitComponent(application.getParent().getName(), application.getName(), type, version, name, location, ref ? ref : 'master'), context.fsPath);
+
+        // This check is here to skip any model updates when there are not workspace folders yet,
+        // because when first folder added to workspace extesion is going to be reloaded anyway and
+        // model loaded when extension is reactivated
         if (workspace.workspaceFolders) {
             const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
             if (!targetApplication) {
                 await this.insertAndReveal(await this.getApplications(application.getParent()), application);
             }
-            return await this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed, context, 'git'));
+            await this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, TreeItemCollapsibleState.Collapsed, context, 'git'));
         }
         workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: context });
         return null;
@@ -716,18 +720,18 @@ export class OdoImpl implements Odo {
 
     public async createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, location: string, ref: string = 'master'): Promise<OpenShiftObject> {
         await this.execute(Command.createBinaryComponent(application.getParent().getName(), application.getName(), type, version, name, location));
-        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, this, TreeItemCollapsibleState.Collapsed, undefined, 'binary'));
+        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, TreeItemCollapsibleState.Collapsed, undefined, 'binary'));
     }
 
     public async deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
         const app = component.getParent();
-        await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()));
+        await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()), Platform.getUserHomePath());
         return this.deleteAndRefresh(await this.getApplicationChildren(app), component);
     }
 
     public async createService(application: OpenShiftObject, templateName: string, planName: string, name: string): Promise<OpenShiftObject> {
         await this.execute(Command.createService(application.getParent().getName(), application.getName(), templateName, planName, name.trim()), Platform.getUserHomePath());
-        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.SERVICE, this, TreeItemCollapsibleState.None));
+        return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.SERVICE, false, this, TreeItemCollapsibleState.None));
     }
 
     public async deleteService(service: OpenShiftObject): Promise<OpenShiftObject> {
@@ -739,7 +743,7 @@ export class OdoImpl implements Odo {
 
     public async createStorage(component: OpenShiftObject, name: string, mountPath: string, size: string): Promise<OpenShiftObject> {
         await this.execute(Command.createStorage(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), name, mountPath, size));
-        return this.insertAndReveal(await this.getComponentChildren(component), new OpenShiftObjectImpl(component, name, ContextType.STORAGE, this, TreeItemCollapsibleState.None));
+        return this.insertAndReveal(await this.getComponentChildren(component), new OpenShiftObjectImpl(component, name, ContextType.STORAGE, false, this, TreeItemCollapsibleState.None));
     }
 
     public async deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject> {
@@ -751,7 +755,7 @@ export class OdoImpl implements Odo {
 
     public async createComponentCustomUrl(component: OpenShiftObject, name: string, port: string): Promise<OpenShiftObject> {
         await this.execute(Command.createComponentCustomUrl(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), name, port));
-        return this.insertAndReveal(await this.getComponentChildren(component), new OpenShiftObjectImpl(component, name, ContextType.COMPONENT_ROUTE, this, TreeItemCollapsibleState.None));
+        return this.insertAndReveal(await this.getComponentChildren(component), new OpenShiftObjectImpl(component, name, ContextType.COMPONENT_ROUTE, false, this, TreeItemCollapsibleState.None));
     }
 
     public async deleteURL(route: OpenShiftObject): Promise<OpenShiftObject> {
@@ -787,8 +791,8 @@ export class OdoImpl implements Odo {
                 } catch (ignore) {
                 }
             });
-            for(const key of this.cache.keys()) {
-                if(key.contextValue === ContextType.APPLICATION) {
+            for (const key of this.cache.keys()) {
+                if (key.contextValue === ContextType.APPLICATION) {
                     added.forEach((added) => {
                         const affectedComponent = this.cache.get(key).find((value) => value.getParent().getName() === added.ComponentSettings.Application && value.getParent().getParent().getName() === added.ComponentSettings.Project && value.getName() === added.ComponentSettings.Name);
                         if (affectedComponent) {
@@ -800,7 +804,6 @@ export class OdoImpl implements Odo {
                     });
                 }
             }
-
         }
 
         if (event && event.removed) {
@@ -813,8 +816,8 @@ export class OdoImpl implements Odo {
             // walk all apps and components to find affected component
             // reset contextPath for deployed components
             // remove not deployed projects, application and component from model
-            for(const key of this.cache.keys()) {
-                if(key.contextValue == ContextType.APPLICATION) {
+            for (const key of this.cache.keys()) {
+                if (key.contextValue === ContextType.APPLICATION) {
                     event.removed.forEach((removed) => {
                         const affectedComponent = this.cache.get(key).find((value) => value.contextPath.fsPath === removed.uri.fsPath);
                         affectedComponent.contextPath = undefined;

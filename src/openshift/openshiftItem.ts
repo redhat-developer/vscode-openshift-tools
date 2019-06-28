@@ -5,7 +5,7 @@
 
 import { Odo, OdoImpl, OpenShiftObject, ContextType, OpenShiftObjectImpl } from '../odo';
 import { OpenShiftExplorer } from '../explorer';
-import { window, QuickPick, QuickPickItem, TreeItemCollapsibleState } from 'vscode';
+import { window, QuickPickItem, TreeItemCollapsibleState } from 'vscode';
 import * as validator from 'validator';
 
 const errorMessage = {
@@ -131,10 +131,10 @@ export abstract class OpenShiftItem {
             project = context as OpenShiftObject;
             context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(OpenShiftItem.getApplicationNames(context as OpenShiftObject, appPlaceholder && compPlaceholder === undefined), {placeHolder: appPlaceholder});
             if (context && isCommand(context)) {
-                context = new OpenShiftObjectImpl(project, await context.command(), ContextType.APPLICATION, OdoImpl.Instance, TreeItemCollapsibleState.Collapsed);
+                context = new OpenShiftObjectImpl(project, await context.command(), ContextType.APPLICATION, false, OdoImpl.Instance, TreeItemCollapsibleState.Collapsed);
             }
         }
-        if (context && compPlaceholder) context = await window.showQuickPick(OpenShiftItem.getComponentNames(context as OpenShiftObject), {placeHolder: compPlaceholder});
+        if (context && !isCommand(context) && context.contextValue === ContextType.APPLICATION && compPlaceholder) context = await window.showQuickPick(OpenShiftItem.getComponentNames(context as OpenShiftObject), {placeHolder: compPlaceholder});
         return context as OpenShiftObject;
     }
 }

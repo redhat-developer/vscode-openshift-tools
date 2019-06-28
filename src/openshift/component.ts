@@ -328,7 +328,7 @@ export class Component extends OpenShiftItem {
             canSelectFolders: true,
             canSelectMany: false,
             defaultUri: Uri.file(Platform.getUserHomePath()),
-            openLabel: "Select Context Folder Location"
+            openLabel: "Select Context Folder for Component"
         });
 
         window.showInformationMessage('Do you want to clone git repository for created Component?', 'Yes', 'No').then((value) => {

@@ -10,7 +10,8 @@ export class TestItem implements OpenShiftObject {
     constructor(
         private parent: OpenShiftObject,
         private name: string,
-        private children = []) {
+        private children = [],
+        public deployed = false) {
     }
 
     getName(): string {
