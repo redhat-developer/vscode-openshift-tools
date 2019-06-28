@@ -754,7 +754,7 @@ export class OdoImpl implements Odo {
     }
 
     public async createComponentCustomUrl(component: OpenShiftObject, name: string, port: string): Promise<OpenShiftObject> {
-        await this.execute(Command.createComponentCustomUrl(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), name, port));
+        await this.execute(Command.createComponentCustomUrl(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), name, port), component.contextPath.fsPath);
         return this.insertAndReveal(await this.getComponentChildren(component), new OpenShiftObjectImpl(component, name, ContextType.COMPONENT_ROUTE, false, this, TreeItemCollapsibleState.None));
     }
 
@@ -796,7 +796,7 @@ export class OdoImpl implements Odo {
                     added.forEach((added) => {
                         const affectedComponent = this.cache.get(key).find((value) => value.getParent().getName() === added.ComponentSettings.Application && value.getParent().getParent().getName() === added.ComponentSettings.Project && value.getName() === added.ComponentSettings.Name);
                         if (affectedComponent) {
-                            affectedComponent.contextPath = added.uri;
+                            affectedComponent.contextPath = added.contextPath;
                         } else {
                             // TODO: identify project/application/component hierarchy for added workspace folders and use existing ones
                             // or create new ones in model
