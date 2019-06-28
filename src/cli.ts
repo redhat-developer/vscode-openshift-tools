@@ -74,8 +74,22 @@ class OdoChannelImpl implements OdoChannel {
         return jsonData;
     }
 
+    getToken(value: string) {
+        const regex = /--token\s*=\s*(.\w[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*)/;
+        const tokenRegex = value.match(regex);
+        return (tokenRegex) ?  value.replace(tokenRegex[1], '**********') : value;
+    }
+
+    getCredentialsLogin(value: string) {
+        const regex = /-p\s*(.\w[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*)/;
+        const tokenRegex = value.match(regex);
+        return (tokenRegex) ? value.replace(tokenRegex[0], '-p **********'): value;
+    }
+
     print(text: string): void {
-        const textData = this.prettifyJson(text);
+        let textData = this.prettifyJson(text);
+        textData = this.getToken(textData);
+        textData = this.getCredentialsLogin(textData);
         this.channel.append(textData);
         if (textData.charAt(textData.length - 1) !== '\n') {
             this.channel.append('\n');
