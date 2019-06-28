@@ -77,6 +77,6 @@ export class Url extends OpenShiftItem{
             result = JSON.parse(UrlDetails.stdout).items;
         } catch (ignore) {}
         const urlObject = result.filter((value) => (value.metadata.name === treeItem.getName()));
-        return open(`${urlObject[0].spec.protocol}://${urlObject[0].spec.path}`);
+        return open(`${urlObject[0].spec.protocol}://${urlObject[0].spec.host}`);
     }
 }
