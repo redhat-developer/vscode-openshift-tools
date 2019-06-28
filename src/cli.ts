@@ -65,31 +65,25 @@ class OdoChannelImpl implements OdoChannel {
     }
 
     prettifyJson(str: string) {
+        const tokenRegex = /--token\s*=\s*(.\w[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*)/;
+        const credentialRegex = /-p\s*(.\w[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*)/;
         let jsonData: string;
         try {
             jsonData = JSON.stringify(JSON.parse(str), null, 2);
         } catch (ignore) {
-            return str;
+            const hideTokenRegex = str.match(tokenRegex);
+            if (hideTokenRegex) {
+                return hideTokenRegex ? str.replace(hideTokenRegex[1], '**********'): str;
+            } else {
+                const hideCredentialRegex = str.match(credentialRegex);
+                return (hideCredentialRegex) ? str.replace(hideCredentialRegex[0], '-p **********'): str;
+            }
         }
         return jsonData;
     }
 
-    getToken(value: string) {
-        const regex = /--token\s*=\s*(.\w[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*)/;
-        const tokenRegex = value.match(regex);
-        return (tokenRegex) ?  value.replace(tokenRegex[1], '**********') : value;
-    }
-
-    getCredentialsLogin(value: string) {
-        const regex = /-p\s*(.\w[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*)/;
-        const tokenRegex = value.match(regex);
-        return (tokenRegex) ? value.replace(tokenRegex[0], '-p **********'): value;
-    }
-
     print(text: string): void {
-        let textData = this.prettifyJson(text);
-        textData = this.getToken(textData);
-        textData = this.getCredentialsLogin(textData);
+        const textData = this.prettifyJson(text);
         this.channel.append(textData);
         if (textData.charAt(textData.length - 1) !== '\n') {
             this.channel.append('\n');
