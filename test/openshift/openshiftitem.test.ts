@@ -80,8 +80,8 @@ suite('OpenShiftItem', () => {
 
         test('returns an array of application names for the project if there is at least one application', async ()=> {
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
-            const appNames = await OpenShiftItem.getApplicationNames(projectItem);
-            //expect(appNames[0].getName()).equals('application');
+            await OpenShiftItem.getApplicationNames(projectItem);
+            // expect(appNames[0].getName()).equals('application');
 
         });
 
