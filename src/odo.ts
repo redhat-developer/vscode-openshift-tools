@@ -131,6 +131,9 @@ export class Command {
     static describeComponent(project: string, app: string, component: string) {
         return `odo describe ${component} --app ${app} --project ${project}`;
     }
+    static describeComponentJson(project: string, app: string, component: string) {
+        return `${Command.describeComponent(project, app, component)} -o json`;
+    }
     static describeService(service: string) {
         return `odo catalog describe service ${service}`;
     }
@@ -197,6 +200,10 @@ export class Command {
     }
     static getComponentJson(project: string, app: string, component: string) {
         return `oc get service ${component}-${app} --namespace ${project} -o json`;
+    }
+
+    static unlinkComponents(project, app, comp1, comp2) {
+        return `odo unlink --project ${project} --app ${app} ${comp2} --component ${comp1}`;
     }
 }
 
