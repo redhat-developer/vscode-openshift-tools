@@ -1,5 +1,5 @@
 # Visual Studio Code OpenShift Connector
-[![Build Status](https://dev.azure.com/redhat-developer/vscode-openshift-tools/_apis/build/status/redhat-developer.vscode-openshift-tools?branchName=azure-ci)](https://dev.azure.com/redhat-developer/vscode-openshift-tools/_build/latest?definitionId=1&branchName=azure-ci)
+[![Build Status](https://dev.azure.com/redhat-developer/vscode-openshift-tools/_apis/build/status/redhat-developer.vscode-openshift-tools?branchName=master)](https://dev.azure.com/redhat-developer/vscode-openshift-tools/_build/latest?definitionId=1&branchName=master)
 [![Build Status](https://travis-ci.org/redhat-developer/vscode-openshift-tools.svg?branch=master)](https://travis-ci.org/redhat-developer/vscode-openshift-tools)
 [![Unit Tests Code Coverage](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/README.md)
