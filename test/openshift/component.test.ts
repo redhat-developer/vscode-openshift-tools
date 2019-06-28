@@ -128,7 +128,7 @@ suite('OpenShift/Component', () => {
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
                 expect(progressFunctionStub).calledOnceWith(
                     `Creating new Component '${componentItem.getName()}'`);
-                expect(termStub).calledOnceWith(Command.pushLocalComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), folder.uri.fsPath));
+                expect(termStub).calledOnceWith(Command.pushComponent());
             });
 
             test('returns null when no folder selected', async () => {
@@ -715,20 +715,20 @@ suite('OpenShift/Component', () => {
         test('push calls the correct odo command with progress', async () => {
             await Component.push(componentItem);
 
-            expect(termStub).calledOnceWith(Command.pushComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.pushComponent());
         });
 
         test('works with no context', async () => {
             await Component.push(null);
 
-            expect(termStub).calledOnceWith(Command.pushComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.pushComponent());
         });
 
         test('works from keybinding', async () => {
             getpushStub.resolves(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
             await Component.push(null);
 
-            expect(termStub).calledOnceWith(Command.pushComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.pushComponent());
         });
     });
 

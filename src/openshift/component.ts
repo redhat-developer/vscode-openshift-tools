@@ -77,12 +77,12 @@ export class Component extends OpenShiftItem {
     }
 
     static async unlinkAllComponents(component: OpenShiftObject) {
-        const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
+        const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
         const compObj: JSON = JSON.parse(compData.stdout);
         const linkComponent = compObj['status'].linkedComponents;
         if (linkComponent) {
             Object.keys(linkComponent).forEach(async key => {
-                await Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), key, component.getName()));
+                await Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), key, component.getName()), component.contextPath.fsPath);
             });
         }
     }
@@ -93,7 +93,7 @@ export class Component extends OpenShiftItem {
             "From which Application you want to describe Component",
             "Select Component you want to describe");
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
+        Component.odo.executeInTerminal(Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
 
     static async log(context: OpenShiftObject): Promise<string> {
@@ -102,7 +102,7 @@ export class Component extends OpenShiftItem {
             "In which Application you want to see Log",
             "For which Component you want to see Log");
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
+        Component.odo.executeInTerminal(Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
 
     static async followLog(context: OpenShiftObject): Promise<string> {
@@ -112,7 +112,7 @@ export class Component extends OpenShiftItem {
             "For which Component you want to follow Log"
         );
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
+        Component.odo.executeInTerminal(Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
 
     static async linkComponent(context: OpenShiftObject): Promise<String> {
@@ -140,7 +140,7 @@ export class Component extends OpenShiftItem {
         }
 
         return Progress.execFunctionWithProgress(`Link Component '${componentToLink.getName()}' with Component '${component.getName()}'`,
-            (progress) => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), componentToLink.getName(), port))
+            (progress) => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), componentToLink.getName(), port), component.contextPath.fsPath)
                 .then(() => `Component '${componentToLink.getName()}' successfully linked with Component '${component.getName()}'`)
                 .catch((err) => Promise.reject(`Failed to link component with error '${err}'`))
         );
@@ -156,7 +156,7 @@ export class Component extends OpenShiftItem {
         if (!serviceToLink) return null;
 
         return Progress.execFunctionWithProgress(`Link Service '${serviceToLink.getName()}' with Component '${component.getName()}'`,
-            (progress) => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), serviceToLink.getName()))
+            (progress) => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), serviceToLink.getName()), component.contextPath.fsPath)
                 .then(() => `Service '${serviceToLink.getName()}' successfully linked with Component '${component.getName()}'`)
                 .catch((err) => Promise.reject(`Failed to link Service with error '${err}'`))
         );
@@ -167,7 +167,7 @@ export class Component extends OpenShiftItem {
     }
 
     static setPushCmd(component: string, application: string, project: string): Thenable<void> {
-        return contextGlobalState.globalState.update('PUSH',  Command.pushComponent(project, application, component));
+        return contextGlobalState.globalState.update('PUSH',  Command.pushComponent());
     }
 
     static async push(context: OpenShiftObject): Promise<string> {
@@ -177,7 +177,7 @@ export class Component extends OpenShiftItem {
             "For which Component you want to push the changes");
         if (!component) return null;
         Component.setPushCmd(component.getName(), component.getParent().getName(), component.getParent().getParent().getName());
-        Component.odo.executeInTerminal(Command.pushComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), context.contextPath.fsPath);
+        Component.odo.executeInTerminal(Command.pushComponent(), context.contextPath.fsPath);
     }
 
     static async lastPush() {
@@ -195,7 +195,7 @@ export class Component extends OpenShiftItem {
             'Select an Application',
             'Select a Component you want to watch');
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()));
+        Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), context.contextPath.fsPath);
     }
 
     static async openUrl(context: OpenShiftObject): Promise<ChildProcess> {
@@ -214,7 +214,7 @@ export class Component extends OpenShiftItem {
         }
 
         if (! await Component.checkRouteCreated(namespace, component)) {
-            const UrlDetails = await Component.odo.execute(Command.getComponentUrl(namespace, app.getName(), component.getName()));
+            const UrlDetails = await Component.odo.execute(Command.getComponentUrl(namespace, app.getName(), component.getName()), component.contextPath.fsPath);
             let result: any[] = [];
             let selectRoute: QuickPickItem;
             try {
@@ -223,7 +223,7 @@ export class Component extends OpenShiftItem {
                 // should give empty list if no url configured
                 // see https://github.com/openshift/odo/issues/1515
             }
-            const hostName: QuickPickItem[] = result.map((value) => ({ label: `${value.spec.protocol}://${value.spec.path}`, description: `Target Port is ${value.spec.port}`}));
+            const hostName: QuickPickItem[] = result.map((value) => ({ label: `${value.spec.protocol}://${value.spec.host}`, description: `Target Port is ${value.spec.port}`}));
             if (hostName.length >1) {
                 selectRoute = await window.showQuickPick(hostName, {placeHolder: "This Component has multiple URLs. Select the desired URL to open in browser."});
                 if (!selectRoute) return null;
@@ -259,7 +259,7 @@ export class Component extends OpenShiftItem {
         const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
 
         if (!componentTypeVersion) return null;
-        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.uri.fsPath));
+        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.uri));
         return `Component '${componentName}' successfully created`;
     }
 
@@ -282,7 +282,7 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeVersion) return null;
 
-        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.fsPath));
+        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder));
         return `Component '${componentName}' successfully created`;
     }
 
@@ -362,7 +362,7 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeVersion) return null;
 
-        await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, binaryFile[0].fsPath);
+        await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, binaryFile[0]);
         return `Component '${componentName}' successfully created`;
     }
 
