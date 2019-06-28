@@ -725,7 +725,7 @@ export class OdoImpl implements Odo {
 
     public async deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
         const app = component.getParent();
-        await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()), Platform.getUserHomePath());
+        await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         return this.deleteAndRefresh(await this.getApplicationChildren(app), component);
     }
 
@@ -742,13 +742,13 @@ export class OdoImpl implements Odo {
     }
 
     public async createStorage(component: OpenShiftObject, name: string, mountPath: string, size: string): Promise<OpenShiftObject> {
-        await this.execute(Command.createStorage(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), name, mountPath, size));
+        await this.execute(Command.createStorage(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), name, mountPath, size), component.contextPath.fsPath);
         return this.insertAndReveal(await this.getComponentChildren(component), new OpenShiftObjectImpl(component, name, ContextType.STORAGE, false, this, TreeItemCollapsibleState.None));
     }
 
     public async deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject> {
         const component = storage.getParent();
-        await this.execute(Command.deleteStorage(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), storage.getName()));
+        await this.execute(Command.deleteStorage(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), storage.getName()), component.contextPath.fsPath);
         await this.execute(Command.waitForStorageToBeGone(storage.getParent().getParent().getParent().getName(), storage.getParent().getParent().getName(), storage.getName()), process.cwd(), false);
         return this.deleteAndRefresh(await this.getComponentChildren(component), storage);
     }
@@ -760,7 +760,7 @@ export class OdoImpl implements Odo {
 
     public async deleteURL(route: OpenShiftObject): Promise<OpenShiftObject> {
         const component = route.getParent();
-        await this.execute(Command.deleteComponentUrl(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), route.getName()));
+        await this.execute(Command.deleteComponentUrl(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), route.getName()), route.getParent().contextPath.fsPath);
         return this.deleteAndRefresh(await this.getComponentChildren(component), route);
     }
 
