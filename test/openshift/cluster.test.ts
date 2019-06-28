@@ -88,6 +88,7 @@ suite('Openshift/Cluster', () => {
             quickPickStub.onThirdCall().resolves({description: "Current Context", label: testUser});
             inputStub.resolves(password);
             commandStub.rejects(error);
+            sandbox.stub(Cluster, 'hideTokenpassword').returns('FATAL ERROR');
 
             try {
                 await Cluster.login();
@@ -162,6 +163,7 @@ suite('Openshift/Cluster', () => {
 
             test('errors if there is output on odo stderr', async () => {
                 execStub.resolves(errorData);
+                sandbox.stub(Cluster, 'hideCredentialPassword').returns('FATAL ERROR');
 
                 try {
                     await Cluster.credentialsLogin();
@@ -247,6 +249,7 @@ suite('Openshift/Cluster', () => {
 
             test('handles incoming errors the same way as credentials login', async () => {
                 execStub.rejects(error);
+                sandbox.stub(Cluster, 'hideTokenpassword').returns('FATAL ERROR');
                 try {
                     await Cluster.tokenLogin();
                     expect.fail();
@@ -312,6 +315,7 @@ suite('Openshift/Cluster', () => {
         });
 
         test('throws errors from subsequent login', async () => {
+            sandbox.stub(Cluster, 'hideTokenpassword').returns('FATAL ERROR');
             execStub.onSecondCall().resolves(errorData);
             infoStub.resolves('Yes');
             quickPickStub.onFirstCall().resolves('Credentials');
