@@ -4,6 +4,7 @@
 [![Unit Tests Code Coverage](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/README.md)
 [![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version/redhat.vscode-openshift-connector.svg)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector)
+[![Gitter](https://badges.gitter.im/redhat-developer/openshift-connector.svg)](https://gitter.im/redhat-developer/openshift-connector?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 
 ## Overview
@@ -134,7 +135,9 @@ Download the most recent `openshift-connector-<version>.vsix` file and install i
 
 Feedback & Questions
 ====================
-If you discover an issue please file a bug and we will fix it as soon as possible. File a bug in [GitHub Issues](https://github.com/redhat-developer/vscode-openshift-tools/issues).
+If you discover an issue please file a bug and we will fix it as soon as possible.
+* File a bug in [GitHub Issues](https://github.com/redhat-developer/vscode-openshift-tools/issues).
+* Chat with us on [Gitter](https://gitter.im/redhat-developer/openshift-connector).
 
 License
 =======
