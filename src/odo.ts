@@ -515,18 +515,14 @@ export class OdoImpl implements Odo {
             return new OpenShiftObjectImpl(application, value.name, ContextType.COMPONENT, true, this, TreeItemCollapsibleState.Collapsed, undefined, compSource);
         });
 
-        // this is temporary fix until
-        const undeployedComponents: any[] = [...this.wsComponents];
-        deployedComponents.forEach((component) => {
-            const index: any = this.wsComponents.findIndex((comp) => comp.ComponentSettings.Name === component.getName() && comp.ComponentSettings.Application === component.getParent().getName() && comp.ComponentSettings.Project === component.getParent().getParent().getName());
-            if (index > -1) {
-                component.contextPath = this.wsComponents[index].contextPath;
-                undeployedComponents.splice(index, 1);
+        this.wsComponents.forEach((comp, index) => {
+            const item = deployedComponents.find((component) => comp.ComponentSettings.Name === component.getName() && comp.ComponentSettings.Application === component.getParent().getName() && comp.ComponentSettings.Project === component.getParent().getParent().getName());
+            if (item) {
+                item.contextPath = comp.contextPath;
+                item.deployed = true;
+            } else {
+                deployedComponents.push(new OpenShiftObjectImpl(application, comp.ComponentSettings.Name, ContextType.COMPONENT, false, this, TreeItemCollapsibleState.Collapsed, comp.contextPath, comp.ComponentSettings.SourceType));
             }
-        });
-
-        undeployedComponents.filter((component) => component.ComponentSettings.Application === application.getName() && component.ComponentSettings.Project === application.getParent().getName()).forEach((component) => {
-            deployedComponents.push( new OpenShiftObjectImpl(application, component.ComponentSettings.Name, ContextType.COMPONENT, false, this, TreeItemCollapsibleState.Collapsed, component.contextPath, component.ComponentSettings.SourceType));
         });
 
         return deployedComponents;
