@@ -59,7 +59,7 @@ function verbose(_target: any, key: string, descriptor: any) {
 
 export class Command {
     static listProjects() {
-        return 'oc get project -o jsonpath="{range .items[?(.status.phase == \\"Active\\" )]}{.metadata.name}{\\"\\n\\"}{end}"';
+        return `odo project list -o json`;
     }
     @verbose
     static listApplications(project: string) {
@@ -430,14 +430,16 @@ export class OdoImpl implements Odo {
 
     public async _getProjects(cluster: OpenShiftObject): Promise<OpenShiftObject[]> {
         return this.execute(Command.listProjects()).then((result) => {
-            let projs: OpenShiftObject[] = [];
-            const stdout: string = result.stdout.trim();
-            if (stdout !== "" ) {
-                projs = stdout.split("\n").map<OpenShiftObject>((value) => new OpenShiftObjectImpl(cluster, value, ContextType.PROJECT, false, OdoImpl.instance));
+            let data: any[] = [];
+            try {
+                data = JSON.parse(result.stdout).items;
+            } catch (ignore) {
             }
+            const projs = data.map((value) => value.metadata.name);
+            return projs.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(cluster, value, ContextType.PROJECT, false, OdoImpl.instance));
+
             // TODO: load projects form workspace folders and add missing ones to the model even they
             // are not created in cluster they should be visible in OpenShift Application Tree
-            return projs.sort(compareNodes);
         }).catch((error) => {
             window.showErrorMessage(`Cannot retrieve projects for current cluster. Error: ${error}`);
             return [];
