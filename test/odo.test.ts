@@ -120,19 +120,30 @@ suite("odo", () => {
             sandbox.stub(fs, 'readFileSync');
         });
 
-        test('getProjects returns items created from oc get project', async () => {
-            const odoProjects = ['project1', 'project2', 'project3'];
-            execStub.resolves({ stdout: odoProjects.join('\n'), stderr: '', error: null });
+        test('getProjects returns projects under a given cluster', async () => {
+            const activeProjs = [{ name: 'project1' }, { name: 'project2'}];
+            yamlStub.returns({ ActiveApplications: activeProjs });
+            execStub.returns({
+                error: undefined,
+                stdout: JSON.stringify({
+                        items: [
+                            {
+                                metadata: {
+                                    name: 'project1'
+                                }
+                            }
+                        ]
+                    }
+                ),
+                stderr: ''
+            });
             const result = await odoCli.getProjects();
 
-            expect(execStub).calledWith(odo.Command.listProjects());
-            expect(result.length).equals(3);
-            for (let i = 1; i < result.length; i++) {
-                expect(result[i].getName()).equals(odoProjects[i]);
-            }
+            expect(result.length).equals(1);
+            expect(result[0].getName()).equals('project1');
         });
 
-        test('getProjects returns empty list if oc produces no output', async () => {
+        test('getProjects returns empty list if no projects present', async () => {
             execStub.resolves({ stdout: '', stderr: '', error: null });
             const result = await odoCli.getProjects();
 
