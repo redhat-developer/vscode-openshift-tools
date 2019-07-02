@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { OpenShiftItem } from './openshiftItem';
-import { OpenShiftObject, Command } from '../odo';
+import { OpenShiftObject, Command, ContextType } from '../odo';
 import { window, commands, QuickPickItem, Uri } from 'vscode';
 import { Progress } from '../util/progress';
 import open = require('open');
@@ -178,6 +178,7 @@ export class Component extends OpenShiftItem {
         if (!component) return null;
         Component.setPushCmd(component.getName(), component.getParent().getName(), component.getParent().getParent().getName());
         Component.odo.executeInTerminal(Command.pushComponent(), context.contextPath.fsPath);
+        context.contextValue = ContextType.COMPONENT_PUSHED;
     }
 
     static async lastPush() {
