@@ -3,27 +3,27 @@
         "description": "OpenShift Do CLI tool",
         "vendor": "Red Hat, Inc.",
         "name": "odo",
-        "version": "1.0.0-beta2",
-        "versionRange": "1.0.0-beta2",
-        "versionRangeLabel": "v1.0.0-beta2",
+        "version": "1.0.0-beta3",
+        "versionRange": "1.0.0-beta3",
+        "versionRangeLabel": "v1.0.0-beta3",
         "dlFileName": "odo",
         "cmdFileName": "odo",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://github.com/openshift/odo/releases/download/v1.0.0-beta2/odo-windows-amd64.exe.gz",
-                "sha256sum": "45b5565e67f188a598b1e94db5c9521c8c0d914dbbe7ac6c329fc79fb7f04ec0",
+                "url": "https://github.com/openshift/odo/releases/download/v1.0.0-beta3/odo-windows-amd64.exe.gz",
+                "sha256sum": "5140191e22057367da22d83d6e57b76e7e5b572276960f397ea7fd6894421d56",
                 "dlFileName": "odo-windows-amd64.exe.gz",
                 "cmdFileName": "odo.exe"
             },
             "darwin": {
-                "url": "https://github.com/openshift/odo/releases/download/v1.0.0-beta2/odo-darwin-amd64.gz",
-                "sha256sum": "dd4a8ff8662d1c4b6b2ffd791f42bb0e3800fd0f8e7788d5cc65fe3407779e74",
+                "url": "https://github.com/openshift/odo/releases/download/v1.0.0-beta3/odo-darwin-amd64.gz",
+                "sha256sum": "52f6a864f2c5a7777ab99c296e95b7bb00c9539235601e04ad3d7eda39e97fa3",
                 "dlFileName": "odo-darwin-amd64.gz"
             },
             "linux": {
-                "url": "https://github.com/openshift/odo/releases/download/v1.0.0-beta2/odo-linux-amd64.gz",
-                "sha256sum": "b6319ca2c47be2e5e8bc7bfece6712f61296aef5fd35d8e497172dd303ccc202",
+                "url": "https://github.com/openshift/odo/releases/download/v1.0.0-beta3/odo-linux-amd64.gz",
+                "sha256sum": "cd3a7f9d8786fe89029eeeaab7a795738ad1486e8e55d1d2b4f1ba95e1f1587b",
                 "dlFileName": "odo-linux-amd64.gz"
             }
         }
