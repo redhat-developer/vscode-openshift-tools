@@ -31,7 +31,9 @@ export enum ContextType {
     CLUSTER = 'cluster',
     PROJECT = 'project',
     APPLICATION = 'application',
-    COMPONENT = 'component',
+    COMPONENT = 'component_not_pushed',
+    COMPONENT_PUSHED = 'component',
+    COMPONENT_NO_CONTEXT = 'component_no_context',
     SERVICE = 'service',
     STORAGE = 'storage',
     CLUSTER_DOWN = 'cluster_down',
@@ -229,6 +231,16 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
             tooltip: 'Component: {label}',
             getChildren: () => this.odo.getComponentChildren(this)
         },
+        component_not_pushed: {
+            icon: '',
+            tooltip: 'Component: {label}',
+            getChildren: () => this.odo.getComponentChildren(this)
+        },
+        component_no_context: {
+            icon: '',
+            tooltip: 'Component: {label}',
+            getChildren: () => this.odo.getComponentChildren(this)
+        },
         service: {
             icon: 'service-node.png',
             tooltip: 'Service: {label}',
@@ -267,7 +279,7 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
     }
 
     get iconPath(): Uri {
-        if (this.contextValue === 'component') {
+        if (this.contextValue === ContextType.COMPONENT_PUSHED || this.contextValue === ContextType.COMPONENT || this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
             if (this.comptype === 'git') {
                 return Uri.file(path.join(__dirname, "../../images/component", 'git.png'));
             } else if (this.comptype === 'local') {
@@ -285,7 +297,15 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
     }
 
     get label(): string {
-        return this.name;
+        let suffix = '';
+        if (this.contextValue === ContextType.COMPONENT) {
+            suffix = ' (not pushed)';
+        } else if (this.contextValue === ContextType.COMPONENT_PUSHED) {
+            suffix = ' (pushed)';
+        } else if (this.contextValue === ContextType.COMPONENT_NO_CONTEXT){
+            suffix = ' (no context)';
+        }
+        return this.name + suffix;
     }
 
     getName(): string {
@@ -328,6 +348,7 @@ export interface Odo {
     createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, path: Uri): Promise<OpenShiftObject>;
     createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, path: Uri): Promise<OpenShiftObject>;
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
+    deleteNotPushedComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     createStorage(component: OpenShiftObject, name: string, mountPath: string, size: string): Promise<OpenShiftObject>;
     deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject>;
     createService(application: OpenShiftObject, templateName: string, planName: string, name: string): Promise<OpenShiftObject>;
@@ -340,10 +361,12 @@ export function getInstance(): Odo {
     return OdoImpl.Instance;
 }
 
-function compareNodes(a, b): number {
+function compareNodes(a: OpenShiftObject, b: OpenShiftObject): number {
     if (!a.contextValue) return -1;
     if (!b.contextValue) return 1;
-    const t = a.contextValue.localeCompare(b.contextValue);
+    const acontext = a.contextValue.includes('_') ? a.contextValue.substr(0, a.contextValue.indexOf('_')) : a.contextValue;
+    const bcontext = b.contextValue.includes('_') ? b.contextValue.substr(0, b.contextValue.indexOf('_')) : b.contextValue;
+    const t = acontext.localeCompare(bcontext);
     return t ? t : a.label.localeCompare(b.label);
 }
 
@@ -514,7 +537,7 @@ export class OdoImpl implements Odo {
                 // for not existing file or folder
                 compSource = 'local';
             }
-            return new OpenShiftObjectImpl(application, value.name, ContextType.COMPONENT, true, this, TreeItemCollapsibleState.Collapsed, undefined, compSource);
+            return new OpenShiftObjectImpl(application, value.name, ContextType.COMPONENT_NO_CONTEXT, true, this, TreeItemCollapsibleState.Collapsed, undefined, compSource);
         });
 
         this.wsComponents.forEach((comp, index) => {
@@ -522,7 +545,8 @@ export class OdoImpl implements Odo {
             if (item) {
                 item.contextPath = comp.contextPath;
                 item.deployed = true;
-            } else {
+                item.contextValue = ContextType.COMPONENT_PUSHED;
+            } else if (comp.ComponentSettings.Application === application.getName() && comp.ComponentSettings.Project === application.getParent().getName()) {
                 deployedComponents.push(new OpenShiftObjectImpl(application, comp.ComponentSettings.Name, ContextType.COMPONENT, false, this, TreeItemCollapsibleState.Collapsed, comp.contextPath, comp.ComponentSettings.SourceType));
             }
         });
@@ -569,18 +593,18 @@ export class OdoImpl implements Odo {
     }
 
     public async _getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        const app = component.getParent();
-        const appName = app.getName();
-        const projName = app.getParent().getName();
-        const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(projName, appName, component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
-
         let data: any[] = [];
-        try {
-            const items = JSON.parse(result.stdout).items;
-            if (items) data = items;
-        } catch (ignore) {
+        if(component.contextValue !== ContextType.COMPONENT) {
+            const app = component.getParent();
+            const appName = app.getName();
+            const projName = app.getParent().getName();
+            const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(projName, appName, component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+            try {
+                const items = JSON.parse(result.stdout).items;
+                if (items) data = items;
+            } catch (ignore) {
+            }
         }
-
         return data.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(component, value.metadata.name, ContextType.STORAGE, false, OdoImpl.instance, TreeItemCollapsibleState.None));
     }
 
@@ -723,6 +747,11 @@ export class OdoImpl implements Odo {
         return this.deleteAndRefresh(await this.getApplicationChildren(app), component);
     }
 
+    public async deleteNotPushedComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
+        const app = component.getParent();
+        return this.deleteAndRefresh(await this.getApplicationChildren(app), component);
+    }
+
     public async createService(application: OpenShiftObject, templateName: string, planName: string, name: string): Promise<OpenShiftObject> {
         await this.execute(Command.createService(application.getParent().getName(), application.getName(), templateName, planName, name.trim()), Platform.getUserHomePath());
         return this.insertAndReveal(await this.getApplicationChildren(application), new OpenShiftObjectImpl(application, name, ContextType.SERVICE, false, this, TreeItemCollapsibleState.None));
@@ -785,38 +814,40 @@ export class OdoImpl implements Odo {
                 } catch (ignore) {
                 }
             });
-            for (const key of this.cache.keys()) {
-                if (key.contextValue === ContextType.APPLICATION) {
-                    added.forEach((added) => {
-                        const affectedComponent = this.cache.get(key).find((value) => value.getParent().getName() === added.ComponentSettings.Application && value.getParent().getParent().getName() === added.ComponentSettings.Project && value.getName() === added.ComponentSettings.Name);
-                        if (affectedComponent) {
-                            affectedComponent.contextPath = added.contextPath;
-                        } else {
-                            // TODO: identify project/application/component hierarchy for added workspace folders and use existing ones
-                            // or create new ones in model
-                        }
-                    });
+
+            added.forEach(async (added) => {
+                const projects = await this.getProjects();
+                const project = projects.find((project) => project.getName() === added.ComponentSettings.Project);
+                if (project) {
+                    const apps = await this.getApplications(project);
+                    let app = apps.find((app) => app.getName() === added.ComponentSettings.Application);
+                    if (!app) {
+                        app = await this.createApplication(project, added.ComponentSettings.Application);
+                    }
+                    const components = await this.getComponents(app);
+                    const affectedComponent = components.find((value) => value.getName() === added.ComponentSettings.Name);
+                    if (affectedComponent) {
+                        await OpenShiftExplorer.getInstance().reveal(affectedComponent);
+                    } else {
+                        const newComponent = new OpenShiftObjectImpl(app, added.ComponentSettings.Name, ContextType.COMPONENT, false, this, TreeItemCollapsibleState.Collapsed, added.contextPath, added.ComponentSettings.SourceType);
+                        newComponent.contextPath = added.contextPath;
+                        await this.insertAndReveal(await this.getApplicationChildren(app), newComponent);
+                    }
                 }
-            }
+            });
         }
 
         if (event && event.removed) {
+            let refreshRequired = false;
             event.removed.forEach((removed: WorkspaceFolder) => {
-                const index = this.wsComponents.findIndex((value) => value.contextPath === removed.uri.fsPath);
+                const index = this.wsComponents.findIndex((value) => value.contextPath === removed.uri);
                 if (index > -1) {
                     this.wsComponents.splice(index, 1);
+                    refreshRequired = true;
                 }
             });
-            // walk all apps and components to find affected component
-            // reset contextPath for deployed components
-            // remove not deployed projects, application and component from model
-            for (const key of this.cache.keys()) {
-                if (key.contextValue === ContextType.APPLICATION) {
-                    event.removed.forEach((removed) => {
-                        const affectedComponent = this.cache.get(key).find((value) => value.contextPath.fsPath === removed.uri.fsPath);
-                        affectedComponent.contextPath = undefined;
-                    });
-                }
+            if (refreshRequired) {
+                OpenShiftExplorer.getInstance().refresh();
             }
         }
     }

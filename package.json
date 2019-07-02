@@ -594,6 +594,11 @@
           "group": "c4@2"
         },
         {
+          "command": "openshift.component.push",
+          "when": "view == openshiftProjectExplorer && viewItem == component_not_pushed",
+          "group": "c4@2"
+        },
+        {
           "command": "openshift.component.watch",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c4@3"
