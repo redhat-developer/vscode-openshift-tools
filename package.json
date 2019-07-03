@@ -595,6 +595,11 @@
         },
         {
           "command": "openshift.component.delete",
+          "when": "view == openshiftProjectExplorer && viewItem == component_no_context",
+          "group": "c5@1"
+        },
+        {
+          "command": "openshift.component.delete",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c5@1"
         },
