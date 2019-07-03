@@ -77,7 +77,7 @@ export class Component extends OpenShiftItem {
     }
 
     static async unlinkAllComponents(component: OpenShiftObject) {
-        const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+        const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         const compObj: JSON = JSON.parse(compData.stdout);
         const linkComponent = compObj['status'].linkedComponents;
         if (linkComponent) {
