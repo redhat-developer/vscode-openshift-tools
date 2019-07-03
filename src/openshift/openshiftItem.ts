@@ -71,18 +71,6 @@ export abstract class OpenShiftItem {
         return (validator.matches(value, '^[a-z]([-a-z0-9]*[a-z0-9])*$')) ? null : message;
     }
 
-    static hideTokenpassword(value: string) {
-        const regex = /--token\s*=\s*(.\w[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*)/;
-        const tokenRegex = value.match(regex);
-        return (tokenRegex) ?  value.replace(tokenRegex[1], '**********') : value;
-    }
-
-    static hideCredentialPassword(value: string) {
-        const regex = /-p\s*(.\w[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*)/;
-        const tokenRegex = value.match(regex);
-        return (tokenRegex) ? value.replace(tokenRegex[0], '-p **********'): value;
-    }
-
     static clusterURL(value: string) {
         const urlRegex = value.match('(https?:\/\/[^ ]*)');
         return (urlRegex) ? urlRegex[0] : null;

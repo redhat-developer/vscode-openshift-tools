@@ -6,6 +6,7 @@
 import * as childProcess from 'child_process';
 import * as vscode from 'vscode';
 import { ExecException, ExecOptions } from 'child_process';
+import { HidePassword } from './util/hidepassword';
 
 export interface CliExitData {
     readonly error: ExecException;
@@ -65,19 +66,12 @@ class OdoChannelImpl implements OdoChannel {
     }
 
     prettifyJson(str: string) {
-        const tokenRegex = /--token\s*=\s*(.\w[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*)/;
-        const credentialRegex = /-p\s*(.\w[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*)/;
         let jsonData: string;
         try {
             jsonData = JSON.stringify(JSON.parse(str), null, 2);
         } catch (ignore) {
-            const hideTokenRegex = str.match(tokenRegex);
-            if (hideTokenRegex) {
-                return hideTokenRegex ? str.replace(hideTokenRegex[1], '**********'): str;
-            } else {
-                const hideCredentialRegex = str.match(credentialRegex);
-                return (hideCredentialRegex) ? str.replace(hideCredentialRegex[0], '-p **********'): str;
-            }
+            const hidePass = HidePassword.hideTokenpassword(str);
+            return HidePassword.hideCredentialPassword(hidePass);
         }
         return jsonData;
     }
