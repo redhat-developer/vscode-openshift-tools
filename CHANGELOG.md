@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.0.23 (July 4, 2019)
+* [#920](https://github.com/redhat-developer/vscode-openshift-tools/pull/920) Fix odo CLI tool download checksum fail for all 3 OS variants
+* [#903](https://github.com/redhat-developer/vscode-openshift-tools/pull/903) Add new login experience using k8 config
+* [#901](https://github.com/redhat-developer/vscode-openshift-tools/pull/901) Fix for Deleting interlinked components breaks the application
+* [#911](https://github.com/redhat-developer/vscode-openshift-tools/pull/911) Integrate Azure Pipelines to CI builds
+* Move public chat discussion to [gitter](https://gitter.im/redhat-developer/openshift-connector) 
+
 ## 0.0.22 (June 18, 2019)
 * [#888](https://github.com/redhat-developer/vscode-openshift-tools/pull/888) Prettify json in OpenShift Output Channel
 * [#882](https://github.com/redhat-developer/vscode-openshift-tools/pull/882) Add BuildConfig and Builds to Clusters View

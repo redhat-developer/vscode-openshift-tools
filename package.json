@@ -2,7 +2,7 @@
   "name": "vscode-openshift-connector",
   "displayName": "OpenShift Connector",
   "description": "Interacting with Red Hat OpenShift clusters and providing a streamlined developer experience using Visual Studio Code",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "license": "MIT",
   "publisher": "redhat",
   "author": "Red Hat",
@@ -15,6 +15,13 @@
   "engines": {
     "vscode": "^1.30.0"
   },
+  "badges": [
+    {
+      "url": "https://badges.gitter.im/redhat-developer/openshift-connector.svg",
+      "href": "https://gitter.im/redhat-developer/openshift-connector",
+      "description": "Join us in the #openshift-connector channel"
+    }
+  ],
   "categories": [
     "Other"
   ],
