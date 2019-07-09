@@ -11,6 +11,7 @@ import { OpenShiftItem } from './openshiftItem';
 import { Progress } from "../util/progress";
 import open = require('open');
 import { ChildProcess } from 'child_process';
+import { getVscodeModule } from '../util/credentialManager';
 
 export class Url extends OpenShiftItem{
 
@@ -76,7 +77,11 @@ export class Url extends OpenShiftItem{
         try {
             result = JSON.parse(UrlDetails.stdout).items;
         } catch (ignore) {}
-        const urlObject = result.filter((value) => (value.metadata.name === treeItem.getName()));
-        return open(`${urlObject[0].spec.protocol}://${urlObject[0].spec.host}`);
+        if (!result) {
+            window.showInformationMessage('Selected URL is not created in cluster. Use \'Push\' command before opening URL in browser.')
+        } else {
+            const urlObject = result.filter((value) => (value.metadata.name === treeItem.getName()));
+            return open(`${urlObject[0].spec.protocol}://${urlObject[0].spec.host}`);
+        }
     }
 }
