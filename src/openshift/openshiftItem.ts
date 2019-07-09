@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Odo, OdoImpl, OpenShiftObject, ContextType, OpenShiftObjectImpl } from '../odo';
+import { Odo, OdoImpl, OpenShiftObject, OpenShiftObjectImpl } from '../odo';
 import { OpenShiftExplorer } from '../explorer';
+import { ContextType } from '../util/constants';
 import { window, QuickPickItem, TreeItemCollapsibleState } from 'vscode';
 import * as validator from 'validator';
 
