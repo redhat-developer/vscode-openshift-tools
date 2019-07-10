@@ -170,6 +170,7 @@ suite('OpenShift/Component', () => {
                 quickPickStub.onCall(3).resolves(version);
                 inputStub.onSecondCall().resolves(componentItem.getName());
                 infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves();
+                sandbox.stub(vscode.window, 'showOpenDialog').resolves([vscode.Uri.parse('file:///c%3A/Temp')]);
             });
 
             test('happy path works', async () => {

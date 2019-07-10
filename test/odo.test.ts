@@ -123,7 +123,17 @@ suite("odo", () => {
         test('getProjects returns projects under a given cluster', async () => {
             const activeProjs = [{ name: 'project1' }, { name: 'project2'}];
             yamlStub.returns({ ActiveApplications: activeProjs });
-            execStub.returns({
+            execStub.onFirstCall().resolves({
+                error: undefined,
+                stdout: 'Server https://172.17.185.52:8443',
+                stderr: ''
+            });
+            execStub.onSecondCall().resolves({
+                error: undefined,
+                stdout: 'Server https://172.17.185.52:8443',
+                stderr: ''
+            });
+            execStub.onThirdCall().resolves({
                 error: undefined,
                 stdout: JSON.stringify({
                         items: [
@@ -144,7 +154,17 @@ suite("odo", () => {
         });
 
         test('getProjects returns empty list if no projects present', async () => {
-            execStub.resolves({ stdout: '', stderr: '', error: null });
+            execStub.onFirstCall().resolves({
+                error: undefined,
+                stdout: 'Server https://172.17.185.52:8443',
+                stderr: ''
+            });
+            execStub.onSecondCall().resolves({
+                error: undefined,
+                stdout: 'Server https://172.17.185.52:8443',
+                stderr: ''
+            });
+            execStub.onThirdCall().resolves({ stdout: '', stderr: '', error: null });
             const result = await odoCli.getProjects();
 
             expect(result).empty;
