@@ -50,7 +50,6 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.app.delete', (context) => execute(Application.del, context)),
         vscode.commands.registerCommand('openshift.component.describe', (context) => execute(Component.describe, context)),
         vscode.commands.registerCommand('openshift.component.describe.palette', (context) => execute(Component.describe, context)),
-        vscode.commands.registerCommand('openshift.component.folder.create', (context) => execute(Component.createFromFolder, context)),
         vscode.commands.registerCommand('openshift.component.create', (context) => execute(Component.create, context)),
         vscode.commands.registerCommand('openshift.component.create.local', (context) => execute(Component.createFromLocal, context)),
         vscode.commands.registerCommand('openshift.component.create.git', (context) => execute(Component.createFromGit, context)),
