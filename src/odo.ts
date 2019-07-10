@@ -18,6 +18,7 @@ import yaml = require('js-yaml');
 import fs = require('fs');
 import * as odo from './odo/config';
 import { ComponentSettings } from './odo/config';
+import { GlyphChars } from './util/constants';
 
 const Collapsed = TreeItemCollapsibleState.Collapsed;
 
@@ -234,16 +235,19 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
         component: {
             icon: '',
             tooltip: 'Component: {label}',
+            description: '',
             getChildren: () => this.odo.getComponentChildren(this)
         },
         component_not_pushed: {
             icon: '',
             tooltip: 'Component: {label}',
+            description: '',
             getChildren: () => this.odo.getComponentChildren(this)
         },
         component_no_context: {
             icon: '',
             tooltip: 'Component: {label}',
+            description: '',
             getChildren: () => this.odo.getComponentChildren(this)
         },
         service: {
@@ -318,15 +322,19 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
     }
 
     get label(): string {
+        return this.name;
+    }
+
+    get description(): string {
         let suffix = '';
         if (this.contextValue === ContextType.COMPONENT) {
-            suffix = ' (not pushed)';
+            suffix = `${GlyphChars.Space}${GlyphChars.NotPushed} not pushed`;
         } else if (this.contextValue === ContextType.COMPONENT_PUSHED) {
-            suffix = ' (pushed)';
+            suffix = `${GlyphChars.Space}${GlyphChars.Push} pushed`;
         } else if (this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
-            suffix = ' (no context)';
+            suffix = `${GlyphChars.Space}${GlyphChars.NoContext} no context`;
         }
-        return this.name + suffix;
+        return suffix;
     }
 
     getName(): string {
