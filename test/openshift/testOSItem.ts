@@ -3,8 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { OpenShiftObject } from "../../src/odo";
-import { ContextType } from '../../src/util/constants';
+import { OpenShiftObject, ContextType } from "../../src/odo";
 
 export class TestItem implements OpenShiftObject {
     public readonly contextValue: ContextType;

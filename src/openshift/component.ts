@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { OpenShiftItem } from './openshiftItem';
-import { OpenShiftObject, Command } from '../odo';
+import { OpenShiftObject, Command, ContextType } from '../odo';
 import { window, commands, QuickPickItem, Uri } from 'vscode';
 import { Progress } from '../util/progress';
 import open = require('open');
@@ -16,7 +16,6 @@ import { Refs, Ref, Type } from '../util/refs';
 import { Delayer } from '../util/async';
 import { contextGlobalState } from '../extension';
 import { Platform } from '../util/platform';
-import { ContextType } from '../util/constants';
 
 export class Component extends OpenShiftItem {
 
