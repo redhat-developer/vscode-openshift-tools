@@ -178,7 +178,7 @@ suite('OpenShift/Component', () => {
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(execStub).calledOnceWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), uri, ref));
+                expect(execStub).calledWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), uri, ref));
             });
 
             test('returns null when no git repo selected', async () => {
