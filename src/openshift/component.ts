@@ -178,7 +178,7 @@ export class Component extends OpenShiftItem {
         if (!component) return null;
         Component.setPushCmd(component.getName(), component.getParent().getName(), component.getParent().getParent().getName());
         Component.odo.executeInTerminal(Command.pushComponent(), component.contextPath.fsPath);
-        context.contextValue = ContextType.COMPONENT_PUSHED;
+        component.contextValue = ContextType.COMPONENT_PUSHED;
         Component.explorer.refresh(component);
     }
 

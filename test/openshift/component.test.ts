@@ -785,7 +785,7 @@ suite('OpenShift/Component', () => {
                 items: [
                     {
                         spec: {
-                            path: 'url',
+                            host: 'url',
                             protocol: 'https',
                             port: 8080
                         }
@@ -804,13 +804,13 @@ suite('OpenShift/Component', () => {
                 items: [
                     {
                         spec: {
-                            path: 'url1',
+                            host: 'url1',
                             protocol: 'https',
                             port: 8080
                         }
                     }, {
                         spec: {
-                            path: 'url2',
+                            host: 'url2',
                             protocol: 'https',
                             port: 8080
                         }
@@ -829,13 +829,13 @@ suite('OpenShift/Component', () => {
                 items: [
                     {
                         spec: {
-                            path: 'url1',
+                            host: 'url1',
                             protocol: 'https',
                             port: 8080
                         }
                     }, {
                         spec: {
-                            path: 'url2',
+                            host: 'url2',
                             protocol: 'https',
                             port: 8080
                         }
@@ -855,7 +855,7 @@ suite('OpenShift/Component', () => {
                 items: [
                     {
                         spec: {
-                            path: 'url',
+                            host: 'url',
                             protocol: 'https',
                             port: 8080
                         }

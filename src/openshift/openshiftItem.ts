@@ -129,7 +129,7 @@ export abstract class OpenShiftItem {
         if (!context) context = await window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder});
         if (context && context.contextValue === ContextType.PROJECT && appPlaceholder ) {
             project = context as OpenShiftObject;
-            context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(OpenShiftItem.getApplicationNames(context as OpenShiftObject, appPlaceholder && compPlaceholder === undefined), {placeHolder: appPlaceholder});
+            context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(OpenShiftItem.getApplicationNames(project, appPlaceholder && compPlaceholder === undefined), {placeHolder: appPlaceholder});
             if (context && isCommand(context)) {
                 context = new OpenShiftObjectImpl(project, await context.command(), ContextType.APPLICATION, false, OdoImpl.Instance, TreeItemCollapsibleState.Collapsed);
             }
