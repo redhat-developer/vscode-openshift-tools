@@ -55,12 +55,12 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.describe.palette', (context) => execute(Component.describe, context)),
         vscode.commands.registerCommand('openshift.component.folder.create', (context) => execute(Component.createFromFolder, context)),
         vscode.commands.registerCommand('openshift.component.create', (context) => execute(Component.create, context)),
-        vscode.commands.registerCommand('openshift.component.create.local', (context) => execute(Component.createFromLocal, context)),
-        vscode.commands.registerCommand('openshift.component.create.git', (context) => execute(Component.createFromGit, context)),
-        vscode.commands.registerCommand('openshift.component.create.binary', (context) => execute(Component.createFromBinary, context)),
+        vscode.commands.registerCommand('openshift.component.createFromLocal', (context) => execute(Component.createFromLocal, context)),
+        vscode.commands.registerCommand('openshift.component.createFromGit', (context) => execute(Component.createFromGit, context)),
+        vscode.commands.registerCommand('openshift.component.createFromBinary', (context) => execute(Component.createFromBinary, context)),
         vscode.commands.registerCommand('openshift.component.delete.palette', (context) => execute(Component.del, context)),
         vscode.commands.registerCommand('openshift.component.push', (context) => execute(Component.push, context)),
-        vscode.commands.registerCommand('openshift.component.last.push', (context) => execute(Component.lastPush, context)),
+        vscode.commands.registerCommand('openshift.component.lastPush', (context) => execute(Component.lastPush, context)),
         vscode.commands.registerCommand('openshift.component.push.palette', (context) => execute(Component.push, context)),
         vscode.commands.registerCommand('openshift.component.watch', (context) => execute(Component.watch, context)),
         vscode.commands.registerCommand('openshift.component.watch.palette', (context) => execute(Component.watch, context)),
@@ -85,8 +85,8 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.service.describe.palette', (context) => execute(Service.describe, context)),
         vscode.commands.registerCommand('openshift.component.linkComponent', (context) => execute(Component.linkComponent, context)),
         vscode.commands.registerCommand('openshift.component.linkService', (context) => execute(Component.linkService, context)),
-        vscode.commands.registerCommand('openshift.useProject', (context) => vscode.commands.executeCommand('extension.vsKubernetesUseNamespace', context)),
-        vscode.commands.registerCommand('openshift.openProjectConsole', openProjectConsole),
+        vscode.commands.registerCommand('clusters.openshift.openProjectConsole', openProjectConsole),
+        vscode.commands.registerCommand('clusters.openshift.useProject', (context) => vscode.commands.executeCommand('extension.vsKubernetesUseNamespace', context)),
         OpenShiftExplorer.getInstance()
     ];
     disposable.forEach((value) => context.subscriptions.push(value));
