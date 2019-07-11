@@ -11,7 +11,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
-import { OdoImpl, Command } from '../../src/odo';
+import { OdoImpl, Command, ContextType } from '../../src/odo';
 import { Progress } from '../../src/util/progress';
 import * as Util from '../../src/util/async';
 import { Refs } from '../../src/util/refs';
@@ -26,10 +26,11 @@ suite('OpenShift/Component', () => {
     let sandbox: sinon.SinonSandbox;
     let termStub: sinon.SinonStub, execStub: sinon.SinonStub;
     let getComponentsStub: sinon.SinonStub;
-    const projectItem = new TestItem(null, 'project');
-    const appItem = new TestItem(projectItem, 'application');
-    const componentItem = new TestItem(appItem, 'component');
-    const serviceItem = new TestItem(appItem, 'service');
+    const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
+    const projectItem = new TestItem(clusterItem, 'project', ContextType.PROJECT);
+    const appItem = new TestItem(projectItem, 'application', ContextType.APPLICATION);
+    const componentItem = new TestItem(appItem, 'component', ContextType.COMPONENT);
+    const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
     const errorMessage = 'FATAL ERROR';
     let getProjects: sinon.SinonStub;
     let getApps: sinon.SinonStub;
@@ -177,7 +178,7 @@ suite('OpenShift/Component', () => {
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(termStub).calledOnceWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), uri, ref));
+                expect(execStub).calledOnceWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), uri, ref));
             });
 
             test('returns null when no git repo selected', async () => {
@@ -873,20 +874,5 @@ suite('OpenShift/Component', () => {
             expect(opnStub).is.not.called;
         });
 
-        test('getComponentUrl returns url list for a component', async () => {
-            execStub.onCall(0).resolves({error: undefined, stdout: JSON.stringify({
-                items: [
-                    {
-                        spec: {
-                            path: 'url',
-                            protocol: 'https',
-                            port: 8080
-                        }
-                    }
-                ]
-            }), stderr: ''});
-            const result = await Command.getComponentUrl(projectItem.getName(), appItem.getName(), componentItem.getName());
-            expect(result.length).equals(78);
-        });
     });
 });

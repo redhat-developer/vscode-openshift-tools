@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { OdoImpl, Command } from '../../src/odo';
+import { OdoImpl, Command, ContextType } from '../../src/odo';
 import { Application } from '../../src/openshift/application';
 import { TestItem } from './testOSItem';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
@@ -22,9 +22,8 @@ suite('OpenShift/Application', () => {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
     let getProjectNamesStub: sinon.SinonStub;
-    let inputStub: sinon.SinonStub;
-    const projectItem = new TestItem(null, 'project');
-    const appItem = new TestItem(projectItem, 'app');
+    const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
+    const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -32,7 +31,7 @@ suite('OpenShift/Application', () => {
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
         getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
-        inputStub = sandbox.stub(vscode.window, 'showInputBox');
+        sandbox.stub(vscode.window, 'showInputBox');
     });
 
     teardown(() => {
@@ -144,9 +143,9 @@ suite('OpenShift/Application', () => {
             expect(warnStub).is.not.called;
         });
 
-        test('requests for a project and an application and exit if application is not provided', async () => {
+        test('requests for a project and an application and exits if application is not provided', async () => {
             const stub = sandbox.stub(vscode.window, 'showQuickPick');
-            stub.onFirstCall().resolves(appItem);
+            stub.onFirstCall().resolves(projectItem);
             stub.onSecondCall().resolves();
             warnStub.resolves('Yes');
 

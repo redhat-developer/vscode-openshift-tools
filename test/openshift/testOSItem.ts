@@ -4,14 +4,17 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { OpenShiftObject, ContextType } from "../../src/odo";
+import { Uri } from "vscode";
 
 export class TestItem implements OpenShiftObject {
-    public readonly contextValue: ContextType;
+
     constructor(
         private parent: OpenShiftObject,
         private name: string,
+        public readonly contextValue: ContextType,
         private children = [],
-        public deployed = false) {
+        public deployed = false,
+        public contextPath = Uri.parse('file:///c%3A/Temp')) {
     }
 
     getName(): string {

@@ -11,7 +11,7 @@ export const enum Kind {
 
 export const enum SourceType {
     GIT = 'git', LOCAL = 'local', BINARY = 'binary'
-};
+}
 
 export interface Config {
     kind: Kind;

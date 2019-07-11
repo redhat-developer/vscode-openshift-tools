@@ -177,7 +177,7 @@ export class Component extends OpenShiftItem {
             "For which Component you want to push the changes");
         if (!component) return null;
         Component.setPushCmd(component.getName(), component.getParent().getName(), component.getParent().getParent().getName());
-        Component.odo.executeInTerminal(Command.pushComponent(), context.contextPath.fsPath);
+        Component.odo.executeInTerminal(Command.pushComponent(), component.contextPath.fsPath);
         context.contextValue = ContextType.COMPONENT_PUSHED;
         Component.explorer.refresh(component);
     }
@@ -197,7 +197,7 @@ export class Component extends OpenShiftItem {
             'Select an Application',
             'Select a Component you want to watch');
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), context.contextPath.fsPath);
+        Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
 
     static async openUrl(context: OpenShiftObject): Promise<ChildProcess> {

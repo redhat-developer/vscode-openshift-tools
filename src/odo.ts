@@ -488,7 +488,7 @@ class OdoModel {
 
 export class OdoImpl implements Odo {
     public static data: OdoModel = new OdoModel();
-    private static ROOT: OpenShiftObject = new OpenShiftObjectImpl(undefined, '/', undefined, false, undefined);
+    public static ROOT: OpenShiftObject = new OpenShiftObjectImpl(undefined, '/', undefined, false, undefined);
     private static cli: cliInstance.ICli = cliInstance.Cli.getInstance();
     private static instance: Odo;
 
@@ -497,8 +497,6 @@ export class OdoImpl implements Odo {
         'the server has asked for the client to provide credentials',
         'Please login to your server'
     ];
-
-    private wsComponents: odo.ComponentSettings[] = [];
 
     private constructor() {
     }
@@ -836,7 +834,6 @@ export class OdoImpl implements Odo {
     }
 
     public async deleteApplication(app: OpenShiftObject): Promise<OpenShiftObject> {
-        const project = app.getParent();
         await this.execute(Command.deleteApplication(app.getParent().getName(), app.getName()));
         return this.deleteAndRefresh(app);
     }
@@ -879,7 +876,6 @@ export class OdoImpl implements Odo {
     }
 
     public async deleteNotPushedComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
-        const app = component.getParent();
         return this.deleteAndRefresh(component);
     }
 

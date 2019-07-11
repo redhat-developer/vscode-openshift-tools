@@ -6,7 +6,7 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import { OpenShiftExplorer } from '../src/explorer';
-import { OdoImpl } from '../src/odo';
+import { OdoImpl, ContextType } from '../src/odo';
 import { TestItem } from './openshift/testOSItem';
 import sinon = require('sinon');
 
@@ -14,10 +14,10 @@ const expect = chai.expect;
 chai.use(sinonChai);
 
 suite('OpenShift Application Explorer', () => {
-    const clusterItem = new TestItem(null, 'cluster');
-    const projectItem = new TestItem(clusterItem, 'project');
-    const appItem = new TestItem(projectItem, 'application', );
-    const serviceItem = new TestItem(appItem, 'service');
+    const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
+    const projectItem = new TestItem(clusterItem, 'project', ContextType.PROJECT);
+    const appItem = new TestItem(projectItem, 'application', ContextType.APPLICATION);
+    const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
     const sandbox = sinon.createSandbox();
 
     let oseInstance: OpenShiftExplorer;
