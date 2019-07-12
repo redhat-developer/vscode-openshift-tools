@@ -359,9 +359,9 @@
         "category": "OpenShift"
       },
       {
-				"command": "openshift.openProjectConsole",
-				"title": "Open Project in Console"
-			}
+        "command": "openshift.openProjectConsole",
+        "title": "Open Project in Console"
+      }
     ],
     "keybindings": [
       {
@@ -645,9 +645,9 @@
           "when": "viewItem =~ /\\.openshift\\.inactiveProject/i"
         },
         {
-					"command": "openshift.openProjectConsole",
-					"when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.\\w*cluster/i"
-				}
+          "command": "openshift.openProjectConsole",
+          "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.\\w*cluster/i"
+        }
       ]
     },
     "configuration": {
