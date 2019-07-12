@@ -79,7 +79,8 @@
     "onCommand:openshift.service.delete",
     "onCommand:openshift.service.describe",
     "onCommand:openshift.service.describe.palette",
-    "onCommand:openshift.component.folder.create"
+    "onCommand:openshift.component.folder.create",
+    "onCommand:openshift.openProjectConsole"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -356,7 +357,11 @@
         "command": "openshift.useProject",
         "title": "Use Project",
         "category": "OpenShift"
-      }
+      },
+      {
+				"command": "openshift.openProjectConsole",
+				"title": "Open Project in Console"
+			}
     ],
     "keybindings": [
       {
@@ -638,7 +643,11 @@
         {
           "command": "openshift.useProject",
           "when": "viewItem =~ /\\.openshift\\.inactiveProject/i"
-        }
+        },
+        {
+					"command": "openshift.openProjectConsole",
+					"when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.\\w*cluster/i"
+				}
       ]
     },
     "configuration": {
