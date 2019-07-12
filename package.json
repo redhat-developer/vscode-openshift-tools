@@ -92,6 +92,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.build.start",
+        "title": "Start Build",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.output",
         "title": "Show Output Channel",
         "category": "OpenShift"
@@ -500,6 +505,11 @@
           "command": "openshift.project.create",
           "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
           "group": "c1"
+        },
+        {
+          "command": "openshift.build.start",
+          "group": "2@0",
+          "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.resource(?!\\.namespace).*/i"
         },
         {
           "command": "openshift.catalog.listComponents",
