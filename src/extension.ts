@@ -87,6 +87,7 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.linkService', (context) => execute(Component.linkService, context)),
         vscode.commands.registerCommand('clusters.openshift.openProjectConsole', openProjectConsole),
         vscode.commands.registerCommand('clusters.openshift.useProject', (context) => vscode.commands.executeCommand('extension.vsKubernetesUseNamespace', context)),
+        vscode.commands.registerCommand('openshift.issueTracker', issueTracker),
         OpenShiftExplorer.getInstance()
     ];
     disposable.forEach((value) => context.subscriptions.push(value));
@@ -175,6 +176,23 @@ async function isOpenShift(): Promise<boolean> {
         }
         return sr.stdout.includes("apps.openshift.io/v1");  // Naive check to keep example simple!
     }
+}
+
+async function issueTracker() {
+    let body: String = '';
+    const repoURL: String = `https://github.com/redhat-developer/vscode-openshift-tools`;
+    const template = {
+        'VS Code version:': vscode.version,
+        'OS:': Platform.OS,
+        'Extension version:': vscode.extensions.getExtension('redhat.vscode-openshift-connector').packageJSON.version
+    };
+    for (const [key, value] of Object.entries(template)) {
+        body = `${body}${key} ${value}\n`;
+    }
+
+    return vscode.commands.executeCommand(
+        'vscode.open',
+        vscode.Uri.parse(`${repoURL}/issues/new?labels=bug&title=Issue&body=**Environment**\n${body}\n**Description**`));
 }
 
 // this method is called when your extension is deactivated
