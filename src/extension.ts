@@ -192,7 +192,7 @@ async function issueTracker() {
 
     return vscode.commands.executeCommand(
         'vscode.open',
-        vscode.Uri.parse(`${repoURL}/issues/new?labels=bug&title=Issue&body=**Environment**\n${body}\n**Description**`));
+        vscode.Uri.parse(`${repoURL}/issues/new?labels=kind/bug&title=Issue&body=**Environment**\n${body}\n**Description**`));
 }
 
 // this method is called when your extension is deactivated
