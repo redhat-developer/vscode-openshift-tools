@@ -69,6 +69,7 @@ export class Component extends OpenShiftItem {
             buildConfigJson['items'].forEach((key: any) => {
                 buildConfigName.push(key.metadata.name);
             });
+            if (buildConfigName.length === 0) throw Error('You have no build available to start');
             buildName = await window.showQuickPick(buildConfigName, {placeHolder: "Select the build to start"});
         }
         if (!buildName) return null;
