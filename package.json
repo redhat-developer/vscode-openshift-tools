@@ -51,9 +51,9 @@
     "onCommand:openshift.app.create",
     "onCommand:openshift.app.delete",
     "onCommand:openshift.component.create",
-    "onCommand:openshift.component.create.local",
-    "onCommand:openshift.component.create.git",
-    "onCommand:openshift.component.create.binary",
+    "onCommand:openshift.component.createFromLocal",
+    "onCommand:openshift.component.createFromGit",
+    "onCommand:openshift.component.createFromBinary",
     "onCommand:openshift.component.describe",
     "onCommand:openshift.component.describe.palette",
     "onCommand:openshift.component.log",
@@ -62,7 +62,7 @@
     "onCommand:openshift.component.followLog.palette",
     "onCommand:openshift.component.delete",
     "onCommand:openshift.component.push",
-    "onCommand:openshift.component.last.push",
+    "onCommand:openshift.component.lastPush",
     "onCommand:openshift.component.push.palette",
     "onCommand:openshift.component.watch",
     "onCommand:openshift.component.watch.palette",
@@ -79,7 +79,9 @@
     "onCommand:openshift.service.delete",
     "onCommand:openshift.service.describe",
     "onCommand:openshift.service.describe.palette",
-    "onCommand:openshift.component.folder.create"
+    "onCommand:openshift.component.folder.create",
+    "onCommand:clusters.openshift.openProjectConsole",
+    "onCommand:clusters.openshift.useProject"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -167,17 +169,17 @@
         "category": "OpenShift"
       },
       {
-        "command": "openshift.component.create.local",
+        "command": "openshift.component.createFromLocal",
         "title": "New Component from local folder",
         "category": "OpenShift"
       },
       {
-        "command": "openshift.component.create.git",
+        "command": "openshift.component.createFromGit",
         "title": "New Component from Git repository",
         "category": "OpenShift"
       },
       {
-        "command": "openshift.component.create.binary",
+        "command": "openshift.component.createFromBinary",
         "title": "New Component form binary",
         "category": "OpenShift"
       },
@@ -257,7 +259,7 @@
         "category": "OpenShift"
       },
       {
-        "command": "openshift.component.last.push",
+        "command": "openshift.component.lastPush",
         "title": "Repeat last push command",
         "category": "OpenShift"
       },
@@ -353,9 +355,13 @@
         "category": "OpenShift"
       },
       {
-        "command": "openshift.useProject",
+        "command": "clusters.openshift.useProject",
         "title": "Use Project",
         "category": "OpenShift"
+      },
+      {
+        "command": "clusters.openshift.openProjectConsole",
+        "title": "Open Project in Console"
       }
     ],
     "keybindings": [
@@ -370,7 +376,7 @@
         "mac": "ctrl+shift+r"
       },
       {
-        "command": "openshift.component.last.push",
+        "command": "openshift.component.lastPush",
         "key": "alt+shift+p",
         "mac": "ctrl+shift+p"
       }
@@ -636,8 +642,12 @@
           "group": "inline"
         },
         {
-          "command": "openshift.useProject",
+          "command": "clusters.openshift.useProject",
           "when": "viewItem =~ /\\.openshift\\.inactiveProject/i"
+        },
+        {
+          "command": "clusters.openshift.openProjectConsole",
+          "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.\\w*cluster/i"
         }
       ]
     },

@@ -21,6 +21,9 @@ import fsx = require('fs-extra');
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { DeploymentConfigNodeContributor } from './k8s/deployment';
+import open = require("open");
+
+let clusterExplorer: k8s.ClusterExplorerV1 | undefined = undefined;
 
 export let contextGlobalState: vscode.ExtensionContext;
 
@@ -52,12 +55,12 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.describe.palette', (context) => execute(Component.describe, context)),
         vscode.commands.registerCommand('openshift.component.folder.create', (context) => execute(Component.createFromFolder, context)),
         vscode.commands.registerCommand('openshift.component.create', (context) => execute(Component.create, context)),
-        vscode.commands.registerCommand('openshift.component.create.local', (context) => execute(Component.createFromLocal, context)),
-        vscode.commands.registerCommand('openshift.component.create.git', (context) => execute(Component.createFromGit, context)),
-        vscode.commands.registerCommand('openshift.component.create.binary', (context) => execute(Component.createFromBinary, context)),
+        vscode.commands.registerCommand('openshift.component.createFromLocal', (context) => execute(Component.createFromLocal, context)),
+        vscode.commands.registerCommand('openshift.component.createFromGit', (context) => execute(Component.createFromGit, context)),
+        vscode.commands.registerCommand('openshift.component.createFromBinary', (context) => execute(Component.createFromBinary, context)),
         vscode.commands.registerCommand('openshift.component.delete.palette', (context) => execute(Component.del, context)),
         vscode.commands.registerCommand('openshift.component.push', (context) => execute(Component.push, context)),
-        vscode.commands.registerCommand('openshift.component.last.push', (context) => execute(Component.lastPush, context)),
+        vscode.commands.registerCommand('openshift.component.lastPush', (context) => execute(Component.lastPush, context)),
         vscode.commands.registerCommand('openshift.component.push.palette', (context) => execute(Component.push, context)),
         vscode.commands.registerCommand('openshift.component.watch', (context) => execute(Component.watch, context)),
         vscode.commands.registerCommand('openshift.component.watch.palette', (context) => execute(Component.watch, context)),
@@ -82,27 +85,29 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.service.describe.palette', (context) => execute(Service.describe, context)),
         vscode.commands.registerCommand('openshift.component.linkComponent', (context) => execute(Component.linkComponent, context)),
         vscode.commands.registerCommand('openshift.component.linkService', (context) => execute(Component.linkService, context)),
-        vscode.commands.registerCommand('openshift.useProject', (context) => vscode.commands.executeCommand('extension.vsKubernetesUseNamespace', context)),
+        vscode.commands.registerCommand('clusters.openshift.openProjectConsole', openProjectConsole),
+        vscode.commands.registerCommand('clusters.openshift.useProject', (context) => vscode.commands.executeCommand('extension.vsKubernetesUseNamespace', context)),
         OpenShiftExplorer.getInstance()
     ];
     disposable.forEach((value) => context.subscriptions.push(value));
 
-    const clusterExplorer = await k8s.extension.clusterExplorer.v1;
+    const clusterExplorerAPI = await k8s.extension.clusterExplorer.v1;
 
-    if (clusterExplorer.available) {
+    if (clusterExplorerAPI.available) {
+        clusterExplorer = clusterExplorerAPI.api;
         const nodeContributors = [
-            clusterExplorer.api.nodeSources.resourceFolder("Projects", "Projects", "Project", "project").if(isOpenShift).at(undefined),
-            clusterExplorer.api.nodeSources.resourceFolder("Templates", "Templates", "Template", "template").if(isOpenShift).at(undefined),
-            clusterExplorer.api.nodeSources.resourceFolder("ImageStreams", "ImageStreams", "ImageStream", "ImageStream").if(isOpenShift).at("Workloads"),
-            clusterExplorer.api.nodeSources.resourceFolder("Routes", "Routes", "Route", "route").if(isOpenShift).at("Network"),
-            clusterExplorer.api.nodeSources.resourceFolder("DeploymentConfigs", "DeploymentConfigs", "DeploymentConfig", "dc").if(isOpenShift).at("Workloads"),
-            clusterExplorer.api.nodeSources.resourceFolder("BuildConfigs", "BuildConfigs", "BuildConfig", "bc").if(isOpenShift).at("Workloads"),
+            clusterExplorer.nodeSources.resourceFolder("Projects", "Projects", "Project", "project").if(isOpenShift).at(undefined),
+            clusterExplorer.nodeSources.resourceFolder("Templates", "Templates", "Template", "template").if(isOpenShift).at(undefined),
+            clusterExplorer.nodeSources.resourceFolder("ImageStreams", "ImageStreams", "ImageStream", "ImageStream").if(isOpenShift).at("Workloads"),
+            clusterExplorer.nodeSources.resourceFolder("Routes", "Routes", "Route", "route").if(isOpenShift).at("Network"),
+            clusterExplorer.nodeSources.resourceFolder("DeploymentConfigs", "DeploymentConfigs", "DeploymentConfig", "dc").if(isOpenShift).at("Workloads"),
+            clusterExplorer.nodeSources.resourceFolder("BuildConfigs", "BuildConfigs", "BuildConfig", "bc").if(isOpenShift).at("Workloads"),
             new DeploymentConfigNodeContributor()
         ];
         nodeContributors.forEach(element => {
-            clusterExplorer.api.registerNodeContributor(element);
+            clusterExplorer.registerNodeContributor(element);
         });
-        clusterExplorer.api.registerNodeUICustomizer({customize});
+        clusterExplorer.registerNodeUICustomizer({customize});
     }
 }
 
@@ -122,6 +127,21 @@ async function initNamespaceName(node: ClusterExplorerV1.ClusterExplorerResource
             return "";
         }
         return currentContext.context.namespace || "default";
+    }
+}
+
+async function openProjectConsole (commandTarget: any) {
+    if (!commandTarget) {
+        vscode.window.showErrorMessage("Cannot load the Project");
+        return;
+    }
+
+    if (isOpenShift()) {
+        const project = commandTarget.id.split('/')[0];
+        const clusterUrl = commandTarget.metadata.clusterName.replace(/-/g, '.');
+        vscode.window.showInformationMessage(`Opening Console for project '${project}'`);
+        await open(`https://${clusterUrl}/console/project/${project}/overview`);
+        return;
     }
 }
 

@@ -61,7 +61,7 @@ suite('openshift connector Extension', async () => {
     test('should activate extension', async () => {
         sandbox.stub(vscode.window, 'showErrorMessage');
         const cmds: string[] = await vscode.commands.getCommands();
-        const osc: string[] = cmds.filter((item) => item.includes('openshift.'));
+        const osc: string[] = cmds.filter((item) => item.startsWith('openshift.'));
         const mths: string[] = await getStaticMethodsToStub(osc);
         (<any>[Application, Catalog, Cluster, Component, Project, Service, Storage, Url]).forEach(async (item) => {
             mths.forEach((name) => {

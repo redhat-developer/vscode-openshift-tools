@@ -163,6 +163,8 @@ suite('OpenShift/Component', () => {
         suite('from git repository', () => {
             const uri = 'git uri';
             setup(() => {
+                sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves(['nodejs']);
+                sandbox.stub(OdoImpl.prototype, 'getComponentTypeVersions').resolves(['latest']);
                 quickPickStub.onFirstCall().resolves({ label: 'Git Repository' });
                 inputStub.onFirstCall().resolves(uri);
                 quickPickStub.onSecondCall().resolves('master');
@@ -176,7 +178,7 @@ suite('OpenShift/Component', () => {
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(termStub).calledOnceWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), uri, ref));
+                expect(termStub).calledWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), uri, ref));
             });
 
             test('returns null when no git repo selected', async () => {
