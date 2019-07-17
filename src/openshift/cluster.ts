@@ -9,8 +9,8 @@ import { window, commands, env, QuickPickItem } from 'vscode';
 import { CliExitData, Cli } from "../cli";
 import open = require("open");
 import { TokenStore } from "../util/credentialManager";
-import { HidePassword } from '../util/hidepassword';
 import { KubeConfigUtils } from '../util/kubeUtils';
+import { Filters } from "../util/filters";
 
 class CreateUrlItem implements QuickPickItem {
 
@@ -173,7 +173,7 @@ export class Cluster extends OpenShiftItem {
             .then(() => Cluster.odo.execute(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd)))
             .then((result) => Cluster.save(username, passwd, password, result))
             .then((result) => Cluster.loginMessage(clusterURL, result))
-            .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${HidePassword.hideCredentialPassword(error.cmd)}'!`));
+            .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.cmd)}'!`));
     }
 
     static async readFromClipboard() {
@@ -206,7 +206,7 @@ export class Cluster extends OpenShiftItem {
         return Promise.resolve()
             .then(() => Cluster.odo.execute(Command.odoLoginWithToken(clusterURL, ocToken)))
             .then((result) => Cluster.loginMessage(clusterURL, result))
-            .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${HidePassword.hideTokenpassword(error.cmd)}'!`));
+            .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(error.cmd)}'!`));
     }
 
     private static async loginMessage(clusterURL: string, result: CliExitData): Promise<string> {

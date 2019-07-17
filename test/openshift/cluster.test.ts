@@ -17,7 +17,7 @@ import { TestItem } from './testOSItem';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
 import { getVscodeModule } from '../../src/util/credentialManager';
-import { HidePassword } from '../../src/util/hidepassword';
+import { Filters } from '../../src/util/filters';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -89,7 +89,7 @@ suite('Openshift/Cluster', () => {
             quickPickStub.onThirdCall().resolves({description: "Current Context", label: testUser});
             inputStub.resolves(password);
             commandStub.rejects(error);
-            sandbox.stub(HidePassword, 'hideTokenpassword').returns('FATAL ERROR');
+            sandbox.stub(Filters, 'filterToken').returns('FATAL ERROR');
 
             try {
                 await Cluster.login();
@@ -164,7 +164,7 @@ suite('Openshift/Cluster', () => {
 
             test('errors if there is output on odo stderr', async () => {
                 execStub.resolves(errorData);
-                sandbox.stub(HidePassword, 'hideCredentialPassword').returns('FATAL ERROR');
+                sandbox.stub(Filters, 'filterPassword').returns('FATAL ERROR');
 
                 try {
                     await Cluster.credentialsLogin();
@@ -250,7 +250,7 @@ suite('Openshift/Cluster', () => {
 
             test('handles incoming errors the same way as credentials login', async () => {
                 execStub.rejects(error);
-                sandbox.stub(HidePassword, 'hideTokenpassword').returns('FATAL ERROR');
+                sandbox.stub(Filters, 'filterToken').returns('FATAL ERROR');
                 try {
                     await Cluster.tokenLogin();
                     expect.fail();
@@ -316,7 +316,7 @@ suite('Openshift/Cluster', () => {
         });
 
         test('throws errors from subsequent login', async () => {
-            sandbox.stub(HidePassword, 'hideTokenpassword').returns('FATAL ERROR');
+            sandbox.stub(Filters, 'filterToken').returns('FATAL ERROR');
             execStub.onSecondCall().resolves(errorData);
             infoStub.resolves('Yes');
             quickPickStub.onFirstCall().resolves('Credentials');

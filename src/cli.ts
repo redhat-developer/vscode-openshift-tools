@@ -6,7 +6,7 @@
 import * as childProcess from 'child_process';
 import * as vscode from 'vscode';
 import { ExecException, ExecOptions } from 'child_process';
-import { HidePassword } from './util/hidepassword';
+import { Filters } from './util/filters';
 
 export interface CliExitData {
     readonly error: ExecException;
@@ -70,8 +70,8 @@ class OdoChannelImpl implements OdoChannel {
         try {
             jsonData = JSON.stringify(JSON.parse(str), null, 2);
         } catch (ignore) {
-            const hidePass = HidePassword.hideTokenpassword(str);
-            return HidePassword.hideCredentialPassword(hidePass);
+            const hidePass = Filters.filterToken(str);
+            return Filters.filterPassword(hidePass);
         }
         return jsonData;
     }
