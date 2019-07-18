@@ -11,7 +11,11 @@ import {
     EventEmitter,
     Disposable,
     TreeView,
-    window
+    window,
+    extensions,
+    version,
+    commands,
+    Uri
 } from 'vscode';
 
 import { Platform } from './util/platform';
@@ -73,5 +77,21 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         // https://github.com/redhat-developer/vscode-openshift-tools/issues/762
         await this.treeView.reveal(item);
         this.treeView.reveal(item);
+    }
+
+    static async reportIssue() {
+        let body: String = '';
+        const repoURL: String = `https://github.com/redhat-developer/vscode-openshift-tools`;
+        const template = {
+            'VS Code version:': version,
+            'OS:': Platform.OS,
+            'Extension version:': extensions.getExtension('redhat.vscode-openshift-connector').packageJSON.version
+        };
+        for (const [key, value] of Object.entries(template)) {
+            body = `${body}${key} ${value}\n`;
+        }
+        return commands.executeCommand(
+            'vscode.open',
+            Uri.parse(`${repoURL}/issues/new?labels=kind/bug&title=Issue&body=**Environment**\n${body}\n**Description**`));
     }
 }

@@ -23,6 +23,7 @@ import { Storage } from '../src/openshift/storage';
 import { Url } from '../src/openshift/url';
 import packagejson = require('../package.json');
 import * as Extension from '../src/extension';
+import { OpenShiftExplorer } from '../src/explorer';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -64,7 +65,7 @@ suite('openshift connector Extension', async () => {
         const cmds: string[] = await vscode.commands.getCommands();
         const osc: string[] = cmds.filter((item) => item.startsWith('openshift.'));
         const mths: string[] = await getStaticMethodsToStub(osc);
-        [Application, Catalog, Cluster, Component, Project, Service, Storage, Url, Extension].forEach((item: { [x: string]: any; }) => {
+        [Application, Catalog, Cluster, Component, Project, Service, Storage, Url, OpenShiftExplorer].forEach((item: { [x: string]: any; }) => {
             mths.forEach((name) => {
                 if (item[name]) {
                     sandbox.stub(item, name).resolves();
