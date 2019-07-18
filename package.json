@@ -80,6 +80,7 @@
     "onCommand:openshift.service.describe",
     "onCommand:openshift.service.describe.palette",
     "onCommand:openshift.component.folder.create",
+    "onCommand:openshift.explorer.reportIssue",
     "onCommand:clusters.openshift.openProjectConsole",
     "onCommand:clusters.openshift.useProject"
   ],
@@ -105,7 +106,10 @@
         "command": "openshift.explorer.login",
         "title": "Log in to cluster",
         "category": "OpenShift",
-        "icon": "images/title/login.png"
+        "icon": {
+          "dark": "images/title/dark/icon-login.svg",
+          "light": "images/title/light/icon-login.svg"
+        }
       },
       {
         "command": "openshift.explorer.login.tokenLogin",
@@ -121,7 +125,19 @@
         "command": "openshift.explorer.refresh",
         "title": "Refresh View",
         "category": "OpenShift",
-        "icon": "images/title/refresh.png"
+        "icon": {
+          "dark": "images/title/dark/icon-refresh.svg",
+          "light": "images/title/light/icon-refresh.svg"
+        }
+      },
+      {
+        "command": "openshift.explorer.reportIssue",
+        "title": "Report Extension Issue on GitHub",
+        "category": "OpenShift",
+        "icon": {
+          "dark": "images/title/dark/icon-issue.svg",
+          "light": "images/title/light/icon-issue.svg"
+        }
       },
       {
         "command": "openshift.project.create",
@@ -493,6 +509,11 @@
           "command": "openshift.explorer.refresh",
           "when": "view == openshiftProjectExplorer",
           "group": "navigation"
+        },
+        {
+          "command": "openshift.explorer.reportIssue",
+          "when": "view == openshiftProjectExplorer",
+          "group": "navigation"
         }
       ],
       "view/item/context": [
@@ -736,6 +757,6 @@
     "targz": "^1.0.1",
     "unzip-stream": "^0.3.0",
     "validator": "^11.0.0",
-    "vscode-kubernetes-tools-api": "0.0.7"
+    "vscode-kubernetes-tools-api": "1.0.0"
   }
 }
