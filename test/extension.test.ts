@@ -22,7 +22,6 @@ import { Service } from '../src/openshift/service';
 import { Storage } from '../src/openshift/storage';
 import { Url } from '../src/openshift/url';
 import packagejson = require('../package.json');
-import * as Extension from '../src/extension';
 import { OpenShiftExplorer } from '../src/explorer';
 
 const expect = chai.expect;
