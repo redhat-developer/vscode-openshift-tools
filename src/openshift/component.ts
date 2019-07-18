@@ -267,7 +267,7 @@ export class Component extends OpenShiftItem {
             "In which Project you want to create a Component",
             "In which Application you want to create a Component"
         );
-
+        if (!application) return null;
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
