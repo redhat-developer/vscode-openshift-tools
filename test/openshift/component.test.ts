@@ -389,173 +389,173 @@ suite('OpenShift/Component', () => {
         });
     });
 
-    suite('start build', () => {
-        const context = {
-            id: "nodejs-comp-nodejs-app",
-            metadata: undefined,
-            namespace: null,
-            nodeCategory: "Kubernetes-explorer-node",
-            nodeType: "resource",
-            resourceId: "bc/nodejs-comp-nodejs-app"
-        };
+    // suite('start build', () => {
+    //     const context = {
+    //         id: "nodejs-comp-nodejs-app",
+    //         metadata: undefined,
+    //         namespace: null,
+    //         nodeCategory: "Kubernetes-explorer-node",
+    //         nodeType: "resource",
+    //         resourceId: "bc/nodejs-comp-nodejs-app"
+    //     };
 
-        const mockData = `{
-            "apiVersion": "v1",
-            "items": [
-                {
-                    "apiVersion": "build.openshift.io/v1",
-                    "kind": "BuildConfig",
-                    "metadata": {
-                        "annotations": {
-                            "app.kubernetes.io/component-source-type": "git",
-                            "app.kubernetes.io/url": "https://github.com/sclorg/nodejs-ex"
-                        },
-                        "creationTimestamp": "2019-07-15T09:18:43Z",
-                        "labels": {
-                            "app": "nodejs-app",
-                            "app.kubernetes.io/component-name": "nodejs-comp",
-                            "app.kubernetes.io/component-type": "nodejs",
-                            "app.kubernetes.io/component-version": "latest",
-                            "app.kubernetes.io/name": "nodejs-app"
-                        },
-                        "name": "nodejs-comp-nodejs-app",
-                        "namespace": "myproject",
-                        "resourceVersion": "116630",
-                        "selfLink": "/apis/build.openshift.io/v1/namespaces/myproject/buildconfigs/nodejs-comp-nodejs-app",
-                        "uid": "8a66b3ff-a6e1-11e9-8dbe-22967c349399"
-                    },
-                    "spec": {
-                        "failedBuildsHistoryLimit": 5,
-                        "nodeSelector": null,
-                        "output": {
-                            "to": {
-                                "kind": "ImageStreamTag",
-                                "name": "nodejs-comp-nodejs-app:latest"
-                            }
-                        },
-                        "postCommit": {},
-                        "resources": {},
-                        "runPolicy": "Serial",
-                        "source": {
-                            "git": {
-                                "ref": "master",
-                                "uri": "https://github.com/sclorg/nodejs-ex"
-                            },
-                            "type": "Git"
-                        },
-                        "strategy": {
-                            "sourceStrategy": {
-                                "from": {
-                                    "kind": "ImageStreamTag",
-                                    "name": "nodejs:latest",
-                                    "namespace": "openshift"
-                                }
-                            },
-                            "type": "Source"
-                        },
-                        "successfulBuildsHistoryLimit": 5,
-                        "triggers": []
-                    },
-                    "status": {
-                        "lastVersion": 8
-                    }
-                },
-                {
-                    "apiVersion": "build.openshift.io/v1",
-                    "kind": "BuildConfig",
-                    "metadata": {
-                        "annotations": {
-                            "app.kubernetes.io/component-source-type": "git",
-                            "app.kubernetes.io/url": "https://github.com/sclorg/nodejs-ex"
-                        },
-                        "creationTimestamp": "2019-07-15T10:00:53Z",
-                        "labels": {
-                            "app": "nodejs-app",
-                            "app.kubernetes.io/component-name": "",
-                            "app.kubernetes.io/component-type": "nodejs",
-                            "app.kubernetes.io/component-version": "latest",
-                            "app.kubernetes.io/name": "nodejs-app"
-                        },
-                        "name": "nodejs-app",
-                        "namespace": "myproject",
-                        "resourceVersion": "135879",
-                        "selfLink": "/apis/build.openshift.io/v1/namespaces/myproject/buildconfigs/nodejs-app",
-                        "uid": "6e7a00dd-a6e7-11e9-8dbe-22967c349399"
-                    },
-                    "spec": {
-                        "failedBuildsHistoryLimit": 5,
-                        "nodeSelector": null,
-                        "output": {
-                            "to": {
-                                "kind": "ImageStreamTag",
-                                "name": "nodejs-app:latest"
-                            }
-                        },
-                        "postCommit": {},
-                        "resources": {},
-                        "runPolicy": "Serial",
-                        "source": {
-                            "git": {
-                                "ref": "master",
-                                "uri": "https://github.com/sclorg/nodejs-ex"
-                            },
-                            "type": "Git"
-                        },
-                        "strategy": {
-                            "sourceStrategy": {
-                                "from": {
-                                    "kind": "ImageStreamTag",
-                                    "name": "nodejs:latest",
-                                    "namespace": "openshift"
-                                }
-                            },
-                            "type": "Source"
-                        },
-                        "successfulBuildsHistoryLimit": 5,
-                        "triggers": []
-                    },
-                    "status": {
-                        "lastVersion": 5
-                    }
-                }
-            ],
-            "kind": "List",
-            "metadata": {
-                "resourceVersion": "",
-                "selfLink": ""
-            }
-        }`;
+    //     const mockData = `{
+    //         "apiVersion": "v1",
+    //         "items": [
+    //             {
+    //                 "apiVersion": "build.openshift.io/v1",
+    //                 "kind": "BuildConfig",
+    //                 "metadata": {
+    //                     "annotations": {
+    //                         "app.kubernetes.io/component-source-type": "git",
+    //                         "app.kubernetes.io/url": "https://github.com/sclorg/nodejs-ex"
+    //                     },
+    //                     "creationTimestamp": "2019-07-15T09:18:43Z",
+    //                     "labels": {
+    //                         "app": "nodejs-app",
+    //                         "app.kubernetes.io/component-name": "nodejs-comp",
+    //                         "app.kubernetes.io/component-type": "nodejs",
+    //                         "app.kubernetes.io/component-version": "latest",
+    //                         "app.kubernetes.io/name": "nodejs-app"
+    //                     },
+    //                     "name": "nodejs-comp-nodejs-app",
+    //                     "namespace": "myproject",
+    //                     "resourceVersion": "116630",
+    //                     "selfLink": "/apis/build.openshift.io/v1/namespaces/myproject/buildconfigs/nodejs-comp-nodejs-app",
+    //                     "uid": "8a66b3ff-a6e1-11e9-8dbe-22967c349399"
+    //                 },
+    //                 "spec": {
+    //                     "failedBuildsHistoryLimit": 5,
+    //                     "nodeSelector": null,
+    //                     "output": {
+    //                         "to": {
+    //                             "kind": "ImageStreamTag",
+    //                             "name": "nodejs-comp-nodejs-app:latest"
+    //                         }
+    //                     },
+    //                     "postCommit": {},
+    //                     "resources": {},
+    //                     "runPolicy": "Serial",
+    //                     "source": {
+    //                         "git": {
+    //                             "ref": "master",
+    //                             "uri": "https://github.com/sclorg/nodejs-ex"
+    //                         },
+    //                         "type": "Git"
+    //                     },
+    //                     "strategy": {
+    //                         "sourceStrategy": {
+    //                             "from": {
+    //                                 "kind": "ImageStreamTag",
+    //                                 "name": "nodejs:latest",
+    //                                 "namespace": "openshift"
+    //                             }
+    //                         },
+    //                         "type": "Source"
+    //                     },
+    //                     "successfulBuildsHistoryLimit": 5,
+    //                     "triggers": []
+    //                 },
+    //                 "status": {
+    //                     "lastVersion": 8
+    //                 }
+    //             },
+    //             {
+    //                 "apiVersion": "build.openshift.io/v1",
+    //                 "kind": "BuildConfig",
+    //                 "metadata": {
+    //                     "annotations": {
+    //                         "app.kubernetes.io/component-source-type": "git",
+    //                         "app.kubernetes.io/url": "https://github.com/sclorg/nodejs-ex"
+    //                     },
+    //                     "creationTimestamp": "2019-07-15T10:00:53Z",
+    //                     "labels": {
+    //                         "app": "nodejs-app",
+    //                         "app.kubernetes.io/component-name": "",
+    //                         "app.kubernetes.io/component-type": "nodejs",
+    //                         "app.kubernetes.io/component-version": "latest",
+    //                         "app.kubernetes.io/name": "nodejs-app"
+    //                     },
+    //                     "name": "nodejs-app",
+    //                     "namespace": "myproject",
+    //                     "resourceVersion": "135879",
+    //                     "selfLink": "/apis/build.openshift.io/v1/namespaces/myproject/buildconfigs/nodejs-app",
+    //                     "uid": "6e7a00dd-a6e7-11e9-8dbe-22967c349399"
+    //                 },
+    //                 "spec": {
+    //                     "failedBuildsHistoryLimit": 5,
+    //                     "nodeSelector": null,
+    //                     "output": {
+    //                         "to": {
+    //                             "kind": "ImageStreamTag",
+    //                             "name": "nodejs-app:latest"
+    //                         }
+    //                     },
+    //                     "postCommit": {},
+    //                     "resources": {},
+    //                     "runPolicy": "Serial",
+    //                     "source": {
+    //                         "git": {
+    //                             "ref": "master",
+    //                             "uri": "https://github.com/sclorg/nodejs-ex"
+    //                         },
+    //                         "type": "Git"
+    //                     },
+    //                     "strategy": {
+    //                         "sourceStrategy": {
+    //                             "from": {
+    //                                 "kind": "ImageStreamTag",
+    //                                 "name": "nodejs:latest",
+    //                                 "namespace": "openshift"
+    //                             }
+    //                         },
+    //                         "type": "Source"
+    //                     },
+    //                     "successfulBuildsHistoryLimit": 5,
+    //                     "triggers": []
+    //                 },
+    //                 "status": {
+    //                     "lastVersion": 5
+    //                 }
+    //             }
+    //         ],
+    //         "kind": "List",
+    //         "metadata": {
+    //             "resourceVersion": "",
+    //             "selfLink": ""
+    //         }
+    //     }`;
 
-        setup(() => {
-            execStub.resolves({ error: undefined, stdout: mockData, stderr: '' });
-            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves("nodejs-comp-nodejs-app");
-        });
+    //     setup(() => {
+    //         execStub.resolves({ error: undefined, stdout: mockData, stderr: '' });
+    //         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+    //         quickPickStub.onFirstCall().resolves("nodejs-comp-nodejs-app");
+    //     });
 
-        test('works from context menu', async () => {
-            const result = await Component.startBuild(context);
+    //     test('works from context menu', async () => {
+    //         const result = await Component.startBuild(context);
 
-            expect(result).equals(`Build '${context.id}' successfully started`);
-            expect(execStub).calledWith(Command.startBuild(context.id));
-        });
+    //         expect(result).equals(`Build '${context.id}' successfully started`);
+    //         expect(execStub).calledWith(Command.startBuild(context.id));
+    //     });
 
-        test('works with no context', async () => {
-            const result = await Component.startBuild(null);
+    //     test('works with no context', async () => {
+    //         const result = await Component.startBuild(null);
 
-            expect(result).equals(`Build '${context.id}' successfully started`);
-            expect(execStub).calledWith(Command.startBuild(context.id));
-        });
+    //         expect(result).equals(`Build '${context.id}' successfully started`);
+    //         expect(execStub).calledWith(Command.startBuild(context.id));
+    //     });
 
-        test('wraps errors in additional info', async () => {
-            execStub.rejects(errorMessage);
+    //     test('wraps errors in additional info', async () => {
+    //         execStub.rejects(errorMessage);
 
-            try {
-                await Component.startBuild(context);
-            } catch (err) {
-                expect(err).equals(`Failed to start build with error '${errorMessage}'`);
-            }
-        });
-    });
+    //         try {
+    //             await Component.startBuild(context);
+    //         } catch (err) {
+    //             expect(err).equals(`Failed to start build with error '${errorMessage}'`);
+    //         }
+    //     });
+    // });
 
     suite('del', () => {
 
