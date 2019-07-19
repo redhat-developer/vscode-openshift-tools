@@ -373,6 +373,11 @@
       {
         "command": "clusters.openshift.openProjectConsole",
         "title": "Open Project in Console"
+      },
+      {
+        "command": "clusters.openshift.build.showLog",
+        "title": "Show Log",
+        "category": "OpenShift"
       }
     ],
     "keybindings": [
@@ -511,6 +516,11 @@
           "command": "clusters.openshift.build.start",
           "group": "2@0",
           "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.bc"
+        },
+        {
+          "command": "clusters.openshift.build.showLog",
+          "group": "2@0",
+          "when": "view == extension.vsKubernetesExplorer && viewItem =~ /openShift\\.resource\\.build.*/i"
         },
         {
           "command": "openshift.catalog.listComponents",

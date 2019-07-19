@@ -22,6 +22,7 @@ import * as k8s from 'vscode-kubernetes-tools-api';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { DeploymentConfigNodeContributor } from './k8s/deployment';
 import open = require("open");
+import * as Build from './k8s/build';
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined = undefined;
 import { Odo, OdoImpl } from './odo';
@@ -55,6 +56,7 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.describe.palette', (context) => execute(Component.describe, context)),
         vscode.commands.registerCommand('openshift.component.create', (context) => execute(Component.create, context)),
         vscode.commands.registerCommand('clusters.openshift.build.start', (context) => execute(Component.startBuild, context)),
+        vscode.commands.registerCommand('clusters.openshift.build.showLog', (context) => execute(Build.showLog, context)),
         vscode.commands.registerCommand('openshift.component.createFromLocal', (context) => execute(Component.createFromLocal, context)),
         vscode.commands.registerCommand('openshift.component.createFromGit', (context) => execute(Component.createFromGit, context)),
         vscode.commands.registerCommand('openshift.component.createFromBinary', (context) => execute(Component.createFromBinary, context)),
