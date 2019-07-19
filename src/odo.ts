@@ -153,12 +153,6 @@ export class Command {
     static listComponentPorts(project: string, app: string, component: string) {
         return `oc get service ${component}-${app} --namespace ${project} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`;
     }
-    static buildConfig() {
-        return `oc get buildConfig -o json`;
-    }
-    static startBuild(comp: string) {
-        return `oc start-build ${comp}`;
-    }
     static linkComponentTo(project: string, app: string, component: string, componentToLink: string, port?: string) {
         return `odo project set ${project} && odo application set ${app} && odo component set ${component} && odo link ${componentToLink} --wait${port ? ' --port ' + port : ''}`;
     }
