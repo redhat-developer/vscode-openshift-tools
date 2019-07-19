@@ -25,11 +25,15 @@ export class Command {
     }
 
     static delete(build: String) {
-        return `oc delete ${this.delete}`;
+        return `oc delete build ${build}`;
     }
 
     static buildConfig() {
         return `oc get buildConfig -o json`;
+    }
+
+    static getParentBuild(childBuild: string) {
+        return `oc get build ${childBuild} -o jsonpath="{.metadata.labels['buildconfig']}"`;
     }
 }
 
@@ -49,11 +53,8 @@ export class Build {
 
     static async startBuild(context: any) {
         let buildName: string;
-        if (context) {
-            buildName = context.id;
-        } else {
-            buildName = await Build.getBuild("Select the build to start");
-        }
+        if (context) buildName = context.id;
+        else buildName = await Build.getBuild("Select the build to start");
         if (!buildName) return null;
         return Progress.execFunctionWithProgress(`Starting build`, async () => {
             return Build.odo.execute(Command.startBuild(buildName));
@@ -61,29 +62,72 @@ export class Build {
         .catch((err) => Promise.reject(`Failed to start build with error '${err}'`));
     }
 
-    static showLog(context: any) {
+    static async getAllBuild(text: string) {
+        const buildName = [];
+        const build = await Build.getBuild("select the build");
+        if (!build) return null;
+        const getBuild =  await Build.odo.execute(Command.getBuild(build));
+        const buildJson: JSON = JSON.parse(getBuild.stdout);
+        buildJson['items'].forEach(element => {
+            buildName.push(element.metadata.name);
+        });
+        if (buildName.length === 0) throw Error('You have no build available');
+        return await window.showQuickPick(buildName, {placeHolder: text});
+    }
+
+    static async showLog(context: any) {
         let buildName: string;
         if (context) {
             buildName = context.impl.name;
         } else {
-
+            const build = await Build.getAllBuild("select the build too see the logs");
+            if (!build) return null;
+            else buildName = build;
         }
         Build.odo.executeInTerminal(Command.showLog(buildName, '-build'));
     }
 
-    static rebuild(context) {
+    static async rebuild(context) {
+        let buildName: string;
+        let parentBuild: string;
+        if (context) {
+            buildName = context.impl.name;
+            const getParentBuild = await Build.odo.execute(Command.getParentBuild(buildName));
+            parentBuild = getParentBuild.stdout;
+        } else {
+            buildName = await Build.getAllBuild("select too rebuild");
+            if (!buildName) return null;
+            const getParentBuild = await Build.odo.execute(Command.getParentBuild(buildName));
+            parentBuild = getParentBuild.stdout;
+        }
+        Build.odo.executeInTerminal(Command.rebuild(parentBuild, buildName));
+    }
+
+    static async followLog(context) {
         let buildName: string;
         if (context) {
             buildName = context.impl.name;
+        } else {
+            const build = await Build.getAllBuild("select the build too see the logs");
+            if (!build) return null;
+            else buildName = build;
         }
         Build.odo.executeInTerminal(Command.showLog(buildName, '-build'));
     }
 
-    static followLog() {
-
-    }
-
-    static delete() {
+    static async delete(context) {
+        let buildName;
+        if (context) {
+            buildName = context.impl.name;
+        } else {
+            const build = await Build.getAllBuild("select the build too delete");
+            if (!build) return null;
+            else buildName = build;
+        }
+        return Progress.execFunctionWithProgress(`Starting build`, async () => {
+            return Build.odo.execute(Command.delete(buildName));
+        }).then(() => `Build '${buildName}' successfully deleted`)
+        .catch((err) => Promise.reject(`Failed to delete build with error '${err}'`));
 
     }
 }
