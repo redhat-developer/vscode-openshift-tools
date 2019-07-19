@@ -12,6 +12,14 @@ export interface CliExitData {
     readonly stdout: string;
     readonly stderr: string;
 }
+export interface ICli {
+    execute(cmd: string, opts?: ExecOptions): Promise<CliExitData>;
+}
+
+export interface OdoChannel {
+    print(text: string): void;
+    show(): void;
+}
 
 export class Cli implements ICli {
     private static instance: Cli;
@@ -47,15 +55,6 @@ export class Cli implements ICli {
             });
         });
     }
-}
-
-export interface ICli {
-    execute(cmd: string, opts?: ExecOptions): Promise<CliExitData>;
-}
-
-export interface OdoChannel {
-    print(text: string): void;
-    show(): void;
 }
 
 class OdoChannelImpl implements OdoChannel {
