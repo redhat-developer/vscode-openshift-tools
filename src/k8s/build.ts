@@ -12,16 +12,16 @@ export class Command {
         return `oc get build -l buildconfig=${build} -o json`;
     }
 
-    static showLog(text: string, build: string) {
-        return `oc logs ${text}${build}`;
+    static showLog(build: string, text: string) {
+        return `oc logs ${build}${text}`;
     }
 
-    static rebuild(build, build1) {
+    static rebuild(build: String, build1: String) {
         return `oc start-build ${build} --from-build ${build1}`;
     }
 
-    static followLog(text: string) {
-        return `oc logs -f ${text}`;
+    static followLog(build: string, text: string) {
+        return `oc logs -f ${build}${text}`;
     }
 
     static delete(build: String) {
@@ -40,7 +40,7 @@ export class Command {
 export class Build {
     protected static readonly odo: Odo = OdoImpl.Instance;
 
-    static async getBuild(text: string) {
+    static async getBuild(text: string): Promise<string> {
         const buildConfigName = [];
         const buildConfigData = await Build.odo.execute(Command.buildConfig());
         const buildConfigJson: JSON = JSON.parse(buildConfigData.stdout);
@@ -51,7 +51,7 @@ export class Build {
         return await window.showQuickPick(buildConfigName, {placeHolder: text});
     }
 
-    static async startBuild(context: any) {
+    static async startBuild(context: { id: any; metadata?: any; namespace?: any; nodeCategory?: string; nodeType?: string; resourceId?: string; }): Promise<string> {
         let buildName: string;
         if (context) buildName = context.id;
         else buildName = await Build.getBuild("Select the build to start");
@@ -62,7 +62,7 @@ export class Build {
         .catch((err) => Promise.reject(`Failed to start build with error '${err}'`));
     }
 
-    static async getAllBuild(text: string) {
+    static async getAllBuild(text: string): Promise<string> {
         const buildName = [];
         const build = await Build.getBuild("select the build");
         if (!build) return null;
@@ -75,7 +75,7 @@ export class Build {
         return await window.showQuickPick(buildName, {placeHolder: text});
     }
 
-    static async showLog(context: any) {
+    static async showLog(context: { id?: string; impl: any; }): Promise<string> {
         let buildName: string;
         if (context) {
             buildName = context.impl.name;
@@ -87,7 +87,7 @@ export class Build {
         Build.odo.executeInTerminal(Command.showLog(buildName, '-build'));
     }
 
-    static async rebuild(context) {
+    static async rebuild(context: { id?: string; impl: any; }): Promise<string> {
         let buildName: string;
         let parentBuild: string;
         if (context) {
@@ -103,7 +103,7 @@ export class Build {
         Build.odo.executeInTerminal(Command.rebuild(parentBuild, buildName));
     }
 
-    static async followLog(context) {
+    static async followLog(context: { id?: string; impl: any; }): Promise<string> {
         let buildName: string;
         if (context) {
             buildName = context.impl.name;
@@ -112,10 +112,10 @@ export class Build {
             if (!build) return null;
             else buildName = build;
         }
-        Build.odo.executeInTerminal(Command.showLog(buildName, '-build'));
+        Build.odo.executeInTerminal(Command.followLog(buildName, '-build'));
     }
 
-    static async delete(context) {
+    static async delete(context: { id?: string; impl: any; }): Promise<string> {
         let buildName;
         if (context) {
             buildName = context.impl.name;
