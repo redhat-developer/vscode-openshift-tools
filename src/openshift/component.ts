@@ -58,6 +58,27 @@ export class Component extends OpenShiftItem {
         return command.catch((err) => Promise.reject(`Failed to create Component with error '${err}'`));
     }
 
+    static async startBuild(context: any) {
+        let buildName: string;
+        if (context) {
+            buildName = context.id;
+        } else {
+            const buildConfigName = [];
+            const buildConfigData = await Component.odo.execute(Command.buildConfig());
+            const buildConfigJson: JSON = JSON.parse(buildConfigData.stdout);
+            buildConfigJson['items'].forEach((key: any) => {
+                buildConfigName.push(key.metadata.name);
+            });
+            if (buildConfigName.length === 0) throw Error('You have no build available to start');
+            buildName = await window.showQuickPick(buildConfigName, {placeHolder: "Select the build to start"});
+        }
+        if (!buildName) return null;
+        return Progress.execFunctionWithProgress(`Starting build`, async () => {
+            return Component.odo.execute(Command.startBuild(buildName));
+        }).then(() => `Build '${buildName}' successfully started`)
+        .catch((err) => Promise.reject(`Failed to start build with error '${err}'`));
+    }
+
     static async del(treeItem: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(treeItem,
             "From which Project do you want to delete Component",
@@ -71,7 +92,7 @@ export class Component extends OpenShiftItem {
                 await Component.unlinkAllComponents(component);
                 return Component.odo.deleteComponent(component);
             }).then(() => `Component '${name}' successfully deleted`)
-                .catch((err) => Promise.reject(`Failed to delete Component with error '${err}'`));
+            .catch((err) => Promise.reject(`Failed to delete Component with error '${err}'`));
         }
     }
 
