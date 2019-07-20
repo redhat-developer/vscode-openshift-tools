@@ -510,7 +510,7 @@
         {
           "command": "clusters.openshift.build.start",
           "group": "2@0",
-          "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.resource(?!\\.namespace).*/i"
+          "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.bc"
         },
         {
           "command": "openshift.catalog.listComponents",
