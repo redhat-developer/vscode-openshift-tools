@@ -395,11 +395,6 @@
         "category": "OpenShift"
       },
       {
-        "command": "clusters.openshift.build.delete",
-        "title": "Delete build",
-        "category": "OpenShift"
-      },
-      {
         "command": "clusters.openshift.build.rebuild",
         "title": "Rebuild",
         "category": "OpenShift"
@@ -548,22 +543,22 @@
         },
         {
           "command": "clusters.openshift.build.showLog",
-          "group": "2@1",
+          "group": "1@1",
           "when": "view == extension.vsKubernetesExplorer && viewItem =~ /openShift\\.resource\\.build.*/i"
         },
         {
           "command": "clusters.openshift.build.followLog",
-          "group": "2@2",
+          "group": "1@2",
           "when": "view == extension.vsKubernetesExplorer && viewItem =~ /openShift\\.resource\\.build.*/i"
         },
         {
           "command": "clusters.openshift.build.delete",
-          "group": "2@3",
+          "group": "2@0",
           "when": "view == extension.vsKubernetesExplorer && viewItem =~ /openShift\\.resource\\.build.*/i"
         },
         {
           "command": "clusters.openshift.build.rebuild",
-          "group": "2@0",
+          "group": "1@0",
           "when": "view == extension.vsKubernetesExplorer && viewItem =~ /openShift\\.resource\\.build.*/i"
         },
         {
