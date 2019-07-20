@@ -153,7 +153,7 @@ suite('K8s/build', () => {
 
         setup(() => {
             execStub.resolves({ error: null, stdout: buildData, stderr: '' });
-            sandbox.stub(Build, 'getBuild').resolves("nodejs-copm-nodejs-comp");
+            sandbox.stub(Build, 'getBuildNames').resolves("nodejs-copm-nodejs-comp");
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves("nodejs-copm-nodejs-comp-8");
         });
@@ -178,7 +178,7 @@ suite('K8s/build', () => {
     suite('rebuild', () => {
 
         setup(() => {
-            sandbox.stub(Build, 'getBuild').resolves("nodejs-copm-nodejs-comp");
+            sandbox.stub(Build, 'getBuildNames').resolves("nodejs-copm-nodejs-comp");
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.resolves("nodejs-copm-nodejs-comp-8");
 
@@ -187,14 +187,14 @@ suite('K8s/build', () => {
         test('works from context menu', async () => {
             execStub.resolves({ error: null, stdout: "nodejs-copm-nodejs-comp", stderr: '' });
             await Build.rebuild(context);
-            expect(termStub).calledOnceWith(Command.rebuild("nodejs-copm-nodejs-comp", context.impl.name));
+            expect(termStub).calledOnceWith(Command.rebuildFrom(context.impl.name));
         });
 
         test('works with no context', async () => {
             execStub.onFirstCall().resolves({ error: null, stdout: buildData, stderr: '' });
             execStub.onSecondCall().resolves({ error: null, stdout: "nodejs-copm-nodejs-comp", stderr: '' });
             await Build.rebuild(null);
-            expect(termStub).calledOnceWith(Command.rebuild("nodejs-copm-nodejs-comp", "nodejs-copm-nodejs-comp-8"));
+            expect(termStub).calledOnceWith(Command.rebuildFrom("nodejs-copm-nodejs-comp-8"));
         });
 
         test('returns null when no build selected to rebuild', async () => {
@@ -210,7 +210,7 @@ suite('K8s/build', () => {
 
         setup(() => {
             execStub.resolves({ error: null, stdout: buildData, stderr: '' });
-            sandbox.stub(Build, 'getBuild').resolves("nodejs-copm-nodejs-comp");
+            sandbox.stub(Build, 'getBuildNames').resolves("nodejs-copm-nodejs-comp");
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.resolves("nodejs-copm-nodejs-comp-8");
         });
@@ -235,7 +235,7 @@ suite('K8s/build', () => {
     suite('Delete', ()=> {
         setup(() => {
             execStub.resolves({ error: null, stdout: buildData, stderr: '' });
-            sandbox.stub(Build, 'getBuild').resolves("nodejs-copm-nodejs-comp");
+            sandbox.stub(Build, 'getBuildNames').resolves("nodejs-copm-nodejs-comp");
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.resolves("nodejs-copm-nodejs-comp-8");
         });

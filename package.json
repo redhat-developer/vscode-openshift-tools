@@ -82,7 +82,13 @@
     "onCommand:openshift.component.folder.create",
     "onCommand:openshift.explorer.reportIssue",
     "onCommand:clusters.openshift.openProjectConsole",
-    "onCommand:clusters.openshift.useProject"
+    "onCommand:clusters.openshift.useProject",
+    "onCommand:clusters.openshift.build.start",
+    "onCommand:clusters.openshift.build.showLog",
+    "onCommand:clusters.openshift.build.followLog",
+    "onCommand:clusters.openshift.build.delete",
+    "onCommand:clusters.openshift.build.delete.palette",
+    "onCommand:clusters.openshift.build.rebuild"
   ],
   "main": "./out/src/extension",
   "contributes": {

@@ -20,7 +20,7 @@ import path = require('path');
 import fsx = require('fs-extra');
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
-import { DeploymentConfigNodeContributor } from './k8s/deployment';
+import { BuildConfigNodeContributor } from './k8s/build';
 import open = require("open");
 import { Build } from './k8s/build';
 
@@ -109,7 +109,7 @@ export async function activate(context: vscode.ExtensionContext) {
             clusterExplorer.nodeSources.resourceFolder("Routes", "Routes", "Route", "route").if(isOpenShift).at("Network"),
             clusterExplorer.nodeSources.resourceFolder("DeploymentConfigs", "DeploymentConfigs", "DeploymentConfig", "dc").if(isOpenShift).at("Workloads"),
             clusterExplorer.nodeSources.resourceFolder("BuildConfigs", "BuildConfigs", "BuildConfig", "bc").if(isOpenShift).at("Workloads"),
-            new DeploymentConfigNodeContributor()
+            new BuildConfigNodeContributor()
         ];
         nodeContributors.forEach(element => {
             clusterExplorer.registerNodeContributor(element);
