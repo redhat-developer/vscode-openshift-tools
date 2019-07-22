@@ -384,7 +384,6 @@
         "command": "clusters.openshift.build.showLog",
         "title": "Show Log",
         "category": "OpenShift"
-<<<<<<< HEAD
       },
       {
         "command": "clusters.openshift.build.followLog",
@@ -405,8 +404,6 @@
         "command": "clusters.openshift.build.rebuild",
         "title": "Rebuild",
         "category": "OpenShift"
-=======
->>>>>>> Stub for 'Show Log' and 'Follow Log' commands
       }
     ],
     "keybindings": [
