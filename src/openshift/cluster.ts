@@ -206,7 +206,7 @@ export class Cluster extends OpenShiftItem {
         return Promise.resolve()
             .then(() => Cluster.odo.execute(Command.odoLoginWithToken(clusterURL, ocToken)))
             .then((result) => Cluster.loginMessage(clusterURL, result))
-            .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(error.message)}'!`));
+            .catch((error) => Promise.reject(new Error(`Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(error.message)}'!`)));
     }
 
     private static async loginMessage(clusterURL: string, result: CliExitData): Promise<string> {
@@ -215,7 +215,7 @@ export class Cluster extends OpenShiftItem {
             return commands.executeCommand('setContext', 'isLoggedIn', true)
                 .then(() => `Successfully logged in to '${clusterURL}'`);
         } else {
-            return Promise.reject(result.stderr);
+            throw new Error(result.stderr);
         }
     }
 }
