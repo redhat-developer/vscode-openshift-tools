@@ -159,12 +159,15 @@ suite('K8s/build', () => {
         });
 
         test('throws error if there is no BuildConfigs to select', async () => {
+            quickPickStub.restore();
             execStub.resolves({ error: undefined, stdout: noBcData, stderr: '' });
+            let checkError: Error;
             try {
-                await Build.startBuild(null);
-            } catch (err) {
-                expect(err).equals(`Failed to start build with error '${errorMessage}'`);
+                const result = await Build.startBuild(null);
+            } catch(err) {
+                checkError = err as Error;
             }
+            expect(checkError.message).equals('You have no BuildConfigs available to start a build');
         });
     });
 
