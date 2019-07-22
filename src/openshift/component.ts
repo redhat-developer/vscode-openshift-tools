@@ -5,7 +5,7 @@
 
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command, ContextType } from '../odo';
-import { window, commands, QuickPickItem, Uri } from 'vscode';
+import { window, commands, QuickPickItem, Uri, workspace, WorkspaceFolder } from 'vscode';
 import { Progress } from '../util/progress';
 import open = require('open');
 import { ChildProcess } from 'child_process';
@@ -243,11 +243,30 @@ export class Component extends OpenShiftItem {
 
     static async createFromLocal(context: OpenShiftObject): Promise<string> {
         let application: OpenShiftObject = context;
+        let folder: WorkspaceFolder | Uri[];
+        let workspacePath: Uri;
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
-        const folder = await window.showWorkspaceFolderPick({
-            placeHolder: 'Select the target workspace folder'
-        });
+        if (workspace.workspaceFolders) {
+            folder = await window.showWorkspaceFolderPick({
+                placeHolder: 'Select the target workspace folder'
+            });
+            if (folder) {
+                workspacePath = folder.uri;
+            }
+        } else {
+            folder = await window.showOpenDialog({
+                canSelectFiles: false,
+                canSelectFolders: true,
+                canSelectMany: false,
+                defaultUri: Uri.file(Platform.getUserHomePath()),
+                openLabel: "Select Context Folder for Component"
+            });
+            if (folder) {
+                workspacePath = folder[0];
+            }
+        }
+
         if (!folder) return null;
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
         const componentName = await Component.getName('Component name', componentList, application.getName());
@@ -261,7 +280,7 @@ export class Component extends OpenShiftItem {
         const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
 
         if (!componentTypeVersion) return null;
-        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.uri));
+        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, workspacePath));
         return `Component '${componentName}' successfully created`;
     }
 
@@ -332,6 +351,8 @@ export class Component extends OpenShiftItem {
             defaultUri: Uri.file(Platform.getUserHomePath()),
             openLabel: "Select Context Folder for Component"
         });
+
+        if (!folder) return null;
 
         window.showInformationMessage('Do you want to clone git repository for created Component?', 'Yes', 'No').then((value) => {
             value === 'Yes' && commands.executeCommand('git.clone', repoURI);

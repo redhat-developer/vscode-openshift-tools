@@ -805,9 +805,10 @@ export class OdoImpl implements Odo {
         return this.insertAndReveal(new OpenShiftObjectImpl(project, applicationName, ContextType.APPLICATION, false, this));
     }
 
-    public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: Uri, ref: string = 'master'): Promise<OpenShiftObject> {
+    public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: Uri): Promise<OpenShiftObject> {
         await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath), location.fsPath);
         await this.executeInTerminal(Command.pushComponent(), location.fsPath);
+        workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: location });
         return this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT_PUSHED, false, this, Collapsed, location, 'local'));
     }
 
@@ -828,7 +829,7 @@ export class OdoImpl implements Odo {
         return null;
     }
 
-    public async createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, location: Uri, ref: string = 'master'): Promise<OpenShiftObject> {
+    public async createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, location: Uri): Promise<OpenShiftObject> {
         await this.execute(Command.createBinaryComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath));
         return this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, undefined, 'binary'));
     }
