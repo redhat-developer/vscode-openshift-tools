@@ -163,8 +163,8 @@ suite('K8s/build', () => {
             execStub.resolves({ error: undefined, stdout: noBcData, stderr: '' });
             let checkError: Error;
             try {
-                const result = await Build.startBuild(null);
-            } catch(err) {
+                await Build.startBuild(null);
+            } catch (err) {
                 checkError = err as Error;
             }
             expect(checkError.message).equals('You have no BuildConfigs available to start a build');
