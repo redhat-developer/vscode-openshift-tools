@@ -169,7 +169,7 @@ suite('Openshift/Cluster', () => {
                 } catch (err) {
                     expectedErr = err;
                 }
-                expect(expectedErr).equals(`Failed to login to cluster '${testUrl}' with '${error}'!`);
+                expect(expectedErr.message).equals(`Failed to login to cluster '${testUrl}' with '${error}'!`);
             });
 
             test('checks cluster url name is valid url', async () => {
