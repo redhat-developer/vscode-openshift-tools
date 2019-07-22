@@ -82,6 +82,16 @@ suite('K8s/build', () => {
             resourceId: "bc/nodejs-comp-nodejs-app"
         };
 
+        const noBcData = `{
+            "apiVersion": "v1",
+            "items": [],
+            "kind": "List",
+            "metadata": {
+                "resourceVersion": "",
+                "selfLink": ""
+            }
+        }`;
+
         const mockData = `{
             "apiVersion": "v1",
             "items": [
@@ -115,7 +125,7 @@ suite('K8s/build', () => {
         setup(() => {
             execStub.resolves({ error: undefined, stdout: mockData, stderr: '' });
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.resolves("nodejs-comp-nodejs-app");
+            quickPickStub.resolves({label: "nodejs-comp-nodejs-app"});
         });
 
         test('works from context menu', async () => {
@@ -132,7 +142,7 @@ suite('K8s/build', () => {
             expect(execStub).calledWith(Command.startBuild(context.id));
         });
 
-        test('returns null when no build selected', async () => {
+        test('returns null when no BuildConfig selected', async () => {
             quickPickStub.resolves();
             const result = await Build.startBuild(null);
             expect(result).null;
@@ -147,15 +157,26 @@ suite('K8s/build', () => {
                 expect(err).equals(`Failed to start build with error '${errorMessage}'`);
             }
         });
+
+        test('throws error if there is no BuildConfigs to select', async () => {
+            execStub.resolves({ error: undefined, stdout: noBcData, stderr: '' });
+            try {
+                await Build.startBuild(null);
+            } catch (err) {
+                expect(err).equals(`Failed to start build with error '${errorMessage}'`);
+            }
+        });
     });
 
     suite('Show Log', () => {
 
         setup(() => {
             execStub.resolves({ error: null, stdout: buildData, stderr: '' });
-            sandbox.stub(Build, 'getBuildNames').resolves("nodejs-copm-nodejs-comp");
+            const buidConfig = {label: "nodejs-copm-nodejs-comp"};
+            sandbox.stub(Build, 'getBuildConfigNames').resolves([buidConfig]);
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves("nodejs-copm-nodejs-comp-8");
+            quickPickStub.onFirstCall().resolves(buidConfig);
+            quickPickStub.onSecondCall().resolves({label: "nodejs-copm-nodejs-comp-8"});
         });
 
         test('works from context menu', async () => {
@@ -169,7 +190,7 @@ suite('K8s/build', () => {
         });
 
         test('returns null when no build selected', async () => {
-            quickPickStub.onFirstCall().resolves();
+            quickPickStub.onSecondCall().resolves();
             const result = await Build.showLog(null);
             expect(result).null;
         });
@@ -180,7 +201,7 @@ suite('K8s/build', () => {
         setup(() => {
             sandbox.stub(Build, 'getBuildNames').resolves("nodejs-copm-nodejs-comp");
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.resolves("nodejs-copm-nodejs-comp-8");
+            quickPickStub.resolves({label: "nodejs-copm-nodejs-comp-8"});
 
         });
 
@@ -212,7 +233,7 @@ suite('K8s/build', () => {
             execStub.resolves({ error: null, stdout: buildData, stderr: '' });
             sandbox.stub(Build, 'getBuildNames').resolves("nodejs-copm-nodejs-comp");
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.resolves("nodejs-copm-nodejs-comp-8");
+            quickPickStub.resolves({label: "nodejs-copm-nodejs-comp-8"});
         });
 
         test('works from context menu', async () => {
@@ -237,7 +258,7 @@ suite('K8s/build', () => {
             execStub.resolves({ error: null, stdout: buildData, stderr: '' });
             sandbox.stub(Build, 'getBuildNames').resolves("nodejs-copm-nodejs-comp");
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.resolves("nodejs-copm-nodejs-comp-8");
+            quickPickStub.resolves({label: "nodejs-copm-nodejs-comp-8"});
         });
 
         test('works from context menu', async () => {

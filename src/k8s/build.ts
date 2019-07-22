@@ -93,7 +93,6 @@ export class Build {
     protected static readonly odo: Odo =    OdoImpl.Instance;
 
     static async getQuickPicks(cmd: string, errorMessage: string): Promise<QuickPickItem[]> {
-        const names: string[] = [];
         const result = await Build.odo.execute(cmd);
         const json: JSON = JSON.parse(result.stdout);
         if (json['items'].length === 0) {
@@ -118,7 +117,7 @@ export class Build {
     }
 
     static async selectBuild(context: any, text: string): Promise<string> {
-        let build: string;
+        let build: string = null;
         if (context) {
             build = context.impl.name;
         } else {
@@ -138,7 +137,7 @@ export class Build {
 
     static async startBuild(context: { id: any; }): Promise<string> {
         let buildName: string = context ? context.id : undefined;
-        let result: Promise<string>;
+        let result: Promise<string> = null;
         if (!buildName) buildName = await Build.selectBuldConfig("Select a BuildConfig to start a build");
         if (buildName) {
             result = Progress.execFunctionWithProgress(`Starting build`, () => Build.odo.execute(Command.startBuild(buildName)))
@@ -148,11 +147,12 @@ export class Build {
         return result;
     }
 
-    static async showLog(context: { impl: any; }): Promise<void> {
+    static async showLog(context: { impl: any; }): Promise<string> {
         const build = await Build.selectBuild(context, "Select a build too see the logs");
         if (build) {
             Build.odo.executeInTerminal(Command.showLog(build, '-build'));
         }
+        return build;
     }
 
     static async rebuild(context: { id?: string; impl: any; }): Promise<string> {

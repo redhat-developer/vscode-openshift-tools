@@ -25,7 +25,7 @@ import open = require("open");
 import { Build } from './k8s/build';
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined = undefined;
-import { Odo, OdoImpl } from './odo';
+import { OdoImpl } from './odo';
 
 export let contextGlobalState: vscode.ExtensionContext;
 
