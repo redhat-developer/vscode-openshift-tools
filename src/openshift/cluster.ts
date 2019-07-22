@@ -10,6 +10,7 @@ import { CliExitData, Cli } from "../cli";
 import open = require("open");
 import { TokenStore } from "../util/credentialManager";
 import { KubeConfigUtils } from '../util/kubeUtils';
+import { Filters } from "../util/filters";
 
 class CreateUrlItem implements QuickPickItem {
 
@@ -172,7 +173,7 @@ export class Cluster extends OpenShiftItem {
             .then(() => Cluster.odo.execute(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd)))
             .then((result) => Cluster.save(username, passwd, password, result))
             .then((result) => Cluster.loginMessage(clusterURL, result))
-            .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`));
+            .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.message)}'!`));
     }
 
     static async readFromClipboard() {
@@ -205,7 +206,7 @@ export class Cluster extends OpenShiftItem {
         return Promise.resolve()
             .then(() => Cluster.odo.execute(Command.odoLoginWithToken(clusterURL, ocToken)))
             .then((result) => Cluster.loginMessage(clusterURL, result))
-            .catch((error) => Promise.reject(`Failed to login to cluster '${clusterURL}' with '${error}'!`));
+            .catch((error) => Promise.reject(new Error(`Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(error.message)}'!`)));
     }
 
     private static async loginMessage(clusterURL: string, result: CliExitData): Promise<string> {
@@ -214,7 +215,7 @@ export class Cluster extends OpenShiftItem {
             return commands.executeCommand('setContext', 'isLoggedIn', true)
                 .then(() => `Successfully logged in to '${clusterURL}'`);
         } else {
-            return Promise.reject(result.stderr);
+            throw new Error(result.stderr);
         }
     }
 }
