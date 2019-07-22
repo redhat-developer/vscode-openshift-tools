@@ -38,6 +38,7 @@ suite('Openshift/Cluster', () => {
         stderr: '',
         stdout: 'output'
     };
+    const err = new Error('FATAL ERROR');
     const error = 'FATAL ERROR';
     const errorData: CliExitData = {
         error: undefined,
@@ -89,7 +90,7 @@ suite('Openshift/Cluster', () => {
             quickPickStub.onThirdCall().resolves({description: "Current Context", label: testUser});
             inputStub.resolves(password);
             commandStub.rejects(error);
-            sandbox.stub(Filters, 'filterToken').returns('FATAL ERROR');
+            sandbox.stub(Filters, 'filterToken').returns(err.message);
 
             try {
                 await Cluster.login();
@@ -164,7 +165,7 @@ suite('Openshift/Cluster', () => {
 
             test('errors if there is output on odo stderr', async () => {
                 execStub.resolves(errorData);
-                sandbox.stub(Filters, 'filterPassword').returns('FATAL ERROR');
+                sandbox.stub(Filters, 'filterPassword').returns(err.message);
 
                 try {
                     await Cluster.credentialsLogin();
@@ -250,7 +251,7 @@ suite('Openshift/Cluster', () => {
 
             test('handles incoming errors the same way as credentials login', async () => {
                 execStub.rejects(error);
-                sandbox.stub(Filters, 'filterToken').returns('FATAL ERROR');
+                sandbox.stub(Filters, 'filterToken').returns(err.message);
                 try {
                     await Cluster.tokenLogin();
                     expect.fail();
@@ -316,7 +317,7 @@ suite('Openshift/Cluster', () => {
         });
 
         test('throws errors from subsequent login', async () => {
-            sandbox.stub(Filters, 'filterToken').returns('FATAL ERROR');
+            sandbox.stub(Filters, 'filterToken').returns(err.message);
             execStub.onSecondCall().resolves(errorData);
             infoStub.resolves('Yes');
             quickPickStub.onFirstCall().resolves('Credentials');
