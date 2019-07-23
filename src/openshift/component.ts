@@ -4,8 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { OpenShiftItem } from './openshiftItem';
-import { OpenShiftObject, Command, ContextType } from '../odo';
-import { window, commands, QuickPickItem, Uri } from 'vscode';
+import { OpenShiftObject, Command, ContextType, OdoImpl } from '../odo';
+import { window, commands, QuickPickItem, Uri, workspace, WorkspaceFolder } from 'vscode';
 import { Progress } from '../util/progress';
 import open = require('open');
 import { ChildProcess } from 'child_process';
@@ -16,6 +16,12 @@ import { Refs, Ref, Type } from '../util/refs';
 import { Delayer } from '../util/async';
 import { contextGlobalState } from '../extension';
 import { Platform } from '../util/platform';
+import path = require('path');
+import fs = require('fs-extra');
+
+interface WorkspaceFolderItem extends QuickPickItem {
+    uri: Uri;
+}
 
 export class Component extends OpenShiftItem {
 
@@ -245,9 +251,27 @@ export class Component extends OpenShiftItem {
         let application: OpenShiftObject = context;
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
-        const folder = await window.showWorkspaceFolderPick({
-            placeHolder: 'Select the target workspace folder'
-        });
+        let folder: WorkspaceFolderItem;
+        if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
+            folder = await window.showQuickPick(
+                (async (): Promise<WorkspaceFolderItem[]> => workspace.workspaceFolders.filter(
+                    (value) => {
+                        let result = true;
+                        try {
+                            result = !fs.statSync(path.join(value.uri.fsPath, '.odo', 'config.yaml')).isFile();
+                        } catch (ignore) {
+                        }
+                        return result;
+                    }
+                ).map(
+                    (folder) => ({ label: folder.uri.fsPath, uri: folder.uri})
+                ))(), {
+                    placeHolder: 'Select workspace folder'
+                }
+            );
+        } else {
+            window.showInformationMessage('Workspace is empty. Please, add folder(s) to workspace and try again.');
+        }
         if (!folder) return null;
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
         const componentName = await Component.getName('Component name', componentList, application.getName());

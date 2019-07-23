@@ -808,12 +808,16 @@ export class OdoImpl implements Odo {
     public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: Uri, ref: string = 'master'): Promise<OpenShiftObject> {
         await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath), location.fsPath);
         await this.executeInTerminal(Command.pushComponent(), location.fsPath);
+        OdoImpl.data.addContexts([workspace.getWorkspaceFolder(location)]);
+        const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
+        if (!targetApplication) {
+            await this.insertAndReveal(application);
+        }
         return this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT_PUSHED, false, this, Collapsed, location, 'local'));
     }
 
     public async createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, location: string, context: Uri, ref: string = 'master'): Promise<OpenShiftObject> {
         await this.execute(Command.createGitComponent(application.getParent().getName(), application.getName(), type, version, name, location, ref ? ref : 'master'), context.fsPath);
-
         // This check is here to skip any model updates when there are not workspace folders yet,
         // because when first folder added to workspace extesion is going to be reloaded anyway and
         // model loaded when extension is reactivated
