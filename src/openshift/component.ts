@@ -252,7 +252,7 @@ export class Component extends OpenShiftItem {
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
         let folder: WorkspaceFolderItem;
-        if (workspace.workspaceFolders) {
+        if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
             folder = await window.showQuickPick(
                 (async (): Promise<WorkspaceFolderItem[]> => workspace.workspaceFolders.filter(
                     (value) => {
