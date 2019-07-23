@@ -85,6 +85,7 @@ export class Cluster extends OpenShiftItem {
         const createUrl = new CreateUrlItem();
         const clusterItems = await k8sConfig.getServers();
         const choice = await window.showQuickPick([createUrl, ...clusterItems], {placeHolder: "Provide Cluster URL to connect"});
+        if (!choice) return null;
         return (choice.label === createUrl.label) ?
             await window.showInputBox({
                 value: clusterURl,
