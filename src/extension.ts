@@ -21,11 +21,13 @@ import fsx = require('fs-extra');
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { BuildConfigNodeContributor } from './k8s/build';
+import { DeploymentConfig } from './k8s/deployment';
+import { ImageStream } from './k8s/imageStream';
+import { OdoImpl } from './odo';
 import open = require("open");
 import { Build } from './k8s/build';
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined = undefined;
-import { OdoImpl } from './odo';
 
 export let contextGlobalState: vscode.ExtensionContext;
 
@@ -61,6 +63,9 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('clusters.openshift.build.delete', (context) => execute(Build.delete, context)),
         vscode.commands.registerCommand('clusters.openshift.build.delete.palette', (context) => execute(Build.delete, context)),
         vscode.commands.registerCommand('clusters.openshift.build.rebuild', (context) => execute(Build.rebuild, context)),
+        vscode.commands.registerCommand('clusters.openshift.build.openConsole', (context) => execute(Build.openConsole, context)),
+        vscode.commands.registerCommand('clusters.openshift.deployment.openConsole', (context) => execute(DeploymentConfig.openConsole, context)),
+        vscode.commands.registerCommand('clusters.openshift.imagestream.openConsole', (context) => execute(ImageStream.openConsole, context)),
         vscode.commands.registerCommand('openshift.component.createFromLocal', (context) => execute(Component.createFromLocal, context)),
         vscode.commands.registerCommand('openshift.component.createFromGit', (context) => execute(Component.createFromGit, context)),
         vscode.commands.registerCommand('openshift.component.createFromBinary', (context) => execute(Component.createFromBinary, context)),

@@ -9,6 +9,8 @@ import { Progress } from "../util/progress";
 import * as vscode from 'vscode';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import * as k8s from 'vscode-kubernetes-tools-api';
+import { KubeConfigUtils } from "../util/kubeUtils";
+import open = require("open");
 
 export class BuildConfigNodeContributor implements ClusterExplorerV1.NodeContributor {
     contributesChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): boolean {
@@ -188,5 +190,17 @@ export class Build {
                 .catch((err) => Promise.reject(`Failed to delete build with error '${err}'`));
         }
         return result;
+    }
+
+    static async openConsole(context: { id: any; }) {
+        if (!context) {
+            vscode.window.showErrorMessage("Cannot load the Build");
+            return;
+        }
+        const k8sConfig = new KubeConfigUtils();
+        const clusterUrl = k8sConfig.getCurrentCluster().server;
+        const project = (k8sConfig.contexts).find((ctx) => ctx.name === k8sConfig.currentContext).namespace;
+        await open(`${clusterUrl}/console/project/${project}/browse/builds/${context.id}?tab=history`);
+        return;
     }
 }
