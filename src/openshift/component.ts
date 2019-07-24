@@ -380,6 +380,8 @@ export class Component extends OpenShiftItem {
             openLabel: "Select Context Folder for Component"
         });
 
+        if (!folder) return null;
+
         window.showInformationMessage('Do you want to clone git repository for created Component?', 'Yes', 'No').then((value) => {
             value === 'Yes' && commands.executeCommand('git.clone', repoURI);
         });
