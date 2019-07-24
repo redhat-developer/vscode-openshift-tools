@@ -269,6 +269,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.undeploy",
+        "title": "Undelopy",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.component.push",
         "title": "Push",
         "category": "OpenShift"
@@ -510,6 +515,10 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
+          "command": "openshift.component.undeploy",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
           "command": "openshift.component.watch",
           "when": "view == openshiftProjectExplorer"
         },
@@ -708,6 +717,11 @@
           "group": "c4@3"
         },
         {
+          "command": "openshift.component.undeploy",
+          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "c4@4"
+        },
+        {
           "command": "openshift.component.delete",
           "when": "view == openshiftProjectExplorer && viewItem == component_no_context",
           "group": "c5@1"
@@ -715,6 +729,11 @@
         {
           "command": "openshift.component.delete",
           "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "c5@1"
+        },
+        {
+          "command": "openshift.component.delete",
+          "when": "view == openshiftProjectExplorer && viewItem == component_not_pushed",
           "group": "c5@1"
         },
         {
