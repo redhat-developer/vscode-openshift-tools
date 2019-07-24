@@ -274,6 +274,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.undeploy.palette",
+        "title": "Undeploy Component",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.component.push",
         "title": "Push",
         "category": "OpenShift"

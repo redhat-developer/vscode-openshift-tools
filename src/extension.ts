@@ -49,6 +49,7 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.project.create', (context) => execute(Project.create, context)),
         vscode.commands.registerCommand('openshift.project.delete', (context) => execute(Project.del, context)),
         vscode.commands.registerCommand('openshift.component.undeploy', (context) => execute(Component.undeploy, context)),
+        vscode.commands.registerCommand('openshift.component.undeploy.palette', (context) => execute(Component.undeploy, context)),
         vscode.commands.registerCommand('openshift.project.delete.palette', (context) => execute(Project.del, context)),
         vscode.commands.registerCommand('openshift.app.delete.palette', (context) => execute(Application.del, context)),
         vscode.commands.registerCommand('openshift.app.describe', (context) => execute(Application.describe, context)),
