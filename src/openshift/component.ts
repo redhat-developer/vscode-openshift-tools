@@ -4,8 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { OpenShiftItem } from './openshiftItem';
-import { OpenShiftObject, Command, ContextType, OdoImpl } from '../odo';
-import { window, commands, QuickPickItem, Uri, workspace, WorkspaceFolder } from 'vscode';
+import { OpenShiftObject, Command, ContextType } from '../odo';
+import { window, commands, QuickPickItem, Uri, workspace } from 'vscode';
 import { Progress } from '../util/progress';
 import open = require('open');
 import { ChildProcess } from 'child_process';
@@ -75,10 +75,33 @@ export class Component extends OpenShiftItem {
         const value = await window.showWarningMessage(`Do you want to delete Component '${name}\'?`, 'Yes', 'Cancel');
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Deleting the Component '${component.getName()} '`, async () => {
-                await Component.unlinkAllComponents(component);
-                return Component.odo.deleteComponent(component);
+                if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT || component.contextValue === ContextType.COMPONENT_PUSHED) {
+                    await Component.unlinkAllComponents(component);
+                    await Component.odo.deleteComponent(component);
+                }
+                if (component.contextPath) {
+                    const wsFolder = workspace.getWorkspaceFolder(component.contextPath);
+                    workspace.updateWorkspaceFolders(wsFolder.index, 1);
+                }
+
             }).then(() => `Component '${name}' successfully deleted`)
             .catch((err) => Promise.reject(`Failed to delete Component with error '${err}'`));
+        }
+    }
+
+    static async undeploy(treeItem: OpenShiftObject): Promise<string> {
+        const component = await Component.getOpenShiftCmdData(treeItem,
+            "From which Project do you want to undeploy Component",
+            "From which Application you want to undeploy Component",
+            "Select Component to undeploy");
+        if (!component) return null;
+        const name: string = component.getName();
+        const value = await window.showWarningMessage(`Do you want to undeploy Component '${name}\'?`, 'Yes', 'Cancel');
+        if (value === 'Yes') {
+            return Progress.execFunctionWithProgress(`Undeploying the Component '${component.getName()} '`, async () => {
+                await Component.odo.undeployComponent(component);
+            }).then(() => `Component '${name}' successfully undeployed`)
+            .catch((err) => Promise.reject(`Failed to undeploy Component with error '${err}'`));
         }
     }
 

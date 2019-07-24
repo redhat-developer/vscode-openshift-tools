@@ -9,8 +9,6 @@ import { Progress } from "../util/progress";
 import * as vscode from 'vscode';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import * as k8s from 'vscode-kubernetes-tools-api';
-import { KubeConfigUtils } from "../util/kubeUtils";
-import open = require("open");
 
 export class BuildConfigNodeContributor implements ClusterExplorerV1.NodeContributor {
     contributesChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): boolean {

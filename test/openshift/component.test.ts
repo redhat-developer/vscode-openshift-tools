@@ -26,10 +26,15 @@ suite('OpenShift/Component', () => {
     let sandbox: sinon.SinonSandbox;
     let termStub: sinon.SinonStub, execStub: sinon.SinonStub;
     let getComponentsStub: sinon.SinonStub;
+    const fixtureFolder = path.join(__dirname, '..', '..', 'test', 'fixtures').normalize();
+    const comp1Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp1'));
+    const comp2Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp2'));
+    const wsFolder1 = { uri: comp1Uri, index: 0, name: 'comp1' };
+    const wsFolder2 = { uri: comp2Uri, index: 1, name: 'comp2' };
     const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
-    const projectItem = new TestItem(clusterItem, 'project', ContextType.PROJECT);
-    const appItem = new TestItem(projectItem, 'application', ContextType.APPLICATION);
-    const componentItem = new TestItem(appItem, 'component', ContextType.COMPONENT);
+    const projectItem = new TestItem(clusterItem, 'myproject', ContextType.PROJECT);
+    const appItem = new TestItem(projectItem, 'app1', ContextType.APPLICATION);
+    const componentItem = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], false, comp1Uri);
     const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
     const errorMessage = 'FATAL ERROR';
     let getProjects: sinon.SinonStub;
@@ -38,6 +43,7 @@ suite('OpenShift/Component', () => {
     let opnStub: sinon.SinonStub;
     let infoStub: sinon.SinonStub;
     let fetchTag: sinon.SinonStub;
+
     setup(() => {
         sandbox = sinon.createSandbox();
         opnStub = sandbox.stub();
@@ -85,9 +91,6 @@ suite('OpenShift/Component', () => {
         const folder = { uri: { fsPath: 'folder' } };
         let inputStub: sinon.SinonStub,
         progressFunctionStub: sinon.SinonStub;
-        const fixtureFolder = path.join(__dirname, '..', '..', 'test', 'fixtures').normalize();
-        const comp1Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp1'));
-        const comp2Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp2'));
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -99,11 +102,7 @@ suite('OpenShift/Component', () => {
             sandbox.stub(Progress, 'execWithProgress').resolves();
             sandbox.stub(Progress, 'execCmdWithProgress').resolves();
             progressFunctionStub = sandbox.stub(Progress, 'execFunctionWithProgress').yields();
-            sandbox.stub(vscode.workspace, 'workspaceFolders').value([{
-                uri: comp1Uri, index: 0, name: 'comp1'
-            }, {
-                uri: comp2Uri, index: 1, name: 'comp2'
-            }]);
+            sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
         });
 
         test('returns null when cancelled', async () => {
@@ -409,6 +408,10 @@ suite('OpenShift/Component', () => {
             quickPickStub.onThirdCall().resolves(componentItem);
             sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
             execStub.resolves({ error: undefined, stdout: '', stderr: '' });
+            sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
+            sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
+            sandbox.stub(vscode.workspace, 'getWorkspaceFolder').returns(wsFolder1);
+            OdoImpl.data.addContexts(vscode.workspace.workspaceFolders);
         });
 
         test('works from context menu', async () => {
