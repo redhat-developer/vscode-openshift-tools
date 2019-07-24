@@ -460,6 +460,67 @@ suite('OpenShift/Component', () => {
         });
     });
 
+    suite('undeploy', () => {
+        setup(() => {
+            sandbox.stub(Component, 'unlinkAllComponents');
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onThirdCall().resolves(componentItem);
+            sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+            execStub.resolves({ error: undefined, stdout: '', stderr: '' });
+            sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
+            sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
+            sandbox.stub(vscode.workspace, 'getWorkspaceFolder').returns(wsFolder1);
+            OdoImpl.data.addContexts(vscode.workspace.workspaceFolders);
+        });
+
+        test('works from context menu', async () => {
+            const result = await Component.undeploy(componentItem);
+
+            expect(result).equals(`Component '${componentItem.getName()}' successfully undeployed`);
+            expect(execStub).calledWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+        });
+
+        test('works with no context', async () => {
+            const result = await Component.undeploy(null);
+
+            expect(result).equals(`Component '${componentItem.getName()}' successfully undeployed`);
+            expect(execStub).calledWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+        });
+
+        test('wraps errors in additional info', async () => {
+            execStub.rejects(errorMessage);
+
+            try {
+                await Component.undeploy(componentItem);
+            } catch (err) {
+                expect(err).equals(`Failed to undeploy Component with error '${errorMessage}'`);
+            }
+        });
+
+        test('returns null when no project is selected', async () => {
+            quickPickStub.onFirstCall().resolves();
+            const result = await Component.undeploy(null);
+
+            expect(result).null;
+        });
+
+        test('returns null when no application is selected', async () => {
+            quickPickStub.onSecondCall().resolves();
+            const result = await Component.undeploy(null);
+
+            expect(result).null;
+        });
+
+        test('returns null when no component is selected', async () => {
+            quickPickStub.onThirdCall().resolves();
+            const result = await Component.undeploy(null);
+
+            expect(result).null;
+        });
+    });
+
     suite('linkComponent', () => {
 
         setup(() => {
