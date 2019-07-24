@@ -270,7 +270,7 @@
       },
       {
         "command": "openshift.component.undeploy",
-        "title": "Undelopy",
+        "title": "Undeploy",
         "category": "OpenShift"
       },
       {
