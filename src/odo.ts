@@ -373,6 +373,7 @@ export interface Odo {
     createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, path: Uri): Promise<OpenShiftObject>;
     createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, path: Uri): Promise<OpenShiftObject>;
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
+    undeployComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     deleteNotPushedComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     createStorage(component: OpenShiftObject, name: string, mountPath: string, size: string): Promise<OpenShiftObject>;
     deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject>;
@@ -809,12 +810,16 @@ export class OdoImpl implements Odo {
         await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath), location.fsPath);
         await this.executeInTerminal(Command.pushComponent(), location.fsPath);
         workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: location });
+        OdoImpl.data.addContexts([workspace.getWorkspaceFolder(location)]);
+        const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
+        if (!targetApplication) {
+            await this.insertAndReveal(application);
+        }
         return this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT_PUSHED, false, this, Collapsed, location, 'local'));
     }
 
     public async createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, location: string, context: Uri, ref: string = 'master'): Promise<OpenShiftObject> {
         await this.execute(Command.createGitComponent(application.getParent().getName(), application.getName(), type, version, name, location, ref ? ref : 'master'), context.fsPath);
-
         // This check is here to skip any model updates when there are not workspace folders yet,
         // because when first folder added to workspace extesion is going to be reloaded anyway and
         // model loaded when extension is reactivated
@@ -838,6 +843,14 @@ export class OdoImpl implements Odo {
         const app = component.getParent();
         await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         return this.deleteAndRefresh(component);
+    }
+
+    public async undeployComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
+        const app = component.getParent();
+        await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+        component.contextValue = ContextType.COMPONENT;
+        OpenShiftExplorer.getInstance().refresh(component);
+        return component;
     }
 
     public async deleteNotPushedComponent(component: OpenShiftObject): Promise<OpenShiftObject> {

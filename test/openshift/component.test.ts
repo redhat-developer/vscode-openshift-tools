@@ -26,10 +26,15 @@ suite('OpenShift/Component', () => {
     let sandbox: sinon.SinonSandbox;
     let termStub: sinon.SinonStub, execStub: sinon.SinonStub;
     let getComponentsStub: sinon.SinonStub;
+    const fixtureFolder = path.join(__dirname, '..', '..', 'test', 'fixtures').normalize();
+    const comp1Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp1'));
+    const comp2Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp2'));
+    const wsFolder1 = { uri: comp1Uri, index: 0, name: 'comp1' };
+    const wsFolder2 = { uri: comp2Uri, index: 1, name: 'comp2' };
     const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
-    const projectItem = new TestItem(clusterItem, 'project', ContextType.PROJECT);
-    const appItem = new TestItem(projectItem, 'application', ContextType.APPLICATION);
-    const componentItem = new TestItem(appItem, 'component', ContextType.COMPONENT);
+    const projectItem = new TestItem(clusterItem, 'myproject', ContextType.PROJECT);
+    const appItem = new TestItem(projectItem, 'app1', ContextType.APPLICATION);
+    const componentItem = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], false, comp1Uri);
     const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
     const errorMessage = 'FATAL ERROR';
     let getProjects: sinon.SinonStub;
@@ -38,6 +43,7 @@ suite('OpenShift/Component', () => {
     let opnStub: sinon.SinonStub;
     let infoStub: sinon.SinonStub;
     let fetchTag: sinon.SinonStub;
+
     setup(() => {
         sandbox = sinon.createSandbox();
         opnStub = sandbox.stub();
@@ -89,12 +95,14 @@ suite('OpenShift/Component', () => {
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves('Workspace Directory');
-            quickPickStub.onSecondCall().resolves(componentType);
-            quickPickStub.onThirdCall().resolves(version);
+            quickPickStub.onSecondCall().resolves({label: 'file:///c:/Temp', folder: vscode.Uri.parse('file:///c:/Temp')});
+            quickPickStub.onThirdCall().resolves(componentType);
+            quickPickStub.onCall(3).resolves(version);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
             sandbox.stub(Progress, 'execWithProgress').resolves();
             sandbox.stub(Progress, 'execCmdWithProgress').resolves();
             progressFunctionStub = sandbox.stub(Progress, 'execFunctionWithProgress').yields();
+            sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
         });
 
         test('returns null when cancelled', async () => {
@@ -105,22 +113,21 @@ suite('OpenShift/Component', () => {
         });
 
         test('errors when a subcommand fails', async () => {
-            sandbox.stub(vscode.window, 'showWorkspaceFolderPick').rejects(errorMessage);
-
+            quickPickStub.onSecondCall().rejects(errorMessage);
+            let expectedError: Error;
             try {
                 await Component.create(appItem);
-                expect.fail();
             } catch (error) {
-                expect(error).equals(`Failed to create Component with error '${errorMessage}'`);
+                expectedError = error;
             }
+            expect(expectedError).equals(`Failed to create Component with error '${errorMessage}'`);
         });
 
         suite('from local workspace', () => {
-            let folderStub: sinon.SinonStub;
 
             setup(() => {
                 inputStub.resolves(componentItem.getName());
-                folderStub = sandbox.stub(vscode.window, 'showWorkspaceFolderPick').resolves(folder);
+                quickPickStub.onSecondCall().resolves({label: folder.uri.fsPath, uri: folder.uri});
             });
 
             test('happy path works', async () => {
@@ -133,7 +140,7 @@ suite('OpenShift/Component', () => {
             });
 
             test('returns null when no folder selected', async () => {
-                folderStub.resolves();
+                quickPickStub.onSecondCall().resolves();
                 const result = await Component.create(appItem);
 
                 expect(result).null;
@@ -279,6 +286,8 @@ suite('OpenShift/Component', () => {
 
             setup(() => {
                 quickPickStub.onFirstCall().resolves({ label: 'Binary File' });
+                quickPickStub.onSecondCall().resolves(componentType);
+                quickPickStub.onThirdCall().resolves(version);
                 fileStub = sandbox.stub(vscode.window, 'showOpenDialog').resolves(files);
                 inputStub.resolves(componentItem.getName());
             });
@@ -399,6 +408,10 @@ suite('OpenShift/Component', () => {
             quickPickStub.onThirdCall().resolves(componentItem);
             sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
             execStub.resolves({ error: undefined, stdout: '', stderr: '' });
+            sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
+            sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
+            sandbox.stub(vscode.workspace, 'getWorkspaceFolder').returns(wsFolder1);
+            OdoImpl.data.addContexts(vscode.workspace.workspaceFolders);
         });
 
         test('works from context menu', async () => {
@@ -442,6 +455,67 @@ suite('OpenShift/Component', () => {
         test('returns null when no component is selected', async () => {
             quickPickStub.onThirdCall().resolves();
             const result = await Component.del(null);
+
+            expect(result).null;
+        });
+    });
+
+    suite('undeploy', () => {
+        setup(() => {
+            sandbox.stub(Component, 'unlinkAllComponents');
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onThirdCall().resolves(componentItem);
+            sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+            execStub.resolves({ error: undefined, stdout: '', stderr: '' });
+            sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
+            sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
+            sandbox.stub(vscode.workspace, 'getWorkspaceFolder').returns(wsFolder1);
+            OdoImpl.data.addContexts(vscode.workspace.workspaceFolders);
+        });
+
+        test('works from context menu', async () => {
+            const result = await Component.undeploy(componentItem);
+
+            expect(result).equals(`Component '${componentItem.getName()}' successfully undeployed`);
+            expect(execStub).calledWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+        });
+
+        test('works with no context', async () => {
+            const result = await Component.undeploy(null);
+
+            expect(result).equals(`Component '${componentItem.getName()}' successfully undeployed`);
+            expect(execStub).calledWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+        });
+
+        test('wraps errors in additional info', async () => {
+            execStub.rejects(errorMessage);
+
+            try {
+                await Component.undeploy(componentItem);
+            } catch (err) {
+                expect(err).equals(`Failed to undeploy Component with error '${errorMessage}'`);
+            }
+        });
+
+        test('returns null when no project is selected', async () => {
+            quickPickStub.onFirstCall().resolves();
+            const result = await Component.undeploy(null);
+
+            expect(result).null;
+        });
+
+        test('returns null when no application is selected', async () => {
+            quickPickStub.onSecondCall().resolves();
+            const result = await Component.undeploy(null);
+
+            expect(result).null;
+        });
+
+        test('returns null when no component is selected', async () => {
+            quickPickStub.onThirdCall().resolves();
+            const result = await Component.undeploy(null);
 
             expect(result).null;
         });

@@ -5,7 +5,7 @@
 
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command, ContextType } from '../odo';
-import { window, commands, QuickPickItem, Uri, workspace, WorkspaceFolder } from 'vscode';
+import { window, commands, QuickPickItem, Uri, workspace } from 'vscode';
 import { Progress } from '../util/progress';
 import open = require('open');
 import { ChildProcess } from 'child_process';
@@ -16,6 +16,21 @@ import { Refs, Ref, Type } from '../util/refs';
 import { Delayer } from '../util/async';
 import { contextGlobalState } from '../extension';
 import { Platform } from '../util/platform';
+import path = require('path');
+import fs = require('fs-extra');
+
+interface WorkspaceFolderItem extends QuickPickItem {
+    uri: Uri;
+}
+
+class CreateWorkspaceItem implements QuickPickItem {
+
+	constructor() { }
+
+	get label(): string { return `$(plus) Add new workspace folder.`; }
+    get description(): string { return 'Folder which does not have an openshift context'; }
+
+}
 
 export class Component extends OpenShiftItem {
 
@@ -69,10 +84,33 @@ export class Component extends OpenShiftItem {
         const value = await window.showWarningMessage(`Do you want to delete Component '${name}\'?`, 'Yes', 'Cancel');
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Deleting the Component '${component.getName()} '`, async () => {
-                await Component.unlinkAllComponents(component);
-                return Component.odo.deleteComponent(component);
+                if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT || component.contextValue === ContextType.COMPONENT_PUSHED) {
+                    await Component.unlinkAllComponents(component);
+                    await Component.odo.deleteComponent(component);
+                }
+                if (component.contextPath) {
+                    const wsFolder = workspace.getWorkspaceFolder(component.contextPath);
+                    workspace.updateWorkspaceFolders(wsFolder.index, 1);
+                }
+
             }).then(() => `Component '${name}' successfully deleted`)
             .catch((err) => Promise.reject(`Failed to delete Component with error '${err}'`));
+        }
+    }
+
+    static async undeploy(treeItem: OpenShiftObject): Promise<string> {
+        const component = await Component.getOpenShiftCmdData(treeItem,
+            "From which Project do you want to undeploy Component",
+            "From which Application you want to undeploy Component",
+            "Select Component to undeploy");
+        if (!component) return null;
+        const name: string = component.getName();
+        const value = await window.showWarningMessage(`Do you want to undeploy Component '${name}\'?`, 'Yes', 'Cancel');
+        if (value === 'Yes') {
+            return Progress.execFunctionWithProgress(`Undeploying the Component '${component.getName()} '`, async () => {
+                await Component.odo.undeployComponent(component);
+            }).then(() => `Component '${name}' successfully undeployed`)
+            .catch((err) => Promise.reject(`Failed to undeploy Component with error '${err}'`));
         }
     }
 
@@ -243,30 +281,29 @@ export class Component extends OpenShiftItem {
 
     static async createFromLocal(context: OpenShiftObject): Promise<string> {
         let application: OpenShiftObject = context;
-        let folder: WorkspaceFolder | Uri[];
-        let workspacePath: Uri;
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
-        if (workspace.workspaceFolders) {
-            folder = await window.showWorkspaceFolderPick({
-                placeHolder: 'Select the target workspace folder'
-            });
-            if (folder) {
-                workspacePath = folder.uri;
-            }
+        let folder: WorkspaceFolderItem;
+        if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
+            folder = await window.showQuickPick(
+                (async (): Promise<WorkspaceFolderItem[]> => workspace.workspaceFolders.filter(
+                    (value) => {
+                        let result = true;
+                        try {
+                            result = !fs.statSync(path.join(value.uri.fsPath, '.odo', 'config.yaml')).isFile();
+                        } catch (ignore) {
+                        }
+                        return result;
+                    }
+                ).map(
+                    (folder) => ({ label: folder.uri.fsPath, uri: folder.uri})
+                ))(), {
+                    placeHolder: 'Select workspace folder'
+                }
+            );
         } else {
-            folder = await window.showOpenDialog({
-                canSelectFiles: false,
-                canSelectFolders: true,
-                canSelectMany: false,
-                defaultUri: Uri.file(Platform.getUserHomePath()),
-                openLabel: "Select Context Folder for Component"
-            });
-            if (folder) {
-                workspacePath = folder[0];
-            }
+            window.showInformationMessage('Workspace is empty. Please, add folder(s) to workspace and try again.');
         }
-
         if (!folder) return null;
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
         const componentName = await Component.getName('Component name', componentList, application.getName());
@@ -280,7 +317,7 @@ export class Component extends OpenShiftItem {
         const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
 
         if (!componentTypeVersion) return null;
-        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, workspacePath));
+        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.uri));
         return `Component '${componentName}' successfully created`;
     }
 

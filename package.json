@@ -88,7 +88,10 @@
     "onCommand:clusters.openshift.build.followLog",
     "onCommand:clusters.openshift.build.delete",
     "onCommand:clusters.openshift.build.delete.palette",
-    "onCommand:clusters.openshift.build.rebuild"
+    "onCommand:clusters.openshift.build.rebuild",
+    "onCommand:clusters.openshift.build.openConsole",
+    "onCommand:clusters.openshift.deployment.openConsole",
+    "onCommand:clusters.openshift.imagestream.openConsole"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -266,6 +269,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.undeploy",
+        "title": "Undeploy",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.component.push",
         "title": "Push",
         "category": "OpenShift"
@@ -404,6 +412,18 @@
         "command": "clusters.openshift.build.rebuild",
         "title": "Rebuild",
         "category": "OpenShift"
+      },
+      {
+        "command": "clusters.openshift.build.openConsole",
+        "title": "Open in Console"
+      },
+      {
+        "command": "clusters.openshift.deployment.openConsole",
+        "title": "Open in Console"
+      },
+      {
+        "command": "clusters.openshift.imagestream.openConsole",
+        "title": "Open in Console"
       }
     ],
     "keybindings": [
@@ -495,6 +515,10 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
+          "command": "openshift.component.undeploy",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
           "command": "openshift.component.watch",
           "when": "view == openshiftProjectExplorer"
         },
@@ -543,8 +567,23 @@
           "group": "c1"
         },
         {
+          "command": "clusters.openshift.deployment.openConsole",
+          "group": "3@0",
+          "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.dc"
+        },
+        {
+          "command": "clusters.openshift.imagestream.openConsole",
+          "group": "3@0",
+          "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.resource\\.imagestream*/i"
+        },
+        {
           "command": "clusters.openshift.build.start",
           "group": "2@0",
+          "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.bc"
+        },
+        {
+          "command": "clusters.openshift.build.openConsole",
+          "group": "3@0",
           "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.bc"
         },
         {
@@ -678,6 +717,11 @@
           "group": "c4@3"
         },
         {
+          "command": "openshift.component.undeploy",
+          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "c4@4"
+        },
+        {
           "command": "openshift.component.delete",
           "when": "view == openshiftProjectExplorer && viewItem == component_no_context",
           "group": "c5@1"
@@ -685,6 +729,11 @@
         {
           "command": "openshift.component.delete",
           "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "c5@1"
+        },
+        {
+          "command": "openshift.component.delete",
+          "when": "view == openshiftProjectExplorer && viewItem == component_not_pushed",
           "group": "c5@1"
         },
         {

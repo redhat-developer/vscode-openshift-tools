@@ -37,6 +37,7 @@ suite('Openshift/Cluster', () => {
         stderr: '',
         stdout: 'output'
     };
+    const err = new Error('FATAL ERROR');
     const error = 'FATAL ERROR';
     const errorData: CliExitData = {
         error: undefined,
@@ -87,14 +88,14 @@ suite('Openshift/Cluster', () => {
             quickPickStub.onSecondCall().resolves({description: "Current Context", label: testUrl});
             quickPickStub.onThirdCall().resolves({description: "Current Context", label: testUser});
             inputStub.resolves(password);
-            commandStub.rejects(error);
-
+            commandStub.rejects(err);
+            let expectedErr;
             try {
                 await Cluster.login();
-                expect.fail();
-            } catch (err) {
-                expect(err).equals(`Failed to login to cluster '${testUrl}' with '${error}'!`);
+            } catch (error) {
+                expectedErr = error;
             }
+            expect(expectedErr.message).equals(`Failed to login to cluster '${testUrl}' with '${err.message}'!`);
         });
 
         test('exits if the user refuses to log out of an existing cluster', async () => {
@@ -162,13 +163,13 @@ suite('Openshift/Cluster', () => {
 
             test('errors if there is output on odo stderr', async () => {
                 execStub.resolves(errorData);
-
+                let expectedErr;
                 try {
                     await Cluster.credentialsLogin();
-                    expect.fail();
                 } catch (err) {
-                    expect(err).equals(`Failed to login to cluster '${testUrl}' with '${error}'!`);
+                    expectedErr = err;
                 }
+                expect(expectedErr.message).equals(`Failed to login to cluster '${testUrl}' with '${error}'!`);
             });
 
             test('checks cluster url name is valid url', async () => {
@@ -246,13 +247,15 @@ suite('Openshift/Cluster', () => {
             });
 
             test('handles incoming errors the same way as credentials login', async () => {
-                execStub.rejects(error);
+                execStub.rejects(err);
+                let expectedErr;
                 try {
                     await Cluster.tokenLogin();
-                    expect.fail();
-                } catch (err) {
-                    expect(err).equals(`Failed to login to cluster '${testUrl}' with '${error}'!`);
+                } catch (error) {
+                    expectedErr = error;
                 }
+                console.log(expectedErr.message);
+                expect(expectedErr.message).equals(`Failed to login to cluster '${testUrl}' with '${err.message}'!`);
             });
         });
     });
@@ -291,24 +294,25 @@ suite('Openshift/Cluster', () => {
 
         test('handles errors from odo', async () => {
             execStub.rejects(error);
-
+            let expectedErr;
             try {
                 await Cluster.logout();
-                expect.fail();
+
             } catch (err) {
-                expect(err).equals(`Failed to logout of the current cluster with '${error}'!`);
+                expectedErr = err;
             }
+            expect(expectedErr).equals(`Failed to logout of the current cluster with '${error}'!`);
         });
 
         test('handles errors from odo stderr', async () => {
             execStub.resolves(errorData);
-
+            let expectedErr;
             try {
                 await Cluster.logout();
-                expect.fail();
             } catch (err) {
-                expect(err).equals(`Failed to logout of the current cluster with '${errorData.stderr}'!`);
+                expectedErr = err;
             }
+            expect(expectedErr).equals(`Failed to logout of the current cluster with '${errorData.stderr}'!`);
         });
 
         test('throws errors from subsequent login', async () => {
@@ -318,13 +322,13 @@ suite('Openshift/Cluster', () => {
             quickPickStub.onSecondCall().resolves({description: "Current Context", label: testUrl});
             quickPickStub.onThirdCall().resolves({description: "Current Context", label: testUrl});
             inputStub.resolves(password);
-
+            let expectedErr;
             try {
                 await Cluster.logout();
-                expect.fail();
             } catch (err) {
-                expect(err).equals(`Failed to login to cluster '${testUrl}' with '${error}'!`);
+                expectedErr = err;
             }
+            expect(expectedErr.message).equals(`Failed to login to cluster '${testUrl}' with '${error}'!`);
         });
     });
 
