@@ -18,11 +18,9 @@ import { contextGlobalState } from '../extension';
 import { Platform } from '../util/platform';
 import path = require('path');
 import fs = require('fs-extra');
-
 interface WorkspaceFolderItem extends QuickPickItem {
     uri: Uri;
 }
-
 class CreateWorkspaceItem implements QuickPickItem {
 
 	constructor() { }
@@ -31,7 +29,6 @@ class CreateWorkspaceItem implements QuickPickItem {
     get description(): string { return 'Folder which does not have an openshift context'; }
 
 }
-
 export class Component extends OpenShiftItem {
 
     static async getOpenshiftData(context: OpenShiftObject): Promise<OpenShiftObject> {
@@ -281,30 +278,39 @@ export class Component extends OpenShiftItem {
 
     static async createFromLocal(context: OpenShiftObject): Promise<string> {
         let application: OpenShiftObject = context;
+        let folder: WorkspaceFolderItem[];
+
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
-        let folder: WorkspaceFolderItem;
         if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
-            folder = await window.showQuickPick(
-                (async (): Promise<WorkspaceFolderItem[]> => workspace.workspaceFolders.filter(
-                    (value) => {
-                        let result = true;
-                        try {
-                            result = !fs.statSync(path.join(value.uri.fsPath, '.odo', 'config.yaml')).isFile();
-                        } catch (ignore) {
-                        }
-                        return result;
+            folder = workspace.workspaceFolders.filter(
+                (value) => {
+                    let result = true;
+                    try {
+                        result = !fs.statSync(path.join(value.uri.fsPath, '.odo', 'config.yaml')).isFile();
+                    } catch (ignore) {
                     }
-                ).map(
-                    (folder) => ({ label: folder.uri.fsPath, uri: folder.uri})
-                ))(), {
-                    placeHolder: 'Select workspace folder'
+                    return result;
                 }
+            ).map(
+                (folder) => ({ label: `$(file-directory) ${folder.uri.fsPath}`, uri: folder.uri })
             );
-        } else {
-            window.showInformationMessage('Workspace is empty. Please, add folder(s) to workspace and try again.');
         }
-        if (!folder) return null;
+        const addWorkspaceFolder = new CreateWorkspaceItem();
+        const choice = await window.showQuickPick([addWorkspaceFolder, ...folder], {placeHolder: "Select workspace folder"});
+
+        if (!choice) return null;
+        const workspacePath: Uri = (choice.label === addWorkspaceFolder.label) ?
+            await window.showOpenDialog({
+                canSelectFiles: false,
+                canSelectFolders: true,
+                canSelectMany: false,
+                defaultUri: Uri.file(Platform.getUserHomePath()),
+                openLabel: "Add workspace Folder for Component"
+            })[0] : folder[0].uri;
+
+        if (!workspacePath) return null;
+
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
@@ -317,7 +323,7 @@ export class Component extends OpenShiftItem {
         const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
 
         if (!componentTypeVersion) return null;
-        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder.uri));
+        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, workspacePath));
         return `Component '${componentName}' successfully created`;
     }
 
