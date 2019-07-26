@@ -27,7 +27,7 @@ export interface OpenShiftObject extends QuickPickItem {
     getParent(): OpenShiftObject;
     getName(): string;
     contextValue: string;
-    comptype?: string;
+    compType?: string;
     contextPath?: Uri;
     deployed: boolean;
     path?: string;
@@ -97,9 +97,6 @@ export class Command {
     }
     static printOcVersion() {
         return 'oc version';
-    }
-    static printOdoVersionAndProjects() {
-        return 'odo version && odo project list';
     }
     static listServiceInstances(project: string, app: string) {
         return `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}" --namespace ${project}`;
@@ -205,7 +202,7 @@ export class Command {
     static getComponentJson(project: string, app: string, component: string) {
         return `oc get service ${component}-${app} --namespace ${project} -o json`;
     }
-    static unlinkComponents(project, app, comp1, comp2) {
+    static unlinkComponents(project: string, app: string, comp1: string, comp2: string) {
         return `odo unlink --project ${project} --app ${app} ${comp2} --component ${comp1}`;
     }
 }
@@ -215,7 +212,7 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
     private readonly CONTEXT_DATA = {
         cluster: {
             icon: 'cluster-node.png',
-            tooltip: '',
+            tooltip: '{name}',
             getChildren: () => this.odo.getProjects()
         },
         project: {
@@ -282,7 +279,7 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
         private readonly odo: Odo,
         public readonly collapsibleState: TreeItemCollapsibleState = Collapsed,
         public contextPath?: Uri,
-        public readonly comptype?: string) {
+        public readonly compType?: string) {
         OdoImpl.data.setPathToObject(this);
     }
 
@@ -301,11 +298,11 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
 
     get iconPath(): Uri {
         if (this.contextValue === ContextType.COMPONENT_PUSHED || this.contextValue === ContextType.COMPONENT || this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
-            if (this.comptype === 'git') {
+            if (this.compType === 'git') {
                 return Uri.file(path.join(__dirname, "../../images/component", 'git.png'));
-            } else if (this.comptype === 'local') {
+            } else if (this.compType === 'local') {
                 return Uri.file(path.join(__dirname, "../../images/component", 'workspace.png'));
-            } else if (this.comptype === 'binary') {
+            } else if (this.compType === 'binary') {
                 return Uri.file(path.join(__dirname, "../../images/component", 'binary.png'));
             }
         } else {
@@ -318,7 +315,8 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
     }
 
     get label(): string {
-        return this.name;
+        const label = this.contextValue === ContextType.CLUSTER ? this.name.split('//')[1] : this.name;
+        return label;
     }
 
     get description(): string {
@@ -536,7 +534,7 @@ export class OdoImpl implements Odo {
     private async getClustersWithOdo(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
         const result: cliInstance.CliExitData = await this.execute(
-            Command.printOdoVersionAndProjects(), process.cwd(), false
+            Command.printOdoVersion(), process.cwd(), false
         );
         if (this.odoLoginMessages.some((element) => result.stderr ? result.stderr.indexOf(element) > -1 : false)) {
             const loginErrorMsg: string = 'Please log in to the cluster';
@@ -759,7 +757,7 @@ export class OdoImpl implements Odo {
     }
 
     public async requireLogin(): Promise<boolean> {
-        const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersionAndProjects(), process.cwd(), false);
+        const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersion(), process.cwd(), false);
         return this.odoLoginMessages.some((element) => { return result.stderr.indexOf(element) > -1; });
     }
 
