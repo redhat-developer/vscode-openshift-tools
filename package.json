@@ -93,7 +93,7 @@
     "onCommand:clusters.openshift.deployment.openConsole",
     "onCommand:clusters.openshift.imagestream.openConsole"
   ],
-  "main": "./out/src/extension",
+  "main": "./dist/extension",
   "contributes": {
     "commands": [
       {
@@ -797,13 +797,13 @@
   },
   "extensionDependencies": [],
   "scripts": {
-    "verify": "node ./out/build/verify-tools.js",
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "rm -rf out && webpack --mode production",
+    "compile": "webpack --mode development",
+    "compile:watch": "webpack --mode development --watch",
     "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "node ./node_modules/vscode/bin/test",
+    "verify": "node ./out/build/verify-tools.js",
     "clean": "rm -rf out || rmdir out /s /q",
-    "test": "npm run clean && npm run compile && npm run verify && node ./node_modules/vscode/bin/test",
     "update-deps": "node_modules/.bin/ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
     "build": "npm run clean && tslint -p tslint.json && npm run compile"
@@ -839,7 +839,10 @@
     "tslint": "^5.18.0",
     "typescript": "^3.5.2",
     "vscode": "^1.1.34",
-    "walker": "^1.0.7"
+    "walker": "^1.0.7",
+    "ts-loader": "^6.0.4",
+    "webpack": "^4.38.0",
+    "webpack-cli": "^3.3.6"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.10.2",
