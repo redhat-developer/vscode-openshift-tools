@@ -79,6 +79,17 @@ export class Cluster extends OpenShiftItem {
         }
     }
 
+    static async switchContext() {
+        const k8sConfig = new KubeConfigUtils();
+        const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
+        const contextName: QuickPickItem[] = contexts.map((ctx) => ({ label: `$(code)  ${ctx.name}`}));
+        const choice = await window.showQuickPick(contextName, {placeHolder: "Select the new context"});
+        if (!choice) return null;
+        return Promise.resolve()
+            .then(() => Cluster.odo.execute(Command.setContext(choice.label)))
+            .then(() => window.showInformationMessage(`Cluster context is changed to: ${choice.label}`));
+    }
+
     static async getUrl(): Promise<string | null> {
         const k8sConfig = new KubeConfigUtils();
         const clusterURl = await Cluster.getUrlFromClipboard();

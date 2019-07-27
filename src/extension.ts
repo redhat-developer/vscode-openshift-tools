@@ -44,6 +44,7 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.explorer.login.credentialsLogin', (context) => execute(Cluster.credentialsLogin, context)),
         vscode.commands.registerCommand('openshift.explorer.logout', (context) => execute(Cluster.logout, context)),
         vscode.commands.registerCommand('openshift.explorer.refresh', (context) => execute(Cluster.refresh, context)),
+        vscode.commands.registerCommand('openshift.explorer.switchContext', (context) => execute(Cluster.switchContext, context)),
         vscode.commands.registerCommand('openshift.catalog.listComponents', (context) => execute(Catalog.listComponents, context)),
         vscode.commands.registerCommand('openshift.catalog.listServices', (context) => execute(Catalog.listServices, context)),
         vscode.commands.registerCommand('openshift.project.create', (context) => execute(Project.create, context)),
