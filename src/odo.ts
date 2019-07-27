@@ -796,8 +796,40 @@ export class OdoImpl implements Odo {
     }
 
     public async deleteApplication(app: OpenShiftObject): Promise<OpenShiftObject> {
-        await this.execute(Command.deleteApplication(app.getParent().getName(), app.getName()));
-        return this.deleteAndRefresh(app);
+        const allComps = await OdoImpl.instance.getComponents(app);
+        const allContexts = [];
+        let callDelete = false;
+        allComps.forEach((component) => {
+            if (component.contextPath) {
+                OdoImpl.data.delete(component); // delete component from model
+                if (!callDelete && component.contextValue === ContextType.COMPONENT_PUSHED || component.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
+                    callDelete = true; // if there is at least one component deployed in application `odo app delete` command should be called
+                }
+                if (component.contextPath) { // if component has context folder save it to remove from settings cache
+                    allContexts.push(workspace.getWorkspaceFolder(component.contextPath));
+                }
+            }
+        });
+
+        if (callDelete) {
+            await this.execute(Command.deleteApplication(app.getParent().getName(), app.getName()));
+        }
+        // Chain workspace folder deltions, because when updateWorkspaceFoder called next call is possible only after
+        // listener registered with onDidChangeWorkspaceFolders called.
+        let result = Promise.resolve();
+        allContexts.forEach((wsFolder) => {
+            result = result.then(() => {
+                workspace.updateWorkspaceFolders(wsFolder.index, 1);
+                return new Promise((resolve) => {
+                    workspace.onDidChangeWorkspaceFolders(() => {
+                        resolve();
+                    });
+                });
+            });
+        });
+        return result.then(() => {
+            return this.deleteAndRefresh(app);
+        });
     }
 
     public async createApplication(project: OpenShiftObject, applicationName: string): Promise<OpenShiftObject> {
