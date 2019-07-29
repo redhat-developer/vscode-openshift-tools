@@ -800,14 +800,12 @@ export class OdoImpl implements Odo {
         const allContexts = [];
         let callDelete = false;
         allComps.forEach((component) => {
-            if (component.contextPath) {
-                OdoImpl.data.delete(component); // delete component from model
-                if (!callDelete && component.contextValue === ContextType.COMPONENT_PUSHED || component.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
-                    callDelete = true; // if there is at least one component deployed in application `odo app delete` command should be called
-                }
-                if (component.contextPath) { // if component has context folder save it to remove from settings cache
-                    allContexts.push(workspace.getWorkspaceFolder(component.contextPath));
-                }
+            OdoImpl.data.delete(component); // delete component from model
+            if (!callDelete && component.contextValue === ContextType.COMPONENT_PUSHED || component.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
+                callDelete = true; // if there is at least one component deployed in application `odo app delete` command should be called
+            }
+            if (component.contextPath) { // if component has context folder save it to remove from settings cache
+                allContexts.push(workspace.getWorkspaceFolder(component.contextPath));
             }
         });
 
