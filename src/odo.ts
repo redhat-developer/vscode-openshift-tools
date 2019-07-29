@@ -151,7 +151,7 @@ export class Command {
         return `oc get service ${component}-${app} --namespace ${project} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`;
     }
     static linkComponentTo(project: string, app: string, component: string, componentToLink: string, port?: string) {
-        return `odo project set ${project} && odo application set ${app} && odo component set ${component} && odo link ${componentToLink} --wait${port ? ' --port ' + port : ''}`;
+        return `odo link ${componentToLink} --project ${project} --app ${app} --component ${component} --wait${port ? ' --port ' + port : ''}`;
     }
     @verbose
     static pushComponent() {
