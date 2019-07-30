@@ -81,6 +81,7 @@
     "onCommand:openshift.service.describe.palette",
     "onCommand:openshift.component.folder.create",
     "onCommand:openshift.explorer.reportIssue",
+    "onCommand:openshift.explorer.switchContext",
     "onCommand:clusters.openshift.openProjectConsole",
     "onCommand:clusters.openshift.useProject",
     "onCommand:clusters.openshift.build.start",
