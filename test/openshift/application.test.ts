@@ -24,6 +24,9 @@ suite('OpenShift/Application', () => {
     let getProjectNamesStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
+    const compItem = new TestItem(appItem, 'app', ContextType.COMPONENT_NO_CONTEXT, [], true, null);
+    compItem['path'] = 'path/to/component';
+    appItem.getChildren().push(compItem);
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -95,6 +98,7 @@ suite('OpenShift/Application', () => {
 
         setup(() => {
             warnStub = sandbox.stub(vscode.window, 'showWarningMessage');
+            sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([compItem]);
         });
 
         test('calls the appropriate odo command if confirmed', async () => {
@@ -124,14 +128,13 @@ suite('OpenShift/Application', () => {
         test('throws an error message when odo command failed', async () => {
             warnStub.resolves('Yes');
             execStub.rejects('ERROR');
-
+            let expectedError;
             try {
                 await Application.del(appItem);
             } catch (err) {
-                expect(err).equals(`Failed to delete Application with error 'ERROR'`);
-                return;
+                expectedError = err;
             }
-            expect.fail();
+            expect(expectedError).equals(`Failed to delete Application with error 'ERROR'`);
         });
 
         test('requests for a project name and exits if not provided', async () => {
