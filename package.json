@@ -81,6 +81,7 @@
     "onCommand:openshift.service.describe.palette",
     "onCommand:openshift.component.folder.create",
     "onCommand:openshift.explorer.reportIssue",
+    "onCommand:openshift.explorer.switchContext",
     "onCommand:clusters.openshift.openProjectConsole",
     "onCommand:clusters.openshift.useProject",
     "onCommand:clusters.openshift.build.start",
@@ -429,6 +430,15 @@
       {
         "command": "clusters.openshift.imagestream.openConsole",
         "title": "Open in Console"
+      },
+      {
+        "command": "openshift.explorer.switchContext",
+        "title": "Switch User",
+        "category": "OpenShift",
+        "icon": {
+          "dark": "images/title/light/user.png",
+          "light": "images/title/dark/user.png"
+        }
       }
     ],
     "keybindings": [
@@ -778,6 +788,11 @@
         {
           "command": "clusters.openshift.openProjectConsole",
           "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.\\w*cluster/i"
+        },
+        {
+          "command": "openshift.explorer.switchContext",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster",
+          "group": "inline"
         }
       ]
     },
