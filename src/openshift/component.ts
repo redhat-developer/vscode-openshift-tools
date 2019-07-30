@@ -301,13 +301,13 @@ export class Component extends OpenShiftItem {
 
         if (!choice) return null;
         const workspacePath: Uri = (choice.label === addWorkspaceFolder.label) ?
-            await window.showOpenDialog({
+            (await window.showOpenDialog({
                 canSelectFiles: false,
                 canSelectFolders: true,
                 canSelectMany: false,
                 defaultUri: Uri.file(Platform.getUserHomePath()),
                 openLabel: "Add workspace Folder for Component"
-            })[0] : folder[0].uri;
+            }))[0] : folder[0].uri;
 
         if (!workspacePath) return null;
 
