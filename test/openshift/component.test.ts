@@ -553,6 +553,7 @@ suite('OpenShift/Component', () => {
 
         test('calls the appropriate error message when only one component found', async () => {
             quickPickStub.restore();
+            componentItem.contextValue = ContextType.COMPONENT_PUSHED;
             getComponentsStub.resolves([componentItem]);
             try {
                 await Component.linkComponent(componentItem);
