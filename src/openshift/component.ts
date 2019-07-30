@@ -156,7 +156,7 @@ export class Component extends OpenShiftItem {
             'Select an Application',
             'Select a Component');
         if (!component) return null;
-        const componentPresent = await Component.odo.getComponents(component.getParent());
+        const componentPresent = (await Component.odo.getComponents(component.getParent())).filter((component) => component.contextValue !== ContextType.COMPONENT);
         if (componentPresent.length === 1) throw Error('You have no Components available to link, please create new OpenShift Component and try again.');
         const componentToLink = await window.showQuickPick(componentPresent.filter((comp)=> comp.getName() !== component.getName()), {placeHolder: "Select a Component to link"});
         if (!componentToLink) return null;

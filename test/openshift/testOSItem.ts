@@ -11,7 +11,7 @@ export class TestItem implements OpenShiftObject {
     constructor(
         private parent: OpenShiftObject,
         private name: string,
-        public readonly contextValue: ContextType,
+        public contextValue: ContextType,
         private children = [],
         public deployed = false,
         public contextPath = Uri.parse('file:///c%3A/Temp')) {
