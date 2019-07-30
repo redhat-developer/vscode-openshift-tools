@@ -84,6 +84,7 @@
     "onCommand:openshift.explorer.switchContext",
     "onCommand:clusters.openshift.openProjectConsole",
     "onCommand:clusters.openshift.useProject",
+    "onCommand:clusters.openshift.deploy",
     "onCommand:clusters.openshift.build.start",
     "onCommand:clusters.openshift.build.showLog",
     "onCommand:clusters.openshift.build.followLog",
@@ -105,6 +106,11 @@
       {
         "command": "clusters.openshift.build.start",
         "title": "Start Build",
+        "category": "OpenShift"
+      },
+      {
+        "command": "clusters.openshift.deploy",
+        "title": "Deploy",
         "category": "OpenShift"
       },
       {
@@ -391,6 +397,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "clusters.openshift.deploy",
+        "title": "Deploy",
+        "category": "OpenShift"
+      },
+      {
         "command": "clusters.openshift.openProjectConsole",
         "title": "Open Project in Console"
       },
@@ -594,6 +605,11 @@
         {
           "command": "clusters.openshift.build.start",
           "group": "2@0",
+          "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.bc"
+        },
+        {
+          "command": "clusters.openshift.deploy",
+          "group": "2@1",
           "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.bc"
         },
         {
