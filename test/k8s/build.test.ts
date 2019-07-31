@@ -61,6 +61,46 @@ suite('K8s/build', () => {
         }
     }`;
 
+    const noBcData = `{
+        "apiVersion": "v1",
+        "items": [],
+        "kind": "List",
+        "metadata": {
+            "resourceVersion": "",
+            "selfLink": ""
+        }
+    }`;
+
+    const mockData = `{
+        "apiVersion": "v1",
+        "items": [
+            {
+                "apiVersion": "build.openshift.io/v1",
+                "kind": "BuildConfig",
+                "metadata": {
+                    "annotations": {
+                        "app.kubernetes.io/component-source-type": "git",
+                        "app.kubernetes.io/url": "https://github.com/sclorg/nodejs-ex"
+                    },
+                    "creationTimestamp": "2019-07-15T09:18:43Z",
+                    "name": "nodejs-comp-nodejs-app",
+                    "namespace": "myproject",
+                    "resourceVersion": "116630",
+                    "selfLink": "/apis/build.openshift.io/v1/namespaces/myproject/buildconfigs/nodejs-comp-nodejs-app",
+                    "uid": "8a66b3ff-a6e1-11e9-8dbe-22967c349399"
+                },
+                "status": {
+                    "lastVersion": 8
+                }
+            }
+        ],
+        "kind": "List",
+        "metadata": {
+            "resourceVersion": "",
+            "selfLink": ""
+        }
+    }`;
+
     setup(() => {
         sandbox = sinon.createSandbox();
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
@@ -81,46 +121,6 @@ suite('K8s/build', () => {
             nodeType: "resource",
             resourceId: "bc/nodejs-comp-nodejs-app"
         };
-
-        const noBcData = `{
-            "apiVersion": "v1",
-            "items": [],
-            "kind": "List",
-            "metadata": {
-                "resourceVersion": "",
-                "selfLink": ""
-            }
-        }`;
-
-        const mockData = `{
-            "apiVersion": "v1",
-            "items": [
-                {
-                    "apiVersion": "build.openshift.io/v1",
-                    "kind": "BuildConfig",
-                    "metadata": {
-                        "annotations": {
-                            "app.kubernetes.io/component-source-type": "git",
-                            "app.kubernetes.io/url": "https://github.com/sclorg/nodejs-ex"
-                        },
-                        "creationTimestamp": "2019-07-15T09:18:43Z",
-                        "name": "nodejs-comp-nodejs-app",
-                        "namespace": "myproject",
-                        "resourceVersion": "116630",
-                        "selfLink": "/apis/build.openshift.io/v1/namespaces/myproject/buildconfigs/nodejs-comp-nodejs-app",
-                        "uid": "8a66b3ff-a6e1-11e9-8dbe-22967c349399"
-                    },
-                    "status": {
-                        "lastVersion": 8
-                    }
-                }
-            ],
-            "kind": "List",
-            "metadata": {
-                "resourceVersion": "",
-                "selfLink": ""
-            }
-        }`;
 
         setup(() => {
             execStub.resolves({ error: undefined, stdout: mockData, stderr: '' });
@@ -168,6 +168,65 @@ suite('K8s/build', () => {
                 checkError = err as Error;
             }
             expect(checkError.message).equals('You have no BuildConfigs available to start a build');
+        });
+    });
+
+    suite('Deploy', () => {
+        const context = {
+            id: "nodejs-comp-nodejs-app",
+            metadata: undefined,
+            namespace: null,
+            nodeCategory: "Kubernetes-explorer-node",
+            nodeType: "resource",
+            resourceId: "bc/nodejs-comp-nodejs-app"
+        };
+
+        setup(() => {
+            execStub.resolves({ error: undefined, stdout: mockData, stderr: '' });
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.resolves({label: "nodejs-comp-nodejs-app"});
+        });
+
+        test('works from context menu', async () => {
+            const result = await Build.deploymentConfig(context);
+
+            expect(result).equals(`Successfully deploy '${context.id}'`);
+            expect(execStub).calledWith(Command.deploy(context.id));
+        });
+
+        test('works with no context', async () => {
+            const result = await Build.deploymentConfig(null);
+
+            expect(result).equals(`Successfully deploy '${context.id}'`);
+            expect(execStub).calledWith(Command.deploy(context.id));
+        });
+
+        test('returns null when no BuildConfig selected', async () => {
+            quickPickStub.resolves();
+            const result = await Build.deploymentConfig(null);
+            expect(result).null;
+        });
+
+        test('wraps errors in additional info', async () => {
+            execStub.rejects(errorMessage);
+
+            try {
+                await Build.deploymentConfig(context);
+            } catch (err) {
+                expect(err).equals(`Failed to deploy with error '${errorMessage}'`);
+            }
+        });
+
+        test('throws error if there is no BuildConfigs to select', async () => {
+            quickPickStub.restore();
+            execStub.resolves({ error: undefined, stdout: noBcData, stderr: '' });
+            let checkError: Error;
+            try {
+                await Build.deploymentConfig(null);
+            } catch (err) {
+                checkError = err as Error;
+            }
+            expect(checkError.message).equals('You have no BuildConfigs available to deploy');
         });
     });
 
