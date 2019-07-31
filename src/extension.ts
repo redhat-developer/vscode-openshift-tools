@@ -60,6 +60,7 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.describe.palette', (context) => execute(Component.describe, context)),
         vscode.commands.registerCommand('openshift.component.create', (context) => execute(Component.create, context)),
         vscode.commands.registerCommand('clusters.openshift.build.start', (context) => execute(Build.startBuild, context)),
+        vscode.commands.registerCommand('clusters.openshift.deploy', (context) => execute(Build.deployApplication, context)),
         vscode.commands.registerCommand('clusters.openshift.build.showLog', (context) => execute(Build.showLog, context)),
         vscode.commands.registerCommand('clusters.openshift.build.followLog', (context) => execute(Build.followLog, context)),
         vscode.commands.registerCommand('clusters.openshift.build.delete', (context) => execute(Build.delete, context)),

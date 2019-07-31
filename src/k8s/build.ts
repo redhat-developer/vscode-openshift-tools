@@ -64,6 +64,10 @@ export class Command {
         return `oc start-build ${buildConfig}`;
     }
 
+    static deploy(build: string) {
+        return `oc rollout latest dc/${build}`;
+    }
+
     static getBuilds(build: string) {
         return `oc get build -l buildconfig=${build} -o json`;
     }
@@ -143,6 +147,18 @@ export class Build {
             result = Progress.execFunctionWithProgress(`Starting build`, () => Build.odo.execute(Command.startBuild(buildName)))
                 .then(() => `Build '${buildName}' successfully started`)
                 .catch((err) => Promise.reject(`Failed to start build with error '${err}'`));
+        }
+        return result;
+    }
+
+    static async deployApplication(context: { id: any; }): Promise<string> {
+        let buildName: string = context ? context.id : undefined;
+        let result: Promise<string> = null;
+        if (!buildName) buildName = await Build.selectBuldConfig("Select a BuildConfig to start a build");
+        if (buildName) {
+            result = Progress.execFunctionWithProgress(`Deploying`, () => Build.odo.execute(Command.deploy(buildName)))
+                .then(() => `Successfully deploy '${buildName}'`)
+                .catch((err) => Promise.reject(`Failed to deploy with error '${err}'`));
         }
         return result;
     }
