@@ -183,7 +183,7 @@ export class Build {
         let result: null | string | Promise<string> | PromiseLike<string> = null;
         const build = await Build.selectBuild(context, "Select a build too delete");
         if (build) {
-            result = Progress.execFunctionWithProgress(`Starting build`, () => Build.odo.execute(Command.delete(build)))
+            result = Progress.execFunctionWithProgress(`Deleting build`, () => Build.odo.execute(Command.delete(build)))
                 .then(() => `Build '${build}' successfully deleted`)
                 .catch((err) => Promise.reject(`Failed to delete build with error '${err}'`));
         }
