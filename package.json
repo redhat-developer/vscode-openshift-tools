@@ -610,7 +610,7 @@
         {
           "command": "clusters.openshift.deploy",
           "group": "2@1",
-          "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.bc"
+          "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.dc"
         },
         {
           "command": "clusters.openshift.build.openConsole",

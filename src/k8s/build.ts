@@ -64,10 +64,6 @@ export class Command {
         return `oc start-build ${buildConfig}`;
     }
 
-    static deploy(build: string) {
-        return `oc rollout latest dc/${build}`;
-    }
-
     static getBuilds(build: string) {
         return `oc get build -l buildconfig=${build} -o json`;
     }
@@ -125,7 +121,7 @@ export class Build {
         if (context) {
             build = context.impl.name;
         } else {
-            const buildConfig = await Build.selectBuldConfig("Select a BuildConfig to see the builds", 'You have no BuildConfigs available');
+            const buildConfig = await Build.selectBuldConfig(await Build.getBuildConfigNames("You have no BuildConfigs available"), "Select a BuildConfig to see the builds");
             if (buildConfig)  {
                 const selBuild = await window.showQuickPick(this.getBuildNames(buildConfig), {placeHolder: text});
                 build = selBuild ? selBuild.label : null;
@@ -134,31 +130,19 @@ export class Build {
         return build;
     }
 
-    static async selectBuldConfig(placeHolderText: string, msg: string): Promise<string> {
-        const buildConfig: any = await window.showQuickPick(this.getBuildConfigNames(msg), {placeHolder: placeHolderText});
+    static async selectBuldConfig(config, placeHolderText: string): Promise<string> {
+        const buildConfig: any = await window.showQuickPick(config, {placeHolder: placeHolderText});
         return buildConfig ? buildConfig.label : null;
     }
 
     static async startBuild(context: { id: any; }): Promise<string> {
         let buildName: string = context ? context.id : undefined;
         let result: Promise<string> = null;
-        if (!buildName) buildName = await Build.selectBuldConfig("Select a BuildConfig to start a build", "You have no BuildConfigs available to start a build");
+        if (!buildName) buildName = await Build.selectBuldConfig(await Build.getBuildConfigNames("You have no BuildConfigs available to start a build"), "Select a BuildConfig to start a build");
         if (buildName) {
             result = Progress.execFunctionWithProgress(`Starting build`, () => Build.odo.execute(Command.startBuild(buildName)))
                 .then(() => `Build '${buildName}' successfully started`)
                 .catch((err) => Promise.reject(`Failed to start build with error '${err}'`));
-        }
-        return result;
-    }
-
-    static async deploymentConfig(context: { id: any; }): Promise<string> {
-        let deployName: string = context ? context.id : undefined;
-        let result: Promise<string> = null;
-        if (!deployName) deployName = await Build.selectBuldConfig("Select a BuildConfig to deploy", "You have no BuildConfigs available to deploy");
-        if (deployName) {
-            result = Progress.execFunctionWithProgress(`Deploying`, () => Build.odo.execute(Command.deploy(deployName)))
-                .then(() => `Successfully deploy '${deployName}'`)
-                .catch((err) => Promise.reject(`Failed to deploy with error '${err}'`));
         }
         return result;
     }
