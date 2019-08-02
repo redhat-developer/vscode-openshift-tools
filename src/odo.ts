@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as cliInstance from './cli';
-import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder } from 'vscode';
+import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Disposable } from 'vscode';
 import { WindowUtil } from './util/windowUtils';
 import { CliExitData } from './cli';
 import * as path from 'path';
@@ -821,11 +821,11 @@ export class OdoImpl implements Odo {
         allContexts.forEach((wsFolder) => {
             result = result.then(() => {
                 workspace.updateWorkspaceFolders(wsFolder.index, 1);
-                return new Promise((resolve) => {
-                    workspace.onDidChangeWorkspaceFolders(() => {
-                        resolve();
+                return new Promise<Disposable>((resolve) => {
+                    const disposabel = workspace.onDidChangeWorkspaceFolders(() => {
+                        resolve(disposabel);
                     });
-                });
+                }).then((disposable) => disposable.dispose());
             });
         });
         return result.then(() => {
@@ -879,8 +879,21 @@ export class OdoImpl implements Odo {
 
     public async deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
         const app = component.getParent();
-        await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
-        return this.deleteAndRefresh(component);
+        if (component.contextValue !== ContextType.COMPONENT) {
+            await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+        }
+        this.deleteAndRefresh(component);
+        if (component.contextPath) {
+            const wsFolder = workspace.getWorkspaceFolder(component.contextPath);
+            workspace.updateWorkspaceFolders(wsFolder.index, 1);
+            await new Promise<Disposable>((resolve) => {
+                const disposabel = workspace.onDidChangeWorkspaceFolders(() => {
+                    disposabel.dispose();
+                    resolve();
+                });
+            });
+        }
+        return component;
     }
 
     public async undeployComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
@@ -979,6 +992,7 @@ export class OdoImpl implements Odo {
                         item.contextPath = undefined;
                         OpenShiftExplorer.getInstance().refresh(item);
                     }
+                    OdoImpl.data.deleteContext(wsFolder.uri);
                 }
             });
         }
