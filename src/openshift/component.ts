@@ -278,7 +278,7 @@ export class Component extends OpenShiftItem {
 
     static async createFromLocal(context: OpenShiftObject): Promise<string> {
         let application: OpenShiftObject = context;
-        let folder: WorkspaceFolderItem[];
+        let folder: WorkspaceFolderItem[] = [];
 
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
