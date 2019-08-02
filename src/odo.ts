@@ -944,23 +944,25 @@ export class OdoImpl implements Odo {
 
             event.added.forEach(async (folder: WorkspaceFolder) => {
                 const added: ComponentSettings = OdoImpl.data.getSettingsByContext(folder.uri);
-                const cluster = (await this.getClusters())[0];
-                const prj = OdoImpl.data.getObjectByPath(path.join(cluster.path, added.Project));
-                if (prj && !!OdoImpl.data.getChildrenByParent(prj)) {
-                    const app = OdoImpl.data.getObjectByPath(path.join(prj.path, added.Application));
-                    if (app && !!OdoImpl.data.getChildrenByParent(app)) {
-                        const comp =  OdoImpl.data.getObjectByPath(path.join(app.path, added.Name));
-                        if (comp && !comp.contextPath) {
-                            comp.contextPath = added.ContextPath;
-                            comp.contextValue = ContextType.COMPONENT_PUSHED;
-                            await OpenShiftExplorer.getInstance().refresh(comp);
-                        } else if (!comp) {
-                            const newComponent = new OpenShiftObjectImpl(app, added.Name, ContextType.COMPONENT, false, this, Collapsed, added.ContextPath, added.SourceType);
-                            await this.insertAndRefresh(newComponent);
+                if (added) {
+                    const cluster = (await this.getClusters())[0];
+                    const prj = OdoImpl.data.getObjectByPath(path.join(cluster.path, added.Project));
+                    if (prj && !!OdoImpl.data.getChildrenByParent(prj)) {
+                        const app = OdoImpl.data.getObjectByPath(path.join(prj.path, added.Application));
+                        if (app && !!OdoImpl.data.getChildrenByParent(app)) {
+                            const comp =  OdoImpl.data.getObjectByPath(path.join(app.path, added.Name));
+                            if (comp && !comp.contextPath) {
+                                comp.contextPath = added.ContextPath;
+                                comp.contextValue = ContextType.COMPONENT_PUSHED;
+                                await OpenShiftExplorer.getInstance().refresh(comp);
+                            } else if (!comp) {
+                                const newComponent = new OpenShiftObjectImpl(app, added.Name, ContextType.COMPONENT, false, this, Collapsed, added.ContextPath, added.SourceType);
+                                await this.insertAndRefresh(newComponent);
+                            }
+                        } else if (!app) {
+                            const newApp = new OpenShiftObjectImpl(prj, added.Application, ContextType.APPLICATION, false, this, Collapsed);
+                            await this.insertAndRefresh(newApp);
                         }
-                    } else if (!app) {
-                        const newApp = new OpenShiftObjectImpl(prj, added.Application, ContextType.APPLICATION, false, this, Collapsed);
-                        await this.insertAndRefresh(newApp);
                     }
                 }
             });
