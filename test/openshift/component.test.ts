@@ -400,6 +400,13 @@ suite('OpenShift/Component', () => {
 
     suite('del', () => {
 
+        const onDidFake = (listener) => {
+            Promise.resolve().then(() => { listener(undefined); } );
+            return {
+                dispose: () => { return; }
+            };
+        };
+
         setup(() => {
             sandbox.stub(Component, 'unlinkAllComponents');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -415,6 +422,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('works from context menu', async () => {
+            sandbox.stub(vscode.workspace, 'onDidChangeWorkspaceFolders').callsFake(onDidFake);
             const result = await Component.del(componentItem);
 
             expect(result).equals(`Component '${componentItem.getName()}' successfully deleted`);
@@ -422,6 +430,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('works with no context', async () => {
+            sandbox.stub(vscode.workspace, 'onDidChangeWorkspaceFolders').callsFake(onDidFake);
             const result = await Component.del(null);
 
             expect(result).equals(`Component '${componentItem.getName()}' successfully deleted`);
