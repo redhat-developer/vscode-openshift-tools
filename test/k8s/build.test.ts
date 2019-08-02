@@ -82,45 +82,45 @@ suite('K8s/build', () => {
             resourceId: "bc/nodejs-comp-nodejs-app"
         };
 
-        const noBcData = `{
-            "apiVersion": "v1",
-            "items": [],
-            "kind": "List",
-            "metadata": {
-                "resourceVersion": "",
-                "selfLink": ""
-            }
-        }`;
+    const noBcData = `{
+        "apiVersion": "v1",
+        "items": [],
+        "kind": "List",
+        "metadata": {
+            "resourceVersion": "",
+            "selfLink": ""
+        }
+    }`;
 
-        const mockData = `{
-            "apiVersion": "v1",
-            "items": [
-                {
-                    "apiVersion": "build.openshift.io/v1",
-                    "kind": "BuildConfig",
-                    "metadata": {
-                        "annotations": {
-                            "app.kubernetes.io/component-source-type": "git",
-                            "app.kubernetes.io/url": "https://github.com/sclorg/nodejs-ex"
-                        },
-                        "creationTimestamp": "2019-07-15T09:18:43Z",
-                        "name": "nodejs-comp-nodejs-app",
-                        "namespace": "myproject",
-                        "resourceVersion": "116630",
-                        "selfLink": "/apis/build.openshift.io/v1/namespaces/myproject/buildconfigs/nodejs-comp-nodejs-app",
-                        "uid": "8a66b3ff-a6e1-11e9-8dbe-22967c349399"
+    const mockData = `{
+        "apiVersion": "v1",
+        "items": [
+            {
+                "apiVersion": "build.openshift.io/v1",
+                "kind": "BuildConfig",
+                "metadata": {
+                    "annotations": {
+                        "app.kubernetes.io/component-source-type": "git",
+                        "app.kubernetes.io/url": "https://github.com/sclorg/nodejs-ex"
                     },
-                    "status": {
-                        "lastVersion": 8
-                    }
+                    "creationTimestamp": "2019-07-15T09:18:43Z",
+                    "name": "nodejs-comp-nodejs-app",
+                    "namespace": "myproject",
+                    "resourceVersion": "116630",
+                    "selfLink": "/apis/build.openshift.io/v1/namespaces/myproject/buildconfigs/nodejs-comp-nodejs-app",
+                    "uid": "8a66b3ff-a6e1-11e9-8dbe-22967c349399"
+                },
+                "status": {
+                    "lastVersion": 8
                 }
-            ],
-            "kind": "List",
-            "metadata": {
-                "resourceVersion": "",
-                "selfLink": ""
             }
-        }`;
+        ],
+        "kind": "List",
+        "metadata": {
+            "resourceVersion": "",
+            "selfLink": ""
+        }
+    }`;
 
         setup(() => {
             execStub.resolves({ error: undefined, stdout: mockData, stderr: '' });

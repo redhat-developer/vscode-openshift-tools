@@ -104,10 +104,10 @@ export class Build {
         return json['items'];
     }
 
-    static async getBuildConfigNames(): Promise<QuickPickItem[]> {
+    static async getBuildConfigNames(msg: string): Promise<QuickPickItem[]> {
         return Build.getQuickPicks(
             Command.getBuildConfigs(),
-            'You have no BuildConfigs available to start a build');
+            msg);
     }
 
     static async getBuildNames(buildConfig: string): Promise<QuickPickItem[]> {
@@ -121,7 +121,7 @@ export class Build {
         if (context) {
             build = context.impl.name;
         } else {
-            const buildConfig = await Build.selectBuldConfig("Select a BuildConfig to see the builds");
+            const buildConfig = await Build.selectBuldConfig(await Build.getBuildConfigNames("You have no BuildConfigs available"), "Select a BuildConfig to see the builds");
             if (buildConfig)  {
                 const selBuild = await window.showQuickPick(this.getBuildNames(buildConfig), {placeHolder: text});
                 build = selBuild ? selBuild.label : null;
@@ -130,15 +130,15 @@ export class Build {
         return build;
     }
 
-    static async selectBuldConfig(placeHolderText: string): Promise<string> {
-        const buildConfig: any = await window.showQuickPick(this.getBuildConfigNames(), {placeHolder: placeHolderText});
+    static async selectBuldConfig(config, placeHolderText: string): Promise<string> {
+        const buildConfig: any = await window.showQuickPick(config, {placeHolder: placeHolderText});
         return buildConfig ? buildConfig.label : null;
     }
 
     static async startBuild(context: { id: any; }): Promise<string> {
         let buildName: string = context ? context.id : undefined;
         let result: Promise<string> = null;
-        if (!buildName) buildName = await Build.selectBuldConfig("Select a BuildConfig to start a build");
+        if (!buildName) buildName = await Build.selectBuldConfig(await Build.getBuildConfigNames("You have no BuildConfigs available to start a build"), "Select a BuildConfig to start a build");
         if (buildName) {
             result = Progress.execFunctionWithProgress(`Starting build`, () => Build.odo.execute(Command.startBuild(buildName)))
                 .then(() => `Build '${buildName}' successfully started`)
