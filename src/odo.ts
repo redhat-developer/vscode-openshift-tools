@@ -821,11 +821,12 @@ export class OdoImpl implements Odo {
         allContexts.forEach((wsFolder) => {
             result = result.then(() => {
                 workspace.updateWorkspaceFolders(wsFolder.index, 1);
-                return new Promise<Disposable>((resolve) => {
-                    const disposabel = workspace.onDidChangeWorkspaceFolders(() => {
-                        resolve(disposabel);
+                return new Promise<void>((resolve) => {
+                    const disposable = workspace.onDidChangeWorkspaceFolders(() => {
+                        disposable.dispose();
+                        resolve();
                     });
-                }).then((disposable) => disposable.dispose());
+                });
             });
         });
         return result.then(() => {
