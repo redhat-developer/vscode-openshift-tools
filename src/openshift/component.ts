@@ -81,15 +81,8 @@ export class Component extends OpenShiftItem {
         const value = await window.showWarningMessage(`Do you want to delete Component '${name}\'?`, 'Yes', 'Cancel');
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Deleting the Component '${component.getName()} '`, async () => {
-                if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT || component.contextValue === ContextType.COMPONENT_PUSHED) {
-                    await Component.unlinkAllComponents(component);
-                    await Component.odo.deleteComponent(component);
-                }
-                if (component.contextPath) {
-                    const wsFolder = workspace.getWorkspaceFolder(component.contextPath);
-                    workspace.updateWorkspaceFolders(wsFolder.index, 1);
-                }
-
+                await Component.unlinkAllComponents(component);
+                await Component.odo.deleteComponent(component);
             }).then(() => `Component '${name}' successfully deleted`)
             .catch((err) => Promise.reject(`Failed to delete Component with error '${err}'`));
         }
