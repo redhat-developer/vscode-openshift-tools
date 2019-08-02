@@ -176,8 +176,8 @@ export class Command {
         return `odo create ${type}:${version} ${name} --git ${git} --ref ${ref} --app ${app} --project ${project}`;
     }
     @verbose
-    static createBinaryComponent(project: string, app: string, type: string, version: string, name: string, binary: string) {
-        return `odo create ${type}:${version} ${name} --binary ${binary} --app ${app} --project ${project}`;
+    static createBinaryComponent(project: string, app: string, type: string, version: string, name: string, binary: string, context: string) {
+        return `odo create ${type}:${version} ${name} --binary ${binary} --app ${app} --project ${project} --context ${context}`;
     }
     @verbose
     static createService(project: string, app: string, template: string, plan: string, name: string) {
@@ -372,7 +372,7 @@ export interface Odo {
     deleteApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, repoUri: string, context: Uri, ref: string): Promise<OpenShiftObject>;
     createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, path: Uri): Promise<OpenShiftObject>;
-    createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, path: Uri): Promise<OpenShiftObject>;
+    createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, path: Uri, context: Uri): Promise<OpenShiftObject>;
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     undeployComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     deleteNotPushedComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
@@ -840,7 +840,6 @@ export class OdoImpl implements Odo {
     public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: Uri): Promise<OpenShiftObject> {
         await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath), location.fsPath);
         await this.executeInTerminal(Command.pushComponent(), location.fsPath);
-        workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: location });
         OdoImpl.data.addContexts([workspace.getWorkspaceFolder(location)]);
         const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
         if (!targetApplication) {
@@ -865,9 +864,17 @@ export class OdoImpl implements Odo {
         return null;
     }
 
-    public async createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, location: Uri): Promise<OpenShiftObject> {
-        await this.execute(Command.createBinaryComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath));
-        return this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, undefined, 'binary'));
+    public async createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, location: Uri, context: Uri): Promise<OpenShiftObject> {
+        await this.execute(Command.createBinaryComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath, context.fsPath));
+        if (workspace.workspaceFolders) {
+            const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
+            if (!targetApplication) {
+                await this.insertAndReveal(application);
+            }
+            this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, undefined, 'binary'));
+        }
+        workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: context });
+        return null;
     }
 
     public async deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject> {

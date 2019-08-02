@@ -428,7 +428,17 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeVersion) return null;
 
-        await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, binaryFile[0]);
+        const folder = await window.showOpenDialog({
+            canSelectFiles: false,
+            canSelectFolders: true,
+            canSelectMany: false,
+            defaultUri: Uri.file(Platform.getUserHomePath()),
+            openLabel: "Select Context Folder for Component"
+        });
+
+        if (!folder) return null;
+
+        await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, binaryFile[0], folder[0]);
         return `Component '${componentName}' successfully created`;
     }
 
