@@ -25,7 +25,7 @@ import { Console } from './k8s/console';
 import { OdoImpl } from './odo';
 import open = require("open");
 import { Build } from './k8s/build';
-import { Deployment } from './k8s/deployment';
+import * as Deployment from './k8s/deployment';
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined = undefined;
 
@@ -61,7 +61,7 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.describe.palette', (context) => execute(Component.describe, context)),
         vscode.commands.registerCommand('openshift.component.create', (context) => execute(Component.create, context)),
         vscode.commands.registerCommand('clusters.openshift.build.start', (context) => execute(Build.startBuild, context)),
-        vscode.commands.registerCommand('clusters.openshift.deploy', (context) => execute(Deployment.deploymentConfig, context)),
+        vscode.commands.registerCommand('clusters.openshift.deploy', (context) => execute(Deployment.deploy, context)),
         vscode.commands.registerCommand('clusters.openshift.build.showLog', (context) => execute(Build.showLog, context)),
         vscode.commands.registerCommand('clusters.openshift.build.followLog', (context) => execute(Build.followLog, context)),
         vscode.commands.registerCommand('clusters.openshift.build.delete', (context) => execute(Build.delete, context)),
