@@ -841,12 +841,15 @@ export class OdoImpl implements Odo {
     public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: Uri): Promise<OpenShiftObject> {
         await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath), location.fsPath);
         await this.executeInTerminal(Command.pushComponent(), location.fsPath);
-        OdoImpl.data.addContexts([workspace.getWorkspaceFolder(location)]);
-        const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
-        if (!targetApplication) {
-            await this.insertAndReveal(application);
+        if (workspace.workspaceFolders) {
+            const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
+            if (!targetApplication) {
+                await this.insertAndReveal(application);
+            }
+            await this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT_PUSHED, false, this, Collapsed, location, 'local'));
         }
-        return this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT_PUSHED, false, this, Collapsed, location, 'local'));
+        workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: location });
+        return null;
     }
 
     public async createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, location: string, context: Uri, ref: string = 'master'): Promise<OpenShiftObject> {
