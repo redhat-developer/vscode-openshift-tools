@@ -11,7 +11,7 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { OdoImpl } from '../../src/odo';
 import { Progress } from '../../src/util/progress';
-import { Deployment, Command } from '../../src/k8s/deployment';
+import * as Deployment from '../../src/k8s/deployment';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -90,22 +90,22 @@ suite('K8s/deployment', () => {
         });
 
         test('works from context menu', async () => {
-            const result = await Deployment.deploymentConfig(context);
+            const result = await Deployment.deploy(context);
 
-            expect(result).equals(`Successfully deploy '${context.id}'`);
-            expect(execStub).calledWith(Command.deploy(context.id));
+            expect(result).equals(`Deployment successfully created for '${context.id}'.`);
+            expect(execStub).calledWith(Deployment.Command.deploy(context.id));
         });
 
         test('works with no context', async () => {
-            const result = await Deployment.deploymentConfig(null);
+            const result = await Deployment.deploy(null);
 
-            expect(result).equals(`Successfully deploy '${context.id}'`);
-            expect(execStub).calledWith(Command.deploy(context.id));
+            expect(result).equals(`Deployment successfully created for '${context.id}'.`);
+            expect(execStub).calledWith(Deployment.Command.deploy(context.id));
         });
 
         test('returns null when no DeploymentConfig selected', async () => {
             quickPickStub.resolves();
-            const result = await Deployment.deploymentConfig(null);
+            const result = await Deployment.deploy(null);
             expect(result).null;
         });
 
@@ -113,9 +113,9 @@ suite('K8s/deployment', () => {
             execStub.rejects(errorMessage);
 
             try {
-                await Deployment.deploymentConfig(context);
+                await Deployment.deploy(context);
             } catch (err) {
-                expect(err).equals(`Failed to deploy with error '${errorMessage}'`);
+                expect(err).equals(`Failed to create Deployment with error '${errorMessage}'.`);
             }
         });
 
@@ -124,7 +124,7 @@ suite('K8s/deployment', () => {
             execStub.resolves({ error: undefined, stdout: noBcData, stderr: '' });
             let checkError: Error;
             try {
-                await Deployment.deploymentConfig(null);
+                await Deployment.deploy(null);
             } catch (err) {
                 checkError = err as Error;
             }

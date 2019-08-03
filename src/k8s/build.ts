@@ -9,6 +9,7 @@ import { Progress } from "../util/progress";
 import * as vscode from 'vscode';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import * as k8s from 'vscode-kubernetes-tools-api';
+import * as common from './common';
 
 export class BuildConfigNodeContributor implements ClusterExplorerV1.NodeContributor {
     contributesChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): boolean {
@@ -92,26 +93,14 @@ export class Command {
 export class Build {
     protected static readonly odo: Odo =    OdoImpl.Instance;
 
-    static async getQuickPicks(cmd: string, errorMessage: string): Promise<QuickPickItem[]> {
-        const result = await Build.odo.execute(cmd);
-        const json: JSON = JSON.parse(result.stdout);
-        if (json['items'].length === 0) {
-            throw Error(errorMessage);
-        }
-        json['items'].forEach((item: any) => {
-            item.label = item.metadata.name;
-        });
-        return json['items'];
-    }
-
     static async getBuildConfigNames(msg: string): Promise<QuickPickItem[]> {
-        return Build.getQuickPicks(
+        return common.getQuickPicks(
             Command.getBuildConfigs(),
             msg);
     }
 
     static async getBuildNames(buildConfig: string): Promise<QuickPickItem[]> {
-        return Build.getQuickPicks(
+        return common.getQuickPicks(
             Command.getBuilds(buildConfig),
             'You have no builds available');
     }
@@ -121,7 +110,7 @@ export class Build {
         if (context) {
             build = context.impl.name;
         } else {
-            const buildConfig = await Build.selectBuldConfig(await Build.getBuildConfigNames("You have no BuildConfigs available"), "Select a BuildConfig to see the builds");
+            const buildConfig = await common.selectResourceByName(Build.getBuildConfigNames("You have no BuildConfigs available"), "Select a BuildConfig to see the builds");
             if (buildConfig)  {
                 const selBuild = await window.showQuickPick(this.getBuildNames(buildConfig), {placeHolder: text});
                 build = selBuild ? selBuild.label : null;
@@ -130,15 +119,10 @@ export class Build {
         return build;
     }
 
-    static async selectBuldConfig(config, placeHolderText: string): Promise<string> {
-        const buildConfig: any = await window.showQuickPick(config, {placeHolder: placeHolderText});
-        return buildConfig ? buildConfig.label : null;
-    }
-
     static async startBuild(context: { id: any; }): Promise<string> {
         let buildName: string = context ? context.id : undefined;
         let result: Promise<string> = null;
-        if (!buildName) buildName = await Build.selectBuldConfig(await Build.getBuildConfigNames("You have no BuildConfigs available to start a build"), "Select a BuildConfig to start a build");
+        if (!buildName) buildName = await common.selectResourceByName(await Build.getBuildConfigNames("You have no BuildConfigs available to start a build"), "Select a BuildConfig to start a build");
         if (buildName) {
             result = Progress.execFunctionWithProgress(`Starting build`, () => Build.odo.execute(Command.startBuild(buildName)))
                 .then(() => `Build '${buildName}' successfully started`)
