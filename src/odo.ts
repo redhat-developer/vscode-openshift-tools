@@ -884,6 +884,10 @@ export class OdoImpl implements Odo {
             await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         }
         this.deleteAndRefresh(component);
+        const children = await app.getChildren();
+        if (children.length === 0) {
+            this.deleteApplication(app);
+        }
         if (component.contextPath) {
             const wsFolder = workspace.getWorkspaceFolder(component.contextPath);
             workspace.updateWorkspaceFolders(wsFolder.index, 1);
@@ -918,7 +922,12 @@ export class OdoImpl implements Odo {
         const app = service.getParent();
         await this.execute(Command.deleteService(app.getParent().getName(), app.getName(), service.getName()));
         await this.execute(Command.waitForServiceToBeGone(app.getParent().getName(), service.getName()));
-        return this.deleteAndRefresh(service);
+        this.deleteAndRefresh(service);
+        const children = await app.getChildren();
+        if (children.length === 0) {
+            this.deleteApplication(app);
+        }
+        return service;
     }
 
     public async createStorage(component: OpenShiftObject, name: string, mountPath: string, size: string): Promise<OpenShiftObject> {
