@@ -136,6 +136,7 @@ suite('OpenShift/Component', () => {
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
                 expect(progressFunctionStub).calledOnceWith(
                     `Creating new Component '${componentItem.getName()}'`);
+                expect(execStub).calledWith(Command.createLocalComponent(appItem.getParent().getName(), appItem.getName(), componentType, version, componentItem.getName(), folder.uri.fsPath));
                 expect(termStub).calledOnceWith(Command.pushComponent());
             });
 
