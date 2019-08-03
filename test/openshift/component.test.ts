@@ -137,7 +137,6 @@ suite('OpenShift/Component', () => {
                 expect(progressFunctionStub).calledOnceWith(
                     `Creating new Component '${componentItem.getName()}'`);
                 expect(execStub).calledWith(Command.createLocalComponent(appItem.getParent().getName(), appItem.getName(), componentType, version, componentItem.getName(), folder.uri.fsPath));
-                expect(termStub).calledOnceWith(Command.pushComponent());
             });
 
             test('returns null when no folder selected', async () => {
