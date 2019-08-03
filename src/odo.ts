@@ -840,15 +840,24 @@ export class OdoImpl implements Odo {
 
     public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: Uri): Promise<OpenShiftObject> {
         await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath), location.fsPath);
-        await this.executeInTerminal(Command.pushComponent(), location.fsPath);
         if (workspace.workspaceFolders) {
             const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
             if (!targetApplication) {
                 await this.insertAndReveal(application);
             }
-            await this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT_PUSHED, false, this, Collapsed, location, 'local'));
+            await this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, location, 'local'));
         }
-        workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: location });
+        let wsFolder: WorkspaceFolder;
+        if (workspace.workspaceFolders) {
+            // could be new or existing folder
+            wsFolder = workspace.getWorkspaceFolder(location);
+            if (wsFolder) { // existing workspace folder
+                OdoImpl.data.addContexts([wsFolder]);
+            }
+        }
+        if (!workspace.workspaceFolders || !wsFolder) {
+            workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: location });
+        }
         return null;
     }
 
