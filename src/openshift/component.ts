@@ -292,7 +292,7 @@ export class Component extends OpenShiftItem {
             );
         }
         const addWorkspaceFolder = new CreateWorkspaceItem();
-        const choice = await window.showQuickPick([addWorkspaceFolder, ...folder], {placeHolder: "Select workspace folder"});
+        const choice: any = await window.showQuickPick([addWorkspaceFolder, ...folder], {placeHolder: "Select workspace folder"});
 
         if (!choice) return null;
         const workspacePath: Uri = (choice.label === addWorkspaceFolder.label) ?
@@ -302,7 +302,7 @@ export class Component extends OpenShiftItem {
                 canSelectMany: false,
                 defaultUri: Uri.file(Platform.getUserHomePath()),
                 openLabel: "Add workspace Folder for Component"
-            }))[0] : folder[0].uri;
+            }))[0] : choice.uri;
 
         if (!workspacePath) return null;
 
