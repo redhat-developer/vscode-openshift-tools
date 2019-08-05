@@ -214,6 +214,9 @@ export class Command {
     static unlinkComponents(project: string, app: string, comp1: string, comp2: string) {
         return `odo unlink --project ${project} --app ${app} ${comp2} --component ${comp1}`;
     }
+    static unlinkService(project: string, app: string, service: string, comp: string) {
+        return `odo unlink --project ${project} --app ${app} ${service} --component ${comp}`;
+    }
     static getOpenshiftClusterRoute() {
         return `oc get routes -n openshift-console -ojson`;
     }

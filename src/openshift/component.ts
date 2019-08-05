@@ -107,11 +107,10 @@ export class Component extends OpenShiftItem {
     }
 
     static async unlinkAllComponents(component: OpenShiftObject) {
-        const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
-        const compObj: JSON = JSON.parse(compData.stdout);
-        const linkComponent = compObj['status'].linkedComponents;
-        if (linkComponent) {
-            Object.keys(linkComponent).forEach(async key => {
+        const linkComponent = await Component.getLinkData(component);
+        const getLinkComponent = linkComponent['status'].linkedComponents;
+        if (getLinkComponent) {
+            Object.keys(getLinkComponent).forEach(async key => {
                 await Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), key, component.getName()), component.contextPath.fsPath);
             });
         }
@@ -143,6 +142,67 @@ export class Component extends OpenShiftItem {
         );
         if (!component) return null;
         Component.odo.executeInTerminal(Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+    }
+
+    private static async getLinkData(component: OpenShiftObject) {
+        const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+        return JSON.parse(compData.stdout);
+    }
+
+    static async unlink(context: OpenShiftObject) {
+        const unlinkActions = [
+            {
+                label: 'Component',
+                description: 'Unlink Component'
+            },
+            {
+                label: 'Service',
+                description: 'Unlink Service'
+            }
+        ];
+        const unlinkActionSelected = await window.showQuickPick(unlinkActions, {placeHolder: 'Select the option'});
+        if (!unlinkActionSelected) return null;
+        return unlinkActionSelected.label === 'Component' ? Component.unlinkComponent(context) : unlinkActionSelected.label === 'Service' ?  Component.unlinkService(context) : null;
+    }
+
+    static async unlinkComponent(context: OpenShiftObject) {
+        const linkCompName: Array<string> = [];
+        const component = await Component.getOpenShiftCmdData(context,
+            'Select a Project',
+            'Select an Application',
+            'Select a Component');
+        if (!component) return null;
+        const linkComponent = await Component.getLinkData(component);
+        const getLinkComponent = linkComponent['status'].linkedComponents;
+        if (!getLinkComponent) throw Error('No linked Components found');
+        Object.keys(getLinkComponent).forEach(async key => {
+            linkCompName.push(key);
+        });
+        const compName = await window.showQuickPick(linkCompName, {placeHolder: "Select a Component to unlink"});
+        if (!compName) return null;
+        return Progress.execFunctionWithProgress(`Unlinking Component`,
+            () => Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), compName), component.contextPath.fsPath)
+                .then(() => `Component ${compName} has been successfully unlinked from the component ${component.getName()}`)
+                .catch((err) => Promise.reject(`Failed to unlink component with error '${err}'`))
+        );
+    }
+
+    static async unlinkService(context: OpenShiftObject) {
+        const component = await Component.getOpenShiftCmdData(context,
+            'Select a Project',
+            'Select an Application',
+            'Select a Component');
+        if (!component) return null;
+        const linkService = await Component.getLinkData(component);
+        const getLinkService = linkService['status'].linkedServices;
+        if (!getLinkService) throw Error('No linked Services found');
+        const serviceName = await window.showQuickPick(getLinkService, {placeHolder: "Select a Service to unlink"});
+        if (!serviceName) return null;
+        return Progress.execFunctionWithProgress(`Unlinking Service`,
+            () => Component.odo.execute(Command.unlinkService(component.getParent().getParent().getName(), component.getParent().getName(), serviceName, component.getName()), component.contextPath.fsPath)
+                .then(() => `Service ${serviceName} has been successfully unlinked from the component ${component.getName()}`)
+                .catch((err) => Promise.reject(`Failed to unlink Service with error '${err}'`))
+        );
     }
 
     static async linkComponent(context: OpenShiftObject): Promise<String> {

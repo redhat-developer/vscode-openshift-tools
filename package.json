@@ -57,6 +57,9 @@
     "onCommand:openshift.component.describe",
     "onCommand:openshift.component.describe.palette",
     "onCommand:openshift.component.log",
+    "onCommand:openshift.component.unlink",
+    "onCommand:openshift.component.unlink.palette",
+    "onCommand:openshift.component.unlink.service.palette",
     "onCommand:openshift.component.log.palette",
     "onCommand:openshift.component.followLog",
     "onCommand:openshift.component.followLog.palette",
@@ -262,6 +265,21 @@
       {
         "command": "openshift.component.linkComponent",
         "title": "Link Component",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.unlink",
+        "title": "Unlink",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.unlink.component.palette",
+        "title": "Unlink Component",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.unlink.service.palette",
+        "title": "Unlink Service",
         "category": "OpenShift"
       },
       {
@@ -537,6 +555,10 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
+          "command": "openshift.component.unlink",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
           "command": "openshift.component.delete",
           "when": "view == openshiftProjectExplorer"
         },
@@ -738,44 +760,49 @@
           "group": "c3@2"
         },
         {
+          "command": "openshift.component.unlink",
+          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "c4"
+        },
+        {
           "command": "openshift.component.openUrl",
           "when": "view == openshiftProjectExplorer && viewItem == component",
-          "group": "c4@1"
+          "group": "c5@1"
         },
         {
           "command": "openshift.component.push",
           "when": "view == openshiftProjectExplorer && viewItem == component",
-          "group": "c4@2"
+          "group": "c5@2"
         },
         {
           "command": "openshift.component.push",
           "when": "view == openshiftProjectExplorer && viewItem == component_not_pushed",
-          "group": "c4@2"
+          "group": "c5@2"
         },
         {
           "command": "openshift.component.watch",
           "when": "view == openshiftProjectExplorer && viewItem == component",
-          "group": "c4@3"
+          "group": "c5@3"
         },
         {
           "command": "openshift.component.undeploy",
           "when": "view == openshiftProjectExplorer && viewItem == component",
-          "group": "c4@4"
+          "group": "c5@4"
         },
         {
           "command": "openshift.component.delete",
           "when": "view == openshiftProjectExplorer && viewItem == component_no_context",
-          "group": "c5@1"
+          "group": "c6@1"
         },
         {
           "command": "openshift.component.delete",
           "when": "view == openshiftProjectExplorer && viewItem == component",
-          "group": "c5@1"
+          "group": "c6@1"
         },
         {
           "command": "openshift.component.delete",
           "when": "view == openshiftProjectExplorer && viewItem == component_not_pushed",
-          "group": "c5@1"
+          "group": "c6@1"
         },
         {
           "command": "openshift.service.create",
