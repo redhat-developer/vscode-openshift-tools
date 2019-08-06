@@ -262,7 +262,7 @@
       },
       {
         "command": "openshift.openshiftConsole",
-        "title": "Open Console",
+        "title": "Open Console Dashboard",
         "category": "OpenShift"
       },
       {
@@ -588,11 +588,6 @@
       ],
       "view/item/context": [
         {
-          "command": "openshift.project.create",
-          "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
-          "group": "c1"
-        },
-        {
           "command": "clusters.openshift.deployment.openConsole",
           "group": "3@0",
           "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.dc"
@@ -638,6 +633,16 @@
           "when": "view == extension.vsKubernetesExplorer && viewItem =~ /openShift\\.resource\\.build.*/i"
         },
         {
+          "command": "openshift.openshiftConsole",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster",
+          "group": "c0"
+        },
+        {
+          "command": "openshift.project.create",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
+          "group": "c1"
+        },
+        {
           "command": "openshift.catalog.listComponents",
           "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
           "group": "c2@1"
@@ -648,24 +653,19 @@
           "group": "c2@2"
         },
         {
-          "command": "openshift.openshiftConsole",
-          "when": "view == openshiftProjectExplorer && viewItem == cluster",
-          "group": "c3"
-        },
-        {
           "command": "openshift.explorer.logout",
           "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
-          "group": "c4"
+          "group": "c3"
         },
         {
           "command": "openshift.about",
           "when": "view == openshiftProjectExplorer && viewItem == cluster",
-          "group": "c5"
+          "group": "c4"
         },
         {
           "command": "openshift.output",
           "when": "view == openshiftProjectExplorer && viewItem == cluster",
-          "group": "c6"
+          "group": "c5"
         },
         {
           "command": "openshift.project.delete",
