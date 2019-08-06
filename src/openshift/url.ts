@@ -71,16 +71,23 @@ export class Url extends OpenShiftItem{
         const component = treeItem.getParent();
         const app = component.getParent();
         const namespace = app.getParent();
-        const UrlDetails = await Url.odo.execute(Command.getComponentUrl(namespace.getName(), app.getName(), component.getName()), component.contextPath.fsPath);
-        let result: any[] = [];
+        const urlDetails = await Url.odo.execute(Command.getComponentUrl(namespace.getName(), app.getName(), component.getName()), component.contextPath.fsPath);
+        const stdout = urlDetails.stdout;
+        let urlObject: any;
+        let result: any[];
         try {
-            result = JSON.parse(UrlDetails.stdout).items;
-        } catch (ignore) {}
-        if (!result) {
-            window.showInformationMessage('Selected URL is not created in cluster. Use \'Push\' command before opening URL in browser.');
-        } else {
-            const urlObject = result.filter((value) => (value.metadata.name === treeItem.getName()));
-            return open(`${urlObject[0].spec.protocol}://${urlObject[0].spec.host}`);
+            result = JSON.parse(urlDetails.stdout).items;
+        } catch (ignore) {
+            // in case of incorrect json output, ignore an error
         }
+        if (result && result.length > 0) {
+            urlObject = result.filter((value) => (value.metadata.name === treeItem.getName()));
+        }
+        if (urlObject) {
+            open(`${urlObject[0].spec.protocol}://${urlObject[0].spec.host}`);
+        } else {
+            window.showInformationMessage('Selected URL is not created in cluster. Use \'Push\' command before opening URL in browser.');
+        }
+        return null;
     }
 }
