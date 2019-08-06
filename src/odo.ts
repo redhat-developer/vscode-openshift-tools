@@ -208,6 +208,15 @@ export class Command {
     static unlinkComponents(project: string, app: string, comp1: string, comp2: string) {
         return `odo unlink --project ${project} --app ${app} ${comp2} --component ${comp1}`;
     }
+    static getOpenshiftClusterRoute() {
+        return `oc get routes -n openshift-console -ojson`;
+    }
+    static clusterVersionDescribe() {
+        return `oc describe clusterversion`;
+    }
+    static showServerUrl() {
+        return `oc whoami --show-server`;
+    }
 }
 
 export class OpenShiftObjectImpl implements OpenShiftObject {
