@@ -77,7 +77,6 @@ export class Cluster extends OpenShiftItem {
             const serverUrl = await Cluster.odo.execute(Command.showServerUrl());
             consoleUrl = `${serverUrl.stdout}/console`;
         }
-        window.showInformationMessage(`Opening console url: ${consoleUrl}`);
         open(consoleUrl);
     }
 
