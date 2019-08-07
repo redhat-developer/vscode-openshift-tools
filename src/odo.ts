@@ -211,8 +211,8 @@ export class Command {
     static getOpenshiftClusterRoute() {
         return `oc get routes -n openshift-console -ojson`;
     }
-    static clusterVersionDescribe() {
-        return `oc describe clusterversion`;
+    static getclusterVersion() {
+        return `oc get clusterversion -ojson`;
     }
     static showServerUrl() {
         return `oc whoami --show-server`;

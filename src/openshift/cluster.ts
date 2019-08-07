@@ -68,7 +68,7 @@ export class Cluster extends OpenShiftItem {
 
     static async openshiftConsole(): Promise<void> {
         let consoleUrl: string;
-        const versionInfo = await Cluster.odo.execute(Command.clusterVersionDescribe(), process.cwd(), false);
+        const versionInfo = await Cluster.odo.execute(Command.getclusterVersion(), process.cwd(), false);
         if (versionInfo.error === null) {
             const routeObj = await Cluster.odo.execute(Command.getOpenshiftClusterRoute());
             const spec = JSON.parse(routeObj.stdout).items[0].spec;
