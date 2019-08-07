@@ -85,6 +85,7 @@ export class Cluster extends OpenShiftItem {
         const contextName: QuickPickItem[] = contexts.map((ctx) => ({ label: `$(code)  ${ctx.name}`}));
         const choice = await window.showQuickPick(contextName, {placeHolder: "Select the new context"});
         if (!choice) return null;
+        choice.label = choice.label.replace('$(code) ', '');
         return Promise.resolve()
             .then(() => Cluster.odo.execute(Command.setContext(choice.label)))
             .then(() => window.showInformationMessage(`Cluster context is changed to: ${choice.label}`));
