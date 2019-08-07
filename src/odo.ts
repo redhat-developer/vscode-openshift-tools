@@ -113,7 +113,7 @@ export class Command {
     static odoLogout() {
         return `odo logout`;
     }
-    static setContext(context: string) {
+    static setOpenshiftContext(context: string) {
         return `oc config use-context ${context}`;
     }
     static odoLoginWithUsernamePassword(clusterURL: string, username: string, passwd: string) {
