@@ -295,15 +295,21 @@ export class Component extends OpenShiftItem {
         const choice: any = await window.showQuickPick([addWorkspaceFolder, ...folder], {placeHolder: "Select workspace folder"});
 
         if (!choice) return null;
-        const workspacePath: Uri = (choice.label === addWorkspaceFolder.label) ?
-            (await window.showOpenDialog({
+        let workspacePath: Uri;
+
+        if (choice.label === addWorkspaceFolder.label) {
+            const folders = await window.showOpenDialog({
                 canSelectFiles: false,
                 canSelectFolders: true,
                 canSelectMany: false,
                 defaultUri: Uri.file(Platform.getUserHomePath()),
                 openLabel: "Add workspace Folder for Component"
-            }))[0] : choice.uri;
-
+            });
+            if (!folders) return null;
+            workspacePath = folders[0];
+        } else {
+            workspacePath = choice.uri;
+        }
         if (!workspacePath) return null;
 
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
