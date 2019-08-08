@@ -8,5 +8,5 @@ downloadAndUnzipVSCode().then((executable) => {
     } else {
         executable = path.join(path.dirname(executable), 'bin', 'code');
     }
-    cp.execSync(`${executable} --install-extension ms-kubernetes-tools.vscode-kubernetes-tools`);
+    cp.execSync(`'${executable}' --install-extension ms-kubernetes-tools.vscode-kubernetes-tools`);
 });
