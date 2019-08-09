@@ -144,7 +144,7 @@
       },
       {
         "command": "openshift.explorer.switchContext",
-        "title": "Manage Contexts",
+        "title": "Switch Contexts",
         "category": "OpenShift",
         "icon": {
           "dark": "images/title/dark/users.svg",
@@ -573,22 +573,22 @@
         {
           "command": "openshift.explorer.login",
           "when": "view == openshiftProjectExplorer",
-          "group": "navigation"
+          "group": "navigation@0"
         },
         {
           "command": "openshift.explorer.switchContext",
           "when": "view == openshiftProjectExplorer",
-          "group": "navigation"
+          "group": "navigation@1"
         },
         {
           "command": "openshift.explorer.refresh",
           "when": "view == openshiftProjectExplorer",
-          "group": "navigation"
+          "group": "navigation@2"
         },
         {
           "command": "openshift.explorer.reportIssue",
           "when": "view == openshiftProjectExplorer",
-          "group": "navigation"
+          "group": "navigation@3"
         }
       ],
       "view/item/context": [
