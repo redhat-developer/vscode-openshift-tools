@@ -99,7 +99,7 @@ export class Command {
         return 'oc version';
     }
     static listServiceInstances(project: string, app: string) {
-        return `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}" --namespace ${project}`;
+        return `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/part-of == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/instance}{\\"\\n\\"}{end}" --namespace ${project}`;
     }
     static describeApplication(project: string, app: string) {
         return `odo app describe ${app} --project ${project}`;
