@@ -408,15 +408,13 @@ function compareNodes(a: OpenShiftObject, b: OpenShiftObject): number {
 
 class OdoModel {
     private treeCache: Map<OpenShiftObject, OpenShiftObject[]> = new Map();
-    private parentCache = new Map<string, OpenShiftObject>();
     private pathCache = new Map<string, OpenShiftObject>();
-    private contextCache1 = new Map<Uri, OpenShiftObject>();
-    private contextCache2 = new Map<Uri, ComponentSettings>();
+    private contextToObject = new Map<Uri, OpenShiftObject>();
+    private contextToSettings = new Map<Uri, ComponentSettings>();
 
     public setParentToChildren(parent: OpenShiftObject, children: OpenShiftObject[]): OpenShiftObject[] {
         if (!this.treeCache.has(parent)) {
             this.treeCache.set(parent, children);
-            this.parentCache.set(parent.path, parent);
         }
         return children;
     }
@@ -435,38 +433,34 @@ class OdoModel {
         }
     }
 
-    public getParentByPath(path: string): OpenShiftObject {
-        return this.parentCache.get(path);
-    }
-
     public getObjectByPath(path: string): OpenShiftObject {
         return this.pathCache.get(path);
     }
 
     public setContextToObject(object: OpenShiftObject) {
         if (object.contextPath) {
-            if (!this.contextCache1.has(object.contextPath)) {
-                this.contextCache1.set(object.contextPath, object );
+            if (!this.contextToObject.has(object.contextPath)) {
+                this.contextToObject.set(object.contextPath, object );
             }
         }
     }
 
     public getObjectByContext(context: Uri) {
-        return this.contextCache1.get(context);
+        return this.contextToObject.get(context);
     }
 
     public setContextToSettings (settings: ComponentSettings) {
-        if (!this.contextCache2.has(settings.ContextPath)) {
-            this.contextCache2.set(settings.ContextPath, settings);
+        if (!this.contextToSettings.has(settings.ContextPath)) {
+            this.contextToSettings.set(settings.ContextPath, settings);
         }
     }
 
     public getSettingsByContext(context: Uri) {
-        return this.contextCache2.get(context);
+        return this.contextToSettings.get(context);
     }
 
     public getSettings(): odo.ComponentSettings[] {
-        return Array.from(this.contextCache2.values());
+        return Array.from(this.contextToSettings.values());
     }
 
     public addContexts(folders: WorkspaceFolder[]) {
@@ -484,12 +478,11 @@ class OdoModel {
         const array = await item.getParent().getChildren();
         array.splice(array.indexOf(item), 1);
         this.pathCache.delete(item.path);
-        this.parentCache.delete(item.path);
-        this.contextCache1.delete(item.contextPath);
+        this.contextToObject.delete(item.contextPath);
     }
 
     public deleteContext(context: Uri) {
-        this.contextCache2.delete(context);
+        this.contextToSettings.delete(context);
     }
 }
 
