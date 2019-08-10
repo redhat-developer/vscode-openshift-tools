@@ -165,7 +165,7 @@ export class Command {
         return `odo watch ${component} --app ${app} --project ${project}`;
     }
     static getRouteHostName(namespace: string, component: string) {
-        return `oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${component}')]}{.spec.host}{end}"`;
+        return `oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/instance=='${component}')]}{.spec.host}{end}"`;
     }
     @verbose
     static createLocalComponent(project: string, app: string, type: string, version: string, name: string, folder: string) {
