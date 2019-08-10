@@ -187,7 +187,7 @@ export class Command {
         return `odo service delete ${name} -f --project ${project} --app ${app}`;
     }
     static getServiceTemplate(project: string, service: string) {
-        return `oc get ServiceInstance ${service} --namespace ${project} -o jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/component-type}"`;
+        return `oc get ServiceInstance ${service} --namespace ${project} -o jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/name}"`;
     }
     static waitForServiceToBeGone(project: string, service: string) {
         return `oc wait ServiceInstance/${service} --for delete --namespace ${project}`;
