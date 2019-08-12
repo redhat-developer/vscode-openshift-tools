@@ -807,10 +807,6 @@
           "when": "viewItem =~ /\\.openshift\\.inactiveProject/i"
         },
         {
-<<<<<<< HEAD
-          "command": "clusters.openshift.openProjectConsole",
-          "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.\\w*cluster/i"
-=======
           "command": "clusters.openshift.project.openConsole",
           "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.resource\\.project*/i"
         },
@@ -818,7 +814,6 @@
           "command": "openshift.explorer.switchContext",
           "when": "view == openshiftProjectExplorer && viewItem == cluster",
           "group": "inline"
->>>>>>> 1af59583005fca6cf97ac7a1b97d5316376265ce
         }
       ]
     },
