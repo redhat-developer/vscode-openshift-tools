@@ -976,7 +976,7 @@ export class OdoImpl implements Odo {
             OdoImpl.data.addContexts(workspace.workspaceFolders);
         }
 
-        if (event && event.added) {
+        if (event && event.added && event.added.length > 0) {
             OdoImpl.data.addContexts(event.added);
 
             event.added.forEach(async (folder: WorkspaceFolder) => {
@@ -1005,7 +1005,7 @@ export class OdoImpl implements Odo {
             });
         }
 
-        if (event && event.removed) {
+        if (event && event.removed && event.removed.length > 0) {
             event.removed.forEach(async (wsFolder: WorkspaceFolder) => {
                 const settings = OdoImpl.data.getSettingsByContext(wsFolder.uri);
                 if (settings) {
