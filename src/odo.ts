@@ -99,7 +99,7 @@ export class Command {
         return 'oc version';
     }
     static listServiceInstances(project: string, app: string) {
-        return `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}" --namespace ${project}`;
+        return `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/part-of == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/instance}{\\"\\n\\"}{end}" --namespace ${project}`;
     }
     static describeApplication(project: string, app: string) {
         return `odo app describe ${app} --project ${project}`;
@@ -109,6 +109,9 @@ export class Command {
     }
     static printOdoVersion() {
         return 'odo version';
+    }
+    static printOdoVersionAndProjects() {
+        return 'odo version && odo project list';
     }
     static odoLogout() {
         return `odo logout`;
@@ -165,7 +168,7 @@ export class Command {
         return `odo watch ${component} --app ${app} --project ${project}`;
     }
     static getRouteHostName(namespace: string, component: string) {
-        return `oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${component}')]}{.spec.host}{end}"`;
+        return `oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/instance=='${component}')]}{.spec.host}{end}"`;
     }
     @verbose
     static createLocalComponent(project: string, app: string, type: string, version: string, name: string, folder: string) {
@@ -187,7 +190,7 @@ export class Command {
         return `odo service delete ${name} -f --project ${project} --app ${app}`;
     }
     static getServiceTemplate(project: string, service: string) {
-        return `oc get ServiceInstance ${service} --namespace ${project} -o jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/component-type}"`;
+        return `oc get ServiceInstance ${service} --namespace ${project} -o jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/name}"`;
     }
     static waitForServiceToBeGone(project: string, service: string) {
         return `oc wait ServiceInstance/${service} --for delete --namespace ${project}`;
@@ -207,6 +210,15 @@ export class Command {
     }
     static unlinkComponents(project: string, app: string, comp1: string, comp2: string) {
         return `odo unlink --project ${project} --app ${app} ${comp2} --component ${comp1}`;
+    }
+    static getOpenshiftClusterRoute() {
+        return `oc get routes -n openshift-console -ojson`;
+    }
+    static getclusterVersion() {
+        return `oc get clusterversion -ojson`;
+    }
+    static showServerUrl() {
+        return `oc whoami --show-server`;
     }
 }
 
@@ -399,15 +411,13 @@ function compareNodes(a: OpenShiftObject, b: OpenShiftObject): number {
 
 class OdoModel {
     private treeCache: Map<OpenShiftObject, OpenShiftObject[]> = new Map();
-    private parentCache = new Map<string, OpenShiftObject>();
     private pathCache = new Map<string, OpenShiftObject>();
-    private contextCache1 = new Map<Uri, OpenShiftObject>();
-    private contextCache2 = new Map<Uri, ComponentSettings>();
+    private contextToObject = new Map<Uri, OpenShiftObject>();
+    private contextToSettings = new Map<Uri, ComponentSettings>();
 
     public setParentToChildren(parent: OpenShiftObject, children: OpenShiftObject[]): OpenShiftObject[] {
         if (!this.treeCache.has(parent)) {
             this.treeCache.set(parent, children);
-            this.parentCache.set(parent.path, parent);
         }
         return children;
     }
@@ -426,38 +436,34 @@ class OdoModel {
         }
     }
 
-    public getParentByPath(path: string): OpenShiftObject {
-        return this.parentCache.get(path);
-    }
-
     public getObjectByPath(path: string): OpenShiftObject {
         return this.pathCache.get(path);
     }
 
     public setContextToObject(object: OpenShiftObject) {
         if (object.contextPath) {
-            if (!this.contextCache1.has(object.contextPath)) {
-                this.contextCache1.set(object.contextPath, object );
+            if (!this.contextToObject.has(object.contextPath)) {
+                this.contextToObject.set(object.contextPath, object );
             }
         }
     }
 
     public getObjectByContext(context: Uri) {
-        return this.contextCache1.get(context);
+        return this.contextToObject.get(context);
     }
 
     public setContextToSettings (settings: ComponentSettings) {
-        if (!this.contextCache2.has(settings.ContextPath)) {
-            this.contextCache2.set(settings.ContextPath, settings);
+        if (!this.contextToSettings.has(settings.ContextPath)) {
+            this.contextToSettings.set(settings.ContextPath, settings);
         }
     }
 
     public getSettingsByContext(context: Uri) {
-        return this.contextCache2.get(context);
+        return this.contextToSettings.get(context);
     }
 
     public getSettings(): odo.ComponentSettings[] {
-        return Array.from(this.contextCache2.values());
+        return Array.from(this.contextToSettings.values());
     }
 
     public addContexts(folders: WorkspaceFolder[]) {
@@ -475,12 +481,11 @@ class OdoModel {
         const array = await item.getParent().getChildren();
         array.splice(array.indexOf(item), 1);
         this.pathCache.delete(item.path);
-        this.parentCache.delete(item.path);
-        this.contextCache1.delete(item.contextPath);
+        this.contextToObject.delete(item.contextPath);
     }
 
     public deleteContext(context: Uri) {
-        this.contextCache2.delete(context);
+        this.contextToSettings.delete(context);
     }
 }
 
@@ -537,7 +542,7 @@ export class OdoImpl implements Odo {
     private async getClustersWithOdo(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
         const result: cliInstance.CliExitData = await this.execute(
-            Command.printOdoVersion(), process.cwd(), false
+            Command.printOdoVersionAndProjects(), process.cwd(), false
         );
         if (this.odoLoginMessages.some((element) => result.stderr ? result.stderr.indexOf(element) > -1 : false)) {
             const loginErrorMsg: string = 'Please log in to the cluster';
@@ -760,7 +765,7 @@ export class OdoImpl implements Odo {
     }
 
     public async requireLogin(): Promise<boolean> {
-        const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersion(), process.cwd(), false);
+        const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersionAndProjects(), process.cwd(), false);
         return this.odoLoginMessages.some((element) => { return result.stderr.indexOf(element) > -1; });
     }
 

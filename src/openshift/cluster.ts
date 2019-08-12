@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { OpenShiftObject, Command } from "../odo";
+import { Command } from "../odo";
 import { OpenShiftItem } from './openshiftItem';
 import { window, commands, env, QuickPickItem } from 'vscode';
 import { CliExitData, Cli } from "../cli";
@@ -66,17 +66,18 @@ export class Cluster extends OpenShiftItem {
         Cli.getInstance().showOutputChannel();
     }
 
-    static async openshiftConsole(context: OpenShiftObject): Promise<void> {
-        if (context) {
-            open(`${context.getName()}/console`);
+    static async openshiftConsole(): Promise<void> {
+        let consoleUrl: string;
+        const versionInfo = await Cluster.odo.execute(Command.getclusterVersion(), process.cwd(), false);
+        if (versionInfo.error === null) {
+            const routeObj = await Cluster.odo.execute(Command.getOpenshiftClusterRoute());
+            const spec = JSON.parse(routeObj.stdout).items[0].spec;
+            consoleUrl = `${spec.port.targetPort}://${spec.host}`;
         } else {
-            const result: OpenShiftObject[] = await Cluster.odo.getClusters();
-            if (result.length>0 && result[0].getName().startsWith('http')) {
-                open(`${result[0].getName()}/console`);
-            } else {
-                window.showErrorMessage(result[0].getName());
-            }
+            const serverUrl = await Cluster.odo.execute(Command.showServerUrl());
+            consoleUrl = `${serverUrl.stdout}/console`;
         }
+        open(consoleUrl);
     }
 
     static async switchContext() {

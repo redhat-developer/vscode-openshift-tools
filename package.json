@@ -82,7 +82,7 @@
     "onCommand:openshift.component.folder.create",
     "onCommand:openshift.explorer.reportIssue",
     "onCommand:openshift.explorer.switchContext",
-    "onCommand:clusters.openshift.openProjectConsole",
+    "onCommand:clusters.openshift.project.openConsole",
     "onCommand:clusters.openshift.useProject",
     "onCommand:clusters.openshift.deploy",
     "onCommand:clusters.openshift.build.start",
@@ -271,7 +271,7 @@
       },
       {
         "command": "openshift.openshiftConsole",
-        "title": "Open Console",
+        "title": "Open Console Dashboard",
         "category": "OpenShift"
       },
       {
@@ -411,7 +411,7 @@
         "category": "OpenShift"
       },
       {
-        "command": "clusters.openshift.openProjectConsole",
+        "command": "clusters.openshift.project.openConsole",
         "title": "Open Project in Console"
       },
       {
@@ -593,11 +593,6 @@
       ],
       "view/item/context": [
         {
-          "command": "openshift.project.create",
-          "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
-          "group": "c1"
-        },
-        {
           "command": "clusters.openshift.deployment.openConsole",
           "group": "3@0",
           "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.dc"
@@ -643,6 +638,16 @@
           "when": "view == extension.vsKubernetesExplorer && viewItem =~ /openShift\\.resource\\.build.*/i"
         },
         {
+          "command": "openshift.openshiftConsole",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster",
+          "group": "c0"
+        },
+        {
+          "command": "openshift.project.create",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
+          "group": "c1"
+        },
+        {
           "command": "openshift.catalog.listComponents",
           "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
           "group": "c2@1"
@@ -653,24 +658,19 @@
           "group": "c2@2"
         },
         {
-          "command": "openshift.openshiftConsole",
-          "when": "view == openshiftProjectExplorer && viewItem == cluster",
-          "group": "c3"
-        },
-        {
           "command": "openshift.explorer.logout",
           "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
-          "group": "c4"
+          "group": "c3"
         },
         {
           "command": "openshift.about",
           "when": "view == openshiftProjectExplorer && viewItem == cluster",
-          "group": "c5"
+          "group": "c4"
         },
         {
           "command": "openshift.output",
           "when": "view == openshiftProjectExplorer && viewItem == cluster",
-          "group": "c6"
+          "group": "c5"
         },
         {
           "command": "openshift.project.delete",
@@ -807,8 +807,18 @@
           "when": "viewItem =~ /\\.openshift\\.inactiveProject/i"
         },
         {
+<<<<<<< HEAD
           "command": "clusters.openshift.openProjectConsole",
           "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.\\w*cluster/i"
+=======
+          "command": "clusters.openshift.project.openConsole",
+          "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.resource\\.project*/i"
+        },
+        {
+          "command": "openshift.explorer.switchContext",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster",
+          "group": "inline"
+>>>>>>> 1af59583005fca6cf97ac7a1b97d5316376265ce
         }
       ]
     },
@@ -834,7 +844,7 @@
   "extensionDependencies": [],
   "scripts": {
     "verify": "node ./out/build/verify-tools.js",
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run build",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",

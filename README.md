@@ -32,6 +32,7 @@ For detail analysis of how to setup and run local OpenShift Cluster using minish
 * `OpenShift: About` - Provides the information about the OpenShift tools.
 * `OpenShift: Log out` - Logs out of the current OpenShift Cluster.
 * `OpenShift: Show Output Channel` - Shows commands running under the hood and their output.
+* `OpenShift: Open Console Dashboard` - Opens the OpenShift webconsole URL.
 
 #### Actions available for an OpenShift Cluster Project
 
