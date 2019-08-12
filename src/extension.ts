@@ -70,6 +70,7 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('clusters.openshift.build.openConsole', (context) => execute(Console.openBuildConfig, context)),
         vscode.commands.registerCommand('clusters.openshift.deployment.openConsole', (context) => execute(Console.openDeploymentConfig, context)),
         vscode.commands.registerCommand('clusters.openshift.imagestream.openConsole', (context) => execute(Console.openImageStream, context)),
+        vscode.commands.registerCommand('clusters.openshift.project.openConsole', (context) => execute(Console.openProject, context)),
         vscode.commands.registerCommand('openshift.component.createFromLocal', (context) => execute(Component.createFromLocal, context)),
         vscode.commands.registerCommand('openshift.component.createFromGit', (context) => execute(Component.createFromGit, context)),
         vscode.commands.registerCommand('openshift.component.createFromBinary', (context) => execute(Component.createFromBinary, context)),
@@ -101,7 +102,6 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.linkComponent', (context) => execute(Component.linkComponent, context)),
         vscode.commands.registerCommand('openshift.component.linkService', (context) => execute(Component.linkService, context)),
         vscode.commands.registerCommand('openshift.explorer.reportIssue', () => OpenShiftExplorer.reportIssue()),
-        vscode.commands.registerCommand('clusters.openshift.openProjectConsole', openProjectConsole),
         vscode.commands.registerCommand('clusters.openshift.useProject', (context) => vscode.commands.executeCommand('extension.vsKubernetesUseNamespace', context)),
         OpenShiftExplorer.getInstance()
     ];
@@ -147,21 +147,6 @@ async function initNamespaceName(node: ClusterExplorerV1.ClusterExplorerResource
             return "";
         }
         return currentContext.context.namespace || "default";
-    }
-}
-
-async function openProjectConsole (commandTarget: any) {
-    if (!commandTarget) {
-        vscode.window.showErrorMessage("Cannot load the Project");
-        return;
-    }
-
-    if (isOpenShift()) {
-        const project = commandTarget.id.split('/')[0];
-        const clusterUrl = commandTarget.metadata.clusterName.replace(/-/g, '.');
-        vscode.window.showInformationMessage(`Opening Console for project '${project}'`);
-        await open(`https://${clusterUrl}/console/project/${project}/overview`);
-        return;
     }
 }
 
