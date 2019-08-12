@@ -23,7 +23,6 @@ import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { BuildConfigNodeContributor } from './k8s/build';
 import { Console } from './k8s/console';
 import { OdoImpl } from './odo';
-import open = require("open");
 import { Build } from './k8s/build';
 import * as Deployment from './k8s/deployment';
 
