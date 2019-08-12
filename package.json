@@ -82,7 +82,7 @@
     "onCommand:openshift.component.folder.create",
     "onCommand:openshift.explorer.reportIssue",
     "onCommand:openshift.explorer.switchContext",
-    "onCommand:clusters.openshift.openProjectConsole",
+    "onCommand:clusters.openshift.project.openConsole",
     "onCommand:clusters.openshift.useProject",
     "onCommand:clusters.openshift.deploy",
     "onCommand:clusters.openshift.build.start",
@@ -402,7 +402,7 @@
         "category": "OpenShift"
       },
       {
-        "command": "clusters.openshift.openProjectConsole",
+        "command": "clusters.openshift.project.openConsole",
         "title": "Open Project in Console"
       },
       {
@@ -802,8 +802,8 @@
           "when": "viewItem =~ /\\.openshift\\.inactiveProject/i"
         },
         {
-          "command": "clusters.openshift.openProjectConsole",
-          "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.\\w*cluster/i"
+          "command": "clusters.openshift.project.openConsole",
+          "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.resource\\.project*/i"
         },
         {
           "command": "openshift.explorer.switchContext",

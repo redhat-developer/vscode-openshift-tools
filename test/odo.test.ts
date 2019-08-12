@@ -523,7 +523,7 @@ suite("odo", () => {
             const stub = sandbox.stub(odoCli, 'execute').resolves({ error: null, stdout: 'logged in', stderr: ''});
             const result = await odoCli.requireLogin();
 
-            expect(stub).calledOnceWith(odo.Command.printOdoVersion());
+            expect(stub).calledOnceWith(odo.Command.printOdoVersionAndProjects());
             expect(result).false;
         });
 

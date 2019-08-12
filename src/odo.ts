@@ -110,6 +110,9 @@ export class Command {
     static printOdoVersion() {
         return 'odo version';
     }
+    static printOdoVersionAndProjects() {
+        return 'odo version && odo project list';
+    }
     static odoLogout() {
         return `odo logout`;
     }
@@ -539,7 +542,7 @@ export class OdoImpl implements Odo {
     private async getClustersWithOdo(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
         const result: cliInstance.CliExitData = await this.execute(
-            Command.printOdoVersion(), process.cwd(), false
+            Command.printOdoVersionAndProjects(), process.cwd(), false
         );
         if (this.odoLoginMessages.some((element) => result.stderr ? result.stderr.indexOf(element) > -1 : false)) {
             const loginErrorMsg: string = 'Please log in to the cluster';
@@ -762,7 +765,7 @@ export class OdoImpl implements Odo {
     }
 
     public async requireLogin(): Promise<boolean> {
-        const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersion(), process.cwd(), false);
+        const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersionAndProjects(), process.cwd(), false);
         return this.odoLoginMessages.some((element) => { return result.stderr.indexOf(element) > -1; });
     }
 
