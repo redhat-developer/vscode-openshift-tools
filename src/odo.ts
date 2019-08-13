@@ -937,7 +937,7 @@ export class OdoImpl implements Odo {
 
     public async deleteService(service: OpenShiftObject): Promise<OpenShiftObject> {
         const app = service.getParent();
-        await this.execute(Command.deleteService(app.getParent().getName(), app.getName(), service.getName()));
+        await this.execute(Command.deleteService(app.getParent().getName(), app.getName(), service.getName()), Platform.getUserHomePath());
         await this.execute(Command.waitForServiceToBeGone(app.getParent().getName(), service.getName()));
         this.deleteAndRefresh(service);
         const children = await app.getChildren();
