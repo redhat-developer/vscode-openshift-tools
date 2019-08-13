@@ -814,11 +814,6 @@
         {
           "command": "clusters.openshift.project.openConsole",
           "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.resource\\.project*/i"
-        },
-        {
-          "command": "openshift.explorer.switchContext",
-          "when": "view == openshiftProjectExplorer && viewItem == cluster",
-          "group": "inline"
         }
       ]
     },
