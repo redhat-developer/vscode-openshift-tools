@@ -713,6 +713,11 @@
           "group": "c2@1"
         },
         {
+          "command": "openshift.component.describe",
+          "when": "view == openshiftProjectExplorer && viewItem == component_no_context",
+          "group": "c2@1"
+        },
+        {
           "command": "openshift.component.log",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c2@2"

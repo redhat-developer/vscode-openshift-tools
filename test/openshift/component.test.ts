@@ -635,7 +635,7 @@ suite('OpenShift/Component', () => {
             const result = await Component.linkService(componentItem);
 
             expect(result).equals(`Service '${serviceItem.getName()}' successfully linked with Component '${componentItem.getName()}'`);
-            expect(execStub).calledOnceWith(Command.linkComponentTo(projectItem.getName(), appItem.getName(), componentItem.getName(), serviceItem.getName()));
+            expect(execStub).calledOnceWith(Command.linkServiceTo(projectItem.getName(), appItem.getName(), componentItem.getName(), serviceItem.getName()));
         });
 
         test('returns null when no service selected to link', async () => {
@@ -673,7 +673,7 @@ suite('OpenShift/Component', () => {
             const result = await Component.linkService(null);
 
             expect(result).equals(`Service '${serviceItem.getName()}' successfully linked with Component '${componentItem.getName()}'`);
-            expect(execStub).calledOnceWith(Command.linkComponentTo(projectItem.getName(), appItem.getName(), componentItem.getName(), serviceItem.getName()));
+            expect(execStub).calledOnceWith(Command.linkServiceTo(projectItem.getName(), appItem.getName(), componentItem.getName(), serviceItem.getName()));
         });
 
         test('returns null when no service selected to link', async () => {

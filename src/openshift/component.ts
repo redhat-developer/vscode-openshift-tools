@@ -123,7 +123,7 @@ export class Component extends OpenShiftItem {
             "From which Application you want to describe Component",
             "Select Component you want to describe");
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+        Component.odo.executeInTerminal(Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
     }
 
     static async log(context: OpenShiftObject): Promise<string> {
@@ -186,7 +186,7 @@ export class Component extends OpenShiftItem {
         if (!serviceToLink) return null;
 
         return Progress.execFunctionWithProgress(`Link Service '${serviceToLink.getName()}' with Component '${component.getName()}'`,
-            (progress) => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), serviceToLink.getName()), component.contextPath.fsPath)
+            (progress) => Component.odo.execute(Command.linkServiceTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), serviceToLink.getName()), component.contextPath.fsPath)
                 .then(() => `Service '${serviceToLink.getName()}' successfully linked with Component '${component.getName()}'`)
                 .catch((err) => Promise.reject(`Failed to link Service with error '${err}'`))
         );

@@ -159,6 +159,9 @@ export class Command {
     static linkComponentTo(project: string, app: string, component: string, componentToLink: string, port?: string) {
         return `odo link ${componentToLink} --project ${project} --app ${app} --component ${component} --wait${port ? ' --port ' + port : ''}`;
     }
+    static linkServiceTo(project: string, app: string, component: string, serviceToLink: string, port?: string) {
+        return `odo link ${serviceToLink} --project ${project} --app ${app} --component ${component} --wait --wait-for-target`;
+    }
     @verbose
     static pushComponent() {
         return `odo push`;
