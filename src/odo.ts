@@ -410,34 +410,37 @@ function compareNodes(a: OpenShiftObject, b: OpenShiftObject): number {
 }
 
 class OdoModel {
-    private treeCache: Map<OpenShiftObject, OpenShiftObject[]> = new Map();
-    private pathCache = new Map<string, OpenShiftObject>();
+    private parentToChildren: Map<OpenShiftObject, OpenShiftObject[]> = new Map();
+    private pathToObject = new Map<string, OpenShiftObject>();
     private contextToObject = new Map<Uri, OpenShiftObject>();
     private contextToSettings = new Map<Uri, ComponentSettings>();
 
     public setParentToChildren(parent: OpenShiftObject, children: OpenShiftObject[]): OpenShiftObject[] {
-        if (!this.treeCache.has(parent)) {
-            this.treeCache.set(parent, children);
+        if (!this.parentToChildren.has(parent)) {
+            this.parentToChildren.set(parent, children);
         }
         return children;
     }
 
     public getChildrenByParent(parent: OpenShiftObject) {
-        return this.treeCache.get(parent);
+        return this.parentToChildren.get(parent);
     }
 
     public clearTreeData() {
-        this.treeCache.clear();
+        this.parentToChildren.clear();
+        this.pathToObject.clear();
+        this.contextToObject.clear();
+        this.addContexts(workspace.workspaceFolders? workspace.workspaceFolders : []);
     }
 
     public setPathToObject(object: OpenShiftObject) {
-        if (!this.pathCache.get(object.path)) {
-            this.pathCache.set(object.path, object);
+        if (!this.pathToObject.get(object.path)) {
+            this.pathToObject.set(object.path, object);
         }
     }
 
     public getObjectByPath(path: string): OpenShiftObject {
-        return this.pathCache.get(path);
+        return this.pathToObject.get(path);
     }
 
     public setContextToObject(object: OpenShiftObject) {
@@ -480,7 +483,7 @@ class OdoModel {
     public async delete(item: OpenShiftObject): Promise<void> {
         const array = await item.getParent().getChildren();
         array.splice(array.indexOf(item), 1);
-        this.pathCache.delete(item.path);
+        this.pathToObject.delete(item.path);
         this.contextToObject.delete(item.contextPath);
     }
 
