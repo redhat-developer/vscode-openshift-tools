@@ -47,6 +47,7 @@ suite('OpenShift/Component', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         opnStub = sandbox.stub();
+        sandbox.stub(vscode.workspace, "updateWorkspaceFolders");
         fetchTag = sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>([['HEAD', 'shanumb']]));
         Component = pq('../../src/openshift/component', {
             open: opnStub
@@ -181,7 +182,6 @@ suite('OpenShift/Component', () => {
                 inputStub.onSecondCall().resolves(componentItem.getName());
                 infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves();
                 sandbox.stub(vscode.window, 'showOpenDialog').resolves([vscode.Uri.parse('file:///c%3A/Temp')]);
-                sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
             });
 
             test('happy path works', async () => {
@@ -416,7 +416,6 @@ suite('OpenShift/Component', () => {
             sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
             execStub.resolves({ error: undefined, stdout: '', stderr: '' });
             sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
-            sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
             sandbox.stub(vscode.workspace, 'getWorkspaceFolder').returns(wsFolder1);
             OdoImpl.data.addContexts(vscode.workspace.workspaceFolders);
         });
@@ -479,7 +478,6 @@ suite('OpenShift/Component', () => {
             sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
             execStub.resolves({ error: undefined, stdout: '', stderr: '' });
             sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
-            sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
             sandbox.stub(vscode.workspace, 'getWorkspaceFolder').returns(wsFolder1);
             OdoImpl.data.addContexts(vscode.workspace.workspaceFolders);
         });
