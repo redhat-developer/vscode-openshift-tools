@@ -10,7 +10,6 @@ import { CliExitData } from './cli';
 import * as path from 'path';
 import { ToolsConfig } from './tools';
 import format =  require('string-format');
-import { OpenShiftExplorer } from './explorer';
 import { statSync } from 'fs';
 import bs = require('binary-search');
 import { Platform } from './util/platform';
@@ -19,6 +18,7 @@ import fs = require('fs');
 import * as odo from './odo/config';
 import { ComponentSettings } from './odo/config';
 import { GlyphChars } from './util/constants';
+import { Subject } from 'rxjs';
 
 const Collapsed = TreeItemCollapsibleState.Collapsed;
 
@@ -362,6 +362,17 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
     }
 }
 
+export interface OdoEvent {
+    readonly type: 'deleted' | 'inserted' | 'changed';
+    readonly data: OpenShiftObject;
+    readonly reveal: boolean;
+}
+
+class OdoEventImpl implements OdoEvent {
+    constructor(readonly type: 'deleted' | 'inserted' | 'changed', readonly data: OpenShiftObject, readonly reveal: boolean = false) {
+    }
+}
+
 export interface Odo {
     getClusters(): Promise<OpenShiftObject[]>;
     getProjects(): Promise<OpenShiftObject[]>;
@@ -397,6 +408,7 @@ export interface Odo {
     deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
     deleteURL(url: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentCustomUrl(component: OpenShiftObject, name: string, port: string): Promise<OpenShiftObject>;
+    readonly subject: Subject<OdoEvent>;
 }
 
 export function getInstance(): Odo {
@@ -507,7 +519,10 @@ export class OdoImpl implements Odo {
         'Please login to your server'
     ];
 
+    private subjectInstance: Subject<OdoEvent> = new Subject<OdoEvent>();
+
     private constructor() {
+
     }
 
     public static get Instance(): Odo {
@@ -515,6 +530,10 @@ export class OdoImpl implements Odo {
             OdoImpl.instance = new OdoImpl();
         }
         return OdoImpl.instance;
+    }
+
+    get subject(): Subject<OdoEvent> {
+        return this.subjectInstance;
     }
 
     async getClusters(): Promise<OpenShiftObject[]> {
@@ -782,18 +801,21 @@ export class OdoImpl implements Odo {
     }
 
     private async insertAndReveal(item: OpenShiftObject): Promise<OpenShiftObject> {
-        await OpenShiftExplorer.getInstance().reveal(this.insert(await item.getParent().getChildren(), item));
+        // await OpenShiftExplorer.getInstance().reveal(this.insert(await item.getParent().getChildren(), item));
+        this.subject.next(new OdoEventImpl('inserted', this.insert(await item.getParent().getChildren(), item), true));
         return item;
     }
 
     private async insertAndRefresh(item: OpenShiftObject): Promise<OpenShiftObject> {
-        await OpenShiftExplorer.getInstance().refresh(this.insert(await item.getParent().getChildren(), item).getParent());
+        // await OpenShiftExplorer.getInstance().refresh(this.insert(await item.getParent().getChildren(), item).getParent());
+        this.subject.next(new OdoEventImpl('changed', this.insert(await item.getParent().getChildren(), item).getParent()));
         return item;
     }
 
     private deleteAndRefresh(item: OpenShiftObject): OpenShiftObject {
         OdoImpl.data.delete(item);
-        OpenShiftExplorer.getInstance().refresh(item.getParent());
+        // OpenShiftExplorer.getInstance().refresh(item.getParent());
+        this.subject.next(new OdoEventImpl('changed', item.getParent()));
         return item;
     }
 
@@ -928,7 +950,8 @@ export class OdoImpl implements Odo {
         const app = component.getParent();
         await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         component.contextValue = ContextType.COMPONENT;
-        OpenShiftExplorer.getInstance().refresh(component);
+        //  OpenShiftExplorer.getInstance().refresh(component);
+        this.subject.next(new OdoEventImpl('changed', component));
         return component;
     }
 
@@ -1000,7 +1023,8 @@ export class OdoImpl implements Odo {
                             if (comp && !comp.contextPath) {
                                 comp.contextPath = added.ContextPath;
                                 comp.contextValue = ContextType.COMPONENT_PUSHED;
-                                await OpenShiftExplorer.getInstance().refresh(comp);
+                                // await OpenShiftExplorer.getInstance().refresh(comp);
+                                this.subject.next(new OdoEventImpl('changed', comp));
                             } else if (!comp) {
                                 const newComponent = new OpenShiftObjectImpl(app, added.Name, ContextType.COMPONENT, false, this, Collapsed, added.ContextPath, added.SourceType);
                                 await this.insertAndRefresh(newComponent);
@@ -1025,7 +1049,8 @@ export class OdoImpl implements Odo {
                     } else if (item) {
                         item.contextValue = ContextType.COMPONENT_NO_CONTEXT;
                         item.contextPath = undefined;
-                        OpenShiftExplorer.getInstance().refresh(item);
+                        // OpenShiftExplorer.getInstance().refresh(item);
+                        this.subject.next(new OdoEventImpl('changed', item));
                     }
                     OdoImpl.data.deleteContext(wsFolder.uri);
                 }
