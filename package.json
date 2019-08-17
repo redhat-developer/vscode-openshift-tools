@@ -895,6 +895,7 @@
     "open": "^6.3.0",
     "request": "^2.88.0",
     "request-progress": "^3.0.0",
+    "rxjs": "^6.5.2",
     "semver": "^6.3.0",
     "shelljs": "^0.8.3",
     "string-format": "^2.0.0",
