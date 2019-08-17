@@ -5,7 +5,7 @@
 
 import { Command } from "../odo";
 import { OpenShiftItem } from './openshiftItem';
-import { window, commands, env, QuickPickItem } from 'vscode';
+import { window, commands, env, QuickPickItem, ExtensionContext } from 'vscode';
 import { CliExitData, Cli } from "../cli";
 import open = require("open");
 import { TokenStore } from "../util/credentialManager";
@@ -30,7 +30,7 @@ class CreateUserItem implements QuickPickItem {
 
 }
 export class Cluster extends OpenShiftItem {
-
+    public static extensionContext: ExtensionContext;
     static async logout(): Promise<string> {
         const value = await window.showWarningMessage(`Do you want to logout of cluster?`, 'Logout', 'Cancel');
         if (value === 'Logout') {

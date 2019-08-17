@@ -8,7 +8,7 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { contextGlobalState } from '../../src/extension';
+
 import { TokenStore, getVscodeModule } from '../../src/util/credentialManager';
 
 const expect = chai.expect;
@@ -46,7 +46,7 @@ suite('TokenStore', () => {
 
     suite('setUserName', () => {
         test('should set user\'s name', async () => {
-            const updateStub = sandbox.stub(contextGlobalState.globalState, 'update').resolves('developer');
+            const updateStub = sandbox.stub(TokenStore.extensionContext.globalState, 'update').resolves('developer');
             const result = await TokenStore.setUserName('username');
             expect(result).equal('developer');
             expect(updateStub).calledOnce;
@@ -55,7 +55,7 @@ suite('TokenStore', () => {
 
     suite('getUserName', () => {
         test('should get user\'s name', async () => {
-            const getStub = sandbox.stub(contextGlobalState.globalState, 'get').resolves('developer');
+            const getStub = sandbox.stub(TokenStore.extensionContext.globalState, 'get').resolves('developer');
             const result = await TokenStore.getUserName();
             expect(result).equal('developer');
             expect(getStub).calledOnce;

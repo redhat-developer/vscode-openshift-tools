@@ -5,7 +5,7 @@
 
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command, ContextType } from '../odo';
-import { window, commands, QuickPickItem, Uri, workspace } from 'vscode';
+import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext } from 'vscode';
 import { Progress } from '../util/progress';
 import open = require('open');
 import { ChildProcess } from 'child_process';
@@ -14,7 +14,6 @@ import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 import { isURL } from 'validator';
 import { Refs, Ref, Type } from '../util/refs';
 import { Delayer } from '../util/async';
-import { contextGlobalState } from '../extension';
 import { Platform } from '../util/platform';
 import path = require('path');
 import fs = require('fs-extra');
@@ -30,7 +29,7 @@ class CreateWorkspaceItem implements QuickPickItem {
 
 }
 export class Component extends OpenShiftItem {
-
+    public static extensionContext: ExtensionContext;
     static async getOpenshiftData(context: OpenShiftObject): Promise<OpenShiftObject> {
         return await Component.getOpenShiftCmdData(context,
             "In which Project you want to create a Component",
@@ -193,11 +192,11 @@ export class Component extends OpenShiftItem {
     }
 
     static getPushCmd(): Thenable< string | undefined> {
-        return contextGlobalState.globalState.get('PUSH');
+        return this.extensionContext.globalState.get('PUSH');
     }
 
     static setPushCmd(component: string, application: string, project: string): Thenable<void> {
-        return contextGlobalState.globalState.update('PUSH',  Command.pushComponent());
+        return this.extensionContext.globalState.update('PUSH',  Command.pushComponent());
     }
 
     static async push(context: OpenShiftObject): Promise<string> {
