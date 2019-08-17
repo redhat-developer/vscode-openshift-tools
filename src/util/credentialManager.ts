@@ -5,12 +5,12 @@
 
 'use strict';
 
-import { contextGlobalState } from '../extension';
-import { env } from 'vscode';
+import { env, ExtensionContext } from 'vscode';
 
 const keytar: any = getVscodeModule('keytar');
 
 export class TokenStore {
+    public static extensionContext: ExtensionContext;
 
     static async setItem(key: string, login: string, value: string): Promise<void> {
         return keytar ? keytar.setPassword(key, login, value) : undefined;
@@ -21,11 +21,11 @@ export class TokenStore {
     }
 
     static setUserName(username: string): Thenable<void> {
-        return contextGlobalState.globalState.update('username', username);
+        return TokenStore.extensionContext.globalState.update('username', username);
     }
 
     static getUserName(): Thenable< string | undefined> {
-        return contextGlobalState.globalState.get('username');
+        return TokenStore.extensionContext.globalState.get('username');
     }
 }
 
