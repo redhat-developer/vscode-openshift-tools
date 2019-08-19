@@ -19,7 +19,7 @@
     {
       "url": "https://badges.gitter.im/redhat-developer/openshift-connector.svg",
       "href": "https://gitter.im/redhat-developer/openshift-connector",
-      "description": "Join us in the #openshift-connector channel"
+      "description": "Join us at #openshift-connector channel"
     }
   ],
   "categories": [
@@ -29,7 +29,9 @@
     "openshift",
     "kubernetes",
     "redhat",
-    "clusters"
+    "clusters",
+    "k8s",
+    "redhat"
   ],
   "icon": "images/openshift_extension.png",
   "activationEvents": [
@@ -851,40 +853,40 @@
   },
   "devDependencies": {
     "@types/byline": "^4.2.31",
-    "@types/chai": "^4.1.7",
+    "@types/chai": "^4.2.0",
     "@types/collections": "^5.0.0",
     "@types/fs-extra": "^8.0.0",
     "@types/js-yaml": "^3.12.1",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.0.10",
-    "@types/request": "^2.48.1",
+    "@types/node": "^12.7.2",
+    "@types/request": "^2.48.2",
     "@types/shelljs": "^0.8.5",
     "@types/sinon": "^5.0.7",
-    "@types/sinon-chai": "^3.2.2",
+    "@types/sinon-chai": "^3.2.3",
     "@types/string-format": "^2.0.0",
     "@types/tmp": "0.1.0",
     "@types/validator": "^10.11.2",
     "chai": "^4.2.0",
     "codecov": "^3.5.0",
     "decache": "^4.5.1",
-    "glob": "^7.1.3",
+    "glob": "^7.1.4",
     "istanbul": "^0.4.5",
-    "mocha": "^6.1.4",
-    "mocha-jenkins-reporter": "^0.4.1",
-    "proxyquire": "^2.1.0",
+    "mocha": "^6.2.0",
+    "mocha-jenkins-reporter": "^0.4.2",
+    "proxyquire": "^2.1.3",
     "remap-istanbul": "^0.13.0",
-    "sinon": "^7.3.2",
+    "sinon": "^7.4.1",
     "sinon-chai": "^3.3.0",
     "tmp": "0.1.0",
     "tslint": "^5.18.0",
-    "typescript": "^3.5.2",
-    "vscode": "^1.1.34",
+    "typescript": "^3.5.3",
+    "vscode": "^1.1.36",
     "walker": "^1.0.7"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.10.2",
-    "binary-search": "^1.3.5",
+    "binary-search": "^1.3.6",
     "byline": "^5.0.0",
     "fs-extra": "^8.1.0",
     "git-fetch-pack": "^0.1.1",
@@ -892,7 +894,7 @@
     "hasha": "^5.0.0",
     "js-yaml": "^3.13.1",
     "mkdirp": "^0.5.1",
-    "open": "^6.3.0",
+    "open": "^6.4.0",
     "request": "^2.88.0",
     "request-progress": "^3.0.0",
     "rxjs": "^6.5.2",
@@ -901,7 +903,7 @@
     "string-format": "^2.0.0",
     "targz": "^1.0.1",
     "unzip-stream": "^0.3.0",
-    "validator": "^11.0.0",
+    "validator": "^11.1.0",
     "vscode-kubernetes-tools-api": "1.0.0"
   }
 }
