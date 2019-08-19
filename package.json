@@ -678,9 +678,14 @@
           "group": "p3"
         },
         {
+          "command": "openshift.service.create",
+          "when": "view == openshiftProjectExplorer && viewItem == project",
+          "group": "p1@1"
+        },
+        {
           "command": "openshift.component.create",
           "when": "view == openshiftProjectExplorer && viewItem == project ",
-          "group": "p2"
+          "group": "p1@0"
         },
         {
           "command": "openshift.component.create",
