@@ -182,8 +182,8 @@ export class Component extends OpenShiftItem {
         if (!compName) return null;
         return Progress.execFunctionWithProgress(`Unlinking Component`,
             () => Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), compName), component.contextPath.fsPath)
-                .then(() => `Component ${compName} has been successfully unlinked from the component ${component.getName()}`)
-                .catch((err) => Promise.reject(`Failed to unlink component with error '${err}'`))
+                .then(() => `Component '${compName}' has been successfully unlinked from the Component '${component.getName()}'`)
+                .catch((err) => Promise.reject(`Failed to unlink Component with error '${err}'`))
         );
     }
 
@@ -200,7 +200,7 @@ export class Component extends OpenShiftItem {
         if (!serviceName) return null;
         return Progress.execFunctionWithProgress(`Unlinking Service`,
             () => Component.odo.execute(Command.unlinkService(component.getParent().getParent().getName(), component.getParent().getName(), serviceName, component.getName()), component.contextPath.fsPath)
-                .then(() => `Service ${serviceName} has been successfully unlinked from the component ${component.getName()}`)
+                .then(() => `Service '${serviceName}' has been successfully unlinked from the Component '${component.getName()}'`)
                 .catch((err) => Promise.reject(`Failed to unlink Service with error '${err}'`))
         );
     }
