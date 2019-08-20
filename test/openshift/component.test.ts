@@ -383,18 +383,131 @@ suite('OpenShift/Component', () => {
             },
             "status": {
                 "active": false,
+                "linkedServices": {
+                    "service1": ["8080"]
+                },
                 "linkedComponents": {
                     "comp1": ["8080"]
                 }
             }
         }`;
+
         setup(() => {
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             execStub.resolves({ error: undefined, stdout: mockData, stderr: '' });
+        });
+
+        test('returns null when no option is selected', async () => {
+            quickPickStub.onFirstCall().resolves(undefined);
+            const result = await Component.unlink(componentItem);
+            expect(result).null;
+        });
+
+        test('works from context menu', async () => {
+            quickPickStub.onFirstCall().resolves({
+                label: 'Component',
+                description: 'Unlink Component'
+            });
+            quickPickStub.resolves("comp2");
+            const result = await Component.unlink(componentItem);
+
+            expect(result).equals(`Component 'comp2' has been successfully unlinked from the Component '${componentItem.getName()}'`);
+        });
+
+        test('returns null when no component selected to unlink', async () => {
+            quickPickStub.onFirstCall().resolves({
+                label: 'Component',
+                description: 'Unlink Component'
+            });
+            quickPickStub.resolves();
+            const result = await Component.unlink(componentItem);
+
+            expect(result).null;
+        });
+
+        test('calls the appropriate error message when no link component found', async () => {
+            quickPickStub.onFirstCall().resolves({
+                label: 'Component',
+                description: 'Unlink Component'
+            });
+            sandbox.stub(Component, 'getLinkData').resolves({
+                kind: "Component",
+                apiVersion: "odo.openshift.io/v1alpha1",
+                metadata: {
+                    name: "comp2",
+                    creationTimestamp: null
+                },
+                spec: {
+                    type: "nodejs",
+                    source: "file:///Users/nodejs-ex"
+                },
+                status: {
+                    active: false
+                }
+            });
+            try {
+                await Component.unlink(componentItem);
+            } catch (err) {
+                expect(err.message).equals('No linked Components found');
+                return;
+            }
+            expect.fail();
         });
 
         test('Should able to unlink the component', async () => {
             await Component.unlinkAllComponents(componentItem);
             execStub.calledOnce;
+        });
+
+        test('works from context menu', async () => {
+            quickPickStub.onFirstCall().resolves({
+                label: 'Service',
+                description: 'Unlink Component'
+            });
+            quickPickStub.resolves("service1");
+            const result = await Component.unlink(componentItem);
+
+            expect(result).equals(`Service 'service1' has been successfully unlinked from the Component '${componentItem.getName()}'`);
+        });
+
+        test('returns null when no service selected to unlink', async () => {
+            quickPickStub.onFirstCall().resolves({
+                label: 'Service',
+                description: 'Unlink Component'
+            });
+            quickPickStub.resolves();
+            const result = await Component.unlink(componentItem);
+
+            expect(result).null;
+        });
+
+        test('calls the appropriate error message when no link component found', async () => {
+            quickPickStub.onFirstCall().resolves({
+                label: 'Service',
+                description: 'Unlink Component'
+            });
+            sandbox.stub(Component, 'getLinkData').resolves({
+                kind: "Component",
+                apiVersion: "odo.openshift.io/v1alpha1",
+                metadata: {
+                    name: "comp2",
+                    creationTimestamp: null
+                },
+                spec: {
+                    type: "nodejs",
+                    source: "file:///Users/nodejs-ex"
+                },
+                status: {
+                    active: false
+                }
+            });
+            try {
+                await Component.unlink(componentItem);
+            } catch (err) {
+                expect(err.message).equals('No linked Services found');
+                return;
+            }
+            expect.fail();
         });
     });
 
