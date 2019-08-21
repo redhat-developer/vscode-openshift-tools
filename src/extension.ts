@@ -168,10 +168,7 @@ async function customizeAsync(node: ClusterExplorerV1.ClusterExplorerResourceNod
             treeItem.contextValue = `${treeItem.contextValue || ''}.openshift.inactiveProject`;
         }
     }
-    if (node.nodeType === 'resource' && node.resourceKind.manifestKind === 'BuildConfig') {
-        treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-    }
-    if (node.nodeType === 'resource' && node.resourceKind.manifestKind === 'DeploymentConfig') {
+    if (node.nodeType === 'resource' && (node.resourceKind.manifestKind === 'BuildConfig' || node.resourceKind.manifestKind === 'DeploymentConfig')) {
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
     }
 }

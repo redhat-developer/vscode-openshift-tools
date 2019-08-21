@@ -11,14 +11,14 @@ export class Node implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterEx
     public id: string;
     public resourceId: string;
     // tslint:disable-next-line:variable-name
-    constructor(readonly namespace: string, readonly name: string, readonly number: number, readonly manifest: string, readonly node: String, readonly metadata?: any) {
+    constructor(readonly namespace: string, readonly name: string, readonly number: number, readonly manifest: string, readonly node: string, readonly metadata?: any) {
         this.id = this.resourceId = `${this.node}/${this.name}`;
     }
 
     nodeType: "resource";
     readonly resourceKind: ClusterExplorerV1.ResourceKind = {
-        manifestKind: `${this.manifest}`,
-        abbreviation: `${this.node}`
+        manifestKind: this.manifest,
+        abbreviation: this.node
     };
     readonly kind: ClusterExplorerV1.ResourceKind = this.resourceKind;
     async getChildren(): Promise<ClusterExplorerV1.Node[]> {

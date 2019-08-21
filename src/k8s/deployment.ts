@@ -4,18 +4,8 @@ import { QuickPickItem } from "vscode";
 import * as common from './common';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 
-export class DeploymentConfigNodeContributor implements ClusterExplorerV1.NodeContributor {
-    contributesChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): boolean {
-        return !!parent && parent.nodeType === 'resource' && parent.resourceKind.manifestKind === 'DeploymentConfig';
-    }
-
-    async getChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): Promise<ClusterExplorerV1.Node[]> {
-        return common.getNode(Command.getAllReplicas(parent), 'Deploy', 'deploy');
-    }
-}
-
 export class Command {
-    static getAllReplicas(parent: ClusterExplorerV1.ClusterExplorerNode) {
+    static getReplicationControllers(parent: ClusterExplorerV1.ClusterExplorerNode) {
         return `get rc -o jsonpath="{range .items[?(.metadata.annotations.openshift\\.io/deployment-config\\.name=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/deployment-config\\.latest-version}{\\"\\n\\"}{end}"`;
     }
 
@@ -25,6 +15,16 @@ export class Command {
 
     static getDeploymentConfigs() {
         return `oc get deploymentConfig -o json`;
+    }
+}
+
+export class DeploymentConfigNodeContributor implements ClusterExplorerV1.NodeContributor {
+    contributesChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): boolean {
+        return !!parent && parent.nodeType === 'resource' && parent.resourceKind.manifestKind === 'DeploymentConfig';
+    }
+
+    async getChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): Promise<ClusterExplorerV1.Node[]> {
+        return common.getChildrenNode(Command.getReplicationControllers(parent), 'ReplicationController', 'rc');
     }
 }
 

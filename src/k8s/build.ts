@@ -9,16 +9,6 @@ import { Progress } from "../util/progress";
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import * as common from './common';
 
-export class BuildConfigNodeContributor implements ClusterExplorerV1.NodeContributor {
-    contributesChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): boolean {
-        return !!parent && parent.nodeType === 'resource' && parent.resourceKind.manifestKind === 'BuildConfig';
-    }
-
-    async getChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): Promise<ClusterExplorerV1.Node[]> {
-        return common.getNode(Command.getAllBuilds(parent), 'Build', 'build');
-    }
-}
-
 export class Command {
 
     static getAllBuilds(parent: ClusterExplorerV1.ClusterExplorerNode) {
@@ -51,6 +41,16 @@ export class Command {
 
     static getBuildConfigs() {
         return `oc get buildConfig -o json`;
+    }
+}
+
+export class BuildConfigNodeContributor implements ClusterExplorerV1.NodeContributor {
+    contributesChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): boolean {
+        return !!parent && parent.nodeType === 'resource' && parent.resourceKind.manifestKind === 'BuildConfig';
+    }
+
+    async getChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): Promise<ClusterExplorerV1.Node[]> {
+        return common.getChildrenNode(Command.getAllBuilds(parent), 'Build', 'build');
     }
 }
 

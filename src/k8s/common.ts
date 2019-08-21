@@ -30,13 +30,13 @@ export async function selectResourceByName(config: Promise<QuickPickItem[]> | Qu
     return resource ? resource.label : null;
 }
 
-export async function getNode(command: string, text1: string, text2: string): Promise<k8s.ClusterExplorerV1.Node[]> {
+export async function getChildrenNode(command: string, kind: string, abbreviation: string): Promise<k8s.ClusterExplorerV1.Node[]> {
     const kubectl = await k8s.extension.kubectl.v1;
         if (kubectl.available) {
             const result = await kubectl.api.invokeCommand(`${command}`);
             const builds = result.stdout.split('\n')
                 .filter((value) => value !== '')
-                .map<Node>((item: string) => new Node(item.split(',')[0], item.split(',')[1], Number.parseInt(item.split(',')[2]), text1, text2));
+                .map<Node>((item: string) => new Node(item.split(',')[0], item.split(',')[1], Number.parseInt(item.split(',')[2]), kind, abbreviation));
             return builds;
         }
         return [];
