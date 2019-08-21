@@ -10,7 +10,6 @@ import { Progress } from '../util/progress';
 import open = require('open');
 import { ChildProcess } from 'child_process';
 import { CliExitData } from '../cli';
-import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 import { isURL } from 'validator';
 import { Refs, Ref, Type } from '../util/refs';
 import { Delayer } from '../util/async';
@@ -500,13 +499,5 @@ export class Component extends OpenShiftItem {
 
         await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, binaryFile[0], folder[0]);
         return `Component '${componentName}' successfully created`;
-    }
-
-    public static async getComponentPorts(context: OpenShiftObject): Promise<V1ServicePort[]> {
-        const app: OpenShiftObject = context.getParent();
-        const project: OpenShiftObject = app.getParent();
-        const portsResult: CliExitData = await Component.odo.execute(Command.getComponentJson(project.getName(), app.getName(), context.getName()));
-        const serviceOpj: V1Service = JSON.parse(portsResult.stdout) as V1Service;
-        return serviceOpj.spec.ports;
     }
 }

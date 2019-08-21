@@ -5,14 +5,22 @@
 
 import { OpenShiftObject, Command } from '../odo';
 import { window, QuickPickItem } from 'vscode';
-import { Component } from '../openshift/component';
-import { V1ServicePort } from '@kubernetes/client-node';
+import { CliExitData } from '../cli';
+import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 import { OpenShiftItem } from './openshiftItem';
 import { Progress } from "../util/progress";
 import open = require('open');
 import { ChildProcess } from 'child_process';
 
 export class Url extends OpenShiftItem{
+
+    public static async getComponentPorts(context: OpenShiftObject): Promise<V1ServicePort[]> {
+        const app: OpenShiftObject = context.getParent();
+        const project: OpenShiftObject = app.getParent();
+        const portsResult: CliExitData = await Url.odo.execute(Command.getComponentJson(project.getName(), app.getName(), context.getName()));
+        const serviceOpj: V1Service = JSON.parse(portsResult.stdout) as V1Service;
+        return serviceOpj.spec.ports;
+    }
 
     static async create(context: OpenShiftObject): Promise<string> {
         const component = await Url.getOpenShiftCmdData(context,
@@ -22,7 +30,7 @@ export class Url extends OpenShiftItem{
         if (component) {
             const urlName = await Url.getName('URL name', await Url.odo.getRoutes(component));
             if (!urlName) return null;
-            const ports: V1ServicePort[] = await Component.getComponentPorts(component);
+            const ports: V1ServicePort[] = await Url.getComponentPorts(component);
             const portItems: QuickPickItem[] = ports.map((item: any) => {
                 item['label'] = `${item.port}/${item.protocol}`;
                 return item;
