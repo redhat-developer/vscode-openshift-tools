@@ -6,9 +6,7 @@
 import { QuickPickItem, window } from "vscode";
 import { OdoImpl, Odo } from "../odo";
 import { Progress } from "../util/progress";
-import * as vscode from 'vscode';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
-import * as k8s from 'vscode-kubernetes-tools-api';
 import * as common from './common';
 
 export class BuildConfigNodeContributor implements ClusterExplorerV1.NodeContributor {
@@ -17,49 +15,15 @@ export class BuildConfigNodeContributor implements ClusterExplorerV1.NodeContrib
     }
 
     async getChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): Promise<ClusterExplorerV1.Node[]> {
-        const kubectl = await k8s.extension.kubectl.v1;
-        if (kubectl.available) {
-            const result = await kubectl.api.invokeCommand(`get build -o jsonpath="{range .items[?(.metadata.labels.buildconfig=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/build\\.number}{\\"\\n\\"}{end}"`);
-            const builds = result.stdout.split('\n')
-                .filter((value) => value !== '')
-                .map<BuildNode>((item: string) => new BuildNode(item.split(',')[0], item.split(',')[1], Number.parseInt(item.split(',')[2])));
-            return builds;
-        }
-        return [];
-    }
-}
-
-class BuildNode implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorerResourceNode {
-    nodeType: "resource";
-    readonly resourceKind: ClusterExplorerV1.ResourceKind = {
-        manifestKind: 'Build',
-        abbreviation: 'build'
-    };
-    readonly kind: ClusterExplorerV1.ResourceKind = this.resourceKind;
-    public id: string;
-    public resourceId: string;
-    // tslint:disable-next-line:variable-name
-    constructor(readonly namespace: string, readonly name: string, readonly number: number, readonly metadata?: any) {
-        this.id = this.resourceId = `build/${this.name}`;
-    }
-
-    async getChildren(): Promise<ClusterExplorerV1.Node[]> {
-        return [];
-    }
-
-    getTreeItem(): vscode.TreeItem {
-        const item = new vscode.TreeItem(this.name);
-        item.contextValue = 'openShift.resource.build';
-        item.command = {
-            arguments: [this],
-            command: 'extension.vsKubernetesLoad',
-            title: "Load"
-        };
-        return item;
+        return common.getNode(Command.getAllBuilds(parent), 'Build', 'build');
     }
 }
 
 export class Command {
+
+    static getAllBuilds(parent: ClusterExplorerV1.ClusterExplorerNode) {
+        return `get build -o jsonpath="{range .items[?(.metadata.labels.buildconfig=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/build\\.number}{\\"\\n\\"}{end}"`;
+    }
 
     static startBuild(buildConfig: string) {
         return `oc start-build ${buildConfig}`;

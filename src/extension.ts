@@ -21,6 +21,7 @@ import fsx = require('fs-extra');
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { BuildConfigNodeContributor } from './k8s/build';
+import { DeploymentConfigNodeContributor } from './k8s/deployment';
 import { Console } from './k8s/console';
 import { OdoImpl } from './odo';
 import { Build } from './k8s/build';
@@ -118,7 +119,8 @@ export async function activate(context: vscode.ExtensionContext) {
             clusterExplorer.nodeSources.resourceFolder("Routes", "Routes", "Route", "route").if(isOpenShift).at("Network"),
             clusterExplorer.nodeSources.resourceFolder("DeploymentConfigs", "DeploymentConfigs", "DeploymentConfig", "dc").if(isOpenShift).at("Workloads"),
             clusterExplorer.nodeSources.resourceFolder("BuildConfigs", "BuildConfigs", "BuildConfig", "bc").if(isOpenShift).at("Workloads"),
-            new BuildConfigNodeContributor()
+            new BuildConfigNodeContributor(),
+            new DeploymentConfigNodeContributor()
         ];
         nodeContributors.forEach(element => {
             clusterExplorer.registerNodeContributor(element);
@@ -167,6 +169,9 @@ async function customizeAsync(node: ClusterExplorerV1.ClusterExplorerResourceNod
         }
     }
     if (node.nodeType === 'resource' && node.resourceKind.manifestKind === 'BuildConfig') {
+        treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+    }
+    if (node.nodeType === 'resource' && node.resourceKind.manifestKind === 'DeploymentConfig') {
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
     }
 }
