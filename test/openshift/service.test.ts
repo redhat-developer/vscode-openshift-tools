@@ -159,6 +159,7 @@ suite('OpenShift/Service', () => {
         setup(() => {
             sandbox.stub(OdoImpl.prototype, 'getServiceTemplates').resolves([]);
             getSvcTemplatePlansStub = sandbox.stub(OdoImpl.prototype, 'getServiceTemplatePlans').resolves(['default', 'free', 'paid']);
+            getApplicationsStub.resolves([appItem]);
             quickPickStub.onFirstCall().resolves(templateName);
             quickPickStub.onSecondCall().resolves(templatePlan);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
