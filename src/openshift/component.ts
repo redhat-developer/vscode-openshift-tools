@@ -301,7 +301,9 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component you want to open in browser');
+            'Select a Component you want to open in browser',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         const app: OpenShiftObject = component.getParent();
         const namespace: string = app.getParent().getName();
