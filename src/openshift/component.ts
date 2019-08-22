@@ -92,7 +92,8 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(treeItem,
             "From which Project do you want to undeploy Component",
             "From which Application you want to undeploy Component",
-            "Select Component to undeploy");
+            "Select Component to undeploy",
+            (component) => component.contextValue === ContextType.COMPONENT_PUSHED);
         if (!component) return null;
         const name: string = component.getName();
         const value = await window.showWarningMessage(`Do you want to undeploy Component '${name}\'?`, 'Yes', 'Cancel');
@@ -292,7 +293,8 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component you want to watch');
+            'Select a Component you want to watch',
+            (component) => component.contextValue === ContextType.COMPONENT_PUSHED);
         if (!component) return null;
         Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
