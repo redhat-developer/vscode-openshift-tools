@@ -119,7 +119,7 @@ export class Component extends OpenShiftItem {
             "From which Project you want to describe Component",
             "From which Application you want to describe Component",
             "Select Component you want to describe",
-            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED);
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED || value.contextValue === ContextType.COMPONENT_NO_CONTEXT);
         if (!component) return null;
         Component.odo.executeInTerminal(Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
     }

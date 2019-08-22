@@ -738,7 +738,7 @@
         },
         {
           "command": "openshift.component.describe",
-          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "when": "view == openshiftProjectExplorer && viewItem == component_no_context",
           "group": "c2@1"
         },
         {
