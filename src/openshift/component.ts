@@ -169,7 +169,9 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component');
+            'Select a Component',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         const linkComponent = await Component.getLinkData(component);
         const getLinkComponent = linkComponent['status'].linkedComponents;
@@ -190,7 +192,9 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component');
+            'Select a Component',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         const linkService = await Component.getLinkData(component);
         const getLinkService = linkService['status'].linkedServices;
@@ -208,7 +212,9 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component');
+            'Select a Component',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         const componentPresent = (await Component.odo.getComponents(component.getParent())).filter((component) => component.contextValue !== ContextType.COMPONENT);
         if (componentPresent.length === 1) throw Error('You have no Components available to link, please create new OpenShift Component and try again.');
@@ -239,7 +245,9 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component');
+            'Select a Component',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         const serviceToLink: OpenShiftObject = await window.showQuickPick(Component.getServiceNames(component.getParent()), {placeHolder: "Select the service to link"});
         if (!serviceToLink) return null;
