@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { OpenShiftItem } from "./openshiftItem";
-import { OpenShiftObject } from "../odo";
+import { OpenShiftObject, ContextType } from "../odo";
 import { window } from 'vscode';
 import { Progress } from "../util/progress";
 import { isEmpty } from "validator";
@@ -14,7 +14,8 @@ export class Storage extends OpenShiftItem {
         const component = await Storage.getOpenShiftCmdData(context,
             "In which Project you want to create a Storage",
             "In which Application you want to create a Storage",
-            "In which Component you want to create a Storage");
+            "In which Component you want to create a Storage",
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED);
         if (!component) return null;
         const storageList: Array<OpenShiftObject> = await OpenShiftItem.odo.getStorageNames(component);
         const storageName = await Storage.getName('Storage name', storageList);
