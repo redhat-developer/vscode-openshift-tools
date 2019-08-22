@@ -129,7 +129,9 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to see Log",
             "In which Application you want to see Log",
-            "For which Component you want to see Log");
+            "For which Component you want to see Log",
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         Component.odo.executeInTerminal(Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
@@ -138,7 +140,8 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to follow Log",
             "In which Application you want to follow Log",
-            "For which Component you want to follow Log"
+            "For which Component you want to follow Log",
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
         Component.odo.executeInTerminal(Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
