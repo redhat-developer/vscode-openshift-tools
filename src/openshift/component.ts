@@ -92,7 +92,9 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(treeItem,
             "From which Project do you want to undeploy Component",
             "From which Application you want to undeploy Component",
-            "Select Component to undeploy");
+            "Select Component to undeploy",
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         const name: string = component.getName();
         const value = await window.showWarningMessage(`Do you want to undeploy Component '${name}\'?`, 'Yes', 'Cancel');
@@ -262,7 +264,10 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to push the changes",
             "In which Application you want to push the changes",
-            "For which Component you want to push the changes");
+            "For which Component you want to push the changes",
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED,
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT
+        );
         if (!component) return null;
         Component.setPushCmd(component.getName(), component.getParent().getName(), component.getParent().getParent().getName());
         Component.odo.executeInTerminal(Command.pushComponent(), component.contextPath.fsPath);
@@ -283,7 +288,9 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component you want to watch');
+            'Select a Component you want to watch',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }

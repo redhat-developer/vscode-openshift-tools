@@ -99,8 +99,21 @@ export abstract class OpenShiftItem {
         }), ...applicationList] : applicationList;
     }
 
-    static async getComponentNames(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean) {
-        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application, condition);
+    static sortArrayObject(applicationList: OpenShiftObject[]) {
+        return applicationList.slice(0).sort((compareObjectName: OpenShiftObject, compareObject: OpenShiftObject) => {
+            return (compareObjectName['name'] > compareObject['name']) ? 1 : (compareObjectName['name'] < compareObject['name']) ? -1 : 0;
+        });
+    }
+
+    static async getComponentNames(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean, notPushedCondition?: (value: OpenShiftObject) => boolean) {
+        let applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application, condition);
+        if (notPushedCondition) {
+            const getNotPushedComponent: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application, notPushedCondition);
+            getNotPushedComponent.forEach((item: OpenShiftObject) => {
+                applicationList.push(item);
+            });
+            applicationList = OpenShiftItem.sortArrayObject(applicationList);
+        }
         if (applicationList.length === 0) throw Error(errorMessage.Component);
         return applicationList;
     }
@@ -123,7 +136,7 @@ export abstract class OpenShiftItem {
         return urlList;
     }
 
-    static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean) {
+    static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean, notPushedCondition?: (value: OpenShiftObject) => boolean) {
         let context: OpenShiftObject | QuickPickCommand = treeItem;
         let project: OpenShiftObject;
         if (!context) context = await window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder});
@@ -134,7 +147,7 @@ export abstract class OpenShiftItem {
                 context = new OpenShiftObjectImpl(project, await context.command(), ContextType.APPLICATION, false, OdoImpl.Instance, TreeItemCollapsibleState.Collapsed);
             }
         }
-        if (context && !isCommand(context) && context.contextValue === ContextType.APPLICATION && compPlaceholder) context = await window.showQuickPick(OpenShiftItem.getComponentNames(context as OpenShiftObject, condition), {placeHolder: compPlaceholder});
+        if (context && !isCommand(context) && context.contextValue === ContextType.APPLICATION && compPlaceholder) context = await window.showQuickPick(OpenShiftItem.getComponentNames(context as OpenShiftObject, condition, notPushedCondition), {placeHolder: compPlaceholder});
         return context as OpenShiftObject;
     }
 }
