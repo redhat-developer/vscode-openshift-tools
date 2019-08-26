@@ -275,7 +275,8 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to push the changes",
             "In which Application you want to push the changes",
-            "For which Component you want to push the changes");
+            "For which Component you want to push the changes",
+            (component) => component.contextValue === ContextType.COMPONENT_PUSHED || component.contextValue === ContextType.COMPONENT);
         if (!component) return null;
         Component.setPushCmd(component.getName(), component.getParent().getName(), component.getParent().getParent().getName());
         Component.odo.executeInTerminal(Command.pushComponent(), component.contextPath.fsPath);
