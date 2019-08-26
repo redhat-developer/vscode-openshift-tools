@@ -11,7 +11,7 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { OdoImpl } from '../../src/odo';
 import { Progress } from '../../src/util/progress';
-import * as Deployment from '../../src/k8s/deployment';
+import { DeploymentConfig, Command } from '../../src/k8s/deployment';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -90,22 +90,22 @@ suite('K8s/deployment', () => {
         });
 
         test('works from context menu', async () => {
-            const result = await Deployment.deploy(context);
+            const result = await DeploymentConfig.deploy(context);
 
             expect(result).equals(`Deployment successfully created for '${context.id}'.`);
-            expect(execStub).calledWith(Deployment.Command.deploy(context.id));
+            expect(execStub).calledWith(Command.deploy(context.id));
         });
 
         test('works with no context', async () => {
-            const result = await Deployment.deploy(null);
+            const result = await DeploymentConfig.deploy(null);
 
             expect(result).equals(`Deployment successfully created for '${context.id}'.`);
-            expect(execStub).calledWith(Deployment.Command.deploy(context.id));
+            expect(execStub).calledWith(Command.deploy(context.id));
         });
 
         test('returns null when no DeploymentConfig selected', async () => {
             quickPickStub.resolves();
-            const result = await Deployment.deploy(null);
+            const result = await DeploymentConfig.deploy(null);
             expect(result).null;
         });
 
@@ -113,7 +113,7 @@ suite('K8s/deployment', () => {
             execStub.rejects(errorMessage);
 
             try {
-                await Deployment.deploy(context);
+                await DeploymentConfig.deploy(context);
             } catch (err) {
                 expect(err).equals(`Failed to create Deployment with error '${errorMessage}'.`);
             }
@@ -124,11 +124,77 @@ suite('K8s/deployment', () => {
             execStub.resolves({ error: undefined, stdout: noBcData, stderr: '' });
             let checkError: Error;
             try {
-                await Deployment.deploy(null);
+                await DeploymentConfig.deploy(null);
             } catch (err) {
                 checkError = err as Error;
             }
             expect(checkError.message).equals('You have no DeploymentConfigs available to deploy');
+        });
+    });
+
+    suite('Delete', ()=> {
+        const context = {
+            id: "dummy",
+            impl: {
+                id: "rc/comp1-app-2",
+                kind: {
+                    manifestKind: "ReplicationController",
+                    abbreviation: "rc"
+                },
+                namespace: "myproject",
+                name: "comp1-app-2",
+                number: 2,
+                manifest: "ReplicationController",
+                metadata: undefined,
+                node: "rc",
+                resourceId: "rc/comp1-app-2"
+            },
+            resourceKind: {
+                manifestKind: "ReplicationController",
+                abbreviation: "rc"
+            },
+            nodeCategory: "kubernetes-explorer-node",
+            nodeType: "extension"
+        };
+
+        const deploymentData = `comp1-app-1\\ncomp1-app-2`;
+
+        setup(() => {
+            execStub.resolves({ error: null, stdout: deploymentData, stderr: '' });
+            sandbox.stub(DeploymentConfig, 'getDeploymentConfigNames').resolves("comp1-app-2");
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+        });
+
+        test('works from context menu', async () => {
+            const result = await DeploymentConfig.delete(context);
+
+            expect(result).equals(`Replica '${context.impl.name}' successfully deleted`);
+            expect(execStub).calledWith(Command.delete(context.impl.name));
+        });
+
+        test('works with no context', async () => {
+            quickPickStub.onFirstCall().resolves({label: "comp1-app-2"});
+            quickPickStub.onSecondCall().resolves("comp1-app-2");
+            const result = await DeploymentConfig.delete(null);
+
+            expect(result).equals(`Replica '${context.impl.name}' successfully deleted`);
+            expect(execStub).calledWith(Command.delete(context.impl.name));
+        });
+
+        test('returns null when no ReplicationController selected to delete', async () => {
+            quickPickStub.resolves();
+            const result = await DeploymentConfig.delete(null);
+            expect(result).null;
+        });
+
+        test('wraps errors in additional info', async () => {
+            execStub.rejects(errorMessage);
+
+            try {
+                await DeploymentConfig.delete(context);
+            } catch (err) {
+                expect(err).equals(`Failed to delete replica with error '${errorMessage}'`);
+            }
         });
     });
 

@@ -25,7 +25,7 @@ import { DeploymentConfigNodeContributor } from './k8s/deployment';
 import { Console } from './k8s/console';
 import { OdoImpl } from './odo';
 import { Build } from './k8s/build';
-import * as Deployment from './k8s/deployment';
+import { DeploymentConfig } from './k8s/deployment';
 import { TokenStore } from './util/credentialManager';
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined = undefined;
@@ -59,7 +59,9 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.describe.palette', (context) => execute(Component.describe, context)),
         vscode.commands.registerCommand('openshift.component.create', (context) => execute(Component.create, context)),
         vscode.commands.registerCommand('clusters.openshift.build.start', (context) => execute(Build.startBuild, context)),
-        vscode.commands.registerCommand('clusters.openshift.deploy', (context) => execute(Deployment.deploy, context)),
+        vscode.commands.registerCommand('clusters.openshift.deploy', (context) => execute(DeploymentConfig.deploy, context)),
+        vscode.commands.registerCommand('clusters.openshift.deploy.delete', (context) => execute(DeploymentConfig.delete, context)),
+        vscode.commands.registerCommand('clusters.openshift.deploy.delete.palette', (context) => execute(DeploymentConfig.delete, context)),
         vscode.commands.registerCommand('clusters.openshift.build.showLog', (context) => execute(Build.showLog, context)),
         vscode.commands.registerCommand('clusters.openshift.build.followLog', (context) => execute(Build.followLog, context)),
         vscode.commands.registerCommand('clusters.openshift.build.delete', (context) => execute(Build.delete, context)),
