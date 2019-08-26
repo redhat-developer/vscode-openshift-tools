@@ -32,12 +32,12 @@ export async function selectResourceByName(config: Promise<QuickPickItem[]> | Qu
 
 export async function getChildrenNode(command: string, kind: string, abbreviation: string): Promise<k8s.ClusterExplorerV1.Node[]> {
     const kubectl = await k8s.extension.kubectl.v1;
-        if (kubectl.available) {
-            const result = await kubectl.api.invokeCommand(`${command}`);
-            const builds = result.stdout.split('\n')
-                .filter((value) => value !== '')
-                .map<Node>((item: string) => new Node(item.split(',')[0], item.split(',')[1], Number.parseInt(item.split(',')[2]), kind, abbreviation));
-            return builds;
-        }
-        return [];
+    if (kubectl.available) {
+        const result = await kubectl.api.invokeCommand(`${command}`);
+        const builds = result.stdout.split('\n')
+            .filter((value) => value !== '')
+            .map<Node>((item: string) => new Node(item.split(',')[0], item.split(',')[1], Number.parseInt(item.split(',')[2]), kind, abbreviation));
+        return builds;
+    }
+    return [];
 }

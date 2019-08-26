@@ -55,7 +55,7 @@ export class BuildConfigNodeContributor implements ClusterExplorerV1.NodeContrib
 }
 
 export class Build {
-    protected static readonly odo: Odo =    OdoImpl.Instance;
+    protected static readonly odo: Odo = OdoImpl.Instance;
 
     static async getBuildConfigNames(msg: string): Promise<QuickPickItem[]> {
         return common.getQuickPicks(
