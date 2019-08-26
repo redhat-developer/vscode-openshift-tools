@@ -43,7 +43,7 @@ export class DeploymentConfig {
         return common.getQuickPicks(Command.getDeploymentConfigs(), msg);
     }
 
-    static async  deploy(context: { id: any; }): Promise<string> {
+    static async deploy(context: { id: any; }): Promise<string> {
         let deployName: string = context ? context.id : undefined;
         let result: Promise<string> = null;
         if (!deployName) deployName = await common.selectResourceByName(this.getDeploymentConfigNames("You have no DeploymentConfigs available to deploy"), "Select a DeploymentConfig to deploy");
