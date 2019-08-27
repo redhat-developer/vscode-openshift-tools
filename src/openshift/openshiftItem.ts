@@ -94,7 +94,6 @@ export abstract class OpenShiftItem {
 
     static async getApplicationNames(project: OpenShiftObject, createCommand: boolean = false): Promise<(OpenShiftObject | QuickPickCommand)[]> {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
-        if (applicationList.length === 0) throw Error(errorMessage.Component);
         return createCommand ? [new QuickPickCommand(`$(plus) Create new Application...`, async () => {
             return await OpenShiftItem.getName('Application name', applicationList);
         }), ...applicationList] : applicationList;
