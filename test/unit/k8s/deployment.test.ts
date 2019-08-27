@@ -17,6 +17,7 @@ const expect = chai.expect;
 chai.use(sinonChai);
 
 suite('K8s/deployment', () => {
+    let termStub: sinon.SinonStub;
     let quickPickStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
@@ -64,7 +65,7 @@ suite('K8s/deployment', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
+        termStub =  sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });
         sandbox.stub(Progress, 'execFunctionWithProgress').yields();
     });
@@ -129,6 +130,40 @@ suite('K8s/deployment', () => {
                 checkError = err as Error;
             }
             expect(checkError.message).equals('You have no DeploymentConfigs available to deploy');
+        });
+    });
+
+    suite('Show Log', () => {
+
+        const context = {
+            id: "nodejs-comp-nodejs-app",
+            metadata: undefined,
+            namespace: null,
+            nodeCategory: "Kubernetes-explorer-node",
+            nodeType: "resource",
+            resourceId: "bc/nodejs-comp-nodejs-app"
+        };
+
+        setup(() => {
+            execStub.resolves({ error: null, stdout: mockData, stderr: '' });
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.resolves({label: "nodejs-comp-nodejs-app"});
+        });
+
+        test('works from context menu', async () => {
+            await DeploymentConfig.dcShowLog(context);
+            expect(termStub).calledOnceWith(Command.showLogDc("nodejs-comp-nodejs-app"));
+        });
+
+        test('works with no context', async () => {
+            await DeploymentConfig.dcShowLog(null);
+            expect(termStub).calledOnceWith(Command.showLogDc('nodejs-comp-nodejs-app'));
+        });
+
+        test('returns null when no replica selected', async () => {
+            quickPickStub.resolves(null);
+            const result = await DeploymentConfig.dcShowLog(null);
+            expect(result).null;
         });
     });
 
