@@ -99,6 +99,8 @@
     "onCommand:clusters.openshift.build.delete.palette",
     "onCommand:clusters.openshift.build.rebuild",
     "onCommand:clusters.openshift.build.openConsole",
+    "onCommand:clusters.openshift.deploy.dc.showLog",
+    "onCommand:clusters.openshift.deploy.dc.showLog.palette",
     "onCommand:clusters.openshift.deploy.delete",
     "onCommand:clusters.openshift.deploy.delete.palette",
     "onCommand:clusters.openshift.deployment.openConsole",
@@ -449,6 +451,16 @@
         "category": "OpenShift"
       },
       {
+        "command": "clusters.openshift.deploy.dc.showLog",
+        "title": "Show Log",
+        "category": "OpenShift"
+      },
+      {
+        "command": "clusters.openshift.deploy.dc.showLog.palette",
+        "title": "Show DeploymentConfig's Log",
+        "category": "OpenShift"
+      },
+      {
         "command": "clusters.openshift.build.followLog",
         "title": "Follow Log",
         "category": "OpenShift"
@@ -614,6 +626,10 @@
         {
           "command": "openshift.service.delete",
           "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "clusters.openshift.deploy.dc.showLog",
+          "when": "view == openshiftProjectExplorer"
         }
       ],
       "view/title": [
@@ -656,6 +672,11 @@
         },
         {
           "command": "clusters.openshift.deploy",
+          "group": "2@0",
+          "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.dc"
+        },
+        {
+          "command": "clusters.openshift.deploy.dc.showLog",
           "group": "2@1",
           "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.dc"
         },

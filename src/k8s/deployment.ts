@@ -17,6 +17,10 @@ export class Command {
         return `oc get deploymentConfig -o json`;
     }
 
+    static showLogDc(deploymentConfig: string) {
+        return `oc logs dc/${deploymentConfig}`;
+    }
+
     static getReplicas(deploymentConfig: string) {
         return `oc get rc -o jsonpath="{range .items[?(.metadata.annotations.openshift\\.io/deployment-config\\.name=='${deploymentConfig}')]}{.metadata.name}{\\"\\n\\"}{end}"`;
     }
@@ -69,6 +73,15 @@ export class DeploymentConfig {
         return DeploymentConfig.getReplicasList(
             Command.getReplicas(deploymentConfig),
             'You have no replicas available');
+    }
+
+    static async dcShowLog(context: { id: any; }): Promise<string> {
+        let deployName: string = context ? context.id : null;
+        if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to see log's"), "Select a DeploymentConfig too see log's");
+        if (deployName) {
+            DeploymentConfig.odo.executeInTerminal(Command.showLogDc(deployName));
+        }
+        return deployName;
     }
 
     static async selectReplica(context: any, replicaPlaceHolder: string): Promise<string> {
