@@ -28,6 +28,10 @@ export class Command {
     static delete(replica: String) {
         return `oc delete rc ${replica}`;
     }
+
+    static showLog(replica: string) {
+        return `oc logs rc/${replica}`;
+    }
 }
 
 export class DeploymentConfigNodeContributor implements ClusterExplorerV1.NodeContributor {

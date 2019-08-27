@@ -63,6 +63,30 @@ suite('K8s/deployment', () => {
         }
     }`;
 
+    const context = {
+        id: "dummy",
+        impl: {
+            id: "rc/comp1-app-2",
+            kind: {
+                manifestKind: "ReplicationController",
+                abbreviation: "rc"
+            },
+            namespace: "myproject",
+            name: "comp1-app-2",
+            number: 2,
+            manifest: "ReplicationController",
+            metadata: undefined,
+            node: "rc",
+            resourceId: "rc/comp1-app-2"
+        },
+        resourceKind: {
+            manifestKind: "ReplicationController",
+            abbreviation: "rc"
+        },
+        nodeCategory: "kubernetes-explorer-node",
+        nodeType: "extension"
+    };
+
     setup(() => {
         sandbox = sinon.createSandbox();
         termStub =  sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
@@ -168,29 +192,6 @@ suite('K8s/deployment', () => {
     });
 
     suite('Delete', ()=> {
-        const context = {
-            id: "dummy",
-            impl: {
-                id: "rc/comp1-app-2",
-                kind: {
-                    manifestKind: "ReplicationController",
-                    abbreviation: "rc"
-                },
-                namespace: "myproject",
-                name: "comp1-app-2",
-                number: 2,
-                manifest: "ReplicationController",
-                metadata: undefined,
-                node: "rc",
-                resourceId: "rc/comp1-app-2"
-            },
-            resourceKind: {
-                manifestKind: "ReplicationController",
-                abbreviation: "rc"
-            },
-            nodeCategory: "kubernetes-explorer-node",
-            nodeType: "extension"
-        };
 
         const deploymentData = `comp1-app-1\\ncomp1-app-2`;
 
