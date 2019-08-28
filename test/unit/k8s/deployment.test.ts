@@ -9,9 +9,11 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
+import * as k8s from 'vscode-kubernetes-tools-api';
 import { OdoImpl } from '../../../src/odo';
 import { Progress } from '../../../src/util/progress';
-import { DeploymentConfig, Command } from '../../../src/k8s/deployment';
+import { DeploymentConfig, Command, DeploymentConfigNodeContributor } from '../../../src/k8s/deployment';
+import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -96,6 +98,40 @@ suite('K8s/deployment', () => {
 
     teardown(() => {
         sandbox.restore();
+    });
+
+    suite('DeploymentConfigNodeContributor', () => {
+        const parent = <ClusterExplorerV1.ClusterExplorerNode>{
+            metadata: undefined,
+            name: "comp1-app",
+            namespace: null,
+            nodeType: "resource",
+            resourceKind: {
+                abbreviation: "dc",
+                description: "",
+                displayName: "DeploymentConfigs",
+                label: "DeploymentConfigs",
+                manifestKind: "DeploymentConfig",
+                pluralDisplayName: "DeploymentConfigs"
+            }
+        };
+
+        setup(() => {
+            const api: k8s.API<k8s.KubectlV1> = {
+                available: true,
+                api: {
+                    invokeCommand: sandbox.stub().resolves({ stdout: 'namespace, name, 1', stderr: '', code: 0}),
+                    portForward: sandbox.stub()
+                }
+            };
+            sandbox.stub(k8s.extension.kubectl, 'v1').value(api);
+        });
+
+        test('should able to get the children node of deployment Config', async () => {
+            const dcnc = new DeploymentConfigNodeContributor();
+            const result = await dcnc.getChildren(parent);
+            expect(result.length).equals(1);
+        });
     });
 
     suite('Deploy', () => {
