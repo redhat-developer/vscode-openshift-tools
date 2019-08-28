@@ -117,6 +117,7 @@ suite("odo", () => {
 
         setup(() => {
             execStub = sandbox.stub(odoCli, 'execute');
+            sandbox.stub(odo.OdoImpl.prototype, 'convertObjectsFromPreviousOdoReleases');
             yamlStub = sandbox.stub(jsYaml, 'safeLoad');
             sandbox.stub(fs, 'readFileSync');
         });
