@@ -94,13 +94,14 @@ export abstract class OpenShiftItem {
 
     static async getApplicationNames(project: OpenShiftObject, createCommand: boolean = false): Promise<(OpenShiftObject | QuickPickCommand)[]> {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
+        if (applicationList.length === 0 && !createCommand) throw Error(errorMessage.Component);
         return createCommand ? [new QuickPickCommand(`$(plus) Create new Application...`, async () => {
             return await OpenShiftItem.getName('Application name', applicationList);
         }), ...applicationList] : applicationList;
     }
 
-    static async getComponentNames(application: OpenShiftObject) {
-        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application);
+    static async getComponentNames(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean) {
+        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application, condition);
         if (applicationList.length === 0) throw Error(errorMessage.Component);
         return applicationList;
     }
@@ -123,7 +124,7 @@ export abstract class OpenShiftItem {
         return urlList;
     }
 
-    static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder?: string, compPlaceholder?: string) {
+    static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean) {
         let context: OpenShiftObject | QuickPickCommand = treeItem;
         let project: OpenShiftObject;
         if (!context) context = await window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder});
@@ -131,10 +132,15 @@ export abstract class OpenShiftItem {
             project = context as OpenShiftObject;
             context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(OpenShiftItem.getApplicationNames(project, appPlaceholder && compPlaceholder === undefined), {placeHolder: appPlaceholder});
             if (context && isCommand(context)) {
-                context = new OpenShiftObjectImpl(project, await context.command(), ContextType.APPLICATION, false, OdoImpl.Instance, TreeItemCollapsibleState.Collapsed);
+                const newAppName = await context.command();
+                if (newAppName) {
+                    context = new OpenShiftObjectImpl(project, newAppName, ContextType.APPLICATION, false, OdoImpl.Instance, TreeItemCollapsibleState.Collapsed);
+                } else {
+                    context = null;
+                }
             }
         }
-        if (context && !isCommand(context) && context.contextValue === ContextType.APPLICATION && compPlaceholder) context = await window.showQuickPick(OpenShiftItem.getComponentNames(context as OpenShiftObject), {placeHolder: compPlaceholder});
+        if (context && !isCommand(context) && context.contextValue === ContextType.APPLICATION && compPlaceholder) context = await window.showQuickPick(OpenShiftItem.getComponentNames(context as OpenShiftObject, condition), {placeHolder: compPlaceholder});
         return context as OpenShiftObject;
     }
 }

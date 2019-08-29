@@ -94,7 +94,8 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(treeItem,
             "From which Project do you want to undeploy Component",
             "From which Application you want to undeploy Component",
-            "Select Component to undeploy");
+            "Select Component to undeploy",
+            (component) => component.contextValue === ContextType.COMPONENT_PUSHED);
         if (!component) return null;
         const name: string = component.getName();
         const value = await window.showWarningMessage(`Do you want to undeploy Component '${name}\'?`, 'Yes', 'Cancel');
@@ -120,7 +121,8 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             "From which Project you want to describe Component",
             "From which Application you want to describe Component",
-            "Select Component you want to describe");
+            "Select Component you want to describe",
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED || value.contextValue === ContextType.COMPONENT_NO_CONTEXT);
         if (!component) return null;
         Component.odo.executeInTerminal(Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
     }
@@ -129,7 +131,9 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to see Log",
             "In which Application you want to see Log",
-            "For which Component you want to see Log");
+            "For which Component you want to see Log",
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         Component.odo.executeInTerminal(Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
@@ -138,7 +142,8 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to follow Log",
             "In which Application you want to follow Log",
-            "For which Component you want to follow Log"
+            "For which Component you want to follow Log",
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
         Component.odo.executeInTerminal(Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
@@ -170,7 +175,9 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component');
+            'Select a Component',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         const linkComponent = await Component.getLinkData(component);
         const getLinkComponent = linkComponent['status'].linkedComponents;
@@ -191,7 +198,9 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component');
+            'Select a Component',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         const linkService = await Component.getLinkData(component);
         const getLinkService = linkService['status'].linkedServices;
@@ -209,7 +218,9 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component');
+            'Select a Component',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         const componentPresent = (await Component.odo.getComponents(component.getParent())).filter((component) => component.contextValue !== ContextType.COMPONENT);
         if (componentPresent.length === 1) throw Error('You have no Components available to link, please create new OpenShift Component and try again.');
@@ -240,7 +251,9 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component');
+            'Select a Component',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         const serviceToLink: OpenShiftObject = await window.showQuickPick(Component.getServiceNames(component.getParent()), {placeHolder: "Select the service to link"});
         if (!serviceToLink) return null;
@@ -264,7 +277,8 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to push the changes",
             "In which Application you want to push the changes",
-            "For which Component you want to push the changes");
+            "For which Component you want to push the changes",
+            (component) => component.contextValue === ContextType.COMPONENT_PUSHED || component.contextValue === ContextType.COMPONENT);
         if (!component) return null;
         Component.setPushCmd(component.getName(), component.getParent().getName(), component.getParent().getParent().getName());
         Component.odo.executeInTerminal(Command.pushComponent(), component.contextPath.fsPath);
@@ -285,7 +299,8 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component you want to watch');
+            'Select a Component you want to watch',
+            (component) => component.contextValue === ContextType.COMPONENT_PUSHED);
         if (!component) return null;
         Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
@@ -294,7 +309,9 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component you want to open in browser');
+            'Select a Component you want to open in browser',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         const app: OpenShiftObject = component.getParent();
         const namespace: string = app.getParent().getName();

@@ -382,7 +382,7 @@ export interface Odo {
     loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): void;
     getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]>;
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
-    getComponents(application: OpenShiftObject): Promise<OpenShiftObject[]>;
+    getComponents(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]>;
     getComponentTypes(): Promise<string[]>;
     getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]>;
@@ -397,7 +397,7 @@ export interface Odo {
     clearCache?(): void;
     createProject(name: string): Promise<OpenShiftObject>;
     deleteProject(project: OpenShiftObject): Promise<OpenShiftObject>;
-    createApplication(project: OpenShiftObject, name: string): Promise<OpenShiftObject>;
+    createApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
     deleteApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, repoUri: string, context: Uri, ref: string): Promise<OpenShiftObject>;
     createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, path: Uri): Promise<OpenShiftObject>;
@@ -645,8 +645,8 @@ export class OdoImpl implements Odo {
         return [... await this._getComponents(application), ... await this._getServices(application)].sort(compareNodes);
     }
 
-    async getComponents(application: OpenShiftObject): Promise<OpenShiftObject[]> {
-        return (await this.getApplicationChildren(application)).filter((value) => value.contextValue === ContextType.COMPONENT || value.contextValue === ContextType.COMPONENT_NO_CONTEXT || value.contextValue === ContextType.COMPONENT_PUSHED);
+    async getComponents(application: OpenShiftObject, condition: (value: OpenShiftObject) => boolean = (value) => value.contextValue === ContextType.COMPONENT || value.contextValue === ContextType.COMPONENT_NO_CONTEXT || value.contextValue === ContextType.COMPONENT_PUSHED): Promise<OpenShiftObject[]> {
+        return (await this.getApplicationChildren(application)).filter(condition);
     }
 
     public async _getComponents(application: OpenShiftObject): Promise<OpenShiftObject[]> {
@@ -870,8 +870,12 @@ export class OdoImpl implements Odo {
         });
     }
 
-    public async createApplication(project: OpenShiftObject, applicationName: string): Promise<OpenShiftObject> {
-        return this.insertAndReveal(new OpenShiftObjectImpl(project, applicationName, ContextType.APPLICATION, false, this));
+    public async createApplication(application: OpenShiftObject): Promise<OpenShiftObject> {
+        const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
+        if (!targetApplication) {
+            await this.insertAndReveal(application);
+        }
+        return application;
     }
 
     public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: Uri): Promise<OpenShiftObject> {
@@ -964,6 +968,7 @@ export class OdoImpl implements Odo {
 
     public async createService(application: OpenShiftObject, templateName: string, planName: string, name: string): Promise<OpenShiftObject> {
         await this.execute(Command.createService(application.getParent().getName(), application.getName(), templateName, planName, name.trim()), Platform.getUserHomePath());
+        await this.createApplication(application);
         return this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.SERVICE, false, this, TreeItemCollapsibleState.None));
     }
 
