@@ -1125,7 +1125,7 @@ export class OdoImpl implements Odo {
                 if (errors.length) {
                     window.showErrorMessage('Not all resources were updates, please see log for details.');
                 } else {
-                    window.showInformationMessage('Cluster resources have been successfuly updated.')
+                    window.showInformationMessage('Cluster resources have been successfuly updated.');
                 }
             }
         }
