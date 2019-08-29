@@ -405,28 +405,28 @@ export class Component extends OpenShiftItem {
         return `Component '${componentName}' successfully created`;
     }
 
-    // static async createFromFolder(folder: Uri): Promise<string> {
-    //     const application = await Component.getOpenShiftCmdData(undefined,
-    //         "In which Project you want to create a Component",
-    //         "In which Application you want to create a Component"
-    //     );
-    //     if (!application) return null;
-    //     const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
-    //     const componentName = await Component.getName('Component name', componentList, application.getName());
+    static async createFromFolder(folder: Uri): Promise<string> {
+        const application = await Component.getOpenShiftCmdData(undefined,
+            "In which Project you want to create a Component",
+            "In which Application you want to create a Component"
+        );
+        if (!application) return null;
+        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
+        const componentName = await Component.getName('Component name', componentList, application.getName());
 
-    //     if (!componentName) return null;
+        if (!componentName) return null;
 
-    //     const componentTypeName = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type"});
+        const componentTypeName = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type"});
 
-    //     if (!componentTypeName) return null;
+        if (!componentTypeName) return null;
 
-    //     const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
+        const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
 
-    //     if (!componentTypeVersion) return null;
+        if (!componentTypeVersion) return null;
 
-    //     await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder));
-    //     return `Component '${componentName}' successfully created`;
-    // }
+        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder));
+        return `Component '${componentName}' successfully created`;
+    }
 
     static async createFromGit(context: OpenShiftObject): Promise<string> {
         let application: OpenShiftObject = context;
@@ -524,16 +524,18 @@ export class Component extends OpenShiftItem {
         }
 
         if (!workspacePath) return null;
+
         const binaryFiles = await FileHound.create()
             .path(workspacePath.path)
             .ignoreHiddenDirectories()
             .ext(['jar', 'war'])
             .find();
 
+        if (binaryFiles.length === 0) return window.showInformationMessage("No binary file present in the context folder selected. We currently only support .jar and .war files. If you need support for any other file, please raise an issue.");
+
         const binaryFileObj: QuickPickItem[] = binaryFiles.map((file) => ({ label: `$(file-zip) ${file.split('/').pop()}`, description: `${file}`}));
 
         const binaryFile: any = await window.showQuickPick(binaryFileObj, {placeHolder: "Select binary file"});
-        console.log(binaryFile);
 
         if (!binaryFile) return null;
 
