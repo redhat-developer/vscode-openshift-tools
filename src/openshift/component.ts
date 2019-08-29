@@ -517,15 +517,4 @@ export class Component extends OpenShiftItem {
         await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, binaryFile[0], folder[0]);
         return `Component '${componentName}' successfully created`;
     }
-
-    static async importToWorkspaceFolder(component: OpenShiftObject): Promise<string> {
-        const appName = component.getParent().getName();
-        const compName = component.getName();
-        // get pvcs and urls based on label selector
-        'oc get pvc -l app.kubernetes.io/instance=nodejs2,app.kubernetes.io/part-of=app1'
-        // ask for context folder the same way we do for create component for workspace folder
-        // create component with the same name
-        // then creante pvcs and urls
-        return `Component '${component.getName()}' was successfully imported.`;
-    }
 }
