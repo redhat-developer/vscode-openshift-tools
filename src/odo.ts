@@ -1084,9 +1084,9 @@ export class OdoImpl implements Odo {
 
     async convertObjectsFromPreviousOdoReleases() {
         const getPreviosOdoResourceNames = (resourceId) => `oc get ${resourceId} -l app.kubernetes.io/component-name -o jsonpath="{range .items[*]}{.metadata.name}{\\"\\n\\"}{end}"`;
-        const result1 = await this.execute(getPreviosOdoResourceNames('dc'));
+        const result1 = await this.execute(getPreviosOdoResourceNames('dc'), __dirname, false);
         const dcs = result1.stdout.split('\n');
-        const result2 = await this.execute(getPreviosOdoResourceNames('ServiceInstance'));
+        const result2 = await this.execute(getPreviosOdoResourceNames('ServiceInstance'), __dirname, false);
         const sis = result2.stdout.split('\n');
         if ((result2.stdout !== '' && sis.length > 0) || (result1.stdout !== '' && dcs.length > 0))  {
             const choice = await window.showWarningMessage(`Some of resources in cluster must be updated to work with latest release of OpenShift Connector Extension.`, 'Learn more...', 'Update', 'Cancel');
@@ -1094,28 +1094,39 @@ export class OdoImpl implements Odo {
                 open('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.0.24');
                 this.subject.next(new OdoEventImpl('changed', this.getClusters()[0]));
             } else if (choice === 'Update') {
+                const errors = [];
                 Progress.execFunctionWithProgress('Updating cluster resources to work with latest OpenShift Connector release', async (progress) => {
                     for (const resourceId of  ['DeploymentConfig', 'Route', 'BuildConfig', 'ImageStream', 'Service', 'pvc', 'Secret', 'ServiceInstance']) {
                         progress.report({increment: 100/8, message: resourceId});
                         const cmd = getPreviosOdoResourceNames(resourceId);
-                        const result = await this.execute(cmd);
-                        const resourceNames = result.stdout === '' ? [] : result.stdout.split('\n');
-                        console.log(cmd, result.stdout);
+                        const result = await this.execute(cmd, __dirname, false);
+                        const resourceNames = result.error || result.stdout === '' ? [] : result.stdout.split('\n');
                         for (const resourceName of resourceNames) {
-                            const result = await this.execute(`oc get ${resourceId} ${resourceName} -o json`);
-                            const labels = JSON.parse(result.stdout).metadata.labels;
-                            let command = `oc label ${resourceId} ${resourceName} --overwrite app.kubernetes.io/instance=${labels['app.kubernetes.io/component-name']}`;
-                            command = command + ` app.kubernetes.io/part-of=${labels['app.kubernetes.io/name']}`;
-                            command = command + ` app.kubernetes.io/name=${labels['app.kubernetes.io/component-type']}`;
-                            if (labels['app.kubernetes.io/component-version']) {
-                                command = command + ` app.openshift.io/runtime-version=${labels['app.kubernetes.io/component-version']}`;
+                            try {
+                                const result = await this.execute(`oc get ${resourceId} ${resourceName} -o json`);
+                                const labels = JSON.parse(result.stdout).metadata.labels;
+                                let command = `oc label ${resourceId} ${resourceName} --overwrite app.kubernetes.io/instance=${labels['app.kubernetes.io/component-name']}`;
+                                command = command + ` app.kubernetes.io/part-of=${labels['app.kubernetes.io/name']}`;
+                                if (labels['app.kubernetes.io/component-type']) {
+                                    command = command + ` app.kubernetes.io/name=${labels['app.kubernetes.io/component-type']}`;
+                                }
+                                if (labels['app.kubernetes.io/component-version']) {
+                                    command = command + ` app.openshift.io/runtime-version=${labels['app.kubernetes.io/component-version']}`;
+                                }
+                                await this.execute(command);
+                                await this.execute(`oc label ${resourceId} ${resourceName} app.kubernetes.io/component-name-`);
+                            } catch (err) {
+                                errors.push(err);
                             }
-                            await this.execute(command);
-                            await this.execute(`oc label ${resourceId} ${resourceName} app.kubernetes.io/component-name-`);
                         }
                     }
                     this.subject.next(new OdoEventImpl('changed', this.getClusters()[0]));
                 });
+                if (errors.length) {
+                    window.showErrorMessage('Not all resources were updates, please see log for details.');
+                } else {
+                    window.showInformationMessage('Cluster resources have been successfuly updated.')
+                }
             }
         }
     }
