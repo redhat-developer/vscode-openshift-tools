@@ -16,6 +16,8 @@ import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import path = require('path');
 import fs = require('fs-extra');
+import FileHound = require('filehound');
+
 interface WorkspaceFolderItem extends QuickPickItem {
     uri: Uri;
 }
@@ -386,28 +388,28 @@ export class Component extends OpenShiftItem {
         return `Component '${componentName}' successfully created`;
     }
 
-    static async createFromFolder(folder: Uri): Promise<string> {
-        const application = await Component.getOpenShiftCmdData(undefined,
-            "In which Project you want to create a Component",
-            "In which Application you want to create a Component"
-        );
-        if (!application) return null;
-        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
-        const componentName = await Component.getName('Component name', componentList, application.getName());
+    // static async createFromFolder(folder: Uri): Promise<string> {
+    //     const application = await Component.getOpenShiftCmdData(undefined,
+    //         "In which Project you want to create a Component",
+    //         "In which Application you want to create a Component"
+    //     );
+    //     if (!application) return null;
+    //     const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
+    //     const componentName = await Component.getName('Component name', componentList, application.getName());
 
-        if (!componentName) return null;
+    //     if (!componentName) return null;
 
-        const componentTypeName = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type"});
+    //     const componentTypeName = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type"});
 
-        if (!componentTypeName) return null;
+    //     if (!componentTypeName) return null;
 
-        const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
+    //     const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
 
-        if (!componentTypeVersion) return null;
+    //     if (!componentTypeVersion) return null;
 
-        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder));
-        return `Component '${componentName}' successfully created`;
-    }
+    //     await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder));
+    //     return `Component '${componentName}' successfully created`;
+    // }
 
     static async createFromGit(context: OpenShiftObject): Promise<string> {
         let application: OpenShiftObject = context;
@@ -465,12 +467,56 @@ export class Component extends OpenShiftItem {
     }
 
     static async createFromBinary(context: OpenShiftObject): Promise<string> {
+
         let application: OpenShiftObject = context;
+        let folder: WorkspaceFolderItem[] = [];
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
-        const binaryFile = await window.showOpenDialog({
-            openLabel: 'Select the binary file'
-        });
+        if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
+            folder = workspace.workspaceFolders.filter(
+                (value) => {
+                    let result = true;
+                    try {
+                        result = !fs.statSync(path.join(value.uri.fsPath, '.odo', 'config.yaml')).isFile();
+                    } catch (ignore) {
+                    }
+                    return result;
+                }
+            ).map(
+                (folder) => ({ label: `$(file-directory) ${folder.uri.fsPath}`, uri: folder.uri })
+            );
+        }
+        const addWorkspaceFolder = new CreateWorkspaceItem();
+        const choice: any = await window.showQuickPick([addWorkspaceFolder, ...folder], {placeHolder: "Select context folder"});
+
+        if (!choice) return null;
+        let workspacePath: Uri;
+
+        if (choice.label === addWorkspaceFolder.label) {
+            const folders = await window.showOpenDialog({
+                canSelectFiles: false,
+                canSelectFolders: true,
+                canSelectMany: false,
+                defaultUri: Uri.file(Platform.getUserHomePath()),
+                openLabel: "Add context Folder for Component"
+            });
+            if (!folders) return null;
+            workspacePath = folders[0];
+        } else {
+            workspacePath = choice.uri;
+        }
+
+        if (!workspacePath) return null;
+        const binaryFiles = await FileHound.create()
+            .path(workspacePath.path)
+            .ignoreHiddenDirectories()
+            .ext(['jar', 'war'])
+            .find();
+
+        const binaryFileObj: QuickPickItem[] = binaryFiles.map((file) => ({ label: `$(file-zip) ${file.split('/').pop()}`, description: `${file}`}));
+
+        const binaryFile: any = await window.showQuickPick(binaryFileObj, {placeHolder: "Select binary file"});
+        console.log(binaryFile);
 
         if (!binaryFile) return null;
 
@@ -487,17 +533,7 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeVersion) return null;
 
-        const folder = await window.showOpenDialog({
-            canSelectFiles: false,
-            canSelectFolders: true,
-            canSelectMany: false,
-            defaultUri: Uri.file(Platform.getUserHomePath()),
-            openLabel: "Select Context Folder for Component"
-        });
-
-        if (!folder) return null;
-
-        await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, binaryFile[0], folder[0]);
+        await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, binaryFile.description, workspacePath);
         return `Component '${componentName}' successfully created`;
     }
 }
