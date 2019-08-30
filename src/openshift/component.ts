@@ -16,7 +16,7 @@ import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import path = require('path');
 import fs = require('fs-extra');
-import FileHound = require('filehound');
+import globby = require('globby');
 
 interface WorkspaceFolderItem extends QuickPickItem {
     uri: Uri;
@@ -525,15 +525,16 @@ export class Component extends OpenShiftItem {
 
         if (!workspacePath) return null;
 
-        const binaryFiles = await FileHound.create()
-            .path(workspacePath.path)
-            .ignoreHiddenDirectories()
-            .ext(['jar', 'war'])
-            .find();
+        const paths = globby.sync(workspacePath.path, {
+                expandDirectories: {
+                    files: ['*'],
+                    extensions: ['jar', 'war']
+                }
+            });
 
-        if (binaryFiles.length === 0) return window.showInformationMessage("No binary file present in the context folder selected. We currently only support .jar and .war files. If you need support for any other file, please raise an issue.");
+        if (paths.length === 0) return window.showInformationMessage("No binary file present in the context folder selected. We currently only support .jar and .war files. If you need support for any other file, please raise an issue.");
 
-        const binaryFileObj: QuickPickItem[] = binaryFiles.map((file) => ({ label: `$(file-zip) ${file.split('/').pop()}`, description: `${file}`}));
+        const binaryFileObj: QuickPickItem[] = paths.map((file) => ({ label: `$(file-zip) ${file.split('/').pop()}`, description: `${file}`}));
 
         const binaryFile: any = await window.showQuickPick(binaryFileObj, {placeHolder: "Select binary file"});
 
@@ -552,7 +553,7 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeVersion) return null;
 
-        await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, binaryFile.description, workspacePath);
+        await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, Uri.file(binaryFile.description), workspacePath);
         return `Component '${componentName}' successfully created`;
     }
 }

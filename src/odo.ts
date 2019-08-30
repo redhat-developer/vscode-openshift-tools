@@ -401,7 +401,7 @@ export interface Odo {
     deleteApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, repoUri: string, context: Uri, ref: string): Promise<OpenShiftObject>;
     createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, path: Uri): Promise<OpenShiftObject>;
-    createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, path: string, context: Uri): Promise<OpenShiftObject>;
+    createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, path: Uri, context: Uri): Promise<OpenShiftObject>;
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     undeployComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     deleteNotPushedComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
@@ -917,8 +917,8 @@ export class OdoImpl implements Odo {
         return null;
     }
 
-    public async createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, location: string, context: Uri): Promise<OpenShiftObject> {
-        await this.execute(Command.createBinaryComponent(application.getParent().getName(), application.getName(), type, version, name, location, context.fsPath));
+    public async createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, location: Uri, context: Uri): Promise<OpenShiftObject> {
+        await this.execute(Command.createBinaryComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath, context.fsPath));
         if (workspace.workspaceFolders) {
             const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
             if (!targetApplication) {
