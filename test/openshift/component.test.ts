@@ -284,7 +284,7 @@ suite('OpenShift/Component', () => {
         suite('from binary file', () => {
             let fileStub: sinon.SinonStub;
             let fsPath: string, paths: string;
-            
+
             if (process.platform === 'win32') {
                 fsPath = 'c:\\Users\\Downloads';
                 paths = 'c:\\Users\\Downloads\\sb.jar';
@@ -292,7 +292,7 @@ suite('OpenShift/Component', () => {
                 fsPath = '/Users/Downloads';
                 paths = '/Users/Downloads';
             }
-            
+
             const files = [{
                 _formatted: undefined,
                 _fsPath: undefined,
