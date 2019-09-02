@@ -282,13 +282,31 @@ suite('OpenShift/Component', () => {
 
         suite('from binary file', () => {
             let fileStub: sinon.SinonStub;
-            const files = [{ fsPath: 'test/sample.war' }];
+            const files = [{
+                _formatted: undefined,
+                _fsPath: undefined,
+                authority: "",
+                fragment: "",
+                fsPath: "/Users/Downloads",
+                path: "/Users/Downloads",
+                query: "",
+                scheme: "file"
+            }];
 
             setup(() => {
                 quickPickStub.onFirstCall().resolves({ label: 'Binary File' });
-                quickPickStub.onSecondCall().resolves(componentType);
-                quickPickStub.onThirdCall().resolves(version);
+                quickPickStub.onSecondCall().resolves({
+                    description: "Folder which does not have an openshift context",
+                    label: `$(plus) Add new workspace folder.`
+                });
+                quickPickStub.onThirdCall().resolves({
+                    description: "/Users/Downloads/sb.jar",
+                    label: `$(file-zip) sb.jar`
+                });
+                quickPickStub.onCall(3).resolves(componentType);
+                quickPickStub.onCall(4).resolves(version);
                 fileStub = sandbox.stub(vscode.window, 'showOpenDialog').resolves(files);
+                sandbox.stub(globby, 'sync').returns(["/Users/Downloads/sb.jar"]);
                 inputStub.resolves(componentItem.getName());
             });
 
@@ -296,9 +314,7 @@ suite('OpenShift/Component', () => {
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(progressFunctionStub).calledOnceWith(
-                    `Creating new Component '${componentItem.getName()}'`);
-                expect(execStub).calledWith(Command.createBinaryComponent(appItem.getParent().getName(), appItem.getName(), componentType, version, componentItem.getName(), folder.uri.fsPath, files[0].fsPath));
+                expect(execStub).calledWith(Command.createBinaryComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), "/Users/Downloads/sb.jar", files[0].fsPath));
             });
 
             test('returns null when no binary file selected', async () => {
