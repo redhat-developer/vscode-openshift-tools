@@ -17,6 +17,7 @@ import * as Util from '../../src/util/async';
 import { Refs } from '../../src/util/refs';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
+import globby = require('globby');
 
 const expect = chai.expect;
 chai.use(sinonChai);
