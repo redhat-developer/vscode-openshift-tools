@@ -17,6 +17,7 @@ import * as Util from '../../src/util/async';
 import { Refs } from '../../src/util/refs';
 import { OpenShiftItem } from '../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
+import globby = require('globby');
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -283,22 +284,49 @@ suite('OpenShift/Component', () => {
 
         suite('from binary file', () => {
             let fileStub: sinon.SinonStub;
-            const files = [{ fsPath: 'test/sample.war' }];
+            let fsPath: string, paths: string;
+
+            if (process.platform === 'win32') {
+                fsPath = 'c:\\Users\\Downloads';
+                paths = 'c:\\Users\\Downloads\\sb.jar';
+            } else {
+                fsPath = '/Users/Downloads';
+                paths = '/Users/Downloads';
+            }
+
+            const files = [{
+                _formatted: undefined,
+                _fsPath: undefined,
+                authority: "",
+                fragment: "",
+                fsPath: fsPath,
+                path: paths,
+                query: "",
+                scheme: "file"
+            }];
 
             setup(() => {
                 quickPickStub.onFirstCall().resolves({ label: 'Binary File' });
-                quickPickStub.onSecondCall().resolves(componentType);
-                quickPickStub.onThirdCall().resolves(version);
+                quickPickStub.onSecondCall().resolves({
+                    description: "Folder which does not have an openshift context",
+                    label: `$(plus) Add new workspace folder.`
+                });
+                quickPickStub.onThirdCall().resolves({
+                    description: paths,
+                    label: `$(file-zip) sb.jar`
+                });
+                quickPickStub.onCall(3).resolves(componentType);
+                quickPickStub.onCall(4).resolves(version);
                 fileStub = sandbox.stub(vscode.window, 'showOpenDialog').resolves(files);
+                sandbox.stub(globby, 'sync').returns([paths]);
                 inputStub.resolves(componentItem.getName());
             });
 
             test('happy path works', async () => {
-
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
-                expect(execStub).calledWith(Command.createBinaryComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), files[0].fsPath, files[0].fsPath));
+                expect(execStub).calledWith(Command.createBinaryComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), paths, files[0].fsPath));
             });
 
             test('returns null when no binary file selected', async () => {

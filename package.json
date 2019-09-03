@@ -928,8 +928,8 @@
     "sinon": "^7.4.1",
     "sinon-chai": "^3.3.0",
     "tmp": "0.1.0",
-    "tslint": "^5.18.0",
-    "typescript": "^3.5.3",
+    "tslint": "^5.19.0",
+    "typescript": "^3.6.2",
     "vscode": "^1.1.36",
     "walker": "^1.0.7"
   },
@@ -940,6 +940,7 @@
     "fs-extra": "^8.1.0",
     "git-fetch-pack": "^0.1.1",
     "git-transport-protocol": "^0.1.0",
+    "globby": "^10.0.1",
     "hasha": "^5.0.0",
     "js-yaml": "^3.13.1",
     "mkdirp": "^0.5.1",

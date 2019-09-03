@@ -16,6 +16,8 @@ import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import path = require('path');
 import fs = require('fs-extra');
+import globby = require('globby');
+
 interface WorkspaceFolderItem extends QuickPickItem {
     uri: Uri;
 }
@@ -482,12 +484,59 @@ export class Component extends OpenShiftItem {
     }
 
     static async createFromBinary(context: OpenShiftObject): Promise<string> {
+
         let application: OpenShiftObject = context;
+        let folder: WorkspaceFolderItem[] = [];
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
-        const binaryFile = await window.showOpenDialog({
-            openLabel: 'Select the binary file'
-        });
+        if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
+            folder = workspace.workspaceFolders.filter(
+                (value) => {
+                    let result = true;
+                    try {
+                        result = !fs.statSync(path.join(value.uri.fsPath, '.odo', 'config.yaml')).isFile();
+                    } catch (ignore) {
+                    }
+                    return result;
+                }
+            ).map(
+                (folder) => ({ label: `$(file-directory) ${folder.uri.fsPath}`, uri: folder.uri })
+            );
+        }
+        const addWorkspaceFolder = new CreateWorkspaceItem();
+        const choice: any = await window.showQuickPick([addWorkspaceFolder, ...folder], {placeHolder: "Select context folder"});
+
+        if (!choice) return null;
+        let workspacePath: Uri;
+
+        if (choice.label === addWorkspaceFolder.label) {
+            const folders = await window.showOpenDialog({
+                canSelectFiles: false,
+                canSelectFolders: true,
+                canSelectMany: false,
+                defaultUri: Uri.file(Platform.getUserHomePath()),
+                openLabel: "Add context Folder for Component"
+            });
+            if (!folders) return null;
+            workspacePath = folders[0];
+        } else {
+            workspacePath = choice.uri;
+        }
+
+        if (!workspacePath) return null;
+
+        const paths = globby.sync(workspacePath.path, {
+                expandDirectories: {
+                    files: ['*'],
+                    extensions: ['jar', 'war']
+                }
+            });
+
+        if (paths.length === 0) return window.showInformationMessage("No binary file present in the context folder selected. We currently only support .jar and .war files. If you need support for any other file, please raise an issue.");
+
+        const binaryFileObj: QuickPickItem[] = paths.map((file) => ({ label: `$(file-zip) ${file.split('/').pop()}`, description: `${file}`}));
+
+        const binaryFile: any = await window.showQuickPick(binaryFileObj, {placeHolder: "Select binary file"});
 
         if (!binaryFile) return null;
 
@@ -504,17 +553,7 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeVersion) return null;
 
-        const folder = await window.showOpenDialog({
-            canSelectFiles: false,
-            canSelectFolders: true,
-            canSelectMany: false,
-            defaultUri: Uri.file(Platform.getUserHomePath()),
-            openLabel: "Select Context Folder for Component"
-        });
-
-        if (!folder) return null;
-
-        await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, binaryFile[0], folder[0]);
+        await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, Uri.file(binaryFile.description), workspacePath);
         return `Component '${componentName}' successfully created`;
     }
 }
