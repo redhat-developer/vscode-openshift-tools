@@ -2,7 +2,7 @@
   "name": "vscode-openshift-connector",
   "displayName": "OpenShift Connector",
   "description": "Interacting with Red Hat OpenShift clusters and providing a streamlined developer experience using Visual Studio Code",
-  "version": "0.0.23",
+  "version": "0.1.0",
   "license": "MIT",
   "publisher": "redhat",
   "author": "Red Hat",
@@ -52,6 +52,7 @@
     "onCommand:openshift.app.describe",
     "onCommand:openshift.app.create",
     "onCommand:openshift.app.delete",
+    "onCommand:openshift.component.import",
     "onCommand:openshift.component.create",
     "onCommand:openshift.component.createFromLocal",
     "onCommand:openshift.component.createFromGit",
@@ -209,6 +210,11 @@
       {
         "command": "openshift.app.delete",
         "title": "Delete",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.import",
+        "title": "Import",
         "category": "OpenShift"
       },
       {
@@ -525,6 +531,10 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
+          "command": "openshift.component.import",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
           "command": "openshift.component.create",
           "when": "view == openshiftProjectExplorer"
         },
@@ -764,6 +774,11 @@
           "group": "c2@1"
         },
         {
+          "command": "openshift.component.import",
+          "when": "view == openshiftProjectExplorer && viewItem == component_no_context",
+          "group": "c2@2"
+        },
+        {
           "command": "openshift.component.log",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c2@2"
@@ -883,6 +898,12 @@
           "type": "number",
           "default": 0,
           "description": "Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and integrated terminal."
+        }, 
+        "openshiftConnector.disableCheckForMigration": {
+          "title": "Disable check if migration required",
+          "type": "boolean",
+          "default": false,
+          "description": "Dsable check if migration is required for resources created with previous version of the extension and mirgation request message."
         }
       }
     }

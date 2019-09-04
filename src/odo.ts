@@ -49,6 +49,12 @@ export enum ContextType {
     COMPONENT_ROUTE = 'component_route'
 }
 
+export enum ComponentType {
+    LOCAL = 'local',
+    GIT = 'git',
+    BINARY = 'binary'
+}
+
 function verbose(_target: any, key: string, descriptor: any) {
 	let fnKey: string | undefined;
 	let fn: Function | undefined;
@@ -321,11 +327,11 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
 
     get iconPath(): Uri {
         if (this.contextValue === ContextType.COMPONENT_PUSHED || this.contextValue === ContextType.COMPONENT || this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
-            if (this.compType === 'git') {
+            if (this.compType === ComponentType.GIT) {
                 return Uri.file(path.join(__dirname, "../../images/component", 'git.png'));
-            } else if (this.compType === 'local') {
+            } else if (this.compType === ComponentType.LOCAL) {
                 return Uri.file(path.join(__dirname, "../../images/component", 'workspace.png'));
-            } else if (this.compType === 'binary') {
+            } else if (this.compType === ComponentType.BINARY) {
                 return Uri.file(path.join(__dirname, "../../images/component", 'binary.png'));
             }
         } else {
@@ -382,6 +388,7 @@ export interface Odo {
     getClusters(): Promise<OpenShiftObject[]>;
     getProjects(): Promise<OpenShiftObject[]>;
     loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): void;
+    addWorkspaceComponent(WorkspaceFolder: WorkspaceFolder, component: OpenShiftObject);
     getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]>;
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponents(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]>;
@@ -555,8 +562,10 @@ export class OdoImpl implements Odo {
             clusters = await this.getClustersWithOc();
         }
         if (clusters.length > 0 && clusters[0].contextValue === ContextType.CLUSTER) {
-            // kick out migration
-            this.convertObjectsFromPreviousOdoReleases();
+            // kick out migration if enabled
+            if (!workspace.getConfiguration("openshiftConnector").get("disableCheckForMigration")) {
+                this.convertObjectsFromPreviousOdoReleases();
+            }
         }
         return clusters;
     }
@@ -663,16 +672,16 @@ export class OdoImpl implements Odo {
             let compSource: string = '';
             try {
                 if (value.source.startsWith('https://')) {
-                    compSource = 'git';
+                    compSource = ComponentType.GIT;
                 } else if (statSync(Uri.parse(value.source).fsPath).isFile()) {
-                    compSource = 'binary';
+                    compSource = ComponentType.BINARY;
                 } else if (statSync(Uri.parse(value.source).fsPath).isDirectory()) {
-                    compSource = 'local';
+                    compSource = ComponentType.LOCAL;
                 }
             } catch (ignore) {
                 // treat component as local in case of error when calling statSync
                 // for not existing file or folder
-                compSource = 'local';
+                compSource = ComponentType.LOCAL;
             }
             return new OpenShiftObjectImpl(application, value.name, ContextType.COMPONENT_NO_CONTEXT, true, this, Collapsed, undefined, compSource);
         });
@@ -917,7 +926,7 @@ export class OdoImpl implements Odo {
             if (!targetApplication) {
                 await this.insertAndReveal(application);
             }
-            await this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, context, 'git'));
+            await this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, context, ComponentType.GIT));
         }
         workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: context });
         return null;
@@ -930,7 +939,7 @@ export class OdoImpl implements Odo {
             if (!targetApplication) {
                 await this.insertAndReveal(application);
             }
-            this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, context, 'binary'));
+            this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, context, ComponentType.BINARY));
         }
         workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: context });
         return null;
@@ -1017,6 +1026,11 @@ export class OdoImpl implements Odo {
         OdoImpl.data.clearTreeData();
     }
 
+    addWorkspaceComponent(folder: WorkspaceFolder, component: OpenShiftObject) {
+        OdoImpl.data.addContexts([folder]);
+        this.subject.next(new OdoEventImpl('changed', null));
+    }
+
     loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): void {
         if (event === null && workspace.workspaceFolders) {
             OdoImpl.data.addContexts(workspace.workspaceFolders);
@@ -1089,13 +1103,15 @@ export class OdoImpl implements Odo {
         const result2 = await this.execute(getPreviosOdoResourceNames('ServiceInstance'), __dirname, false);
         const sis = result2.stdout.split('\n');
         if ((result2.stdout !== '' && sis.length > 0) || (result1.stdout !== '' && dcs.length > 0))  {
-            const choice = await window.showWarningMessage(`Some of resources in cluster must be updated to work with latest release of OpenShift Connector Extension.`, 'Learn more...', 'Update', 'Cancel');
-            if (choice === 'Learn more...') {
+            const choice = await window.showWarningMessage(`Some of resources in cluster must be updated to work with latest release of OpenShift Connector Extension.`, 'Update', 'Don\'t show it again', 'Help', 'Cancel');
+            if (choice === 'Help') {
                 open('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.0.24');
                 this.subject.next(new OdoEventImpl('changed', this.getClusters()[0]));
+            } else if (choice === 'Don\'t show it again') {
+                workspace.getConfiguration("openshiftConnector").update("disableCheckForMigration", true, true);
             } else if (choice === 'Update') {
                 const errors = [];
-                Progress.execFunctionWithProgress('Updating cluster resources to work with latest OpenShift Connector release', async (progress) => {
+                await Progress.execFunctionWithProgress('Updating cluster resources to work with latest OpenShift Connector release', async (progress) => {
                     for (const resourceId of  ['DeploymentConfig', 'Route', 'BuildConfig', 'ImageStream', 'Service', 'pvc', 'Secret', 'ServiceInstance']) {
                         progress.report({increment: 100/8, message: resourceId});
                         const cmd = getPreviosOdoResourceNames(resourceId);
@@ -1113,8 +1129,12 @@ export class OdoImpl implements Odo {
                                 if (labels['app.kubernetes.io/component-version']) {
                                     command = command + ` app.openshift.io/runtime-version=${labels['app.kubernetes.io/component-version']}`;
                                 }
+                                if (labels['app.kubernetes.io/url-name']) {
+                                    command = command + ` odo.openshift.io/url-name=${labels['app.kubernetes.io/url-name']}`;
+                                }
                                 await this.execute(command);
                                 await this.execute(`oc label ${resourceId} ${resourceName} app.kubernetes.io/component-name-`);
+                                await this.execute(`oc label ${resourceId} ${resourceName} odo.openshift.io/migrated=true`);
                             } catch (err) {
                                 errors.push(err);
                             }
@@ -1123,7 +1143,7 @@ export class OdoImpl implements Odo {
                     this.subject.next(new OdoEventImpl('changed', this.getClusters()[0]));
                 });
                 if (errors.length) {
-                    window.showErrorMessage('Not all resources were updates, please see log for details.');
+                    window.showErrorMessage('Not all resources were updates, please see OpenShift output channel for details.');
                 } else {
                     window.showInformationMessage('Cluster resources have been successfuly updated.');
                 }
