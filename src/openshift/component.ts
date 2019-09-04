@@ -300,7 +300,7 @@ export class Component extends OpenShiftItem {
             if (undeployRequired) {
                 let choice: string;
                 do {
-                    choice = await window.showWarningMessage('This Component must be undeployed before new version is pushed, because it was created and deployed with previous version ot the extension.', 'Undeploy', 'More Info...', 'Cancel');
+                    choice = await window.showWarningMessage('This Component must be undeployed before new version is pushed, because it was created and deployed with previous version ot the extension.', 'Undeploy', 'Help', 'Cancel');
                     switch (choice) {
                         case 'Undeploy':
                             await Component.undeploy(component);
