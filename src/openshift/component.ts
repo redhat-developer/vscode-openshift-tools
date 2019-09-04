@@ -307,7 +307,7 @@ export class Component extends OpenShiftItem {
                             return null;
                             break;
                         case 'More Info...':
-                            open('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.0.24');
+                            open('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0');
                             break;
                         case 'Cancel':
                             return null;
