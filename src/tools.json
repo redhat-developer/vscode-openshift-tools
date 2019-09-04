@@ -11,10 +11,9 @@
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://github.com/openshift/odo/releases/download/v1.0.0-beta5/odo-darwin-amd64.tar.gz",
+                "url": "https://github.com/openshift/odo/releases/download/v1.0.0-beta5/odo-windows-amd64.exe.tar.gz",
                 "sha256sum": "7cf31f35b53ad954eeec690afd4a8ad2ed433cb1b982964ba5b1484c021660d8",
-                "dlFileName": "odo-darwin-amd64.tar.gz",
-                "cmdFileName": "odo.exe"
+                "dlFileName": "odo-windows-amd64.tar.gz"
             },
             "darwin": {
                 "url": "https://github.com/openshift/odo/releases/download/v1.0.0-beta5/odo-darwin-amd64.tar.gz",
