@@ -306,13 +306,13 @@ export class Component extends OpenShiftItem {
                             await Component.undeploy(component);
                             return null;
                             break;
-                        case 'More Info...':
+                        case 'Help':
                             open('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0');
                             break;
                         case 'Cancel':
                             return null;
                     }
-                } while (choice === 'More Info...');
+                } while (choice === 'Help');
                 return choice;
             }
         } catch (ignore) {
