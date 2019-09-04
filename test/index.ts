@@ -3,6 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-let mode: string = process.env.VSCOST_TEST_MODE || 'coverage';
+let mode: string = process.env.VSCOST_TEST_MODE || 'debug';
 
 module.exports = require(`./index.${mode}`);
