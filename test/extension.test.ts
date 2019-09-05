@@ -25,6 +25,8 @@ import packagejson = require('../package.json');
 import { OpenShiftExplorer } from '../src/explorer';
 import path = require('path');
 import { OdoImpl, ContextType, OpenShiftObjectImpl } from '../src/odo';
+import { METHODS } from 'http';
+import { addListener } from 'cluster';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -45,13 +47,7 @@ suite('openshift connector Extension', async () => {
         }, {
             uri: comp2Uri, index: 1, name: 'comp2'
         }]);
-        const stub = sandbox.stub(Cluster, 'about');
-        try {
-            await vscode.commands.executeCommand('openshift.about');
-        } catch (ignore) {
-        } finally {
-            stub.restore();
-        }
+        await vscode.commands.executeCommand('openshift.output');
         sandbox.stub(OdoImpl.prototype, '_getClusters').resolves([clusterItem]);
         sandbox.stub(OdoImpl.prototype, '_getProjects').resolves([projectItem]);
         sandbox.stub(OdoImpl.prototype, '_getApplications').resolves([appItem]);
@@ -67,14 +63,16 @@ suite('openshift connector Extension', async () => {
 		assert.ok(vscode.extensions.getExtension('redhat.vscode-openshift-connector'));
 	});
 
-    async function getStaticMethodsToStub(osc: string[]): Promise<string[]> {
+    function getStaticMethodsToStub(osc: string[]): string[] {
         const mths: Set<string> = new Set();
         osc.forEach((name) => {
-            name.replace('.palette', '');
+            name = name.replace('.palette', '');
             const segs: string[] = name.split('.');
             let methName: string = segs[segs.length-1];
             methName = methName === 'delete'? 'del' : methName;
-            !mths.has(methName) && mths.add(methName);
+            if (!mths.has(methName)) {
+                mths.add(methName);
+            }
 
         });
         return [...mths];
@@ -84,7 +82,7 @@ suite('openshift connector Extension', async () => {
         sandbox.stub(vscode.window, 'showErrorMessage');
         const cmds: string[] = await vscode.commands.getCommands();
         const osc: string[] = cmds.filter((item) => item.startsWith('openshift.'));
-        const mths: string[] = await getStaticMethodsToStub(osc);
+        const mths: string[] = getStaticMethodsToStub(osc);
         [Application, Catalog, Cluster, Component, Project, Service, Storage, Url, OpenShiftExplorer].forEach((item: { [x: string]: any; }) => {
             mths.forEach((name) => {
                 if (item[name]) {
