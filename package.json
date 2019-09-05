@@ -13,7 +13,7 @@
   },
   "bugs": "https://github.com/redhat-developer/vscode-openshift-tools/issues",
   "engines": {
-    "vscode": "^1.37.0"
+    "vscode": "^1.38.0"
   },
   "badges": [
     {
