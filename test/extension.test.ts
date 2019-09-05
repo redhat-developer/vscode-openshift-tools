@@ -25,8 +25,6 @@ import packagejson = require('../package.json');
 import { OpenShiftExplorer } from '../src/explorer';
 import path = require('path');
 import { OdoImpl, ContextType, OpenShiftObjectImpl } from '../src/odo';
-import { METHODS } from 'http';
-import { addListener } from 'cluster';
 
 const expect = chai.expect;
 chai.use(sinonChai);
