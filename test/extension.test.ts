@@ -92,7 +92,9 @@ suite('openshift connector Extension', async () => {
                 }
             });
         });
-        osc.forEach((item) => vscode.commands.executeCommand(item));
+        for (const command of osc) {
+            await vscode.commands.executeCommand(command);
+        }
         expect(vscode.window.showErrorMessage).has.not.been.called;
     });
 
