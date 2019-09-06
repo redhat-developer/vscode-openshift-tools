@@ -489,7 +489,7 @@ class OdoModel {
         return Array.from(this.contextToSettings.values());
     }
 
-    public addContexts(folders: WorkspaceFolder[]) {
+    public addContexts(folders: ReadonlyArray<WorkspaceFolder>) {
         for (const folder of folders) {
             try {
                 const compData = yaml.safeLoad(fs.readFileSync(path.join(folder.uri.fsPath, '.odo', 'config.yaml'), 'utf8')) as odo.Config;
