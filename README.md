@@ -24,7 +24,7 @@ This release(`0.1.0`) uses latest odo version(`v1.0.0-beta5`) that requires belo
 * This breaks backward compatibility with older versions and components created with previous version will no longer be identified. Therefore after extension is updated to new version all previously deployed components won't be visible in OpenShift Application View.
 * Users can recreate components from existing sources, but pushing those components to the cluster would lead to deployment failure, because of name conflicts.
 
-> **Please follow the this _migration_ guide to resolve any possible issues.** In case of any queries, please use the [Feedback & Question](#Feedback-&-Questions) section.
+> **Please follow the this [_migration_](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0) guide to resolve any possible issues.** In case of any queries, please use the [Feedback & Question](#Feedback-&-Questions) section.
 
 ## Commands and features
 
