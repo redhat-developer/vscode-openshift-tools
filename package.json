@@ -61,7 +61,8 @@
     "onCommand:openshift.component.log",
     "onCommand:openshift.component.unlink",
     "onCommand:openshift.component.unlink.palette",
-    "onCommand:openshift.component.unlink.service.palette",
+    "onCommand:openshift.component.unlinkComponent.palette",
+    "onCommand:openshift.component.unlinkService.palette",
     "onCommand:openshift.component.log.palette",
     "onCommand:openshift.component.followLog",
     "onCommand:openshift.component.followLog.palette",
@@ -277,12 +278,12 @@
         "category": "OpenShift"
       },
       {
-        "command": "openshift.component.unlink.component.palette",
+        "command": "openshift.component.unlinkComponent.palette",
         "title": "Unlink Component",
         "category": "OpenShift"
       },
       {
-        "command": "openshift.component.unlink.service.palette",
+        "command": "openshift.component.unlinkService.palette",
         "title": "Unlink Service",
         "category": "OpenShift"
       },

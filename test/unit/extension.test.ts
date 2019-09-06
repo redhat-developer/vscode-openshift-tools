@@ -67,7 +67,7 @@ suite('openshift connector Extension', async () => {
 		assert.ok(vscode.extensions.getExtension('redhat.vscode-openshift-connector'));
 	});
 
-    async function getStaticMethodsToStub(osc: string[]): Promise<string[]> {
+    function getStaticMethodsToStub(osc: string[]): string[] {
         const mths: Set<string> = new Set();
         osc.forEach((name) => {
             name = name.replace('.palette', '');
@@ -75,7 +75,6 @@ suite('openshift connector Extension', async () => {
             let methName: string = segs[segs.length-1];
             methName = methName === 'delete'? 'del' : methName;
             !mths.has(methName) && mths.add(methName);
-
         });
         return [...mths];
     }
@@ -84,7 +83,7 @@ suite('openshift connector Extension', async () => {
         sandbox.stub(vscode.window, 'showErrorMessage');
         const cmds: string[] = await vscode.commands.getCommands();
         const osc: string[] = cmds.filter((item) => item.startsWith('openshift.'));
-        const mths: string[] = await getStaticMethodsToStub(osc);
+        const mths: string[] = getStaticMethodsToStub(osc);
         [Application, Catalog, Cluster, Component, Project, Service, Storage, Url, OpenShiftExplorer].forEach((item: { [x: string]: any; }) => {
             mths.forEach((name) => {
                 if (item[name]) {
@@ -92,7 +91,9 @@ suite('openshift connector Extension', async () => {
                 }
             });
         });
-        osc.forEach((item) => vscode.commands.executeCommand(item));
+        for (const command of osc) {
+            await vscode.commands.executeCommand(command);
+        }
         expect(vscode.window.showErrorMessage).has.not.been.called;
     });
 
