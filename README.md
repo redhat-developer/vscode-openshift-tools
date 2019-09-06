@@ -15,6 +15,17 @@ To run the instance of OpenShift cluster locally, developers can use [minishift]
 
 For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
 
+## WARNING! Breaking changes for users using the older version
+
+This release(`0.1.0`) uses latest odo version(`v1.0.0-beta5`) that requires below mentioned changes.
+
+* Every component/service needs to have a context folder. The extension will prompt thhe user to specify the context folder with the creation of component.
+* All component configurations are saved to `./.odo/config.yaml`. You can commit this file to your repository to easily recreate component with the same configuration later, or to share it with someone else. 
+* This breaks backward compatibility with older versions and components created with previous version will no longer be identified. Therefore after extension is updated to new version all previously deployed components won't be visible in OpenShift Application View.
+* Users can recreate components from existing sources, but pushing those components to the cluster would lead to deployment failure, because of name conflicts.
+
+> **Please follow the this _migration_ guide to resolve any possible issues.** In case of any queries, please use the [Feedback & Question](#Feedback-&-Questions) section.
+
 ## Commands and features
 
 ![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/vscode-openshift-tools.gif)
@@ -106,7 +117,7 @@ For detail analysis of how to setup and run local OpenShift Cluster using minish
 
 This extension uses two CLI tools to interact with OpenShift cluster:
 * OKD CLI client tool - [oc](https://github.com/openshift/origin/releases)
-* OpenShift Do tool - [odo](https://github.com/openshift/odo/releases/tag/v0.0.20)
+* OpenShift Do tool - [odo](https://github.com/openshift/odo/releases/tag/v1.0.0-beta5)
 
 > If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
 The extension will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see an notification for the missing tool.
