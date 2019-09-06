@@ -894,7 +894,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "clean": "rm -rf out || rmdir out /s /q",
-    "test": "npm run clean && npm run compile && npm run verify && node ./out/build/unit-test.js",
+    "test": "npm run clean && npm run compile && npm run verify && node ./out/build/unit-tests.js",
     "update-deps": "node_modules/.bin/ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
     "build": "npm run clean && tslint -p tslint.json && npm run compile"

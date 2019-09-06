@@ -47,7 +47,7 @@ suite('openshift connector Extension', async () => {
         }]);
         const stub = sandbox.stub(Cluster, 'about');
         try {
-            await vscode.commands.executeCommand('openshift.about');
+            await vscode.commands.executeCommand('openshift.output');
         } catch (ignore) {
         } finally {
             stub.restore();
@@ -70,7 +70,7 @@ suite('openshift connector Extension', async () => {
     async function getStaticMethodsToStub(osc: string[]): Promise<string[]> {
         const mths: Set<string> = new Set();
         osc.forEach((name) => {
-            name.replace('.palette', '');
+            name = name.replace('.palette', '');
             const segs: string[] = name.split('.');
             let methName: string = segs[segs.length-1];
             methName = methName === 'delete'? 'del' : methName;
