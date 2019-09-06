@@ -32,6 +32,7 @@ For detail analysis of how to setup and run local OpenShift Cluster using minish
 * `OpenShift: About` - Provides the information about the OpenShift tools.
 * `OpenShift: Log out` - Logs out of the current OpenShift Cluster.
 * `OpenShift: Show Output Channel` - Shows commands running under the hood and their output.
+* `OpenShift: Open Console Dashboard` - Opens the OpenShift webconsole URL.
 
 #### Actions available for an OpenShift Cluster Project
 
@@ -112,7 +113,7 @@ The extension will detect these dependencies and prompt the user to install if t
 
 #### Extensions
 
-This extension depends on Kubernetes Extension form Microsoft which is going to be installed automatically along with OpenShift Connector Extension. Latter is using Kubernetes Extension public API to show
+This extension depends on Kubernetes Extension from Microsoft which is going to be installed automatically along with OpenShift Connector Extension. Latter is using Kubernetes Extension public API to show
 OpenShift specific resources like Projects, Routes, Deployment Configs, Image Streams and Templates in Kubernetes Clusters View. Those resources are visible only for OpenShift clusters. 
 
 OpenShift Connector extension also provides ```Use Project``` command to switch between OpenShift Projects in Kubernetes Clusters View.

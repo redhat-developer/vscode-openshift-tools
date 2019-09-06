@@ -4,13 +4,12 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as cliInstance from './cli';
-import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder } from 'vscode';
+import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Disposable } from 'vscode';
 import { WindowUtil } from './util/windowUtils';
 import { CliExitData } from './cli';
 import * as path from 'path';
 import { ToolsConfig } from './tools';
 import format =  require('string-format');
-import { OpenShiftExplorer } from './explorer';
 import { statSync } from 'fs';
 import bs = require('binary-search');
 import { Platform } from './util/platform';
@@ -19,6 +18,9 @@ import fs = require('fs');
 import * as odo from './odo/config';
 import { ComponentSettings } from './odo/config';
 import { GlyphChars } from './util/constants';
+import { Subject } from 'rxjs';
+import open = require('open');
+import { Progress } from './util/progress';
 
 const Collapsed = TreeItemCollapsibleState.Collapsed;
 
@@ -99,7 +101,7 @@ export class Command {
         return 'oc version';
     }
     static listServiceInstances(project: string, app: string) {
-        return `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/component-name}{\\"\\n\\"}{end}" --namespace ${project}`;
+        return `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/part-of == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/instance}{\\"\\n\\"}{end}" --namespace ${project}`;
     }
     static describeApplication(project: string, app: string) {
         return `odo app describe ${app} --project ${project}`;
@@ -110,8 +112,14 @@ export class Command {
     static printOdoVersion() {
         return 'odo version';
     }
+    static printOdoVersionAndProjects() {
+        return 'odo version && odo project list';
+    }
     static odoLogout() {
         return `odo logout`;
+    }
+    static setOpenshiftContext(context: string) {
+        return `oc config use-context ${context}`;
     }
     static odoLoginWithUsernamePassword(clusterURL: string, username: string, passwd: string) {
         return `odo login ${clusterURL} -u ${username} -p ${passwd} --insecure-skip-tls-verify`;
@@ -151,7 +159,10 @@ export class Command {
         return `oc get service ${component}-${app} --namespace ${project} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`;
     }
     static linkComponentTo(project: string, app: string, component: string, componentToLink: string, port?: string) {
-        return `odo project set ${project} && odo application set ${app} && odo component set ${component} && odo link ${componentToLink} --wait${port ? ' --port ' + port : ''}`;
+        return `odo link ${componentToLink} --project ${project} --app ${app} --component ${component} --wait${port ? ' --port ' + port : ''}`;
+    }
+    static linkServiceTo(project: string, app: string, component: string, serviceToLink: string, port?: string) {
+        return `odo link ${serviceToLink} --project ${project} --app ${app} --component ${component} --wait --wait-for-target`;
     }
     @verbose
     static pushComponent() {
@@ -162,7 +173,7 @@ export class Command {
         return `odo watch ${component} --app ${app} --project ${project}`;
     }
     static getRouteHostName(namespace: string, component: string) {
-        return `oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/component-name=='${component}')]}{.spec.host}{end}"`;
+        return `oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/instance=='${component}')]}{.spec.host}{end}"`;
     }
     @verbose
     static createLocalComponent(project: string, app: string, type: string, version: string, name: string, folder: string) {
@@ -173,8 +184,8 @@ export class Command {
         return `odo create ${type}:${version} ${name} --git ${git} --ref ${ref} --app ${app} --project ${project}`;
     }
     @verbose
-    static createBinaryComponent(project: string, app: string, type: string, version: string, name: string, binary: string) {
-        return `odo create ${type}:${version} ${name} --binary ${binary} --app ${app} --project ${project}`;
+    static createBinaryComponent(project: string, app: string, type: string, version: string, name: string, binary: string, context: string) {
+        return `odo create ${type}:${version} ${name} --binary ${binary} --app ${app} --project ${project} --context ${context}`;
     }
     @verbose
     static createService(project: string, app: string, template: string, plan: string, name: string) {
@@ -184,7 +195,7 @@ export class Command {
         return `odo service delete ${name} -f --project ${project} --app ${app}`;
     }
     static getServiceTemplate(project: string, service: string) {
-        return `oc get ServiceInstance ${service} --namespace ${project} -o jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/component-type}"`;
+        return `oc get ServiceInstance ${service} --namespace ${project} -o jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/name}"`;
     }
     static waitForServiceToBeGone(project: string, service: string) {
         return `oc wait ServiceInstance/${service} --for delete --namespace ${project}`;
@@ -204,6 +215,18 @@ export class Command {
     }
     static unlinkComponents(project: string, app: string, comp1: string, comp2: string) {
         return `odo unlink --project ${project} --app ${app} ${comp2} --component ${comp1}`;
+    }
+    static unlinkService(project: string, app: string, service: string, comp: string) {
+        return `odo unlink --project ${project} --app ${app} ${service} --component ${comp}`;
+    }
+    static getOpenshiftClusterRoute() {
+        return `oc get routes -n openshift-console -ojson`;
+    }
+    static getclusterVersion() {
+        return `oc get clusterversion -ojson`;
+    }
+    static showServerUrl() {
+        return `oc whoami --show-server`;
     }
 }
 
@@ -344,13 +367,24 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
     }
 }
 
+export interface OdoEvent {
+    readonly type: 'deleted' | 'inserted' | 'changed';
+    readonly data: OpenShiftObject;
+    readonly reveal: boolean;
+}
+
+class OdoEventImpl implements OdoEvent {
+    constructor(readonly type: 'deleted' | 'inserted' | 'changed', readonly data: OpenShiftObject, readonly reveal: boolean = false) {
+    }
+}
+
 export interface Odo {
     getClusters(): Promise<OpenShiftObject[]>;
     getProjects(): Promise<OpenShiftObject[]>;
     loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): void;
     getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]>;
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
-    getComponents(application: OpenShiftObject): Promise<OpenShiftObject[]>;
+    getComponents(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]>;
     getComponentTypes(): Promise<string[]>;
     getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]>;
@@ -365,11 +399,11 @@ export interface Odo {
     clearCache?(): void;
     createProject(name: string): Promise<OpenShiftObject>;
     deleteProject(project: OpenShiftObject): Promise<OpenShiftObject>;
-    createApplication(project: OpenShiftObject, name: string): Promise<OpenShiftObject>;
+    createApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
     deleteApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, repoUri: string, context: Uri, ref: string): Promise<OpenShiftObject>;
     createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, path: Uri): Promise<OpenShiftObject>;
-    createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, path: Uri): Promise<OpenShiftObject>;
+    createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, path: Uri, context: Uri): Promise<OpenShiftObject>;
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     undeployComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     deleteNotPushedComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
@@ -379,6 +413,7 @@ export interface Odo {
     deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
     deleteURL(url: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentCustomUrl(component: OpenShiftObject, name: string, port: string): Promise<OpenShiftObject>;
+    readonly subject: Subject<OdoEvent>;
 }
 
 export function getInstance(): Odo {
@@ -395,69 +430,66 @@ function compareNodes(a: OpenShiftObject, b: OpenShiftObject): number {
 }
 
 class OdoModel {
-    private treeCache: Map<OpenShiftObject, OpenShiftObject[]> = new Map();
-    private parentCache = new Map<string, OpenShiftObject>();
-    private pathCache = new Map<string, OpenShiftObject>();
-    private contextCache1 = new Map<Uri, OpenShiftObject>();
-    private contextCache2 = new Map<Uri, ComponentSettings>();
+    private parentToChildren: Map<OpenShiftObject, OpenShiftObject[]> = new Map();
+    private pathToObject = new Map<string, OpenShiftObject>();
+    private contextToObject = new Map<Uri, OpenShiftObject>();
+    private contextToSettings = new Map<Uri, ComponentSettings>();
 
     public setParentToChildren(parent: OpenShiftObject, children: OpenShiftObject[]): OpenShiftObject[] {
-        if (!this.treeCache.has(parent)) {
-            this.treeCache.set(parent, children);
-            this.parentCache.set(parent.path, parent);
+        if (!this.parentToChildren.has(parent)) {
+            this.parentToChildren.set(parent, children);
         }
         return children;
     }
 
     public getChildrenByParent(parent: OpenShiftObject) {
-        return this.treeCache.get(parent);
+        return this.parentToChildren.get(parent);
     }
 
     public clearTreeData() {
-        this.treeCache.clear();
+        this.parentToChildren.clear();
+        this.pathToObject.clear();
+        this.contextToObject.clear();
+        this.addContexts(workspace.workspaceFolders? workspace.workspaceFolders : []);
     }
 
     public setPathToObject(object: OpenShiftObject) {
-        if (!this.pathCache.get(object.path)) {
-            this.pathCache.set(object.path, object);
+        if (!this.pathToObject.get(object.path)) {
+            this.pathToObject.set(object.path, object);
         }
     }
 
-    public getParentByPath(path: string): OpenShiftObject {
-        return this.parentCache.get(path);
-    }
-
     public getObjectByPath(path: string): OpenShiftObject {
-        return this.pathCache.get(path);
+        return this.pathToObject.get(path);
     }
 
     public setContextToObject(object: OpenShiftObject) {
         if (object.contextPath) {
-            if (!this.contextCache1.has(object.contextPath)) {
-                this.contextCache1.set(object.contextPath, object );
+            if (!this.contextToObject.has(object.contextPath)) {
+                this.contextToObject.set(object.contextPath, object );
             }
         }
     }
 
     public getObjectByContext(context: Uri) {
-        return this.contextCache1.get(context);
+        return this.contextToObject.get(context);
     }
 
     public setContextToSettings (settings: ComponentSettings) {
-        if (!this.contextCache2.has(settings.ContextPath)) {
-            this.contextCache2.set(settings.ContextPath, settings);
+        if (!this.contextToSettings.has(settings.ContextPath)) {
+            this.contextToSettings.set(settings.ContextPath, settings);
         }
     }
 
     public getSettingsByContext(context: Uri) {
-        return this.contextCache2.get(context);
+        return this.contextToSettings.get(context);
     }
 
     public getSettings(): odo.ComponentSettings[] {
-        return Array.from(this.contextCache2.values());
+        return Array.from(this.contextToSettings.values());
     }
 
-    public addContexts(folders: WorkspaceFolder[]) {
+    public addContexts(folders: ReadonlyArray<WorkspaceFolder>) {
         for (const folder of folders) {
             try {
                 const compData = yaml.safeLoad(fs.readFileSync(path.join(folder.uri.fsPath, '.odo', 'config.yaml'), 'utf8')) as odo.Config;
@@ -471,13 +503,12 @@ class OdoModel {
     public async delete(item: OpenShiftObject): Promise<void> {
         const array = await item.getParent().getChildren();
         array.splice(array.indexOf(item), 1);
-        this.pathCache.delete(item.path);
-        this.parentCache.delete(item.path);
-        this.contextCache1.delete(item.contextPath);
+        this.pathToObject.delete(item.path);
+        this.contextToObject.delete(item.contextPath);
     }
 
     public deleteContext(context: Uri) {
-        this.contextCache2.delete(context);
+        this.contextToSettings.delete(context);
     }
 }
 
@@ -493,7 +524,10 @@ export class OdoImpl implements Odo {
         'Please login to your server'
     ];
 
+    private subjectInstance: Subject<OdoEvent> = new Subject<OdoEvent>();
+
     private constructor() {
+
     }
 
     public static get Instance(): Odo {
@@ -501,6 +535,10 @@ export class OdoImpl implements Odo {
             OdoImpl.instance = new OdoImpl();
         }
         return OdoImpl.instance;
+    }
+
+    get subject(): Subject<OdoEvent> {
+        return this.subjectInstance;
     }
 
     async getClusters(): Promise<OpenShiftObject[]> {
@@ -515,6 +553,10 @@ export class OdoImpl implements Odo {
         let clusters: OpenShiftObject[] = await this.getClustersWithOdo();
         if (clusters.length === 0) {
             clusters = await this.getClustersWithOc();
+        }
+        if (clusters.length > 0 && clusters[0].contextValue === ContextType.CLUSTER) {
+            // kick out migration
+            this.convertObjectsFromPreviousOdoReleases();
         }
         return clusters;
     }
@@ -534,7 +576,7 @@ export class OdoImpl implements Odo {
     private async getClustersWithOdo(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
         const result: cliInstance.CliExitData = await this.execute(
-            Command.printOdoVersion(), process.cwd(), false
+            Command.printOdoVersionAndProjects(), process.cwd(), false
         );
         if (this.odoLoginMessages.some((element) => result.stderr ? result.stderr.indexOf(element) > -1 : false)) {
             const loginErrorMsg: string = 'Please log in to the cluster';
@@ -609,8 +651,8 @@ export class OdoImpl implements Odo {
         return [... await this._getComponents(application), ... await this._getServices(application)].sort(compareNodes);
     }
 
-    async getComponents(application: OpenShiftObject): Promise<OpenShiftObject[]> {
-        return (await this.getApplicationChildren(application)).filter((value) => value.contextValue === ContextType.COMPONENT || value.contextValue === ContextType.COMPONENT_NO_CONTEXT || value.contextValue === ContextType.COMPONENT_PUSHED);
+    async getComponents(application: OpenShiftObject, condition: (value: OpenShiftObject) => boolean = (value) => value.contextValue === ContextType.COMPONENT || value.contextValue === ContextType.COMPONENT_NO_CONTEXT || value.contextValue === ContextType.COMPONENT_PUSHED): Promise<OpenShiftObject[]> {
+        return (await this.getApplicationChildren(application)).filter(condition);
     }
 
     public async _getComponents(application: OpenShiftObject): Promise<OpenShiftObject[]> {
@@ -757,7 +799,7 @@ export class OdoImpl implements Odo {
     }
 
     public async requireLogin(): Promise<boolean> {
-        const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersion(), process.cwd(), false);
+        const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersionAndProjects(), process.cwd(), false);
         return this.odoLoginMessages.some((element) => { return result.stderr.indexOf(element) > -1; });
     }
 
@@ -768,18 +810,21 @@ export class OdoImpl implements Odo {
     }
 
     private async insertAndReveal(item: OpenShiftObject): Promise<OpenShiftObject> {
-        await OpenShiftExplorer.getInstance().reveal(this.insert(await item.getParent().getChildren(), item));
+        // await OpenShiftExplorer.getInstance().reveal(this.insert(await item.getParent().getChildren(), item));
+        this.subject.next(new OdoEventImpl('inserted', this.insert(await item.getParent().getChildren(), item), true));
         return item;
     }
 
     private async insertAndRefresh(item: OpenShiftObject): Promise<OpenShiftObject> {
-        await OpenShiftExplorer.getInstance().refresh(this.insert(await item.getParent().getChildren(), item).getParent());
+        // await OpenShiftExplorer.getInstance().refresh(this.insert(await item.getParent().getChildren(), item).getParent());
+        this.subject.next(new OdoEventImpl('changed', this.insert(await item.getParent().getChildren(), item).getParent()));
         return item;
     }
 
     private deleteAndRefresh(item: OpenShiftObject): OpenShiftObject {
         OdoImpl.data.delete(item);
-        OpenShiftExplorer.getInstance().refresh(item.getParent());
+        // OpenShiftExplorer.getInstance().refresh(item.getParent());
+        this.subject.next(new OdoEventImpl('changed', item.getParent()));
         return item;
     }
 
@@ -796,24 +841,70 @@ export class OdoImpl implements Odo {
     }
 
     public async deleteApplication(app: OpenShiftObject): Promise<OpenShiftObject> {
-        await this.execute(Command.deleteApplication(app.getParent().getName(), app.getName()));
-        return this.deleteAndRefresh(app);
+        const allComps = await OdoImpl.instance.getComponents(app);
+        const allContexts = [];
+        let callDelete = false;
+        allComps.forEach((component) => {
+            OdoImpl.data.delete(component); // delete component from model
+            if (!callDelete && component.contextValue === ContextType.COMPONENT_PUSHED || component.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
+                callDelete = true; // if there is at least one component deployed in application `odo app delete` command should be called
+            }
+            if (component.contextPath) { // if component has context folder save it to remove from settings cache
+                allContexts.push(workspace.getWorkspaceFolder(component.contextPath));
+            }
+        });
+
+        if (callDelete) {
+            await this.execute(Command.deleteApplication(app.getParent().getName(), app.getName()));
+        }
+        // Chain workspace folder deltions, because when updateWorkspaceFoder called next call is possible only after
+        // listener registered with onDidChangeWorkspaceFolders called.
+        let result = Promise.resolve();
+        allContexts.forEach((wsFolder) => {
+            result = result.then(() => {
+                workspace.updateWorkspaceFolders(wsFolder.index, 1);
+                return new Promise<void>((resolve) => {
+                    const disposable = workspace.onDidChangeWorkspaceFolders(() => {
+                        disposable.dispose();
+                        resolve();
+                    });
+                });
+            });
+        });
+        return result.then(() => {
+            return this.deleteAndRefresh(app);
+        });
     }
 
-    public async createApplication(project: OpenShiftObject, applicationName: string): Promise<OpenShiftObject> {
-        return this.insertAndReveal(new OpenShiftObjectImpl(project, applicationName, ContextType.APPLICATION, false, this));
-    }
-
-    public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: Uri): Promise<OpenShiftObject> {
-        await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath), location.fsPath);
-        await this.executeInTerminal(Command.pushComponent(), location.fsPath);
-        workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: location });
-        OdoImpl.data.addContexts([workspace.getWorkspaceFolder(location)]);
+    public async createApplication(application: OpenShiftObject): Promise<OpenShiftObject> {
         const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
         if (!targetApplication) {
             await this.insertAndReveal(application);
         }
-        return this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT_PUSHED, false, this, Collapsed, location, 'local'));
+        return application;
+    }
+
+    public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: Uri): Promise<OpenShiftObject> {
+        await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath), location.fsPath);
+        if (workspace.workspaceFolders) {
+            const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
+            if (!targetApplication) {
+                await this.insertAndReveal(application);
+            }
+            await this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, location, 'local'));
+        }
+        let wsFolder: WorkspaceFolder;
+        if (workspace.workspaceFolders) {
+            // could be new or existing folder
+            wsFolder = workspace.getWorkspaceFolder(location);
+            if (wsFolder) { // existing workspace folder
+                OdoImpl.data.addContexts([wsFolder]);
+            }
+        }
+        if (!workspace.workspaceFolders || !wsFolder) {
+            workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: location });
+        }
+        return null;
     }
 
     public async createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, location: string, context: Uri, ref: string = 'master'): Promise<OpenShiftObject> {
@@ -832,22 +923,48 @@ export class OdoImpl implements Odo {
         return null;
     }
 
-    public async createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, location: Uri): Promise<OpenShiftObject> {
-        await this.execute(Command.createBinaryComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath));
-        return this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, undefined, 'binary'));
+    public async createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, location: Uri, context: Uri): Promise<OpenShiftObject> {
+        await this.execute(Command.createBinaryComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath, context.fsPath));
+        if (workspace.workspaceFolders) {
+            const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
+            if (!targetApplication) {
+                await this.insertAndReveal(application);
+            }
+            this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, context, 'binary'));
+        }
+        workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: context });
+        return null;
     }
 
     public async deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
         const app = component.getParent();
-        await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
-        return this.deleteAndRefresh(component);
+        if (component.contextValue !== ContextType.COMPONENT) {
+            await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+        }
+        this.deleteAndRefresh(component);
+        const children = await app.getChildren();
+        if (children.length === 0) {
+            this.deleteApplication(app);
+        }
+        if (component.contextPath) {
+            const wsFolder = workspace.getWorkspaceFolder(component.contextPath);
+            workspace.updateWorkspaceFolders(wsFolder.index, 1);
+            await new Promise<Disposable>((resolve) => {
+                const disposabel = workspace.onDidChangeWorkspaceFolders(() => {
+                    disposabel.dispose();
+                    resolve();
+                });
+            });
+        }
+        return component;
     }
 
     public async undeployComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
         const app = component.getParent();
         await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         component.contextValue = ContextType.COMPONENT;
-        OpenShiftExplorer.getInstance().refresh(component);
+        //  OpenShiftExplorer.getInstance().refresh(component);
+        this.subject.next(new OdoEventImpl('changed', component));
         return component;
     }
 
@@ -857,14 +974,20 @@ export class OdoImpl implements Odo {
 
     public async createService(application: OpenShiftObject, templateName: string, planName: string, name: string): Promise<OpenShiftObject> {
         await this.execute(Command.createService(application.getParent().getName(), application.getName(), templateName, planName, name.trim()), Platform.getUserHomePath());
+        await this.createApplication(application);
         return this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.SERVICE, false, this, TreeItemCollapsibleState.None));
     }
 
     public async deleteService(service: OpenShiftObject): Promise<OpenShiftObject> {
         const app = service.getParent();
-        await this.execute(Command.deleteService(app.getParent().getName(), app.getName(), service.getName()));
+        await this.execute(Command.deleteService(app.getParent().getName(), app.getName(), service.getName()), Platform.getUserHomePath());
         await this.execute(Command.waitForServiceToBeGone(app.getParent().getName(), service.getName()));
-        return this.deleteAndRefresh(service);
+        this.deleteAndRefresh(service);
+        const children = await app.getChildren();
+        if (children.length === 0) {
+            this.deleteApplication(app);
+        }
+        return service;
     }
 
     public async createStorage(component: OpenShiftObject, name: string, mountPath: string, size: string): Promise<OpenShiftObject> {
@@ -899,34 +1022,37 @@ export class OdoImpl implements Odo {
             OdoImpl.data.addContexts(workspace.workspaceFolders);
         }
 
-        if (event && event.added) {
+        if (event && event.added && event.added.length > 0) {
             OdoImpl.data.addContexts(event.added);
 
             event.added.forEach(async (folder: WorkspaceFolder) => {
                 const added: ComponentSettings = OdoImpl.data.getSettingsByContext(folder.uri);
-                const cluster = (await this.getClusters())[0];
-                const prj = OdoImpl.data.getObjectByPath(path.join(cluster.path, added.Project));
-                if (prj && !!OdoImpl.data.getChildrenByParent(prj)) {
-                    const app = OdoImpl.data.getObjectByPath(path.join(prj.path, added.Application));
-                    if (app && !!OdoImpl.data.getChildrenByParent(app)) {
-                        const comp =  OdoImpl.data.getObjectByPath(path.join(app.path, added.Name));
-                        if (comp && !comp.contextPath) {
-                            comp.contextPath = added.ContextPath;
-                            comp.contextValue = ContextType.COMPONENT_PUSHED;
-                            await OpenShiftExplorer.getInstance().refresh(comp);
-                        } else if (!comp) {
-                            const newComponent = new OpenShiftObjectImpl(app, added.Name, ContextType.COMPONENT, false, this, Collapsed, added.ContextPath, added.SourceType);
-                            await this.insertAndRefresh(newComponent);
+                if (added) {
+                    const cluster = (await this.getClusters())[0];
+                    const prj = OdoImpl.data.getObjectByPath(path.join(cluster.path, added.Project));
+                    if (prj && !!OdoImpl.data.getChildrenByParent(prj)) {
+                        const app = OdoImpl.data.getObjectByPath(path.join(prj.path, added.Application));
+                        if (app && !!OdoImpl.data.getChildrenByParent(app)) {
+                            const comp =  OdoImpl.data.getObjectByPath(path.join(app.path, added.Name));
+                            if (comp && !comp.contextPath) {
+                                comp.contextPath = added.ContextPath;
+                                comp.contextValue = ContextType.COMPONENT_PUSHED;
+                                // await OpenShiftExplorer.getInstance().refresh(comp);
+                                this.subject.next(new OdoEventImpl('changed', comp));
+                            } else if (!comp) {
+                                const newComponent = new OpenShiftObjectImpl(app, added.Name, ContextType.COMPONENT, false, this, Collapsed, added.ContextPath, added.SourceType);
+                                await this.insertAndRefresh(newComponent);
+                            }
+                        } else if (!app) {
+                            const newApp = new OpenShiftObjectImpl(prj, added.Application, ContextType.APPLICATION, false, this, Collapsed);
+                            await this.insertAndRefresh(newApp);
                         }
-                    } else if (!app) {
-                        const newApp = new OpenShiftObjectImpl(prj, added.Application, ContextType.APPLICATION, false, this, Collapsed);
-                        await this.insertAndRefresh(newApp);
                     }
                 }
             });
         }
 
-        if (event && event.removed) {
+        if (event && event.removed && event.removed.length > 0) {
             event.removed.forEach(async (wsFolder: WorkspaceFolder) => {
                 const settings = OdoImpl.data.getSettingsByContext(wsFolder.uri);
                 if (settings) {
@@ -937,8 +1063,10 @@ export class OdoImpl implements Odo {
                     } else if (item) {
                         item.contextValue = ContextType.COMPONENT_NO_CONTEXT;
                         item.contextPath = undefined;
-                        OpenShiftExplorer.getInstance().refresh(item);
+                        // OpenShiftExplorer.getInstance().refresh(item);
+                        this.subject.next(new OdoEventImpl('changed', item));
                     }
+                    OdoImpl.data.deleteContext(wsFolder.uri);
                 }
             });
         }
@@ -952,5 +1080,54 @@ export class OdoImpl implements Odo {
         } catch (ignore) {
         }
         return data;
+    }
+
+    async convertObjectsFromPreviousOdoReleases() {
+        const getPreviosOdoResourceNames = (resourceId) => `oc get ${resourceId} -l app.kubernetes.io/component-name -o jsonpath="{range .items[*]}{.metadata.name}{\\"\\n\\"}{end}"`;
+        const result1 = await this.execute(getPreviosOdoResourceNames('dc'), __dirname, false);
+        const dcs = result1.stdout.split('\n');
+        const result2 = await this.execute(getPreviosOdoResourceNames('ServiceInstance'), __dirname, false);
+        const sis = result2.stdout.split('\n');
+        if ((result2.stdout !== '' && sis.length > 0) || (result1.stdout !== '' && dcs.length > 0))  {
+            const choice = await window.showWarningMessage(`Some of resources in cluster must be updated to work with latest release of OpenShift Connector Extension.`, 'Learn more...', 'Update', 'Cancel');
+            if (choice === 'Learn more...') {
+                open('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.0.24');
+                this.subject.next(new OdoEventImpl('changed', this.getClusters()[0]));
+            } else if (choice === 'Update') {
+                const errors = [];
+                Progress.execFunctionWithProgress('Updating cluster resources to work with latest OpenShift Connector release', async (progress) => {
+                    for (const resourceId of  ['DeploymentConfig', 'Route', 'BuildConfig', 'ImageStream', 'Service', 'pvc', 'Secret', 'ServiceInstance']) {
+                        progress.report({increment: 100/8, message: resourceId});
+                        const cmd = getPreviosOdoResourceNames(resourceId);
+                        const result = await this.execute(cmd, __dirname, false);
+                        const resourceNames = result.error || result.stdout === '' ? [] : result.stdout.split('\n');
+                        for (const resourceName of resourceNames) {
+                            try {
+                                const result = await this.execute(`oc get ${resourceId} ${resourceName} -o json`);
+                                const labels = JSON.parse(result.stdout).metadata.labels;
+                                let command = `oc label ${resourceId} ${resourceName} --overwrite app.kubernetes.io/instance=${labels['app.kubernetes.io/component-name']}`;
+                                command = command + ` app.kubernetes.io/part-of=${labels['app.kubernetes.io/name']}`;
+                                if (labels['app.kubernetes.io/component-type']) {
+                                    command = command + ` app.kubernetes.io/name=${labels['app.kubernetes.io/component-type']}`;
+                                }
+                                if (labels['app.kubernetes.io/component-version']) {
+                                    command = command + ` app.openshift.io/runtime-version=${labels['app.kubernetes.io/component-version']}`;
+                                }
+                                await this.execute(command);
+                                await this.execute(`oc label ${resourceId} ${resourceName} app.kubernetes.io/component-name-`);
+                            } catch (err) {
+                                errors.push(err);
+                            }
+                        }
+                    }
+                    this.subject.next(new OdoEventImpl('changed', this.getClusters()[0]));
+                });
+                if (errors.length) {
+                    window.showErrorMessage('Not all resources were updates, please see log for details.');
+                } else {
+                    window.showInformationMessage('Cluster resources have been successfuly updated.');
+                }
+            }
+        }
     }
 }

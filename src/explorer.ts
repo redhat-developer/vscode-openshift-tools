@@ -38,6 +38,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
         this.fsw.emitter.on('file-changed', this.refresh.bind(this));
         this.treeView = window.createTreeView('openshiftProjectExplorer', {treeDataProvider: this});
+        OpenShiftExplorer.odoctl.subject.subscribe(event => event.reveal ? this.reveal(event.data) : this.refresh(event.data));
     }
 
     static getInstance(): OpenShiftExplorer {

@@ -21,19 +21,18 @@ import fsx = require('fs-extra');
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { BuildConfigNodeContributor } from './k8s/build';
+import { DeploymentConfigNodeContributor } from './k8s/deployment';
 import { Console } from './k8s/console';
 import { OdoImpl } from './odo';
-import open = require("open");
 import { Build } from './k8s/build';
+import { DeploymentConfig } from './k8s/deployment';
+import { TokenStore } from './util/credentialManager';
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined = undefined;
 
-export let contextGlobalState: vscode.ExtensionContext;
-
 export async function activate(context: vscode.ExtensionContext) {
-    contextGlobalState = context;
     migrateFromOdo018();
-
+    Cluster.extensionContext = Component.extensionContext = TokenStore.extensionContext = context;
     const disposable = [
         vscode.commands.registerCommand('openshift.about', (context) => execute(Cluster.about, context)),
         vscode.commands.registerCommand('openshift.output', (context) => execute(Cluster.showOpenShiftOutput, context)),
@@ -44,11 +43,13 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.explorer.login.credentialsLogin', (context) => execute(Cluster.credentialsLogin, context)),
         vscode.commands.registerCommand('openshift.explorer.logout', (context) => execute(Cluster.logout, context)),
         vscode.commands.registerCommand('openshift.explorer.refresh', (context) => execute(Cluster.refresh, context)),
+        vscode.commands.registerCommand('openshift.explorer.switchContext', (context) => execute(Cluster.switchContext, context)),
         vscode.commands.registerCommand('openshift.catalog.listComponents', (context) => execute(Catalog.listComponents, context)),
         vscode.commands.registerCommand('openshift.catalog.listServices', (context) => execute(Catalog.listServices, context)),
         vscode.commands.registerCommand('openshift.project.create', (context) => execute(Project.create, context)),
         vscode.commands.registerCommand('openshift.project.delete', (context) => execute(Project.del, context)),
         vscode.commands.registerCommand('openshift.component.undeploy', (context) => execute(Component.undeploy, context)),
+        vscode.commands.registerCommand('openshift.component.undeploy.palette', (context) => execute(Component.undeploy, context)),
         vscode.commands.registerCommand('openshift.project.delete.palette', (context) => execute(Project.del, context)),
         vscode.commands.registerCommand('openshift.app.delete.palette', (context) => execute(Application.del, context)),
         vscode.commands.registerCommand('openshift.app.describe', (context) => execute(Application.describe, context)),
@@ -58,6 +59,9 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.describe.palette', (context) => execute(Component.describe, context)),
         vscode.commands.registerCommand('openshift.component.create', (context) => execute(Component.create, context)),
         vscode.commands.registerCommand('clusters.openshift.build.start', (context) => execute(Build.startBuild, context)),
+        vscode.commands.registerCommand('clusters.openshift.deploy', (context) => execute(DeploymentConfig.deploy, context)),
+        vscode.commands.registerCommand('clusters.openshift.deploy.delete', (context) => execute(DeploymentConfig.delete, context)),
+        vscode.commands.registerCommand('clusters.openshift.deploy.delete.palette', (context) => execute(DeploymentConfig.delete, context)),
         vscode.commands.registerCommand('clusters.openshift.build.showLog', (context) => execute(Build.showLog, context)),
         vscode.commands.registerCommand('clusters.openshift.build.followLog', (context) => execute(Build.followLog, context)),
         vscode.commands.registerCommand('clusters.openshift.build.delete', (context) => execute(Build.delete, context)),
@@ -66,6 +70,7 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('clusters.openshift.build.openConsole', (context) => execute(Console.openBuildConfig, context)),
         vscode.commands.registerCommand('clusters.openshift.deployment.openConsole', (context) => execute(Console.openDeploymentConfig, context)),
         vscode.commands.registerCommand('clusters.openshift.imagestream.openConsole', (context) => execute(Console.openImageStream, context)),
+        vscode.commands.registerCommand('clusters.openshift.project.openConsole', (context) => execute(Console.openProject, context)),
         vscode.commands.registerCommand('openshift.component.createFromLocal', (context) => execute(Component.createFromLocal, context)),
         vscode.commands.registerCommand('openshift.component.createFromGit', (context) => execute(Component.createFromGit, context)),
         vscode.commands.registerCommand('openshift.component.createFromBinary', (context) => execute(Component.createFromBinary, context)),
@@ -95,9 +100,11 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.service.describe', (context) => execute(Service.describe, context)),
         vscode.commands.registerCommand('openshift.service.describe.palette', (context) => execute(Service.describe, context)),
         vscode.commands.registerCommand('openshift.component.linkComponent', (context) => execute(Component.linkComponent, context)),
+        vscode.commands.registerCommand('openshift.component.unlink', (context) => execute(Component.unlink, context)),
+        vscode.commands.registerCommand('openshift.component.unlinkComponent.palette', (context) => execute(Component.unlinkComponent, context)),
+        vscode.commands.registerCommand('openshift.component.unlinkService.palette', (context) => execute(Component.unlinkService, context)),
         vscode.commands.registerCommand('openshift.component.linkService', (context) => execute(Component.linkService, context)),
         vscode.commands.registerCommand('openshift.explorer.reportIssue', () => OpenShiftExplorer.reportIssue()),
-        vscode.commands.registerCommand('clusters.openshift.openProjectConsole', openProjectConsole),
         vscode.commands.registerCommand('clusters.openshift.useProject', (context) => vscode.commands.executeCommand('extension.vsKubernetesUseNamespace', context)),
         OpenShiftExplorer.getInstance()
     ];
@@ -114,7 +121,8 @@ export async function activate(context: vscode.ExtensionContext) {
             clusterExplorer.nodeSources.resourceFolder("Routes", "Routes", "Route", "route").if(isOpenShift).at("Network"),
             clusterExplorer.nodeSources.resourceFolder("DeploymentConfigs", "DeploymentConfigs", "DeploymentConfig", "dc").if(isOpenShift).at("Workloads"),
             clusterExplorer.nodeSources.resourceFolder("BuildConfigs", "BuildConfigs", "BuildConfig", "bc").if(isOpenShift).at("Workloads"),
-            new BuildConfigNodeContributor()
+            new BuildConfigNodeContributor(),
+            new DeploymentConfigNodeContributor()
         ];
         nodeContributors.forEach(element => {
             clusterExplorer.registerNodeContributor(element);
@@ -146,21 +154,6 @@ async function initNamespaceName(node: ClusterExplorerV1.ClusterExplorerResource
     }
 }
 
-async function openProjectConsole (commandTarget: any) {
-    if (!commandTarget) {
-        vscode.window.showErrorMessage("Cannot load the Project");
-        return;
-    }
-
-    if (isOpenShift()) {
-        const project = commandTarget.id.split('/')[0];
-        const clusterUrl = commandTarget.metadata.clusterName.replace(/-/g, '.');
-        vscode.window.showInformationMessage(`Opening Console for project '${project}'`);
-        await open(`https://${clusterUrl}/console/project/${project}/overview`);
-        return;
-    }
-}
-
 async function customizeAsync(node: ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): Promise<void> {
     if ((node as any).nodeType === 'context') {
         lastNamespace = await initNamespaceName(node);
@@ -177,7 +170,7 @@ async function customizeAsync(node: ClusterExplorerV1.ClusterExplorerResourceNod
             treeItem.contextValue = `${treeItem.contextValue || ''}.openshift.inactiveProject`;
         }
     }
-    if (node.nodeType === 'resource' && node.resourceKind.manifestKind === 'BuildConfig') {
+    if (node.nodeType === 'resource' && (node.resourceKind.manifestKind === 'BuildConfig' || node.resourceKind.manifestKind === 'DeploymentConfig')) {
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
     }
 }

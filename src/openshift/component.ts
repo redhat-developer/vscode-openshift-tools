@@ -5,19 +5,19 @@
 
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command, ContextType } from '../odo';
-import { window, commands, QuickPickItem, Uri, workspace } from 'vscode';
+import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext } from 'vscode';
 import { Progress } from '../util/progress';
 import open = require('open');
 import { ChildProcess } from 'child_process';
 import { CliExitData } from '../cli';
-import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 import { isURL } from 'validator';
 import { Refs, Ref, Type } from '../util/refs';
 import { Delayer } from '../util/async';
-import { contextGlobalState } from '../extension';
 import { Platform } from '../util/platform';
 import path = require('path');
 import fs = require('fs-extra');
+import globby = require('globby');
+
 interface WorkspaceFolderItem extends QuickPickItem {
     uri: Uri;
 }
@@ -30,7 +30,7 @@ class CreateWorkspaceItem implements QuickPickItem {
 
 }
 export class Component extends OpenShiftItem {
-
+    public static extensionContext: ExtensionContext;
     static async getOpenshiftData(context: OpenShiftObject): Promise<OpenShiftObject> {
         return await Component.getOpenShiftCmdData(context,
             "In which Project you want to create a Component",
@@ -83,13 +83,8 @@ export class Component extends OpenShiftItem {
             return Progress.execFunctionWithProgress(`Deleting the Component '${component.getName()} '`, async () => {
                 if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT || component.contextValue === ContextType.COMPONENT_PUSHED) {
                     await Component.unlinkAllComponents(component);
-                    await Component.odo.deleteComponent(component);
                 }
-                if (component.contextPath) {
-                    const wsFolder = workspace.getWorkspaceFolder(component.contextPath);
-                    workspace.updateWorkspaceFolders(wsFolder.index, 1);
-                }
-
+                await Component.odo.deleteComponent(component);
             }).then(() => `Component '${name}' successfully deleted`)
             .catch((err) => Promise.reject(`Failed to delete Component with error '${err}'`));
         }
@@ -99,7 +94,8 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(treeItem,
             "From which Project do you want to undeploy Component",
             "From which Application you want to undeploy Component",
-            "Select Component to undeploy");
+            "Select Component to undeploy",
+            (component) => component.contextValue === ContextType.COMPONENT_PUSHED);
         if (!component) return null;
         const name: string = component.getName();
         const value = await window.showWarningMessage(`Do you want to undeploy Component '${name}\'?`, 'Yes', 'Cancel');
@@ -112,11 +108,10 @@ export class Component extends OpenShiftItem {
     }
 
     static async unlinkAllComponents(component: OpenShiftObject) {
-        const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
-        const compObj: JSON = JSON.parse(compData.stdout);
-        const linkComponent = compObj['status'].linkedComponents;
-        if (linkComponent) {
-            Object.keys(linkComponent).forEach(async key => {
+        const linkComponent = await Component.getLinkData(component);
+        const getLinkComponent = linkComponent['status'].linkedComponents;
+        if (getLinkComponent) {
+            Object.keys(getLinkComponent).forEach(async key => {
                 await Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), key, component.getName()), component.contextPath.fsPath);
             });
         }
@@ -126,16 +121,19 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             "From which Project you want to describe Component",
             "From which Application you want to describe Component",
-            "Select Component you want to describe");
+            "Select Component you want to describe",
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED || value.contextValue === ContextType.COMPONENT_NO_CONTEXT);
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+        Component.odo.executeInTerminal(Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
     }
 
     static async log(context: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to see Log",
             "In which Application you want to see Log",
-            "For which Component you want to see Log");
+            "For which Component you want to see Log",
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         Component.odo.executeInTerminal(Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
@@ -144,19 +142,87 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to follow Log",
             "In which Application you want to follow Log",
-            "For which Component you want to follow Log"
+            "For which Component you want to follow Log",
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
         Component.odo.executeInTerminal(Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+    }
+
+    private static async getLinkData(component: OpenShiftObject) {
+        const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+        return JSON.parse(compData.stdout);
+    }
+
+    static async unlink(context: OpenShiftObject) {
+        const unlinkActions = [
+            {
+                label: 'Component',
+                description: 'Unlink Component'
+            },
+            {
+                label: 'Service',
+                description: 'Unlink Service'
+            }
+        ];
+        const unlinkActionSelected = await window.showQuickPick(unlinkActions, {placeHolder: 'Select the option'});
+        if (!unlinkActionSelected) return null;
+        return unlinkActionSelected.label === 'Component' ? Component.unlinkComponent(context) : unlinkActionSelected.label === 'Service' ?  Component.unlinkService(context) : null;
+    }
+
+    static async unlinkComponent(context: OpenShiftObject) {
+        const linkCompName: Array<string> = [];
+        const component = await Component.getOpenShiftCmdData(context,
+            'Select a Project',
+            'Select an Application',
+            'Select a Component',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
+        if (!component) return null;
+        const linkComponent = await Component.getLinkData(component);
+        const getLinkComponent = linkComponent['status'].linkedComponents;
+        if (!getLinkComponent) throw Error('No linked Components found');
+        Object.keys(getLinkComponent).forEach(async key => {
+            linkCompName.push(key);
+        });
+        const compName = await window.showQuickPick(linkCompName, {placeHolder: "Select a Component to unlink"});
+        if (!compName) return null;
+        return Progress.execFunctionWithProgress(`Unlinking Component`,
+            () => Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), compName), component.contextPath.fsPath)
+                .then(() => `Component '${compName}' has been successfully unlinked from the Component '${component.getName()}'`)
+                .catch((err) => Promise.reject(`Failed to unlink Component with error '${err}'`))
+        );
+    }
+
+    static async unlinkService(context: OpenShiftObject) {
+        const component = await Component.getOpenShiftCmdData(context,
+            'Select a Project',
+            'Select an Application',
+            'Select a Component',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
+        if (!component) return null;
+        const linkService = await Component.getLinkData(component);
+        const getLinkService = linkService['status'].linkedServices;
+        if (!getLinkService) throw Error('No linked Services found');
+        const serviceName = await window.showQuickPick(getLinkService, {placeHolder: "Select a Service to unlink"});
+        if (!serviceName) return null;
+        return Progress.execFunctionWithProgress(`Unlinking Service`,
+            () => Component.odo.execute(Command.unlinkService(component.getParent().getParent().getName(), component.getParent().getName(), serviceName, component.getName()), component.contextPath.fsPath)
+                .then(() => `Service '${serviceName}' has been successfully unlinked from the Component '${component.getName()}'`)
+                .catch((err) => Promise.reject(`Failed to unlink Service with error '${err}'`))
+        );
     }
 
     static async linkComponent(context: OpenShiftObject): Promise<String> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component');
+            'Select a Component',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
-        const componentPresent = await Component.odo.getComponents(component.getParent());
+        const componentPresent = (await Component.odo.getComponents(component.getParent())).filter((component) => component.contextValue !== ContextType.COMPONENT);
         if (componentPresent.length === 1) throw Error('You have no Components available to link, please create new OpenShift Component and try again.');
         const componentToLink = await window.showQuickPick(componentPresent.filter((comp)=> comp.getName() !== component.getName()), {placeHolder: "Select a Component to link"});
         if (!componentToLink) return null;
@@ -185,31 +251,34 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component');
+            'Select a Component',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         const serviceToLink: OpenShiftObject = await window.showQuickPick(Component.getServiceNames(component.getParent()), {placeHolder: "Select the service to link"});
         if (!serviceToLink) return null;
 
         return Progress.execFunctionWithProgress(`Link Service '${serviceToLink.getName()}' with Component '${component.getName()}'`,
-            (progress) => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), serviceToLink.getName()), component.contextPath.fsPath)
+            (progress) => Component.odo.execute(Command.linkServiceTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), serviceToLink.getName()), component.contextPath.fsPath)
                 .then(() => `Service '${serviceToLink.getName()}' successfully linked with Component '${component.getName()}'`)
                 .catch((err) => Promise.reject(`Failed to link Service with error '${err}'`))
         );
     }
 
     static getPushCmd(): Thenable< string | undefined> {
-        return contextGlobalState.globalState.get('PUSH');
+        return this.extensionContext.globalState.get('PUSH');
     }
 
     static setPushCmd(component: string, application: string, project: string): Thenable<void> {
-        return contextGlobalState.globalState.update('PUSH',  Command.pushComponent());
+        return this.extensionContext.globalState.update('PUSH',  Command.pushComponent());
     }
 
     static async push(context: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to push the changes",
             "In which Application you want to push the changes",
-            "For which Component you want to push the changes");
+            "For which Component you want to push the changes",
+            (component) => component.contextValue === ContextType.COMPONENT_PUSHED || component.contextValue === ContextType.COMPONENT);
         if (!component) return null;
         Component.setPushCmd(component.getName(), component.getParent().getName(), component.getParent().getParent().getName());
         Component.odo.executeInTerminal(Command.pushComponent(), component.contextPath.fsPath);
@@ -230,7 +299,8 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component you want to watch');
+            'Select a Component you want to watch',
+            (component) => component.contextValue === ContextType.COMPONENT_PUSHED);
         if (!component) return null;
         Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
@@ -239,7 +309,9 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component you want to open in browser');
+            'Select a Component you want to open in browser',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
         if (!component) return null;
         const app: OpenShiftObject = component.getParent();
         const namespace: string = app.getParent().getName();
@@ -278,7 +350,7 @@ export class Component extends OpenShiftItem {
 
     static async createFromLocal(context: OpenShiftObject): Promise<string> {
         let application: OpenShiftObject = context;
-        let folder: WorkspaceFolderItem[];
+        let folder: WorkspaceFolderItem[] = [];
 
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
@@ -297,18 +369,24 @@ export class Component extends OpenShiftItem {
             );
         }
         const addWorkspaceFolder = new CreateWorkspaceItem();
-        const choice = await window.showQuickPick([addWorkspaceFolder, ...folder], {placeHolder: "Select workspace folder"});
+        const choice: any = await window.showQuickPick([addWorkspaceFolder, ...folder], {placeHolder: "Select workspace folder"});
 
         if (!choice) return null;
-        const workspacePath: Uri = (choice.label === addWorkspaceFolder.label) ?
-            await window.showOpenDialog({
+        let workspacePath: Uri;
+
+        if (choice.label === addWorkspaceFolder.label) {
+            const folders = await window.showOpenDialog({
                 canSelectFiles: false,
                 canSelectFolders: true,
                 canSelectMany: false,
                 defaultUri: Uri.file(Platform.getUserHomePath()),
                 openLabel: "Add workspace Folder for Component"
-            })[0] : folder[0].uri;
-
+            });
+            if (!folders) return null;
+            workspacePath = folders[0];
+        } else {
+            workspacePath = choice.uri;
+        }
         if (!workspacePath) return null;
 
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
@@ -406,12 +484,54 @@ export class Component extends OpenShiftItem {
     }
 
     static async createFromBinary(context: OpenShiftObject): Promise<string> {
+
         let application: OpenShiftObject = context;
+        let folder: WorkspaceFolderItem[] = [];
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
-        const binaryFile = await window.showOpenDialog({
-            openLabel: 'Select the binary file'
-        });
+        if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
+            folder = workspace.workspaceFolders.filter(
+                (value) => {
+                    let result = true;
+                    try {
+                        result = !fs.statSync(path.join(value.uri.fsPath, '.odo', 'config.yaml')).isFile();
+                    } catch (ignore) {
+                    }
+                    return result;
+                }
+            ).map(
+                (folder) => ({ label: `$(file-directory) ${folder.uri.fsPath}`, uri: folder.uri })
+            );
+        }
+        const addWorkspaceFolder = new CreateWorkspaceItem();
+        const choice: any = await window.showQuickPick([addWorkspaceFolder, ...folder], {placeHolder: "Select context folder"});
+
+        if (!choice) return null;
+        let workspacePath: Uri;
+
+        if (choice.label === addWorkspaceFolder.label) {
+            const folders = await window.showOpenDialog({
+                canSelectFiles: false,
+                canSelectFolders: true,
+                canSelectMany: false,
+                defaultUri: Uri.file(Platform.getUserHomePath()),
+                openLabel: "Add context Folder for Component"
+            });
+            if (!folders) return null;
+            workspacePath = folders[0];
+        } else {
+            workspacePath = choice.uri;
+        }
+
+        if (!workspacePath) return null;
+        const globPath = process.platform === 'win32' ? workspacePath.fsPath.replace(/\\/g, '/') : workspacePath.path;
+        const paths = globby.sync(`${globPath}/*.+(jar|war)`, { extglob: true });
+
+        if (paths.length === 0) return window.showInformationMessage("No binary file present in the context folder selected. We currently only support .jar and .war files. If you need support for any other file, please raise an issue.");
+
+        const binaryFileObj: QuickPickItem[] = paths.map((file) => ({ label: `$(file-zip) ${path.basename(file)}`, description: `${file}`}));
+
+        const binaryFile: any = await window.showQuickPick(binaryFileObj, {placeHolder: "Select binary file"});
 
         if (!binaryFile) return null;
 
@@ -428,15 +548,7 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeVersion) return null;
 
-        await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, binaryFile[0]);
+        await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, Uri.file(binaryFile.description), workspacePath);
         return `Component '${componentName}' successfully created`;
-    }
-
-    public static async getComponentPorts(context: OpenShiftObject): Promise<V1ServicePort[]> {
-        const app: OpenShiftObject = context.getParent();
-        const project: OpenShiftObject = app.getParent();
-        const portsResult: CliExitData = await Component.odo.execute(Command.getComponentJson(project.getName(), app.getName(), context.getName()));
-        const serviceOpj: V1Service = JSON.parse(portsResult.stdout) as V1Service;
-        return serviceOpj.spec.ports;
     }
 }

@@ -19,7 +19,7 @@
     {
       "url": "https://badges.gitter.im/redhat-developer/openshift-connector.svg",
       "href": "https://gitter.im/redhat-developer/openshift-connector",
-      "description": "Join us in the #openshift-connector channel"
+      "description": "Join us at #openshift-connector channel"
     }
   ],
   "categories": [
@@ -29,7 +29,9 @@
     "openshift",
     "kubernetes",
     "redhat",
-    "clusters"
+    "clusters",
+    "k8s",
+    "redhat"
   ],
   "icon": "images/openshift_extension.png",
   "activationEvents": [
@@ -57,6 +59,10 @@
     "onCommand:openshift.component.describe",
     "onCommand:openshift.component.describe.palette",
     "onCommand:openshift.component.log",
+    "onCommand:openshift.component.unlink",
+    "onCommand:openshift.component.unlink.palette",
+    "onCommand:openshift.component.unlinkComponent.palette",
+    "onCommand:openshift.component.unlinkService.palette",
     "onCommand:openshift.component.log.palette",
     "onCommand:openshift.component.followLog",
     "onCommand:openshift.component.followLog.palette",
@@ -81,8 +87,10 @@
     "onCommand:openshift.service.describe.palette",
     "onCommand:openshift.component.folder.create",
     "onCommand:openshift.explorer.reportIssue",
-    "onCommand:clusters.openshift.openProjectConsole",
+    "onCommand:openshift.explorer.switchContext",
+    "onCommand:clusters.openshift.project.openConsole",
     "onCommand:clusters.openshift.useProject",
+    "onCommand:clusters.openshift.deploy",
     "onCommand:clusters.openshift.build.start",
     "onCommand:clusters.openshift.build.showLog",
     "onCommand:clusters.openshift.build.followLog",
@@ -90,6 +98,8 @@
     "onCommand:clusters.openshift.build.delete.palette",
     "onCommand:clusters.openshift.build.rebuild",
     "onCommand:clusters.openshift.build.openConsole",
+    "onCommand:clusters.openshift.deploy.delete",
+    "onCommand:clusters.openshift.deploy.delete.palette",
     "onCommand:clusters.openshift.deployment.openConsole",
     "onCommand:clusters.openshift.imagestream.openConsole"
   ],
@@ -104,6 +114,11 @@
       {
         "command": "clusters.openshift.build.start",
         "title": "Start Build",
+        "category": "OpenShift"
+      },
+      {
+        "command": "clusters.openshift.deploy",
+        "title": "Deploy",
         "category": "OpenShift"
       },
       {
@@ -134,6 +149,15 @@
         "command": "openshift.explorer.login.credentialsLogin",
         "title": "Login into Cluster with credentials",
         "category": "OpenShift"
+      },
+      {
+        "command": "openshift.explorer.switchContext",
+        "title": "Switch Contexts",
+        "category": "OpenShift",
+        "icon": {
+          "dark": "images/title/dark/users.svg",
+          "light": "images/title/light/users.svg"
+        }
       },
       {
         "command": "openshift.explorer.refresh",
@@ -249,13 +273,28 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.unlink",
+        "title": "Unlink",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.unlinkComponent.palette",
+        "title": "Unlink Component",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.unlinkService.palette",
+        "title": "Unlink Service",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.component.linkService",
         "title": "Link Service",
         "category": "OpenShift"
       },
       {
         "command": "openshift.openshiftConsole",
-        "title": "Open Console",
+        "title": "Open Console Dashboard",
         "category": "OpenShift"
       },
       {
@@ -271,6 +310,11 @@
       {
         "command": "openshift.component.undeploy",
         "title": "Undeploy",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.undeploy.palette",
+        "title": "Undeploy Component",
         "category": "OpenShift"
       },
       {
@@ -385,7 +429,12 @@
         "category": "OpenShift"
       },
       {
-        "command": "clusters.openshift.openProjectConsole",
+        "command": "clusters.openshift.deploy",
+        "title": "Deploy",
+        "category": "OpenShift"
+      },
+      {
+        "command": "clusters.openshift.project.openConsole",
         "title": "Open Project in Console"
       },
       {
@@ -416,6 +465,16 @@
       {
         "command": "clusters.openshift.build.openConsole",
         "title": "Open in Console"
+      },
+      {
+        "command": "clusters.openshift.deploy.delete.palette",
+        "title": "Delete Replica",
+        "category": "OpenShift"
+      },
+      {
+        "command": "clusters.openshift.deploy.delete",
+        "title": "Delete",
+        "category": "OpenShift"
       },
       {
         "command": "clusters.openshift.deployment.openConsole",
@@ -455,10 +514,6 @@
     "views": {
       "openshiftView": [
         {
-          "id": "extension.vsKubernetesExplorer",
-          "name": "Clusters"
-        },
-        {
           "id": "openshiftProjectExplorer",
           "name": "OpenShift Application Explorer"
         }
@@ -476,6 +531,10 @@
         },
         {
           "command": "clusters.openshift.build.delete",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "clusters.openshift.deploy.delete",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -508,6 +567,10 @@
         },
         {
           "command": "openshift.component.openUrl",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.unlink",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -547,25 +610,25 @@
         {
           "command": "openshift.explorer.login",
           "when": "view == openshiftProjectExplorer",
-          "group": "navigation"
+          "group": "navigation@0"
+        },
+        {
+          "command": "openshift.explorer.switchContext",
+          "when": "view == openshiftProjectExplorer",
+          "group": "navigation@1"
         },
         {
           "command": "openshift.explorer.refresh",
           "when": "view == openshiftProjectExplorer",
-          "group": "navigation"
+          "group": "navigation@2"
         },
         {
           "command": "openshift.explorer.reportIssue",
           "when": "view == openshiftProjectExplorer",
-          "group": "navigation"
+          "group": "navigation@3"
         }
       ],
       "view/item/context": [
-        {
-          "command": "openshift.project.create",
-          "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
-          "group": "c1"
-        },
         {
           "command": "clusters.openshift.deployment.openConsole",
           "group": "3@0",
@@ -580,6 +643,11 @@
           "command": "clusters.openshift.build.start",
           "group": "2@0",
           "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.bc"
+        },
+        {
+          "command": "clusters.openshift.deploy",
+          "group": "2@1",
+          "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.dc"
         },
         {
           "command": "clusters.openshift.build.openConsole",
@@ -602,9 +670,24 @@
           "when": "view == extension.vsKubernetesExplorer && viewItem =~ /openShift\\.resource\\.build.*/i"
         },
         {
+          "command": "clusters.openshift.deploy.delete",
+          "group": "1",
+          "when": "view == extension.vsKubernetesExplorer && viewItem =~ /openShift\\.resource\\.rc.*/i"
+        },
+        {
           "command": "clusters.openshift.build.rebuild",
           "group": "1@0",
           "when": "view == extension.vsKubernetesExplorer && viewItem =~ /openShift\\.resource\\.build.*/i"
+        },
+        {
+          "command": "openshift.openshiftConsole",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster",
+          "group": "c0"
+        },
+        {
+          "command": "openshift.project.create",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
+          "group": "c1"
         },
         {
           "command": "openshift.catalog.listComponents",
@@ -617,24 +700,19 @@
           "group": "c2@2"
         },
         {
-          "command": "openshift.openshiftConsole",
-          "when": "view == openshiftProjectExplorer && viewItem == cluster",
-          "group": "c3"
-        },
-        {
           "command": "openshift.explorer.logout",
           "when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
-          "group": "c4"
+          "group": "c3"
         },
         {
           "command": "openshift.about",
           "when": "view == openshiftProjectExplorer && viewItem == cluster",
-          "group": "c5"
+          "group": "c4"
         },
         {
           "command": "openshift.output",
           "when": "view == openshiftProjectExplorer && viewItem == cluster",
-          "group": "c6"
+          "group": "c5"
         },
         {
           "command": "openshift.project.delete",
@@ -642,9 +720,14 @@
           "group": "p3"
         },
         {
+          "command": "openshift.service.create",
+          "when": "view == openshiftProjectExplorer && viewItem == project",
+          "group": "p1@1"
+        },
+        {
           "command": "openshift.component.create",
           "when": "view == openshiftProjectExplorer && viewItem == project ",
-          "group": "p2"
+          "group": "p1@0"
         },
         {
           "command": "openshift.component.create",
@@ -677,6 +760,11 @@
           "group": "c2@1"
         },
         {
+          "command": "openshift.component.describe",
+          "when": "view == openshiftProjectExplorer && viewItem == component_no_context",
+          "group": "c2@1"
+        },
+        {
           "command": "openshift.component.log",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c2@2"
@@ -695,6 +783,11 @@
           "command": "openshift.component.linkService",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c3@2"
+        },
+        {
+          "command": "openshift.component.unlink",
+          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "c3@3"
         },
         {
           "command": "openshift.component.openUrl",
@@ -771,8 +864,8 @@
           "when": "viewItem =~ /\\.openshift\\.inactiveProject/i"
         },
         {
-          "command": "clusters.openshift.openProjectConsole",
-          "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.\\w*cluster/i"
+          "command": "clusters.openshift.project.openConsole",
+          "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.resource\\.project*/i"
         }
       ]
     },
@@ -797,73 +890,75 @@
   },
   "extensionDependencies": [],
   "scripts": {
-    "vscode:prepublish": "rm -rf out && webpack --mode production",
-    "compile": "webpack --mode development",
-    "compile:watch": "webpack --mode development --watch",
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "node ./node_modules/vscode/bin/test",
-    "verify": "node ./out/build/verify-tools.js",
+    "watch": "tsc -watch -p ./",
     "clean": "rm -rf out || rmdir out /s /q",
+    "test": "npm run clean && npm run compile && npm run verify && node ./out/build/unit-tests.js",
+    "vscode:prepublish": "rm -rf out && webpack --mode production",
+    "compile": "tsc -p ./&webpack --mode development",
+    "compile:watch": "webpack --mode development --watch",
+    "verify": "node ./out/build/verify-tools.js",
     "update-deps": "node_modules/.bin/ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
     "build": "npm run clean && tslint -p tslint.json && npm run compile"
   },
   "devDependencies": {
     "@types/byline": "^4.2.31",
-    "@types/chai": "^4.1.7",
+    "@types/chai": "^4.2.0",
     "@types/collections": "^5.0.0",
-    "@types/fs-extra": "^5.0.5",
+    "@types/fs-extra": "^8.0.0",
     "@types/js-yaml": "^3.12.1",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.0.10",
-    "@types/request": "^2.48.1",
+    "@types/node": "^12.7.2",
+    "@types/request": "^2.48.2",
     "@types/shelljs": "^0.8.5",
     "@types/sinon": "^5.0.7",
-    "@types/sinon-chai": "^3.2.2",
+    "@types/sinon-chai": "^3.2.3",
     "@types/string-format": "^2.0.0",
-    "@types/tmp": "0.0.34",
-    "@types/validator": "^10.11.1",
+    "@types/tmp": "0.1.0",
+    "@types/validator": "^10.11.2",
+    "@types/vscode": "^1.30.0",
     "chai": "^4.2.0",
     "codecov": "^3.5.0",
     "decache": "^4.5.1",
-    "glob": "^7.1.3",
+    "glob": "^7.1.4",
     "istanbul": "^0.4.5",
-    "mocha": "^6.1.4",
-    "mocha-jenkins-reporter": "^0.4.1",
-    "proxyquire": "^2.1.0",
+    "mocha": "^6.2.0",
+    "mocha-jenkins-reporter": "^0.4.2",
+    "proxyquire": "^2.1.3",
     "remap-istanbul": "^0.13.0",
-    "sinon": "^7.3.2",
+    "sinon": "^7.4.1",
     "sinon-chai": "^3.3.0",
-    "tmp": "0.0.33",
-    "tslint": "^5.18.0",
-    "typescript": "^3.5.2",
-    "vscode": "^1.1.34",
-    "walker": "^1.0.7",
     "ts-loader": "^6.0.4",
     "webpack": "^4.38.0",
-    "webpack-cli": "^3.3.6"
+    "webpack-cli": "^3.3.6",
+    "tmp": "0.1.0",
+    "tslint": "^5.19.0",
+    "typescript": "^3.6.2",
+    "vscode-test": "^1.2.0",
+    "walker": "^1.0.7"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.10.2",
-    "binary-search": "^1.3.5",
+    "binary-search": "^1.3.6",
     "byline": "^5.0.0",
-    "event-stream": "3.3.4",
-    "fs-extra": "^7.0.1",
+    "fs-extra": "^8.1.0",
     "git-fetch-pack": "^0.1.1",
     "git-transport-protocol": "^0.1.0",
+    "globby": "^10.0.1",
     "hasha": "^5.0.0",
     "js-yaml": "^3.13.1",
     "mkdirp": "^0.5.1",
-    "open": "^6.3.0",
+    "open": "^6.4.0",
     "request": "^2.88.0",
     "request-progress": "^3.0.0",
-    "semver": "^6.1.1",
+    "rxjs": "^6.5.2",
+    "semver": "^6.3.0",
     "shelljs": "^0.8.3",
     "string-format": "^2.0.0",
     "targz": "^1.0.1",
     "unzip-stream": "^0.3.0",
-    "validator": "^11.0.0",
+    "validator": "^11.1.0",
     "vscode-kubernetes-tools-api": "1.0.0"
   }
 }

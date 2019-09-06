@@ -39,7 +39,7 @@ async function downloadFileAndCreateSha256(targetFolder: string, fileName: strin
 }
 
 const fileCheckRegex = /\w*tools.json/;
-cp.exec('git diff --name-only master..HEAD', async (error, stdout, stderr) => {
+cp.exec('git diff --name-only origin/master -- .', async (error, stdout, stderr) => {
   if (error) {
     throw error;
   }

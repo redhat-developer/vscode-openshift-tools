@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { OpenShiftObject, Command } from "../odo";
+import { Command } from "../odo";
 import { OpenShiftItem } from './openshiftItem';
-import { window, commands, env, QuickPickItem } from 'vscode';
+import { window, commands, env, QuickPickItem, ExtensionContext } from 'vscode';
 import { CliExitData, Cli } from "../cli";
 import open = require("open");
 import { TokenStore } from "../util/credentialManager";
@@ -30,7 +30,7 @@ class CreateUserItem implements QuickPickItem {
 
 }
 export class Cluster extends OpenShiftItem {
-
+    public static extensionContext: ExtensionContext;
     static async logout(): Promise<string> {
         const value = await window.showWarningMessage(`Do you want to logout of cluster?`, 'Logout', 'Cancel');
         if (value === 'Logout') {
@@ -66,17 +66,29 @@ export class Cluster extends OpenShiftItem {
         Cli.getInstance().showOutputChannel();
     }
 
-    static async openshiftConsole(context: OpenShiftObject): Promise<void> {
-        if (context) {
-            open(`${context.getName()}/console`);
+    static async openshiftConsole(): Promise<void> {
+        let consoleUrl: string;
+        const versionInfo = await Cluster.odo.execute(Command.getclusterVersion(), process.cwd(), false);
+        if (versionInfo.error === null) {
+            const routeObj = await Cluster.odo.execute(Command.getOpenshiftClusterRoute());
+            const spec = JSON.parse(routeObj.stdout).items[0].spec;
+            consoleUrl = `${spec.port.targetPort}://${spec.host}`;
         } else {
-            const result: OpenShiftObject[] = await Cluster.odo.getClusters();
-            if (result.length>0 && result[0].getName().startsWith('http')) {
-                open(`${result[0].getName()}/console`);
-            } else {
-                window.showErrorMessage(result[0].getName());
-            }
+            const serverUrl = await Cluster.odo.execute(Command.showServerUrl());
+            consoleUrl = `${serverUrl.stdout}/console`;
         }
+        open(consoleUrl);
+    }
+
+    static async switchContext() {
+        const k8sConfig = new KubeConfigUtils();
+        const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
+        const contextName: QuickPickItem[] = contexts.map((ctx) => ({ label: `${ctx.name}`}));
+        const choice = await window.showQuickPick(contextName, {placeHolder: "Select the new OpenShift context"});
+        if (!choice) return null;
+        return Promise.resolve()
+            .then(() => Cluster.odo.execute(Command.setOpenshiftContext(choice.label)))
+            .then(() => window.showInformationMessage(`Cluster context is changed to: ${choice.label}`));
     }
 
     static async getUrl(): Promise<string | null> {

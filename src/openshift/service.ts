@@ -7,6 +7,7 @@ import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
 import { window } from 'vscode';
 import { Progress } from '../util/progress';
+import { Platform } from '../util/platform';
 
 export class Service extends OpenShiftItem {
 
@@ -78,7 +79,7 @@ export class Service extends OpenShiftItem {
         if (service) {
             const template = await Service.getTemplate(service);
             if (template) {
-                Service.odo.executeInTerminal(Command.describeService(template));
+                Service.odo.executeInTerminal(Command.describeService(template), Platform.getUserHomePath());
             } else {
                 throw Error(`Cannot get Service Type name for Service \'${service.getName()}\'`);
             }
