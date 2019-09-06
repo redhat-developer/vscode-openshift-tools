@@ -81,5 +81,5 @@ export function run(): any {
                 return e(error);
             }
         });
-    }).then((coverageRunner:any) => coverageRunner.reportCoverage());
+    }).then((coverageRunner: any) => coverageRunner.reportCoverage());
 }
