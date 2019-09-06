@@ -103,7 +103,7 @@
     "onCommand:clusters.openshift.deployment.openConsole",
     "onCommand:clusters.openshift.imagestream.openConsole"
   ],
-  "main": "./out/src/extension",
+  "main": "./dist/extension",
   "contributes": {
     "commands": [
       {
@@ -890,12 +890,13 @@
   },
   "extensionDependencies": [],
   "scripts": {
-    "verify": "node ./out/build/verify-tools.js",
-    "vscode:prepublish": "npm run build",
-    "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "clean": "rm -rf out || rmdir out /s /q",
     "test": "npm run clean && npm run compile && npm run verify && node ./out/build/unit-tests.js",
+    "vscode:prepublish": "rm -rf out && webpack --mode production",
+    "compile": "tsc -p ./&webpack --mode development",
+    "compile:watch": "webpack --mode development --watch",
+    "verify": "node ./out/build/verify-tools.js",
     "update-deps": "node_modules/.bin/ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
     "build": "npm run clean && tslint -p tslint.json && npm run compile"
@@ -932,7 +933,10 @@
     "tslint": "^5.19.0",
     "typescript": "^3.6.2",
     "vscode-test": "^1.2.0",
-    "walker": "^1.0.7"
+    "walker": "^1.0.7",
+    "ts-loader": "^6.0.4",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.8"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.10.2",
