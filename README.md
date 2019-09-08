@@ -15,16 +15,15 @@ To run the instance of OpenShift cluster locally, developers can use [minishift]
 
 For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
 
-## WARNING! Breaking changes for users using the older version
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/warning.png" width="15" height="15" /><span style="margin: 20px;color: #ee0000">WARNING!! Breaking changes</span></div>
 
-This release(`0.1.0`) uses latest odo version(`v1.0.0-beta5`) that requires below mentioned changes.
+This release(`0.1.0`) requires below mentioned changes. Use the migration guide mentioned below to resolve them.
 
-* Every component/service needs to have a context folder. The extension will prompt thhe user to specify the context folder with the creation of component.
-* All component configurations are saved to `./.odo/config.yaml`. You can commit this file to your repository to easily recreate component with the same configuration later, or to share it with someone else. 
-* This breaks backward compatibility with older versions and components created with previous version will no longer be identified. Therefore after extension is updated to new version all previously deployed components won't be visible in OpenShift Application View.
-* Users can recreate components from existing sources, but pushing those components to the cluster would lead to deployment failure, because of name conflicts.
+* This breaks backward compatibility with older versions(`<=0.0.23`).
+* Components created with previous version will no longer be identified. Therefore after extension is updated to new version(`0.1.0`) all previously deployed components won't be visible in OpenShift Application View.
+* Every component/service needs to have a context folder. The extension will prompt the user to specify the context folder with the creation of component/service.
 
-> **Please follow the this [_migration_](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0) guide to resolve any possible issues.** In case of any queries, please use the [Feedback & Question](#Feedback-&-Questions) section.
+> **Please follow the [_migration_](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0) guide to resolve any possible issues.** In case of any queries, please use the [Feedback & Question](#Feedback-&-Questions) section.
 
 ## Commands and features
 
