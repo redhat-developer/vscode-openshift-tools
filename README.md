@@ -23,7 +23,9 @@ This release(`0.1.0`) requires below mentioned changes. Use the migration guide 
 * Components created with previous version will no longer be identified. Therefore after extension is updated to new version(`0.1.0`) all previously deployed components won't be visible in OpenShift Application View.
 * Every component/service needs to have a context folder. The extension will prompt the user to specify the context folder with the creation of component/service.
 
-> **Please follow the [_migration_](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0) guide to resolve any possible issues.** In case of any queries, please use the [Feedback & Question](#Feedback-&-Questions) section.
+> **Please follow the [migration](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0) guide to resolve any possible issues.**
+
+In case of any queries, please use the [Feedback & Question](#Feedback-&-Questions) section.
 
 ## Commands and features
 
