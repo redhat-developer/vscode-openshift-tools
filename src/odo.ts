@@ -128,7 +128,7 @@ export class Command {
         return `oc config use-context ${context}`;
     }
     static odoLoginWithUsernamePassword(clusterURL: string, username: string, passwd: string) {
-        return `odo login ${clusterURL} -u ${username} -p ${passwd} --insecure-skip-tls-verify`;
+        return `odo login ${clusterURL} -u '${username}' -p '${passwd}' --insecure-skip-tls-verify`;
     }
     static odoLoginWithToken(clusterURL: string, ocToken: string) {
         return `odo login ${clusterURL} --token=${ocToken} --insecure-skip-tls-verify`;

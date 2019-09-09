@@ -10,7 +10,7 @@ export class Filters {
         return value ? value.replace(Filters.tokenRegex, '--token **********') : value;
     }
 
-    static readonly passwordRegex = /-p\s+[^\s]*/;
+    static readonly passwordRegex = /-p\s+'([^']+)'/;
 
     static filterPassword(value: string) {
         return value? value.replace(Filters.passwordRegex, '-p **********') : value;
