@@ -15,7 +15,7 @@ To run the instance of OpenShift cluster locally, developers can use [minishift]
 
 For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
 
-<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/warning.png" width="15" height="15" /><span style="margin: 20px;color: #ee0000">WARNING!! Breaking changes</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/readme-0.1.0/images/warning.png" width="15" height="15" /><span style="margin: 20px;color: #ee0000">WARNING!! Breaking changes</span></div>
 
 This release(`0.1.0`) requires below mentioned changes. Use the migration guide mentioned below to resolve them.
 
