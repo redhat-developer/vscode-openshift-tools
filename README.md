@@ -15,6 +15,18 @@ To run the instance of OpenShift cluster locally, developers can use [minishift]
 
 For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
 
+## WARNING !! Breaking Changes
+
+This release(`0.1.0`) requires below mentioned changes. Use the migration guide mentioned below to resolve them.
+
+* This breaks backward compatibility with older versions(`<=0.0.23`).
+* Components created with previous version will no longer be identified. Therefore after extension is updated to new version(`0.1.0`) all previously deployed components won't be visible in OpenShift Application View.
+* Every component/service needs to have a context folder. The extension will prompt the user to specify the context folder with the creation of component/service.
+
+> **Please follow the [migration](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0) guide to resolve any possible issues.**
+
+In case of any queries, please use the [Feedback & Question](#Feedback-&-Questions) section.
+
 ## Commands and features
 
 ![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/vscode-openshift-tools.gif)
@@ -83,8 +95,8 @@ For detail analysis of how to setup and run local OpenShift Cluster using minish
 
 #### Icons Representation
 
-<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/title/login.png" width="15" height="15" /><span style="margin: 20px">Log in to Cluster</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/title/refresh.png" width="15" height="15" /><span style="margin: 20px">Refresh Cluster</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/title/readme/icon-login.png" width="15" height="15" /><span style="margin: 20px">Log in to Cluster</span></div>
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/title/readme/icon-refresh.png" width="15" height="15" /><span style="margin: 20px">Refresh Cluster</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/cluster-node.png" width="15" height="15" /><span style="margin: 20px">Cluster Resource Node</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/project-node.png" width="15" height="15" /><span style="margin: 20px">Project Resource</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/application-node.png" width="15" height="15" /><span style="margin: 20px">Application Resource</span></div>
@@ -106,7 +118,7 @@ For detail analysis of how to setup and run local OpenShift Cluster using minish
 
 This extension uses two CLI tools to interact with OpenShift cluster:
 * OKD CLI client tool - [oc](https://github.com/openshift/origin/releases)
-* OpenShift Do tool - [odo](https://github.com/openshift/odo/releases/tag/v0.0.20)
+* OpenShift Do tool - [odo](https://github.com/openshift/odo/releases/tag/v1.0.0-beta5)
 
 > If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
 The extension will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see an notification for the missing tool.
