@@ -300,7 +300,7 @@ export class Component extends OpenShiftItem {
             if (undeployRequired) {
                 let choice: string;
                 do {
-                    choice = await window.showWarningMessage('This Component must be undeployed before new version is pushed, because it was created and deployed with previous version ot the extension.', 'Undeploy', 'Help', 'Cancel');
+                    choice = await window.showWarningMessage('This Component must be undeployed before new version is pushed, because it was created and deployed with previous version of the extension.', 'Undeploy', 'Help', 'Cancel');
                     switch (choice) {
                         case 'Undeploy':
                             await Component.undeploy(component);
@@ -565,7 +565,7 @@ export class Component extends OpenShiftItem {
             window.showInformationMessage('Import for binary OpenShift Components is not supported.');
             return;
         } else if (componentType !== ComponentType.GIT && componentType !== ComponentType.LOCAL) {
-            window.showInformationMessage(`Cannot import unknown Component type '${componentType}'.`);
+            window.showErrorMessage(`Cannot import unknown Component type '${componentType}'.`);
             return;
         }
 
@@ -645,9 +645,9 @@ export class Component extends OpenShiftItem {
                 } else {
                     workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: workspaceFolder });
                 }
-                return `Component '${compName}' was sucessfully imported.`;
+                return window.showInformationMessage(`Component '${compName}' was sucessfully imported.`);
             } catch (errGetCompJson) {
-                return `Component import failed with error '${errGetCompJson.message}'.`;
+                return window.showErrorMessage(`Component import failed with error '${errGetCompJson.message}'.`);
             }
         }); // create component with the same name
     }
