@@ -151,18 +151,18 @@ suite('K8s/deployment', () => {
         });
 
         test('works from context menu', async () => {
-            await DeploymentConfig.dcShowLog(context);
-            expect(termStub).calledOnceWith(Command.showLogDc("nodejs-comp-nodejs-app"));
+            await DeploymentConfig.showLog(context);
+            expect(termStub).calledOnceWith(Command.showDeploymentConfigLog("nodejs-comp-nodejs-app"));
         });
 
         test('works with no context', async () => {
-            await DeploymentConfig.dcShowLog(null);
-            expect(termStub).calledOnceWith(Command.showLogDc('nodejs-comp-nodejs-app'));
+            await DeploymentConfig.showLog(null);
+            expect(termStub).calledOnceWith(Command.showDeploymentConfigLog('nodejs-comp-nodejs-app'));
         });
 
         test('returns null when no replica selected', async () => {
             quickPickStub.resolves(null);
-            const result = await DeploymentConfig.dcShowLog(null);
+            const result = await DeploymentConfig.showLog(null);
             expect(result).null;
         });
     });
