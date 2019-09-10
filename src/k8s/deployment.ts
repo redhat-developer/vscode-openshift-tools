@@ -17,7 +17,7 @@ export class Command {
         return `oc get deploymentConfig -o json`;
     }
 
-    static showLogDc(deploymentConfig: string) {
+    static showDeploymentConfigLog(deploymentConfig: string) {
         return `oc logs dc/${deploymentConfig}`;
     }
 
@@ -75,11 +75,11 @@ export class DeploymentConfig {
             'You have no replicas available');
     }
 
-    static async dcShowLog(context: { id: any; }): Promise<string> {
+    static async showLog(context: { id: any; }): Promise<string> {
         let deployName: string = context ? context.id : null;
         if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to see log's"), "Select a DeploymentConfig too see log's");
         if (deployName) {
-            DeploymentConfig.odo.executeInTerminal(Command.showLogDc(deployName));
+            DeploymentConfig.odo.executeInTerminal(Command.showDeploymentConfigLog(deployName));
         }
         return deployName;
     }

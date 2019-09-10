@@ -920,7 +920,7 @@
           "type": "number",
           "default": 0,
           "description": "Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and integrated terminal."
-        }, 
+        },
         "openshiftConnector.disableCheckForMigration": {
           "title": "Disable check if migration required",
           "type": "boolean",
