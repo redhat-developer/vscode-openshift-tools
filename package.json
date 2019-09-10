@@ -94,7 +94,6 @@
     "onCommand:clusters.openshift.deploy",
     "onCommand:clusters.openshift.build.start",
     "onCommand:clusters.openshift.build.showLog",
-    "onCommand:clusters.openshift.build.showLog.palette",
     "onCommand:clusters.openshift.build.followLog",
     "onCommand:clusters.openshift.build.delete",
     "onCommand:clusters.openshift.build.delete.palette",

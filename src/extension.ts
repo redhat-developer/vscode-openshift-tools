@@ -68,7 +68,6 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('clusters.openshift.deploy.showLog', (context) => execute(DeploymentConfig.showLog, context)),
         vscode.commands.registerCommand('clusters.openshift.deploy.showLog.palette', (context) => execute(DeploymentConfig.showLog, context)),
         vscode.commands.registerCommand('clusters.openshift.build.showLog', (context) => execute(Build.showLog, context)),
-        vscode.commands.registerCommand('clusters.openshift.build.showLog.palette', (context) => execute(Build.showLog, context)),
         vscode.commands.registerCommand('clusters.openshift.build.followLog', (context) => execute(Build.followLog, context)),
         vscode.commands.registerCommand('clusters.openshift.build.delete', (context) => execute(Build.delete, context)),
         vscode.commands.registerCommand('clusters.openshift.build.delete.palette', (context) => execute(Build.delete, context)),
