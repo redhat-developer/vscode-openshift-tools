@@ -74,7 +74,7 @@ suite('K8s/build', () => {
 
     suite('start build', () => {
         const context = {
-            id: "nodejs-comp-nodejs-app",
+            name: "nodejs-comp-nodejs-app",
             metadata: undefined,
             namespace: null,
             nodeCategory: "Kubernetes-explorer-node",
@@ -131,15 +131,15 @@ suite('K8s/build', () => {
         test('works from context menu', async () => {
             const result = await Build.startBuild(context);
 
-            expect(result).equals(`Build '${context.id}' successfully started`);
-            expect(execStub).calledWith(Command.startBuild(context.id));
+            expect(result).equals(`Build '${context.name}' successfully started`);
+            expect(execStub).calledWith(Command.startBuild(context.name));
         });
 
         test('works with no context', async () => {
             const result = await Build.startBuild(null);
 
-            expect(result).equals(`Build '${context.id}' successfully started`);
-            expect(execStub).calledWith(Command.startBuild(context.id));
+            expect(result).equals(`Build '${context.name}' successfully started`);
+            expect(execStub).calledWith(Command.startBuild(context.name));
         });
 
         test('returns null when no BuildConfig selected', async () => {
