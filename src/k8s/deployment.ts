@@ -43,10 +43,10 @@ export class DeploymentConfig {
         return common.getQuickPicks(Command.getDeploymentConfigs(), msg);
     }
 
-    static async deploy(context: { id: any; }): Promise<string> {
-        let deployName: string = context ? context.id : undefined;
+    static async deploy(context: { name: string; }): Promise<string> {
+        let deployName: string = context ? context.name : undefined;
         let result: Promise<string> = null;
-        if (!deployName) deployName = await common.selectResourceByName(this.getDeploymentConfigNames("You have no DeploymentConfigs available to deploy"), "Select a DeploymentConfig to deploy");
+        if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to deploy"), "Select a DeploymentConfig to deploy");
         if (deployName) {
             result = Progress.execFunctionWithProgress(`Creating Deployment for '${deployName}'.`, () => DeploymentConfig.odo.execute(Command.deploy(deployName)))
                 .then(() => `Deployment successfully created for '${deployName}'.`)
