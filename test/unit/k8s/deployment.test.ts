@@ -76,7 +76,7 @@ suite('K8s/deployment', () => {
 
     suite('Deploy', () => {
         const context = {
-            id: "nodejs-comp-nodejs-app",
+            name: "nodejs-comp-nodejs-app",
             metadata: undefined,
             namespace: null,
             nodeCategory: "Kubernetes-explorer-node",
@@ -93,15 +93,15 @@ suite('K8s/deployment', () => {
         test('works from context menu', async () => {
             const result = await DeploymentConfig.deploy(context);
 
-            expect(result).equals(`Deployment successfully created for '${context.id}'.`);
-            expect(execStub).calledWith(Command.deploy(context.id));
+            expect(result).equals(`Deployment successfully created for '${context.name}'.`);
+            expect(execStub).calledWith(Command.deploy(context.name));
         });
 
         test('works with no context', async () => {
             const result = await DeploymentConfig.deploy(null);
 
-            expect(result).equals(`Deployment successfully created for '${context.id}'.`);
-            expect(execStub).calledWith(Command.deploy(context.id));
+            expect(result).equals(`Deployment successfully created for '${context.name}'.`);
+            expect(execStub).calledWith(Command.deploy(context.name));
         });
 
         test('returns null when no DeploymentConfig selected', async () => {
