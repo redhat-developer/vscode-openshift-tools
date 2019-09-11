@@ -83,8 +83,8 @@ export class Build {
         return build;
     }
 
-    static async startBuild(context: { id: any; }): Promise<string> {
-        let buildName: string = context ? context.id : undefined;
+    static async startBuild(context: { name: string; }): Promise<string> {
+        let buildName: string = context ? context.name : undefined;
         let result: Promise<string> = null;
         if (!buildName) buildName = await common.selectResourceByName(await Build.getBuildConfigNames("You have no BuildConfigs available to start a build"), "Select a BuildConfig to start a build");
         if (buildName) {
