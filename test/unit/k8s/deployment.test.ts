@@ -136,7 +136,7 @@ suite('K8s/deployment', () => {
     suite('Show Log', () => {
 
         const context = {
-            id: "nodejs-comp-nodejs-app",
+            name: "nodejs-comp-nodejs-app",
             metadata: undefined,
             namespace: null,
             nodeCategory: "Kubernetes-explorer-node",
