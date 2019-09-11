@@ -75,8 +75,8 @@ export class DeploymentConfig {
             'You have no replicas available');
     }
 
-    static async showLog(context: { id: any; }): Promise<string> {
-        let deployName: string = context ? context.id : null;
+    static async showLog(context: { name: string; }): Promise<string> {
+        let deployName: string = context ? context.name : null;
         if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to see log's"), "Select a DeploymentConfig too see log's");
         if (deployName) {
             DeploymentConfig.odo.executeInTerminal(Command.showDeploymentConfigLog(deployName));
