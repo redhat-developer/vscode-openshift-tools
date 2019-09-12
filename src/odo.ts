@@ -743,7 +743,6 @@ export class OdoImpl implements Odo {
     }
 
     public async _getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        const app = component.getParent();
         const result: cliInstance.CliExitData = await this.execute(Command.getComponentUrl(), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath(), false);
         return this.loadItems(result).map((value) => new OpenShiftObjectImpl(component, value.metadata.name, ContextType.COMPONENT_ROUTE, false, OdoImpl.instance, TreeItemCollapsibleState.None));
     }
