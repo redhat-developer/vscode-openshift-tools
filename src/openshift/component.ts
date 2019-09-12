@@ -608,27 +608,30 @@ export class Component extends OpenShiftItem {
                 } else { // componentType === ComponentType.Local
                     await Component.odo.execute(Command.createLocalComponent(prjName, appName, componentJson.metadata.labels['app.kubernetes.io/name'], componentJson.metadata.labels['app.openshift.io/runtime-version'], compName, workspaceFolder.fsPath));
                 }
-
-                const volumeMounts: any[] = componentJson.spec.template.spec.containers[0].volumeMounts.filter((volume) => !volume.name.startsWith(compName));
-                const volumes: any[] = componentJson.spec.template.spec.volumes.filter((volume) => volume.persistentVolumeClaim !== undefined && !volume.name.startsWith(compName));
-                const storageData: Partial<{mountPath: string, pvcName: string}>[] = volumes.map((volume) => {
-                    const data: Partial<{mountPath: string, pvcName: string}> = {};
-                    const mount = volumeMounts.find((mount) => mount.name === volume.name);
-                    data.mountPath = mount.mountPath;
-                    data.pvcName = volume.persistentVolumeClaim.claimName;
-                    return data;
-                });
-                for (const storage of storageData) {
-                    try {
-                        const pvcResult = await Component.odo.execute(`oc get pvc/${storage.pvcName} -o json`, Platform.getUserHomePath(), false);
-                        const pvcJson = JSON.parse(pvcResult.stdout);
-                        const storageName = pvcJson.metadata.labels['app.kubernetes.io/storage-name'];
-                        const size = pvcJson.spec.resources.requests.storage;
-                        await Component.odo.execute(Command.createStorage(prjName, appName, compName, storageName, storage.mountPath, size), workspaceFolder.fsPath);
-                    } catch (ignore) {
-                        // means there is no storage attached to component
+                // import storage if present
+                if (componentJson.spec.template.spec.containers[0].volumeMounts) {
+                    const volumeMounts: any[] = componentJson.spec.template.spec.containers[0].volumeMounts.filter((volume) => !volume.name.startsWith(compName));
+                    const volumes: any[] = componentJson.spec.template.spec.volumes.filter((volume) => volume.persistentVolumeClaim !== undefined && !volume.name.startsWith(compName));
+                    const storageData: Partial<{mountPath: string, pvcName: string}>[] = volumes.map((volume) => {
+                        const data: Partial<{mountPath: string, pvcName: string}> = {};
+                        const mount = volumeMounts.find((mount) => mount.name === volume.name);
+                        data.mountPath = mount.mountPath;
+                        data.pvcName = volume.persistentVolumeClaim.claimName;
+                        return data;
+                    });
+                    for (const storage of storageData) {
+                        try {
+                            const pvcResult = await Component.odo.execute(`oc get pvc/${storage.pvcName} -o json`, Platform.getUserHomePath(), false);
+                            const pvcJson = JSON.parse(pvcResult.stdout);
+                            const storageName = pvcJson.metadata.labels['app.kubernetes.io/storage-name'];
+                            const size = pvcJson.spec.resources.requests.storage;
+                            await Component.odo.execute(Command.createStorage(prjName, appName, compName, storageName, storage.mountPath, size), workspaceFolder.fsPath);
+                        } catch (ignore) {
+                            // means there is no storage attached to component
+                        }
                     }
                 }
+                // import routes if present
                 try {
                     const routeResult = await Component.odo.execute(`oc get route -l app.kubernetes.io/instance=${compName},app.kubernetes.io/part-of=${appName} -o json`, Platform.getUserHomePath(), false);
                     const routeJson = JSON.parse(routeResult.stdout);
