@@ -40,7 +40,7 @@ suite('Cli', () => {
         execStub.yields(null, stdout, '');
         const result = await cli.execute(command, options);
 
-        expect(execStub).calledOnceWithExactly(command, options, sinon.match.func);
+        expect(execStub).calledWithExactly(command, options, sinon.match.func);
         expect(result).deep.equals({ error: null, stdout: stdout, stderr: '' });
     });
 

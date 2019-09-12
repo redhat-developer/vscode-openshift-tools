@@ -634,7 +634,7 @@ export class Component extends OpenShiftItem {
                     const routeJson = JSON.parse(routeResult.stdout);
                     const routeData: Partial<{name: string, port: string}>[] = routeJson.items.map((element: any) => ({name: element.metadata.labels['odo.openshift.io/url-name'], port: element.spec.port.targetPort}));
                     for (const url of routeData) {
-                        Component.odo.execute(Command.createComponentCustomUrl(prjName, appName, compName, url.name, url.port), workspaceFolder.fsPath);
+                        Component.odo.execute(Command.createComponentCustomUrl(url.name, url.port), workspaceFolder.fsPath);
                     }
                 } catch (ignore) {
                     // means there is no routes to the component

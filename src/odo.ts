@@ -21,6 +21,7 @@ import { GlyphChars } from './util/constants';
 import { Subject } from 'rxjs';
 import open = require('open');
 import { Progress } from './util/progress';
+import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 
 const Collapsed = TreeItemCollapsibleState.Collapsed;
 
@@ -207,8 +208,8 @@ export class Command {
         return `oc wait ServiceInstance/${service} --for delete --namespace ${project}`;
     }
     @verbose
-    static createComponentCustomUrl(project: string, app: string, component: string, name: string, port: string) {
-        return `odo url create ${name} --port ${port} --project ${project} --app ${app} --component ${component}`;
+    static createComponentCustomUrl(name: string, port: string) {
+        return `odo url create ${name} --port ${port}`;
     }
     static getComponentUrl(project: string, app: string, component: string) {
         return `odo url list -o json`;
@@ -395,6 +396,7 @@ export interface Odo {
     getComponentTypes(): Promise<string[]>;
     getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]>;
+    getComponentPorts(component: OpenShiftObject): Promise<V1ServicePort[]>;
     getComponentTypeVersions(componentName: string): Promise<string[]>;
     getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getServiceTemplates(): Promise<string[]>;
@@ -723,6 +725,26 @@ export class OdoImpl implements Odo {
         return (await this.getComponentChildren(component)).filter((value) => value.contextValue === ContextType.COMPONENT_ROUTE);
     }
 
+    async getComponentPorts(component: OpenShiftObject): Promise<V1ServicePort[]> {
+        let ports: V1ServicePort[] = [];
+        if (component.contextValue === ContextType.COMPONENT_PUSHED) {
+            const app: OpenShiftObject = component.getParent();
+            const project: OpenShiftObject = app.getParent();
+            const portsResult: CliExitData = await this.execute(Command.getComponentJson(project.getName(), app.getName(), component.getName()), component.contextPath.fsPath);
+            const serviceOpj: V1Service = JSON.parse(portsResult.stdout) as V1Service;
+            return serviceOpj.spec.ports;
+        } else {
+            const settings: ComponentSettings = OdoImpl.data.getSettingsByContext(component.contextPath);
+            if (settings) {
+                ports = settings.Ports.map<V1ServicePort>((port: string)  => {
+                    const data = port.split('/');
+                    return {port: Number.parseInt(data[0]), protocol: data[1], name: port};
+                });
+            }
+        }
+        return ports;
+    }
+
     public async _getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         const app = component.getParent();
         const result: cliInstance.CliExitData = await this.execute(Command.getComponentUrl(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath(), false);
@@ -1012,7 +1034,7 @@ export class OdoImpl implements Odo {
     }
 
     public async createComponentCustomUrl(component: OpenShiftObject, name: string, port: string): Promise<OpenShiftObject> {
-        await this.execute(Command.createComponentCustomUrl(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), name, port), component.contextPath.fsPath);
+        await this.execute(Command.createComponentCustomUrl(name, port), component.contextPath.fsPath);
         return this.insertAndReveal(new OpenShiftObjectImpl(component, name, ContextType.COMPONENT_ROUTE, false, this, TreeItemCollapsibleState.None));
     }
 

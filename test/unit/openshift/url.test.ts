@@ -27,7 +27,7 @@ suite('OpenShift/URL', () => {
     let getRouteNameStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
-    const componentItem = new TestItem(appItem, 'component', ContextType.COMPONENT);
+    const componentItem = new TestItem(appItem, 'component', ContextType.COMPONENT_PUSHED);
     const routeItem = new TestItem(componentItem, 'route', ContextType.COMPONENT_ROUTE);
     const errorMessage = 'ERROR';
 

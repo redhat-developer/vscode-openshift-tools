@@ -781,6 +781,11 @@
           "group": "c1@1"
         },
         {
+          "command": "openshift.url.create",
+          "when": "view == openshiftProjectExplorer && viewItem == component_not_pushed",
+          "group": "c1@1"
+        },
+        {
           "command": "openshift.storage.create",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c1@2"
