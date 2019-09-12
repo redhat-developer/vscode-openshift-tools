@@ -28,4 +28,5 @@ export interface ComponentSettings {
     Project: string;
     Name: string;
     ContextPath?: Uri;
+    Ports: string[];
 }
