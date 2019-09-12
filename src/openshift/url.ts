@@ -70,7 +70,7 @@ export class Url extends OpenShiftItem{
         const component = treeItem.getParent();
         const app = component.getParent();
         const namespace = app.getParent();
-        const urlDetails = await Url.odo.execute(Command.getComponentUrl(namespace.getName(), app.getName(), component.getName()), component.contextPath.fsPath);
+        const urlDetails = await Url.odo.execute(Command.getComponentUrl(), component.contextPath.fsPath);
         let urlObject: any;
         let result: any[];
         try {

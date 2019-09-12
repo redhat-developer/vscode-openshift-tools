@@ -179,9 +179,6 @@ export class Command {
     static watchComponent(project: string, app: string, component: string) {
         return `odo watch ${component} --app ${app} --project ${project}`;
     }
-    static getRouteHostName(namespace: string, component: string) {
-        return `oc get route --namespace ${namespace} -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/instance=='${component}')]}{.spec.host}{end}"`;
-    }
     @verbose
     static createLocalComponent(project: string, app: string, type: string, version: string, name: string, folder: string) {
         return `odo create ${type}:${version} ${name} --context ${folder} --app ${app} --project ${project}`;
@@ -211,7 +208,7 @@ export class Command {
     static createComponentCustomUrl(name: string, port: string) {
         return `odo url create ${name} --port ${port}`;
     }
-    static getComponentUrl(project: string, app: string, component: string) {
+    static getComponentUrl() {
         return `odo url list -o json`;
     }
     static deleteComponentUrl(project: string, app: string, component: string, name: string) {
@@ -747,7 +744,7 @@ export class OdoImpl implements Odo {
 
     public async _getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         const app = component.getParent();
-        const result: cliInstance.CliExitData = await this.execute(Command.getComponentUrl(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath(), false);
+        const result: cliInstance.CliExitData = await this.execute(Command.getComponentUrl(), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath(), false);
         return this.loadItems(result).map((value) => new OpenShiftObjectImpl(component, value.metadata.name, ContextType.COMPONENT_ROUTE, false, OdoImpl.instance, TreeItemCollapsibleState.None));
     }
 
