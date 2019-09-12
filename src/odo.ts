@@ -1039,7 +1039,6 @@ export class OdoImpl implements Odo {
     }
 
     public async deleteURL(route: OpenShiftObject): Promise<OpenShiftObject> {
-        const component = route.getParent();
         await this.execute(Command.deleteComponentUrl(route.getName()), route.getParent().contextPath.fsPath);
         return this.deleteAndRefresh(route);
     }
