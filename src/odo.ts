@@ -214,8 +214,8 @@ export class Command {
     static getComponentUrl(project: string, app: string, component: string) {
         return `odo url list -o json`;
     }
-    static deleteComponentUrl(project: string, app: string, component: string, name: string) {
-        return `odo url delete -f ${name} --project ${project} --app ${app} --component ${component}`;
+    static deleteComponentUrl(name: string) {
+        return `odo url delete -f ${name}`;
     }
     static getComponentJson(project: string, app: string, component: string) {
         return `oc get service ${component}-${app} --namespace ${project} -o json`;
@@ -1040,7 +1040,7 @@ export class OdoImpl implements Odo {
 
     public async deleteURL(route: OpenShiftObject): Promise<OpenShiftObject> {
         const component = route.getParent();
-        await this.execute(Command.deleteComponentUrl(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), route.getName()), route.getParent().contextPath.fsPath);
+        await this.execute(Command.deleteComponentUrl(route.getName()), route.getParent().contextPath.fsPath);
         return this.deleteAndRefresh(route);
     }
 
