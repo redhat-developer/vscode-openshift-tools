@@ -79,6 +79,14 @@ export class DeploymentConfig {
             'You have no replicas available');
     }
 
+    static async rcShowLog(context: { impl: any; }): Promise<string> {
+        const replica = await DeploymentConfig.selectReplica(context, "Select a Replica too see the logs");
+        if (replica) {
+            DeploymentConfig.odo.executeInTerminal(Command.showLog(replica));
+        }
+        return replica;
+    }
+
     static async showLog(context: { name: string; }): Promise<string> {
         let deployName: string = context ? context.name : null;
         if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to see log's"), "Select a DeploymentConfig too see log's");
