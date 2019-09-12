@@ -562,11 +562,9 @@ export class Component extends OpenShiftItem {
         const componentJson = JSON.parse(componentResult.stdout).items[0];
         const componentType = componentJson.metadata.annotations['app.kubernetes.io/component-source-type'];
         if (componentType === ComponentType.BINARY) {
-            window.showInformationMessage('Import for binary OpenShift Components is not supported.');
-            return;
+            return 'Import for binary OpenShift Components is not supported.';
         } else if (componentType !== ComponentType.GIT && componentType !== ComponentType.LOCAL) {
-            window.showErrorMessage(`Cannot import unknown Component type '${componentType}'.`);
-            return;
+            throw new Error(`Cannot import unknown Component type '${componentType}'.`);
         }
 
         const workspaceFolder = await selectWorkspaceFolder();
@@ -578,7 +576,7 @@ export class Component extends OpenShiftItem {
                 //  annotations:
                 //      app.kubernetes.io/component-source-type: binary
                 //      app.openshift.io/vcs-uri: 'file:///helloworld.war'
-                // verify if local file exists and ask for correct location
+                // not supported yet
 
                 // metadata:
                 //  annotations:
@@ -589,14 +587,7 @@ export class Component extends OpenShiftItem {
                 //  annotations:
                 //      app.kubernetes.io/component-source-type: git
                 //      app.kubernetes.io/url: 'https://github.com/dgolovin/nodejs-ex'
-                // if (componentJson.annotations['app.kubernetes.io/component-source-type'] === ComponentType.BINARY) {
-                //     const binaryUri = Uri.parse(componentJson.annotations['app.openshift.io/vcs-uri']);
-                //     if (path.isAbsolute(binaryUri.fsPath)) {
 
-                //     } else {
-
-                //     }
-                //     await Component.odo.execute(Command.createBinaryComponent(prjName, appName, componentJson.metadata.labels['app.kubernetes.io/name'], componentJson.metadata.labels['app.openshift.io/runtime-version'], compName, 'binary-location', workspaceFolder.fsPath));
                 if (componentType === ComponentType.GIT) {
                     const bcResult = await Component.odo.execute(`oc get bc/${componentJson.metadata.name} -o json`);
                     const bcJson = JSON.parse(bcResult.stdout);
@@ -645,9 +636,9 @@ export class Component extends OpenShiftItem {
                 } else {
                     workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: workspaceFolder });
                 }
-                return window.showInformationMessage(`Component '${compName}' was sucessfully imported.`);
+                return `Component '${compName}' was successfully imported.`;
             } catch (errGetCompJson) {
-                return window.showErrorMessage(`Component import failed with error '${errGetCompJson.message}'.`);
+                throw new Error(`Component import failed with error '${errGetCompJson.message}'.`);
             }
         }); // create component with the same name
     }
