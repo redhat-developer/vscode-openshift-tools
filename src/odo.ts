@@ -1125,7 +1125,7 @@ export class OdoImpl implements Odo {
         const result2 = await this.execute(getPreviosOdoResourceNames('ServiceInstance'), __dirname, false);
         const sis = result2.stdout.split('\n');
         if ((result2.stdout !== '' && sis.length > 0) || (result1.stdout !== '' && dcs.length > 0))  {
-            const choice = await window.showWarningMessage(`Some of resources in cluster must be updated to work with latest release of OpenShift Connector Extension.`, 'Update', 'Don\'t show it again', 'Help', 'Cancel');
+            const choice = await window.showWarningMessage(`Some of the resources in cluster must be updated to work with latest release of OpenShift Connector Extension.`, 'Update', 'Don\'t show it again', 'Help', 'Cancel');
             if (choice === 'Help') {
                 open('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0');
                 this.subject.next(new OdoEventImpl('changed', this.getClusters()[0]));
