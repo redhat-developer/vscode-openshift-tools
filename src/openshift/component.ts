@@ -348,24 +348,17 @@ export class Component extends OpenShiftItem {
         );
         if (!component) return null;
         const app: OpenShiftObject = component.getParent();
-        const namespace: string = app.getParent().getName();
-        if (await Component.checkRouteCreated(namespace, component)) {
+        const urlItems = await Component.listUrl(component);
+        if (urlItems === null) {
             const value = await window.showInformationMessage(`No URL for Component '${component.getName()}' in Application '${app.getName()}'. Do you want to create a URL and open it?`, 'Create', 'Cancel');
             if (value === 'Create') {
                 await commands.executeCommand('openshift.url.create', component);
             }
         }
 
-        if (! await Component.checkRouteCreated(namespace, component)) {
-            const UrlDetails = await Component.odo.execute(Command.getComponentUrl(namespace, app.getName(), component.getName()), component.contextPath.fsPath);
-            let result: any[] = [];
+        if (urlItems !== null) {
             let selectRoute: QuickPickItem;
-            try {
-                result = JSON.parse(UrlDetails.stdout).items;
-            } catch (ignore) {
-                // should give empty list if no url configured
-                // see https://github.com/openshift/odo/issues/1515
-            }
+            const result = urlItems.filter(value => value.status.state === 'Pushed');
             const hostName: QuickPickItem[] = result.map((value) => ({ label: `${value.spec.protocol}://${value.spec.host}`, description: `Target Port is ${value.spec.port}`}));
             if (hostName.length >1) {
                 selectRoute = await window.showQuickPick(hostName, {placeHolder: "This Component has multiple URLs. Select the desired URL to open in browser."});
@@ -377,9 +370,9 @@ export class Component extends OpenShiftItem {
         }
     }
 
-    static async checkRouteCreated(namespace: string, component: OpenShiftObject): Promise<boolean> {
-        const routeCheck = await Component.odo.execute(Command.getRouteHostName(namespace, component.getName()));
-        return routeCheck.stdout.trim() === '';
+    static async listUrl(component: OpenShiftObject) {
+        const UrlDetails = await Component.odo.execute(Command.getComponentUrl(), component.contextPath.fsPath);
+        return JSON.parse(UrlDetails.stdout).items;
     }
 
     static async createFromLocal(context: OpenShiftObject): Promise<string> {
