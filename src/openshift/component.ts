@@ -15,22 +15,8 @@ import { Refs, Ref, Type } from '../util/refs';
 import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import path = require('path');
-import fs = require('fs-extra');
 import globby = require('globby');
 import { workspaceUtil } from '../util/workspaceUtil';
-
-interface WorkspaceFolderItem extends QuickPickItem {
-    uri: Uri;
-}
-
-class CreateWorkspaceItem implements QuickPickItem {
-
-	constructor() { }
-
-	get label(): string { return `$(plus) Add new workspace folder.`; }
-    get description(): string { return 'Folder which does not have an openshift context'; }
-
-}
 
 export class Component extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
