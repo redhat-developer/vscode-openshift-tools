@@ -1131,7 +1131,7 @@ export class OdoImpl implements Odo {
 
         }
         if (projectsToMigrate.length > 0) {
-            const choice = await window.showWarningMessage(`Some of the resources in cluster must be updated to work with latest release of OpenShift Connector Extension.`, 'Update', 'Don\'t show it again', 'Help', 'Cancel');
+            const choice = await window.showWarningMessage(`Some of the resources in cluster must be updated to work with latest release of OpenShift Connector Extension.`, 'Update', 'Don\'t check again', 'Help', 'Cancel');
             if (choice === 'Help') {
                 open('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0');
                 this.subject.next(new OdoEventImpl('changed', this.getClusters()[0]));
@@ -1160,7 +1160,7 @@ export class OdoImpl implements Odo {
                                     if (labels['app.kubernetes.io/url-name']) {
                                         command = command + ` odo.openshift.io/url-name=${labels['app.kubernetes.io/url-name']}`;
                                     }
-                                    await this.execute(command);
+                                    await this.execute(command + ` --namespace=${project}`);
                                     await this.execute(`oc label ${resourceId} ${resourceName} app.kubernetes.io/component-name- --namespace=${project}`);
                                     await this.execute(`oc label ${resourceId} ${resourceName} odo.openshift.io/migrated=true --namespace=${project}`);
                                 } catch (err) {
