@@ -12,7 +12,7 @@ class CreateWorkspaceItem implements QuickPickItem {
 	constructor() { }
 
 	get label(): string { return `$(plus) Add new context folder.`; }
-    get description(): string { return 'Folder which does not have an openshift context'; }
+    get description(): string { return 'Folder which does not have an OpenShift context'; }
 
 }
 
@@ -48,7 +48,7 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
         });
         if (!folders) return null;
         if (await checkComponentFolder(folders[0])) {
-            window.showInformationMessage('The folder selected already contains a component. Please select a different folder');
+            window.showInformationMessage('The folder selected already contains a component. Please select a different folder.');
             return this.selectWorkspaceFolder();
         } else {
             workspacePath = folders[0];
@@ -59,6 +59,6 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
     return workspacePath;
     }
 
-    async function checkComponentFolder(folder) {
-        return fs.existsSync(path.join(folder.path, '.odo', 'config.yaml'));
+    async function checkComponentFolder(folder: Uri) {
+        return fs.existsSync(path.join(folder.fsPath, '.odo', 'config.yaml'));
     }
