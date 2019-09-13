@@ -16,7 +16,7 @@ import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import path = require('path');
 import globby = require('globby');
-import { workspaceUtil } from '../util/workspaceUtil';
+import { selectWorkspaceFolder } from '../util/workspace';
 
 export class Component extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
@@ -366,7 +366,7 @@ export class Component extends OpenShiftItem {
 
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
-        const workspacePath = await workspaceUtil.selectWorkspaceFolder();
+        const workspacePath = await selectWorkspaceFolder();
         if (!workspacePath) return null;
 
         const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
@@ -412,7 +412,7 @@ export class Component extends OpenShiftItem {
         let application: OpenShiftObject = context;
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
-        const workspacePath = await workspaceUtil.selectWorkspaceFolder();
+        const workspacePath = await selectWorkspaceFolder();
         if (!workspacePath) return null;
         const delayer = new Delayer<string>(500);
 
@@ -464,7 +464,7 @@ export class Component extends OpenShiftItem {
 
         if (!application) return null;
 
-        const workspacePath = await workspaceUtil.selectWorkspaceFolder();
+        const workspacePath = await selectWorkspaceFolder();
 
         if (!workspacePath) return null;
 
@@ -510,7 +510,7 @@ export class Component extends OpenShiftItem {
             throw new Error(`Cannot import unknown Component type '${componentType}'.`);
         }
 
-        const workspaceFolder = await workspaceUtil.selectWorkspaceFolder();
+        const workspaceFolder = await selectWorkspaceFolder();
         if (!workspaceFolder) return null;
         return await Progress.execFunctionWithProgress(`Importing component '${compName}'`, async (progress) => {
             try {
