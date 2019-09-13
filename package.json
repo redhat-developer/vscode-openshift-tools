@@ -584,10 +584,6 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
-          "command": "clusters.openshift.build.showLog",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
           "command": "openshift.app.delete",
           "when": "view == openshiftProjectExplorer"
         },
