@@ -1118,7 +1118,7 @@ export class OdoImpl implements Odo {
         const projectsResult = await this.execute(`oc get project -o jsonpath="{range .items[*]}{.metadata.name}{\\"\\n\\"}{end}"`);
         const projects = projectsResult.stdout.split('\n');
         const projectsToMigrate: string[] = [];
-        const getPreviosOdoResourceNames = (resourceId, namespace) => `oc get ${resourceId} -l app.kubernetes.io/component-name -o jsonpath="{range .items[*]}{.metadata.name}{\\"\\n\\"}{end}" --namespace=${project}`;
+        const getPreviosOdoResourceNames = (resourceId: string, project: string) => `oc get ${resourceId} -l app.kubernetes.io/component-name -o jsonpath="{range .items[*]}{.metadata.name}{\\"\\n\\"}{end}" --namespace=${project}`;
 
         for (const project of projects) {
             const result1 = await this.execute(getPreviosOdoResourceNames('dc', project), __dirname, false);
