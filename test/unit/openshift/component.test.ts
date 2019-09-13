@@ -1006,11 +1006,12 @@ suite('OpenShift/Component', () => {
         });
 
         test('gets URLs for component and if there is only one opens it in browser', async () => {
-            execStub.onCall(0).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
+            execStub.onCall(0).resolves({error: undefined, stdout: JSON.stringify({
                 items: [
                     {
+                        status: {
+                            state: 'Pushed'
+                        },
                         spec: {
                             host: 'url',
                             protocol: 'https',
@@ -1025,17 +1026,21 @@ suite('OpenShift/Component', () => {
 
         test('gets URLs for the component and if there is more than one asks which one to open it in browser and opens selected', async () => {
             quickPickStub.onCall(3).resolves({label: 'https://url1'});
-            execStub.onCall(0).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
+            execStub.onCall(0).resolves({error: undefined, stdout: JSON.stringify({
                 items: [
                     {
+                        status: {
+                            state: 'Pushed'
+                        },
                         spec: {
                             host: 'url1',
                             protocol: 'https',
                             port: 8080
                         }
                     }, {
+                        status: {
+                            state: 'Pushed'
+                        },
                         spec: {
                             host: 'url2',
                             protocol: 'https',
@@ -1050,17 +1055,21 @@ suite('OpenShift/Component', () => {
 
         test('gets URLs for the component, if there is more than one asks which one to open it in browser and exits if selection is canceled', async () => {
             quickPickStub.onCall(3).resolves(null);
-            execStub.onCall(0).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
+            execStub.onCall(0).resolves({error: undefined, stdout: JSON.stringify({
                 items: [
                     {
+                        status: {
+                            state: 'Pushed'
+                        },
                         spec: {
                             host: 'url1',
                             protocol: 'https',
                             port: 8080
                         }
                     }, {
+                        status: {
+                            state: 'Pushed'
+                        },
                         spec: {
                             host: 'url2',
                             protocol: 'https',
@@ -1076,11 +1085,12 @@ suite('OpenShift/Component', () => {
         test('request to create url for component if it does not exist, creates the URL if confirmed by user and opens it in browser.' , async () => {
             sandbox.stub(vscode.window, 'showInformationMessage').resolves('Create');
             sandbox.stub(vscode.commands, 'executeCommand').resolves();
-            execStub.onCall(0).resolves({error: undefined, stdout: '', stderr: ''});
-            execStub.onCall(1).resolves({error: undefined, stdout: 'url', stderr: ''});
-            execStub.onCall(2).resolves({error: undefined, stdout: JSON.stringify({
+            execStub.onCall(0).resolves({error: undefined, stdout: JSON.stringify({
                 items: [
                     {
+                        status: {
+                            state: 'Pushed'
+                        },
                         spec: {
                             host: 'url',
                             protocol: 'https',
@@ -1096,7 +1106,20 @@ suite('OpenShift/Component', () => {
         test('request to create url for component if it does not exist and exits when not confirmed' , async () => {
             sandbox.stub(vscode.window, 'showInformationMessage').resolves('Cancel');
             sandbox.stub(vscode.commands, 'executeCommand').resolves();
-            execStub.onFirstCall().resolves({error: undefined, stdout: '', stderr: ''});
+            execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        status: {
+                            state: 'Pushed'
+                        },
+                        spec: {
+                            host: 'url',
+                            protocol: 'https',
+                            port: 8080
+                        }
+                    }
+                ]
+            }), stderr: ''});
             await Component.openUrl(null);
             expect(opnStub).is.not.called;
         });
