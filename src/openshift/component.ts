@@ -15,22 +15,8 @@ import { Refs, Ref, Type } from '../util/refs';
 import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import path = require('path');
-import fs = require('fs-extra');
 import globby = require('globby');
 import { selectWorkspaceFolder } from '../util/workspace';
-
-interface WorkspaceFolderItem extends QuickPickItem {
-    uri: Uri;
-}
-
-class CreateWorkspaceItem implements QuickPickItem {
-
-	constructor() { }
-
-	get label(): string { return `$(plus) Add new workspace folder.`; }
-    get description(): string { return 'Folder which does not have an openshift context'; }
-
-}
 
 export class Component extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
@@ -426,7 +412,10 @@ export class Component extends OpenShiftItem {
         let application: OpenShiftObject = context;
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
+        const workspacePath = await selectWorkspaceFolder();
+        if (!workspacePath) return null;
         const delayer = new Delayer<string>(500);
+
         const repoURI = await window.showInputBox({
             prompt: 'Git repository URI',
             validateInput: (value: string) => {
@@ -459,65 +448,26 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeVersion) return null;
 
-        const folder = await window.showOpenDialog({
-            canSelectFiles: false,
-            canSelectFolders: true,
-            canSelectMany: false,
-            defaultUri: Uri.file(Platform.getUserHomePath()),
-            openLabel: "Select Context Folder for Component"
-        });
-
-        if (!folder) return null;
-
         window.showInformationMessage('Do you want to clone git repository for created Component?', 'Yes', 'No').then((value) => {
             value === 'Yes' && commands.executeCommand('git.clone', repoURI);
         });
 
-        await Component.odo.createComponentFromGit(application, componentTypeName, componentTypeVersion, componentName, repoURI, folder[0], gitRef.label);
+        await Component.odo.createComponentFromGit(application, componentTypeName, componentTypeVersion, componentName, repoURI, workspacePath, gitRef.label);
         return `Component '${componentName}' successfully created`;
     }
 
     static async createFromBinary(context: OpenShiftObject): Promise<string> {
 
         let application: OpenShiftObject = context;
-        let folder: WorkspaceFolderItem[] = [];
+
         if (!application) application = await Component.getOpenshiftData(context);
+
         if (!application) return null;
-        if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
-            folder = workspace.workspaceFolders.filter(
-                (value) => {
-                    let result = true;
-                    try {
-                        result = !fs.statSync(path.join(value.uri.fsPath, '.odo', 'config.yaml')).isFile();
-                    } catch (ignore) {
-                    }
-                    return result;
-                }
-            ).map(
-                (folder) => ({ label: `$(file-directory) ${folder.uri.fsPath}`, uri: folder.uri })
-            );
-        }
-        const addWorkspaceFolder = new CreateWorkspaceItem();
-        const choice: any = await window.showQuickPick([addWorkspaceFolder, ...folder], {placeHolder: "Select context folder"});
 
-        if (!choice) return null;
-        let workspacePath: Uri;
-
-        if (choice.label === addWorkspaceFolder.label) {
-            const folders = await window.showOpenDialog({
-                canSelectFiles: false,
-                canSelectFolders: true,
-                canSelectMany: false,
-                defaultUri: Uri.file(Platform.getUserHomePath()),
-                openLabel: "Add context Folder for Component"
-            });
-            if (!folders) return null;
-            workspacePath = folders[0];
-        } else {
-            workspacePath = choice.uri;
-        }
+        const workspacePath = await selectWorkspaceFolder();
 
         if (!workspacePath) return null;
+
         const globPath = process.platform === 'win32' ? workspacePath.fsPath.replace(/\\/g, '/') : workspacePath.path;
         const paths = globby.sync(`${globPath}/*.+(jar|war)`, { extglob: true });
 
