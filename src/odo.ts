@@ -145,7 +145,7 @@ export class Command {
         return `oc wait pvc/${storage}-${app}-pvc --for=delete --namespace ${project}`;
     }
     static deleteComponent(project: string, app: string, component: string) {
-        return `odo delete ${component} -f --app ${app} --project ${project}`;
+        return `odo delete ${component} -f --app ${app} --project ${project} --all`;
     }
     static describeComponent(project: string, app: string, component: string) {
         return `odo describe ${component} --app ${app} --project ${project}`;

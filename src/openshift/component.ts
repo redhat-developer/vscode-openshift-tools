@@ -61,13 +61,20 @@ export class Component extends OpenShiftItem {
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
+        let warningMsg: string;
         const component = await Component.getOpenShiftCmdData(treeItem,
             "From which Project do you want to delete Component",
             "From which Application you want to delete Component",
             "Select Component to delete");
         if (!component) return null;
         const name: string = component.getName();
-        const value = await window.showWarningMessage(`Do you want to delete Component '${name}\'?`, 'Yes', 'Cancel');
+        if (component.contextValue === ContextType.COMPONENT_PUSHED) {
+            warningMsg = `Do you want to delete Component '${name}\'? This will delete component from local config after it gets deleted from the cluster`;
+        } else {
+            warningMsg = `Do you want to delete Component '${name}\'?`;
+        }
+        const value = await window.showWarningMessage(warningMsg, 'Yes', 'Cancel');
+
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Deleting the Component '${component.getName()} '`, async () => {
                 if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT || component.contextValue === ContextType.COMPONENT_PUSHED) {
@@ -87,7 +94,7 @@ export class Component extends OpenShiftItem {
             (component) => component.contextValue === ContextType.COMPONENT_PUSHED);
         if (!component) return null;
         const name: string = component.getName();
-        const value = await window.showWarningMessage(`Do you want to undeploy Component '${name}\'?`, 'Yes', 'Cancel');
+        const value = await window.showWarningMessage(`Do you want to undeploy Component '${name}\'? This will remove the component from the cluster.`, 'Yes', 'Cancel');
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Undeploying the Component '${component.getName()} '`, async () => {
                 await Component.odo.undeployComponent(component);
