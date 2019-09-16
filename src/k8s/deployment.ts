@@ -63,6 +63,24 @@ export class DeploymentConfig {
         return result;
     }
 
+    static async pause(context: { name: string; }): Promise<string> {
+        let deployName: string = context ? context.name : null;
+        if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to pause"), "Select a DeploymentConfig to pause");
+        if (deployName) {
+            DeploymentConfig.odo.executeInTerminal(Command.pause(deployName));
+        }
+        return deployName;
+    }
+
+    static async resume(context: { name: string; }): Promise<string> {
+        let deployName: string = context ? context.name : null;
+        if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to resume"), "Select a DeploymentConfig to resume");
+        if (deployName) {
+            DeploymentConfig.odo.executeInTerminal(Command.resume(deployName));
+        }
+        return deployName;
+    }
+
     static async getReplicasList(cmd: string, errorMessage: string): Promise<string[]> {
         const result = await DeploymentConfig.odo.execute(cmd);
         const replica: string = result.stdout;
