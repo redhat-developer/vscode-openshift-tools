@@ -116,6 +116,8 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
    * `Service -> Describe` - Describe a Service Type for a selected Component
    * `Service -> Delete` - Delete a Service from an Application
 
+**NOTE:** Currently we support creation of one component per folder. Multiple components from a folder might be supported in future releases.
+
 #### Icons Representation
 
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/title/readme/icon-login.png" width="15" height="15" /><span style="margin: 20px">Log in to Cluster</span></div>
