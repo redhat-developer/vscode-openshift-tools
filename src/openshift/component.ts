@@ -68,6 +68,7 @@ export class Component extends OpenShiftItem {
         if (!component) return null;
         const name: string = component.getName();
         const value = await window.showWarningMessage(`Do you want to delete Component '${name}\'?`, 'Yes', 'Cancel');
+
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Deleting the Component '${component.getName()} '`, async () => {
                 if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT || component.contextValue === ContextType.COMPONENT_PUSHED) {
