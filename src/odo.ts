@@ -144,6 +144,9 @@ export class Command {
     static waitForStorageToBeGone(project: string, app: string, storage: string) {
         return `oc wait pvc/${storage}-${app}-pvc --for=delete --namespace ${project}`;
     }
+    static undeployComponent(project: string, app: string, component: string) {
+        return `odo delete ${component} -f --app ${app} --project ${project}`;
+    }
     static deleteComponent(project: string, app: string, component: string) {
         return `odo delete ${component} -f --app ${app} --project ${project} --all`;
     }
@@ -988,7 +991,7 @@ export class OdoImpl implements Odo {
 
     public async undeployComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
         const app = component.getParent();
-        await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+        await this.execute(Command.undeployComponent(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         component.contextValue = ContextType.COMPONENT;
         //  OpenShiftExplorer.getInstance().refresh(component);
         this.subject.next(new OdoEventImpl('changed', component));
