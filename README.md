@@ -48,8 +48,12 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 
 #### Actions available for an OpenShift Cluster Project
 
-   * `Project -> New Application` - Create a new Application inside the selected Project.
-   * `Project -> Delete` - Delete the selected Project.
+   * `Project -> New Component` - Create a new Component from the Project.
+        * git - Use a git repository as the source for the Component.
+        * binary - Use binary file as a source for the Component
+        * local - Use local directory as a source for the Component.
+   * `Project -> New Service` - Perform Service Catalog operations when it is enabled.
+   * `Project -> Delete` - Delete an existing Project.
 
 #### Actions available for an Application in a Project
 
@@ -63,17 +67,40 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 
 #### Actions available for a Component in an Application
 
+##### Components can be in 3 stages:
+
+      pushed - When the components are deployed into the cluster.
+      not pushed - When are the components are in local config but NOT deployed into the cluster.
+      no context - When there is no context folder associated with the component in the workspace.
+
+#### Actions for a Pushed Component
+
    * `Component -> New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster.
    * `Component -> New Storage` - Create Storage and mount to a Component.
+   * `Component -> Describe` - Describe the given Component in terminal window.
    * `Component -> Show Log` - Retrieve the log for the given Component.
    * `Component -> Follow Log` - Follow logs for the given Component.
-   * `Component -> Link Service` - Link a Component to a Service.
    * `Component -> Link Component` - Link Component to another Component.
+   * `Component -> Link Service` - Link Component to a Service.
+   * `Component -> Unlink` - Unlink Component from Component/Service.
    * `Component -> Open in Browser` - Open the exposed URL in browser.
-   * `Component -> Push` - Push source code to a Component.
+   * `Component -> Push` - Push the source code to a Component.
    * `Component -> Watch` - Watch for changes, update Component on change.
+   * `Component -> Undeploy` - Undeploys a Component from the cluster. The component still resides in the local config.
+   * `Component -> Delete` - Delete an existing Component from the cluster and removes the local config also.
+
+#### Actions for a Not Pushed Component
+
+   * `Component -> New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster.
+   * `Component -> Push` - Push the source code to a Component.
+   * `Component -> Delete` - Delete an existing Component from the local config.
+
+
+#### Actions for a no context Component
+
    * `Component -> Describe` - Describe the given Component in terminal window.
-   * `Component -> Delete` - Delete an existing Component.
+   * `Component -> Delete` - Delete an existing Component from the local config.
+   * `Component -> Import` - If the component was created using old version of the extension (`<=0.0.23`), users can use the `Import` action to migrate to latest version and import the metadata changes.
 
 #### Actions available for a URL in a Component
 
@@ -88,10 +115,6 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 
    * `Service -> Describe` - Describe a Service Type for a selected Component
    * `Service -> Delete` - Delete a Service from an Application
-
-#### Actions available for a Folder in Explorer view
-
-   * `New OpenShift Component` - Create an OpenShift component from selected folder
 
 #### Icons Representation
 
