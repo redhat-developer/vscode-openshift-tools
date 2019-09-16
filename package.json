@@ -94,6 +94,7 @@
     "onCommand:clusters.openshift.deploy",
     "onCommand:clusters.openshift.build.start",
     "onCommand:clusters.openshift.build.showLog",
+    "onCommand:clusters.openshift.build.showLog.palette",
     "onCommand:clusters.openshift.build.followLog",
     "onCommand:clusters.openshift.build.delete",
     "onCommand:clusters.openshift.build.delete.palette",
@@ -453,6 +454,11 @@
         "category": "OpenShift"
       },
       {
+        "command": "clusters.openshift.build.showLog.palette",
+        "title": "Show Build's Log",
+        "category": "OpenShift"
+      },
+      {
         "command": "clusters.openshift.deploy.dc.showLog",
         "title": "Show Log",
         "category": "OpenShift"
@@ -565,6 +571,10 @@
         },
         {
           "command": "clusters.openshift.build.delete",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "clusters.openshift.build.showLog",
           "when": "view == openshiftProjectExplorer"
         },
         {
