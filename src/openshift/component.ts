@@ -345,14 +345,19 @@ export class Component extends OpenShiftItem {
 
         if (urlItems !== null) {
             let selectRoute: QuickPickItem;
-            const result = urlItems.filter(value => value.status.state === 'Pushed');
-            const hostName: QuickPickItem[] = result.map((value) => ({ label: `${value.spec.protocol}://${value.spec.host}`, description: `Target Port is ${value.spec.port}`}));
-            if (hostName.length >1) {
-                selectRoute = await window.showQuickPick(hostName, {placeHolder: "This Component has multiple URLs. Select the desired URL to open in browser."});
-                if (!selectRoute) return null;
-                return open(`${selectRoute.label}`);
-            } else {
-                return open(`${hostName[0].label}`);
+            const unpushedUrl = urlItems.filter(value => value.status.state === 'Not Pushed');
+            const pushedUrl = urlItems.filter(value => value.status.state === 'Pushed');
+            if (pushedUrl.length > 0) {
+                const hostName: QuickPickItem[] = pushedUrl.map((value) => ({ label: `${value.spec.protocol}://${value.spec.host}`, description: `Target Port is ${value.spec.port}`}));
+                if (hostName.length >1) {
+                    selectRoute = await window.showQuickPick(hostName, {placeHolder: "This Component has multiple URLs. Select the desired URL to open in browser."});
+                    if (!selectRoute) return null;
+                    return open(`${selectRoute.label}`);
+                } else {
+                    return open(`${hostName[0].label}`);
+                }
+            } else if (unpushedUrl.length > 0) {
+                window.showInformationMessage(`${unpushedUrl.length} unpushed URL in the local config. Use \'Push\' command before opening URL in browser.`);
             }
         }
     }

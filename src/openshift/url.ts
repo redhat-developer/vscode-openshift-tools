@@ -79,7 +79,7 @@ export class Url extends OpenShiftItem{
         if (result && result.length > 0) {
             urlObject = result.filter((value) => (value.metadata.name === treeItem.getName()));
         }
-        if (urlObject) {
+        if (urlObject[0].status.state === 'Pushed') {
             open(`${urlObject[0].spec.protocol}://${urlObject[0].spec.host}`);
         } else {
             window.showInformationMessage('Selected URL is not created in cluster. Use \'Push\' command before opening URL in browser.');
