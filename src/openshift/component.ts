@@ -449,10 +449,8 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeVersion) return null;
 
-        window.showInformationMessage('Do you want to clone git repository for created Component?', 'Yes', 'No').then((value) => {
-            value === 'Yes' && commands.executeCommand('git.clone', repoURI);
-        });
-
+        const response = await window.showInformationMessage('Do you want to clone git repository for created Component?', 'Yes', 'No');
+        if (response === 'Yes') await commands.executeCommand('git.clone', repoURI);
         await Component.odo.createComponentFromGit(application, componentTypeName, componentTypeVersion, componentName, repoURI, workspacePath, gitRef.label);
         return `Component '${componentName}' successfully created`;
     }
