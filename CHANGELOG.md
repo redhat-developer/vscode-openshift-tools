@@ -1,5 +1,53 @@
 # Change Log
 
+## 0.1.0 (September 18, 2019)
+This release involves *Breaking Changes* !!
+
+* Components created with previous version will no longer be identified. Therefore after extension is updated to new version(`0.1.0`) all previously deployed components won't be visible in OpenShift Application View.
+* For older versions, here is the [Migration Guide](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0).
+
+### Added
+* Every component/service needs to have a context folder. The extension will prompt the user to specify the context folder with the creation of component/service.
+* The selected context folder will reside in the vscode workspace.
+* `Create Component` creates a local component configuration within `./.odo/config.yaml` in the context folder selected, nothing is created on the cluster at this point.
+* All component configurations are saved to ./.odo/config.yaml. You can commit this file to your repository to easily recreate component with the same configuration later, or to share it with someone else.
+* To deploy the component to a cluster or to apply config changes, run `PUSH` command for the component.
+    * `PUSH` will create component/urls/storage on the OpenShift cluster and push your local files to it.
+* `Import` actions for components which were created using old versions of the extension.
+* Support for OpenShift 4.x clusters.
+* Update Actions to Navigation Item
+    * Add Switch Contexts - This will help users to switch contexts from kubeconfig.
+    * Add Issue tracker - Users can directly file extension issues/feedback.
+* Added Multiple Actions to Kubernetes resources in Kubernetes View.
+    * For Build Configs - Start Build, Rebuild, Show Logs, Follow Logs
+    * For Deployment Configs - Deploy, Show Logs
+    * Add `Open in Console` for k8s resources in Kubernetes View.
+
+### Changes
+* The openshift labels used internally by odo to identify its components, have been updated to match https://github.com/gorkem/app-labels/blob/master/labels-annotation-for-openshift.adoc.
+* Components can be in 3 stages:
+    * pushed - When the components are deployed into the cluster.
+    * not pushed - When are the components are in local config but NOT deployed into the cluster.
+    * no context - When there is no context folder associated with the component in the workspace.
+* Extension uses [odo-v1.0.0-beta5](https://github.com/openshift/odo/releases/tag/v1.0.0-beta5).
+* Remove Clusters view from OpenShift Views Container. Users can perform all the required action from Kubernetes extension Clusters view.
+
+### Fixes
+* [#1117](https://github.com/redhat-developer/vscode-openshift-tools/pull/1117) Import command for components without context
+* [#1107](https://github.com/redhat-developer/vscode-openshift-tools/pull/1107) Add migration for component/services deployed in active cluster 
+* [#1169](https://github.com/redhat-developer/vscode-openshift-tools/pull/1169) Fix clone the git repository while creating Component
+* [#1158](https://github.com/redhat-developer/vscode-openshift-tools/pull/1158) Fix workflow for git + binary component
+* [#1152](https://github.com/redhat-developer/vscode-openshift-tools/pull/1152) Fix list of urls in Open in Browser action
+* [#1126](https://github.com/redhat-developer/vscode-openshift-tools/pull/1126) Migrarion to @types/vscode and vscode-test
+* [#1115](https://github.com/redhat-developer/vscode-openshift-tools/pull/1115) Remove recursive search from binary component selection
+* [#1113](https://github.com/redhat-developer/vscode-openshift-tools/pull/1113) Add binary file list from context folder in the quickPick
+* [#950](https://github.com/redhat-developer/vscode-openshift-tools/pull/950) Provide context folder selection if no workspace present
+* [#1046](https://github.com/redhat-developer/vscode-openshift-tools/pull/1046) Use users home folder as current directory when deleting service.
+* `Open in Browser` commands should show only components in `pushed` state
+* `Link/Unlink` commands and services should show only components in `pushed` state
+* Remove circular dependencies introduced by extension context
+* Differentiate between console urls for OpenShift 3.x and 4.x clusters
+
 ## 0.0.23 (July 4, 2019)
 * [#920](https://github.com/redhat-developer/vscode-openshift-tools/pull/920) Fix odo CLI tool download checksum fail for all 3 OS variants
 * [#903](https://github.com/redhat-developer/vscode-openshift-tools/pull/903) Add new login experience using k8 config
