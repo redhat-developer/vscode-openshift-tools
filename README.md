@@ -15,13 +15,13 @@ To run the instance of OpenShift cluster locally, developers can use [minishift]
 
 For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
 
-## WARNING !! Breaking Changes
+## WARNING !!! Breaking Changes
 
-This release(`0.1.0`) requires below mentioned changes. Use the migration guide mentioned below to resolve them.
+This release `0.1.0` contains breaking changes mentioned below.
 
-* This breaks backward compatibility with older versions(`<=0.0.23`).
-* Components created with previous version will no longer be identified. Therefore after extension is updated to new version(`0.1.0`) all previously deployed components won't be visible in OpenShift Application View.
-* Every component/service needs to have a context folder. The extension will prompt the user to specify the context folder with the creation of component/service.
+* The Components created with previous versions will no longer be visible in OpenShift Application Explorer view.
+* The Extension will prompt the user to specify the context folder when creating new Components and then add selected folder to workspace.
+* New Component, Url and Storage objects are created locally in context folder and not immediatly pushed to the cluster.
 
 > **Please follow the [migration](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0) guide to resolve any possible issues.**
 
