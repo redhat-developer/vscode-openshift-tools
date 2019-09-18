@@ -28,6 +28,10 @@ export class Command {
     static delete(replica: String) {
         return `oc delete rc ${replica}`;
     }
+
+    static showLog(replica: string) {
+        return `oc logs rc/${replica}`;
+    }
 }
 
 export class DeploymentConfigNodeContributor implements ClusterExplorerV1.NodeContributor {
@@ -73,6 +77,14 @@ export class DeploymentConfig {
         return DeploymentConfig.getReplicasList(
             Command.getReplicas(deploymentConfig),
             'You have no replicas available');
+    }
+
+    static async rcShowLog(context: { impl: any; }): Promise<string> {
+        const replica = await DeploymentConfig.selectReplica(context, "Select a Replica too see the logs");
+        if (replica) {
+            DeploymentConfig.odo.executeInTerminal(Command.showLog(replica));
+        }
+        return replica;
     }
 
     static async showLog(context: { name: string; }): Promise<string> {

@@ -63,6 +63,30 @@ suite('K8s/deployment', () => {
         }
     }`;
 
+    const context = {
+        id: "dummy",
+        impl: {
+            id: "rc/comp1-app-2",
+            kind: {
+                manifestKind: "ReplicationController",
+                abbreviation: "rc"
+            },
+            namespace: "myproject",
+            name: "comp1-app-2",
+            number: 2,
+            manifest: "ReplicationController",
+            metadata: undefined,
+            node: "rc",
+            resourceId: "rc/comp1-app-2"
+        },
+        resourceKind: {
+            manifestKind: "ReplicationController",
+            abbreviation: "rc"
+        },
+        nodeCategory: "kubernetes-explorer-node",
+        nodeType: "extension"
+    };
+
     setup(() => {
         sandbox = sinon.createSandbox();
         termStub =  sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
@@ -167,30 +191,35 @@ suite('K8s/deployment', () => {
         });
     });
 
+    suite('Show Replica Log', () => {
+
+        setup(() => {
+            execStub.resolves({ error: null, stdout: mockData, stderr: '' });
+            const deploymentConfig = {label: "comp1-app"};
+            sandbox.stub(DeploymentConfig, 'getReplicaNames').resolves(["comp1-app-1", "comp1-app-2"]);
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onFirstCall().resolves(deploymentConfig);
+            quickPickStub.onSecondCall().resolves("comp1-app-1");
+        });
+
+        test('works from context menu', async () => {
+            await DeploymentConfig.rcShowLog(context);
+            expect(termStub).calledOnceWith(Command.showLog("comp1-app-2"));
+        });
+
+        test('works with no context', async () => {
+            await DeploymentConfig.rcShowLog(null);
+            expect(termStub).calledOnceWith(Command.showLog('comp1-app-1'));
+        });
+
+        test('returns null when no replica selected', async () => {
+            quickPickStub.onSecondCall().resolves();
+            const result = await DeploymentConfig.rcShowLog(null);
+            expect(result).null;
+        });
+    });
+
     suite('Delete', ()=> {
-        const context = {
-            id: "dummy",
-            impl: {
-                id: "rc/comp1-app-2",
-                kind: {
-                    manifestKind: "ReplicationController",
-                    abbreviation: "rc"
-                },
-                namespace: "myproject",
-                name: "comp1-app-2",
-                number: 2,
-                manifest: "ReplicationController",
-                metadata: undefined,
-                node: "rc",
-                resourceId: "rc/comp1-app-2"
-            },
-            resourceKind: {
-                manifestKind: "ReplicationController",
-                abbreviation: "rc"
-            },
-            nodeCategory: "kubernetes-explorer-node",
-            nodeType: "extension"
-        };
 
         const deploymentData = `comp1-app-1\\ncomp1-app-2`;
 
