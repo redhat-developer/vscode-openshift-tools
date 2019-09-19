@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.1.0 (September 18, 2019)
+## 0.1.0 (September 19, 2019)
 This release involves *Breaking Changes* !!
 
 * Components created with previous version will no longer be identified. Therefore after extension is updated to new version(`0.1.0`) all previously deployed components won't be visible in OpenShift Application View.
