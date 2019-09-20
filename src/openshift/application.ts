@@ -11,6 +11,7 @@ import { Progress } from '../util/progress';
 export class Application extends OpenShiftItem {
 
     static async describe(treeItem: OpenShiftObject): Promise<void> {
+        if (!treeItem) await Application.setDelApplicationStatus(true);
         const application = await Application.getOpenShiftCmdData(treeItem,
             "From which project you want to describe Application",
             "Select Application you want to describe");
@@ -18,6 +19,7 @@ export class Application extends OpenShiftItem {
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
+        if (!treeItem) await Application.setDelApplicationStatus(true);
         const application = await Application.getOpenShiftCmdData(treeItem,
             "From which Project you want to delete Application",
             "Select Application to delete");

@@ -5,7 +5,7 @@
 
 import { Odo, OdoImpl, OpenShiftObject, OpenShiftObjectImpl, ContextType } from '../odo';
 import { OpenShiftExplorer } from '../explorer';
-import { window, QuickPickItem, TreeItemCollapsibleState } from 'vscode';
+import { window, QuickPickItem, TreeItemCollapsibleState, ExtensionContext } from 'vscode';
 import * as validator from 'validator';
 
 const errorMessage = {
@@ -34,6 +34,7 @@ function isCommand(item: QuickPickItem | QuickPickCommand): item is QuickPickCom
 }
 
 export abstract class OpenShiftItem {
+    public static extensionContext: ExtensionContext;
     protected static readonly odo: Odo = OdoImpl.Instance;
     protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
 
@@ -92,10 +93,20 @@ export abstract class OpenShiftItem {
         return projectList;
     }
 
-    static async getApplicationNames(project: OpenShiftObject, createCommand: boolean = false): Promise<(OpenShiftObject | QuickPickCommand)[]> {
+    static setDelApplicationStatus(condition: boolean): Thenable<void> {
+        return OpenShiftItem.extensionContext.globalState.update('ApplicationDelStatus', condition);
+    }
+
+    static async getApplicationDelStatus() {
+        return await OpenShiftItem.extensionContext.globalState.get('ApplicationDelStatus');
+    }
+
+    static async getApplicationNames(project: OpenShiftObject): Promise<(OpenShiftObject | QuickPickCommand)[]> {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
-        if (applicationList.length === 0 && !createCommand) throw Error(errorMessage.Component);
-        return createCommand ? [new QuickPickCommand(`$(plus) Create new Application...`, async () => {
+        const createCommand = await OpenShiftItem.getApplicationDelStatus();
+        await OpenShiftItem.setDelApplicationStatus(false);
+        if (applicationList.length === 0 && createCommand) throw Error(errorMessage.Component);
+        return !createCommand ? [new QuickPickCommand(`$(plus) Create new Application...`, async () => {
             return await OpenShiftItem.getName('Application name', applicationList);
         }), ...applicationList] : applicationList;
     }
@@ -130,7 +141,7 @@ export abstract class OpenShiftItem {
         if (!context) context = await window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder});
         if (context && context.contextValue === ContextType.PROJECT && appPlaceholder ) {
             project = context as OpenShiftObject;
-            context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(OpenShiftItem.getApplicationNames(project, appPlaceholder && compPlaceholder === undefined), {placeHolder: appPlaceholder});
+            context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(OpenShiftItem.getApplicationNames(project), {placeHolder: appPlaceholder});
             if (context && isCommand(context)) {
                 const newAppName = await context.command();
                 if (newAppName) {
