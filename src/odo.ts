@@ -1175,7 +1175,7 @@ export class OdoImpl implements Odo {
                     this.subject.next(new OdoEventImpl('changed', this.getClusters()[0]));
                 });
                 if (errors.length) {
-                    window.showErrorMessage('Not all resources were updates, please see OpenShift output channel for details.');
+                    window.showErrorMessage('Not all resources were updated, please see OpenShift output channel for details.');
                 } else {
                     window.showInformationMessage('Cluster resources have been successfuly updated.');
                 }
