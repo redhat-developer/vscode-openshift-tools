@@ -177,17 +177,21 @@ suite('OpenShift/Component', () => {
                 sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves(['nodejs']);
                 sandbox.stub(OdoImpl.prototype, 'getComponentTypeVersions').resolves(['latest']);
                 quickPickStub.onFirstCall().resolves({ label: 'Git Repository' });
+                quickPickStub.onSecondCall().resolves({
+                    description: "Folder which does not have an OpenShift context",
+                    label: "$(plus) Add new context folder."
+                });
                 inputStub.onFirstCall().resolves(uri);
-                quickPickStub.onSecondCall().resolves('master');
-                quickPickStub.onThirdCall().resolves(componentType);
-                quickPickStub.onCall(3).resolves(version);
+                quickPickStub.onThirdCall().resolves('master');
+                quickPickStub.onCall(3).resolves(componentType);
+                quickPickStub.onCall(4).resolves(version);
                 inputStub.onSecondCall().resolves(componentItem.getName());
                 infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves();
                 sandbox.stub(vscode.window, 'showOpenDialog').resolves([vscode.Uri.parse('file:///c%3A/Temp')]);
             });
 
             test('happy path works', async () => {
-                const result = await Component.create(appItem);
+                const result =  await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
                 expect(execStub).calledWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), uri, ref));
@@ -308,8 +312,8 @@ suite('OpenShift/Component', () => {
             setup(() => {
                 quickPickStub.onFirstCall().resolves({ label: 'Binary File' });
                 quickPickStub.onSecondCall().resolves({
-                    description: "Folder which does not have an openshift context",
-                    label: `$(plus) Add new workspace folder.`
+                    description: "Folder which does not have an OpenShift context",
+                    label: "$(plus) Add new context folder."
                 });
                 quickPickStub.onThirdCall().resolves({
                     description: paths,
@@ -628,14 +632,14 @@ suite('OpenShift/Component', () => {
             const result = await Component.undeploy(componentItem);
 
             expect(result).equals(`Component '${componentItem.getName()}' successfully undeployed`);
-            expect(execStub).calledWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(execStub).calledWith(Command.undeployComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
 
         test('works with no context', async () => {
             const result = await Component.undeploy(null);
 
             expect(result).equals(`Component '${componentItem.getName()}' successfully undeployed`);
-            expect(execStub).calledWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(execStub).calledWith(Command.undeployComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
 
         test('wraps errors in additional info', async () => {
@@ -1105,21 +1109,7 @@ suite('OpenShift/Component', () => {
 
         test('request to create url for component if it does not exist and exits when not confirmed' , async () => {
             sandbox.stub(vscode.window, 'showInformationMessage').resolves('Cancel');
-            sandbox.stub(vscode.commands, 'executeCommand').resolves();
-            execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({
-                items: [
-                    {
-                        status: {
-                            state: 'Pushed'
-                        },
-                        spec: {
-                            host: 'url',
-                            protocol: 'https',
-                            port: 8080
-                        }
-                    }
-                ]
-            }), stderr: ''});
+            sandbox.stub(Component, 'listUrl').resolves(null);
             await Component.openUrl(null);
             expect(opnStub).is.not.called;
         });

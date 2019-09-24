@@ -8,12 +8,8 @@ interface WorkspaceFolderItem extends QuickPickItem {
 }
 
 class CreateWorkspaceItem implements QuickPickItem {
-
-	constructor() { }
-
 	get label(): string { return `$(plus) Add new context folder.`; }
     get description(): string { return 'Folder which does not have an OpenShift context'; }
-
 }
 
 export async function selectWorkspaceFolder(): Promise<Uri> {
@@ -38,7 +34,7 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
 
     let workspacePath: Uri;
 
-    if (choice === addWorkspaceFolder) {
+    if (choice.label === addWorkspaceFolder.label) {
         const folders = await window.showOpenDialog({
             canSelectFiles: false,
             canSelectFolders: true,
