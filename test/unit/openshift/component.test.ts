@@ -1105,21 +1105,7 @@ suite('OpenShift/Component', () => {
 
         test('request to create url for component if it does not exist and exits when not confirmed' , async () => {
             sandbox.stub(vscode.window, 'showInformationMessage').resolves('Cancel');
-            sandbox.stub(vscode.commands, 'executeCommand').resolves();
-            execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({
-                items: [
-                    {
-                        status: {
-                            state: 'Pushed'
-                        },
-                        spec: {
-                            host: 'url',
-                            protocol: 'https',
-                            port: 8080
-                        }
-                    }
-                ]
-            }), stderr: ''});
+            sandbox.stub(Component, 'listUrl').resolves(null);
             await Component.openUrl(null);
             expect(opnStub).is.not.called;
         });
