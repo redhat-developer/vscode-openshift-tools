@@ -177,17 +177,21 @@ suite('OpenShift/Component', () => {
                 sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves(['nodejs']);
                 sandbox.stub(OdoImpl.prototype, 'getComponentTypeVersions').resolves(['latest']);
                 quickPickStub.onFirstCall().resolves({ label: 'Git Repository' });
+                quickPickStub.onSecondCall().resolves({
+                    description: "Folder which does not have an OpenShift context",
+                    label: "$(plus) Add new context folder."
+                });
                 inputStub.onFirstCall().resolves(uri);
-                quickPickStub.onSecondCall().resolves('master');
-                quickPickStub.onThirdCall().resolves(componentType);
-                quickPickStub.onCall(3).resolves(version);
+                quickPickStub.onThirdCall().resolves('master');
+                quickPickStub.onCall(3).resolves(componentType);
+                quickPickStub.onCall(4).resolves(version);
                 inputStub.onSecondCall().resolves(componentItem.getName());
                 infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves();
                 sandbox.stub(vscode.window, 'showOpenDialog').resolves([vscode.Uri.parse('file:///c%3A/Temp')]);
             });
 
             test('happy path works', async () => {
-                const result = await Component.create(appItem);
+                const result =  await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
                 expect(execStub).calledWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), uri, ref));
