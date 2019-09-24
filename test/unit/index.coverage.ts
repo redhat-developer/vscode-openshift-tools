@@ -75,11 +75,12 @@ export function run(): any {
                 mocha.run()
                     .on('fail', () => failureCount++)
                     .on('end', () => {
-                        c(coverageRunner);
+                        coverageRunner.reportCoverage()
+                        failureCount > 0 ? e(`${failureCount} tests failed.`) : c();
                     });
             } catch (error) {
                 return e(error);
             }
         });
-    }).then((coverageRunner: any) => coverageRunner.reportCoverage());
+    });
 }
