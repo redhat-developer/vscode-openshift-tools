@@ -632,14 +632,14 @@ suite('OpenShift/Component', () => {
             const result = await Component.undeploy(componentItem);
 
             expect(result).equals(`Component '${componentItem.getName()}' successfully undeployed`);
-            expect(execStub).calledWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(execStub).calledWith(Command.undeployComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
 
         test('works with no context', async () => {
             const result = await Component.undeploy(null);
 
             expect(result).equals(`Component '${componentItem.getName()}' successfully undeployed`);
-            expect(execStub).calledWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(execStub).calledWith(Command.undeployComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
 
         test('wraps errors in additional info', async () => {
