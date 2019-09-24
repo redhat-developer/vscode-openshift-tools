@@ -419,6 +419,27 @@ suite('OpenShift/URL', () => {
         });
 
         test('open url in browser', async () => {
+            execStub.onFirstCall().resolves({error: null, stderr: '', stdout: `{
+                "kind": "List",
+                "apiVersion": "odo.openshift.io/v1alpha1",
+                "metadata": {},
+                "items": [
+                    {
+                        "kind": "url",
+                        "apiVersion": "odo.openshift.io/v1alpha1",
+                        "metadata": {
+                            "name": "route",
+                            "creationTimestamp": null
+                        },
+                        "spec": {
+                            "port": 8080
+                        },
+                        "status": {
+                            "state": "Pushed"
+                        }
+                    }
+                ]
+            }`});
             await UrlMock.open(routeItem);
             openStub.calledOnceWith('http://route-nodejs-app-myproject.192.168.64.59.nip.io');
         });
