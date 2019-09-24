@@ -106,6 +106,8 @@
     "onCommand:clusters.openshift.deploy.delete.palette",
     "onCommand:clusters.openshift.deploy.rcShowLog",
     "onCommand:clusters.openshift.deploy.rcShowLog.palette",
+    "onCommand:clusters.openshift.deploy.pause",
+    "onCommand:clusters.openshift.deploy.resume",
     "onCommand:clusters.openshift.deployment.openConsole",
     "onCommand:clusters.openshift.imagestream.openConsole"
   ],

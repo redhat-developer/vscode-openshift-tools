@@ -9,6 +9,18 @@ export class Command {
         return `get rc -o jsonpath="{range .items[?(.metadata.annotations.openshift\\.io/deployment-config\\.name=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/deployment-config\\.latest-version}{\\"\\n\\"}{end}"`;
     }
 
+    static getDeploymentConfigState(deploymentConfig: string) {
+        return `oc get dc/${deploymentConfig} -o jsonpath={".spec.paused"}`;
+    }
+
+    static pause(deploymentConfig: string) {
+        return `oc rollout pause dc ${deploymentConfig}`;
+    }
+
+    static resume(deploymentConfig: string) {
+        return `oc rollout resume dc ${deploymentConfig}`;
+    }
+
     static deploy(build: string) {
         return `oc rollout latest dc/${build}`;
     }
@@ -53,6 +65,8 @@ export class DeploymentConfig {
 
     static async deploy(context: { name: string; }): Promise<string> {
         let deployName: string = context ? context.name : undefined;
+        const deploymentStatus = await DeploymentConfig.getDeploymentConfigState(deployName);
+        if (deploymentStatus) throw await window.showWarningMessage(`${deployName} is paused. This will stop any new rollouts or triggers from running until resumed.`);
         let result: Promise<string> = null;
         if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to deploy"), "Select a DeploymentConfig to deploy");
         if (deployName) {
@@ -65,6 +79,8 @@ export class DeploymentConfig {
 
     static async pause(context: { name: string; }): Promise<string> {
         let deployName: string = context ? context.name : null;
+        const deploymentStatus = await DeploymentConfig.getDeploymentConfigState(deployName);
+        if (deploymentStatus) throw await window.showWarningMessage(`${deployName} is paused. This will stop any new rollouts or triggers from running until resumed.`);
         if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to pause"), "Select a DeploymentConfig to pause");
         if (deployName) {
             DeploymentConfig.odo.executeInTerminal(Command.pause(deployName));
@@ -72,8 +88,21 @@ export class DeploymentConfig {
         return deployName;
     }
 
+    static async getDeploymentConfigState(deploymentConfigName: string, status?: string) {
+        const deploymentStatus = await DeploymentConfig.odo.execute(Command.getDeploymentConfigState(deploymentConfigName));
+        if (deploymentStatus.stdout === 'true') return true;
+        return false;
+    }
+
     static async resume(context: { name: string; }): Promise<string> {
         let deployName: string = context ? context.name : null;
+        const deploymentStatus = await DeploymentConfig.getDeploymentConfigState(deployName);
+        if (deploymentStatus) {
+            await window.showWarningMessage(`${deployName} is resume.`);
+        } else {
+            throw await window.showWarningMessage(`${deployName} is resume.`);
+        }
+        await DeploymentConfig.getDeploymentConfigState(deployName);
         if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to resume"), "Select a DeploymentConfig to resume");
         if (deployName) {
             DeploymentConfig.odo.executeInTerminal(Command.resume(deployName));
