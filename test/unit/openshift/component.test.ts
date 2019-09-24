@@ -312,8 +312,8 @@ suite('OpenShift/Component', () => {
             setup(() => {
                 quickPickStub.onFirstCall().resolves({ label: 'Binary File' });
                 quickPickStub.onSecondCall().resolves({
-                    description: "Folder which does not have an openshift context",
-                    label: `$(plus) Add new workspace folder.`
+                    description: "Folder which does not have an OpenShift context",
+                    label: "$(plus) Add new context folder."
                 });
                 quickPickStub.onThirdCall().resolves({
                     description: paths,
