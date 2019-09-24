@@ -75,7 +75,7 @@ export function run(): any {
                 mocha.run()
                     .on('fail', () => failureCount++)
                     .on('end', () => {
-                        coverageRunner.reportCoverage()
+                        coverageRunner.reportCoverage();
                         failureCount > 0 ? e(`${failureCount} tests failed.`) : c();
                     });
             } catch (error) {
