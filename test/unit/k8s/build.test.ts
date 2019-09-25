@@ -10,8 +10,10 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { OdoImpl } from '../../../src/odo';
-import { Build, Command } from '../../../src/k8s/build';
+import { Build, Command, BuildConfigNodeContributor } from '../../../src/k8s/build';
 import { Progress } from '../../../src/util/progress';
+import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
+import * as k8s from 'vscode-kubernetes-tools-api';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -70,6 +72,40 @@ suite('K8s/build', () => {
 
     teardown(() => {
         sandbox.restore();
+    });
+
+    suite('BuildConfigNodeContributor', () => {
+        const parent = <ClusterExplorerV1.ClusterExplorerNode>{
+            metadata: undefined,
+            name: "comp1-app",
+            namespace: null,
+            nodeType: "resource",
+            resourceKind: {
+                abbreviation: "bc",
+                description: "",
+                displayName: "BuildConfigs",
+                label: "BuildConfigs",
+                manifestKind: "BuildConfigs",
+                pluralDisplayName: "BuildConfigs"
+            }
+        };
+
+        setup(() => {
+            const api: k8s.API<k8s.KubectlV1> = {
+                available: true,
+                api: {
+                    invokeCommand: sandbox.stub().resolves({ stdout: 'namespace, name, 1', stderr: '', code: 0}),
+                    portForward: sandbox.stub()
+                }
+            };
+            sandbox.stub(k8s.extension.kubectl, 'v1').value(api);
+        });
+
+        test('should able to get the children node of build Config', async () => {
+            const bcnc = new BuildConfigNodeContributor();
+            const result = await bcnc.getChildren(parent);
+            expect(result.length).equals(1);
+        });
     });
 
     suite('start build', () => {
