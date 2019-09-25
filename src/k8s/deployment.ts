@@ -81,6 +81,7 @@ export class DeploymentConfig {
         let deployName: string = context ? context.name : null;
         const deploymentStatus = await DeploymentConfig.getDeploymentConfigState(deployName);
         if (deploymentStatus) throw await window.showWarningMessage(`${deployName} is paused. This will stop any new rollouts or triggers from running until resumed.`);
+        window.showWarningMessage(`${deployName} is paused.`);
         if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to pause"), "Select a DeploymentConfig to pause");
         if (deployName) {
             DeploymentConfig.odo.executeInTerminal(Command.pause(deployName));
@@ -98,7 +99,7 @@ export class DeploymentConfig {
         let deployName: string = context ? context.name : null;
         const deploymentStatus = await DeploymentConfig.getDeploymentConfigState(deployName);
         if (deploymentStatus) {
-            await window.showWarningMessage(`${deployName} is resume.`);
+            window.showWarningMessage(`${deployName} is resume.`);
         } else {
             throw await window.showWarningMessage(`${deployName} is resume.`);
         }
