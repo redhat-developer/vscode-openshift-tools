@@ -189,13 +189,13 @@ export class Cluster extends OpenShiftItem {
             .catch((error) => Promise.reject(new Error(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.message)}'!`)));
     }
 
-    static async readFromClipboard() {
-        return await env.clipboard.readText();
+    static async readFromClipboard(): Promise<string> {
+        return env.clipboard ? await env.clipboard.readText() : "";
     }
 
     static async getUrlFromClipboard() {
         const clipboard = await Cluster.readFromClipboard();
-        if (await Cluster.ocLoginCommandMatches(clipboard)) return await Cluster.clusterURL(clipboard);
+        if (Cluster.ocLoginCommandMatches(clipboard)) return Cluster.clusterURL(clipboard);
         return null;
     }
 
