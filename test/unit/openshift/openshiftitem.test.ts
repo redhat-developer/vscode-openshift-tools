@@ -80,9 +80,26 @@ suite('OpenShiftItem', () => {
 
         test('returns an array of application names for the project if there is at least one application', async ()=> {
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
-            await OpenShiftItem.getApplicationNames(projectItem);
-            // expect(appNames[0].getName()).equals('application');
+            const appNames = await OpenShiftItem.getApplicationNames(projectItem, false);
+            expect(appNames[0].getName()).equals('application');
+        });
 
+        test('Should able to show create new application option in QuickPick if no component available', async ()=> {
+            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
+            sandbox.stub(OpenShiftItem, 'getName').resolves();
+            const appNames = await OpenShiftItem.getApplicationNames(projectItem, true);
+            expect(appNames[0].label).equals(`$(plus) Create new Application...`);
+        });
+
+        test('throws error if there are no application available', async ()=> {
+            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
+            try {
+                await OpenShiftItem.getApplicationNames(appItem, false);
+            } catch (err) {
+                expect(err.message).equals('You need at least one Component available. Please create new OpenShift Component and try again.');
+                return;
+            }
+            fail('should throw error in case components array is empty');
         });
 
     });
