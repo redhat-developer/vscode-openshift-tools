@@ -13,22 +13,13 @@ import { KubeConfigUtils } from '../util/kubeUtils';
 import { Filters } from "../util/filters";
 
 class CreateUrlItem implements QuickPickItem {
-
-	constructor() { }
-
 	get label(): string { return `$(plus) Provide new URL...`; }
-    get description(): string { return ''; }
-
 }
 
 class CreateUserItem implements QuickPickItem {
-
-	constructor() { }
-
 	get label(): string { return `$(plus) Add new user...`; }
-    get description(): string { return ''; }
-
 }
+
 export class Cluster extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
     static async logout(): Promise<string> {
