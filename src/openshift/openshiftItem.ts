@@ -23,7 +23,8 @@ export class QuickPickCommand implements QuickPickItem {
         public description?: string,
         public detail?: string,
         public picked?: boolean,
-        public alwaysShow?: boolean
+        public alwaysShow?: boolean,
+        public getName?: () => string
     ) {
 
     }
@@ -92,7 +93,7 @@ export abstract class OpenShiftItem {
         return projectList;
     }
 
-    static async getApplicationNames(project: OpenShiftObject, createCommand: boolean = false): Promise<(OpenShiftObject | QuickPickCommand)[]> {
+    static async getApplicationNames(project: OpenShiftObject, createCommand: boolean = false): Promise<Array<OpenShiftObject | QuickPickCommand>> {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
         if (applicationList.length === 0 && !createCommand) throw Error(errorMessage.Component);
         return createCommand ? [new QuickPickCommand(`$(plus) Create new Application...`, async () => {
