@@ -84,7 +84,7 @@ suite('OpenShiftItem', () => {
             expect(appNames[0].getName()).equals('application');
         });
 
-        test('Should able to show create new application option in QuickPick if no component available', async ()=> {
+        test('shows item to create new application in QuickPick if no application available', async ()=> {
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
             sandbox.stub(OpenShiftItem, 'getName').resolves();
             const appNames = await OpenShiftItem.getApplicationNames(projectItem, true);
