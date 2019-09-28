@@ -3,27 +3,27 @@
         "description": "OpenShift Do CLI tool",
         "vendor": "Red Hat, Inc.",
         "name": "odo",
-        "version": "1.0.0-beta5",
-        "versionRange": "1.0.0-beta5",
-        "versionRangeLabel": "v1.0.0-beta5",
+        "version": "1.0.0-beta6",
+        "versionRange": "1.0.0-beta6",
+        "versionRangeLabel": "v1.0.0-beta6",
         "dlFileName": "odo",
         "cmdFileName": "odo",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://github.com/openshift/odo/releases/download/v1.0.0-beta5/odo-windows-amd64.exe.tar.gz",
-                "sha256sum": "7cf31f35b53ad954eeec690afd4a8ad2ed433cb1b982964ba5b1484c021660d8",
+                "url": "https://github.com/openshift/odo/releases/download/v1.0.0-beta6/odo-windows-amd64.exe.tar.gz",
+                "sha256sum": "2dc751dd3a375a55aa0b1257fd3baa71815c8b3f8bd1fcf398207a021df2d2dd",
                 "dlFileName": "odo-windows-amd64.exe.tar.gz",
                 "cmdFileName": "odo.exe"
             },
             "darwin": {
-                "url": "https://github.com/openshift/odo/releases/download/v1.0.0-beta5/odo-darwin-amd64.tar.gz",
-                "sha256sum": "defd5b0727cc4e5b4f8b397488ac6d70e7bdeddffd555c835c375f7dd07198f9",
+                "url": "https://github.com/openshift/odo/releases/download/v1.0.0-beta6/odo-darwin-amd64.tar.gz",
+                "sha256sum": "4bb92f4e310be3e979f681e1a03dfa0101958abc41116ac582a1fa9470a8c108",
                 "dlFileName": "odo-darwin-amd64.tar.gz"
             },
             "linux": {
-                "url": "https://github.com/openshift/odo/releases/download/v1.0.0-beta5/odo-linux-amd64.tar.gz",
-                "sha256sum": "59d0fce895560396941a2b34c5d3029923913da673e0a254a3b207e99999bd8a",
+                "url": "https://github.com/openshift/odo/releases/download/v1.0.0-beta6/odo-linux-amd64.tar.gz",
+                "sha256sum": "94774221801d40c41e23c41c700ed7377c4a6fe9ed7b17f0e71cb205244404a4",
                 "dlFileName": "odo-linux-amd64.tar.gz"
             }
         }
