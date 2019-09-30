@@ -44,6 +44,113 @@ suite('Openshift/Cluster', () => {
         stderr: error,
         stdout: 'output'
     };
+    const routeObj = `{
+        "apiVersion": "v1",
+        "items": [
+            {
+                "apiVersion": "route.openshift.io/v1",
+                "kind": "Route",
+                "metadata": {
+                    "annotations": {
+                        "openshift.io/host.generated": "true"
+                    },
+                    "creationTimestamp": "2019-09-14T02:38:54Z",
+                    "labels": {
+                        "app": "console"
+                    },
+                    "name": "console",
+                    "namespace": "openshift-console",
+                    "resourceVersion": "15395",
+                    "selfLink": "/apis/route.openshift.io/v1/namespaces/openshift-console/routes/console",
+                    "uid": "cb4f2596-d698-11e9-ab76-0a580a800042"
+                },
+                "spec": {
+                    "host": "console-openshift-console.apps-crc.testing",
+                    "port": {
+                        "targetPort": "https"
+                    },
+                    "subdomain": "",
+                    "tls": {
+                        "insecureEdgeTerminationPolicy": "Redirect",
+                        "termination": "reencrypt"
+                    },
+                    "to": {
+                        "kind": "Service",
+                        "name": "console",
+                        "weight": 100
+                    },
+                    "wildcardPolicy": "None"
+                },
+                "status": {
+                    "ingress": [
+                        {
+                            "conditions": [
+                                {
+                                    "lastTransitionTime": "2019-09-14T02:41:51Z",
+                                    "status": "True",
+                                    "type": "Admitted"
+                                }
+                            ],
+                            "host": "console-openshift-console.apps-crc.testing",
+                            "routerCanonicalHostname": "apps-crc.testing",
+                            "routerName": "default",
+                            "wildcardPolicy": "None"
+                        }
+                    ]
+                }
+            },
+            {
+                "apiVersion": "route.openshift.io/v1",
+                "kind": "Route",
+                "metadata": {
+                    "creationTimestamp": "2019-09-14T02:34:34Z",
+                    "name": "downloads",
+                    "namespace": "openshift-console",
+                    "resourceVersion": "15390",
+                    "selfLink": "/apis/route.openshift.io/v1/namespaces/openshift-console/routes/downloads",
+                    "uid": "3041478e-d698-11e9-8170-0a580a800028"
+                },
+                "spec": {
+                    "host": "downloads-openshift-console.apps-crc.testing",
+                    "port": {
+                        "targetPort": "http"
+                    },
+                    "subdomain": "",
+                    "tls": {
+                        "termination": "edge"
+                    },
+                    "to": {
+                        "kind": "Service",
+                        "name": "downloads",
+                        "weight": 100
+                    },
+                    "wildcardPolicy": "None"
+                },
+                "status": {
+                    "ingress": [
+                        {
+                            "conditions": [
+                                {
+                                    "lastTransitionTime": "2019-09-14T02:41:51Z",
+                                    "status": "True",
+                                    "type": "Admitted"
+                                }
+                            ],
+                            "host": "downloads-openshift-console.apps-crc.testing",
+                            "routerCanonicalHostname": "apps-crc.testing",
+                            "routerName": "default",
+                            "wildcardPolicy": "None"
+                        }
+                    ]
+                }
+            }
+        ],
+        "kind": "List",
+        "metadata": {
+            "resourceVersion": "",
+            "selfLink": ""
+        }
+    }`;
     const testUrl = 'https://162.165.64.43:8443';
     const testUser = 'user';
     const password = 'password';
@@ -277,7 +384,7 @@ suite('Openshift/Cluster', () => {
 
             test('handles incoming errors the same way as credentials login', async () => {
                 execStub.rejects(err);
-                let expectedErr;
+                let expectedErr: { message: any; };
                 try {
                     await Cluster.tokenLogin();
                 } catch (error) {
@@ -378,35 +485,66 @@ suite('Openshift/Cluster', () => {
         });
     });
 
+    suite('switchContext', () => {
+        const choice = {
+            label: 'minishift'
+        };
+        test('should able to change cluster context', () => {
+            quickPickStub.onFirstCall().resolves(choice);
+            const result = Cluster.switchContext();
+            expect(result).equals(`Cluster context is changed to: ${choice.label}`);
+        });
+
+        test('return null if OpenShift context is not selected', () => {
+            quickPickStub.onFirstCall().resolves(null);
+            const result = Cluster.switchContext();
+            expect(result).equals(`Cluster context is changed to: ${choice.label}`);
+        });
+    });
+
     suite('open console', () => {
         const openStub: sinon.SinonStub = sinon.stub();
-        let clusterMock;
+        let clusterMock: { openshiftConsole: { (arg0: TestItem): void; (): void; (): void; }; };
+        let cluster: TestItem;
+
         setup(() => {
             clusterMock = pq('../../../src/openshift/cluster', {
                 open: openStub
             }).Cluster;
+            cluster = new TestItem(null, 'http://localhost', ContextType.CLUSTER);
         });
 
         test('opens URL from cluster\'s tree item label if called from cluster\'s context menu', () => {
-            const cluster = new TestItem(null, 'http://localhost', ContextType.CLUSTER);
             clusterMock.openshiftConsole(cluster);
             openStub.calledOnceWith('http://localhost');
         });
 
         test('opens URL from first cluster label', () => {
-            const cluster = new TestItem(null, 'http://localhost', ContextType.CLUSTER);
             sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
             clusterMock.openshiftConsole();
             openStub.calledOnceWith('http://localhost');
         });
 
         test('shows error message if node label is not URL', () => {
-            const cluster = new TestItem(null, 'localhost', ContextType.CLUSTER);
             sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
             const errMsgStub = sandbox.stub(vscode.window, 'showErrorMessage');
             clusterMock.openshiftConsole();
             errMsgStub.calledOnceWith('localhost', undefined);
         });
 
+        test('open cluster\'s URL from context menu', () => {
+            execStub.onFirstCall().resolves({
+                error: null,
+                stderr: error,
+                stdout: 'output'
+            });
+            execStub.onSecondCall().resolves({
+                error: null,
+                stderr: error,
+                stdout: routeObj
+            });
+            clusterMock.openshiftConsole(cluster);
+            openStub.calledOnceWith('http://localhost');
+        });
     });
 });
