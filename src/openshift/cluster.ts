@@ -79,7 +79,7 @@ export class Cluster extends OpenShiftItem {
         if (!choice) return null;
         return Promise.resolve()
             .then(() => Cluster.odo.execute(Command.setOpenshiftContext(choice.label)))
-            .then(() => window.showInformationMessage(`Cluster context is changed to: ${choice.label}`));
+            .then(() => `Cluster context is changed to: ${choice.label}`);
     }
 
     static async getUrl(): Promise<string | null> {
