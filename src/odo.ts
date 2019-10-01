@@ -99,7 +99,7 @@ export class Command {
         return `odo catalog list components`;
     }
     static listCatalogServices () {
-        return `odo catalog list services`;
+        return `odo catalog list services -o json`;
     }
     static listStorageNames(project: string, app: string, component: string) {
         return `odo storage list -o json`;
@@ -772,20 +772,30 @@ export class OdoImpl implements Odo {
     }
 
     public async getServiceTemplates(): Promise<string[]> {
+        // tslint:disable-next-line: prefer-const
+        let serviceTemplate: Array<string>;
+        let items: Array<any> = [];
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices(), Platform.getUserHomePath(), false);
-        if (result.error) {
-            throw new Error(result.stderr.trim());
+        try {
+            items = JSON.parse(result.stdout).items;
+        } catch (err) {
+            throw new Error(JSON.parse(result.stderr).message);
         }
-        return result.stdout.trim().split('\n').slice(1).map((value) => value.trim().replace(/\s{1,}/g, '|').split('|')[0]);
+        serviceTemplate = items.map((value: { metadata: { name: string; }; }) => value.metadata.name);
+        return serviceTemplate;
     }
 
     public async getServiceTemplatePlans(svcName: string): Promise<string[]> {
+        let items: Array<any>;
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices(), Platform.getUserHomePath());
-        const plans = result.stdout.trim().split('\n').slice(1).filter((value) => {
-                const data = value.trim().replace(/\s{1,}/g, '|').split('|');
-                return data[0] === svcName;
-            }).map((value) => value.trim().replace(/\s{1,}/g, '|').split('|')[1]);
-        return plans[0].split(',');
+        try {
+            items = JSON.parse(result.stdout).items;
+        } catch (err) {
+            // ignore
+        }
+        const stpObject: Array<any> = items.filter((value) => value.metadata.name === svcName);
+        const serviceTemplatePlans  = stpObject.map((value: { spec: { planList: any; }; }) => value.spec.planList)[0];
+        return serviceTemplatePlans;
     }
 
     async getServices(application: OpenShiftObject): Promise<OpenShiftObject[]> {
