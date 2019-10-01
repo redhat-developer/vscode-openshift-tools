@@ -517,7 +517,14 @@ export class Component extends OpenShiftItem {
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
-    static async debug(): Promise<string> {
+    static async debug(context: OpenShiftObject): Promise<string> {
+        const component = await Component.getOpenShiftCmdData(context,
+            'Select a Project',
+            'Select an Application',
+            'Select a Component you want to debug',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
+        if (!component) return null;
         return 'Happy debugging!';
     }
 
