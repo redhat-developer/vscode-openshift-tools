@@ -517,6 +517,10 @@ export class Component extends OpenShiftItem {
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
+    static async debug(): Promise<string> {
+        return 'Happy debugging!';
+    }
+
     static async import(component: OpenShiftObject): Promise<string> {
         const prjName = component.getParent().getParent().getName();
         const appName = component.getParent().getName();

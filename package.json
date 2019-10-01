@@ -81,6 +81,8 @@
     "onCommand:openshift.url.delete.palette",
     "onCommand:openshift.component.openUrl",
     "onCommand:openshift.component.openUrl.palette",
+    "onCommand:openshift.component.debug",
+    "onCommand:openshift.component.debug.palette",
     "onCommand:openshift.storage.create",
     "onCommand:openshift.storage.delete",
     "onCommand:openshift.service.create",
@@ -401,6 +403,16 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.debug",
+        "title": "Debug",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.debug.palette",
+        "title": "Debug Component",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.storage.create",
         "title": "New Storage",
         "category": "OpenShift"
@@ -621,6 +633,10 @@
         },
         {
           "command": "openshift.component.openUrl",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.debug",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -891,6 +907,11 @@
           "command": "openshift.component.undeploy",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c4@4"
+        },
+        {
+          "command": "openshift.component.debug",
+          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "c4@5"
         },
         {
           "command": "openshift.component.delete",

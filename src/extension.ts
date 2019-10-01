@@ -94,6 +94,7 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('openshift.component.followLog.palette', (context) => execute(Component.followLog, context)),
         vscode.commands.registerCommand('openshift.component.openUrl', (context) => execute(Component.openUrl, context)),
         vscode.commands.registerCommand('openshift.component.openUrl.palette', (context) => execute(Component.openUrl, context)),
+        vscode.commands.registerCommand('openshift.component.debug', (context) => execute(Component.debug, context)),
         vscode.commands.registerCommand('openshift.component.delete', (context) => execute(Component.del, context)),
         vscode.commands.registerCommand('openshift.storage.create', (context) => execute(Storage.create, context)),
         vscode.commands.registerCommand('openshift.storage.delete.palette', (context) => execute(Storage.del, context)),
