@@ -773,29 +773,27 @@ export class OdoImpl implements Odo {
 
     public async getServiceTemplates(): Promise<string[]> {
         // tslint:disable-next-line: prefer-const
-        let serviceTemplate: Array<string>;
-        let items: Array<any> = [];
+        let serviceTemplate: string[];
+        let items: any[] = [];
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices(), Platform.getUserHomePath(), false);
         try {
             items = JSON.parse(result.stdout).items;
         } catch (err) {
             throw new Error(JSON.parse(result.stderr).message);
         }
-        serviceTemplate = items.map((value: { metadata: { name: string; }; }) => value.metadata.name);
+        serviceTemplate = items.map((value) => value.metadata.name);
         return serviceTemplate;
     }
 
     public async getServiceTemplatePlans(svcName: string): Promise<string[]> {
-        let items: Array<any>;
+        let items: any[] = [];
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices(), Platform.getUserHomePath());
         try {
             items = JSON.parse(result.stdout).items;
-        } catch (err) {
-            // ignore
+        } catch (ignore) {
         }
-        const stpObject: Array<any> = items.filter((value) => value.metadata.name === svcName);
-        const serviceTemplatePlans  = stpObject.map((value: { spec: { planList: any; }; }) => value.spec.planList)[0];
-        return serviceTemplatePlans;
+        const stpObject = items.find((value) => value.metadata.name === svcName);
+        return stpObject.spec.planList;
     }
 
     async getServices(application: OpenShiftObject): Promise<OpenShiftObject[]> {
