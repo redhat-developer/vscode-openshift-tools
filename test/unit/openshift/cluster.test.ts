@@ -16,7 +16,7 @@ import { CliExitData } from '../../../src/cli';
 import { TestItem } from './testOSItem';
 import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
 import pq = require('proxyquire');
-import { getVscodeModule } from '../../../src/util/credentialManager';
+import { getVscodeModule, TokenStore } from '../../../src/util/credentialManager';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -44,6 +44,27 @@ suite('Openshift/Cluster', () => {
         stderr: error,
         stdout: 'output'
     };
+    const routeObj = `{
+        "apiVersion": "v1",
+        "items": [
+            {
+                "apiVersion": "route.openshift.io/v1",
+                "kind": "Route",
+                "spec": {
+                    "host": "console-openshift-console.apps-crc.testing",
+                    "port": {
+                        "targetPort": "https"
+                    },
+                    "wildcardPolicy": "None"
+                }
+            }
+        ],
+        "kind": "List",
+        "metadata": {
+            "resourceVersion": "",
+            "selfLink": ""
+        }
+    }`;
     const testUrl = 'https://162.165.64.43:8443';
     const testUser = 'user';
     const password = 'password';
@@ -83,13 +104,21 @@ suite('Openshift/Cluster', () => {
             expect(status).null;
         });
 
+        test('returns null if loginActions is not selected', async () => {
+            infoStub.resolves('Yes');
+            quickPickStub.onFirstCall().resolves(null);
+            const status = await Cluster.login();
+
+            expect(status).null;
+        });
+
         test('wraps incoming errors', async () => {
             quickPickStub.resolves('Credentials');
             quickPickStub.onSecondCall().resolves({description: "Current Context", label: testUrl});
             quickPickStub.onThirdCall().resolves({description: "Current Context", label: testUser});
             inputStub.resolves(password);
             commandStub.rejects(err);
-            let expectedErr;
+            let expectedErr: { message: any; };
             try {
                 await Cluster.login();
             } catch (error) {
@@ -121,6 +150,27 @@ suite('Openshift/Cluster', () => {
             test('logins to new cluster if user answer yes to a warning', async () => {
                 loginStub.resolves(false);
                 infoStub.resolves('Yes');
+                const result = await Cluster.credentialsLogin();
+                expect(result).equals(`Successfully logged in to '${testUrl}'`);
+            });
+
+            test('returns null if cluster url is not provided', async () => {
+                infoStub.resolves('Yes');
+                quickPickStub.onFirstCall().resolves(null);
+                const result = await Cluster.credentialsLogin();
+                expect(result).null;
+            });
+
+            test('returns null if username is not provided', async () => {
+                infoStub.resolves('Yes');
+                quickPickStub.onSecondCall().resolves(null);
+                const result = await Cluster.credentialsLogin();
+                expect(result).null;
+            });
+
+            test("doesn't ask to save password if old and new passwords are the same", async () => {
+                infoStub.resolves('Yes');
+                sandbox.stub(TokenStore, 'getItem').resolves(password);
                 const result = await Cluster.credentialsLogin();
                 expect(result).equals(`Successfully logged in to '${testUrl}'`);
             });
@@ -163,7 +213,7 @@ suite('Openshift/Cluster', () => {
 
             test('errors if there is output on odo stderr', async () => {
                 execStub.resolves(errorData);
-                let expectedErr;
+                let expectedErr: { message: any; };
                 try {
                     await Cluster.credentialsLogin();
                 } catch (err) {
@@ -248,13 +298,12 @@ suite('Openshift/Cluster', () => {
 
             test('handles incoming errors the same way as credentials login', async () => {
                 execStub.rejects(err);
-                let expectedErr;
+                let expectedErr: { message: any; };
                 try {
                     await Cluster.tokenLogin();
                 } catch (error) {
                     expectedErr = error;
                 }
-                console.log(expectedErr.message);
                 expect(expectedErr.message).equals(`Failed to login to cluster '${testUrl}' with '${err.message}'!`);
             });
         });
@@ -294,7 +343,7 @@ suite('Openshift/Cluster', () => {
 
         test('handles errors from odo', async () => {
             execStub.rejects(error);
-            let expectedErr;
+            let expectedErr: any;
             try {
                 await Cluster.logout();
 
@@ -306,7 +355,7 @@ suite('Openshift/Cluster', () => {
 
         test('handles errors from odo stderr', async () => {
             execStub.resolves(errorData);
-            let expectedErr;
+            let expectedErr: any;
             try {
                 await Cluster.logout();
             } catch (err) {
@@ -322,7 +371,7 @@ suite('Openshift/Cluster', () => {
             quickPickStub.onSecondCall().resolves({description: "Current Context", label: testUrl});
             quickPickStub.onThirdCall().resolves({description: "Current Context", label: testUrl});
             inputStub.resolves(password);
-            let expectedErr;
+            let expectedErr: { message: any; };
             try {
                 await Cluster.logout();
             } catch (err) {
@@ -350,35 +399,70 @@ suite('Openshift/Cluster', () => {
         });
     });
 
+    suite('switchContext', () => {
+        const choice = {
+            label: 'minishift'
+        };
+        setup(() => {
+            execStub.onFirstCall().resolves();
+        });
+
+        test('changes cluster\'s context', async () => {
+            quickPickStub.onFirstCall().resolves(choice);
+            const result = await Cluster.switchContext();
+            expect(result).equals(`Cluster context is changed to: ${choice.label}`);
+        });
+
+        test('returns null if OpenShift context is not selected', async () => {
+            quickPickStub.onFirstCall().resolves(null);
+            const result = await Cluster.switchContext();
+            expect(result).null;
+        });
+    });
+
     suite('open console', () => {
         const openStub: sinon.SinonStub = sinon.stub();
-        let clusterMock;
+        let clusterMock: { openshiftConsole: { (arg0: TestItem): void; (): void; (): void; }; };
+        let cluster: TestItem;
+
         setup(() => {
             clusterMock = pq('../../../src/openshift/cluster', {
                 open: openStub
             }).Cluster;
+            cluster = new TestItem(null, 'http://localhost', ContextType.CLUSTER);
         });
 
         test('opens URL from cluster\'s tree item label if called from cluster\'s context menu', () => {
-            const cluster = new TestItem(null, 'http://localhost', ContextType.CLUSTER);
             clusterMock.openshiftConsole(cluster);
             openStub.calledOnceWith('http://localhost');
         });
 
         test('opens URL from first cluster label', () => {
-            const cluster = new TestItem(null, 'http://localhost', ContextType.CLUSTER);
             sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
             clusterMock.openshiftConsole();
             openStub.calledOnceWith('http://localhost');
         });
 
         test('shows error message if node label is not URL', () => {
-            const cluster = new TestItem(null, 'localhost', ContextType.CLUSTER);
             sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
             const errMsgStub = sandbox.stub(vscode.window, 'showErrorMessage');
             clusterMock.openshiftConsole();
             errMsgStub.calledOnceWith('localhost', undefined);
         });
 
+        test('opens cluster\'s URL from context menu', () => {
+            execStub.onFirstCall().resolves({
+                error: null,
+                stderr: error,
+                stdout: 'output'
+            });
+            execStub.onSecondCall().resolves({
+                error: null,
+                stderr: error,
+                stdout: routeObj
+            });
+            clusterMock.openshiftConsole(cluster);
+            openStub.calledOnceWith('http://localhost');
+        });
     });
 });

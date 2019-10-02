@@ -13,22 +13,13 @@ import { KubeConfigUtils } from '../util/kubeUtils';
 import { Filters } from "../util/filters";
 
 class CreateUrlItem implements QuickPickItem {
-
-	constructor() { }
-
 	get label(): string { return `$(plus) Provide new URL...`; }
-    get description(): string { return ''; }
-
 }
 
 class CreateUserItem implements QuickPickItem {
-
-	constructor() { }
-
 	get label(): string { return `$(plus) Add new user...`; }
-    get description(): string { return ''; }
-
 }
+
 export class Cluster extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
     static async logout(): Promise<string> {
@@ -88,7 +79,7 @@ export class Cluster extends OpenShiftItem {
         if (!choice) return null;
         return Promise.resolve()
             .then(() => Cluster.odo.execute(Command.setOpenshiftContext(choice.label)))
-            .then(() => window.showInformationMessage(`Cluster context is changed to: ${choice.label}`));
+            .then(() => `Cluster context is changed to: ${choice.label}`);
     }
 
     static async getUrl(): Promise<string | null> {
