@@ -267,8 +267,13 @@ suite("odo", () => {
         });
 
         test('getServiceTemplates throws exception if service catalog is not enabled', async () => {
-            const stderr = 'error message';
-            execStub.resolves({error: new Error(), stdout: '', stderr});
+            execStub.resolves({error: null, stdout: '', stderr:
+                JSON.stringify({
+                    kind: "Error",
+                    apiVersion: "odo.openshift.io/v1alpha1",
+                    message: "unable to list services because Service Catalog is not enabled in your cluster"
+                })
+            });
             let e: Error;
             try {
                 await odoCli.getServiceTemplates();
@@ -276,9 +281,7 @@ suite("odo", () => {
                 e = err;
             }
 
-            expect(e, 'getServiceTemplates has not threw error').is.not.undefined;
-            expect(e.message, 'error has no message fields').is.not.undefined;
-            expect(e.message, 'message is not equal stdout stream output').equals(stderr);
+            expect(e.message).equals("unable to list services because Service Catalog is not enabled in your cluster");
 
         });
 
@@ -440,17 +443,31 @@ suite("odo", () => {
     });
 
     suite("service integration", () => {
-        const svc1 = 'svc1';
-        const svc2 = 'svc2';
-        const svc3 = 'svc3';
-
-        const odoPlans: string = [
-            `NAME      PLANS`,
-            `${svc1}   default,free,paid`,
-            `${svc2}   default,free`,
-            `${svc3}   default`
-        ].join('\n');
-        const data: CliExitData = { error: undefined, stderr: null, stdout: odoPlans };
+        const data: CliExitData = { error: undefined, stderr: null, stdout:
+            JSON.stringify({
+                kind: "ServiceTypeList",
+                apiVersion: "odo.openshift.io/v1alpha1",
+                metadata: {
+                    creationTimestamp: null
+                },
+                items: [
+                    {
+                        kind: "ServiceType",
+                        apiVersion: "odo.openshift.io/v1alpha1",
+                        metadata: {
+                            name: "cakephp-mysql-persistent",
+                            creationTimestamp: null
+                        },
+                        spec: {
+                            hidden: false,
+                            planList: [
+                                "default"
+                            ]
+                        }
+                    },
+                ]
+            })
+        };
 
         setup(() => {
             sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves(data);
@@ -458,18 +475,14 @@ suite("odo", () => {
 
         test("getServiceTemplates returns correct number of services", async () => {
             const result: string[] = await odoCli.getServiceTemplates();
-            assert.equal(result.length, 3);
-            assert.equal(result[0], svc1);
-            assert.equal(result[1], svc2);
-            assert.equal(result[2], svc3);
+            expect(result.length).equals(1);
+            expect(result[0]).equals("cakephp-mysql-persistent");
         });
 
         test("getServiceTemplatePlans returns correct number of plans for service", async () => {
-            const result: string[] = await odoCli.getServiceTemplatePlans(svc1);
-            assert.equal(result.length, 3);
+            const result: string[] = await odoCli.getServiceTemplatePlans("cakephp-mysql-persistent");
+            assert.equal(result.length, 1);
             assert.equal(result[0], 'default');
-            assert.equal(result[1], 'free');
-            assert.equal(result[2], 'paid');
         });
     });
 
