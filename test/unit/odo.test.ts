@@ -391,17 +391,35 @@ suite("odo", () => {
     });
 
     suite("catalog integration", () => {
-        const http = 'httpd';
         const nodejs = 'nodejs';
-        const python = 'python';
 
-        const odoCatalog: string = [
-            `NAME            PROJECT                 TAGS`,
-            `${nodejs}       openshift               1.0`,
-            `${python}       openshift               1.0,2.0`,
-            `${http}         openshift               2.2,2.3,latest`
-        ].join('\n');
-        let result: string[];
+        const odoCatalog = JSON.stringify({
+            kind : "ComponentTypeList",
+            apiVersion : "odo.openshift.io/v1alpha1",
+            items: [
+                {
+                    kind : "ComponentType",
+                    apiVersion : "odo.openshift.io/v1alpha1",
+                    metadata: {
+                        name : "nodejs",
+                        namespace : "openshift",
+                        creationTimestamp : null
+                    },
+                    spec: {
+                        allTags: [
+                            "0.10",
+                            "10",
+                            "4",
+                            "6",
+                            "8",
+                            "8-RHOAR",
+                            "latest",
+                        ]
+                    }
+                }
+            ]
+        });
+
         const catalogData: CliExitData = {
             error: null,
             stderr: '',
@@ -410,32 +428,19 @@ suite("odo", () => {
 
         setup(async () => {
             sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves(catalogData);
-            result = await odoCli.getComponentTypes();
         });
 
-        test("getComponentTypes returns correct number of component types", () => {
-            assert.equal(result.length, 3);
+        test("getComponentTypes returns correct component type names", async () => {
+            const result = await odoCli.getComponentTypes();
+            expect(result.length).equals(1);
+            expect(result[0]).equals('nodejs');
         });
 
-        test("getComponentTypes returns correct component type names", () => {
-            const resultArray = result.filter((element: string) => {
-                return element === http || element === nodejs || element === python;
-            });
-            assert.equal(resultArray.length, 3);
-        });
-
-        test("getComponentTypeVersions returns correct number of tags for component type", () => {
-            return Promise.all([
-                odoCli.getComponentTypeVersions(nodejs).then((result)=> {
-                    assert.equal(result.length, 1);
-                }),
-                odoCli.getComponentTypeVersions(python).then((result)=> {
-                    assert.equal(result.length, 2);
-                }),
-                odoCli.getComponentTypeVersions(http).then((result)=> {
-                    assert.equal(result.length, 3);
-                })
-            ]);
+        test("getComponentTypeVersions returns correct number of tags for component type", async () => {
+            const result = await odoCli.getComponentTypeVersions(nodejs);
+            expect(result.length).equals(7);
+            expect(result[0]).equals("0.10");
+            expect(result[6]).equals("latest");
         });
     });
 
