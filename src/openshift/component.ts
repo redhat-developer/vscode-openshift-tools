@@ -388,7 +388,7 @@ export class Component extends OpenShiftItem {
 
         if (!componentTypeVersion) return null;
         await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, workspacePath));
-        return `Component '${componentName}' successfully created`;
+        return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
     static async createFromFolder(folder: Uri): Promise<string> {
@@ -411,7 +411,7 @@ export class Component extends OpenShiftItem {
         if (!componentTypeVersion) return null;
 
         await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder));
-        return `Component '${componentName}' successfully created`;
+        return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
     static async createFromGit(context: OpenShiftObject): Promise<string> {
@@ -457,7 +457,7 @@ export class Component extends OpenShiftItem {
         const response = await window.showInformationMessage('Do you want to clone git repository for created Component?', 'Yes', 'No');
         if (response === 'Yes') await commands.executeCommand('git.clone', repoURI);
         await Component.odo.createComponentFromGit(application, componentTypeName, componentTypeVersion, componentName, repoURI, workspacePath, gitRef.label);
-        return `Component '${componentName}' successfully created`;
+        return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
     static async createFromBinary(context: OpenShiftObject): Promise<string> {
@@ -497,7 +497,7 @@ export class Component extends OpenShiftItem {
         if (!componentTypeVersion) return null;
 
         await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, Uri.file(binaryFile.description), workspacePath);
-        return `Component '${componentName}' successfully created`;
+        return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
     static async import(component: OpenShiftObject): Promise<string> {
