@@ -1106,7 +1106,8 @@ export class OdoImpl implements Odo {
         try {
             const items = JSON.parse(result.stdout).items;
             if (items) data = items;
-        } catch (ignore) {
+        } catch (err) {
+            throw new Error(JSON.parse(result.stderr).message);
         }
         return data;
     }
