@@ -206,6 +206,30 @@ suite("odo", () => {
             expect(result[0].getName()).equals('app1');
         });
 
+        test('deleteProject deletes project and returns message', async () => {
+            const activeApps = [{ name: 'app1', project: 'project1' }, { name: 'app2', project: 'project1'}];
+            yamlStub.returns({ ActiveApplications: activeApps });
+            execStub.returns({
+                error: undefined,
+                stdout: JSON.stringify({
+                    kind: "Project",
+                    apiVersion: "odo.openshift.io/v1alpha1",
+                    metadata: {
+                        name: "project1",
+                        namespace: "app1",
+                        creationTimestamp: null
+                    },
+                    message: "Deleted project : project1"
+                    }
+                ),
+                stderr: ''
+            });
+
+            const result = await odoCli.deleteProject(project);
+
+            expect(result[0].message).equals(`Deleted project : ${project}`);
+        });
+
         test('getApplications returns empty list if no odo apps are present', async () => {
             const activeApps = [{ name: 'app1', project: 'project1' }, { name: 'app2', project: 'project1'}];
             yamlStub.returns({ ActiveApplications: activeApps });

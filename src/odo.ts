@@ -83,7 +83,7 @@ export class Command {
         return `odo application list --project ${project} -o json`;
     }
     static deleteProject(name: string) {
-        return `odo project delete ${name} -f`;
+        return `odo project delete ${name} -o json`;
     }
     static waitForProjectToBeGone(project: string) {
         return `oc wait project/${project} --for delete`;
