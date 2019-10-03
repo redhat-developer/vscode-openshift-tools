@@ -35,7 +35,7 @@ suite('odo integration', () => {
         });
 
         test('about()', async () => {
-            await Cluster.about();
+            Cluster.about();
             assert.ok(true);
         });
     });
