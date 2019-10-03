@@ -706,9 +706,7 @@ export class OdoImpl implements Odo {
 
     public async getComponentTypes(): Promise<string[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
-        const items = JSON.parse(result.stdout).items;
-        const componentTypes: Array<string> = items.map((value: { metadata: { name: any; }; }) => value.metadata.name);
-        return componentTypes;
+        return this.loadItems(result).map((value) => value.metadata.name);
     }
 
     public async getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]> {
@@ -766,9 +764,7 @@ export class OdoImpl implements Odo {
 
     public async getComponentTypeVersions(componentName: string) {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
-        const items = JSON.parse(result.stdout).items;
-        const versions = items.find((value: { metadata: { name: string; }; }) => value.metadata.name === componentName);
-        return versions.spec.allTags;
+        return this.loadItems(result).filter((value) => value.metadata.name === componentName)[0].spec.allTags;
     }
 
     public async getServiceTemplates(): Promise<string[]> {
@@ -781,19 +777,13 @@ export class OdoImpl implements Odo {
         } catch (err) {
             throw new Error(JSON.parse(result.stderr).message);
         }
-        serviceTemplate = items.map((value) => value.metadata.name);
-        return serviceTemplate;
+        return items.map((value) => value.metadata.name);
     }
 
     public async getServiceTemplatePlans(svcName: string): Promise<string[]> {
-        let items: any[] = [];
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices(), Platform.getUserHomePath());
-        try {
-            items = JSON.parse(result.stdout).items;
-        } catch (ignore) {
-        }
-        const stpObject = items.find((value) => value.metadata.name === svcName);
-        return stpObject.spec.planList;
+        return this.loadItems(result).filter((value) => value.metadata.name === svcName)[0].spec.planList;
+
     }
 
     async getServices(application: OpenShiftObject): Promise<OpenShiftObject[]> {
