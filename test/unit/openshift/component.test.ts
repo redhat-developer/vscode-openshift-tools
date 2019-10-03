@@ -136,7 +136,7 @@ suite('OpenShift/Component', () => {
             test('happy path works', async () => {
                 const result = await Component.create(appItem);
 
-                expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
+                expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
                 expect(progressFunctionStub).calledOnceWith(
                     `Creating new Component '${componentItem.getName()}'`);
                 expect(execStub).calledWith(Command.createLocalComponent(appItem.getParent().getName(), appItem.getName(), componentType, version, componentItem.getName(), folder.uri.fsPath));
@@ -193,7 +193,7 @@ suite('OpenShift/Component', () => {
             test('happy path works', async () => {
                 const result =  await Component.create(appItem);
 
-                expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
+                expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
                 expect(execStub).calledWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), uri, ref));
             });
 
@@ -329,7 +329,7 @@ suite('OpenShift/Component', () => {
             test('happy path works', async () => {
                 const result = await Component.create(appItem);
 
-                expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
+                expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
                 expect(execStub).calledWith(Command.createBinaryComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), paths, files[0].fsPath));
             });
 
@@ -398,7 +398,7 @@ suite('OpenShift/Component', () => {
             quickPickStub.onThirdCall().resolves('nodejs');
             quickPickStub.resolves('latest');
             const result = await Component.createFromFolder(folder);
-            expect(result).equals(`Component '${componentItem.getName()}' successfully created`);
+            expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
         });
     });
 
