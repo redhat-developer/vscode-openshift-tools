@@ -215,11 +215,11 @@ suite("odo", () => {
                     kind: "Project",
                     apiVersion: "odo.openshift.io/v1alpha1",
                     metadata: {
-                        name: "project1",
-                        namespace: "app1",
+                        name: "project",
+                        namespace: "app",
                         creationTimestamp: null
                     },
-                    message: "Deleted project : project1"
+                    message: "Deleted project : project"
                     }
                 ),
                 stderr: ''
