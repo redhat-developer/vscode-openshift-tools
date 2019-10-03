@@ -96,7 +96,7 @@ export class Command {
         return `odo list --app ${app} --project ${project} -o json`;
     }
     static listCatalogComponents() {
-        return `odo catalog list components`;
+        return `odo catalog list components -o json`;
     }
     static listCatalogServices () {
         return `odo catalog list services -o json`;
@@ -706,7 +706,7 @@ export class OdoImpl implements Odo {
 
     public async getComponentTypes(): Promise<string[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
-        return result.stdout.trim().split('\n').slice(1).map((value) => value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|')[0]);
+        return this.loadItems(result).map((value) => value.metadata.name);
     }
 
     public async getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]> {
@@ -764,25 +764,12 @@ export class OdoImpl implements Odo {
 
     public async getComponentTypeVersions(componentName: string) {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
-        const versions = result.stdout.trim().split('\n').slice(1).filter((value) => {
-            const data = value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|');
-            return data[0] === componentName;
-        }).map((value) => value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|')[2]);
-        return versions && versions.length > 0 ? versions[0].split(',') : [];
+        return this.loadItems(result).filter((value) => value.metadata.name === componentName)[0].spec.allTags;
     }
 
     public async getServiceTemplates(): Promise<string[]> {
-        // tslint:disable-next-line: prefer-const
-        let serviceTemplate: string[];
-        let items: any[] = [];
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices(), Platform.getUserHomePath(), false);
-        try {
-            items = JSON.parse(result.stdout).items;
-        } catch (err) {
-            throw new Error(JSON.parse(result.stderr).message);
-        }
-        serviceTemplate = items.map((value) => value.metadata.name);
-        return serviceTemplate;
+        return this.loadItems(result).map((value) => value.metadata.name);
     }
 
     public async getServiceTemplatePlans(svcName: string): Promise<string[]> {
