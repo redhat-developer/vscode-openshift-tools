@@ -96,7 +96,7 @@ export class Command {
         return `odo list --app ${app} --project ${project} -o json`;
     }
     static listCatalogComponents() {
-        return `odo catalog list components`;
+        return `odo catalog list components -o json`;
     }
     static listCatalogServices () {
         return `odo catalog list services -o json`;
@@ -706,7 +706,9 @@ export class OdoImpl implements Odo {
 
     public async getComponentTypes(): Promise<string[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
-        return result.stdout.trim().split('\n').slice(1).map((value) => value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|')[0]);
+        const items = JSON.parse(result.stdout).items;
+        const componentTypes: Array<string> = items.map((value: { metadata: { name: any; }; }) => value.metadata.name);
+        return componentTypes;
     }
 
     public async getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]> {
@@ -764,11 +766,9 @@ export class OdoImpl implements Odo {
 
     public async getComponentTypeVersions(componentName: string) {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
-        const versions = result.stdout.trim().split('\n').slice(1).filter((value) => {
-            const data = value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|');
-            return data[0] === componentName;
-        }).map((value) => value.replace(/\*/g, '').trim().replace(/\s{1,}/g, '|').split('|')[2]);
-        return versions && versions.length > 0 ? versions[0].split(',') : [];
+        const items = JSON.parse(result.stdout).items;
+        const versions = items.find((value: { metadata: { name: string; }; }) => value.metadata.name === componentName);
+        return versions.spec.allTags;
     }
 
     public async getServiceTemplates(): Promise<string[]> {
