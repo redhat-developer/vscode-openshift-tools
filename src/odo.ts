@@ -768,8 +768,6 @@ export class OdoImpl implements Odo {
     }
 
     public async getServiceTemplates(): Promise<string[]> {
-        // tslint:disable-next-line: prefer-const
-        let serviceTemplate: string[];
         let items: any[] = [];
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices(), Platform.getUserHomePath(), false);
         try {
