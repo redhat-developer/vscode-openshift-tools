@@ -410,10 +410,7 @@ suite("odo", () => {
                     },
                     spec: {
                         allTags: [
-                            "0.10",
                             "10",
-                            "4",
-                            "6",
                             "8",
                             "8-RHOAR",
                             "latest",
@@ -423,14 +420,14 @@ suite("odo", () => {
             ]
         });
 
-        const catalogData: CliExitData = {
+        const componentCatalog: CliExitData = {
             error: null,
             stderr: '',
             stdout: odoCatalog
         };
 
         setup(async () => {
-            sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves(catalogData);
+            sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves(componentCatalog);
         });
 
         test("getComponentTypes returns correct component type names", async () => {
@@ -441,9 +438,9 @@ suite("odo", () => {
 
         test("getComponentTypeVersions returns correct number of tags for component type", async () => {
             const result = await odoCli.getComponentTypeVersions(nodejs);
-            expect(result.length).equals(7);
-            expect(result[0]).equals("0.10");
-            expect(result[6]).equals("latest");
+            expect(result.length).equals(4);
+            expect(result[0]).equals("10");
+            expect(result[3]).equals("latest");
         });
     });
 
