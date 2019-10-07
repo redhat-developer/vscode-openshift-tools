@@ -251,7 +251,7 @@ suite("odo", () => {
             execStub.resolves({ error: null, stderr: '', stdout: services.join('\n') });
             const result = await odoCli.getServices(app);
 
-            expect(execStub).calledWith(odo.Command.listServiceInstances(project.getName(), app.getName()));
+            expect(execStub).calledWith(odo.Command.listServiceInstances(project.getName()));
             expect(result.length).equals(3);
             for (let i = 0; i < result.length; i++) {
                 expect(result[i].getName()).equals(services[i]);
