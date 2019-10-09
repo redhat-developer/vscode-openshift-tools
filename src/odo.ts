@@ -23,8 +23,14 @@ import { GlyphChars } from './util/constants';
 import { Subject } from 'rxjs';
 import { Progress } from './util/progress';
 import { V1ServicePort, V1Service } from '@kubernetes/client-node';
+import jsondata = require('jsondata');
 
 const Collapsed = TreeItemCollapsibleState.Collapsed;
+
+export interface BuilderImage {
+    readonly name: string;
+    readonly tag: string;
+}
 
 export interface OpenShiftObject extends QuickPickItem {
     getChildren(): ProviderResult<OpenShiftObject[]>;
@@ -35,6 +41,7 @@ export interface OpenShiftObject extends QuickPickItem {
     contextPath?: Uri;
     deployed: boolean;
     path?: string;
+    builderImage?: BuilderImage;
 }
 
 export enum ContextType {
@@ -319,8 +326,9 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
         public deployed: boolean,
         private readonly odo: Odo,
         public readonly collapsibleState: TreeItemCollapsibleState = Collapsed,
-        public contextPath?: Uri,
-        public readonly compType?: string) {
+        public contextPath: Uri = undefined,
+        public readonly compType: string = undefined,
+        public readonly builderImage: BuilderImage = undefined) {
         OdoImpl.data.setPathToObject(this);
     }
 
@@ -405,6 +413,7 @@ export interface Odo {
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponents(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]>;
     getComponentTypes(): Promise<string[]>;
+    getComponentTypesJson(): Promise<any[]>;
     getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponentPorts(component: OpenShiftObject): Promise<V1ServicePort[]>;
@@ -721,6 +730,11 @@ export class OdoImpl implements Odo {
         return this.loadItems(result).map((value) => value.metadata.name);
     }
 
+    public async getComponentTypesJson(): Promise<any> {
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
+        return JSON.parse(result.stdout).items;
+    }
+
     public async getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         let children = OdoImpl.data.getChildrenByParent(component);
         if (!children) {
@@ -925,7 +939,7 @@ export class OdoImpl implements Odo {
             if (!targetApplication) {
                 await this.insertAndReveal(application);
             }
-            await this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, location, 'local'));
+            await this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, location, 'local', {name: type, tag: version}));
         }
         let wsFolder: WorkspaceFolder;
         if (workspace.workspaceFolders) {
@@ -951,7 +965,7 @@ export class OdoImpl implements Odo {
             if (!targetApplication) {
                 await this.insertAndReveal(application);
             }
-            await this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, context, ComponentType.GIT));
+            await this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, context, ComponentType.GIT, {name: type, tag: version}));
         }
         workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: context });
         return null;
@@ -964,7 +978,7 @@ export class OdoImpl implements Odo {
             if (!targetApplication) {
                 await this.insertAndReveal(application);
             }
-            this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, context, ComponentType.BINARY));
+            this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, context, ComponentType.BINARY, {name: type, tag: version}));
         }
         workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: context });
         return null;

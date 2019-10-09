@@ -17,7 +17,7 @@ import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import path = require('path');
 import globby = require('globby');
-import { selectWorkspaceFolder } from '../util/workspace';
+import { selectWorkspaceFolder, getDebuggerAdapters } from '../util/workspace';
 
 export class Component extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
@@ -525,6 +525,20 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
+        const components = await Component.odo.getComponentTypesJson();
+        const componentBuilder = components.find((builder) => builder.metadata.name === component.builderImage.name);
+        const tag = componentBuilder.spec.imageStreamRef.spec.tags.find((tag) => tag.name === component.builderImage.tag);
+        const debuggerAdapters = getDebuggerAdapters();
+        if (tag.annotations.tags.includes('java') ) {
+
+        } else if (tag.annotations.tags.includes('nodejs')) {
+
+        } else {
+            // select debugger to run
+            // filter debuggers with attach support
+        }
+
+
         return 'Happy debugging!';
     }
 
