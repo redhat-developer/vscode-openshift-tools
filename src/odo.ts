@@ -99,13 +99,13 @@ export class Command {
         return `odo catalog list components`;
     }
     static listCatalogComponentsJson() {
-        return `odo catalog list components -o json`;
+        return `${Command.listCatalogComponents()} -o json`;
     }
     static listCatalogServices () {
         return `odo catalog list services`;
     }
     static listCatalogServicesJson () {
-        return `odo catalog list services -o json`;
+        return `${Command.listCatalogServices()} -o json`;
     }
     static listStorageNames(project: string, app: string, component: string) {
         return `odo storage list -o json`;
