@@ -96,9 +96,15 @@ export class Command {
         return `odo list --app ${app} --project ${project} -o json`;
     }
     static listCatalogComponents() {
+        return `odo catalog list components`;
+    }
+    static listCatalogComponentsJson() {
         return `odo catalog list components -o json`;
     }
     static listCatalogServices () {
+        return `odo catalog list services`;
+    }
+    static listCatalogServicesJson () {
         return `odo catalog list services -o json`;
     }
     static listStorageNames(project: string, app: string, component: string) {
@@ -705,7 +711,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getComponentTypes(): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
         return this.loadItems(result).map((value) => value.metadata.name);
     }
 
@@ -763,13 +769,13 @@ export class OdoImpl implements Odo {
     }
 
     public async getComponentTypeVersions(componentName: string) {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
         return this.loadItems(result).filter((value) => value.metadata.name === componentName)[0].spec.allTags;
     }
 
     public async getServiceTemplates(): Promise<string[]> {
         let items: any[] = [];
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices(), Platform.getUserHomePath(), false);
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServicesJson(), Platform.getUserHomePath(), false);
         try {
             items = JSON.parse(result.stdout).items;
         } catch (err) {
@@ -779,7 +785,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getServiceTemplatePlans(svcName: string): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices(), Platform.getUserHomePath());
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServicesJson(), Platform.getUserHomePath());
         return this.loadItems(result).filter((value) => value.metadata.name === svcName)[0].spec.planList;
 
     }
