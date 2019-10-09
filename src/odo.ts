@@ -696,8 +696,8 @@ export class OdoImpl implements Odo {
         });
         const targetAppName = application.getName(),
             targetPrjName = application.getParent().getName();
-
-        OdoImpl.data.getSettings().filter((comp) => comp.Application === targetAppName && comp.Project === targetPrjName).forEach((comp, index) => {
+        const compData = await OdoImpl.data.getSettings();
+        compData.filter((comp) => comp.Application === targetAppName && comp.Project === targetPrjName).map((comp) => {
             const item = deployedComponents.find((component) => component.getName() === comp.Name);
             OdoImpl.data.setStringToContext(comp.Application, comp.ContextPath);
             if (item) {

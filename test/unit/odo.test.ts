@@ -26,6 +26,56 @@ suite("odo", () => {
     const odoCli: odo.Odo = odo.OdoImpl.Instance;
     let sandbox: sinon.SinonSandbox;
     const errorMessage = 'Error';
+    const context = {
+        Application: "app",
+        ContextPath: {
+            _formatted: "file:///Users//Desktop/comp1/nodejs-ex",
+            _fsPath: "/Users//Desktop/comp1/nodejs-ex",
+            authority: "",
+            fragment: "",
+            fsPath: "/Users/Desktop/comp1/nodejs-ex",
+            path: "/Users/Desktop/comp1/nodejs-ex",
+            query: "",
+            scheme: "file"
+        },
+        Name: "comp1",
+        Ports: ["8080/TCP"],
+        Project: "project",
+        Ref: "master",
+        SourceLocation: "https://github.com/sclorg/nodejs-ex",
+        Type: "nodejs:latest",
+        Url: []
+    };
+
+    const service = {
+        kind: "ServiceList",
+        apiVersion: "odo.openshift.io/v1alpha1",
+        metadata: {
+            creationTimestamp: null
+        },
+        items: [{
+            kind: "Service",
+            apiVersion: "odo.openshift.io/v1alpha1",
+            metadata: {
+                name: "service",
+                creationTimestamp: null
+            },
+            spec: {
+                type: "postgresql-persistent",
+                plan: "default"
+            },
+            status: {
+                status: "ProvisionedAndBound"
+            }
+        }]
+    };
+
+    const component = {
+        kind: "List",
+        apiVersion: "odo.openshift.io/v1alpha1",
+        metadata: {},
+        items: []
+    };
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -117,6 +167,7 @@ suite("odo", () => {
 
         setup(() => {
             execStub = sandbox.stub(odoCli, 'execute');
+            sandbox.stub(odo.OdoImpl.data, 'getSettings').resolves([context]);
             sandbox.stub(odo.OdoImpl.prototype, 'convertObjectsFromPreviousOdoReleases');
             yamlStub = sandbox.stub(jsYaml, 'safeLoad');
             sandbox.stub(fs, 'readFileSync');
@@ -247,15 +298,12 @@ suite("odo", () => {
         });
 
         test('getServices returns services for an application', async () => {
-            const services = ['service1', 'service2', 'service3'];
-            execStub.resolves({ error: null, stderr: '', stdout: services.join('\n') });
+            execStub.onFirstCall().resolves({ error: null, stderr: '', stdout: JSON.stringify(component)});
+            execStub.onSecondCall().resolves({ error: null, stderr: '', stdout: JSON.stringify(service)});
             const result = await odoCli.getServices(app);
 
-            expect(execStub).calledWith(odo.Command.listServiceInstances(project.getName()));
-            expect(result.length).equals(3);
-            for (let i = 0; i < result.length; i++) {
-                expect(result[i].getName()).equals(services[i]);
-            }
+            expect(execStub).calledWith(odo.Command.listServiceInstances(context.ContextPath.fsPath));
+            expect(result.length).equals(1);
         });
 
         test('getServices returns an empty list if an error occurs', async () => {
@@ -286,24 +334,12 @@ suite("odo", () => {
         });
 
         test('getApplicationChildren returns both components and services for an application', async () => {
-            execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({
-                items: [
-                    {
-                        metadata: {
-                            name: 'component1',
-                            namespace: 'project'
-                        },
-                        spec: {
-                            source: 'https://'
-                        }
-                    }
-                ]
-            }), stderr: ''});
-            execStub.onSecondCall().resolves({error: undefined, stdout: 'serv', stderr: ''});
+            execStub.onFirstCall().resolves({ error: null, stderr: '', stdout: JSON.stringify(component)});
+            execStub.onSecondCall().resolves({ error: null, stderr: '', stdout: JSON.stringify(service)});
             const result = await odoCli.getApplicationChildren(app);
 
-            expect(result[0].getName()).deep.equals('component1');
-            expect(result[1].getName()).deep.equals('serv');
+            expect(result[0].getName()).deep.equals('comp1');
+            expect(result[1].getName()).deep.equals('service');
         });
 
         test('getStorageNames returns storage items for a component', async () => {
