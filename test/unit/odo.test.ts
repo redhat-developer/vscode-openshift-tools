@@ -161,13 +161,13 @@ suite("odo", () => {
     });
 
     suite('item listings', () => {
-        let execStub: sinon.SinonStub, yamlStub: sinon.SinonStub;
+        let execStub: sinon.SinonStub, yamlStub: sinon.SinonStub, getSettingStub;
         const project = new TestItem(null, 'project', ContextType.PROJECT);
         const app = new TestItem(project, 'app', ContextType.APPLICATION);
 
         setup(() => {
             execStub = sandbox.stub(odoCli, 'execute');
-            sandbox.stub(odo.OdoImpl.data, 'getSettings').resolves([context]);
+            getSettingStub = sandbox.stub(odo.OdoImpl.data, 'getSettings').resolves([context]);
             sandbox.stub(odo.OdoImpl.prototype, 'convertObjectsFromPreviousOdoReleases');
             yamlStub = sandbox.stub(jsYaml, 'safeLoad');
             sandbox.stub(fs, 'readFileSync');
@@ -234,32 +234,29 @@ suite("odo", () => {
         });
 
         test('getApplications returns applications for a project', async () => {
-            const activeApps = [{ name: 'app1', project: 'project1' }, { name: 'app2', project: 'project1'}];
-            yamlStub.returns({ ActiveApplications: activeApps });
-            execStub.returns({
-                error: undefined,
-                stdout: JSON.stringify({
-                        items: [
-                            {
-                                metadata: {
-                                    name: 'app1',
-                                    namespace: 'project'
-                                }
-                            }
-                        ]
-                    }
-                ),
-                stderr: ''
-            });
+            execStub.onFirstCall().resolves(JSON.stringify({
+                kind: "List",
+                apiVersion: "odo.openshift.io/v1alpha1",
+                metadata: {},
+                items: [{
+                    kind: "app",
+                    apiVersion: "odo.openshift.io/v1alpha1",
+                    metadata: {
+                        name: "app",
+                        namespace: "project",
+                        creationTimestamp: null
+                    },
+                    spec: {}
+                }]
+            }));
             const result = await odoCli.getApplications(project);
 
             expect(result.length).equals(1);
-            expect(result[0].getName()).equals('app1');
+            expect(result[0].getName()).equals('app');
         });
 
         test('getApplications returns empty list if no odo apps are present', async () => {
-            const activeApps = [{ name: 'app1', project: 'project1' }, { name: 'app2', project: 'project1'}];
-            yamlStub.returns({ ActiveApplications: activeApps });
+            getSettingStub.resolves([]);
             execStub.returns({
                 error: undefined,
                 stdout: JSON.stringify({

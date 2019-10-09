@@ -649,7 +649,8 @@ export class OdoImpl implements Odo {
         let apps: string[] = this.loadItems(result).map((value) => value.metadata.name);
         apps = [...new Set(apps)]; // remove duplicates form array
         // extract apps from local not yet deployed components
-        OdoImpl.data.getSettings().forEach((component) => {
+        const compData = await OdoImpl.data.getSettings();
+        compData.map((component) => {
             if (component.Project === project.getName() && !apps.find((item) => item === component.Application)) {
                 apps.push(component.Application);
             }
