@@ -473,7 +473,7 @@ export class Component extends OpenShiftItem {
         if (!workspacePath) return null;
 
         const globPath = process.platform === 'win32' ? workspacePath.fsPath.replace(/\\/g, '/') : workspacePath.path;
-        const paths = globby.sync(`${globPath}/*.+(jar|war)`, { extglob: true });
+        const paths = globby.sync(`${globPath}`, { expandDirectories: { files: ['*'], extensions: ['jar', 'war']} });
 
         if (paths.length === 0) return window.showInformationMessage("No binary file present in the context folder selected. We currently only support .jar and .war files. If you need support for any other file, please raise an issue.");
 
