@@ -54,7 +54,7 @@ export class Component extends OpenShiftItem {
             command = Component.createFromGit(application);
         } else if (componentSource.label === 'Binary File') {
             command = Component.createFromBinary(application);
-        } else {
+        } else if (componentSource.label === 'Workspace Directory') {
             command = Component.createFromLocal(application);
         }
         return command.catch((err) => Promise.reject(`Failed to create Component with error '${err}'`));
@@ -279,7 +279,7 @@ export class Component extends OpenShiftItem {
         Component.explorer.refresh(component);
     }
 
-    static async handleMigratedComponent(component: OpenShiftObject) {
+    static async handleMigratedComponent(component: OpenShiftObject): Promise<string> {
         const project = component.getParent().getParent().getName();
         const app = component.getParent().getName();
         try {
@@ -293,10 +293,9 @@ export class Component extends OpenShiftItem {
                         case 'Undeploy':
                             await Component.undeploy(component);
                             return null;
-                            break;
                         case 'Help':
                             open('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0');
-                            break;
+                            return null;
                         case 'Cancel':
                             return null;
                     }
@@ -327,7 +326,7 @@ export class Component extends OpenShiftItem {
         Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
 
-    static async openUrl(context: OpenShiftObject): Promise<ChildProcess> {
+    static async openUrl(context: OpenShiftObject): Promise<ChildProcess | string> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
@@ -346,8 +345,8 @@ export class Component extends OpenShiftItem {
 
         if (urlItems !== null) {
             let selectRoute: QuickPickItem;
-            const unpushedUrl = urlItems.filter(value => value.status.state === 'Not Pushed');
-            const pushedUrl = urlItems.filter(value => value.status.state === 'Pushed');
+            const unpushedUrl = urlItems.filter((value) => value.status.state === 'Not Pushed');
+            const pushedUrl = urlItems.filter((value) => value.status.state === 'Pushed');
             if (pushedUrl.length > 0) {
                 const hostName: QuickPickItem[] = pushedUrl.map((value) => ({ label: `${value.spec.protocol}://${value.spec.host}`, description: `Target Port is ${value.spec.port}`}));
                 if (hostName.length >1) {
@@ -358,7 +357,7 @@ export class Component extends OpenShiftItem {
                     return open(`${hostName[0].label}`);
                 }
             } else if (unpushedUrl.length > 0) {
-                window.showInformationMessage(`${unpushedUrl.length} unpushed URL in the local config. Use \'Push\' command before opening URL in browser.`);
+                return `${unpushedUrl.length} unpushed URL in the local config. Use \'Push\' command before opening URL in browser.`;
             }
         }
     }
@@ -476,7 +475,7 @@ export class Component extends OpenShiftItem {
         const globPath = process.platform === 'win32' ? workspacePath.fsPath.replace(/\\/g, '/') : workspacePath.path;
         const paths = globby.sync(`${globPath}`, { expandDirectories: { files: ['*'], extensions: ['jar', 'war']}, deep: 20 });
 
-        if (paths.length === 0) return window.showInformationMessage("No binary file present in the context folder selected. We currently only support .jar and .war files. If you need support for any other file, please raise an issue.");
+        if (paths.length === 0) return "No binary file present in the context folder selected. We currently only support .jar and .war files. If you need support for any other file, please raise an issue.";
 
         const binaryFileObj: QuickPickItem[] = paths.map((file) => ({ label: `$(file-zip) ${path.basename(file)}`, description: `${file}`}));
 
