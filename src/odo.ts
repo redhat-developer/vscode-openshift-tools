@@ -96,19 +96,25 @@ export class Command {
         return `odo list --app ${app} --project ${project} -o json`;
     }
     static listCatalogComponents() {
-        return `odo catalog list components -o json`;
+        return `odo catalog list components`;
+    }
+    static listCatalogComponentsJson() {
+        return `${Command.listCatalogComponents()} -o json`;
     }
     static listCatalogServices () {
-        return `odo catalog list services -o json`;
+        return `odo catalog list services`;
     }
-    static listStorageNames() {
+    static listCatalogServicesJson () {
+        return `${Command.listCatalogServices()} -o json`;
+    }
+    static listStorageNames(project: string, app: string, component: string) {
         return `odo storage list -o json`;
     }
     static printOcVersion() {
         return 'oc version';
     }
-    static listServiceInstances(context: string) {
-        return `odo service list -o json --context ${context}`;
+    static listServiceInstances(project: string, app: string) {
+        return `odo service list -o json --project ${project} --app ${app}`;
     }
     static describeApplication(project: string, app: string) {
         return `odo app describe ${app} --project ${project}`;
@@ -389,7 +395,7 @@ export interface Odo {
     getClusters(): Promise<OpenShiftObject[]>;
     getProjects(): Promise<OpenShiftObject[]>;
     loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): void;
-    addWorkspaceComponent(WorkspaceFolder: WorkspaceFolder, component: OpenShiftObject): void;
+    addWorkspaceComponent(WorkspaceFolder: WorkspaceFolder, component: OpenShiftObject);
     getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]>;
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponents(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]>;
@@ -443,7 +449,6 @@ class OdoModel {
     private pathToObject = new Map<string, OpenShiftObject>();
     private contextToObject = new Map<Uri, OpenShiftObject>();
     private contextToSettings = new Map<Uri, ComponentSettings>();
-    private stringToContext = new Map<string, Uri>();
 
     public setParentToChildren(parent: OpenShiftObject, children: OpenShiftObject[]): OpenShiftObject[] {
         if (!this.parentToChildren.has(parent)) {
@@ -473,20 +478,10 @@ class OdoModel {
         return this.pathToObject.get(path);
     }
 
-    public setStringToContext(name: string, uri: Uri) {
-        if (name && uri) {
-            this.stringToContext.set(name, uri);
-        }
-    }
-
-    public getStringByContext(comp: string) {
-        return this.stringToContext.get(comp);
-    }
-
     public setContextToObject(object: OpenShiftObject) {
         if (object.contextPath) {
             if (!this.contextToObject.has(object.contextPath)) {
-                this.contextToObject.set(object.contextPath, object);
+                this.contextToObject.set(object.contextPath, object );
             }
         }
     }
@@ -495,7 +490,7 @@ class OdoModel {
         return this.contextToObject.get(context);
     }
 
-    public setContextToSettings(settings: ComponentSettings) {
+    public setContextToSettings (settings: ComponentSettings) {
         if (!this.contextToSettings.has(settings.ContextPath)) {
             this.contextToSettings.set(settings.ContextPath, settings);
         }
@@ -545,6 +540,10 @@ export class OdoImpl implements Odo {
     ];
 
     private subjectInstance: Subject<OdoEvent> = new Subject<OdoEvent>();
+
+    private constructor() {
+
+    }
 
     public static get Instance(): Odo {
         if (!OdoImpl.instance) {
@@ -649,8 +648,7 @@ export class OdoImpl implements Odo {
         let apps: string[] = this.loadItems(result).map((value) => value.metadata.name);
         apps = [...new Set(apps)]; // remove duplicates form array
         // extract apps from local not yet deployed components
-        const compData = await OdoImpl.data.getSettings();
-        compData.map((component) => {
+        OdoImpl.data.getSettings().forEach((component) => {
             if (component.Project === project.getName() && !apps.find((item) => item === component.Application)) {
                 apps.push(component.Application);
             }
@@ -697,10 +695,9 @@ export class OdoImpl implements Odo {
         });
         const targetAppName = application.getName(),
             targetPrjName = application.getParent().getName();
-        const compData = await OdoImpl.data.getSettings();
-        compData.filter((comp) => comp.Application === targetAppName && comp.Project === targetPrjName).map((comp) => {
+
+        OdoImpl.data.getSettings().filter((comp) => comp.Application === targetAppName && comp.Project === targetPrjName).forEach((comp, index) => {
             const item = deployedComponents.find((component) => component.getName() === comp.Name);
-            OdoImpl.data.setStringToContext(comp.Application, comp.ContextPath);
             if (item) {
                 item.contextPath = comp.ContextPath;
                 item.deployed = true;
@@ -714,7 +711,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getComponentTypes(): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
         return this.loadItems(result).map((value) => value.metadata.name);
     }
 
@@ -764,18 +761,21 @@ export class OdoImpl implements Odo {
     }
 
     public async _getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+        const app = component.getParent();
+        const appName = app.getName();
+        const projName = app.getParent().getName();
+        const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(projName, appName, component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         return this.loadItems(result).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(component, value.metadata.name, ContextType.STORAGE, false, OdoImpl.instance, TreeItemCollapsibleState.None));
     }
 
     public async getComponentTypeVersions(componentName: string) {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponents());
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
         return this.loadItems(result).filter((value) => value.metadata.name === componentName)[0].spec.allTags;
     }
 
     public async getServiceTemplates(): Promise<string[]> {
         let items: any[] = [];
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices(), Platform.getUserHomePath(), false);
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServicesJson(), Platform.getUserHomePath(), false);
         try {
             items = JSON.parse(result.stdout).items;
         } catch (err) {
@@ -785,7 +785,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getServiceTemplatePlans(svcName: string): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServices(), Platform.getUserHomePath());
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServicesJson(), Platform.getUserHomePath());
         return this.loadItems(result).filter((value) => value.metadata.name === svcName)[0].spec.planList;
 
     }
@@ -796,10 +796,10 @@ export class OdoImpl implements Odo {
 
     public async _getServices(application: OpenShiftObject): Promise<OpenShiftObject[]> {
         const appName: string = application.getName();
+        const projName: string = application.getParent().getName();
         let services: OpenShiftObject[] = [];
         try {
-            const context = OdoImpl.data.getStringByContext(appName);
-            const result: cliInstance.CliExitData = await this.execute(Command.listServiceInstances(context.fsPath));
+            const result: cliInstance.CliExitData = await this.execute(Command.listServiceInstances(projName, appName));
             services = this.loadItems(result)
                 .map((value) => new OpenShiftObjectImpl(application, value.metadata.name, ContextType.SERVICE, true, OdoImpl.instance, TreeItemCollapsibleState.None));
         } catch (ignore) {
@@ -1047,7 +1047,7 @@ export class OdoImpl implements Odo {
         OdoImpl.data.clearTreeData();
     }
 
-    addWorkspaceComponent(folder: WorkspaceFolder, component: OpenShiftObject): void {
+    addWorkspaceComponent(folder: WorkspaceFolder, component: OpenShiftObject) {
         OdoImpl.data.addContexts([folder]);
         this.subject.next(new OdoEventImpl('changed', null));
     }

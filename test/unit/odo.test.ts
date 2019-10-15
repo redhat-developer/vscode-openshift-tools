@@ -26,56 +26,6 @@ suite("odo", () => {
     const odoCli: odo.Odo = odo.OdoImpl.Instance;
     let sandbox: sinon.SinonSandbox;
     const errorMessage = 'Error';
-    const context = {
-        Application: "app",
-        ContextPath: {
-            _formatted: "file:///Users//Desktop/comp1/nodejs-ex",
-            _fsPath: "/Users//Desktop/comp1/nodejs-ex",
-            authority: "",
-            fragment: "",
-            fsPath: "/Users/Desktop/comp1/nodejs-ex",
-            path: "/Users/Desktop/comp1/nodejs-ex",
-            query: "",
-            scheme: "file"
-        },
-        Name: "comp1",
-        Ports: ["8080/TCP"],
-        Project: "project",
-        Ref: "master",
-        SourceLocation: "https://github.com/sclorg/nodejs-ex",
-        Type: "nodejs:latest",
-        Url: []
-    };
-
-    const service = {
-        kind: "ServiceList",
-        apiVersion: "odo.openshift.io/v1alpha1",
-        metadata: {
-            creationTimestamp: null
-        },
-        items: [{
-            kind: "Service",
-            apiVersion: "odo.openshift.io/v1alpha1",
-            metadata: {
-                name: "service",
-                creationTimestamp: null
-            },
-            spec: {
-                type: "postgresql-persistent",
-                plan: "default"
-            },
-            status: {
-                status: "ProvisionedAndBound"
-            }
-        }]
-    };
-
-    const component = {
-        kind: "List",
-        apiVersion: "odo.openshift.io/v1alpha1",
-        metadata: {},
-        items: []
-    };
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -161,13 +111,12 @@ suite("odo", () => {
     });
 
     suite('item listings', () => {
-        let execStub: sinon.SinonStub, yamlStub: sinon.SinonStub, getSettingStub;
+        let execStub: sinon.SinonStub, yamlStub: sinon.SinonStub;
         const project = new TestItem(null, 'project', ContextType.PROJECT);
         const app = new TestItem(project, 'app', ContextType.APPLICATION);
 
         setup(() => {
             execStub = sandbox.stub(odoCli, 'execute');
-            getSettingStub = sandbox.stub(odo.OdoImpl.data, 'getSettings').resolves([context]);
             sandbox.stub(odo.OdoImpl.prototype, 'convertObjectsFromPreviousOdoReleases');
             yamlStub = sandbox.stub(jsYaml, 'safeLoad');
             sandbox.stub(fs, 'readFileSync');
@@ -234,29 +183,32 @@ suite("odo", () => {
         });
 
         test('getApplications returns applications for a project', async () => {
-            execStub.onFirstCall().resolves(JSON.stringify({
-                kind: "List",
-                apiVersion: "odo.openshift.io/v1alpha1",
-                metadata: {},
-                items: [{
-                    kind: "app",
-                    apiVersion: "odo.openshift.io/v1alpha1",
-                    metadata: {
-                        name: "app",
-                        namespace: "project",
-                        creationTimestamp: null
-                    },
-                    spec: {}
-                }]
-            }));
+            const activeApps = [{ name: 'app1', project: 'project1' }, { name: 'app2', project: 'project1'}];
+            yamlStub.returns({ ActiveApplications: activeApps });
+            execStub.returns({
+                error: undefined,
+                stdout: JSON.stringify({
+                        items: [
+                            {
+                                metadata: {
+                                    name: 'app1',
+                                    namespace: 'project'
+                                }
+                            }
+                        ]
+                    }
+                ),
+                stderr: ''
+            });
             const result = await odoCli.getApplications(project);
 
             expect(result.length).equals(1);
-            expect(result[0].getName()).equals('app');
+            expect(result[0].getName()).equals('app1');
         });
 
         test('getApplications returns empty list if no odo apps are present', async () => {
-            getSettingStub.resolves([]);
+            const activeApps = [{ name: 'app1', project: 'project1' }, { name: 'app2', project: 'project1'}];
+            yamlStub.returns({ ActiveApplications: activeApps });
             execStub.returns({
                 error: undefined,
                 stdout: JSON.stringify({
@@ -295,12 +247,34 @@ suite("odo", () => {
         });
 
         test('getServices returns services for an application', async () => {
-            execStub.onFirstCall().resolves({ error: null, stderr: '', stdout: JSON.stringify(component)});
-            execStub.onSecondCall().resolves({ error: null, stderr: '', stdout: JSON.stringify(service)});
+            const services = ['service1', 'service2', 'service3'];
+            execStub.resolves({ error: null, stderr: '', stdout: JSON.stringify({
+                    kind: "ServiceList",
+                    items: [{
+                        metadata: {
+                            name: "service1"
+                        }, spec: {
+                        }
+                    }, {
+                        metadata: {
+                            name: "service2"
+                        }, spec: {
+                        }
+                    }, {
+                        metadata: {
+                            name: "service3"
+                        }, spec: {
+                        }
+                    }]
+                })
+            });
             const result = await odoCli.getServices(app);
 
-            expect(execStub).calledWith(odo.Command.listServiceInstances(context.ContextPath.fsPath));
-            expect(result.length).equals(1);
+            expect(execStub).calledWith(odo.Command.listServiceInstances(project.getName(), app.getName()));
+            expect(result.length).equals(3);
+            for (let i = 0; i < result.length; i++) {
+                expect(result[i].getName()).equals(services[i]);
+            }
         });
 
         test('getServices returns an empty list if an error occurs', async () => {
@@ -331,12 +305,32 @@ suite("odo", () => {
         });
 
         test('getApplicationChildren returns both components and services for an application', async () => {
-            execStub.onFirstCall().resolves({ error: null, stderr: '', stdout: JSON.stringify(component)});
-            execStub.onSecondCall().resolves({ error: null, stderr: '', stdout: JSON.stringify(service)});
+            execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        metadata: {
+                            name: 'component1',
+                            namespace: 'project'
+                        },
+                        spec: {
+                            source: 'https://'
+                        }
+                    }
+                ]
+            }), stderr: ''});
+            const stdout = JSON.stringify({
+                kind: "ServiceList",
+                items: [{
+                    metadata: {
+                        name: "service1"
+                    }
+                }]
+            });
+            execStub.onSecondCall().resolves({error: undefined, stdout, stderr: ''});
             const result = await odoCli.getApplicationChildren(app);
 
-            expect(result[0].getName()).deep.equals('comp1');
-            expect(result[1].getName()).deep.equals('service');
+            expect(result[0].getName()).deep.equals('component1');
+            expect(result[1].getName()).deep.equals('service1');
         });
 
         test('getStorageNames returns storage items for a component', async () => {
