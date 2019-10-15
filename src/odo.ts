@@ -114,7 +114,7 @@ export class Command {
         return 'oc version';
     }
     static listServiceInstances(project: string, app: string) {
-        return `oc get ServiceInstance -o jsonpath="{range .items[?(.metadata.labels.app\\.kubernetes\\.io/part-of == \\"${app}\\")]}{.metadata.labels.app\\.kubernetes\\.io/instance}{\\"\\n\\"}{end}" --namespace ${project}`;
+        return `odo service list -o json --project ${project} --app ${app}`;
     }
     static describeApplication(project: string, app: string) {
         return `odo app describe ${app} --project ${project}`;
@@ -800,9 +800,8 @@ export class OdoImpl implements Odo {
         let services: OpenShiftObject[] = [];
         try {
             const result: cliInstance.CliExitData = await this.execute(Command.listServiceInstances(projName, appName));
-            services = result.stdout.trim().split('\n')
-                .filter((value) => value !== '')
-                .map((value) => new OpenShiftObjectImpl(application, value, ContextType.SERVICE, true, OdoImpl.instance, TreeItemCollapsibleState.None));
+            services = this.loadItems(result)
+                .map((value) => new OpenShiftObjectImpl(application, value.metadata.name, ContextType.SERVICE, true, OdoImpl.instance, TreeItemCollapsibleState.None));
         } catch (ignore) {
             // ignore error in case service catalog is not configured
         }

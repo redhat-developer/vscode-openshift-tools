@@ -248,7 +248,26 @@ suite("odo", () => {
 
         test('getServices returns services for an application', async () => {
             const services = ['service1', 'service2', 'service3'];
-            execStub.resolves({ error: null, stderr: '', stdout: services.join('\n') });
+            execStub.resolves({ error: null, stderr: '', stdout: JSON.stringify({
+                    kind: "ServiceList",
+                    items: [{
+                        metadata: {
+                            name: "service1"
+                        }, spec: {
+                        }
+                    }, {
+                        metadata: {
+                            name: "service2"
+                        }, spec: {
+                        }
+                    }, {
+                        metadata: {
+                            name: "service3"
+                        }, spec: {
+                        }
+                    }]
+                })
+            });
             const result = await odoCli.getServices(app);
 
             expect(execStub).calledWith(odo.Command.listServiceInstances(project.getName(), app.getName()));
@@ -299,11 +318,19 @@ suite("odo", () => {
                     }
                 ]
             }), stderr: ''});
-            execStub.onSecondCall().resolves({error: undefined, stdout: 'serv', stderr: ''});
+            const stdout = JSON.stringify({
+                kind: "ServiceList",
+                items: [{
+                    metadata: {
+                        name: "service1"
+                    }
+                }]
+            });
+            execStub.onSecondCall().resolves({error: undefined, stdout, stderr: ''});
             const result = await odoCli.getApplicationChildren(app);
 
             expect(result[0].getName()).deep.equals('component1');
-            expect(result[1].getName()).deep.equals('serv');
+            expect(result[1].getName()).deep.equals('service1');
         });
 
         test('getStorageNames returns storage items for a component', async () => {
