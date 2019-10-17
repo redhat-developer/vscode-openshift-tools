@@ -259,8 +259,9 @@ export class Component extends OpenShiftItem {
         return this.extensionContext.globalState.get('PUSH');
     }
 
-    static setPushCmd(component: string, application: string, project: string): Thenable<void> {
-        return this.extensionContext.globalState.update('PUSH',  Command.pushComponent());
+    static setPushCmd(fsPath: string): Thenable<void> {
+        return this.extensionContext.globalState.update('PUSH',  { pushCmd: Command.pushComponent(),
+        contextPath: fsPath});
     }
 
     static async push(context: OpenShiftObject): Promise<string> {
@@ -272,7 +273,7 @@ export class Component extends OpenShiftItem {
         if (!component) return null;
         const choice = await Component.handleMigratedComponent(component);
         if (!choice) return null;
-        Component.setPushCmd(component.getName(), component.getParent().getName(), component.getParent().getParent().getName());
+        Component.setPushCmd(component.contextPath.fsPath);
         Component.odo.executeInTerminal(Command.pushComponent(), component.contextPath.fsPath);
         component.contextValue = ContextType.COMPONENT_PUSHED;
         Component.explorer.refresh(component);
@@ -309,8 +310,8 @@ export class Component extends OpenShiftItem {
 
     static async lastPush() {
         const getPushCmd = await Component.getPushCmd();
-        if (getPushCmd) {
-            Component.odo.executeInTerminal(getPushCmd);
+        if (getPushCmd['pushCmd'] && getPushCmd['contextPath']) {
+            Component.odo.executeInTerminal(getPushCmd['pushCmd'], getPushCmd['contextPath']);
         } else {
             throw Error('No existing push command found');
         }
