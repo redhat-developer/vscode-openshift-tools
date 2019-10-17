@@ -78,7 +78,7 @@ suite('OpenShift/Component', () => {
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(null);
+            quickPickStub.onSecondCall().resolves(undefined);
         });
 
         test('asks for context and exits if not provided', async () => {
@@ -115,7 +115,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('returns null when cancelled', async () => {
-            quickPickStub.onFirstCall().resolves(null);
+            quickPickStub.onFirstCall().resolves(undefined);
             const result = await Component.create(appItem);
 
             expect(result).null;
@@ -149,13 +149,13 @@ suite('OpenShift/Component', () => {
             });
 
             test('returns null when no option is selected from quick pick', async () => {
-                quickPickStub.onFirstCall().resolves(null);
+                quickPickStub.onFirstCall().resolves(undefined);
                 const result = await Component.createFromLocal(null);
                 expect(result).null;
             });
 
             test('returns null when no folder selected', async () => {
-                quickPickStub.onSecondCall().resolves(null);
+                quickPickStub.onSecondCall().resolves(undefined);
                 const result = await Component.create(appItem);
 
                 expect(result).null;
@@ -169,14 +169,14 @@ suite('OpenShift/Component', () => {
             });
 
             test('returns null when no component type selected', async () => {
-                quickPickStub.onThirdCall().resolves(null);
+                quickPickStub.onThirdCall().resolves(undefined);
                 const result = await Component.create(appItem);
 
                 expect(result).null;
             });
 
             test('returns null when no component type version selected', async () => {
-                quickPickStub.onCall(3).resolves(null);
+                quickPickStub.onCall(3).resolves(undefined);
                 const result = await Component.create(appItem);
 
                 expect(result).null;
@@ -203,13 +203,13 @@ suite('OpenShift/Component', () => {
             });
 
             test('returns null when no option is selected from quick pick', async () => {
-                quickPickStub.onFirstCall().resolves(null);
+                quickPickStub.onFirstCall().resolves(undefined);
                 const result = await Component.createFromGit(null);
                 expect(result).null;
             });
 
             test('returns null when no folder selected', async () => {
-                quickPickStub.onFirstCall().resolves(null);
+                quickPickStub.onFirstCall().resolves(undefined);
                 const result = await Component.createFromGit(appItem);
                 expect(result).null;
             });
@@ -357,7 +357,7 @@ suite('OpenShift/Component', () => {
             });
 
             test('returns null when no option is selected from quick pick', async () => {
-                quickPickStub.onFirstCall().resolves(null);
+                quickPickStub.onFirstCall().resolves(undefined);
                 const result = await Component.createFromBinary(null);
                 expect(result).null;
             });
@@ -369,14 +369,14 @@ suite('OpenShift/Component', () => {
             });
 
             test('returns null when no work space folder selected', async () => {
-                quickPickStub.onSecondCall().resolves(null);
+                quickPickStub.onSecondCall().resolves(undefined);
                 const result = await Component.create(appItem);
 
                 expect(result).null;
             });
 
             test('returns null when no binary file selected', async () => {
-                quickPickStub.onThirdCall().resolves(null);
+                quickPickStub.onThirdCall().resolves(undefined);
                 const result = await Component.create(appItem);
 
                 expect(result).null;
@@ -418,7 +418,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('returns null when no option is selected from quick pick', async () => {
-            quickPickStub.onFirstCall().resolves(null);
+            quickPickStub.onFirstCall().resolves(undefined);
             const result = await Component.createFromFolder(null);
             expect(result).null;
         });
@@ -511,7 +511,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('returns null when no option is selected from quick pick', async () => {
-            quickPickStub.onSecondCall().resolves(null);
+            quickPickStub.onSecondCall().resolves(undefined);
             const result = await Component.unlink(null);
             expect(result).null;
         });
@@ -615,7 +615,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('returns null when no option is selected from quick pick', async () => {
-            quickPickStub.onSecondCall().resolves(null);
+            quickPickStub.onSecondCall().resolves(undefined);
             const result = await Component.unlink(null);
             expect(result).null;
         });
@@ -890,7 +890,7 @@ suite('OpenShift/Component', () => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(null);
+            quickPickStub.onThirdCall().resolves(undefined);
         });
 
         test('asks for context and exits if not provided', async () => {
@@ -1066,13 +1066,14 @@ suite('OpenShift/Component', () => {
     });
 
     suite('push', () => {
-        let getpushStub;
+        let getpushStub: sinon.SinonStub<any[], any>, showWarningMessageStub: sinon.SinonStub<[string, vscode.MessageOptions, ...vscode.MessageItem[]], Thenable<vscode.MessageItem>>;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
+            showWarningMessageStub = sandbox.stub(vscode.window, 'showWarningMessage');
             getpushStub = sandbox.stub(Component, 'getPushCmd').resolves(undefined);
             sandbox.stub(Component, 'setPushCmd');
         });
@@ -1105,7 +1106,7 @@ suite('OpenShift/Component', () => {
 
         test('returns null if user cancel to Migrated Component', async () => {
             execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({}), stderr: ''});
-            sandbox.stub(vscode.window, 'showWarningMessage').resolves('Cancel');
+            showWarningMessageStub.resolves('Cancel');
             const result = await Component.push(componentItem);
 
             expect(result).null;
@@ -1114,7 +1115,7 @@ suite('OpenShift/Component', () => {
         test('returns null if user select Undeploy', async () => {
             execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({}), stderr: ''});
             sandbox.stub(Component, 'undeploy');
-            sandbox.stub(vscode.window, 'showWarningMessage').resolves('Undeploy');
+            showWarningMessageStub.resolves('Undeploy');
             const result = await Component.push(componentItem);
 
             expect(result).null;
@@ -1122,7 +1123,8 @@ suite('OpenShift/Component', () => {
 
         test('open url if user select on help button', async () => {
             execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({}), stderr: ''});
-            sandbox.stub(vscode.window, 'showWarningMessage').resolves('Help');
+            showWarningMessageStub.onFirstCall().resolves('Help');
+            showWarningMessageStub.onSecondCall().resolves(undefined);
             const result = await Component.push(componentItem);
 
             expect(opnStub).calledOnceWith('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0');
@@ -1168,7 +1170,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('ask for context when called from command bar and exits with null if canceled', async () => {
-            quickPickStub.onThirdCall().resolves(null);
+            quickPickStub.onThirdCall().resolves(undefined);
             const result = await Component.openUrl(null);
             expect(quickPickStub).calledThrice;
             expect(result).is.null;
@@ -1223,7 +1225,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('gets URLs for the component, if there is more than one asks which one to open it in browser and exits if selection is canceled', async () => {
-            quickPickStub.onCall(3).resolves(null);
+            quickPickStub.onCall(3).resolves(undefined);
             execStub.onCall(0).resolves({error: undefined, stdout: JSON.stringify({
                 items: [
                     {
@@ -1440,7 +1442,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('returns null when no work space folder selected', async () => {
-            quickPickStub.onFirstCall().resolves(null);
+            quickPickStub.onFirstCall().resolves(undefined);
             const result = await Component.import(componentItem);
             expect(result).null;
         });
