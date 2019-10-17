@@ -11,6 +11,7 @@ import open = require("open");
 import { TokenStore } from "../util/credentialManager";
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { Filters } from "../util/filters";
+import { Progress } from "../util/progress";
 
 class CreateUrlItem implements QuickPickItem {
 	get label(): string { return `$(plus) Provide new URL...`; }
@@ -173,11 +174,12 @@ export class Cluster extends OpenShiftItem {
 
         if (!passwd) return null;
 
-        return Promise.resolve()
-            .then(() => Cluster.odo.execute(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd)))
+        return Progress.execFunctionWithProgress(`login to cluster: ${clusterURL}`,
+            () => Cluster.odo.execute(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd))
             .then((result) => Cluster.save(username, passwd, password, result))
             .then((result) => Cluster.loginMessage(clusterURL, result))
-            .catch((error) => Promise.reject(new Error(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.message)}'!`)));
+            .catch((error) => Promise.reject(new Error(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.message)}'!`)))
+        );
     }
 
     static async readFromClipboard(): Promise<string> {
@@ -207,10 +209,11 @@ export class Cluster extends OpenShiftItem {
             password: true
         });
         if (!ocToken) return null;
-        return Promise.resolve()
-            .then(() => Cluster.odo.execute(Command.odoLoginWithToken(clusterURL, ocToken)))
+        return Progress.execFunctionWithProgress(`login to cluster: ${clusterURL}`,
+            () => Cluster.odo.execute(Command.odoLoginWithToken(clusterURL, ocToken))
             .then((result) => Cluster.loginMessage(clusterURL, result))
-            .catch((error) => Promise.reject(new Error(`Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(error.message)}'!`)));
+            .catch((error) => Promise.reject(new Error(`Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(error.message)}'!`)))
+        );
     }
 
     private static async loginMessage(clusterURL: string, result: CliExitData): Promise<string> {
