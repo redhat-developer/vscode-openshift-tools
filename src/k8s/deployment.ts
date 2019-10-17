@@ -67,9 +67,6 @@ export class DeploymentConfig {
         const result = await DeploymentConfig.odo.execute(cmd);
         const replica: string = result.stdout;
         const replicationList = replica.split("\n");
-        if (replicationList.length === 0) {
-            throw Error(errorMessage);
-        }
         return replicationList;
     }
 
