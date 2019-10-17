@@ -101,6 +101,8 @@ suite('K8s/deployment', () => {
     });
 
     suite('DeploymentConfigNodeContributor', () => {
+        let dcnc: DeploymentConfigNodeContributor;
+        let kubectlV1Stub: sinon.SinonStub<any[], any>;
         const parent = <ClusterExplorerV1.ClusterExplorerNode>{
             metadata: undefined,
             name: "comp1-app",
@@ -117,6 +119,7 @@ suite('K8s/deployment', () => {
         };
 
         setup(() => {
+            dcnc = new DeploymentConfigNodeContributor();
             const api: k8s.API<k8s.KubectlV1> = {
                 available: true,
                 api: {
@@ -124,13 +127,21 @@ suite('K8s/deployment', () => {
                     portForward: sandbox.stub()
                 }
             };
-            sandbox.stub(k8s.extension.kubectl, 'v1').value(api);
+            kubectlV1Stub = sandbox.stub(k8s.extension.kubectl, 'v1').value(api);
         });
 
         test('should able to get the children node of deployment Config', async () => {
-            const dcnc = new DeploymentConfigNodeContributor();
             const result = await dcnc.getChildren(parent);
             expect(result.length).equals(1);
+        });
+
+        test('returns empty children node of deployment Config', async () => {
+            const api = {
+                available: false
+            };
+            kubectlV1Stub.onFirstCall().value(api);
+            const result = await dcnc.getChildren(parent);
+            expect(result.length).equals(0);
         });
     });
 
