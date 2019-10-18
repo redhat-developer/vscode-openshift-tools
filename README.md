@@ -143,7 +143,7 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 
 This extension uses two CLI tools to interact with OpenShift cluster:
 * OKD CLI client tool - [oc](https://github.com/openshift/origin/releases)
-* OpenShift Do tool - [odo](https://github.com/openshift/odo/releases/tag/v1.0.0-beta5)
+* OpenShift Do tool - [odo](https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.0.0/)
 
 > If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
 The extension will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see an notification for the missing tool.
