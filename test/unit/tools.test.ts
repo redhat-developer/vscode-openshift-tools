@@ -6,8 +6,8 @@
 import { CliExitData, Cli } from '../../src/cli';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
-import { ToolsConfig } from '../../src/tools';
 import * as vscode from 'vscode';
+import * as chai from 'chai';
 import * as shelljs from 'shelljs';
 import { Platform } from '../../src/util/platform';
 import { Archive } from '../../src/util/archive';
@@ -15,14 +15,25 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as fsex from 'fs-extra';
 import hasha = require("hasha");
+import pq = require('proxyquire');
+import sinonChai = require('sinon-chai');
+
+const expect = chai.expect;
+chai.use(sinonChai);
 
 suite("tools configuration", () => {
     let sb: sinon.SinonSandbox;
     let chmodSyncStub: sinon.SinonStub;
+    let opnStub: sinon.SinonStub<any[], any>;
+    let ToolsConfig: any;
 
     setup(() => {
         sb = sinon.createSandbox();
         chmodSyncStub = sb.stub(fs, 'chmodSync');
+        opnStub = sb.stub();
+        ToolsConfig = pq('../../src/tools', {
+            open: opnStub
+        }).ToolsConfig;
         ToolsConfig.resetConfiguration();
     });
 
@@ -69,7 +80,7 @@ suite("tools configuration", () => {
     });
 
     suite('detectOrDownload()', () => {
-        let withProgress;
+        let withProgress: sinon.SinonStub<[vscode.ProgressOptions, (progress: vscode.Progress<{ message?: string; increment?: number; }>, token: vscode.CancellationToken) => Thenable<unknown>], Thenable<unknown>>;
 
         setup(() => {
             withProgress = sb.stub(vscode.window, 'withProgress').resolves();
@@ -172,6 +183,16 @@ suite("tools configuration", () => {
                 sb.stub(Archive, 'unzip').resolves();
                 await ToolsConfig.detectOrDownload('odo');
                 assert.ok(!chmodSyncStub.called);
+            });
+
+            test('Open help page if user click on help button', async () => {
+                sb.stub(shelljs, 'which');
+                sb.stub(fs, 'existsSync').returns(true);
+                sb.stub(fsex, 'ensureDirSync').returns();
+                sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
+                sb.stub(vscode.window, 'showInformationMessage').resolves('Help');
+                await ToolsConfig.detectOrDownload('odo');
+                expect(opnStub).calledOnceWith('https://github.com/redhat-developer/vscode-openshift-tools#dependencies');
             });
         });
 
