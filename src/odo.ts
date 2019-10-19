@@ -107,7 +107,7 @@ export class Command {
     static listCatalogServicesJson () {
         return `${Command.listCatalogServices()} -o json`;
     }
-    static listStorageNames(project: string, app: string, component: string) {
+    static listStorageNames() {
         return `odo storage list -o json`;
     }
     static printOcVersion() {
@@ -141,11 +141,11 @@ export class Command {
         return `odo login ${clusterURL} --token=${ocToken} --insecure-skip-tls-verify`;
     }
     @verbose
-    static createStorage(project: string, app: string, component: string, storageName: string, mountPath: string, storageSize: string) {
-        return `odo storage create ${storageName} --path=${mountPath} --size=${storageSize} --project ${project} --app ${app} --component ${component}`;
+    static createStorage(storageName: string, mountPath: string, storageSize: string) {
+        return `odo storage create ${storageName} --path=${mountPath} --size=${storageSize}}`;
     }
-    static deleteStorage(project: string, app: string, component: string, storage: string) {
-        return `odo storage delete ${storage} -f --project ${project} --app ${app} --component ${component}`;
+    static deleteStorage(storage: string) {
+        return `odo storage delete ${storage} -f`;
     }
     static waitForStorageToBeGone(project: string, app: string, storage: string) {
         return `oc wait pvc/${storage}-${app}-pvc --for=delete --namespace ${project}`;
@@ -761,10 +761,7 @@ export class OdoImpl implements Odo {
     }
 
     public async _getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        const app = component.getParent();
-        const appName = app.getName();
-        const projName = app.getParent().getName();
-        const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(projName, appName, component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+        const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         return this.loadItems(result).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(component, value.metadata.name, ContextType.STORAGE, false, OdoImpl.instance, TreeItemCollapsibleState.None));
     }
 
@@ -1022,13 +1019,13 @@ export class OdoImpl implements Odo {
     }
 
     public async createStorage(component: OpenShiftObject, name: string, mountPath: string, size: string): Promise<OpenShiftObject> {
-        await this.execute(Command.createStorage(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), name, mountPath, size), component.contextPath.fsPath);
+        await this.execute(Command.createStorage(name, mountPath, size), component.contextPath.fsPath);
         return this.insertAndReveal(new OpenShiftObjectImpl(component, name, ContextType.STORAGE, false, this, TreeItemCollapsibleState.None));
     }
 
     public async deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject> {
         const component = storage.getParent();
-        await this.execute(Command.deleteStorage(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), storage.getName()), component.contextPath.fsPath);
+        await this.execute(Command.deleteStorage(storage.getName()), component.contextPath.fsPath);
         await this.execute(Command.waitForStorageToBeGone(storage.getParent().getParent().getParent().getName(), storage.getParent().getParent().getName(), storage.getName()), process.cwd(), false);
         return this.deleteAndRefresh(storage);
     }

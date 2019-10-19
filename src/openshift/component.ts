@@ -563,7 +563,7 @@ export class Component extends OpenShiftItem {
                             const pvcJson = JSON.parse(pvcResult.stdout);
                             const storageName = pvcJson.metadata.labels['app.kubernetes.io/storage-name'];
                             const size = pvcJson.spec.resources.requests.storage;
-                            await Component.odo.execute(Command.createStorage(prjName, appName, compName, storageName, storage.mountPath, size), workspaceFolder.fsPath);
+                            await Component.odo.execute(Command.createStorage(storageName, storage.mountPath, size), workspaceFolder.fsPath);
                         } catch (ignore) {
                             // means there is no storage attached to component
                         }

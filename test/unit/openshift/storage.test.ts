@@ -153,7 +153,7 @@ suite('OpenShift/Storage', () => {
             const result = await Storage.create(componentItem);
 
             expect(result).equals(`Storage '${storageItem.getName()}' successfully created for Component '${componentItem.getName()}'`);
-            expect(execStub).calledOnceWith(Command.createStorage(projectItem.getName(), appItem.getName(), componentItem.getName(), storageItem.getName(), mountPath, size));
+            expect(execStub).calledOnceWith(Command.createStorage(storageItem.getName(), mountPath, size));
         });
 
         test('returns null when no storage name selected', async () => {
@@ -306,7 +306,7 @@ suite('OpenShift/Storage', () => {
             const result = await Storage.del(storageItem);
 
             expect(result).equals(`Storage '${storageItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
-            expect(execStub.getCall(0).args[0]).equals(Command.deleteStorage(projectItem.getName(), appItem.getName(), componentItem.getName(), storageItem.getName()));
+            expect(execStub.getCall(0).args[0]).equals(Command.deleteStorage(storageItem.getName()));
             expect(execStub.getCall(1).args[0]).equals(Command.waitForStorageToBeGone(projectItem.getName(), appItem.getName(), storageItem.getName()));
         });
 
@@ -314,7 +314,7 @@ suite('OpenShift/Storage', () => {
             const result = await Storage.del(null);
 
             expect(result).equals(`Storage '${storageItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
-            expect(execStub.getCall(0).args[0]).equals(Command.deleteStorage(projectItem.getName(), appItem.getName(), componentItem.getName(), storageItem.getName()));
+            expect(execStub.getCall(0).args[0]).equals(Command.deleteStorage(storageItem.getName()));
             expect(execStub.getCall(1).args[0]).equals(Command.waitForStorageToBeGone(projectItem.getName(), appItem.getName(), storageItem.getName()));
         });
 
