@@ -11,15 +11,22 @@
 
 A Visual Studio Code extension for interacting with Red Hat OpenShift cluster. This extension is currently in Preview Mode and supports only Java and Node.js components. We will be supporting other languages in the future releases.
 
-To run the instance of OpenShift cluster locally, developers can use [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/). Currently all clusters are supported, but with some limitations for OpenShift Online Pro where additional storage might be required to create more than two components.
+### Running OpenShift Clusters
 
-For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
+To run the instance of OpenShift cluster locally, developers can use the following:
+
+* OpenShift 4.x - [CodeReadyContainers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned)
+* OpenShift 3.x - [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/). For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
+
+The extension also supports OpenShift running on Azure, AWS. 
+
+Currently all clusters are supported, but with some limitations for OpenShift Online Pro where additional storage might be required to create more than two components.
 
 ## WARNING !!! Breaking Changes
 
-This release `0.1.0` contains breaking changes mentioned below.
+This release `0.1.1` contains breaking changes mentioned below.
 
-* The Components created with previous versions will no longer be visible in OpenShift Application Explorer view.
+* The Components created with previous versions(<=0.0.23) will no longer be visible in OpenShift Application Explorer view.
 * The Extension will prompt the user to specify the context folder when creating new Components and then add selected folder to workspace.
 * New Component, Url and Storage objects are created locally in context folder and not immediatly pushed to the cluster.
 
@@ -75,8 +82,8 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 
 #### Actions for a Pushed Component
 
-   * `Component -> New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster.
-   * `Component -> New Storage` - Create Storage and mount to a Component.
+   * `Component -> New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster. Push the component to reflect the changes on the cluster.
+   * `Component -> New Storage` - Create Storage and mount to a Component. Push the component to reflect the changes on the cluster.
    * `Component -> Describe` - Describe the given Component in terminal window.
    * `Component -> Show Log` - Retrieve the log for the given Component.
    * `Component -> Follow Log` - Follow logs for the given Component.
@@ -85,7 +92,7 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
    * `Component -> Unlink` - Unlink Component from Component/Service.
    * `Component -> Open in Browser` - Open the exposed URL in browser.
    * `Component -> Push` - Push the source code to a Component.
-   * `Component -> Watch` - Watch for changes, update Component on change.
+   * `Component -> Watch` - Watch for changes, update Component on change. This is not supported for git based components.
    * `Component -> Undeploy` - Undeploys a Component from the cluster. The component still resides in the local config.
    * `Component -> Delete` - Delete an existing Component from the cluster and removes the local config also.
 
