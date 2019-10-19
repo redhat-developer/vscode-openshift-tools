@@ -761,9 +761,6 @@ export class OdoImpl implements Odo {
     }
 
     public async _getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        const app = component.getParent();
-        const appName = app.getName();
-        const projName = app.getParent().getName();
         const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         return this.loadItems(result).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(component, value.metadata.name, ContextType.STORAGE, false, OdoImpl.instance, TreeItemCollapsibleState.None));
     }
