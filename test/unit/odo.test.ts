@@ -11,7 +11,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import { ToolsConfig } from '../../src/tools';
 import { WindowUtil } from '../../src/util/windowUtils';
-import { window, Terminal } from 'vscode';
+import { window, Terminal, workspace } from 'vscode';
 import jsYaml = require('js-yaml');
 import { TestItem } from './openshift/testOSItem';
 import { ExecException } from 'child_process';
@@ -29,6 +29,23 @@ suite("odo", () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
+        sandbox.stub(workspace, 'getConfiguration').returns({
+            get<T>(key: string): Promise<T|undefined> {
+                return Promise.resolve(undefined);
+            },
+            update(key: string, value: any): Promise<void> {
+                return Promise.resolve();
+            },
+            inspect(section: string): {
+                key: string;
+            } { return; },
+            has(section: string): boolean {
+                return true;
+            },
+            disableCheckForMigration: false,
+            outputVerbosityLevel: 0,
+            showChannelOnOutput: false
+        });
         sandbox.stub(ToolsConfig, 'getVersion').resolves('0.0.15');
         odoCli.clearCache();
     });
@@ -575,6 +592,58 @@ suite("odo", () => {
             const result = await odoCli.requireLogin();
 
             expect(result).true;
+        });
+    });
+
+    suite('convertObjectsFromPreviousOdoReleases', () => {
+        let execStub: sinon.SinonStub;
+        let showWarningMessageStub: sinon.SinonStub<[string, import("vscode").MessageOptions, ...import("vscode").MessageItem[]], Thenable<import("vscode").MessageItem>>;
+
+        setup(() => {
+            sandbox.stub(workspace.getConfiguration(), 'update');
+            execStub = sandbox.stub(odoCli, 'execute');
+            execStub.onFirstCall().resolves({
+                error: undefined,
+                stdout: 'odo v1.0.0 (4e3175e6f)\n\nServer: https://192.168.64.177:8443\nKubernetes: v1.11.0+d4cacc0\nACTIVE     NAME\n*          project1',
+                stderr: ''
+            });
+            execStub.onSecondCall().resolves({
+                error: null,
+                stderr: "",
+                stdout: "project1"
+            });
+            execStub.onThirdCall().resolves({
+                error: null,
+                stderr: "",
+                stdout: "comp"
+            });
+            execStub.onCall(3).resolves({
+                error: null,
+                stderr: "",
+                stdout: "service"
+            });
+            showWarningMessageStub = sandbox.stub(window, 'showWarningMessage');
+        });
+
+        test('Disable the check for migration if user select Don\'t check again button', async () => {
+            showWarningMessageStub.onFirstCall().resolves('Don\'t check again');
+            execStub.onCall(4).resolves({
+                error: undefined,
+                stdout: JSON.stringify({
+                        items: [
+                            {
+                                metadata: {
+                                    name: 'project1'
+                                }
+                            }
+                        ]
+                    }
+                ),
+                stderr: ''
+            });
+            const result = await odoCli.getProjects();
+            expect(result.length).equals(1);
+            expect(result[0].getName()).equals('project1');
         });
     });
 });

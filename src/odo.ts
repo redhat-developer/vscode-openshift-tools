@@ -570,7 +570,7 @@ export class OdoImpl implements Odo {
         }
         if (clusters.length > 0 && clusters[0].contextValue === ContextType.CLUSTER) {
             // kick out migration if enabled
-            if (!workspace.getConfiguration("openshiftConnector").get("disableCheckForMigration")) {
+            if (!await workspace.getConfiguration("openshiftConnector").get("disableCheckForMigration")) {
                 this.convertObjectsFromPreviousOdoReleases();
             }
         }
