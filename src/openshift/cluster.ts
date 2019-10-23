@@ -174,7 +174,7 @@ export class Cluster extends OpenShiftItem {
 
         if (!passwd) return null;
 
-        return Progress.execFunctionWithProgress(`login to the cluster: ${clusterURL}`,
+        return Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`,
             () => Cluster.odo.execute(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd))
             .then((result) => Cluster.save(username, passwd, password, result))
             .then((result) => Cluster.loginMessage(clusterURL, result))
@@ -209,7 +209,7 @@ export class Cluster extends OpenShiftItem {
             password: true
         });
         if (!ocToken) return null;
-        return Progress.execFunctionWithProgress(`login to the cluster: ${clusterURL}`,
+        return Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`,
             () => Cluster.odo.execute(Command.odoLoginWithToken(clusterURL, ocToken))
             .then((result) => Cluster.loginMessage(clusterURL, result))
             .catch((error) => Promise.reject(new Error(`Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(error.message)}'!`)))
