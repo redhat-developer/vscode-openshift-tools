@@ -1103,7 +1103,7 @@ export class OdoImpl implements Odo {
         }
     }
 
-    loadItems(result: cliInstance.CliExitData) {
+    private loadItems(result: cliInstance.CliExitData) {
         let data: any[] = [];
         try {
             const items = JSON.parse(result.stdout).items;

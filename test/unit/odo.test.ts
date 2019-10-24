@@ -565,6 +565,26 @@ suite("odo", () => {
             assert.equal(cluster[0].getName(), clusterUrl);
         });
 
+        test('show error message if cluster is not login', async () => {
+            sandbox.stub(odo.OdoImpl.prototype, 'execute').onFirstCall().resolves({
+                error: undefined,
+                stdout: '',
+                stderr: 'Please log in to the cluster'
+            });
+            const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
+            assert.equal(cluster[0].getName(), "Please log in to the cluster");
+        });
+
+        test('show message if cluster is down', async () => {
+            sandbox.stub(odo.OdoImpl.prototype, 'execute').onFirstCall().resolves({
+                error: undefined,
+                stdout: '',
+                stderr: 'Unable to connect to OpenShift cluster, is it down?'
+            });
+            const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
+            assert.equal(cluster[0].getName(), "Please start the OpenShift cluster");
+        });
+
         test('extension uses oc version to get cluster url as a backup plan', async () => {
             sandbox.stub(odo.OdoImpl.prototype, 'execute').onFirstCall().resolves({
                 error: undefined,
@@ -600,7 +620,6 @@ suite("odo", () => {
         let showWarningMessageStub: sinon.SinonStub<[string, import("vscode").MessageOptions, ...import("vscode").MessageItem[]], Thenable<import("vscode").MessageItem>>;
 
         setup(() => {
-            sandbox.stub(workspace.getConfiguration(), 'update');
             execStub = sandbox.stub(odoCli, 'execute');
             execStub.onFirstCall().resolves({
                 error: undefined,
@@ -640,6 +659,85 @@ suite("odo", () => {
                     }
                 ),
                 stderr: ''
+            });
+            const result = await odoCli.getProjects();
+            expect(result.length).equals(1);
+            expect(result[0].getName()).equals('project1');
+        });
+
+        test('Update the cluster resource when user select on update button', async () => {
+            sandbox.stub(odoCli.subject, 'next').resolves();
+            sandbox.stub(window, 'showInformationMessage').resolves();
+            showWarningMessageStub.onFirstCall().resolves('Update');
+            execStub.onCall(4).resolves({
+                error: undefined,
+                stdout: JSON.stringify({
+                        items: [
+                            {
+                                metadata: {
+                                    name: 'project1'
+                                }
+                            }
+                        ]
+                    }
+                ),
+                stderr: ''
+            });
+            execStub.onCall(5).resolves({
+                error: null,
+                stderr: "",
+                stdout: "comp"
+            });
+            execStub.onCall(6).resolves({
+                error: null,
+                stderr: "",
+                stdout: JSON.stringify({
+                    metadata: {
+                        labels: {
+                            app: "app",
+                            "app.kubernetes.io/component-name": "comp",
+                            "app.kubernetes.io/component-type": "nodejs",
+                            "app.kubernetes.io/component-version": "latest",
+                            "app.kubernetes.io/name": "app",
+                            "app.kubernetes.io/url-name": "URL"
+                        }
+                    }
+                })
+            });
+            execStub.onCall(10).resolves({
+                error: null,
+                stderr: "",
+                stdout: ""
+            });
+            execStub.onCall(11).resolves({
+                error: null,
+                stderr: "",
+                stdout: ""
+            });
+            execStub.onCall(12).resolves({
+                error: null,
+                stderr: "",
+                stdout: ""
+            });
+            execStub.onCall(13).resolves({
+                error: null,
+                stderr: "",
+                stdout: ""
+            });
+            execStub.onCall(14).resolves({
+                error: null,
+                stderr: "",
+                stdout: ""
+            });
+            execStub.onCall(15).resolves({
+                error: null,
+                stderr: "",
+                stdout: ""
+            });
+            execStub.onCall(16).resolves({
+                error: null,
+                stderr: "",
+                stdout: ""
             });
             const result = await odoCli.getProjects();
             expect(result.length).equals(1);
