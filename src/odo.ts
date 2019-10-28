@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as cliInstance from './cli';
-import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Disposable } from 'vscode';
+import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Disposable, env } from 'vscode';
 import { WindowUtil } from './util/windowUtils';
 import { CliExitData } from './cli';
 import * as path from 'path';
@@ -19,7 +19,6 @@ import * as odo from './odo/config';
 import { ComponentSettings } from './odo/config';
 import { GlyphChars } from './util/constants';
 import { Subject } from 'rxjs';
-import open = require('open');
 import { Progress } from './util/progress';
 import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 
@@ -1134,7 +1133,7 @@ export class OdoImpl implements Odo {
         if (projectsToMigrate.length > 0) {
             const choice = await window.showWarningMessage(`Some of the resources in cluster must be updated to work with latest release of OpenShift Connector Extension.`, 'Update', 'Don\'t check again', 'Help', 'Cancel');
             if (choice === 'Help') {
-                open('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0');
+                env.openExternal(Uri.parse('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0'));
                 this.subject.next(new OdoEventImpl('changed', this.getClusters()[0]));
             } else if (choice === 'Don\'t check again') {
                 workspace.getConfiguration("openshiftConnector").update("disableCheckForMigration", true, true);
