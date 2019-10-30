@@ -1127,7 +1127,7 @@ suite('OpenShift/Component', () => {
             showWarningMessageStub.onSecondCall().resolves(undefined);
             const result = await Component.push(componentItem);
 
-            expect(opnStub).calledOnceWith('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0');
+            expect(opnStub).calledOnceWith(vscode.Uri.parse('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0'));
             expect(result).null;
         });
     });
@@ -1192,7 +1192,7 @@ suite('OpenShift/Component', () => {
                 ]
             }), stderr: ''});
             await Component.openUrl(null);
-            expect(opnStub).calledOnceWith('https://url');
+            expect(opnStub).calledOnceWith(vscode.Uri.parse('https://url'));
         });
 
         test('gets URLs for the component and if there is more than one asks which one to open it in browser and opens selected', async () => {
@@ -1221,7 +1221,7 @@ suite('OpenShift/Component', () => {
                 ]
             }), stderr: ''});
             await Component.openUrl(null);
-            expect(opnStub).calledOnceWith('https://url1');
+            expect(opnStub).calledOnceWith(vscode.Uri.parse('https://url1'));
         });
 
         test('gets URLs for the component, if there is more than one asks which one to open it in browser and exits if selection is canceled', async () => {
@@ -1271,7 +1271,7 @@ suite('OpenShift/Component', () => {
                 ]
             }), stderr: ''});
             await Component.openUrl(null);
-            expect(opnStub).calledOnceWith('https://url');
+            expect(opnStub).calledOnceWith(vscode.Uri.parse('https://url'));
         });
 
         test('request to create url for component if it does not exist and exits when not confirmed' , async () => {

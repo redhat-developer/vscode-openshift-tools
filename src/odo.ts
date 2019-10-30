@@ -4,7 +4,18 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as cliInstance from './cli';
-import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Disposable, env } from 'vscode';
+import { ProviderResult,
+        TreeItemCollapsibleState,
+        window,
+        Terminal,
+        Uri,
+        commands,
+        QuickPickItem,
+        workspace,
+        WorkspaceFoldersChangeEvent,
+        WorkspaceFolder,
+        Disposable,
+        env } from 'vscode';
 import { WindowUtil } from './util/windowUtils';
 import { CliExitData } from './cli';
 import * as path from 'path';

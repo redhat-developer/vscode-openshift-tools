@@ -434,13 +434,13 @@ suite('Openshift/Cluster', () => {
 
         test('opens URL from cluster\'s tree item label if called from cluster\'s context menu', () => {
             clusterMock.openshiftConsole(cluster);
-            openStub.calledOnceWith('http://localhost');
+            openStub.calledOnceWith(vscode.Uri.parse('http://localhost'));
         });
 
         test('opens URL from first cluster label', () => {
             sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
             clusterMock.openshiftConsole();
-            openStub.calledOnceWith('http://localhost');
+            openStub.calledOnceWith(vscode.Uri.parse('http://localhost'));
         });
 
         test('shows error message if node label is not URL', () => {

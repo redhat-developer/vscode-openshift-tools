@@ -6,7 +6,6 @@
 import * as vscode from 'vscode';
 import { Command } from "../odo";
 import { KubeConfigUtils } from "../util/kubeUtils";
-import open = require("open");
 import { OpenShiftItem } from '../openshift/openshiftItem';
 
 const k8sConfig = new KubeConfigUtils();
@@ -39,9 +38,9 @@ export class Console extends OpenShiftItem {
         }
         const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
         if (await Console.fetchClusterVersion() === null) {
-            return await open(`${consoleUrl}/k8s/ns/${context.id}/buildconfigs`);
+            return await vscode.env.openExternal(vscode.Uri.parse(`${consoleUrl}/k8s/ns/${context.id}/buildconfigs`));
         } else {
-            return await open(`${clusterUrl}/console/project/${project}/browse/builds/${context.id}?tab=history`);
+            return await vscode.env.openExternal(vscode.Uri.parse(`${clusterUrl}/console/project/${project}/browse/builds/${context.id}?tab=history`));
         }
     }
 
@@ -52,9 +51,9 @@ export class Console extends OpenShiftItem {
         }
         const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
         if (await Console.fetchClusterVersion() === null) {
-            return await open(`${consoleUrl}/k8s/ns/${context.id}/deploymentconfigs`);
+            return await vscode.env.openExternal(vscode.Uri.parse(`${consoleUrl}/k8s/ns/${context.id}/deploymentconfigs`));
         } else {
-            return await open(`${clusterUrl}/console/project/${project}/browse/dc/${context.id}?tab=history`);
+            return await vscode.env.openExternal(vscode.Uri.parse(`${clusterUrl}/console/project/${project}/browse/dc/${context.id}?tab=history`));
         }
     }
 
@@ -65,9 +64,9 @@ export class Console extends OpenShiftItem {
         }
         const consoleUrl = await this.fetchOpenshiftConsoleUrl();
         if (await Console.fetchClusterVersion() === null) {
-            return await open(`${consoleUrl}/k8s/ns/${context.id}/imagestreams`);
+            return await vscode.env.openExternal(vscode.Uri.parse(`${consoleUrl}/k8s/ns/${context.id}/imagestreams`));
         } else {
-            return await open(`${clusterUrl}/console/project/${project}/browse/images/${context.id}?tab=history`);
+            return await vscode.env.openExternal(vscode.Uri.parse(`${clusterUrl}/console/project/${project}/browse/images/${context.id}?tab=history`));
         }
     }
 
@@ -78,9 +77,9 @@ export class Console extends OpenShiftItem {
         }
         const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
         if (await Console.fetchClusterVersion() === null) {
-            return await open(`${consoleUrl}/overview/ns/${context.id}`);
+            return await vscode.env.openExternal(vscode.Uri.parse(`${consoleUrl}/overview/ns/${context.id}`));
         } else {
-            return await open(`${consoleUrl}/console/project/${context.id}/overview`);
+            return await vscode.env.openExternal(vscode.Uri.parse(`${consoleUrl}/console/project/${context.id}/overview`));
         }
     }
 }
