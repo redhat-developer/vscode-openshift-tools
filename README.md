@@ -11,6 +11,12 @@
 
 A Visual Studio Code extension for interacting with Red Hat OpenShift cluster. This extension is currently in Preview Mode and supports only Java and Node.js components. We will be supporting other languages in the future releases.
 
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/m0wBKuKDYO0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+* Demo: https://youtube.com/watch?v=m0wBKuKDYO0&feature=youtu.be
+* Blog: https://developers.redhat.com/blog/2019/10/31/openshift-connector-visual-studio-code-extension-for-red-hat-openshift/
+
 ### Running OpenShift Clusters
 
 To run the instance of OpenShift cluster locally, developers can use the following:
