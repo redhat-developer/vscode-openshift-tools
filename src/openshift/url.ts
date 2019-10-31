@@ -4,11 +4,10 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { OpenShiftObject, Command } from '../odo';
-import { window, QuickPickItem } from 'vscode';
+import { window, QuickPickItem, commands, Uri } from 'vscode';
 import { V1ServicePort } from '@kubernetes/client-node';
 import { OpenShiftItem } from './openshiftItem';
 import { Progress } from "../util/progress";
-import open = require('open');
 import { ChildProcess } from 'child_process';
 
 export class Url extends OpenShiftItem{
@@ -80,7 +79,7 @@ export class Url extends OpenShiftItem{
             urlObject = result.filter((value) => (value.metadata.name === treeItem.getName()));
         }
         if (urlObject[0].status.state === 'Pushed') {
-            open(`${urlObject[0].spec.protocol}://${urlObject[0].spec.host}`);
+            return commands.executeCommand('vscode.open', Uri.parse(`${urlObject[0].spec.protocol}://${urlObject[0].spec.host}`));
         } else {
             window.showInformationMessage('Selected URL is not created in cluster. Use \'Push\' command before opening URL in browser.');
         }
