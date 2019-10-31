@@ -41,19 +41,15 @@ suite('OpenShift/Component', () => {
     let getProjects: sinon.SinonStub;
     let getApps: sinon.SinonStub;
     let Component: any;
-    let opnStub: sinon.SinonStub;
     let infoStub: sinon.SinonStub;
     let fetchTag: sinon.SinonStub;
     let commandStub: sinon.SinonStub;
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        opnStub = sandbox.stub();
         sandbox.stub(vscode.workspace, "updateWorkspaceFolders");
         fetchTag = sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>([['HEAD', 'shanumb']]));
-        Component = pq('../../../src/openshift/component', {
-            open: opnStub
-        }).Component;
+        Component = pq('../../../src/openshift/component', {}).Component;
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });
         sandbox.stub(OdoImpl.prototype, 'getServices');
@@ -1127,7 +1123,7 @@ suite('OpenShift/Component', () => {
             showWarningMessageStub.onSecondCall().resolves(undefined);
             const result = await Component.push(componentItem);
 
-            expect(opnStub).calledOnceWith('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0');
+            expect(commandStub).calledOnceWith('vscode.open', vscode.Uri.parse('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0'));
             expect(result).null;
         });
     });
@@ -1192,7 +1188,7 @@ suite('OpenShift/Component', () => {
                 ]
             }), stderr: ''});
             await Component.openUrl(null);
-            expect(opnStub).calledOnceWith('https://url');
+            expect(commandStub).calledOnceWith('vscode.open', vscode.Uri.parse('https://url'));
         });
 
         test('gets URLs for the component and if there is more than one asks which one to open it in browser and opens selected', async () => {
@@ -1221,7 +1217,7 @@ suite('OpenShift/Component', () => {
                 ]
             }), stderr: ''});
             await Component.openUrl(null);
-            expect(opnStub).calledOnceWith('https://url1');
+            expect(commandStub).calledOnceWith('vscode.open', vscode.Uri.parse('https://url1'));
         });
 
         test('gets URLs for the component, if there is more than one asks which one to open it in browser and exits if selection is canceled', async () => {
@@ -1250,7 +1246,7 @@ suite('OpenShift/Component', () => {
                 ]
             }), stderr: ''});
             await Component.openUrl(null);
-            expect(opnStub.callCount).equals(0);
+            expect(commandStub.callCount).equals(0);
         });
 
         test('request to create url for component if it does not exist, creates the URL if confirmed by user and opens it in browser.' , async () => {
@@ -1271,14 +1267,14 @@ suite('OpenShift/Component', () => {
                 ]
             }), stderr: ''});
             await Component.openUrl(null);
-            expect(opnStub).calledOnceWith('https://url');
+            expect(commandStub).calledOnceWith('vscode.open', vscode.Uri.parse('https://url'));
         });
 
         test('request to create url for component if it does not exist and exits when not confirmed' , async () => {
             sandbox.stub(vscode.window, 'showInformationMessage').resolves('Cancel');
             sandbox.stub(Component, 'listUrl').resolves(null);
             await Component.openUrl(null);
-            expect(opnStub).is.not.called;
+            expect(commandStub).is.not.called;
         });
 
         test('request to create url for component if it does not exist' , async () => {
