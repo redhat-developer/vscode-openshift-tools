@@ -294,7 +294,7 @@ export class Component extends OpenShiftItem {
                             await Component.undeploy(component);
                             return null;
                         case 'Help':
-                            open('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0');
+                            commands.executeCommand('vscode.open', Uri.parse(`https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0`));
                             break;
                         case 'Cancel':
                             return null;
@@ -352,9 +352,9 @@ export class Component extends OpenShiftItem {
                 if (hostName.length >1) {
                     selectRoute = await window.showQuickPick(hostName, {placeHolder: "This Component has multiple URLs. Select the desired URL to open in browser."});
                     if (!selectRoute) return null;
-                    return open(`${selectRoute.label}`);
+                    return commands.executeCommand('vscode.open', Uri.parse(`${selectRoute.label}`));
                 } else {
-                    return open(`${hostName[0].label}`);
+                    return commands.executeCommand('vscode.open', Uri.parse(`${hostName[0].label}`));
                 }
             } else if (unpushedUrl.length > 0) {
                 return `${unpushedUrl.length} unpushed URL in the local config. Use \'Push\' command before opening URL in browser.`;

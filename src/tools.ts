@@ -94,7 +94,7 @@ export class ToolsConfig {
                         toolLocation = toolCacheLocation;
                     }
                 } else if (response === `Help`) {
-                    open('https://github.com/redhat-developer/vscode-openshift-tools#dependencies');
+                    vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(`https://github.com/redhat-developer/vscode-openshift-tools#dependencies`));
                 }
             }
             if (toolLocation) {

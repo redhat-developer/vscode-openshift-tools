@@ -5,9 +5,8 @@
 
 import { Command } from "../odo";
 import { OpenShiftItem } from './openshiftItem';
-import { window, commands, env, QuickPickItem, ExtensionContext } from 'vscode';
+import { window, commands, env, QuickPickItem, ExtensionContext, Uri } from 'vscode';
 import { CliExitData, Cli } from "../cli";
-import open = require("open");
 import { TokenStore } from "../util/credentialManager";
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { Filters } from "../util/filters";
@@ -69,7 +68,7 @@ export class Cluster extends OpenShiftItem {
             const serverUrl = await Cluster.odo.execute(Command.showServerUrl());
             consoleUrl = `${serverUrl.stdout}/console`;
         }
-        open(consoleUrl);
+        return commands.executeCommand('vscode.open', Uri.parse(consoleUrl));
     }
 
     static async switchContext() {
