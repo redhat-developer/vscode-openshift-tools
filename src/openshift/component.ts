@@ -7,7 +7,6 @@ import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command, ContextType, ComponentType } from '../odo';
 import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext } from 'vscode';
 import { Progress } from '../util/progress';
-import open = require('open');
 import { ChildProcess } from 'child_process';
 import { CliExitData } from '../cli';
 import { isURL } from 'validator';

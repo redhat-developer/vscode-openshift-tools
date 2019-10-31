@@ -8,7 +8,6 @@ import { window, QuickPickItem, commands, Uri } from 'vscode';
 import { V1ServicePort } from '@kubernetes/client-node';
 import { OpenShiftItem } from './openshiftItem';
 import { Progress } from "../util/progress";
-import open = require('open');
 import { ChildProcess } from 'child_process';
 
 export class Url extends OpenShiftItem{

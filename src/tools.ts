@@ -8,7 +8,6 @@ import { Archive } from "./util/archive";
 import { which } from "shelljs";
 import { DownloadUtil } from "./util/download";
 import hasha = require("hasha");
-import open = require("open");
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fsex from 'fs-extra';
