@@ -1,5 +1,29 @@
 # Change Log
 
+## 0.1.1 - 🎃Trick or Treat ( November 1, 2019) 
+
+Halloween Release 🎃
+
+This release is built on top of 0.1.0. If any developer is migrating from `<=0.0.23` release, please follow the [Migration Guide](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0).
+
+## Updates
+* Extension uses [OpenShift Do(odo) 1.0.0 GA](https://github.com/openshift/odo/releases/tag/v1.0.0)
+* Support [Red Hat Code Ready Containers 1.0](https://access.redhat.com/documentation/en-us/red_hat_codeready_containers/1.0/html/getting_started_guide/index) for OpenShift 4.x clusters
+* Update download path for odo-v1.0.0 binary
+* Icons for OpenShift Connector are working for Eclipse Che extension
+* [Demo](https://youtube.com/watch?v=m0wBKuKDYO0) video and [blog](https://developers.redhat.com/blog/2019/10/31/openshift-connector-visual-studio-code-extension-for-red-hat-openshift/) updated for `0.1.1` release
+
+## Changes
+* [#1254](https://github.com/redhat-developer/vscode-openshift-tools/pull/1254) use vscode open command instead of open module for external links    
+* [#1236](https://github.com/redhat-developer/vscode-openshift-tools/pull/1236) Show progress bar for credentials and token Login
+* [#1229](https://github.com/redhat-developer/vscode-openshift-tools/pull/1229) support deep nesting for binary files 
+* [#1243](https://github.com/redhat-developer/vscode-openshift-tools/pull/1243) remove flags from storage commands
+* [#1211](https://github.com/redhat-developer/vscode-openshift-tools/pull/1211) Add json output for catalog list services
+* [#1213](https://github.com/redhat-developer/vscode-openshift-tools/pull/1213) Added json output for catalog list components to determine component type and version
+* [#1218](https://github.com/redhat-developer/vscode-openshift-tools/pull/1218) Provide information message to user to Push the components after success of component creation
+* Increase Code Coverage and improve unit tests
+
+
 ## 0.1.0 (September 19, 2019)
 This release involves *Breaking Changes* !!
 
