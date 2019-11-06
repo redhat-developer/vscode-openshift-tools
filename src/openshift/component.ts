@@ -96,12 +96,20 @@ export class Component extends OpenShiftItem {
         }
     }
 
+    static async getLinkPort(component: OpenShiftObject, compName: string) {
+        const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), compName), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+        return JSON.parse(compData.stdout);
+    }
+
     static async unlinkAllComponents(component: OpenShiftObject) {
         const linkComponent = await Component.getLinkData(component);
         const getLinkComponent = linkComponent['status'].linkedComponents;
         if (getLinkComponent) {
             Object.keys(getLinkComponent).forEach(async key => {
-                await Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), key, component.getName()), component.contextPath.fsPath);
+                const getLinkPort = await Component.getLinkPort(component, key);
+                getLinkPort['status'].linkedComponents[component.getName()].forEach(async (port: string) => {
+                    await Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), key, component.getName(), port), component.contextPath.fsPath);
+                });
             });
         }
     }
@@ -176,8 +184,11 @@ export class Component extends OpenShiftItem {
         });
         const compName = await window.showQuickPick(linkCompName, {placeHolder: "Select a Component to unlink"});
         if (!compName) return null;
+        const getLinkPort = linkComponent['status'].linkedComponents[compName];
+        const port = await window.showQuickPick(getLinkPort, {placeHolder: "Select a Port"});
+        if (!port) return null;
         return Progress.execFunctionWithProgress(`Unlinking Component`,
-            () => Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), compName), component.contextPath.fsPath)
+            () => Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), compName, port), component.contextPath.fsPath)
                 .then(() => `Component '${compName}' has been successfully unlinked from the Component '${component.getName()}'`)
                 .catch((err) => Promise.reject(`Failed to unlink Component with error '${err}'`))
         );

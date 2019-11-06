@@ -225,8 +225,8 @@ export class Command {
     static getComponentJson(project: string, app: string, component: string) {
         return `oc get service ${component}-${app} --namespace ${project} -o json`;
     }
-    static unlinkComponents(project: string, app: string, comp1: string, comp2: string) {
-        return `odo unlink --project ${project} --app ${app} ${comp2} --component ${comp1}`;
+    static unlinkComponents(project: string, app: string, comp1: string, comp2: string, port: string) {
+        return `odo unlink --project ${project} --app ${app} ${comp2} --port ${port} --component ${comp1}`;
     }
     static unlinkService(project: string, app: string, service: string, comp: string) {
         return `odo unlink --project ${project} --app ${app} ${service} --component ${comp}`;
