@@ -535,7 +535,8 @@ export class OdoImpl implements Odo {
     private readonly odoLoginMessages = [
         'Please log in to the cluster',
         'the server has asked for the client to provide credentials',
-        'Please login to your server'
+        'Please login to your server',
+        'Unauthorized'
     ];
 
     private subjectInstance: Subject<OdoEvent> = new Subject<OdoEvent>();
@@ -827,7 +828,7 @@ export class OdoImpl implements Odo {
 
     public async requireLogin(): Promise<boolean> {
         const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersionAndProjects(), process.cwd(), false);
-        return this.odoLoginMessages.some((element) => { return result.stderr.indexOf(element) > -1; });
+        return this.odoLoginMessages.some((msg) => result.stderr.indexOf(msg) > -1);
     }
 
     private insert(array: OpenShiftObject[], item: OpenShiftObject): OpenShiftObject {
