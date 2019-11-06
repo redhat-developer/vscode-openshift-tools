@@ -24,17 +24,16 @@ chai.use(sinonChai);
 suite("tools configuration", () => {
     let sb: sinon.SinonSandbox;
     let chmodSyncStub: sinon.SinonStub;
-    let opnStub: sinon.SinonStub<any[], any>;
     let ToolsConfig: any;
+    let commandStub: any;
 
     setup(() => {
         sb = sinon.createSandbox();
         chmodSyncStub = sb.stub(fs, 'chmodSync');
-        opnStub = sb.stub();
         ToolsConfig = pq('../../src/tools', {
-            open: opnStub
         }).ToolsConfig;
         ToolsConfig.resetConfiguration();
+        commandStub = sb.stub(vscode.commands, 'executeCommand');
     });
 
     teardown(() => {
@@ -192,7 +191,7 @@ suite("tools configuration", () => {
                 sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
                 sb.stub(vscode.window, 'showInformationMessage').resolves('Help');
                 await ToolsConfig.detectOrDownload('odo');
-                expect(opnStub).calledOnceWith('https://github.com/redhat-developer/vscode-openshift-tools#dependencies');
+                expect(commandStub).calledOnceWith('vscode.open', vscode.Uri.parse('https://github.com/redhat-developer/vscode-openshift-tools#dependencies'));
             });
         });
 
