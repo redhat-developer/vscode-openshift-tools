@@ -105,12 +105,14 @@ export class Component extends OpenShiftItem {
         const linkComponent = await Component.getLinkData(component);
         const getLinkComponent = linkComponent['status'].linkedComponents;
         if (getLinkComponent) {
-            Object.keys(getLinkComponent).forEach(async key => {
+            for (const key of Object.keys(getLinkComponent)) {
                 const getLinkPort = await Component.getLinkPort(component, key);
-                getLinkPort['status'].linkedComponents[component.getName()].forEach(async (port: string) => {
-                    await Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), key, component.getName(), port), component.contextPath.fsPath);
-                });
-            });
+                if (getLinkPort['status'].linkedComponents[component.getName()]) {
+                    getLinkPort['status'].linkedComponents[component.getName()].forEach(async (port: string) => {
+                        await Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), key, component.getName(), port), component.contextPath.fsPath);
+                    });
+                }
+            }
         }
     }
 
