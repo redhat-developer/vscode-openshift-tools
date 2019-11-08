@@ -46,6 +46,7 @@ export abstract class OpenShiftItem {
     static async getName(message: string, data: Array<OpenShiftObject>, offset?: string): Promise<string> {
         return await window.showInputBox({
             prompt: `Provide ${message}`,
+            ignoreFocusOut: true,
             validateInput: (value: string) => {
                 let validationMessage = OpenShiftItem.emptyName(`Empty ${message}`, value.trim());
                 if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character`, value);
@@ -128,10 +129,10 @@ export abstract class OpenShiftItem {
     static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean) {
         let context: OpenShiftObject | QuickPickCommand = treeItem;
         let project: OpenShiftObject;
-        if (!context) context = await window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder});
+        if (!context) context = await window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder, ignoreFocusOut: true});
         if (context && context.contextValue === ContextType.PROJECT && appPlaceholder ) {
             project = context as OpenShiftObject;
-            context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(OpenShiftItem.getApplicationNames(project, appPlaceholder.includes('create') && compPlaceholder === undefined), {placeHolder: appPlaceholder});
+            context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(OpenShiftItem.getApplicationNames(project, appPlaceholder.includes('create') && compPlaceholder === undefined), {placeHolder: appPlaceholder, ignoreFocusOut: true});
             if (context && isCommand(context)) {
                 const newAppName = await context.command();
                 if (newAppName) {
@@ -141,7 +142,7 @@ export abstract class OpenShiftItem {
                 }
             }
         }
-        if (context && !isCommand(context) && context.contextValue === ContextType.APPLICATION && compPlaceholder) context = await window.showQuickPick(OpenShiftItem.getComponentNames(context as OpenShiftObject, condition), {placeHolder: compPlaceholder});
+        if (context && !isCommand(context) && context.contextValue === ContextType.APPLICATION && compPlaceholder) context = await window.showQuickPick(OpenShiftItem.getComponentNames(context as OpenShiftObject, condition), {placeHolder: compPlaceholder, ignoreFocusOut: true});
         return context as OpenShiftObject;
     }
 }

@@ -44,7 +44,8 @@ export class Component extends OpenShiftItem {
             }
         ];
         const componentSource = await window.showQuickPick(sourceTypes, {
-            placeHolder: "Select source type for Component"
+            placeHolder: "Select source type for Component",
+            ignoreFocusOut: true
         });
         if (!componentSource) return null;
 
@@ -154,7 +155,7 @@ export class Component extends OpenShiftItem {
                 description: 'Unlink Service'
             }
         ];
-        const unlinkActionSelected = await window.showQuickPick(unlinkActions, {placeHolder: 'Select the option'});
+        const unlinkActionSelected = await window.showQuickPick(unlinkActions, {placeHolder: 'Select the option', ignoreFocusOut: true});
         if (!unlinkActionSelected) return null;
         return unlinkActionSelected.label === 'Component' ? Component.unlinkComponent(context) : unlinkActionSelected.label === 'Service' ?  Component.unlinkService(context) : null;
     }
@@ -174,7 +175,7 @@ export class Component extends OpenShiftItem {
         Object.keys(getLinkComponent).forEach(async key => {
             linkCompName.push(key);
         });
-        const compName = await window.showQuickPick(linkCompName, {placeHolder: "Select a Component to unlink"});
+        const compName = await window.showQuickPick(linkCompName, {placeHolder: "Select a Component to unlink", ignoreFocusOut: true});
         if (!compName) return null;
         return Progress.execFunctionWithProgress(`Unlinking Component`,
             () => Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), compName), component.contextPath.fsPath)
@@ -194,7 +195,7 @@ export class Component extends OpenShiftItem {
         const linkService = await Component.getLinkData(component);
         const getLinkService = linkService['status'].linkedServices;
         if (!getLinkService) throw Error('No linked Services found');
-        const serviceName = await window.showQuickPick(getLinkService, {placeHolder: "Select a Service to unlink"});
+        const serviceName = await window.showQuickPick(getLinkService, {placeHolder: "Select a Service to unlink", ignoreFocusOut: true});
         if (!serviceName) return null;
         return Progress.execFunctionWithProgress(`Unlinking Service`,
             () => Component.odo.execute(Command.unlinkService(component.getParent().getParent().getName(), component.getParent().getName(), serviceName, component.getName()), component.contextPath.fsPath)
@@ -213,7 +214,7 @@ export class Component extends OpenShiftItem {
         if (!component) return null;
         const componentPresent = (await Component.odo.getComponents(component.getParent())).filter((component) => component.contextValue !== ContextType.COMPONENT);
         if (componentPresent.length === 1) throw Error('You have no Components available to link, please create new OpenShift Component and try again.');
-        const componentToLink = await window.showQuickPick(componentPresent.filter((comp)=> comp.getName() !== component.getName()), {placeHolder: "Select a Component to link"});
+        const componentToLink = await window.showQuickPick(componentPresent.filter((comp)=> comp.getName() !== component.getName()), {placeHolder: "Select a Component to link", ignoreFocusOut: true});
         if (!componentToLink) return null;
 
         const portsResult: CliExitData = await Component.odo.execute(Command.listComponentPorts(component.getParent().getParent().getName(), component.getParent().getName(), componentToLink.getName()));
@@ -224,7 +225,7 @@ export class Component extends OpenShiftItem {
         if (ports.length === 1) {
             port = ports[0];
         } else if (ports.length > 1) {
-            port = await window.showQuickPick(ports, {placeHolder: "Select Port to link"});
+            port = await window.showQuickPick(ports, {placeHolder: "Select Port to link", ignoreFocusOut: true});
         } else {
             return Promise.reject(`Component '${component.getName()}' has no Ports declared.`);
         }
@@ -244,7 +245,7 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
-        const serviceToLink: OpenShiftObject = await window.showQuickPick(Component.getServiceNames(component.getParent()), {placeHolder: "Select the service to link"});
+        const serviceToLink: OpenShiftObject = await window.showQuickPick(Component.getServiceNames(component.getParent()), {placeHolder: "Select the service to link", ignoreFocusOut: true});
         if (!serviceToLink) return null;
 
         return Progress.execFunctionWithProgress(`Link Service '${serviceToLink.getName()}' with Component '${component.getName()}'`,
@@ -349,7 +350,7 @@ export class Component extends OpenShiftItem {
             if (pushedUrl.length > 0) {
                 const hostName: QuickPickItem[] = pushedUrl.map((value) => ({ label: `${value.spec.protocol}://${value.spec.host}`, description: `Target Port is ${value.spec.port}`}));
                 if (hostName.length >1) {
-                    selectRoute = await window.showQuickPick(hostName, {placeHolder: "This Component has multiple URLs. Select the desired URL to open in browser."});
+                    selectRoute = await window.showQuickPick(hostName, {placeHolder: "This Component has multiple URLs. Select the desired URL to open in browser.", ignoreFocusOut: true});
                     if (!selectRoute) return null;
                     return commands.executeCommand('vscode.open', Uri.parse(`${selectRoute.label}`));
                 } else {
@@ -379,11 +380,11 @@ export class Component extends OpenShiftItem {
 
         if (!componentName) return null;
 
-        const componentTypeName = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type"});
+        const componentTypeName = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type", ignoreFocusOut: true});
 
         if (!componentTypeName) return null;
 
-        const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
+        const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version", ignoreFocusOut: true});
 
         if (!componentTypeVersion) return null;
         await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, workspacePath));
@@ -401,11 +402,11 @@ export class Component extends OpenShiftItem {
 
         if (!componentName) return null;
 
-        const componentTypeName = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type"});
+        const componentTypeName = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type", ignoreFocusOut: true});
 
         if (!componentTypeName) return null;
 
-        const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
+        const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version", ignoreFocusOut: true});
 
         if (!componentTypeVersion) return null;
 
@@ -423,6 +424,7 @@ export class Component extends OpenShiftItem {
 
         const repoURI = await window.showInputBox({
             prompt: 'Git repository URI',
+            ignoreFocusOut: true,
             validateInput: (value: string) => {
                 return delayer.trigger(async () => {
                     if (!value.trim()) return 'Empty Git repository URL';
@@ -436,7 +438,7 @@ export class Component extends OpenShiftItem {
         if (!repoURI) return null;
 
         const references: Map<string, Ref> = await Refs.fetchTag(repoURI);
-        const gitRef = await window.showQuickPick([...references.values()].map(value => ({label: value.name, description: value.type === Type.TAG? `Tag at ${value.hash}` : value.hash })) , {placeHolder: "Select git reference (branch/tag)"});
+        const gitRef = await window.showQuickPick([...references.values()].map(value => ({label: value.name, description: value.type === Type.TAG? `Tag at ${value.hash}` : value.hash })) , {placeHolder: "Select git reference (branch/tag)", ignoreFocusOut: true});
 
         if (!gitRef) return null;
 
@@ -445,11 +447,11 @@ export class Component extends OpenShiftItem {
 
         if (!componentName) return null;
 
-        const componentTypeName = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type"});
+        const componentTypeName = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type", ignoreFocusOut: true});
 
         if (!componentTypeName) return null;
 
-        const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
+        const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version", ignoreFocusOut: true});
 
         if (!componentTypeVersion) return null;
 
@@ -478,7 +480,7 @@ export class Component extends OpenShiftItem {
 
         const binaryFileObj: QuickPickItem[] = paths.map((file) => ({ label: `$(file-zip) ${path.basename(file)}`, description: `${file}`}));
 
-        const binaryFile: any = await window.showQuickPick(binaryFileObj, {placeHolder: "Select binary file"});
+        const binaryFile: any = await window.showQuickPick(binaryFileObj, {placeHolder: "Select binary file", ignoreFocusOut: true});
 
         if (!binaryFile) return null;
 
@@ -487,11 +489,11 @@ export class Component extends OpenShiftItem {
 
         if (!componentName) return null;
 
-        const componentTypeName = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type"});
+        const componentTypeName = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type", ignoreFocusOut: true});
 
         if (!componentTypeName) return null;
 
-        const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version"});
+        const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version", ignoreFocusOut: true});
 
         if (!componentTypeVersion) return null;
 

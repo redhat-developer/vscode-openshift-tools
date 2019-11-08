@@ -75,7 +75,7 @@ export class Cluster extends OpenShiftItem {
         const k8sConfig = new KubeConfigUtils();
         const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
         const contextName: QuickPickItem[] = contexts.map((ctx) => ({ label: `${ctx.name}`}));
-        const choice = await window.showQuickPick(contextName, {placeHolder: "Select the new OpenShift context"});
+        const choice = await window.showQuickPick(contextName, {placeHolder: "Select the new OpenShift context", ignoreFocusOut: true});
         if (!choice) return null;
         return Promise.resolve()
             .then(() => Cluster.odo.execute(Command.setOpenshiftContext(choice.label)))
@@ -87,7 +87,7 @@ export class Cluster extends OpenShiftItem {
         const clusterURl = await Cluster.getUrlFromClipboard();
         const createUrl = new CreateUrlItem();
         const clusterItems = await k8sConfig.getServers();
-        const choice = await window.showQuickPick([createUrl, ...clusterItems], {placeHolder: "Provide Cluster URL to connect"});
+        const choice = await window.showQuickPick([createUrl, ...clusterItems], {placeHolder: "Provide Cluster URL to connect", ignoreFocusOut: true});
         if (!choice) return null;
         return (choice.label === createUrl.label) ?
             await window.showInputBox({
@@ -111,7 +111,7 @@ export class Cluster extends OpenShiftItem {
             }
         ];
         if (response !== 'Yes') return null;
-        const loginActionSelected = await window.showQuickPick(loginActions, {placeHolder: 'Select the way to log in to the cluster.'});
+        const loginActionSelected = await window.showQuickPick(loginActions, {placeHolder: 'Select the way to log in to the cluster.', ignoreFocusOut: true});
         if (!loginActionSelected) return null;
         return loginActionSelected.label === 'Credentials' ? Cluster.credentialsLogin(true) : Cluster.tokenLogin(true);
     }
@@ -148,7 +148,7 @@ export class Cluster extends OpenShiftItem {
         const k8sConfig = new KubeConfigUtils();
         const users = await k8sConfig.getClusterUsers(clusterURL);
         const addUser = new CreateUserItem();
-        const choice = await window.showQuickPick([addUser, ...users], {placeHolder: "Select username for basic authentication to the API server"});
+        const choice = await window.showQuickPick([addUser, ...users], {placeHolder: "Select username for basic authentication to the API server", ignoreFocusOut: true});
 
         if (!choice) return null;
 

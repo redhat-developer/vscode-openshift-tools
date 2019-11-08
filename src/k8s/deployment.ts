@@ -100,7 +100,7 @@ export class DeploymentConfig {
         } else {
             const deploymentConfig = await common.selectResourceByName(this.getDeploymentConfigNames("You have no DeploymentConfigs available"), "Select a DeploymentConfig to see the Replica");
             if (!deploymentConfig) return null;
-            const selreplica = await window.showQuickPick(this.getReplicaNames(deploymentConfig), {placeHolder: replicaPlaceHolder});
+            const selreplica = await window.showQuickPick(this.getReplicaNames(deploymentConfig), {placeHolder: replicaPlaceHolder, ignoreFocusOut: true});
             replica = selreplica ? selreplica : null;
         }
         return replica;

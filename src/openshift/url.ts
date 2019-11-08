@@ -29,7 +29,7 @@ export class Url extends OpenShiftItem{
             if (ports.length === 1) {
                 port = ports[0];
             } else if (ports.length > 1) {
-                port = await window.showQuickPick(portItems, {placeHolder: "Select port to expose"});
+                port = await window.showQuickPick(portItems, {placeHolder: "Select port to expose", ignoreFocusOut: true});
             } else {
                 return Promise.reject(`Component '${component.getName()}' has no ports declared.`);
             }
@@ -52,7 +52,7 @@ export class Url extends OpenShiftItem{
             "From which Application you want to delete URL",
             "From which Component you want to delete URL");
         if (!url && component) {
-            url = await window.showQuickPick(Url.odo.getRoutes(component), {placeHolder: `Select the URL to delete from the component ${component.getName()}`});
+            url = await window.showQuickPick(Url.odo.getRoutes(component), {placeHolder: `Select the URL to delete from the component ${component.getName()}`, ignoreFocusOut: true});
         }
         if (url) {
             const value = await window.showWarningMessage(`Do you want to delete URL '${url.getName()}' from Component '${url.getParent().getName()}'?`, 'Yes', 'Cancel');

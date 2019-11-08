@@ -29,7 +29,7 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
         );
     }
     const addWorkspaceFolder = new CreateWorkspaceItem();
-    const choice: any = await window.showQuickPick([addWorkspaceFolder, ...folder], {placeHolder: "Select context folder"});
+    const choice: any = await window.showQuickPick([addWorkspaceFolder, ...folder], {placeHolder: "Select context folder", ignoreFocusOut: true});
     if (!choice) return null;
 
     let workspacePath: Uri;
