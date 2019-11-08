@@ -81,8 +81,8 @@ suite('OpenShift/Application', () => {
 
                 await Application.describe(null);
 
-                expect(quickPickStub).calledWith(projects, { placeHolder: "From which project you want to describe Application" });
-                expect(quickPickStub).calledWith(apps, { placeHolder: "Select Application you want to describe" });
+                expect(quickPickStub).calledWith(projects, { placeHolder: "From which project you want to describe Application", ignoreFocusOut: true });
+                expect(quickPickStub).calledWith(apps, { placeHolder: "Select Application you want to describe", ignoreFocusOut: true });
             });
 
             test('skips odo command execution if canceled by user', async () => {

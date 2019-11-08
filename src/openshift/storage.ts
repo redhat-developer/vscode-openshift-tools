@@ -22,14 +22,16 @@ export class Storage extends OpenShiftItem {
 
         if (!storageName) return null;
 
-        const mountPath = await window.showInputBox({prompt: "Specify the mount path", validateInput: (value: string) => {
+        const mountPath = await window.showInputBox({prompt: "Specify the mount path",
+        ignoreFocusOut: true,
+        validateInput: (value: string) => {
             if (isEmpty(value.trim())) {
                 return 'Invalid mount path';
             }
         }});
         if (!mountPath) return null;
 
-        const storageSize = await window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the Storage size'});
+        const storageSize = await window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the Storage size', ignoreFocusOut: true});
         if (!storageSize) return null;
 
         return Progress.execFunctionWithProgress(`Creating the Storage '${component.getName()}'`, () => Storage.odo.createStorage(component, storageName, mountPath, storageSize))
@@ -43,7 +45,7 @@ export class Storage extends OpenShiftItem {
             "From which Project you want to delete Storage",
             "From which Application you want to delete Storage",
             "From which Component you want to delete Storage");
-        if (!storage && component) storage = await window.showQuickPick(Storage.getStorageNames(component), {placeHolder: "Select Storage to delete"});
+        if (!storage && component) storage = await window.showQuickPick(Storage.getStorageNames(component), {placeHolder: "Select Storage to delete", ignoreFocusOut: true});
         if (storage) {
             const value = await window.showWarningMessage(`Do you want to delete Storage '${storage.getName()}' from Component '${storage.getParent().getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {

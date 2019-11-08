@@ -76,7 +76,7 @@ export class Build {
         } else {
             const buildConfig = await common.selectResourceByName(Build.getBuildConfigNames("You have no BuildConfigs available"), "Select a BuildConfig to see the builds");
             if (buildConfig)  {
-                const selBuild = await window.showQuickPick(this.getBuildNames(buildConfig), {placeHolder: text});
+                const selBuild = await window.showQuickPick(this.getBuildNames(buildConfig), {placeHolder: text, ignoreFocusOut: true});
                 build = selBuild ? selBuild.label : null;
             }
         }

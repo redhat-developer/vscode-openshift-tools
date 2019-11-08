@@ -28,7 +28,8 @@ export class Service extends OpenShiftItem {
             serviceTemplatePlanName = plans[0];
         } else if (plans.length > 1) {
             serviceTemplatePlanName = await window.showQuickPick(plans, {
-                placeHolder: "Service Template Plan Name"
+                placeHolder: "Service Template Plan Name",
+                ignoreFocusOut: true
             });
         } else {
             window.showErrorMessage('No Service Plans available for selected Service Template');
@@ -51,7 +52,8 @@ export class Service extends OpenShiftItem {
                 "From which Application you want to delete Service"
             );
             if (application) {
-                service = await window.showQuickPick(Service.getServiceNames(application), {placeHolder: "Select Service to delete"});
+                service = await window.showQuickPick(Service.getServiceNames(application), {placeHolder: "Select Service to delete",
+                ignoreFocusOut: true});
             }
         }
         if (service) {
@@ -73,7 +75,8 @@ export class Service extends OpenShiftItem {
                 "From which project you want to describe Service",
                 "From which application you want to describe Service");
             if (application) {
-                service = await window.showQuickPick(Service.getServiceNames(application), {placeHolder: "Select Service you want to describe"});
+                service = await window.showQuickPick(Service.getServiceNames(application), {placeHolder: "Select Service you want to describe",
+                ignoreFocusOut: true});
             }
         }
         if (service) {
