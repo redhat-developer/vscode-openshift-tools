@@ -11,7 +11,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import { ToolsConfig } from '../../src/tools';
 import { WindowUtil } from '../../src/util/windowUtils';
-import { window, Terminal } from 'vscode';
+import { window, Terminal, workspace } from 'vscode';
 import jsYaml = require('js-yaml');
 import { TestItem } from './openshift/testOSItem';
 import { ExecException } from 'child_process';
@@ -29,6 +29,23 @@ suite("odo", () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
+        sandbox.stub(workspace, 'getConfiguration').returns({
+            get<T>(key: string): Promise<T|undefined> {
+                return Promise.resolve(undefined);
+            },
+            update(key: string, value: any): Promise<void> {
+                return Promise.resolve();
+            },
+            inspect(section: string): {
+                key: string;
+            } { return; },
+            has(section: string): boolean {
+                return true;
+            },
+            disableCheckForMigration: false,
+            outputVerbosityLevel: 0,
+            showChannelOnOutput: false
+        });
         sandbox.stub(ToolsConfig, 'getVersion').resolves('0.0.15');
         odoCli.clearCache();
     });
@@ -548,6 +565,26 @@ suite("odo", () => {
             assert.equal(cluster[0].getName(), clusterUrl);
         });
 
+        test('show error message if cluster is not login', async () => {
+            sandbox.stub(odo.OdoImpl.prototype, 'execute').onFirstCall().resolves({
+                error: undefined,
+                stdout: '',
+                stderr: 'Please log in to the cluster'
+            });
+            const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
+            assert.equal(cluster[0].getName(), "Please log in to the cluster");
+        });
+
+        test('show message if cluster is down', async () => {
+            sandbox.stub(odo.OdoImpl.prototype, 'execute').onFirstCall().resolves({
+                error: undefined,
+                stdout: '',
+                stderr: 'Unable to connect to OpenShift cluster, is it down?'
+            });
+            const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
+            assert.equal(cluster[0].getName(), "Please start the OpenShift cluster");
+        });
+
         test('extension uses oc version to get cluster url as a backup plan', async () => {
             sandbox.stub(odo.OdoImpl.prototype, 'execute').onFirstCall().resolves({
                 error: undefined,
@@ -575,6 +612,136 @@ suite("odo", () => {
             const result = await odoCli.requireLogin();
 
             expect(result).true;
+        });
+    });
+
+    suite('convertObjectsFromPreviousOdoReleases', () => {
+        let execStub: sinon.SinonStub;
+        let showWarningMessageStub: sinon.SinonStub<[string, import("vscode").MessageOptions, ...import("vscode").MessageItem[]], Thenable<import("vscode").MessageItem>>;
+
+        setup(() => {
+            execStub = sandbox.stub(odoCli, 'execute');
+            execStub.onFirstCall().resolves({
+                error: undefined,
+                stdout: 'odo v1.0.0 (4e3175e6f)\n\nServer: https://192.168.64.177:8443\nKubernetes: v1.11.0+d4cacc0\nACTIVE     NAME\n*          project1',
+                stderr: ''
+            });
+            execStub.onSecondCall().resolves({
+                error: null,
+                stderr: "",
+                stdout: "project1"
+            });
+            execStub.onThirdCall().resolves({
+                error: null,
+                stderr: "",
+                stdout: "comp"
+            });
+            execStub.onCall(3).resolves({
+                error: null,
+                stderr: "",
+                stdout: "service"
+            });
+            showWarningMessageStub = sandbox.stub(window, 'showWarningMessage');
+        });
+
+        test('Disable the check for migration if user select Don\'t check again button', async () => {
+            showWarningMessageStub.onFirstCall().resolves('Don\'t check again');
+            execStub.onCall(4).resolves({
+                error: undefined,
+                stdout: JSON.stringify({
+                        items: [
+                            {
+                                metadata: {
+                                    name: 'project1'
+                                }
+                            }
+                        ]
+                    }
+                ),
+                stderr: ''
+            });
+            const result = await odoCli.getProjects();
+            expect(result.length).equals(1);
+            expect(result[0].getName()).equals('project1');
+        });
+
+        test('Update the cluster resource when user select on update button', async () => {
+            sandbox.stub(odoCli.subject, 'next').resolves();
+            sandbox.stub(window, 'showInformationMessage').resolves();
+            showWarningMessageStub.onFirstCall().resolves('Update');
+            execStub.onCall(4).resolves({
+                error: undefined,
+                stdout: JSON.stringify({
+                        items: [
+                            {
+                                metadata: {
+                                    name: 'project1'
+                                }
+                            }
+                        ]
+                    }
+                ),
+                stderr: ''
+            });
+            execStub.onCall(5).resolves({
+                error: null,
+                stderr: "",
+                stdout: "comp"
+            });
+            execStub.onCall(6).resolves({
+                error: null,
+                stderr: "",
+                stdout: JSON.stringify({
+                    metadata: {
+                        labels: {
+                            app: "app",
+                            "app.kubernetes.io/component-name": "comp",
+                            "app.kubernetes.io/component-type": "nodejs",
+                            "app.kubernetes.io/component-version": "latest",
+                            "app.kubernetes.io/name": "app",
+                            "app.kubernetes.io/url-name": "URL"
+                        }
+                    }
+                })
+            });
+            execStub.onCall(10).resolves({
+                error: null,
+                stderr: "",
+                stdout: ""
+            });
+            execStub.onCall(11).resolves({
+                error: null,
+                stderr: "",
+                stdout: ""
+            });
+            execStub.onCall(12).resolves({
+                error: null,
+                stderr: "",
+                stdout: ""
+            });
+            execStub.onCall(13).resolves({
+                error: null,
+                stderr: "",
+                stdout: ""
+            });
+            execStub.onCall(14).resolves({
+                error: null,
+                stderr: "",
+                stdout: ""
+            });
+            execStub.onCall(15).resolves({
+                error: null,
+                stderr: "",
+                stdout: ""
+            });
+            execStub.onCall(16).resolves({
+                error: null,
+                stderr: "",
+                stdout: ""
+            });
+            const result = await odoCli.getProjects();
+            expect(result.length).equals(1);
+            expect(result[0].getName()).equals('project1');
         });
     });
 });
