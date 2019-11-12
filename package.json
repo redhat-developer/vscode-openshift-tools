@@ -1009,7 +1009,7 @@
     "tmp": "0.1.0",
     "tslint": "^5.20.0",
     "typescript": "^3.6.4",
-    "vscode-test": "^1.2.2",
+    "vscode-test": "^1.2.3",
     "walker": "^1.0.7"
   },
   "dependencies": {
