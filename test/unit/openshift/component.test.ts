@@ -528,6 +528,7 @@ suite('OpenShift/Component', () => {
 
         test('errors when a command fails', async () => {
             quickPickStub.onFirstCall().resolves('comp2');
+            quickPickStub.onSecondCall().resolves('8080');
             execStub.onFirstCall().rejects(errorMessage);
             let savedErr: any;
 
