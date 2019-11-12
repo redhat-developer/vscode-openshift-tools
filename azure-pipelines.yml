@@ -18,10 +18,8 @@ jobs:
         inputs:
           verbose: false
       - script: |
-          npm install -g typescript --save-dev
-          npm install
           npm run vscode:prepublish
-        displayName: 'npm install, run prepublish'
+        displayName: 'run prepublish'
       - script: |
           npm test --silent
         displayName: 'Run tests'  
@@ -43,7 +41,7 @@ jobs:
           verbose: true
       - script: |
           npm run vscode:prepublish
-        displayName: 'npm install, run prepublish'
+        displayName: 'run prepublish'
       - script: |
           npm test --silent
         displayName: 'Run tests'
@@ -64,7 +62,7 @@ jobs:
           verbose: true
       - script: |
           npm run vscode:prepublish
-        displayName: 'npm install, run prepublish'
+        displayName: 'run prepublish'
       - script: |
           set -e
           /usr/bin/Xvfb :10 -ac >> /tmp/Xvfb.out 2>&1 &
