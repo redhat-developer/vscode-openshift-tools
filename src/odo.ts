@@ -240,6 +240,9 @@ export class Command {
     static showServerUrl() {
         return `oc whoami --show-server`;
     }
+    static showConsoleUrl() {
+        return `oc get configmaps console-public -n openshift-config-managed -o json`;
+    }
 }
 
 export class OpenShiftObjectImpl implements OpenShiftObject {

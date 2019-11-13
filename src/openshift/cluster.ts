@@ -59,12 +59,10 @@ export class Cluster extends OpenShiftItem {
 
     static async openshiftConsole(): Promise<void> {
         let consoleUrl: string;
-        const versionInfo = await Cluster.odo.execute(Command.getclusterVersion(), process.cwd(), false);
-        if (versionInfo.error === null) {
-            const routeObj = await Cluster.odo.execute(Command.getOpenshiftClusterRoute());
-            const spec = JSON.parse(routeObj.stdout).items[0].spec;
-            consoleUrl = `${spec.port.targetPort}://${spec.host}`;
-        } else {
+        try {
+            const getUrlObj = await Cluster.odo.execute(Command.showConsoleUrl());
+            consoleUrl = JSON.parse(getUrlObj.stdout).data.consoleURL;
+        } catch (ignore) {
             const serverUrl = await Cluster.odo.execute(Command.showServerUrl());
             consoleUrl = `${serverUrl.stdout}/console`;
         }
