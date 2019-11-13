@@ -27,7 +27,6 @@ import { OdoImpl } from './odo';
 import { Build } from './k8s/build';
 import { DeploymentConfig } from './k8s/deployment';
 import { TokenStore } from './util/credentialManager';
-import * as Oc from './oc';
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined = undefined;
 
@@ -36,7 +35,6 @@ export async function activate(context: vscode.ExtensionContext) {
     Cluster.extensionContext = Component.extensionContext = TokenStore.extensionContext = context;
     const disposable = [
         vscode.commands.registerCommand('openshift.about', (context) => execute(Cluster.about, context)),
-        vscode.commands.registerCommand('openshift.create', (context) => execute(Oc.create, context)),
         vscode.commands.registerCommand('openshift.output', (context) => execute(Cluster.showOpenShiftOutput, context)),
         vscode.commands.registerCommand('openshift.openshiftConsole', (context) => execute(Cluster.openshiftConsole, context)),
         vscode.commands.registerCommand('openshift.openshiftConsole.palette', (context) => execute(Cluster.openshiftConsole, context)),

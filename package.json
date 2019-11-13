@@ -39,7 +39,6 @@
     "onView:extension.vsKubernetesExplorer",
     "onCommand:openshift.about",
     "onCommand:openshift.output",
-    "onCommand:openshift.create",
     "onCommand:openshift.openshiftConsole.palette",
     "onCommand:openshift.explorer.login",
     "onCommand:openshift.explorer.login.credentialsLogin",
@@ -116,11 +115,6 @@
       {
         "command": "openshift.about",
         "title": "About",
-        "category": "OpenShift"
-      },
-      {
-        "command": "openshift.create",
-        "title": "Create",
         "category": "OpenShift"
       },
       {
@@ -1015,7 +1009,7 @@
     "tmp": "0.1.0",
     "tslint": "^5.20.0",
     "typescript": "^3.6.4",
-    "vscode-test": "^1.2.3",
+    "vscode-test": "^1.2.2",
     "walker": "^1.0.7"
   },
   "dependencies": {
