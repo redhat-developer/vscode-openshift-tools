@@ -27,7 +27,7 @@ import { OdoImpl } from './odo';
 import { Build } from './k8s/build';
 import { DeploymentConfig } from './k8s/deployment';
 import { TokenStore } from './util/credentialManager';
-import * as Oc from './oc';
+import { Oc } from './oc';
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined = undefined;
 

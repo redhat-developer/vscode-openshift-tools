@@ -25,6 +25,7 @@ import packagejson = require('../../package.json');
 import { OpenShiftExplorer } from '../../src/explorer';
 import path = require('path');
 import { OdoImpl, ContextType, OpenShiftObjectImpl } from '../../src/odo';
+import { Oc } from '../../src/oc';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -45,12 +46,10 @@ suite('openshift connector Extension', async () => {
         }, {
             uri: comp2Uri, index: 1, name: 'comp2'
         }]);
-        const stub = sandbox.stub(Cluster, 'about');
         try {
             await vscode.commands.executeCommand('openshift.output');
         } catch (ignore) {
         } finally {
-            stub.restore();
         }
         sandbox.stub(OdoImpl.prototype, '_getClusters').resolves([clusterItem]);
         sandbox.stub(OdoImpl.prototype, '_getProjects').resolves([projectItem]);
@@ -84,7 +83,7 @@ suite('openshift connector Extension', async () => {
         const cmds: string[] = await vscode.commands.getCommands();
         const osc: string[] = cmds.filter((item) => item.startsWith('openshift.'));
         const mths: string[] = getStaticMethodsToStub(osc);
-        [Application, Catalog, Cluster, Component, Project, Service, Storage, Url, OpenShiftExplorer].forEach((item: { [x: string]: any; }) => {
+        [Application, Catalog, Cluster, Component, Project, Service, Storage, Url, OpenShiftExplorer, Oc].forEach((item: { [x: string]: any; }) => {
             mths.forEach((name) => {
                 if (item[name]) {
                     sandbox.stub(item, name).resolves();
