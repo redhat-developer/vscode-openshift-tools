@@ -11,7 +11,7 @@ This release brings to you:
   - [#1247](https://github.com/redhat-developer/vscode-openshift-tools/issues/1247) Open console command doesn't open the console web page  
 
 
-## 0.1.1 - 🎃Trick or Treat ( November 1, 2019) 
+## 0.1.1 - 🎃Trick or Treat (November 1, 2019) 
 
 Halloween Release 🎃
 
