@@ -141,7 +141,7 @@ export class Command {
     }
     @verbose
     static createStorage(storageName: string, mountPath: string, storageSize: string) {
-        return `odo storage create ${storageName} --path=${mountPath} --size=${storageSize}}`;
+        return `odo storage create ${storageName} --path=${mountPath} --size=${storageSize}`;
     }
     static deleteStorage(storage: string) {
         return `odo storage delete ${storage} -f`;
