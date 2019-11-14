@@ -14,17 +14,17 @@ export class Oc {
         const pleaseSave = 'Please save your changes before executing \'OpenShift: Create\' command.';
         let message: string;
 
-        if (!document) {
+        if (!document || !(document.fileName.endsWith('.yaml') || document.fileName.endsWith('.json'))) {
             message = '\'OpenShift: Create\' command requires .yaml or .json a file opened in editor.';
         }
 
-        if (!message  && document.isUntitled) {
+        if (!message && document.isUntitled) {
             message = pleaseSave;
         }
 
         if (!message && document.isDirty) {
             const save = 'Save';
-            const action = await window.showInformationMessage('Editor has unsaved changes', save);
+            const action = await window.showInformationMessage('Editor has unsaved changes.', save);
             if (action !== save) {
                 message = pleaseSave;
             } else {
@@ -32,11 +32,18 @@ export class Oc {
             }
         }
 
+        let toolLocation: string;
+        if (!message) {
+            toolLocation = await ToolsConfig.detectOrDownload('oc');
+            if (!toolLocation) {
+                message = 'Cannot run \'oc create\'. OKD CLI client tool cannot be found.';
+            }
+        }
+
         if (message) {
             window.showWarningMessage(message);
         } else {
             const project = await OpenShiftItem.getOpenShiftCmdData(undefined, 'Select a Project where to create a new resource');
-            const toolLocation = await ToolsConfig.detectOrDownload('oc');
             const result = await Cli.getInstance().execute(`${toolLocation} create -f ${document.fileName} --namespace ${project.getName()}`);
             if (result.error) {
                 throw result.error;
@@ -44,6 +51,5 @@ export class Oc {
                 return 'Resources were successfully created.';
             }
         }
-
     }
 }
