@@ -3,27 +3,27 @@
         "description": "OpenShift Do CLI tool",
         "vendor": "Red Hat, Inc.",
         "name": "odo",
-        "version": "1.0.0",
-        "versionRange": "1.0.0",
-        "versionRangeLabel": "v1.0.0",
+        "version": "1.0.1",
+        "versionRange": "1.0.1",
+        "versionRangeLabel": "v1.0.1",
         "dlFileName": "odo",
         "cmdFileName": "odo",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.0.0/odo-windows-amd64.exe.tar.gz",
-                "sha256sum": "86124dccf8d6c27da8c5fa73d34b4190feccf4902329dd6da2c2df2357f13fcc",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.0.1/odo-windows-amd64.exe.tar.gz",
+                "sha256sum": "cae3767e05603fcfa179173faf44f9ccb260c2ade53cb525bf0bfdc6a56d7a8b",
                 "dlFileName": "odo-windows-amd64.exe.tar.gz",
                 "cmdFileName": "odo.exe"
             },
             "darwin": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.0.0/odo-darwin-amd64.tar.gz",
-                "sha256sum": "f25056cd448c2a08e6d4ff270fd5d27c064cb16b6973682941fe433b239af97d",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.0.1/odo-darwin-amd64.tar.gz",
+                "sha256sum": "0217c0743a5636eb904fe965dc30282b58414459c80a7cf1de630ffdc61c9c0b",
                 "dlFileName": "odo-darwin-amd64.tar.gz"
             },
             "linux": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.0.0/odo-linux-amd64.tar.gz",
-                "sha256sum": "1a377204b84af6a2de987d4cf222a2f01b43218e3a348309e4a5b47de5043f06",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.0.1/odo-linux-amd64.tar.gz",
+                "sha256sum": "4047b8d9cd746109a93bf208cd1c740b100e2e13d4b96fbf9862551ca4eca5b3",
                 "dlFileName": "odo-linux-amd64.tar.gz"
             }
         }
