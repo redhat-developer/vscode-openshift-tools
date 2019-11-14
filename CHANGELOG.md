@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.1.2 (November 18, 2019)
+
+This release brings to you: 
+* [#1277](https://github.com/redhat-developer/vscode-openshift-tools/issues/1277) Latest v1.0.1 version of OpenShift Do CLI tool 
+* [#1268](https://github.com/redhat-developer/vscode-openshift-tools/issues/1268) New `OpenShift: Create` command to create resources based on file from active editor
+* Bugfixes for minor issues:
+  - [#1262](https://github.com/redhat-developer/vscode-openshift-tools/issues/1262) Keep QuickInputs open after VSCode window lost focus
+  - [#1261](https://github.com/redhat-developer/vscode-openshift-tools/issues/1261) 'Unlink' command for components does not work
+  - [#1247](https://github.com/redhat-developer/vscode-openshift-tools/issues/1247) Open console command doesn't open the console web page  
+
+
 ## 0.1.1 - 🎃Trick or Treat ( November 1, 2019) 
 
 Halloween Release 🎃
