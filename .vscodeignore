@@ -16,3 +16,7 @@ Jenkinsfile
 .gitattributes
 .travis.yml
 CONTRIBUTING.md
+build/**
+out/build**
+azure-pipelines.yml
+images/demo-featured-image.png
