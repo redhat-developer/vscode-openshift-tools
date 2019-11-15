@@ -8,7 +8,9 @@ This release brings to you:
 * Bugfixes for minor issues:
   - [#1262](https://github.com/redhat-developer/vscode-openshift-tools/issues/1262) Keep QuickInputs open after VSCode window lost focus
   - [#1261](https://github.com/redhat-developer/vscode-openshift-tools/issues/1261) 'Unlink' command for components does not work
-  - [#1247](https://github.com/redhat-developer/vscode-openshift-tools/issues/1247) Open console command doesn't open the console web page  
+  - [#1247](https://github.com/redhat-developer/vscode-openshift-tools/issues/1247) Open console command doesn't open the console web page
+  - [#1260](https://github.com/redhat-developer/vscode-openshift-tools/issues/1260) Sometimes login does not work anymore
+  - [#1284](https://github.com/redhat-developer/vscode-openshift-tools/issues/1284) With latest VSCode 1.40.0 release oc and odo download fails on sha256 verification
 
 
 ## 0.1.1 - 🎃Trick or Treat (November 1, 2019) 
