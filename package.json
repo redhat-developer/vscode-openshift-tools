@@ -101,6 +101,7 @@
     "onCommand:clusters.openshift.build.delete.palette",
     "onCommand:clusters.openshift.build.rebuild",
     "onCommand:clusters.openshift.build.openConsole",
+    "onCommand:clusters.openshift.build.openConsole.palette",
     "onCommand:clusters.openshift.deploy.dc.showLog",
     "onCommand:clusters.openshift.deploy.dc.showLog.palette",
     "onCommand:clusters.openshift.deploy.delete",
@@ -108,7 +109,9 @@
     "onCommand:clusters.openshift.deploy.rcShowLog",
     "onCommand:clusters.openshift.deploy.rcShowLog.palette",
     "onCommand:clusters.openshift.deployment.openConsole",
-    "onCommand:clusters.openshift.imagestream.openConsole"
+    "onCommand:clusters.openshift.deployment.openConsole.palette",
+    "onCommand:clusters.openshift.imagestream.openConsole",
+    "onCommand:clusters.openshift.imagestream.openConsole.palette"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -452,7 +455,8 @@
       },
       {
         "command": "clusters.openshift.project.openConsole",
-        "title": "Open Project in Console"
+        "title": "Open Project in Console",
+        "category": "OpenShift"
       },
       {
         "command": "clusters.openshift.build.showLog",
@@ -499,6 +503,11 @@
         "title": "Open in Console"
       },
       {
+        "command": "clusters.openshift.build.openConsole.palette",
+        "title": "Open build's in Console",
+        "category": "OpenShift"
+      },
+      {
         "command": "clusters.openshift.deploy.rcShowLog.palette",
         "title": "Show Replica's Log",
         "category": "OpenShift"
@@ -523,8 +532,18 @@
         "title": "Open in Console"
       },
       {
+        "command": "clusters.openshift.deployment.openConsole.palette",
+        "title": "Open Deployment's in Console",
+        "category": "OpenShift"
+      },
+      {
         "command": "clusters.openshift.imagestream.openConsole",
         "title": "Open in Console"
+      },
+      {
+        "command": "clusters.openshift.imagestream.openConsole.palette",
+        "title": "Open Image stream's in Console",
+        "category": "OpenShift"
       }
     ],
     "keybindings": [
@@ -661,6 +680,18 @@
         },
         {
           "command": "clusters.openshift.deploy.dc.showLog",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "clusters.openshift.imagestream.openConsole",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "clusters.openshift.deployment.openConsole",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "clusters.openshift.build.openConsole",
           "when": "view == openshiftProjectExplorer"
         }
       ],

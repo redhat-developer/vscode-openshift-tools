@@ -10,13 +10,14 @@ import { Command } from "../odo";
 import { KubeConfigUtils } from "../util/kubeUtils";
 import { OpenShiftItem } from '../openshift/openshiftItem';
 import { CliExitData } from '../cli';
+import * as common from './common';
 
 const k8sConfig = new KubeConfigUtils();
 const project = (k8sConfig.contexts).find((ctx) => ctx.name === k8sConfig.currentContext).namespace;
 
 export class Console extends OpenShiftItem {
 
-    static async fetchOpenshiftConsoleUrl() {
+    static async fetchOpenShiftConsoleUrl() {
         try {
             return await Console.odo.execute(Command.showConsoleUrl());
         } catch (ignore) {
@@ -31,60 +32,65 @@ export class Console extends OpenShiftItem {
 
     static async openBuildConfig(context: { name: any; }) {
         let url = '';
-        if (!context) {
-            vscode.window.showErrorMessage("Cannot load the build config");
-            return;
-        }
-        const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
+        let buildName: string = context ? context.name : undefined;
+        if (!buildName) buildName = await common.selectResourceByName(await common.getBuildConfigNames("You have no BuildConfigs available"), "Select a BuildConfig too open in console");
+        if (!buildName) return null;
+        const consoleUrl = await Console.fetchOpenShiftConsoleUrl();
         if (consoleUrl['stdout']) {
-            url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/ns/${project}/buildconfigs/${context.name}`;
+            url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/ns/${project}/buildconfigs/${buildName}`;
         } else {
-            url = `${consoleUrl}/console/project/${project}/browse/builds/${context.name}?tab=history`;
+            url = `${consoleUrl}/console/project/${project}/browse/builds/${buildName}?tab=history`;
         }
         return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
     }
 
     static async openDeploymentConfig(context: { name: any; }) {
         let url = '';
-        if (!context) {
-            vscode.window.showErrorMessage("Cannot load the deployment config");
-            return;
-        }
-        const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
-        if (consoleUrl['stdout']) {
-            url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/ns/${project}/deploymentconfigs/${context.name}`;
+        let deployName: string = null;
+        if (context) {
+            deployName = context.name;
         } else {
-            url = `${consoleUrl}/console/project/${project}/browse/dc/${context.name}?tab=history`;
+            deployName = await common.selectResourceByName(common.getDeploymentConfigNames("You have no DeploymentConfigs available"), "Select a DeploymentConfig");
+        }
+        if (!deployName) return null;
+        const consoleUrl = await Console.fetchOpenShiftConsoleUrl();
+        if (consoleUrl['stdout']) {
+            url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/ns/${project}/deploymentconfigs/${deployName}`;
+        } else {
+            url = `${consoleUrl}/console/project/${project}/browse/dc/${deployName}?tab=history`;
         }
         return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
     }
 
     static async openImageStream(context: { name: any; }) {
         let url = '';
-        if (!context) {
-            vscode.window.showErrorMessage("Cannot load the image stream");
-            return;
-        }
-        const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
-        if (consoleUrl['stdout']) {
-            url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/ns/${project}/imagestreams/${context.name}`;
+        let imageStreamName: string = null;
+        if (context) {
+            imageStreamName = context.name;
         } else {
-            url = `${consoleUrl}/console/project/${project}/browse/images/${context.name}`;
+            imageStreamName = await common.selectResourceByName(common.getImageStreamNames("You have no ImageStream available"), "Select a ImageStream");
+        }
+        if (!imageStreamName) return null;
+        const consoleUrl = await Console.fetchOpenShiftConsoleUrl();
+        if (consoleUrl['stdout']) {
+            url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/ns/${project}/imagestreams/${imageStreamName}`;
+        } else {
+            url = `${consoleUrl}/console/project/${project}/browse/images/${imageStreamName}`;
         }
         return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
     }
 
     static async openProject(context: { name: any; }) {
         let url = '';
-        if (!context) {
-            vscode.window.showErrorMessage("Cannot load the Project");
-            return;
-        }
-        const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
+        const project = await common.getProject(context,
+            "Select Project"
+        );
+        if (!project) return null;
+        const consoleUrl = await Console.fetchOpenShiftConsoleUrl();
         if (consoleUrl['stdout']) {
-            url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/cluster/projects/${project}`;
+            url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/cluster/projects/${project.name}`;
         } else {
-            url = `${consoleUrl}/console/project/${project}/overview`;
+            url = `${consoleUrl}/console/project/${project.name}/overview`;
         }
         return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
     }

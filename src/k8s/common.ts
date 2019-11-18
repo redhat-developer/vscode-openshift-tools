@@ -10,6 +10,15 @@ import { QuickPickItem, window } from "vscode";
 
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { Node } from './node';
+import * as deploy from './deployment';
+import * as build from './build';
+import { OpenShiftItem } from '../openshift/openshiftItem';
+
+export class Command {
+    static getImageStream() {
+        return `oc get is -o json`;
+    }
+}
 
 function convertItemToQuickPick(item: any) {
     item.label = item.metadata.name;
@@ -30,6 +39,24 @@ export async function getQuickPicks(cmd: string, errorMessage: string, converter
 export async function selectResourceByName(config: Promise<QuickPickItem[]> | QuickPickItem[], placeHolderText: string): Promise<string> {
     const resource: any = await window.showQuickPick(config, {placeHolder: placeHolderText, ignoreFocusOut: true});
     return resource ? resource.label : null;
+}
+
+export async function getDeploymentConfigNames(msg: string): Promise<QuickPickItem[]> {
+    return getQuickPicks(deploy.Command.getDeploymentConfigs(), msg);
+}
+
+export async function getBuildConfigNames(msg: string): Promise<QuickPickItem[]> {
+    return getQuickPicks(build.Command.getBuildConfigs(), msg);
+}
+
+export async function getImageStreamNames(msg: string): Promise<QuickPickItem[]> {
+    return getQuickPicks(Command.getImageStream(), msg);
+}
+
+export async function getProject(treeItem: any, projectPlaceholder: string) {
+    let context = treeItem;
+    if (!context) context = await window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder, ignoreFocusOut: true});
+    return context;
 }
 
 export async function getChildrenNode(command: string, kind: string, abbreviation: string): Promise<k8s.ClusterExplorerV1.Node[]> {

@@ -6,7 +6,7 @@
 'use strict';
 
 import { Progress } from "../util/progress";
-import { QuickPickItem, window } from "vscode";
+import { window } from "vscode";
 import * as common from './common';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { OdoImpl, Odo } from "../odo";
@@ -54,14 +54,10 @@ export class DeploymentConfigNodeContributor implements ClusterExplorerV1.NodeCo
 export class DeploymentConfig {
     protected static readonly odo: Odo = OdoImpl.Instance;
 
-    static async getDeploymentConfigNames(msg: string): Promise<QuickPickItem[]> {
-        return common.getQuickPicks(Command.getDeploymentConfigs(), msg);
-    }
-
     static async deploy(context: { name: string; }): Promise<string> {
         let deployName: string = context ? context.name : undefined;
         let result: Promise<string> = null;
-        if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to deploy"), "Select a DeploymentConfig to deploy");
+        if (!deployName) deployName = await common.selectResourceByName(common.getDeploymentConfigNames("You have no DeploymentConfigs available to deploy"), "Select a DeploymentConfig to deploy");
         if (deployName) {
             result = Progress.execFunctionWithProgress(`Creating Deployment for '${deployName}'.`, () => DeploymentConfig.odo.execute(Command.deploy(deployName)))
                 .then(() => `Deployment successfully created for '${deployName}'.`)
@@ -93,7 +89,7 @@ export class DeploymentConfig {
 
     static async showLog(context: { name: string; }): Promise<string> {
         let deployName: string = context ? context.name : null;
-        if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to see log's"), "Select a DeploymentConfig too see logs");
+        if (!deployName) deployName = await common.selectResourceByName(common.getDeploymentConfigNames("You have no DeploymentConfigs available to see log's"), "Select a DeploymentConfig too see logs");
         if (deployName) {
             DeploymentConfig.odo.executeInTerminal(Command.showDeploymentConfigLog(deployName));
         }
@@ -105,7 +101,7 @@ export class DeploymentConfig {
         if (context) {
             replica = context.impl.name;
         } else {
-            const deploymentConfig = await common.selectResourceByName(this.getDeploymentConfigNames("You have no DeploymentConfigs available"), "Select a DeploymentConfig to see the Replica");
+            const deploymentConfig = await common.selectResourceByName(common.getDeploymentConfigNames("You have no DeploymentConfigs available"), "Select a DeploymentConfig to see the Replica");
             if (!deploymentConfig) return null;
             const selreplica = await window.showQuickPick(this.getReplicaNames(deploymentConfig), {placeHolder: replicaPlaceHolder, ignoreFocusOut: true});
             replica = selreplica ? selreplica : null;

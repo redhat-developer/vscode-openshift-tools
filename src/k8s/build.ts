@@ -59,12 +59,6 @@ export class BuildConfigNodeContributor implements ClusterExplorerV1.NodeContrib
 export class Build {
     protected static readonly odo: Odo = OdoImpl.Instance;
 
-    static async getBuildConfigNames(msg: string): Promise<QuickPickItem[]> {
-        return common.getQuickPicks(
-            Command.getBuildConfigs(),
-            msg);
-    }
-
     static async getBuildNames(buildConfig: string): Promise<QuickPickItem[]> {
         return common.getQuickPicks(
             Command.getBuilds(buildConfig),
@@ -76,7 +70,7 @@ export class Build {
         if (context) {
             build = context.impl.name;
         } else {
-            const buildConfig = await common.selectResourceByName(Build.getBuildConfigNames("You have no BuildConfigs available"), "Select a BuildConfig to see the builds");
+            const buildConfig = await common.selectResourceByName(common.getBuildConfigNames("You have no BuildConfigs available"), "Select a BuildConfig to see the builds");
             if (buildConfig)  {
                 const selBuild = await window.showQuickPick(this.getBuildNames(buildConfig), {placeHolder: text, ignoreFocusOut: true});
                 build = selBuild ? selBuild.label : null;
@@ -88,7 +82,7 @@ export class Build {
     static async startBuild(context: { name: string; }): Promise<string> {
         let buildName: string = context ? context.name : undefined;
         let result: Promise<string> = null;
-        if (!buildName) buildName = await common.selectResourceByName(await Build.getBuildConfigNames("You have no BuildConfigs available to start a build"), "Select a BuildConfig to start a build");
+        if (!buildName) buildName = await common.selectResourceByName(await common.getBuildConfigNames("You have no BuildConfigs available to start a build"), "Select a BuildConfig to start a build");
         if (buildName) {
             result = Progress.execFunctionWithProgress(`Starting build`, () => Build.odo.execute(Command.startBuild(buildName)))
                 .then(() => `Build '${buildName}' successfully started`)

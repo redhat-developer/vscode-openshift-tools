@@ -14,6 +14,7 @@ import { Build, Command, BuildConfigNodeContributor } from '../../../src/k8s/bui
 import { Progress } from '../../../src/util/progress';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import * as k8s from 'vscode-kubernetes-tools-api';
+import * as common from '../../../src/k8s/common';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -212,7 +213,7 @@ suite('K8s/build', () => {
         setup(() => {
             execStub.resolves({ error: null, stdout: buildData, stderr: '' });
             const buidConfig = {label: "nodejs-copm-nodejs-comp"};
-            sandbox.stub(Build, 'getBuildConfigNames').resolves([buidConfig]);
+            sandbox.stub(common, 'getBuildConfigNames').resolves([buidConfig]);
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(buidConfig);
             quickPickStub.onSecondCall().resolves({label: "nodejs-copm-nodejs-comp-8"});
