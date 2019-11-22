@@ -145,11 +145,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
 let lastNamespace = '';
 
-function customize(node: ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): void | Thenable<void> {
+export function customize(node: ClusterExplorerV1.ClusterExplorerContextNode | ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): void | Thenable<void> {
     return customizeAsync(node, treeItem);
 }
 
-async function initNamespaceName(node: ClusterExplorerV1.ClusterExplorerResourceNode) {
+async function initNamespaceName(node: ClusterExplorerV1.ClusterExplorerContextNode | ClusterExplorerV1.ClusterExplorerResourceNode) {
     const kubectl = await k8s.extension.kubectl.v1;
     if (kubectl.available) {
         const result = await kubectl.api.invokeCommand('config view -o json');
@@ -162,7 +162,7 @@ async function initNamespaceName(node: ClusterExplorerV1.ClusterExplorerResource
     }
 }
 
-async function customizeAsync(node: ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): Promise<void> {
+async function customizeAsync(node: ClusterExplorerV1.ClusterExplorerContextNode | ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): Promise<void> {
     if ((node as any).nodeType === 'context') {
         lastNamespace = await initNamespaceName(node);
         if (isOpenShift()) {
