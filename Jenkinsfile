@@ -38,19 +38,15 @@ node('rhel7'){
 		stage('Snapshot') {
 			def filesToPush = findFiles(glob: '**.vsix')
 			sh "rsync -Pzrlt --rsh=ssh --protocol=28 ${filesToPush[0].path} ${UPLOAD_LOCATION}/snapshots/vscode-openshift-tools/"
-            stash name:'vsix', includes:filesToPush[0].path
 		}
     }
-}
 
-node('rhel7'){
 	if(publishToMarketPlace.equals('true')){
 		timeout(time:5, unit:'DAYS') {
 			input message:'Approve deployment?', submitter: 'msuman,degolovi'
 		}
 
 		stage("Publish to Marketplace") {
-            unstash 'vsix'
             withCredentials([[$class: 'StringBinding', credentialsId: 'vscode_java_marketplace', variable: 'TOKEN']]) {
                 def vsix = findFiles(glob: '**.vsix')
                 sh 'vsce publish -p ${TOKEN} --packagePath' + " ${vsix[0].path}"
