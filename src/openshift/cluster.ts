@@ -180,7 +180,12 @@ export class Cluster extends OpenShiftItem {
     }
 
     static async readFromClipboard(): Promise<string> {
-        return env.clipboard ? await env.clipboard.readText() : "";
+        let r = "";
+        try {
+            r = await env.clipboard.readText();
+        } catch (ignore) {
+        }
+        return r;
     }
 
     static async getUrlFromClipboard() {
