@@ -38,16 +38,9 @@ node('rhel7'){
 
 	if(params.UPLOAD_LOCATION) {
 		stage('Snapshot') {
-			def filesToPush = findFiles(glob: '**.vsix*')
-			for (int i = 0; i < filesToPush.size(); i++) {
-				sh "rsync -Pzrlt --rsh=ssh --protocol=28 ${filesToPush[i].path} ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
-				if (filesToPush[i].path.endsWith('vsix')){
-					stash name:'vsix', includes:filesToPush[i].path
-				}
-				if (filesToPush[i].path.endsWith('sha256')) {
-					stash name:'vsix.256Sum', includes:256SumFilesToPush[i].path
-				}
-			}
+			def filesToPush = findFiles(glob: '**.vsix')
+			sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.vsix* ${UPLOAD_LOCATION}/snapshots/vscode-openshift-tools/"
+            stash name:'vsix', includes:filesToPush[0].path
 		}
     }
 
@@ -64,10 +57,7 @@ node('rhel7'){
             archive includes:"**.vsix"
 
             stage "Promote the build to stable"
-            def vsix = findFiles(glob: '**.vsix*')
-			for (int i = 0; i < vsix.size(); i++) {
-				sh "rsync -Pzrlt --rsh=ssh --protocol=28 ${vsix[i].path} ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
-			}
+			sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.vsix* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
         }
 	}
 }
