@@ -82,9 +82,9 @@ export class ToolsConfig {
 
                     if (action !== 'Cancel') {
                         if (toolDlLocation.endsWith('.zip') || toolDlLocation.endsWith('.tar.gz')) {
-                            await Archive.unzip(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), ToolsConfig.tools[cmd].filePrefix);
+                            await Archive.extract(toolDlLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift'), ToolsConfig.tools[cmd].filePrefix);
                         } else if (toolDlLocation.endsWith('.gz')) {
-                            await Archive.unzip(toolDlLocation, toolCacheLocation, ToolsConfig.tools[cmd].filePrefix);
+                            await Archive.extract(toolDlLocation, toolCacheLocation, ToolsConfig.tools[cmd].filePrefix);
                         }
                         fsex.removeSync(toolDlLocation);
                         if (Platform.OS !== 'win32') {

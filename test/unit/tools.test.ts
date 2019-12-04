@@ -108,7 +108,7 @@ suite("tools configuration", () => {
             const showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves(`Download and install v${ToolsConfig.tools['odo'].version}`);
             const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
             stub.onSecondCall().returns(ToolsConfig.tools['oc'].sha256sum);
-            sb.stub(Archive, 'unzip').resolves();
+            sb.stub(Archive, 'extract').resolves();
             let toolLocation = await ToolsConfig.detectOrDownload('odo');
             assert.ok(showInfo.calledOnce);
             assert.ok(withProgress.calledOnce);
@@ -139,7 +139,7 @@ suite("tools configuration", () => {
             const fromFile = sb.stub(hasha, 'fromFile').onFirstCall().resolves('not really sha256');
             fromFile.onSecondCall().returns(ToolsConfig.tools['odo'].sha256sum);
             sb.stub(fsex, 'removeSync');
-            sb.stub(Archive, 'unzip').resolves();
+            sb.stub(Archive, 'extract').resolves();
             const toolLocation = await ToolsConfig.detectOrDownload('odo');
             assert.ok(withProgress.calledTwice);
             assert.ok(showInfo.calledTwice);
@@ -155,7 +155,7 @@ suite("tools configuration", () => {
             const fromFile = sb.stub(hasha, 'fromFile').onFirstCall().resolves('not really sha256');
             fromFile.onSecondCall().returns(ToolsConfig.tools['odo'].sha256sum);
             sb.stub(fsex, 'removeSync');
-            sb.stub(Archive, 'unzip').resolves();
+            sb.stub(Archive, 'extract').resolves();
             const toolLocation = await ToolsConfig.detectOrDownload('odo');
             assert.ok(withProgress.calledOnce);
             assert.ok(showInfo.calledTwice);
@@ -179,7 +179,7 @@ suite("tools configuration", () => {
                 sb.stub(vscode.window, 'showInformationMessage').resolves(`Download and install v${ToolsConfig.tools['odo'].version}`);
                 const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
                 stub.onSecondCall().returns(ToolsConfig.tools['oc'].sha256sum);
-                sb.stub(Archive, 'unzip').resolves();
+                sb.stub(Archive, 'extract').resolves();
                 await ToolsConfig.detectOrDownload('odo');
                 assert.ok(!chmodSyncStub.called);
             });
@@ -210,7 +210,7 @@ suite("tools configuration", () => {
                 sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
                 sb.stub(vscode.window, 'showInformationMessage').resolves(`Download and install v${ToolsConfig.tools['odo'].version}`);
                 sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools['odo'].sha256sum);
-                sb.stub(Archive, 'unzip').resolves();
+                sb.stub(Archive, 'extract').resolves();
                 await ToolsConfig.detectOrDownload('odo');
                 assert.ok(chmodSyncStub.called);
             });
