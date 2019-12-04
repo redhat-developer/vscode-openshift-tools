@@ -32,15 +32,13 @@ node('rhel7'){
         packageJson.extensionDependencies = ["ms-kubernetes-tools.vscode-kubernetes-tools"]
         writeJSON file: 'package.json', json: packageJson, pretty: 4
         sh "vsce package -o openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix"
-		def findVsix = findFiles(glob: '**.vsix')
-		sh "sha256sum ${findVsix[0].path} > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix.sha256"
+		sh "sha256sum *.vsix > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix.sha256"
 	}
 
 	if(params.UPLOAD_LOCATION) {
 		stage('Snapshot') {
 			def filesToPush = findFiles(glob: '**.vsix')
 			sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.vsix* ${UPLOAD_LOCATION}/snapshots/vscode-openshift-tools/"
-            stash name:'vsix', includes:filesToPush[0].path
 		}
     }
 
@@ -54,7 +52,7 @@ node('rhel7'){
                 def vsix = findFiles(glob: '**.vsix')
                 sh 'vsce publish -p ${TOKEN} --packagePath' + " ${vsix[0].path}"
             }
-            archive includes:"**.vsix"
+            archive includes:"**.vsix*"
 
             stage "Promote the build to stable"
 			sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.vsix* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
