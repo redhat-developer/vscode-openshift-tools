@@ -33,9 +33,9 @@
         "vendor": "Red Hat, Inc.",
         "name": "oc",
         "cmdFileName": "oc",
-        "version": "4.2.9",
-        "versionRange": "^4.2.9",
-        "versionRangeLabel": "version >= 3.11.0 and <= 4.2.9",
+        "version": "4.2.2",
+        "versionRange": "^4.2.2",
+        "versionRangeLabel": "version >= 3.11.0 and <= 4.2.2",
         "filePrefix": "",
         "platform": {
             "win32": {
