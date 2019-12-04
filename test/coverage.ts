@@ -11,10 +11,9 @@ function _mkDirIfExists(dir: string): void {
 }
 
 export interface ITestRunnerOptions {
-    enabled?: boolean;
-    relativeCoverageDir: string;
-    relativeSourcePath: string;
-    ignorePatterns: string[];
+    relativeCoverageDir?: string;
+    relativeSourcePath?: string;
+    ignorePatterns?: string[];
     includePid?: boolean;
     reports?: string[];
     verbose?: boolean;
