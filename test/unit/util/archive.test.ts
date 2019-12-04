@@ -36,7 +36,7 @@ suite('Archive Utility', () => {
     });
 
     test('calls untar if file is a tar.gz archive', async () => {
-        await Archive.unzip(tarPath, extractTo);
+        await Archive.extract(tarPath, extractTo);
 
         expect(tarStub).calledOnceWith({
             src: tarPath,
@@ -49,7 +49,7 @@ suite('Archive Utility', () => {
         sandbox.restore();
         const tempDir = fs.realpathSync(tmp.dirSync().name);
         const testArchive = path.join(__dirname, '..', '..', '..', '..', 'test', 'fixtures', 'test.tar.gz');
-        await Archive.unzip(testArchive, tempDir);
+        await Archive.extract(testArchive, tempDir);
         expect(fs.existsSync(path.join(tempDir, 'test', 'test.json'))).is.true;
     });
 
@@ -57,21 +57,21 @@ suite('Archive Utility', () => {
         sandbox.restore();
         const tempDir = fs.realpathSync(tmp.dirSync().name);
         const testArchive = path.join(__dirname, '..', '..', '..', '..', 'test', 'fixtures', 'test.tar.gz');
-        await Archive.unzip(testArchive, tempDir, 'test');
+        await Archive.extract(testArchive, tempDir, 'test');
         expect(fs.existsSync(path.join(tempDir, 'test.json'))).is.true;
     });
 
     test('untar rejects when error occurs', async () => {
         tarStub.yields(errorMessage);
         try {
-            await Archive.unzip(tarPath, extractTo);
+            await Archive.extract(tarPath, extractTo);
         } catch (err) {
             expect(err).equals(errorMessage);
         }
     });
 
     test('calls gunzip when file is a .gz archive', async () => {
-        await Archive.unzip(gzipPath, extractTo);
+        await Archive.extract(gzipPath, extractTo);
 
         expect(zipStub).calledOnceWith(gzipPath, extractTo);
     });
@@ -79,7 +79,7 @@ suite('Archive Utility', () => {
     test('rejects when gunzip fails', async () => {
         zipStub.rejects(errorMessage);
         try {
-            await Archive.unzip(gzipPath, extractTo);
+            await Archive.extract(gzipPath, extractTo);
         } catch (err) {
             expect(err).matches(new RegExp(errorMessage));
         }
@@ -98,14 +98,14 @@ suite('Archive Utility', () => {
         sandbox.restore();
         const tempDir = tmp.dirSync().name;
         const testArchive = path.join(__dirname, '..', '..', '..', '..', 'test', 'fixtures', 'test.zip');
-        await Archive.unzip(testArchive, tempDir);
+        await Archive.extract(testArchive, tempDir);
         expect(fs.existsSync(path.join(tempDir, 'test', 'test.json'))).is.true;
     });
 
     test('rejects if the file type in not supported', async () => {
         const file = 'file.whatever';
         try {
-            await Archive.unzip('file.whatever', extractTo);
+            await Archive.extract('file.whatever', extractTo);
         } catch (err) {
             expect(err).equals(`Unsupported extension for '${file}'`);
         }
