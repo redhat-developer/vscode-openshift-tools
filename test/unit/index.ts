@@ -35,7 +35,7 @@ if (process.env.BUILD_ID && process.env.BUILD_NUMBER) {
     config.reporter = 'mocha-jenkins-reporter';
 }
 
-let mocha = new Mocha(config);
+const mocha = new Mocha(config);
 
 function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
     let coverageRunner: CoverageRunner;
