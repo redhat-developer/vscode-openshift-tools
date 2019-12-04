@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import * as zlib from 'zlib';
 import targz = require('targz');
 import unzipm = require('unzip-stream');
-import pify = require('pify')
+import pify = require('pify');
 
 export class Archive {
     static extract(zipFile: string, extractTo: string, prefix?: string): Promise<void> {
@@ -51,7 +51,7 @@ export class Archive {
             tar: {
                 map: (header) => prefix && header.name.startsWith(prefix) ? (header.name = header.name.substring(prefix.length), header) : header
             }
-        })
+        });
     }
 
     static unzip(zipFile: string, extractTo: string): Promise<void> {
