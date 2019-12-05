@@ -33,7 +33,7 @@
             ],
             "preLaunchTask": "npm: watch",
             "env": {
-                "VSCOST_TEST_MODE": "debug"
+                "OST_DISABLE_COVERAGE": "true"
             }
         },
         {
@@ -48,10 +48,7 @@
             "outFiles": [
                 "${workspaceFolder}/out/test/unit/**/*.js"
             ],
-            "preLaunchTask": "npm: watch",
-            "env": {
-                "VSCOST_TEST_MODE": "coverage"
-            }
+            "preLaunchTask": "npm: watch"
         },
         {
             "name": "Extension integration Tests Debug",
