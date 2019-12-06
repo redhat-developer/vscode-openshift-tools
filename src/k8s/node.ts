@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+ 'use strict';
+
 import { ClusterExplorerV1 } from "vscode-kubernetes-tools-api";
 import * as vscode from 'vscode';
 

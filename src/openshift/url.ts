@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+'use strict';
+
 import { OpenShiftObject, Command } from '../odo';
 import { window, QuickPickItem, commands, Uri } from 'vscode';
 import { V1ServicePort } from '@kubernetes/client-node';

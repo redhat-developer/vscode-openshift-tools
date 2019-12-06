@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+'use strict';
+
 import { Odo, OdoImpl, Command } from "../odo";
 import { Platform } from "../util/platform";
 

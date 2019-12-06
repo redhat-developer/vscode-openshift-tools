@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+'use strict';
+
 import { Odo, OdoImpl, OpenShiftObject, OpenShiftObjectImpl, ContextType } from '../odo';
 import { OpenShiftExplorer } from '../explorer';
 import { window, QuickPickItem, TreeItemCollapsibleState } from 'vscode';

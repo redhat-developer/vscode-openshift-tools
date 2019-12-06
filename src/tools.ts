@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+'use strict';
+
 import { Platform } from "./util/platform";
 import { Archive } from "./util/archive";
 import { which } from "shelljs";

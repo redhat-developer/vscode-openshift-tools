@@ -1,3 +1,10 @@
+/*-----------------------------------------------------------------------------------------------
+ *  Copyright (c) Red Hat, Inc. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE file in the project root for license information.
+ *-----------------------------------------------------------------------------------------------*/
+
+'use strict';
+
 import { QuickPickItem } from "vscode";
 import { KubeConfig } from '@kubernetes/client-node';
 import { User, Cluster } from "@kubernetes/client-node/dist/config_types";
