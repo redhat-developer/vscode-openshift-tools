@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+'use strict';
+
 import * as cliInstance from './cli';
 import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Disposable } from 'vscode';
 import { WindowUtil } from './util/windowUtils';

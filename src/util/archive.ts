@@ -16,18 +16,15 @@ export class Archive {
                 Archive.untar(zipFile, extractTo, prefix)
                     .then(resolve)
                     .catch(reject);
-            }
-            else if (zipFile.endsWith('.gz')) {
+            } else if (zipFile.endsWith('.gz')) {
                 Archive.gunzip(zipFile, extractTo)
                     .then(resolve)
                     .catch(reject);
-            }
-            else if (zipFile.endsWith('.zip')) {
+            } else if (zipFile.endsWith('.zip')) {
                 Archive.unzip(zipFile, extractTo)
                     .then(resolve)
                     .catch(reject);
-            }
-            else {
+            } else {
                 reject(`Unsupported extension for '${zipFile}'`);
             }
         });

@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+'use strict';
+
 import * as vscode from 'vscode';
 import { Command } from "../odo";
 import { KubeConfigUtils } from "../util/kubeUtils";

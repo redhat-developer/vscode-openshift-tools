@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+'use strict';
+
 import * as childProcess from 'child_process';
 import * as vscode from 'vscode';
 import { ExecException, ExecOptions } from 'child_process';
@@ -13,6 +15,7 @@ export interface CliExitData {
     readonly stdout: string;
     readonly stderr: string;
 }
+
 export interface ICli {
     execute(cmd: string, opts?: ExecOptions): Promise<CliExitData>;
 }

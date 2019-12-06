@@ -1,3 +1,10 @@
+/*-----------------------------------------------------------------------------------------------
+ *  Copyright (c) Red Hat, Inc. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE file in the project root for license information.
+ *-----------------------------------------------------------------------------------------------*/
+
+'use strict';
+
 import { workspace, QuickPickItem, window, Uri } from "vscode";
 import { Platform } from "./platform";
 import path = require('path');
