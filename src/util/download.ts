@@ -32,7 +32,7 @@ export class DownloadUtil {
       await pipeline(dls, fs.createWriteStream(toFile));
     } finally {
       // Unsubscribe form 'downloadProgress' and 'end' events
-      // Is it really required? 
+      // Is it really required?
       progress.unsubscribe();
       end.unsubscribe();
     }
