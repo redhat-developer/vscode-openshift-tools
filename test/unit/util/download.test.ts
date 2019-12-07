@@ -8,6 +8,7 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
+import { wait } from '../../../src/util/async';
 import pq = require('proxyquire');
 import { EventEmitter } from 'events';
 
@@ -25,47 +26,34 @@ suite('Download Util', () => {
         streamEmitter = new EventEmitter();
         requestEmitter['pipe'] = () => streamEmitter;
         progressMock = pq('../../../src/util/download', {
-            'request-progress': (_: any) => requestEmitter,
-            request: (_: any) => _
+            got: {
+                stream: () => requestEmitter
+            },
+            stream: {
+                pipeline: async (a, b, cb) => {
+                    await wait(300);
+                    requestEmitter.emit('downloadProgress', {percent: 0.33});
+                    await wait(300);
+                    requestEmitter.emit('downloadProgress', {percent: 0.66});
+                    await wait(300);
+                    requestEmitter.emit('end');
+                    cb(null);
+                }
             }
-        ).DownloadUtil;
+        }).DownloadUtil;
     });
 
     teardown(() => {
         sandbox.restore();
     });
 
-    test('reports download progress', () => {
+    test('reports download progress', async () => {
         const callback = sandbox.stub();
         const result = progressMock.downloadFile('url', 'toFile', callback);
-        requestEmitter.emit('progress', {percent: 0.33});
-        requestEmitter.emit('progress', {percent: 0.66});
-        requestEmitter.emit('end');
-        streamEmitter.emit('close');
         return result.then(() => {
             expect(callback).calledWith(33, 33);
             expect(callback).calledWith(66, 33);
             expect(callback).calledWith(100, 34);
-        });
-    });
-
-    test('fails when download fails', () => {
-        const result = progressMock.downloadFile('url', 'toFile');
-        requestEmitter.emit('error', new Error('failure'));
-        return result.then(() => {
-            return Promise.reject(Error('No failure reported'));
-        }).catch((err: Error) => {
-            expect(err.message).equals('failure');
-        });
-    });
-
-    test('fails when stream fails', () => {
-        const result = progressMock.downloadFile('url', 'toFile');
-        streamEmitter.emit('error', new Error('failure'));
-        return result.then(() => {
-            return Promise.reject(Error('No failure reported'));
-        }).catch((err: Error) => {
-            expect(err.message).equals('failure');
         });
     });
 });
