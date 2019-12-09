@@ -17,7 +17,7 @@ const project = (k8sConfig.contexts).find((ctx) => ctx.name === k8sConfig.curren
 
 export class Console extends OpenShiftItem {
 
-    static async openConsole(context: { name: any; }) {
+    static async openConsole() {
         const openConsole = [
             {
                 label: 'BuildConfigs',
@@ -42,13 +42,13 @@ export class Console extends OpenShiftItem {
         });
         if (!consoleSource) return null;
         if (consoleSource.label === 'BuildConfigs') {
-            Console.openBuildConfig(context);
+            return Console.openBuildConfig(null);
         } else if (consoleSource.label === 'DeploymentConfigs') {
-            Console.openDeploymentConfig(context);
+            return Console.openDeploymentConfig(null);
         } else if (consoleSource.label === 'ImageStream') {
-            Console.openImageStream(context);
+            return Console.openImageStream(null);
         } else if (consoleSource.label === 'Open Project') {
-            Console.openProject(context);
+            return Console.openProject(null);
         }
     }
 

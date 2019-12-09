@@ -9,9 +9,12 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { OdoImpl } from '../../../src/odo';
+import * as common from '../../../src/k8s/common';
+import { OdoImpl, ContextType } from '../../../src/odo';
 import { Console } from '../../../src/k8s/console';
 import { KubeConfigUtils } from '../../../src/util/kubeUtils';
+import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
+import { TestItem } from '../openshift/testOSItem';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -24,6 +27,8 @@ suite('K8s/console', () => {
 
     const k8sConfig = new KubeConfigUtils();
     const project = (k8sConfig.contexts).find((ctx) => ctx.name === k8sConfig.currentContext).namespace;
+    const cluster = new TestItem(null, 'cluster', ContextType.CLUSTER);
+    const projectItem = new TestItem(cluster, 'project', ContextType.PROJECT);
 
     const context = {
         extraInfo: undefined,
@@ -124,8 +129,20 @@ suite('K8s/console', () => {
         });
 
         test('returns null if build is not selected', async () => {
+            quickPickStub.onFirstCall().resolves({
+                label: 'BuildConfigs',
+                description: 'Select BuildConfigs too open in console'
+            });
+            const buidConfig = {label: "nodejs-copm-nodejs-comp"};
+            sandbox.stub(common, 'getBuildConfigNames').resolves([buidConfig]);
+            quickPickStub.onSecondCall().resolves(undefined);
+            const result = await Console.openConsole();
+            expect(result).null;
+        });
+
+        test('returns null if no resource is selected', async () => {
             quickPickStub.onFirstCall().resolves(undefined);
-            const result = await Console.openBuildConfig(null);
+            const result = await Console.openConsole();
             expect(result).null;
         });
 
@@ -166,8 +183,14 @@ suite('K8s/console', () => {
         });
 
         test('returns null when no DeploymentConfig selected', async () => {
-            quickPickStub.resolves(undefined);
-            const result = await Console.openDeploymentConfig(null);
+            quickPickStub.onFirstCall().resolves({
+                label: 'DeploymentConfigs',
+                description: 'Select DeploymentConfigs too open in console'
+            });
+            const deploymentConfigs = {label: "nodejs-copm-nodejs-comp"};
+            sandbox.stub(common, 'getBuildConfigNames').resolves([deploymentConfigs]);
+            quickPickStub.onSecondCall().resolves(undefined);
+            const result = await Console.openConsole();
             expect(result).null;
         });
 
@@ -208,8 +231,14 @@ suite('K8s/console', () => {
         });
 
         test('returns null when no Image Stream selected', async () => {
-            quickPickStub.resolves(undefined);
-            const result = await Console.openImageStream(null);
+            quickPickStub.onFirstCall().resolves({
+                label: 'ImageStream',
+                description: 'Select ImageStream too open in console'
+            });
+            const imageStreams = {label: "nodejs-copm-nodejs-comp"};
+            sandbox.stub(common, 'getBuildConfigNames').resolves([imageStreams]);
+            quickPickStub.onSecondCall().resolves(undefined);
+            const result = await Console.openConsole();
             expect(result).null;
         });
 
@@ -249,7 +278,9 @@ suite('K8s/console', () => {
                 label: 'Open Project',
                 description: 'Select Project too open in console'
             });
-            quickPickStub.onSecondCall().resolves();
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+            sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
+            quickPickStub.onSecondCall().resolves(undefined);
             const result = await Console.openConsole();
 
             expect(result).null;
