@@ -106,17 +106,12 @@ export class ToolsConfig {
     public static async getVersion(location: string, cmd: string = path.parse(location).name): Promise<string> {
         let detectedVersion: string;
         if (fs.existsSync(location)) {
-            let version: RegExp;
-            if (cmd === "oc") {
-                version = /openshift-clients-(([0-9]+)\.([0-9]+)\.([0-9]+))(?:-([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?.*/;
-            } else {
-                version = new RegExp(`${cmd.toLocaleLowerCase()} v((([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?).*`);
-            }
+            const version = new RegExp(`(openshift-clients-|${cmd.toLocaleLowerCase()} v)(([0-9]+)\\.([0-9]+)\\.([0-9]+))(?:-([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?.*`);
             const result = await Cli.getInstance().execute(`"${location}" version`);
             if (result.stdout) {
                 const toolVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
                     return value.match(version);
-                }).map((value)=>version.exec(value)[1]);
+                }).map((value)=>version.exec(value)[2]);
                 if (toolVersion.length) {
                     detectedVersion = toolVersion[0];
                 }

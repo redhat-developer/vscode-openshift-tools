@@ -34,8 +34,8 @@
         "name": "oc",
         "cmdFileName": "oc",
         "version": "4.2.2",
-        "versionRange": "^4.2.2",
-        "versionRangeLabel": "version >= 3.11.0 and <= 4.2.2",
+        "versionRange": "~4.2.2",
+        "versionRangeLabel": "version >= 4.2.2 and < 4.3.0",
         "filePrefix": "",
         "platform": {
             "win32": {
