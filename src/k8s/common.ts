@@ -7,7 +7,6 @@
 
 import * as Odo from '../odo';
 import { QuickPickItem, window } from "vscode";
-
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { Node } from './node';
 import * as deploy from './deployment';

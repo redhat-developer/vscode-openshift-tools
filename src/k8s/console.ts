@@ -17,6 +17,41 @@ const project = (k8sConfig.contexts).find((ctx) => ctx.name === k8sConfig.curren
 
 export class Console extends OpenShiftItem {
 
+    static async openConsole(context: { name: any; }) {
+        const openConsole = [
+            {
+                label: 'BuildConfigs',
+                description: 'Select BuildConfigs too open in console'
+            },
+            {
+                label: 'DeploymentConfigs',
+                description: 'Select DeploymentConfigs too open in console'
+            },
+            {
+                label: 'ImageStream',
+                description: 'Select ImageStream too open in console'
+            },
+            {
+                label: 'Open Project',
+                description: 'Select Project too open in console'
+            }
+        ];
+        const consoleSource = await vscode.window.showQuickPick(openConsole, {
+            placeHolder: "Select source type for Component",
+            ignoreFocusOut: true
+        });
+        if (!consoleSource) return null;
+        if (consoleSource.label === 'BuildConfigs') {
+            Console.openBuildConfig(context);
+        } else if (consoleSource.label === 'DeploymentConfigs') {
+            Console.openDeploymentConfig(context);
+        } else if (consoleSource.label === 'ImageStream') {
+            Console.openImageStream(context);
+        } else if (consoleSource.label === 'Open Project') {
+            Console.openProject(context);
+        }
+    }
+
     static async fetchOpenShiftConsoleUrl() {
         try {
             return await Console.odo.execute(Command.showConsoleUrl());

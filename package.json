@@ -101,7 +101,7 @@
     "onCommand:clusters.openshift.build.delete.palette",
     "onCommand:clusters.openshift.build.rebuild",
     "onCommand:clusters.openshift.build.openConsole",
-    "onCommand:clusters.openshift.build.openConsole.palette",
+    "onCommand:clusters.openshift.openConsole.palette",
     "onCommand:clusters.openshift.deploy.dc.showLog",
     "onCommand:clusters.openshift.deploy.dc.showLog.palette",
     "onCommand:clusters.openshift.deploy.delete",
@@ -109,9 +109,7 @@
     "onCommand:clusters.openshift.deploy.rcShowLog",
     "onCommand:clusters.openshift.deploy.rcShowLog.palette",
     "onCommand:clusters.openshift.deployment.openConsole",
-    "onCommand:clusters.openshift.deployment.openConsole.palette",
-    "onCommand:clusters.openshift.imagestream.openConsole",
-    "onCommand:clusters.openshift.imagestream.openConsole.palette"
+    "onCommand:clusters.openshift.imagestream.openConsole"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -503,11 +501,6 @@
         "title": "Open in Console"
       },
       {
-        "command": "clusters.openshift.build.openConsole.palette",
-        "title": "Open build's in Console",
-        "category": "OpenShift"
-      },
-      {
         "command": "clusters.openshift.deploy.rcShowLog.palette",
         "title": "Show Replica's Log",
         "category": "OpenShift"
@@ -532,18 +525,13 @@
         "title": "Open in Console"
       },
       {
-        "command": "clusters.openshift.deployment.openConsole.palette",
-        "title": "Open Deployment's in Console",
+        "command": "clusters.openshift.openConsole.palette",
+        "title": "Open Resource in Console",
         "category": "OpenShift"
       },
       {
         "command": "clusters.openshift.imagestream.openConsole",
         "title": "Open in Console"
-      },
-      {
-        "command": "clusters.openshift.imagestream.openConsole.palette",
-        "title": "Open Image stream's in Console",
-        "category": "OpenShift"
       }
     ],
     "keybindings": [

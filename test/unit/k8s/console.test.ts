@@ -245,8 +245,12 @@ suite('K8s/console', () => {
         });
 
         test('returns null if no project selected', async () => {
-            quickPickStub.resolves();
-            const result = await Console.openProject(null);
+            quickPickStub.onFirstCall().resolves({
+                label: 'Open Project',
+                description: 'Select Project too open in console'
+            });
+            quickPickStub.onSecondCall().resolves();
+            const result = await Console.openConsole();
 
             expect(result).null;
         });
