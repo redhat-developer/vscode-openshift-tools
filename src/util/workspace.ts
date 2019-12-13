@@ -5,11 +5,10 @@
 
 'use strict';
 
-import { workspace, QuickPickItem, window, Uri, extensions, Extension } from "vscode";
+import { workspace, QuickPickItem, window, Uri } from "vscode";
 import { Platform } from "./platform";
 import path = require('path');
 import fs = require('fs-extra');
-import jsondata = require('jsondata');
 
 interface WorkspaceFolderItem extends QuickPickItem {
     uri: Uri;
@@ -67,11 +66,3 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
         return fs.existsSync(path.join(folder.fsPath, '.odo', 'config.yaml'));
     }
 
-export async function getDebuggerAdapters(...langsArg: string[]): Promise<Extension<any>[]> {
-        return extensions.all.filter((ext) => {
-            const expression = jsondata('contributes.debuggers.languages');
-            const langs: string[] = expression.evaluate(ext.packageJSON);
-            return langs.filter((lang) => langsArg.includes(lang));
-        });
-    return;
-}

@@ -23,7 +23,8 @@ import { GlyphChars } from './util/constants';
 import { Subject } from 'rxjs';
 import { Progress } from './util/progress';
 import { V1ServicePort, V1Service } from '@kubernetes/client-node';
-import jsondata = require('jsondata');
+import { ChildProcess } from 'child_process';
+import { threadId } from 'worker_threads';
 
 const Collapsed = TreeItemCollapsibleState.Collapsed;
 
@@ -463,6 +464,7 @@ class OdoModel {
     private pathToObject = new Map<string, OpenShiftObject>();
     private contextToObject = new Map<Uri, OpenShiftObject>();
     private contextToSettings = new Map<Uri, ComponentSettings>();
+    private objectToProcess = new Map<OpenShiftObject, ChildProcess>();
 
     public setParentToChildren(parent: OpenShiftObject, children: OpenShiftObject[]): OpenShiftObject[] {
         if (!this.parentToChildren.has(parent)) {
@@ -534,6 +536,8 @@ class OdoModel {
         array.splice(array.indexOf(item), 1);
         this.pathToObject.delete(item.path);
         this.contextToObject.delete(item.contextPath);
+        const ps = this.objectToProcess.get(item);
+        if(ps) ps.kill('SIGINT');
     }
 
     public deleteContext(context: Uri) {
@@ -717,8 +721,9 @@ export class OdoImpl implements Odo {
                 item.contextPath = comp.ContextPath;
                 item.deployed = true;
                 item.contextValue = ContextType.COMPONENT_PUSHED;
+                item.builderImage = {name: comp.Type.split(':')[0], tag: comp.Type.split(':')[1]};
             } else {
-                deployedComponents.push(new OpenShiftObjectImpl(application, comp.Name, ContextType.COMPONENT, false, this, Collapsed, comp.ContextPath, comp.SourceType));
+                deployedComponents.push(new OpenShiftObjectImpl(application, comp.Name, ContextType.COMPONENT, false, this, Collapsed, comp.ContextPath, comp.SourceType, {name: comp.Type.split(':')[0], tag: comp.Type.split(':')[1]}));
             }
         });
 
@@ -1089,10 +1094,9 @@ export class OdoImpl implements Odo {
                             if (comp && !comp.contextPath) {
                                 comp.contextPath = added.ContextPath;
                                 comp.contextValue = ContextType.COMPONENT_PUSHED;
-                                // await OpenShiftExplorer.getInstance().refresh(comp);
                                 this.subject.next(new OdoEventImpl('changed', comp));
                             } else if (!comp) {
-                                const newComponent = new OpenShiftObjectImpl(app, added.Name, ContextType.COMPONENT, false, this, Collapsed, added.ContextPath, added.SourceType);
+                                const newComponent = new OpenShiftObjectImpl(app, added.Name, ContextType.COMPONENT, false, this, Collapsed, added.ContextPath, added.SourceType,  { name: added.Type.split(':')[0], tag: added.Type.split(':')[1]});
                                 await this.insertAndRefresh(newComponent);
                             }
                         } else if (!app) {
