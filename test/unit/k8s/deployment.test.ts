@@ -14,6 +14,7 @@ import { OdoImpl } from '../../../src/odo';
 import { Progress } from '../../../src/util/progress';
 import { DeploymentConfig, Command, DeploymentConfigNodeContributor } from '../../../src/k8s/deployment';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
+import * as common from '../../../src/k8s/common';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -272,7 +273,7 @@ suite('K8s/deployment', () => {
 
         setup(() => {
             execStub.resolves({ error: null, stdout: deploymentData, stderr: '' });
-            sandbox.stub(DeploymentConfig, 'getDeploymentConfigNames').resolves("comp1-app-2");
+            sandbox.stub(common, 'getDeploymentConfigNames').resolves("comp1-app-2");
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
         });
 

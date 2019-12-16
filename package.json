@@ -101,6 +101,7 @@
     "onCommand:clusters.openshift.build.delete.palette",
     "onCommand:clusters.openshift.build.rebuild",
     "onCommand:clusters.openshift.build.openConsole",
+    "onCommand:clusters.openshift.openConsole.palette",
     "onCommand:clusters.openshift.deploy.dc.showLog",
     "onCommand:clusters.openshift.deploy.dc.showLog.palette",
     "onCommand:clusters.openshift.deploy.delete",
@@ -452,7 +453,8 @@
       },
       {
         "command": "clusters.openshift.project.openConsole",
-        "title": "Open Project in Console"
+        "title": "Open Project in Console",
+        "category": "OpenShift"
       },
       {
         "command": "clusters.openshift.build.showLog",
@@ -521,6 +523,11 @@
       {
         "command": "clusters.openshift.deployment.openConsole",
         "title": "Open in Console"
+      },
+      {
+        "command": "clusters.openshift.openConsole.palette",
+        "title": "Open Resource in Console",
+        "category": "OpenShift"
       },
       {
         "command": "clusters.openshift.imagestream.openConsole",
@@ -661,6 +668,18 @@
         },
         {
           "command": "clusters.openshift.deploy.dc.showLog",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "clusters.openshift.imagestream.openConsole",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "clusters.openshift.deployment.openConsole",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "clusters.openshift.build.openConsole",
           "when": "view == openshiftProjectExplorer"
         }
       ],

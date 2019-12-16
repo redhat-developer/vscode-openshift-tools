@@ -78,6 +78,7 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('clusters.openshift.build.openConsole', (context) => execute(Console.openBuildConfig, context)),
         vscode.commands.registerCommand('clusters.openshift.deployment.openConsole', (context) => execute(Console.openDeploymentConfig, context)),
         vscode.commands.registerCommand('clusters.openshift.imagestream.openConsole', (context) => execute(Console.openImageStream, context)),
+        vscode.commands.registerCommand('clusters.openshift.openConsole.palette', (context) => execute(Console.openConsole, context)),
         vscode.commands.registerCommand('clusters.openshift.project.openConsole', (context) => execute(Console.openProject, context)),
         vscode.commands.registerCommand('openshift.component.createFromLocal', (context) => execute(Component.createFromLocal, context)),
         vscode.commands.registerCommand('openshift.component.createFromGit', (context) => execute(Component.createFromGit, context)),
