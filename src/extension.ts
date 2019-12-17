@@ -206,15 +206,19 @@ export function deactivate() {
 }
 
 function execute<T>(command: (...args: T[]) => Promise<any> | void, ...params: T[]) {
-    const res = command.call(null, ...params);
-    return res && res.then
-        ? res.then((result: any) => {
-            displayResult(result);
+    try {
+        const res = command.call(null, ...params);
+        return res && res.then
+            ? res.then((result: any) => {
+                displayResult(result);
 
-        }).catch((err: any) => {
-            vscode.window.showErrorMessage(err.message ? err.message : err);
-        })
-        : undefined;
+            }).catch((err: any) => {
+                vscode.window.showErrorMessage(err.message ? err.message : err);
+            })
+            : undefined;
+    } catch (err) {
+        vscode.window.showErrorMessage(err);
+    }
 }
 
 function displayResult(result?: any) {
