@@ -24,7 +24,6 @@ import { Subject } from 'rxjs';
 import { Progress } from './util/progress';
 import { V1ServicePort, V1Service } from '@kubernetes/client-node';
 import { ChildProcess } from 'child_process';
-import { threadId } from 'worker_threads';
 
 const Collapsed = TreeItemCollapsibleState.Collapsed;
 
@@ -537,7 +536,7 @@ class OdoModel {
         this.pathToObject.delete(item.path);
         this.contextToObject.delete(item.contextPath);
         const ps = this.objectToProcess.get(item);
-        if(ps) ps.kill('SIGINT');
+        if (ps) ps.kill('SIGINT');
     }
 
     public deleteContext(context: Uri) {

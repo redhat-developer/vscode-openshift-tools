@@ -6,8 +6,8 @@
 'use strict';
 
 import { OpenShiftItem } from './openshiftItem';
-import { OpenShiftObject, Command, ContextType, ComponentType, OdoImpl } from '../odo';
-import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration } from 'vscode';
+import { OpenShiftObject, Command, ContextType, ComponentType } from '../odo';
+import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation } from 'vscode';
 import { Progress } from '../util/progress';
 import { ChildProcess } from 'child_process';
 import { CliExitData } from '../cli';
@@ -17,10 +17,9 @@ import { Delayer, wait } from '../util/async';
 import { Platform } from '../util/platform';
 import path = require('path');
 import globby = require('globby');
-import { selectWorkspaceFolder} from '../util/workspace';
+import { selectWorkspaceFolder } from '../util/workspace';
 import { exec } from 'child_process';
 import { ToolsConfig } from '../tools';
-import { start } from 'repl';
 const waitPort = require('wait-port');
 
 export class Component extends OpenShiftItem {
@@ -525,7 +524,7 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
-            'Select a Component you want to debug (showing only local Components pushed to the cluster)',
+            'Select a Component you want to debug (showing only Components pushed to the cluster)',
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
@@ -538,19 +537,49 @@ export class Component extends OpenShiftItem {
         const tag = componentBuilder.spec.imageStreamRef.spec.tags.find((tag: { name: string; }) => tag.name === component.builderImage.tag);
         const isJava = tag.annotations.tags.includes('java');
         const isNode = tag.annotations.tags.includes('nodejs');
+        const JAVA_EXT = 'redhat.java';
+        const JAVA_DEBUG_EXT = 'vscjava.vscode-java-debug';
         let result: undefined | string | PromiseLike<string>;
         if (isJava || isNode) {
             const toolLocation = await ToolsConfig.detectOrDownload(`odo`);
             if (isJava) {
-                result = Component.startNodeDebugger(toolLocation, component,  {
-                    name: `Attach to '${component.getName()}' component.`,
-                    type: 'java',
-                    request: 'attach',
-                    hostName: 'localhost',
-                    projectName: path.basename(component.contextPath.fsPath)
-                });
+                if (component.compType === ComponentType.LOCAL) {
+                    const jlsIsActive = extensions.getExtension(JAVA_EXT);
+                    const jdIsActive = extensions.getExtension(JAVA_DEBUG_EXT);
+                    if (!jlsIsActive || !jdIsActive) {
+                        let warningMsg;
+                        if (jlsIsActive && !jdIsActive) {
+                            warningMsg = 'Debugger for Java is required to debug component';
+                        } else if (!jlsIsActive && jdIsActive) {
+                            warningMsg = 'Language Support for Java is required to debug component';
+                        } else {
+                            warningMsg = 'Language Support and Debugger for Java are required to debug component';
+                        }
+                        const response = await window.showWarningMessage(warningMsg, 'Install');
+                        if (response === 'Install') {
+                            await window.withProgress({ location: ProgressLocation.Notification }, async (progress) => {
+                                progress.report({ message: 'Installing extensions required to debug Java Component ...'});
+                                if (!jlsIsActive) await commands.executeCommand('workbench.extensions.installExtension', JAVA_EXT);
+                                if (!jdIsActive) await commands.executeCommand('workbench.extensions.installExtension', JAVA_DEBUG_EXT);
+                            });
+                            await window.showInformationMessage("Please reload window to activate installed extensions.", 'Reload');
+                            await commands.executeCommand("workbench.action.reloadWindow");
+                        }
+                    }
+                    if (jlsIsActive && jdIsActive) {
+                        result = Component.startOdoAndConnectDebugger(toolLocation, component,  {
+                            name: `Attach to '${component.getName()}' component.`,
+                            type: 'java',
+                            request: 'attach',
+                            hostName: 'localhost',
+                            projectName: path.basename(component.contextPath.fsPath)
+                        });
+                    }
+                } else {
+                    window.showWarningMessage('Debug command supports only Local Java Components.');
+                }
             } else {
-                result = Component.startNodeDebugger(toolLocation, component,  {
+                result = Component.startOdoAndConnectDebugger(toolLocation, component,  {
                     name: `Attach to '${component.getName()}' component.`,
                     type: 'node2',
                     request: 'attach',
@@ -565,10 +594,10 @@ export class Component extends OpenShiftItem {
         return result;
     }
 
-    static async startNodeDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration) {
-        const cp = exec(`"${toolLocation}" debug port-forward`, {cwd: component.contextPath.fsPath}); 
+    static async startOdoAndConnectDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration) {
+        const cp = exec(`"${toolLocation}" debug port-forward`, {cwd: component.contextPath.fsPath});
         return new Promise<String>((resolve, reject) => {
-            cp.stdout.on('data', async function(data: string) {
+            cp.stdout.on('data', async (data: string) => {
                 const port = data.trim().match(/(?<localPort>\d+)\:\d+$/);
                 if (port.groups.localPort) {
                     await wait(1000);
@@ -579,14 +608,14 @@ export class Component extends OpenShiftItem {
                     resolve(port.groups.localPort);
                 }
             });
-            cp.stderr.on('data', async function (data: string) {
+            cp.stderr.on('data', async (data: string) => {
                 reject(data);
             });
         }).then((port) => {
             config.port = port;
             config.odoPid = cp.pid;
             return debug.startDebugging(workspace.getWorkspaceFolder(component.contextPath), config);
-        }).then(() => 
+        }).then(() =>
             'Debugger session has successfully started.'
         );
     }

@@ -65,4 +65,3 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
     async function checkComponentFolder(folder: Uri) {
         return fs.existsSync(path.join(folder.fsPath, '.odo', 'config.yaml'));
     }
-

@@ -145,10 +145,10 @@ export async function activate(context: vscode.ExtensionContext) {
     OdoImpl.Instance.loadWorkspaceComponents(null);
     context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(session => {
         if (session.configuration.odoPid) {
-            require('tree-kill')(session.configuration.odoPid)
+            require('tree-kill')(session.configuration.odoPid);
         }
     }));
-}   
+}
 
 let lastNamespace = '';
 
