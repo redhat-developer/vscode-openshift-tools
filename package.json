@@ -446,11 +446,6 @@
         "category": "OpenShift"
       },
       {
-        "command": "clusters.openshift.deploy",
-        "title": "Deploy",
-        "category": "OpenShift"
-      },
-      {
         "command": "clusters.openshift.project.openConsole",
         "title": "Open Project in Console"
       },
