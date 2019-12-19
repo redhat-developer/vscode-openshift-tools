@@ -11,10 +11,13 @@ import { KubeConfigUtils } from "../util/kubeUtils";
 import { OpenShiftItem } from '../openshift/openshiftItem';
 import { CliExitData } from '../cli';
 
-const k8sConfig = new KubeConfigUtils();
-const project = (k8sConfig.contexts).find((ctx) => ctx.name === k8sConfig.currentContext).namespace;
-
 export class Console extends OpenShiftItem {
+
+    static getCurrentProject() {
+        const k8sConfig = new KubeConfigUtils();
+        const project = (k8sConfig.contexts).find((ctx) => ctx.name === k8sConfig.currentContext).namespace;
+        return project;
+    }
 
     static async fetchOpenshiftConsoleUrl() {
         try {
@@ -36,6 +39,7 @@ export class Console extends OpenShiftItem {
             return;
         }
         const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
+        const project = Console.getCurrentProject();
         if (consoleUrl['stdout']) {
             url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/ns/${project}/buildconfigs/${context.name}`;
         } else {
@@ -50,6 +54,7 @@ export class Console extends OpenShiftItem {
             vscode.window.showErrorMessage("Cannot load the deployment config");
             return;
         }
+        const project = Console.getCurrentProject();
         const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
         if (consoleUrl['stdout']) {
             url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/ns/${project}/deploymentconfigs/${context.name}`;
@@ -65,6 +70,7 @@ export class Console extends OpenShiftItem {
             vscode.window.showErrorMessage("Cannot load the image stream");
             return;
         }
+        const project = Console.getCurrentProject();
         const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
         if (consoleUrl['stdout']) {
             url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/ns/${project}/imagestreams/${context.name}`;
@@ -80,6 +86,7 @@ export class Console extends OpenShiftItem {
             vscode.window.showErrorMessage("Cannot load the Project");
             return;
         }
+        const project = Console.getCurrentProject();
         const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
         if (consoleUrl['stdout']) {
             url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/cluster/projects/${project}`;
