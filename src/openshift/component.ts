@@ -13,7 +13,7 @@ import { ChildProcess } from 'child_process';
 import { CliExitData } from '../cli';
 import { isURL } from 'validator';
 import { Refs, Ref, Type } from '../util/refs';
-import { Delayer, wait } from '../util/async';
+import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import path = require('path');
 import globby = require('globby');
@@ -595,12 +595,12 @@ export class Component extends OpenShiftItem {
     }
 
     static async startOdoAndConnectDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration) {
-        const cp = exec(`"${toolLocation}" debug port-forward`, {cwd: component.contextPath.fsPath});
+        const port = await require('get-port')();
+        const cp = exec(`"${toolLocation}" debug port-forward --local-port ${port}`, {cwd: component.contextPath.fsPath});
         return new Promise<String>((resolve, reject) => {
             cp.stdout.on('data', async (data: string) => {
                 const port = data.trim().match(/(?<localPort>\d+)\:\d+$/);
-                if (port.groups.localPort) {
-                    await wait(1000);
+                if (port?.groups?.localPort) {
                     await waitPort({
                         host: 'localhost',
                         port: parseInt(port.groups.localPort)
