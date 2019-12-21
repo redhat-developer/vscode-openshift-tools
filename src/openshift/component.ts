@@ -21,6 +21,7 @@ import { selectWorkspaceFolder } from '../util/workspace';
 import { exec } from 'child_process';
 import { ToolsConfig } from '../tools';
 const waitPort = require('wait-port');
+const getPort = require('get-port');
 
 export class Component extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
@@ -595,7 +596,7 @@ export class Component extends OpenShiftItem {
     }
 
     static async startOdoAndConnectDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration) {
-        const port = await require('get-port')();
+        const port = await getPort();
         const cp = exec(`"${toolLocation}" debug port-forward --local-port ${port}`, {cwd: component.contextPath.fsPath});
         return new Promise<String>((resolve, reject) => {
             cp.stdout.on('data', async (data: string) => {
