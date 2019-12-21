@@ -81,6 +81,8 @@
     "onCommand:openshift.url.delete.palette",
     "onCommand:openshift.component.openUrl",
     "onCommand:openshift.component.openUrl.palette",
+    "onCommand:openshift.component.debug",
+    "onCommand:openshift.component.debug.palette",
     "onCommand:openshift.storage.create",
     "onCommand:openshift.storage.delete",
     "onCommand:openshift.service.create",
@@ -401,6 +403,16 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.debug",
+        "title": "Debug",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.debug.palette",
+        "title": "Debug Component",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.storage.create",
         "title": "New Storage",
         "category": "OpenShift"
@@ -616,6 +628,10 @@
         },
         {
           "command": "openshift.component.openUrl",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.debug",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -888,6 +904,11 @@
           "group": "c4@4"
         },
         {
+          "command": "openshift.component.debug",
+          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "c4@5"
+        },
+        {
           "command": "openshift.component.delete",
           "when": "view == openshiftProjectExplorer && viewItem == component_no_context",
           "group": "c5@1"
@@ -988,6 +1009,7 @@
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.12.7",
+    "@types/pify": "^3.0.2",
     "@types/shelljs": "^0.8.6",
     "@types/sinon": "^5.0.7",
     "@types/sinon-chai": "^3.2.3",
@@ -1033,8 +1055,10 @@
     "source-map-support": "^0.5.16",
     "string-format": "^2.0.0",
     "targz": "^1.0.1",
+    "tree-kill": "^1.2.2",
     "unzip-stream": "^0.3.0",
     "validator": "^12.0.0",
-    "vscode-kubernetes-tools-api": "1.0.0"
+    "vscode-kubernetes-tools-api": "1.0.0",
+    "wait-port": "^0.2.7"
   }
 }

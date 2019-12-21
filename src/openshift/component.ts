@@ -7,17 +7,20 @@
 
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command, ContextType, ComponentType } from '../odo';
-import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext } from 'vscode';
+import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation } from 'vscode';
 import { Progress } from '../util/progress';
 import { ChildProcess } from 'child_process';
 import { CliExitData } from '../cli';
 import { isURL } from 'validator';
 import { Refs, Ref, Type } from '../util/refs';
-import { Delayer } from '../util/async';
+import { Delayer, wait } from '../util/async';
 import { Platform } from '../util/platform';
 import path = require('path');
 import globby = require('globby');
 import { selectWorkspaceFolder } from '../util/workspace';
+import { exec } from 'child_process';
+import { ToolsConfig } from '../tools';
+const waitPort = require('wait-port');
 
 export class Component extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
@@ -361,10 +364,10 @@ export class Component extends OpenShiftItem {
 
         if (urlItems !== null) {
             let selectRoute: QuickPickItem;
-            const unpushedUrl = urlItems.filter((value) => value.status.state === 'Not Pushed');
-            const pushedUrl = urlItems.filter((value) => value.status.state === 'Pushed');
+            const unpushedUrl = urlItems.filter((value: { status: { state: string; }; }) => value.status.state === 'Not Pushed');
+            const pushedUrl = urlItems.filter((value: { status: { state: string; }; }) => value.status.state === 'Pushed');
             if (pushedUrl.length > 0) {
-                const hostName: QuickPickItem[] = pushedUrl.map((value) => ({ label: `${value.spec.protocol}://${value.spec.host}`, description: `Target Port is ${value.spec.port}`}));
+                const hostName: QuickPickItem[] = pushedUrl.map((value: { spec: { protocol: any; host: any; port: any; }; }) => ({ label: `${value.spec.protocol}://${value.spec.host}`, description: `Target Port is ${value.spec.port}`}));
                 if (hostName.length >1) {
                     selectRoute = await window.showQuickPick(hostName, {placeHolder: "This Component has multiple URLs. Select the desired URL to open in browser.", ignoreFocusOut: true});
                     if (!selectRoute) return null;
@@ -517,6 +520,106 @@ export class Component extends OpenShiftItem {
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
+    static async debug(context: OpenShiftObject): Promise<string> {
+        const component = await Component.getOpenShiftCmdData(context,
+            'Select a Project',
+            'Select an Application',
+            'Select a Component you want to debug (showing only Components pushed to the cluster)',
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        );
+        if (!component) return null;
+        return Progress.execFunctionWithProgress(`Starting debugger session for the component '${component.getName()}'.`, (progress) => Component.startDebugger(component));
+    }
+
+    static async startDebugger(component: OpenShiftObject): Promise<string> {
+        const components = await Component.odo.getComponentTypesJson();
+        const componentBuilder = components.find((builder) => builder.metadata.name === component.builderImage.name);
+        const tag = componentBuilder.spec.imageStreamRef.spec.tags.find((tag: { name: string; }) => tag.name === component.builderImage.tag);
+        const isJava = tag.annotations.tags.includes('java');
+        const isNode = tag.annotations.tags.includes('nodejs');
+        const JAVA_EXT = 'redhat.java';
+        const JAVA_DEBUG_EXT = 'vscjava.vscode-java-debug';
+        let result: undefined | string | PromiseLike<string>;
+        if (isJava || isNode) {
+            const toolLocation = await ToolsConfig.detectOrDownload(`odo`);
+            if (isJava) {
+                if (component.compType === ComponentType.LOCAL) {
+                    const jlsIsActive = extensions.getExtension(JAVA_EXT);
+                    const jdIsActive = extensions.getExtension(JAVA_DEBUG_EXT);
+                    if (!jlsIsActive || !jdIsActive) {
+                        let warningMsg;
+                        if (jlsIsActive && !jdIsActive) {
+                            warningMsg = 'Debugger for Java is required to debug component';
+                        } else if (!jlsIsActive && jdIsActive) {
+                            warningMsg = 'Language Support for Java is required to debug component';
+                        } else {
+                            warningMsg = 'Language Support and Debugger for Java are required to debug component';
+                        }
+                        const response = await window.showWarningMessage(warningMsg, 'Install');
+                        if (response === 'Install') {
+                            await window.withProgress({ location: ProgressLocation.Notification }, async (progress) => {
+                                progress.report({ message: 'Installing extensions required to debug Java Component ...'});
+                                if (!jlsIsActive) await commands.executeCommand('workbench.extensions.installExtension', JAVA_EXT);
+                                if (!jdIsActive) await commands.executeCommand('workbench.extensions.installExtension', JAVA_DEBUG_EXT);
+                            });
+                            await window.showInformationMessage("Please reload window to activate installed extensions.", 'Reload');
+                            await commands.executeCommand("workbench.action.reloadWindow");
+                        }
+                    }
+                    if (jlsIsActive && jdIsActive) {
+                        result = Component.startOdoAndConnectDebugger(toolLocation, component,  {
+                            name: `Attach to '${component.getName()}' component.`,
+                            type: 'java',
+                            request: 'attach',
+                            hostName: 'localhost',
+                            projectName: path.basename(component.contextPath.fsPath)
+                        });
+                    }
+                } else {
+                    window.showWarningMessage('Debug command supports only Local Java Components.');
+                }
+            } else {
+                result = Component.startOdoAndConnectDebugger(toolLocation, component,  {
+                    name: `Attach to '${component.getName()}' component.`,
+                    type: 'node2',
+                    request: 'attach',
+                    address: 'localhost',
+                    localRoot: component.contextPath.fsPath,
+                    remoteRoot: '/opt/app-root/src'
+                });
+            }
+        } else {
+            window.showWarningMessage('Debug command supports only Java and Node.Js components.');
+        }
+        return result;
+    }
+
+    static async startOdoAndConnectDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration) {
+        const cp = exec(`"${toolLocation}" debug port-forward`, {cwd: component.contextPath.fsPath});
+        return new Promise<String>((resolve, reject) => {
+            cp.stdout.on('data', async (data: string) => {
+                const port = data.trim().match(/(?<localPort>\d+)\:\d+$/);
+                if (port.groups.localPort) {
+                    await wait(1000);
+                    await waitPort({
+                        host: 'localhost',
+                        port: parseInt(port.groups.localPort)
+                    });
+                    resolve(port.groups.localPort);
+                }
+            });
+            cp.stderr.on('data', async (data: string) => {
+                reject(data);
+            });
+        }).then((port) => {
+            config.port = port;
+            config.odoPid = cp.pid;
+            return debug.startDebugging(workspace.getWorkspaceFolder(component.contextPath), config);
+        }).then(() =>
+            'Debugger session has successfully started.'
+        );
+    }
+
     static async import(component: OpenShiftObject): Promise<string> {
         const prjName = component.getParent().getParent().getName();
         const appName = component.getParent().getName();
@@ -565,8 +668,8 @@ export class Component extends OpenShiftItem {
                 }
                 // import storage if present
                 if (componentJson.spec.template.spec.containers[0].volumeMounts) {
-                    const volumeMounts: any[] = componentJson.spec.template.spec.containers[0].volumeMounts.filter((volume) => !volume.name.startsWith(compName));
-                    const volumes: any[] = componentJson.spec.template.spec.volumes.filter((volume) => volume.persistentVolumeClaim !== undefined && !volume.name.startsWith(compName));
+                    const volumeMounts: any[] = componentJson.spec.template.spec.containers[0].volumeMounts.filter((volume: { name: string; }) => !volume.name.startsWith(compName));
+                    const volumes: any[] = componentJson.spec.template.spec.volumes.filter((volume: { persistentVolumeClaim: any; name: string; }) => volume.persistentVolumeClaim !== undefined && !volume.name.startsWith(compName));
                     const storageData: Partial<{mountPath: string, pvcName: string}>[] = volumes.map((volume) => {
                         const data: Partial<{mountPath: string, pvcName: string}> = {};
                         const mount = volumeMounts.find((mount) => mount.name === volume.name);
