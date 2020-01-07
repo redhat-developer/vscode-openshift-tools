@@ -983,7 +983,7 @@
           "title": "Disable check if migration required",
           "type": "boolean",
           "default": false,
-          "description": "Disable check if migration is required for resources created with previous version of the extension and mirgation request message."
+          "description": "Disable check if migration is required for resources created with previous version of the extension and migration request message."
         }
       }
     }
