@@ -6,6 +6,8 @@ This release adds `OpenShift: Debug` command for Java and Node.js components. Th
 menu for nodes representing Components. See issues [#1322](https://github.com/redhat-developer/vscode-openshift-tools/pull/1322) and 
 [#1328](https://github.com/redhat-developer/vscode-openshift-tools/pull/1328) for details.
 
+It also includes update for OpenShift Do CLI. Version 1.0.2 will be downloaded after extension is updated to this release.
+
 
 ## 0.1.2 (November 18, 2019)
 
