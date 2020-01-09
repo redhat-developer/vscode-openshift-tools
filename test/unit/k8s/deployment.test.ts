@@ -182,6 +182,7 @@ suite('K8s/deployment', () => {
         });
 
         test('wraps errors in additional info', async () => {
+            sandbox.stub(DeploymentConfig, 'getDeploymentConfigState').resolves(false);
             execStub.rejects(errorMessage);
 
             try {

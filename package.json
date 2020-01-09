@@ -109,6 +109,8 @@
     "onCommand:clusters.openshift.deploy.delete.palette",
     "onCommand:clusters.openshift.deploy.rcShowLog",
     "onCommand:clusters.openshift.deploy.rcShowLog.palette",
+    "onCommand:clusters.openshift.deploy.pause",
+    "onCommand:clusters.openshift.deploy.resume",
     "onCommand:clusters.openshift.deployment.openConsole",
     "onCommand:clusters.openshift.imagestream.openConsole"
   ],
@@ -526,6 +528,16 @@
         "category": "OpenShift"
       },
       {
+        "command": "clusters.openshift.deploy.pause",
+        "title": "Pause",
+        "category": "OpenShift"
+      },
+      {
+        "command": "clusters.openshift.deploy.resume",
+        "title": "Resume",
+        "category": "OpenShift"
+      },
+      {
         "command": "clusters.openshift.deployment.openConsole",
         "title": "Open in Console"
       },
@@ -592,6 +604,14 @@
         },
         {
           "command": "clusters.openshift.deploy.delete",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "clusters.openshift.deploy.pause",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "clusters.openshift.deploy.resume",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -721,6 +741,16 @@
         {
           "command": "clusters.openshift.deploy.dc.showLog",
           "group": "2@1",
+          "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.dc"
+        },
+        {
+          "command": "clusters.openshift.deploy.pause",
+          "group": "2@2",
+          "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.dc"
+        },
+        {
+          "command": "clusters.openshift.deploy.resume",
+          "group": "2@3",
           "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.dc"
         },
         {
