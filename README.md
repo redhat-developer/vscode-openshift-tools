@@ -102,6 +102,7 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
    * `Component -> Watch` - Watch for changes, update Component on change. This is not supported for git based components.
    * `Component -> Undeploy` - Undeploys a Component from the cluster. The component still resides in the local config.
    * `Component -> Delete` - Delete an existing Component from the cluster and removes the local config also.
+   * `Component -> Debug` - Debug Java or Node.js Component.
 
 #### Actions for a Not Pushed Component
 
