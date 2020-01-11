@@ -34,7 +34,7 @@ export class Oc {
 
         let toolLocation: string;
         if (!message) {
-            toolLocation = await ToolsConfig.detectOrDownload('oc');
+            toolLocation = await ToolsConfig.detect('oc');
             if (!toolLocation) {
                 message = 'Cannot run \'oc create\'. OKD CLI client tool cannot be found.';
             }

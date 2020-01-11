@@ -1,6 +1,7 @@
 out
 node_modules
 .vscode-test/
+test/fixtures/workspace/.vscode/
 *.vsix
 coverage/
 toFile

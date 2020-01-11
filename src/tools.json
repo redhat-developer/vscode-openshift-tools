@@ -7,7 +7,6 @@
         "versionRange": "1.0.2",
         "versionRangeLabel": "v1.0.2",
         "dlFileName": "odo",
-        "cmdFileName": "odo",
         "filePrefix": "",
         "platform": {
             "win32": {
@@ -19,12 +18,14 @@
             "darwin": {
                 "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.0.2/odo-darwin-amd64.tar.gz",
                 "sha256sum": "af50916c359b5a383f983c6776f166728497076ff1226e0ef97a3926b447b71e",
-                "dlFileName": "odo-darwin-amd64.tar.gz"
+                "dlFileName": "odo-darwin-amd64.tar.gz",
+                "cmdFileName": "odo"
             },
             "linux": {
                 "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.0.2/odo-linux-amd64.tar.gz",
                 "sha256sum": "14640b4fd76c6bd863b5f2a5f871760054cd085da4bc87dc0499eb8a0f9389b3",
-                "dlFileName": "odo-linux-amd64.tar.gz"
+                "dlFileName": "odo-linux-amd64.tar.gz",
+                "cmdFileName": "odo"
             }
         }
     },
@@ -47,14 +48,16 @@
             "darwin": {
                 "url": "https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-mac.zip",
                 "sha256sum": "75d58500aec1a2cee9473dfa826c81199669dbc0f49806e31a13626b5e4cfcf0",
-                "dlFileName": "oc.zip"
+                "dlFileName": "oc.zip",
+                "cmdFileName": "oc"
             },
             "linux": {
                 "url": "https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz",
                 "sha256sum": "4b0f07428ba854174c58d2e38287e5402964c9a9355f6c359d1242efd0990da3",
                 "fileName": "oc.tar.gz",
                 "dlFileName": "oc.tar.gz",
-                "filePrefix": "openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit"
+                "filePrefix": "openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit",
+                "cmdFileName": "oc"
             }
         }
     }

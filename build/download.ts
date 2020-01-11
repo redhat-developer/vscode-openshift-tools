@@ -4,6 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 /* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable no-unused-expressions */
 import * as fs from 'fs-extra';
 
 const { promisify } = require('util');

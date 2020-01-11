@@ -8,7 +8,6 @@ import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as shelljs from 'shelljs';
-import * as path from 'path';
 import * as fs from 'fs';
 import * as fsex from 'fs-extra';
 import { Archive } from '../../src/util/archive';
@@ -18,15 +17,14 @@ import { CliExitData, CliChannel } from '../../src/cli';
 import hasha = require("hasha");
 import pq = require('proxyquire');
 import sinonChai = require('sinon-chai');
+import path = require('path');
 
-const {expect} = chai;
 chai.use(sinonChai);
 
 suite("tools configuration", () => {
     let sb: sinon.SinonSandbox;
     let chmodSyncStub: sinon.SinonStub;
     let ToolsConfig: any;
-    let commandStub: any;
 
     setup(() => {
         sb = sinon.createSandbox();
@@ -34,7 +32,6 @@ suite("tools configuration", () => {
         ToolsConfig = pq('../../src/tools', {
         }).ToolsConfig;
         ToolsConfig.resetConfiguration();
-        commandStub = sb.stub(vscode.commands, 'executeCommand');
     });
 
     teardown(() => {
@@ -79,88 +76,18 @@ suite("tools configuration", () => {
         });
     });
 
-    suite('detectOrDownload()', () => {
-        let withProgress: sinon.SinonStub<[vscode.ProgressOptions, (progress: vscode.Progress<{ message?: string; increment?: number }>, token: vscode.CancellationToken) => Thenable<unknown>], Thenable<unknown>>;
-
-        setup(() => {
-            withProgress = sb.stub(vscode.window, 'withProgress').resolves();
-        });
+    suite('detect', () => {
 
         test('returns path to tool detected form PATH locations if detected version is correct', async () => {
             sb.stub(shelljs, 'which').returns({stdout: 'odo'} as string & shelljs.ShellReturnValue);
             sb.stub(fs, 'existsSync').returns(false);
-            sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools.odo.version);
-            const toolLocation = await ToolsConfig.detectOrDownload('odo');
-            assert.equal(toolLocation, 'odo');
-        });
-
-        test('returns path to previously downloaded tool if detected version is correct', async () => {
-            sb.stub(shelljs, 'which');
-            sb.stub(fs, 'existsSync').returns(true);
-            sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools.odo.version);
-            const toolLocation = await ToolsConfig.detectOrDownload('odo');
-            assert.equal( toolLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools.odo.cmdFileName));
-        });
-
-        test('ask to downloads tool if previously downloaded version is not correct and download if requested by user', async () => {
-            sb.stub(shelljs, 'which');
-            sb.stub(fs, 'existsSync').returns(true);
-            sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-            const showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves(`Download and install v${ToolsConfig.tools.odo.version}`);
-            const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools.odo.sha256sum);
-            stub.onSecondCall().returns(ToolsConfig.tools.oc.sha256sum);
-            sb.stub(Archive, 'extract').resolves();
-            let toolLocation = await ToolsConfig.detectOrDownload('odo');
-            assert.ok(showInfo.calledOnce);
-            assert.ok(withProgress.calledOnce);
-            assert.equal( toolLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools.odo.cmdFileName));
-            showInfo.resolves(`Download and install v${ToolsConfig.tools.oc.version}`);
-            toolLocation = await ToolsConfig.detectOrDownload('oc');
-            assert.ok(showInfo.calledTwice);
-            assert.ok(withProgress.calledTwice);
-            assert.equal( toolLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools.oc.cmdFileName));
-        });
-
-        test('ask to downloads tool if previously downloaded version is not correct and skip download if canceled by user', async () => {
-            sb.stub(shelljs, 'which');
-            sb.stub(fs, 'existsSync').returns(true);
-            sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-            const showInfo = sb.stub(vscode.window, 'showInformationMessage').resolves('Cancel');
-            const toolLocation = await ToolsConfig.detectOrDownload('odo');
-            assert.ok(showInfo.calledOnce);
-            assert.equal(toolLocation, undefined);
-        });
-
-        test('downloads tool, ask to download again if checksum does not match and finish if consecutive download successful', async () => {
-            sb.stub(shelljs, 'which');
-            sb.stub(fs, 'existsSync').returns(true);
-            sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-            const showInfo = sb.stub(vscode.window, 'showInformationMessage').onFirstCall().resolves(`Download and install v${ToolsConfig.tools.odo.version}`);
-            showInfo.onSecondCall().resolves('Download again');
-            const fromFile = sb.stub(hasha, 'fromFile').onFirstCall().resolves('not really sha256');
-            fromFile.onSecondCall().returns(ToolsConfig.tools.odo.sha256sum);
-            sb.stub(fsex, 'removeSync');
-            sb.stub(Archive, 'extract').resolves();
-            const toolLocation = await ToolsConfig.detectOrDownload('odo');
-            assert.ok(withProgress.calledTwice);
-            assert.ok(showInfo.calledTwice);
-            assert.equal( toolLocation, path.resolve(Platform.getUserHomePath(), '.vs-openshift', ToolsConfig.tools.odo.cmdFileName));
-        });
-
-        test('downloads tool, ask to download again if checksum does not match and exits if canceled', async () => {
-            sb.stub(shelljs, 'which');
-            sb.stub(fs, 'existsSync').returns(true);
-            sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-            const showInfo = sb.stub(vscode.window, 'showInformationMessage').onFirstCall().resolves(`Download and install v${ToolsConfig.tools.odo.version}`);
-            showInfo.onSecondCall().resolves('Cancel');
-            const fromFile = sb.stub(hasha, 'fromFile').onFirstCall().resolves('not really sha256');
-            fromFile.onSecondCall().returns(ToolsConfig.tools.odo.sha256sum);
-            sb.stub(fsex, 'removeSync');
-            sb.stub(Archive, 'extract').resolves();
-            const toolLocation = await ToolsConfig.detectOrDownload('odo');
-            assert.ok(withProgress.calledOnce);
-            assert.ok(showInfo.calledTwice);
-            assert.equal(toolLocation, undefined);
+            sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools['odo'].version);
+            const toolLocation = await ToolsConfig.detect('odo');
+            if (vscode.workspace.getConfiguration('openshiftConnector').get('searchForToolsInPath')) {
+                assert.equal(toolLocation, 'odo');
+            } else {
+                assert.equal(toolLocation, path.resolve(__dirname, '..', '..', '..', 'out', 'tools', Platform.OS, ToolsConfig.tools['odo'].cmdFileName));
+            }
         });
 
         suite('on windows', () => {
@@ -181,18 +108,8 @@ suite("tools configuration", () => {
                 const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools.odo.sha256sum);
                 stub.onSecondCall().returns(ToolsConfig.tools.oc.sha256sum);
                 sb.stub(Archive, 'extract').resolves();
-                await ToolsConfig.detectOrDownload('odo');
+                await ToolsConfig.detect('odo');
                 assert.ok(!chmodSyncStub.called);
-            });
-
-            test('Open help page if user click on help button', async () => {
-                sb.stub(shelljs, 'which');
-                sb.stub(fs, 'existsSync').returns(true);
-                sb.stub(fsex, 'ensureDirSync').returns();
-                sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-                sb.stub(vscode.window, 'showInformationMessage').resolves('Help');
-                await ToolsConfig.detectOrDownload('odo');
-                expect(commandStub).calledOnceWith('vscode.open', vscode.Uri.parse('https://github.com/redhat-developer/vscode-openshift-tools#dependencies'));
             });
         });
 
@@ -206,13 +123,9 @@ suite("tools configuration", () => {
             });
             test('set executable attribute for tool file', async () => {
                 sb.stub(shelljs, 'which');
-                sb.stub(fs, 'existsSync').returns(false);
-                sb.stub(fsex, 'ensureDirSync').returns();
-                sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-                sb.stub(vscode.window, 'showInformationMessage').resolves(`Download and install v${ToolsConfig.tools.odo.version}`);
-                sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools.odo.sha256sum);
+                sb.stub(ToolsConfig, 'getVersion').resolves(ToolsConfig.tools['odo'].versionRange);
                 sb.stub(Archive, 'extract').resolves();
-                await ToolsConfig.detectOrDownload('odo');
+                await ToolsConfig.detect('odo');
                 assert.ok(chmodSyncStub.called);
             });
         });

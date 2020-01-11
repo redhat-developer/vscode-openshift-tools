@@ -46,7 +46,7 @@ suite('Oc', () => {
         warnStub = sandbox.stub(window, 'showWarningMessage');
         execStub = sandbox.stub(CliChannel.prototype, 'execute');
         quickPickStub = sandbox.stub(window, 'showQuickPick');
-        detectOrDownloadStub = sandbox.stub(ToolsConfig, 'detectOrDownload').resolves('path');
+        detectOrDownloadStub = sandbox.stub(ToolsConfig, 'detect').resolves('path');
     });
 
     teardown(() => {
