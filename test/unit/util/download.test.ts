@@ -24,7 +24,7 @@ suite('Download Util', () => {
         requestEmitter = new EventEmitter();
         streamEmitter = new EventEmitter();
         requestEmitter.pipe = (): any => streamEmitter;
-        progressMock = pq('../../../src/util/download', {
+        progressMock = pq('../../../build/download', {
             got: {
                 stream: (): any => requestEmitter
             },

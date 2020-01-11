@@ -9,12 +9,13 @@ import * as zlib from 'zlib';
 import targz = require('targz');
 import unzipm = require('unzip-stream');
 import pify = require('pify');
+import path = require('path');
 
 export class Archive {
-    static extract(zipFile: string, extractTo: string, prefix?: string): Promise<void> {
+    static extract(zipFile: string, extractTo: string, cmdFileName: string, prefix?: string): Promise<void> {
         return new Promise((resolve, reject) => {
             if (zipFile.endsWith('.tar.gz')) {
-                Archive.untar(zipFile, extractTo, prefix)
+                Archive.untar(zipFile, extractTo, cmdFileName, prefix)
                     .then(resolve)
                     .catch(reject);
             } else if (zipFile.endsWith('.gz')) {
@@ -22,7 +23,7 @@ export class Archive {
                     .then(resolve)
                     .catch(reject);
             } else if (zipFile.endsWith('.zip')) {
-                Archive.unzip(zipFile, extractTo)
+                Archive.unzip(zipFile, extractTo, cmdFileName)
                     .then(resolve)
                     .catch(reject);
             } else {
@@ -42,7 +43,7 @@ export class Archive {
         });
     }
 
-    static untar(zipFile: string, extractTo: string, prefix: string): Promise<void> {
+    static untar(zipFile: string, extractTo: string, fileName: string, prefix: string): Promise<void> {
         return pify(targz.decompress)({
             src: zipFile,
             dest: extractTo,
@@ -53,15 +54,25 @@ export class Archive {
                     result.name = header.name.substring(prefix.length);
                   }
                   return result;
+                },
+                ignore: (name: string): boolean => {
+                    return path.basename(name) !== fileName;
                 }
             }
         });
     }
 
-    static unzip(zipFile: string, extractTo: string): Promise<void> {
+    static unzip(zipFile: string, extractTo: string, fileName: string): Promise<void> {
         return new Promise((resolve, reject) => {
             fs.createReadStream(zipFile)
-            .pipe(unzipm.Extract({ path: extractTo }))
+            .pipe(unzipm.Parse())
+            .on('entry', (entry) => {
+                if (path.basename(entry.path) === fileName) {
+                    entry.pipe(fs.createWriteStream(path.join(extractTo, fileName)));
+                } else {
+                    entry.autodrain();
+                }
+            })
             .on('error', reject)
             .on('close', resolve);
         });

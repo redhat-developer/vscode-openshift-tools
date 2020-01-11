@@ -62,7 +62,7 @@ suite("odo", () => {
 
         setup(() => {
             execStub = sandbox.stub(CliChannel.prototype, 'execute');
-            toolsStub = sandbox.stub(ToolsConfig, 'detectOrDownload').resolves();
+            toolsStub = sandbox.stub(ToolsConfig, 'detect').resolves();
         });
 
         test('execute calls the given command in shell', async () => {
@@ -120,7 +120,7 @@ suite("odo", () => {
                 dispose: sinon.stub()
             };
             toolsStub.restore();
-            toolsStub = sandbox.stub(ToolsConfig, 'detectOrDownload').resolves(path.join('segment1', 'segment2'));
+            toolsStub = sandbox.stub(ToolsConfig, 'detect').resolves(path.join('segment1', 'segment2'));
             const ctStub = sandbox.stub(WindowUtil, 'createTerminal').returns(termFake);
             await odoCli.executeInTerminal('cmd');
             expect(termFake.sendText).calledOnce;

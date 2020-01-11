@@ -540,9 +540,9 @@ export class Component extends OpenShiftItem {
         const isNode = tag.annotations.tags.includes('nodejs');
         const JAVA_EXT = 'redhat.java';
         const JAVA_DEBUG_EXT = 'vscjava.vscode-java-debug';
-        let result: undefined | PromiseLike<string>;
-        if (component.compType === ComponentType.LOCAL && (isJava || isNode)) {
-            const toolLocation = await ToolsConfig.detectOrDownload(`odo`);
+        let result: undefined | string | PromiseLike<string>;
+        if (isJava || isNode) {
+            const toolLocation = await ToolsConfig.detect(`odo`);
             if (isJava) {
                 const jlsIsActive = extensions.getExtension(JAVA_EXT);
                 const jdIsActive = extensions.getExtension(JAVA_DEBUG_EXT);
