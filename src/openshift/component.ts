@@ -541,43 +541,39 @@ export class Component extends OpenShiftItem {
         const JAVA_EXT = 'redhat.java';
         const JAVA_DEBUG_EXT = 'vscjava.vscode-java-debug';
         let result: undefined | string | PromiseLike<string>;
-        if (isJava || isNode) {
+        if (component.compType === ComponentType.LOCAL && (isJava || isNode)) {
             const toolLocation = await ToolsConfig.detectOrDownload(`odo`);
             if (isJava) {
-                if (component.compType === ComponentType.LOCAL) {
-                    const jlsIsActive = extensions.getExtension(JAVA_EXT);
-                    const jdIsActive = extensions.getExtension(JAVA_DEBUG_EXT);
-                    if (!jlsIsActive || !jdIsActive) {
-                        let warningMsg;
-                        if (jlsIsActive && !jdIsActive) {
-                            warningMsg = 'Debugger for Java is required to debug component';
-                        } else if (!jlsIsActive && jdIsActive) {
-                            warningMsg = 'Language Support for Java is required to debug component';
-                        } else {
-                            warningMsg = 'Language Support and Debugger for Java are required to debug component';
-                        }
-                        const response = await window.showWarningMessage(warningMsg, 'Install');
-                        if (response === 'Install') {
-                            await window.withProgress({ location: ProgressLocation.Notification }, async (progress) => {
-                                progress.report({ message: 'Installing extensions required to debug Java Component ...'});
-                                if (!jlsIsActive) await commands.executeCommand('workbench.extensions.installExtension', JAVA_EXT);
-                                if (!jdIsActive) await commands.executeCommand('workbench.extensions.installExtension', JAVA_DEBUG_EXT);
-                            });
-                            await window.showInformationMessage("Please reload window to activate installed extensions.", 'Reload');
-                            await commands.executeCommand("workbench.action.reloadWindow");
-                        }
+                const jlsIsActive = extensions.getExtension(JAVA_EXT);
+                const jdIsActive = extensions.getExtension(JAVA_DEBUG_EXT);
+                if (!jlsIsActive || !jdIsActive) {
+                    let warningMsg;
+                    if (jlsIsActive && !jdIsActive) {
+                        warningMsg = 'Debugger for Java is required to debug component';
+                    } else if (!jlsIsActive && jdIsActive) {
+                        warningMsg = 'Language Support for Java is required to debug component';
+                    } else {
+                        warningMsg = 'Language Support and Debugger for Java are required to debug component';
                     }
-                    if (jlsIsActive && jdIsActive) {
-                        result = Component.startOdoAndConnectDebugger(toolLocation, component,  {
-                            name: `Attach to '${component.getName()}' component.`,
-                            type: 'java',
-                            request: 'attach',
-                            hostName: 'localhost',
-                            projectName: path.basename(component.contextPath.fsPath)
+                    const response = await window.showWarningMessage(warningMsg, 'Install');
+                    if (response === 'Install') {
+                        await window.withProgress({ location: ProgressLocation.Notification }, async (progress) => {
+                            progress.report({ message: 'Installing extensions required to debug Java Component ...'});
+                            if (!jlsIsActive) await commands.executeCommand('workbench.extensions.installExtension', JAVA_EXT);
+                            if (!jdIsActive) await commands.executeCommand('workbench.extensions.installExtension', JAVA_DEBUG_EXT);
                         });
+                        await window.showInformationMessage("Please reload window to activate installed extensions.", 'Reload');
+                        await commands.executeCommand("workbench.action.reloadWindow");
                     }
-                } else {
-                    window.showWarningMessage('Debug command supports only Local Java Components.');
+                }
+                if (jlsIsActive && jdIsActive) {
+                    result = Component.startOdoAndConnectDebugger(toolLocation, component,  {
+                        name: `Attach to '${component.getName()}' component.`,
+                        type: 'java',
+                        request: 'attach',
+                        hostName: 'localhost',
+                        projectName: path.basename(component.contextPath.fsPath)
+                    });
                 }
             } else {
                 result = Component.startOdoAndConnectDebugger(toolLocation, component,  {
@@ -590,7 +586,7 @@ export class Component extends OpenShiftItem {
                 });
             }
         } else {
-            window.showWarningMessage('Debug command supports only Java and Node.Js components.');
+            window.showWarningMessage('Debug command supports only local Java and Node.Js components.');
         }
         return result;
     }
