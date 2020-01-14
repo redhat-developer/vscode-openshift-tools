@@ -610,8 +610,8 @@ export class Component extends OpenShiftItem {
             config.port = port;
             config.odoPid = cp.pid;
             return debug.startDebugging(workspace.getWorkspaceFolder(component.contextPath), config);
-        }).then(() =>
-            'Debugger session has successfully started.'
+        }).then((result: boolean) =>
+            result ? 'Debugger session has successfully started.' : Promise.reject('Debugger session failed to start.')
         );
     }
 
