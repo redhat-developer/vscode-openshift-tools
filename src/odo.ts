@@ -556,6 +556,12 @@ export class OdoImpl implements Odo {
         'Please login to your server',
         'Unauthorized'
     ];
+    private readonly serverDownMessages = [
+        'Unable to connect to OpenShift cluster, is it down?',
+        'no such host',
+        'no route to host',
+        'connection refused'
+    ];
 
     private subjectInstance: Subject<OdoEvent> = new Subject<OdoEvent>();
 
@@ -617,8 +623,8 @@ export class OdoImpl implements Odo {
             const loginErrorMsg: string = 'Please log in to the cluster';
             return[new OpenShiftObjectImpl(null, loginErrorMsg, ContextType.LOGIN_REQUIRED, false, OdoImpl.instance, TreeItemCollapsibleState.None)];
         }
-        if (result.stderr.indexOf("Unable to connect to OpenShift cluster, is it down?") > -1) {
-            const clusterDownMsg: string = 'Please start the OpenShift cluster';
+        if (this.serverDownMessages.some((element) => result.stderr ? result.stderr.indexOf(element) > -1 : false)) {
+            const clusterDownMsg: string = 'Cannot connect to the OpenShift cluster';
             return [new OpenShiftObjectImpl(null, clusterDownMsg, ContextType.CLUSTER_DOWN, false, OdoImpl.instance, TreeItemCollapsibleState.None)];
         }
         commands.executeCommand('setContext', 'isLoggedIn', true);
