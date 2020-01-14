@@ -41,7 +41,6 @@ suite('OpenShift/Component', () => {
     let getProjects: sinon.SinonStub;
     let getApps: sinon.SinonStub;
     let Component: any;
-    let infoStub: sinon.SinonStub;
     let fetchTag: sinon.SinonStub;
     let commandStub: sinon.SinonStub;
 
