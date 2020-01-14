@@ -582,7 +582,7 @@ suite("odo", () => {
                 stderr: 'Unable to connect to OpenShift cluster, is it down?'
             });
             const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
-            assert.equal(cluster[0].getName(), "Please start the OpenShift cluster");
+            assert.equal(cluster[0].getName(), "Cannot connect to the OpenShift cluster");
         });
 
         test('extension uses oc version to get cluster url as a backup plan', async () => {
