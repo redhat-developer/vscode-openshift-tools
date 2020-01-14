@@ -252,13 +252,6 @@ suite('OpenShift/Component', () => {
                 expect(result).null;
             });
 
-            test('clones the git repo if selected', async () => {
-                infoStub.resolves('Yes');
-                await Component.create(appItem);
-
-                expect(commandStub).calledOnceWith('git.clone', uri);
-            });
-
             test('allows to continue with valid git repository url', async () => {
                 let result: string | Thenable<string>;
                 inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Promise<string> => {
