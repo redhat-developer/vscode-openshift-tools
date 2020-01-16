@@ -34,7 +34,7 @@ This release `0.1.1` contains breaking changes mentioned below.
 
 * The Components created with previous versions(<=0.0.23) will no longer be visible in OpenShift Application Explorer view.
 * The Extension will prompt the user to specify the context folder when creating new Components and then add selected folder to workspace.
-* New Component, Url and Storage objects are created locally in context folder and not immediatly pushed to the cluster.
+* New Component, Url and Storage objects are created locally in context folder and not immediately pushed to the cluster.
 
 > **Please follow the [migration](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0) guide to resolve any possible issues.**
 
