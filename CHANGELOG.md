@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.1.3 (January 13, 2020)
+## 0.1.3 (January 16, 2020)
 
 This release adds `OpenShift: Debug` command for Java and Node.js components. The command is available form command palette and OpenShift Application View context
 menu for nodes representing Components. See issues [#1322](https://github.com/redhat-developer/vscode-openshift-tools/pull/1322) and 
