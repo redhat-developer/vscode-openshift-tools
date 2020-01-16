@@ -5,5 +5,6 @@
 		"ms-vscode.vscode-typescript-tslint-plugin",
 		"eg2.vscode-npm-script",
 		"ryanluker.vscode-coverage-gutters",
-		"streetsidesoftware.code-spell-checker"]
+		"streetsidesoftware.code-spell-checker",
+		"shd101wyy.markdown-preview-enhanced"]
 }
