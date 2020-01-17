@@ -86,7 +86,7 @@ export abstract class OpenShiftItem {
     }
 
     static getToken(value: string): string | null {
-        const tokenRegex = value.match(/--token\s*=\s*(.*)/);
+        const tokenRegex = value.match(/--token\s*=\s*(\S*).*/);
         return (tokenRegex) ? tokenRegex[1] : null;
     }
 
