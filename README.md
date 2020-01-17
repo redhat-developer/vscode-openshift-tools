@@ -10,7 +10,9 @@ OpenShift Connector extension provides an end-to-end developer experience for Re
 
 [![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/vscode-openshift-tools.gif)](https://youtube.com/watch?v=m0wBKuKDYO0)
 
-### Running OpenShift Clusters
+### Supported OpenShift Clusters
+
+The extension can work with local or remote OpenShift clusters.
 
 To run the local instance of OpenShift cluster, developers can use the following options:
 * [CodeReadyContainers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned) - run single node local OpenShift 4.x cluster
@@ -18,19 +20,19 @@ To run the local instance of OpenShift cluster, developers can use the following
 
 For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
 
-The extension also supports remote OpenShift clusters from various Red Hat products:
+Remote OpenShift clusters from various Red Hat products are also supported:
 * [Red Hat OpenShift Container Platform](https://www.openshift.com/products/container-platform) - build, deploy and manage your applications across cloud- and on-premise infrastructure
 * [Red Hat OpenShift Dedicated](https://www.openshift.com/products/dedicated/) - single-tenant, high-availability Kubernetes clusters in the public cloud
 * [Microsoft Azure Red Hat OpenShift](https://www.openshift.com/products/azure-openshift) - fully managed Red Hat OpenShift service on Microsoft Azure
 * [Red Hat OpenShift Online](https://www.openshift.com/products/online/) - the fastest way for developers to build, host and scale applications in the public cloud
 
-When connecting to [OpenShift Online](https://www.openshift.com/products/online/) only one component can be created for Starter plan and Pro plan with default storage. If you want to create multi component application you could opt in for Pro plan with bigger persistence storage (up to 150GiB).
+When connecting to [OpenShift Online](https://www.openshift.com/products/online/) only one component can be created for Starter plan and Pro plan with default 2GiB storage. If you want to create multi component application you could opt in for Pro plan with bigger persistence storage (up to 150GiB).
 
-## New and Noteworthy 
+## New and Noteworthy
 
 ### Debug Support for Local Node.js and Java Components
 
-The latest release provides new 'OpenShift: Debug' command to simplify the way to start debugging for OpenShift Components pushed to a cluster. It is an experimental feature, because it is using experimental OpenShift Do `debug` command under the hood and supports only local Java and Node.js components. The command is available from command pallet and context menu for Component nodes in OpenShift Application Explorer view. 
+This release provides new 'OpenShift: Debug' command to simplify the way to start debugging for OpenShift Components pushed to a cluster. It is an experimental feature, because it is using experimental OpenShift Do `debug` command under the hood and supports only local Java and Node.js components. The command is available from command pallet and context menu for Component nodes in OpenShift Application Explorer view. 
 
 #### Debug Node.js Component
 
