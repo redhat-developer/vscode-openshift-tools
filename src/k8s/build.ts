@@ -29,7 +29,7 @@ export class Command {
         return `oc logs ${build}${text}`;
     }
 
-    static rebuildFrom(resourceId: String) {
+    static rebuildFrom(resourceId: string) {
         return `oc start-build --from-build ${resourceId}`;
     }
 
@@ -37,7 +37,7 @@ export class Command {
         return `oc logs ${build}${text} -f`;
     }
 
-    static delete(build: String) {
+    static delete(build: string) {
         return `oc delete build ${build}`;
     }
 
@@ -85,7 +85,7 @@ export class Build {
         return build;
     }
 
-    static async startBuild(context: { name: string; }): Promise<string> {
+    static async startBuild(context: { name: string}): Promise<string> {
         let buildName: string = context ? context.name : undefined;
         let result: Promise<string> = null;
         if (!buildName) buildName = await common.selectResourceByName(await Build.getBuildConfigNames("You have no BuildConfigs available to start a build"), "Select a BuildConfig to start a build");
@@ -97,7 +97,7 @@ export class Build {
         return result;
     }
 
-    static async showLog(context: { impl: any; }): Promise<string> {
+    static async showLog(context: { impl: any}): Promise<string> {
         const build = await Build.selectBuild(context, "Select a build too see the logs");
         if (build) {
             Build.odo.executeInTerminal(Command.showLog(build, '-build'));
@@ -105,7 +105,7 @@ export class Build {
         return build;
     }
 
-    static async rebuild(context: { id?: string; impl: any; }): Promise<string> {
+    static async rebuild(context: { id?: string; impl: any}): Promise<string> {
         let resourceId: string;
         if (context) {
             resourceId = context.impl.name;
@@ -121,7 +121,7 @@ export class Build {
         return null;
     }
 
-    static async followLog(context: { impl: any; }): Promise<string> {
+    static async followLog(context: { impl: any}): Promise<string> {
         const build = await Build.selectBuild(context, "Select a build too follow the logs");
         if (build) {
             Build.odo.executeInTerminal(Command.followLog(build, '-build'));
@@ -129,7 +129,7 @@ export class Build {
         return null;
     }
 
-    static async delete(context: { impl: any; }): Promise<string> {
+    static async delete(context: { impl: any}): Promise<string> {
         let result: null | string | Promise<string> | PromiseLike<string> = null;
         const build = await Build.selectBuild(context, "Select a build too delete");
         if (build) {

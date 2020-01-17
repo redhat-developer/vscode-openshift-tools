@@ -40,7 +40,7 @@ export abstract class OpenShiftItem {
     protected static readonly odo: Odo = OdoImpl.Instance;
     protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
 
-    static validateUniqueName(data: Array<OpenShiftObject>, value: string) {
+    static validateUniqueName(data: Array<OpenShiftObject>, value: string): string {
         const openshiftObject =  data.find((openshiftObject) =>  openshiftObject.getName() === value);
         return openshiftObject && `This name is already used, please enter different name.`;
     }
@@ -59,34 +59,34 @@ export abstract class OpenShiftItem {
         });
     }
 
-    static emptyName(message: string, value: string) {
+    static emptyName(message: string, value: string): string | null {
         return validator.isEmpty(value) ? message : null;
     }
 
-    static lengthName(message: string, value: string, offset: number) {
+    static lengthName(message: string, value: string, offset: number): string | null {
         return validator.isLength(value, 2, 63 - offset) ? null : message;
     }
 
-    static validateUrl(message: string, value: string) {
+    static validateUrl(message: string, value: string): string | null {
         return validator.isURL(value) ? null : message;
     }
 
-    static validateMatches(message: string, value: string) {
+    static validateMatches(message: string, value: string): string | null {
         return (validator.matches(value, '^[a-z]([-a-z0-9]*[a-z0-9])*$')) ? null : message;
     }
 
-    static clusterURL(value: string) {
-        const urlRegex = value.match('(https?:\/\/[^ ]*)');
+    static clusterURL(value: string): string | null {
+        const urlRegex = value.match('(https?://[^ ]*)');
         return (urlRegex) ? urlRegex[0] : null;
     }
 
-    static ocLoginCommandMatches(value: string) {
-        const ocloginRegex = /oc login (http|https):(.*?) --token=(.*)/;
-        return ocloginRegex.test(value) ? value : null;
+    static ocLoginCommandMatches(value: string): string | null {
+        const ocLoginRegex = /oc login (http|https):(.*?) --token=(.*)/;
+        return ocLoginRegex.test(value) ? value : null;
     }
 
-    static getToken(value: string) {
-        const tokenRegex = value.match('--token\s*=\s*(.*)');
+    static getToken(value: string): string | null {
+        const tokenRegex = value.match(/--token\s*=\s*(.*)\s/);
         return (tokenRegex) ? tokenRegex[1] : null;
     }
 
@@ -96,7 +96,7 @@ export abstract class OpenShiftItem {
         return projectList;
     }
 
-    static async getApplicationNames(project: OpenShiftObject, createCommand: boolean = false): Promise<Array<OpenShiftObject | QuickPickCommand>> {
+    static async getApplicationNames(project: OpenShiftObject, createCommand = false): Promise<Array<OpenShiftObject | QuickPickCommand>> {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
         if (applicationList.length === 0 && !createCommand) throw Error(errorMessage.Component);
         return createCommand ? [new QuickPickCommand(`$(plus) Create new Application...`, async () => {
@@ -104,31 +104,31 @@ export abstract class OpenShiftItem {
         }), ...applicationList] : applicationList;
     }
 
-    static async getComponentNames(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean) {
+    static async getComponentNames(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]> {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application, condition);
         if (applicationList.length === 0) throw Error(errorMessage.Component);
         return applicationList;
     }
 
-    static async getServiceNames(application: OpenShiftObject) {
+    static async getServiceNames(application: OpenShiftObject): Promise<OpenShiftObject[]> {
         const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(application);
         if (serviceList.length === 0) throw Error(errorMessage.Service);
         return serviceList;
     }
 
-    static async getStorageNames(component: OpenShiftObject) {
+    static async getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         const storageList: Array<OpenShiftObject> = await OpenShiftItem.odo.getStorageNames(component);
         if (storageList.length === 0) throw Error(errorMessage.Storage);
         return storageList;
     }
 
-    static async getRoutes(component: OpenShiftObject) {
+    static async getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         const urlList: Array<OpenShiftObject> = await OpenShiftItem.odo.getRoutes(component);
         if (urlList.length === 0) throw Error(errorMessage.Route);
         return urlList;
     }
 
-    static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean) {
+    static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject | null>  {
         let context: OpenShiftObject | QuickPickCommand = treeItem;
         let project: OpenShiftObject;
         if (!context) context = await window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder, ignoreFocusOut: true});
