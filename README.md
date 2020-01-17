@@ -12,21 +12,21 @@ OpenShift Connector extension provides an end-to-end developer experience for Re
 
 ### Supported OpenShift Clusters
 
-The extension can work with local or remote OpenShift clusters.
+This extension can work with local or remote OpenShift clusters.
 
-To run the local instance of OpenShift cluster, developers can use the following options:
+To start local instance of OpenShift cluster, developers can use the following options:
 * [CodeReadyContainers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned) - run single node local OpenShift 4.x cluster
 * [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/) - run single node local OpenShift 3.x cluster 
 
 For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
 
-Remote OpenShift clusters from various Red Hat products are also supported:
+If developers can not run local OpenShift cluster the extension can work with remote one from various Red Hat products:
 * [Red Hat OpenShift Container Platform](https://www.openshift.com/products/container-platform) - build, deploy and manage your applications across cloud- and on-premise infrastructure
 * [Red Hat OpenShift Dedicated](https://www.openshift.com/products/dedicated/) - single-tenant, high-availability Kubernetes clusters in the public cloud
 * [Microsoft Azure Red Hat OpenShift](https://www.openshift.com/products/azure-openshift) - fully managed Red Hat OpenShift service on Microsoft Azure
 * [Red Hat OpenShift Online](https://www.openshift.com/products/online/) - the fastest way for developers to build, host and scale applications in the public cloud
 
-When connecting to [OpenShift Online](https://www.openshift.com/products/online/) only one component can be created for Starter plan and Pro plan with default 2GiB storage. If you want to create multi component application you could opt in for Pro plan with bigger persistence storage (up to 150GiB).
+When working with [OpenShift Online](https://www.openshift.com/products/online/) remote cluster only one component can be created for Starter plan and Pro plan with default 2GiB storage. If you want to create multi component application you could opt in for Pro plan with bigger persistence storage (up to 150GiB).
 
 ## New and Noteworthy
 
