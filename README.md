@@ -1,48 +1,50 @@
 # Visual Studio Code OpenShift Connector
 
-| System | Status |
-| ------ | -------|
-| Build ([master](https://github.com/redhat-developer/vscode-openshift-tools/tree/master) branch) | [![Build Status](https://dev.azure.com/redhat-developer/vscode-openshift-tools/_apis/build/status/redhat-developer.vscode-openshift-tools?branchName=master)](https://dev.azure.com/redhat-developer/vscode-openshift-tools/_build/latest?definitionId=1&branchName=master) [![Build Status](https://travis-ci.org/redhat-developer/vscode-openshift-tools.svg?branch=master)](https://travis-ci.org/redhat-developer/vscode-openshift-tools) [![Unit Tests Code Coverage](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg) [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/README.md) |
-| [Marketplace](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector) | [![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version/redhat.vscode-openshift-connector.svg)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector) [![Gitter](https://badges.gitter.im/redhat-developer/openshift-connector.svg)](https://gitter.im/redhat-developer/openshift-connector)
-
-
+[![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version/redhat.vscode-openshift-connector.svg)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector) [![Gitter](https://badges.gitter.im/redhat-developer/openshift-connector.svg)](https://gitter.im/redhat-developer/openshift-connector) [![Build Status](https://dev.azure.com/redhat-developer/vscode-openshift-tools/_apis/build/status/redhat-developer.vscode-openshift-tools?branchName=master)](https://dev.azure.com/redhat-developer/vscode-openshift-tools/_build/latest?definitionId=1&branchName=master) [![Build Status](https://travis-ci.org/redhat-developer/vscode-openshift-tools.svg?branch=master)](https://travis-ci.org/redhat-developer/vscode-openshift-tools) [![Unit Tests Code Coverage](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg) [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/LICENSE)
 
 ## Overview
 
-A Visual Studio Code extension for interacting with Red Hat OpenShift cluster. This extension is currently in Preview Mode and supports only Java and Node.js components. We will be supporting other languages in the future releases.
-
-
-[![Demo](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/demo-featured-image.png)](http://www.youtube.com/watch?v=m0wBKuKDYO0)
+OpenShift Connector extension provides an end-to-end developer experience for Red Hat OpenShift. Using this extension developers can easily create, deploy and live debug applications running on OpenShift.
 
 * Demo: https://youtube.com/watch?v=m0wBKuKDYO0
-* Blog: https://developers.redhat.com/blog/2019/10/31/openshift-connector-visual-studio-code-extension-for-red-hat-openshift/
+
+[![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/vscode-openshift-tools.gif)](https://youtube.com/watch?v=m0wBKuKDYO0)
 
 ### Running OpenShift Clusters
 
-To run the instance of OpenShift cluster locally, developers can use the following:
+To run the local instance of OpenShift cluster, developers can use the following options:
+* [CodeReadyContainers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned) - run single node local OpenShift 4.x cluster
+* [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/) - run single node local OpenShift 3.x cluster 
 
-* OpenShift 4.x - [CodeReadyContainers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned)
-* OpenShift 3.x - [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/). For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
+For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
 
-The extension also supports OpenShift running on Azure, AWS. 
+The extension also supports remote OpenShift clusters from various Red Hat products:
+* [Red Hat OpenShift Container Platform](https://www.openshift.com/products/container-platform) - build, deploy and manage your applications across cloud- and on-premise infrastructure
+* [Red Hat OpenShift Dedicated](https://www.openshift.com/products/dedicated/) - single-tenant, high-availability Kubernetes clusters in the public cloud
+* [Microsoft Azure Red Hat OpenShift](https://www.openshift.com/products/azure-openshift) - fully managed Red Hat OpenShift service on Microsoft Azure
+* [Red Hat OpenShift Online](https://www.openshift.com/products/online/) - the fastest way for developers to build, host and scale applications in the public cloud
 
-Currently all clusters are supported, but with some limitations for OpenShift Online Pro where additional storage might be required to create more than two components.
+When connecting to [OpenShift Online](https://www.openshift.com/products/online/) only one component can be created for Starter plan and Pro plan with default storage. If you want to create multi component application you could opt in for Pro plan with bigger persistence storage (up to 150GiB).
 
-## WARNING !!! Breaking Changes
+## New and Noteworthy 
 
-This release `0.1.1` contains breaking changes mentioned below.
+### Debug Support for Local Node.js and Java Components
 
-* The Components created with previous versions(<=0.0.23) will no longer be visible in OpenShift Application Explorer view.
-* The Extension will prompt the user to specify the context folder when creating new Components and then add selected folder to workspace.
-* New Component, Url and Storage objects are created locally in context folder and not immediately pushed to the cluster.
+The latest release provides new 'OpenShift: Debug' command to simplify the way to start debugging for OpenShift Components pushed to a cluster. It is an experimental feature, because it is using experimental OpenShift Do `debug` command under the hood and supports only local Java and Node.js components. The command is available from command pallet and context menu for Component nodes in OpenShift Application Explorer view. 
 
-> **Please follow the [migration](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0) guide to resolve any possible issues.**
+#### Debug Node.js Component
 
-In case of any queries, please use the [Feedback & Question](#Feedback-&-Questions) section.
+Default Visual Studio Code installation includes JavaScript/TypeScript Language Support and Debugger Extensions required to debug a Node.js Component. That means new `OpenShift: Debug` command can be used without installing any additional extensions.
 
-## Commands and features
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/debug-node.gif)
 
-![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/vscode-openshift-tools.gif)
+#### Debug Java Component
+
+To debug a Java Component Java Language Support and Java Debugger Extensions required. OpenShift Connector extension will request to install missing extension before it starts Debugger for a Java Component.
+
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/debug-java.gif)
+
+## Commands and Features
 
 `vs-openshift-connector` supports a number of commands & actions for interacting with OpenShift clusters; these are accessible via the command menu (`Cmd+Shift+P` <kbd>⌘⇧P</kbd> on macOS or `Ctrl+Shift+P` <kbd>⌃⇧P</kbd> on Windows and Linux) and may be bound to keys in the normal way.
 
@@ -60,7 +62,7 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 * `OpenShift: Open Console Dashboard` - Opens the OpenShift webconsole URL.
 * `OpenShift: Create` - Creates an OpenShift resource using `.json` or `.yaml` file location from an active editor.
 
-#### Actions available for an OpenShift Cluster Project
+#### Actions Available for an OpenShift Cluster Project
 
    * `Project -> New Component` - Create a new Component from the Project.
         * git - Use a git repository as the source for the Component.
@@ -69,7 +71,7 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
    * `Project -> New Service` - Perform Service Catalog operations when it is enabled.
    * `Project -> Delete` - Delete an existing Project.
 
-#### Actions available for an Application in a Project
+#### Actions Available for an Application in a Project
 
    * `Application -> New Component` - Create a new Component inside the selected Application.
         * git - Use a git repository as the source for the Component.
@@ -79,7 +81,7 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
    * `Application -> Describe` - Describe the given Application in terminal window.
    * `Application -> Delete` - Delete an existing Application.
 
-#### Actions available for a Component in an Application
+#### Actions Available for a Component in an Application
 
 ##### Components can be in 3 stages:
 
@@ -102,14 +104,13 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
    * `Component -> Watch` - Watch for changes, update Component on change. This is not supported for git based components.
    * `Component -> Undeploy` - Undeploys a Component from the cluster. The component still resides in the local config.
    * `Component -> Delete` - Delete an existing Component from the cluster and removes the local config also.
-   * `Component -> Debug` - Debug Java or Node.js Component.
+   * `Component -> Debug` - Debug local Java or Node.js Component.
 
-#### Actions for a Not Pushed Component
+#### Actions for a not Pushed Component
 
    * `Component -> New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster.
    * `Component -> Push` - Push the source code to a Component.
    * `Component -> Delete` - Delete an existing Component from the local config.
-
 
 #### Actions for a no context Component
 
@@ -152,9 +153,9 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
    * `OpenShift Connector: Show Channel On Output` - Show OpenShift Connector output channel when new text added to output stream
    * `OpenShift Connector: Output verbosity level` - Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and terminal view
 
-### Dependencies
+## Dependencies
 
-#### CLI Tools
+### CLI Tools
 
 This extension uses two CLI tools to interact with OpenShift cluster:
 * OKD CLI client tool - [oc](https://github.com/openshift/origin/releases)
@@ -163,7 +164,7 @@ This extension uses two CLI tools to interact with OpenShift cluster:
 > If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
 The extension will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see an notification for the missing tool.
 
-#### Extensions
+### Extensions
 
 This extension depends on Kubernetes Extension from Microsoft which is going to be installed automatically along with OpenShift Connector Extension. Latter is using Kubernetes Extension public API to show
 OpenShift specific resources like Projects, Routes, Deployment Configs, Image Streams and Templates in Kubernetes Clusters View. Those resources are visible only for OpenShift clusters. 
@@ -174,24 +175,36 @@ OpenShift Connector extension also provides ```Use Project``` command to switch 
 
 **NOTE:** This extension is in Preview mode. The extension support for OpenShift is strictly experimental - assumptions may break, commands and behavior may change!
 
-## Release notes
+## Breaking Changes Between Previous Releases
+
+### Updating from release 0.0.23 or earlier
+
+* The Components created with previous versions(<=0.0.23) will no longer be visible in OpenShift Application Explorer view.
+* The Extension will prompt the user to specify the context folder when creating new Components and then add selected folder to workspace.
+* New Component, Url and Storage objects are created locally in context folder and not immediately pushed to the cluster.
+
+> **Please follow the [migration](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0) guide to resolve any possible issues.**
+
+In case of any queries, please use the [Feedback & Question](#Feedback-&-Questions) section.
+
+## Release Notes
 
 See the [change log](CHANGELOG.md).
 
-Contributing
-============
+# Contributing
+
 This is an open source project open to anyone. This project welcomes contributions and suggestions!
 
 For information on getting started, refer to the [CONTRIBUTING instructions](CONTRIBUTING.md).
 
 Download the most recent `openshift-connector-<version>.vsix` file and install it by following the instructions [here](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix). Stable releases are archived [here](https://download.jboss.org/jbosstools/adapters/snapshots/vscode-openshift-tools/?C=M;O=D).
 
-Feedback & Questions
-====================
+# Feedback & Questions
+
 If you discover an issue please file a bug and we will fix it as soon as possible.
 * File a bug in [GitHub Issues](https://github.com/redhat-developer/vscode-openshift-tools/issues).
 * Chat with us on [Gitter](https://gitter.im/redhat-developer/openshift-connector).
 
-License
-=======
+# License
+
 MIT, See [LICENSE](LICENSE) for more information.
