@@ -32,7 +32,7 @@ export class Console extends OpenShiftItem {
         return JSON.parse(consoleUrl['stdout']).data.consoleURL;
     }
 
-    static async openBuildConfig(context: { name: any; }) {
+    static async openBuildConfig(context: { name: any}) {
         let url = '';
         if (!context) {
             vscode.window.showErrorMessage("Cannot load the build config");
@@ -48,7 +48,7 @@ export class Console extends OpenShiftItem {
         return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
     }
 
-    static async openDeploymentConfig(context: { name: any; }) {
+    static async openDeploymentConfig(context: { name: any}) {
         let url = '';
         if (!context) {
             vscode.window.showErrorMessage("Cannot load the deployment config");
@@ -64,7 +64,7 @@ export class Console extends OpenShiftItem {
         return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
     }
 
-    static async openImageStream(context: { name: any; }) {
+    static async openImageStream(context: { name: any}) {
         let url = '';
         if (!context) {
             vscode.window.showErrorMessage("Cannot load the image stream");
@@ -80,7 +80,7 @@ export class Console extends OpenShiftItem {
         return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
     }
 
-    static async openProject(context: { name: any; }) {
+    static async openProject(context: { name: any}) {
         let url = '';
         if (!context) {
             vscode.window.showErrorMessage("Cannot load the Project");

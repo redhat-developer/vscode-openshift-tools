@@ -116,7 +116,7 @@ export class Cluster extends OpenShiftItem {
         return loginActionSelected.label === 'Credentials' ? Cluster.credentialsLogin(true) : Cluster.tokenLogin(true);
     }
 
-    private static async requestLoginConfirmation(skipConfirmation: boolean = false): Promise<string> {
+    private static async requestLoginConfirmation(skipConfirmation = false): Promise<string> {
         let response = 'Yes';
         if (!skipConfirmation && !await Cluster.odo.requireLogin()) {
             response = await window.showInformationMessage(`You are already logged in the cluster. Do you want to login to a different cluster?`, 'Yes', 'No');
@@ -134,7 +134,7 @@ export class Cluster extends OpenShiftItem {
         return result;
     }
 
-    static async credentialsLogin(skipConfirmation: boolean = false): Promise<string> {
+    static async credentialsLogin(skipConfirmation = false): Promise<string> {
         let password: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
 
@@ -186,6 +186,7 @@ export class Cluster extends OpenShiftItem {
         try {
             r = await env.clipboard.readText();
         } catch (ignore) {
+            // ignore exceptions and return empty string
         }
         return r;
     }
@@ -196,7 +197,7 @@ export class Cluster extends OpenShiftItem {
         return null;
     }
 
-    static async tokenLogin(skipConfirmation: boolean = false): Promise<string> {
+    static async tokenLogin(skipConfirmation = false): Promise<string> {
         let token: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
         if (response !== 'Yes') return null;
