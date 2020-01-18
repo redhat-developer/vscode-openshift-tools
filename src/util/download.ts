@@ -5,6 +5,7 @@
 
 'use strict';
 
+/* eslint-disable @typescript-eslint/no-var-requires */
 import * as fs from 'fs-extra';
 const { promisify } = require('util');
 const { fromEvent } = require('rxjs');
@@ -14,11 +15,11 @@ const got = require('got');
 
 export class DownloadUtil {
 
-  static async downloadFile(fromUrl: string, toFile: string, progressCb?: (current: number, increment: number) => void, throttle: number = 250): Promise<void> {
+  static async downloadFile(fromUrl: string, toFile: string, progressCb?: (current: number, increment: number) => void, throttle = 250): Promise<void> {
     const dls = got.stream(fromUrl);
     let previous = 0;
     // Process progress event from 'got'
-    const progress = fromEvent(dls, 'downloadProgress').pipe(throttleTime(throttle)).subscribe((progress: { percent: number; }) => {
+    const progress = fromEvent(dls, 'downloadProgress').pipe(throttleTime(throttle)).subscribe((progress: { percent: number }) => {
         const current = Math.round(progress.percent * 100);
         current !== previous && progressCb && progressCb(current, current - previous);
         previous = current;

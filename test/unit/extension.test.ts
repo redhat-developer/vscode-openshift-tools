@@ -46,11 +46,8 @@ suite('openshift connector Extension', async () => {
         }, {
             uri: comp2Uri, index: 1, name: 'comp2'
         }]);
-        try {
-            await vscode.commands.executeCommand('openshift.output');
-        } catch (ignore) {
-        } finally {
-        }
+
+        await vscode.commands.executeCommand('openshift.output');
         sandbox.stub(OdoImpl.prototype, '_getClusters').resolves([clusterItem]);
         sandbox.stub(OdoImpl.prototype, '_getProjects').resolves([projectItem]);
         sandbox.stub(OdoImpl.prototype, '_getApplications').resolves([appItem]);
@@ -83,7 +80,7 @@ suite('openshift connector Extension', async () => {
         const cmds: string[] = await vscode.commands.getCommands();
         const osc: string[] = cmds.filter((item) => item.startsWith('openshift.'));
         const mths: string[] = getStaticMethodsToStub(osc);
-        [Application, Catalog, Cluster, Component, Project, Service, Storage, Url, OpenShiftExplorer, Oc].forEach((item: { [x: string]: any; }) => {
+        [Application, Catalog, Cluster, Component, Project, Service, Storage, Url, OpenShiftExplorer, Oc].forEach((item: { [x: string]: any }) => {
             mths.forEach((name) => {
                 if (item[name]) {
                     sandbox.stub(item, name).resolves();

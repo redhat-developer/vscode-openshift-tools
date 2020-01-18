@@ -3,7 +3,7 @@
  * Licensed under the MIT License. See ./refs.license.txt for license information.
  *-----------------------------------------------------------------------------------------------*/
 //  Inspired by https://github.com/sindresorhus/remote-git-tags
-
+/* eslint-disable header/header */
 'use strict';
 
 import url = require('url');
@@ -35,7 +35,7 @@ export class Refs {
             const client = gitClient(input);
             const tags = new Map<string, Ref>();
 
-            client.refs.on('data', (ref: { name: string; hash: string; }) => {
+            client.refs.on('data', (ref: { name: string; hash: string }) => {
                 if (ref.name.indexOf('/') < 0) {
                     tags.set(ref.name, { name: ref.name, type: Type.BRANCH, hash: ref.hash.substr(0, 7) });
                     return;

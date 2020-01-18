@@ -2,17 +2,19 @@
  * Copyright (c) Microsoft Corporation
  * Licensed under the MIT License. See LICENSE file in the project root for license information.
  * Taken from https://www.github.com/microsoft/vscode/src/vs/common/async.ts
- */
+ **/
+
+/* eslint-disable header/header */
 
 export function isThenable<T>(candidate: any): candidate is Thenable<T> {
-    return candidate && typeof (<Thenable<any>>candidate).then === 'function';
+    return candidate && typeof (candidate as Thenable<any>).then === 'function';
 }
 
-export async function wait(timeout: number = 2500): Promise<void> {
+export async function wait(timeout = 2500): Promise<void> {
 	return new Promise((res) => setTimeout(res, timeout));
 }
 
-export interface ITask<T> {
+export interface Task<T> {
 	(): T;
 }
 
@@ -26,7 +28,7 @@ export class Delayer<T> {
 	private completionPromise: Promise<any> | null;
 	private doResolve: ((value?: any | Promise<any>) => void) | null;
 	private doReject: (err: any) => void;
-	private task: ITask<T | Promise<T>> | null;
+	private task: Task<T | Promise<T>> | null;
 
 	constructor(public defaultDelay: number) {
 		this.timeout = null;
@@ -36,7 +38,7 @@ export class Delayer<T> {
 		this.task = null;
 	}
 
-	trigger(task: ITask<T | Promise<T>>, delay: number = this.defaultDelay): Promise<T> {
+	trigger(task: Task<T | Promise<T>>, delay: number = this.defaultDelay): Promise<T> {
 		this.task = task;
 		this.cancelTimeout();
 
@@ -47,7 +49,7 @@ export class Delayer<T> {
 			}).then(() => {
 				this.completionPromise = null;
 				this.doResolve = null;
-				const task = this.task!;
+				const task = this.task;
 				this.task = null;
 
 				return task();
@@ -56,7 +58,7 @@ export class Delayer<T> {
 
 		this.timeout = setTimeout(() => {
 			this.timeout = null;
-			this.doResolve!(null);
+			this.doResolve(null);
 		}, delay);
 
 		return this.completionPromise;

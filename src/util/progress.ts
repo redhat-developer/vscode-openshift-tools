@@ -17,8 +17,8 @@ export interface Step {
 export class Progress {
     static execWithProgress(options, steps: Step[], odo: odoctl.Odo): Thenable<void> {
         return vscode.window.withProgress(options,
-            (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
-                const calls: (()=>Promise<any>)[] = [];
+            (progress: vscode.Progress<{increment: number; message: string}>, token: vscode.CancellationToken) => {
+                const calls: (() => Promise<any>)[] = [];
                 steps.reduce((previous: Step, current: Step, currentIndex: number, steps: Step[])=> {
                     current.total = previous.total + current.increment;
                     calls.push (() => {
@@ -37,20 +37,20 @@ export class Progress {
                     return current;
                 }, {increment: 0, command: "", total: 0});
 
-                return calls.reduce<Promise<any>>((previous: Promise<any>, current: ()=>Promise<any>, index: number, calls: (()=>Promise<any>)[])=> {
+                return calls.reduce<Promise<any>>((previous: Promise<any>, current: () => Promise<any>, index: number, calls: (() => Promise<any>)[])=> {
                     return previous.then(current);
                 }, Promise.resolve());
             });
     }
 
     static async execCmdWithProgress(title: string, cmd: string): Promise<any> {
-        return new Promise(async (resolve, reject) => {
-            await vscode.window.withProgress({
+        return new Promise((resolve, reject) => {
+            return vscode.window.withProgress({
                     cancellable: false,
                     location: vscode.ProgressLocation.Notification,
                     title
                 },
-                async (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
+                async () => {
                     const result = await odoctl.getInstance().execute(cmd, process.cwd(), false);
                     result.error ? reject(result.error) : resolve();
                 }
@@ -58,14 +58,14 @@ export class Progress {
         });
     }
 
-    static async execFunctionWithProgress(title: string, func: (progress: vscode.Progress<{increment: number, message: string}>) => Promise<any> ): Promise<string> {
-        return new Promise(async (resolve, reject) => {
-            await vscode.window.withProgress({
+    static async execFunctionWithProgress(title: string, func: (progress: vscode.Progress<{increment: number; message: string}>) => Promise<any> ): Promise<string> {
+        return new Promise((resolve, reject) => {
+            return vscode.window.withProgress({
                     cancellable: false,
                     location: vscode.ProgressLocation.Notification,
                     title
                 },
-                async (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
+                async (progress: vscode.Progress<{increment: number; message: string}>) => {
                     await func(progress).then(resolve).catch(reject);
                 }
             );

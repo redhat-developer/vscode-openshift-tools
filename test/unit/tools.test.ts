@@ -79,14 +79,14 @@ suite("tools configuration", () => {
     });
 
     suite('detectOrDownload()', () => {
-        let withProgress: sinon.SinonStub<[vscode.ProgressOptions, (progress: vscode.Progress<{ message?: string; increment?: number; }>, token: vscode.CancellationToken) => Thenable<unknown>], Thenable<unknown>>;
+        let withProgress: sinon.SinonStub<[vscode.ProgressOptions, (progress: vscode.Progress<{ message?: string; increment?: number }>, token: vscode.CancellationToken) => Thenable<unknown>], Thenable<unknown>>;
 
         setup(() => {
             withProgress = sb.stub(vscode.window, 'withProgress').resolves();
         });
 
         test('returns path to tool detected form PATH locations if detected version is correct', async () => {
-            sb.stub(shelljs, 'which').returns(<string & shelljs.ShellReturnValue>{stdout: 'odo'});
+            sb.stub(shelljs, 'which').returns({stdout: 'odo'} as string & shelljs.ShellReturnValue);
             sb.stub(fs, 'existsSync').returns(false);
             sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools['odo'].version);
             const toolLocation = await ToolsConfig.detectOrDownload('odo');

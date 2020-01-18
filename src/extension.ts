@@ -145,6 +145,7 @@ export async function activate(context: vscode.ExtensionContext) {
     OdoImpl.Instance.loadWorkspaceComponents(null);
     context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(session => {
         if (session.configuration.odoPid) {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             require('tree-kill')(session.configuration.odoPid);
         }
     }));
@@ -202,6 +203,7 @@ async function isOpenShift(): Promise<boolean> {
 }
 
 // this method is called when your extension is deactivated
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 export function deactivate() {
 }
 

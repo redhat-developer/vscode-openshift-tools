@@ -118,7 +118,7 @@ suite('Openshift/Cluster', () => {
             quickPickStub.onThirdCall().resolves({description: "Current Context", label: testUser});
             inputStub.resolves(password);
             commandStub.rejects(err);
-            let expectedErr: { message: any; };
+            let expectedErr: { message: any };
             try {
                 await Cluster.login();
             } catch (error) {
@@ -213,7 +213,7 @@ suite('Openshift/Cluster', () => {
 
             test('errors if there is output on odo stderr', async () => {
                 execStub.resolves(errorData);
-                let expectedErr: { message: any; };
+                let expectedErr: { message: any };
                 try {
                     await Cluster.credentialsLogin();
                 } catch (err) {
@@ -298,7 +298,7 @@ suite('Openshift/Cluster', () => {
 
             test('handles incoming errors the same way as credentials login', async () => {
                 execStub.rejects(err);
-                let expectedErr: { message: any; };
+                let expectedErr: { message: any };
                 try {
                     await Cluster.tokenLogin();
                 } catch (error) {
@@ -371,7 +371,7 @@ suite('Openshift/Cluster', () => {
             quickPickStub.onSecondCall().resolves({description: "Current Context", label: testUrl});
             quickPickStub.onThirdCall().resolves({description: "Current Context", label: testUrl});
             inputStub.resolves(password);
-            let expectedErr: { message: any; };
+            let expectedErr: { message: any };
             try {
                 await Cluster.logout();
             } catch (err) {
@@ -422,7 +422,7 @@ suite('Openshift/Cluster', () => {
 
     suite('open console', () => {
         const openStub: sinon.SinonStub = sinon.stub();
-        let clusterMock: { openshiftConsole: { (arg0: TestItem): void; (): void; (): void; }; };
+        let clusterMock: { openshiftConsole: { (arg0: TestItem): void; (): void; (): void } };
         let cluster: TestItem;
 
         setup(() => {

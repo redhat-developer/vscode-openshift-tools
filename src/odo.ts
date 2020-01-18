@@ -48,14 +48,14 @@ export enum ContextType {
     CLUSTER = 'cluster',
     PROJECT = 'project',
     APPLICATION = 'application',
-    COMPONENT = 'component_not_pushed',
+    COMPONENT = 'componentNotPushed',
     COMPONENT_PUSHED = 'component',
-    COMPONENT_NO_CONTEXT = 'component_no_context',
+    COMPONENT_NO_CONTEXT = 'componentNoContext',
     SERVICE = 'service',
     STORAGE = 'storage',
-    CLUSTER_DOWN = 'cluster_down',
-    LOGIN_REQUIRED = 'login_required',
-    COMPONENT_ROUTE = 'component_route'
+    CLUSTER_DOWN = 'clusterDown',
+    LOGIN_REQUIRED = 'loginRequired',
+    COMPONENT_ROUTE = 'componentRoute'
 }
 
 export enum ComponentType {
@@ -279,13 +279,13 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
             description: '',
             getChildren: () => this.odo.getComponentChildren(this)
         },
-        component_not_pushed: {
+        componentNotPushed: {
             icon: '',
             tooltip: 'Component: {label}',
             description: '',
             getChildren: () => this.odo.getComponentChildren(this)
         },
-        component_no_context: {
+        componentNoContext: {
             icon: '',
             tooltip: 'Component: {label}',
             description: '',
@@ -301,17 +301,17 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
             tooltip: 'Storage: {label}',
             getChildren: () => []
         },
-        cluster_down: {
+        clusterDown: {
             icon: 'cluster-down.png',
             tooltip: 'Cannot connect to the cluster',
             getChildren: () => []
         },
-        login_required: {
+        loginRequired: {
             icon: 'cluster-down.png',
             tooltip: 'Please Log in to the cluster',
             getChildren: () => []
         },
-        component_route: {
+        componentRoute: {
             icon: 'url-node.png',
             tooltip: 'URL: {label}',
             getChildren: () => []
@@ -334,11 +334,11 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
 
     get path(): string {
         if (!this.explorerPath) {
-            let parent: OpenShiftObject = this;
+            let parent: OpenShiftObject;
             const segments: string[] = [];
             do {
                 segments.splice(0, 0, parent.getName());
-                parent = parent.getParent();
+                parent = parent ? parent.getParent() : this.getParent();
             } while (parent);
             this.explorerPath = path.join(...segments);
         }
@@ -526,6 +526,7 @@ class OdoModel {
                 compData.ComponentSettings.ContextPath = folder.uri;
                 OdoImpl.data.setContextToSettings(compData.ComponentSettings);
             } catch (ignore) {
+                // ignore errors when loading .yaml file
             }
         }
     }
@@ -547,7 +548,7 @@ class OdoModel {
 export class OdoImpl implements Odo {
     public static data: OdoModel = new OdoModel();
     public static ROOT: OpenShiftObject = new OpenShiftObjectImpl(undefined, '/', undefined, false, undefined);
-    private static cli: cliInstance.ICli = cliInstance.Cli.getInstance();
+    private static cli: cliInstance.Cli = cliInstance.Cli.getInstance();
     private static instance: Odo;
 
     private readonly odoLoginMessages = [
@@ -564,10 +565,6 @@ export class OdoImpl implements Odo {
     ];
 
     private subjectInstance: Subject<OdoEvent> = new Subject<OdoEvent>();
-
-    private constructor() {
-
-    }
 
     public static get Instance(): Odo {
         if (!OdoImpl.instance) {
@@ -620,11 +617,11 @@ export class OdoImpl implements Odo {
             Command.printOdoVersionAndProjects(), process.cwd(), false
         );
         if (this.odoLoginMessages.some((element) => result.stderr ? result.stderr.indexOf(element) > -1 : false)) {
-            const loginErrorMsg: string = 'Please log in to the cluster';
+            const loginErrorMsg = 'Please log in to the cluster';
             return[new OpenShiftObjectImpl(null, loginErrorMsg, ContextType.LOGIN_REQUIRED, false, OdoImpl.instance, TreeItemCollapsibleState.None)];
         }
         if (this.serverDownMessages.some((element) => result.stderr ? result.stderr.indexOf(element) > -1 : false)) {
-            const clusterDownMsg: string = 'Cannot connect to the OpenShift cluster';
+            const clusterDownMsg = 'Cannot connect to the OpenShift cluster';
             return [new OpenShiftObjectImpl(null, clusterDownMsg, ContextType.CLUSTER_DOWN, false, OdoImpl.instance, TreeItemCollapsibleState.None)];
         }
         commands.executeCommand('setContext', 'isLoggedIn', true);
@@ -701,7 +698,7 @@ export class OdoImpl implements Odo {
         const componentObject = this.loadItems(result).map(value => ({ name: value.metadata.name, source: value.spec.source }));
 
         const deployedComponents = componentObject.map<OpenShiftObject>((value) => {
-            let compSource: string = '';
+            let compSource = '';
             try {
                 if (value.source.startsWith('https://')) {
                     compSource = ComponentType.GIT;
@@ -836,7 +833,7 @@ export class OdoImpl implements Odo {
         return services;
     }
 
-    public async executeInTerminal(command: string, cwd: string = process.cwd(), name: string = 'OpenShift') {
+    public async executeInTerminal(command: string, cwd: string = process.cwd(), name ='OpenShift') {
         const cmd = command.split(' ')[0];
         let toolLocation = await ToolsConfig.detectOrDownload(cmd);
         if (toolLocation) {
@@ -847,7 +844,7 @@ export class OdoImpl implements Odo {
         terminal.show();
     }
 
-    public async execute(command: string, cwd?: string, fail: boolean = true): Promise<CliExitData> {
+    public async execute(command: string, cwd?: string, fail = true): Promise<CliExitData> {
         const cmd = command.split(' ')[0];
         const toolLocation = await ToolsConfig.detectOrDownload(cmd);
         return OdoImpl.cli.execute(
@@ -965,7 +962,7 @@ export class OdoImpl implements Odo {
         return null;
     }
 
-    public async createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, location: string, context: Uri, ref: string = 'master'): Promise<OpenShiftObject> {
+    public async createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, location: string, context: Uri, ref = 'master'): Promise<OpenShiftObject> {
         await this.execute(Command.createGitComponent(application.getParent().getName(), application.getName(), type, version, name, location, ref ? ref : 'master'), context.fsPath);
         // This check is here to skip any model updates when there are not workspace folders yet,
         // because when first folder added to workspace extesion is going to be reloaded anyway and
@@ -1139,6 +1136,7 @@ export class OdoImpl implements Odo {
             const items = JSON.parse(result.stdout).items;
             if (items) data = items;
         } catch (ignore) {
+            // ignore parse errors and return empty array
         }
         return data;
     }

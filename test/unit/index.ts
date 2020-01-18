@@ -11,12 +11,13 @@ import * as fs from 'fs';
 import * as glob from 'glob';
 import * as paths from 'path';
 import Mocha = require('mocha');
-import { ITestRunnerOptions, CoverageRunner } from '../coverage';
+import { TestRunnerOptions, CoverageRunner } from '../coverage';
 
 // declare var global: any;
 
 // Linux: prevent a weird NPE when mocha on Linux requires the window size from the TTY
 // Since we are not running in a tty environment, we just implement the method statically
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const tty = require('tty');
 if (!tty.getWindowSize) {
     tty.getWindowSize = (): number[] => {
@@ -41,7 +42,7 @@ function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
     let coverageRunner: CoverageRunner;
     const coverConfigPath = paths.join(testsRoot, '..', '..', '..', 'coverconfig.json');
     if (!process.env.OST_DISABLE_COVERAGE && fs.existsSync(coverConfigPath)) {
-        coverageRunner = new CoverageRunner(JSON.parse(fs.readFileSync(coverConfigPath, 'utf-8')) as ITestRunnerOptions, testsRoot);
+        coverageRunner = new CoverageRunner(JSON.parse(fs.readFileSync(coverConfigPath, 'utf-8')) as TestRunnerOptions, testsRoot);
         coverageRunner.setupCoverage();
     }
     return coverageRunner;

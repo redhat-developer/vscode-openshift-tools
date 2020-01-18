@@ -14,7 +14,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fsex from 'fs-extra';
 import * as fs from 'fs';
-import { Cli } from './cli';
+import { CliImpl } from './cli';
 import semver = require('semver');
 import configData = require('./tools.json');
 
@@ -67,7 +67,7 @@ export class ToolsConfig {
                             location: vscode.ProgressLocation.Notification,
                             title: `Downloading ${ToolsConfig.tools[cmd].description}`
                             },
-                            (progress: vscode.Progress<{increment: number, message: string}>, token: vscode.CancellationToken) => {
+                            (progress: vscode.Progress<{increment: number; message: string}>, token: vscode.CancellationToken) => {
                                 return DownloadUtil.downloadFile(
                                     ToolsConfig.tools[cmd].url,
                                     toolDlLocation,
@@ -109,7 +109,7 @@ export class ToolsConfig {
         let detectedVersion: string;
         if (fs.existsSync(location)) {
             const version = new RegExp(`${cmd.toLocaleLowerCase()} v((([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?).*`);
-            const result = await Cli.getInstance().execute(`"${location}" version`);
+            const result = await CliImpl.getInstance().execute(`"${location}" version`);
             if (result.stdout) {
                 const toolVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
                     return value.match(version);

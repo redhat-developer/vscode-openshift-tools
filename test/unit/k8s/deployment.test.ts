@@ -103,7 +103,7 @@ suite('K8s/deployment', () => {
     suite('DeploymentConfigNodeContributor', () => {
         let dcnc: DeploymentConfigNodeContributor;
         let kubectlV1Stub: sinon.SinonStub<any[], any>;
-        const parent = <ClusterExplorerV1.ClusterExplorerNode>{
+        const parent = {
             metadata: undefined,
             name: "comp1-app",
             namespace: null,
@@ -116,7 +116,7 @@ suite('K8s/deployment', () => {
                 manifestKind: "DeploymentConfig",
                 pluralDisplayName: "DeploymentConfigs"
             }
-        };
+        } as ClusterExplorerV1.ClusterExplorerNode;
 
         setup(() => {
             dcnc = new DeploymentConfigNodeContributor();

@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 'use strict';
 
 import { OpenShiftItem } from './openshiftItem';
@@ -73,7 +75,7 @@ export class Component extends OpenShiftItem {
             "Select Component to delete");
         if (!component) return null;
         const name: string = component.getName();
-        const value = await window.showWarningMessage(`Do you want to delete Component '${name}\'?`, 'Yes', 'Cancel');
+        const value = await window.showWarningMessage(`Do you want to delete Component '${name}'?`, 'Yes', 'Cancel');
 
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Deleting the Component '${component.getName()} '`, async () => {
@@ -94,7 +96,7 @@ export class Component extends OpenShiftItem {
             (component) => component.contextValue === ContextType.COMPONENT_PUSHED);
         if (!component) return null;
         const name: string = component.getName();
-        const value = await window.showWarningMessage(`Do you want to undeploy Component '${name}\'?`, 'Yes', 'Cancel');
+        const value = await window.showWarningMessage(`Do you want to undeploy Component '${name}'?`, 'Yes', 'Cancel');
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Undeploying the Component '${component.getName()} '`, async () => {
                 await Component.odo.undeployComponent(component);
@@ -224,7 +226,7 @@ export class Component extends OpenShiftItem {
         );
     }
 
-    static async linkComponent(context: OpenShiftObject): Promise<String> {
+    static async linkComponent(context: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
@@ -257,7 +259,7 @@ export class Component extends OpenShiftItem {
         );
     }
 
-    static async linkService(context: OpenShiftObject): Promise<String> {
+    static async linkService(context: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
@@ -365,10 +367,10 @@ export class Component extends OpenShiftItem {
 
         if (urlItems !== null) {
             let selectRoute: QuickPickItem;
-            const unpushedUrl = urlItems.filter((value: { status: { state: string; }; }) => value.status.state === 'Not Pushed');
-            const pushedUrl = urlItems.filter((value: { status: { state: string; }; }) => value.status.state === 'Pushed');
+            const unpushedUrl = urlItems.filter((value: { status: { state: string } }) => value.status.state === 'Not Pushed');
+            const pushedUrl = urlItems.filter((value: { status: { state: string } }) => value.status.state === 'Pushed');
             if (pushedUrl.length > 0) {
-                const hostName: QuickPickItem[] = pushedUrl.map((value: { spec: { protocol: any; host: any; port: any; }; }) => ({ label: `${value.spec.protocol}://${value.spec.host}`, description: `Target Port is ${value.spec.port}`}));
+                const hostName: QuickPickItem[] = pushedUrl.map((value: { spec: { protocol: any; host: any; port: any } }) => ({ label: `${value.spec.protocol}://${value.spec.host}`, description: `Target Port is ${value.spec.port}`}));
                 if (hostName.length >1) {
                     selectRoute = await window.showQuickPick(hostName, {placeHolder: "This Component has multiple URLs. Select the desired URL to open in browser.", ignoreFocusOut: true});
                     if (!selectRoute) return null;
@@ -377,7 +379,7 @@ export class Component extends OpenShiftItem {
                     return commands.executeCommand('vscode.open', Uri.parse(`${hostName[0].label}`));
                 }
             } else if (unpushedUrl.length > 0) {
-                return `${unpushedUrl.length} unpushed URL in the local config. Use \'Push\' command before opening URL in browser.`;
+                return `${unpushedUrl.length} unpushed URL in the local config. Use 'Push' command before opening URL in browser.`;
             }
         }
     }
@@ -533,7 +535,7 @@ export class Component extends OpenShiftItem {
     static async startDebugger(component: OpenShiftObject): Promise<string> {
         const components = await Component.odo.getComponentTypesJson();
         const componentBuilder = components.find((builder) => builder.metadata.name === component.builderImage.name);
-        const tag = componentBuilder.spec.imageStreamRef.spec.tags.find((tag: { name: string; }) => tag.name === component.builderImage.tag);
+        const tag = componentBuilder.spec.imageStreamRef.spec.tags.find((tag: { name: string }) => tag.name === component.builderImage.tag);
         const isJava = tag.annotations.tags.includes('java');
         const isNode = tag.annotations.tags.includes('nodejs');
         const JAVA_EXT = 'redhat.java';
@@ -592,9 +594,9 @@ export class Component extends OpenShiftItem {
     static async startOdoAndConnectDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration) {
         const port = await getPort();
         const cp = exec(`"${toolLocation}" debug port-forward --local-port ${port}`, {cwd: component.contextPath.fsPath});
-        return new Promise<String>((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
             cp.stdout.on('data', async (data: string) => {
-                const port = data.trim().match(/(?<localPort>\d+)\:\d+$/);
+                const port = data.trim().match(/(?<localPort>\d+):\d+$/);
                 if (port?.groups?.localPort) {
                     await waitPort({
                         host: 'localhost',
@@ -663,10 +665,10 @@ export class Component extends OpenShiftItem {
                 }
                 // import storage if present
                 if (componentJson.spec.template.spec.containers[0].volumeMounts) {
-                    const volumeMounts: any[] = componentJson.spec.template.spec.containers[0].volumeMounts.filter((volume: { name: string; }) => !volume.name.startsWith(compName));
-                    const volumes: any[] = componentJson.spec.template.spec.volumes.filter((volume: { persistentVolumeClaim: any; name: string; }) => volume.persistentVolumeClaim !== undefined && !volume.name.startsWith(compName));
-                    const storageData: Partial<{mountPath: string, pvcName: string}>[] = volumes.map((volume) => {
-                        const data: Partial<{mountPath: string, pvcName: string}> = {};
+                    const volumeMounts: any[] = componentJson.spec.template.spec.containers[0].volumeMounts.filter((volume: { name: string }) => !volume.name.startsWith(compName));
+                    const volumes: any[] = componentJson.spec.template.spec.volumes.filter((volume: { persistentVolumeClaim: any; name: string }) => volume.persistentVolumeClaim !== undefined && !volume.name.startsWith(compName));
+                    const storageData: Partial<{mountPath: string; pvcName: string}>[] = volumes.map((volume) => {
+                        const data: Partial<{mountPath: string; pvcName: string}> = {};
                         const mount = volumeMounts.find((mount) => mount.name === volume.name);
                         data.mountPath = mount.mountPath;
                         data.pvcName = volume.persistentVolumeClaim.claimName;
@@ -688,7 +690,7 @@ export class Component extends OpenShiftItem {
                 try {
                     const routeResult = await Component.odo.execute(`oc get route -l app.kubernetes.io/instance=${compName},app.kubernetes.io/part-of=${appName} --namespace ${prjName} -o json`, Platform.getUserHomePath(), false);
                     const routeJson = JSON.parse(routeResult.stdout);
-                    const routeData: Partial<{name: string, port: string}>[] = routeJson.items.map((element: any) => ({name: element.metadata.labels['odo.openshift.io/url-name'], port: element.spec.port.targetPort}));
+                    const routeData: Partial<{name: string; port: string}>[] = routeJson.items.map((element: any) => ({name: element.metadata.labels['odo.openshift.io/url-name'], port: element.spec.port.targetPort}));
                     for (const url of routeData) {
                         Component.odo.execute(Command.createComponentCustomUrl(url.name, url.port), workspaceFolder.fsPath);
                     }
