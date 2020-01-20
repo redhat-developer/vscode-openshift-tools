@@ -548,7 +548,7 @@ class OdoModel {
 export class OdoImpl implements Odo {
     public static data: OdoModel = new OdoModel();
     public static ROOT: OpenShiftObject = new OpenShiftObjectImpl(undefined, '/', undefined, false, undefined);
-    private static cli: cliInstance.Cli = cliInstance.Cli.getInstance();
+    private static cli: cliInstance.Cli = cliInstance.CliChannel.getInstance();
     private static instance: Odo;
 
     private readonly odoLoginMessages = [
@@ -833,7 +833,7 @@ export class OdoImpl implements Odo {
         return services;
     }
 
-    public async executeInTerminal(command: string, cwd: string = process.cwd(), name ='OpenShift') {
+    public async executeInTerminal(command: string, cwd: string = process.cwd(), name = 'OpenShift') {
         const cmd = command.split(' ')[0];
         let toolLocation = await ToolsConfig.detectOrDownload(cmd);
         if (toolLocation) {

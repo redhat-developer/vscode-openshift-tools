@@ -8,7 +8,7 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { Cli } from '../../src/cli';
+import { CliChannel } from '../../src/cli';
 import * as childProcess from 'child_process';
 
 const expect = chai.expect;
@@ -17,7 +17,7 @@ chai.use(sinonChai);
 suite('Cli', () => {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
-    const cli = Cli.getInstance();
+    const cli = CliChannel.getInstance();
     const command = 'command';
     const options: childProcess.ExecOptions = { cwd: 'cwd' };
     const stdout = 'Standard output';

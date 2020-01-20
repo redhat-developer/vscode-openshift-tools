@@ -25,18 +25,18 @@ export interface OdoChannel {
     show(): void;
 }
 
-export class CliImpl implements Cli {
-    private static instance: Cli;
+export class CliChannel implements Cli {
+    private static instance: CliChannel;
     private odoChannel: OdoChannel = new OdoChannelImpl();
 
-    static getInstance(): Cli {
-        if (!CliImpl.instance) {
-            CliImpl.instance = new CliImpl();
+    static getInstance(): CliChannel {
+        if (!CliChannel.instance) {
+            CliChannel.instance = new CliChannel();
         }
-        return CliImpl.instance;
+        return CliChannel.instance;
     }
 
-    async showOutputChannel(): Promise<void> {
+    async showOutput(): Promise<void> {
         this.odoChannel.show();
     }
 

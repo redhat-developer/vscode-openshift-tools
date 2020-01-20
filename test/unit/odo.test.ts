@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as odo from '../../src/odo';
-import { CliExitData, Cli } from '../../src/cli';
+import { CliExitData, CliChannel } from '../../src/cli';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as chai from 'chai';
@@ -59,7 +59,7 @@ suite("odo", () => {
         const command = 'odo do whatever you do';
 
         setup(() => {
-            execStub = sandbox.stub(Cli.prototype, 'execute');
+            execStub = sandbox.stub(CliChannel.prototype, 'execute');
             toolsStub = sandbox.stub(ToolsConfig, 'detectOrDownload').resolves();
         });
 
