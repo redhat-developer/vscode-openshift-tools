@@ -158,7 +158,7 @@ export class Component extends OpenShiftItem {
         Component.odo.executeInTerminal(Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
 
-    private static async getLinkData(component: OpenShiftObject): Promise<any>{
+    private static async getLinkData(component: OpenShiftObject): Promise<any> {
         const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         return JSON.parse(compData.stdout);
     }
