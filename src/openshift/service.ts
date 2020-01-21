@@ -86,7 +86,7 @@ export class Service extends OpenShiftItem {
             if (template) {
                 Service.odo.executeInTerminal(Command.describeService(template), Platform.getUserHomePath());
             } else {
-                throw Error(`Cannot get Service Type name for Service \'${service.getName()}\'`);
+                throw Error(`Cannot get Service Type name for Service '${service.getName()}'`);
             }
         }
     }

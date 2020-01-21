@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { CliExitData, Cli } from '../../src/cli';
+import { CliExitData, CliChannel } from '../../src/cli';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
@@ -43,7 +43,7 @@ suite("tools configuration", () => {
     suite('getVersion()', () => {
         test('returns version number with expected output', async () => {
             const testData: CliExitData = { stdout: 'odo v0.0.13 (65b5bed8)\n line two', stderr: '', error: undefined };
-            sb.stub(Cli.prototype, 'execute').resolves(testData);
+            sb.stub(CliChannel.prototype, 'execute').resolves(testData);
             sb.stub(fs, 'existsSync').returns(true);
 
             const result: string = await ToolsConfig.getVersion('odo');
@@ -52,7 +52,7 @@ suite("tools configuration", () => {
 
         test('returns version undefined for unexpected output', async () => {
             const invalidData: CliExitData = { error: undefined, stderr: '', stdout: 'ocunexpected v0.0.13 (65b5bed8) \n line two' };
-            sb.stub(Cli.prototype, 'execute').resolves(invalidData);
+            sb.stub(CliChannel.prototype, 'execute').resolves(invalidData);
             sb.stub(fs, 'existsSync').returns(true);
 
             const result: string = await ToolsConfig.getVersion('oc');
@@ -61,7 +61,7 @@ suite("tools configuration", () => {
 
         test('returns version undefined for not existing tool', async () => {
             const invalidData: CliExitData = { error: undefined, stderr: '', stdout: 'ocunexpected v0.0.13 (65b5bed8) \n line two' };
-            sb.stub(Cli.prototype, 'execute').resolves(invalidData);
+            sb.stub(CliChannel.prototype, 'execute').resolves(invalidData);
             sb.stub(fs, 'existsSync').returns(false);
 
             const result: string = await ToolsConfig.getVersion('oc');
@@ -70,7 +70,7 @@ suite("tools configuration", () => {
 
         test('returns version undefined for tool that does not support version parameter', async () => {
             const invalidData: CliExitData = { error: new Error('something bad happened'), stderr: '', stdout: 'ocunexpected v0.0.13 (65b5bed8) \n line two' };
-            sb.stub(Cli.prototype, 'execute').resolves(invalidData);
+            sb.stub(CliChannel.prototype, 'execute').resolves(invalidData);
             sb.stub(fs, 'existsSync').returns(true);
 
             const result: string = await ToolsConfig.getVersion('oc');
@@ -79,14 +79,14 @@ suite("tools configuration", () => {
     });
 
     suite('detectOrDownload()', () => {
-        let withProgress: sinon.SinonStub<[vscode.ProgressOptions, (progress: vscode.Progress<{ message?: string; increment?: number; }>, token: vscode.CancellationToken) => Thenable<unknown>], Thenable<unknown>>;
+        let withProgress: sinon.SinonStub<[vscode.ProgressOptions, (progress: vscode.Progress<{ message?: string; increment?: number }>, token: vscode.CancellationToken) => Thenable<unknown>], Thenable<unknown>>;
 
         setup(() => {
             withProgress = sb.stub(vscode.window, 'withProgress').resolves();
         });
 
         test('returns path to tool detected form PATH locations if detected version is correct', async () => {
-            sb.stub(shelljs, 'which').returns(<string & shelljs.ShellReturnValue>{stdout: 'odo'});
+            sb.stub(shelljs, 'which').returns({stdout: 'odo'} as string & shelljs.ShellReturnValue);
             sb.stub(fs, 'existsSync').returns(false);
             sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools['odo'].version);
             const toolLocation = await ToolsConfig.detectOrDownload('odo');

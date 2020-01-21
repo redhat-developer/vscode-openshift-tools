@@ -8,7 +8,7 @@
 import { Command } from "../odo";
 import { OpenShiftItem } from './openshiftItem';
 import { window, commands, env, QuickPickItem, ExtensionContext, Uri } from 'vscode';
-import { CliExitData, Cli } from "../cli";
+import { CliExitData, CliChannel } from "../cli";
 import { TokenStore } from "../util/credentialManager";
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { Filters } from "../util/filters";
@@ -56,7 +56,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     static async showOpenShiftOutput(): Promise<void> {
-        Cli.getInstance().showOutputChannel();
+        CliChannel.getInstance().showOutput();
     }
 
     static async openshiftConsole(): Promise<void> {

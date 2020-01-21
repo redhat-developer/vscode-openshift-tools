@@ -6,7 +6,7 @@
 'use strict';
 
 import { window } from 'vscode';
-import { Cli } from './cli';
+import { CliChannel } from './cli';
 import { ToolsConfig } from './tools';
 import { OpenShiftItem } from './openshift/openshiftItem';
 
@@ -47,7 +47,7 @@ export class Oc {
         } else {
             const project = await OpenShiftItem.getOpenShiftCmdData(undefined, 'Select a Project where to create a new resource');
             if (!project) return null;
-            const result = await Cli.getInstance().execute(`${toolLocation} create -f ${document.fileName} --namespace ${project.getName()}`);
+            const result = await CliChannel.getInstance().execute(`${toolLocation} create -f ${document.fileName} --namespace ${project.getName()}`);
             if (result.error) {
                 throw result.error;
             } else {

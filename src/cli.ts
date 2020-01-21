@@ -16,7 +16,7 @@ export interface CliExitData {
     readonly stderr: string;
 }
 
-export interface ICli {
+export interface Cli {
     execute(cmd: string, opts?: ExecOptions): Promise<CliExitData>;
 }
 
@@ -25,25 +25,23 @@ export interface OdoChannel {
     show(): void;
 }
 
-export class Cli implements ICli {
-    private static instance: Cli;
+export class CliChannel implements Cli {
+    private static instance: CliChannel;
     private odoChannel: OdoChannel = new OdoChannelImpl();
 
-    private constructor() {}
-
-    static getInstance(): Cli {
-        if (!Cli.instance) {
-            Cli.instance = new Cli();
+    static getInstance(): CliChannel {
+        if (!CliChannel.instance) {
+            CliChannel.instance = new CliChannel();
         }
-        return Cli.instance;
+        return CliChannel.instance;
     }
 
-    async showOutputChannel(): Promise<void> {
+    async showOutput(): Promise<void> {
         this.odoChannel.show();
     }
 
     async execute(cmd: string, opts: ExecOptions = {}): Promise<CliExitData> {
-        return new Promise<CliExitData>(async (resolve, reject) => {
+        return new Promise<CliExitData>((resolve) => {
             this.odoChannel.print(cmd);
             if (opts.maxBuffer === undefined) {
                 opts.maxBuffer = 2*1024*1024;

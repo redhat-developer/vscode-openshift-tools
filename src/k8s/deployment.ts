@@ -32,7 +32,7 @@ export class Command {
         return `oc get rc -o jsonpath="{range .items[?(.metadata.annotations.openshift\\.io/deployment-config\\.name=='${deploymentConfig}')]}{.metadata.name}{\\"\\n\\"}{end}"`;
     }
 
-    static delete(replica: String) {
+    static delete(replica: string) {
         return `oc delete rc ${replica}`;
     }
 
@@ -58,7 +58,7 @@ export class DeploymentConfig {
         return common.getQuickPicks(Command.getDeploymentConfigs(), msg);
     }
 
-    static async deploy(context: { name: string; }): Promise<string> {
+    static async deploy(context: { name: string }): Promise<string> {
         let deployName: string = context ? context.name : undefined;
         let result: Promise<string> = null;
         if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to deploy"), "Select a DeploymentConfig to deploy");
@@ -83,7 +83,7 @@ export class DeploymentConfig {
             'You have no replicas available');
     }
 
-    static async rcShowLog(context: { impl: any; }): Promise<string> {
+    static async rcShowLog(context: { impl: any }): Promise<string> {
         const replica = await DeploymentConfig.selectReplica(context, "Select a Replica too see the logs");
         if (replica) {
             DeploymentConfig.odo.executeInTerminal(Command.showLog(replica));
@@ -91,7 +91,7 @@ export class DeploymentConfig {
         return replica;
     }
 
-    static async showLog(context: { name: string; }): Promise<string> {
+    static async showLog(context: { name: string }): Promise<string> {
         let deployName: string = context ? context.name : null;
         if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to see log's"), "Select a DeploymentConfig too see logs");
         if (deployName) {
@@ -113,7 +113,7 @@ export class DeploymentConfig {
         return replica;
     }
 
-    static async delete(context: { impl: any; }): Promise<string> {
+    static async delete(context: { impl: any }): Promise<string> {
         let result: null | string | Promise<string> | PromiseLike<string> = null;
         const replica = await DeploymentConfig.selectReplica(context, "Select a Replica too delete");
         if (replica) {

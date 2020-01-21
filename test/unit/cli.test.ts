@@ -8,8 +8,8 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { Cli } from '../../src/cli';
-import * as child_process from 'child_process';
+import { CliChannel } from '../../src/cli';
+import * as childProcess from 'child_process';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -17,19 +17,19 @@ chai.use(sinonChai);
 suite('Cli', () => {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
-    const cli = Cli.getInstance();
+    const cli = CliChannel.getInstance();
     const command = 'command';
-    const options: child_process.ExecOptions = { cwd: 'cwd' };
+    const options: childProcess.ExecOptions = { cwd: 'cwd' };
     const stdout = 'Standard output';
     const stderr = 'Error output';
-    const error: child_process.ExecException = {
+    const error: childProcess.ExecException = {
         message: 'Fatal Error',
         name: 'name'
     };
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        execStub = sandbox.stub(child_process, 'exec');
+        execStub = sandbox.stub(childProcess, 'exec');
     });
 
     teardown(() => {

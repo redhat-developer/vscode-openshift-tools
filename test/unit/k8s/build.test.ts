@@ -75,7 +75,7 @@ suite('K8s/build', () => {
     });
 
     suite('BuildConfigNodeContributor', () => {
-        const parent = <ClusterExplorerV1.ClusterExplorerNode>{
+        const parent = {
             metadata: undefined,
             name: "comp1-app",
             namespace: null,
@@ -88,7 +88,7 @@ suite('K8s/build', () => {
                 manifestKind: "BuildConfigs",
                 pluralDisplayName: "BuildConfigs"
             }
-        };
+        } as ClusterExplorerV1.ClusterExplorerNode;
 
         setup(() => {
             const api: k8s.API<k8s.KubectlV1> = {

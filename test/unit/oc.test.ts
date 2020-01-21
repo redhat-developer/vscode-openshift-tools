@@ -11,7 +11,7 @@ import { Oc } from '../../src/oc';
 import { ContextType } from '../../src/odo';
 import { ToolsConfig } from '../../src/tools';
 import { TestItem } from './openshift/testOSItem';
-import { Cli } from '../../src/cli';
+import { CliChannel } from '../../src/cli';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -44,7 +44,7 @@ suite('Oc', async () => {
     setup(async () => {
         sandbox = sinon.createSandbox();
         warnStub = sandbox.stub(window, 'showWarningMessage');
-        execStub = sandbox.stub(Cli.prototype, 'execute');
+        execStub = sandbox.stub(CliChannel.prototype, 'execute');
         quickPickStub = sandbox.stub(window, 'showQuickPick');
         detectOrDownloadStub = sandbox.stub(ToolsConfig, 'detectOrDownload').resolves('path');
     });

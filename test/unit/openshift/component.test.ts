@@ -1291,7 +1291,7 @@ suite('OpenShift/Component', () => {
             commandStub.resolves();
             execStub.onCall(0).resolves({error: undefined, stdout: JSON.stringify(unpushedUrl), stderr: ''});
             const result = await Component.openUrl(null);
-            expect(result).equals(`${unpushedUrl.items.length} unpushed URL in the local config. Use \'Push\' command before opening URL in browser.`);
+            expect(result).equals(`${unpushedUrl.items.length} unpushed URL in the local config. Use 'Push' command before opening URL in browser.`);
         });
 
     });

@@ -28,6 +28,7 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
                 try {
                     result = !fs.statSync(path.join(value.uri.fsPath, '.odo', 'config.yaml')).isFile();
                 } catch (ignore) {
+                    // ignore errors if file does not exist
                 }
                 return result;
             }
