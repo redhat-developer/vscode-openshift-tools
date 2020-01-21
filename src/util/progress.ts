@@ -17,7 +17,7 @@ export interface Step {
 export class Progress {
     static execWithProgress(options, steps: Step[], odo: odoctl.Odo): Thenable<void> {
         return vscode.window.withProgress(options,
-            (progress: vscode.Progress<{increment: number; message: string}>, token: vscode.CancellationToken) => {
+            (progress: vscode.Progress<{increment: number; message: string}>) => {
                 const calls: (() => Promise<any>)[] = [];
                 steps.reduce((previous: Step, current: Step, currentIndex: number, steps: Step[])=> {
                     current.total = previous.total + current.increment;
@@ -37,7 +37,7 @@ export class Progress {
                     return current;
                 }, {increment: 0, command: "", total: 0});
 
-                return calls.reduce<Promise<any>>((previous: Promise<any>, current: () => Promise<any>, index: number, calls: (() => Promise<any>)[])=> {
+                return calls.reduce<Promise<any>>((previous: Promise<any>, current: () => Promise<any>)=> {
                     return previous.then(current);
                 }, Promise.resolve());
             });

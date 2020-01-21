@@ -71,7 +71,7 @@ export class Cluster extends OpenShiftItem {
         return commands.executeCommand('vscode.open', Uri.parse(consoleUrl));
     }
 
-    static async switchContext() {
+    static async switchContext(): Promise<string> {
         const k8sConfig = new KubeConfigUtils();
         const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
         const contextName: QuickPickItem[] = contexts.map((ctx) => ({ label: `${ctx.name}`}));
@@ -191,13 +191,13 @@ export class Cluster extends OpenShiftItem {
         return r;
     }
 
-    static async getUrlFromClipboard() {
+    static async getUrlFromClipboard(): Promise<string | null> {
         const clipboard = await Cluster.readFromClipboard();
         if (Cluster.ocLoginCommandMatches(clipboard)) return Cluster.clusterURL(clipboard);
         return null;
     }
 
-    static async tokenLogin(skipConfirmation = false): Promise<string> {
+    static async tokenLogin(skipConfirmation = false): Promise<string | null> {
         let token: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
         if (response !== 'Yes') return null;
@@ -221,7 +221,7 @@ export class Cluster extends OpenShiftItem {
         );
     }
 
-    private static async loginMessage(clusterURL: string, result: CliExitData): Promise<string> {
+    private static async loginMessage(clusterURL: string, result: CliExitData): Promise<string | undefined> {
         if (result.stderr === "") {
             Cluster.explorer.refresh();
             return commands.executeCommand('setContext', 'isLoggedIn', true)

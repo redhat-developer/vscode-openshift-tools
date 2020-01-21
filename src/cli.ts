@@ -66,7 +66,7 @@ class OdoChannelImpl implements OdoChannel {
         this.channel.show();
     }
 
-    prettifyJson(str: string) {
+    prettifyJson(str: string): string {
         let jsonData: string;
         try {
             jsonData = JSON.stringify(JSON.parse(str), null, 2);

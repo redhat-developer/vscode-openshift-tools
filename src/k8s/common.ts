@@ -11,7 +11,7 @@ import { QuickPickItem, window } from "vscode";
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { Node } from './node';
 
-function convertItemToQuickPick(item: any) {
+function convertItemToQuickPick(item: any): void {
     item.label = item.metadata.name;
 }
 

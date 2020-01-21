@@ -253,7 +253,7 @@ suite('OpenShift/Component', () => {
 
             test('allows to continue with valid git repository url', async () => {
                 let result: string | Thenable<string>;
-                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Promise<string> => {
+                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
                     result = await options.validateInput('https://github.com/redhat-developer/vscode-openshift-tools');
                     return Promise.resolve('https://github.com/redhat-developer/vscode-openshift-tools');
                 });
@@ -265,7 +265,7 @@ suite('OpenShift/Component', () => {
             test('shows error message when repo does not exist', async () => {
                 fetchTag.resolves (new Map<string, string>());
                 let result: string | Thenable<string>;
-                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Promise<string> => {
+                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
                     result = await options.validateInput('https://github.com');
                     return Promise.resolve('https://github.com');
                 });
@@ -276,7 +276,7 @@ suite('OpenShift/Component', () => {
 
             test('shows error message when invalid URL provided', async () => {
                 let result: string | Thenable<string>;
-                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Promise<string> => {
+                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
                     result = await options.validateInput('github');
                     return Promise.resolve('github');
                 });
@@ -287,7 +287,7 @@ suite('OpenShift/Component', () => {
 
             test('shows error message for empty git repository url', async () => {
                 let result: string | Thenable<string>;
-                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Promise<string> => {
+                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
                     result =  await (async () => options.validateInput(''))();
                     return Promise.resolve('');
                 });
@@ -674,7 +674,7 @@ suite('OpenShift/Component', () => {
 
     suite('del', () => {
 
-        const onDidFake = (listener) => {
+        const onDidFake = (listener): vscode.Disposable => {
             Promise.resolve().then(() => { listener(undefined); } );
             return {
                 dispose: () => { return; }

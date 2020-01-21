@@ -61,7 +61,7 @@ export class Service extends OpenShiftItem {
         if (service) {
             const answer = await window.showWarningMessage(`Do you want to delete Service '${service.getName()}'?`, 'Yes', 'Cancel');
             if (answer === 'Yes') {
-                return Progress.execFunctionWithProgress(`Deleting Service '${service.getName()}' from Application '${service.getParent().getName()}'`, (progress) => Service.odo.deleteService(service))
+                return Progress.execFunctionWithProgress(`Deleting Service '${service.getName()}' from Application '${service.getParent().getName()}'`, () => Service.odo.deleteService(service))
                     .then(() => `Service '${service.getName()}' successfully deleted`)
                     .catch((err) => Promise.reject(`Failed to delete Service with error '${err}'`));
             }

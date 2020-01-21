@@ -195,7 +195,7 @@ suite('OpenShift/Storage', () => {
 
         test('validator returns undefined for valid storage name', async () => {
             let result: string | Thenable<string>;
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('goodvalue');
                 return Promise.resolve('goodvalue');
             });
@@ -207,7 +207,7 @@ suite('OpenShift/Storage', () => {
 
         test('validator returns error message for empty storage', async () => {
             let result: string | Thenable<string>;
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('');
                 return Promise.resolve('');
             });
@@ -220,7 +220,7 @@ suite('OpenShift/Storage', () => {
         test('validator returns undefined for valid storage path', async () => {
             let result: string | Thenable<string>;
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().resolves('name');
-            inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('goodvalue');
                 return Promise.resolve('goodvalue');
             });
@@ -232,7 +232,7 @@ suite('OpenShift/Storage', () => {
         test('validator returns error message for empty storage path', async () => {
             let result: string | Thenable<string>;
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().resolves('name');
-            inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('');
                 return Promise.resolve('');
             });
@@ -244,7 +244,7 @@ suite('OpenShift/Storage', () => {
         test('validator returns error message for none alphanumeric storage name', async () => {
             let result: string | Thenable<string>;
             inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('name&name');
                 return Promise.resolve('name&name');
             });
@@ -256,7 +256,7 @@ suite('OpenShift/Storage', () => {
         test('validator returns error message if same name of storage found', async () => {
             let result: string | Thenable<string>;
             inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('storage');
                 return Promise.resolve('storage');
             });
@@ -268,7 +268,7 @@ suite('OpenShift/Storage', () => {
         test('validator returns error message for storage name longer than 63 characters', async () => {
             let result: string | Thenable<string>;
             inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('n123456789012345678901234567890123456789012345678901234567890123');
                 return Promise.resolve('n123456789012345678901234567890123456789012345678901234567890123');
             });

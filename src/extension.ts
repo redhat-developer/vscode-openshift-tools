@@ -157,16 +157,16 @@ function customize(node: ClusterExplorerV1.ClusterExplorerResourceNode, treeItem
     return customizeAsync(node, treeItem);
 }
 
-async function initNamespaceName(node: ClusterExplorerV1.ClusterExplorerResourceNode) {
+async function initNamespaceName(node: ClusterExplorerV1.ClusterExplorerResourceNode): Promise<string | undefined> {
     const kubectl = await k8s.extension.kubectl.v1;
     if (kubectl.available) {
         const result = await kubectl.api.invokeCommand('config view -o json');
         const config = JSON.parse(result.stdout);
         const currentContext = (config.contexts || []).find((ctx) => ctx.name === node.name);
         if (!currentContext) {
-            return "";
+            return '';
         }
-        return currentContext.context.namespace || "default";
+        return currentContext.context.namespace || 'default';
     }
 }
 
@@ -204,10 +204,10 @@ async function isOpenShift(): Promise<boolean> {
 
 // this method is called when your extension is deactivated
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-export function deactivate() {
+export function deactivate(): void {
 }
 
-function execute<T>(command: (...args: T[]) => Promise<any> | void, ...params: T[]) {
+function execute<T>(command: (...args: T[]) => Promise<any> | void, ...params: T[]): Promise<any> {
     try {
         const res = command.call(null, ...params);
         return res && res.then
@@ -223,13 +223,13 @@ function execute<T>(command: (...args: T[]) => Promise<any> | void, ...params: T
     }
 }
 
-function displayResult(result?: any) {
+function displayResult(result?: any): void {
     if (result && typeof result === 'string') {
         vscode.window.showInformationMessage(result);
     }
 }
 
-function migrateFromOdo018() {
+function migrateFromOdo018(): void {
     const newCfgDir = path.join(Platform.getUserHomePath(), '.odo');
     const newCfg = path.join(newCfgDir, 'odo-config.yaml');
     const oldCfg = path.join(Platform.getUserHomePath(), '.kube', 'odo');

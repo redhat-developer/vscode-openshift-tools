@@ -13,35 +13,35 @@ import * as common from './common';
 
 export class Command {
 
-    static getAllBuilds(parent: ClusterExplorerV1.ClusterExplorerNode) {
+    static getAllBuilds(parent: ClusterExplorerV1.ClusterExplorerNode): string {
         return `get build -o jsonpath="{range .items[?(.metadata.labels.buildconfig=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/build\\.number}{\\"\\n\\"}{end}"`;
     }
 
-    static startBuild(buildConfig: string) {
+    static startBuild(buildConfig: string): string {
         return `oc start-build ${buildConfig}`;
     }
 
-    static getBuilds(build: string) {
+    static getBuilds(build: string): string {
         return `oc get build -l buildconfig=${build} -o json`;
     }
 
-    static showLog(build: string, text: string) {
+    static showLog(build: string, text: string): string {
         return `oc logs ${build}${text}`;
     }
 
-    static rebuildFrom(resourceId: string) {
+    static rebuildFrom(resourceId: string): string {
         return `oc start-build --from-build ${resourceId}`;
     }
 
-    static followLog(build: string, text: string) {
+    static followLog(build: string, text: string): string {
         return `oc logs ${build}${text} -f`;
     }
 
-    static delete(build: string) {
+    static delete(build: string): string {
         return `oc delete build ${build}`;
     }
 
-    static getBuildConfigs() {
+    static getBuildConfigs(): string {
         return `oc get buildConfig -o json`;
     }
 }

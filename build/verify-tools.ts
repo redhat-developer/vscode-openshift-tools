@@ -14,7 +14,7 @@ import configData = require('../src/tools.json');
 import os = require('os');
 import { DownloadUtil } from '../src/util/download';
 
-async function verifyTools() {
+async function verifyTools(): Promise<void> {
   for (const key in configData) {
     for (const OS in configData[key].platform) {
       const targetFolder =  path.resolve(os.tmpdir(), OS);
@@ -23,7 +23,7 @@ async function verifyTools() {
   }
 }
 
-async function downloadFileAndCreateSha256(targetFolder: string, fileName: string, reqURL: string, sha256sum: string) {
+async function downloadFileAndCreateSha256(targetFolder: string, fileName: string, reqURL: string, sha256sum: string): Promise<void> {
   if (!fs.existsSync(targetFolder)) {
     await mkdirp.sync(targetFolder);
   }
@@ -39,7 +39,7 @@ async function downloadFileAndCreateSha256(targetFolder: string, fileName: strin
 }
 
 const fileCheckRegex = /\w*tools.json/;
-cp.exec('git diff --name-only origin/master -- .', async (error, stdout, stderr) => {
+cp.exec('git diff --name-only origin/master -- .', async (error, stdout) => {
   if (error) {
     throw error;
   }

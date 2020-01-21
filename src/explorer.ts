@@ -82,7 +82,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         this.treeView.reveal(item);
     }
 
-    static async reportIssue() {
+    static async reportIssue(): Promise<unknown> {
         let body = '';
         const repoURL = `https://github.com/redhat-developer/vscode-openshift-tools`;
         const template = {

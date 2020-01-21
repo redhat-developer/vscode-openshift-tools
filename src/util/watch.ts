@@ -6,7 +6,7 @@
 'use strict';
 
 import * as fs from 'fs';
-import * as fsex from 'fs-extra';
+import * as fsxt from 'fs-extra';
 import * as path from 'path';
 import { EventEmitter } from 'events';
 import byline = require('byline');
@@ -16,8 +16,8 @@ export class WatchUtil {
         const emitter: EventEmitter = new EventEmitter();
         let timer: NodeJS.Timer;
         let context = '';
-        fsex.ensureDirSync(location);
-        const watcher: fs.FSWatcher = fsex.watch(location, (eventType, changedFile) => {
+        fsxt.ensureDirSync(location);
+        const watcher: fsxt.FSWatcher = fsxt.watch(location, (eventType, changedFile) => {
             if (filename === changedFile) {
                 if (timer) {
                     clearTimeout(timer);

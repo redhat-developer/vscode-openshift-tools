@@ -319,7 +319,7 @@ suite('OpenShift/URL', () => {
         test('checks if URL name is not empty', async () => {
             execStub.onFirstCall().resolves({error: null, stdout: noPortsOutput, stderr: ''});
             let result: string | Thenable<string>;
-            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('');
                 expect(result).equal('Empty URL name');
                 result = options.validateInput('Urlname');

@@ -21,11 +21,11 @@ export class TestItem implements OpenShiftObject {
         return this.name;
     }
 
-    getTreeItem() {
+    getTreeItem(): null {
         return null;
     }
 
-    getChildren() {
+    getChildren(): any[] {
         return this.children;
     }
 

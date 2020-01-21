@@ -12,7 +12,7 @@ import { DownloadUtil } from "./util/download";
 import hasha = require("hasha");
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as fsex from 'fs-extra';
+import * as fsxt from 'fs-extra';
 import * as fs from 'fs';
 import { CliChannel } from './cli';
 import semver = require('semver');
@@ -57,7 +57,7 @@ export class ToolsConfig {
                 const installRequest = `Download and install v${ToolsConfig.tools[cmd].version}`;
                 const response = await vscode.window.showInformationMessage(
                     `Cannot find ${ToolsConfig.tools[cmd].description} ${ToolsConfig.tools[cmd].versionRangeLabel}.`, installRequest, 'Help', 'Cancel');
-                fsex.ensureDirSync(path.resolve(Platform.getUserHomePath(), '.vs-openshift'));
+                fsxt.ensureDirSync(path.resolve(Platform.getUserHomePath(), '.vs-openshift'));
                 if (response === installRequest) {
                     let action: string;
                     do {
@@ -67,7 +67,7 @@ export class ToolsConfig {
                             location: vscode.ProgressLocation.Notification,
                             title: `Downloading ${ToolsConfig.tools[cmd].description}`
                             },
-                            (progress: vscode.Progress<{increment: number; message: string}>, token: vscode.CancellationToken) => {
+                            (progress: vscode.Progress<{increment: number; message: string}>) => {
                                 return DownloadUtil.downloadFile(
                                     ToolsConfig.tools[cmd].url,
                                     toolDlLocation,
@@ -76,7 +76,7 @@ export class ToolsConfig {
                         });
                         const sha256sum: string = await hasha.fromFile(toolDlLocation, {algorithm: 'sha256'});
                         if (sha256sum !== ToolsConfig.tools[cmd].sha256sum) {
-                            fsex.removeSync(toolDlLocation);
+                            fsxt.removeSync(toolDlLocation);
                             action = await vscode.window.showInformationMessage(`Checksum for downloaded ${ToolsConfig.tools[cmd].description} v${ToolsConfig.tools[cmd].version} is not correct.`, 'Download again', 'Cancel');
                         }
 
@@ -88,7 +88,7 @@ export class ToolsConfig {
                         } else if (toolDlLocation.endsWith('.gz')) {
                             await Archive.extract(toolDlLocation, toolCacheLocation, ToolsConfig.tools[cmd].filePrefix);
                         }
-                        fsex.removeSync(toolDlLocation);
+                        fsxt.removeSync(toolDlLocation);
                         if (Platform.OS !== 'win32') {
                             fs.chmodSync(toolCacheLocation, 0o765);
                         }
