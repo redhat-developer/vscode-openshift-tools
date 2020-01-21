@@ -74,7 +74,7 @@ suite('OpenShift/Project', () => {
         test('validator returns undefined for valid project name', async () => {
             let result: string | Thenable<string>;
             inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('goodvalue');
                 return Promise.resolve('goodvalue');
             });
@@ -86,7 +86,7 @@ suite('OpenShift/Project', () => {
         test('validator returns error message for empty project name', async () => {
             let result: string | Thenable<string>;
             inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('');
                 return Promise.resolve('');
             });
@@ -98,7 +98,7 @@ suite('OpenShift/Project', () => {
         test('validator returns error message for none alphanumeric project name', async () => {
             let result: string | Thenable<string>;
             inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('name&name');
                 return Promise.resolve('name&name');
             });
@@ -110,7 +110,7 @@ suite('OpenShift/Project', () => {
         test('validator returns error message if same name of project found', async () => {
             let result: string | Thenable<string>;
             inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('project');
                 return Promise.resolve('project');
             });
@@ -122,7 +122,7 @@ suite('OpenShift/Project', () => {
         test('validator returns error message for project name longer than 63 characters', async () => {
             let result: string | Thenable<string>;
             inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('n123456789012345678901234567890123456789012345678901234567890123');
                 return Promise.resolve('n123456789012345678901234567890123456789012345678901234567890123');
             });

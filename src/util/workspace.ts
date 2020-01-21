@@ -37,7 +37,7 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
         );
     }
     const addWorkspaceFolder = new CreateWorkspaceItem();
-    const choice: any = await window.showQuickPick([addWorkspaceFolder, ...folder], {placeHolder: "Select context folder", ignoreFocusOut: true});
+    const choice = await window.showQuickPick([addWorkspaceFolder, ...folder], {placeHolder: "Select context folder", ignoreFocusOut: true});
     if (!choice) return null;
 
     let workspacePath: Uri;
@@ -58,11 +58,11 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
             workspacePath = folders[0];
         }
     } else if (choice) {
-        workspacePath = choice.uri;
+        workspacePath = (choice as WorkspaceFolderItem).uri;
     }
     return workspacePath;
     }
 
-    async function checkComponentFolder(folder: Uri) {
+    async function checkComponentFolder(folder: Uri): Promise<boolean> {
         return fs.existsSync(path.join(folder.fsPath, '.odo', 'config.yaml'));
     }

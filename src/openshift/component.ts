@@ -105,12 +105,12 @@ export class Component extends OpenShiftItem {
         }
     }
 
-    static async getLinkPort(component: OpenShiftObject, compName: string) {
+    static async getLinkPort(component: OpenShiftObject, compName: string): Promise<any> {
         const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), compName), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         return JSON.parse(compData.stdout);
     }
 
-    static async unlinkAllComponents(component: OpenShiftObject) {
+    static async unlinkAllComponents(component: OpenShiftObject): Promise<void> {
         const linkComponent = await Component.getLinkData(component);
         const getLinkComponent = linkComponent['status'].linkedComponents;
         if (getLinkComponent) {
@@ -158,12 +158,12 @@ export class Component extends OpenShiftItem {
         Component.odo.executeInTerminal(Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
 
-    private static async getLinkData(component: OpenShiftObject) {
+    private static async getLinkData(component: OpenShiftObject): Promise<any>{
         const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         return JSON.parse(compData.stdout);
     }
 
-    static async unlink(context: OpenShiftObject) {
+    static async unlink(context: OpenShiftObject): Promise<string | null> {
         const unlinkActions = [
             {
                 label: 'Component',
@@ -179,7 +179,7 @@ export class Component extends OpenShiftItem {
         return unlinkActionSelected.label === 'Component' ? Component.unlinkComponent(context) : unlinkActionSelected.label === 'Service' ?  Component.unlinkService(context) : null;
     }
 
-    static async unlinkComponent(context: OpenShiftObject) {
+    static async unlinkComponent(context: OpenShiftObject): Promise<string | null> {
         const linkCompName: Array<string> = [];
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
@@ -206,7 +206,7 @@ export class Component extends OpenShiftItem {
         );
     }
 
-    static async unlinkService(context: OpenShiftObject) {
+    static async unlinkService(context: OpenShiftObject): Promise<string | null> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
@@ -226,7 +226,7 @@ export class Component extends OpenShiftItem {
         );
     }
 
-    static async linkComponent(context: OpenShiftObject): Promise<string> {
+    static async linkComponent(context: OpenShiftObject): Promise<string | null> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
@@ -253,13 +253,13 @@ export class Component extends OpenShiftItem {
         }
 
         return Progress.execFunctionWithProgress(`Link Component '${componentToLink.getName()}' with Component '${component.getName()}'`,
-            (progress) => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), componentToLink.getName(), port), component.contextPath.fsPath)
+            () => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), componentToLink.getName(), port), component.contextPath.fsPath)
                 .then(() => `Component '${componentToLink.getName()}' successfully linked with Component '${component.getName()}'`)
                 .catch((err) => Promise.reject(`Failed to link component with error '${err}'`))
         );
     }
 
-    static async linkService(context: OpenShiftObject): Promise<string> {
+    static async linkService(context: OpenShiftObject): Promise<string | null> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
@@ -271,13 +271,13 @@ export class Component extends OpenShiftItem {
         if (!serviceToLink) return null;
 
         return Progress.execFunctionWithProgress(`Link Service '${serviceToLink.getName()}' with Component '${component.getName()}'`,
-            (progress) => Component.odo.execute(Command.linkServiceTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), serviceToLink.getName()), component.contextPath.fsPath)
+            () => Component.odo.execute(Command.linkServiceTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), serviceToLink.getName()), component.contextPath.fsPath)
                 .then(() => `Service '${serviceToLink.getName()}' successfully linked with Component '${component.getName()}'`)
                 .catch((err) => Promise.reject(`Failed to link Service with error '${err}'`))
         );
     }
 
-    static getPushCmd(): Thenable< string | undefined> {
+    static getPushCmd(): Thenable<string | undefined> {
         return this.extensionContext.globalState.get('PUSH');
     }
 
@@ -286,7 +286,7 @@ export class Component extends OpenShiftItem {
         contextPath: fsPath});
     }
 
-    static async push(context: OpenShiftObject): Promise<string> {
+    static async push(context: OpenShiftObject): Promise<string | null> {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to push the changes",
             "In which Application you want to push the changes",
@@ -301,7 +301,7 @@ export class Component extends OpenShiftItem {
         Component.explorer.refresh(component);
     }
 
-    static async handleMigratedComponent(component: OpenShiftObject): Promise<string> {
+    static async handleMigratedComponent(component: OpenShiftObject): Promise<string | null> {
         const project = component.getParent().getParent().getName();
         const app = component.getParent().getName();
         try {
@@ -329,7 +329,7 @@ export class Component extends OpenShiftItem {
         }
     }
 
-    static async lastPush() {
+    static async lastPush(): Promise<void> {
         const getPushCmd = await Component.getPushCmd();
         if (getPushCmd['pushCmd'] && getPushCmd['contextPath']) {
             Component.odo.executeInTerminal(getPushCmd['pushCmd'], getPushCmd['contextPath']);
@@ -384,12 +384,12 @@ export class Component extends OpenShiftItem {
         }
     }
 
-    static async listUrl(component: OpenShiftObject) {
+    static async listUrl(component: OpenShiftObject): Promise<any> {
         const UrlDetails = await Component.odo.execute(Command.getComponentUrl(), component.contextPath.fsPath);
         return JSON.parse(UrlDetails.stdout).items;
     }
 
-    static async createFromLocal(context: OpenShiftObject): Promise<string> {
+    static async createFromLocal(context: OpenShiftObject): Promise<string | null> {
         let application: OpenShiftObject = context;
 
         if (!application) application = await Component.getOpenshiftData(context);
@@ -413,7 +413,7 @@ export class Component extends OpenShiftItem {
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
-    static async createFromFolder(folder: Uri): Promise<string> {
+    static async createFromFolder(folder: Uri): Promise<string | null> {
         const application = await Component.getOpenShiftCmdData(undefined,
             "In which Project you want to create a Component",
             "In which Application you want to create a Component"
@@ -436,7 +436,7 @@ export class Component extends OpenShiftItem {
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
-    static async createFromGit(context: OpenShiftObject): Promise<string> {
+    static async createFromGit(context: OpenShiftObject): Promise<string | null> {
         let application: OpenShiftObject = context;
         if (!application) application = await Component.getOpenshiftData(context);
         if (!application) return null;
@@ -481,7 +481,7 @@ export class Component extends OpenShiftItem {
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
-    static async createFromBinary(context: OpenShiftObject): Promise<string> {
+    static async createFromBinary(context: OpenShiftObject): Promise<string | null> {
 
         let application: OpenShiftObject = context;
 
@@ -521,7 +521,7 @@ export class Component extends OpenShiftItem {
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
-    static async debug(context: OpenShiftObject): Promise<string> {
+    static async debug(context: OpenShiftObject): Promise<string | null> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
             'Select an Application',
@@ -529,10 +529,10 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
-        return Progress.execFunctionWithProgress(`Starting debugger session for the component '${component.getName()}'.`, (progress) => Component.startDebugger(component));
+        return Progress.execFunctionWithProgress(`Starting debugger session for the component '${component.getName()}'.`, () => Component.startDebugger(component));
     }
 
-    static async startDebugger(component: OpenShiftObject): Promise<string> {
+    static async startDebugger(component: OpenShiftObject): Promise<string | undefined> {
         const components = await Component.odo.getComponentTypesJson();
         const componentBuilder = components.find((builder) => builder.metadata.name === component.builderImage.name);
         const tag = componentBuilder.spec.imageStreamRef.spec.tags.find((tag: { name: string }) => tag.name === component.builderImage.tag);
@@ -540,7 +540,7 @@ export class Component extends OpenShiftItem {
         const isNode = tag.annotations.tags.includes('nodejs');
         const JAVA_EXT = 'redhat.java';
         const JAVA_DEBUG_EXT = 'vscjava.vscode-java-debug';
-        let result: undefined | string | PromiseLike<string>;
+        let result: undefined | PromiseLike<string>;
         if (component.compType === ComponentType.LOCAL && (isJava || isNode)) {
             const toolLocation = await ToolsConfig.detectOrDownload(`odo`);
             if (isJava) {
@@ -591,7 +591,7 @@ export class Component extends OpenShiftItem {
         return result;
     }
 
-    static async startOdoAndConnectDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration) {
+    static async startOdoAndConnectDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration): Promise<string> {
         const port = await getPort();
         const cp = exec(`"${toolLocation}" debug port-forward --local-port ${port}`, {cwd: component.contextPath.fsPath});
         return new Promise<string>((resolve, reject) => {
@@ -617,7 +617,7 @@ export class Component extends OpenShiftItem {
         );
     }
 
-    static async import(component: OpenShiftObject): Promise<string> {
+    static async import(component: OpenShiftObject): Promise<string | null> {
         const prjName = component.getParent().getParent().getName();
         const appName = component.getParent().getName();
         const compName = component.getName();
@@ -633,7 +633,7 @@ export class Component extends OpenShiftItem {
 
         const workspaceFolder = await selectWorkspaceFolder();
         if (!workspaceFolder) return null;
-        return await Progress.execFunctionWithProgress(`Importing component '${compName}'`, async (progress) => {
+        return await Progress.execFunctionWithProgress(`Importing component '${compName}'`, async () => {
             try {
                 // use annotations to understand what kind of component is imported
                 // metadata:

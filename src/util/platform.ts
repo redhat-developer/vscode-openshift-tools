@@ -7,7 +7,7 @@
 
 export class Platform {
 
-    static identify(map) {
+    static identify<T>(map: {[key: string]: () => T}): T {
         if (map[Platform.OS]) {
             return map[Platform.OS]();
         }

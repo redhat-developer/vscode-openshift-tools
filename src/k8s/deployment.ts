@@ -12,31 +12,31 @@ import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { OdoImpl, Odo } from "../odo";
 
 export class Command {
-    static getReplicationControllers(parent: ClusterExplorerV1.ClusterExplorerNode) {
+    static getReplicationControllers(parent: ClusterExplorerV1.ClusterExplorerNode): string {
         return `get rc -o jsonpath="{range .items[?(.metadata.annotations.openshift\\.io/deployment-config\\.name=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/deployment-config\\.latest-version}{\\"\\n\\"}{end}"`;
     }
 
-    static deploy(build: string) {
+    static deploy(build: string): string {
         return `oc rollout latest dc/${build}`;
     }
 
-    static getDeploymentConfigs() {
+    static getDeploymentConfigs(): string {
         return `oc get deploymentConfig -o json`;
     }
 
-    static showDeploymentConfigLog(deploymentConfig: string) {
+    static showDeploymentConfigLog(deploymentConfig: string): string {
         return `oc logs dc/${deploymentConfig}`;
     }
 
-    static getReplicas(deploymentConfig: string) {
+    static getReplicas(deploymentConfig: string): string {
         return `oc get rc -o jsonpath="{range .items[?(.metadata.annotations.openshift\\.io/deployment-config\\.name=='${deploymentConfig}')]}{.metadata.name}{\\"\\n\\"}{end}"`;
     }
 
-    static delete(replica: string) {
+    static delete(replica: string): string {
         return `oc delete rc ${replica}`;
     }
 
-    static showLog(replica: string) {
+    static showLog(replica: string): string {
         return `oc logs rc/${replica}`;
     }
 }
@@ -70,7 +70,7 @@ export class DeploymentConfig {
         return result;
     }
 
-    static async getReplicasList(cmd: string, errorMessage: string): Promise<string[]> {
+    static async getReplicasList(cmd: string): Promise<string[]> {
         const result = await DeploymentConfig.odo.execute(cmd);
         const replica: string = result.stdout;
         const replicationList = replica.split("\n");
@@ -79,8 +79,7 @@ export class DeploymentConfig {
 
     static async getReplicaNames(deploymentConfig: string): Promise<string[]> {
         return DeploymentConfig.getReplicasList(
-            Command.getReplicas(deploymentConfig),
-            'You have no replicas available');
+            Command.getReplicas(deploymentConfig));
     }
 
     static async rcShowLog(context: { impl: any }): Promise<string> {
@@ -100,7 +99,7 @@ export class DeploymentConfig {
         return deployName;
     }
 
-    static async selectReplica(context: any, replicaPlaceHolder: string): Promise<string> {
+    static async selectReplica(context: { impl: any }, replicaPlaceHolder: string): Promise<string> {
         let replica: string = null;
         if (context) {
             replica = context.impl.name;

@@ -77,7 +77,7 @@ suite('OpenShift/Service', () => {
             getProjectsStub.resolves([projectItem]);
             getApplicationsStub.resolves([appItem]);
             let result: string | Thenable<string>;
-            inputStub.callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub.callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('goodvalue');
                 return Promise.resolve('goodvalue');
             });
@@ -90,7 +90,7 @@ suite('OpenShift/Service', () => {
             getProjectsStub.resolves([projectItem]);
             getApplicationsStub.resolves([appItem]);
             let result: string | Thenable<string>;
-            inputStub.callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub.callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('goodvaluebutwaytolongtobeusedasservicenameincubernetescluster');
                 return Promise.resolve(null);
             });
@@ -168,7 +168,7 @@ suite('OpenShift/Service', () => {
 
         test('validator returns undefined for valid service name', async () => {
             let result: string | Thenable<string>;
-            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('goodvalue');
                 return Promise.resolve('goodvalue');
             });
@@ -179,7 +179,7 @@ suite('OpenShift/Service', () => {
 
         test('validator returns error message for empty service name', async () => {
             let result: string | Thenable<string>;
-            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('');
                 return Promise.resolve('');
             });
@@ -190,7 +190,7 @@ suite('OpenShift/Service', () => {
 
         test('validator returns error message for none alphanumeric service name', async () => {
             let result: string | Thenable<string>;
-            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('name&name');
                 return Promise.resolve('name&name');
             });
@@ -201,7 +201,7 @@ suite('OpenShift/Service', () => {
 
         test('validator returns error message if same name of service found', async () => {
             let result: string | Thenable<string>;
-            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('service');
                 return Promise.resolve('service');
             });
@@ -212,7 +212,7 @@ suite('OpenShift/Service', () => {
 
         test('validator returns error message for service name longer than 63 characters', async () => {
             let result: string | Thenable<string>;
-            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions, token?: vscode.CancellationToken): Thenable<string> => {
+            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('n123456789012345678901234567890123456789012345678901234567890123');
                 return Promise.resolve('n123456789012345678901234567890123456789012345678901234567890123');
             });

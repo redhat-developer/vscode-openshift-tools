@@ -30,16 +30,16 @@ suite("odo", () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         sandbox.stub(workspace, 'getConfiguration').returns({
-            get<T>(key: string): Promise<T|undefined> {
+            get<T>(): Promise<T|undefined> {
                 return Promise.resolve(undefined);
             },
-            update(key: string, value: any): Promise<void> {
+            update(): Promise<void> {
                 return Promise.resolve();
             },
-            inspect(section: string): {
+            inspect(): {
                 key: string;
             } { return; },
-            has(section: string): boolean {
+            has(): boolean {
                 return true;
             },
             disableCheckForMigration: false,

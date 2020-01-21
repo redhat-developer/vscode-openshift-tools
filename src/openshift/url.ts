@@ -10,7 +10,6 @@ import { window, QuickPickItem, commands, Uri } from 'vscode';
 import { V1ServicePort } from '@kubernetes/client-node';
 import { OpenShiftItem } from './openshiftItem';
 import { Progress } from "../util/progress";
-import { ChildProcess } from 'child_process';
 
 export class Url extends OpenShiftItem{
 
@@ -47,7 +46,7 @@ export class Url extends OpenShiftItem{
         return null;
     }
 
-    static async del(treeItem: OpenShiftObject): Promise<string> {
+    static async del(treeItem: OpenShiftObject): Promise<string | null> {
         let url = treeItem;
         const component = await Url.getOpenShiftCmdData(url,
             "From which Project you want to delete URL",
@@ -67,7 +66,7 @@ export class Url extends OpenShiftItem{
         return null;
     }
 
-    static async open(treeItem: OpenShiftObject): Promise<ChildProcess> {
+    static async open(treeItem: OpenShiftObject): Promise<void> {
         const component = treeItem.getParent();
         const urlDetails = await Url.odo.execute(Command.getComponentUrl(), component.contextPath.fsPath);
         let urlObject: any;
@@ -81,10 +80,9 @@ export class Url extends OpenShiftItem{
             urlObject = result.filter((value) => (value.metadata.name === treeItem.getName()));
         }
         if (urlObject[0].status.state === 'Pushed') {
-            return commands.executeCommand('vscode.open', Uri.parse(`${urlObject[0].spec.protocol}://${urlObject[0].spec.host}`));
+            commands.executeCommand('vscode.open', Uri.parse(`${urlObject[0].spec.protocol}://${urlObject[0].spec.host}`));
         } else {
             window.showInformationMessage('Selected URL is not created in cluster. Use \'Push\' command before opening URL in browser.');
         }
-        return null;
     }
 }
