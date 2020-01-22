@@ -830,7 +830,7 @@
         },
         {
           "command": "openshift.url.create",
-          "when": "view == openshiftProjectExplorer && viewItem == component_not_pushed",
+          "when": "view == openshiftProjectExplorer && viewItem == componentNotPushed",
           "group": "c1@1"
         },
         {
@@ -845,12 +845,12 @@
         },
         {
           "command": "openshift.component.describe",
-          "when": "view == openshiftProjectExplorer && viewItem == component_no_context",
+          "when": "view == openshiftProjectExplorer && viewItem == componentNoContext",
           "group": "c2@1"
         },
         {
           "command": "openshift.component.import",
-          "when": "view == openshiftProjectExplorer && viewItem == component_no_context",
+          "when": "view == openshiftProjectExplorer && viewItem == componentNoContext",
           "group": "c2@2"
         },
         {
@@ -890,7 +890,7 @@
         },
         {
           "command": "openshift.component.push",
-          "when": "view == openshiftProjectExplorer && viewItem == component_not_pushed",
+          "when": "view == openshiftProjectExplorer && viewItem == componentNotPushed",
           "group": "c4@2"
         },
         {
@@ -910,7 +910,7 @@
         },
         {
           "command": "openshift.component.delete",
-          "when": "view == openshiftProjectExplorer && viewItem == component_no_context",
+          "when": "view == openshiftProjectExplorer && viewItem == componentNoContext",
           "group": "c5@1"
         },
         {
@@ -920,7 +920,7 @@
         },
         {
           "command": "openshift.component.delete",
-          "when": "view == openshiftProjectExplorer && viewItem == component_not_pushed",
+          "when": "view == openshiftProjectExplorer && viewItem == componentNotPushed",
           "group": "c5@1"
         },
         {
@@ -945,12 +945,12 @@
         },
         {
           "command": "openshift.url.delete",
-          "when": "view == openshiftProjectExplorer && viewItem == component_route",
+          "when": "view == openshiftProjectExplorer && viewItem == componentRoute",
           "group": "s3"
         },
         {
           "command": "openshift.url.open",
-          "when": "view == openshiftProjectExplorer && viewItem == component_route",
+          "when": "view == openshiftProjectExplorer && viewItem == componentRoute",
           "group": "inline"
         },
         {
