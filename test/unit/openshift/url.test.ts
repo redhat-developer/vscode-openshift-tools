@@ -91,12 +91,7 @@ suite('OpenShift/URL', () => {
         "spec": {
             "clusterIP": "172.30.156.161",
             "ports": [
-                {
-                    "name": "8080-tcp",
-                    "port": 8080,
-                    "protocol": "TCP",
-                    "targetPort": 8080
-                }
+                "8080/TCP"
             ],
             "selector": {
                 "deploymentconfig": "node-app1"
@@ -134,18 +129,8 @@ suite('OpenShift/URL', () => {
         "spec": {
             "clusterIP": "172.30.156.161",
             "ports": [
-                {
-                    "name": "8080-tcp",
-                    "port": 8080,
-                    "protocol": "TCP",
-                    "targetPort": 8080
-                },
-                {
-                    "name": "8081-tcp",
-                    "port": 8081,
-                    "protocol": "TCP",
-                    "targetPort": 8081
-                }
+                "8080/TCP",
+                "8081/TCP"
             ],
             "selector": {
                 "deploymentconfig": "node-app1"
