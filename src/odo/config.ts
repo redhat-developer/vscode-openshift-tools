@@ -32,3 +32,8 @@ export interface ComponentSettings {
     ContextPath?: Uri;
     Ports: string[];
 }
+
+export interface Port {
+    Number: number;
+    Protocol: string;
+}

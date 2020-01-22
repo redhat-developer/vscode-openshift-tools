@@ -7,9 +7,9 @@
 
 import { OpenShiftObject, Command } from '../odo';
 import { window, QuickPickItem, commands, Uri } from 'vscode';
-import { V1ServicePort } from '@kubernetes/client-node';
 import { OpenShiftItem } from './openshiftItem';
 import { Progress } from "../util/progress";
+import { Port } from '../odo/config';
 
 export class Url extends OpenShiftItem{
 
@@ -21,12 +21,12 @@ export class Url extends OpenShiftItem{
         if (component) {
             const urlName = await Url.getName('URL name', await Url.odo.getRoutes(component));
             if (!urlName) return null;
-            const ports: V1ServicePort[] = await Url.odo.getComponentPorts(component);
-            const portItems: QuickPickItem[] = ports.map((item: any) => {
-                item['label'] = `${item.port}/${item.protocol}`;
+            const ports: Port[] = await Url.odo.getComponentPorts(component);
+            const portItems: QuickPickItem[] = ports.map<QuickPickItem>((item: any) => {
+                item['label'] = `${item.Number}/${item.Protocol}`;
                 return item;
             });
-            let port: V1ServicePort | QuickPickItem;
+            let port: Port | QuickPickItem;
             if (ports.length === 1) {
                 port = ports[0];
             } else if (ports.length > 1) {
@@ -37,7 +37,7 @@ export class Url extends OpenShiftItem{
 
             if (port) {
                 return Progress.execFunctionWithProgress(`Creating a URL '${urlName}' for the Component '${component.getName()}'`,
-                    () => Url.odo.createComponentCustomUrl(component, `${urlName}`, `${port['port']}`)
+                    () => Url.odo.createComponentCustomUrl(component, `${urlName}`, `${port['Number']}`)
                         .then(() => `URL '${urlName}' for component '${component.getName()}' successfully created`)
                         .catch((err) => Promise.reject(`Failed to create URL '${urlName}' for component '${component.getName()}'. ${err.message}`))
                 );
