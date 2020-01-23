@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
@@ -12,7 +10,7 @@ import * as path from 'path';
 import { window, TerminalOptions } from 'vscode';
 import { WindowUtil } from '../../../src/util/windowUtils';
 
-const expect = chai.expect;
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('Window Utility', () => {
@@ -44,7 +42,7 @@ suite('Window Utility', () => {
             cwd: process.cwd(),
             name: 'terminal',
             shellPath: process.platform === 'win32' ? undefined : '/bin/bash',
-            env: env
+            env
         };
         WindowUtil.createTerminal('terminal', process.cwd(), toolLocationDir);
 

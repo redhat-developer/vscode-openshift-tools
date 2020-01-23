@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
@@ -14,7 +12,7 @@ import { Application } from '../../../src/openshift/application';
 import { TestItem } from './testOSItem';
 import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
 
-const expect = chai.expect;
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('OpenShift/Application', () => {

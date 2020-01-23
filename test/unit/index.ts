@@ -2,16 +2,17 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-'use strict';
-
-require('source-map-support').install();
-
 /* tslint:disable no-require-imports */
 import * as fs from 'fs';
 import * as glob from 'glob';
 import * as paths from 'path';
-import Mocha = require('mocha');
 import { TestRunnerOptions, CoverageRunner } from '../coverage';
+
+'use strict';
+
+require('source-map-support').install();
+
+import Mocha = require('mocha');
 
 // declare var global: any;
 
@@ -19,6 +20,7 @@ import { TestRunnerOptions, CoverageRunner } from '../coverage';
 // Since we are not running in a tty environment, we just implement the method statically
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const tty = require('tty');
+
 if (!tty.getWindowSize) {
     tty.getWindowSize = (): number[] => {
         return [80, 75];

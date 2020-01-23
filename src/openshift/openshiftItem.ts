@@ -3,12 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
-import { Odo, OdoImpl, OpenShiftObject, OpenShiftObjectImpl, ContextType } from '../odo';
-import { OpenShiftExplorer } from '../explorer';
 import { window, QuickPickItem, TreeItemCollapsibleState } from 'vscode';
 import * as validator from 'validator';
+import { Odo, OdoImpl, OpenShiftObject, OpenShiftObjectImpl, ContextType } from '../odo';
+import { OpenShiftExplorer } from '../explorer';
 
 const errorMessage = {
     Project: 'You need at least one Project available. Please create new OpenShift Project and try again.',
@@ -38,6 +36,7 @@ function isCommand(item: QuickPickItem | QuickPickCommand): item is QuickPickCom
 
 export abstract class OpenShiftItem {
     protected static readonly odo: Odo = OdoImpl.Instance;
+
     protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
 
     static validateUniqueName(data: Array<OpenShiftObject>, value: string): string {
@@ -133,7 +132,7 @@ export abstract class OpenShiftItem {
         let project: OpenShiftObject;
         if (!context) context = await window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder, ignoreFocusOut: true});
         if (context && context.contextValue === ContextType.PROJECT && appPlaceholder ) {
-            project = context as OpenShiftObject;
+            project = context;
             context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(OpenShiftItem.getApplicationNames(project, appPlaceholder.includes('create') && compPlaceholder === undefined), {placeHolder: appPlaceholder, ignoreFocusOut: true});
             if (context && isCommand(context)) {
                 const newAppName = await context.command();
@@ -144,7 +143,7 @@ export abstract class OpenShiftItem {
                 }
             }
         }
-        if (context && !isCommand(context) && context.contextValue === ContextType.APPLICATION && compPlaceholder) context = await window.showQuickPick(OpenShiftItem.getComponentNames(context as OpenShiftObject, condition), {placeHolder: compPlaceholder, ignoreFocusOut: true});
+        if (context && !isCommand(context) && context.contextValue === ContextType.APPLICATION && compPlaceholder) context = await window.showQuickPick(OpenShiftItem.getComponentNames(context, condition), {placeHolder: compPlaceholder, ignoreFocusOut: true});
         return context as OpenShiftObject;
     }
 }

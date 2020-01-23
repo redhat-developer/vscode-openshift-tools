@@ -3,11 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
+import { window } from 'vscode';
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
-import { window } from 'vscode';
 import { Progress } from '../util/progress';
 
 export class Application extends OpenShiftItem {

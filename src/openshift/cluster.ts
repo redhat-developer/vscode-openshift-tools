@@ -3,11 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
- 'use strict';
-
+import { window, commands, env, QuickPickItem, ExtensionContext, Uri } from 'vscode';
 import { Command } from "../odo";
 import { OpenShiftItem } from './openshiftItem';
-import { window, commands, env, QuickPickItem, ExtensionContext, Uri } from 'vscode';
 import { CliExitData, CliChannel } from "../cli";
 import { TokenStore } from "../util/credentialManager";
 import { KubeConfigUtils } from '../util/kubeUtils';
@@ -24,6 +22,7 @@ class CreateUserItem implements QuickPickItem {
 
 export class Cluster extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
+
     static async logout(): Promise<string> {
         const value = await window.showWarningMessage(`Do you want to logout of cluster?`, 'Logout', 'Cancel');
         if (value === 'Logout') {
@@ -36,12 +35,12 @@ export class Cluster extends OpenShiftItem {
                     const logoutInfo = await window.showInformationMessage(`Successfully logged out. Do you want to login to a new cluster`, 'Yes', 'No');
                     if (logoutInfo === 'Yes') {
                         return Cluster.login();
-                    } else {
-                        return null;
                     }
-                } else {
-                    return Promise.reject(`Failed to logout of the current cluster with '${result.stderr}'!`);
+                        return null;
+
                 }
+                    return Promise.reject(`Failed to logout of the current cluster with '${result.stderr}'!`);
+
             });
         }
         return null;
@@ -226,8 +225,8 @@ export class Cluster extends OpenShiftItem {
             Cluster.explorer.refresh();
             return commands.executeCommand('setContext', 'isLoggedIn', true)
                 .then(() => `Successfully logged in to '${clusterURL}'`);
-        } else {
-            throw new Error(result.stderr);
         }
+            throw new Error(result.stderr);
+
     }
 }

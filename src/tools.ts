@@ -3,18 +3,17 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
-import { Platform } from "./util/platform";
-import { Archive } from "./util/archive";
 import { which } from "shelljs";
-import { DownloadUtil } from "./util/download";
-import hasha = require("hasha");
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fsxt from 'fs-extra';
 import * as fs from 'fs';
+import { DownloadUtil } from "./util/download";
+import { Archive } from "./util/archive";
+import { Platform } from "./util/platform";
 import { CliChannel } from './cli';
+
+import hasha = require("hasha");
 import semver = require('semver');
 import configData = require('./tools.json');
 

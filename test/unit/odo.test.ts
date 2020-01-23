@@ -3,23 +3,24 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as odo from '../../src/odo';
-import { CliExitData, CliChannel } from '../../src/cli';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
-import { ToolsConfig } from '../../src/tools';
-import { WindowUtil } from '../../src/util/windowUtils';
 import { window, Terminal, workspace } from 'vscode';
-import jsYaml = require('js-yaml');
-import { TestItem } from './openshift/testOSItem';
 import { ExecException } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import { TestItem } from './openshift/testOSItem';
+import { WindowUtil } from '../../src/util/windowUtils';
+import { ToolsConfig } from '../../src/tools';
+import { CliExitData, CliChannel } from '../../src/cli';
+import * as odo from '../../src/odo';
 import { ContextType } from '../../src/odo';
 
-const expect = chai.expect;
+import jsYaml = require('js-yaml');
+
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite("odo", () => {
@@ -38,7 +39,9 @@ suite("odo", () => {
             },
             inspect(): {
                 key: string;
-            } { return; },
+            } {
+              return undefined;
+            },
             has(): boolean {
                 return true;
             },
@@ -55,7 +58,7 @@ suite("odo", () => {
     });
 
     suite('command execution', () => {
-        let execStub: sinon.SinonStub, toolsStub: sinon.SinonStub;
+        let execStub: sinon.SinonStub; let toolsStub: sinon.SinonStub;
         const command = 'odo do whatever you do';
 
         setup(() => {
@@ -86,7 +89,7 @@ suite("odo", () => {
             const cwd = 'path/to/some/dir';
             await odoCli.execute(command, cwd);
 
-            expect(execStub).calledOnceWith(command, { cwd: cwd });
+            expect(execStub).calledOnceWith(command, { cwd });
         });
 
         test('execute rejects if an error occurs in the shell command', async () => {
@@ -128,7 +131,7 @@ suite("odo", () => {
     });
 
     suite('item listings', () => {
-        let execStub: sinon.SinonStub, yamlStub: sinon.SinonStub;
+        let execStub: sinon.SinonStub; let yamlStub: sinon.SinonStub;
         const project = new TestItem(null, 'project', ContextType.PROJECT);
         const app = new TestItem(project, 'app', ContextType.APPLICATION);
 

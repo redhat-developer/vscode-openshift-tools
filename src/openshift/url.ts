@@ -3,10 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
-import { OpenShiftObject, Command } from '../odo';
 import { window, QuickPickItem, commands, Uri } from 'vscode';
+import { OpenShiftObject, Command } from '../odo';
 import { OpenShiftItem } from './openshiftItem';
 import { Progress } from "../util/progress";
 import { Port } from '../odo/config';
@@ -23,7 +21,7 @@ export class Url extends OpenShiftItem{
             if (!urlName) return null;
             const ports: Port[] = await Url.odo.getComponentPorts(component);
             const portItems: QuickPickItem[] = ports.map<QuickPickItem>((item: any) => {
-                item['label'] = `${item.Number}/${item.Protocol}`;
+                item.label = `${item.Number}/${item.Protocol}`;
                 return item;
             });
             let port: Port | QuickPickItem;

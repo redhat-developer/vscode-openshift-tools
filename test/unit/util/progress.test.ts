@@ -3,16 +3,14 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { Progress } from '../../../src/util/progress';
 import * as vscode from 'vscode';
+import { Progress } from '../../../src/util/progress';
 import { OdoImpl } from '../../../src/odo';
 
-const expect = chai.expect;
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('Progress Utility', () => {

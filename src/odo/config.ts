@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
- 'use strict';
-
 import { Uri } from "vscode";
 
 export const enum Kind {

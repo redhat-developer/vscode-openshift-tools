@@ -3,12 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
-import { Progress } from "../util/progress";
 import { QuickPickItem, window } from "vscode";
-import * as common from './common';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
+import { Progress } from "../util/progress";
+import * as common from './common';
 import { OdoImpl, Odo } from "../odo";
 
 export class Command {
@@ -107,7 +105,7 @@ export class DeploymentConfig {
             const deploymentConfig = await common.selectResourceByName(this.getDeploymentConfigNames("You have no DeploymentConfigs available"), "Select a DeploymentConfig to see the Replica");
             if (!deploymentConfig) return null;
             const selreplica = await window.showQuickPick(this.getReplicaNames(deploymentConfig), {placeHolder: replicaPlaceHolder, ignoreFocusOut: true});
-            replica = selreplica ? selreplica : null;
+            replica = selreplica || null;
         }
         return replica;
     }

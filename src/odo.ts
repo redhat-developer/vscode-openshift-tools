@@ -3,28 +3,27 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
-import * as cliInstance from './cli';
 import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Disposable } from 'vscode';
+import * as path from 'path';
+import { statSync } from 'fs';
+import { Subject } from 'rxjs';
+import { ChildProcess } from 'child_process';
+import * as cliInstance from './cli';
 import { WindowUtil } from './util/windowUtils';
 import { CliExitData } from './cli';
-import * as path from 'path';
 import { ToolsConfig } from './tools';
-import format =  require('string-format');
-import { statSync } from 'fs';
-import bs = require('binary-search');
 import { Platform } from './util/platform';
-import yaml = require('js-yaml');
-import fs = require('fs');
 import * as odo from './odo/config';
 import { ComponentSettings } from './odo/config';
 import { GlyphChars } from './util/constants';
-import { Subject } from 'rxjs';
 import { Progress } from './util/progress';
-import { ChildProcess } from 'child_process';
 
-const Collapsed = TreeItemCollapsibleState.Collapsed;
+import format =  require('string-format');
+import bs = require('binary-search');
+import yaml = require('js-yaml');
+import fs = require('fs');
+
+const {Collapsed} = TreeItemCollapsibleState;
 
 export interface BuilderImage {
     readonly name: string;
@@ -85,170 +84,222 @@ export class Command {
     static listProjects(): string {
         return `odo project list -o json`;
     }
+
     @verbose
     static listApplications(project: string): string {
         return `odo application list --project ${project} -o json`;
     }
+
     static deleteProject(name: string): string {
         return `odo project delete ${name} -o json`;
     }
+
     static waitForProjectToBeGone(project: string): string {
         return `oc wait project/${project} --for delete`;
     }
+
     @verbose
     static createProject(name: string): string {
         return `odo project create ${name}`;
     }
+
     static listComponents(project: string, app: string): string {
         return `odo list --app ${app} --project ${project} -o json`;
     }
+
     static listCatalogComponents(): string {
         return `odo catalog list components`;
     }
+
     static listCatalogComponentsJson(): string {
         return `${Command.listCatalogComponents()} -o json`;
     }
+
     static listCatalogServices(): string {
         return `odo catalog list services`;
     }
+
     static listCatalogServicesJson(): string {
         return `${Command.listCatalogServices()} -o json`;
     }
+
     static listStorageNames(): string {
         return `odo storage list -o json`;
     }
+
     static printOcVersion(): string {
         return 'oc version';
     }
+
     static listServiceInstances(project: string, app: string): string {
         return `odo service list -o json --project ${project} --app ${app}`;
     }
+
     static describeApplication(project: string, app: string): string {
         return `odo app describe ${app} --project ${project}`;
     }
+
     static deleteApplication(project: string, app: string): string {
         return `odo app delete ${app} --project ${project} -f`;
     }
+
     static printOdoVersion(): string {
         return 'odo version';
     }
+
     static printOdoVersionAndProjects(): string {
         return 'odo version && odo project list';
     }
+
     static odoLogout(): string {
         return `odo logout`;
     }
+
     static setOpenshiftContext(context: string): string {
         return `oc config use-context ${context}`;
     }
+
     static odoLoginWithUsernamePassword(clusterURL: string, username: string, passwd: string): string {
         const quote = Platform.OS === 'win32' ? `"` : `'`;
         return `odo login ${clusterURL} -u ${quote}${username}${quote} -p ${quote}${passwd}${quote} --insecure-skip-tls-verify`;
     }
+
     static odoLoginWithToken(clusterURL: string, ocToken: string): string {
         return `odo login ${clusterURL} --token=${ocToken} --insecure-skip-tls-verify`;
     }
+
     @verbose
     static createStorage(storageName: string, mountPath: string, storageSize: string): string {
         return `odo storage create ${storageName} --path=${mountPath} --size=${storageSize}`;
     }
+
     static deleteStorage(storage: string): string {
         return `odo storage delete ${storage} -f`;
     }
+
     static waitForStorageToBeGone(project: string, app: string, storage: string): string {
         return `oc wait pvc/${storage}-${app}-pvc --for=delete --namespace ${project}`;
     }
+
     static undeployComponent(project: string, app: string, component: string): string {
         return `odo delete ${component} -f --app ${app} --project ${project}`;
     }
+
     static deleteComponent(project: string, app: string, component: string): string {
         return `odo delete ${component} -f --app ${app} --project ${project} --all`;
     }
+
     static describeComponent(project: string, app: string, component: string): string {
         return `odo describe ${component} --app ${app} --project ${project}`;
     }
+
     static describeComponentJson(project: string, app: string, component: string): string {
         return `${Command.describeComponent(project, app, component)} -o json`;
     }
+
     static describeService(service: string): string {
         return `odo catalog describe service ${service}`;
     }
+
     static showLog(project: string, app: string, component: string): string {
         return `odo log ${component} --app ${app} --project ${project}`;
     }
+
     static showLogAndFollow(project: string, app: string, component: string): string {
         return `odo log ${component} -f --app ${app} --project ${project}`;
     }
+
     static listComponentPorts(project: string, app: string, component: string): string {
         return `oc get service ${component}-${app} --namespace ${project} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`;
     }
+
     static linkComponentTo(project: string, app: string, component: string, componentToLink: string, port?: string): string {
-        return `odo link ${componentToLink} --project ${project} --app ${app} --component ${component} --wait${port ? ' --port ' + port : ''}`;
+        return `odo link ${componentToLink} --project ${project} --app ${app} --component ${component} --wait${port ? ` --port ${  port}` : ''}`;
     }
+
     static linkServiceTo(project: string, app: string, component: string, serviceToLink: string): string {
         return `odo link ${serviceToLink} --project ${project} --app ${app} --component ${component} --wait --wait-for-target`;
     }
+
     @verbose
     static pushComponent(): string {
         return `odo push`;
     }
+
     @verbose
     static watchComponent(project: string, app: string, component: string): string {
         return `odo watch ${component} --app ${app} --project ${project}`;
     }
+
     @verbose
     static createLocalComponent(project: string, app: string, type: string, version: string, name: string, folder: string): string {
         return `odo create ${type}:${version} ${name} --context ${folder} --app ${app} --project ${project}`;
     }
+
     @verbose
     static createGitComponent(project: string, app: string, type: string, version: string, name: string, git: string, ref: string): string {
         return `odo create ${type}:${version} ${name} --git ${git} --ref ${ref} --app ${app} --project ${project}`;
     }
+
     @verbose
     static createBinaryComponent(project: string, app: string, type: string, version: string, name: string, binary: string, context: string): string {
         return `odo create ${type}:${version} ${name} --binary ${binary} --app ${app} --project ${project} --context ${context}`;
     }
+
     @verbose
     static createService(project: string, app: string, template: string, plan: string, name: string): string {
         return `odo service create ${template} --plan ${plan} ${name} --app ${app} --project ${project} -w`;
     }
+
     static deleteService(project: string, app: string, name: string): string {
         return `odo service delete ${name} -f --project ${project} --app ${app}`;
     }
+
     static getServiceTemplate(project: string, service: string): string {
         return `oc get ServiceInstance ${service} --namespace ${project} -o jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/name}"`;
     }
+
     static waitForServiceToBeGone(project: string, service: string): string {
         return `oc wait ServiceInstance/${service} --for delete --namespace ${project}`;
     }
+
     @verbose
     static createComponentCustomUrl(name: string, port: string): string {
         return `odo url create ${name} --port ${port}`;
     }
+
     static getComponentUrl(): string {
         return `odo url list -o json`;
     }
+
     static deleteComponentUrl(name: string): string {
         return `odo url delete -f ${name}`;
     }
+
     static getComponentJson(): string {
         return `odo describe -o json`;
     }
+
     static unlinkComponents(project: string, app: string, comp1: string, comp2: string, port: string): string {
         return `odo unlink --project ${project} --app ${app} ${comp2} --port ${port} --component ${comp1}`;
     }
+
     static unlinkService(project: string, app: string, service: string, comp: string): string {
         return `odo unlink --project ${project} --app ${app} ${service} --component ${comp}`;
     }
+
     static getOpenshiftClusterRoute(): string {
         return `oc get routes -n openshift-console -ojson`;
     }
+
     static getclusterVersion(): string {
         return `oc get clusterversion -ojson`;
     }
+
     static showServerUrl(): string {
         return `oc whoami --show-server`;
     }
+
     static showConsoleUrl(): string {
         return `oc get configmaps console-public -n openshift-config-managed -o json`;
     }
@@ -348,9 +399,9 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
         if (this.contextValue === ContextType.COMPONENT_PUSHED || this.contextValue === ContextType.COMPONENT || this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
             if (this.compType === ComponentType.GIT) {
                 return Uri.file(path.join(__dirname, "../../images/component", 'git.png'));
-            } else if (this.compType === ComponentType.LOCAL) {
+            } if (this.compType === ComponentType.LOCAL) {
                 return Uri.file(path.join(__dirname, "../../images/component", 'workspace.png'));
-            } else if (this.compType === ComponentType.BINARY) {
+            } if (this.compType === ComponentType.BINARY) {
                 return Uri.file(path.join(__dirname, "../../images/component", 'binary.png'));
             }
         } else {
@@ -454,14 +505,18 @@ function compareNodes(a: OpenShiftObject, b: OpenShiftObject): number {
     const acontext = a.contextValue.includes('_') ? a.contextValue.substr(0, a.contextValue.indexOf('_')) : a.contextValue;
     const bcontext = b.contextValue.includes('_') ? b.contextValue.substr(0, b.contextValue.indexOf('_')) : b.contextValue;
     const t = acontext.localeCompare(bcontext);
-    return t ? t : a.label.localeCompare(b.label);
+    return t || a.label.localeCompare(b.label);
 }
 
 class OdoModel {
     private parentToChildren: Map<OpenShiftObject, OpenShiftObject[]> = new Map();
+
     private pathToObject = new Map<string, OpenShiftObject>();
+
     private contextToObject = new Map<Uri, OpenShiftObject>();
+
     private contextToSettings = new Map<Uri, ComponentSettings>();
+
     private objectToProcess = new Map<OpenShiftObject, ChildProcess>();
 
     public setParentToChildren(parent: OpenShiftObject, children: OpenShiftObject[]): OpenShiftObject[] {
@@ -546,8 +601,11 @@ class OdoModel {
 
 export class OdoImpl implements Odo {
     public static data: OdoModel = new OdoModel();
+
     public static ROOT: OpenShiftObject = new OpenShiftObjectImpl(undefined, '/', undefined, false, undefined);
+
     private static cli: cliInstance.Cli = cliInstance.CliChannel.getInstance();
+
     private static instance: Odo;
 
     private readonly odoLoginMessages = [
@@ -556,6 +614,7 @@ export class OdoImpl implements Odo {
         'Please login to your server',
         'Unauthorized'
     ];
+
     private readonly serverDownMessages = [
         'Unable to connect to OpenShift cluster, is it down?',
         'no such host',
@@ -602,7 +661,7 @@ export class OdoImpl implements Odo {
         let clusters: OpenShiftObject[] = [];
         const result: cliInstance.CliExitData = await this.execute(Command.printOcVersion(), process.cwd(), false);
         clusters = result.stdout.trim().split('\n').filter((value) => {
-            return value.indexOf('Server ') !== -1;
+            return value.includes('Server ');
         }).map((value) => {
             const server: string = value.substr(value.indexOf(' ')+1).trim();
             return new OpenShiftObjectImpl(null, server, ContextType.CLUSTER, false, OdoImpl.instance, TreeItemCollapsibleState.Expanded);
@@ -615,17 +674,17 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(
             Command.printOdoVersionAndProjects(), process.cwd(), false
         );
-        if (this.odoLoginMessages.some((element) => result.stderr ? result.stderr.indexOf(element) > -1 : false)) {
+        if (this.odoLoginMessages.some((element) => result.stderr ? result.stderr.includes(element) : false)) {
             const loginErrorMsg = 'Please log in to the cluster';
             return[new OpenShiftObjectImpl(null, loginErrorMsg, ContextType.LOGIN_REQUIRED, false, OdoImpl.instance, TreeItemCollapsibleState.None)];
         }
-        if (this.serverDownMessages.some((element) => result.stderr ? result.stderr.indexOf(element) > -1 : false)) {
+        if (this.serverDownMessages.some((element) => result.stderr ? result.stderr.includes(element) : false)) {
             const clusterDownMsg = 'Cannot connect to the OpenShift cluster';
             return [new OpenShiftObjectImpl(null, clusterDownMsg, ContextType.CLUSTER_DOWN, false, OdoImpl.instance, TreeItemCollapsibleState.None)];
         }
         commands.executeCommand('setContext', 'isLoggedIn', true);
         clusters = result.stdout.trim().split('\n').filter((value) => {
-            return value.indexOf('Server:') !== -1;
+            return value.includes('Server:');
         }).map((value) => {
             const server: string = value.substr(value.indexOf(':')+1).trim();
             return new OpenShiftObjectImpl(null, server, ContextType.CLUSTER, false, OdoImpl.instance, TreeItemCollapsibleState.Expanded);
@@ -713,8 +772,8 @@ export class OdoImpl implements Odo {
             }
             return new OpenShiftObjectImpl(application, value.name, ContextType.COMPONENT_NO_CONTEXT, true, this, Collapsed, undefined, compSource);
         });
-        const targetAppName = application.getName(),
-            targetPrjName = application.getParent().getName();
+        const targetAppName = application.getName();
+            const targetPrjName = application.getParent().getName();
 
         OdoImpl.data.getSettings().filter((comp) => comp.Application === targetAppName && comp.Project === targetPrjName).forEach((comp) => {
             const item = deployedComponents.find((component) => component.getName() === comp.Name);
@@ -852,7 +911,7 @@ export class OdoImpl implements Odo {
 
     public async requireLogin(): Promise<boolean> {
         const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersionAndProjects(), process.cwd(), false);
-        return this.odoLoginMessages.some((msg) => result.stderr.indexOf(msg) > -1);
+        return this.odoLoginMessages.some((msg) => result.stderr.includes(msg));
     }
 
     private insert(array: OpenShiftObject[], item: OpenShiftObject): OpenShiftObject {
@@ -960,7 +1019,7 @@ export class OdoImpl implements Odo {
     }
 
     public async createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, location: string, context: Uri, ref = 'master'): Promise<OpenShiftObject> {
-        await this.execute(Command.createGitComponent(application.getParent().getName(), application.getName(), type, version, name, location, ref ? ref : 'master'), context.fsPath);
+        await this.execute(Command.createGitComponent(application.getParent().getName(), application.getName(), type, version, name, location, ref || 'master'), context.fsPath);
         // This check is here to skip any model updates when there are not workspace folders yet,
         // because when first folder added to workspace extesion is going to be reloaded anyway and
         // model loaded when extension is reactivated
@@ -1130,7 +1189,7 @@ export class OdoImpl implements Odo {
     private loadItems(result: cliInstance.CliExitData): any[] {
         let data: any[] = [];
         try {
-            const items = JSON.parse(result.stdout).items;
+            const {items} = JSON.parse(result.stdout);
             if (items) data = items;
         } catch (ignore) {
             // ignore parse errors and return empty array
@@ -1173,19 +1232,19 @@ export class OdoImpl implements Odo {
                             for (const resourceName of resourceNames) {
                                 try {
                                     const result = await this.execute(`oc get ${resourceId} ${resourceName} -o json --namespace=${project}`);
-                                    const labels = JSON.parse(result.stdout).metadata.labels;
+                                    const {labels} = JSON.parse(result.stdout).metadata;
                                     let command = `oc label ${resourceId} ${resourceName} --overwrite app.kubernetes.io/instance=${labels['app.kubernetes.io/component-name']}`;
-                                    command = command + ` app.kubernetes.io/part-of=${labels['app.kubernetes.io/name']}`;
+                                    command += ` app.kubernetes.io/part-of=${labels['app.kubernetes.io/name']}`;
                                     if (labels['app.kubernetes.io/component-type']) {
-                                        command = command + ` app.kubernetes.io/name=${labels['app.kubernetes.io/component-type']}`;
+                                        command += ` app.kubernetes.io/name=${labels['app.kubernetes.io/component-type']}`;
                                     }
                                     if (labels['app.kubernetes.io/component-version']) {
-                                        command = command + ` app.openshift.io/runtime-version=${labels['app.kubernetes.io/component-version']}`;
+                                        command += ` app.openshift.io/runtime-version=${labels['app.kubernetes.io/component-version']}`;
                                     }
                                     if (labels['app.kubernetes.io/url-name']) {
-                                        command = command + ` odo.openshift.io/url-name=${labels['app.kubernetes.io/url-name']}`;
+                                        command += ` odo.openshift.io/url-name=${labels['app.kubernetes.io/url-name']}`;
                                     }
-                                    await this.execute(command + ` --namespace=${project}`);
+                                    await this.execute(`${command  } --namespace=${project}`);
                                     await this.execute(`oc label ${resourceId} ${resourceName} app.kubernetes.io/component-name- --namespace=${project}`);
                                     await this.execute(`oc label ${resourceId} ${resourceName} odo.openshift.io/migrated=true --namespace=${project}`);
                                 } catch (err) {

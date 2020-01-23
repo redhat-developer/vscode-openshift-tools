@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as vscode from 'vscode';
+import * as k8s from 'vscode-kubernetes-tools-api';
+import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { OpenShiftExplorer } from './explorer';
 import { Cluster } from './openshift/cluster';
 import { Catalog } from './openshift/catalog';
@@ -16,20 +16,18 @@ import { Storage } from './openshift/storage';
 import { Url } from './openshift/url';
 import { Service } from './openshift/service';
 import { Platform } from './util/platform';
-import path = require('path');
-import fsx = require('fs-extra');
-import * as k8s from 'vscode-kubernetes-tools-api';
-import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
-import { BuildConfigNodeContributor } from './k8s/build';
-import { DeploymentConfigNodeContributor } from './k8s/deployment';
+import { BuildConfigNodeContributor , Build } from './k8s/build';
+import { DeploymentConfigNodeContributor , DeploymentConfig } from './k8s/deployment';
 import { Console } from './k8s/console';
 import { OdoImpl } from './odo';
-import { Build } from './k8s/build';
-import { DeploymentConfig } from './k8s/deployment';
+
 import { TokenStore } from './util/credentialManager';
 import { Oc } from './oc';
 
-let clusterExplorer: k8s.ClusterExplorerV1 | undefined = undefined;
+import path = require('path');
+import fsx = require('fs-extra');
+
+let clusterExplorer: k8s.ClusterExplorerV1 | undefined;
 
 export async function activate(context: vscode.ExtensionContext) {
     migrateFromOdo018();

@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
@@ -13,7 +11,7 @@ import { OdoImpl } from '../../../src/odo';
 import { Console } from '../../../src/k8s/console';
 import { KubeConfigUtils } from '../../../src/util/kubeUtils';
 
-const expect = chai.expect;
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('K8s/console', () => {

@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { DownloadUtil } from '../src/util/download';
+
 'use strict';
 
 import hasha = require('hasha');
@@ -12,7 +14,6 @@ import path = require("path");
 import cp = require('child_process');
 import configData = require('../src/tools.json');
 import os = require('os');
-import { DownloadUtil } from '../src/util/download';
 
 async function verifyTools(): Promise<void> {
   for (const key in configData) {
@@ -29,7 +30,7 @@ async function downloadFileAndCreateSha256(targetFolder: string, fileName: strin
   }
   const currentFile = path.join(targetFolder, fileName);
   console.log(`${currentFile} download started from ${reqURL}`);
-  await DownloadUtil.downloadFile(reqURL, currentFile, (current) => console.log(current + '%'));
+  await DownloadUtil.downloadFile(reqURL, currentFile, (current) => console.log(`${current  }%`));
   const currentSHA256 = await hasha.fromFile(currentFile, {algorithm: 'sha256'});
   if (currentSHA256 === sha256sum) {
     console.log( `[INFO] ${currentFile} is downloaded and sha256 is correct`);

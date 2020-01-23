@@ -3,13 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as vscode from 'vscode';
 import { Command } from "../odo";
 import { KubeConfigUtils } from "../util/kubeUtils";
 import { OpenShiftItem } from '../openshift/openshiftItem';
-import { CliExitData } from '../cli';
 
 export class Console extends OpenShiftItem {
 
@@ -19,7 +16,7 @@ export class Console extends OpenShiftItem {
         return project;
     }
 
-    static async fetchOpenshiftConsoleUrl(): Promise<string | CliExitData> {
+    static async fetchOpenshiftConsoleUrl(): Promise<any> {
         try {
             return await Console.odo.execute(Command.showConsoleUrl());
         } catch (ignore) {
@@ -28,8 +25,8 @@ export class Console extends OpenShiftItem {
         }
     }
 
-    static openShift4ClusterUrl(consoleUrl: string | CliExitData): string {
-        return JSON.parse(consoleUrl['stdout']).data.consoleURL;
+    static openShift4ClusterUrl(consoleUrl: any): string {
+        return JSON.parse(consoleUrl.stdout).data.consoleURL;
     }
 
     static async openBuildConfig(context: { name: string}): Promise<unknown> {
@@ -40,7 +37,7 @@ export class Console extends OpenShiftItem {
         }
         const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
         const project = Console.getCurrentProject();
-        if (consoleUrl['stdout']) {
+        if (consoleUrl.stdout) {
             url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/ns/${project}/buildconfigs/${context.name}`;
         } else {
             url = `${consoleUrl}/console/project/${project}/browse/builds/${context.name}?tab=history`;
@@ -56,7 +53,7 @@ export class Console extends OpenShiftItem {
         }
         const project = Console.getCurrentProject();
         const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
-        if (consoleUrl['stdout']) {
+        if (consoleUrl.stdout) {
             url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/ns/${project}/deploymentconfigs/${context.name}`;
         } else {
             url = `${consoleUrl}/console/project/${project}/browse/dc/${context.name}?tab=history`;
@@ -72,7 +69,7 @@ export class Console extends OpenShiftItem {
         }
         const project = Console.getCurrentProject();
         const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
-        if (consoleUrl['stdout']) {
+        if (consoleUrl.stdout) {
             url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/ns/${project}/imagestreams/${context.name}`;
         } else {
             url = `${consoleUrl}/console/project/${project}/browse/images/${context.name}`;
@@ -88,7 +85,7 @@ export class Console extends OpenShiftItem {
         }
         const project = Console.getCurrentProject();
         const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
-        if (consoleUrl['stdout']) {
+        if (consoleUrl.stdout) {
             url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/cluster/projects/${project}`;
         } else {
             url = `${consoleUrl}/console/project/${project}/overview`;

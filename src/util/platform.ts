@@ -3,15 +3,13 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 export class Platform {
 
     static identify<T>(map: {[key: string]: () => T}): T {
         if (map[Platform.OS]) {
             return map[Platform.OS]();
         }
-        return map['default'] ? map['default']() : undefined;
+        return map.default ? map.default() : undefined;
     }
 
     static getOS(): string {

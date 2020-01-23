@@ -3,13 +3,11 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
+import { window } from 'vscode';
+import { isEmpty } from "validator";
 import { OpenShiftItem } from "./openshiftItem";
 import { OpenShiftObject, ContextType } from "../odo";
-import { window } from 'vscode';
 import { Progress } from "../util/progress";
-import { isEmpty } from "validator";
 
 export class Storage extends OpenShiftItem {
     static async create(context: OpenShiftObject): Promise<string> {

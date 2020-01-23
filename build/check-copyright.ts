@@ -2,10 +2,11 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import { WatchUtil } from '../src/util/watch';
+
 'use strict';
 
 import walker = require('walker');
-import { WatchUtil } from '../src/util/watch';
 
 let failed = false;
 walker('.').filterDir((dir: string) => dir !== 'node_modules' && dir !== '.vscode-test').on('file', async (file: string) => {
@@ -16,7 +17,7 @@ walker('.').filterDir((dir: string) => dir !== 'node_modules' && dir !== '.vscod
         failed = true;
         console.log('Files without copyright comment:');
       }
-      console.log('- ' + file);
+      console.log(`- ${  file}`);
     }
   }
 }).on('end', () => {

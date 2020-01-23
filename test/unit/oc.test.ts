@@ -13,7 +13,7 @@ import { ToolsConfig } from '../../src/tools';
 import { TestItem } from './openshift/testOSItem';
 import { CliChannel } from '../../src/cli';
 
-const expect = chai.expect;
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('Oc', async () => {

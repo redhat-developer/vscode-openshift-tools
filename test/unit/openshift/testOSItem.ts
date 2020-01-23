@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { OpenShiftObject, ContextType } from "../../../src/odo";
 import { Uri } from "vscode";
+import { OpenShiftObject, ContextType } from "../../../src/odo";
 
 export class TestItem implements OpenShiftObject {
 

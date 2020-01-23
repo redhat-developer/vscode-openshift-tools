@@ -3,18 +3,17 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
-import sinon = require('sinon');
+import { fail } from 'assert';
 import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
 import { OdoImpl, ContextType } from '../../../src/odo';
 import { wait } from '../../../src/util/async';
 import { TestItem } from './testOSItem';
-import { fail } from 'assert';
 
-const expect = chai.expect;
+import sinon = require('sinon');
+
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('OpenShiftItem', () => {

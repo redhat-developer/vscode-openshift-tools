@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
@@ -15,22 +13,23 @@ import { OpenShiftExplorer } from '../../../src/explorer';
 import { CliExitData } from '../../../src/cli';
 import { TestItem } from './testOSItem';
 import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
-import pq = require('proxyquire');
 import { getVscodeModule, TokenStore } from '../../../src/util/credentialManager';
 
-const expect = chai.expect;
+import pq = require('proxyquire');
+
+const {expect} = chai;
 chai.use(sinonChai);
 
 const keytar: any = getVscodeModule('keytar');
 
 suite('Openshift/Cluster', () => {
-    let sandbox: sinon.SinonSandbox,
-        execStub: sinon.SinonStub,
-        commandStub: sinon.SinonStub,
-        inputStub: sinon.SinonStub,
-        infoStub: sinon.SinonStub,
-        loginStub: sinon.SinonStub,
-        quickPickStub: sinon.SinonStub;
+    let sandbox: sinon.SinonSandbox;
+        let execStub: sinon.SinonStub;
+        let commandStub: sinon.SinonStub;
+        let inputStub: sinon.SinonStub;
+        let infoStub: sinon.SinonStub;
+        let loginStub: sinon.SinonStub;
+        let quickPickStub: sinon.SinonStub;
 
     const testData: CliExitData = {
         error: undefined,

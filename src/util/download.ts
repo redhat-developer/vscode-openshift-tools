@@ -3,10 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as fs from 'fs-extra';
+
 const { promisify } = require('util');
 const { fromEvent } = require('rxjs');
 const { throttleTime } = require('rxjs/operators');

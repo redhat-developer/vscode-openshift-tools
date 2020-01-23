@@ -2,7 +2,7 @@
  * Copyright (c) Microsoft Corporation
  * Licensed under the MIT License. See LICENSE file in the project root for license information.
  * Taken from https://www.github.com/microsoft/vscode/src/vs/common/async.ts
- **/
+ * */
 
 /* eslint-disable header/header */
 
@@ -25,9 +25,13 @@ export interface Task<T> {
 export class Delayer<T> {
 
 	private timeout: any;
+
 	private completionPromise: Promise<any> | null;
+
 	private doResolve: ((value?: any | Promise<any>) => void) | null;
+
 	private doReject: (err: any) => void;
+
 	private task: Task<T | Promise<T>> | null;
 
 	constructor(public defaultDelay: number) {
@@ -49,7 +53,7 @@ export class Delayer<T> {
 			}).then(() => {
 				this.completionPromise = null;
 				this.doResolve = null;
-				const task = this.task;
+				const {task} = this;
 				this.task = null;
 
 				return task();
