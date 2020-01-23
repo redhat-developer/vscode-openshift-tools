@@ -111,6 +111,7 @@
     "remap-istanbul": "^0.13.0",
     "sinon": "^7.5.0",
     "sinon-chai": "^3.3.0",
+    "source-map-support": "^0.5.16",
     "tmp": "0.1.0",
     "tslint": "^5.20.1",
     "typescript": "^3.7.2",
