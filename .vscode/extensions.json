@@ -6,5 +6,6 @@
 		"eg2.vscode-npm-script",
 		"ryanluker.vscode-coverage-gutters",
 		"streetsidesoftware.code-spell-checker",
-		"shd101wyy.markdown-preview-enhanced"]
+    "shd101wyy.markdown-preview-enhanced",
+    "esbenp.prettier-vscode"]
 }
