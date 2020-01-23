@@ -1,0 +1,76 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "es6": true,
+    "jasmine": true
+  },
+  "extends": [
+    "airbnb-base",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "prettier",
+    "prettier/@typescript-eslint"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "comment": true,
+    "project": "./tsconfig.json",
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint", "prettier"],
+  "settings": {
+    "import/core-modules": [ "vscode" ],
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import/resolver": {
+      "typescript": {},
+      "node": {
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".ts"
+        ]
+      }
+    },
+    "import/extensions": [
+      ".js",
+      ".jsx",
+      ".ts"
+    ]
+  },  "rules": {
+    "camelcase": 2,
+    "consistent-return": 0,
+    "consistent-this": [1, "that"],
+    "curly": [2, "all"],
+    "default-case": [2],
+    "dot-notation": [2],
+    "no-multiple-empty-lines": [2, { "max": 2, "maxEOF": 0 }],
+    "eqeqeq": [2, "allow-null"],
+    "guard-for-in": 2,
+    "import/no-unresolved": ["error"],
+    "import/no-duplicates": ["error"],
+    "max-nested-callbacks": [1, 4],
+    "no-alert": 2,
+    "no-caller": 2,
+    "no-console": 2,
+    "no-constant-condition": 2,
+    "no-debugger": 2,
+    "no-else-return": ["error"],
+    "no-global-strict": 0,
+    "no-irregular-whitespace": ["error"],
+    "no-shadow": ["error"],
+    "no-underscore-dangle": 0,
+    "@typescript-eslint/no-use-before-define": 2,
+    "@typescript-eslint/await-thenable": "error",
+    "no-var": 2,
+    "object-shorthand": ["error", "properties"],
+    "prefer-const": ["error", { "destructuring": "all" }],
+    "prefer-template": 2,
+    "radix": 2
+  }
+}
