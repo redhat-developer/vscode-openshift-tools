@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
@@ -14,7 +12,7 @@ import { OdoImpl, Command, ContextType } from '../../../src/odo';
 import { Storage } from '../../../src/openshift/storage';
 import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
 
-const expect = chai.expect;
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('OpenShift/Storage', () => {
@@ -85,7 +83,7 @@ suite('OpenShift/Storage', () => {
                 await Storage.create(null);
             } catch (err) {
                 expect(err.message).equals('You need at least one Component available to create an Storage. Please create new OpenShift Project and try again.');
-                return;
+
             }
         });
 

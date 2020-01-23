@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as childProcess from 'child_process';
 import * as vscode from 'vscode';
 import { ExecException, ExecOptions } from 'child_process';
@@ -27,6 +25,7 @@ export interface OdoChannel {
 
 export class CliChannel implements Cli {
     private static instance: CliChannel;
+
     private odoChannel: OdoChannel = new OdoChannelImpl();
 
     static getInstance(): CliChannel {
@@ -80,7 +79,7 @@ class OdoChannelImpl implements OdoChannel {
     print(text: string): void {
         const textData = this.prettifyJson(text);
         this.channel.append(textData);
-        if (textData.charAt(textData.length - 1) !== '\n') {
+        if (!textData.endsWith('\n')) {
             this.channel.append('\n');
         }
         if (vscode.workspace.getConfiguration('openshiftConnector').get<boolean>('showChannelOnOutput')) {

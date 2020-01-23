@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
@@ -13,9 +11,10 @@ import { TestItem } from './testOSItem';
 import { OdoImpl, Command, ContextType } from '../../../src/odo';
 import { Url } from '../../../src/openshift/url';
 import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
+
 import pq = require('proxyquire');
 
-const expect = chai.expect;
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('OpenShift/URL', () => {

@@ -29,13 +29,16 @@ export interface TestRunnerOptions {
 export class CoverageRunner {
 
     private coverageVar = `$$cov_${new Date().getTime()}$$`;
+
     private transformer: any = undefined;
+
     private matchFn: any = undefined;
+
     private instrumenter: any = undefined;
 
     constructor(private options: TestRunnerOptions, private testsRoot: string) {
         if (!options.relativeSourcePath) {
-            return;
+
         }
     }
 
@@ -94,9 +97,8 @@ export class CoverageRunner {
         if (typeof global[this.coverageVar] === 'undefined' || Object.keys(global[this.coverageVar]).length === 0) {
             console.error('No coverage information was collected, exit without writing coverage information');
             return;
-        } else {
-            cov = global[this.coverageVar];
         }
+            cov = global[this.coverageVar];
 
         // TODO consider putting this under a conditional flag
         // Files that are not touched by code ran by the test runner is manually instrumented, to
@@ -119,8 +121,8 @@ export class CoverageRunner {
 
         // TODO Allow config of reporting directory with
         const reportingDir = paths.join(this.testsRoot, this.options.relativeCoverageDir);
-        const includePid = this.options.includePid;
-        const pidExt = includePid ? ('-' + process.pid) : '';
+        const {includePid} = this.options;
+        const pidExt = includePid ? (`-${  process.pid}`) : '';
         const coverageFile = paths.resolve(reportingDir, `coverage${pidExt}.json`);
 
         // yes, do this again since some test runners could clean the dir initially created

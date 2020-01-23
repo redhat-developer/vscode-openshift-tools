@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as chai from 'chai';
@@ -16,16 +14,17 @@ import { Progress } from '../../../src/util/progress';
 import * as Util from '../../../src/util/async';
 import { Refs } from '../../../src/util/refs';
 import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
+
 import pq = require('proxyquire');
 import globby = require('globby');
 
-const expect = chai.expect;
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('OpenShift/Component', () => {
     let quickPickStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
-    let termStub: sinon.SinonStub, execStub: sinon.SinonStub;
+    let termStub: sinon.SinonStub; let execStub: sinon.SinonStub;
     let getComponentsStub: sinon.SinonStub;
     const fixtureFolder = path.join(__dirname, '..', '..', '..', 'test', 'fixtures').normalize();
     const comp1Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp1'));
@@ -89,8 +88,8 @@ suite('OpenShift/Component', () => {
         const version = 'latest';
         const ref = 'master';
         const folder = { uri: { fsPath: 'folder' } };
-        let inputStub: sinon.SinonStub,
-        progressFunctionStub: sinon.SinonStub;
+        let inputStub: sinon.SinonStub;
+        let progressFunctionStub: sinon.SinonStub;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -298,7 +297,7 @@ suite('OpenShift/Component', () => {
         });
 
         suite('from binary file', () => {
-            let fsPath: string, paths: string;
+            let fsPath: string; let paths: string;
             let globbyStub: sinon.SinonStub;
 
             if (process.platform === 'win32') {
@@ -314,7 +313,7 @@ suite('OpenShift/Component', () => {
                 _fsPath: undefined,
                 authority: "",
                 fragment: "",
-                fsPath: fsPath,
+                fsPath,
                 path: paths,
                 query: "",
                 scheme: "file"
@@ -677,7 +676,7 @@ suite('OpenShift/Component', () => {
         const onDidFake = (listener): vscode.Disposable => {
             Promise.resolve().then(() => { listener(undefined); } );
             return {
-                dispose: () => { return; }
+                dispose: () => {  }
             };
         };
 
@@ -1055,7 +1054,7 @@ suite('OpenShift/Component', () => {
     });
 
     suite('push', () => {
-        let getpushStub: sinon.SinonStub<any[], any>, showWarningMessageStub: sinon.SinonStub<[string, vscode.MessageOptions, ...vscode.MessageItem[]], Thenable<vscode.MessageItem>>;
+        let getpushStub: sinon.SinonStub<any[], any>; let showWarningMessageStub: sinon.SinonStub<[string, vscode.MessageOptions, ...vscode.MessageItem[]], Thenable<vscode.MessageItem>>;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');

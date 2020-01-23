@@ -3,22 +3,21 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import * as fs from 'fs-extra';
-import { WatchUtil } from '../../../src/util/watch';
-import tmp = require('tmp');
 import * as path from 'path';
+import { WatchUtil } from '../../../src/util/watch';
 
-const expect = chai.expect;
+import tmp = require('tmp');
+
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('File Watch Utility', () => {
     let sandbox: sinon.SinonSandbox;
-    let ensureStub: sinon.SinonStub, watchStub: sinon.SinonStub;
+    let ensureStub: sinon.SinonStub; let watchStub: sinon.SinonStub;
     const location = 'location';
     const filename = 'file';
 

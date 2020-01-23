@@ -3,23 +3,22 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { Archive } from '../../../src/util/archive';
+
 import targz = require('targz');
 import fs = require('fs-extra');
 import tmp = require('tmp');
 import path = require('path');
 
-const expect = chai.expect;
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('Archive Utility', () => {
     let sandbox: sinon.SinonSandbox;
-    let tarStub: sinon.SinonStub, zipStub: sinon.SinonStub;
+    let tarStub: sinon.SinonStub; let zipStub: sinon.SinonStub;
     const errorMessage = 'FATAL ERROR';
     const extractTo = 'here';
     const tarPath = 'file.tar.gz';

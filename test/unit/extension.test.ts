@@ -21,13 +21,14 @@ import { Project } from '../../src/openshift/project';
 import { Service } from '../../src/openshift/service';
 import { Storage } from '../../src/openshift/storage';
 import { Url } from '../../src/openshift/url';
-import packagejson = require('../../package.json');
 import { OpenShiftExplorer } from '../../src/explorer';
-import path = require('path');
 import { OdoImpl, ContextType, OpenShiftObjectImpl } from '../../src/odo';
 import { Oc } from '../../src/oc';
 
-const expect = chai.expect;
+import packagejson = require('../../package.json');
+import path = require('path');
+
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('openshift connector Extension', async () => {
@@ -126,7 +127,7 @@ suite('openshift connector Extension', async () => {
     test('should register all extension commands declared commands in package descriptor', async () => {
         return await vscode.commands.getCommands(true).then((commands) => {
             packagejson.contributes.commands.forEach((value)=> {
-                expect(commands.indexOf(value.command) > -1, `Command '${value.command}' handler is not registered during activation`).true;
+                expect(commands.includes(value.command), `Command '${value.command}' handler is not registered during activation`).true;
             });
         });
     });

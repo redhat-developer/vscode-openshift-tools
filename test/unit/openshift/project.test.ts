@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
@@ -14,7 +12,7 @@ import { TestItem } from './testOSItem';
 import { Project } from '../../../src/openshift/project';
 import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
 
-const expect = chai.expect;
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('OpenShift/Project', () => {
@@ -133,7 +131,7 @@ suite('OpenShift/Project', () => {
     });
 
     suite('del', () => {
-        let warnStub: sinon.SinonStub, quickPickStub: sinon.SinonStub;
+        let warnStub: sinon.SinonStub; let quickPickStub: sinon.SinonStub;
 
         setup(() => {
             warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');

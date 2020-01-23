@@ -3,12 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
-import * as Odo from '../odo';
 import { QuickPickItem, window } from "vscode";
 
 import * as k8s from 'vscode-kubernetes-tools-api';
+import * as Odo from '../odo';
 import { Node } from './node';
 
 function convertItemToQuickPick(item: any): void {
@@ -17,14 +15,14 @@ function convertItemToQuickPick(item: any): void {
 
 export async function getQuickPicks(cmd: string, errorMessage: string, converter: (item: any) => void = convertItemToQuickPick): Promise<QuickPickItem[]> {
     const result = await Odo.getInstance().execute(cmd);
-    const json: JSON = JSON.parse(result.stdout);
-    if (json['items'].length === 0) {
+    const json: any = JSON.parse(result.stdout);
+    if (json.items.length === 0) {
         throw Error(errorMessage);
     }
-    json['items'].forEach((item: any) => {
+    json.items.forEach((item: any) => {
        converter(item);
     });
-    return json['items'];
+    return json.items;
 }
 
 export async function selectResourceByName(config: Promise<QuickPickItem[]> | QuickPickItem[], placeHolderText: string): Promise<string> {
@@ -38,7 +36,7 @@ export async function getChildrenNode(command: string, kind: string, abbreviatio
         const result = await kubectl.api.invokeCommand(`${command}`);
         const builds = result.stdout.split('\n')
             .filter((value) => value !== '')
-            .map<Node>((item: string) => new Node(item.split(',')[0], item.split(',')[1], Number.parseInt(item.split(',')[2]), kind, abbreviation));
+            .map<Node>((item: string) => new Node(item.split(',')[0], item.split(',')[1], Number.parseInt(item.split(',')[2], 10), kind, abbreviation));
         return builds;
     }
     return [];

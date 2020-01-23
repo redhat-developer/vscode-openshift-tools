@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 export enum GlyphChars {
     Asterisk = '\u2217',
     Check = '\u2713',

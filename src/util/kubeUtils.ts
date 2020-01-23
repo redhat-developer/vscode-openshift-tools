@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import { QuickPickItem } from "vscode";
 import { KubeConfig } from '@kubernetes/client-node';
 import { User, Cluster } from "@kubernetes/client-node/dist/config_types";
@@ -29,7 +27,7 @@ export class KubeConfigUtils extends KubeConfig {
         const currentUser = this.getCurrentUser();
         const cluster = this.findCluster(clusterServer);
         const users = this.getUsers();
-        const clusterUsers = users.filter((item) => cluster && item.name.indexOf(cluster.name) > -1);
+        const clusterUsers = users.filter((item) => cluster && item.name.includes(cluster.name));
         return clusterUsers.map((u: User) => ({
             label: u.name.split('/')[0],
             description: u === currentUser ? 'Current Context' : ''

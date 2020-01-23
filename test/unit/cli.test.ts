@@ -3,15 +3,13 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { CliChannel } from '../../src/cli';
 import * as childProcess from 'child_process';
+import { CliChannel } from '../../src/cli';
 
-const expect = chai.expect;
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('Cli', () => {
@@ -41,7 +39,7 @@ suite('Cli', () => {
         const result = await cli.execute(command, options);
 
         expect(execStub).calledWithExactly(command, options, sinon.match.func);
-        expect(result).deep.equals({ error: null, stdout: stdout, stderr: '' });
+        expect(result).deep.equals({ error: null, stdout, stderr: '' });
     });
 
     test('execute uses a 2MB buffer by default', async () => {
@@ -55,6 +53,6 @@ suite('Cli', () => {
         execStub.yields(error, stdout, stderr);
         const result = await cli.execute(command);
 
-        expect(result).deep.equals({ error: error, stdout: stdout, stderr: stderr });
+        expect(result).deep.equals({ error, stdout, stderr });
     });
 });

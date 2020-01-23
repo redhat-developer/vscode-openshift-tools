@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import {
     TreeDataProvider,
     TreeItem,
@@ -20,8 +18,8 @@ import {
     Uri
 } from 'vscode';
 
-import { Platform } from './util/platform';
 import * as path from 'path';
+import { Platform } from './util/platform';
 
 import { Odo, OpenShiftObject, OdoImpl } from './odo';
 import { WatchUtil, FileContentChangeNotifier } from './util/watch';
@@ -30,10 +28,15 @@ const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
 export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Disposable {
     private static instance: OpenShiftExplorer;
+
     private static odoctl: Odo = OdoImpl.Instance;
+
     private treeView: TreeView<OpenShiftObject>;
+
     private fsw: FileContentChangeNotifier;
+
     private onDidChangeTreeDataEmitter: EventEmitter<OpenShiftObject | undefined> = new EventEmitter<OpenShiftObject | undefined>();
+
     readonly onDidChangeTreeData: Event<OpenShiftObject | undefined> = this.onDidChangeTreeDataEmitter.event;
 
     private constructor() {

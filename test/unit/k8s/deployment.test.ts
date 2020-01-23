@@ -3,19 +3,17 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import * as k8s from 'vscode-kubernetes-tools-api';
+import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { OdoImpl } from '../../../src/odo';
 import { Progress } from '../../../src/util/progress';
 import { DeploymentConfig, Command, DeploymentConfigNodeContributor } from '../../../src/k8s/deployment';
-import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 
-const expect = chai.expect;
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('K8s/deployment', () => {

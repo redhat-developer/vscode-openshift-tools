@@ -5,30 +5,30 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-'use strict';
-
+import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation } from 'vscode';
+import { ChildProcess , exec } from 'child_process';
+import { isURL } from 'validator';
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command, ContextType, ComponentType } from '../odo';
-import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation } from 'vscode';
 import { Progress } from '../util/progress';
-import { ChildProcess } from 'child_process';
 import { CliExitData } from '../cli';
-import { isURL } from 'validator';
 import { Refs, Ref, Type } from '../util/refs';
 import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
+import { selectWorkspaceFolder } from '../util/workspace';
+
+import { ToolsConfig } from '../tools';
+
 import path = require('path');
 import globby = require('globby');
-import { selectWorkspaceFolder } from '../util/workspace';
-import { exec } from 'child_process';
-import { ToolsConfig } from '../tools';
 const waitPort = require('wait-port');
 const getPort = require('get-port');
 
 export class Component extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
+
     static async getOpenshiftData(context: OpenShiftObject): Promise<OpenShiftObject> {
-        return await Component.getOpenShiftCmdData(context,
+        return Component.getOpenShiftCmdData(context,
             "In which Project you want to create a Component",
             "In which Application you want to create a Component"
         );
@@ -112,11 +112,11 @@ export class Component extends OpenShiftItem {
 
     static async unlinkAllComponents(component: OpenShiftObject): Promise<void> {
         const linkComponent = await Component.getLinkData(component);
-        const getLinkComponent = linkComponent['status'].linkedComponents;
+        const getLinkComponent = linkComponent.status.linkedComponents;
         if (getLinkComponent) {
             for (const key of Object.keys(getLinkComponent)) {
                 const getLinkPort = await Component.getLinkPort(component, key);
-                const getPort = getLinkPort['status'].linkedComponents[component.getName()];
+                const getPort = getLinkPort.status.linkedComponents[component.getName()];
                 if (getPort) {
                     for (const port of getPort) {
                         await Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), key, component.getName(), port), component.contextPath.fsPath);
@@ -189,14 +189,14 @@ export class Component extends OpenShiftItem {
         );
         if (!component) return null;
         const linkComponent = await Component.getLinkData(component);
-        const getLinkComponent = linkComponent['status'].linkedComponents;
+        const getLinkComponent = linkComponent.status.linkedComponents;
         if (!getLinkComponent) throw Error('No linked Components found');
         Object.keys(getLinkComponent).forEach(async key => {
             linkCompName.push(key);
         });
         const compName = await window.showQuickPick(linkCompName, {placeHolder: "Select a Component to unlink", ignoreFocusOut: true});
         if (!compName) return null;
-        const getLinkPort = linkComponent['status'].linkedComponents[compName];
+        const getLinkPort = linkComponent.status.linkedComponents[compName];
         const port = await window.showQuickPick(getLinkPort, {placeHolder: "Select a Port"});
         if (!port) return null;
         return Progress.execFunctionWithProgress(`Unlinking Component`,
@@ -215,7 +215,7 @@ export class Component extends OpenShiftItem {
         );
         if (!component) return null;
         const linkService = await Component.getLinkData(component);
-        const getLinkService = linkService['status'].linkedServices;
+        const getLinkService = linkService.status.linkedServices;
         if (!getLinkService) throw Error('No linked Services found');
         const serviceName = await window.showQuickPick(getLinkService, {placeHolder: "Select a Service to unlink", ignoreFocusOut: true});
         if (!serviceName) return null;
@@ -277,7 +277,7 @@ export class Component extends OpenShiftItem {
         );
     }
 
-    static getPushCmd(): Thenable<string | undefined> {
+    static getPushCmd(): Thenable<{pushCmd: string; contextPath: string}> {
         return this.extensionContext.globalState.get('PUSH');
     }
 
@@ -331,8 +331,8 @@ export class Component extends OpenShiftItem {
 
     static async lastPush(): Promise<void> {
         const getPushCmd = await Component.getPushCmd();
-        if (getPushCmd['pushCmd'] && getPushCmd['contextPath']) {
-            Component.odo.executeInTerminal(getPushCmd['pushCmd'], getPushCmd['contextPath']);
+        if (getPushCmd.pushCmd && getPushCmd.contextPath) {
+            Component.odo.executeInTerminal(getPushCmd.pushCmd, getPushCmd.contextPath);
         } else {
             throw Error('No existing push command found');
         }
@@ -375,10 +375,10 @@ export class Component extends OpenShiftItem {
                     selectRoute = await window.showQuickPick(hostName, {placeHolder: "This Component has multiple URLs. Select the desired URL to open in browser.", ignoreFocusOut: true});
                     if (!selectRoute) return null;
                     return commands.executeCommand('vscode.open', Uri.parse(`${selectRoute.label}`));
-                } else {
-                    return commands.executeCommand('vscode.open', Uri.parse(`${hostName[0].label}`));
                 }
-            } else if (unpushedUrl.length > 0) {
+                    return commands.executeCommand('vscode.open', Uri.parse(`${hostName[0].label}`));
+
+            } if (unpushedUrl.length > 0) {
                 return `${unpushedUrl.length} unpushed URL in the local config. Use 'Push' command before opening URL in browser.`;
             }
         }
@@ -627,7 +627,7 @@ export class Component extends OpenShiftItem {
         const componentType = componentJson.metadata.annotations['app.kubernetes.io/component-source-type'];
         if (componentType === ComponentType.BINARY) {
             return 'Import for binary OpenShift Components is not supported.';
-        } else if (componentType !== ComponentType.GIT && componentType !== ComponentType.LOCAL) {
+        } if (componentType !== ComponentType.GIT && componentType !== ComponentType.LOCAL) {
             throw new Error(`Cannot import unknown Component type '${componentType}'.`);
         }
 

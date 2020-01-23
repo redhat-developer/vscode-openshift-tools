@@ -3,16 +3,15 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { wait } from '../../../src/util/async';
-import pq = require('proxyquire');
 import { EventEmitter } from 'events';
+import { wait } from '../../../src/util/async';
 
-const expect = chai.expect;
+import pq = require('proxyquire');
+
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('Download Util', () => {
@@ -47,7 +46,7 @@ suite('Download Util', () => {
         sandbox.restore();
     });
 
-    test('reports download progress', async () => {
+    test('reports download progress', () => {
         const callback = sandbox.stub();
         const result = progressMock.downloadFile('url', 'toFile', callback);
         return result.then(() => {

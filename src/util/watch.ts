@@ -3,12 +3,11 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as fs from 'fs';
 import * as fsxt from 'fs-extra';
 import * as path from 'path';
 import { EventEmitter } from 'events';
+
 import byline = require('byline');
 
 export class WatchUtil {

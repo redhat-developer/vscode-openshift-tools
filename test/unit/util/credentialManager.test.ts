@@ -3,15 +3,13 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 
 import { TokenStore, getVscodeModule } from '../../../src/util/credentialManager';
 
-const expect = chai.expect;
+const {expect} = chai;
 chai.use(sinonChai);
 
 const keytar: any = getVscodeModule('keytar');

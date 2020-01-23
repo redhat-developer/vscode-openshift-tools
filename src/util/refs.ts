@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 //  Inspired by https://github.com/sindresorhus/remote-git-tags
 /* eslint-disable header/header */
-'use strict';
 
 import url = require('url');
 import net = require('net');
@@ -18,7 +17,9 @@ export enum Type {
 
 export class Ref {
     name: string;
+
     type: Type;
+
     hash: string;
 }
 
@@ -36,16 +37,16 @@ export class Refs {
             const tags = new Map<string, Ref>();
 
             client.refs.on('data', (ref: { name: string; hash: string }) => {
-                if (ref.name.indexOf('/') < 0) {
+                if (!ref.name.includes('/')) {
                     tags.set(ref.name, { name: ref.name, type: Type.BRANCH, hash: ref.hash.substr(0, 7) });
                     return;
                 }
                 const name = ref.name.split('/')[2].replace(/\^\{\}$/, '');
-                if (/^refs\/heads/.test(ref.name)) {
+                if (ref.name.startsWith("refs/heads")) {
                    tags.set(name, { name, type: Type.BRANCH, hash: ref.hash.substr(0, 7) });
                 }
 
-                if (/^refs\/tags/.test(ref.name)) {
+                if (ref.name.startsWith("refs/tags")) {
                     tags.set(name, { name, type: Type.TAG, hash: ref.hash.substr(0, 7) });
                 }
             });

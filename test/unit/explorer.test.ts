@@ -8,9 +8,10 @@ import * as sinonChai from 'sinon-chai';
 import { OpenShiftExplorer } from '../../src/explorer';
 import { OdoImpl, ContextType } from '../../src/odo';
 import { TestItem } from './openshift/testOSItem';
+
 import sinon = require('sinon');
 
-const expect = chai.expect;
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('OpenShift Application Explorer', () => {

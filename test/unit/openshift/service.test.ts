@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
@@ -15,7 +13,7 @@ import { Progress } from '../../../src/util/progress';
 import { Service } from '../../../src/openshift/service';
 import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
 
-const expect = chai.expect;
+const {expect} = chai;
 chai.use(sinonChai);
 
 suite('OpenShift/Service', () => {
@@ -152,9 +150,9 @@ suite('OpenShift/Service', () => {
     });
 
     suite('create', () => {
-        let inputStub: sinon.SinonStub,
-            progressStub: sinon.SinonStub,
-            getSvcTemplatePlansStub: sinon.SinonStub;
+        let inputStub: sinon.SinonStub;
+            let progressStub: sinon.SinonStub;
+            let getSvcTemplatePlansStub: sinon.SinonStub;
 
         setup(() => {
             sandbox.stub(OdoImpl.prototype, 'getServiceTemplates').resolves([]);
