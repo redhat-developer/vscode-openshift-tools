@@ -33,6 +33,8 @@ node('rhel7'){
         writeJSON file: 'package.json', json: packageJson, pretty: 4
         sh "vsce package -o openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix"
 		sh "sha256sum *.vsix > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix.sha256"
+		sh "npm pack && mv vscode-openshift-connector-${packageJson.version}.tgz openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.tgz
+		sh "sha256sum *.tgz > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.tgz.sha256"
 	}
 
 	if(params.UPLOAD_LOCATION) {
@@ -52,10 +54,11 @@ node('rhel7'){
                 def vsix = findFiles(glob: '**.vsix')
                 sh 'vsce publish -p ${TOKEN} --packagePath' + " ${vsix[0].path}"
             }
-            archive includes:"**.vsix*"
+            archive includes:"**.vsix*","**.tgz*"
 
             stage "Promote the build to stable"
 			sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.vsix* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
+			sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.tgz* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
         }
 	}
 }
