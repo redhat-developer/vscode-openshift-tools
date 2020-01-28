@@ -132,7 +132,7 @@ suite('OpenShift/Application', () => {
             } catch (err) {
                 expectedError = err;
             }
-            expect(expectedError).equals(`Failed to delete Application with error 'ERROR'`);
+            expect(expectedError.message).equals(`Failed to delete Application with error 'ERROR'`);
         });
 
         test('requests for a project name and exits if not provided', async () => {

@@ -9,64 +9,54 @@ import { OdoImpl, Odo } from "../odo";
 import { Progress } from "../util/progress";
 import * as common from './common';
 
-export class Command {
-
-    static getAllBuilds(parent: ClusterExplorerV1.ClusterExplorerNode): string {
-        return `get build -o jsonpath="{range .items[?(.metadata.labels.buildconfig=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/build\\.number}{\\"\\n\\"}{end}"`;
-    }
-
-    static startBuild(buildConfig: string): string {
-        return `oc start-build ${buildConfig}`;
-    }
-
-    static getBuilds(build: string): string {
-        return `oc get build -l buildconfig=${build} -o json`;
-    }
-
-    static showLog(build: string, text: string): string {
-        return `oc logs ${build}${text}`;
-    }
-
-    static rebuildFrom(resourceId: string): string {
-        return `oc start-build --from-build ${resourceId}`;
-    }
-
-    static followLog(build: string, text: string): string {
-        return `oc logs ${build}${text} -f`;
-    }
-
-    static delete(build: string): string {
-        return `oc delete build ${build}`;
-    }
-
-    static getBuildConfigs(): string {
-        return `oc get buildConfig -o json`;
-    }
-}
-
-export class BuildConfigNodeContributor implements ClusterExplorerV1.NodeContributor {
-    contributesChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): boolean {
-        return !!parent && parent.nodeType === 'resource' && parent.resourceKind.manifestKind === 'BuildConfig';
-    }
-
-    async getChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): Promise<ClusterExplorerV1.Node[]> {
-        return common.getChildrenNode(Command.getAllBuilds(parent), 'Build', 'build');
-    }
-}
-
 export class Build {
+
+    public static command = {
+      getAllBuilds(parent: ClusterExplorerV1.ClusterExplorerNode): string {
+          return `get build -o jsonpath="{range .items[?(.metadata.labels.buildconfig=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/build\\.number}{\\"\\n\\"}{end}"`;
+      },
+      startBuild(buildConfig: string): string {
+          return `oc start-build ${buildConfig}`;
+      },
+      getBuilds(build: string): string {
+          return `oc get build -l buildconfig=${build} -o json`;
+      },
+      showLog(build: string, text: string): string {
+          return `oc logs ${build}${text}`;
+      },
+      rebuildFrom(resourceId: string): string {
+          return `oc start-build --from-build ${resourceId}`;
+      },
+      followLog(build: string, text: string): string {
+          return `oc logs ${build}${text} -f`;
+      },
+      delete(build: string): string {
+          return `oc delete build ${build}`;
+      },
+      getBuildConfigs(): string {
+          return `oc get buildConfig -o json`;
+      }
+  };
+
     protected static readonly odo: Odo = OdoImpl.Instance;
 
+    static getNodeContributor(): ClusterExplorerV1.NodeContributor {
+      return {
+          contributesChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): boolean {
+             return !!parent && parent.nodeType === 'resource' && parent.resourceKind.manifestKind === 'BuildConfig';
+          },
+          async getChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): Promise<ClusterExplorerV1.Node[]> {
+              return common.getChildrenNode(Build.command.getAllBuilds(parent), 'Build', 'build');
+          }
+      };
+    }
+
     static async getBuildConfigNames(msg: string): Promise<QuickPickItem[]> {
-        return common.getQuickPicks(
-            Command.getBuildConfigs(),
-            msg);
+        return common.getQuickPicks(Build.command.getBuildConfigs(), msg);
     }
 
     static async getBuildNames(buildConfig: string): Promise<QuickPickItem[]> {
-        return common.getQuickPicks(
-            Command.getBuilds(buildConfig),
-            'You have no builds available');
+        return common.getQuickPicks(Build.command.getBuilds(buildConfig), 'You have no builds available');
     }
 
     static async selectBuild(context: any, text: string): Promise<string> {
@@ -88,9 +78,9 @@ export class Build {
         let result: Promise<string> = null;
         if (!buildName) buildName = await common.selectResourceByName(await Build.getBuildConfigNames("You have no BuildConfigs available to start a build"), "Select a BuildConfig to start a build");
         if (buildName) {
-            result = Progress.execFunctionWithProgress(`Starting build`, () => Build.odo.execute(Command.startBuild(buildName)))
+            result = Progress.execFunctionWithProgress(`Starting build`, () => Build.odo.execute(Build.command.startBuild(buildName)))
                 .then(() => `Build '${buildName}' successfully started`)
-                .catch((err) => Promise.reject(`Failed to start build with error '${err}'`));
+                .catch((err) => Promise.reject(new Error(`Failed to start build with error '${err}'`)));
         }
         return result;
     }
@@ -98,7 +88,7 @@ export class Build {
     static async showLog(context: { impl: any}): Promise<string> {
         const build = await Build.selectBuild(context, "Select a build too see the logs");
         if (build) {
-            Build.odo.executeInTerminal(Command.showLog(build, '-build'));
+            Build.odo.executeInTerminal(Build.command.showLog(build, '-build'));
         }
         return build;
     }
@@ -114,7 +104,7 @@ export class Build {
             }
         }
         if (resourceId) {
-            Build.odo.executeInTerminal(Command.rebuildFrom(resourceId));
+            Build.odo.executeInTerminal(Build.command.rebuildFrom(resourceId));
         }
         return null;
     }
@@ -122,7 +112,7 @@ export class Build {
     static async followLog(context: { impl: any}): Promise<string> {
         const build = await Build.selectBuild(context, "Select a build too follow the logs");
         if (build) {
-            Build.odo.executeInTerminal(Command.followLog(build, '-build'));
+            Build.odo.executeInTerminal(Build.command.followLog(build, '-build'));
         }
         return null;
     }
@@ -131,9 +121,9 @@ export class Build {
         let result: null | string | Promise<string> | PromiseLike<string> = null;
         const build = await Build.selectBuild(context, "Select a build too delete");
         if (build) {
-            result = Progress.execFunctionWithProgress(`Deleting build`, () => Build.odo.execute(Command.delete(build)))
+            result = Progress.execFunctionWithProgress(`Deleting build`, () => Build.odo.execute(Build.command.delete(build)))
                 .then(() => `Build '${build}' successfully deleted`)
-                .catch((err) => Promise.reject(`Failed to delete build with error '${err}'`));
+                .catch((err) => Promise.reject(new Error(`Failed to delete build with error '${err}'`)));
         }
         return result;
     }

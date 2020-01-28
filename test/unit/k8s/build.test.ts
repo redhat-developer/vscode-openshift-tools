@@ -10,7 +10,7 @@ import * as sinon from 'sinon';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { OdoImpl } from '../../../src/odo';
-import { Build, Command, BuildConfigNodeContributor } from '../../../src/k8s/build';
+import { Build } from '../../../src/k8s/build';
 import { Progress } from '../../../src/util/progress';
 
 const {expect} = chai;
@@ -100,7 +100,7 @@ suite('K8s/build', () => {
         });
 
         test('should able to get the children node of build Config', async () => {
-            const bcnc = new BuildConfigNodeContributor();
+            const bcnc = Build.getNodeContributor();
             const result = await bcnc.getChildren(parent);
             expect(result.length).equals(1);
         });
@@ -166,14 +166,14 @@ suite('K8s/build', () => {
             const result = await Build.startBuild(context);
 
             expect(result).equals(`Build '${context.name}' successfully started`);
-            expect(execStub).calledWith(Command.startBuild(context.name));
+            expect(execStub).calledWith(Build.command.startBuild(context.name));
         });
 
         test('works with no context', async () => {
             const result = await Build.startBuild(null);
 
             expect(result).equals(`Build '${context.name}' successfully started`);
-            expect(execStub).calledWith(Command.startBuild(context.name));
+            expect(execStub).calledWith(Build.command.startBuild(context.name));
         });
 
         test('returns null when no BuildConfig selected', async () => {
@@ -188,7 +188,7 @@ suite('K8s/build', () => {
             try {
                 await Build.startBuild(context);
             } catch (err) {
-                expect(err).equals(`Failed to start build with error '${errorMessage}'`);
+                expect(err.message).equals(`Failed to start build with error '${errorMessage}'`);
             }
         });
 
@@ -218,12 +218,12 @@ suite('K8s/build', () => {
 
         test('works from context menu', async () => {
             await Build.showLog(context);
-            expect(termStub).calledOnceWith(Command.showLog(context.impl.name, '-build'));
+            expect(termStub).calledOnceWith(Build.command.showLog(context.impl.name, '-build'));
         });
 
         test('works with no context', async () => {
             await Build.showLog(null);
-            expect(termStub).calledOnceWith(Command.showLog('nodejs-copm-nodejs-comp-8', '-build'));
+            expect(termStub).calledOnceWith(Build.command.showLog('nodejs-copm-nodejs-comp-8', '-build'));
         });
 
         test('returns null when no build selected', async () => {
@@ -245,14 +245,14 @@ suite('K8s/build', () => {
         test('works from context menu', async () => {
             execStub.resolves({ error: null, stdout: "nodejs-copm-nodejs-comp", stderr: '' });
             await Build.rebuild(context);
-            expect(termStub).calledOnceWith(Command.rebuildFrom(context.impl.name));
+            expect(termStub).calledOnceWith(Build.command.rebuildFrom(context.impl.name));
         });
 
         test('works with no context', async () => {
             execStub.onFirstCall().resolves({ error: null, stdout: buildData, stderr: '' });
             execStub.onSecondCall().resolves({ error: null, stdout: "nodejs-copm-nodejs-comp", stderr: '' });
             await Build.rebuild(null);
-            expect(termStub).calledOnceWith(Command.rebuildFrom("nodejs-copm-nodejs-comp-8"));
+            expect(termStub).calledOnceWith(Build.command.rebuildFrom("nodejs-copm-nodejs-comp-8"));
         });
 
         test('returns null when no build selected to rebuild', async () => {
@@ -275,12 +275,12 @@ suite('K8s/build', () => {
 
         test('works from context menu', async () => {
             await Build.followLog(context);
-            expect(termStub).calledOnceWith(Command.followLog(context.impl.name, '-build'));
+            expect(termStub).calledOnceWith(Build.command.followLog(context.impl.name, '-build'));
         });
 
         test('works with no context', async () => {
             await Build.followLog(null);
-            expect(termStub).calledOnceWith(Command.followLog('nodejs-copm-nodejs-comp-8', '-build'));
+            expect(termStub).calledOnceWith(Build.command.followLog('nodejs-copm-nodejs-comp-8', '-build'));
         });
 
         test('returns null when no build selected', async () => {
@@ -302,14 +302,14 @@ suite('K8s/build', () => {
             const result = await Build.delete(context);
 
             expect(result).equals(`Build '${context.impl.name}' successfully deleted`);
-            expect(execStub).calledWith(Command.delete(context.impl.name));
+            expect(execStub).calledWith(Build.command.delete(context.impl.name));
         });
 
         test('works with no context', async () => {
             const result = await Build.delete(null);
 
             expect(result).equals(`Build 'nodejs-copm-nodejs-comp-8' successfully deleted`);
-            expect(execStub).calledWith(Command.delete('nodejs-copm-nodejs-comp-8'));
+            expect(execStub).calledWith(Build.command.delete('nodejs-copm-nodejs-comp-8'));
         });
 
         test('returns null when no build selected to delete', async () => {
@@ -324,7 +324,7 @@ suite('K8s/build', () => {
             try {
                 await Build.delete(context);
             } catch (err) {
-                expect(err).equals(`Failed to delete build with error '${errorMessage}'`);
+                expect(err.message).equals(`Failed to delete build with error '${errorMessage}'`);
             }
         });
     });

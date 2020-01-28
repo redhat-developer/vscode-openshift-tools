@@ -24,7 +24,8 @@
   "plugins": [
     "@typescript-eslint",
     "prettier",
-    "header"],
+    "header",
+    "import"],
   "settings": {
     "import/core-modules": [ "vscode" ],
     "import/parsers": {
@@ -58,6 +59,7 @@
     "guard-for-in": 2,
     "import/no-unresolved": ["error"],
     "import/no-duplicates": ["error"],
+    "import/prefer-default-export": 0,
     "max-nested-callbacks": [1, 4],
     "no-alert": 2,
     "no-caller": 2,

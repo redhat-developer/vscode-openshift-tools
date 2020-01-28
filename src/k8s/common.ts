@@ -9,20 +9,19 @@ import * as k8s from 'vscode-kubernetes-tools-api';
 import * as Odo from '../odo';
 import { Node } from './node';
 
-function convertItemToQuickPick(item: any): void {
-    item.label = item.metadata.name;
+function convertItemToQuickPick(item: any): QuickPickItem {
+    const qp = item;
+    qp.label = item.metadata.name;
+    return qp;
 }
 
-export async function getQuickPicks(cmd: string, errorMessage: string, converter: (item: any) => void = convertItemToQuickPick): Promise<QuickPickItem[]> {
+export async function getQuickPicks(cmd: string, errorMessage: string, converter: (item: any) => QuickPickItem = convertItemToQuickPick): Promise<QuickPickItem[]> {
     const result = await Odo.getInstance().execute(cmd);
-    const json: any = JSON.parse(result.stdout);
+    const json = JSON.parse(result.stdout);
     if (json.items.length === 0) {
         throw Error(errorMessage);
     }
-    json.items.forEach((item: any) => {
-       converter(item);
-    });
-    return json.items;
+    return json.items.map(converter);
 }
 
 export async function selectResourceByName(config: Promise<QuickPickItem[]> | QuickPickItem[], placeHolderText: string): Promise<string> {

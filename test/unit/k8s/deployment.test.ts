@@ -11,7 +11,7 @@ import * as k8s from 'vscode-kubernetes-tools-api';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { OdoImpl } from '../../../src/odo';
 import { Progress } from '../../../src/util/progress';
-import { DeploymentConfig, Command, DeploymentConfigNodeContributor } from '../../../src/k8s/deployment';
+import { DeploymentConfig } from '../../../src/k8s/deployment';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -99,7 +99,7 @@ suite('K8s/deployment', () => {
     });
 
     suite('DeploymentConfigNodeContributor', () => {
-        let dcnc: DeploymentConfigNodeContributor;
+        let dcnc;
         let kubectlV1Stub: sinon.SinonStub<any[], any>;
         const parent = {
             metadata: undefined,
@@ -117,7 +117,7 @@ suite('K8s/deployment', () => {
         } as ClusterExplorerV1.ClusterExplorerNode;
 
         setup(() => {
-            dcnc = new DeploymentConfigNodeContributor();
+            dcnc = DeploymentConfig.getNodeContributor();
             const api: k8s.API<k8s.KubectlV1> = {
                 available: true,
                 api: {
@@ -163,14 +163,14 @@ suite('K8s/deployment', () => {
             const result = await DeploymentConfig.deploy(context);
 
             expect(result).equals(`Deployment successfully created for '${context.name}'.`);
-            expect(execStub).calledWith(Command.deploy(context.name));
+            expect(execStub).calledWith(DeploymentConfig.command.deploy(context.name));
         });
 
         test('works with no context', async () => {
             const result = await DeploymentConfig.deploy(null);
 
             expect(result).equals(`Deployment successfully created for '${context.name}'.`);
-            expect(execStub).calledWith(Command.deploy(context.name));
+            expect(execStub).calledWith(DeploymentConfig.command.deploy(context.name));
         });
 
         test('returns null when no DeploymentConfig selected', async () => {
@@ -185,7 +185,7 @@ suite('K8s/deployment', () => {
             try {
                 await DeploymentConfig.deploy(context);
             } catch (err) {
-                expect(err).equals(`Failed to create Deployment with error '${errorMessage}'.`);
+                expect(err.message).equals(`Failed to create Deployment with error '${errorMessage}'.`);
             }
         });
 
@@ -221,12 +221,12 @@ suite('K8s/deployment', () => {
 
         test('works from context menu', async () => {
             await DeploymentConfig.showLog(context);
-            expect(termStub).calledOnceWith(Command.showDeploymentConfigLog("nodejs-comp-nodejs-app"));
+            expect(termStub).calledOnceWith(DeploymentConfig.command.showDeploymentConfigLog("nodejs-comp-nodejs-app"));
         });
 
         test('works with no context', async () => {
             await DeploymentConfig.showLog(null);
-            expect(termStub).calledOnceWith(Command.showDeploymentConfigLog('nodejs-comp-nodejs-app'));
+            expect(termStub).calledOnceWith(DeploymentConfig.command.showDeploymentConfigLog('nodejs-comp-nodejs-app'));
         });
 
         test('returns null when no replica selected', async () => {
@@ -249,12 +249,12 @@ suite('K8s/deployment', () => {
 
         test('works from context menu', async () => {
             await DeploymentConfig.rcShowLog(context);
-            expect(termStub).calledOnceWith(Command.showLog("comp1-app-2"));
+            expect(termStub).calledOnceWith(DeploymentConfig.command.showLog("comp1-app-2"));
         });
 
         test('works with no context', async () => {
             await DeploymentConfig.rcShowLog(null);
-            expect(termStub).calledOnceWith(Command.showLog('comp1-app-1'));
+            expect(termStub).calledOnceWith(DeploymentConfig.command.showLog('comp1-app-1'));
         });
 
         test('returns null when no replica selected', async () => {
@@ -278,7 +278,7 @@ suite('K8s/deployment', () => {
             const result = await DeploymentConfig.delete(context);
 
             expect(result).equals(`Replica '${context.impl.name}' successfully deleted`);
-            expect(execStub).calledWith(Command.delete(context.impl.name));
+            expect(execStub).calledWith(DeploymentConfig.command.delete(context.impl.name));
         });
 
         test('works with no context', async () => {
@@ -287,7 +287,7 @@ suite('K8s/deployment', () => {
             const result = await DeploymentConfig.delete(null);
 
             expect(result).equals(`Replica '${context.impl.name}' successfully deleted`);
-            expect(execStub).calledWith(Command.delete(context.impl.name));
+            expect(execStub).calledWith(DeploymentConfig.command.delete(context.impl.name));
         });
 
         test('returns null when no ReplicationController selected to delete', async () => {
@@ -302,7 +302,7 @@ suite('K8s/deployment', () => {
             try {
                 await DeploymentConfig.delete(context);
             } catch (err) {
-                expect(err).equals(`Failed to delete replica with error '${errorMessage}'`);
+                expect(err.message).equals(`Failed to delete replica with error '${errorMessage}'`);
             }
         });
     });

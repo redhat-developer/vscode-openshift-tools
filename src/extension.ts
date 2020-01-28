@@ -5,7 +5,6 @@
 
 import * as vscode from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
-import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { OpenShiftExplorer } from './explorer';
 import { Cluster } from './openshift/cluster';
 import { Catalog } from './openshift/catalog';
@@ -16,8 +15,8 @@ import { Storage } from './openshift/storage';
 import { Url } from './openshift/url';
 import { Service } from './openshift/service';
 import { Platform } from './util/platform';
-import { BuildConfigNodeContributor , Build } from './k8s/build';
-import { DeploymentConfigNodeContributor , DeploymentConfig } from './k8s/deployment';
+import { Build } from './k8s/build';
+import { DeploymentConfig } from './k8s/deployment';
 import { Console } from './k8s/console';
 import { OdoImpl } from './odo';
 
@@ -26,12 +25,103 @@ import { Oc } from './oc';
 
 import path = require('path');
 import fsx = require('fs-extra');
+import treeKill = require('tree-kill');
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined;
 
-export async function activate(context: vscode.ExtensionContext) {
+let lastNamespace = '';
+
+async function isOpenShift(): Promise<boolean> {
+  const kubectl = await k8s.extension.kubectl.v1;
+  if (kubectl.available) {
+      const sr = await kubectl.api.invokeCommand('api-versions');
+      if (!sr || sr.code !== 0) {
+          return false;
+      }
+      return sr.stdout.includes("apps.openshift.io/v1");  // Naive check to keep example simple!
+  }
+}
+
+async function initNamespaceName(node: k8s.ClusterExplorerV1.ClusterExplorerResourceNode): Promise<string | undefined> {
+  const kubectl = await k8s.extension.kubectl.v1;
+  if (kubectl.available) {
+      const result = await kubectl.api.invokeCommand('config view -o json');
+      const config = JSON.parse(result.stdout);
+      const currentContext = (config.contexts || []).find((ctx) => ctx.name === node.name);
+      if (!currentContext) {
+          return '';
+      }
+      return currentContext.context.namespace || 'default';
+  }
+}
+
+async function customizeAsync(node: k8s.ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): Promise<void> {
+  if ((node as any).nodeType === 'context') {
+      lastNamespace = await initNamespaceName(node);
+      if (await isOpenShift()) {
+          treeItem.iconPath = vscode.Uri.file(path.join(__dirname, "../../images/context/cluster-node.png"));
+      }
+  }
+  if (node.nodeType === 'resource' && node.resourceKind.manifestKind === 'Project') {
+      // assuming now that it’s a project node
+      const projectName = node.name;
+      if (projectName === lastNamespace) {
+          treeItem.label = `* ${treeItem.label}`;
+      } else {
+          treeItem.contextValue = `${treeItem.contextValue || ''}.openshift.inactiveProject`;
+      }
+  }
+  if (node.nodeType === 'resource' && (node.resourceKind.manifestKind === 'BuildConfig' || node.resourceKind.manifestKind === 'DeploymentConfig')) {
+      treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+  }
+}
+
+function customize(node: k8s.ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): void | Thenable<void> {
+    return customizeAsync(node, treeItem);
+}
+
+// this method is called when your extension is deactivated
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export function deactivate(): void {
+}
+
+function displayResult(result?: any): void {
+  if (result && typeof result === 'string') {
+      vscode.window.showInformationMessage(result);
+  }
+}
+
+function execute<T>(command: (...args: T[]) => Promise<any> | void, ...params: T[]): Promise<any> {
+    try {
+        const res = command.call(null, ...params);
+        return res && res.then
+            ? res.then((result: any) => {
+                displayResult(result);
+
+            }).catch((err: any) => {
+                vscode.window.showErrorMessage(err.message ? err.message : err);
+            })
+            : undefined;
+    } catch (err) {
+        vscode.window.showErrorMessage(err);
+    }
+}
+
+function migrateFromOdo018(): void {
+  const newCfgDir = path.join(Platform.getUserHomePath(), '.odo');
+  const newCfg = path.join(newCfgDir, 'odo-config.yaml');
+  const oldCfg = path.join(Platform.getUserHomePath(), '.kube', 'odo');
+  if (!fsx.existsSync(newCfg) && fsx.existsSync(oldCfg)) {
+      fsx.ensureDirSync(newCfgDir);
+      fsx.copyFileSync(oldCfg, newCfg);
+  }
+}
+
+export async function activate(extensionContext: vscode.ExtensionContext) {
     migrateFromOdo018();
-    Cluster.extensionContext = Component.extensionContext = TokenStore.extensionContext = context;
+    Cluster.extensionContext = extensionContext;
+    Component.extensionContext = extensionContext;
+    TokenStore.extensionContext = extensionContext;
     const disposable = [
         vscode.commands.registerCommand('openshift.about', (context) => execute(Cluster.about, context)),
         vscode.commands.registerCommand('openshift.create', (context) => execute(Oc.create, context)),
@@ -116,7 +206,7 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('clusters.openshift.useProject', (context) => vscode.commands.executeCommand('extension.vsKubernetesUseNamespace', context)),
         OpenShiftExplorer.getInstance()
     ];
-    disposable.forEach((value) => context.subscriptions.push(value));
+    disposable.forEach((value) => extensionContext.subscriptions.push(value));
 
     const clusterExplorerAPI = await k8s.extension.clusterExplorer.v1;
 
@@ -129,8 +219,8 @@ export async function activate(context: vscode.ExtensionContext) {
             clusterExplorer.nodeSources.resourceFolder("Routes", "Routes", "Route", "route").if(isOpenShift).at("Network"),
             clusterExplorer.nodeSources.resourceFolder("DeploymentConfigs", "DeploymentConfigs", "DeploymentConfig", "dc").if(isOpenShift).at("Workloads"),
             clusterExplorer.nodeSources.resourceFolder("BuildConfigs", "BuildConfigs", "BuildConfig", "bc").if(isOpenShift).at("Workloads"),
-            new BuildConfigNodeContributor(),
-            new DeploymentConfigNodeContributor()
+            Build.getNodeContributor(),
+            DeploymentConfig.getNodeContributor()
         ];
         nodeContributors.forEach(element => {
             clusterExplorer.registerNodeContributor(element);
@@ -141,98 +231,10 @@ export async function activate(context: vscode.ExtensionContext) {
         OdoImpl.Instance.loadWorkspaceComponents(event);
     });
     OdoImpl.Instance.loadWorkspaceComponents(null);
-    context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(session => {
+    extensionContext.subscriptions.push(vscode.debug.onDidTerminateDebugSession(session => {
         if (session.configuration.odoPid) {
             // eslint-disable-next-line @typescript-eslint/no-var-requires
-            require('tree-kill')(session.configuration.odoPid);
+            treeKill(session.configuration.odoPid);
         }
     }));
-}
-
-let lastNamespace = '';
-
-function customize(node: ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): void | Thenable<void> {
-    return customizeAsync(node, treeItem);
-}
-
-async function initNamespaceName(node: ClusterExplorerV1.ClusterExplorerResourceNode): Promise<string | undefined> {
-    const kubectl = await k8s.extension.kubectl.v1;
-    if (kubectl.available) {
-        const result = await kubectl.api.invokeCommand('config view -o json');
-        const config = JSON.parse(result.stdout);
-        const currentContext = (config.contexts || []).find((ctx) => ctx.name === node.name);
-        if (!currentContext) {
-            return '';
-        }
-        return currentContext.context.namespace || 'default';
-    }
-}
-
-async function customizeAsync(node: ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): Promise<void> {
-    if ((node as any).nodeType === 'context') {
-        lastNamespace = await initNamespaceName(node);
-        if (isOpenShift()) {
-            treeItem.iconPath = vscode.Uri.file(path.join(__dirname, "../../images/context/cluster-node.png"));
-        }
-    }
-    if (node.nodeType === 'resource' && node.resourceKind.manifestKind === 'Project') {
-        // assuming now that it’s a project node
-        const projectName = node.name;
-        if (projectName === lastNamespace) {
-            treeItem.label = `* ${treeItem.label}`;
-        } else {
-            treeItem.contextValue = `${treeItem.contextValue || ''}.openshift.inactiveProject`;
-        }
-    }
-    if (node.nodeType === 'resource' && (node.resourceKind.manifestKind === 'BuildConfig' || node.resourceKind.manifestKind === 'DeploymentConfig')) {
-        treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-    }
-}
-
-async function isOpenShift(): Promise<boolean> {
-    const kubectl = await k8s.extension.kubectl.v1;
-    if (kubectl.available) {
-        const sr = await kubectl.api.invokeCommand('api-versions');
-        if (!sr || sr.code !== 0) {
-            return false;
-        }
-        return sr.stdout.includes("apps.openshift.io/v1");  // Naive check to keep example simple!
-    }
-}
-
-// this method is called when your extension is deactivated
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-export function deactivate(): void {
-}
-
-function execute<T>(command: (...args: T[]) => Promise<any> | void, ...params: T[]): Promise<any> {
-    try {
-        const res = command.call(null, ...params);
-        return res && res.then
-            ? res.then((result: any) => {
-                displayResult(result);
-
-            }).catch((err: any) => {
-                vscode.window.showErrorMessage(err.message ? err.message : err);
-            })
-            : undefined;
-    } catch (err) {
-        vscode.window.showErrorMessage(err);
-    }
-}
-
-function displayResult(result?: any): void {
-    if (result && typeof result === 'string') {
-        vscode.window.showInformationMessage(result);
-    }
-}
-
-function migrateFromOdo018(): void {
-    const newCfgDir = path.join(Platform.getUserHomePath(), '.odo');
-    const newCfg = path.join(newCfgDir, 'odo-config.yaml');
-    const oldCfg = path.join(Platform.getUserHomePath(), '.kube', 'odo');
-    if (!fsx.existsSync(newCfg) && fsx.existsSync(oldCfg)) {
-        fsx.ensureDirSync(newCfgDir);
-        fsx.copyFileSync(oldCfg, newCfg);
-    }
 }

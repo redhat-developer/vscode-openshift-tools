@@ -14,7 +14,8 @@ export class Node implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterEx
 
     // tslint:disable-next-line:variable-name
     constructor(readonly namespace: string, readonly name: string, readonly number: number, readonly manifest: string, readonly node: string, readonly metadata?: any) {
-        this.id = this.resourceId = `${this.node}/${this.name}`;
+        this.id = `${this.node}/${this.name}`;
+        this.resourceId = this.id;
     }
 
     nodeType: "resource";
