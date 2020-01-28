@@ -9,51 +9,48 @@ import { Progress } from "../util/progress";
 import * as common from './common';
 import { OdoImpl, Odo } from "../odo";
 
-export class Command {
-    static getReplicationControllers(parent: ClusterExplorerV1.ClusterExplorerNode): string {
-        return `get rc -o jsonpath="{range .items[?(.metadata.annotations.openshift\\.io/deployment-config\\.name=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/deployment-config\\.latest-version}{\\"\\n\\"}{end}"`;
-    }
-
-    static deploy(build: string): string {
-        return `oc rollout latest dc/${build}`;
-    }
-
-    static getDeploymentConfigs(): string {
-        return `oc get deploymentConfig -o json`;
-    }
-
-    static showDeploymentConfigLog(deploymentConfig: string): string {
-        return `oc logs dc/${deploymentConfig}`;
-    }
-
-    static getReplicas(deploymentConfig: string): string {
-        return `oc get rc -o jsonpath="{range .items[?(.metadata.annotations.openshift\\.io/deployment-config\\.name=='${deploymentConfig}')]}{.metadata.name}{\\"\\n\\"}{end}"`;
-    }
-
-    static delete(replica: string): string {
-        return `oc delete rc ${replica}`;
-    }
-
-    static showLog(replica: string): string {
-        return `oc logs rc/${replica}`;
-    }
-}
-
-export class DeploymentConfigNodeContributor implements ClusterExplorerV1.NodeContributor {
-    contributesChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): boolean {
-        return !!parent && parent.nodeType === 'resource' && parent.resourceKind.manifestKind === 'DeploymentConfig';
-    }
-
-    async getChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): Promise<ClusterExplorerV1.Node[]> {
-        return common.getChildrenNode(Command.getReplicationControllers(parent), 'ReplicationController', 'rc');
-    }
-}
-
 export class DeploymentConfig {
+
+    public static command = {
+        getReplicationControllers(parent: ClusterExplorerV1.ClusterExplorerNode): string {
+            return `get rc -o jsonpath="{range .items[?(.metadata.annotations.openshift\\.io/deployment-config\\.name=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/deployment-config\\.latest-version}{\\"\\n\\"}{end}"`;
+        },
+        deploy(build: string): string {
+            return `oc rollout latest dc/${build}`;
+        },
+        getDeploymentConfigs(): string {
+            return `oc get deploymentConfig -o json`;
+        },
+        showDeploymentConfigLog(deploymentConfig: string): string {
+            return `oc logs dc/${deploymentConfig}`;
+        },
+        getReplicas(deploymentConfig: string): string {
+            return `oc get rc -o jsonpath="{range .items[?(.metadata.annotations.openshift\\.io/deployment-config\\.name=='${deploymentConfig}')]}{.metadata.name}{\\"\\n\\"}{end}"`;
+        },
+        delete(replica: string): string {
+            return `oc delete rc ${replica}`;
+        },
+        showLog(replica: string): string {
+            return `oc logs rc/${replica}`;
+        }
+    };
+
     protected static readonly odo: Odo = OdoImpl.Instance;
 
     static async getDeploymentConfigNames(msg: string): Promise<QuickPickItem[]> {
-        return common.getQuickPicks(Command.getDeploymentConfigs(), msg);
+        return common.getQuickPicks(DeploymentConfig.command.getDeploymentConfigs(), msg);
+    }
+
+    static getNodeContributor(): ClusterExplorerV1.NodeContributor {
+      return {
+        contributesChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): boolean {
+          return !!parent && parent.nodeType === 'resource' && parent.resourceKind.manifestKind === 'DeploymentConfig';
+        },
+
+        async getChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): Promise<ClusterExplorerV1.Node[]> {
+          return common.getChildrenNode(DeploymentConfig.command.getReplicationControllers(parent), 'ReplicationController', 'rc');
+        }
+      };
     }
 
     static async deploy(context: { name: string }): Promise<string> {
@@ -61,9 +58,9 @@ export class DeploymentConfig {
         let result: Promise<string> = null;
         if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to deploy"), "Select a DeploymentConfig to deploy");
         if (deployName) {
-            result = Progress.execFunctionWithProgress(`Creating Deployment for '${deployName}'.`, () => DeploymentConfig.odo.execute(Command.deploy(deployName)))
+            result = Progress.execFunctionWithProgress(`Creating Deployment for '${deployName}'.`, () => DeploymentConfig.odo.execute(DeploymentConfig.command.deploy(deployName)))
                 .then(() => `Deployment successfully created for '${deployName}'.`)
-                .catch((err) => Promise.reject(`Failed to create Deployment with error '${err}'.`));
+                .catch((err) => Promise.reject(Error(`Failed to create Deployment with error '${err}'.`)));
         }
         return result;
     }
@@ -77,13 +74,13 @@ export class DeploymentConfig {
 
     static async getReplicaNames(deploymentConfig: string): Promise<string[]> {
         return DeploymentConfig.getReplicasList(
-            Command.getReplicas(deploymentConfig));
+          DeploymentConfig.command.getReplicas(deploymentConfig));
     }
 
     static async rcShowLog(context: { impl: any }): Promise<string> {
         const replica = await DeploymentConfig.selectReplica(context, "Select a Replica too see the logs");
         if (replica) {
-            DeploymentConfig.odo.executeInTerminal(Command.showLog(replica));
+            DeploymentConfig.odo.executeInTerminal(DeploymentConfig.command.showLog(replica));
         }
         return replica;
     }
@@ -92,7 +89,7 @@ export class DeploymentConfig {
         let deployName: string = context ? context.name : null;
         if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to see log's"), "Select a DeploymentConfig too see logs");
         if (deployName) {
-            DeploymentConfig.odo.executeInTerminal(Command.showDeploymentConfigLog(deployName));
+            DeploymentConfig.odo.executeInTerminal(DeploymentConfig.command.showDeploymentConfigLog(deployName));
         }
         return deployName;
     }
@@ -114,9 +111,9 @@ export class DeploymentConfig {
         let result: null | string | Promise<string> | PromiseLike<string> = null;
         const replica = await DeploymentConfig.selectReplica(context, "Select a Replica too delete");
         if (replica) {
-            result = Progress.execFunctionWithProgress(`Deleting replica`, () => DeploymentConfig.odo.execute(Command.delete(replica)))
+            result = Progress.execFunctionWithProgress(`Deleting replica`, () => DeploymentConfig.odo.execute(DeploymentConfig.command.delete(replica)))
                 .then(() => `Replica '${replica}' successfully deleted`)
-                .catch((err) => Promise.reject(`Failed to delete replica with error '${err}'`));
+                .catch((err) => Promise.reject(Error(`Failed to delete replica with error '${err}'`)));
         }
         return result;
     }

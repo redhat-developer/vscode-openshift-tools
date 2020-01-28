@@ -27,7 +27,7 @@ export class Application extends OpenShiftItem {
             if (value === 'Yes') {
                 return Progress.execFunctionWithProgress(`Deleting the Application '${appName}'`, () => Application.odo.deleteApplication(application))
                     .then(() => `Application '${appName}' successfully deleted`)
-                    .catch((err) => Promise.reject(`Failed to delete Application with error '${err}'`));
+                    .catch((err) => Promise.reject(Error(`Failed to delete Application with error '${err}'`)));
             }
         }
         return null;
