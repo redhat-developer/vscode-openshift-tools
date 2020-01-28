@@ -46,7 +46,8 @@
       ".jsx",
       ".ts"
     ]
-  },  "rules": {
+  },
+  "rules": {
     "header/header": [2, "./header.js"],
     "camelcase": 2,
     "consistent-return": 0,
@@ -79,5 +80,13 @@
     "prefer-template": 2,
     "radix": 2,
     "no-trailing-spaces": "error"
-  }
+  },
+  "overrides": [
+    {
+        "files": ["*.test.ts"],
+        "rules": {
+            "no-unused-expressions": "off"
+        }
+    }
+  ]
 }
