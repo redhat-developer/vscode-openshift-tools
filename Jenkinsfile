@@ -33,7 +33,7 @@ node('rhel7'){
         writeJSON file: 'package.json', json: packageJson, pretty: 4
         sh "vsce package -o openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix"
 		sh "sha256sum *.vsix > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix.sha256"
-		sh "npm pack && mv vscode-openshift-connector-${packageJson.version}.tgz openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.tgz
+		sh "npm pack && mv vscode-openshift-connector-${packageJson.version}.tgz openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.tgz"
 		sh "sha256sum *.tgz > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.tgz.sha256"
 	}
 
