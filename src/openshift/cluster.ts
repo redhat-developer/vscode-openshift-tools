@@ -12,14 +12,6 @@ import { KubeConfigUtils } from '../util/kubeUtils';
 import { Filters } from "../util/filters";
 import { Progress } from "../util/progress";
 
-class CreateUrlItem implements QuickPickItem {
-	get label(): string { return `$(plus) Provide new URL...`; }
-}
-
-class CreateUserItem implements QuickPickItem {
-	get label(): string { return `$(plus) Add new user...`; }
-}
-
 export class Cluster extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
 
@@ -27,7 +19,7 @@ export class Cluster extends OpenShiftItem {
         const value = await window.showWarningMessage(`Do you want to logout of cluster?`, 'Logout', 'Cancel');
         if (value === 'Logout') {
             return Cluster.odo.execute(Command.odoLogout())
-            .catch((error) => Promise.reject(`Failed to logout of the current cluster with '${error}'!`))
+            .catch((error) => Promise.reject(Error(`Failed to logout of the current cluster with '${error}'!`)))
             .then(async (result) => {
                 if (result.stderr === "") {
                     Cluster.explorer.refresh();
@@ -36,11 +28,9 @@ export class Cluster extends OpenShiftItem {
                     if (logoutInfo === 'Yes') {
                         return Cluster.login();
                     }
-                        return null;
-
+                    return null;
                 }
-                    return Promise.reject(`Failed to logout of the current cluster with '${result.stderr}'!`);
-
+                throw Error(`Failed to logout of the current cluster with '${result.stderr}'!`);
             });
         }
         return null;
@@ -55,7 +45,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     static async showOpenShiftOutput(): Promise<void> {
-        CliChannel.getInstance().showOutput();
+        return CliChannel.getInstance().showOutput();
     }
 
     static async openshiftConsole(): Promise<void> {
@@ -76,20 +66,19 @@ export class Cluster extends OpenShiftItem {
         const contextName: QuickPickItem[] = contexts.map((ctx) => ({ label: `${ctx.name}`}));
         const choice = await window.showQuickPick(contextName, {placeHolder: "Select the new OpenShift context", ignoreFocusOut: true});
         if (!choice) return null;
-        return Promise.resolve()
-            .then(() => Cluster.odo.execute(Command.setOpenshiftContext(choice.label)))
-            .then(() => `Cluster context is changed to: ${choice.label}`);
+        await Cluster.odo.execute(Command.setOpenshiftContext(choice.label));
+        return `Cluster context is changed to: ${choice.label}`;
     }
 
     static async getUrl(): Promise<string | null> {
         const k8sConfig = new KubeConfigUtils();
         const clusterURl = await Cluster.getUrlFromClipboard();
-        const createUrl = new CreateUrlItem();
+        const createUrl: QuickPickItem = { label: `$(plus) Provide new URL...`};
         const clusterItems = await k8sConfig.getServers();
         const choice = await window.showQuickPick([createUrl, ...clusterItems], {placeHolder: "Provide Cluster URL to connect", ignoreFocusOut: true});
         if (!choice) return null;
         return (choice.label === createUrl.label) ?
-            await window.showInputBox({
+            window.showInputBox({
                 value: clusterURl,
                 ignoreFocusOut: true,
                 prompt: "Provide new Cluster URL to connect",
@@ -146,7 +135,7 @@ export class Cluster extends OpenShiftItem {
         const getUserName = await TokenStore.getUserName();
         const k8sConfig = new KubeConfigUtils();
         const users = await k8sConfig.getClusterUsers(clusterURL);
-        const addUser = new CreateUserItem();
+        const addUser: QuickPickItem = { label: `$(plus) Add new user...`};
         const choice = await window.showQuickPick([addUser, ...users], {placeHolder: "Select username for basic authentication to the API server", ignoreFocusOut: true});
 
         if (!choice) return null;
@@ -223,10 +212,9 @@ export class Cluster extends OpenShiftItem {
     private static async loginMessage(clusterURL: string, result: CliExitData): Promise<string | undefined> {
         if (result.stderr === "") {
             Cluster.explorer.refresh();
-            return commands.executeCommand('setContext', 'isLoggedIn', true)
-                .then(() => `Successfully logged in to '${clusterURL}'`);
+            await commands.executeCommand('setContext', 'isLoggedIn', true);
+            return `Successfully logged in to '${clusterURL}'`;
         }
-            throw new Error(result.stderr);
-
+        throw new Error(result.stderr);
     }
 }
