@@ -349,7 +349,7 @@ suite('Openshift/Cluster', () => {
             } catch (err) {
                 expectedErr = err;
             }
-            expect(expectedErr).equals(`Failed to logout of the current cluster with '${error}'!`);
+            expect(expectedErr.message).equals(`Failed to logout of the current cluster with '${error}'!`);
         });
 
         test('handles errors from odo stderr', async () => {
@@ -360,7 +360,7 @@ suite('Openshift/Cluster', () => {
             } catch (err) {
                 expectedErr = err;
             }
-            expect(expectedErr).equals(`Failed to logout of the current cluster with '${errorData.stderr}'!`);
+            expect(expectedErr.message).equals(`Failed to logout of the current cluster with '${errorData.stderr}'!`);
         });
 
         test('throws errors from subsequent login', async () => {
