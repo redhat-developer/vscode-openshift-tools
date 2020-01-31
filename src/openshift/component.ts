@@ -65,7 +65,7 @@ export class Component extends OpenShiftItem {
         } else if (componentSource.label === 'Workspace Directory') {
             command = Component.createFromLocal(application);
         }
-        return command.catch((err) => Promise.reject(`Failed to create Component with error '${err}'`));
+        return command.catch((err) => Promise.reject(Error(`Failed to create Component with error '${err}'`)));
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
@@ -84,7 +84,7 @@ export class Component extends OpenShiftItem {
                 }
                 await Component.odo.deleteComponent(component);
             }).then(() => `Component '${name}' successfully deleted`)
-            .catch((err) => Promise.reject(`Failed to delete Component with error '${err}'`));
+            .catch((err) => Promise.reject(Error(`Failed to delete Component with error '${err}'`)));
         }
     }
 
@@ -93,7 +93,7 @@ export class Component extends OpenShiftItem {
             "From which Project do you want to undeploy Component",
             "From which Application you want to undeploy Component",
             "Select Component to undeploy",
-            (component) => component.contextValue === ContextType.COMPONENT_PUSHED);
+            (target) => target.contextValue === ContextType.COMPONENT_PUSHED);
         if (!component) return null;
         const name: string = component.getName();
         const value = await window.showWarningMessage(`Do you want to undeploy Component '${name}'?`, 'Yes', 'Cancel');
@@ -101,7 +101,7 @@ export class Component extends OpenShiftItem {
             return Progress.execFunctionWithProgress(`Undeploying the Component '${component.getName()} '`, async () => {
                 await Component.odo.undeployComponent(component);
             }).then(() => `Component '${name}' successfully undeployed`)
-            .catch((err) => Promise.reject(`Failed to undeploy Component with error '${err}'`));
+            .catch((err) => Promise.reject(Error(`Failed to undeploy Component with error '${err}'`)));
         }
     }
 
@@ -191,7 +191,7 @@ export class Component extends OpenShiftItem {
         const linkComponent = await Component.getLinkData(component);
         const getLinkComponent = linkComponent.status.linkedComponents;
         if (!getLinkComponent) throw Error('No linked Components found');
-        Object.keys(getLinkComponent).forEach(async key => {
+        Object.keys(getLinkComponent).forEach(key => {
             linkCompName.push(key);
         });
         const compName = await window.showQuickPick(linkCompName, {placeHolder: "Select a Component to unlink", ignoreFocusOut: true});
@@ -202,7 +202,7 @@ export class Component extends OpenShiftItem {
         return Progress.execFunctionWithProgress(`Unlinking Component`,
             () => Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), compName, port), component.contextPath.fsPath)
                 .then(() => `Component '${compName}' has been successfully unlinked from the Component '${component.getName()}'`)
-                .catch((err) => Promise.reject(`Failed to unlink Component with error '${err}'`))
+                .catch((err) => Promise.reject(Error(`Failed to unlink Component with error '${err}'`)))
         );
     }
 
@@ -222,7 +222,7 @@ export class Component extends OpenShiftItem {
         return Progress.execFunctionWithProgress(`Unlinking Service`,
             () => Component.odo.execute(Command.unlinkService(component.getParent().getParent().getName(), component.getParent().getName(), serviceName, component.getName()), component.contextPath.fsPath)
                 .then(() => `Service '${serviceName}' has been successfully unlinked from the Component '${component.getName()}'`)
-                .catch((err) => Promise.reject(`Failed to unlink Service with error '${err}'`))
+                .catch((err) => Promise.reject(Error(`Failed to unlink Service with error '${err}'`)))
         );
     }
 
@@ -234,7 +234,7 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
-        const componentPresent = (await Component.odo.getComponents(component.getParent())).filter((component) => component.contextValue !== ContextType.COMPONENT);
+        const componentPresent = (await Component.odo.getComponents(component.getParent())).filter((target) => target.contextValue !== ContextType.COMPONENT);
         if (componentPresent.length === 1) throw Error('You have no Components available to link, please create new OpenShift Component and try again.');
         const componentToLink = await window.showQuickPick(componentPresent.filter((comp)=> comp.getName() !== component.getName()), {placeHolder: "Select a Component to link", ignoreFocusOut: true});
         if (!componentToLink) return null;
@@ -245,17 +245,17 @@ export class Component extends OpenShiftItem {
         ports = ports.slice(0, ports.length-1);
         let port: string;
         if (ports.length === 1) {
-            port = ports[0];
+            [port] = ports;
         } else if (ports.length > 1) {
             port = await window.showQuickPick(ports, {placeHolder: "Select Port to link", ignoreFocusOut: true});
         } else {
-            return Promise.reject(`Component '${component.getName()}' has no Ports declared.`);
+            return Promise.reject(Error(`Component '${component.getName()}' has no Ports declared.`));
         }
 
         return Progress.execFunctionWithProgress(`Link Component '${componentToLink.getName()}' with Component '${component.getName()}'`,
             () => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), componentToLink.getName(), port), component.contextPath.fsPath)
                 .then(() => `Component '${componentToLink.getName()}' successfully linked with Component '${component.getName()}'`)
-                .catch((err) => Promise.reject(`Failed to link component with error '${err}'`))
+                .catch((err) => Promise.reject(Error(`Failed to link component with error '${err}'`)))
         );
     }
 
@@ -273,7 +273,7 @@ export class Component extends OpenShiftItem {
         return Progress.execFunctionWithProgress(`Link Service '${serviceToLink.getName()}' with Component '${component.getName()}'`,
             () => Component.odo.execute(Command.linkServiceTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), serviceToLink.getName()), component.contextPath.fsPath)
                 .then(() => `Service '${serviceToLink.getName()}' successfully linked with Component '${component.getName()}'`)
-                .catch((err) => Promise.reject(`Failed to link Service with error '${err}'`))
+                .catch((err) => Promise.reject(Error(`Failed to link Service with error '${err}'`)))
         );
     }
 
@@ -291,7 +291,7 @@ export class Component extends OpenShiftItem {
             "In which Project you want to push the changes",
             "In which Application you want to push the changes",
             "For which Component you want to push the changes",
-            (component) => component.contextValue === ContextType.COMPONENT_PUSHED || component.contextValue === ContextType.COMPONENT);
+            (target) => target.contextValue === ContextType.COMPONENT_PUSHED || target.contextValue === ContextType.COMPONENT);
         if (!component) return null;
         const choice = await Component.handleMigratedComponent(component);
         if (!choice) return null;
@@ -318,7 +318,7 @@ export class Component extends OpenShiftItem {
                         case 'Help':
                             commands.executeCommand('vscode.open', Uri.parse(`https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0`));
                             break;
-                        case 'Cancel':
+                        default:
                             return null;
                     }
                 } while (choice === 'Help');
@@ -343,7 +343,7 @@ export class Component extends OpenShiftItem {
             'Select a Project',
             'Select an Application',
             'Select a Component you want to watch',
-            (component) => component.contextValue === ContextType.COMPONENT_PUSHED);
+            (target) => target.contextValue === ContextType.COMPONENT_PUSHED);
         if (!component) return null;
         Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
@@ -535,7 +535,7 @@ export class Component extends OpenShiftItem {
     static async startDebugger(component: OpenShiftObject): Promise<string | undefined> {
         const components = await Component.odo.getComponentTypesJson();
         const componentBuilder = components.find((builder) => builder.metadata.name === component.builderImage.name);
-        const tag = componentBuilder.spec.imageStreamRef.spec.tags.find((tag: { name: string }) => tag.name === component.builderImage.tag);
+        const tag = componentBuilder.spec.imageStreamRef.spec.tags.find((element: { name: string }) => element.name === component.builderImage.tag);
         const isJava = tag.annotations.tags.includes('java');
         const isNode = tag.annotations.tags.includes('nodejs');
         const JAVA_EXT = 'redhat.java';
@@ -605,15 +605,15 @@ export class Component extends OpenShiftItem {
                     resolve(port.groups.localPort);
                 }
             });
-            cp.stderr.on('data', async (data: string) => {
+            cp.stderr.on('data', (data: string) => {
                 reject(data);
             });
-        }).then((port) => {
-            config.port = port;
+        }).then((result) => {
+            config.port = result;
             config.odoPid = cp.pid;
             return debug.startDebugging(workspace.getWorkspaceFolder(component.contextPath), config);
         }).then((result: boolean) =>
-            result ? 'Debugger session has successfully started.' : Promise.reject('Debugger session failed to start.')
+            result ? 'Debugger session has successfully started.' : Promise.reject(Error('Debugger session failed to start.'))
         );
     }
 
