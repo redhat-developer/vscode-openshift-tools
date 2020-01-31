@@ -7,5 +7,7 @@
 		"ryanluker.vscode-coverage-gutters",
 		"streetsidesoftware.code-spell-checker",
     "shd101wyy.markdown-preview-enhanced",
-    "esbenp.prettier-vscode"]
+    "esbenp.prettier-vscode",
+    "gruntfuggly.todo-tree"
+  ]
 }
