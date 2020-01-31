@@ -123,7 +123,7 @@ suite('OpenShift/Component', () => {
             } catch (error) {
                 expectedError = error;
             }
-            expect(expectedError).equals(`Failed to create Component with error '${errorMessage}'`);
+            expect(expectedError.message).equals(`Failed to create Component with error '${errorMessage}'`);
         });
 
         suite('from local workspace', () => {
@@ -528,7 +528,7 @@ suite('OpenShift/Component', () => {
             } catch (err) {
                 savedErr = err;
             }
-            expect(savedErr).equals(`Failed to unlink Component with error '${errorMessage}'`);
+            expect(savedErr.message).equals(`Failed to unlink Component with error '${errorMessage}'`);
         });
 
         test('calls the appropriate error message when no link component found', async () => {
@@ -642,7 +642,7 @@ suite('OpenShift/Component', () => {
             } catch (err) {
                 savedErr = err;
             }
-            expect(savedErr).equals(`Failed to unlink Service with error '${errorMessage}'`);
+            expect(savedErr.message).equals(`Failed to unlink Service with error '${errorMessage}'`);
         });
 
         test('calls the appropriate error message when no link component found', async () => {
@@ -715,7 +715,7 @@ suite('OpenShift/Component', () => {
             try {
                 await Component.del(componentItem);
             } catch (err) {
-                expect(err).equals(`Failed to delete Component with error '${errorMessage}'`);
+                expect(err.message).equals(`Failed to delete Component with error '${errorMessage}'`);
             }
         });
 
@@ -775,7 +775,7 @@ suite('OpenShift/Component', () => {
             try {
                 await Component.undeploy(componentItem);
             } catch (err) {
-                expect(err).equals(`Failed to undeploy Component with error '${errorMessage}'`);
+                expect(err.message).equals(`Failed to undeploy Component with error '${errorMessage}'`);
             }
         });
 
@@ -855,7 +855,7 @@ suite('OpenShift/Component', () => {
                 savedErr = err;
             }
 
-            expect(savedErr).equals(`Component '${componentItem.getName()}' has no Ports declared.`);
+            expect(savedErr.message).equals(`Component '${componentItem.getName()}' has no Ports declared.`);
         });
 
         test('errors when a subcommand fails', async () => {
@@ -869,7 +869,7 @@ suite('OpenShift/Component', () => {
             } catch (err) {
                 savedErr = err;
             }
-            expect(savedErr).equals(`Failed to link component with error '${errorMessage}'`);
+            expect(savedErr.message).equals(`Failed to link component with error '${errorMessage}'`);
         });
     });
 
@@ -926,7 +926,7 @@ suite('OpenShift/Component', () => {
             } catch (err) {
                 savedErr = err;
             }
-            expect(savedErr).equals(`Failed to link Service with error '${errorMessage}'`);
+            expect(savedErr.message).equals(`Failed to link Service with error '${errorMessage}'`);
         });
     });
 
@@ -964,7 +964,7 @@ suite('OpenShift/Component', () => {
             } catch (err) {
                 savedErr = err;
             }
-            expect(savedErr).equals(`Failed to link Service with error '${errorMessage}'`);
+            expect(savedErr.message).equals(`Failed to link Service with error '${errorMessage}'`);
         });
     });
 
