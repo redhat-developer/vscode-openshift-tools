@@ -74,7 +74,7 @@ export class Cluster extends OpenShiftItem {
         const k8sConfig = new KubeConfigUtils();
         const clusterURl = await Cluster.getUrlFromClipboard();
         const createUrl: QuickPickItem = { label: `$(plus) Provide new URL...`};
-        const clusterItems = await k8sConfig.getServers();
+        const clusterItems = k8sConfig.getServers();
         const choice = await window.showQuickPick([createUrl, ...clusterItems], {placeHolder: "Provide Cluster URL to connect", ignoreFocusOut: true});
         if (!choice) return null;
         return (choice.label === createUrl.label) ?
@@ -134,7 +134,7 @@ export class Cluster extends OpenShiftItem {
 
         const getUserName = await TokenStore.getUserName();
         const k8sConfig = new KubeConfigUtils();
-        const users = await k8sConfig.getClusterUsers(clusterURL);
+        const users = k8sConfig.getClusterUsers(clusterURL);
         const addUser: QuickPickItem = { label: `$(plus) Add new user...`};
         const choice = await window.showQuickPick([addUser, ...users], {placeHolder: "Select username for basic authentication to the API server", ignoreFocusOut: true});
 

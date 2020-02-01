@@ -14,7 +14,7 @@ export class KubeConfigUtils extends KubeConfig {
         this.loadFromDefault();
     }
 
-    async getServers(): Promise<QuickPickItem[]> {
+    public getServers(): QuickPickItem[] {
         const currentCluster = this.getCurrentCluster();
         const clusters = this.clusters || [];
         return clusters.map((c: any) => ({
@@ -23,7 +23,7 @@ export class KubeConfigUtils extends KubeConfig {
         }));
     }
 
-    async getClusterUsers(clusterServer: string): Promise<QuickPickItem[]> {
+    public getClusterUsers(clusterServer: string): QuickPickItem[] {
         const currentUser = this.getCurrentUser();
         const cluster = this.findCluster(clusterServer);
         const users = this.getUsers();
@@ -34,7 +34,7 @@ export class KubeConfigUtils extends KubeConfig {
         }));
     }
 
-    findCluster(clusterServer: string): Cluster {
+    public findCluster(clusterServer: string): Cluster {
         return this.getClusters().find((cluster: Cluster) => cluster.server === clusterServer);
     }
 }
