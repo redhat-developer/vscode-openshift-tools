@@ -10,5 +10,4 @@ export enum GlyphChars {
     Push = '\u25C9',
     NotPushed = '\u25CE',
     NoContext = '\u2718'
-
 }
