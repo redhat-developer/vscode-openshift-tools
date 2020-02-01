@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import * as odoctl from '../odo';
 
 export interface Step {
     command: string;
@@ -13,52 +12,10 @@ export interface Step {
 }
 
 export class Progress {
-    static execWithProgress(options, steps: Step[], odo: odoctl.Odo): Thenable<void> {
-        return vscode.window.withProgress(options,
-            (progress: vscode.Progress<{increment: number; message: string}>) => {
-                const calls: (() => Promise<any>)[] = [];
-                steps.reduce((previous: Step, current: Step, currentIndex: number, steps: Step[])=> {
-                    current.total = previous.total + current.increment;
-                    calls.push (() => {
-                        return Promise.resolve()
-                            .then(() => progress.report({increment: previous.increment, message: `${previous.total}%` }))
-                            .then(() => odo.execute(current.command))
-                            .then(() => {
-                                if (currentIndex+1 === steps.length) {
-                                    progress.report({
-                                        increment: current.increment,
-                                        message: `${current.total}%`
-                                    });
-                                }
-                            });
-                    });
-                    return current;
-                }, {increment: 0, command: "", total: 0});
 
-                return calls.reduce<Promise<any>>((previous: Promise<any>, current: () => Promise<any>)=> {
-                    return previous.then(current);
-                }, Promise.resolve());
-            });
-    }
-
-    static async execCmdWithProgress(title: string, cmd: string): Promise<any> {
+  static async execFunctionWithProgress(title: string, func: (progress: vscode.Progress<{increment: number; message: string}>) => Promise<any> ): Promise<string> {
         return new Promise((resolve, reject) => {
-            return vscode.window.withProgress({
-                    cancellable: false,
-                    location: vscode.ProgressLocation.Notification,
-                    title
-                },
-                async () => {
-                    const result = await odoctl.getInstance().execute(cmd, process.cwd(), false);
-                    result.error ? reject(result.error) : resolve();
-                }
-            );
-        });
-    }
-
-    static async execFunctionWithProgress(title: string, func: (progress: vscode.Progress<{increment: number; message: string}>) => Promise<any> ): Promise<string> {
-        return new Promise((resolve, reject) => {
-            return vscode.window.withProgress({
+            vscode.window.withProgress({
                     cancellable: false,
                     location: vscode.ProgressLocation.Notification,
                     title
@@ -68,6 +25,5 @@ export class Progress {
                 }
             );
         });
-
     }
 }

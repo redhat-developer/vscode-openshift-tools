@@ -6,25 +6,11 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import * as vscode from 'vscode';
-import { Progress } from '../../../src/util/progress';
-import { OdoImpl } from '../../../src/odo';
 
-const {expect} = chai;
 chai.use(sinonChai);
 
 suite('Progress Utility', () => {
     let sandbox: sinon.SinonSandbox;
-    let execStub: sinon.SinonStub;
-    const options = {
-        cancellable: false,
-        location: vscode.ProgressLocation.Notification,
-        title: `Testing Progress`
-    };
-    const command1 = { command: 'command one', increment: 50};
-    const command2 = { command: 'command two', increment: 50};
-    const steps = [ command1, command2 ];
-    const errorMessage = 'An error';
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -34,57 +20,7 @@ suite('Progress Utility', () => {
         sandbox.restore();
     });
 
-    test('calls cli commands in sequence', async () => {
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ error: undefined, stdout: "", stderr: "" });
-        await Progress.execWithProgress(options, steps, OdoImpl.Instance);
+    test.skip('resolves if function resolves');
 
-        expect(execStub).calledTwice;
-        expect(execStub.getCall(0).args[0]).equals(command1.command);
-        expect(execStub.getCall(1).args[0]).equals(command2.command);
-    });
-
-    test('calls progress with given options', async () => {
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ error: undefined, stdout: "", stderr: "" });
-        const spy = sandbox.spy(vscode.window, 'withProgress');
-        await Progress.execWithProgress(options, steps, OdoImpl.Instance);
-
-        expect(spy).calledOnceWith(options, sinon.match.func);
-    });
-
-    test('throw an error if a command fails', async () => {
-        const error = new Error(errorMessage);
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').rejects(error);
-        let e;
-        try {
-            await Progress.execWithProgress(options, steps, OdoImpl.Instance);
-        } catch (err)  {
-            e = err;
-            expect(err.message).equals(errorMessage);
-        }
-        if (!e) {
-            expect.fail('no error thrown');
-        }
-    });
-
-    test('execCmdWithProgress returned promise resolves in case of cmd finished successfully', () => {
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
-        Progress.execCmdWithProgress('title', 'cmd').catch(() => {
-            expect.fail(true, false, 'returned promise should not be rejected');
-        });
-    });
-
-    test('execCmdWithProgress returned promise rejects in case of cmd finished with failure', async () => {
-        const error = new Error(errorMessage);
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error, stdout: '', stderr: ''});
-        let e;
-        try {
-            await Progress.execCmdWithProgress('title', 'cmd');
-        } catch (err)  {
-            e = err;
-            expect(err.message).equals(errorMessage);
-        }
-        if (!e) {
-            expect.fail('no error thrown');
-        }
-    });
+    test.skip('fails if function fails');
 });

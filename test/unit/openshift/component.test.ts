@@ -101,8 +101,6 @@ suite('OpenShift/Component', () => {
             quickPickStub.onThirdCall().resolves(componentType);
             quickPickStub.onCall(3).resolves(version);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
-            sandbox.stub(Progress, 'execWithProgress').resolves();
-            sandbox.stub(Progress, 'execCmdWithProgress').resolves();
             progressFunctionStub = sandbox.stub(Progress, 'execFunctionWithProgress').yields();
             sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
 
