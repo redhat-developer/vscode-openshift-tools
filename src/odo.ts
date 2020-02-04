@@ -473,7 +473,7 @@ export interface Odo {
     getServiceTemplatePlans(svc: string): Promise<string[]>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     execute(command: string, cwd?: string, fail?: boolean): Promise<CliExitData>;
-    executeInTerminal(command: string, cwd?: string): void;
+    executeInTerminal(command: string, cwd?: string): Promise<void>;
     requireLogin(): Promise<boolean>;
     clearCache?(): void;
     createProject(name: string): Promise<OpenShiftObject>;
@@ -891,12 +891,13 @@ export class OdoImpl implements Odo {
 
     public async executeInTerminal(command: string, cwd: string = process.cwd(), name = 'OpenShift'): Promise<void> {
         const cmd = command.split(' ')[0];
-        let toolLocation = await ToolsConfig.detectOrDownload(cmd);
+        const toolLocation = await ToolsConfig.detectOrDownload(cmd);
+        let toolDirLocation: string;
         if (toolLocation) {
-            toolLocation = path.dirname(toolLocation);
+          toolDirLocation = path.dirname(toolLocation);
         }
-        const terminal: Terminal = WindowUtil.createTerminal(name, cwd, toolLocation);
-        terminal.sendText(command, true);
+        const terminal: Terminal = WindowUtil.createTerminal(name, cwd);
+        terminal.sendText(toolDirLocation ? command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`) : command, true);
         terminal.show();
     }
 
