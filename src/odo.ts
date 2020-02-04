@@ -891,7 +891,7 @@ export class OdoImpl implements Odo {
 
     public async executeInTerminal(command: string, cwd: string = process.cwd(), name = 'OpenShift'): Promise<void> {
         const cmd = command.split(' ')[0];
-        let toolLocation = await ToolsConfig.detectOrDownload(cmd);
+        const toolLocation = await ToolsConfig.detectOrDownload(cmd);
         let toolDirLocation: string;
         if (toolLocation) {
           toolDirLocation = path.dirname(toolLocation);

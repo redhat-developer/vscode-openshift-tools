@@ -6,8 +6,7 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import * as path from 'path';
-import { window, TerminalOptions } from 'vscode';
+import { window } from 'vscode';
 import { WindowUtil } from '../../../src/util/windowUtils';
 
 const {expect} = chai;
