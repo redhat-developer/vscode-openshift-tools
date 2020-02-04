@@ -296,7 +296,7 @@ export class Component extends OpenShiftItem {
         const choice = await Component.handleMigratedComponent(component);
         if (!choice) return null;
         Component.setPushCmd(component.contextPath.fsPath);
-        Component.odo.executeInTerminal(Command.pushComponent(), component.contextPath.fsPath);
+        await Component.odo.executeInTerminal(Command.pushComponent(), component.contextPath.fsPath);
         component.contextValue = ContextType.COMPONENT_PUSHED;
         Component.explorer.refresh(component);
     }

@@ -31,21 +31,4 @@ suite('Window Utility', () => {
         expect(termStub).calledOnce;
     });
 
-    test('createTerminal adds tools location and shell path to the environment', () => {
-        const toolLocationDir = path.dirname(path.join("dir", "where", "tool", "is", "located", "tool"));
-        const env: NodeJS.ProcessEnv = {};
-        const key = process.platform === 'win32' ? 'Path' : 'PATH';
-        Object.assign(env, process.env);
-        env[key] = `${toolLocationDir}${path.delimiter}${process.env[key]}`;
-
-        const options: TerminalOptions = {
-            cwd: process.cwd(),
-            name: 'terminal',
-            shellPath: process.platform === 'win32' ? undefined : '/bin/bash',
-            env
-        };
-        WindowUtil.createTerminal('terminal', process.cwd(), toolLocationDir);
-
-        expect(termStub).calledOnceWith(options);
-    });
 });

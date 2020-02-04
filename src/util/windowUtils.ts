@@ -4,23 +4,14 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { window, Terminal, TerminalOptions } from 'vscode';
-import * as path from 'path';
 
 export class WindowUtil {
 
-    static createTerminal(name: string, cwd: string, toolLocation?: string, env: NodeJS.ProcessEnv = process.env): Terminal {
-        const finalEnv: NodeJS.ProcessEnv = {};
-        Object.assign(finalEnv, env);
-        const key = process.platform === 'win32' ? 'Path' : 'PATH';
-
-        if (toolLocation && env[key] && !env[key].includes(toolLocation)) {
-            finalEnv[key] = `${toolLocation}${path.delimiter}${env[key]}`;
-        }
+    static createTerminal(name: string, cwd: string): Terminal {
         const options: TerminalOptions = {
             cwd,
             name,
-            env: finalEnv,
-            shellPath: process.platform === 'win32' ? undefined : '/bin/bash'
+            shellPath: process.platform === 'win32' ? process.env.ComSpec : '/bin/bash'
         };
         return window.createTerminal(options);
     }

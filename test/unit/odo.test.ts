@@ -126,7 +126,7 @@ suite("odo", () => {
             await odoCli.executeInTerminal('cmd');
             expect(termFake.sendText).calledOnce;
             expect(termFake.show).calledOnce;
-            expect(ctStub).calledWith('OpenShift', process.cwd(), 'segment1');
+            expect(ctStub).calledWith('OpenShift', process.cwd());
         });
     });
 
