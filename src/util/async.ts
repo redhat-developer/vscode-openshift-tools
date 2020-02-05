@@ -38,7 +38,7 @@ export class Delayer<T> {
 		this.timeout = null;
 		this.completionPromise = null;
 		this.doResolve = null;
-		this.doReject;
+		this.doReject = null;
 		this.task = null;
 	}
 
@@ -46,6 +46,7 @@ export class Delayer<T> {
 		this.task = task;
 		this.cancelTimeout();
 
+		// eslint-disable-next-line @typescript-eslint/no-misused-promises
 		if (!this.completionPromise) {
 			this.completionPromise = new Promise((c, e) => {
 				this.doResolve = c;
@@ -53,6 +54,7 @@ export class Delayer<T> {
 			}).then(() => {
 				this.completionPromise = null;
 				this.doResolve = null;
+				// eslint-disable-next-line no-shadow
 				const {task} = this;
 				this.task = null;
 

@@ -27,13 +27,13 @@ export class Refs {
 
     static async fetchTag(input: string): Promise<Map<string, Ref>> {
         return new Promise((resolve, reject) => {
-            input = input.replace(/^(?!(?:https|git):\/\/)/, 'https://');
+            const gitUrl = input.replace(/^(?!(?:https|git):\/\/)/, 'https://');
 
             const tcp = net.connect({
-                host: url.parse(input).host,
+                host: url.parse(gitUrl).host,
                 port: 9418
             });
-            const client = gitClient(input);
+            const client = gitClient(gitUrl);
             const tags = new Map<string, Ref>();
 
             client.refs.on('data', (ref: { name: string; hash: string }) => {

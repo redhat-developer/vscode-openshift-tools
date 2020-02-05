@@ -106,7 +106,7 @@ suite('Archive Utility', () => {
         try {
             await Archive.extract('file.whatever', extractTo);
         } catch (err) {
-            expect(err).equals(`Unsupported extension for '${file}'`);
+            expect(err.message).equals(`Unsupported extension for '${file}'`);
         }
     });
 });
