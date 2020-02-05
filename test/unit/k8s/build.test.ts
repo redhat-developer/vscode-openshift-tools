@@ -7,7 +7,6 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { OdoImpl } from '../../../src/odo';
 import { Build } from '../../../src/k8s/build';
@@ -86,7 +85,7 @@ suite('K8s/build', () => {
                 manifestKind: "BuildConfigs",
                 pluralDisplayName: "BuildConfigs"
             }
-        } as ClusterExplorerV1.ClusterExplorerNode;
+        } as k8s.ClusterExplorerV1.ClusterExplorerNode;
 
         setup(() => {
             const api: k8s.API<k8s.KubectlV1> = {
@@ -107,7 +106,7 @@ suite('K8s/build', () => {
     });
 
     suite('start build', () => {
-        const context = {
+        const startBuildCtx = {
             name: "nodejs-comp-nodejs-app",
             metadata: undefined,
             namespace: null,
@@ -163,17 +162,17 @@ suite('K8s/build', () => {
         });
 
         test('works from context menu', async () => {
-            const result = await Build.startBuild(context);
+            const result = await Build.startBuild(startBuildCtx);
 
-            expect(result).equals(`Build '${context.name}' successfully started`);
-            expect(execStub).calledWith(Build.command.startBuild(context.name));
+            expect(result).equals(`Build '${startBuildCtx.name}' successfully started`);
+            expect(execStub).calledWith(Build.command.startBuild(startBuildCtx.name));
         });
 
         test('works with no context', async () => {
             const result = await Build.startBuild(null);
 
-            expect(result).equals(`Build '${context.name}' successfully started`);
-            expect(execStub).calledWith(Build.command.startBuild(context.name));
+            expect(result).equals(`Build '${startBuildCtx.name}' successfully started`);
+            expect(execStub).calledWith(Build.command.startBuild(startBuildCtx.name));
         });
 
         test('returns null when no BuildConfig selected', async () => {
@@ -186,7 +185,7 @@ suite('K8s/build', () => {
             execStub.rejects(errorMessage);
 
             try {
-                await Build.startBuild(context);
+                await Build.startBuild(startBuildCtx);
             } catch (err) {
                 expect(err.message).equals(`Failed to start build with error '${errorMessage}'`);
             }

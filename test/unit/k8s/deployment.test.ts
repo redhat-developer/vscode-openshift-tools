@@ -8,7 +8,6 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import * as k8s from 'vscode-kubernetes-tools-api';
-import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { OdoImpl } from '../../../src/odo';
 import { Progress } from '../../../src/util/progress';
 import { DeploymentConfig } from '../../../src/k8s/deployment';
@@ -114,7 +113,7 @@ suite('K8s/deployment', () => {
                 manifestKind: "DeploymentConfig",
                 pluralDisplayName: "DeploymentConfigs"
             }
-        } as ClusterExplorerV1.ClusterExplorerNode;
+        } as k8s.ClusterExplorerV1.ClusterExplorerNode;
 
         setup(() => {
             dcnc = DeploymentConfig.getNodeContributor();
@@ -144,7 +143,7 @@ suite('K8s/deployment', () => {
     });
 
     suite('Deploy', () => {
-        const context = {
+        const deployCtx = {
             name: "nodejs-comp-nodejs-app",
             metadata: undefined,
             namespace: null,
@@ -160,17 +159,17 @@ suite('K8s/deployment', () => {
         });
 
         test('works from context menu', async () => {
-            const result = await DeploymentConfig.deploy(context);
+            const result = await DeploymentConfig.deploy(deployCtx);
 
-            expect(result).equals(`Deployment successfully created for '${context.name}'.`);
-            expect(execStub).calledWith(DeploymentConfig.command.deploy(context.name));
+            expect(result).equals(`Deployment successfully created for '${deployCtx.name}'.`);
+            expect(execStub).calledWith(DeploymentConfig.command.deploy(deployCtx.name));
         });
 
         test('works with no context', async () => {
             const result = await DeploymentConfig.deploy(null);
 
-            expect(result).equals(`Deployment successfully created for '${context.name}'.`);
-            expect(execStub).calledWith(DeploymentConfig.command.deploy(context.name));
+            expect(result).equals(`Deployment successfully created for '${deployCtx.name}'.`);
+            expect(execStub).calledWith(DeploymentConfig.command.deploy(deployCtx.name));
         });
 
         test('returns null when no DeploymentConfig selected', async () => {
@@ -183,7 +182,7 @@ suite('K8s/deployment', () => {
             execStub.rejects(errorMessage);
 
             try {
-                await DeploymentConfig.deploy(context);
+                await DeploymentConfig.deploy(deployCtx);
             } catch (err) {
                 expect(err.message).equals(`Failed to create Deployment with error '${errorMessage}'.`);
             }
@@ -204,7 +203,7 @@ suite('K8s/deployment', () => {
 
     suite('Show Log', () => {
 
-        const context = {
+        const showLogCtx = {
             name: "nodejs-comp-nodejs-app",
             metadata: undefined,
             namespace: null,
@@ -220,7 +219,7 @@ suite('K8s/deployment', () => {
         });
 
         test('works from context menu', async () => {
-            await DeploymentConfig.showLog(context);
+            await DeploymentConfig.showLog(showLogCtx);
             expect(termStub).calledOnceWith(DeploymentConfig.command.showDeploymentConfigLog("nodejs-comp-nodejs-app"));
         });
 

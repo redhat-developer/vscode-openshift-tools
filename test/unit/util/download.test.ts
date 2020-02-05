@@ -17,19 +17,19 @@ chai.use(sinonChai);
 suite('Download Util', () => {
     let progressMock;
     const sandbox: sinon.SinonSandbox = sinon.createSandbox();
-    let requestEmitter: EventEmitter;
+    let requestEmitter: any;
     let streamEmitter: EventEmitter;
 
     setup(() => {
         requestEmitter = new EventEmitter();
         streamEmitter = new EventEmitter();
-        requestEmitter['pipe'] = () => streamEmitter;
+        requestEmitter.pipe = (): any => streamEmitter;
         progressMock = pq('../../../src/util/download', {
             got: {
-                stream: () => requestEmitter
+                stream: (): any => requestEmitter
             },
             stream: {
-                pipeline: async (a, b, cb) => {
+                pipeline: async (a, b, cb): Promise<void> => {
                     await wait(300);
                     requestEmitter.emit('downloadProgress', {percent: 0.33});
                     await wait(300);

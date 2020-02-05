@@ -7,7 +7,9 @@ import { Uri } from "vscode";
 import { OpenShiftObject, ContextType } from "../../../src/odo";
 
 export class TestItem implements OpenShiftObject {
+    public treeItem = null;
 
+    // eslint-disable-next-line no-useless-constructor
     constructor(
         private parent: OpenShiftObject,
         private name: string,
@@ -22,7 +24,7 @@ export class TestItem implements OpenShiftObject {
     }
 
     getTreeItem(): null {
-        return null;
+        return this.treeItem;
     }
 
     getChildren(): any[] {
@@ -36,4 +38,6 @@ export class TestItem implements OpenShiftObject {
     get label(): string {
         return this.name;
     }
+
+    public path: string;
 }

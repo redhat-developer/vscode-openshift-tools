@@ -4,6 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 
 /* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable no-console */
+/* eslint-disable global-require */
 
 import glob = require("glob");
 import paths = require('path');
@@ -36,10 +38,8 @@ export class CoverageRunner {
 
     private instrumenter: any = undefined;
 
+    // eslint-disable-next-line no-useless-constructor
     constructor(private options: TestRunnerOptions, private testsRoot: string) {
-        if (!options.relativeSourcePath) {
-
-        }
     }
 
     public setupCoverage(): void {
@@ -93,12 +93,12 @@ export class CoverageRunner {
      */
     public reportCoverage(): void {
         istanbul.hook.unhookRequire();
-        let cov: any;
+
         if (typeof global[this.coverageVar] === 'undefined' || Object.keys(global[this.coverageVar]).length === 0) {
             console.error('No coverage information was collected, exit without writing coverage information');
             return;
         }
-            cov = global[this.coverageVar];
+        const cov = global[this.coverageVar];
 
         // TODO consider putting this under a conditional flag
         // Files that are not touched by code ran by the test runner is manually instrumented, to
