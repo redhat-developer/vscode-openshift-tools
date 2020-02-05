@@ -67,6 +67,7 @@ suite('openshift connector Extension', () => {
     function getStaticMethodsToStub(osc: string[]): string[] {
         const mths: Set<string> = new Set();
         osc.forEach((name) => {
+            // eslint-disable-next-line no-param-reassign
             name = name.replace('.palette', '');
             const segs: string[] = name.split('.');
             let methName: string = segs[segs.length-1];

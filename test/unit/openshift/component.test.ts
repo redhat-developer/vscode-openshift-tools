@@ -674,7 +674,7 @@ suite('OpenShift/Component', () => {
         const onDidFake = (listener): vscode.Disposable => {
             Promise.resolve().then(() => { listener(undefined); } );
             return {
-                dispose: () => {  }
+                dispose: sandbox.stub()
             };
         };
 

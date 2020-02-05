@@ -34,7 +34,7 @@ suite('odo integration', () => {
             assert.ok(projects.length > 0);
         });
 
-        test('about()', async () => {
+        test('about()', () => {
             Cluster.about();
             assert.ok(true);
         });

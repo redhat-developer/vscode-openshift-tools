@@ -36,11 +36,12 @@ suite('Openshift/Cluster', () => {
         stderr: '',
         stdout: 'output'
     };
-    const err = new Error('FATAL ERROR');
-    const error = 'FATAL ERROR';
+
+    const fatalErrorText = 'FATAL ERROR';
+    const fatalError = new Error(fatalErrorText);
     const errorData: CliExitData = {
         error: undefined,
-        stderr: error,
+        stderr: fatalErrorText,
         stdout: 'output'
     };
     const routeObj = `{
@@ -116,14 +117,14 @@ suite('Openshift/Cluster', () => {
             quickPickStub.onSecondCall().resolves({description: "Current Context", label: testUrl});
             quickPickStub.onThirdCall().resolves({description: "Current Context", label: testUser});
             inputStub.resolves(password);
-            commandStub.rejects(err);
+            commandStub.rejects(fatalError);
             let expectedErr: { message: any };
             try {
                 await Cluster.login();
             } catch (error) {
                 expectedErr = error;
             }
-            expect(expectedErr.message).equals(`Failed to login to cluster '${testUrl}' with '${err.message}'!`);
+            expect(expectedErr.message).equals(`Failed to login to cluster '${testUrl}' with '${fatalError.message}'!`);
         });
 
         test('exits if the user refuses to log out of an existing cluster', async () => {
@@ -218,7 +219,7 @@ suite('Openshift/Cluster', () => {
                 } catch (err) {
                     expectedErr = err;
                 }
-                expect(expectedErr.message).equals(`Failed to login to cluster '${testUrl}' with '${error}'!`);
+                expect(expectedErr.message).equals(`Failed to login to cluster '${testUrl}' with '${fatalErrorText}'!`);
             });
 
             test('checks cluster url name is valid url', async () => {
@@ -296,14 +297,14 @@ suite('Openshift/Cluster', () => {
             });
 
             test('handles incoming errors the same way as credentials login', async () => {
-                execStub.rejects(err);
+                execStub.rejects(fatalError);
                 let expectedErr: { message: any };
                 try {
                     await Cluster.tokenLogin();
                 } catch (error) {
                     expectedErr = error;
                 }
-                expect(expectedErr.message).equals(`Failed to login to cluster '${testUrl}' with '${err.message}'!`);
+                expect(expectedErr.message).equals(`Failed to login to cluster '${testUrl}' with '${fatalError.message}'!`);
             });
         });
     });
@@ -341,7 +342,7 @@ suite('Openshift/Cluster', () => {
         });
 
         test('handles errors from odo', async () => {
-            execStub.rejects(error);
+            execStub.rejects(fatalErrorText);
             let expectedErr: any;
             try {
                 await Cluster.logout();
@@ -349,7 +350,7 @@ suite('Openshift/Cluster', () => {
             } catch (err) {
                 expectedErr = err;
             }
-            expect(expectedErr.message).equals(`Failed to logout of the current cluster with '${error}'!`);
+            expect(expectedErr.message).equals(`Failed to logout of the current cluster with '${fatalErrorText}'!`);
         });
 
         test('handles errors from odo stderr', async () => {
@@ -376,7 +377,7 @@ suite('Openshift/Cluster', () => {
             } catch (err) {
                 expectedErr = err;
             }
-            expect(expectedErr.message).equals(`Failed to login to cluster '${testUrl}' with '${error}'!`);
+            expect(expectedErr.message).equals(`Failed to login to cluster '${testUrl}' with '${fatalErrorText}'!`);
         });
     });
 
@@ -452,12 +453,12 @@ suite('Openshift/Cluster', () => {
         test('opens cluster\'s URL from context menu', () => {
             execStub.onFirstCall().resolves({
                 error: null,
-                stderr: error,
+                stderr: fatalErrorText,
                 stdout: 'output'
             });
             execStub.onSecondCall().resolves({
                 error: null,
-                stderr: error,
+                stderr: fatalErrorText,
                 stdout: routeObj
             });
             clusterMock.openshiftConsole(cluster);

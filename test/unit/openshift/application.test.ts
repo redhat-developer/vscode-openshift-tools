@@ -23,7 +23,7 @@ suite('OpenShift/Application', () => {
     const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
     const compItem = new TestItem(appItem, 'app', ContextType.COMPONENT_NO_CONTEXT, [], true, null);
-    compItem['path'] = 'path/to/component';
+    compItem.path = 'path/to/component';
     appItem.getChildren().push(compItem);
 
     setup(() => {
