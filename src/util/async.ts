@@ -18,10 +18,6 @@ export interface Task<T> {
 	(): T;
 }
 
-// export interface IDisposable {
-// 	dispose(): void;
-// }
-
 export class Delayer<T> {
 
 	private timeout: any;
@@ -30,15 +26,12 @@ export class Delayer<T> {
 
 	private doResolve: ((value?: any | Promise<any>) => void) | null;
 
-	private doReject: (err: any) => void;
-
 	private task: Task<T | Promise<T>> | null;
 
 	constructor(public defaultDelay: number) {
 		this.timeout = null;
 		this.completionPromise = null;
 		this.doResolve = null;
-		this.doReject = null;
 		this.task = null;
 	}
 
@@ -50,7 +43,6 @@ export class Delayer<T> {
 		if (!this.completionPromise) {
 			this.completionPromise = new Promise((c, e) => {
 				this.doResolve = c;
-				this.doReject = e;
 			}).then(() => {
 				this.completionPromise = null;
 				this.doResolve = null;
@@ -70,27 +62,10 @@ export class Delayer<T> {
 		return this.completionPromise;
 	}
 
-	// isTriggered(): boolean {
-	// 	return this.timeout !== null;
-	// }
-
-	// cancel(): void {
-	// 	this.cancelTimeout();
-
-	// 	if (this.completionPromise) {
-	// 		this.doReject(Error('Canceled'));
-	// 		this.completionPromise = null;
-	// 	}
-	// }
-
 	private cancelTimeout(): void {
 		if (this.timeout !== null) {
 			clearTimeout(this.timeout);
 			this.timeout = null;
 		}
 	}
-
-	// dispose(): void {
-	// 	this.cancelTimeout();
-	// }
 }
