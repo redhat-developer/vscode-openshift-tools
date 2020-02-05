@@ -31,7 +31,7 @@ import path = require('path');
 const {expect} = chai;
 chai.use(sinonChai);
 
-suite('openshift connector Extension', async () => {
+suite('openshift connector Extension', () => {
     let sandbox: sinon.SinonSandbox;
 
     const clusterItem = new OpenShiftObjectImpl(OdoImpl.ROOT, 'cluster', ContextType.CLUSTER, false, OdoImpl.Instance);
@@ -88,9 +88,9 @@ suite('openshift connector Extension', async () => {
                 }
             });
         });
-        for (const command of osc) {
-            await vscode.commands.executeCommand(command);
-        }
+        osc.forEach((command) => {
+            vscode.commands.executeCommand(command);
+        });
         expect(vscode.window.showErrorMessage).has.not.been.called;
     });
 
@@ -125,7 +125,7 @@ suite('openshift connector Extension', async () => {
     });
 
     test('should register all extension commands declared commands in package descriptor', async () => {
-        return await vscode.commands.getCommands(true).then((commands) => {
+        return vscode.commands.getCommands(true).then((commands) => {
             packagejson.contributes.commands.forEach((value)=> {
                 expect(commands.includes(value.command), `Command '${value.command}' handler is not registered during activation`).true;
             });
@@ -141,7 +141,7 @@ suite('openshift connector Extension', async () => {
     });
 
     test('async command wrapper shows error message from rejected command', async () => {
-        sandbox.stub(Cluster, 'login').returns(Promise.reject('message'));
+        sandbox.stub(Cluster, 'login').returns(Promise.reject(Error('message')));
         const semStub: sinon.SinonStub = sandbox.stub(vscode.window, 'showErrorMessage');
         sandbox.stub(vscode.window, 'showInformationMessage');
         await vscode.commands.executeCommand('openshift.explorer.login');

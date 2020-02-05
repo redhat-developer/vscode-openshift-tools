@@ -16,7 +16,7 @@ import { CliChannel } from '../../src/cli';
 const {expect} = chai;
 chai.use(sinonChai);
 
-suite('Oc', async () => {
+suite('Oc', () => {
     let sandbox: sinon.SinonSandbox;
     let detectOrDownloadStub: sinon.SinonStub<[string], Promise<string>>;
     let warnStub: sinon.SinonStub<[string, import("vscode").MessageOptions, ...import("vscode").MessageItem[]], Thenable<import("vscode").MessageItem>>;
@@ -41,7 +41,7 @@ suite('Oc', async () => {
         },
     };
 
-    setup(async () => {
+    setup(()=> {
         sandbox = sinon.createSandbox();
         warnStub = sandbox.stub(window, 'showWarningMessage');
         execStub = sandbox.stub(CliChannel.prototype, 'execute');

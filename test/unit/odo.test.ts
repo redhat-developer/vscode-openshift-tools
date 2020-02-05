@@ -16,7 +16,6 @@ import { WindowUtil } from '../../src/util/windowUtils';
 import { ToolsConfig } from '../../src/tools';
 import { CliExitData, CliChannel } from '../../src/cli';
 import * as odo from '../../src/odo';
-import { ContextType } from '../../src/odo';
 
 import jsYaml = require('js-yaml');
 
@@ -132,8 +131,8 @@ suite("odo", () => {
 
     suite('item listings', () => {
         let execStub: sinon.SinonStub; let yamlStub: sinon.SinonStub;
-        const project = new TestItem(null, 'project', ContextType.PROJECT);
-        const app = new TestItem(project, 'app', ContextType.APPLICATION);
+        const project = new TestItem(null, 'project', odo.ContextType.PROJECT);
+        const app = new TestItem(project, 'app', odo.ContextType.APPLICATION);
 
         setup(() => {
             execStub = sandbox.stub(odoCli, 'execute');
@@ -194,7 +193,7 @@ suite("odo", () => {
 
         test('getProjects returns empty list if an error occurs', async () => {
             const errorStub = sandbox.stub(window, 'showErrorMessage');
-            sandbox.stub(odoCli, 'getClusters').resolves([new TestItem(undefined, 'cluster', ContextType.CLUSTER)]);
+            sandbox.stub(odoCli, 'getClusters').resolves([new TestItem(undefined, 'cluster', odo.ContextType.CLUSTER)]);
             execStub.rejects(errorMessage);
             const result = await odoCli.getProjects();
 
@@ -292,7 +291,7 @@ suite("odo", () => {
 
             expect(execStub).calledWith(odo.Command.listServiceInstances(project.getName(), app.getName()));
             expect(result.length).equals(3);
-            for (let i = 0; i < result.length; i++) {
+            for (let i = 0; i < result.length; i+=1) {
                 expect(result[i].getName()).equals(services[i]);
             }
         });
@@ -354,7 +353,7 @@ suite("odo", () => {
         });
 
         test('getStorageNames returns storage items for a component', async () => {
-            const component = new TestItem(app, 'comp', ContextType.COMPONENT);
+            const component = new TestItem(app, 'comp', odo.ContextType.COMPONENT);
             execStub.returns({
                 error: undefined,
                 stdout: JSON.stringify({
@@ -379,7 +378,7 @@ suite("odo", () => {
         });
 
         test('getRoutes returns URL list items for a component', async () => {
-            const component = new TestItem(app, 'comp', ContextType.COMPONENT);
+            const component = new TestItem(app, 'comp', odo.ContextType.COMPONENT);
             execStub.returns({
                 error: undefined,
                 stdout: JSON.stringify({
@@ -404,7 +403,7 @@ suite("odo", () => {
         });
 
         test('getComponentChildren returns both routes and storage for a component', async () => {
-            const component = new TestItem(app, 'comp', ContextType.COMPONENT);
+            const component = new TestItem(app, 'comp', odo.ContextType.COMPONENT);
             execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({
                 items: [
                     {
@@ -473,7 +472,7 @@ suite("odo", () => {
             stdout: odoCatalog
         };
 
-        setup(async () => {
+        setup(() => {
             sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves(componentCatalog);
         });
 

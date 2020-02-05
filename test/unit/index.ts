@@ -8,8 +8,6 @@ import * as glob from 'glob';
 import * as paths from 'path';
 import { TestRunnerOptions, CoverageRunner } from '../coverage';
 
-'use strict';
-
 require('source-map-support').install();
 
 import Mocha = require('mocha');
