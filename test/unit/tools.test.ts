@@ -219,17 +219,17 @@ suite("tools configuration", () => {
     });
     suite('loadMetadata()', () => {
         test('keeps tool configuration if there is no platform attribute', () => {
-            let config: object = {
+            let config = {
                 odo: {
                     name: 'OpenShift Do tool',
                     version: '0.0.100'
                 }
             };
             config = ToolsConfig.loadMetadata(config, 'platform-name');
-            assert.ok(config['odo']);
+            assert.ok(config.odo);
         });
         test('removes tool configuration if platform is not supported', () => {
-            let config: object = {
+            let config = {
                 odo: {
                     name: 'OpenShift Do tool',
                     version: '0.0.100',
@@ -240,7 +240,7 @@ suite("tools configuration", () => {
                 }
             };
             config = ToolsConfig.loadMetadata(config, 'platform-name');
-            assert.ok(!config['odo']);
+            assert.ok(!config.odo);
         });
     });
 });
