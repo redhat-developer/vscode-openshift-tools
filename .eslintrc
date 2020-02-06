@@ -62,6 +62,7 @@
     "import/no-duplicates": ["error"],
     "import/prefer-default-export": 0,
     "max-nested-callbacks": [1, 4],
+    "max-classes-per-file": [0],
     "no-alert": 2,
     "no-caller": 2,
     "no-console": 2,

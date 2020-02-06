@@ -26,7 +26,7 @@ export class Archive {
                     .then(resolve)
                     .catch(reject);
             } else {
-                reject(`Unsupported extension for '${zipFile}'`);
+                reject(Error(`Unsupported extension for '${zipFile}'`));
             }
         });
     }
@@ -47,7 +47,13 @@ export class Archive {
             src: zipFile,
             dest: extractTo,
             tar: {
-                map: (header) => prefix && header.name.startsWith(prefix) ? (header.name = header.name.substring(prefix.length), header) : header
+                map: (header: { name: string; }): { name: string; } => {
+                  const result = header;
+                  if (prefix && header.name.startsWith(prefix)) {
+                    result.name = header.name.substring(prefix.length);
+                  }
+                  return result;
+                }
             }
         });
     }
