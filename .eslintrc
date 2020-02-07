@@ -76,18 +76,13 @@
     "no-underscore-dangle": 0,
     "@typescript-eslint/no-use-before-define": 2,
     "@typescript-eslint/await-thenable": "error",
+    "@typescript-eslint/unbound-method": ["error", { "ignoreStatic": true }],
     "no-var": 2,
     "object-shorthand": ["error", "properties"],
     "prefer-const": ["error", { "destructuring": "all" }],
     "prefer-template": 2,
     "radix": 2,
-    "no-trailing-spaces": "error",
-    "@typescript-eslint/unbound-method": [
-      "error",
-      {
-        "ignoreStatic": true
-      }
-    ]
+    "no-trailing-spaces": "error"
   },
   "overrides": [
     {

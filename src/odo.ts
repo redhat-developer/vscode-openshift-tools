@@ -493,10 +493,6 @@ export interface Odo {
     readonly subject: Subject<OdoEvent>;
 }
 
-export function getInstance(): Odo {
-    return OdoImpl.Instance;
-}
-
 function compareNodes(a: OpenShiftObject, b: OpenShiftObject): number {
     if (!a.contextValue) return -1;
     if (!b.contextValue) return 1;
@@ -572,7 +568,7 @@ class OdoModel {
     }
 
     public addContexts(folders: ReadonlyArray<WorkspaceFolder>): void {
-        for (const folder of folders) {
+        folders.forEach((folder)=> {
             try {
                 const compData = yaml.safeLoad(fs.readFileSync(path.join(folder.uri.fsPath, '.odo', 'config.yaml'), 'utf8')) as odo.Config;
                 compData.ComponentSettings.ContextPath = folder.uri;
@@ -580,7 +576,7 @@ class OdoModel {
             } catch (ignore) {
                 // ignore errors when loading .yaml file
             }
-        }
+        });
     }
 
     public async delete(item: OpenShiftObject): Promise<void> {
@@ -927,8 +923,8 @@ export class OdoImpl implements Odo {
         return item;
     }
 
-    private deleteAndRefresh(item: OpenShiftObject): OpenShiftObject {
-        OdoImpl.data.delete(item);
+    private async deleteAndRefresh(item: OpenShiftObject): Promise<OpenShiftObject> {
+        await OdoImpl.data.delete(item);
         // OpenShiftExplorer.getInstance().refresh(item.getParent());
         this.subject.next(new OdoEventImpl('changed', item.getParent()));
         return item;
@@ -1047,7 +1043,7 @@ export class OdoImpl implements Odo {
         if (component.contextValue !== ContextType.COMPONENT) {
             await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         }
-        this.deleteAndRefresh(component);
+        await this.deleteAndRefresh(component);
         const children = await app.getChildren();
         if (children.length === 0) {
             this.deleteApplication(app);
@@ -1088,7 +1084,7 @@ export class OdoImpl implements Odo {
         const app = service.getParent();
         await this.execute(Command.deleteService(app.getParent().getName(), app.getName(), service.getName()), Platform.getUserHomePath());
         await this.execute(Command.waitForServiceToBeGone(app.getParent().getName(), service.getName()));
-        this.deleteAndRefresh(service);
+        await this.deleteAndRefresh(service);
         const children = await app.getChildren();
         if (children.length === 0) {
             this.deleteApplication(app);
@@ -1168,11 +1164,10 @@ export class OdoImpl implements Odo {
                     const cluster = (await this.getClusters())[0];
                     const item = OdoImpl.data.getObjectByPath(path.join(cluster.path, settings.Project, settings.Application, settings.Name));
                     if (item && item.contextValue === ContextType.COMPONENT) {
-                        this.deleteAndRefresh(item);
+                        await this.deleteAndRefresh(item);
                     } else if (item) {
                         item.contextValue = ContextType.COMPONENT_NO_CONTEXT;
                         item.contextPath = undefined;
-                        // OpenShiftExplorer.getInstance().refresh(item);
                         this.subject.next(new OdoEventImpl('changed', item));
                     }
                     OdoImpl.data.deleteContext(wsFolder.uri);
@@ -1258,4 +1253,8 @@ export class OdoImpl implements Odo {
             }
         }
     }
+}
+
+export function getInstance(): Odo {
+  return OdoImpl.Instance;
 }
