@@ -3,9 +3,9 @@
         "description": "OpenShift Do CLI tool",
         "vendor": "Red Hat, Inc.",
         "name": "odo",
-        "version": "1.0.2",
-        "versionRange": "1.0.2",
-        "versionRangeLabel": "v1.0.2",
+        "version": "1.1.0",
+        "versionRange": "1.1.0",
+        "versionRangeLabel": "v1.1.0",
         "dlFileName": "odo",
         "filePrefix": "",
         "platform": {
