@@ -3,6 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+/* eslint-disable no-console */
+/* eslint-disable import/no-extraneous-dependencies */
+
 import * as path from 'path';
 import { runTests } from 'vscode-test';
 

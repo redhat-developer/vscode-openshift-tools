@@ -114,11 +114,15 @@ export class Component extends OpenShiftItem {
         const linkComponent = await Component.getLinkData(component);
         const getLinkComponent = linkComponent.status.linkedComponents;
         if (getLinkComponent) {
+            // eslint-disable-next-line no-restricted-syntax
             for (const key of Object.keys(getLinkComponent)) {
+                // eslint-disable-next-line no-await-in-loop
                 const getLinkPort = await Component.getLinkPort(component, key);
-                const getPort = getLinkPort.status.linkedComponents[component.getName()];
+                const ports = getLinkPort.status.linkedComponents[component.getName()];
                 if (getPort) {
-                    for (const port of getPort) {
+                    // eslint-disable-next-line no-restricted-syntax
+                    for (const port of ports) {
+                        // eslint-disable-next-line no-await-in-loop
                         await Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), key, component.getName(), port), component.contextPath.fsPath);
                     }
                 }
@@ -176,6 +180,8 @@ export class Component extends OpenShiftItem {
         ];
         const unlinkActionSelected = await window.showQuickPick(unlinkActions, {placeHolder: 'Select the option', ignoreFocusOut: true});
         if (!unlinkActionSelected) return null;
+        // TODO fix eslint rule violation
+        // eslint-disable-next-line no-nested-ternary
         return unlinkActionSelected.label === 'Component' ? Component.unlinkComponent(context) : unlinkActionSelected.label === 'Service' ?  Component.unlinkService(context) : null;
     }
 
@@ -310,9 +316,11 @@ export class Component extends OpenShiftItem {
             if (undeployRequired) {
                 let choice: string;
                 do {
+                    // eslint-disable-next-line no-await-in-loop
                     choice = await window.showWarningMessage('This Component must be undeployed before new version is pushed, because it was created and deployed with previous version of the extension.', 'Undeploy', 'Help', 'Cancel');
                     switch (choice) {
                         case 'Undeploy':
+                            // eslint-disable-next-line no-await-in-loop
                             await Component.undeploy(component);
                             return null;
                         case 'Help':
@@ -595,14 +603,15 @@ export class Component extends OpenShiftItem {
         const port = await getPort();
         const cp = exec(`"${toolLocation}" debug port-forward --local-port ${port}`, {cwd: component.contextPath.fsPath});
         return new Promise<string>((resolve, reject) => {
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             cp.stdout.on('data', async (data: string) => {
-                const port = data.trim().match(/(?<localPort>\d+):\d+$/);
-                if (port?.groups?.localPort) {
+                const parsedPort = data.trim().match(/(?<localPort>\d+):\d+$/);
+                if (parsedPort?.groups?.localPort) {
                     await waitPort({
                         host: 'localhost',
-                        port: parseInt(port.groups.localPort)
+                        port: parseInt(parsedPort.groups.localPort, 10)
                     });
-                    resolve(port.groups.localPort);
+                    resolve(parsedPort.groups.localPort);
                 }
             });
             cp.stderr.on('data', (data: string) => {
@@ -633,7 +642,7 @@ export class Component extends OpenShiftItem {
 
         const workspaceFolder = await selectWorkspaceFolder();
         if (!workspaceFolder) return null;
-        return await Progress.execFunctionWithProgress(`Importing component '${compName}'`, async () => {
+        return Progress.execFunctionWithProgress(`Importing component '${compName}'`, async () => {
             try {
                 // use annotations to understand what kind of component is imported
                 // metadata:
@@ -669,17 +678,20 @@ export class Component extends OpenShiftItem {
                     const volumes: any[] = componentJson.spec.template.spec.volumes.filter((volume: { persistentVolumeClaim: any; name: string }) => volume.persistentVolumeClaim !== undefined && !volume.name.startsWith(compName));
                     const storageData: Partial<{mountPath: string; pvcName: string}>[] = volumes.map((volume) => {
                         const data: Partial<{mountPath: string; pvcName: string}> = {};
-                        const mount = volumeMounts.find((mount) => mount.name === volume.name);
+                        const mount = volumeMounts.find((item) => item.name === volume.name);
                         data.mountPath = mount.mountPath;
                         data.pvcName = volume.persistentVolumeClaim.claimName;
                         return data;
                     });
+                    // eslint-disable-next-line no-restricted-syntax
                     for (const storage of storageData) {
                         try {
+                            // eslint-disable-next-line no-await-in-loop
                             const pvcResult = await Component.odo.execute(`oc get pvc/${storage.pvcName} --namespace ${prjName} -o json`, Platform.getUserHomePath(), false);
                             const pvcJson = JSON.parse(pvcResult.stdout);
                             const storageName = pvcJson.metadata.labels['app.kubernetes.io/storage-name'];
                             const size = pvcJson.spec.resources.requests.storage;
+                            // eslint-disable-next-line no-await-in-loop
                             await Component.odo.execute(Command.createStorage(storageName, storage.mountPath, size), workspaceFolder.fsPath);
                         } catch (ignore) {
                             // means there is no storage attached to component
@@ -691,6 +703,7 @@ export class Component extends OpenShiftItem {
                     const routeResult = await Component.odo.execute(`oc get route -l app.kubernetes.io/instance=${compName},app.kubernetes.io/part-of=${appName} --namespace ${prjName} -o json`, Platform.getUserHomePath(), false);
                     const routeJson = JSON.parse(routeResult.stdout);
                     const routeData: Partial<{name: string; port: string}>[] = routeJson.items.map((element: any) => ({name: element.metadata.labels['odo.openshift.io/url-name'], port: element.spec.port.targetPort}));
+                    // eslint-disable-next-line no-restricted-syntax
                     for (const url of routeData) {
                         Component.odo.execute(Command.createComponentCustomUrl(url.name, url.port), workspaceFolder.fsPath);
                     }

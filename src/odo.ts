@@ -3,6 +3,14 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable class-methods-use-this */
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-await-in-loop */
+
+/* TODO Review classes hierarchy */
+
 import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Disposable } from 'vscode';
 import * as path from 'path';
 import { statSync } from 'fs';
@@ -372,6 +380,7 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
         public readonly name: string,
         public readonly contextValue: ContextType,
         public deployed: boolean,
+        // eslint-disable-next-line no-shadow
         private readonly odo: Odo,
         public readonly collapsibleState: TreeItemCollapsibleState = Collapsed,
         public contextPath: Uri = undefined,
@@ -1221,8 +1230,8 @@ export class OdoImpl implements Odo {
                             const resourceNames = result.error || result.stdout === '' ? [] : result.stdout.split('\n');
                             for (const resourceName of resourceNames) {
                                 try {
-                                    const result = await this.execute(`oc get ${resourceId} ${resourceName} -o json --namespace=${project}`);
-                                    const {labels} = JSON.parse(result.stdout).metadata;
+                                    const resources = await this.execute(`oc get ${resourceId} ${resourceName} -o json --namespace=${project}`);
+                                    const {labels} = JSON.parse(resources.stdout).metadata;
                                     let command = `oc label ${resourceId} ${resourceName} --overwrite app.kubernetes.io/instance=${labels['app.kubernetes.io/component-name']}`;
                                     command += ` app.kubernetes.io/part-of=${labels['app.kubernetes.io/name']}`;
                                     if (labels['app.kubernetes.io/component-type']) {

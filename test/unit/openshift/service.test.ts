@@ -144,7 +144,7 @@ suite('OpenShift/Service', () => {
             try {
                 await Service.create(null);
             } catch (err) {
-                expect(err).equals(`Failed to create Service with error '${errorMessage}'`);
+                expect(err.message).equals(`Failed to create Service with error '${errorMessage}'`);
             }
         });
     });
@@ -334,7 +334,7 @@ suite('OpenShift/Service', () => {
             try {
                 await Service.del(serviceItem);
             } catch (err) {
-                expect(err).equals(`Failed to delete Service with error '${errorMessage}'`);
+                expect(err.message).equals(`Failed to delete Service with error '${errorMessage}'`);
             }
         });
     });

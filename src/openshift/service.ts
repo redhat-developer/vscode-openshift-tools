@@ -25,7 +25,7 @@ export class Service extends OpenShiftItem {
         const plans: string[] = await Service.odo.getServiceTemplatePlans(serviceTemplateName);
         let serviceTemplatePlanName: string;
         if (plans.length === 1) {
-            serviceTemplatePlanName = plans[0];
+            [serviceTemplatePlanName] = plans;
         } else if (plans.length > 1) {
             serviceTemplatePlanName = await window.showQuickPick(plans, {
                 placeHolder: "Service Template Plan Name",
@@ -40,7 +40,7 @@ export class Service extends OpenShiftItem {
         if (!serviceName) return null;
         return Progress.execFunctionWithProgress(`Creating a new Service '${serviceName}'`, () => Service.odo.createService(application, serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))
             .then(() => `Service '${serviceName}' successfully created`)
-            .catch((err) => Promise.reject(`Failed to create Service with error '${err}'`));
+            .catch((err) => Promise.reject(Error(`Failed to create Service with error '${err}'`)));
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
@@ -61,7 +61,7 @@ export class Service extends OpenShiftItem {
             if (answer === 'Yes') {
                 return Progress.execFunctionWithProgress(`Deleting Service '${service.getName()}' from Application '${service.getParent().getName()}'`, () => Service.odo.deleteService(service))
                     .then(() => `Service '${service.getName()}' successfully deleted`)
-                    .catch((err) => Promise.reject(`Failed to delete Service with error '${err}'`));
+                    .catch((err) => Promise.reject(Error(`Failed to delete Service with error '${err}'`)));
             }
         }
         return null;

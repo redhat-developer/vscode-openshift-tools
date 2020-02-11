@@ -81,12 +81,12 @@ suite("tools configuration", () => {
         test('returns path to tool detected form PATH locations if detected version is correct', async () => {
             sb.stub(shelljs, 'which').returns({stdout: 'odo'} as string & shelljs.ShellReturnValue);
             sb.stub(fs, 'existsSync').returns(false);
-            sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools['odo'].version);
+            sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools.odo.version);
             const toolLocation = await ToolsConfig.detect('odo');
             if (vscode.workspace.getConfiguration('openshiftConnector').get('searchForToolsInPath')) {
                 assert.equal(toolLocation, 'odo');
             } else {
-                assert.equal(toolLocation, path.resolve(__dirname, '..', '..', '..', 'out', 'tools', Platform.OS, ToolsConfig.tools['odo'].cmdFileName));
+                assert.equal(toolLocation, path.resolve(__dirname, '..', '..', '..', 'out', 'tools', Platform.OS, ToolsConfig.tools.odo.cmdFileName));
             }
         });
 
@@ -123,7 +123,7 @@ suite("tools configuration", () => {
             });
             test('set executable attribute for tool file', async () => {
                 sb.stub(shelljs, 'which');
-                sb.stub(ToolsConfig, 'getVersion').resolves(ToolsConfig.tools['odo'].versionRange);
+                sb.stub(ToolsConfig, 'getVersion').resolves(ToolsConfig.tools.odo.versionRange);
                 sb.stub(Archive, 'extract').resolves();
                 await ToolsConfig.detect('odo');
                 assert.ok(chmodSyncStub.called);

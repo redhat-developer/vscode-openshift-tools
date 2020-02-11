@@ -25,13 +25,11 @@ export class QuickPickCommand implements QuickPickItem {
         public picked?: boolean,
         public alwaysShow?: boolean,
         public getName?: () => string
-    ) {
-
-    }
+    ) { }
 }
 
 function isCommand(item: QuickPickItem | QuickPickCommand): item is QuickPickCommand {
-    return item['command'];
+    return (item as any).command;
 }
 
 export abstract class OpenShiftItem {
@@ -40,12 +38,12 @@ export abstract class OpenShiftItem {
     protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
 
     static validateUniqueName(data: Array<OpenShiftObject>, value: string): string {
-        const openshiftObject =  data.find((openshiftObject) =>  openshiftObject.getName() === value);
+        const openshiftObject =  data.find((item) => item.getName() === value);
         return openshiftObject && `This name is already used, please enter different name.`;
     }
 
-    static async getName(message: string, data: Array<OpenShiftObject>, offset?: string): Promise<string> {
-        return await window.showInputBox({
+    static getName(message: string, data: Array<OpenShiftObject>, offset?: string): Thenable<string> {
+        return window.showInputBox({
             prompt: `Provide ${message}`,
             ignoreFocusOut: true,
             validateInput: (value: string) => {
@@ -99,7 +97,7 @@ export abstract class OpenShiftItem {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
         if (applicationList.length === 0 && !createCommand) throw Error(errorMessage.Component);
         return createCommand ? [new QuickPickCommand(`$(plus) Create new Application...`, async () => {
-            return await OpenShiftItem.getName('Application name', applicationList);
+            return OpenShiftItem.getName('Application name', applicationList);
         }), ...applicationList] : applicationList;
     }
 
