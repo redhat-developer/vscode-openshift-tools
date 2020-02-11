@@ -129,7 +129,7 @@ suite('OpenShift/Storage', () => {
                 await Storage.create(null);
                 expect.fail();
             } catch (err) {
-                expect(err).equals(`New Storage command failed with error: '${errorMessage}'!`);
+                expect(err.message).equals(`New Storage command failed with error: '${errorMessage}'!`);
             }
         });
     });
@@ -181,7 +181,7 @@ suite('OpenShift/Storage', () => {
                 await Storage.create(componentItem);
                 expect.fail();
             } catch (err) {
-                expect(err).equals(`New Storage command failed with error: '${errorMessage}'!`);
+                expect(err.message).equals(`New Storage command failed with error: '${errorMessage}'!`);
             }
         });
     });
@@ -336,7 +336,7 @@ suite('OpenShift/Storage', () => {
                 await Storage.del(storageItem);
                 expect.fail();
             } catch (err) {
-                expect(err).equals(`Failed to delete Storage with error '${errorMessage}'`);
+                expect(err.message).equals(`Failed to delete Storage with error '${errorMessage}'`);
             }
         });
     });

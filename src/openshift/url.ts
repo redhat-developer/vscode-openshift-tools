@@ -26,18 +26,18 @@ export class Url extends OpenShiftItem{
             });
             let port: Port | QuickPickItem;
             if (ports.length === 1) {
-                port = ports[0];
+                [ port ] = ports;
             } else if (ports.length > 1) {
                 port = await window.showQuickPick(portItems, {placeHolder: "Select port to expose", ignoreFocusOut: true});
             } else {
-                return Promise.reject(`Component '${component.getName()}' has no ports declared.`);
+                return Promise.reject(Error(`Component '${component.getName()}' has no ports declared.`));
             }
 
             if (port) {
                 return Progress.execFunctionWithProgress(`Creating a URL '${urlName}' for the Component '${component.getName()}'`,
-                    () => Url.odo.createComponentCustomUrl(component, `${urlName}`, `${port['Number']}`)
+                    () => Url.odo.createComponentCustomUrl(component, `${urlName}`, `${(port as any).Number}`)
                         .then(() => `URL '${urlName}' for component '${component.getName()}' successfully created`)
-                        .catch((err) => Promise.reject(`Failed to create URL '${urlName}' for component '${component.getName()}'. ${err.message}`))
+                        .catch((err) => Promise.reject(Error(`Failed to create URL '${urlName}' for component '${component.getName()}'. ${err.message}`)))
                 );
             }
         }
@@ -58,7 +58,7 @@ export class Url extends OpenShiftItem{
             if (value === 'Yes') {
                 return Progress.execFunctionWithProgress(`Deleting URL ${url.getName()} from Component ${component.getName()}`, () => Url.odo.deleteURL(url))
                     .then(() => `URL '${url.getName()}' from Component '${url.getParent().getName()}' successfully deleted`)
-                    .catch((err) => Promise.reject(`Failed to delete URL with error '${err}'`));
+                    .catch((err) => Promise.reject(Error(`Failed to delete URL with error '${err}'`)));
             }
         }
         return null;

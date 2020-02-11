@@ -17,7 +17,7 @@ export class Project extends OpenShiftItem {
         projectName = projectName.trim();
         return Project.odo.createProject(projectName)
             .then(() => `Project '${projectName}' successfully created`)
-            .catch((error) => Promise.reject(`Failed to create Project with error '${error}'`));
+            .catch((error) => Promise.reject(Error(`Failed to create Project with error '${error}'`)));
     }
 
     static async del(context: OpenShiftObject): Promise<string> {
@@ -31,7 +31,7 @@ export class Project extends OpenShiftItem {
                 result = Progress.execFunctionWithProgress(`Deleting Project '${project.getName()}'`,
                     () => Project.odo.deleteProject(project)
                         .then(() => `Project '${project.getName()}' successfully deleted`)
-                        .catch((err) => Promise.reject(`Failed to delete Project with error '${err}'`))
+                        .catch((err) => Promise.reject(Error(`Failed to delete Project with error '${err}'`)))
                 );
             }
         }

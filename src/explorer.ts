@@ -43,7 +43,13 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
         this.fsw.emitter.on('file-changed', this.refresh.bind(this));
         this.treeView = window.createTreeView('openshiftProjectExplorer', {treeDataProvider: this});
-        OpenShiftExplorer.odoctl.subject.subscribe(event => event.reveal ? this.reveal(event.data) : this.refresh(event.data));
+        OpenShiftExplorer.odoctl.subject.subscribe(event =>  {
+            if (event.reveal) {
+                this.reveal(event.data)
+             } else {
+                 this.refresh(event.data)
+             }
+        });
     }
 
     static getInstance(): OpenShiftExplorer {
@@ -53,14 +59,17 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         return OpenShiftExplorer.instance;
     }
 
+    // eslint-disable-next-line class-methods-use-this
     getTreeItem(element: OpenShiftObject): TreeItem | Thenable<TreeItem> {
         return element;
     }
 
+    // eslint-disable-next-line class-methods-use-this
     getChildren(element?: OpenShiftObject): ProviderResult<OpenShiftObject[]> {
         return element ? element.getChildren() : OpenShiftExplorer.odoctl.getClusters();
     }
 
+    // eslint-disable-next-line class-methods-use-this
     getParent?(element: OpenShiftObject): OpenShiftObject {
         return element.getParent();
     }
@@ -93,9 +102,9 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
             'OS:': Platform.OS,
             'Extension version:': extensions.getExtension('redhat.vscode-openshift-connector').packageJSON.version
         };
-        for (const [key, value] of Object.entries(template)) {
+        Object.entries<string>(template).forEach(([key, value]) => {
             body = `${body}${key} ${value}\n`;
-        }
+        })
         return commands.executeCommand(
             'vscode.open',
             Uri.parse(`${repoURL}/issues/new?labels=kind/bug&title=Issue&body=**Environment**\n${body}\n**Description**`));

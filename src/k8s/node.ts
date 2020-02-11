@@ -27,6 +27,7 @@ export class Node implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterEx
 
     readonly kind: ClusterExplorerV1.ResourceKind = this.resourceKind;
 
+    // eslint-disable-next-line @typescript-eslint/require-await, class-methods-use-this
     async getChildren(): Promise<ClusterExplorerV1.Node[]> {
         return [];
     }

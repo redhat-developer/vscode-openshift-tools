@@ -65,7 +65,7 @@ suite('OpenShift/Project', () => {
                 await Project.create();
                 expect.fail();
             } catch (err) {
-                expect(err).equals(`Failed to create Project with error '${errorMessage}'`);
+                expect(err.message).equals(`Failed to create Project with error '${errorMessage}'`);
             }
         });
 
@@ -175,7 +175,7 @@ suite('OpenShift/Project', () => {
                 await Project.del(projectItem);
                 expect.fail();
             } catch (err) {
-                expect(err).equals(`Failed to delete Project with error '${errorMessage}'`);
+                expect(err.message).equals(`Failed to delete Project with error '${errorMessage}'`);
             }
         });
     });

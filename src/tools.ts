@@ -3,14 +3,13 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-'use strict';
-
-import { Platform } from "./util/platform";
-import { which } from "shelljs";
-import * as vscode from 'vscode';
-import * as path from 'path';
 import * as fs from 'fs';
+import * as path from 'path';
+import * as vscode from 'vscode';
+import { which } from "shelljs";
+import { Platform } from "./util/platform";
 import { CliChannel } from './cli';
+
 import semver = require('semver');
 import configData = require('./tools.json');
 
@@ -20,7 +19,7 @@ export class ToolsConfig {
 
     public static loadMetadata(requirements, platform): object {
         const reqs = JSON.parse(JSON.stringify(requirements));
-        for (const object in requirements) {
+        Object.keys(requirements).forEach((object) => {
             if (reqs[object].platform) {
                 if (reqs[object].platform[platform]) {
                     Object.assign(reqs[object], reqs[object].platform[platform]);
@@ -29,7 +28,7 @@ export class ToolsConfig {
                     delete reqs[object];
                 }
             }
-        }
+        });
         return reqs;
     }
 
@@ -62,10 +61,10 @@ export class ToolsConfig {
             const result = await CliChannel.getInstance().execute(`"${location}" version`);
             if (result.stdout) {
                 const toolVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
-                    return value.match(version);
+                    return version.test(value);
                 }).map((value)=>version.exec(value)[1]);
                 if (toolVersion.length) {
-                    detectedVersion = toolVersion[0];
+                    [ detectedVersion ] = toolVersion;
                 }
             }
         }
@@ -73,8 +72,11 @@ export class ToolsConfig {
     }
 
     public static async selectTool(locations: string[], versionRange: string): Promise<string> {
-        let result;
+        let result: string;
+        // Array.find cannot be used here because of async calls
+        // eslint-disable-next-line no-restricted-syntax
         for (const location of locations) {
+            // eslint-disable-next-line no-await-in-loop
             if (location && semver.satisfies(await ToolsConfig.getVersion(location), versionRange)) {
                 result = location;
                 break;

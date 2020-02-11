@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { workspace, QuickPickItem, window, Uri } from "vscode";
-import { Platform } from "./platform";
+import { workspace, QuickPickItem, window, Uri } from 'vscode';
+import { Platform } from './platform';
 
 import path = require('path');
 import fs = require('fs-extra');
@@ -13,31 +13,35 @@ interface WorkspaceFolderItem extends QuickPickItem {
     uri: Uri;
 }
 
-class CreateWorkspaceItem implements QuickPickItem {
-	get label(): string { return `$(plus) Add new context folder.`; }
-
-    get description(): string { return 'Folder which does not have an OpenShift context'; }
-}
+const addWorkspaceFolder: QuickPickItem =  {
+    label: `$(plus) Add new context folder.`,
+    description: 'Folder which does not have an OpenShift context'
+};
 
 export async function selectWorkspaceFolder(): Promise<Uri> {
     let folder: WorkspaceFolderItem[] = [];
     if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
-        folder = workspace.workspaceFolders.filter(
-            (value) => {
+        folder = workspace.workspaceFolders
+            .filter((value) => {
                 let result = true;
                 try {
-                    result = !fs.statSync(path.join(value.uri.fsPath, '.odo', 'config.yaml')).isFile();
+                    result = !fs
+                        .statSync(path.join(value.uri.fsPath, '.odo', 'config.yaml'))
+                        .isFile();
                 } catch (ignore) {
                     // ignore errors if file does not exist
                 }
                 return result;
-            }
-        ).map(
-            (folder) => ({ label: `$(file-directory) ${folder.uri.fsPath}`, uri: folder.uri })
-        );
+            })
+            .map((wsFolder) => ({
+                label: `$(file-directory) ${wsFolder.uri.fsPath}`,
+                uri: wsFolder.uri,
+            }));
     }
-    const addWorkspaceFolder = new CreateWorkspaceItem();
-    const choice = await window.showQuickPick([addWorkspaceFolder, ...folder], {placeHolder: "Select context folder", ignoreFocusOut: true});
+    const choice = await window.showQuickPick([addWorkspaceFolder, ...folder], {
+        placeHolder: 'Select context folder',
+        ignoreFocusOut: true,
+    });
     if (!choice) return null;
 
     let workspacePath: Uri;
@@ -48,21 +52,18 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
             canSelectFolders: true,
             canSelectMany: false,
             defaultUri: Uri.file(Platform.getUserHomePath()),
-            openLabel: "Add context folder for component in workspace."
+            openLabel: 'Add context folder for component in workspace.',
         });
         if (!folders) return null;
-        if (await checkComponentFolder(folders[0])) {
-            window.showInformationMessage('The folder selected already contains a component. Please select a different folder.');
+        if (fs.existsSync(path.join(folders[0].fsPath, '.odo', 'config.yaml'))) {
+            window.showInformationMessage(
+                'The folder selected already contains a component. Please select a different folder.',
+            );
             return this.selectWorkspaceFolder();
         }
-            workspacePath = folders[0];
-
+        [ workspacePath ] = folders;
     } else if (choice) {
         workspacePath = (choice as WorkspaceFolderItem).uri;
     }
     return workspacePath;
-    }
-
-    async function checkComponentFolder(folder: Uri): Promise<boolean> {
-        return fs.existsSync(path.join(folder.fsPath, '.odo', 'config.yaml'));
-    }
+}

@@ -281,7 +281,7 @@ suite('OpenShift/URL', () => {
             try {
                 await Url.create(componentItem);
             } catch (error) {
-                expect(error).equals(`Failed to create URL 'urlName' for component '${componentItem.getName()}'. Error`);
+                expect(error.message).equals(`Failed to create URL 'urlName' for component '${componentItem.getName()}'. Error`);
                 return;
             }
 
@@ -294,7 +294,7 @@ suite('OpenShift/URL', () => {
             try {
                 await Url.create(componentItem);
             } catch (error) {
-                expect(error).equals(`Component '${componentItem.getName()}' has no ports declared.`);
+                expect(error.message).equals(`Component '${componentItem.getName()}' has no ports declared.`);
                 return;
             }
             expect.fail(false, true, 'No exception thrown');
@@ -365,7 +365,7 @@ suite('OpenShift/URL', () => {
                 await Url.del(routeItem);
                 expect.fail();
             } catch (err) {
-                expect(err).equals(`Failed to delete URL with error '${errorMessage}'`);
+                expect(err.message).equals(`Failed to delete URL with error '${errorMessage}'`);
             }
         });
     });

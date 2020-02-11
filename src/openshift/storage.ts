@@ -36,7 +36,7 @@ export class Storage extends OpenShiftItem {
 
         return Progress.execFunctionWithProgress(`Creating the Storage '${component.getName()}'`, () => Storage.odo.createStorage(component, storageName, mountPath, storageSize))
             .then(() => `Storage '${storageName}' successfully created for Component '${component.getName()}'`)
-            .catch((err) => Promise.reject(`New Storage command failed with error: '${err}'!`));
+            .catch((err) => Promise.reject(Error(`New Storage command failed with error: '${err}'!`)));
     }
 
     static async del(treeItem: OpenShiftObject): Promise<string> {
@@ -51,7 +51,7 @@ export class Storage extends OpenShiftItem {
             if (value === 'Yes') {
                 return Progress.execFunctionWithProgress(`Deleting Storage ${storage.getName()} from Component ${component.getName()}`, () => Storage.odo.deleteStorage(storage))
                     .then(() => `Storage '${storage.getName()}' from Component '${storage.getParent().getName()}' successfully deleted`)
-                    .catch((err) => Promise.reject(`Failed to delete Storage with error '${err}'`));
+                    .catch((err) => Promise.reject(Error(`Failed to delete Storage with error '${err}'`)));
             }
         }
         return null;
