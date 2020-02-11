@@ -71,6 +71,7 @@
     "no-else-return": ["error"],
     "no-global-strict": 0,
     "no-irregular-whitespace": ["error"],
+    "no-param-reassign": ["error", { "props": false }],
     "no-shadow": ["error"],
     "no-underscore-dangle": 0,
     "@typescript-eslint/no-use-before-define": 2,
@@ -80,7 +81,13 @@
     "prefer-const": ["error", { "destructuring": "all" }],
     "prefer-template": 2,
     "radix": 2,
-    "no-trailing-spaces": "error"
+    "no-trailing-spaces": "error",
+    "@typescript-eslint/unbound-method": [
+      "error",
+      {
+        "ignoreStatic": true
+      }
+    ]
   },
   "overrides": [
     {
