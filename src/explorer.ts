@@ -45,9 +45,9 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         this.treeView = window.createTreeView('openshiftProjectExplorer', {treeDataProvider: this});
         OpenShiftExplorer.odoctl.subject.subscribe(event =>  {
             if (event.reveal) {
-                this.reveal(event.data)
+                this.reveal(event.data);
              } else {
-                 this.refresh(event.data)
+                 this.refresh(event.data);
              }
         });
     }
@@ -104,7 +104,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         };
         Object.entries<string>(template).forEach(([key, value]) => {
             body = `${body}${key} ${value}\n`;
-        })
+        });
         return commands.executeCommand(
             'vscode.open',
             Uri.parse(`${repoURL}/issues/new?labels=kind/bug&title=Issue&body=**Environment**\n${body}\n**Description**`));
