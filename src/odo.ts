@@ -10,11 +10,9 @@ import { Subject } from 'rxjs';
 import { ChildProcess } from 'child_process';
 import * as cliInstance from './cli';
 import { WindowUtil } from './util/windowUtils';
-import { CliExitData } from './cli';
 import { ToolsConfig } from './tools';
 import { Platform } from './util/platform';
 import * as odo from './odo/config';
-import { ComponentSettings } from './odo/config';
 import { GlyphChars } from './util/constants';
 import { Progress } from './util/progress';
 
@@ -472,7 +470,7 @@ export interface Odo {
     getServiceTemplates(): Promise<string[]>;
     getServiceTemplatePlans(svc: string): Promise<string[]>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
-    execute(command: string, cwd?: string, fail?: boolean): Promise<CliExitData>;
+    execute(command: string, cwd?: string, fail?: boolean): Promise<cliInstance.CliExitData>;
     executeInTerminal(command: string, cwd?: string): Promise<void>;
     requireLogin(): Promise<boolean>;
     clearCache?(): void;
@@ -515,7 +513,7 @@ class OdoModel {
 
     private contextToObject = new Map<Uri, OpenShiftObject>();
 
-    private contextToSettings = new Map<Uri, ComponentSettings>();
+    private contextToSettings = new Map<Uri, odo.ComponentSettings>();
 
     private objectToProcess = new Map<OpenShiftObject, ChildProcess>();
 
@@ -543,8 +541,8 @@ class OdoModel {
         }
     }
 
-    public getObjectByPath(path: string): OpenShiftObject {
-        return this.pathToObject.get(path);
+    public getObjectByPath(objPath: string): OpenShiftObject {
+        return this.pathToObject.get(objPath);
     }
 
     public setContextToObject(object: OpenShiftObject): void {
@@ -559,7 +557,7 @@ class OdoModel {
         return this.contextToObject.get(context);
     }
 
-    public setContextToSettings (settings: ComponentSettings): void {
+    public setContextToSettings (settings: odo.ComponentSettings): void {
         if (!this.contextToSettings.has(settings.ContextPath)) {
             this.contextToSettings.set(settings.ContextPath, settings);
         }
@@ -819,18 +817,18 @@ export class OdoImpl implements Odo {
     async getComponentPorts(component: OpenShiftObject): Promise<odo.Port[]> {
         let ports: string[] = [];
         if (component.contextValue === ContextType.COMPONENT_PUSHED) {
-            const portsResult: CliExitData = await this.execute(Command.getComponentJson(), component.contextPath.fsPath);
+            const portsResult: cliInstance.CliExitData = await this.execute(Command.getComponentJson(), component.contextPath.fsPath);
             const serviceOpj = JSON.parse(portsResult.stdout);
             ports = serviceOpj.spec.ports;
         } else {
-            const settings: ComponentSettings = OdoImpl.data.getSettingsByContext(component.contextPath);
+            const settings: odo.ComponentSettings = OdoImpl.data.getSettingsByContext(component.contextPath);
             if (settings) {
                 ports = settings.Ports;
             }
         }
         return ports.map<odo.Port>((port: string) => {
             const data = port.split('/');
-            return {Number: Number.parseInt(data[0]), Protocol: data[1]};
+            return {Number: Number.parseInt(data[0], 10), Protocol: data[1]};
         });
     }
 
@@ -897,7 +895,7 @@ export class OdoImpl implements Odo {
         terminal.show();
     }
 
-    public async execute(command: string, cwd?: string, fail = true): Promise<CliExitData> {
+    public async execute(command: string, cwd?: string, fail = true): Promise<cliInstance.CliExitData> {
         const cmd = command.split(' ')[0];
         const toolLocation = await ToolsConfig.detect(cmd);
         return OdoImpl.cli.execute(
@@ -1138,7 +1136,7 @@ export class OdoImpl implements Odo {
             OdoImpl.data.addContexts(event.added);
 
             event.added.forEach(async (folder: WorkspaceFolder) => {
-                const added: ComponentSettings = OdoImpl.data.getSettingsByContext(folder.uri);
+                const added: odo.ComponentSettings = OdoImpl.data.getSettingsByContext(folder.uri);
                 if (added) {
                     const cluster = (await this.getClusters())[0];
                     const prj = OdoImpl.data.getObjectByPath(path.join(cluster.path, added.Project));

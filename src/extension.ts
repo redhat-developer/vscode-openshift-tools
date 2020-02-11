@@ -117,7 +117,7 @@ function migrateFromOdo018(): void {
   }
 }
 
-export async function activate(extensionContext: vscode.ExtensionContext) {
+export async function activate(extensionContext: vscode.ExtensionContext): Promise<void> {
     migrateFromOdo018();
     Cluster.extensionContext = extensionContext;
     Component.extensionContext = extensionContext;

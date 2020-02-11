@@ -3,25 +3,59 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as childProcess from 'child_process';
+import * as cp from 'child_process';
 import * as vscode from 'vscode';
-import { ExecException, ExecOptions } from 'child_process';
 import { Filters } from './util/filters';
 
 export interface CliExitData {
-    readonly error: ExecException;
+    readonly error: cp.ExecException;
     readonly stdout: string;
     readonly stderr: string;
 }
 
 export interface Cli {
-    execute(cmd: string, opts?: ExecOptions): Promise<CliExitData>;
+    execute(cmd: string, opts?: cp.ExecOptions): Promise<CliExitData>;
 }
 
 export interface OdoChannel {
     print(text: string): void;
     show(): void;
 }
+
+function prettifyJson(str: string): string {
+  let jsonData: string;
+  try {
+      jsonData = JSON.stringify(JSON.parse(str), null, 2);
+  } catch (ignore) {
+      const hidePass = Filters.filterToken(str);
+      return Filters.filterPassword(hidePass);
+  }
+  return jsonData;
+}
+
+class OdoChannelImpl implements OdoChannel {
+  private readonly channel: vscode.OutputChannel = vscode.window.createOutputChannel("OpenShift");
+
+  show(): void {
+      this.channel.show();
+  }
+
+  print(text: string): void {
+      const textData = prettifyJson(text);
+      this.channel.append(textData);
+      if (!textData.endsWith('\n')) {
+          this.channel.append('\n');
+      }
+      if (vscode.workspace.getConfiguration('openshiftConnector').get<boolean>('showChannelOnOutput')) {
+          this.channel.show();
+      }
+  }
+}
+
+// TODO Refactor to OdoCli or OpenShiftCli class
+// This is Cli interface implementation that lets
+// execute commands and prints commands and output
+// to an output channel
 
 export class CliChannel implements Cli {
     private static instance: CliChannel;
@@ -35,17 +69,17 @@ export class CliChannel implements Cli {
         return CliChannel.instance;
     }
 
-    async showOutput(): Promise<void> {
+    showOutput(): void {
         this.odoChannel.show();
     }
 
-    async execute(cmd: string, opts: ExecOptions = {}): Promise<CliExitData> {
+    async execute(cmd: string, opts: cp.ExecOptions = {}): Promise<CliExitData> {
         return new Promise<CliExitData>((resolve) => {
             this.odoChannel.print(cmd);
             if (opts.maxBuffer === undefined) {
                 opts.maxBuffer = 2*1024*1024;
             }
-            childProcess.exec(cmd, opts, (error: ExecException, stdout: string, stderr: string) => {
+            cp.exec(cmd, opts, (error: cp.ExecException, stdout: string, stderr: string) => {
                 const stdoutFiltered = stdout.replace(/---[\s\S]*$/g, '').trim();
                 this.odoChannel.print(stdoutFiltered);
                 this.odoChannel.print(stderr);
@@ -55,35 +89,5 @@ export class CliChannel implements Cli {
                 resolve({ error, stdout: stdoutFiltered, stderr });
             });
         });
-    }
-}
-
-class OdoChannelImpl implements OdoChannel {
-    private readonly channel: vscode.OutputChannel = vscode.window.createOutputChannel("OpenShift");
-
-    show(): void {
-        this.channel.show();
-    }
-
-    prettifyJson(str: string): string {
-        let jsonData: string;
-        try {
-            jsonData = JSON.stringify(JSON.parse(str), null, 2);
-        } catch (ignore) {
-            const hidePass = Filters.filterToken(str);
-            return Filters.filterPassword(hidePass);
-        }
-        return jsonData;
-    }
-
-    print(text: string): void {
-        const textData = this.prettifyJson(text);
-        this.channel.append(textData);
-        if (!textData.endsWith('\n')) {
-            this.channel.append('\n');
-        }
-        if (vscode.workspace.getConfiguration('openshiftConnector').get<boolean>('showChannelOnOutput')) {
-            this.channel.show();
-        }
     }
 }
