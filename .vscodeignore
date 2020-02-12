@@ -10,7 +10,7 @@ vsc-extension-quickstart.md
 tslint.json
 *.vsix
 test/**
-coverage/**
+out/coverage/**
 coverconfig.json
 Jenkinsfile
 .gitattributes
