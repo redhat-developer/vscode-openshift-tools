@@ -123,7 +123,7 @@ suite("tools configuration", () => {
             });
             test('set executable attribute for tool file', async () => {
                 sb.stub(shelljs, 'which');
-                sb.stub(ToolsConfig, 'getVersion').resolves(ToolsConfig.tools.odo.versionRange);
+                sb.stub(ToolsConfig, 'getVersion').resolves(ToolsConfig.tools.odo.version);
                 sb.stub(Archive, 'extract').resolves();
                 await ToolsConfig.detect('odo');
                 assert.ok(chmodSyncStub.called);
