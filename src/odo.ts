@@ -87,6 +87,10 @@ function verbose(_target: any, key: string, descriptor: any): void {
 }
 
 export class Command {
+    static printCatalogComponentImageStreamRefJson(name: string, namespace: string): string {
+        return `oc get imagestream ${name} -n ${namespace} -o json`
+    }
+
     static listProjects(): string {
         return `odo project list -o json`;
     }
@@ -471,6 +475,7 @@ export interface Odo {
     getComponents(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]>;
     getComponentTypes(): Promise<string[]>;
     getComponentTypesJson(): Promise<any[]>;
+    getImageStreamRef(name: string, namespace: string): Promise<any>;
     getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponentPorts(component: OpenShiftObject): Promise<odo.Port[]>;
@@ -801,6 +806,11 @@ export class OdoImpl implements Odo {
     public async getComponentTypesJson(): Promise<any> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
         return JSON.parse(result.stdout).items;
+    }
+
+    public async getImageStreamRef(name: string, namespace: string): Promise<any> {
+        const result: cliInstance.CliExitData = await this.execute(Command.printCatalogComponentImageStreamRefJson(name, namespace));
+        return JSON.parse(result.stdout);
     }
 
     public async getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]> {
