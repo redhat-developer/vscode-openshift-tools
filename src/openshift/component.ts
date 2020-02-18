@@ -543,7 +543,8 @@ export class Component extends OpenShiftItem {
     static async startDebugger(component: OpenShiftObject): Promise<string | undefined> {
         const components = await Component.odo.getComponentTypesJson();
         const componentBuilder = components.find((builder) => builder.metadata.name === component.builderImage.name);
-        const tag = componentBuilder.spec.imageStreamRef.spec.tags.find((element: { name: string }) => element.name === component.builderImage.tag);
+        const imageStreamRef = await Component.odo.getImageStreamRef(componentBuilder.metadata.name, componentBuilder.metadata.namespace);
+        const tag = imageStreamRef.spec.tags.find((element: { name: string }) => element.name === component.builderImage.tag);
         const isJava = tag.annotations.tags.includes('java');
         const isNode = tag.annotations.tags.includes('nodejs');
         const JAVA_EXT = 'redhat.java';
