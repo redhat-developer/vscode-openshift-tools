@@ -853,7 +853,8 @@ export class OdoImpl implements Odo {
 
     public async getComponentTypeVersions(componentName: string): Promise<any> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
-        return this.loadItems(result).filter((value) => value.metadata.name === componentName)[0].spec.allTags;
+        const items = this.loadItems(result).filter((value) => value.metadata.name === componentName);
+        return items.length > 0 ? items[0].spec.allTags : [];
     }
 
     public async getServiceTemplates(): Promise<string[]> {
