@@ -44,27 +44,6 @@ suite('Openshift/Cluster', () => {
         stderr: fatalErrorText,
         stdout: 'output'
     };
-    const routeObj = `{
-        "apiVersion": "v1",
-        "items": [
-            {
-                "apiVersion": "route.openshift.io/v1",
-                "kind": "Route",
-                "spec": {
-                    "host": "console-openshift-console.apps-crc.testing",
-                    "port": {
-                        "targetPort": "https"
-                    },
-                    "wildcardPolicy": "None"
-                }
-            }
-        ],
-        "kind": "List",
-        "metadata": {
-            "resourceVersion": "",
-            "selfLink": ""
-        }
-    }`;
     const testUrl = 'https://162.165.64.43:8443';
     const testUser = 'user';
     const password = 'password';
