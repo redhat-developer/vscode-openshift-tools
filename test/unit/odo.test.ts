@@ -597,6 +597,7 @@ suite("odo", () => {
                 stdout: oc.join('\n'),
                 stderr: ''
             });
+            sandbox.stub(odo.OdoImpl.prototype, 'convertObjectsFromPreviousOdoReleases');
             const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
             assert.equal(cluster[0].getName(), clusterUrl);
         });

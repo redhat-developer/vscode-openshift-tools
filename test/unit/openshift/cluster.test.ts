@@ -34,7 +34,7 @@ suite('Openshift/Cluster', () => {
     const testData: CliExitData = {
         error: undefined,
         stderr: '',
-        stdout: 'output'
+        stdout: 'https://localhost'
     };
 
     const fatalErrorText = 'FATAL ERROR';
@@ -458,8 +458,8 @@ suite('Openshift/Cluster', () => {
             });
             execStub.onSecondCall().resolves({
                 error: null,
-                stderr: fatalErrorText,
-                stdout: routeObj
+                stderr: null,
+                stdout: 'http://localhost'
             });
             clusterMock.openshiftConsole(cluster);
             openStub.calledOnceWith('http://localhost');
