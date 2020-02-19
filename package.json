@@ -98,7 +98,7 @@
     "chai": "^4.2.0",
     "codecov": "^3.6.1",
     "decache": "^4.5.1",
-    "eslint": "^6.7.1",
+    "eslint": "5.16.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-prettier": "^6.7.0",
     "eslint-import-resolver-typescript": "^2.0.0",
