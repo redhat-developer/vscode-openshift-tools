@@ -5,7 +5,7 @@
 {
 	"version": "0.2.0",
     "configurations": [
-        
+
         {
             "name": "Extension",
             "type": "extensionHost",
@@ -57,15 +57,12 @@
             "runtimeExecutable": "${execPath}",
             "args": [
                 "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionTestsPath=${workspaceFolder}/out/test/int"
+                "--extensionTestsPath=${workspaceFolder}/out/test/integration"
             ],
             "outFiles": [
-                "${workspaceFolder}/out/test/int/**/*.js"
+                "${workspaceFolder}/out/test/integration/**/*.js"
             ],
-            "preLaunchTask": "npm: watch",
-            "env": {
-                "VSCOST_TEST_MODE": "debug"
-            }
+            "preLaunchTask": "npm: watch"
         }
     ]
 }
