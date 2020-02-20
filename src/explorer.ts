@@ -95,18 +95,18 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     }
 
     static async reportIssue(): Promise<unknown> {
-        let body = '';
-        const repoURL = `https://github.com/redhat-developer/vscode-openshift-tools`;
-        const template = {
-            'VS Code version:': version,
-            'OS:': Platform.OS,
-            'Extension version:': extensions.getExtension('redhat.vscode-openshift-connector').packageJSON.version
-        };
-        Object.entries<string>(template).forEach(([key, value]) => {
-            body = `${body}${key} ${value}\n`;
-        });
         return commands.executeCommand(
             'vscode.open',
-            Uri.parse(`${repoURL}/issues/new?labels=kind/bug&title=Issue&body=**Environment**\n${body}\n**Description**`));
+            Uri.parse(OpenShiftExplorer.issueUrl()));
+    }
+
+    static issueUrl(): string {
+        const packageJSON = extensions.getExtension('redhat.vscode-openshift-connector').packageJSON;
+        const body = [
+            `VS Code version: ${version}`,
+            `OS: ${Platform.OS}`,
+            `Extension version: ${packageJSON.version}`
+        ].join('\n');
+        return `${packageJSON.bugs}/new?labels=kind/bug&title=&body=**Environment**\n${body}\n**Description**`;
     }
 }

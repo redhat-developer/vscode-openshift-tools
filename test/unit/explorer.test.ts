@@ -5,6 +5,7 @@
 
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
+import { commands, Uri } from 'vscode';
 import { OpenShiftExplorer } from '../../src/explorer';
 import { OdoImpl, ContextType } from '../../src/odo';
 import { TestItem } from './openshift/testOSItem';
@@ -44,4 +45,9 @@ suite('OpenShift Application Explorer', () => {
         expect(oseInstance.getTreeItem(serviceItem)).equals(serviceItem);
     });
 
+    test('reportIssue calls vscode.open with github.com url', async () => {
+        const execCmdStub = sandbox.stub(commands, 'executeCommand');
+        await OpenShiftExplorer.reportIssue();
+        expect(execCmdStub).calledWith('vscode.open', Uri.parse(OpenShiftExplorer.issueUrl()));
+    });
 });
