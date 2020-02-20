@@ -245,10 +245,7 @@ export class Component extends OpenShiftItem {
         const componentToLink = await window.showQuickPick(componentPresent.filter((comp)=> comp.getName() !== component.getName()), {placeHolder: "Select a Component to link", ignoreFocusOut: true});
         if (!componentToLink) return null;
 
-        const portsResult: CliExitData = await Component.odo.execute(Command.listComponentPorts(component.getParent().getParent().getName(), component.getParent().getName(), componentToLink.getName()));
-
-        let ports: string[] = portsResult.stdout.trim().split(',');
-        ports = ports.slice(0, ports.length-1);
+        const ports: string[] = await Component.getPorts(component, componentToLink);
         let port: string;
         if (ports.length === 1) {
             [port] = ports;
@@ -263,6 +260,13 @@ export class Component extends OpenShiftItem {
                 .then(() => `Component '${componentToLink.getName()}' successfully linked with Component '${component.getName()}'`)
                 .catch((err) => Promise.reject(Error(`Failed to link component with error '${err}'`)))
         );
+    }
+
+    static async getPorts(component: OpenShiftObject, componentToLink: OpenShiftObject): Promise<string[]> {
+        const portsResult: CliExitData = await Component.odo.execute(Command.listComponentPorts(component.getParent().getParent().getName(), component.getParent().getName(), componentToLink.getName()));
+        let ports: string[] = portsResult.stdout.trim().split(',');
+        ports = ports.slice(0, ports.length - 1);
+        return ports;
     }
 
     static async linkService(context: OpenShiftObject): Promise<string | null> {
