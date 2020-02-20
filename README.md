@@ -32,7 +32,7 @@ When working with [OpenShift Online](https://www.openshift.com/products/online/)
 
 ### Debug Support for Local Node.js and Java Components
 
-This release provides new 'OpenShift: Debug' command to simplify the way to start debugging for OpenShift Components pushed to a cluster. It is an experimental feature, because it is using experimental OpenShift Do `debug` command under the hood and supports only local Java and Node.js components. The command is available from command pallet and context menu for Component nodes in OpenShift Application Explorer view. 
+This release provides new 'OpenShift: Debug' command to simplify the way to start debugging for OpenShift Components pushed to a cluster. It is an experimental feature, because it is using experimental OpenShift Do `debug` command under the hood and supports only local Java and Node.js components. The command is available from command palette and context menu for Component nodes in OpenShift Application Explorer view. 
 
 #### Debug Node.js Component
 
@@ -42,7 +42,7 @@ Default Visual Studio Code installation includes JavaScript/TypeScript Language 
 
 #### Debug Java Component
 
-To debug a Java Component Java Language Support and Java Debugger Extensions required. OpenShift Connector extension will request to install missing extension before it starts Debugger for a Java Component.
+To debug a Java Component, Java Language Support and Java Debugger Extensions are required. OpenShift Connector extension will prompt the user to install missing extension(s) before it starts Debugger for a Java Component.
 
 ![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/debug-java.gif)
 
