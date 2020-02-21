@@ -4,6 +4,7 @@ images/vscode-openshift-tools.gif
 out/test/**
 out/**/*.map
 src/**
+doc/**
 .gitignore
 tsconfig.json
 vsc-extension-quickstart.md
