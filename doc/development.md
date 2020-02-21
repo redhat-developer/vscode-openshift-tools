@@ -1,3 +1,34 @@
+# NPM scripts description
+
+## Print TODO/FIXME tasks
+
+To mark a development task use comment that starts with TODO or FIXME keyword.
+To print out TODO/FIXME comments throughout the code run `npm run todo`. The output for this script would look like one below.
+
+``` todo
+$ npm run todo
+
+> vscode-openshift-connector@0.1.4 todo C:\p\vscode-openshift-tools
+> leasot **/*.ts --ignore node_modules -x
+
+
+src/cli.ts
+  line 55   TODO  Refactor to OdoCli or OpenShiftCli class
+
+src/odo.ts
+  line 12   TODO  Review classes hierarchy
+  line 717  TODO  load projects form workspace folders and add missing ones to the model even they
+
+test/coverage.ts
+  line 103  TODO  consider putting this under a conditional flag
+  line 122  TODO  Allow config of reporting directory with
+
+src/openshift/component.ts
+  line 183  TODO  fix eslint rule violation
+
+ × 6 todos/fixmes found
+```
+
 # Known Problems
 
 ## Running tests on Windows fails with error `Uncaught TypeError: Cannot read property 'phase' of null`
