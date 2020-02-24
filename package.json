@@ -45,7 +45,7 @@
     "lint-fix": "node_modules/.bin/eslint . --ext .ts --fix",
     "lint-nic": "node_modules/.bin/eslint . --ext .ts --no-inline-config",
     "todo": "node_modules/.bin/leasot **/*.ts --ignore node_modules -x",
-    "test": "npm run clean && npm run compile && npm run verify && node ./out/build/unit-tests.js",
+    "test": "npm run clean && npm run compile && npm run verify && node ./out/build/run-tests.js unit",
     "update-deps": "node_modules/.bin/ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
     "build": "npm run clean && npm run lint && npm run compile"
