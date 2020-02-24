@@ -14,46 +14,63 @@ import { DownloadUtil } from './download';
 import hasha = require('hasha');
 import mkdirp = require('mkdirp');
 import fs = require('fs-extra');
-import path = require("path");
+import path = require('path');
 import cp = require('child_process');
 import configData = require('../src/tools.json');
 import os = require('os');
 
-async function downloadFileAndCreateSha256(targetFolder: string, fileName: string, reqURL: string, sha256sum: string): Promise<void> {
+/**
+ * Download reqURL to targetFolder and save it to fileName. Verify the downloaded file sha256 is matching sha256sum
+ * @param targetFolder
+ * @param fileName
+ * @param reqURL
+ * @param sha256sum
+ */
+async function downloadFileAndCreateSha256(
+    targetFolder: string,
+    fileName: string,
+    reqURL: string,
+    sha256sum: string,
+): Promise<void> {
     if (!fs.existsSync(targetFolder)) {
-      mkdirp.sync(targetFolder);
+        mkdirp.sync(targetFolder);
     }
     const currentFile = path.join(targetFolder, fileName);
     console.log(`${currentFile} download started from ${reqURL}`);
-    await DownloadUtil.downloadFile(reqURL, currentFile, (current) => console.log(`${current  }%`));
-    const currentSHA256 = await hasha.fromFile(currentFile, {algorithm: 'sha256'});
+    await DownloadUtil.downloadFile(reqURL, currentFile, (current) => console.log(`${current}%`));
+    const currentSHA256 = await hasha.fromFile(currentFile, { algorithm: 'sha256' });
     if (currentSHA256 === sha256sum) {
-      console.log( `[INFO] ${currentFile} is downloaded and sha256 is correct`);
+        console.log(`[INFO] ${currentFile} is downloaded and sha256 is correct`);
     } else {
-      throw Error(`${currentFile} is downloaded and sha256 is not correct`);
+        throw Error(`${currentFile} is downloaded and sha256 is not correct`);
     }
-  }
+}
 
 async function verifyTools(): Promise<void> {
-  for (const key in configData) {
-    for (const OS in configData[key].platform) {
-      const targetFolder =  path.resolve(os.tmpdir(), OS);
-      await downloadFileAndCreateSha256(targetFolder, configData[key].platform[OS].dlFileName, configData[key].platform[OS].url, configData[key].platform[OS].sha256sum);
+    for (const key in configData) {
+        for (const OS in configData[key].platform) {
+            const targetFolder = path.resolve(os.tmpdir(), OS);
+            await downloadFileAndCreateSha256(
+                targetFolder,
+                configData[key].platform[OS].dlFileName,
+                configData[key].platform[OS].url,
+                configData[key].platform[OS].sha256sum,
+            );
+        }
     }
-  }
 }
 
 const fileCheckRegex = /\w*tools.json/;
 cp.exec('git diff --name-only origin/master -- .', async (error, stdout) => {
-  if (error) {
-    throw error;
-  }
-  console.log('The changed files:');
-  console.log(stdout);
-  if (fileCheckRegex.test(stdout)) {
-    console.log('tools.json is changed, starting download verification');
-    await verifyTools();
-  } else {
-    console.log('tools.json is not changed, skipping download verification');
-  }
+    if (error) {
+        throw error;
+    }
+    console.log('The changed files:');
+    console.log(stdout);
+    if (fileCheckRegex.test(stdout)) {
+        console.log('tools.json is changed, starting download verification');
+        await verifyTools();
+    } else {
+        console.log('tools.json is not changed, skipping download verification');
+    }
 });
