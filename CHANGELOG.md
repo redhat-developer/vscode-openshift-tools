@@ -6,7 +6,7 @@ New and noteworthy changes:
   - [#1227](https://github.com/redhat-developer/vscode-openshift-tools/issues/1227) Include odo and oc binaries into extension package for all supported platforms macOS/Linux/Windows
   - [#1388](https://github.com/redhat-developer/vscode-openshift-tools/issues/1388) Update odo to latest release v1.1.0
   - [#1396](https://github.com/redhat-developer/vscode-openshift-tools/issues/1396) Allow to use compatible odo version available from PATH locations
-  - [#1380](https://github.com/redhat-developer/vscode-openshift-tools/issues/1380)Absolute path should be used for commands when running in vscode terminal view 
+  - [#1380](https://github.com/redhat-developer/vscode-openshift-tools/issues/1380) Absolute path should be used for commands when running in vscode terminal view 
 
 
 ## 0.1.3 (January 16, 2020)
