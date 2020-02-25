@@ -52,7 +52,7 @@ node('rhel7'){
     stage("Publish to Marketplace") {
       withCredentials([[$class: 'StringBinding', credentialsId: 'vscode_java_marketplace', variable: 'TOKEN']]) {
           def vsix = findFiles(glob: '**.vsix')
-          // sh 'vsce publish -p ${TOKEN} --packagePath' + " ${vsix[0].path}"
+          sh 'vsce publish -p ${TOKEN} --packagePath' + " ${vsix[0].path}"
       }
 
       stage "Promote the build to stable"
