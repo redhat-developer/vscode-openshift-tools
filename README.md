@@ -30,6 +30,13 @@ When working with [OpenShift Online](https://www.openshift.com/products/online/)
 
 ## New and Noteworthy
 
+## All Required CLI Tools Included
+
+This release includes binaries for all required CLI tools:
+* OKD CLI Client (`oc`)
+* OpenShift Do (`odo`)
+Once extension is installed it is ready to use. There is no additional configuration steps to download CLI tools binaries.
+
 ### Debug Support for Local Node.js and Java Components
 
 This release provides new 'OpenShift: Debug' command to simplify the way to start debugging for OpenShift Components pushed to a cluster. It is an experimental feature, because it is using experimental OpenShift Do `debug` command under the hood and supports only local Java and Node.js components. The command is available from command palette and context menu for Component nodes in OpenShift Application Explorer view. 
@@ -161,10 +168,9 @@ To debug a Java Component, Java Language Support and Java Debugger Extensions ar
 
 This extension uses two CLI tools to interact with OpenShift cluster:
 * OKD CLI client tool - [oc](https://github.com/openshift/origin/releases)
-* OpenShift Do tool - [odo](https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.0.0/)
+* OpenShift Do tool - [odo](https://mirror.openshift.com/pub/openshift-v4/clients/odo)
 
-> If `oc` and `odo` tools are located in a directory from `PATH` environment variable they will be used automatically. 
-The extension will detect these dependencies and prompt the user to install if they are missing or have not supported version - choose `Download & Install` when you see an notification for the missing tool.
+> `oc` and `odo` tools for Windows, Linux and macOS are included into extension package. Once the extension is installed it is ready to use.
 
 ### Extensions
 
