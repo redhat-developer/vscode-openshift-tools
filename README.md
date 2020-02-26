@@ -35,7 +35,7 @@ When working with [OpenShift Online](https://www.openshift.com/products/online/)
 This release includes binaries for all required CLI tools:
 * OKD CLI Client (`oc`)
 * OpenShift Do (`odo`)
-Once extension is installed it is ready to be used. There is no additional configuration steps to download CLI tools binaries.
+Once extension is installed it is ready to use. There is no additional configuration steps to download CLI tools binaries.
 
 ### Debug Support for Local Node.js and Java Components
 
