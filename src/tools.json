@@ -34,26 +34,26 @@
         "vendor": "Red Hat, Inc.",
         "name": "oc",
         "cmdFileName": "oc",
-        "version": "4.3.1",
-        "versionRange": "^4.3.1",
-        "versionRangeLabel": "version 4.3.1 or higher",
+        "version": "4.3.3",
+        "versionRange": "^4.3.3",
+        "versionRangeLabel": "version 4.3.3 and < 5.0.0",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.3.1/openshift-client-windows-4.3.1.zip",
-                "sha256sum": "ec530577b86eee3234de31e4e0cdda88af4d28cc8f47be446e087ad589cf5e3d",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.3.3/openshift-client-windows-4.3.3.zip",
+                "sha256sum": "c628e1c98c58ab47460286dd8c9ca809f3e259e12d7e1f2f30cea373d3d0601d",
                 "dlFileName": "oc-win.zip",
                 "cmdFileName": "oc.exe"
             },
             "darwin": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.3.1/openshift-client-mac-4.3.1.tar.gz",
-                "sha256sum": "5b91a763956a859cd88cfa7b40cfe1672b836162baece907baec99e6c50cc079",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.3.3/openshift-client-mac-4.3.3.tar.gz",
+                "sha256sum": "e79c29d90b31a99b1d4c34d5e5eda4c6485ba8eaf555e79ad2e60d9c9dee6261",
                 "dlFileName": "oc-mac.tar.gz",
                 "cmdFileName": "oc"
             },
             "linux": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.3.1/openshift-client-linux-4.3.1.tar.gz",
-                "sha256sum": "9938b9894b50a717a94c2baa6eceeabc23678f059852b76d67f8c1d520db2fd6",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.3.3/openshift-client-linux-4.3.3.tar.gz",
+                "sha256sum": "23a7553d6dcf0914b5dcdde571870a4fc75c25be1b43da0a284b14c1003dec8c",
                 "dlFileName": "oc-linux.tar.gz",
                 "cmdFileName": "oc"
             }
