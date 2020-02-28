@@ -144,7 +144,6 @@ suite('OpenShift/Project', () => {
 
             expect(result).equals(`Project '${projectItem.getName()}' successfully deleted`);
             expect(execStub.getCall(0).args[0]).equals(Command.deleteProject(projectItem.getName()));
-            expect(execStub.getCall(1).args[0]).equals(Command.waitForProjectToBeGone(projectItem.getName()));
         });
 
         test('works without context', async () => {
@@ -152,7 +151,6 @@ suite('OpenShift/Project', () => {
 
             expect(result).equals(`Project '${projectItem.getName()}' successfully deleted`);
             expect(execStub.getCall(0).args[0]).equals(Command.deleteProject(projectItem.getName()));
-            expect(execStub.getCall(1).args[0]).equals(Command.waitForProjectToBeGone(projectItem.getName()));
         });
 
         test('returns null with no project selected', async () => {
