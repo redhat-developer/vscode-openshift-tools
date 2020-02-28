@@ -298,10 +298,6 @@ export class Command {
         return `odo unlink --project ${project} --app ${app} ${service} --component ${comp}`;
     }
 
-    static getOpenshiftClusterRoute(): string {
-        return `oc get routes -n openshift-console -ojson`;
-    }
-
     static getclusterVersion(): string {
         return `oc get clusterversion -ojson`;
     }
