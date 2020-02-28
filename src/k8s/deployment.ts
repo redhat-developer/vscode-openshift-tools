@@ -78,7 +78,7 @@ export class DeploymentConfig {
     }
 
     static async rcShowLog(context: { impl: any }): Promise<string> {
-        const replica = await DeploymentConfig.selectReplica(context, "Select a Replica too see the logs");
+        const replica = await DeploymentConfig.selectReplica(context, "Select a Replica to see the logs");
         if (replica) {
             DeploymentConfig.odo.executeInTerminal(DeploymentConfig.command.showLog(replica));
         }
@@ -87,7 +87,7 @@ export class DeploymentConfig {
 
     static async showLog(context: { name: string }): Promise<string> {
         let deployName: string = context ? context.name : null;
-        if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to see log's"), "Select a DeploymentConfig too see logs");
+        if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to see logs"), "Select a DeploymentConfig to see logs");
         if (deployName) {
             DeploymentConfig.odo.executeInTerminal(DeploymentConfig.command.showDeploymentConfigLog(deployName));
         }
@@ -109,7 +109,7 @@ export class DeploymentConfig {
 
     static async delete(context: { impl: any }): Promise<string> {
         let result: null | string | Promise<string> | PromiseLike<string> = null;
-        const replica = await DeploymentConfig.selectReplica(context, "Select a Replica too delete");
+        const replica = await DeploymentConfig.selectReplica(context, "Select a Replica to delete");
         if (replica) {
             result = Progress.execFunctionWithProgress(`Deleting replica`, () => DeploymentConfig.odo.execute(DeploymentConfig.command.delete(replica)))
                 .then(() => `Replica '${replica}' successfully deleted`)
