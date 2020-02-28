@@ -57,12 +57,12 @@ export class ToolsConfig {
     public static async getVersion(location: string, cmd: string = path.parse(location).name): Promise<string> {
         let detectedVersion: string;
         if (fs.existsSync(location)) {
-            const version = new RegExp(`${cmd.toLocaleLowerCase()} v((([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?).*`);
             const result = await CliChannel.getInstance().execute(`"${location}" version`);
             if (result.stdout) {
+                const versionRegExp = /.*([0-9]+\.[0-9]+\.[0-9]+).*/;
                 const toolVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
-                    return version.test(value);
-                }).map((value)=>version.exec(value)[1]);
+                    return versionRegExp.test(value);
+                }).map((value)=>versionRegExp.exec(value)[1]);
                 if (toolVersion.length) {
                     [ detectedVersion ] = toolVersion;
                 }
