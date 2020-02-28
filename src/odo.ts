@@ -104,10 +104,6 @@ export class Command {
         return `odo project delete ${name} -o json`;
     }
 
-    static waitForProjectToBeGone(project: string): string {
-        return `oc wait project/${project} --for delete`;
-    }
-
     @verbose
     static createProject(name: string): string {
         return `odo project create ${name}`;
@@ -948,7 +944,6 @@ export class OdoImpl implements Odo {
 
     public async deleteProject(project: OpenShiftObject): Promise<OpenShiftObject> {
         await this.execute(Command.deleteProject(project.getName()));
-        await this.execute(Command.waitForProjectToBeGone(project.getName()), process.cwd(), false);
         return this.deleteAndRefresh(project);
     }
 

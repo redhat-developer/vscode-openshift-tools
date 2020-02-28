@@ -49,7 +49,7 @@ suite("tools configuration", () => {
         });
 
         test('returns version undefined for unexpected output', async () => {
-            const invalidData: CliExitData = { error: undefined, stderr: '', stdout: 'ocunexpected v0.0.13 (65b5bed8) \n line two' };
+            const invalidData: CliExitData = { error: undefined, stderr: '', stdout: 'ocunexpected v0-0-13 (65b5bed8) \n line two' };
             sb.stub(CliChannel.prototype, 'execute').resolves(invalidData);
             sb.stub(fs, 'existsSync').returns(true);
 
@@ -58,7 +58,7 @@ suite("tools configuration", () => {
         });
 
         test('returns version undefined for not existing tool', async () => {
-            const invalidData: CliExitData = { error: undefined, stderr: '', stdout: 'ocunexpected v0.0.13 (65b5bed8) \n line two' };
+            const invalidData: CliExitData = { error: undefined, stderr: '', stdout: 'ocunexpected v0-0-13 (65b5bed8) \n line two' };
             sb.stub(CliChannel.prototype, 'execute').resolves(invalidData);
             sb.stub(fs, 'existsSync').returns(false);
 
@@ -67,7 +67,7 @@ suite("tools configuration", () => {
         });
 
         test('returns version undefined for tool that does not support version parameter', async () => {
-            const invalidData: CliExitData = { error: new Error('something bad happened'), stderr: '', stdout: 'ocunexpected v0.0.13 (65b5bed8) \n line two' };
+            const invalidData: CliExitData = { error: new Error('something bad happened'), stderr: '', stdout: 'ocunexpected v0-0-13 (65b5bed8) \n line two' };
             sb.stub(CliChannel.prototype, 'execute').resolves(invalidData);
             sb.stub(fs, 'existsSync').returns(true);
 
