@@ -115,7 +115,7 @@ suite('Oc', () => {
         expect(result).equals('Resources were successfully created.');
     });
 
-    test('errors when fail too create resource', async () => {
+    test('errors when fail to create resource', async () => {
         let savedErr: any;
         execStub.resolves({
             error: 'error',

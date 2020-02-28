@@ -86,7 +86,7 @@ export class Build {
     }
 
     static async showLog(context: { impl: any}): Promise<string> {
-        const build = await Build.selectBuild(context, "Select a build too see the logs");
+        const build = await Build.selectBuild(context, "Select a build to see the logs");
         if (build) {
             Build.odo.executeInTerminal(Build.command.showLog(build, '-build'));
         }
@@ -98,7 +98,7 @@ export class Build {
         if (context) {
             resourceId = context.impl.name;
         } else {
-            const name = await Build.selectBuild(context, "select too rebuild");
+            const name = await Build.selectBuild(context, "select to rebuild");
             if (name) {
                 resourceId = name;
             }
@@ -110,7 +110,7 @@ export class Build {
     }
 
     static async followLog(context: { impl: any}): Promise<string> {
-        const build = await Build.selectBuild(context, "Select a build too follow the logs");
+        const build = await Build.selectBuild(context, "Select a build to follow the logs");
         if (build) {
             Build.odo.executeInTerminal(Build.command.followLog(build, '-build'));
         }
@@ -119,7 +119,7 @@ export class Build {
 
     static async delete(context: { impl: any}): Promise<string> {
         let result: null | string | Promise<string> | PromiseLike<string> = null;
-        const build = await Build.selectBuild(context, "Select a build too delete");
+        const build = await Build.selectBuild(context, "Select a build to delete");
         if (build) {
             result = Progress.execFunctionWithProgress(`Deleting build`, () => Build.odo.execute(Build.command.delete(build)))
                 .then(() => `Build '${build}' successfully deleted`)
