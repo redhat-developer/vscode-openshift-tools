@@ -549,7 +549,8 @@
       },
       {
         "command": "clusters.openshift.project.openConsole",
-        "title": "Open Project in Console"
+        "title": "Open Project in Console",
+        "Category": "OpenShift"
       },
       {
         "command": "clusters.openshift.build.showLog",
@@ -593,7 +594,8 @@
       },
       {
         "command": "clusters.openshift.build.openConsole",
-        "title": "Open in Console"
+        "title": "Open in Console",
+        "Category": "OpenShift"
       },
       {
         "command": "clusters.openshift.deploy.rcShowLog.palette",
@@ -617,15 +619,18 @@
       },
       {
         "command": "clusters.openshift.deployment.openConsole",
-        "title": "Open in Console"
+        "title": "Open in Console",
+        "Category": "OpenShift"
       },
       {
         "command": "clusters.openshift.imagestream.openConsole",
-        "title": "Open in Console"
+        "title": "Open in Console",
+        "Category": "OpenShift"
       },
       {
         "command": "clusters.openshift.route.open",
-        "title": "Open URL in Browser"
+        "title": "Open in Browser",
+        "Category": "OpenShift"
       }
     ],
     "keybindings": [
@@ -767,6 +772,10 @@
         {
           "command": "clusters.openshift.deploy.dc.showLog",
           "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "clusters.openshift.route.open",
+          "when": "false"
         }
       ],
       "view/title": [
