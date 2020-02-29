@@ -19,13 +19,14 @@ import { Build } from './k8s/build';
 import { DeploymentConfig } from './k8s/deployment';
 import { Console } from './k8s/console';
 import { OdoImpl } from './odo';
-
 import { TokenStore } from './util/credentialManager';
 import { Oc } from './oc';
+import { Route } from './k8s/route';
 
 import path = require('path');
 import fsx = require('fs-extra');
 import treeKill = require('tree-kill');
+
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined;
 
@@ -204,6 +205,7 @@ export async function activate(extensionContext: vscode.ExtensionContext): Promi
         vscode.commands.registerCommand('openshift.component.linkService', (context) => execute(Component.linkService, context)),
         vscode.commands.registerCommand('openshift.explorer.reportIssue', () => OpenShiftExplorer.reportIssue()),
         vscode.commands.registerCommand('clusters.openshift.useProject', (context) => vscode.commands.executeCommand('extension.vsKubernetesUseNamespace', context)),
+        vscode.commands.registerCommand('clusters.openshift.route.open', (context) => execute(Route.openUrl, context)),
         OpenShiftExplorer.getInstance()
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));

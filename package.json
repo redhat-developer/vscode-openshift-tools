@@ -63,6 +63,7 @@
     "hasha": "5.0.0",
     "js-yaml": "^3.13.1",
     "mkdirp": "^0.5.1",
+    "openshift-rest-client": "^4.0.0",
     "pify": "^4.0.1",
     "rxjs": "^6.5.3",
     "semver": "^6.3.0",
@@ -548,7 +549,8 @@
       },
       {
         "command": "clusters.openshift.project.openConsole",
-        "title": "Open Project in Console"
+        "title": "Open Project in Console",
+        "Category": "OpenShift"
       },
       {
         "command": "clusters.openshift.build.showLog",
@@ -592,7 +594,8 @@
       },
       {
         "command": "clusters.openshift.build.openConsole",
-        "title": "Open in Console"
+        "title": "Open in Console",
+        "Category": "OpenShift"
       },
       {
         "command": "clusters.openshift.deploy.rcShowLog.palette",
@@ -616,11 +619,18 @@
       },
       {
         "command": "clusters.openshift.deployment.openConsole",
-        "title": "Open in Console"
+        "title": "Open in Console",
+        "Category": "OpenShift"
       },
       {
         "command": "clusters.openshift.imagestream.openConsole",
-        "title": "Open in Console"
+        "title": "Open in Console",
+        "Category": "OpenShift"
+      },
+      {
+        "command": "clusters.openshift.route.open",
+        "title": "Open in Browser",
+        "Category": "OpenShift"
       }
     ],
     "keybindings": [
@@ -762,6 +772,10 @@
         {
           "command": "clusters.openshift.deploy.dc.showLog",
           "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "clusters.openshift.route.open",
+          "when": "false"
         }
       ],
       "view/title": [
@@ -1049,6 +1063,11 @@
         {
           "command": "clusters.openshift.project.openConsole",
           "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.resource\\.project*/i"
+        },
+        {
+          "command": "clusters.openshift.route.open",
+          "group": "2@0",
+          "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.resource\\.route/i"
         }
       ]
     },
