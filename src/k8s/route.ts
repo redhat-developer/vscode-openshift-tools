@@ -34,6 +34,6 @@ const openshiftRestClient = require('openshift-rest-client').OpenshiftClient;
             throw Error('Cannot find current context in Kubernetes configuration.')
         }
         const url = await Route.getUrl(currentContextObj.namespace, context.name)
-        commands.executeCommand('vscode.open', Uri.parse(`http://${url}`));
+        commands.executeCommand('vscode.open', Uri.parse(url));
     }
  }
