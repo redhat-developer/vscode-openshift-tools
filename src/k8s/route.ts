@@ -17,7 +17,11 @@ const openshiftRestClient = require('openshift-rest-client').OpenshiftClient;
               .routes(name)
               .get()
               .then((response: any) => {
-                return response?.body?.spec.host;
+                const hostName = response?.body?.spec.host;
+                if (hostName === undefined) {
+                    throw Error(`Cannot identify host name for Route '${name}'`);
+                }
+                return response.body.spec.tls ? `https://${hostName}` : `http://${hostName}`;
               });
           });
     }
@@ -25,7 +29,11 @@ const openshiftRestClient = require('openshift-rest-client').OpenshiftClient;
     public static async openUrl(context): Promise<void> {
         const kc = new KubeConfig();
         kc.loadFromDefault();
-        const url = await Route.getUrl(kc.getContexts().find((ctx)=> ctx.name === kc.getCurrentContext()).namespace, context.name)
+        const currentContextObj = kc.getContextObject(kc.getCurrentContext());
+        if (currentContextObj === undefined) {
+            throw Error('Cannot find current context in Kubernetes configuration.')
+        }
+        const url = await Route.getUrl(currentContextObj.namespace, context.name)
         commands.executeCommand('vscode.open', Uri.parse(`http://${url}`));
     }
  }
