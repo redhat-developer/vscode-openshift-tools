@@ -27,20 +27,18 @@ import path = require('path');
 import fsx = require('fs-extra');
 import treeKill = require('tree-kill');
 
-
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined;
 
 let lastNamespace = '';
 
 async function isOpenShift(): Promise<boolean> {
   const kubectl = await k8s.extension.kubectl.v1;
+  let isOS = false;
   if (kubectl.available) {
       const sr = await kubectl.api.invokeCommand('api-versions');
-      if (!sr || sr.code !== 0) {
-          return false;
-      }
-      return sr.stdout.includes("apps.openshift.io/v1");  // Naive check to keep example simple!
+      isOS = sr && sr.code === 0 && sr.stdout.includes("apps.openshift.io/v1");
   }
+  return isOS;
 }
 
 async function initNamespaceName(node: k8s.ClusterExplorerV1.ClusterExplorerResourceNode): Promise<string | undefined> {
@@ -77,7 +75,7 @@ async function customizeAsync(node: k8s.ClusterExplorerV1.ClusterExplorerResourc
   }
 }
 
-function customize(node: k8s.ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): void | Thenable<void> {
+function customize(node: k8s.ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): Thenable<void> {
     return customizeAsync(node, treeItem);
 }
 
@@ -98,7 +96,6 @@ function execute<T>(command: (...args: T[]) => Promise<any> | void, ...params: T
         return res && res.then
             ? res.then((result: any) => {
                 displayResult(result);
-
             }).catch((err: any) => {
                 vscode.window.showErrorMessage(err.message ? err.message : err);
             })
