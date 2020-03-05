@@ -179,10 +179,16 @@ export class Component extends OpenShiftItem {
             }
         ];
         const unlinkActionSelected = await window.showQuickPick(unlinkActions, {placeHolder: 'Select the option', ignoreFocusOut: true});
+
         if (!unlinkActionSelected) return null;
-        // TODO fix eslint rule violation
-        // eslint-disable-next-line no-nested-ternary
-        return unlinkActionSelected.label === 'Component' ? Component.unlinkComponent(context) : unlinkActionSelected.label === 'Service' ?  Component.unlinkService(context) : null;
+
+        let result = null;
+        if (unlinkActionSelected.label === 'Component') {
+            result = Component.unlinkComponent(context);
+        } else {
+            result = Component.unlinkService(context);
+        }
+        return result;
     }
 
     static async unlinkComponent(context: OpenShiftObject): Promise<string | null> {
@@ -382,7 +388,7 @@ export class Component extends OpenShiftItem {
             const unpushedUrl = urlItems.filter((value: { status: { state: string } }) => value.status.state === 'Not Pushed');
             const pushedUrl = urlItems.filter((value: { status: { state: string } }) => value.status.state === 'Pushed');
             if (pushedUrl.length > 0) {
-                const hostName: QuickPickItem[] = pushedUrl.map((value: { spec: { protocol: any; host: any; port: any } }) => ({ label: `${value.spec.protocol}://${value.spec.host}`, description: `Target Port is ${value.spec.port}`}));
+                const hostName: QuickPickItem[] = pushedUrl.map((value: { spec: { protocol: string; host: string; port: any } }) => ({ label: `${value.spec.protocol}://${value.spec.host}`, description: `Target Port is ${value.spec.port}`}));
                 if (hostName.length >1) {
                     selectRoute = await window.showQuickPick(hostName, {placeHolder: "This Component has multiple URLs. Select the desired URL to open in browser.", ignoreFocusOut: true});
                     if (!selectRoute) return null;
