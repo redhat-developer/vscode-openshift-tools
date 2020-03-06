@@ -13,6 +13,6 @@ export class Filters {
     static readonly passwordRegex = /-p\s+'([^']+)'/;
 
     static filterPassword(value: string): string {
-        return value? value.replace(Filters.passwordRegex, '-p **********') : value;
+        return value ? value.replace(Filters.passwordRegex, '-p **********') : value;
     }
 }

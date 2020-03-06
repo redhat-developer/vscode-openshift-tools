@@ -11,7 +11,10 @@ import { EventEmitter } from 'events';
 import byline = require('byline');
 
 export class WatchUtil {
-    static watchFileForContextChange(location: string, filename: string): FileContentChangeNotifier {
+    static watchFileForContextChange(
+        location: string,
+        filename: string,
+    ): FileContentChangeNotifier {
         const emitter: EventEmitter = new EventEmitter();
         let timer: NodeJS.Timer;
         let context = '';
@@ -23,12 +26,14 @@ export class WatchUtil {
                 }
                 timer = setTimeout(() => {
                     timer = undefined;
-                    WatchUtil.grep(path.join(location, filename), /current-context:.*/).then((newContext: string)=> {
-                        if (context !== newContext) {
-                          emitter.emit('file-changed');
-                          context = newContext;
-                        }
-                    });
+                    WatchUtil.grep(path.join(location, filename), /current-context:.*/).then(
+                        (newContext: string) => {
+                            if (context !== newContext) {
+                                emitter.emit('file-changed');
+                                context = newContext;
+                            }
+                        },
+                    );
                 }, 500);
             }
         });
@@ -37,7 +42,7 @@ export class WatchUtil {
 
     static grep(fileLocation: string, rx: RegExp): Promise<string> {
         return new Promise<string>((resolve, reject) => {
-            const fileStream = fs.createReadStream(fileLocation, {encoding: 'utf8'});
+            const fileStream = fs.createReadStream(fileLocation, { encoding: 'utf8' });
             byline(fileStream)
                 .on('data', (line: string) => {
                     if (rx.test(line)) {

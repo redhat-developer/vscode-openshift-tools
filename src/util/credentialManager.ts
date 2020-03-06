@@ -3,23 +3,23 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
- /* eslint-disable import/no-dynamic-require */
- /* eslint-disable global-require */
+/* eslint-disable import/no-dynamic-require */
+/* eslint-disable global-require */
 
- import { env, ExtensionContext } from 'vscode';
+import { env, ExtensionContext } from 'vscode';
 
- export function getVscodeModule<T>(moduleName: string): T | undefined {
-  try {
-      return require(`${env.appRoot}/node_modules.asar/${moduleName}`);
-  } catch (err) {
-      // Not in ASAR.
-  }
-  try {
-      return require(`${env.appRoot}/node_modules/${moduleName}`);
-  } catch (err) {
-      // Not available.
-  }
-  return undefined;
+export function getVscodeModule<T>(moduleName: string): T | undefined {
+    try {
+        return require(`${env.appRoot}/node_modules.asar/${moduleName}`);
+    } catch (err) {
+        // Not in ASAR.
+    }
+    try {
+        return require(`${env.appRoot}/node_modules/${moduleName}`);
+    } catch (err) {
+        // Not available.
+    }
+    return undefined;
 }
 
 const keytar: any = getVscodeModule('keytar');
@@ -39,7 +39,7 @@ export class TokenStore {
         return TokenStore.extensionContext.globalState.update('username', username);
     }
 
-    static getUserName(): Thenable< string | undefined> {
+    static getUserName(): Thenable<string | undefined> {
         return TokenStore.extensionContext.globalState.get('username');
     }
 }

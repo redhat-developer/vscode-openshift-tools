@@ -4,8 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 export class Platform {
-
-    static identify<T>(map: {[key: string]: () => T}): T {
+    static identify<T>(map: { [key: string]: () => T }): T {
         if (map[Platform.OS]) {
             return map[Platform.OS]();
         }
@@ -31,7 +30,7 @@ export class Platform {
     static getUserHomePath(): string {
         return Platform.identify({
             win32: () => Platform.ENV.USERPROFILE,
-            default: () => Platform.ENV.HOME
+            default: () => Platform.ENV.HOME,
         });
     }
 }
