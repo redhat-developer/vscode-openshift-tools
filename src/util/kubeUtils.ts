@@ -17,7 +17,7 @@ export class KubeConfigUtils extends KubeConfig {
     public getServers(): QuickPickItem[] {
         const currentCluster = this.getCurrentCluster();
         const clusters = this.clusters || [];
-        return clusters.map((c: any) => ({
+        return clusters.map((c: Cluster) => ({
             label: c.server,
             description: currentCluster && c.name === currentCluster.name ? 'Current Context' : ''
         }));
