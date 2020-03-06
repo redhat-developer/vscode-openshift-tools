@@ -54,7 +54,7 @@ export class ToolsConfig {
         return toolLocation;
     }
 
-    public static async getVersion(location: string, cmd: string = path.parse(location).name): Promise<string> {
+    public static async getVersion(location: string): Promise<string> {
         let detectedVersion: string;
         if (fs.existsSync(location)) {
             const result = await CliChannel.getInstance().execute(`"${location}" version`);
