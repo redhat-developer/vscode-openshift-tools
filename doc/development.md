@@ -35,3 +35,14 @@ src/openshift/component.ts
 
 This is most likely related to run extension tests after installing extension from .vsix file.
 On Windows the fix is to clean up `%USER_PROFILE%\AppData\Roaming\Code\CachedData` folder.
+
+## Local cluster started with minishift v1.29.0+ has no access to images from registry.redhat.io
+
+Before applying `xpaas` add-on run apply `redhat-registry-login` with this command
+
+`minishift addon apply redhat-registry-login --env-var REGISTRY_USERNAME=username --env-var REGISTRY_PASSWORD=password`
+
+where `username` and `password` are your credentials to access registry.redhat.io.
+Then apply `xpaas` with the command below
+
+`minishift addon apply xpaas`
