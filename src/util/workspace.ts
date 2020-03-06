@@ -13,9 +13,9 @@ interface WorkspaceFolderItem extends QuickPickItem {
     uri: Uri;
 }
 
-const addWorkspaceFolder: QuickPickItem =  {
+const addWorkspaceFolder: QuickPickItem = {
     label: `$(plus) Add new context folder.`,
-    description: 'Folder which does not have an OpenShift context'
+    description: 'Folder which does not have an OpenShift context',
 };
 
 export async function selectWorkspaceFolder(): Promise<Uri> {
@@ -61,7 +61,7 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
             );
             return this.selectWorkspaceFolder();
         }
-        [ workspacePath ] = folders;
+        [workspacePath] = folders;
     } else if (choice) {
         workspacePath = (choice as WorkspaceFolderItem).uri;
     }
