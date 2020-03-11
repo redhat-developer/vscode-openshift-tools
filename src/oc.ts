@@ -11,11 +11,15 @@ import { OpenShiftItem } from './openshift/openshiftItem';
 export class Oc {
     public static async create(): Promise<string | null> {
         const document = window.activeTextEditor ? window.activeTextEditor.document : undefined;
-        const pleaseSave = 'Please save your changes before executing \'OpenShift: Create\' command.';
+        const pleaseSave = "Please save your changes before executing 'OpenShift: Create' command.";
         let message: string;
 
-        if (!document || !(document.fileName.endsWith('.yaml') || document.fileName.endsWith('.json'))) {
-            message = '\'OpenShift: Create\' command requires .yaml or .json a file opened in editor.';
+        if (
+            !document ||
+            !(document.fileName.endsWith('.yaml') || document.fileName.endsWith('.json'))
+        ) {
+            message =
+                "'OpenShift: Create' command requires .yaml or .json a file opened in editor.";
         }
 
         if (!message && document.isUntitled) {
@@ -36,16 +40,21 @@ export class Oc {
         if (!message) {
             toolLocation = await ToolsConfig.detect('oc');
             if (!toolLocation) {
-                message = 'Cannot run \'oc create\'. OKD CLI client tool cannot be found.';
+                message = "Cannot run 'oc create'. OKD CLI client tool cannot be found.";
             }
         }
 
         if (message) {
             window.showWarningMessage(message);
         } else {
-            const project = await OpenShiftItem.getOpenShiftCmdData(undefined, 'Select a Project where to create a new resource');
+            const project = await OpenShiftItem.getOpenShiftCmdData(
+                undefined,
+                'Select a Project where to create a new resource',
+            );
             if (!project) return null;
-            const result = await CliChannel.getInstance().execute(`${toolLocation} create -f ${document.fileName} --namespace ${project.getName()}`);
+            const result = await CliChannel.getInstance().execute(
+                `${toolLocation} create -f ${document.fileName} --namespace ${project.getName()}`,
+            );
             if (result.error) {
                 throw result.error;
             } else {

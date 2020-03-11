@@ -3,14 +3,16 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Uri } from "vscode";
+import { Uri } from 'vscode';
 
 export const enum Kind {
-    LocalConfig
+    LocalConfig,
 }
 
 export const enum SourceType {
-    GIT = 'git', LOCAL = 'local', BINARY = 'binary'
+    GIT = 'git',
+    LOCAL = 'local',
+    BINARY = 'binary',
 }
 
 export interface Config {
