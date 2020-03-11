@@ -12,7 +12,7 @@ import transport = require('git-transport-protocol');
 
 export enum Type {
     TAG,
-    BRANCH
+    BRANCH,
 }
 
 export class Ref {
@@ -24,29 +24,32 @@ export class Ref {
 }
 
 export class Refs {
-
     static async fetchTag(input: string): Promise<Map<string, Ref>> {
         return new Promise((resolve, reject) => {
             const gitUrl = input.replace(/^(?!(?:https|git):\/\/)/, 'https://');
 
             const tcp = net.connect({
                 host: url.parse(gitUrl).host,
-                port: 9418
+                port: 9418,
             });
             const client = gitClient(gitUrl);
             const tags = new Map<string, Ref>();
 
             client.refs.on('data', (ref: { name: string; hash: string }) => {
                 if (!ref.name.includes('/')) {
-                    tags.set(ref.name, { name: ref.name, type: Type.BRANCH, hash: ref.hash.substr(0, 7) });
+                    tags.set(ref.name, {
+                        name: ref.name,
+                        type: Type.BRANCH,
+                        hash: ref.hash.substr(0, 7),
+                    });
                     return;
                 }
                 const name = ref.name.split('/')[2].replace(/\^\{\}$/, '');
-                if (ref.name.startsWith("refs/heads")) {
-                   tags.set(name, { name, type: Type.BRANCH, hash: ref.hash.substr(0, 7) });
+                if (ref.name.startsWith('refs/heads')) {
+                    tags.set(name, { name, type: Type.BRANCH, hash: ref.hash.substr(0, 7) });
                 }
 
-                if (ref.name.startsWith("refs/tags")) {
+                if (ref.name.startsWith('refs/tags')) {
                     tags.set(name, { name, type: Type.TAG, hash: ref.hash.substr(0, 7) });
                 }
             });

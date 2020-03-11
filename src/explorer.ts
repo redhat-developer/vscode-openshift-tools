@@ -15,7 +15,7 @@ import {
     extensions,
     version,
     commands,
-    Uri
+    Uri,
 } from 'vscode';
 
 import * as path from 'path';
@@ -35,20 +35,25 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
 
     private fsw: FileContentChangeNotifier;
 
-    private onDidChangeTreeDataEmitter: EventEmitter<OpenShiftObject | undefined> = new EventEmitter<OpenShiftObject | undefined>();
+    private onDidChangeTreeDataEmitter: EventEmitter<
+        OpenShiftObject | undefined
+    > = new EventEmitter<OpenShiftObject | undefined>();
 
-    readonly onDidChangeTreeData: Event<OpenShiftObject | undefined> = this.onDidChangeTreeDataEmitter.event;
+    readonly onDidChangeTreeData: Event<OpenShiftObject | undefined> = this
+        .onDidChangeTreeDataEmitter.event;
 
     private constructor() {
         this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
         this.fsw.emitter.on('file-changed', this.refresh.bind(this));
-        this.treeView = window.createTreeView('openshiftProjectExplorer', {treeDataProvider: this});
-        OpenShiftExplorer.odoctl.subject.subscribe(event =>  {
+        this.treeView = window.createTreeView('openshiftProjectExplorer', {
+            treeDataProvider: this,
+        });
+        OpenShiftExplorer.odoctl.subject.subscribe((event) => {
             if (event.reveal) {
                 this.reveal(event.data);
-             } else {
-                 this.refresh(event.data);
-             }
+            } else {
+                this.refresh(event.data);
+            }
         });
     }
 
@@ -95,17 +100,16 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     }
 
     static async reportIssue(): Promise<unknown> {
-        return commands.executeCommand(
-            'vscode.open',
-            Uri.parse(OpenShiftExplorer.issueUrl()));
+        return commands.executeCommand('vscode.open', Uri.parse(OpenShiftExplorer.issueUrl()));
     }
 
     static issueUrl(): string {
-        const packageJSON = extensions.getExtension('redhat.vscode-openshift-connector').packageJSON;
+        const packageJSON = extensions.getExtension('redhat.vscode-openshift-connector')
+            .packageJSON;
         const body = [
             `VS Code version: ${version}`,
             `OS: ${Platform.OS}`,
-            `Extension version: ${packageJSON.version}`
+            `Extension version: ${packageJSON.version}`,
         ].join('\n');
         return `${packageJSON.bugs}/new?labels=kind/bug&title=&body=**Environment**\n${body}\n**Description**`;
     }

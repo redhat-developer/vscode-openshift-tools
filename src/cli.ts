@@ -23,33 +23,37 @@ export interface OdoChannel {
 }
 
 function prettifyJson(str: string): string {
-  let jsonData: string;
-  try {
-      jsonData = JSON.stringify(JSON.parse(str), null, 2);
-  } catch (ignore) {
-      const hidePass = Filters.filterToken(str);
-      return Filters.filterPassword(hidePass);
-  }
-  return jsonData;
+    let jsonData: string;
+    try {
+        jsonData = JSON.stringify(JSON.parse(str), null, 2);
+    } catch (ignore) {
+        const hidePass = Filters.filterToken(str);
+        return Filters.filterPassword(hidePass);
+    }
+    return jsonData;
 }
 
 class OdoChannelImpl implements OdoChannel {
-  private readonly channel: vscode.OutputChannel = vscode.window.createOutputChannel("OpenShift");
+    private readonly channel: vscode.OutputChannel = vscode.window.createOutputChannel('OpenShift');
 
-  show(): void {
-      this.channel.show();
-  }
+    show(): void {
+        this.channel.show();
+    }
 
-  print(text: string): void {
-      const textData = prettifyJson(text);
-      this.channel.append(textData);
-      if (!textData.endsWith('\n')) {
-          this.channel.append('\n');
-      }
-      if (vscode.workspace.getConfiguration('openshiftConnector').get<boolean>('showChannelOnOutput')) {
-          this.channel.show();
-      }
-  }
+    print(text: string): void {
+        const textData = prettifyJson(text);
+        this.channel.append(textData);
+        if (!textData.endsWith('\n')) {
+            this.channel.append('\n');
+        }
+        if (
+            vscode.workspace
+                .getConfiguration('openshiftConnector')
+                .get<boolean>('showChannelOnOutput')
+        ) {
+            this.channel.show();
+        }
+    }
 }
 
 // TODO Refactor to OdoCli or OpenShiftCli class
@@ -77,7 +81,7 @@ export class CliChannel implements Cli {
         return new Promise<CliExitData>((resolve) => {
             this.odoChannel.print(cmd);
             if (opts.maxBuffer === undefined) {
-                opts.maxBuffer = 2*1024*1024;
+                opts.maxBuffer = 2 * 1024 * 1024;
             }
             cp.exec(cmd, opts, (error: cp.ExecException, stdout: string, stderr: string) => {
                 const stdoutFiltered = stdout.replace(/---[\s\S]*$/g, '').trim();
