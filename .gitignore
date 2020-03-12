@@ -8,3 +8,4 @@ toFile
 cache
 dist/
 public/
+test-resources/
