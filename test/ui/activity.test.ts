@@ -4,9 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import {
-    QuickOpenBox,
     VSBrowser,
-    WebDriver,
     ActivityBar,
     Workbench,
     BottomBarPanel,
