@@ -4,9 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import {
-    QuickOpenBox,
     VSBrowser,
-    WebDriver,
     ActivityBar,
     Workbench,
     BottomBarPanel,
@@ -21,28 +19,24 @@ export async function wait(timeout = 2500): Promise<void> {
 }
 
 // Create a Mocha suite
-describe('My Test Suite', () => {
+describe('OpenShift Connector Smoke Test', () => {
     let browser: VSBrowser;
-    let driver: WebDriver;
+
     // initialize the browser and webdriver
     before(() => {
         browser = VSBrowser.instance;
-        driver = browser.driver;
     });
 
     // test whatever we want using webdriver, here we are just checking the page title
-    it('OpenShift views container is present', async () => {
+    it('OpenShift Connector installed and activated', async () => {
+        await browser.waitForWorkbench();
         const control = new ActivityBar().getViewControl('OpenShift');
-        await driver.getTitle();
         // eslint-disable-next-line no-console
         expect(control.getTitle()).equals('OpenShift');
         const wb = new Workbench();
         const terminalView: TerminalView = await new BottomBarPanel().openTerminalView();
         wb.openCommandPrompt();
-        const input = await QuickOpenBox.create();
-        await input.setText('>OpenShift: About');
-        await input.selectQuickPick(0);
-        await input.confirm();
+        wb.executeCommand('OpenShift: About');
         await wait(10000);
         const text = await terminalView.getText();
         expect(text).contains('odo v1.1.0');
