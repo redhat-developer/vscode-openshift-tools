@@ -23,3 +23,5 @@ azure-pipelines.yml
 images/demo-featured-image.png
 images/debug-node.gif
 images/debug-java.gif
+test-resources/**
+
