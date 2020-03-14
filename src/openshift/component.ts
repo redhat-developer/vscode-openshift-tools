@@ -178,7 +178,7 @@ export class Component extends OpenShiftItem {
                 description: 'Unlink Service'
             }
         ];
-        const unlinkActionSelected = await window.showQuickPick(unlinkActions, {placeHolder: 'Select the option', ignoreFocusOut: true});
+        const unlinkActionSelected = await window.showQuickPick(unlinkActions, {placeHolder: 'Select an option', ignoreFocusOut: true});
 
         if (!unlinkActionSelected) return null;
 
@@ -283,7 +283,7 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
-        const serviceToLink: OpenShiftObject = await window.showQuickPick(Component.getServiceNames(component.getParent()), {placeHolder: "Select the service to link", ignoreFocusOut: true});
+        const serviceToLink: OpenShiftObject = await window.showQuickPick(Component.getServiceNames(component.getParent()), {placeHolder: "Select a service to link", ignoreFocusOut: true});
         if (!serviceToLink) return null;
 
         return Progress.execFunctionWithProgress(`Link Service '${serviceToLink.getName()}' with Component '${component.getName()}'`,

@@ -64,7 +64,7 @@ export class Cluster extends OpenShiftItem {
         const k8sConfig = new KubeConfigUtils();
         const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
         const contextName: QuickPickItem[] = contexts.map((ctx) => ({ label: `${ctx.name}`}));
-        const choice = await window.showQuickPick(contextName, {placeHolder: "Select the new OpenShift context", ignoreFocusOut: true});
+        const choice = await window.showQuickPick(contextName, {placeHolder: "Select a new OpenShift context", ignoreFocusOut: true});
         if (!choice) return null;
         await Cluster.odo.execute(Command.setOpenshiftContext(choice.label));
         return `Cluster context is changed to: ${choice.label}`;
@@ -99,7 +99,7 @@ export class Cluster extends OpenShiftItem {
             }
         ];
         if (response !== 'Yes') return null;
-        const loginActionSelected = await window.showQuickPick(loginActions, {placeHolder: 'Select the way to log in to the cluster.', ignoreFocusOut: true});
+        const loginActionSelected = await window.showQuickPick(loginActions, {placeHolder: 'Select a way to log in to the cluster.', ignoreFocusOut: true});
         if (!loginActionSelected) return null;
         return loginActionSelected.label === 'Credentials' ? Cluster.credentialsLogin(true) : Cluster.tokenLogin(true);
     }

@@ -31,7 +31,7 @@ export class Storage extends OpenShiftItem {
         }});
         if (!mountPath) return null;
 
-        const storageSize = await window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select the Storage size', ignoreFocusOut: true});
+        const storageSize = await window.showQuickPick(['1Gi', '1.5Gi', '2Gi'], {placeHolder: 'Select a Storage size', ignoreFocusOut: true});
         if (!storageSize) return null;
 
         return Progress.execFunctionWithProgress(`Creating the Storage '${component.getName()}'`, () => Storage.odo.createStorage(component, storageName, mountPath, storageSize))
