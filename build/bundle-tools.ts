@@ -16,36 +16,55 @@ import path = require('path');
 import fs = require('fs-extra');
 import configData = require('../src/tools.json');
 
+async function isDownloadRequired(filePath, sha256): Promise<boolean> {
+    let result = true;
+    if (fs.existsSync(filePath)) {
+        const fileSha256 = await hasha.fromFile(filePath, {algorithm: 'sha256'});
+        result = fileSha256 !== sha256;
+    }
+    return result;
+}
+
 async function downloadFileAndCreateSha256(
-    targetFolder: string,
-    fileName: string,
-    reqURL: string,
+    toolsCacheFolder: string,
+    toolsFolder: string,
+    dlFileName: string,
+    url: string,
     sha256sum: string,
     cmdFileName: string,
     filePrefix?: string,
-) {
-    mkdirp.sync(targetFolder);
-    const currentFile = path.join(targetFolder, fileName);
-    console.log(`${currentFile} download started from ${reqURL}`);
-    await DownloadUtil.downloadFile(reqURL, currentFile, (current) => console.log(`${current}%`));
-    const currentSHA256 = await hasha.fromFile(currentFile, { algorithm: 'sha256' });
-    if (currentSHA256 === sha256sum) {
-        console.log(`[INFO] ${currentFile} is downloaded and sha256 is correct`);
+): Promise<void> {
+    mkdirp.sync(toolsCacheFolder);
+    mkdirp.sync(toolsFolder);
+    const currentFile = path.join(toolsCacheFolder, dlFileName);
+    if (await isDownloadRequired(currentFile, sha256sum)) {
+        console.log(`Downloading ${url} to ${currentFile}`);
+        await DownloadUtil.downloadFile(url, currentFile, (current) => console.log(`${current}%`));
+        const currentSHA256 = await hasha.fromFile(currentFile, { algorithm: 'sha256' });
+        if (currentSHA256 === sha256sum) {
+            console.log(`Download of ${currentFile} has finished and SHA256 is correct`);
+        } else {
+            throw Error(`${currentFile} is downloaded and SHA256 is not correct`);
+        }
     } else {
-        throw Error(`${currentFile} is downloaded and sha256 is not correct`);
+        console.log('Previously downloaded archive SHA256 is correct')
     }
-    await Archive.extract(currentFile, targetFolder, cmdFileName, filePrefix);
-    fs.removeSync(currentFile);
+    console.log(`Extracting ${currentFile} to ${path.join(toolsFolder, cmdFileName)}`);
+    await Archive.extract(currentFile, toolsFolder, cmdFileName, filePrefix);
 }
 
 async function bundleTools(): Promise<void> {
+    const outFolder = path.resolve('.', 'out');
+    const toolsCacheFolder = path.join(outFolder, 'tools-cache');
+    console.info(`Download tools to '${toolsCacheFolder}'`);
     for (const key in configData) {
+        const tool = configData[key];
         for (const OS in configData[key].platform) {
-            const targetFolder = path.resolve('.', 'out', 'tools', OS);
-            console.info(`Download tools to '${targetFolder}'`);
+            console.log(`Bundle '${tool.description}' for ${OS}`);
             // eslint-disable-next-line no-await-in-loop
             await downloadFileAndCreateSha256(
-                targetFolder,
+                toolsCacheFolder,
+                path.join(outFolder, 'tools', OS),
                 configData[key].platform[OS].dlFileName,
                 configData[key].platform[OS].url,
                 configData[key].platform[OS].sha256sum,

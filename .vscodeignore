@@ -2,6 +2,9 @@
 .vscode-test/**
 images/vscode-openshift-tools.gif
 out/test/**
+out/build/**
+out/test-resources/**
+out/tools-cache/**
 out/**/*.map
 src/**
 doc/**
@@ -24,4 +27,6 @@ images/demo-featured-image.png
 images/debug-node.gif
 images/debug-java.gif
 test-resources/**
-
+header.js
+.mocharc.js
+.eslintignore
