@@ -242,7 +242,7 @@
       },
       {
         "command": "openshift.explorer.login",
-        "title": "Log in to cluster",
+        "title": "Login into Cluster",
         "category": "OpenShift",
         "icon": {
           "dark": "images/title/dark/icon-login.svg",
@@ -1073,6 +1073,14 @@
           "command": "clusters.openshift.route.open",
           "group": "2@0",
           "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.resource\\.route/i"
+        },
+        {
+          "command": "openshift.explorer.login.tokenLogin",
+          "when": "view == openshiftProjectExplorer && viewItem == loginRequired"
+        },
+        {
+          "command": "openshift.explorer.login.credentialsLogin",
+          "when": "view == openshiftProjectExplorer && viewItem == loginRequired"
         }
       ]
     },
