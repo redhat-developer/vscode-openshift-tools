@@ -11,7 +11,7 @@
 
 /* TODO Review classes hierarchy */
 
-import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Disposable } from 'vscode';
+import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Command as VSCommand, Disposable } from 'vscode';
 import * as path from 'path';
 import { statSync } from 'fs';
 import { Subject } from 'rxjs';
@@ -419,6 +419,15 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
     get label(): string {
         const label = this.contextValue === ContextType.CLUSTER ? this.name.split('//')[1] : this.name;
         return label;
+    }
+
+    get command(): VSCommand {
+        if (this.contextValue === ContextType.LOGIN_REQUIRED) {
+            return {
+                command: 'openshift.explorer.login',
+                title: 'Login to the cluster',
+            };
+        }
     }
 
     get description(): string {
