@@ -613,7 +613,7 @@ export class OdoImpl implements Odo {
         'the server has asked for the client to provide credentials',
         'Please login to your server',
         'Unauthorized',
-        "User \"system:anonymous\" cannot list resource \"projects\""
+        'User "system:anonymous" cannot list resource "projects"'
     ];
 
     private readonly serverDownMessages = [
