@@ -612,7 +612,8 @@ export class OdoImpl implements Odo {
         'Please log in to the cluster',
         'the server has asked for the client to provide credentials',
         'Please login to your server',
-        'Unauthorized'
+        'Unauthorized',
+        "User \"system:anonymous\" cannot list resource \"projects\""
     ];
 
     private readonly serverDownMessages = [
