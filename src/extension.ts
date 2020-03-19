@@ -22,6 +22,7 @@ import { OdoImpl } from './odo';
 import { TokenStore } from './util/credentialManager';
 import { Oc } from './oc';
 import { Route } from './k8s/route';
+import { EditorResourceProvider, OPENSHIFT_RESOURCE_SCHEME } from './util/editor';
 
 import path = require('path');
 import fsx = require('fs-extra');
@@ -120,6 +121,7 @@ export async function activate(extensionContext: vscode.ExtensionContext): Promi
     Cluster.extensionContext = extensionContext;
     Component.extensionContext = extensionContext;
     TokenStore.extensionContext = extensionContext;
+    const resourceDocProvider = new EditorResourceProvider();
     const disposable = [
         vscode.commands.registerCommand('openshift.about', (context) => execute(Cluster.about, context)),
         vscode.commands.registerCommand('openshift.create', (context) => execute(Oc.create, context)),
@@ -203,7 +205,8 @@ export async function activate(extensionContext: vscode.ExtensionContext): Promi
         vscode.commands.registerCommand('openshift.explorer.reportIssue', () => OpenShiftExplorer.reportIssue()),
         vscode.commands.registerCommand('clusters.openshift.useProject', (context) => vscode.commands.executeCommand('extension.vsKubernetesUseNamespace', context)),
         vscode.commands.registerCommand('clusters.openshift.route.open', (context) => execute(Route.openUrl, context)),
-        OpenShiftExplorer.getInstance()
+        OpenShiftExplorer.getInstance(),
+        vscode.workspace.registerFileSystemProvider(OPENSHIFT_RESOURCE_SCHEME, resourceDocProvider, {}),
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
 

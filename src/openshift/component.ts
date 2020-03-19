@@ -16,7 +16,7 @@ import { Refs, Ref, Type } from '../util/refs';
 import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import { selectWorkspaceFolder } from '../util/workspace';
-
+import { openshiftfsUri } from '../util/editor';
 import { ToolsConfig } from '../tools';
 
 import path = require('path');
@@ -148,7 +148,14 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+
+        const uri = openshiftfsUri(`${context.getName()}`);
+        workspace.openTextDocument(uri).then((doc) => {
+          if (doc) {
+            window.showTextDocument(doc, { preserveFocus: true, preview: true });
+          }
+        }, (err) => window.showErrorMessage(`Error loading document: ${err}`));
+        // Component.odo.executeInTerminal(Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
 
     static async followLog(context: OpenShiftObject): Promise<string> {
