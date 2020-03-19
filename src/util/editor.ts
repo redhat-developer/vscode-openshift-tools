@@ -7,7 +7,6 @@ import { Uri, FileSystemProvider, FileType, FileStat, FileChangeEvent, Event, Ev
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
-import * as querystring from 'querystring';
 import { CliChannel, CliExitData } from '../cli';
 import { Command } from '../odo';
 
