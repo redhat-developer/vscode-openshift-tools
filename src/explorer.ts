@@ -19,10 +19,12 @@ import {
 } from 'vscode';
 
 import * as path from 'path';
+import { Context } from '@kubernetes/client-node/dist/config_types';
 import { Platform } from './util/platform';
 
 import { Odo, OpenShiftObject, OdoImpl } from './odo';
 import { WatchUtil, FileContentChangeNotifier } from './util/watch';
+import { KubeConfigUtils } from './util/kubeUtils';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
@@ -34,17 +36,26 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     private treeView: TreeView<OpenShiftObject>;
 
     private fsw: FileContentChangeNotifier;
+    private kubeContext: Context;
 
-    private onDidChangeTreeDataEmitter: EventEmitter<
-        OpenShiftObject | undefined
-    > = new EventEmitter<OpenShiftObject | undefined>();
+    private onDidChangeTreeDataEmitter: EventEmitter<OpenShiftObject> =
+        new EventEmitter<OpenShiftObject | undefined>();
 
     readonly onDidChangeTreeData: Event<OpenShiftObject | undefined> = this
         .onDidChangeTreeDataEmitter.event;
 
     private constructor() {
+        const ku1 = new KubeConfigUtils();
+        this.kubeContext = ku1.getContextObject(ku1.currentContext);
         this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
-        this.fsw.emitter.on('file-changed', this.refresh.bind(this));
+        this.fsw.emitter.on('file-changed', () => {
+            const ku2 = new KubeConfigUtils();
+            const newKubeCtx = ku2.getContextObject(ku2.currentContext);
+            if (this.kubeContext.cluster !== newKubeCtx.cluster || this.kubeContext.user !== newKubeCtx.user) {
+                this.refresh();
+            }
+            this.kubeContext = newKubeCtx;
+        });
         this.treeView = window.createTreeView('openshiftProjectExplorer', {
             treeDataProvider: this,
         });
