@@ -40,7 +40,7 @@ export interface OpenShiftObject extends QuickPickItem {
     getChildren(): ProviderResult<OpenShiftObject[]>;
     getParent(): OpenShiftObject;
     getName(): string;
-    contextValue: string;
+    contextValue: ContextType;
     compType?: string;
     contextPath?: Uri;
     deployed: boolean;
@@ -786,14 +786,22 @@ export class OdoImpl implements Odo {
             const targetPrjName = application.getParent().getName();
 
         OdoImpl.data.getSettings().filter((comp) => comp.Application === targetAppName && comp.Project === targetPrjName).forEach((comp) => {
-            const item = deployedComponents.find((component) => component.getName() === comp.Name);
-            if (item) {
+            const jsonItem = componentObject.find((item)=> item.name === comp.Name);
+            let item: OpenShiftObject;
+            if (jsonItem) {
+                item = deployedComponents.find((component) => component.getName() === comp.Name);
+            }
+            const builderImage = {
+                name: comp.Type.split(':')[0],
+                tag: comp.Type.split(':')[1]
+            };
+            if (item && item.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
                 item.contextPath = comp.ContextPath;
                 item.deployed = true;
                 item.contextValue = ContextType.COMPONENT_PUSHED;
-                item.builderImage = {name: comp.Type.split(':')[0], tag: comp.Type.split(':')[1]};
+                item.builderImage = builderImage;
             } else {
-                deployedComponents.push(new OpenShiftObjectImpl(application, comp.Name, ContextType.COMPONENT, false, this, Collapsed, comp.ContextPath, comp.SourceType, {name: comp.Type.split(':')[0], tag: comp.Type.split(':')[1]}));
+                deployedComponents.push(new OpenShiftObjectImpl(application, comp.Name, item ? item.contextValue : ContextType.COMPONENT, false, this, Collapsed, comp.ContextPath, comp.SourceType, builderImage));
             }
         });
 
