@@ -4,13 +4,15 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { window, commands, env, QuickPickItem, ExtensionContext, Uri } from 'vscode';
-import { Command } from "../odo";
+import { Command, OdoImpl } from "../odo";
 import { OpenShiftItem } from './openshiftItem';
 import { CliExitData, CliChannel } from "../cli";
 import { TokenStore } from "../util/credentialManager";
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { Filters } from "../util/filters";
 import { Progress } from "../util/progress";
+import { Metrics } from '../util/metrics';
+
 
 export class Cluster extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
@@ -213,6 +215,8 @@ export class Cluster extends OpenShiftItem {
         if (result.stderr === "") {
             Cluster.explorer.refresh();
             await commands.executeCommand('setContext', 'isLoggedIn', true);
+            await OdoImpl.Instance.setToolVersions();
+            Metrics.publishUsageMetrics("Logged into the cluster");
             return `Successfully logged in to '${clusterURL}'`;
         }
         throw new Error(result.stderr);

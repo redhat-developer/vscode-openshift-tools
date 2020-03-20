@@ -23,11 +23,13 @@ import { Platform } from './util/platform';
 import * as odo from './odo/config';
 import { GlyphChars } from './util/constants';
 import { Progress } from './util/progress';
+import { Metrics } from './util/metrics';
 
 import format =  require('string-format');
 import bs = require('binary-search');
 import yaml = require('js-yaml');
 import fs = require('fs');
+
 
 const {Collapsed} = TreeItemCollapsibleState;
 
@@ -479,6 +481,9 @@ export interface Odo {
     execute(command: string, cwd?: string, fail?: boolean): Promise<cliInstance.CliExitData>;
     executeInTerminal(command: string, cwd?: string): Promise<void>;
     requireLogin(): Promise<boolean>;
+    getOdoVersion(): Promise<string>;
+    getOCVersion(): Promise<string>;
+    setToolVersions(): Promise<boolean>;
     clearCache?(): void;
     createProject(name: string): Promise<OpenShiftObject>;
     deleteProject(project: OpenShiftObject): Promise<OpenShiftObject>;
@@ -917,6 +922,15 @@ export class OdoImpl implements Odo {
         return this.odoLoginMessages.some((msg) => result.stderr.includes(msg));
     }
 
+    public async getOdoVersion(): Promise<string> {
+        const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersion(), process.cwd(), false);
+        return result.stdout;
+    }
+    public async getOCVersion(): Promise<string> {
+        const result: cliInstance.CliExitData = await this.execute(Command.printOcVersion(), process.cwd(), false);
+        return result.stdout;
+    }
+
     private insert(array: OpenShiftObject[], item: OpenShiftObject): OpenShiftObject {
         const i = bs(array, item, compareNodes);
         array.splice(Math.abs(i)-1, 0, item);
@@ -947,7 +961,37 @@ export class OdoImpl implements Odo {
         return this.deleteAndRefresh(project);
     }
 
+    public async setToolVersions(): Promise<boolean> {
+        if (!Metrics.getODOVersionString() || !Metrics.getOCVersionString()) {
+            const odoVersion = await OdoImpl.Instance.getOdoVersion();
+            const ocVersion =  await OdoImpl.Instance.getOCVersion();
+
+            odoVersion.trim().split('\n').filter((value) => {
+                return value.includes("odo");
+            }).map((value) => {
+                Metrics.setODOVersionString(value.substr(value.indexOf(':')+1).trim());
+            });
+            ocVersion.trim().split('\n').filter((value) => {
+                return value.includes("Server Version");
+            }).map((value) => {
+                Metrics.setOCVersionString(value.substr(value.indexOf(':')+1).trim());
+            });
+            ocVersion.trim().split('\n').filter((value) => {
+                return value.includes("Client Version");
+            }).map((value) => {
+                Metrics.setOCClientVersionString(value.substr(value.indexOf(':')+1).trim());
+            });
+            ocVersion.trim().split('\n').filter((value) => {
+                return value.includes("Kubernetes Version");
+            }).map((value) => {
+                Metrics.setKubeVersionString(value.substr(value.indexOf(':')+1).trim());
+            });
+        }
+        return true;
+    }
+
     public async createProject(projectName: string): Promise<OpenShiftObject> {
+        Metrics.publishUsageMetrics("Creating a new OpenShift project.. ");
         await OdoImpl.instance.execute(Command.createProject(projectName));
         const clusters = await this.getClusters();
         return this.insertAndReveal(new OpenShiftObjectImpl(clusters[0], projectName, ContextType.PROJECT, false, this));
