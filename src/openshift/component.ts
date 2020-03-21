@@ -5,7 +5,7 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation } from 'vscode';
+import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, Position } from 'vscode';
 import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
 import { OpenShiftItem } from './openshiftItem';
@@ -150,9 +150,16 @@ export class Component extends OpenShiftItem {
         if (!component) return null;
 
         const uri = openshiftfsUri(`${context.getName()}`);
-        workspace.openTextDocument(uri).then((doc) => {
+        workspace.openTextDocument(uri).then(async (doc) => {
           if (doc) {
-            window.showTextDocument(doc, { preserveFocus: true, preview: true });
+            const textEditor = await window.showTextDocument(doc, { preserveFocus: true, preview: true });
+            const logProcess = await Component.odo.spawn('odo', ['log', component.getName(), '--app', component.getParent().getName(), '--project', component.getParent().getParent().getName()] ,component.contextPath.fsPath);
+            logProcess.stdout.on('data', (data) => {
+                textEditor.edit((editorBuilder) => {
+                    console.log(data);
+                    editorBuilder.insert(new Position(doc.lineCount, 0), `${data}`);
+                })
+            });
           }
         }, (err) => window.showErrorMessage(`Error loading document: ${err}`));
         // Component.odo.executeInTerminal(Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);

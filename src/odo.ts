@@ -477,6 +477,7 @@ export interface Odo {
     getServiceTemplatePlans(svc: string): Promise<string[]>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     execute(command: string, cwd?: string, fail?: boolean): Promise<cliInstance.CliExitData>;
+    spawn(command: string, params: string[], cwd?: string): Promise<ChildProcess>;
     executeInTerminal(command: string, cwd?: string): Promise<void>;
     requireLogin(): Promise<boolean>;
     clearCache?(): void;
@@ -909,7 +910,20 @@ export class OdoImpl implements Odo {
         return OdoImpl.cli.execute(
             toolLocation ? command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`) : command,
             cwd ? {cwd} : { }
-        ).then(async (result) => result.error && fail ?  Promise.reject(result.error) : result).catch((err) => fail ? Promise.reject(err) : Promise.resolve({error: null, stdout: '', stderr: ''}));
+        ).then(
+            async (result) => result.error && fail ?  Promise.reject(result.error) : result
+        ).catch(
+            (err) => fail ? Promise.reject(err) : Promise.resolve({error: null, stdout: '', stderr: ''})
+        );
+    }
+
+    public async spawn(command: string, params: string[], cwd?: string): Promise<ChildProcess> {
+        const toolLocation = await ToolsConfig.detect(command);
+        const defaultOptions = {
+            cwd,
+            env: process.env
+        };
+        return OdoImpl.cli.spawn(toolLocation, params, defaultOptions);
     }
 
     public async requireLogin(): Promise<boolean> {
