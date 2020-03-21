@@ -15,7 +15,7 @@ export class Storage extends OpenShiftItem {
             "In which Project you want to create a Storage",
             "In which Application you want to create a Storage",
             "In which Component you want to create a Storage",
-            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED);
+            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED || value.contextValue === ContextType.COMPONENT);
         if (!component) return null;
         const storageList: Array<OpenShiftObject> = await OpenShiftItem.odo.getStorageNames(component);
         const storageName = await Storage.getName('Storage name', storageList);
