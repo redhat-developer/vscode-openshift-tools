@@ -195,8 +195,12 @@ export class Command {
         return `odo delete ${component} -f --app ${app} --project ${project} --all`;
     }
 
-    static describeComponent(project: string, app: string, component: string): string {
+    static describeComponentNoContext(project: string, app: string, component: string): string {
         return `odo describe ${component} --app ${app} --project ${project}`;
+    }
+
+    static describeComponent(project: string, app: string, component: string): string {
+        return `odo describe`;
     }
 
     static describeComponentJson(project: string, app: string, component: string): string {

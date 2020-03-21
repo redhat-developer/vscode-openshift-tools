@@ -134,10 +134,18 @@ export class Component extends OpenShiftItem {
         const component = await Component.getOpenShiftCmdData(context,
             "From which Project you want to describe Component",
             "From which Application you want to describe Component",
-            "Select Component you want to describe",
-            (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED || value.contextValue === ContextType.COMPONENT_NO_CONTEXT);
+            "Select Component you want to describe");
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+        let command: string;
+        if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
+            command = Command.describeComponentNoContext(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
+        } else {
+            command = Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
+        }
+        Component.odo.executeInTerminal(
+            command,
+            component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()
+        );
     }
 
     static async log(context: OpenShiftObject): Promise<string> {
