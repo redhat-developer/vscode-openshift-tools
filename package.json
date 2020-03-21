@@ -958,6 +958,11 @@
         },
         {
           "command": "openshift.component.describe",
+          "when": "view == openshiftProjectExplorer && viewItem == componentNotPushed",
+          "group": "c2@1"
+        },
+        {
+          "command": "openshift.component.describe",
           "when": "view == openshiftProjectExplorer && viewItem == componentNoContext",
           "group": "c2@1"
         },
