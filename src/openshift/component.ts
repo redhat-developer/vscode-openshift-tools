@@ -156,7 +156,6 @@ export class Component extends OpenShiftItem {
             const logProcess = await Component.odo.spawn('odo', ['log', component.getName(), '--app', component.getParent().getName(), '--project', component.getParent().getParent().getName()] ,component.contextPath.fsPath);
             logProcess.stdout.on('data', (data) => {
                 textEditor.edit((editorBuilder) => {
-                    console.log(data);
                     editorBuilder.insert(new Position(doc.lineCount, 0), `${data}`);
                 })
             });
