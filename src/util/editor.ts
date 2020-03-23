@@ -7,8 +7,6 @@ import { Uri, FileSystemProvider, FileType, FileStat, FileChangeEvent, Event, Ev
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
-import { CliChannel, CliExitData } from '../cli';
-import { Command } from '../odo';
 
 export const OPENSHIFT_RESOURCE_SCHEME = "component";
 export const OPENSHIFT_RESOURCE_AUTHORITY = "logs";
@@ -51,31 +49,8 @@ export class EditorResourceProvider implements FileSystemProvider {
         // no-op
     }
 
-    readFile(uri: Uri): Uint8Array | Thenable<Uint8Array> {
-        return this.readFileAsync(uri);
-    }
-
-    async readFileAsync(uri: Uri): Promise<Uint8Array> {
-        const content = await this.loadResource(uri);
-        return new Buffer(content, 'utf8');
-    }
-
-    async loadResource(uri: Uri): Promise<string> {
-        const sr = await this.execLoadResource();
-
-        if (!sr || sr.error || sr.stderr) {
-          let message = sr ? sr.error : 'Unable to run command line tool';
-          if (sr.stderr) {
-            message = sr.stderr;
-          }
-          throw message;
-        }
-        return sr.stdout;
-      }
-
-    async execLoadResource(): Promise<any> {
-        const result: CliExitData = await CliChannel.getInstance().execute(Command.printOcVersion());
-        return result;
+    readFile(): Uint8Array | Thenable<Uint8Array> {
+        return new Buffer('', 'utf8');
     }
 
     writeFile(uri: Uri, content: Uint8Array): void | Thenable<void> {
