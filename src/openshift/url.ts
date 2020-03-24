@@ -33,7 +33,7 @@ export class Url extends OpenShiftItem{
                 return Promise.reject(Error(`Component '${component.getName()}' has no ports declared.`));
             }
             if (!port) return null;
-            const secure = await window.showQuickPick(['Yes', 'No'], {placeHolder: "Select port to expose"});
+            const secure = await window.showQuickPick(['Yes', 'No'], {placeHolder: "Do you want to secure new URL?"});
             if (secure) {
                 return Progress.execFunctionWithProgress(`Creating a URL '${urlName}' for the Component '${component.getName()}'`,
                     () => Url.odo.createComponentCustomUrl(component, `${urlName}`, `${(port as any).Number}`)
