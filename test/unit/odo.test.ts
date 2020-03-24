@@ -16,6 +16,7 @@ import { WindowUtil } from '../../src/util/windowUtils';
 import { ToolsConfig } from '../../src/tools';
 import { CliExitData, CliChannel } from '../../src/cli';
 import * as odo from '../../src/odo';
+import { Metrics } from '../../src/util/metrics';
 
 import jsYaml = require('js-yaml');
 
@@ -600,6 +601,20 @@ suite("odo", () => {
             sandbox.stub(odo.OdoImpl.prototype, 'convertObjectsFromPreviousOdoReleases');
             const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
             assert.equal(cluster[0].getName(), clusterUrl);
+        });
+
+        test('capture versions of OC, ODO and Kube', async () => {
+            sandbox.stub(odoCli, 'execute').resolves({ error: null, stdout: '', stderr: 'Please log in to the cluster'});
+            const result = await odoCli.setToolVersions();
+
+            expect(result).true;
+        });
+
+        test('send usage metrics to Segment', function () {
+            sandbox.stub(odoCli, 'execute').resolves({ error: null, stdout: '', stderr: 'Please verify API key for Segment'});
+            const result = Metrics.publishUsageMetrics("From automated tests..");
+
+            expect(result).true;
         });
 
         test('extension uses odo version to determine if login is required', async () => {
