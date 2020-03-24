@@ -47,6 +47,7 @@
     "bundle-tools": "node ./out/build/bundle-tools.js --platform",
     "todo": "leasot **/*.ts --ignore node_modules -x",
     "test": "npm run clean && npm run compile && npm run verify && node ./out/build/run-tests.js unit",
+    "ui-test": "extest setup-and-run out/test/ui/*.test.js",
     "update-deps": "ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
     "build": "npm run clean && npm run lint && npm run compile"
