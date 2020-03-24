@@ -11,7 +11,7 @@
 
 /* TODO Review classes hierarchy */
 
-import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Disposable } from 'vscode';
+import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Command as VSCommand, Disposable } from 'vscode';
 import * as path from 'path';
 import { statSync } from 'fs';
 import { Subject } from 'rxjs';
@@ -42,7 +42,7 @@ export interface OpenShiftObject extends QuickPickItem {
     getChildren(): ProviderResult<OpenShiftObject[]>;
     getParent(): OpenShiftObject;
     getName(): string;
-    contextValue: string;
+    contextValue: ContextType;
     compType?: string;
     contextPath?: Uri;
     deployed: boolean;
@@ -197,8 +197,12 @@ export class Command {
         return `odo delete ${component} -f --app ${app} --project ${project} --all`;
     }
 
-    static describeComponent(project: string, app: string, component: string): string {
+    static describeComponentNoContext(project: string, app: string, component: string): string {
         return `odo describe ${component} --app ${app} --project ${project}`;
+    }
+
+    static describeComponent(project: string, app: string, component: string): string {
+        return `odo describe`;
     }
 
     static describeComponentJson(project: string, app: string, component: string): string {
@@ -272,8 +276,8 @@ export class Command {
     }
 
     @verbose
-    static createComponentCustomUrl(name: string, port: string): string {
-        return `odo url create ${name} --port ${port}`;
+    static createComponentCustomUrl(name: string, port: string, secure = false): string {
+        return `odo url create ${name} --port ${port} ${secure? '--secure': ''}`;
     }
 
     static getComponentUrl(): string {
@@ -423,6 +427,15 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
         return label;
     }
 
+    get command(): VSCommand {
+        if (this.contextValue === ContextType.LOGIN_REQUIRED) {
+            return {
+                command: 'openshift.explorer.login',
+                title: 'Login to the cluster',
+            };
+        }
+    }
+
     get description(): string {
         let suffix = '';
         if (this.contextValue === ContextType.COMPONENT) {
@@ -500,7 +513,7 @@ export interface Odo {
     createService(application: OpenShiftObject, templateName: string, planName: string, name: string): Promise<OpenShiftObject>;
     deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
     deleteURL(url: OpenShiftObject): Promise<OpenShiftObject>;
-    createComponentCustomUrl(component: OpenShiftObject, name: string, port: string): Promise<OpenShiftObject>;
+    createComponentCustomUrl(component: OpenShiftObject, name: string, port: string, secure?: boolean): Promise<OpenShiftObject>;
     readonly subject: Subject<OdoEvent>;
 }
 
@@ -617,7 +630,8 @@ export class OdoImpl implements Odo {
         'Please log in to the cluster',
         'the server has asked for the client to provide credentials',
         'Please login to your server',
-        'Unauthorized'
+        'Unauthorized',
+        'User "system:anonymous" cannot list resource "projects"'
     ];
 
     private readonly serverDownMessages = [
@@ -781,14 +795,22 @@ export class OdoImpl implements Odo {
             const targetPrjName = application.getParent().getName();
 
         OdoImpl.data.getSettings().filter((comp) => comp.Application === targetAppName && comp.Project === targetPrjName).forEach((comp) => {
-            const item = deployedComponents.find((component) => component.getName() === comp.Name);
-            if (item) {
+            const jsonItem = componentObject.find((item)=> item.name === comp.Name);
+            let item: OpenShiftObject;
+            if (jsonItem) {
+                item = deployedComponents.find((component) => component.getName() === comp.Name);
+            }
+            const builderImage = {
+                name: comp.Type.split(':')[0],
+                tag: comp.Type.split(':')[1]
+            };
+            if (item && item.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
                 item.contextPath = comp.ContextPath;
                 item.deployed = true;
                 item.contextValue = ContextType.COMPONENT_PUSHED;
-                item.builderImage = {name: comp.Type.split(':')[0], tag: comp.Type.split(':')[1]};
+                item.builderImage = builderImage;
             } else {
-                deployedComponents.push(new OpenShiftObjectImpl(application, comp.Name, ContextType.COMPONENT, false, this, Collapsed, comp.ContextPath, comp.SourceType, {name: comp.Type.split(':')[0], tag: comp.Type.split(':')[1]}));
+                deployedComponents.push(new OpenShiftObjectImpl(application, comp.Name, item ? item.contextValue : ContextType.COMPONENT, false, this, Collapsed, comp.ContextPath, comp.SourceType, builderImage));
             }
         });
 
@@ -1159,8 +1181,8 @@ export class OdoImpl implements Odo {
         return this.deleteAndRefresh(storage);
     }
 
-    public async createComponentCustomUrl(component: OpenShiftObject, name: string, port: string): Promise<OpenShiftObject> {
-        await this.execute(Command.createComponentCustomUrl(name, port), component.contextPath.fsPath);
+    public async createComponentCustomUrl(component: OpenShiftObject, name: string, port: string, secure = false): Promise<OpenShiftObject> {
+        await this.execute(Command.createComponentCustomUrl(name, port, secure), component.contextPath.fsPath);
         return this.insertAndReveal(new OpenShiftObjectImpl(component, name, ContextType.COMPONENT_ROUTE, false, this, TreeItemCollapsibleState.None));
     }
 
