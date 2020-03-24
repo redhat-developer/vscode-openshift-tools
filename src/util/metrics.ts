@@ -56,8 +56,8 @@ export class Metrics {
     return false;
   }
 
-  public static publishUsageMetrics(eventMessage: string) {
-    const analytics = new segmentanalytics(segmentToken);
+  public static publishUsageMetrics(eventMessage: string) : boolean {
+    const analytics = new segmentanalytics(segmentToken, { flushAt: 1 }); // Flush events to Segment with NO buffering
 
       if (Metrics.shallSendMetrics()) {
            analytics.track({
@@ -68,9 +68,13 @@ export class Metrics {
               ocServerVersion: Metrics.getOCVersionString(),
               ocClientVersion: Metrics.getOCClientVersionString(),
               kubeVersion: Metrics.getKubeVersionString()
-
             }
+          }, function(error, batch) {
+              if (error) {
+                return false;
+              }
           });
-      }
+        }
+        return true;
   }
-}
+  }
