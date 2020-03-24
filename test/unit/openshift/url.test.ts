@@ -278,6 +278,7 @@ suite('OpenShift/URL', () => {
             execStub.onFirstCall().resolves({error: null, stdout: portOutput, stderr: ''});
             execStub.onSecondCall().rejects(Error('Error'));
             inputStub.onFirstCall().resolves('urlName');
+            quickPickStub.resolves('No');
             try {
                 await Url.create(componentItem);
             } catch (error) {
