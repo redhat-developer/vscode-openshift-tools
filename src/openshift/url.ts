@@ -28,12 +28,13 @@ export class Url extends OpenShiftItem{
             if (ports.length === 1) {
                 [ port ] = ports;
             } else if (ports.length > 1) {
-                port = await window.showQuickPick(portItems, {placeHolder: "Select port to expose", ignoreFocusOut: true});
+                port = await window.showQuickPick(portItems, {placeHolder: "Select port to expose"});
             } else {
                 return Promise.reject(Error(`Component '${component.getName()}' has no ports declared.`));
             }
-
-            if (port) {
+            if (!port) return null;
+            const secure = await window.showQuickPick(['Yes', 'No'], {placeHolder: "Select port to expose"});
+            if (secure) {
                 return Progress.execFunctionWithProgress(`Creating a URL '${urlName}' for the Component '${component.getName()}'`,
                     () => Url.odo.createComponentCustomUrl(component, `${urlName}`, `${(port as any).Number}`)
                         .then(() => `URL '${urlName}' for component '${component.getName()}' successfully created`)

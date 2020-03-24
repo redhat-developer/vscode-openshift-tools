@@ -274,8 +274,8 @@ export class Command {
     }
 
     @verbose
-    static createComponentCustomUrl(name: string, port: string): string {
-        return `odo url create ${name} --port ${port}`;
+    static createComponentCustomUrl(name: string, port: string, secure = false): string {
+        return `odo url create ${name} --port ${port} ${secure? '--secure': ''}`;
     }
 
     static getComponentUrl(): string {
@@ -508,7 +508,7 @@ export interface Odo {
     createService(application: OpenShiftObject, templateName: string, planName: string, name: string): Promise<OpenShiftObject>;
     deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
     deleteURL(url: OpenShiftObject): Promise<OpenShiftObject>;
-    createComponentCustomUrl(component: OpenShiftObject, name: string, port: string): Promise<OpenShiftObject>;
+    createComponentCustomUrl(component: OpenShiftObject, name: string, port: string, secure?: boolean): Promise<OpenShiftObject>;
     readonly subject: Subject<OdoEvent>;
 }
 
@@ -1137,8 +1137,8 @@ export class OdoImpl implements Odo {
         return this.deleteAndRefresh(storage);
     }
 
-    public async createComponentCustomUrl(component: OpenShiftObject, name: string, port: string): Promise<OpenShiftObject> {
-        await this.execute(Command.createComponentCustomUrl(name, port), component.contextPath.fsPath);
+    public async createComponentCustomUrl(component: OpenShiftObject, name: string, port: string, secure = false): Promise<OpenShiftObject> {
+        await this.execute(Command.createComponentCustomUrl(name, port, secure), component.contextPath.fsPath);
         return this.insertAndReveal(new OpenShiftObjectImpl(component, name, ContextType.COMPONENT_ROUTE, false, this, TreeItemCollapsibleState.None));
     }
 
