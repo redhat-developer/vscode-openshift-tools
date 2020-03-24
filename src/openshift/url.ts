@@ -36,7 +36,7 @@ export class Url extends OpenShiftItem{
             const secure = await window.showQuickPick(['Yes', 'No'], {placeHolder: "Do you want to secure new URL?"});
             if (secure) {
                 return Progress.execFunctionWithProgress(`Creating a URL '${urlName}' for the Component '${component.getName()}'`,
-                    () => Url.odo.createComponentCustomUrl(component, `${urlName}`, `${(port as any).Number}`)
+                    () => Url.odo.createComponentCustomUrl(component, `${urlName}`, `${(port as any).Number}`, secure === 'Yes')
                         .then(() => `URL '${urlName}' for component '${component.getName()}' successfully created`)
                         .catch((err) => Promise.reject(Error(`Failed to create URL '${urlName}' for component '${component.getName()}'. ${err.message}`)))
                 );
