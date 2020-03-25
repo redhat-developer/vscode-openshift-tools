@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-node('rhel7'){
+node('rhel8'){
   stage('Checkout repo') {
     deleteDir()
     git url: 'https://github.com/redhat-developer/vscode-openshift-tools.git',
@@ -37,6 +37,15 @@ node('rhel7'){
     sh "sha256sum *.tgz > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.tgz.sha256"
   }
 
+  stage('UI smoke test') {
+      wrap([$class: 'Xvnc']) {
+        sh "npx extest get-vscode"
+        sh "npx extest get-chromedriver"
+        sh "npx extest install-vsix openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix"
+        sh "npx extest run-tests out/test/ui/*.test.js"
+      }
+  }
+
   if(params.UPLOAD_LOCATION) {
     stage('Snapshot') {
       def filesToPush = findFiles(glob: '**.vsix')
@@ -52,12 +61,12 @@ node('rhel7'){
     stage("Publish to Marketplace") {
       withCredentials([[$class: 'StringBinding', credentialsId: 'vscode_java_marketplace', variable: 'TOKEN']]) {
           def vsix = findFiles(glob: '**.vsix')
-          sh 'vsce publish -p ${TOKEN} --packagePath' + " ${vsix[0].path}"
+          // sh 'vsce publish -p ${TOKEN} --packagePath' + " ${vsix[0].path}"
       }
 
       stage "Promote the build to stable"
-      sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.vsix* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
-      sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.tgz* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
+      // sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.vsix* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
+      // sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.tgz* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
       archive includes:"**.vsix*,**.tgz*"
     }
   }
