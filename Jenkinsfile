@@ -42,7 +42,7 @@ node('rhel8'){
       wrap([$class: 'Xvnc']) {
         sh "npx extest get-vscode"
         sh "npx extest get-chromedriver"
-        sh "npx extest install-vsix openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix"
+        sh "npx extest install-vsix -f openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix"
         sh "npx extest run-tests out/test/ui/*.test.js"
       }
   }
