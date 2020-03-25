@@ -27,8 +27,9 @@ node('rhel8'){
     }
   }
 
+  def packageJson = readJSON file: 'package.json'
+
   stage('Package') {
-    def packageJson = readJSON file: 'package.json'
     packageJson.extensionDependencies = ["ms-kubernetes-tools.vscode-kubernetes-tools"]
     writeJSON file: 'package.json', json: packageJson, pretty: 4
     sh "vsce package -o openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix"
