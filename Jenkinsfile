@@ -27,13 +27,6 @@ node('rhel8'){
     }
   }
 
-  stage('UI smoke test') {
-      wrap([$class: 'Xvnc']) {
-        sh "npm run ui-test"
-        junit 'report.xml'
-      }
-  }
-
   stage('Package') {
     def packageJson = readJSON file: 'package.json'
     packageJson.extensionDependencies = ["ms-kubernetes-tools.vscode-kubernetes-tools"]
@@ -42,6 +35,15 @@ node('rhel8'){
     sh "sha256sum *.vsix > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix.sha256"
     sh "npm pack && mv vscode-openshift-connector-${packageJson.version}.tgz openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.tgz"
     sh "sha256sum *.tgz > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.tgz.sha256"
+  }
+
+  stage('UI smoke test') {
+      wrap([$class: 'Xvnc']) {
+        sh "npx extest get-vscode"
+        sh "npx extest get-chromedriver"
+        sh "npx extest install-vsix openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix"
+        sh "npx extest run-tests out/test/ui/*.test.js"
+      }
   }
 
   if(params.UPLOAD_LOCATION) {
