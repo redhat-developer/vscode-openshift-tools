@@ -122,6 +122,7 @@ export async function activate(extensionContext: vscode.ExtensionContext): Promi
     TokenStore.extensionContext = extensionContext;
     const disposable = [
         vscode.commands.registerCommand('openshift.about', (context) => execute(Cluster.about, context)),
+        vscode.commands.registerCommand('openshift.oc.about', (context) => execute(Cluster.ocAbout, context)),
         vscode.commands.registerCommand('openshift.create', (context) => execute(Oc.create, context)),
         vscode.commands.registerCommand('openshift.output', (context) => execute(Cluster.showOpenShiftOutput, context)),
         vscode.commands.registerCommand('openshift.openshiftConsole', (context) => execute(Cluster.openshiftConsole, context)),

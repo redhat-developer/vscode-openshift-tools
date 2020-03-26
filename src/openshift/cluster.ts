@@ -44,6 +44,10 @@ export class Cluster extends OpenShiftItem {
         await Cluster.odo.executeInTerminal(Command.printOdoVersion());
     }
 
+    static async ocAbout(): Promise<void> {
+        await Cluster.odo.executeInTerminal(Command.printOcVersion());
+    }
+
     static showOpenShiftOutput(): void {
         CliChannel.getInstance().showOutput();
     }
