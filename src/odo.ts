@@ -813,13 +813,13 @@ export class OdoImpl implements Odo {
     }
 
     public async getComponentTypes(): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
-        return this.loadItems(result).map((value) => value.metadata.name);
+        const items = await this.getComponentTypesJson();
+        return items.map((value) => value.metadata.name);
     }
 
     public async getComponentTypesJson(): Promise<any> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
-        return JSON.parse(result.stdout).items;
+        return this.loadItems(result);
     }
 
     public async getImageStreamRef(name: string, namespace: string): Promise<any> {
