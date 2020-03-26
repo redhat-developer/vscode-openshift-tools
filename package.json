@@ -135,6 +135,7 @@
     "onView:openshiftProjectExplorer",
     "onView:extension.vsKubernetesExplorer",
     "onCommand:openshift.about",
+    "onCommand:openshift.oc.about",
     "onCommand:openshift.output",
     "onCommand:openshift.create",
     "onCommand:openshift.openshiftConsole.palette",
@@ -214,6 +215,11 @@
       {
         "command": "openshift.about",
         "title": "About",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.oc.about",
+        "title": "Print OKD Client Tool Version",
         "category": "OpenShift"
       },
       {
