@@ -37,8 +37,12 @@ describe('OpenShift Connector Smoke Test', () => {
         const terminalView: TerminalView = await new BottomBarPanel().openTerminalView();
         wb.openCommandPrompt();
         wb.executeCommand('OpenShift: About');
-        await wait(20000);
-        const text = await terminalView.getText();
-        expect(text).contains('odo v1.1.1');
+        browser.driver.sleep(20000);
+        const odoVersion = await terminalView.getText();
+        expect(odoVersion).contains('odo v1.1.1');
+        wb.executeCommand('OpenShift: Print OKD Client Tool Version');
+        browser.driver.sleep(20000);
+        const ocVersion = await terminalView.getText();
+        expect(ocVersion).contains('Client Version: 4.3.3');
     });
 });
