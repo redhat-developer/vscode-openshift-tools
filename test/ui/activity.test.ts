@@ -29,7 +29,7 @@ describe('OpenShift Connector Smoke Test', () => {
     });
 
     // test whatever we want using webdriver, here we are just checking the page title
-    it('OpenShift Connector installed and activated', async () => {
+    it('OpenShift Connector installed and activated', ()=> {
         const control = new ActivityBar().getViewControl('OpenShift');
         // eslint-disable-next-line no-console
         expect(control.getTitle()).equals('OpenShift');
