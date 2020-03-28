@@ -16,11 +16,12 @@ import { Refs, Ref, Type } from '../util/refs';
 import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import { selectWorkspaceFolder } from '../util/workspace';
-
 import { ToolsConfig } from '../tools';
+import { Catalog } from './catalog';
 
 import path = require('path');
 import globby = require('globby');
+
 const waitPort = require('wait-port');
 const getPort = require('get-port');
 
@@ -427,12 +428,12 @@ export class Component extends OpenShiftItem {
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
-
-        const componentTypeName = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type", ignoreFocusOut: true});
+        const catalog = new Catalog();
+        const componentTypeName = await window.showQuickPick(catalog.getComponentNames(), {placeHolder: "Component type", ignoreFocusOut: true});
 
         if (!componentTypeName) return null;
 
-        const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version", ignoreFocusOut: true});
+        const componentTypeVersion = await window.showQuickPick(catalog.getComponentVersions(componentTypeName), {placeHolder: "Component type version", ignoreFocusOut: true});
 
         if (!componentTypeVersion) return null;
         await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, workspacePath));
@@ -449,12 +450,12 @@ export class Component extends OpenShiftItem {
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
-
-        const componentTypeName = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type", ignoreFocusOut: true});
+        const catalog = new Catalog();
+        const componentTypeName = await window.showQuickPick(catalog.getComponentNames(), {placeHolder: "Component type", ignoreFocusOut: true});
 
         if (!componentTypeName) return null;
 
-        const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version", ignoreFocusOut: true});
+        const componentTypeVersion = await window.showQuickPick(catalog.getComponentVersions(componentTypeName), {placeHolder: "Component type version", ignoreFocusOut: true});
 
         if (!componentTypeVersion) return null;
 
@@ -494,12 +495,12 @@ export class Component extends OpenShiftItem {
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
-
-        const componentTypeName = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type", ignoreFocusOut: true});
+        const catalog = new Catalog();
+        const componentTypeName = await window.showQuickPick(catalog.getComponentNames(), {placeHolder: "Component type", ignoreFocusOut: true});
 
         if (!componentTypeName) return null;
 
-        const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version", ignoreFocusOut: true});
+        const componentTypeVersion = await window.showQuickPick(catalog.getComponentVersions(componentTypeName), {placeHolder: "Component type version", ignoreFocusOut: true});
 
         if (!componentTypeVersion) return null;
 
@@ -534,12 +535,12 @@ export class Component extends OpenShiftItem {
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
-
-        const componentTypeName = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type", ignoreFocusOut: true});
+        const catalog = new Catalog();
+        const componentTypeName = await window.showQuickPick(catalog.getComponentNames(), {placeHolder: "Component type", ignoreFocusOut: true});
 
         if (!componentTypeName) return null;
 
-        const componentTypeVersion = await window.showQuickPick(Component.odo.getComponentTypeVersions(componentTypeName), {placeHolder: "Component type version", ignoreFocusOut: true});
+        const componentTypeVersion = await window.showQuickPick(catalog.getComponentVersions(componentTypeName), {placeHolder: "Component type version", ignoreFocusOut: true});
 
         if (!componentTypeVersion) return null;
 
