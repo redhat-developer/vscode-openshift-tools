@@ -49,7 +49,7 @@ export class Storage extends OpenShiftItem {
         if (storage) {
             const value = await window.showWarningMessage(`Do you want to delete Storage '${storage.getName()}' from Component '${storage.getParent().getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
-                return Progress.execFunctionWithProgress(`Deleting Storage ${storage.getName()} from Component ${component.getName()}`, () => Storage.odo.deleteStorage(storage))
+                return Progress.execFunctionWithProgress(`Deleting Storage ${storage.getName()} from Component ${storage.getParent().getName()}`, () => Storage.odo.deleteStorage(storage))
                     .then(() => `Storage '${storage.getName()}' from Component '${storage.getParent().getName()}' successfully deleted`)
                     .catch((err) => Promise.reject(Error(`Failed to delete Storage with error '${err}'`)));
             }
