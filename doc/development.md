@@ -46,3 +46,15 @@ where `username` and `password` are your credentials to access registry.redhat.i
 Then apply `xpaas` with the command below
 
 `minishift addon apply xpaas`
+
+# Running local OpenShift Cluster
+
+## Code Ready Containers
+
+TBD
+
+## minishift
+
+TBD
+
+
