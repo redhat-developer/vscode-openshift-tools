@@ -9,5 +9,6 @@ export enum GlyphChars {
     Space = '\u00a0',
     Push = '\u25C9',
     NotPushed = '\u25CE',
-    NoContext = '\u2718',
+    NoContext = '\u25CB',
+    LocallyDeleted = '\u2297',
 }
