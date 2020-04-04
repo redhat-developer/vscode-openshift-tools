@@ -232,8 +232,8 @@ export class Command {
     }
 
     @verbose
-    static pushComponent(): string {
-        return `odo push`;
+    static pushComponent(configOnly = false): string {
+        return `odo push${configOnly ? '--config' : ''} `;
     }
 
     @verbose
