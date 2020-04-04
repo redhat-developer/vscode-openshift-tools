@@ -311,7 +311,7 @@ export class Component extends OpenShiftItem {
         contextPath: fsPath});
     }
 
-    static async push(context: OpenShiftObject): Promise<string | null> {
+    static async push(context: OpenShiftObject, configOnly = false): Promise<string | null> {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to push the changes",
             "In which Application you want to push the changes",
@@ -321,7 +321,7 @@ export class Component extends OpenShiftItem {
         const choice = await Component.handleMigratedComponent(component);
         if (!choice) return null;
         Component.setPushCmd(component.contextPath.fsPath);
-        await Component.odo.executeInTerminal(Command.pushComponent(), component.contextPath.fsPath);
+        await Component.odo.executeInTerminal(Command.pushComponent(configOnly), component.contextPath.fsPath);
         component.contextValue = ContextType.COMPONENT_PUSHED;
         Component.explorer.refresh(component);
     }
