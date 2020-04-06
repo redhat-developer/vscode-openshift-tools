@@ -18,6 +18,7 @@ import { Platform } from '../util/platform';
 import { selectWorkspaceFolder } from '../util/workspace';
 import { ToolsConfig } from '../tools';
 import { Catalog } from './catalog';
+import { LogsPanel } from './logsWebview';
 
 import path = require('path');
 import globby = require('globby');
@@ -157,7 +158,12 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+        const project = component.getParent().getParent().getName();
+        const app = component.getParent().getName();
+        const resource = `${project}/${app}`;
+        const panel = LogsPanel.createOrShow('Loading...', resource);
+        const showLogCmd = await Component.odo.execute(Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+        panel.addContent(showLogCmd.stdout);
     }
 
     static async followLog(context: OpenShiftObject): Promise<string> {
@@ -168,7 +174,12 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+        const project = component.getParent().getParent().getName();
+        const app = component.getParent().getName();
+        const resource = `${project}/${app}`;
+        const panel = LogsPanel.createOrShow('Loading...', resource);
+        const showLogCmd = await Component.odo.execute(Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+        panel.addContent(showLogCmd.stdout);
     }
 
     private static async getLinkData(component: OpenShiftObject): Promise<any> {
