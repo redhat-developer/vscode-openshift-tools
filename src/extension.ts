@@ -18,7 +18,7 @@ import { Platform } from './util/platform';
 import { Build } from './k8s/build';
 import { DeploymentConfig } from './k8s/deployment';
 import { Console } from './k8s/console';
-import { OdoImpl } from './odo';
+import { OdoImpl, ComponentType, ContextType } from './odo';
 import { TokenStore } from './util/credentialManager';
 import { Oc } from './oc';
 import { Route } from './k8s/route';
@@ -170,7 +170,7 @@ export async function activate(extensionContext: vscode.ExtensionContext): Promi
         vscode.commands.registerCommand('openshift.component.createFromGit', (context) => execute(Component.createFromGit, context)),
         vscode.commands.registerCommand('openshift.component.createFromBinary', (context) => execute(Component.createFromBinary, context)),
         vscode.commands.registerCommand('openshift.component.delete.palette', (context) => execute(Component.del, context)),
-        vscode.commands.registerCommand('openshift.component.push', (context) => execute(Component.push, context)),
+        vscode.commands.registerCommand('openshift.component.push', (...params) => execute(Component.push, ...params)),
         vscode.commands.registerCommand('openshift.component.lastPush', (context) => execute(Component.lastPush, context)),
         vscode.commands.registerCommand('openshift.component.push.palette', (context) => execute(Component.push, context)),
         vscode.commands.registerCommand('openshift.component.watch', (context) => execute(Component.watch, context)),
@@ -207,6 +207,24 @@ export async function activate(extensionContext: vscode.ExtensionContext): Promi
         OpenShiftExplorer.getInstance()
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
+
+    // TODO: Implement the case when 'odo watch' is running for component and push would be done automatically
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    OdoImpl.Instance.subject.subscribe(async (event) => {
+        if (event.type === 'inserted' && event.data.contextValue === ContextType.COMPONENT) {
+            const choice = await vscode.window.showInformationMessage(`Do you want to push new '${event.data.getName()}' Component?`, 'Push');
+            if (choice === 'Push') {
+                await vscode.commands.executeCommand('openshift.component.push', event.data);
+                OpenShiftExplorer.getInstance().refresh(event.data);
+            }
+        } else if (event.type === 'inserted' && (event.data.contextValue === ContextType.COMPONENT_ROUTE || event.data.contextValue === ContextType.STORAGE)) {
+            const choice = await vscode.window.showInformationMessage(`Do you want to push changes for '${event.data.getParent().getName()}' Component?`, 'Push');
+            if (choice === 'Push') {
+                await vscode.commands.executeCommand('openshift.component.push', event.data.getParent(), true);
+                OpenShiftExplorer.getInstance().refresh(event.data.getParent());
+            }
+        }
+    });
 
     const clusterExplorerAPI = await k8s.extension.clusterExplorer.v1;
 
