@@ -283,7 +283,7 @@ export class Command {
     }
 
     static deleteComponentUrl(name: string): string {
-        return `odo url delete -f ${name}`;
+        return `odo url delete -f ${name} --now`;
     }
 
     static getComponentJson(): string {
