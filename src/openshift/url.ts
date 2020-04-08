@@ -88,4 +88,16 @@ export class Url extends OpenShiftItem{
             return 'Selected URL is not created in cluster. Use \'Push\' command before opening URL in browser.';
         }
     }
+
+    static async describe(treeItem: OpenShiftObject): Promise<void> {
+        let url = treeItem;
+        const component = await Url.getOpenShiftCmdData(url,
+            "From which Project you want to describe URL",
+            "From which Application you want to describe URL",
+            "From which Component you want to describe URL");
+        if (!url && component) {
+            url = await window.showQuickPick(Url.odo.getRoutes(component), {placeHolder: `Select the URL to describe from the component ${component.getName()}`, ignoreFocusOut: true});
+        }
+        if (url) Url.odo.executeInTerminal(Command.describeUrl(url.getName()));
+    }
 }

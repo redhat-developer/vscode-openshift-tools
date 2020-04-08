@@ -211,6 +211,14 @@ export class Command {
         return `odo catalog describe service ${service}`;
     }
 
+    static describeUrl(url: string): string {
+        return `odo url describe ${url}`;
+    }
+
+    static describeStorage(storage: string): string {
+        return `odo storage describe ${storage}`;
+    }
+
     static showLog(project: string, app: string, component: string): string {
         return `odo log ${component} --app ${app} --project ${project}`;
     }
