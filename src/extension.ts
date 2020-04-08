@@ -22,6 +22,7 @@ import { OdoImpl } from './odo';
 import { TokenStore } from './util/credentialManager';
 import { Oc } from './oc';
 import { Route } from './k8s/route';
+import LogViewLoader from './view/log/LogViewLoader';
 
 import path = require('path');
 import fsx = require('fs-extra');
@@ -116,6 +117,7 @@ function migrateFromOdo018(): void {
 }
 
 export async function activate(extensionContext: vscode.ExtensionContext): Promise<void> {
+    let logViewLoader: LogViewLoader;
     migrateFromOdo018();
     Cluster.extensionContext = extensionContext;
     Component.extensionContext = extensionContext;
@@ -176,7 +178,13 @@ export async function activate(extensionContext: vscode.ExtensionContext): Promi
         vscode.commands.registerCommand('openshift.component.watch', (context) => execute(Component.watch, context)),
         vscode.commands.registerCommand('openshift.component.watch.palette', (context) => execute(Component.watch, context)),
         vscode.commands.registerCommand('openshift.component.log', (context) => execute(Component.log, context)),
-        vscode.commands.registerCommand('openshift.component.log.palette', (context) => execute(Component.log, context)),
+        vscode.commands.registerCommand('openshift.component.log.palette', () => {
+            if(logViewLoader) {
+                logViewLoader.postMessage({action: 'info', message: 'Hello from VSCode!'});
+            } else {
+                logViewLoader = new LogViewLoader(extensionContext.extensionPath);
+            }
+        }),
         vscode.commands.registerCommand('openshift.component.followLog', (context) => execute(Component.followLog, context)),
         vscode.commands.registerCommand('openshift.component.followLog.palette', (context) => execute(Component.followLog, context)),
         vscode.commands.registerCommand('openshift.component.openUrl', (context) => execute(Component.openUrl, context)),
