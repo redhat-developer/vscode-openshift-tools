@@ -6,7 +6,7 @@
 import { window } from 'vscode';
 import { isEmpty } from "validator";
 import { OpenShiftItem } from "./openshiftItem";
-import { OpenShiftObject, ContextType } from "../odo";
+import { OpenShiftObject, ContextType, Command } from "../odo";
 import { Progress } from "../util/progress";
 
 export class Storage extends OpenShiftItem {
@@ -55,5 +55,15 @@ export class Storage extends OpenShiftItem {
             }
         }
         return null;
+    }
+
+    static async describe(treeItem: OpenShiftObject): Promise<void> {
+        let storage = treeItem;
+        const component = await Storage.getOpenShiftCmdData(storage,
+            "From which Project you want to describe Storage",
+            "From which Application you want to describe Storage",
+            "From which Component you want to describe Storage");
+        if (!storage && component) storage = await window.showQuickPick(Storage.getStorageNames(component), {placeHolder: "Select Storage to describe", ignoreFocusOut: true});
+        if (storage) Storage.odo.executeInTerminal(Command.describeStorage(storage.getName()));
     }
 }

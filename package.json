@@ -175,6 +175,8 @@
     "onCommand:openshift.catalog.listComponents",
     "onCommand:openshift.catalog.listServices",
     "onCommand:openshift.url.create",
+    "onCommand:openshift.url.describe",
+    "onCommand:openshift.url.describe.palette",
     "onCommand:openshift.url.delete",
     "onCommand:openshift.url.delete.palette",
     "onCommand:openshift.component.openUrl",
@@ -182,6 +184,8 @@
     "onCommand:openshift.component.debug",
     "onCommand:openshift.component.debug.palette",
     "onCommand:openshift.storage.create",
+    "onCommand:openshift.storage.describe",
+    "onCommand:openshift.storage.describe.palette",
     "onCommand:openshift.storage.delete",
     "onCommand:openshift.service.create",
     "onCommand:openshift.service.delete",
@@ -489,6 +493,16 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.url.describe",
+        "title": "Describe",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.url.describe.palette",
+        "title": "Describe URL",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.url.open",
         "title": "Open URL",
         "category": "OpenShift",
@@ -527,6 +541,16 @@
       {
         "command": "openshift.storage.delete",
         "title": "Delete",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.storage.describe",
+        "title": "Describe",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.storage.describe.palette",
+        "title": "Describe Storage",
         "category": "OpenShift"
       },
       {
@@ -766,7 +790,15 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
+          "command": "openshift.storage.describe",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
           "command": "openshift.storage.delete",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.url.describe",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -1064,10 +1096,20 @@
           "group": "s2"
         },
         {
+          "command": "openshift.storage.describe",
+          "when": "view == openshiftProjectExplorer && viewItem == storage",
+          "group": "s3"
+        },
+        {
           "command": "openshift.storage.delete",
           "when": "view == openshiftProjectExplorer && viewItem == storage",
           "group": "s3"
         },
+        {
+          "command": "openshift.url.describe",
+          "when": "view == openshiftProjectExplorer && viewItem == componentRoute",
+          "group": "s3"
+        },        
         {
           "command": "openshift.url.delete",
           "when": "view == openshiftProjectExplorer && viewItem == componentRoute",
