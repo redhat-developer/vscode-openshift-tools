@@ -16,6 +16,7 @@ import { Refs, Ref, Type } from '../util/refs';
 import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import { selectWorkspaceFolder } from '../util/workspace';
+import * as consts from '../util/constants';
 import { ToolsConfig } from '../tools';
 import { Catalog } from './catalog';
 
@@ -157,6 +158,7 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
+        extensions.getExtension(consts.ExtenisonID).extensionPath
         Component.odo.executeInTerminal(Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
 

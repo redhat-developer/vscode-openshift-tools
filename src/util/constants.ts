@@ -12,3 +12,5 @@ export enum GlyphChars {
     NoContext = '\u25CB',
     LocallyDeleted = '\u2297',
 }
+
+export const ExtenisonID = 'redhat.vscode-openshift-connector';

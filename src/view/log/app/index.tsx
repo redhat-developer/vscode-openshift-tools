@@ -5,18 +5,11 @@
 
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import Log from './log';
 
-import Log from "./log";
-
-declare global {
-  interface Window {
-    acquireVsCodeApi(): any;
-  }
-}
-
-const vscode = window.acquireVsCodeApi();
+const ll = React.createElement(Log, {url: window.logPath});
 
 ReactDOM.render(
-  <Log vscode={vscode} window={window}/>,
+  ll,
   document.getElementById("root"),
 );

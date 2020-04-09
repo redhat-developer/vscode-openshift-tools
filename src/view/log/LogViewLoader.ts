@@ -5,74 +5,79 @@
 import * as vscode from "vscode";
 import * as path from "path";
 
-export default class ViewLoader {
-  private readonly _panel: vscode.WebviewPanel | undefined;
-  private readonly _extensionPath: string;
-  private _disposables: vscode.Disposable[] = [];
+export default class LogViewLoader {
+    private readonly _panel: vscode.WebviewPanel | undefined;
 
-  constructor(extensionPath: string) {
-    this._extensionPath = extensionPath;
+    static loadView(extensionPath: string, title: string): vscode.Webview {
+        const localResourceRoot = vscode.Uri.file(path.join(extensionPath, 'out', "logViewer"));
 
-    this._panel = vscode.window.createWebviewPanel(
-        "configView",
-        "Config View",
-        vscode.ViewColumn.One,
-        {
-          enableScripts: true,
+        const panel = vscode.window.createWebviewPanel(
+            "logView",
+            title,
+            vscode.ViewColumn.One,
+            {
+              enableScripts: true,
 
-          localResourceRoots: [
-            vscode.Uri.file(path.join(extensionPath, 'out', "logViewer"))
-          ]
-        }
-      );
+              localResourceRoots: [
+                localResourceRoot
+              ]
+            }
+        );
 
-      this._panel.webview.html = this.getWebviewContent();
-
-      this._panel.webview.onDidReceiveMessage(
-        (command: {action: string, message: string}) => {
-          switch (command.action) {
-            case 'info':
-              vscode.window.showInformationMessage(command.message);
-              return;
-            default:
-                return;
-          }
-        },
-        undefined,
-        this._disposables
-      );
+        panel.webview.html = LogViewLoader.getWebviewContent(extensionPath);
+        return panel.webview;
     }
 
-    postMessage(arg0: { action: string; message: string; }) {
-        this._panel.webview.postMessage(arg0);
+    // postMessage(webWiewarg0: { action: string; message: string; }): void {
+    //     this._panel.webview.postMessage(arg0);
+    // }
+
+    private static getWebviewContent(extensionPath: string): string {
+        // Local path to main script run in the webview
+        const reactAppPathOnDisk = vscode.Uri.file(
+        path.join(extensionPath, 'out', 'logViewer', 'logViewer.js')
+        );
+        const reactAppUri = reactAppPathOnDisk.with({ scheme: "vscode-resource" });
+
+        return `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Config View</title>
+            <meta http-equiv="Content-Security-Policy"
+                        content="connect-src *;
+                                default-src 'none';
+                                img-src https:;
+                                script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;
+                                style-src vscode-resource: 'unsafe-inline';">
+            <script>
+            window.acquireVsCodeApi = acquireVsCodeApi;
+            window.logPath = "https://gist.githubusercontent.com/helfi92/96d4444aa0ed46c5f9060a789d316100/raw/ba0d30a9877ea5cc23c7afcd44505dbc2bab1538/typical-live_backing.log";
+            </script>
+            <style>
+                #root {
+                    height: 100%;
+                    width: 100%;
+                    position: absolute;
+                    top:0;
+                    left:0;
+                    right:0;
+                    bottom:0;
+                }
+                #container {
+                    width: 100%;
+                    height: 100vh;
+                    display: flex;
+                    padding: 0;
+                    overflow: auto;
+                }
+            </style>
+        </head>
+        <body>
+            <div id="container"><div id="root"></div></div>
+            <script src="${reactAppUri}"></script>
+        </body>
+        </html>`;
     }
-
-  private getWebviewContent(): string {
-    // Local path to main script run in the webview
-    const reactAppPathOnDisk = vscode.Uri.file(
-      path.join(this._extensionPath, 'out', 'logViewer', 'logViewer.js')
-    );
-    const reactAppUri = reactAppPathOnDisk.with({ scheme: "vscode-resource" });
-
-    return `<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Config View</title>
-        <meta http-equiv="Content-Security-Policy"
-                    content="default-src 'none';
-                             img-src https:;
-                             script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;
-                             style-src vscode-resource: 'unsafe-inline';">
-        <script>
-          window.acquireVsCodeApi = acquireVsCodeApi;
-        </script>
-    </head>
-    <body>
-        <div id="root"></div>
-        <script src="${reactAppUri}"></script>
-    </body>
-    </html>`;
-  }
 }
