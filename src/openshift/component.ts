@@ -16,8 +16,10 @@ import { Refs, Ref, Type } from '../util/refs';
 import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import { selectWorkspaceFolder } from '../util/workspace';
+import * as consts from '../util/constants';
 import { ToolsConfig } from '../tools';
 import { Catalog } from './catalog';
+import LogViewLoader from "../webview/log/viewLoader"
 
 import path = require('path');
 import globby = require('globby');
@@ -150,6 +152,8 @@ export class Component extends OpenShiftItem {
     }
 
     static async log(context: OpenShiftObject): Promise<string> {
+        let logViewLoader: LogViewLoader;
+
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to see Log",
             "In which Application you want to see Log",
@@ -157,7 +161,21 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+        extensions.getExtension(consts.ExtensionID).extensionPath;
+        // eslint-disable-next-line prefer-const
+        logViewLoader = new LogViewLoader(extensions.getExtension(consts.ExtensionID).extensionPath, `Logs/${component.getName()}`);
+        const showLogCmd = await Component.odo.execute(
+            Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()),
+            component.contextPath.fsPath);
+
+        logViewLoader.postMessage({action: 'info', message: showLogCmd.stdout})
+
+        // const logProcess = await Component.odo.spawn('odo', ['log', component.getName(), '--app', component.getParent().getName(), '--project', component.getParent().getParent().getName()] ,component.contextPath.fsPath);
+        //     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        //     logProcess.stdout.on('data', (data) => {
+        //         logViewLoader.postMessage({action: 'info', message: data})
+        //     })
+        // Component.odo.executeInTerminal(Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
 
     static async followLog(context: OpenShiftObject): Promise<string> {

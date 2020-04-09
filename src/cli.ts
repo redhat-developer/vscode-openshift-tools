@@ -15,6 +15,7 @@ export interface CliExitData {
 
 export interface Cli {
     execute(cmd: string, opts?: cp.ExecOptions): Promise<CliExitData>;
+    spawn(cmd: string, params: string[], opts: cp.SpawnOptions): cp.ChildProcess;
 }
 
 export interface OdoChannel {
@@ -93,5 +94,9 @@ export class CliChannel implements Cli {
                 resolve({ error, stdout: stdoutFiltered, stderr });
             });
         });
+    }
+
+    spawn(cmd: string, params: string[], opts: cp.SpawnOptions = {cwd: undefined, env: process.env}): cp.ChildProcess {
+        return cp.spawn(cmd, params, opts);
     }
 }
