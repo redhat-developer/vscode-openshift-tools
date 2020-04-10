@@ -182,7 +182,7 @@ export class Component extends OpenShiftItem {
         const [tool, ...params] = cmd.split(' ');
         const process = await Component.odo.spawn(tool, params, component.contextPath.fsPath);
         process.stdout.on('data', (data) => {
-            view.postMessage({action: 'add', data: `${data}`.split('\n')});
+            view.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
         });
 
     }
