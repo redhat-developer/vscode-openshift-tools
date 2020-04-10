@@ -19,9 +19,11 @@ import { selectWorkspaceFolder } from '../util/workspace';
 import * as consts from '../util/constants';
 import { ToolsConfig } from '../tools';
 import { Catalog } from './catalog';
+import LogViewLoader from '../view/log/LogViewLoader';
 
 import path = require('path');
 import globby = require('globby');
+
 
 const waitPort = require('wait-port');
 const getPort = require('get-port');
@@ -158,8 +160,13 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
-        extensions.getExtension(consts.ExtenisonID).extensionPath
-        Component.odo.executeInTerminal(Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+        const view = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.getName()} Log`);
+        const cmd = Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
+        const [tool, ...params] = cmd.split(' ');
+        const process = await Component.odo.spawn(tool, params, component.contextPath.fsPath);
+        process.stdout.on('data', (data) => {
+            view.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
+        });
     }
 
     static async followLog(context: OpenShiftObject): Promise<string> {
@@ -170,7 +177,14 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+        const view = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.getName()} Log`);
+        const cmd = Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
+        const [tool, ...params] = cmd.split(' ');
+        const process = await Component.odo.spawn(tool, params, component.contextPath.fsPath);
+        process.stdout.on('data', (data) => {
+            view.postMessage({action: 'add', data: `${data}`.split('\n')});
+        });
+
     }
 
     private static async getLinkData(component: OpenShiftObject): Promise<any> {

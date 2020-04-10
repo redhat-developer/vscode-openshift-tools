@@ -7,9 +7,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import Log from './log';
 
-const ll = React.createElement(Log, {url: window.logPath});
-
 ReactDOM.render(
-  ll,
-  document.getElementById("root"),
+    <Log text={'odo log'} />,
+    document.getElementById("root"),
 );

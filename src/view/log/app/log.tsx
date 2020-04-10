@@ -8,28 +8,24 @@ import { List } from 'immutable'
 declare global {
     interface Window {
       acquireVsCodeApi(): any;
-      logPath: string;
     }
   }
 
 export default class Log extends LazyLog {
     constructor(props: LazyLogProps) {
         super(props);
+        const enc = new TextEncoder();
         window.addEventListener('message', event => {
             const message = event.data; // The JSON data our extension sent
             switch (message.action) {
-                case 'info': {
+                case 'add': {
+                    const encodedLines = message.data.map((line) => enc.encode(line));
+                    (this as any).handleUpdate({lines: List(encodedLines)});
                     break;
                 }
                 default:
                     break;
             }
         });
-        const that = this as any;
-        setTimeout(() => {
-            console.log('timer kicks back');
-            const enc = new TextEncoder();
-            that.handleUpdate({lines: List([enc.encode('line1'), enc.encode('line2')])});
-        }, 1000);
     }
 }

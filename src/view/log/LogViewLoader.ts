@@ -2,42 +2,30 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as vscode from "vscode";
-import * as path from "path";
+import * as vscode from 'vscode';
+import * as path from 'path';
 
 export default class LogViewLoader {
-    private readonly _panel: vscode.WebviewPanel | undefined;
-
     static loadView(extensionPath: string, title: string): vscode.Webview {
-        const localResourceRoot = vscode.Uri.file(path.join(extensionPath, 'out', "logViewer"));
+        const localResourceRoot = vscode.Uri.file(path.join(extensionPath, 'out', 'logViewer'));
 
-        const panel = vscode.window.createWebviewPanel(
-            "logView",
-            title,
-            vscode.ViewColumn.One,
-            {
-              enableScripts: true,
+        const panel = vscode.window.createWebviewPanel('logView', title, vscode.ViewColumn.One, {
+            enableScripts: true,
+            localResourceRoots: [localResourceRoot],
+            retainContextWhenHidden: true
+        });
 
-              localResourceRoots: [
-                localResourceRoot
-              ]
-            }
-        );
-
+        // TODO: When webview is going to be ready?
         panel.webview.html = LogViewLoader.getWebviewContent(extensionPath);
         return panel.webview;
     }
 
-    // postMessage(webWiewarg0: { action: string; message: string; }): void {
-    //     this._panel.webview.postMessage(arg0);
-    // }
-
     private static getWebviewContent(extensionPath: string): string {
         // Local path to main script run in the webview
         const reactAppPathOnDisk = vscode.Uri.file(
-        path.join(extensionPath, 'out', 'logViewer', 'logViewer.js')
+            path.join(extensionPath, 'out', 'logViewer', 'logViewer.js'),
         );
-        const reactAppUri = reactAppPathOnDisk.with({ scheme: "vscode-resource" });
+        const reactAppUri = reactAppPathOnDisk.with({ scheme: 'vscode-resource' });
 
         return `<!DOCTYPE html>
         <html lang="en">
@@ -53,7 +41,6 @@ export default class LogViewLoader {
                                 style-src vscode-resource: 'unsafe-inline';">
             <script>
             window.acquireVsCodeApi = acquireVsCodeApi;
-            window.logPath = "https://gist.githubusercontent.com/helfi92/96d4444aa0ed46c5f9060a789d316100/raw/ba0d30a9877ea5cc23c7afcd44505dbc2bab1538/typical-live_backing.log";
             </script>
             <style>
                 #root {
