@@ -24,7 +24,6 @@ import LogViewLoader from '../view/log/LogViewLoader';
 import path = require('path');
 import globby = require('globby');
 
-
 const waitPort = require('wait-port');
 const getPort = require('get-port');
 

@@ -22,7 +22,6 @@ import { OdoImpl } from './odo';
 import { TokenStore } from './util/credentialManager';
 import { Oc } from './oc';
 import { Route } from './k8s/route';
-import LogViewLoader from './view/log/LogViewLoader';
 
 import path = require('path');
 import fsx = require('fs-extra');
