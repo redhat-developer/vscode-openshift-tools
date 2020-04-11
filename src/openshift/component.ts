@@ -161,6 +161,7 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
+        // TODO: should change return to panel to allow listening onDidDispose event and kill odo process in this case
         const view = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.getName()} Log`);
         const cmd = Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
         const [tool, ...params] = cmd.split(' ');
@@ -171,7 +172,7 @@ export class Component extends OpenShiftItem {
             view.postMessage({action: 'finished'});
         });
         view.onDidReceiveMessage((event) => {
-            if (event.data.message === 'stop') {
+            if (event.action === 'stop') {
                 treeKill(process.pid);
             }
         })
