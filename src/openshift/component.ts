@@ -23,6 +23,7 @@ import LogViewLoader from '../view/log/LogViewLoader';
 
 import path = require('path');
 import globby = require('globby');
+import treeKill = require('tree-kill');
 
 
 const waitPort = require('wait-port');
@@ -166,7 +167,14 @@ export class Component extends OpenShiftItem {
         const process = await Component.odo.spawn(tool, params, component.contextPath.fsPath);
         process.stdout.on('data', (data) => {
             view.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
+        }).on('end', (data) => {
+            view.postMessage({action: 'finished'});
         });
+        view.onDidReceiveMessage((event) => {
+            if (event.data.message === 'stop') {
+                treeKill(process.pid);
+            }
+        })
     }
 
     static async followLog(context: OpenShiftObject): Promise<string> {
@@ -183,8 +191,14 @@ export class Component extends OpenShiftItem {
         const process = await Component.odo.spawn(tool, params, component.contextPath.fsPath);
         process.stdout.on('data', (data) => {
             view.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
+        }).on('close', ()=>{
+            view.postMessage({action: 'finished'});
         });
-
+        view.onDidReceiveMessage((event) => {
+            if (event.action === 'stop') {
+                treeKill(process.pid);
+            }
+        })
     }
 
     private static async getLinkData(component: OpenShiftObject): Promise<any> {

@@ -5,9 +5,15 @@
 
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import Spinner from './spinner'
 import Log from './log';
 
 ReactDOM.render(
-    <Log text={'odo log'} />,
+    <Spinner/>,
+    document.getElementById("spinner")
+)
+
+ReactDOM.render(
+    React.createElement(Log, {text: 'odo log', enableSearch: true}),
     document.getElementById("root"),
 );

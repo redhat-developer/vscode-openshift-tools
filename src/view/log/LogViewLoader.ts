@@ -43,28 +43,44 @@ export default class LogViewLoader {
             window.acquireVsCodeApi = acquireVsCodeApi;
             </script>
             <style>
-                #root {
-                    height: 100%;
-                    width: 100%;
-                    position: absolute;
-                    top:0;
-                    left:0;
-                    right:0;
-                    bottom:0;
+                html,
+                body {
+                padding: 0;
+                overflow: hidden;
                 }
-                #container {
-                    width: 100%;
-                    height: 100vh;
+
+                .box {
                     display: flex;
-                    padding: 0;
-                    overflow: auto;
+                    flex-flow: column;
+                    position: absolute;
+                    top: 0px;
+                    bottom: 1px;
+                    left: 0px;
+                    right: 0px;
+                }
+
+                .box .row.header {
+                    flex: 0 1 auto;
+                    /* The above is shorthand for:
+                    flex-grow: 0,
+                    flex-shrink: 1,
+                    flex-basis: auto
+                    */
+                }
+
+                .box .row.content {
+                    flex: 1 1 auto;
                 }
             </style>
         </head>
-        <body>
-            <div id="container"><div id="root"></div></div>
-            <script src="${reactAppUri}"></script>
-        </body>
-        </html>`;
+        <div class="box">
+            <div class="row header" id="spinner">
+            </div>
+            <div class="row content" id="root">
+            </div>
+        </div>
+        <script src="${reactAppUri}"></script>
+      </body>
+    </html>`;
     }
 }
