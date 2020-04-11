@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 
 export default class LogViewLoader {
-    static loadView(extensionPath: string, title: string): vscode.Webview {
+    static loadView(extensionPath: string, title: string): vscode.WebviewPanel {
         const localResourceRoot = vscode.Uri.file(path.join(extensionPath, 'out', 'logViewer'));
 
         const panel = vscode.window.createWebviewPanel('logView', title, vscode.ViewColumn.One, {
@@ -17,7 +17,7 @@ export default class LogViewLoader {
 
         // TODO: When webview is going to be ready?
         panel.webview.html = LogViewLoader.getWebviewContent(extensionPath);
-        return panel.webview;
+        return panel;
     }
 
     private static getWebviewContent(extensionPath: string): string {

@@ -162,20 +162,24 @@ export class Component extends OpenShiftItem {
         );
         if (!component) return null;
         // TODO: should change return to panel to allow listening onDidDispose event and kill odo process in this case
-        const view = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.getName()} Log`);
+        const panel = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.getName()} Log`);
         const cmd = Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
         const [tool, ...params] = cmd.split(' ');
         const process = await Component.odo.spawn(tool, params, component.contextPath.fsPath);
         process.stdout.on('data', (data) => {
-            view.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
+            panel.webview.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
         }).on('end', (data) => {
-            view.postMessage({action: 'finished'});
+            panel.webview.postMessage({action: 'finished'});
         });
-        view.onDidReceiveMessage((event) => {
+        panel.webview.onDidReceiveMessage((event) => {
             if (event.action === 'stop') {
                 treeKill(process.pid);
             }
         })
+        const disposable = panel.onDidDispose(()=> {
+            treeKill(process.pid);
+            disposable.dispose();
+        });
     }
 
     static async followLog(context: OpenShiftObject): Promise<string> {
@@ -186,20 +190,25 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
-        const view = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.getName()} Log`);
+        const panel = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.getName()} Log`);
         const cmd = Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
         const [tool, ...params] = cmd.split(' ');
         const process = await Component.odo.spawn(tool, params, component.contextPath.fsPath);
         process.stdout.on('data', (data) => {
-            view.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
+            panel.webview.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
         }).on('close', ()=>{
-            view.postMessage({action: 'finished'});
+            panel.webview.postMessage({action: 'finished'});
         });
-        view.onDidReceiveMessage((event) => {
+        panel.webview.onDidReceiveMessage((event) => {
             if (event.action === 'stop') {
                 treeKill(process.pid);
             }
         })
+        const disposable = panel.onDidDispose(()=> {
+            treeKill(process.pid);
+            disposable.dispose();
+        });
+
     }
 
     private static async getLinkData(component: OpenShiftObject): Promise<any> {
