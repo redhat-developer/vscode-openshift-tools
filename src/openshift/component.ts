@@ -23,6 +23,7 @@ import LogViewLoader from '../view/log/LogViewLoader';
 
 import path = require('path');
 import globby = require('globby');
+import treeKill = require('tree-kill');
 
 
 const waitPort = require('wait-port');
@@ -160,12 +161,24 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
-        const view = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.getName()} Log`);
+        // TODO: should change return to panel to allow listening onDidDispose event and kill odo process in this case
+        const panel = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.getName()} Log`);
         const cmd = Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
         const [tool, ...params] = cmd.split(' ');
         const process = await Component.odo.spawn(tool, params, component.contextPath.fsPath);
         process.stdout.on('data', (data) => {
-            view.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
+            panel.webview.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
+        }).on('end', (data) => {
+            panel.webview.postMessage({action: 'finished'});
+        });
+        panel.webview.onDidReceiveMessage((event) => {
+            if (event.action === 'stop') {
+                treeKill(process.pid);
+            }
+        })
+        const disposable = panel.onDidDispose(()=> {
+            treeKill(process.pid);
+            disposable.dispose();
         });
     }
 
@@ -177,12 +190,23 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
-        const view = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.getName()} Log`);
+        const panel = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.getName()} Log`);
         const cmd = Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
         const [tool, ...params] = cmd.split(' ');
         const process = await Component.odo.spawn(tool, params, component.contextPath.fsPath);
         process.stdout.on('data', (data) => {
-            view.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
+            panel.webview.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
+        }).on('close', ()=>{
+            panel.webview.postMessage({action: 'finished'});
+        });
+        panel.webview.onDidReceiveMessage((event) => {
+            if (event.action === 'stop') {
+                treeKill(process.pid);
+            }
+        })
+        const disposable = panel.onDidDispose(()=> {
+            treeKill(process.pid);
+            disposable.dispose();
         });
 
     }
