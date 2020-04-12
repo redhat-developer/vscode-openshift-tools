@@ -14,6 +14,7 @@ export default class LogViewLoader {
             localResourceRoots: [localResourceRoot],
             retainContextWhenHidden: true
         });
+        panel.iconPath = vscode.Uri.file(path.join(extensionPath, "images/context/cluster-node.png"));
 
         // TODO: When webview is going to be ready?
         panel.webview.html = LogViewLoader.getWebviewContent(extensionPath);

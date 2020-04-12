@@ -25,7 +25,6 @@ import path = require('path');
 import globby = require('globby');
 import treeKill = require('tree-kill');
 
-
 const waitPort = require('wait-port');
 const getPort = require('get-port');
 
@@ -162,7 +161,7 @@ export class Component extends OpenShiftItem {
         );
         if (!component) return null;
         // TODO: should change return to panel to allow listening onDidDispose event and kill odo process in this case
-        const panel = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.getName()} Log`);
+        const panel = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.getName()}/Show Log`);
         const cmd = Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
         const [tool, ...params] = cmd.split(' ');
         const process = await Component.odo.spawn(tool, params, component.contextPath.fsPath);
@@ -190,7 +189,7 @@ export class Component extends OpenShiftItem {
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
         );
         if (!component) return null;
-        const panel = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.getName()} Log`);
+        const panel = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.getName()}/ Follow Log`);
         const cmd = Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
         const [tool, ...params] = cmd.split(' ');
         const process = await Component.odo.spawn(tool, params, component.contextPath.fsPath);
