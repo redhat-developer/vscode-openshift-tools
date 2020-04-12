@@ -82,9 +82,7 @@
     "unzip-stream": "^0.3.0",
     "validator": "^12.2.0",
     "vscode-kubernetes-tools-api": "1.0.0",
-    "wait-port": "^0.2.7",
-    "webpack": "^4.35.2",
-    "webpack-cli": "^3.3.5"
+    "wait-port": "^0.2.7"
   },
   "devDependencies": {
     "@types/byline": "^4.2.31",

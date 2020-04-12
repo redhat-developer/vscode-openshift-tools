@@ -4,10 +4,8 @@
         "target": "es6",
         "outDir": "out",
         "lib": [
-            "es6",
-            "dom"
+            "es6"
         ],
-        "jsx": "react",
         "sourceMap": true,
         "rootDir": ".",
         /* Strict Type-Checking Option */
