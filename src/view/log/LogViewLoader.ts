@@ -71,6 +71,7 @@ export default class LogViewLoader {
 
                 .box .row.content {
                     flex: 1 1 auto;
+                    margin: 30px;
                 }
             </style>
         </head>
