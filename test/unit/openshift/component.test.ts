@@ -250,6 +250,7 @@ suite('OpenShift/Component', () => {
 
             test('allows to continue with valid git repository url', async () => {
                 let result: string | Thenable<string>;
+                // eslint-disable-next-line max-nested-callbacks
                 inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
                     result = await options.validateInput('https://github.com/redhat-developer/vscode-openshift-tools');
                     return Promise.resolve('https://github.com/redhat-developer/vscode-openshift-tools');
@@ -262,6 +263,7 @@ suite('OpenShift/Component', () => {
             test('shows error message when repo does not exist', async () => {
                 fetchTag.resolves (new Map<string, string>());
                 let result: string | Thenable<string>;
+                // eslint-disable-next-line max-nested-callbacks
                 inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
                     result = await options.validateInput('https://github.com');
                     return Promise.resolve('https://github.com');
@@ -984,12 +986,12 @@ suite('OpenShift/Component', () => {
 
         test('describe calls the correct odo command in terminal', async () => {
             await Component.describe(componentItem);
-            expect(termStub).calledOnceWith(Command.describeComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.describeComponent());
         });
 
         test('works with no context', async () => {
             await Component.describe(null);
-            expect(termStub).calledOnceWith(Command.describeComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.describeComponent());
         });
     });
 

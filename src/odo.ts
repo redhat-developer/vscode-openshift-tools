@@ -199,12 +199,12 @@ export class Command {
         return `odo describe ${component} --app ${app} --project ${project}`;
     }
 
-    static describeComponent(project: string, app: string, component: string): string {
+    static describeComponent(): string {
         return `odo describe`;
     }
 
-    static describeComponentJson(project: string, app: string, component: string): string {
-        return `${Command.describeComponent(project, app, component)} -o json`;
+    static describeComponentJson(): string {
+        return `${Command.describeComponent()} -o json`;
     }
 
     static describeService(service: string): string {

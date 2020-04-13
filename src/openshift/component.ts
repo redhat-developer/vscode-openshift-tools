@@ -106,8 +106,8 @@ export class Component extends OpenShiftItem {
         }
     }
 
-    static async getLinkPort(component: OpenShiftObject, compName: string): Promise<any> {
-        const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), compName), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+    static async getLinkPort(component: OpenShiftObject): Promise<any> {
+        const compData = await Component.odo.execute(Command.describeComponentJson(), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         return JSON.parse(compData.stdout);
     }
 
@@ -118,7 +118,7 @@ export class Component extends OpenShiftItem {
             // eslint-disable-next-line no-restricted-syntax
             for (const key of Object.keys(getLinkComponent)) {
                 // eslint-disable-next-line no-await-in-loop
-                const getLinkPort = await Component.getLinkPort(component, key);
+                const getLinkPort = await Component.getLinkPort(component);
                 const ports = getLinkPort.status.linkedComponents[component.getName()];
                 if (getPort) {
                     // eslint-disable-next-line no-restricted-syntax
@@ -141,7 +141,7 @@ export class Component extends OpenShiftItem {
         if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
             command = Command.describeComponentNoContext(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
         } else {
-            command = Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
+            command = Command.describeComponent();
         }
         Component.odo.executeInTerminal(
             command,
@@ -172,7 +172,7 @@ export class Component extends OpenShiftItem {
     }
 
     private static async getLinkData(component: OpenShiftObject): Promise<any> {
-        const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+        const compData = await Component.odo.execute(Command.describeComponentJson(), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         return JSON.parse(compData.stdout);
     }
 
