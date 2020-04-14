@@ -16,11 +16,13 @@
         // "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
         // "noUnusedParameters": true,  /* Report errors on unused parameters. */
         "experimentalDecorators": true,
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
     },
     "exclude": [
         "node_modules",
         ".vscode-test",
         "test-resources",
+        "src/view/log/app",
     ]
 }
