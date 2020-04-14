@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 
 export default class LogViewLoader {
-    static loadView(extensionPath: string, title: string): vscode.WebviewPanel {
+    static loadView(extensionPath: string, title: string, cmdText: string): vscode.WebviewPanel {
         const localResourceRoot = vscode.Uri.file(path.join(extensionPath, 'out', 'logViewer'));
 
         const panel = vscode.window.createWebviewPanel('logView', title, vscode.ViewColumn.One, {
@@ -17,11 +17,11 @@ export default class LogViewLoader {
         panel.iconPath = vscode.Uri.file(path.join(extensionPath, "images/context/cluster-node.png"));
 
         // TODO: When webview is going to be ready?
-        panel.webview.html = LogViewLoader.getWebviewContent(extensionPath);
+        panel.webview.html = LogViewLoader.getWebviewContent(extensionPath, cmdText);
         return panel;
     }
 
-    private static getWebviewContent(extensionPath: string): string {
+    private static getWebviewContent(extensionPath: string, cmdText: string): string {
         // Local path to main script run in the webview
         const reactAppPathOnDisk = vscode.Uri.file(
             path.join(extensionPath, 'out', 'logViewer', 'logViewer.js'),
@@ -41,7 +41,8 @@ export default class LogViewLoader {
                                 script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;
                                 style-src vscode-resource: 'unsafe-inline';">
             <script>
-            window.acquireVsCodeApi = acquireVsCodeApi;
+                window.acquireVsCodeApi = acquireVsCodeApi;
+                window.cmdText = "${cmdText}";
             </script>
             <style>
                 html,
@@ -71,7 +72,6 @@ export default class LogViewLoader {
 
                 .box .row.content {
                     flex: 1 1 auto;
-                    margin: 30px;
                 }
             </style>
         </head>

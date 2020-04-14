@@ -17,8 +17,6 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       flexGrow: 1,
-      marginBottom: '-45px',
-      padding: '30px'
     },
     menuButton: {
       marginRight: theme.spacing(2),
@@ -30,8 +28,8 @@ const useStyles = makeStyles((theme: Theme) =>
         '&:hover': {
             backgroundColor: 'grey',
             color: '#FFF'
-        }
-    }
+        },
+    },
   }),
 );
 declare global {
@@ -59,7 +57,7 @@ export default function spinner(props: any): JSX.Element {
 
     return display ? (
         <div className={classes.root}>
-            <AppBar position="static" style={{backgroundColor: '#222222'}}>
+            <AppBar position="static" style={{backgroundColor: '#1e1e1e'}}>
                 <Toolbar>
                     <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
                         <Loader
@@ -70,7 +68,7 @@ export default function spinner(props: any): JSX.Element {
                         />
                     </IconButton>
                     <Typography variant="h6" className={classes.title}>
-                    Streaming Logs
+                    Streaming Log
                     </Typography>
                     <Button color="inherit" className={classes.stopButton} onClick={stop}>Stop Streaming</Button>
                 </Toolbar>

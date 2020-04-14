@@ -397,7 +397,7 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
                 segments.splice(0, 0, parent ? parent.getName() : this.getName());
                 parent = parent ? parent.getParent() : this.getParent();
             } while (parent);
-            this.explorerPath = path.join(...segments);
+            this.explorerPath = segments.join('/');
         }
         return this.explorerPath;
     }

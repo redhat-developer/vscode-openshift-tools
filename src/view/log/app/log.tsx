@@ -5,11 +5,17 @@
 import { LazyLog } from 'react-lazylog';
 import { List } from 'immutable'
 
+declare global {
+    interface Window {
+        cmdText: string;
+    }
+}
+
 export default class Log extends LazyLog {
     constructor(props: any) {
         super(props);
         const enc = new TextEncoder();
-        let wholeLog = '';
+        let wholeLog = `${window.cmdText}\n`;
         window.addEventListener('message', event => {
             const message: {action: string, data: string[]} = event.data; // The JSON data our extension sent
             switch (message.action) {

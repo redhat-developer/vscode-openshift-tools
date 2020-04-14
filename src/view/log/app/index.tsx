@@ -8,12 +8,18 @@ import * as ReactDOM from "react-dom";
 import Spinner from './spinner'
 import Log from './log';
 
+declare global {
+    interface Window {
+        cmdText: string;
+    }
+}
+
 ReactDOM.render(
     <Spinner/>,
     document.getElementById("spinner")
 )
 
 ReactDOM.render(
-    React.createElement(Log, {text: 'odo log', enableSearch: true}),
+    React.createElement(Log, {text: window.cmdText, enableSearch: true}),
     document.getElementById("root"),
 );
