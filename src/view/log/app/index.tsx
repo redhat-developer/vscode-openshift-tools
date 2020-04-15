@@ -7,6 +7,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import Spinner from './spinner'
 import Log from './log';
+import { ScrollFollow } from "react-lazylog";
 
 declare global {
     interface Window {
@@ -20,6 +21,11 @@ ReactDOM.render(
 )
 
 ReactDOM.render(
-    React.createElement(Log, {text: window.cmdText, enableSearch: true}),
+    React.createElement(ScrollFollow, {
+        startFollowing: true,
+        render:({ follow, onScroll, startFollowing, stopFollowing }) =>
+                React.createElement(Log, { enableSearch: true, text: window.cmdText, follow: follow, stream: true, onScroll, startFollowing, stopFollowing })
+        }
+    ),
     document.getElementById("root"),
 );
