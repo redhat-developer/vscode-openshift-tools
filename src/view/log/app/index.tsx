@@ -7,7 +7,6 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import Spinner from './spinner'
 import Log from './log';
-import { ScrollFollow } from "react-lazylog";
 
 declare global {
     interface Window {
@@ -15,17 +14,27 @@ declare global {
     }
 }
 
-ReactDOM.render(
-    <Spinner/>,
-    document.getElementById("spinner")
-)
+const context: {
+    setFollow?:  (set: boolean) => void,
+    follow?: boolean,
+} = {};
+
+function FollowLog () {
+    const [follow, setFollow] = React.useState(false);
+    context.setFollow = setFollow;
+    context.follow = follow;
+    return React.createElement(Log, { enableSearch: true, text: window.cmdText, follow });
+}
 
 ReactDOM.render(
-    React.createElement(ScrollFollow, {
-        startFollowing: true,
-        render:({ follow, onScroll, startFollowing, stopFollowing }) =>
-                React.createElement(Log, { enableSearch: true, text: window.cmdText, follow: follow, stream: true, onScroll, startFollowing, stopFollowing })
-        }
-    ),
+    <div className="box">
+        <div className="row header">
+            <Spinner context={context}/>
+        </div>
+        <div className="row content">
+            <FollowLog />
+        </div>
+    </div>
+    ,
     document.getElementById("root"),
 );

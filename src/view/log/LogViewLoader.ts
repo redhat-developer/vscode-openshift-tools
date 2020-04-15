@@ -47,8 +47,8 @@ export default class LogViewLoader {
             <style>
                 html,
                 body {
-                padding: 0;
-                overflow: hidden;
+                    padding: 0;
+                    overflow: hidden;
                 }
 
                 .box {
@@ -63,11 +63,6 @@ export default class LogViewLoader {
 
                 .box .row.header {
                     flex: 0 1 auto;
-                    /* The above is shorthand for:
-                    flex-grow: 0,
-                    flex-shrink: 1,
-                    flex-basis: auto
-                    */
                 }
 
                 .box .row.content {
@@ -75,11 +70,7 @@ export default class LogViewLoader {
                 }
             </style>
         </head>
-        <div class="box">
-            <div class="row header" id="spinner">
-            </div>
-            <div class="row content" id="root">
-            </div>
+        <div class="box" id="root">
         </div>
         <script src="${reactAppUri}"></script>
       </body>

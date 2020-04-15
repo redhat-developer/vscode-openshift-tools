@@ -7,10 +7,14 @@ import * as React from "react";
 
 import Loader from 'react-loader-spinner';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import { blue } from '@material-ui/core/colors';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import IconButton from '@material-ui/core/IconButton';
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -30,6 +34,12 @@ const useStyles = makeStyles((theme: Theme) =>
             color: '#FFF'
         },
     },
+    autoCheckbox: {
+        color: blue[400],
+        '&$checked': {
+            color: blue[600],
+        },
+    }
   }),
 );
 declare global {
@@ -70,6 +80,12 @@ export default function spinner(props: any): JSX.Element {
                     <Typography variant="h6" className={classes.title}>
                     Streaming Log
                     </Typography>
+                    <FormGroup row>
+                        <FormControlLabel
+                            control={<Checkbox color="default" className={classes.autoCheckbox} onChange={(event)=>props.context.setFollow(event.target.checked)}/>}
+                            label="Enable auto-scrolling"
+                        />
+                    </FormGroup>
                     <Button color="inherit" className={classes.stopButton} onClick={stop}>Stop Streaming</Button>
                 </Toolbar>
             </AppBar>
