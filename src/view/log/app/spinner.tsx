@@ -6,21 +6,22 @@
 import * as React from "react";
 
 import Loader from 'react-loader-spinner';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { blue } from '@material-ui/core/colors';
+import { createStyles, makeStyles, Theme, createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import Checkbox from '@material-ui/core/Checkbox';
+import Switch from '@material-ui/core/Switch';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import IconButton from '@material-ui/core/IconButton';
+import { blue } from "@material-ui/core/colors";
+import { withStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      flexGrow: 1,
+      flexGrow: 1
     },
     menuButton: {
       marginRight: theme.spacing(2),
@@ -34,14 +35,37 @@ const useStyles = makeStyles((theme: Theme) =>
             color: '#FFF'
         },
     },
-    autoCheckbox: {
-        color: blue[400],
-        '&$checked': {
-            color: blue[600],
-        },
-    }
   }),
 );
+
+const theme = createMuiTheme({
+    typography: {
+      h6: {
+        fontSize: 12,
+      },
+      button: {
+        fontSize: 12,
+      },
+    },
+  });
+
+const AutoScrollSwitch = withStyles({
+    switchBase: {
+      color: blue[900],
+      "&$checked": {
+        color: blue[900]
+      },
+      "&$checked + $track": {
+        backgroundColor: blue[900]
+      },
+      "& + $track": {
+        backgroundColor: blue[50]
+      }
+    },
+    checked: {},
+    track: {},
+  })(Switch);
+
 declare global {
     interface Window {
         acquireVsCodeApi(): any;
@@ -66,29 +90,26 @@ export default function spinner(props: any): JSX.Element {
     const classes = useStyles();
 
     return display ? (
+        <ThemeProvider theme={theme}>
         <div className={classes.root}>
             <AppBar position="static" style={{backgroundColor: '#1e1e1e'}}>
-                <Toolbar>
+                <Toolbar variant="dense">
                     <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-                        <Loader
-                            type="Bars"
-                            color="#00BFFF"
-                            height= { 20 }
-                            width= { 20 }
-                        />
+                        <Loader type="Bars" color="#00BFFF" height={20} width={20} />
                     </IconButton>
                     <Typography variant="h6" className={classes.title}>
                     Streaming Log
                     </Typography>
                     <FormGroup row>
                         <FormControlLabel
-                            control={<Checkbox color="default" className={classes.autoCheckbox} onChange={(event)=>props.context.setFollow(event.target.checked)}/>}
-                            label="Enable auto-scrolling"
+                            control={<AutoScrollSwitch onChange={(event)=>props.context.setFollow(event.target.checked)} size="small"/>}
+                            label={<Typography variant="h6" className={classes.title}>Auto Scrolling</Typography>}
                         />
                     </FormGroup>
                     <Button color="inherit" className={classes.stopButton} onClick={stop}>Stop Streaming</Button>
                 </Toolbar>
             </AppBar>
         </div>
+        </ThemeProvider>
 ) : null;
 }
