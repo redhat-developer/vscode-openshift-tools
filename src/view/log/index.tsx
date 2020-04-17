@@ -6,7 +6,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import Spinner from './spinner'
-import Log from '../view/log/log';
+import Log from './log';
 
 declare global {
     interface Window {
