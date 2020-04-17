@@ -7,21 +7,28 @@ import { List } from 'immutable'
 
 declare global {
     interface Window {
-        cmdText: string;
+        acquireVsCodeApi(): any;
     }
 }
+
+// function stop() {
+//     const vscode = window.acquireVsCodeApi();
+//     vscode.postMessage({action: 'stop'});
+// }
 
 export default class Log extends LazyLog {
 
     constructor(props: any) {
         super(props);
         const enc = new TextEncoder();
-        let wholeLog = `${window.cmdText}\n`;
+        let wholeLog = `${props.text}\n`;
         window.addEventListener('message', event => {
-            const message: {action: string, data: string[]} = event.data; // The JSON data our extension sent
+            const message = event.data; // The JSON data our extension sent
+            if (!message.action) return;
             switch (message.action) {
                 case 'add': {
-                    message.data.forEach((element:string, index: number)=> {
+                    console.log('add message arrived');
+                    message.data.forEach((element: string, index: number)=> {
                         wholeLog = wholeLog.concat(`${element}\n`);
                     });
                     const encodedLines = message.data.map((line) => enc.encode(line));
