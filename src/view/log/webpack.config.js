@@ -8,10 +8,10 @@ const path = require("path");
 
 module.exports = {
   entry: {
-    logViewer: "./src/view/log/app/index.tsx"
+    logViewer: "./src/view/log/index.tsx"
   },
   output: {
-    path: path.resolve(__dirname, "out", "logViewer"),
+    path: path.resolve(__dirname, "../../../out", "logViewer"),
     filename: "[name].js"
   },
   devtool: "eval-source-map",

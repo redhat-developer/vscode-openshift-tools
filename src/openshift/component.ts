@@ -19,7 +19,7 @@ import { selectWorkspaceFolder } from '../util/workspace';
 import * as consts from '../util/constants';
 import { ToolsConfig } from '../tools';
 import { Catalog } from './catalog';
-import LogViewLoader from '../view/log/LogViewLoader';
+import ViewLoader from '../view/ViewLoader';
 
 import path = require('path');
 import globby = require('globby');
@@ -161,7 +161,7 @@ export class Component extends OpenShiftItem {
         );
         if (!component) return null;
         const cmd = Command.showLog(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
-        const panel = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.path} Log`, cmd);
+        const panel = ViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.path} Log`, cmd);
         const [tool, ...params] = cmd.split(' ');
         const process = await Component.odo.spawn(tool, params, component.contextPath.fsPath);
         process.stdout.on('data', (data) => {
@@ -190,7 +190,7 @@ export class Component extends OpenShiftItem {
         );
         if (!component) return null;
         const cmd = Command.showLogAndFollow(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
-        const panel = LogViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.path} Follow Log`, cmd);
+        const panel = ViewLoader.loadView(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.path} Follow Log`, cmd);
         const [tool, ...params] = cmd.split(' ');
         const process = await Component.odo.spawn(tool, params, component.contextPath.fsPath);
         process.stdout.on('data', (data) => {

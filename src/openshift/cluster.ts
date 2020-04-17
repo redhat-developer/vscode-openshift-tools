@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window, commands, env, QuickPickItem, ExtensionContext, Uri } from 'vscode';
+import { window, commands, env, QuickPickItem, ExtensionContext, Uri, extensions } from 'vscode';
 import { Command } from "../odo";
 import { OpenShiftItem } from './openshiftItem';
 import { CliExitData, CliChannel } from "../cli";
@@ -11,6 +11,8 @@ import { TokenStore } from "../util/credentialManager";
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { Filters } from "../util/filters";
 import { Progress } from "../util/progress";
+import * as consts from '../util/constants';
+import ViewLoader from '../view/ViewLoader';
 
 export class Cluster extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
@@ -88,6 +90,12 @@ export class Cluster extends OpenShiftItem {
                 prompt: "Provide new Cluster URL to connect",
                 validateInput: (value: string) => Cluster.validateUrl('Invalid URL provided', value)
             }) : choice.label;
+    }
+
+    static add(): Promise<any> {
+        const panel = ViewLoader.loadViewDescribe(extensions.getExtension(consts.ExtenisonID).extensionPath, 'Add Cluster', '');
+        panel.webview.postMessage({action: 'cluster', data: ''});
+        return;
     }
 
     static async login(): Promise<string> {

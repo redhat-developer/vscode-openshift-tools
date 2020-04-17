@@ -5,8 +5,17 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-export default class LogViewLoader {
+export default class ViewLoader {
     static loadView(extensionPath: string, title: string, cmdText: string): vscode.WebviewPanel {
+        // if (resource === 'describe') {
+        //     const localResourceRoot = vscode.Uri.file(path.join(extensionPath, 'out', 'addClusterViewer'));
+        // } else{
+        //     const localResourceRoot = vscode.Uri.file(path.join(extensionPath, 'out', 'logViewer'));
+        // }
+        const reactAppPathOnDisk = vscode.Uri.file(
+            path.join(extensionPath, 'out', 'logViewer', 'logViewer.js'),
+        );
+
         const localResourceRoot = vscode.Uri.file(path.join(extensionPath, 'out', 'logViewer'));
 
         const panel = vscode.window.createWebviewPanel('logView', title, vscode.ViewColumn.One, {
@@ -17,15 +26,40 @@ export default class LogViewLoader {
         panel.iconPath = vscode.Uri.file(path.join(extensionPath, "images/context/cluster-node.png"));
 
         // TODO: When webview is going to be ready?
-        panel.webview.html = LogViewLoader.getWebviewContent(extensionPath, cmdText);
+        panel.webview.html = ViewLoader.getWebviewContent(extensionPath, cmdText, reactAppPathOnDisk);
         return panel;
     }
 
-    private static getWebviewContent(extensionPath: string, cmdText: string): string {
-        // Local path to main script run in the webview
+    static loadViewDescribe(extensionPath: string, title: string, cmdText: string): vscode.WebviewPanel {
+        // if (resource === 'describe') {
+        //     const localResourceRoot = vscode.Uri.file(path.join(extensionPath, 'out', 'addClusterViewer'));
+        // } else{
+        //     const localResourceRoot = vscode.Uri.file(path.join(extensionPath, 'out', 'logViewer'));
+        // }
+
         const reactAppPathOnDisk = vscode.Uri.file(
-            path.join(extensionPath, 'out', 'logViewer', 'logViewer.js'),
+            path.join(extensionPath, 'out', 'addClusterViewer', 'addClusterViewer.js'),
         );
+
+        const localResourceRoot = vscode.Uri.file(path.join(extensionPath, 'out', 'addClusterViewer'));
+
+        const panel = vscode.window.createWebviewPanel('logView', title, vscode.ViewColumn.One, {
+            enableScripts: true,
+            localResourceRoots: [localResourceRoot],
+            retainContextWhenHidden: true
+        });
+        panel.iconPath = vscode.Uri.file(path.join(extensionPath, "images/context/cluster-node.png"));
+
+        // TODO: When webview is going to be ready?
+        panel.webview.html = ViewLoader.getWebviewContent(extensionPath, cmdText, reactAppPathOnDisk);
+        return panel;
+    }
+
+    private static getWebviewContent(extensionPath: string, cmdText: string, reactAppPathOnDisk: vscode.Uri): string {
+        // Local path to main script run in the webview
+        // const reactAppPathOnDisk = vscode.Uri.file(
+        //     path.join(extensionPath, 'out', 'logViewer', 'logViewer.js'),
+        // );
         const reactAppUri = reactAppPathOnDisk.with({ scheme: 'vscode-resource' });
 
         return `<!DOCTYPE html>
@@ -73,11 +107,21 @@ export default class LogViewLoader {
                 .box .row.content {
                     flex: 1 1 auto;
                 }
+
+                body.vscode-light {
+                    color: black;
+                }
+                  
+                body.vscode-dark {
+                    color: white;
+                }
+                  
+                body.vscode-high-contrast {
+                    color: red;
+                }
             </style>
         </head>
         <div class="box">
-            <div class="row header" id="spinner">
-            </div>
             <div class="row content" id="root">
             </div>
         </div>

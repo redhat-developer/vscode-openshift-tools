@@ -23,6 +23,7 @@
         "node_modules",
         ".vscode-test",
         "test-resources",
-        "src/view/log/app",
+        "src/view/cluster",
+        "src/view/log"
     ]
 }
