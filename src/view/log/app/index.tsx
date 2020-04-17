@@ -14,25 +14,13 @@ declare global {
     }
 }
 
-const context: {
-    setFollow?:  (set: boolean) => void,
-    follow?: boolean,
-} = {};
-
-function FollowLog () {
-    const [follow, setFollow] = React.useState(false);
-    context.setFollow = setFollow;
-    context.follow = follow;
-    return React.createElement(Log, { enableSearch: true, text: window.cmdText, follow });
-}
-
 ReactDOM.render(
     <div className="box">
         <div className="row header">
-            <Spinner context={context}/>
+            <Spinner />
         </div>
         <div className="row content">
-            <FollowLog />
+            <Log />
         </div>
     </div>
     ,

@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme: Theme) =>
 const theme = createMuiTheme({
     typography: {
       h6: {
-        fontSize: 12,
+        fontSize: 30,
       },
       button: {
         fontSize: 12,
@@ -77,39 +77,54 @@ function stop() {
     vscode.postMessage({action: 'stop'});
 }
 
+export interface SpinnerProps {
+    context?: {
+        setFollow?: (set: boolean)=>void,
+        follow?: boolean
+    }
+}
+
 // Do not change any type, that would lead to props validation error
 // during the compile:views
-export default function spinner(props: any): JSX.Element {
-    const [display ,setDisplay] = React.useState(true);
-    window.addEventListener('message', event => {
-        if (event.data.action === 'finished') {
-            setDisplay(false);
-        }
-    });
+export default class Spinner extends React.Component<SpinnerProps> {
 
-    const classes = useStyles();
+    state = {
+        display: false
+    };
 
-    return display ? (
-        <ThemeProvider theme={theme}>
-        <div className={classes.root}>
-            <AppBar position="static" style={{backgroundColor: '#1e1e1e'}}>
-                <Toolbar variant="dense">
-                    <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-                        <Loader type="Bars" color="#00BFFF" height={20} width={20} />
-                    </IconButton>
-                    <Typography variant="h6" className={classes.title}>
-                    Streaming Log
-                    </Typography>
-                    <FormGroup row>
-                        <FormControlLabel
-                            control={<AutoScrollSwitch onChange={(event)=>props.context.setFollow(event.target.checked)} size="small"/>}
-                            label={<Typography variant="h6" className={classes.title}>Auto Scrolling</Typography>}
-                        />
-                    </FormGroup>
-                    <Button color="inherit" className={classes.stopButton} onClick={stop}>Stop Streaming</Button>
-                </Toolbar>
-            </AppBar>
-        </div>
-        </ThemeProvider>
-) : null;
+    constructor(props: any) {
+        super(props);
+        window.addEventListener('message', event => {
+            if (event.data.action === 'finished') {
+                this.setState({display: false});
+            }
+        });
+    }
+    render () {
+        const classes = useStyles();
+        const { display }  = this.state;
+        return display ? (
+            <ThemeProvider theme={theme}>
+            <div className={classes.root}>
+                <AppBar position="static" style={{backgroundColor: '#1e1e1e'}}>
+                    <Toolbar variant="dense">
+                        <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
+                            <Loader type="Bars" color="#00BFFF" height={20} width={20} />
+                        </IconButton>
+                        <Typography variant="h6" className={classes.title}>
+                        Streaming Log
+                        </Typography>
+                        <FormGroup row>
+                            <FormControlLabel
+                                control={<AutoScrollSwitch onChange={(event)=>this.props.context.setFollow(event.target.checked)} size="small"/>}
+                                label={<Typography variant="h6" className={classes.title}>Auto Scrolling</Typography>}
+                            />
+                        </FormGroup>
+                        <Button color="inherit" className={classes.stopButton} onClick={stop}>Stop Streaming</Button>
+                    </Toolbar>
+                </AppBar>
+            </div>
+            </ThemeProvider>
+        ) : null;
+    }
 }

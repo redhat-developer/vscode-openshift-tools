@@ -1,0 +1,63 @@
+`<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Config View</title>
+        <script>
+            let streamTo;
+            window.acquireVsCodeApi = function() {
+                return {
+                    postMessage: function(event) {
+                        if (event.action == 'stop') {
+                            window.postMessage({ action: 'finished' });
+                            if (streamTo) {
+                                clearTimeout(streamTo);
+                            }
+                        }
+                    },
+                };
+            };
+
+            function sendMessage() {
+                clearTimeout(streamTo);
+                window.postMessage({ action: 'add', data: [`${Math.random()}`] });
+                streamTo = setTimeout(sendMessage, 1000);
+            }
+            function onLoad() {
+                streamTo = setTimeout(sendMessage, 5000);
+            }
+            window.cmdText = 'woho';
+            window.onload = onLoad;
+        </script>
+        <style>
+            html,
+            body {
+                padding: 0;
+                overflow: hidden;
+            }
+
+            .box {
+                display: flex;
+                flex-flow: column;
+                position: absolute;
+                top: 0px;
+                bottom: 1px;
+                left: 0px;
+                right: 0px;
+            }
+
+            .box .row.header {
+                flex: 0 1 auto;
+            }
+
+            .box .row.content {
+                flex: 1 1 auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="box" id="root"></div>
+        <script src="../../../../out/logViewer/logViewer.js"></script>
+    </body>
+</html>
