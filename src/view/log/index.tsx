@@ -14,12 +14,27 @@ declare global {
     }
 }
 
-ReactDOM.render(
-    <Spinner/>,
-    document.getElementById("spinner")
-)
+const context: {
+    setFollow?:  (set: boolean) => void,
+    follow?: boolean,
+} = {};
+
+function FollowLog () {
+    const [follow, setFollow] = React.useState(false);
+    context.setFollow = setFollow;
+    context.follow = follow;
+    return React.createElement(Log, { enableSearch: true, text: window.cmdText, follow });
+}
 
 ReactDOM.render(
-    React.createElement(Log, {text: window.cmdText, enableSearch: true}),
+    <div className="box">
+        <div className="row header">
+            <Spinner context={context}/>
+        </div>
+        <div className="row content">
+            <FollowLog />
+        </div>
+    </div>
+    ,
     document.getElementById("root"),
 );

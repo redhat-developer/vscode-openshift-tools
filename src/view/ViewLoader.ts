@@ -81,8 +81,8 @@ export default class ViewLoader {
             <style>
                 html,
                 body {
-                padding: 0;
-                overflow: hidden;
+                    padding: 0;
+                    overflow: hidden;
                 }
 
                 .box {
@@ -97,11 +97,6 @@ export default class ViewLoader {
 
                 .box .row.header {
                     flex: 0 1 auto;
-                    /* The above is shorthand for:
-                    flex-grow: 0,
-                    flex-shrink: 1,
-                    flex-basis: auto
-                    */
                 }
 
                 .box .row.content {
@@ -121,9 +116,7 @@ export default class ViewLoader {
                 }
             </style>
         </head>
-        <div class="box">
-            <div class="row content" id="root">
-            </div>
+        <div class="box" id="root">
         </div>
         <script src="${reactAppUri}"></script>
       </body>
