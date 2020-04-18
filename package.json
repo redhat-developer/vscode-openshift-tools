@@ -41,6 +41,7 @@
     "compile": "npm-run-all compile:*",
     "compile:ext": "tsc -p ./",
     "compile:views": "webpack --mode development",
+    "dev:logView": "webpack-dev-server --mode=development",
     "watch": "tsc -watch -p ./",
     "watch:views": "webpack --watch --mode development",
     "clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/logViewer",

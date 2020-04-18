@@ -1,34 +1,40 @@
-`<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Config View</title>
+        <!-- meta http-equiv="Content-Security-Policy" -->
         <script>
-            let streamTo;
-            window.acquireVsCodeApi = function() {
-                return {
-                    postMessage: function(event) {
-                        if (event.action == 'stop') {
-                            window.postMessage({ action: 'finished' });
-                            if (streamTo) {
-                                clearTimeout(streamTo);
+            if (typeof acquireVsCodeApi !== 'undefined') {
+                window.acquireVsCodeApi = acquireVsCodeApi;
+                window.cmdText = "%COMMAND%"
+            } else {
+                // to run locally for testing
+                let streamTo;
+                window.acquireVsCodeApi = function() {
+                    return {
+                        postMessage: function(event) {
+                            if (event.action == 'stop') {
+                                window.postMessage({ action: 'finished' });
+                                if (streamTo) {
+                                    clearTimeout(streamTo);
+                                }
                             }
-                        }
-                    },
+                        },
+                    };
                 };
-            };
-
-            function sendMessage() {
-                clearTimeout(streamTo);
-                window.postMessage({ action: 'add', data: [`${Math.random()}`] });
-                streamTo = setTimeout(sendMessage, 1000);
+                let i = 0;
+                function sendMessage() {
+                    window.postMessage({ action: 'add', data: [`${i++}`] });
+                    streamTo = setTimeout(sendMessage, 1000);
+                }
+                function onLoad() {
+                    streamTo = setTimeout(sendMessage, 5000);
+                }
+                window.cmdText = 'woho';
+                window.onload = onLoad;
             }
-            function onLoad() {
-                streamTo = setTimeout(sendMessage, 5000);
-            }
-            window.cmdText = 'woho';
-            window.onload = onLoad;
         </script>
         <style>
             html,
@@ -58,6 +64,5 @@
     </head>
     <body>
         <div class="box" id="root"></div>
-        <script src="../../../../out/logViewer/logViewer.js"></script>
     </body>
 </html>
