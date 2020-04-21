@@ -16,7 +16,8 @@ export class TestItem implements OpenShiftObject {
         public contextValue: ContextType,
         private children = [],
         public deployed = false,
-        public contextPath = Uri.parse('file:///c%3A/Temp')) {
+        public contextPath = Uri.parse('file:///c%3A/Temp'),
+        public path?: string) {
     }
 
     getName(): string {
@@ -38,6 +39,4 @@ export class TestItem implements OpenShiftObject {
     get label(): string {
         return this.name;
     }
-
-    public path: string;
 }
