@@ -14,6 +14,7 @@ import { Progress } from '../../../src/util/progress';
 import * as Util from '../../../src/util/async';
 import { Refs } from '../../../src/util/refs';
 import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
+import LogViewLoader from '../../../src/view/log/LogViewLoader';
 
 import pq = require('proxyquire');
 import globby = require('globby');
@@ -34,7 +35,7 @@ suite('OpenShift/Component', () => {
     const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
     const projectItem = new TestItem(clusterItem, 'myproject', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app1', ContextType.APPLICATION);
-    const componentItem = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], false, comp1Uri);
+    const componentItem = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], false, comp1Uri, 'https://host/proj/app/comp1');
     const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
     const errorMessage = 'FATAL ERROR';
     let getProjects: sinon.SinonStub;
@@ -61,6 +62,7 @@ suite('OpenShift/Component', () => {
         sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
         sandbox.stub(OdoImpl.prototype, 'convertObjectsFromPreviousOdoReleases');
         commandStub = sandbox.stub(vscode.commands, 'executeCommand');
+        sandbox.stub()
     });
 
     teardown(() => {
@@ -994,41 +996,34 @@ suite('OpenShift/Component', () => {
     });
 
     suite('log', () => {
-
+        let logViewStub;
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
+            logViewStub = sandbox.stub(LogViewLoader, 'loadView');
         });
 
-        test('returns null when cancelled', async () => {
-            quickPickStub.onFirstCall().resolves();
-            const result = await Component.log(null);
-
-            expect(result).null;
-        });
-
-        test('log calls the correct odo command in terminal', async () => {
+        test('log calls the correct odo command', async () => {
             await Component.log(componentItem);
-
-            expect(termStub).calledOnceWith(Command.showLog(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(logViewStub).calledOnceWith(`${componentItem.path} Log`, Command.showLog, componentItem);
         });
 
         test('works with no context', async () => {
             await Component.log(null);
-
-            expect(termStub).calledOnceWith(Command.showLog(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(logViewStub).calledOnceWith(`${componentItem.path} Log`, Command.showLog, componentItem);
         });
     });
 
     suite('followLog', () => {
-
+        let logViewStub;
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
+            logViewStub = sandbox.stub(LogViewLoader, 'loadView');
         });
 
         test('returns null when cancelled', async () => {
@@ -1038,16 +1033,14 @@ suite('OpenShift/Component', () => {
             expect(result).null;
         });
 
-        test('followLog calls the correct odo command in terminal  w/ context', async () => {
+        test('followLog calls the correct odo command', async () => {
             await Component.followLog(componentItem);
-
-            expect(termStub).calledOnceWith(Command.showLogAndFollow(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(logViewStub).calledOnceWith(`${componentItem.path} Follow Log`, Command.showLogAndFollow, componentItem);
         });
 
         test('works with no context', async () => {
             await Component.followLog(null);
-
-            expect(termStub).calledOnceWith(Command.showLogAndFollow(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(logViewStub).calledOnceWith(`${componentItem.path} Follow Log`, Command.showLogAndFollow, componentItem);
         });
     });
 
