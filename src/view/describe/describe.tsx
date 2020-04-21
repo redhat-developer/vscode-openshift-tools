@@ -2,24 +2,54 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import { LazyLog, LazyLogProps } from 'react-lazylog';
+import { List } from 'immutable'
 
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import DescribeView from './describeView';
+declare global {
+    interface Window {
+        acquireVsCodeApi(): any;
+    }
+}
+export interface LogProps extends LazyLogProps {
+    enableSearch: boolean;
+}
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export default function Describe() {
-    window.addEventListener('message', event => {
-        const message: {action: string, data: string[]} = event.data; // The JSON data our extension sent
-        switch (message.action) {
-            case 'describe': {
-                ReactDOM.render(
-                    <DescribeView data={message.data}/>
-                    , document.getElementById('root'));
+export default class Describe extends LazyLog {
+    private wholeLog;
+    constructor(props: any) {
+        super(props);
+        this.wholeLog = `${this.props.text}\n`;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    componentDidMount() {
+        super.componentDidMount();
+        window.addEventListener('message', this.messageListener);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    messageListener = (event) => {
+        const enc = new TextEncoder();
+        if (event?.data?.action){
+            const message = event.data; // The JSON data our extension sent
+            switch (message.action) {
+                case 'describe': {
+                    message.data.forEach((element: string, index: number)=> {
+                        this.wholeLog = this.wholeLog.concat(`${element}\n`);
+                    });
+                    const encodedLines = message.data.map((line) => enc.encode(line));
+                    (this as any).handleUpdate({lines: List(encodedLines), encodedLog: enc.encode(this.wholeLog)});
                 break;
+                }
+                default:
+                    break;
             }
-            default:
-                break;
         }
-    });
+    }
+
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    componentWillUnmount() {
+        super.componentWillUnmount();
+        window.removeEventListener('message',this.messageListener);
+    }
 }

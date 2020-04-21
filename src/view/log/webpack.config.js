@@ -6,6 +6,8 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require("path");
 
+const HtmlWebPackPlugin = require( 'html-webpack-plugin' );
+
 module.exports = {
   entry: {
     logViewer: "./src/view/log/index.tsx"
@@ -40,5 +42,11 @@ module.exports = {
   },
   performance: {
     hints: false
-  }
+  },
+  plugins: [
+    new HtmlWebPackPlugin({
+       template: path.resolve( __dirname, './index.html' ),
+       filename: 'index.html'
+    })
+ ]
 };

@@ -42,6 +42,7 @@
     "compile:ext": "tsc -p ./",
     "compile:logview": "webpack --mode development --config src/view/log/webpack.config.js",
     "compile:describeview": "webpack --mode development --config src/view/describe/webpack.config.js",
+    "dev:describeview": "webpack-dev-server --mode=development --config src/view/describe/webpack.config.js",
     "watch": "tsc -watch -p ./",
     "watch:views": "webpack --watch --mode development",
     "clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/logViewer",
@@ -127,6 +128,7 @@
     "eslint-plugin-prettier": "^3.1.1",
     "glob": "^7.1.6",
     "handlebars": "^4.7.3",
+    "html-webpack-plugin": "^4.2.0",
     "istanbul": "^0.4.5",
     "leasot": "^10.1.0",
     "mocha": "^6.2.2",
@@ -149,7 +151,8 @@
     "vscode-test": "^1.2.3",
     "walker": "^1.0.7",
     "webpack": "^4.35.2",
-    "webpack-cli": "^3.3.5"
+    "webpack-cli": "^3.3.5",
+    "webpack-dev-server": "^3.10.3"
   },
   "activationEvents": [
     "onView:openshiftProjectExplorer",

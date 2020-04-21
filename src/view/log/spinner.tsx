@@ -102,7 +102,7 @@ export default function spinner(props: any): JSX.Element {
                     </Typography>
                     <FormGroup row>
                         <FormControlLabel
-                            control={<AutoScrollSwitch onChange={(event)=>props.context.setFollow(event.target.checked)} size="small"/>}
+                            control={<AutoScrollSwitch onChange={props.toggleAutoScroll} size="small"/>}
                             label={<Typography variant="h6" className={classes.title}>Auto Scrolling</Typography>}
                         />
                     </FormGroup>

@@ -3,10 +3,11 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
-import * as ReactDOM from "react-dom";
-import Spinner from './spinner'
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import Spinner from './spinner';
 import Log from './log';
+import { LogViewContext } from './context';
 
 declare global {
     interface Window {
@@ -14,27 +15,37 @@ declare global {
     }
 }
 
-const context: {
-    setFollow?:  (set: boolean) => void,
-    follow?: boolean,
-} = {};
+class LogView extends React.Component {
+    private toggleAutoScroll = () => {
+        console.log('toggling autoscroll')
+        this.setState({
+            autoScroll: !this.state.autoScroll,
+        });
+    };
 
-function FollowLog () {
-    const [follow, setFollow] = React.useState(false);
-    context.setFollow = setFollow;
-    context.follow = follow;
-    return React.createElement(Log, { enableSearch: true, text: window.cmdText, follow });
+    state = {
+        autoScroll: false,
+    };
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            autoScroll: false,
+        };
+    }
+
+    render() {
+        return <div className="box">
+            <LogViewContext.Provider value={{autoScroll: this.state.autoScroll }} >
+                <div className="row header">
+                    <Spinner toggleAutoScroll={this.toggleAutoScroll} />
+                </div>
+                <div className="row content">
+                    {React.createElement(Log, {enableSearch: true, text: window.cmdText, follow: this.state.autoScroll, stream: true})}
+                </div>
+            </LogViewContext.Provider>
+        </div>;
+    }
 }
 
-ReactDOM.render(
-    <div className="box">
-        <div className="row header">
-            <Spinner context={context}/>
-        </div>
-        <div className="row content">
-            <FollowLog />
-        </div>
-    </div>
-    ,
-    document.getElementById("root"),
-);
+ReactDOM.render(<LogView />, document.getElementById('root'));

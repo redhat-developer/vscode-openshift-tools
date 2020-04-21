@@ -2,35 +2,57 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { LazyLog } from 'react-lazylog';
+import { LazyLog, LazyLogProps } from 'react-lazylog';
 import { List } from 'immutable'
 
 declare global {
     interface Window {
-        cmdText: string;
+        acquireVsCodeApi(): any;
     }
 }
 
-export default class Log extends LazyLog {
+// function stop() {
+//     const vscode = window.acquireVsCodeApi();
+//     vscode.postMessage({action: 'stop'});
+// }
 
+export interface LogProps extends LazyLogProps {
+    enableSearch: boolean;
+}
+
+export default class Log extends LazyLog {
+    private wholeLog;
     constructor(props: any) {
         super(props);
+        this.wholeLog = `${this.props.text}\n`;
+    }
+
+    componentDidMount() {
+        super.componentDidMount();
+        window.addEventListener('message', this.messageListener);
+    }
+
+    messageListener = (event) => {
         const enc = new TextEncoder();
-        let wholeLog = `${window.cmdText}\n`;
-        window.addEventListener('message', event => {
-            const message: {action: string, data: string[]} = event.data; // The JSON data our extension sent
+        if (event?.data?.action){
+            const message = event.data; // The JSON data our extension sent
             switch (message.action) {
                 case 'add': {
-                    message.data.forEach((element:string, index: number)=> {
-                        wholeLog = wholeLog.concat(`${element}\n`);
+                    message.data.forEach((element: string, index: number)=> {
+                        this.wholeLog = this.wholeLog.concat(`${element}\n`);
                     });
                     const encodedLines = message.data.map((line) => enc.encode(line));
-                    (this as any).handleUpdate({lines: List(encodedLines), encodedLog: enc.encode(wholeLog)});
+                    (this as any).handleUpdate({lines: List(encodedLines), encodedLog: enc.encode(this.wholeLog)});
                     break;
                 }
                 default:
                     break;
             }
-        });
+        }
+    }
+
+    componentWillUnmount() {
+        super.componentWillUnmount();
+        window.removeEventListener('message',this.messageListener);
     }
 }

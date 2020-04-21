@@ -144,18 +144,36 @@ export class Component extends OpenShiftItem {
         if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
             command = Command.describeComponentNoContext(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
         } else {
-            command = Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
+            command = Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
         }
         const panel = ViewLoader.loadViewDescribe(extensions.getExtension(consts.ExtenisonID).extensionPath, `${component.getName()} Describe`, command);
-        const process = await Component.odo.execute(command, component.contextPath.fsPath);
-        // eslint-disable-next-line no-console
-        console.log(process.stdout);
-        panel.webview.postMessage({action: 'describe', data: `${process.stdout}`});
-        // Component.odo.executeInTerminal(
-        //     command,
-        //     component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()
-        // );
+        const [tool, ...params] = command.split(' ');
+        const process = await Component.odo.spawn(tool, params, component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+        process.stdout.on('data', (data) => {
+            panel.webview.postMessage({action: 'describe', data: `${data}`.trim().split('\n')});
+        });
+
+        // const recieveDisposable = panel.webview.onDidReceiveMessage((event) => {
+        //     if (event.action === 'rawdata') {
+        //         Component.describeRaw(component, panel);
+        //     }
+        //     recieveDisposable.dispose();
+        // })
     }
+
+    // static async describeRaw(component: OpenShiftObject, panel): Promise<string> {
+    //     let command: string;
+    //     if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
+    //         command = Command.describeComponentNoContext(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
+    //     } else {
+    //         command = Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
+    //     }
+    //     const [tool, ...params] = command.split(' ');
+    //     const process = await Component.odo.spawn(tool, params, component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+    //     process.stdout.on('data', (data) => {
+    //         panel.webview.postMessage({action: 'describe-raw', data: `${data}`.trim().split('\n')});
+    //     });
+    // }
 
     static async log(context: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(context,
