@@ -18,7 +18,7 @@ import { Platform } from './util/platform';
 import { Build } from './k8s/build';
 import { DeploymentConfig } from './k8s/deployment';
 import { Console } from './k8s/console';
-import { OdoImpl, ComponentType, ContextType } from './odo';
+import { OdoImpl, ContextType } from './odo';
 import { TokenStore } from './util/credentialManager';
 import { Oc } from './oc';
 import { Route } from './k8s/route';
