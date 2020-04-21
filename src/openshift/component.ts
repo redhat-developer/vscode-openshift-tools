@@ -19,6 +19,7 @@ import { selectWorkspaceFolder } from '../util/workspace';
 import { ToolsConfig } from '../tools';
 import { Catalog } from './catalog';
 import LogViewLoader from '../view/log/LogViewLoader';
+import DescribeViewLoader from '../view/describe/describeViewLoader';
 
 import path = require('path');
 import globby = require('globby');
@@ -138,16 +139,8 @@ export class Component extends OpenShiftItem {
             "From which Application you want to describe Component",
             "Select Component you want to describe");
         if (!component) return null;
-        let command: string;
-        if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
-            command = Command.describeComponentNoContext(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
-        } else {
-            command = Command.describeComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName());
-        }
-        Component.odo.executeInTerminal(
-            command,
-            component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()
-        );
+        const command = (component.contextValue === ContextType.COMPONENT_NO_CONTEXT) ? Command.describeComponentNoContext : Command.describeComponentJson;
+        DescribeViewLoader.loadView(`${component.path} Describe`,  command, component);
     }
 
     static async log(context: OpenShiftObject): Promise<string> {

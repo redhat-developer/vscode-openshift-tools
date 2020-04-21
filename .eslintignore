@@ -7,3 +7,4 @@ node_modules
 Godeps
 test-resources,
 src/view/log
+src/view/describe

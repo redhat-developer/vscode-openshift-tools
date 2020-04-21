@@ -15,6 +15,7 @@ import * as Util from '../../../src/util/async';
 import { Refs } from '../../../src/util/refs';
 import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
 import LogViewLoader from '../../../src/view/log/LogViewLoader';
+import DescribeViewLoader from '../../../src/view/describe/describeViewLoader';
 
 import pq = require('proxyquire');
 import globby = require('globby');
@@ -969,29 +970,29 @@ suite('OpenShift/Component', () => {
     });
 
     suite('describe', () => {
-
+        let viewStub;
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
+            viewStub = sandbox.stub(DescribeViewLoader, 'loadView');
         });
 
         test('returns null when cancelled', async () => {
             quickPickStub.onFirstCall().resolves();
             const result = await Component.describe(null);
-
             expect(result).null;
         });
 
-        test('describe calls the correct odo command in terminal', async () => {
+        test('calls the correct odo command', async () => {
             await Component.describe(componentItem);
-            expect(termStub).calledOnceWith(Command.describeComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(viewStub).calledOnceWith(`${componentItem.path} Describe`, Command.describeComponentJson, componentItem);
         });
 
         test('works with no context', async () => {
             await Component.describe(null);
-            expect(termStub).calledOnceWith(Command.describeComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(viewStub).calledOnceWith(`${componentItem.path} Describe`, Command.describeComponentJson, componentItem);
         });
     });
 
