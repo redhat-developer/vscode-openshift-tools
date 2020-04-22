@@ -212,13 +212,13 @@ export async function activate(extensionContext: vscode.ExtensionContext): Promi
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     OdoImpl.Instance.subject.subscribe(async (event) => {
         if (event.type === 'inserted' && event.data.contextValue === ContextType.COMPONENT) {
-            const choice = await vscode.window.showInformationMessage(`Do you want to push new '${event.data.getName()}' Component?`, 'Push Now', 'Close');
+            const choice = await vscode.window.showInformationMessage(`Do you want to push new '${event.data.getName()}' Component?`, 'Push');
             if (choice === 'Push') {
                 await vscode.commands.executeCommand('openshift.component.push', event.data);
                 OpenShiftExplorer.getInstance().refresh(event.data);
             }
         } else if (event.type === 'inserted' && (event.data.contextValue === ContextType.COMPONENT_ROUTE || event.data.contextValue === ContextType.STORAGE)) {
-            const choice = await vscode.window.showInformationMessage(`Do you want to push changes for '${event.data.getParent().getName()}' Component?`, 'Push Now', 'Close');
+            const choice = await vscode.window.showInformationMessage(`Do you want to push changes for '${event.data.getParent().getName()}' Component?`, 'Push');
             if (choice === 'Push') {
                 await vscode.commands.executeCommand('openshift.component.push', event.data.getParent(), true);
                 OpenShiftExplorer.getInstance().refresh(event.data.getParent());
