@@ -47,8 +47,7 @@ export class Url extends OpenShiftItem{
         return null;
     }
 
-    @vsCommand('openshift.url.delete')
-    @vsCommand('openshift.url.delete.palette')
+    @vsCommand('openshift.url.delete', true)
     static async del(treeItem: OpenShiftObject): Promise<string | null> {
         let url = treeItem;
         const component = await Url.getOpenShiftCmdData(url,

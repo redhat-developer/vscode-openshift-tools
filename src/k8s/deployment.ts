@@ -79,8 +79,7 @@ export class DeploymentConfig {
           DeploymentConfig.command.getReplicas(deploymentConfig));
     }
 
-    @vsCommand('clusters.openshift.deploy.rcShowLog')
-    @vsCommand('clusters.openshift.deploy.rcShowLog.palette')
+    @vsCommand('clusters.openshift.deploy.rcShowLog', true)
     static async rcShowLog(context: { impl: any }): Promise<string> {
         const replica = await DeploymentConfig.selectReplica(context, "Select a Replica to see the logs");
         if (replica) {
@@ -89,8 +88,7 @@ export class DeploymentConfig {
         return replica;
     }
 
-    @vsCommand('clusters.openshift.deploy.dc.showLog')
-    @vsCommand('clusters.openshift.deploy.dc.showLog.palette')
+    @vsCommand('clusters.openshift.deploy.dc.showLog', true)
     static async showLog(context: { name: string }): Promise<string> {
         let deployName: string = context ? context.name : null;
         if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to see logs"), "Select a DeploymentConfig to see logs");
@@ -113,8 +111,7 @@ export class DeploymentConfig {
         return replica;
     }
 
-    @vsCommand('clusters.openshift.deploy.delete')
-    @vsCommand('clusters.openshift.deploy.delete.palette')
+    @vsCommand('clusters.openshift.deploy.delete', true)
     static async delete(context: { impl: any }): Promise<string> {
         let result: null | string | Promise<string> | PromiseLike<string> = null;
         const replica = await DeploymentConfig.selectReplica(context, "Select a Replica to delete");

@@ -45,8 +45,7 @@ export class Service extends OpenShiftItem {
             .catch((err) => Promise.reject(Error(`Failed to create Service with error '${err}'`)));
     }
 
-    @vsCommand('openshift.service.delete')
-    @vsCommand('openshift.service.delete.palette')
+    @vsCommand('openshift.service.delete', true)
     static async del(treeItem: OpenShiftObject): Promise<string> {
         let service = treeItem;
 
@@ -71,8 +70,7 @@ export class Service extends OpenShiftItem {
         return null;
     }
 
-    @vsCommand('openshift.service.describe')
-    @vsCommand('openshift.service.describe.palette')
+    @vsCommand('openshift.service.describe', true)
     static async describe(context: OpenShiftObject): Promise<void> {
         let service = context;
 

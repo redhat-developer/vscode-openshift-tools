@@ -87,8 +87,7 @@ export class Build {
         return result;
     }
 
-    @vsCommand('clusters.openshift.build.showLog')
-    @vsCommand('clusters.openshift.build.showLog.palette')
+    @vsCommand('clusters.openshift.build.showLog', true)
     static async showLog(context: { impl: any}): Promise<string> {
         const build = await Build.selectBuild(context, "Select a build to see the logs");
         if (build) {
@@ -123,8 +122,7 @@ export class Build {
         return null;
     }
 
-    @vsCommand('clusters.openshift.build.delete')
-    @vsCommand('clusters.openshift.build.delete.palette')
+    @vsCommand('clusters.openshift.build.delete', true)
     static async delete(context: { impl: any}): Promise<string> {
         let result: null | string | Promise<string> | PromiseLike<string> = null;
         const build = await Build.selectBuild(context, "Select a build to delete");

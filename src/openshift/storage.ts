@@ -42,8 +42,7 @@ export class Storage extends OpenShiftItem {
             .catch((err) => Promise.reject(Error(`New Storage command failed with error: '${err}'!`)));
     }
 
-    @vsCommand('openshift.storage.delete')
-    @vsCommand('openshift.storage.delete.palette')
+    @vsCommand('openshift.storage.delete', true)
     static async del(treeItem: OpenShiftObject): Promise<string> {
         let storage = treeItem;
         const component = await Storage.getOpenShiftCmdData(storage,
