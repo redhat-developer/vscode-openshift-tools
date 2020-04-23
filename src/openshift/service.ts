@@ -8,9 +8,11 @@ import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
 import { Progress } from '../util/progress';
 import { Platform } from '../util/platform';
+import { vsCommand } from '../vscommand';
 
 export class Service extends OpenShiftItem {
 
+    @vsCommand('openshift.service.create')
     static async create(context: OpenShiftObject): Promise<string>  {
         const application = await Service.getOpenShiftCmdData(context,
             "In which Project you want to create a Service",
@@ -43,6 +45,8 @@ export class Service extends OpenShiftItem {
             .catch((err) => Promise.reject(Error(`Failed to create Service with error '${err}'`)));
     }
 
+    @vsCommand('openshift.service.delete')
+    @vsCommand('openshift.service.delete.palette')
     static async del(treeItem: OpenShiftObject): Promise<string> {
         let service = treeItem;
 
@@ -67,6 +71,8 @@ export class Service extends OpenShiftItem {
         return null;
     }
 
+    @vsCommand('openshift.service.describe')
+    @vsCommand('openshift.service.describe.palette')
     static async describe(context: OpenShiftObject): Promise<void> {
         let service = context;
 

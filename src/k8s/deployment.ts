@@ -8,6 +8,7 @@ import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { Progress } from "../util/progress";
 import * as common from './common';
 import { OdoImpl, Odo } from "../odo";
+import { vsCommand } from "../vscommand";
 
 export class DeploymentConfig {
 
@@ -53,6 +54,7 @@ export class DeploymentConfig {
       };
     }
 
+    @vsCommand('clusters.openshift.deploy')
     static async deploy(context: { name: string }): Promise<string> {
         let deployName: string = context ? context.name : undefined;
         let result: Promise<string> = null;
@@ -77,6 +79,8 @@ export class DeploymentConfig {
           DeploymentConfig.command.getReplicas(deploymentConfig));
     }
 
+    @vsCommand('clusters.openshift.deploy.rcShowLog')
+    @vsCommand('clusters.openshift.deploy.rcShowLog.palette')
     static async rcShowLog(context: { impl: any }): Promise<string> {
         const replica = await DeploymentConfig.selectReplica(context, "Select a Replica to see the logs");
         if (replica) {
@@ -85,6 +89,8 @@ export class DeploymentConfig {
         return replica;
     }
 
+    @vsCommand('clusters.openshift.deploy.dc.showLog')
+    @vsCommand('clusters.openshift.deploy.dc.showLog.palette')
     static async showLog(context: { name: string }): Promise<string> {
         let deployName: string = context ? context.name : null;
         if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to see logs"), "Select a DeploymentConfig to see logs");
@@ -107,6 +113,8 @@ export class DeploymentConfig {
         return replica;
     }
 
+    @vsCommand('clusters.openshift.deploy.delete')
+    @vsCommand('clusters.openshift.deploy.delete.palette')
     static async delete(context: { impl: any }): Promise<string> {
         let result: null | string | Promise<string> | PromiseLike<string> = null;
         const replica = await DeploymentConfig.selectReplica(context, "Select a Replica to delete");

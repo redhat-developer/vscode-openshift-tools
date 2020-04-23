@@ -32,7 +32,7 @@ function isCommand(item: QuickPickItem | QuickPickCommand): item is QuickPickCom
     return (item as any).command;
 }
 
-export abstract class OpenShiftItem {
+export class OpenShiftItem {
     protected static readonly odo: Odo = OdoImpl.Instance;
 
     protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
@@ -145,3 +145,5 @@ export abstract class OpenShiftItem {
         return context as OpenShiftObject;
     }
 }
+
+

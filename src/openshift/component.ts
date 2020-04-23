@@ -20,6 +20,7 @@ import { ToolsConfig } from '../tools';
 import { Catalog } from './catalog';
 import LogViewLoader from '../view/log/LogViewLoader';
 import DescribeViewLoader from '../view/describe/describeViewLoader';
+import { vsCommand } from '../vscommand';
 
 import path = require('path');
 import globby = require('globby');
@@ -37,6 +38,7 @@ export class Component extends OpenShiftItem {
         );
     }
 
+    @vsCommand('openshift.component.create')
     static async create(context: OpenShiftObject): Promise<string> {
         const application = await Component.getOpenshiftData(context);
         if (!application) return null;
@@ -71,6 +73,8 @@ export class Component extends OpenShiftItem {
         return command.catch((err) => Promise.reject(Error(`Failed to create Component with error '${err}'`)));
     }
 
+    @vsCommand('openshift.component.delete')
+    @vsCommand('openshift.component.delete.palette')
     static async del(treeItem: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(treeItem,
             "From which Project do you want to delete Component",
@@ -90,7 +94,8 @@ export class Component extends OpenShiftItem {
             .catch((err) => Promise.reject(Error(`Failed to delete Component with error '${err}'`)));
         }
     }
-
+    @vsCommand('openshift.component.undeploy')
+    @vsCommand('openshift.component.undeploy.palette')
     static async undeploy(treeItem: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(treeItem,
             "From which Project do you want to undeploy Component",
@@ -133,6 +138,8 @@ export class Component extends OpenShiftItem {
         }
     }
 
+    @vsCommand('openshift.component.describe')
+    @vsCommand('openshift.component.describe.palette')
     static async describe(context: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(context,
             "From which Project you want to describe Component",
@@ -143,6 +150,8 @@ export class Component extends OpenShiftItem {
         DescribeViewLoader.loadView(`${component.path} Describe`,  command, component);
     }
 
+    @vsCommand('openshift.component.log')
+    @vsCommand('openshift.component.log.palette')
     static async log(context: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to see Log",
@@ -154,6 +163,8 @@ export class Component extends OpenShiftItem {
         LogViewLoader.loadView(`${component.path} Log`,  Command.showLog, component);
     }
 
+    @vsCommand('openshift.component.followLog')
+    @vsCommand('openshift.component.followLog.palette')
     static async followLog(context: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to follow Log",
@@ -170,6 +181,7 @@ export class Component extends OpenShiftItem {
         return JSON.parse(compData.stdout);
     }
 
+    @vsCommand('openshift.component.unlink')
     static async unlink(context: OpenShiftObject): Promise<string | null> {
         const unlinkActions = [
             {
@@ -194,6 +206,7 @@ export class Component extends OpenShiftItem {
         return result;
     }
 
+    @vsCommand('openshift.component.unlinkComponent.palette')
     static async unlinkComponent(context: OpenShiftObject): Promise<string | null> {
         const linkCompName: Array<string> = [];
         const component = await Component.getOpenShiftCmdData(context,
@@ -221,6 +234,7 @@ export class Component extends OpenShiftItem {
         );
     }
 
+    @vsCommand('openshift.component.unlinkService.palette')
     static async unlinkService(context: OpenShiftObject): Promise<string | null> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
@@ -241,6 +255,7 @@ export class Component extends OpenShiftItem {
         );
     }
 
+    @vsCommand('openshift.component.linkComponent')
     static async linkComponent(context: OpenShiftObject): Promise<string | null> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
@@ -278,6 +293,7 @@ export class Component extends OpenShiftItem {
         return ports;
     }
 
+    @vsCommand('openshift.component.linkService')
     static async linkService(context: OpenShiftObject): Promise<string | null> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
@@ -305,6 +321,8 @@ export class Component extends OpenShiftItem {
         contextPath: fsPath});
     }
 
+    @vsCommand('openshift.component.push')
+    @vsCommand('openshift.component.push.palette')
     static async push(context: OpenShiftObject, configOnly = false): Promise<string | null> {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to push the changes",
@@ -350,6 +368,7 @@ export class Component extends OpenShiftItem {
         }
     }
 
+    @vsCommand('openshift.component.lastPush')
     static async lastPush(): Promise<void> {
         const getPushCmd = await Component.getPushCmd();
         if (getPushCmd.pushCmd && getPushCmd.contextPath) {
@@ -359,6 +378,8 @@ export class Component extends OpenShiftItem {
         }
     }
 
+    @vsCommand('openshift.component.watch')
+    @vsCommand('openshift.component.watch.palette')
     static async watch(context: OpenShiftObject): Promise<void> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
@@ -369,6 +390,8 @@ export class Component extends OpenShiftItem {
         Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
 
+    @vsCommand('openshift.component.openUrl')
+    @vsCommand('openshift.component.openUrl.palette')
     static async openUrl(context: OpenShiftObject): Promise<ChildProcess | string> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
@@ -410,6 +433,7 @@ export class Component extends OpenShiftItem {
         return JSON.parse(UrlDetails.stdout).items;
     }
 
+    @vsCommand('openshift.component.createFromLocal')
     static async createFromLocal(context: OpenShiftObject): Promise<string | null> {
         let application: OpenShiftObject = context;
 
@@ -457,6 +481,7 @@ export class Component extends OpenShiftItem {
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
+    @vsCommand('openshift.component.createFromGit')
     static async createFromGit(context: OpenShiftObject): Promise<string | null> {
         let application: OpenShiftObject = context;
         if (!application) application = await Component.getOpenshiftData(context);
@@ -502,6 +527,7 @@ export class Component extends OpenShiftItem {
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
+    @vsCommand('openshift.component.createFromBinary')
     static async createFromBinary(context: OpenShiftObject): Promise<string | null> {
 
         let application: OpenShiftObject = context;
@@ -542,6 +568,8 @@ export class Component extends OpenShiftItem {
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
+    @vsCommand('openshift.component.debug')
+    @vsCommand('openshift.component.debug.palette')
     static async debug(context: OpenShiftObject): Promise<string | null> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
@@ -640,6 +668,7 @@ export class Component extends OpenShiftItem {
         );
     }
 
+    @vsCommand('openshift.component.import')
     static async import(component: OpenShiftObject): Promise<string | null> {
         const prjName = component.getParent().getParent().getName();
         const appName = component.getParent().getName();

@@ -5,6 +5,7 @@
 
 import { KubeConfig } from '@kubernetes/client-node';
 import { Uri, commands } from 'vscode';
+import { vsCommand } from '../vscommand';
 
 const openshiftRestClient = require('openshift-rest-client').OpenshiftClient;
 
@@ -26,6 +27,7 @@ const openshiftRestClient = require('openshift-rest-client').OpenshiftClient;
           });
     }
 
+    @vsCommand('clusters.openshift.route.open')
     public static async openUrl(context): Promise<void> {
         const kc = new KubeConfig();
         kc.loadFromDefault();

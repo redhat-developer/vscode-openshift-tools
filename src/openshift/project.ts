@@ -7,9 +7,11 @@ import { window } from 'vscode';
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject } from '../odo';
 import { Progress } from '../util/progress';
+import { vsCommand } from '../vscommand';
 
 export class Project extends OpenShiftItem {
 
+    @vsCommand('openshift.project.create')
     static async create(): Promise<string> {
         const projectList: Array<OpenShiftObject> = await OpenShiftItem.odo.getProjects();
         let projectName = await Project.getName('Project name', projectList);
@@ -20,6 +22,8 @@ export class Project extends OpenShiftItem {
             .catch((error) => Promise.reject(Error(`Failed to create Project with error '${error}'`)));
     }
 
+    @vsCommand('openshift.project.delete')
+    @vsCommand('openshift.project.delete.palette')
     static async del(context: OpenShiftObject): Promise<string> {
         let result: Promise<string> = null;
         const project = await Project.getOpenShiftCmdData(context,

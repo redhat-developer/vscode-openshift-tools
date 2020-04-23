@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import { Command } from "../odo";
 import { KubeConfigUtils } from "../util/kubeUtils";
 import { OpenShiftItem } from '../openshift/openshiftItem';
+import { vsCommand } from '../vscommand';
 
 export class Console extends OpenShiftItem {
 
@@ -29,6 +30,7 @@ export class Console extends OpenShiftItem {
         return JSON.parse(consoleUrl.stdout).data.consoleURL;
     }
 
+    @vsCommand('clusters.openshift.build.openConsole')
     static async openBuildConfig(context: { name: string}): Promise<unknown> {
         let url = '';
         if (!context) {
@@ -45,6 +47,7 @@ export class Console extends OpenShiftItem {
         return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
     }
 
+    @vsCommand('clusters.openshift.deployment.openConsole')
     static async openDeploymentConfig(context: { name: string}): Promise<unknown> {
         let url = '';
         if (!context) {
@@ -61,6 +64,7 @@ export class Console extends OpenShiftItem {
         return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
     }
 
+    @vsCommand('clusters.openshift.imagestream.openConsole')
     static async openImageStream(context: { name: string}): Promise<unknown> {
         let url = '';
         if (!context) {
@@ -77,6 +81,7 @@ export class Console extends OpenShiftItem {
         return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
     }
 
+    @vsCommand('clusters.openshift.project.openConsole')
     static async openProject(context: { name: string}): Promise<unknown> {
         let url = '';
         if (!context) {
