@@ -73,8 +73,7 @@ export class Component extends OpenShiftItem {
         return command.catch((err) => Promise.reject(Error(`Failed to create Component with error '${err}'`)));
     }
 
-    @vsCommand('openshift.component.delete')
-    @vsCommand('openshift.component.delete.palette')
+    @vsCommand('openshift.component.delete', true)
     static async del(treeItem: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(treeItem,
             "From which Project do you want to delete Component",
@@ -94,8 +93,7 @@ export class Component extends OpenShiftItem {
             .catch((err) => Promise.reject(Error(`Failed to delete Component with error '${err}'`)));
         }
     }
-    @vsCommand('openshift.component.undeploy')
-    @vsCommand('openshift.component.undeploy.palette')
+    @vsCommand('openshift.component.undeploy', true)
     static async undeploy(treeItem: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(treeItem,
             "From which Project do you want to undeploy Component",
@@ -138,8 +136,7 @@ export class Component extends OpenShiftItem {
         }
     }
 
-    @vsCommand('openshift.component.describe')
-    @vsCommand('openshift.component.describe.palette')
+    @vsCommand('openshift.component.describe', true)
     static async describe(context: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(context,
             "From which Project you want to describe Component",
@@ -150,8 +147,7 @@ export class Component extends OpenShiftItem {
         DescribeViewLoader.loadView(`${component.path} Describe`,  command, component);
     }
 
-    @vsCommand('openshift.component.log')
-    @vsCommand('openshift.component.log.palette')
+    @vsCommand('openshift.component.log', true)
     static async log(context: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to see Log",
@@ -163,8 +159,7 @@ export class Component extends OpenShiftItem {
         LogViewLoader.loadView(`${component.path} Log`,  Command.showLog, component);
     }
 
-    @vsCommand('openshift.component.followLog')
-    @vsCommand('openshift.component.followLog.palette')
+    @vsCommand('openshift.component.followLog', true)
     static async followLog(context: OpenShiftObject): Promise<string> {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to follow Log",
@@ -321,8 +316,7 @@ export class Component extends OpenShiftItem {
         contextPath: fsPath});
     }
 
-    @vsCommand('openshift.component.push')
-    @vsCommand('openshift.component.push.palette')
+    @vsCommand('openshift.component.push', true)
     static async push(context: OpenShiftObject, configOnly = false): Promise<string | null> {
         const component = await Component.getOpenShiftCmdData(context,
             "In which Project you want to push the changes",
@@ -378,8 +372,7 @@ export class Component extends OpenShiftItem {
         }
     }
 
-    @vsCommand('openshift.component.watch')
-    @vsCommand('openshift.component.watch.palette')
+    @vsCommand('openshift.component.watch', true)
     static async watch(context: OpenShiftObject): Promise<void> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
@@ -390,8 +383,7 @@ export class Component extends OpenShiftItem {
         Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
 
-    @vsCommand('openshift.component.openUrl')
-    @vsCommand('openshift.component.openUrl.palette')
+    @vsCommand('openshift.component.openUrl', true)
     static async openUrl(context: OpenShiftObject): Promise<ChildProcess | string> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',
@@ -568,8 +560,7 @@ export class Component extends OpenShiftItem {
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
-    @vsCommand('openshift.component.debug')
-    @vsCommand('openshift.component.debug.palette')
+    @vsCommand('openshift.component.debug', true)
     static async debug(context: OpenShiftObject): Promise<string | null> {
         const component = await Component.getOpenShiftCmdData(context,
             'Select a Project',

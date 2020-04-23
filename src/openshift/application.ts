@@ -11,8 +11,7 @@ import { vsCommand } from '../vscommand';
 
 export class Application extends OpenShiftItem {
 
-    @vsCommand('openshift.app.describe')
-    @vsCommand('openshift.app.describe.palette')
+    @vsCommand('openshift.app.describe', true)
     static async describe(treeItem: OpenShiftObject): Promise<void> {
         const application = await Application.getOpenShiftCmdData(treeItem,
             "From which project you want to describe Application",
@@ -20,8 +19,7 @@ export class Application extends OpenShiftItem {
         if (application) Application.odo.executeInTerminal(Command.describeApplication(application.getParent().getName(), application.getName()));
     }
 
-    @vsCommand('openshift.app.delete')
-    @vsCommand('openshift.app.delete.palette')
+    @vsCommand('openshift.app.delete', true)
     static async del(treeItem: OpenShiftObject): Promise<string> {
         const application = await Application.getOpenShiftCmdData(treeItem,
             "From which Project you want to delete Application",

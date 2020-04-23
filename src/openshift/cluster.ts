@@ -58,8 +58,7 @@ export class Cluster extends OpenShiftItem {
         CliChannel.getInstance().showOutput();
     }
 
-    @vsCommand('openshift.openshiftConsole')
-    @vsCommand('openshift.openshiftConsole.palette')
+    @vsCommand('openshift.openshiftConsole', true)
     static async openshiftConsole(): Promise<void> {
         let consoleUrl: string;
         try {

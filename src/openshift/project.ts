@@ -22,8 +22,7 @@ export class Project extends OpenShiftItem {
             .catch((error) => Promise.reject(Error(`Failed to create Project with error '${error}'`)));
     }
 
-    @vsCommand('openshift.project.delete')
-    @vsCommand('openshift.project.delete.palette')
+    @vsCommand('openshift.project.delete', true)
     static async del(context: OpenShiftObject): Promise<string> {
         let result: Promise<string> = null;
         const project = await Project.getOpenShiftCmdData(context,
