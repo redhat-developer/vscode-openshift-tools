@@ -8,6 +8,7 @@ import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { OdoImpl, Odo } from "../odo";
 import { Progress } from "../util/progress";
 import * as common from './common';
+import { vsCommand } from "../vscommand";
 
 export class Build {
 
@@ -73,6 +74,7 @@ export class Build {
         return build;
     }
 
+    @vsCommand('clusters.openshift.build.start')
     static async startBuild(context: { name: string}): Promise<string> {
         let buildName: string = context ? context.name : undefined;
         let result: Promise<string> = null;
@@ -85,6 +87,8 @@ export class Build {
         return result;
     }
 
+    @vsCommand('clusters.openshift.build.showLog')
+    @vsCommand('clusters.openshift.build.showLog.palette')
     static async showLog(context: { impl: any}): Promise<string> {
         const build = await Build.selectBuild(context, "Select a build to see the logs");
         if (build) {
@@ -93,6 +97,7 @@ export class Build {
         return build;
     }
 
+    @vsCommand('clusters.openshift.build.rebuild')
     static async rebuild(context: { id?: string; impl: any}): Promise<string> {
         let resourceId: string;
         if (context) {
@@ -109,6 +114,7 @@ export class Build {
         return null;
     }
 
+    @vsCommand('clusters.openshift.build.followLog')
     static async followLog(context: { impl: any}): Promise<string> {
         const build = await Build.selectBuild(context, "Select a build to follow the logs");
         if (build) {
@@ -117,6 +123,8 @@ export class Build {
         return null;
     }
 
+    @vsCommand('clusters.openshift.build.delete')
+    @vsCommand('clusters.openshift.build.delete.palette')
     static async delete(context: { impl: any}): Promise<string> {
         let result: null | string | Promise<string> | PromiseLike<string> = null;
         const build = await Build.selectBuild(context, "Select a build to delete");

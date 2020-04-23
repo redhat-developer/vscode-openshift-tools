@@ -25,6 +25,7 @@ import { Platform } from './util/platform';
 import { Odo, OpenShiftObject, OdoImpl } from './odo';
 import { WatchUtil, FileContentChangeNotifier } from './util/watch';
 import { KubeConfigUtils } from './util/kubeUtils';
+import { vsCommand } from './vscommand';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
@@ -110,6 +111,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         this.treeView.reveal(item);
     }
 
+    @vsCommand('openshift.explorer.reportIssue')
     static async reportIssue(): Promise<unknown> {
         return commands.executeCommand('vscode.open', Uri.parse(OpenShiftExplorer.issueUrl()));
     }

@@ -8,8 +8,11 @@ import { isEmpty } from "validator";
 import { OpenShiftItem } from "./openshiftItem";
 import { OpenShiftObject, ContextType } from "../odo";
 import { Progress } from "../util/progress";
+import { vsCommand } from '../vscommand';
 
 export class Storage extends OpenShiftItem {
+
+    @vsCommand('openshift.storage.create')
     static async create(context: OpenShiftObject): Promise<string> {
         const component = await Storage.getOpenShiftCmdData(context,
             "In which Project you want to create a Storage",
@@ -39,6 +42,8 @@ export class Storage extends OpenShiftItem {
             .catch((err) => Promise.reject(Error(`New Storage command failed with error: '${err}'!`)));
     }
 
+    @vsCommand('openshift.storage.delete')
+    @vsCommand('openshift.storage.delete.palette')
     static async del(treeItem: OpenShiftObject): Promise<string> {
         let storage = treeItem;
         const component = await Storage.getOpenShiftCmdData(storage,

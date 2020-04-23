@@ -5,16 +5,19 @@
 
 import { Odo, OdoImpl, Command } from '../odo';
 import { Platform } from '../util/platform';
+import { vsCommand } from '../vscommand';
 
 export class Catalog {
     private static odo: Odo = OdoImpl.Instance;
 
     private componentsJson: any[] = [];
 
+    @vsCommand('openshift.catalog.listComponents')
     static listComponents(): void {
         Catalog.odo.executeInTerminal(Command.listCatalogComponents(), Platform.getUserHomePath());
     }
 
+    @vsCommand('openshift.catalog.listServices')
     static listServices(): void {
         Catalog.odo.executeInTerminal(Command.listCatalogServices(), Platform.getUserHomePath());
     }

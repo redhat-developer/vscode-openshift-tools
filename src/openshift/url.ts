@@ -8,9 +8,11 @@ import { OpenShiftObject, Command } from '../odo';
 import { OpenShiftItem } from './openshiftItem';
 import { Progress } from "../util/progress";
 import { Port } from '../odo/config';
+import { vsCommand } from '../vscommand';
 
 export class Url extends OpenShiftItem{
 
+    @vsCommand('openshift.url.create')
     static async create(context: OpenShiftObject): Promise<string> {
         const component = await Url.getOpenShiftCmdData(context,
             'Select a Project to create a URL',
@@ -45,6 +47,8 @@ export class Url extends OpenShiftItem{
         return null;
     }
 
+    @vsCommand('openshift.url.delete')
+    @vsCommand('openshift.url.delete.palette')
     static async del(treeItem: OpenShiftObject): Promise<string | null> {
         let url = treeItem;
         const component = await Url.getOpenShiftCmdData(url,
@@ -65,6 +69,7 @@ export class Url extends OpenShiftItem{
         return null;
     }
 
+    @vsCommand('openshift.url.open')
     static async open(treeItem: OpenShiftObject): Promise<void> {
         const component = treeItem.getParent();
         const urlDetails = await Url.odo.execute(Command.getComponentUrl(), component.contextPath.fsPath);

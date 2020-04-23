@@ -11,10 +11,12 @@ import { TokenStore } from "../util/credentialManager";
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { Filters } from "../util/filters";
 import { Progress } from "../util/progress";
+import { vsCommand } from '../vscommand';
 
 export class Cluster extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
 
+    @vsCommand('openshift.explorer.logout')
     static async logout(): Promise<string> {
         const value = await window.showWarningMessage(`Do you want to logout of cluster?`, 'Logout', 'Cancel');
         if (value === 'Logout') {
@@ -36,22 +38,28 @@ export class Cluster extends OpenShiftItem {
         return null;
     }
 
+    @vsCommand('openshift.explorer.refresh')
     static refresh(): void {
         Cluster.explorer.refresh();
     }
 
+    @vsCommand('openshift.about')
     static async about(): Promise<void> {
         await Cluster.odo.executeInTerminal(Command.printOdoVersion());
     }
 
+    @vsCommand('openshift.oc.about')
     static async ocAbout(): Promise<void> {
         await Cluster.odo.executeInTerminal(Command.printOcVersion());
     }
 
+    @vsCommand('openshift.output')
     static showOpenShiftOutput(): void {
         CliChannel.getInstance().showOutput();
     }
 
+    @vsCommand('openshift.openshiftConsole')
+    @vsCommand('openshift.openshiftConsole.palette')
     static async openshiftConsole(): Promise<void> {
         let consoleUrl: string;
         try {
@@ -64,6 +72,7 @@ export class Cluster extends OpenShiftItem {
         return commands.executeCommand('vscode.open', Uri.parse(consoleUrl));
     }
 
+    @vsCommand('openshift.explorer.switchContext')
     static async switchContext(): Promise<string> {
         const k8sConfig = new KubeConfigUtils();
         const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
@@ -90,6 +99,7 @@ export class Cluster extends OpenShiftItem {
             }) : choice.label;
     }
 
+    @vsCommand('openshift.explorer.login')
     static async login(): Promise<string> {
         const response = await Cluster.requestLoginConfirmation();
         const loginActions = [
@@ -126,6 +136,7 @@ export class Cluster extends OpenShiftItem {
         return result;
     }
 
+    @vsCommand('openshift.explorer.login.credentialsLogin')
     static async credentialsLogin(skipConfirmation = false): Promise<string> {
         let password: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
@@ -189,6 +200,7 @@ export class Cluster extends OpenShiftItem {
         return null;
     }
 
+    @vsCommand('openshift.explorer.login.tokenLogin')
     static async tokenLogin(skipConfirmation = false): Promise<string | null> {
         let token: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
