@@ -46,7 +46,6 @@ export function vsCommand(commandId: string): Function {
 		if (!(typeof descriptor.value === 'function')) {
 			throw new Error('not supported');
 		}
-
 		vsCommands.push({ commandId, key, method: descriptor.value });
 	};
 }

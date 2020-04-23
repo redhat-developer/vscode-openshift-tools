@@ -79,6 +79,8 @@ export class DeploymentConfig {
           DeploymentConfig.command.getReplicas(deploymentConfig));
     }
 
+    @vsCommand('clusters.openshift.deploy.rcShowLog')
+    @vsCommand('clusters.openshift.deploy.rcShowLog.palette')
     static async rcShowLog(context: { impl: any }): Promise<string> {
         const replica = await DeploymentConfig.selectReplica(context, "Select a Replica to see the logs");
         if (replica) {

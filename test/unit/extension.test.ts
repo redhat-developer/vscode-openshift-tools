@@ -13,17 +13,8 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { Cluster } from '../../src/openshift/cluster';
-import { Application } from '../../src/openshift/application';
-import { Catalog } from '../../src/openshift/catalog';
-import { Component } from '../../src/openshift/component';
-import { Project } from '../../src/openshift/project';
-import { Service } from '../../src/openshift/service';
-import { Storage } from '../../src/openshift/storage';
-import { Url } from '../../src/openshift/url';
-import { OpenShiftExplorer } from '../../src/explorer';
 import { OdoImpl, ContextType, OpenShiftObjectImpl } from '../../src/odo';
-import { Oc } from '../../src/oc';
+import { Progress } from '../../src/util/progress';
 
 import packagejson = require('../../package.json');
 import path = require('path');
@@ -64,37 +55,6 @@ suite('openshift connector Extension', () => {
 		assert.ok(vscode.extensions.getExtension('redhat.vscode-openshift-connector'));
 	});
 
-    function getStaticMethodsToStub(osc: string[]): string[] {
-        const mths: Set<string> = new Set();
-        osc.forEach((name) => {
-            // eslint-disable-next-line no-param-reassign
-            name = name.replace('.palette', '');
-            const segs: string[] = name.split('.');
-            let methName: string = segs[segs.length-1];
-            methName = methName === 'delete'? 'del' : methName;
-            !mths.has(methName) && mths.add(methName);
-        });
-        return [...mths];
-    }
-
-    test('should activate extension', async () => {
-        sandbox.stub(vscode.window, 'showErrorMessage');
-        const cmds: string[] = await vscode.commands.getCommands();
-        const osc: string[] = cmds.filter((item) => item.startsWith('openshift.'));
-        const mths: string[] = getStaticMethodsToStub(osc);
-        [Application, Catalog, Cluster, Component, Project, Service, Storage, Url, OpenShiftExplorer, Oc].forEach((item: { [x: string]: any }) => {
-            mths.forEach((name) => {
-                if (item[name]) {
-                    sandbox.stub(item, name).resolves();
-                }
-            });
-        });
-        osc.forEach((command) => {
-            vscode.commands.executeCommand(command);
-        });
-        expect(vscode.window.showErrorMessage).has.not.been.called;
-    });
-
     test('should load components from workspace folders', async () => {
         sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
         const components = await OdoImpl.Instance.getApplicationChildren(appItem);
@@ -134,42 +94,19 @@ suite('openshift connector Extension', () => {
     });
 
     test('async command wrapper shows message returned from command', async () => {
-        sandbox.stub(Cluster, 'login').resolves('message');
-        sandbox.stub(vscode.window, 'showErrorMessage');
-        const simStub: sinon.SinonStub = sandbox.stub(vscode.window, 'showInformationMessage');
-        await vscode.commands.executeCommand('openshift.explorer.login');
-        expect(simStub).calledWith('message');
+        sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+        const simStub = sandbox.stub(vscode.window, 'showInformationMessage');
+        sandbox.stub(Progress, 'execFunctionWithProgress').resolves();
+        await vscode.commands.executeCommand('openshift.app.delete', appItem);
+        expect(simStub).calledWith(`Application '${appItem.getName()}' successfully deleted`);
     });
 
     test('async command wrapper shows error message from rejected command', async () => {
-        sandbox.stub(Cluster, 'login').returns(Promise.reject(Error('message')));
-        const semStub: sinon.SinonStub = sandbox.stub(vscode.window, 'showErrorMessage');
+        sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
         sandbox.stub(vscode.window, 'showInformationMessage');
-        await vscode.commands.executeCommand('openshift.explorer.login');
-        expect(semStub).calledWith('message');
-    });
-
-    test('async command wrapper shows error.message from rejected command', async () => {
-        sandbox.stub(Cluster, 'login').returns(Promise.reject(new Error('message')));
-        const semStub: sinon.SinonStub = sandbox.stub(vscode.window, 'showErrorMessage');
-        sandbox.stub(vscode.window, 'showInformationMessage');
-        await vscode.commands.executeCommand('openshift.explorer.login');
-        expect(semStub).calledWith('message');
-    });
-
-    test('sync command wrapper shows message returned from command', async () => {
-        sandbox.stub(Cluster, 'about');
-        sandbox.stub(vscode.window, 'showErrorMessage');
-        const simStub: sinon.SinonStub = sandbox.stub(vscode.window, 'showInformationMessage');
-        await vscode.commands.executeCommand('openshift.about');
-        expect(simStub).not.called;
-    });
-
-    test('sync command wrapper shows message returned from command', async () => {
-        const error = new Error('Message');
-        sandbox.stub(Cluster, 'refresh').throws(error);
-        const semStub: sinon.SinonStub = sandbox.stub(vscode.window, 'showErrorMessage');
-        await vscode.commands.executeCommand('openshift.explorer.refresh');
-        expect(semStub).calledWith(error);
+        const semStub = sandbox.stub(vscode.window, 'showErrorMessage');
+        sandbox.stub(Progress, 'execFunctionWithProgress').rejects(Error('message'));
+        await vscode.commands.executeCommand('openshift.app.delete', appItem);
+        expect(semStub).calledWith(`Failed to delete Application with error 'Error: message'`);
     });
 });

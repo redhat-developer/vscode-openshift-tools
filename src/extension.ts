@@ -7,19 +7,20 @@ import * as vscode from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { OpenShiftExplorer } from './explorer';
 import { Cluster } from './openshift/cluster';
+import { Component } from './openshift/component';
 import { Platform } from './util/platform';
 import { Build } from './k8s/build';
 import { DeploymentConfig } from './k8s/deployment';
 import { OdoImpl, ContextType } from './odo';
 import { TokenStore } from './util/credentialManager';
-import { registerCommands } from './vscommand';
-import { Component } from './openshift/component';
+import { registerCommands} from './vscommand';
 
 import path = require('path');
 import fsx = require('fs-extra');
 import treeKill = require('tree-kill');
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined;
+
 let lastNamespace = '';
 
 async function isOpenShift(): Promise<boolean> {
@@ -93,15 +94,16 @@ export async function activate(extensionContext: vscode.ExtensionContext): Promi
     TokenStore.extensionContext = extensionContext;
     const disposable = [
         ...await registerCommands(
+            './k8s/route',
             './openshift/catalog',
-            './oc',
-            './k8s/console',
-            './openshift/service',
-            './openshift/url',
-            './openshift/storage',
-            './openshift/application',
             './openshift/project',
-            './k8s/route'),
+            './openshift/application',
+            './openshift/storage',
+            './openshift/url',
+            './openshift/service',
+            './k8s/console',
+            './oc',
+        ),
         vscode.commands.registerCommand('clusters.openshift.useProject', (context) => vscode.commands.executeCommand('extension.vsKubernetesUseNamespace', context)),
         OpenShiftExplorer.getInstance()
     ];
