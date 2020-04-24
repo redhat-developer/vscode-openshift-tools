@@ -8,7 +8,7 @@ import { OpenShiftObject, Command } from '../odo';
 import { OpenShiftItem } from './openshiftItem';
 import { Progress } from "../util/progress";
 import { Port } from '../odo/config';
-import { vsCommand } from '../vscommand';
+import { vsCommand, VsCommandError } from '../vscommand';
 
 export class Url extends OpenShiftItem{
 
@@ -32,7 +32,7 @@ export class Url extends OpenShiftItem{
             } else if (ports.length > 1) {
                 port = await window.showQuickPick(portItems, {placeHolder: "Select port to expose"});
             } else {
-                return Promise.reject(Error(`Component '${component.getName()}' has no ports declared.`));
+                throw new VsCommandError(`Component '${component.getName()}' has no ports declared.`);
             }
             if (!port) return null;
             const secure = await window.showQuickPick(['Yes', 'No'], {placeHolder: "Do you want to secure new URL?"});
@@ -40,7 +40,7 @@ export class Url extends OpenShiftItem{
                 return Progress.execFunctionWithProgress(`Creating a URL '${urlName}' for the Component '${component.getName()}'`,
                     () => Url.odo.createComponentCustomUrl(component, `${urlName}`, `${(port as any).Number}`, secure === 'Yes')
                         .then(() => `URL '${urlName}' for component '${component.getName()}' successfully created`)
-                        .catch((err) => Promise.reject(Error(`Failed to create URL '${urlName}' for component '${component.getName()}'. ${err.message}`)))
+                        .catch((err) => Promise.reject(new VsCommandError(`Failed to create URL '${urlName}' for component '${component.getName()}'. ${err.message}`)))
                 );
             }
         }
@@ -62,14 +62,14 @@ export class Url extends OpenShiftItem{
             if (value === 'Yes') {
                 return Progress.execFunctionWithProgress(`Deleting URL ${url.getName()} from Component ${component.getName()}`, () => Url.odo.deleteURL(url))
                     .then(() => `URL '${url.getName()}' from Component '${url.getParent().getName()}' successfully deleted`)
-                    .catch((err) => Promise.reject(Error(`Failed to delete URL with error '${err}'`)));
+                    .catch((err) => Promise.reject(new VsCommandError(`Failed to delete URL with error '${err}'`)));
             }
         }
         return null;
     }
 
     @vsCommand('openshift.url.open')
-    static async open(treeItem: OpenShiftObject): Promise<void> {
+    static async open(treeItem: OpenShiftObject): Promise<string> {
         const component = treeItem.getParent();
         const urlDetails = await Url.odo.execute(Command.getComponentUrl(), component.contextPath.fsPath);
         let urlObject: any;
@@ -85,7 +85,7 @@ export class Url extends OpenShiftItem{
         if (urlObject[0].status.state === 'Pushed') {
             commands.executeCommand('vscode.open', Uri.parse(`${urlObject[0].spec.protocol}://${urlObject[0].spec.host}`));
         } else {
-            window.showInformationMessage('Selected URL is not created in cluster. Use \'Push\' command before opening URL in browser.');
+            return 'Selected URL is not created in cluster. Use \'Push\' command before opening URL in browser.';
         }
     }
 }

@@ -5,7 +5,7 @@
 
 import { KubeConfig } from '@kubernetes/client-node';
 import { Uri, commands } from 'vscode';
-import { vsCommand } from '../vscommand';
+import { vsCommand, VsCommandError } from '../vscommand';
 
 const openshiftRestClient = require('openshift-rest-client').OpenshiftClient;
 
@@ -20,7 +20,7 @@ const openshiftRestClient = require('openshift-rest-client').OpenshiftClient;
               .then((response: any) => {
                 const hostName = response?.body?.spec.host;
                 if (hostName === undefined) {
-                    throw Error(`Cannot identify host name for Route '${name}'`);
+                    throw new VsCommandError(`Cannot identify host name for Route '${name}'`);
                 }
                 return response.body.spec.tls ? `https://${hostName}` : `http://${hostName}`;
               });
@@ -33,7 +33,7 @@ const openshiftRestClient = require('openshift-rest-client').OpenshiftClient;
         kc.loadFromDefault();
         const currentContextObj = kc.getContextObject(kc.getCurrentContext());
         if (currentContextObj === undefined) {
-            throw Error('Cannot find current context in Kubernetes configuration.')
+            throw new VsCommandError('Cannot find current context in Kubernetes configuration.')
         }
         const url = await Route.getUrl(currentContextObj.namespace, context.name)
         commands.executeCommand('vscode.open', Uri.parse(url));

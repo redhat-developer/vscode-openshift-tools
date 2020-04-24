@@ -8,7 +8,7 @@ import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
 import { Progress } from '../util/progress';
 import { Platform } from '../util/platform';
-import { vsCommand } from '../vscommand';
+import { vsCommand, VsCommandError } from '../vscommand';
 
 export class Service extends OpenShiftItem {
 
@@ -42,7 +42,7 @@ export class Service extends OpenShiftItem {
         if (!serviceName) return null;
         return Progress.execFunctionWithProgress(`Creating a new Service '${serviceName}'`, () => Service.odo.createService(application, serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))
             .then(() => `Service '${serviceName}' successfully created`)
-            .catch((err) => Promise.reject(Error(`Failed to create Service with error '${err}'`)));
+            .catch((err) => Promise.reject(new VsCommandError(`Failed to create Service with error '${err}'`)));
     }
 
     @vsCommand('openshift.service.delete', true)
@@ -64,7 +64,7 @@ export class Service extends OpenShiftItem {
             if (answer === 'Yes') {
                 return Progress.execFunctionWithProgress(`Deleting Service '${service.getName()}' from Application '${service.getParent().getName()}'`, () => Service.odo.deleteService(service))
                     .then(() => `Service '${service.getName()}' successfully deleted`)
-                    .catch((err) => Promise.reject(Error(`Failed to delete Service with error '${err}'`)));
+                    .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Service with error '${err}'`)));
             }
         }
         return null;
@@ -88,7 +88,7 @@ export class Service extends OpenShiftItem {
             if (template) {
                 Service.odo.executeInTerminal(Command.describeService(template), Platform.getUserHomePath());
             } else {
-                throw Error(`Cannot get Service Type name for Service '${service.getName()}'`);
+                throw new VsCommandError(`Cannot get Service Type name for Service '${service.getName()}'`);
             }
         }
     }

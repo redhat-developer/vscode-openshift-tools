@@ -8,7 +8,7 @@ import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { OdoImpl, Odo } from "../odo";
 import { Progress } from "../util/progress";
 import * as common from './common';
-import { vsCommand } from "../vscommand";
+import { vsCommand, VsCommandError } from "../vscommand";
 
 export class Build {
 
@@ -82,7 +82,7 @@ export class Build {
         if (buildName) {
             result = Progress.execFunctionWithProgress(`Starting build`, () => Build.odo.execute(Build.command.startBuild(buildName)))
                 .then(() => `Build '${buildName}' successfully started`)
-                .catch((err) => Promise.reject(new Error(`Failed to start build with error '${err}'`)));
+                .catch((err) => Promise.reject(new VsCommandError(`Failed to start build with error '${err}'`)));
         }
         return result;
     }
@@ -129,7 +129,7 @@ export class Build {
         if (build) {
             result = Progress.execFunctionWithProgress(`Deleting build`, () => Build.odo.execute(Build.command.delete(build)))
                 .then(() => `Build '${build}' successfully deleted`)
-                .catch((err) => Promise.reject(new Error(`Failed to delete build with error '${err}'`)));
+                .catch((err) => Promise.reject(new VsCommandError(`Failed to delete build with error '${err}'`)));
         }
         return result;
     }

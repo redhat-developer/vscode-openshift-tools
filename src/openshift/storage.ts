@@ -8,7 +8,7 @@ import { isEmpty } from "validator";
 import { OpenShiftItem } from "./openshiftItem";
 import { OpenShiftObject, ContextType } from "../odo";
 import { Progress } from "../util/progress";
-import { vsCommand } from '../vscommand';
+import { vsCommand, VsCommandError } from '../vscommand';
 
 export class Storage extends OpenShiftItem {
 
@@ -39,7 +39,7 @@ export class Storage extends OpenShiftItem {
 
         return Progress.execFunctionWithProgress(`Creating the Storage '${component.getName()}'`, () => Storage.odo.createStorage(component, storageName, mountPath, storageSize))
             .then(() => `Storage '${storageName}' successfully created for Component '${component.getName()}'`)
-            .catch((err) => Promise.reject(Error(`New Storage command failed with error: '${err}'!`)));
+            .catch((err) => Promise.reject(new VsCommandError(`New Storage command failed with error: '${err}'!`)));
     }
 
     @vsCommand('openshift.storage.delete', true)
@@ -55,7 +55,7 @@ export class Storage extends OpenShiftItem {
             if (value === 'Yes') {
                 return Progress.execFunctionWithProgress(`Deleting Storage ${storage.getName()} from Component ${storage.getParent().getName()}`, () => Storage.odo.deleteStorage(storage))
                     .then(() => `Storage '${storage.getName()}' from Component '${storage.getParent().getName()}' successfully deleted`)
-                    .catch((err) => Promise.reject(Error(`Failed to delete Storage with error '${err}'`)));
+                    .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Storage with error '${err}'`)));
             }
         }
         return null;

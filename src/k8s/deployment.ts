@@ -8,7 +8,7 @@ import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { Progress } from "../util/progress";
 import * as common from './common';
 import { OdoImpl, Odo } from "../odo";
-import { vsCommand } from "../vscommand";
+import { vsCommand, VsCommandError } from "../vscommand";
 
 export class DeploymentConfig {
 
@@ -62,7 +62,7 @@ export class DeploymentConfig {
         if (deployName) {
             result = Progress.execFunctionWithProgress(`Creating Deployment for '${deployName}'.`, () => DeploymentConfig.odo.execute(DeploymentConfig.command.deploy(deployName)))
                 .then(() => `Deployment successfully created for '${deployName}'.`)
-                .catch((err) => Promise.reject(Error(`Failed to create Deployment with error '${err}'.`)));
+                .catch((err) => Promise.reject(new VsCommandError(`Failed to create Deployment with error '${err}'.`)));
         }
         return result;
     }
@@ -118,7 +118,7 @@ export class DeploymentConfig {
         if (replica) {
             result = Progress.execFunctionWithProgress(`Deleting replica`, () => DeploymentConfig.odo.execute(DeploymentConfig.command.delete(replica)))
                 .then(() => `Replica '${replica}' successfully deleted`)
-                .catch((err) => Promise.reject(Error(`Failed to delete replica with error '${err}'`)));
+                .catch((err) => Promise.reject(new VsCommandError(`Failed to delete replica with error '${err}'`)));
         }
         return result;
     }

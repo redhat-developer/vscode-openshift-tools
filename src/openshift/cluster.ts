@@ -11,7 +11,7 @@ import { TokenStore } from "../util/credentialManager";
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { Filters } from "../util/filters";
 import { Progress } from "../util/progress";
-import { vsCommand } from '../vscommand';
+import { vsCommand, VsCommandError } from '../vscommand';
 
 export class Cluster extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
@@ -32,7 +32,7 @@ export class Cluster extends OpenShiftItem {
                     }
                     return null;
                 }
-                throw Error(`Failed to logout of the current cluster with '${result.stderr}'!`);
+                throw new VsCommandError(`Failed to logout of the current cluster with '${result.stderr}'!`);
             });
         }
         return null;
@@ -179,7 +179,7 @@ export class Cluster extends OpenShiftItem {
             () => Cluster.odo.execute(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd))
             .then((result) => Cluster.save(username, passwd, password, result))
             .then((result) => Cluster.loginMessage(clusterURL, result))
-            .catch((error) => Promise.reject(new Error(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.message)}'!`)))
+            .catch((error) => Promise.reject(new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.message)}'!`)))
         );
     }
 
@@ -220,7 +220,7 @@ export class Cluster extends OpenShiftItem {
         return Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`,
             () => Cluster.odo.execute(Command.odoLoginWithToken(clusterURL, ocToken))
             .then((result) => Cluster.loginMessage(clusterURL, result))
-            .catch((error) => Promise.reject(new Error(`Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(error.message)}'!`)))
+            .catch((error) => Promise.reject(new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(error.message)}'!`)))
         );
     }
 
