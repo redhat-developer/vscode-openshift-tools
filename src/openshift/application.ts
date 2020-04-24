@@ -7,7 +7,7 @@ import { window } from 'vscode';
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject, Command } from '../odo';
 import { Progress } from '../util/progress';
-import { vsCommand } from '../vscommand';
+import { vsCommand, VsCommandError } from '../vscommand';
 
 export class Application extends OpenShiftItem {
 
@@ -30,7 +30,7 @@ export class Application extends OpenShiftItem {
             if (value === 'Yes') {
                 return Progress.execFunctionWithProgress(`Deleting the Application '${appName}'`, () => Application.odo.deleteApplication(application))
                     .then(() => `Application '${appName}' successfully deleted`)
-                    .catch((err) => Promise.reject(Error(`Failed to delete Application with error '${err}'`)));
+                    .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Application with error '${err}'`)));
             }
         }
         return null;
