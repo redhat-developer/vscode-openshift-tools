@@ -3,39 +3,44 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { commands, Disposable, window } from 'vscode';
+
+type VsCommandFunction = (...args: any[]) => Promise<any> | any;
 
 interface VsCommand {
     commandId: string;
     key: string;
-    method: (...args: any[]) => Promise<any> | void;
+    method: VsCommandFunction;
+}
+
+export class VsCommandError extends Error {
+    constructor(message: string, public parent?: Error) {
+        super(message);
+        Object.setPrototypeOf(this, new.target.prototype);
+    }
 }
 
 const vsCommands: VsCommand[] = [];
 
-function displayResult(result?: any): void {
+function displayResult(result?: unknown): unknown {
     if (result && typeof result === 'string') {
         window.showInformationMessage(result);
     }
+    return result;
 }
 
-function execute<T>(
-    command: (...args: T[]) => Promise<any> | void,
-    ...params: T[]
-): Promise<any> {
+async function execute(command: VsCommandFunction, ...params: any[]): Promise<any> {
     try {
         const res = command.call(null, ...params);
-        return res && res.then
-            ? res
-                  .then((result: any) => {
-                      displayResult(result);
-                  })
-                  .catch((err: any) => {
-                      window.showErrorMessage(err.message ? err.message : err);
-                  })
-            : undefined;
+        return res ? displayResult(res.then ? await res : res) : undefined;
     } catch (err) {
-        window.showErrorMessage(err);
+        if (err instanceof VsCommandError) {
+            window.showErrorMessage(err.message);
+        } else {
+            throw err;
+        }
     }
 }
 

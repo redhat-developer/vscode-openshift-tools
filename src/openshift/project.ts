@@ -7,7 +7,7 @@ import { window } from 'vscode';
 import { OpenShiftItem } from './openshiftItem';
 import { OpenShiftObject } from '../odo';
 import { Progress } from '../util/progress';
-import { vsCommand } from '../vscommand';
+import { vsCommand, VsCommandError } from '../vscommand';
 
 export class Project extends OpenShiftItem {
 
@@ -19,7 +19,7 @@ export class Project extends OpenShiftItem {
         projectName = projectName.trim();
         return Project.odo.createProject(projectName)
             .then(() => `Project '${projectName}' successfully created`)
-            .catch((error) => Promise.reject(Error(`Failed to create Project with error '${error}'`)));
+            .catch((error) => Promise.reject(new VsCommandError(`Failed to create Project with error '${error}'`)));
     }
 
     @vsCommand('openshift.project.delete', true)
@@ -34,7 +34,7 @@ export class Project extends OpenShiftItem {
                 result = Progress.execFunctionWithProgress(`Deleting Project '${project.getName()}'`,
                     () => Project.odo.deleteProject(project)
                         .then(() => `Project '${project.getName()}' successfully deleted`)
-                        .catch((err) => Promise.reject(Error(`Failed to delete Project with error '${err}'`)))
+                        .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Project with error '${err}'`)))
                 );
             }
         }
