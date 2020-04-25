@@ -6,7 +6,7 @@
 import * as vscode from 'vscode';
 import { Command } from "../odo";
 import { KubeConfigUtils } from "../util/kubeUtils";
-import { OpenShiftItem } from '../openshift/openshiftItem';
+import OpenShiftItem from '../openshift/openshiftItem';
 import { vsCommand } from '../vscommand';
 
 export class Console extends OpenShiftItem {

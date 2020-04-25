@@ -12,7 +12,7 @@ import { Cluster } from '../../../src/openshift/cluster';
 import { OpenShiftExplorer } from '../../../src/explorer';
 import { CliExitData } from '../../../src/cli';
 import { TestItem } from './testOSItem';
-import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
+import OpenShiftItem from '../../../src/openshift/openshiftItem';
 import { getVscodeModule, TokenStore } from '../../../src/util/credentialManager';
 
 import pq = require('proxyquire');

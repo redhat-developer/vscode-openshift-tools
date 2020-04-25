@@ -11,7 +11,7 @@ import { OdoImpl, Command, ContextType } from '../../../src/odo';
 import { TestItem } from './testOSItem';
 import { Progress } from '../../../src/util/progress';
 import { Service } from '../../../src/openshift/service';
-import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
+import OpenShiftItem from '../../../src/openshift/openshiftItem';
 
 const {expect} = chai;
 chai.use(sinonChai);

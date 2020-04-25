@@ -12,7 +12,7 @@ import { ContextType } from '../../src/odo';
 import { ToolsConfig } from '../../src/tools';
 import { TestItem } from './openshift/testOSItem';
 import { CliChannel } from '../../src/cli';
-import { OpenShiftItem } from '../../src/openshift/openshiftItem';
+import OpenShiftItem from '../../src/openshift/openshiftItem';
 
 const {expect} = chai;
 chai.use(sinonChai);

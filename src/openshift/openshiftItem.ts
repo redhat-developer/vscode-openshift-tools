@@ -32,7 +32,7 @@ function isCommand(item: QuickPickItem | QuickPickCommand): item is QuickPickCom
     return (item as any).command;
 }
 
-export class OpenShiftItem {
+export default class OpenShiftItem {
     protected static readonly odo: Odo = OdoImpl.Instance;
 
     protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
@@ -146,4 +146,44 @@ export class OpenShiftItem {
     }
 }
 
+export function selectTargetComponent(condition?: (value: OpenShiftObject) => boolean) {
+    return function (_target: any, key: string, descriptor: any): void {
+        let fnKey: string | undefined;
+        let fn: Function | undefined;
 
+        if (typeof descriptor.value === 'function') {
+            fnKey = 'value';
+            fn = descriptor.value;
+        } else {
+            throw new Error('not supported');
+        }
+
+        descriptor[fnKey] = async function (...args: any[]) {
+            let [context, ...others] = args;
+            if (!context) {
+                context = await OpenShiftItem.getOpenShiftCmdData(context, 'Select a Project', 'Select an Application', 'Select a Component', condition);
+            }
+            return fn.apply(this, [context, ...others]);
+        };
+    }
+}
+
+export function selectTargetApplication (_target: any, key: string, descriptor: any): void {
+    let fnKey: string | undefined;
+    let fn: Function | undefined;
+
+    if (typeof descriptor.value === 'function') {
+        fnKey = 'value';
+        fn = descriptor.value;
+    } else {
+        throw new Error('not supported');
+    }
+
+    descriptor[fnKey] = async function (...args: any[]) {
+        let [context] = args;
+        if (!context) {
+            context = await OpenShiftItem.getOpenShiftCmdData(context, 'Select a Project', 'Select an Application');
+        }
+        return fn.apply(this, args);
+    };
+}

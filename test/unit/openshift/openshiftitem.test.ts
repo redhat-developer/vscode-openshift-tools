@@ -6,7 +6,7 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import { fail } from 'assert';
-import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
+import OpenShiftItem from '../../../src/openshift/openshiftItem';
 import { OdoImpl, ContextType } from '../../../src/odo';
 import { wait } from '../../../src/util/async';
 import { TestItem } from './testOSItem';

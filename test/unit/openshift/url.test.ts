@@ -10,7 +10,7 @@ import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
 import { OdoImpl, Command, ContextType } from '../../../src/odo';
 import { Url } from '../../../src/openshift/url';
-import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
+import OpenShiftItem from '../../../src/openshift/openshiftItem';
 
 import pq = require('proxyquire');
 

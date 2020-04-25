@@ -5,7 +5,7 @@
 
 import { window, commands, env, QuickPickItem, ExtensionContext, Uri } from 'vscode';
 import { Command } from "../odo";
-import { OpenShiftItem } from './openshiftItem';
+import OpenShiftItem from './openshiftItem';
 import { CliExitData, CliChannel } from "../cli";
 import { TokenStore } from "../util/credentialManager";
 import { KubeConfigUtils } from '../util/kubeUtils';
@@ -21,7 +21,7 @@ export class Cluster extends OpenShiftItem {
         const value = await window.showWarningMessage(`Do you want to logout of cluster?`, 'Logout', 'Cancel');
         if (value === 'Logout') {
             return Cluster.odo.execute(Command.odoLogout())
-            .catch((error) => Promise.reject(Error(`Failed to logout of the current cluster with '${error}'!`)))
+            .catch((error) => Promise.reject(new VsCommandError(`Failed to logout of the current cluster with '${error}'!`)))
             .then(async (result) => {
                 if (result.stderr === "") {
                     Cluster.explorer.refresh();
@@ -230,6 +230,6 @@ export class Cluster extends OpenShiftItem {
             await commands.executeCommand('setContext', 'isLoggedIn', true);
             return `Successfully logged in to '${clusterURL}'`;
         }
-        throw new Error(result.stderr);
+        throw new VsCommandError(result.stderr);
     }
 }
