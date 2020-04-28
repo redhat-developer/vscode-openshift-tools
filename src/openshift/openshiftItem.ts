@@ -146,44 +146,29 @@ export default class OpenShiftItem {
     }
 }
 
-export function selectTargetComponent(condition?: (value: OpenShiftObject) => boolean) {
+export function selectTargetComponent(prjPlaceHolder, appPlaceHolder, cmpPlaceHolder, condition?: (value: OpenShiftObject) => boolean) {
+    return selectTargetDecoratorFactory(async (context) => OpenShiftItem.getOpenShiftCmdData(context, prjPlaceHolder, appPlaceHolder, cmpPlaceHolder, condition));
+}
+
+export function selectTargetApplication(prjPlaceHolder, appPlaceHolder) {
+    return selectTargetDecoratorFactory(async (context) => OpenShiftItem.getOpenShiftCmdData(context, prjPlaceHolder, appPlaceHolder));
+}
+
+function selectTargetDecoratorFactory(decorator: (...args:any[]) => Promise<OpenShiftObject> ) {
     return function (_target: any, key: string, descriptor: any): void {
         let fnKey: string | undefined;
         let fn: Function | undefined;
-
+    
         if (typeof descriptor.value === 'function') {
             fnKey = 'value';
             fn = descriptor.value;
         } else {
             throw new Error('not supported');
         }
-
-        descriptor[fnKey] = async function (...args: any[]) {
-            let [context, ...others] = args;
-            if (!context) {
-                context = await OpenShiftItem.getOpenShiftCmdData(context, 'Select a Project', 'Select an Application', 'Select a Component', condition);
-            }
-            return fn.apply(this, [context, ...others]);
+    
+       descriptor[fnKey] = async function (...args: any[]) {
+            args[0] = await decorator(args[0]);
+            return fn.apply(this, args);
         };
-    }
-}
-
-export function selectTargetApplication (_target: any, key: string, descriptor: any): void {
-    let fnKey: string | undefined;
-    let fn: Function | undefined;
-
-    if (typeof descriptor.value === 'function') {
-        fnKey = 'value';
-        fn = descriptor.value;
-    } else {
-        throw new Error('not supported');
-    }
-
-    descriptor[fnKey] = async function (...args: any[]) {
-        let [context] = args;
-        if (!context) {
-            context = await OpenShiftItem.getOpenShiftCmdData(context, 'Select a Project', 'Select an Application');
-        }
-        return fn.apply(this, args);
     };
 }

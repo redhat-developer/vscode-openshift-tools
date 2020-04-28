@@ -39,7 +39,10 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.create')
-    @selectTargetApplication
+    @selectTargetApplication(
+        "In which Project you want to create a Component",
+        "In which Application you want to create a Component"
+    )
     static async create(application: OpenShiftObject): Promise<string> {
         if (!application) return null;
         const sourceTypes: QuickPickItem[] = [
@@ -74,7 +77,11 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.delete', true)
-    @selectTargetComponent()
+    @selectTargetComponent(
+        "From which Project do you want to delete Component",
+        "From which Application you want to delete Component",
+        "Select Component to delete"
+    )
     static async del(component: OpenShiftObject): Promise<string> {
         if (!component) return null;
         const name: string = component.getName();
@@ -92,7 +99,12 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.undeploy', true)
-    @selectTargetComponent()
+    @selectTargetComponent(
+        "From which Project do you want to undeploy Component",
+        "From which Application you want to undeploy Component",
+        "Select Component to undeploy",
+        (target) => target.contextValue === ContextType.COMPONENT_PUSHED
+    )
     static async undeploy(component: OpenShiftObject): Promise<string> {
         if (!component) return null;
         const name: string = component.getName();
@@ -131,7 +143,11 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.describe', true)
-    @selectTargetComponent()
+    @selectTargetComponent(
+        "From which Project you want to describe Component",
+        "From which Application you want to describe Component",
+        "Select Component you want to describe"
+    )
     static describe(component: OpenShiftObject): Promise<string> {
         if (!component) return null;
         const command = (component.contextValue === ContextType.COMPONENT_NO_CONTEXT) ? Command.describeComponentNoContext : Command.describeComponentJson;
@@ -139,14 +155,24 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.log', true)
-    @selectTargetComponent()
+    @selectTargetComponent(
+        "In which Project you want to see Log",
+        "In which Application you want to see Log",
+        "For which Component you want to see Log",
+        (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+    )
     static log(component: OpenShiftObject): Promise<string> {
         if (!component) return null;
         LogViewLoader.loadView(`${component.path} Log`,  Command.showLog, component);
     }
 
     @vsCommand('openshift.component.followLog', true)
-    @selectTargetComponent()
+    @selectTargetComponent(
+        "In which Project you want to follow Log",
+        "In which Application you want to follow Log",
+        "For which Component you want to follow Log",
+        (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+    )
     static followLog(component: OpenShiftObject): Promise<string> {
         if (!component) return null;
         LogViewLoader.loadView(`${component.path} Follow Log`,  Command.showLogAndFollow, component);
@@ -183,7 +209,12 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.unlinkComponent.palette')
-    @selectTargetComponent((value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED)
+    @selectTargetComponent(
+        'Select a Project',
+        'Select an Application',
+        'Select a Component',
+        (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+    )
     static async unlinkComponent(component: OpenShiftObject): Promise<string | null> {
         if (!component) return null;
 
@@ -210,7 +241,12 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.unlinkService.palette')
-    @selectTargetComponent((value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED)
+    @selectTargetComponent(
+        'Select a Project',
+        'Select an Application',
+        'Select a Component',
+        (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+    )
     static async unlinkService(component: OpenShiftObject): Promise<string | null> {
         if (!component) return null;
 
@@ -231,7 +267,12 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.linkComponent')
-    @selectTargetComponent((value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED)
+    @selectTargetComponent(
+        'Select a Project',
+        'Select an Application',
+        'Select a Component',
+        (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+    )
     static async linkComponent(component: OpenShiftObject): Promise<string | null> {
         if (!component) return null;
 
@@ -268,7 +309,12 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.linkService')
-    @selectTargetComponent((value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED)
+    @selectTargetComponent(
+        'Select a Project',
+        'Select an Application',
+        'Select a Component',
+        (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+    )
     static async linkService(component: OpenShiftObject): Promise<string | null> {
         if (!component) return null;
         const serviceToLink: OpenShiftObject = await window.showQuickPick(Component.getServiceNames(component.getParent()), {placeHolder: "Select a service to link", ignoreFocusOut: true});
@@ -291,7 +337,12 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.push', true)
-    @selectTargetComponent((target) => target.contextValue === ContextType.COMPONENT_PUSHED || target.contextValue === ContextType.COMPONENT)
+    @selectTargetComponent(
+        'In which Project you want to push the changes',
+        'In which Application you want to push the changes',
+        'For which Component you want to push the changes',
+        (target) => target.contextValue === ContextType.COMPONENT_PUSHED || target.contextValue === ContextType.COMPONENT
+    )
     static async push(component: OpenShiftObject, configOnly = false): Promise<string | null> {
         if (!component) return null;
         const choice = await Component.handleMigratedComponent(component);
@@ -343,14 +394,24 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.watch', true)
-    @selectTargetComponent((target) => target.contextValue === ContextType.COMPONENT_PUSHED)
+    @selectTargetComponent(
+        'Select a Project',
+        'Select an Application',
+        'Select a Component you want to watch',
+        (target) => target.contextValue === ContextType.COMPONENT_PUSHED
+    )
     static watch(component: OpenShiftObject): Promise<void> {
         if (!component) return null;
         Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
     }
 
     @vsCommand('openshift.component.openUrl', true)
-    @selectTargetComponent((target) => target.contextValue === ContextType.COMPONENT_PUSHED)
+    @selectTargetComponent(
+        'Select a Project',
+        'Select an Application',
+        'Select a Component to open in browser',
+        (target) => target.contextValue === ContextType.COMPONENT_PUSHED
+    )
     static async openUrl(component: OpenShiftObject): Promise<ChildProcess | string> {
         if (!component) return null;
         const app: OpenShiftObject = component.getParent();
@@ -387,7 +448,10 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.createFromLocal')
-    @selectTargetApplication
+    @selectTargetApplication(
+        "In which Project you want to create a Component",
+        "In which Application you want to create a Component"
+    )
     static async createFromLocal(application: OpenShiftObject): Promise<string | null> {
         if (!application) return null;
         const workspacePath = await selectWorkspaceFolder();
@@ -433,7 +497,10 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.createFromGit')
-    @selectTargetApplication
+    @selectTargetApplication(
+        "In which Project you want to create a Component",
+        "In which Application you want to create a Component"
+    )
     static async createFromGit(application: OpenShiftObject): Promise<string | null> {
         if (!application) return null;
         const workspacePath = await selectWorkspaceFolder();
@@ -478,12 +545,11 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.createFromBinary')
-    static async createFromBinary(context: OpenShiftObject): Promise<string | null> {
-
-        let application: OpenShiftObject = context;
-
-        if (!application) application = await Component.getOpenshiftData(context);
-
+    @selectTargetApplication(
+        "In which Project you want to create a Component",
+        "In which Application you want to create a Component"
+    )
+    static async createFromBinary(application: OpenShiftObject): Promise<string | null> {
         if (!application) return null;
 
         const workspacePath = await selectWorkspaceFolder();
@@ -519,7 +585,12 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.debug', true)
-    @selectTargetComponent((value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED)
+    @selectTargetComponent(
+        'Select a Project',
+        'Select an Application',
+        'Select a Component you want to debug (showing only Components pushed to the cluster)',
+        (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+    )
     static async debug(component: OpenShiftObject): Promise<string | null> {
         if (!component) return null;
         return Progress.execFunctionWithProgress(`Starting debugger session for the component '${component.getName()}'.`, () => Component.startDebugger(component));
