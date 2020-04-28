@@ -148,7 +148,7 @@
     "tslint": "^5.20.1",
     "typescript": "^3.8.3",
     "utf-8-validate": "^5.0.2",
-    "vscode-extension-tester": "^2.4.0",
+    "vscode-extension-tester": "2.6.0",
     "vscode-test": "^1.2.3",
     "walker": "^1.0.7",
     "webpack": "^4.35.2",
