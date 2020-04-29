@@ -970,13 +970,11 @@ suite('OpenShift/Component', () => {
     });
 
     suite('describe', () => {
-        let viewStub;
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
-            viewStub = sandbox.stub(DescribeViewLoader, 'loadView');
         });
 
         test('returns null when cancelled', async () => {
@@ -997,13 +995,11 @@ suite('OpenShift/Component', () => {
     });
 
     suite('log', () => {
-        let logViewStub;
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
-            logViewStub = sandbox.stub(LogViewLoader, 'loadView');
         });
 
         test('log calls the correct odo command', async () => {
@@ -1018,13 +1014,11 @@ suite('OpenShift/Component', () => {
     });
 
     suite('followLog', () => {
-        let logViewStub;
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
-            logViewStub = sandbox.stub(LogViewLoader, 'loadView');
         });
 
         test('returns null when cancelled', async () => {
