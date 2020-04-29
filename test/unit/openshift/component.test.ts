@@ -14,8 +14,6 @@ import { Progress } from '../../../src/util/progress';
 import * as Util from '../../../src/util/async';
 import { Refs } from '../../../src/util/refs';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
-import LogViewLoader from '../../../src/view/log/LogViewLoader';
-import DescribeViewLoader from '../../../src/view/describe/describeViewLoader';
 
 import pq = require('proxyquire');
 import globby = require('globby');
