@@ -93,7 +93,7 @@ export class Build {
         if (build) {
             Build.odo.executeInTerminal(Build.command.showLog(build, '-build'));
         }
-        return build;
+        return null;
     }
 
     @vsCommand('clusters.openshift.build.rebuild')
