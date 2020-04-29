@@ -491,7 +491,7 @@ export interface Odo {
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     execute(command: string, cwd?: string, fail?: boolean): Promise<cliInstance.CliExitData>;
     spawn(command: string, cwd?: string): Promise<ChildProcess>;
-    executeInTerminal(command: string, cwd?: string): Promise<void>;
+    executeInTerminal(command: string, cwd?: string, name?: string): Promise<void>;
     requireLogin(): Promise<boolean>;
     clearCache?(): void;
     createProject(name: string): Promise<OpenShiftObject>;
