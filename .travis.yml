@@ -4,19 +4,12 @@ language: node_js
 node_js:
 - "node"
 
-matrix:
-  include:
-    - os: linux
-      dist: trusty
-    - os: osx
+os:
+  - linux
+  - osx
 
-before_install:
-- if [ $TRAVIS_OS_NAME == "linux" ]; then
-      export CXX="g++" CC="gcc" DISPLAY=:99.0;
-      sh -e /etc/init.d/xvfb start;
-      sleep 3;
-    fi
-- npm install -g typescript
+services:
+  - xvfb
 
 install:
   - npm install
