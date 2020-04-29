@@ -41,9 +41,10 @@
     "compile": "npm-run-all compile:*",
     "compile:ext": "tsc -p ./",
     "compile:views": "webpack --mode development",
+    "compile:clusterView": "webpack --mode development --config src/view/cluster/webpack.config.js",
     "compile:describeView": "webpack --mode development --config src/view/describe/webpack.config.js",
     "dev:logView": "webpack-dev-server --mode=development",
-    "dev:describbeView": "webpack-dev-server --mode=development --config src/view/describe/webpack.config.js",
+    "dev:describeView": "webpack-dev-server --mode=development --config src/view/describe/webpack.config.js",
     "watch": "tsc -watch -p ./",
     "watch:views": "webpack --watch --mode development",
     "clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/logViewer",
@@ -60,6 +61,8 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.11.1",
+    "@material-ui/core": "^4.9.10",
+    "@material-ui/icons": "^4.9.1",
     "binary-search": "^1.3.6",
     "byline": "^5.0.0",
     "fs-extra": "^8.1.0",
@@ -74,6 +77,8 @@
     "mkdirp": "^0.5.1",
     "openshift-rest-client": "^4.0.0",
     "pify": "^4.0.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
     "rxjs": "^6.5.3",
     "semver": "^6.3.0",
     "shelljs": "^0.8.3",
@@ -126,15 +131,11 @@
     "html-webpack-plugin": "^4.2.0",
     "istanbul": "^0.4.5",
     "leasot": "^10.1.0",
-    "@material-ui/core": "^4.9.10",
-    "@material-ui/icons": "^4.9.1",
     "mocha": "^6.2.2",
     "mocha-jenkins-reporter": "^0.4.2",
     "npm-run-all": "^4.1.5",
     "prettier": "^1.19.1",
     "proxyquire": "^2.1.3",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
     "react-lazylog": "^4.5.2",
     "react-loader-spinner": "^3.1.14",
     "remap-istanbul": "^0.13.0",
@@ -163,6 +164,7 @@
     "onCommand:openshift.output",
     "onCommand:openshift.create",
     "onCommand:openshift.openshiftConsole.palette",
+    "onCommand:openshift.explorer.addCluster",
     "onCommand:openshift.explorer.login",
     "onCommand:openshift.explorer.login.credentialsLogin",
     "onCommand:openshift.explorer.login.tokenLogin",
@@ -270,6 +272,15 @@
         "command": "openshift.explorer.logout",
         "title": "Log out",
         "category": "OpenShift"
+      },
+      {
+        "command": "openshift.explorer.addCluster",
+        "title": "Add OpenShift Cluster",
+        "category": "OpenShift",
+        "icon": {
+          "dark": "images/title/dark/add-cluster.svg",
+          "light": "images/title/light/add-cluster.svg"
+        }
       },
       {
         "command": "openshift.explorer.login",
@@ -734,6 +745,10 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
+          "command": "openshift.explorer.addCluster",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
           "command": "openshift.explorer.login",
           "when": "view == openshiftProjectExplorer"
         },
@@ -816,24 +831,29 @@
       ],
       "view/title": [
         {
-          "command": "openshift.explorer.login",
+          "command": "openshift.explorer.addCluster",
           "when": "view == openshiftProjectExplorer",
           "group": "navigation@0"
         },
         {
-          "command": "openshift.explorer.switchContext",
+          "command": "openshift.explorer.login",
           "when": "view == openshiftProjectExplorer",
           "group": "navigation@1"
         },
         {
-          "command": "openshift.explorer.refresh",
+          "command": "openshift.explorer.switchContext",
           "when": "view == openshiftProjectExplorer",
           "group": "navigation@2"
         },
         {
-          "command": "openshift.explorer.reportIssue",
+          "command": "openshift.explorer.refresh",
           "when": "view == openshiftProjectExplorer",
           "group": "navigation@3"
+        },
+        {
+          "command": "openshift.explorer.reportIssue",
+          "when": "view == openshiftProjectExplorer",
+          "group": "navigation@4"
         }
       ],
       "view/item/context": [
