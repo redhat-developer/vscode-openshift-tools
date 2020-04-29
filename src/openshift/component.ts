@@ -142,6 +142,12 @@ export class Component extends OpenShiftItem {
         }
     }
 
+    static isUsingWebviewEditor() {
+        return workspace
+            .getConfiguration('openshiftConnector')
+            .get<boolean>('useWebviewInsteadOfTerminalView');
+    }
+
     @vsCommand('openshift.component.describe', true)
     @selectTargetComponent(
         "From which Project you want to describe Component",
@@ -150,8 +156,17 @@ export class Component extends OpenShiftItem {
     )
     static describe(component: OpenShiftObject): Promise<string> {
         if (!component) return null;
-        const command = (component.contextValue === ContextType.COMPONENT_NO_CONTEXT) ? Command.describeComponentNoContext : Command.describeComponentJson;
-        DescribeViewLoader.loadView(`${component.path} Describe`,  command, component);
+        const command = (component.contextValue === ContextType.COMPONENT_NO_CONTEXT) ? Command.describeComponentNoContext : Command.describeComponent;
+        if (Component.isUsingWebviewEditor()) {
+            DescribeViewLoader.loadView(`${component.path} Describe`,  command, component);
+        } else {
+            Component.odo.executeInTerminal(
+                command(component.getParent().getParent().getName(),
+                component.getParent().getName(),
+                component.getName()),
+                component.contextPath.fsPath,
+                `OpenShift: Describe '${component.getName()}' Component`);
+        }
     }
 
     @vsCommand('openshift.component.log', true)
@@ -163,7 +178,16 @@ export class Component extends OpenShiftItem {
     )
     static log(component: OpenShiftObject): Promise<string> {
         if (!component) return null;
-        LogViewLoader.loadView(`${component.path} Log`,  Command.showLog, component);
+        if (Component.isUsingWebviewEditor()) {
+            LogViewLoader.loadView(`${component.path} Log`,  Command.showLog, component);
+        } else {
+            Component.odo.executeInTerminal(
+                Command.showLog(component.getParent().getParent().getName(),
+                component.getParent().getName(),
+                component.getName()),
+                component.contextPath.fsPath,
+                `OpenShift: Show '${component.getName()}' Component Log`);
+        }
     }
 
     @vsCommand('openshift.component.followLog', true)
@@ -175,7 +199,16 @@ export class Component extends OpenShiftItem {
     )
     static followLog(component: OpenShiftObject): Promise<string> {
         if (!component) return null;
-        LogViewLoader.loadView(`${component.path} Follow Log`,  Command.showLogAndFollow, component);
+        if (Component.isUsingWebviewEditor()) {
+            LogViewLoader.loadView(`${component.path} Follow Log`,  Command.showLogAndFollow, component);
+        } else {
+            Component.odo.executeInTerminal(
+                Command.showLogAndFollow(component.getParent().getParent().getName(),
+                component.getParent().getName(),
+                component.getName()),
+                component.contextPath.fsPath,
+                `OpenShift: Follow '${component.getName()}' Component Log`);
+        }
     }
 
     private static async getLinkData(component: OpenShiftObject): Promise<any> {

@@ -1152,6 +1152,12 @@
           "type": "boolean",
           "default": false,
           "description": "Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries."
+        },
+        "openshiftConnector.useWebviewInsteadOfTerminalView": {
+          "Title": "Use Webview based editors to show 'Show Log', 'Follow Log' and 'Describe' commands output.",
+          "type": "boolean",
+          "defaul": false,
+          "description" : "By default the Terminal View is used to execute OpenShift 'Show Log', 'Follow Log' and 'Describe' commands. Select this option if you want to use Webview based editors for it."
         }
       }
     }

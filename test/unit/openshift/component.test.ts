@@ -987,12 +987,12 @@ suite('OpenShift/Component', () => {
 
         test('calls the correct odo command', async () => {
             await Component.describe(componentItem);
-            expect(viewStub).calledOnceWith(`${componentItem.path} Describe`, Command.describeComponentJson, componentItem);
+            expect(termStub).calledOnceWith(Command.describeComponent(componentItem.getParent().getParent().getName(), componentItem.getParent().getName(), componentItem.getName()));
         });
 
         test('works with no context', async () => {
             await Component.describe(null);
-            expect(viewStub).calledOnceWith(`${componentItem.path} Describe`, Command.describeComponentJson, componentItem);
+            expect(termStub).calledOnceWith(Command.describeComponent(componentItem.getParent().getParent().getName(), componentItem.getParent().getName(), componentItem.getName()));
         });
     });
 
@@ -1008,12 +1008,12 @@ suite('OpenShift/Component', () => {
 
         test('log calls the correct odo command', async () => {
             await Component.log(componentItem);
-            expect(logViewStub).calledOnceWith(`${componentItem.path} Log`, Command.showLog, componentItem);
+            expect(termStub).calledOnceWith(Command.showLog(componentItem.getParent().getParent().getName(), componentItem.getParent().getName(), componentItem.getName()));
         });
 
         test('works with no context', async () => {
             await Component.log(null);
-            expect(logViewStub).calledOnceWith(`${componentItem.path} Log`, Command.showLog, componentItem);
+            expect(termStub).calledOnceWith(Command.showLog(componentItem.getParent().getParent().getName(), componentItem.getParent().getName(), componentItem.getName()));
         });
     });
 
@@ -1036,12 +1036,12 @@ suite('OpenShift/Component', () => {
 
         test('followLog calls the correct odo command', async () => {
             await Component.followLog(componentItem);
-            expect(logViewStub).calledOnceWith(`${componentItem.path} Follow Log`, Command.showLogAndFollow, componentItem);
+            expect(termStub).calledOnceWith(Command.showLogAndFollow(componentItem.getParent().getParent().getName(), componentItem.getParent().getName(), componentItem.getName()));
         });
 
         test('works with no context', async () => {
             await Component.followLog(null);
-            expect(logViewStub).calledOnceWith(`${componentItem.path} Follow Log`, Command.showLogAndFollow, componentItem);
+            expect(termStub).calledOnceWith(Command.showLogAndFollow(componentItem.getParent().getParent().getName(), componentItem.getParent().getName(), componentItem.getName()));
         });
     });
 
