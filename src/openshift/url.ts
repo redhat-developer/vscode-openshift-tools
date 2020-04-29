@@ -5,7 +5,7 @@
 
 import { window, QuickPickItem, commands, Uri } from 'vscode';
 import { OpenShiftObject, Command } from '../odo';
-import { OpenShiftItem } from './openshiftItem';
+import OpenShiftItem from './openshiftItem';
 import { Progress } from "../util/progress";
 import { Port } from '../odo/config';
 import { vsCommand, VsCommandError } from '../vscommand';

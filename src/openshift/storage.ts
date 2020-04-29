@@ -5,7 +5,7 @@
 
 import { window } from 'vscode';
 import { isEmpty } from "validator";
-import { OpenShiftItem } from "./openshiftItem";
+import OpenShiftItem from "./openshiftItem";
 import { OpenShiftObject, ContextType } from "../odo";
 import { Progress } from "../util/progress";
 import { vsCommand, VsCommandError } from '../vscommand';

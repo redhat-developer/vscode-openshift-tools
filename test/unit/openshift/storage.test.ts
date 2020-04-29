@@ -10,7 +10,7 @@ import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
 import { OdoImpl, Command, ContextType } from '../../../src/odo';
 import { Storage } from '../../../src/openshift/storage';
-import { OpenShiftItem } from '../../../src/openshift/openshiftItem';
+import OpenShiftItem from '../../../src/openshift/openshiftItem';
 
 const {expect} = chai;
 chai.use(sinonChai);

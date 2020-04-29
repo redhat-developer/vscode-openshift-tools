@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { window } from 'vscode';
-import { OpenShiftItem } from './openshiftItem';
+import OpenShiftItem from './openshiftItem';
 import { OpenShiftObject } from '../odo';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
