@@ -6,7 +6,7 @@
 import { window } from 'vscode';
 import { CliChannel } from './cli';
 import { ToolsConfig } from './tools';
-import { OpenShiftItem } from './openshift/openshiftItem';
+import OpenShiftItem from './openshift/openshiftItem';
 import { vsCommand } from './vscommand';
 
 export class Oc {

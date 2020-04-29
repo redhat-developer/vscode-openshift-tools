@@ -32,7 +32,7 @@ function isCommand(item: QuickPickItem | QuickPickCommand): item is QuickPickCom
     return (item as any).command;
 }
 
-export class OpenShiftItem {
+export default class OpenShiftItem {
     protected static readonly odo: Odo = OdoImpl.Instance;
 
     protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
@@ -146,4 +146,29 @@ export class OpenShiftItem {
     }
 }
 
+function selectTargetDecoratorFactory(decorator: (...args:any[]) => Promise<OpenShiftObject> ) {
+    return function (_target: any, key: string, descriptor: any): void {
+        let fnKey: string | undefined;
+        let fn: Function | undefined;
 
+        if (typeof descriptor.value === 'function') {
+            fnKey = 'value';
+            fn = descriptor.value;
+        } else {
+            throw new Error('not supported');
+        }
+
+       descriptor[fnKey] = async function (...args: any[]) {
+            args[0] = await decorator(args[0]);
+            return fn.apply(this, args);
+        };
+    };
+}
+
+export function selectTargetComponent(prjPlaceHolder, appPlaceHolder, cmpPlaceHolder, condition?: (value: OpenShiftObject) => boolean) {
+    return selectTargetDecoratorFactory(async (context) => OpenShiftItem.getOpenShiftCmdData(context, prjPlaceHolder, appPlaceHolder, cmpPlaceHolder, condition));
+}
+
+export function selectTargetApplication(prjPlaceHolder, appPlaceHolder) {
+    return selectTargetDecoratorFactory(async (context) => OpenShiftItem.getOpenShiftCmdData(context, prjPlaceHolder, appPlaceHolder));
+}
