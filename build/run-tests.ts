@@ -9,7 +9,7 @@ import * as path from 'path';
 import { runTests } from 'vscode-test';
 
 /**
- * Run mocha tests from project's tests folder. 
+ * Run mocha tests from project's tests folder.
  * This script expects a subfolder name and extension development path as parameters to
  * identify what kind of tests to run: unit, integration or ui.
  */
