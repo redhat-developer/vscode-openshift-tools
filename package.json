@@ -206,8 +206,6 @@
     "onCommand:openshift.component.debug",
     "onCommand:openshift.component.debug.palette",
     "onCommand:openshift.storage.create",
-    "onCommand:openshift.storage.describe",
-    "onCommand:openshift.storage.describe.palette",
     "onCommand:openshift.storage.delete",
     "onCommand:openshift.service.create",
     "onCommand:openshift.service.delete",
@@ -566,16 +564,6 @@
         "category": "OpenShift"
       },
       {
-        "command": "openshift.storage.describe",
-        "title": "Describe",
-        "category": "OpenShift"
-      },
-      {
-        "command": "openshift.storage.describe.palette",
-        "title": "Describe Storage",
-        "category": "OpenShift"
-      },
-      {
         "command": "openshift.service.create",
         "title": "New Service",
         "category": "OpenShift"
@@ -809,10 +797,6 @@
         },
         {
           "command": "openshift.component.push",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
-          "command": "openshift.storage.describe",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -1116,11 +1100,6 @@
           "command": "openshift.service.delete",
           "when": "view == openshiftProjectExplorer && viewItem == service",
           "group": "s2"
-        },
-        {
-          "command": "openshift.storage.describe",
-          "when": "view == openshiftProjectExplorer && viewItem == storage",
-          "group": "s3"
         },
         {
           "command": "openshift.storage.delete",

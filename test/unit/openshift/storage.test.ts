@@ -20,7 +20,6 @@ suite('OpenShift/Storage', () => {
     let execStub: sinon.SinonStub;
     let quickPickStub: sinon.SinonStub;
     let inputStub: sinon.SinonStub;
-    let termStub: sinon.SinonStub;
     let getProjectNamesStub: sinon.SinonStub;
     let getStorageNamesStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
@@ -34,7 +33,6 @@ suite('OpenShift/Storage', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         getStorageNamesStub = sandbox.stub(OdoImpl.prototype, 'getStorageNames').resolves([storageItem]);
-        termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: '', stdout: '', stderr: ''});
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
     });
@@ -340,38 +338,6 @@ suite('OpenShift/Storage', () => {
             } catch (err) {
                 expect(err.message).equals(`Failed to delete Storage with error '${errorMessage}'`);
             }
-        });
-    });
-
-    suite('describe', () => {
-
-        setup(() => {
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
-            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
-            sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
-            getStorageNamesStub.resolves([]);
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(componentItem);
-            quickPickStub.onCall(3).resolves(storageItem);
-        });
-
-        test('calls the correct odo command w/ context', async () => {
-            await Storage.describe(storageItem);
-
-            expect(termStub).calledOnceWith(Command.describeUrl(storageItem.getName()));
-        });
-
-        test('calls the correct odo command w/o context', async () => {
-            await Storage.describe(null);
-
-            expect(termStub).calledOnceWith(Command.describeUrl(storageItem.getName()));
-        });
-
-        test('does not call the odo command if canceled', async () => {
-            sandbox.stub(Storage, 'getOpenShiftCmdData').resolves(null);
-            await Storage.describe(null);
-            expect(termStub).not.called;
         });
     });
 });
