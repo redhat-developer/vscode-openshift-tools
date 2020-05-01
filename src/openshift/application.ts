@@ -16,7 +16,7 @@ export class Application extends OpenShiftItem {
         const application = await Application.getOpenShiftCmdData(treeItem,
             "From which project you want to describe Application",
             "Select Application you want to describe");
-        if (application) Application.odo.executeInTerminal(Command.describeApplication(application.getParent().getName(), application.getName()));
+        if (application) Application.odo.executeInTerminal(Command.describeApplication(application.getParent().getName(), application.getName()), undefined, `OpenShift: Describe '${application.getName()}' Application`);
     }
 
     @vsCommand('openshift.app.delete', true)
