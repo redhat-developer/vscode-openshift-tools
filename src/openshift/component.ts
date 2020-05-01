@@ -182,9 +182,7 @@ export class Component extends OpenShiftItem {
             LogViewLoader.loadView(`${component.path} Log`,  Command.showLog, component);
         } else {
             Component.odo.executeInTerminal(
-                Command.showLog(component.getParent().getParent().getName(),
-                component.getParent().getName(),
-                component.getName()),
+                Command.showLog(),
                 component.contextPath.fsPath,
                 `OpenShift: Show '${component.getName()}' Component Log`);
         }
@@ -203,9 +201,7 @@ export class Component extends OpenShiftItem {
             LogViewLoader.loadView(`${component.path} Follow Log`,  Command.showLogAndFollow, component);
         } else {
             Component.odo.executeInTerminal(
-                Command.showLogAndFollow(component.getParent().getParent().getName(),
-                component.getParent().getName(),
-                component.getName()),
+                Command.showLogAndFollow(),
                 component.contextPath.fsPath,
                 `OpenShift: Follow '${component.getName()}' Component Log`);
         }

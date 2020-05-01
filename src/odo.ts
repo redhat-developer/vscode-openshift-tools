@@ -219,12 +219,12 @@ export class Command {
         return `odo storage describe ${storage}`;
     }
 
-    static showLog(project: string, app: string, component: string): string {
-        return `odo log ${component} --app ${app} --project ${project}`;
+    static showLog(): string {
+        return `odo log`;
     }
 
-    static showLogAndFollow(project: string, app: string, component: string): string {
-        return `odo log ${component} -f --app ${app} --project ${project}`;
+    static showLogAndFollow(): string {
+        return `odo log -f`;
     }
 
     static listComponentPorts(project: string, app: string, component: string): string {
