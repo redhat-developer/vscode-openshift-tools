@@ -399,7 +399,7 @@
       },
       {
         "command": "openshift.component.log.palette",
-        "title": "Show Component's Log",
+        "title": "Show Component Log",
         "category": "OpenShift"
       },
       {
@@ -409,7 +409,7 @@
       },
       {
         "command": "openshift.component.followLog.palette",
-        "title": "Follow Component's Log",
+        "title": "Follow Component Log",
         "category": "OpenShift"
       },
       {
