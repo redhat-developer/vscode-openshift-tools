@@ -14,12 +14,12 @@ export class Catalog {
 
     @vsCommand('openshift.catalog.listComponents')
     static listComponents(): void {
-        Catalog.odo.executeInTerminal(Command.listCatalogComponents(), Platform.getUserHomePath());
+        Catalog.odo.executeInTerminal(Command.listCatalogComponents(), Platform.getUserHomePath(), 'OpenShift: List Available Component Types');
     }
 
     @vsCommand('openshift.catalog.listServices')
     static listServices(): void {
-        Catalog.odo.executeInTerminal(Command.listCatalogServices(), Platform.getUserHomePath());
+        Catalog.odo.executeInTerminal(Command.listCatalogServices(), Platform.getUserHomePath(), 'OpenShift: List Available Services');
     }
 
     async getComponentNames(): Promise<string[]> {
