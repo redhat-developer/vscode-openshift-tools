@@ -9,21 +9,16 @@ import * as path from 'path';
 import { runTests } from 'vscode-test';
 
 /**
- * Run mocha tests from project's tests folder. This script expects a subfolder name as a parameter to
+ * Run mocha tests from project's tests folder. 
+ * This script expects a subfolder name and extension development path as parameters to
  * identify what kind of tests to run: unit, integration or ui.
  */
 async function main(): Promise<void> {
-    const extensionDevelopmentPath = path.resolve(__dirname, '../../');
-    const extensionTestsPath = path.resolve(
-        extensionDevelopmentPath,
-        'out',
-        'test',
-        process.argv.slice(2)[0],
-    );
-    await runTests({
-        extensionDevelopmentPath,
-        extensionTestsPath,
-    });
+    const [, , tests, extension = ''] = process.argv;
+    const extensionRootPath = path.resolve(__dirname, '../../');
+    const extensionDevelopmentPath = path.resolve(extensionRootPath, extension);
+    const extensionTestsPath = path.resolve(extensionRootPath, 'out', 'test', tests);
+    await runTests({ extensionDevelopmentPath, extensionTestsPath });
 }
 
 main();

@@ -38,12 +38,9 @@ node('rhel8'){
     sh "sha256sum *.tgz > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.tgz.sha256"
   }
 
-  stage('UI smoke test') {
+  stage('vsix package smoke test') {
       wrap([$class: 'Xvnc']) {
-        sh "npx extest get-vscode"
-        sh "npx extest get-chromedriver"
-        sh "npx extest install-vsix -f openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix"
-        sh "npx extest run-tests out/test/ui/*.test.js"
+        sh "node ./out/build/install-vscode.js openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix && node ./out/build/run-tests.js vsix-test test/fake-extension/"
       }
   }
 

@@ -1,0 +1,29 @@
+{
+    "name": "vscode-openshift-connector-testing",
+    "displayName": "OpenShift Connector Fake",
+    "description": "Fake extension",
+    "version": "0.0.1",
+    "license": "MIT",
+    "publisher": "redhat",
+    "author": "Red Hat",
+    "preview": true,
+    "engines": {
+        "vscode": "^1.30.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "keywords": [
+        "redhat"
+    ],
+    "main": "./out/src/extension",
+    "dependencies": {
+    },
+    "devDependencies": {
+    },
+    "activationEvents": [
+    ],
+    "contributes": {
+    },
+    "extensionDependencies": []
+}

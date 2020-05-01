@@ -18,6 +18,7 @@ import { registerCommands} from './vscommand';
 import path = require('path');
 import fsx = require('fs-extra');
 import treeKill = require('tree-kill');
+import { ToolsConfig } from './tools';
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined;
 
@@ -87,7 +88,14 @@ function migrateFromOdo018(): void {
   }
 }
 
-export async function activate(extensionContext: vscode.ExtensionContext): Promise<void> {
+async function verifyBundledBinaries() {
+     return {
+         odoPath: await ToolsConfig.detect('odo'),
+         ocPath: await ToolsConfig.detect('oc'),
+     };
+}
+
+export async function activate(extensionContext: vscode.ExtensionContext): Promise<any> {
     migrateFromOdo018();
     Cluster.extensionContext = extensionContext;
     Component.extensionContext = extensionContext;
@@ -156,4 +164,7 @@ export async function activate(extensionContext: vscode.ExtensionContext): Promi
             treeKill(session.configuration.odoPid);
         }
     }));
+    return {
+        verifyBundledBinaries
+    }
 }
