@@ -1002,12 +1002,12 @@ suite('OpenShift/Component', () => {
 
         test('log calls the correct odo command', async () => {
             await Component.log(componentItem);
-            expect(termStub).calledOnceWith(Command.showLog(componentItem.getParent().getParent().getName(), componentItem.getParent().getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.showLog());
         });
 
         test('works with no context', async () => {
             await Component.log(null);
-            expect(termStub).calledOnceWith(Command.showLog(componentItem.getParent().getParent().getName(), componentItem.getParent().getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.showLog());
         });
     });
 
@@ -1028,12 +1028,12 @@ suite('OpenShift/Component', () => {
 
         test('followLog calls the correct odo command', async () => {
             await Component.followLog(componentItem);
-            expect(termStub).calledOnceWith(Command.showLogAndFollow(componentItem.getParent().getParent().getName(), componentItem.getParent().getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.showLogAndFollow());
         });
 
         test('works with no context', async () => {
             await Component.followLog(null);
-            expect(termStub).calledOnceWith(Command.showLogAndFollow(componentItem.getParent().getParent().getName(), componentItem.getParent().getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.showLogAndFollow());
         });
     });
 
