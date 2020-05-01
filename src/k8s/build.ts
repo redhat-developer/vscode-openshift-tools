@@ -89,9 +89,9 @@ export class Build {
 
     @vsCommand('clusters.openshift.build.showLog', true)
     static async showLog(context: { impl: any}): Promise<string> {
-        const build = await Build.selectBuild(context, "Select a build to see the logs");
+        const build = await Build.selectBuild(context, "Select a Build to see the logs");
         if (build) {
-            Build.odo.executeInTerminal(Build.command.showLog(build, '-build'));
+            Build.odo.executeInTerminal(Build.command.showLog(build, '-build'), undefined, `OpenShift: Show '${build}' Build Log`);
         }
         return null;
     }
@@ -102,13 +102,13 @@ export class Build {
         if (context) {
             resourceId = context.impl.name;
         } else {
-            const name = await Build.selectBuild(context, "select to rebuild");
+            const name = await Build.selectBuild(context, "Select build to rebuild");
             if (name) {
                 resourceId = name;
             }
         }
         if (resourceId) {
-            Build.odo.executeInTerminal(Build.command.rebuildFrom(resourceId));
+            Build.odo.executeInTerminal(Build.command.rebuildFrom(resourceId), undefined, `OpenShift: Rebuild '${resourceId}' Build`);
         }
         return null;
     }
@@ -117,7 +117,7 @@ export class Build {
     static async followLog(context: { impl: any}): Promise<string> {
         const build = await Build.selectBuild(context, "Select a build to follow the logs");
         if (build) {
-            Build.odo.executeInTerminal(Build.command.followLog(build, '-build'));
+            Build.odo.executeInTerminal(Build.command.followLog(build, '-build'), undefined, `OpenShift: Follow '${build}' Build Log`);
         }
         return null;
     }
