@@ -53,7 +53,6 @@
     "bundle-tools": "node ./out/build/bundle-tools.js --platform",
     "todo": "leasot **/*.ts --ignore node_modules -x",
     "test": "npm run clean && npm run compile && npm run verify && node ./out/build/run-tests.js unit",
-    "ui-test": "extest setup-and-run out/test/ui/*.test.js",
     "update-deps": "ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
     "build": "npm run clean && npm run lint && npm run compile"
@@ -148,7 +147,6 @@
     "tslint": "^5.20.1",
     "typescript": "^3.8.3",
     "utf-8-validate": "^5.0.2",
-    "vscode-extension-tester": "2.6.0",
     "vscode-test": "^1.2.3",
     "walker": "^1.0.7",
     "webpack": "^4.35.2",
@@ -1157,7 +1155,7 @@
           "Title": "Use Webview based editors to show 'Show Log', 'Follow Log' and 'Describe' commands output.",
           "type": "boolean",
           "defaul": false,
-          "description" : "By default the Terminal View is used to execute OpenShift 'Show Log', 'Follow Log' and 'Describe' commands. Select this option if you want to use Webview based editors for it."
+          "description": "By default the Terminal View is used to execute OpenShift 'Show Log', 'Follow Log' and 'Describe' commands. Select this option if you want to use Webview based editors for it."
         }
       }
     }
