@@ -99,6 +99,6 @@ export class Url extends OpenShiftItem{
         if (!url && component) {
             url = await window.showQuickPick(Url.odo.getRoutes(component), {placeHolder: `Select the URL to describe from the component ${component.getName()}`, ignoreFocusOut: true});
         }
-        if (url) Url.odo.executeInTerminal(Command.describeUrl(url.getName()));
+        if (url) Url.odo.executeInTerminal(Command.describeUrl(url.getName()), url.getParent().contextPath.fsPath);
     }
 }
