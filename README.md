@@ -137,7 +137,6 @@ To debug a Java Component, Java Language Support and Java Debugger Extensions ar
 #### Actions available for a Storage in a Component
 
    * `Storage -> Delete` - Delete a Storage from a Component.
-   * `Storage -> Describe` - Describe the given Storage for the component in terminal window.
 
 
 #### Actions available for a Service in an Application
