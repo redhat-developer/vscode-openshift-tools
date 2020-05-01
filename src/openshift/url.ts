@@ -89,6 +89,7 @@ export class Url extends OpenShiftItem{
         }
     }
 
+    @vsCommand('openshift.url.describe', true)
     static async describe(treeItem: OpenShiftObject): Promise<void> {
         let url = treeItem;
         const component = await Url.getOpenShiftCmdData(url,
