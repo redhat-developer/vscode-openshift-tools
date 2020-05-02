@@ -13,7 +13,6 @@
 
 import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Command as VSCommand, Disposable } from 'vscode';
 import * as path from 'path';
-import { statSync } from 'fs';
 import { Subject } from 'rxjs';
 import { ChildProcess } from 'child_process';
 import * as cliInstance from './cli';
@@ -467,14 +466,16 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
     }
 }
 
+type OdoEventType = 'deleted' | 'inserted' | 'changed';
+
 export interface OdoEvent {
-    readonly type: 'deleted' | 'inserted' | 'changed';
+    readonly type: OdoEventType;
     readonly data: OpenShiftObject;
     readonly reveal: boolean;
 }
 
 class OdoEventImpl implements OdoEvent {
-    constructor(readonly type: 'deleted' | 'inserted' | 'changed', readonly data: OpenShiftObject, readonly reveal: boolean = false) {
+    constructor(readonly type: OdoEventType, readonly data: OpenShiftObject, readonly reveal: boolean = false) {
     }
 }
 
@@ -645,17 +646,13 @@ export class OdoImpl implements Odo {
         'connection refused'
     ];
 
-    private subjectInstance: Subject<OdoEvent> = new Subject<OdoEvent>();
+    public readonly subject: Subject<OdoEvent> = new Subject<OdoEvent>();
 
     public static get Instance(): Odo {
         if (!OdoImpl.instance) {
             OdoImpl.instance = new OdoImpl();
         }
         return OdoImpl.instance;
-    }
-
-    get subject(): Subject<OdoEvent> {
-        return this.subjectInstance;
     }
 
     async getClusters(): Promise<OpenShiftObject[]> {
@@ -776,24 +773,10 @@ export class OdoImpl implements Odo {
 
     public async _getComponents(application: OpenShiftObject): Promise<OpenShiftObject[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listComponents(application.getParent().getName(), application.getName()), Platform.getUserHomePath());
-        const componentObject = this.loadItems(result).map(value => ({ name: value.metadata.name, source: value.spec.source }));
+        const componentObject = this.loadItems(result).map(value => ({ name: value.metadata.name, sourceType: value.spec.sourceType }));
 
         const deployedComponents = componentObject.map<OpenShiftObject>((value) => {
-            let compSource = '';
-            try {
-                if (value.source.startsWith('https://')) {
-                    compSource = ComponentType.GIT;
-                } else if (statSync(Uri.parse(value.source).fsPath).isFile()) {
-                    compSource = ComponentType.BINARY;
-                } else if (statSync(Uri.parse(value.source).fsPath).isDirectory()) {
-                    compSource = ComponentType.LOCAL;
-                }
-            } catch (ignore) {
-                // treat component as local in case of error when calling statSync
-                // for not existing file or folder
-                compSource = ComponentType.LOCAL;
-            }
-            return new OpenShiftObjectImpl(application, value.name, ContextType.COMPONENT_NO_CONTEXT, true, this, Collapsed, undefined, compSource);
+            return new OpenShiftObjectImpl(application, value.name, ContextType.COMPONENT_NO_CONTEXT, true, this, Collapsed, undefined, value.sourceType);
         });
         const targetAppName = application.getName();
             const targetPrjName = application.getParent().getName();
