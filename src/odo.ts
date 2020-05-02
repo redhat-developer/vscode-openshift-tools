@@ -1187,11 +1187,11 @@ export class OdoImpl implements Odo {
                 const added: odo.ComponentSettings = OdoImpl.data.getSettingsByContext(folder.uri);
                 if (added) {
                     const cluster = (await this.getClusters())[0];
-                    const prj = OdoImpl.data.getObjectByPath(path.join(cluster.path, added.Project));
+                    const prj = OdoImpl.data.getObjectByPath([cluster.path, added.Project].join('/'));
                     if (prj && !!OdoImpl.data.getChildrenByParent(prj)) {
-                        const app = OdoImpl.data.getObjectByPath(path.join(prj.path, added.Application));
+                        const app = OdoImpl.data.getObjectByPath([prj.path, added.Application].join('/'));
                         if (app && !!OdoImpl.data.getChildrenByParent(app)) {
-                            const comp =  OdoImpl.data.getObjectByPath(path.join(app.path, added.Name));
+                            const comp =  OdoImpl.data.getObjectByPath([app.path, added.Name].join('/'));
                             if (comp && !comp.contextPath) {
                                 comp.contextPath = added.ContextPath;
                                 comp.contextValue = ContextType.COMPONENT_PUSHED;
@@ -1214,7 +1214,7 @@ export class OdoImpl implements Odo {
                 const settings = OdoImpl.data.getSettingsByContext(wsFolder.uri);
                 if (settings) {
                     const cluster = (await this.getClusters())[0];
-                    const item = OdoImpl.data.getObjectByPath(path.join(cluster.path, settings.Project, settings.Application, settings.Name));
+                    const item = OdoImpl.data.getObjectByPath([cluster.path, settings.Project, settings.Application, settings.Name].join('/'));
                     if (item && item.contextValue === ContextType.COMPONENT) {
                         await this.deleteAndRefresh(item);
                     } else if (item) {
