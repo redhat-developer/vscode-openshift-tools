@@ -182,9 +182,7 @@ export class Component extends OpenShiftItem {
             LogViewLoader.loadView(`${component.path} Log`,  Command.showLog, component);
         } else {
             Component.odo.executeInTerminal(
-                Command.showLog(component.getParent().getParent().getName(),
-                component.getParent().getName(),
-                component.getName()),
+                Command.showLog(),
                 component.contextPath.fsPath,
                 `OpenShift: Show '${component.getName()}' Component Log`);
         }
@@ -203,9 +201,7 @@ export class Component extends OpenShiftItem {
             LogViewLoader.loadView(`${component.path} Follow Log`,  Command.showLogAndFollow, component);
         } else {
             Component.odo.executeInTerminal(
-                Command.showLogAndFollow(component.getParent().getParent().getName(),
-                component.getParent().getName(),
-                component.getName()),
+                Command.showLogAndFollow(),
                 component.contextPath.fsPath,
                 `OpenShift: Follow '${component.getName()}' Component Log`);
         }
@@ -360,13 +356,13 @@ export class Component extends OpenShiftItem {
         );
     }
 
-    static getPushCmd(): Thenable<{pushCmd: string; contextPath: string}> {
+    static getPushCmd(): Thenable<{pushCmd: string; contextPath: string; name: string}> {
         return this.extensionContext.globalState.get('PUSH');
     }
 
-    static setPushCmd(fsPath: string): Thenable<void> {
+    static setPushCmd(fsPath: string, name: string): Thenable<void> {
         return this.extensionContext.globalState.update('PUSH',  { pushCmd: Command.pushComponent(),
-        contextPath: fsPath});
+        contextPath: fsPath, name });
     }
 
     @vsCommand('openshift.component.push', true)
@@ -380,8 +376,8 @@ export class Component extends OpenShiftItem {
         if (!component) return null;
         const choice = await Component.handleMigratedComponent(component);
         if (!choice) return null;
-        Component.setPushCmd(component.contextPath.fsPath);
-        await Component.odo.executeInTerminal(Command.pushComponent(configOnly), component.contextPath.fsPath);
+        Component.setPushCmd(component.contextPath.fsPath, component.getName());
+        await Component.odo.executeInTerminal(Command.pushComponent(configOnly), component.contextPath.fsPath, `OpenShift: Push '${component.getName()}' Component`);
         component.contextValue = ContextType.COMPONENT_PUSHED;
         Component.explorer.refresh(component);
     }
@@ -420,7 +416,7 @@ export class Component extends OpenShiftItem {
     static async lastPush(): Promise<void> {
         const getPushCmd = await Component.getPushCmd();
         if (getPushCmd.pushCmd && getPushCmd.contextPath) {
-            Component.odo.executeInTerminal(getPushCmd.pushCmd, getPushCmd.contextPath);
+            Component.odo.executeInTerminal(getPushCmd.pushCmd, getPushCmd.contextPath, `OpenShift: Push '${getPushCmd.name}' Component`);
         } else {
             throw Error('No existing push command found');
         }
@@ -435,7 +431,7 @@ export class Component extends OpenShiftItem {
     )
     static watch(component: OpenShiftObject): Promise<void> {
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+        Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath, `OpenShift: Watch '${component.getName()}' Component`);
     }
 
     @vsCommand('openshift.component.openUrl', true)

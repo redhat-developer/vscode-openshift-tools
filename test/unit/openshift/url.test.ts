@@ -21,6 +21,7 @@ suite('OpenShift/URL', () => {
     let sandbox: sinon.SinonSandbox;
     let quickPickStub: sinon.SinonStub;
     let inputStub: sinon.SinonStub;
+    let termStub: sinon.SinonStub;
     let execStub: sinon.SinonStub;
     let getProjectsNameStub: sinon.SinonStub;
     let getRouteNameStub: sinon.SinonStub;
@@ -193,6 +194,7 @@ suite('OpenShift/URL', () => {
         getRouteNameStub = sandbox.stub(OpenShiftItem, 'getRoutes').resolves([routeItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
+        termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: '', stdout: '', stderr: ''});
     });
 
@@ -427,6 +429,38 @@ suite('OpenShift/URL', () => {
             }`});
             await UrlMock.open(routeItem);
             openStub.calledOnceWith('http://route-nodejs-app-myproject.192.168.64.59.nip.io');
+        });
+    });
+
+    suite('describe', () => {
+
+        setup(() => {
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
+            sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
+            getRouteNameStub.resolves([]);
+            quickPickStub.onFirstCall().resolves(projectItem);
+            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onThirdCall().resolves(componentItem);
+            quickPickStub.onCall(3).resolves(routeItem);
+        });
+
+        test('calls the correct odo command w/ context', async () => {
+            await Url.describe(routeItem);
+
+            expect(termStub).calledOnceWith(Command.describeUrl(routeItem.getName()));
+        });
+
+        test('calls the correct odo command w/o context', async () => {
+            await Url.describe(null);
+
+            expect(termStub).calledOnceWith(Command.describeUrl(routeItem.getName()));
+        });
+
+        test('does not call the odo command if canceled', async () => {
+            sandbox.stub(Url, 'getOpenShiftCmdData').resolves(null);
+            await Url.describe(null);
+            expect(termStub).not.called;
         });
     });
 });

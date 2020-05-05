@@ -54,7 +54,6 @@
     "bundle-tools": "node ./out/build/bundle-tools.js --platform",
     "todo": "leasot **/*.ts --ignore node_modules -x",
     "test": "npm run clean && npm run compile && npm run verify && node ./out/build/run-tests.js unit",
-    "ui-test": "extest setup-and-run out/test/ui/*.test.js",
     "update-deps": "ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
     "build": "npm run clean && npm run lint && npm run compile"
@@ -149,7 +148,6 @@
     "tslint": "^5.20.1",
     "typescript": "^3.8.3",
     "utf-8-validate": "^5.0.2",
-    "vscode-extension-tester": "2.6.0",
     "vscode-test": "^1.2.3",
     "walker": "^1.0.7",
     "webpack": "^4.35.2",
@@ -201,6 +199,8 @@
     "onCommand:openshift.catalog.listComponents",
     "onCommand:openshift.catalog.listServices",
     "onCommand:openshift.url.create",
+    "onCommand:openshift.url.describe",
+    "onCommand:openshift.url.describe.palette",
     "onCommand:openshift.url.delete",
     "onCommand:openshift.url.delete.palette",
     "onCommand:openshift.component.openUrl",
@@ -410,7 +410,7 @@
       },
       {
         "command": "openshift.component.log.palette",
-        "title": "Show Component's Log",
+        "title": "Show Component Log",
         "category": "OpenShift"
       },
       {
@@ -420,7 +420,7 @@
       },
       {
         "command": "openshift.component.followLog.palette",
-        "title": "Follow Component's Log",
+        "title": "Follow Component Log",
         "category": "OpenShift"
       },
       {
@@ -521,6 +521,16 @@
       {
         "command": "openshift.url.delete.palette",
         "title": "Delete URL",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.url.describe",
+        "title": "Describe",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.url.describe.palette",
+        "title": "Describe URL",
         "category": "OpenShift"
       },
       {
@@ -806,6 +816,10 @@
         },
         {
           "command": "openshift.storage.delete",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.url.describe",
           "when": "view == openshiftProjectExplorer"
         },
         {
@@ -1111,6 +1125,11 @@
           "command": "openshift.storage.delete",
           "when": "view == openshiftProjectExplorer && viewItem == storage",
           "group": "s3"
+        },
+        {
+          "command": "openshift.url.describe",
+          "when": "view == openshiftProjectExplorer && viewItem == componentRoute",
+          "group": "s1"
         },
         {
           "command": "openshift.url.delete",

@@ -131,10 +131,13 @@ To debug a Java Component, Java Language Support and Java Debugger Extensions ar
 
    * `URL -> Delete` - Delete a URL from a Component.
    * `URL -> Open URL` - Click on the icon opens the specific URL in Browser.
+   * `URL -> Describe` - Describe the given URL for the component in terminal window.
+
 
 #### Actions available for a Storage in a Component
 
    * `Storage -> Delete` - Delete a Storage from a Component.
+
 
 #### Actions available for a Service in an Application
 

@@ -83,7 +83,7 @@ export class DeploymentConfig {
     static async rcShowLog(context: { impl: any }): Promise<string> {
         const replica = await DeploymentConfig.selectReplica(context, "Select a Replica to see the logs");
         if (replica) {
-            DeploymentConfig.odo.executeInTerminal(DeploymentConfig.command.showLog(replica));
+            DeploymentConfig.odo.executeInTerminal(DeploymentConfig.command.showLog(replica), undefined, `OpenShift: Show '${replica}' Replica Log`);
         }
         return replica;
     }
@@ -93,7 +93,7 @@ export class DeploymentConfig {
         let deployName: string = context ? context.name : null;
         if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to see logs"), "Select a DeploymentConfig to see logs");
         if (deployName) {
-            DeploymentConfig.odo.executeInTerminal(DeploymentConfig.command.showDeploymentConfigLog(deployName));
+            DeploymentConfig.odo.executeInTerminal(DeploymentConfig.command.showDeploymentConfigLog(deployName), undefined, `OpenShift: Show '${deployName}' DeploymentConfig Log`);
         }
         return deployName;
     }

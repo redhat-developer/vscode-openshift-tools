@@ -13,7 +13,6 @@
 
 import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Command as VSCommand, Disposable } from 'vscode';
 import * as path from 'path';
-import { statSync } from 'fs';
 import { Subject } from 'rxjs';
 import { ChildProcess } from 'child_process';
 import * as cliInstance from './cli';
@@ -211,12 +210,20 @@ export class Command {
         return `odo catalog describe service ${service}`;
     }
 
-    static showLog(project: string, app: string, component: string): string {
-        return `odo log ${component} --app ${app} --project ${project}`;
+    static describeUrl(url: string): string {
+        return `odo url describe ${url}`;
     }
 
-    static showLogAndFollow(project: string, app: string, component: string): string {
-        return `odo log ${component} -f --app ${app} --project ${project}`;
+    static describeStorage(storage: string): string {
+        return `odo storage describe ${storage}`;
+    }
+
+    static showLog(): string {
+        return `odo log`;
+    }
+
+    static showLogAndFollow(): string {
+        return `odo log -f`;
     }
 
     static listComponentPorts(project: string, app: string, component: string): string {
@@ -459,14 +466,16 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
     }
 }
 
+type OdoEventType = 'deleted' | 'inserted' | 'changed';
+
 export interface OdoEvent {
-    readonly type: 'deleted' | 'inserted' | 'changed';
+    readonly type: OdoEventType;
     readonly data: OpenShiftObject;
     readonly reveal: boolean;
 }
 
 class OdoEventImpl implements OdoEvent {
-    constructor(readonly type: 'deleted' | 'inserted' | 'changed', readonly data: OpenShiftObject, readonly reveal: boolean = false) {
+    constructor(readonly type: OdoEventType, readonly data: OpenShiftObject, readonly reveal: boolean = false) {
     }
 }
 
@@ -637,17 +646,13 @@ export class OdoImpl implements Odo {
         'connection refused'
     ];
 
-    private subjectInstance: Subject<OdoEvent> = new Subject<OdoEvent>();
+    public readonly subject: Subject<OdoEvent> = new Subject<OdoEvent>();
 
     public static get Instance(): Odo {
         if (!OdoImpl.instance) {
             OdoImpl.instance = new OdoImpl();
         }
         return OdoImpl.instance;
-    }
-
-    get subject(): Subject<OdoEvent> {
-        return this.subjectInstance;
     }
 
     async getClusters(): Promise<OpenShiftObject[]> {
@@ -768,24 +773,10 @@ export class OdoImpl implements Odo {
 
     public async _getComponents(application: OpenShiftObject): Promise<OpenShiftObject[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listComponents(application.getParent().getName(), application.getName()), Platform.getUserHomePath());
-        const componentObject = this.loadItems(result).map(value => ({ name: value.metadata.name, source: value.spec.source }));
+        const componentObject = this.loadItems(result).map(value => ({ name: value.metadata.name, sourceType: value.spec.sourceType }));
 
         const deployedComponents = componentObject.map<OpenShiftObject>((value) => {
-            let compSource = '';
-            try {
-                if (value.source.startsWith('https://')) {
-                    compSource = ComponentType.GIT;
-                } else if (statSync(Uri.parse(value.source).fsPath).isFile()) {
-                    compSource = ComponentType.BINARY;
-                } else if (statSync(Uri.parse(value.source).fsPath).isDirectory()) {
-                    compSource = ComponentType.LOCAL;
-                }
-            } catch (ignore) {
-                // treat component as local in case of error when calling statSync
-                // for not existing file or folder
-                compSource = ComponentType.LOCAL;
-            }
-            return new OpenShiftObjectImpl(application, value.name, ContextType.COMPONENT_NO_CONTEXT, true, this, Collapsed, undefined, compSource);
+            return new OpenShiftObjectImpl(application, value.name, ContextType.COMPONENT_NO_CONTEXT, true, this, Collapsed, undefined, value.sourceType);
         });
         const targetAppName = application.getName();
             const targetPrjName = application.getParent().getName();
@@ -1179,11 +1170,11 @@ export class OdoImpl implements Odo {
                 const added: odo.ComponentSettings = OdoImpl.data.getSettingsByContext(folder.uri);
                 if (added) {
                     const cluster = (await this.getClusters())[0];
-                    const prj = OdoImpl.data.getObjectByPath(path.join(cluster.path, added.Project));
+                    const prj = OdoImpl.data.getObjectByPath([cluster.path, added.Project].join('/'));
                     if (prj && !!OdoImpl.data.getChildrenByParent(prj)) {
-                        const app = OdoImpl.data.getObjectByPath(path.join(prj.path, added.Application));
+                        const app = OdoImpl.data.getObjectByPath([prj.path, added.Application].join('/'));
                         if (app && !!OdoImpl.data.getChildrenByParent(app)) {
-                            const comp =  OdoImpl.data.getObjectByPath(path.join(app.path, added.Name));
+                            const comp =  OdoImpl.data.getObjectByPath([app.path, added.Name].join('/'));
                             if (comp && !comp.contextPath) {
                                 comp.contextPath = added.ContextPath;
                                 comp.contextValue = ContextType.COMPONENT_PUSHED;
@@ -1206,7 +1197,7 @@ export class OdoImpl implements Odo {
                 const settings = OdoImpl.data.getSettingsByContext(wsFolder.uri);
                 if (settings) {
                     const cluster = (await this.getClusters())[0];
-                    const item = OdoImpl.data.getObjectByPath(path.join(cluster.path, settings.Project, settings.Application, settings.Name));
+                    const item = OdoImpl.data.getObjectByPath([cluster.path, settings.Project, settings.Application, settings.Name].join('/'));
                     if (item && item.contextValue === ContextType.COMPONENT) {
                         await this.deleteAndRefresh(item);
                     } else if (item) {

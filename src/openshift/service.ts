@@ -86,7 +86,7 @@ export class Service extends OpenShiftItem {
         if (service) {
             const template = await Service.getTemplate(service);
             if (template) {
-                Service.odo.executeInTerminal(Command.describeService(template), Platform.getUserHomePath());
+                Service.odo.executeInTerminal(Command.describeService(template), Platform.getUserHomePath(), `OpenShift: Describe '${service.getName()}' Service`);
             } else {
                 throw new VsCommandError(`Cannot get Service Type name for Service '${service.getName()}'`);
             }
