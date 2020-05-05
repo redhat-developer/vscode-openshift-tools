@@ -5,7 +5,28 @@
 
 import * as React from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
-import { Button, InputLabel, FormControl, FormHelperText, LinearProgress, MenuItem, Paper, Select, Stepper, Step, StepLabel, StepContent, TextField, Typography } from '@material-ui/core';
+import { InsertDriveFile, GetApp, VpnKey} from '@material-ui/icons';
+import {
+  Avatar,
+  Button,
+  Divider,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  MenuItem,
+  Paper,
+  Select,
+  Stepper,
+  Step,
+  StepLabel,
+  StepContent,
+  TextField,
+  Typography } from '@material-ui/core';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -16,15 +37,27 @@ const useStyles = makeStyles((theme: Theme) =>
         width: '25ch',
       },
       '& .MuiStepContent-root': {
-        paddingLeft: '40px'
+        paddingLeft: theme.spacing(5)
       },
       '& .MuiStepper-root': {
-        marginLeft: '30px'
+        marginLeft: theme.spacing(4)
+      },
+      '& .MuiButton-root': {
+        textTransform: 'none'
+      },
+      '& .MuiStepIcon-root.MuiStepIcon-active': {
+        color: '#BE0000'
+      },
+      '& .MuiStepIcon-root.MuiStepIcon-completed': {
+        color: '#BE0000'
+      },
+      '& .MuiButton-containedPrimary': {
+        backgroundColor: '#BE0000'
       }
     },
     button: {
       marginTop: theme.spacing(1),
-      marginRight: theme.spacing(1),
+      marginRight: theme.spacing(1)
     },
     actionsContainer: {
       marginBottom: theme.spacing(2),
@@ -35,7 +68,8 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     formControl: {
       margin: theme.spacing(1),
-      minWidth: 120
+      minWidth: 120,
+      width: '40%'
     },
     uploadLabel: {
       marginTop: theme.spacing(2)
@@ -51,7 +85,7 @@ declare global {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function getSteps() {
-  return ['Select OpenShift Version', 'Specify CRC binary path', 'File path of image pull secret', 'Select optional configurations', 'Start the cluster'];
+  return ['Select OpenShift Version', 'CRC Binary Path/Download', 'File path of image pull secret', 'Select optional configurations', 'Start the cluster'];
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -86,26 +120,53 @@ export default function addClusterView() {
     const getStepContent = (step: number) => {
       switch (step) {
           case 0:
-              return(
-                  <FormControl className={classes.formControl}>
-                  <InputLabel id="demo-simple-select-label">OpenShift Version</InputLabel>
-                      <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      value={vers}
-                      onChange={handleChange}
-                      >
-                          <MenuItem value={3}>OpenShift 3.x</MenuItem>
-                          <MenuItem value={4}>OpenShift 4.x</MenuItem>
-                      </Select>
-                      <FormHelperText>This provides the major version.</FormHelperText>
-                  </FormControl>
-              )
+            return(
+              <FormControl className={classes.formControl}>
+              <InputLabel id="select-openshift-label">OpenShift Version</InputLabel>
+                <Select
+                labelId="select-openshift-label"
+                id="simple-select"
+                required
+                value={vers}
+                onChange={handleChange}
+                >
+                  <MenuItem value={3}>OpenShift 3.x</MenuItem>
+                  <MenuItem value={4}>OpenShift 4.x</MenuItem>
+                </Select>
+                <FormHelperText>This provides the major version.</FormHelperText>
+              </FormControl>
+            )
           case 1:
             return (
               <div>
                 <Typography>Red Hat CodeReady Containers brings a minimal OpenShift 4.2 or newer cluster to your local laptop or desktop computer.<br></br> Download and extract the CodeReady Containers archive for your operating system and provide the binary path.</Typography>
-                <div className={classes.uploadLabel}>
+                <List className={classes.uploadLabel}>
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar>
+                        <GetApp />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary="Download" secondary="This will download the latest crc bundle." />
+                    <Button
+                      variant="contained"
+                      component="span"
+                      color="default"
+                      href="http://mirror.openshift.com/pub/openshift-v4/clients/crc/latest/crc-macos-amd64.tar.xz"
+                      className={classes.button}
+                      startIcon={<GetApp />}
+                    >
+                      Download
+                    </Button>
+                  </ListItem>
+                  <Divider variant="inset" component="li" />
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar>
+                        <InsertDriveFile />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary="Binary Location" secondary="Provide the crc binary location" />
                     <div>
                       <input
                       style={{ display: "none" }}
@@ -115,16 +176,18 @@ export default function addClusterView() {
                       onChange={handleUploadPath}
                       />
                       <label htmlFor="contained-button-file">
-                        <Button variant="contained" component="span">
-                        Upload
+                        <Button variant="contained" component="span" className={classes.button}>
+                        Select Path
                         </Button>
                       </label>
                     </div>
-                    {fileName && (
+                  </ListItem>
+                  <Divider variant="inset" component="li" />
+                  {fileName && (
                       <TextField
                         id="outlined-location"
-                        label="Binary Path"
-                        style={{ marginTop: '20px'}}
+                        label="Binary Location"
+                        style={{ marginTop: '20px', width: '100%'}}
                         fullWidth
                         defaultValue={fileName}
                         InputProps={{
@@ -134,29 +197,52 @@ export default function addClusterView() {
                         size="small"
                       />
                     )}
-                </div>
+              </List>
               </div>
             )
           case 2:
           return (
-            <div>
-              <Typography>Download pull secret file from <a href="https://cloud.redhat.com/openshift/install/crc/installer-provisioned">https://cloud.redhat.com/openshift/install/crc/installer-provisioned</a> and upload it.</Typography>
+            <List>
+              <ListItem>
+              <ListItemAvatar>
+                <Avatar>
+                  <VpnKey />
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary="Provide the pull secret."
+                secondary={<span>Download pull secret file from <a href="https://cloud.redhat.com/openshift/install/crc/installer-provisioned">here</a> and upload it.</span>} />
               <div className={classes.uploadLabel}>
-                  <input
-                  accept="text/*"
-                  style={{ display: "none" }}
-                  id="contained-button-file"
-                  multiple
-                  type="file"
-                  onChange={handleUploadPullSecret}
-                  />
-                  <label htmlFor="contained-button-file">
-                    <Button variant="contained" component="span">
-                    Upload
-                    </Button>
-                  </label>
+                <input
+                accept="text/*"
+                style={{ display: "none" }}
+                id="contained-button-file"
+                multiple
+                type="file"
+                onChange={handleUploadPullSecret}
+                />
+                <label htmlFor="contained-button-file">
+                  <Button variant="contained" component="span">
+                  Upload Pull Secret
+                  </Button>
+                </label>
               </div>
-            </div>
+            </ListItem>
+            {pullSecretPath && (
+              <TextField
+                id="outlined-location"
+                label="Pull Secret Location"
+                style={{ marginTop: '20px', width: '100%'}}
+                fullWidth
+                defaultValue={pullSecretPath}
+                InputProps={{
+                  readOnly: true,
+                }}
+                variant="outlined"
+                size="small"
+              />
+            )}
+          </List>
           )
           case 3:
             return (
