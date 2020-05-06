@@ -53,6 +53,9 @@ const useStyles = makeStyles((theme: Theme) =>
       },
       '& .MuiButton-containedPrimary': {
         backgroundColor: '#BE0000'
+      },
+      '& .MuiStepLabel-iconContainer': {
+        paddingRight: theme.spacing(2)
       }
     },
     button: {

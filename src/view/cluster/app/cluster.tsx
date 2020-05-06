@@ -8,7 +8,6 @@ import { makeStyles, Theme, createStyles, withStyles } from '@material-ui/core/s
 import { AppBar, Toolbar, Card, Typography, Button, CardContent, CardActions, IconButton } from '@material-ui/core';
 
 import AddClusterView from './clusterView';
-import './cluster.css';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -24,10 +23,8 @@ const useStyles = makeStyles((theme: Theme) =>
         padding: '20px'
     },
     container: {
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      marginTop: '10em',
-      color: 'black'
+      marginTop: '8em',
+      marginBottom: '8em'
     },
     textWhite: {
       marginBottom: '20px!important',
@@ -38,6 +35,24 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     rowBody: {
       padding: '0 10em 0 10em'
+    },
+    cardTransform: {
+      width: '30%',
+      float: 'left',
+      marginRight: theme.spacing(4),
+      marginLeft: theme.spacing(4),
+      position: 'relative',
+      overflow: 'hidden',
+      transform: 'scale(0.95)',
+      '&:hover': {
+        transform: 'scale(1)',
+        boxShadow: '5px 20px 30px rgba(0,0,0,0.2)'
+      }
+    },
+    cardHeader: {
+      backgroundColor: '#00586d!important',
+      padding: theme.spacing(2),
+      borderBottom: '0 solid transparent'
     }
   }),
 );
@@ -85,8 +100,8 @@ export default function Header() {
   const Card1 = ({cardList}) => (
     <>
       {cardList.map((list, index) => (
-        <Card className="card" key={index}>
-          <div className="bg-teal-dark">
+        <Card className={classes.cardTransform} key={index}>
+          <div className={classes.cardHeader}>
             <Typography variant="caption" display="block" style={{fontSize: '1.25em', color: 'white'}}>
               {list.heading}
             </Typography>
