@@ -37,7 +37,7 @@
   "main": "./out/src/extension",
   "scripts": {
     "verify": "node ./out/build/verify-tools.js",
-    "vscode:prepublish": "npm run build && node ./out/build/bundle-tools.js",
+    "vscode:prepublish": "npm run build && npm run verify && node ./out/build/bundle-tools.js",
     "compile": "npm-run-all compile:*",
     "compile:ext": "tsc -p ./",
     "compile:views": "webpack --mode development",
