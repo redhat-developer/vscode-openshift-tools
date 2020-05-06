@@ -9,6 +9,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 
+import { exit } from 'shelljs';
 import { DownloadUtil } from './download';
 
 import hasha = require('hasha');
@@ -18,7 +19,7 @@ import path = require('path');
 import cp = require('child_process');
 import configData = require('../src/tools.json');
 import os = require('os');
-import { exit } from 'shelljs';
+
 
 /**
  * Download reqURL to targetFolder and save it to fileName. Verify the downloaded file sha256 is matching sha256sum
