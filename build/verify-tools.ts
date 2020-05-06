@@ -9,6 +9,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 
+import { exit } from 'shelljs';
 import { DownloadUtil } from './download';
 
 import hasha = require('hasha');
@@ -18,6 +19,7 @@ import path = require('path');
 import cp = require('child_process');
 import configData = require('../src/tools.json');
 import os = require('os');
+
 
 /**
  * Download reqURL to targetFolder and save it to fileName. Verify the downloaded file sha256 is matching sha256sum
@@ -69,7 +71,11 @@ cp.exec('git diff --name-only origin/master -- .', async (error, stdout) => {
     console.log(stdout);
     if (fileCheckRegex.test(stdout)) {
         console.log('tools.json is changed, starting download verification');
-        await verifyTools();
+        try {
+            await verifyTools();
+        } catch (err) {
+            exit(1);
+        }
     } else {
         console.log('tools.json is not changed, skipping download verification');
     }

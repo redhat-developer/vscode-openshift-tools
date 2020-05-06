@@ -55,7 +55,7 @@
     "test": "npm run clean && npm run compile && npm run verify && node ./out/build/run-tests.js unit",
     "update-deps": "ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
-    "build": "npm run clean && npm run lint && npm run compile"
+    "build": "npm run clean && npm run lint && npm run compile && npm run verify"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.11.1",
