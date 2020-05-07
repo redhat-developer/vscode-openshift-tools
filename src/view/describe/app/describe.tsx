@@ -28,7 +28,7 @@ export default class Describe extends LazyLog {
     }
 
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    messageListener = (event) => {
+    messageListener = (event: MessageEvent) => {
         const enc = new TextEncoder();
         if (event?.data?.action){
             const message = event.data; // The JSON data our extension sent
