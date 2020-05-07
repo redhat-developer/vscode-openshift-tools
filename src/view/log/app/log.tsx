@@ -32,7 +32,7 @@ export default class Log extends LazyLog {
         window.addEventListener('message', this.messageListener);
     }
 
-    messageListener = (event) => {
+    messageListener = (event: MessageEvent) => {
         const enc = new TextEncoder();
         if (event?.data?.action){
             const message = event.data; // The JSON data our extension sent
