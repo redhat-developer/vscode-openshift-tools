@@ -10,7 +10,6 @@ import * as chai from 'chai';
 import * as shelljs from 'shelljs';
 import * as fs from 'fs';
 import * as fsex from 'fs-extra';
-import { Archive } from '../../src/util/archive';
 import { Platform } from '../../src/util/platform';
 import { CliExitData, CliChannel } from '../../src/cli';
 
@@ -107,7 +106,6 @@ suite("tools configuration", () => {
                 sb.stub(vscode.window, 'showInformationMessage').resolves(`Download and install v${ToolsConfig.tools.odo.version}`);
                 const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools.odo.sha256sum);
                 stub.onSecondCall().returns(ToolsConfig.tools.oc.sha256sum);
-                sb.stub(Archive, 'extract').resolves();
                 await ToolsConfig.detect('odo');
                 assert.ok(!chmodSyncStub.called);
             });
@@ -124,7 +122,6 @@ suite("tools configuration", () => {
             test('set executable attribute for tool file', async () => {
                 sb.stub(shelljs, 'which');
                 sb.stub(ToolsConfig, 'getVersion').resolves(ToolsConfig.tools.odo.version);
-                sb.stub(Archive, 'extract').resolves();
                 await ToolsConfig.detect('odo');
                 assert.ok(chmodSyncStub.called);
             });
