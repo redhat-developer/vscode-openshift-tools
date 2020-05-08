@@ -8,7 +8,7 @@
 /* eslint-disable no-console */
 
 import { DownloadUtil } from './download';
-import { Archive } from '../src/util/archive';
+import { Archive } from './archive';
 
 import hasha = require('hasha');
 import mkdirp = require('mkdirp');

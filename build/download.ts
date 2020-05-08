@@ -11,6 +11,7 @@ const { promisify } = require('util');
 const { fromEvent } = require('rxjs');
 const { throttleTime } = require('rxjs/operators');
 const pipeline = promisify(require('stream').pipeline);
+// eslint-disable-next-line import/no-extraneous-dependencies
 const got = require('got');
 
 export class DownloadUtil {
