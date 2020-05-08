@@ -3,10 +3,17 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Uri } from 'vscode';
-
 export const enum Kind {
     LocalConfig,
+}
+
+export const enum Protocol {
+    TCP,
+}
+
+export interface Port {
+    number: number;
+    protocol: string;
 }
 
 export const enum SourceType {
@@ -15,25 +22,27 @@ export const enum SourceType {
     BINARY = 'binary',
 }
 
-export interface Config {
-    kind: Kind;
-    apiversion: string;
-    ComponentSettings: ComponentSettings;
+export interface ComponentMetadata {
+    name: string;
+    namespace: string;
+    creationTimestamp: string;
 }
 
-export interface ComponentSettings {
-    Type: string;
-    SourceLocation: string;
-    Ref: string;
-    SourceType: SourceType;
-    Application: string;
-    Project: string;
-    Name: string;
-    ContextPath?: Uri;
-    Ports: string[];
+export interface ComponentSpec {
+    app: string;
+    type: string;
+    sourceType: SourceType,
+    ports: string[];
 }
 
-export interface Port {
-    Number: number;
-    Protocol: string;
+export interface ComponentStatus {
+    context: string;
+    state: string;
+}
+
+export interface Component {
+    apiVersion: "odo.openshift.io/v1alpha1";
+    metadata: ComponentMetadata;
+    spec: ComponentSpec;
+    status: ComponentStatus;
 }

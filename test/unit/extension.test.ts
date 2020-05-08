@@ -22,6 +22,38 @@ import path = require('path');
 const {expect} = chai;
 chai.use(sinonChai);
 
+function genComponentJson(p: string, a: string, n: string, c: string ) {
+    return `
+    {
+        "kind": "List",
+        "apiVersion": "odo.openshift.io/v1alpha1",
+        "metadata": {},
+        "items": [
+          {
+            "kind": "Component",
+            "apiVersion": "odo.openshift.io/v1alpha1",
+            "metadata": {
+              "name": "${n}",
+              "namespace": "${p}",
+              "creationTimestamp": null
+            },
+            "spec": {
+              "app": "app1",
+              "type": "nodejs:10",
+              "sourceType": "git",
+              "ports": [
+                "8080/TCP"
+              ]
+            },
+            "status": {
+              "context": "${c}",
+              "state": "Not Pushed"
+            }
+          }
+        ]
+      }`
+}
+
 suite('openshift connector Extension', () => {
     let sandbox: sinon.SinonSandbox;
 
@@ -30,7 +62,7 @@ suite('openshift connector Extension', () => {
     const appItem = new OpenShiftObjectImpl(projectItem, 'app1', ContextType.APPLICATION, false, OdoImpl.Instance);
     const fixtureFolder = path.join(__dirname, '..', '..', '..', 'test', 'fixtures').normalize();
     const comp2Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp2'));
-
+    let activated;
     setup(async () => {
         sandbox = sinon.createSandbox();
         sandbox.stub(vscode.workspace, 'workspaceFolders').value([{
@@ -38,8 +70,35 @@ suite('openshift connector Extension', () => {
         }, {
             uri: comp2Uri, index: 1, name: 'comp2'
         }]);
+        // eslint-disable-next-line @typescript-eslint/require-await
+        sandbox.stub(OdoImpl.prototype, 'execute').callsFake(async (cmd: string)=> {
+            if (cmd.includes('version')) {
+                return { error: undefined, stdout: "Server: https://api.crc.testing:6443", stderr: '' };
+            }
 
-        await vscode.commands.executeCommand('openshift.output');
+            if(cmd.includes('--path')) {
+                const args = cmd.split(' ');
+                const name = args[3].substr(args[3].lastIndexOf(path.sep));
+                return { error: undefined, stdout: genComponentJson('myproject', 'app1', name, args[3]), stderr: '' };
+            }
+
+            if (cmd.includes('list --app')) {
+                return { error: undefined, stdout: `
+                {
+                    "kind": "List",
+                    "apiVersion": "odo.openshift.io/v1alpha1",
+                    "metadata": {},
+                    "items": []
+                  }`, stderr: ''}
+            }
+            return { error: undefined, stdout: '', stderr: ''};
+        });
+        if (activated) {
+            await OdoImpl.Instance.loadWorkspaceComponents(null);
+        } else {
+            await vscode.commands.executeCommand('openshift.output');
+            activated = true;
+        }
         sandbox.stub(OdoImpl.prototype, '_getClusters').resolves([clusterItem]);
         sandbox.stub(OdoImpl.prototype, '_getProjects').resolves([projectItem]);
         sandbox.stub(OdoImpl.prototype, '_getApplications').resolves([appItem]);
@@ -56,14 +115,12 @@ suite('openshift connector Extension', () => {
 	});
 
     test('should load components from workspace folders', async () => {
-        sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
         const components = await OdoImpl.Instance.getApplicationChildren(appItem);
         expect(components.length).is.equals(2);
     });
 
     test('should load components from added folders', async () => {
-        sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
-        OdoImpl.Instance.loadWorkspaceComponents({
+        await OdoImpl.Instance.loadWorkspaceComponents({
             added: [{
                 uri: vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp3')), index: 0, name: 'comp3'
             }],

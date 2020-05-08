@@ -25,8 +25,6 @@ import { Progress } from './util/progress';
 
 import format =  require('string-format');
 import bs = require('binary-search');
-import yaml = require('js-yaml');
-import fs = require('fs');
 
 const {Collapsed} = TreeItemCollapsibleState;
 
@@ -482,7 +480,7 @@ class OdoEventImpl implements OdoEvent {
 export interface Odo {
     getClusters(): Promise<OpenShiftObject[]>;
     getProjects(): Promise<OpenShiftObject[]>;
-    loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): void;
+    loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): Promise<void>;
     addWorkspaceComponent(WorkspaceFolder: WorkspaceFolder, component: OpenShiftObject);
     getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]>;
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
@@ -538,7 +536,7 @@ class OdoModel {
 
     private contextToObject = new Map<Uri, OpenShiftObject>();
 
-    private contextToSettings = new Map<Uri, odo.ComponentSettings>();
+    private contextToSettings = new Map<string, odo.Component>();
 
     private objectToProcess = new Map<OpenShiftObject, ChildProcess>();
 
@@ -557,6 +555,7 @@ class OdoModel {
         this.parentToChildren.clear();
         this.pathToObject.clear();
         this.contextToObject.clear();
+        this.contextToSettings.clear();
         this.addContexts(workspace.workspaceFolders? workspace.workspaceFolders : []);
     }
 
@@ -582,28 +581,38 @@ class OdoModel {
         return this.contextToObject.get(context);
     }
 
-    public setContextToSettings (settings: odo.ComponentSettings): void {
-        if (!this.contextToSettings.has(settings.ContextPath)) {
-            this.contextToSettings.set(settings.ContextPath, settings);
+    public setContextToSettings (settings: odo.Component): void {
+        if (!this.contextToSettings.has(settings.status.context)) {
+            this.contextToSettings.set(settings.status.context, settings);
         }
     }
 
-    public getSettingsByContext(context: Uri): odo.ComponentSettings {
+    public getSettingsByContext(context: string): odo.Component {
         return this.contextToSettings.get(context);
     }
 
-    public getSettings(): odo.ComponentSettings[] {
+    public getSettings(): odo.Component[] {
         return Array.from(this.contextToSettings.values());
     }
 
-    public addContexts(folders: ReadonlyArray<WorkspaceFolder>): void {
+    async addContexts(folders: ReadonlyArray<WorkspaceFolder>): Promise<void> {
+        const execs: Promise<cliInstance.CliExitData>[] = [];
         folders.forEach((folder)=> {
             try {
-                const compData = yaml.safeLoad(fs.readFileSync(path.join(folder.uri.fsPath, '.odo', 'config.yaml'), 'utf8')) as odo.Config;
-                compData.ComponentSettings.ContextPath = folder.uri;
-                OdoImpl.data.setContextToSettings(compData.ComponentSettings);
+                execs.push(OdoImpl.Instance.execute(`odo list --path ${folder.uri.fsPath} -o json`, undefined, false));
             } catch (ignore) {
-                // ignore errors when loading .yaml file
+                // ignore execution errors
+            }
+        });
+        const results = await Promise.all(execs);
+        results.forEach((result) => {
+            if (!result.error) {
+                try {
+                    const compData = JSON.parse(result.stdout).items[0] as odo.Component;
+                    compData && OdoImpl.data.setContextToSettings(compData);
+                } catch (err) {
+                    // ignore unexpected parsing errors
+                }
             }
         });
     }
@@ -617,7 +626,7 @@ class OdoModel {
         if (ps) ps.kill('SIGINT');
     }
 
-    public deleteContext(context: Uri): void {
+    public deleteContext(context: string): void {
         this.contextToSettings.delete(context);
     }
 }
@@ -748,8 +757,8 @@ export class OdoImpl implements Odo {
         apps = [...new Set(apps)]; // remove duplicates form array
         // extract apps from local not yet deployed components
         OdoImpl.data.getSettings().forEach((component) => {
-            if (component.Project === project.getName() && !apps.find((item) => item === component.Application)) {
-                apps.push(component.Application);
+            if (component.metadata.namespace === project.getName() && !apps.find((item) => item === component.spec.app)) {
+                apps.push(component.spec.app);
             }
         });
         return apps.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(project, value, ContextType.APPLICATION, false, OdoImpl.instance)).sort(compareNodes);
@@ -779,25 +788,25 @@ export class OdoImpl implements Odo {
             return new OpenShiftObjectImpl(application, value.name, ContextType.COMPONENT_NO_CONTEXT, true, this, Collapsed, undefined, value.sourceType);
         });
         const targetAppName = application.getName();
-            const targetPrjName = application.getParent().getName();
+        const targetPrjName = application.getParent().getName();
 
-        OdoImpl.data.getSettings().filter((comp) => comp.Application === targetAppName && comp.Project === targetPrjName).forEach((comp) => {
-            const jsonItem = componentObject.find((item)=> item.name === comp.Name);
+        OdoImpl.data.getSettings().filter((comp) => comp.spec.app === targetAppName && comp.metadata.namespace === targetPrjName).forEach((comp) => {
+            const jsonItem = componentObject.find((item)=> item.name === comp.metadata.name);
             let item: OpenShiftObject;
             if (jsonItem) {
-                item = deployedComponents.find((component) => component.getName() === comp.Name);
+                item = deployedComponents.find((component) => component.getName() === comp.metadata.name);
             }
             const builderImage = {
-                name: comp.Type.split(':')[0],
-                tag: comp.Type.split(':')[1]
+                name: comp.spec.type.split(':')[0],
+                tag: comp.spec.type.split(':')[1]
             };
             if (item && item.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
-                item.contextPath = comp.ContextPath;
+                item.contextPath = Uri.parse(comp.status.context);
                 item.deployed = true;
                 item.contextValue = ContextType.COMPONENT_PUSHED;
                 item.builderImage = builderImage;
             } else {
-                deployedComponents.push(new OpenShiftObjectImpl(application, comp.Name, item ? item.contextValue : ContextType.COMPONENT, false, this, Collapsed, comp.ContextPath, comp.SourceType, builderImage));
+                deployedComponents.push(new OpenShiftObjectImpl(application, comp.metadata.name, item ? item.contextValue : ContextType.COMPONENT, false, this, Collapsed, Uri.parse(comp.status.context), comp.spec.sourceType, builderImage));
             }
         });
 
@@ -842,14 +851,14 @@ export class OdoImpl implements Odo {
             const serviceOpj = JSON.parse(portsResult.stdout);
             ports = serviceOpj.spec.ports;
         } else {
-            const settings: odo.ComponentSettings = OdoImpl.data.getSettingsByContext(component.contextPath);
+            const settings: odo.Component = OdoImpl.data.getSettingsByContext(component.contextPath.fsPath);
             if (settings) {
-                ports = settings.Ports;
+                ports = settings.spec.ports;
             }
         }
         return ports.map<odo.Port>((port: string) => {
             const data = port.split('/');
-            return {Number: Number.parseInt(data[0], 10), Protocol: data[1]};
+            return {number: Number.parseInt(data[0], 10), protocol: data[1]};
         });
     }
 
@@ -925,7 +934,11 @@ export class OdoImpl implements Odo {
         return OdoImpl.cli.execute(
             toolLocation ? command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`) : command,
             cwd ? {cwd} : { }
-        ).then(async (result) => result.error && fail ?  Promise.reject(result.error) : result).catch((err) => fail ? Promise.reject(err) : Promise.resolve({error: null, stdout: '', stderr: ''}));
+        ).then(async (result) => {
+            return result.error && fail ?  Promise.reject(result.error) : result;
+        }).catch((err) => {
+            return fail ? Promise.reject(err) : Promise.resolve({error: null, stdout: '', stderr: ''});
+        });
     }
 
     public async spawn(command: string, cwd?: string): Promise<ChildProcess> {
@@ -1160,34 +1173,31 @@ export class OdoImpl implements Odo {
         this.subject.next(new OdoEventImpl('changed', null));
     }
 
-    loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): void {
-        if (event === null && workspace.workspaceFolders) {
-            OdoImpl.data.addContexts(workspace.workspaceFolders);
-        }
-
-        if (event && event.added && event.added.length > 0) {
-            OdoImpl.data.addContexts(event.added);
-
-            event.added.forEach(async (folder: WorkspaceFolder) => {
-                const added: odo.ComponentSettings = OdoImpl.data.getSettingsByContext(folder.uri);
+    async loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): Promise<void> {
+        const clusters = (await this.getClusters());
+        if(!clusters) return;
+        if (event === null && workspace.workspaceFolders || event && event.added && event.added.length > 0) {
+            const addedFolders = event === null? workspace.workspaceFolders : event.added;
+            await OdoImpl.data.addContexts(addedFolders);
+            addedFolders.forEach((folder: WorkspaceFolder) => {
+                const added: odo.Component = OdoImpl.data.getSettingsByContext(folder.uri.fsPath);
                 if (added) {
-                    const cluster = (await this.getClusters())[0];
-                    const prj = OdoImpl.data.getObjectByPath([cluster.path, added.Project].join('/'));
+                    const prj = OdoImpl.data.getObjectByPath([clusters[0].path, added.metadata.namespace].join('/'));
                     if (prj && !!OdoImpl.data.getChildrenByParent(prj)) {
-                        const app = OdoImpl.data.getObjectByPath([prj.path, added.Application].join('/'));
+                        const app = OdoImpl.data.getObjectByPath([prj.path, added.spec.app].join('/'));
                         if (app && !!OdoImpl.data.getChildrenByParent(app)) {
-                            const comp =  OdoImpl.data.getObjectByPath([app.path, added.Name].join('/'));
+                            const comp =  OdoImpl.data.getObjectByPath([app.path, added.metadata.name].join('/'));
                             if (comp && !comp.contextPath) {
-                                comp.contextPath = added.ContextPath;
+                                comp.contextPath = Uri.parse(added.status.context);
                                 comp.contextValue = ContextType.COMPONENT_PUSHED;
                                 this.subject.next(new OdoEventImpl('changed', comp));
                             } else if (!comp) {
-                                const newComponent = new OpenShiftObjectImpl(app, added.Name, ContextType.COMPONENT, false, this, Collapsed, added.ContextPath, added.SourceType,  { name: added.Type.split(':')[0], tag: added.Type.split(':')[1]});
-                                await this.insertAndRefresh(newComponent);
+                                const newComponent = new OpenShiftObjectImpl(app, added.metadata.name, ContextType.COMPONENT, false, this, Collapsed, Uri.parse(added.status.context), added.spec.sourceType,  { name: added.spec.type.split(':')[0], tag: added.spec.type.split(':')[1]});
+                                this.insertAndRefresh(newComponent);
                             }
                         } else if (!app) {
-                            const newApp = new OpenShiftObjectImpl(prj, added.Application, ContextType.APPLICATION, false, this, Collapsed);
-                            await this.insertAndRefresh(newApp);
+                            const newApp = new OpenShiftObjectImpl(prj, added.spec.app, ContextType.APPLICATION, false, this, Collapsed);
+                            this.insertAndRefresh(newApp);
                         }
                     }
                 }
@@ -1195,19 +1205,18 @@ export class OdoImpl implements Odo {
         }
 
         if (event && event.removed && event.removed.length > 0) {
-            event.removed.forEach(async (wsFolder: WorkspaceFolder) => {
-                const settings = OdoImpl.data.getSettingsByContext(wsFolder.uri);
+            event.removed.forEach((wsFolder: WorkspaceFolder) => {
+                const settings = OdoImpl.data.getSettingsByContext(wsFolder.uri.fsPath);
                 if (settings) {
-                    const cluster = (await this.getClusters())[0];
-                    const item = OdoImpl.data.getObjectByPath([cluster.path, settings.Project, settings.Application, settings.Name].join('/'));
+                    const item = OdoImpl.data.getObjectByPath([clusters[0].path, settings.metadata.namespace, settings.spec.app, settings.metadata.name].join('/'));
                     if (item && item.contextValue === ContextType.COMPONENT) {
-                        await this.deleteAndRefresh(item);
+                        this.deleteAndRefresh(item);
                     } else if (item) {
                         item.contextValue = ContextType.COMPONENT_NO_CONTEXT;
                         item.contextPath = undefined;
                         this.subject.next(new OdoEventImpl('changed', item));
                     }
-                    OdoImpl.data.deleteContext(wsFolder.uri);
+                    OdoImpl.data.deleteContext(wsFolder.uri.fsPath);
                 }
             });
         }
