@@ -9,7 +9,6 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 
-import { exit } from 'shelljs';
 import { DownloadUtil } from './download';
 
 import hasha = require('hasha');
@@ -74,7 +73,8 @@ cp.exec('git diff --name-only origin/master -- .', async (error, stdout) => {
         try {
             await verifyTools();
         } catch (err) {
-            exit(1);
+            console.log(err);
+            process.exit(1);
         }
     } else {
         console.log('tools.json is not changed, skipping download verification');

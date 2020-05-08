@@ -73,7 +73,6 @@
     "pify": "^4.0.1",
     "rxjs": "^6.5.3",
     "semver": "^6.3.0",
-    "shelljs": "^0.8.3",
     "string-format": "^2.0.0",
     "targz": "^1.0.1",
     "tree-kill": "^1.2.2",
@@ -1107,7 +1106,7 @@
           "command": "openshift.url.describe",
           "when": "view == openshiftProjectExplorer && viewItem == componentRoute",
           "group": "s1"
-        },        
+        },
         {
           "command": "openshift.url.delete",
           "when": "view == openshiftProjectExplorer && viewItem == componentRoute",

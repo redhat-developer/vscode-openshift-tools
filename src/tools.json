@@ -23,7 +23,7 @@
             },
             "linux": {
                 "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.0/odo-linux-amd64.tar.gz",
-                "sha256sum": "50ce630fb288db487cc2f1ef1d6f2bcdb6c6a9fa5f04e5fc206b4cb03c7e5621",
+                "sha256sum": "50ce630fb288db487cc2f1ef1d6f2bcdb6c6a9fa5f04e5fc206b4cb03c7e562",
                 "dlFileName": "odo-linux-amd64.tar.gz",
                 "cmdFileName": "odo"
             }
