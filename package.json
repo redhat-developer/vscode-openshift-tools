@@ -41,10 +41,10 @@
     "compile": "npm-run-all compile:*",
     "compile:ext": "tsc -p ./",
     "compile:views": "webpack --mode development --config src/view/webpack.config.js",
-    "dev:logView": "webpack-dev-server --mode=development",
-    "dev:describeView": "webpack-dev-server --mode=development --config src/view/describe/webpack.config.js",
+    "dev:log-view": "webpack-dev-server --mode development --config src/view/log/webpack.config.js",
+    "dev:describe-view": "webpack-dev-server --mode development --config src/view/describe/webpack.config.js",
+    "dev:cluster-view": "webpack-dev-server --mode development --config src/view/cluster/webpack.config.js",
     "watch": "tsc -watch -p ./",
-    "watch:views": "webpack --watch --mode development",
     "clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/logViewer",
     "lint": "eslint . --ext .ts --quiet",
     "lint-fix": "eslint . --ext .ts --fix",
@@ -54,7 +54,7 @@
     "test": "npm run clean && npm run compile && npm run verify && node ./out/build/run-tests.js unit",
     "update-deps": "ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
-    "build": "npm run clean && npm run lint && npm run compile"
+    "build": "npm run clean && npm run lint && npm run compile && npm run verify"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.11.1",
@@ -149,7 +149,6 @@
     "typescript": "^3.8.3",
     "utf-8-validate": "^5.0.2",
     "vscode-test": "^1.2.3",
-    "walker": "^1.0.7",
     "webpack": "^4.35.2",
     "webpack-cli": "^3.3.5",
     "webpack-dev-server": "^3.10.3"

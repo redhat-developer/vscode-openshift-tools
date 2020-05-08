@@ -28,8 +28,9 @@ if (!tty.getWindowSize) {
 const config: any = {
     reporter: 'mocha-jenkins-reporter',
     ui: 'tdd',
-    timeout: 15000,
-    color: true
+    timeout: 60000,
+    color: true,
+    // grep: 'should load components from workspace folders'
 };
 
 if (process.env.BUILD_ID && process.env.BUILD_NUMBER) {
