@@ -5,12 +5,8 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-// import { WindowUtil } from '../../util/windowUtils';
-import { ExtenisonID } from '../../util/constants';
 import { spawnSync, spawn } from 'child_process';
-// import * as odo from '../../odo';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { spawn } = require('child_process');
+import { ExtenisonID } from '../../util/constants';
 
 export default class ClusterViewLoader {
 
@@ -33,17 +29,15 @@ export default class ClusterViewLoader {
         // TODO: When webview is going to be ready?
         panel.webview.html = ClusterViewLoader.getWebviewContent(ClusterViewLoader.extensionPath);
         panel.webview.postMessage({action: 'cluster', data: ''});
-        panel.webview.onDidReceiveMessage(async event => {
+        panel.webview.onDidReceiveMessage((event)  => {
             if (event.action === 'run') {
 
                 const [tool, ...params] = event.data.split(' ');
                 const startCrc = spawnSync(tool, ['setup']);
                 if (!startCrc.error) {
                     const child = spawn(tool, params);
-                    child.stdout.setEncoding('utf8'); 
+                    child.stdout.setEncoding('utf8');
                     child.stdout.on('data', (chunk) => {
-                        // eslint-disable-next-line no-console
-                        console.log(chunk);
                         panel.webview.postMessage({action: 'crcoutput', data: chunk})
                     });
                     child.on('close', (code) => {
