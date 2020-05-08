@@ -13,7 +13,7 @@ module.exports = {
     logViewer: "./src/view/log/app/index.tsx"
   },
   output: {
-    path: path.resolve(__dirname, "out", "logViewer"),
+    path: path.resolve(__dirname, "..", "..", "..", "out", "logViewer"),
     filename: "[name].js"
   },
   devtool: "eval-source-map",
@@ -45,7 +45,7 @@ module.exports = {
   },
   plugins: [
      new HtmlWebPackPlugin({
-        template: path.resolve( __dirname, 'src/view/log/app/index.html' ),
+        template: path.resolve( __dirname, './app/index.html' ),
         filename: 'index.html'
      })
   ]
