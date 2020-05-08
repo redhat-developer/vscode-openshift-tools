@@ -72,12 +72,14 @@ async function bundleTools(): Promise<void> {
         for (const OS in tool.platform) {
             if (currentPlatform === 'all' || OS === process.platform) {
                 console.log(`Bundle '${tool.description}' for ${OS}`);
+                const osSpecificLocation = path.join(outFolder, 'tools', OS);
                 // eslint-disable-next-line no-await-in-loop
                 await downloadFileAndCreateSha256(
                     toolsCacheFolder,
-                    path.join(outFolder, 'tools', OS),
+                    osSpecificLocation,
                     tool.platform[OS],
                 );
+                fs.chmodSync(path.join(osSpecificLocation, tool.platform[OS].cmdFileName), 0o765);
             }
         }
     }
