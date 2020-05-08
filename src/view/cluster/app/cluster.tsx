@@ -5,7 +5,25 @@
 
 import * as React from 'react';
 import { makeStyles, Theme, createStyles, withStyles } from '@material-ui/core/styles';
-import { AppBar, Toolbar, Card, Typography, Button, CardContent, CardActions, IconButton } from '@material-ui/core';
+import clsx from 'clsx';
+import { 
+  AppBar,
+  Button,
+  Card,
+  CardContent,
+  CardActions,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  StepConnector,
+  StepIconProps,
+  StepLabel,
+  Stepper,
+  Step,
+  Toolbar,
+  Typography} from '@material-ui/core';
+import Check from '@material-ui/icons/Check';
 
 import AddClusterView from './clusterView';
 
@@ -23,7 +41,7 @@ const useStyles = makeStyles((theme: Theme) =>
         padding: '20px'
     },
     container: {
-      marginTop: '8em',
+      marginTop: '4em',
       marginBottom: '8em'
     },
     textWhite: {
@@ -37,7 +55,7 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: '0 10em 0 10em'
     },
     cardTransform: {
-      width: '30%',
+      width: '33%',
       float: 'left',
       marginRight: theme.spacing(4),
       marginLeft: theme.spacing(4),
@@ -53,6 +71,10 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: '#00586d!important',
       padding: theme.spacing(2),
       borderBottom: '0 solid transparent'
+    },
+    cardButton: {
+      display: 'block',
+      marginBottom: theme.spacing(2)
     }
   }),
 );
@@ -67,33 +89,105 @@ const ColorButton = withStyles((theme: Theme) => ({
   }
 }))(Button);
 
+const WizardConnector = withStyles({
+  alternativeLabel: {
+    top: 10,
+    left: 'calc(-50% + 16px)',
+    right: 'calc(50% + 16px)',
+  },
+  active: {
+    '& $line': {
+      borderColor: 'black',
+    },
+  },
+  completed: {
+    '& $line': {
+      borderColor: 'black',
+    },
+  },
+  line: {
+    borderColor: '#eaeaf0',
+    borderTopWidth: 3,
+    borderRadius: 1,
+  },
+})(StepConnector);
+
+const useSelectionStepIconStyles = makeStyles({
+  root: {
+    color: '#eaeaf0',
+    display: 'flex',
+    height: 22,
+    alignItems: 'center',
+  },
+  active: {
+    color: '#EE0000',
+  },
+  circle: {
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    backgroundColor: 'currentColor',
+  },
+  completed: {
+    color: '#EE0000',
+    zIndex: 1,
+    fontSize: 18,
+  },
+});
+
 const cardList = [
   {
     heading: "Local Installation",
     description: "Install on Laptop: Red Hat CodeReady Containers.",
+    smallInfo: "Red Hat CodeReady Containers brings a minimal OpenShift 4.2 or newer cluster to your local laptop or desktop computer.",
     url: "https://www.openshift.com/hubfs/images/logos/osh/Logo-Red_Hat-OpenShift-A-Standard-RGB.svg",
     urlAlt: "Red Hat OpenShift",
     redirectLink: "",
-    buttonText: "Create cluster"
+    buttonText: "Create cluster",
+    instruction: "You can create OpenShift clusters using this wizard."
   },
   {
     heading: "Hybrid Cloud Installation",
     description: "Install, register, and manage OpenShift 4 clusters.",
+    smallInfo: "This will allow to select an infrastructure provider to run OpenShift 4 such as Microsoft Azure, GCP, AWS.",
     url: "https://www.openshift.com/hubfs/images/logos/osh/Logo-Red_Hat-OpenShift_4-A-Standard-RGB.svg",
     urlAlt: "Red Hat OpenShift 4",
     redirectLink: "https://cloud.redhat.com/openshift/install",
-    buttonText: "Learn More"
+    buttonText: "Learn More",
+    instruction: "For official documentations, click on Learn More."
   }
 ];
+
+function getSteps() {
+  return ['Select infrastructure provider', 'Create cluster'];
+}
+
+function SelectionStepIcon(props: StepIconProps) {
+  const classes = useSelectionStepIconStyles();
+  const { active, completed } = props;
+
+  return (
+    <div
+      className={clsx(classes.root, {
+        [classes.active]: active,
+      })}
+    >
+      {completed ? <Check className={classes.completed} /> : <div className={classes.circle} />}
+    </div>
+  );
+}
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function Header() {
   const classes = useStyles();
-  const [showCard, setShowCard] = React.useState(false);
+  const [showWizard, setShowWizard] = React.useState(false);
+  const [activeStep, setActiveStep] = React.useState(0);
+  const steps = getSteps();
 
   const handleView = (index) => {
     if (index === 0) {
-      setShowCard(!showCard);
+      setShowWizard(!showWizard);
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
   };
 
@@ -106,15 +200,23 @@ export default function Header() {
               {list.heading}
             </Typography>
           </div>
-          <CardContent style= {{ height: 200 }}>
+          <CardContent style= {{ height: 275 }}>
             <Typography style={{ padding: '1em' }}>
               <img src={list.url} alt={list.urlAlt} style={{ height: 45 }}></img>
             </Typography>
-            <Typography>
-              {list.description}
-            </Typography>
+            <List>
+              <ListItem>
+              <ListItemText
+                primary={list.description}
+                secondary={list.smallInfo} />
+              </ListItem>
+              <ListItem>
+              <ListItemText
+                primary={list.instruction} />
+              </ListItem>
+            </List>
           </CardContent>
-          <CardActions style={{display: 'block', margin: '10px'}}>
+          <CardActions className={classes.cardButton}>
             <ColorButton href={list.redirectLink} onClick={() => handleView(index)}>
               {list.buttonText}
             </ColorButton>
@@ -135,19 +237,26 @@ export default function Header() {
           </Typography>
         </Toolbar>
       </AppBar>
+      <Stepper alternativeLabel activeStep={activeStep} connector={<WizardConnector />} style={{background: 'none'}}>
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel StepIconComponent={SelectionStepIcon}>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
       <div className={classes.container}>
-        {showCard && (<div className={classes.rowBody}>
+        {showWizard && (<div className={classes.rowBody}>
           <Card>
             <div className={classes.media}>
-                <img src="https://www.openshift.com/hubfs/images/logos/osh/Logo-Red_Hat-OpenShift-A-Standard-RGB.svg" />
+              <img src="https://www.openshift.com/hubfs/images/logos/osh/Logo-Red_Hat-OpenShift-A-Standard-RGB.svg" />
             </div>
             <Typography variant="body2" component="p" style={{paddingBottom: '20px'}}>
-              You can use this wizard to create OpenShift clusters locally. Clusters take approximately 15 minutes to provision.
+              Red Hat CodeReady Containers brings a minimal OpenShift 4.2 or newer cluster to your local laptop or desktop computer.<br></br>You can use this wizard to create OpenShift clusters locally. Clusters take approximately 15 minutes to provision.
             </Typography>
-          <AddClusterView />
-        </Card>
+            <AddClusterView />
+          </Card>
         </div>)}
-        {!showCard && (<div className="row" style={{ marginLeft: '10em', paddingLeft: '15em'}}>
+        {!showWizard && (<div className="row" style={{ paddingLeft: '15em'}}>
           <Card1 cardList={cardList}></Card1>
         </div>)}
       </div>
