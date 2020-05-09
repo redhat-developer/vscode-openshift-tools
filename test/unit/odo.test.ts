@@ -136,7 +136,7 @@ suite("odo", () => {
 
         setup(() => {
             execStub = sandbox.stub(odoCli, 'execute');
-            sandbox.stub(odo.OdoImpl.prototype, 'convertObjectsFromPreviousOdoReleases');
+            sandbox.stub(odo.OdoImpl, 'convertObjectsFromPreviousOdoReleases');
             yamlStub = sandbox.stub(jsYaml, 'safeLoad');
             sandbox.stub(fs, 'readFileSync');
         });
@@ -597,7 +597,7 @@ suite("odo", () => {
                 stdout: oc.join('\n'),
                 stderr: ''
             });
-            sandbox.stub(odo.OdoImpl.prototype, 'convertObjectsFromPreviousOdoReleases');
+            sandbox.stub(odo.OdoImpl, 'convertObjectsFromPreviousOdoReleases');
             const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
             assert.equal(cluster[0].getName(), clusterUrl);
         });
@@ -645,27 +645,6 @@ suite("odo", () => {
                 stdout: "service"
             });
             showWarningMessageStub = sandbox.stub(window, 'showWarningMessage');
-        });
-
-        test('Disable the check for migration if user select Don\'t check again button', async () => {
-            showWarningMessageStub.onFirstCall().resolves('Don\'t check again');
-            execStub.onCall(4).resolves({
-                error: undefined,
-                stdout: JSON.stringify({
-                        items: [
-                            {
-                                metadata: {
-                                    name: 'project1'
-                                }
-                            }
-                        ]
-                    }
-                ),
-                stderr: ''
-            });
-            const result = await odoCli.getProjects();
-            expect(result.length).equals(1);
-            expect(result[0].getName()).equals('project1');
         });
 
         test('Update the cluster resource when user select on update button', async () => {

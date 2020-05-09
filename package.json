@@ -211,6 +211,7 @@
     "onCommand:openshift.component.folder.create",
     "onCommand:openshift.explorer.reportIssue",
     "onCommand:openshift.explorer.switchContext",
+    "onCommand:openshift.migrate.odo00X.components",
     "onCommand:clusters.openshift.project.openConsole",
     "onCommand:clusters.openshift.useProject",
     "onCommand:clusters.openshift.deploy",
@@ -583,6 +584,11 @@
       {
         "command": "openshift.service.delete.palette",
         "title": "Delete Service",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.migrate.odo00X.components",
+        "title": "Migrate the Components created with v0.0.23 or earlier releases",
         "category": "OpenShift"
       },
       {
