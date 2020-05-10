@@ -22,6 +22,7 @@ import {
   StepLabel,
   StepContent,
   TextField,
+  Tooltip,
   Typography } from '@material-ui/core';
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -217,9 +218,11 @@ export default function addClusterView() {
                       onChange={handleUploadPath}
                       />
                       <label htmlFor="contained-button-file">
-                        <Button variant="contained" component="span" className={classes.button}>
-                        Select Path
-                        </Button>
+                        <Tooltip title="This is a required field" placement="left">
+                          <Button variant="contained" component="span" className={classes.button}>
+                          Select Path
+                          </Button>
+                        </Tooltip>
                       </label>
                     </div>
                   </ListItem>
@@ -262,9 +265,11 @@ export default function addClusterView() {
                   onChange={handleUploadPullSecret}
                   />
                   <label htmlFor="contained-button-file">
-                    <Button variant="contained" component="span">
-                    Upload Pull Secret
-                    </Button>
+                    <Tooltip title="This is a required field" placement="left">
+                      <Button variant="contained" component="span">
+                      Upload Pull Secret
+                      </Button>
+                    </Tooltip>
                   </label>
                 </div>
               </ListItem>
