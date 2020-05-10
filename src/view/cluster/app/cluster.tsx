@@ -22,6 +22,7 @@ import {
   Stepper,
   Step,
   Toolbar,
+  Tooltip,
   Typography} from '@material-ui/core';
 import Check from '@material-ui/icons/Check';
 
@@ -36,12 +37,7 @@ const useStyles = makeStyles((theme: Theme) =>
       flexGrow: 1,
       fontSize: '1.25em'
     },
-    media: {
-        height: 60,
-        padding: '20px'
-    },
     container: {
-      marginTop: '4em',
       marginBottom: '8em'
     },
     textWhite: {
@@ -55,7 +51,7 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: '0 10em 0 10em'
     },
     cardTransform: {
-      width: '33%',
+      width: '30%',
       float: 'left',
       marginRight: theme.spacing(4),
       marginLeft: theme.spacing(4),
@@ -137,24 +133,24 @@ const useSelectionStepIconStyles = makeStyles({
 
 const cardList = [
   {
-    heading: "Local Installation",
+    heading: "Deploy it locally on your laptop",
     description: "Install on Laptop: Red Hat CodeReady Containers.",
-    smallInfo: "Red Hat CodeReady Containers brings a minimal OpenShift 4.2 or newer cluster to your local laptop or desktop computer.",
-    url: "https://www.openshift.com/hubfs/images/logos/osh/Logo-Red_Hat-OpenShift-A-Standard-RGB.svg",
+    smallInfo: "A minimal, preconfigured Red Hat OpenShift 4 cluster on your laptop or desktop for development and testing",
+    url: "https://www.openshift.com/hubfs/images/icons/Icon-Red_Hat-Hardware-Laptop-A-Black-RGB.svg",
     urlAlt: "Red Hat OpenShift",
     redirectLink: "",
     buttonText: "Create cluster",
-    instruction: "You can create OpenShift clusters using this wizard."
+    tooltip: "You can create OpenShift cluster using this wizard."
   },
   {
-    heading: "Hybrid Cloud Installation",
-    description: "Install, register, and manage OpenShift 4 clusters.",
-    smallInfo: "This will allow to select an infrastructure provider to run OpenShift 4 such as Microsoft Azure, GCP, AWS.",
-    url: "https://www.openshift.com/hubfs/images/logos/osh/Logo-Red_Hat-OpenShift_4-A-Standard-RGB.svg",
+    heading: "Deploy it in your public cloud",
+    description: "Install Red Hat OpenShift 4 in your account on any of the supported public cloud providers.",
+    smallInfo: "This includes Amazon Web Services (AWS), Microsoft Azure, and Google Cloud. Coming soon: IBM Cloud, Ali Cloud.",
+    url: "https://www.openshift.com/hubfs/images/icons/Icon-Red_Hat-Software_and_technologies-Cloud-A-Black-RGB.svg",
     urlAlt: "Red Hat OpenShift 4",
     redirectLink: "https://cloud.redhat.com/openshift/install",
-    buttonText: "Learn More",
-    instruction: "For official documentations, click on Learn More."
+    buttonText: "Try it in the cloud",
+    tooltip: "For complete installation, follow the official documentation."
   }
 ];
 
@@ -200,8 +196,8 @@ export default function Header() {
               {list.heading}
             </Typography>
           </div>
-          <CardContent style= {{ height: 275 }}>
-            <Typography style={{ padding: '1em' }}>
+          <CardContent style= {{ height: 240 }}>
+            <Typography style={{ padding: '10px' }}>
               <img src={list.url} alt={list.urlAlt} style={{ height: 45 }}></img>
             </Typography>
             <List>
@@ -210,16 +206,14 @@ export default function Header() {
                 primary={list.description}
                 secondary={list.smallInfo} />
               </ListItem>
-              <ListItem>
-              <ListItemText
-                primary={list.instruction} />
-              </ListItem>
             </List>
           </CardContent>
           <CardActions className={classes.cardButton}>
-            <ColorButton href={list.redirectLink} onClick={() => handleView(index)}>
-              {list.buttonText}
-            </ColorButton>
+            <Tooltip title={list.tooltip} placement="top">
+              <ColorButton href={list.redirectLink} onClick={() => handleView(index)}>
+                {list.buttonText}
+              </ColorButton>
+            </Tooltip>
           </CardActions>
         </Card>
       ))}
@@ -233,7 +227,7 @@ export default function Header() {
           <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
           </IconButton>
           <Typography variant="h6" className={classes.title}>
-            Install OpenShift Container Platform 4
+            Create your own Red Hat OpenShift 4 cluster today
           </Typography>
         </Toolbar>
       </AppBar>
@@ -245,20 +239,21 @@ export default function Header() {
         ))}
       </Stepper>
       <div className={classes.container}>
+        <div className="row" style={{ height: 60, marginBottom: '3em' }}>
+          <img src="https://assets.openshift.com/hubfs/images/logos/osh/Logo-Red_Hat-OpenShift-A-Reverse-RGB.svg" alt="redhat-openshift"></img>
+        </div>
         {showWizard && (<div className={classes.rowBody}>
           <Card>
-            <div className={classes.media}>
-              <img src="https://www.openshift.com/hubfs/images/logos/osh/Logo-Red_Hat-OpenShift-A-Standard-RGB.svg" />
-            </div>
-            <Typography variant="body2" component="p" style={{paddingBottom: '20px'}}>
+            <Typography variant="body2" component="p" style={{padding: '20px'}}>
               Red Hat CodeReady Containers brings a minimal OpenShift 4.2 or newer cluster to your local laptop or desktop computer.<br></br>You can use this wizard to create OpenShift clusters locally. Clusters take approximately 15 minutes to provision.
             </Typography>
             <AddClusterView />
           </Card>
         </div>)}
-        {!showWizard && (<div className="row" style={{ paddingLeft: '15em'}}>
-          <Card1 cardList={cardList}></Card1>
-        </div>)}
+        {!showWizard && (
+          <div className="row" style={{ paddingLeft: '15em'}}>
+            <Card1 cardList={cardList}></Card1>
+          </div>)}
       </div>
     </div>
   );
