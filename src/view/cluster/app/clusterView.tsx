@@ -6,7 +6,7 @@
 import * as React from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { InsertDriveFile, GetApp, VpnKey, ChevronRight} from '@material-ui/icons';
+import { InsertDriveFile, GetApp, VpnKey, ChevronRight } from '@material-ui/icons';
 import {
   Avatar,
   Button,
@@ -72,6 +72,10 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     uploadLabel: {
       marginTop: theme.spacing(2)
+    },
+    pullSecretField: {
+      marginTop: '20px',
+      width: '100%'
     }
   })
 );
@@ -84,17 +88,17 @@ declare global {
 const vscode = window.acquireVsCodeApi();
 
 const crcVersions = [
-  { crcVersion: "1.0.0", openshiftMajorVersion: "4.2", openshiftVersion: "4.2.0"},
-  { crcVersion: "1.1.0", openshiftMajorVersion: "4.2", openshiftVersion: "4.2.2"},
-  { crcVersion: "1.2.0", openshiftMajorVersion: "4.2", openshiftVersion: "4.2.8"},
-  { crcVersion: "1.3.0", openshiftMajorVersion: "4.2", openshiftVersion: "4.2.10"},
-  { crcVersion: "1.4.0", openshiftMajorVersion: "4.2", openshiftVersion: "4.2.13"},
-  { crcVersion: "1.5.0", openshiftMajorVersion: "4.2", openshiftVersion: "4.2.14"},
-  { crcVersion: "1.6.0", openshiftMajorVersion: "4.3", openshiftVersion: "4.3.0"},
-  { crcVersion: "1.7.0", openshiftMajorVersion: "4.3", openshiftVersion: "4.3.1"},
-  { crcVersion: "1.8.0", openshiftMajorVersion: "4.3", openshiftVersion: "4.3.8"},
-  { crcVersion: "1.9.0", openshiftMajorVersion: "4.3", openshiftVersion: "4.3.10"},
-  { crcVersion: "latest", openshiftMajorVersion: "4.4", openshiftVersion: "4.4.3"}
+  { crcVersion: "1.0.0", openshiftVersion: "4.2.0"},
+  { crcVersion: "1.1.0", openshiftVersion: "4.2.2"},
+  { crcVersion: "1.2.0", openshiftVersion: "4.2.8"},
+  { crcVersion: "1.3.0", openshiftVersion: "4.2.10"},
+  { crcVersion: "1.4.0", openshiftVersion: "4.2.13"},
+  { crcVersion: "1.5.0", openshiftVersion: "4.2.14"},
+  { crcVersion: "1.6.0", openshiftVersion: "4.3.0"},
+  { crcVersion: "1.7.0", openshiftVersion: "4.3.1"},
+  { crcVersion: "1.8.0", openshiftVersion: "4.3.8"},
+  { crcVersion: "1.9.0", openshiftVersion: "4.3.10"},
+  { crcVersion: "latest", openshiftVersion: "4.4.3"}
 ];
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -109,12 +113,12 @@ export default function addClusterView() {
     const [pullSecretPath, setSecret] = React.useState('');
     const [cpuSize, setCpuSize] = React.useState(4);
     const [memory, setMemory] = React.useState(8192);
-    const [state, setState] = React.useState('latest');
+    const [versionLabel, setVersionLabel] = React.useState('latest');
     const [crcOut, setOut] = React.useState('');
     const [crcProgress, setProgress] = React.useState(false);
     const messageListener = (event) => {
       if (event?.data?.action){
-        const message = event.data; // The JSON data our extension sent
+        const message = event.data;
           switch (message.action) {
             case 'crcoutput' :
               setOut(message.data);
@@ -128,7 +132,7 @@ export default function addClusterView() {
       }
     }
     window.addEventListener('message', messageListener);
-    const crcDownload = `http://mirror.openshift.com/pub/openshift-v4/clients/crc/${state}/crc-macos-amd64.tar.xz`;
+    const crcDownload = `http://mirror.openshift.com/pub/openshift-v4/clients/crc/${versionLabel}/crc-macos-amd64.tar.xz`;
     const handleUploadPath = (event) => {
       setBinaryPath(event.target.files[0].path);
     }
@@ -149,13 +153,12 @@ export default function addClusterView() {
       switch (step) {
           case 0:
             const options = crcVersions.map((option) => {
-              const majorVersion = option.openshiftMajorVersion;
+              const majorVersion = option.openshiftVersion;
               return {
-                majorVersion: majorVersion,
+                majorVersion: majorVersion.substring(0, majorVersion.lastIndexOf('.')),
                 ...option,
               };
-            });
-          
+            });          
             return (
               <Autocomplete
                 id="grouped-demo"
@@ -164,9 +167,9 @@ export default function addClusterView() {
                 getOptionLabel={(option) => option.crcVersion}
                 style={{ width: 300 }}
                 onInputChange={(_, val) => {
-                  setState(val);
+                  setVersionLabel(val);
                 }}
-                renderInput={(params) => <TextField {...params} label="CRC Versions" variant="outlined" />}
+                renderInput={(params) => <TextField {...params} label="CRC Version" variant="outlined" />}
               />
             );
           case 1:
@@ -182,7 +185,7 @@ export default function addClusterView() {
                     </ListItemAvatar>
                     <ListItemText
                       primary="Download"
-                      secondary={<span>This will download crc bundle - {state}</span>}/>
+                      secondary={<span>This will download crc bundle - {versionLabel}</span>}/>
                       <a href={crcDownload} style={{ textDecoration: 'none'}}>
                         <Button
                           variant="contained"
@@ -202,7 +205,9 @@ export default function addClusterView() {
                         <InsertDriveFile />
                       </Avatar>
                     </ListItemAvatar>
-                    <ListItemText primary="Binary Location" secondary="Provide the crc binary location" />
+                    <ListItemText
+                      primary={<span>Binary Location<sup style={{color: '#BE0000'}}>*</sup></span>}
+                      secondary="Provide the crc binary location" />
                     <div>
                       <input
                       style={{ display: "none" }}
@@ -234,52 +239,50 @@ export default function addClusterView() {
                       />
                     )}
               </List>
-              </div>
-            )
+            </div>)
           case 2:
-          return (
-            <List>
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar>
-                    <VpnKey />
-                  </Avatar>
-                </ListItemAvatar>
-              <ListItemText
-                primary="Provide the pull secret."
-                secondary={<span>Download pull secret file from <a href="https://cloud.redhat.com/openshift/install/crc/installer-provisioned">here</a> and upload it.</span>} />
-              <div className={classes.uploadLabel}>
-                <input
-                accept="text/*"
-                style={{ display: "none" }}
-                id="contained-button-file"
-                multiple
-                type="file"
-                onChange={handleUploadPullSecret}
+            return (
+              <List>
+                <ListItem>
+                  <ListItemAvatar>
+                    <Avatar>
+                      <VpnKey />
+                    </Avatar>
+                  </ListItemAvatar>
+                <ListItemText
+                  primary={<span>Provide the pull secret.<sup style={{color: '#BE0000'}}>*</sup></span>}
+                  secondary={<span>Download pull secret file from <a href="https://cloud.redhat.com/openshift/install/crc/installer-provisioned">here</a> and upload it.</span>} />
+                <div className={classes.uploadLabel}>
+                  <input
+                  accept="text/*"
+                  style={{ display: "none" }}
+                  id="contained-button-file"
+                  multiple
+                  type="file"
+                  onChange={handleUploadPullSecret}
+                  />
+                  <label htmlFor="contained-button-file">
+                    <Button variant="contained" component="span">
+                    Upload Pull Secret
+                    </Button>
+                  </label>
+                </div>
+              </ListItem>
+              {pullSecretPath && (
+                <TextField
+                  id="outlined-location"
+                  label="Pull Secret Location"
+                  className={classes.pullSecretField}
+                  fullWidth
+                  defaultValue={pullSecretPath}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  variant="outlined"
+                  size="small"
                 />
-                <label htmlFor="contained-button-file">
-                  <Button variant="contained" component="span">
-                  Upload Pull Secret
-                  </Button>
-                </label>
-              </div>
-            </ListItem>
-            {pullSecretPath && (
-              <TextField
-                id="outlined-location"
-                label="Pull Secret Location"
-                style={{ marginTop: '20px', width: '100%'}}
-                fullWidth
-                defaultValue={pullSecretPath}
-                InputProps={{
-                  readOnly: true,
-                }}
-                variant="outlined"
-                size="small"
-              />
-            )}
-          </List>
-          )
+              )}
+            </List>)
           case 3:
             return (
               <div>
@@ -304,16 +307,14 @@ export default function addClusterView() {
                   InputProps={{ inputProps: { min: 8192 } }}
                   helperText="Value in MiB"
                 />
-              </div>
-            )
+              </div>)
           case 4:
-          return (
-            <Typography>
-              Run the <code>crc setup</code> command to set up your host operating system for the CodeReady Containers virtual machine. Once done, Start the cluster.
-            </Typography>
-          )
+            return (
+              <Typography>
+                Start the cluster. This will also set up local virtualization and networking infrastructure for the OpenShift cluster.
+              </Typography>)
           default:
-          return 'Unknown step';
+            return 'Unknown step';
       }
     }
 
@@ -332,9 +333,14 @@ export default function addClusterView() {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
+  const handleDisabled = () => {
+    if (activeStep === 1 && fileName === '') return true;
+    if (activeStep === 2 && pullSecretPath === '') return true;
+  };
+
   const handleReset = () => {
     setActiveStep(0);
-    // setVersion('');
+    setVersionLabel('latest');
     setBinaryPath('');
     setSecret('');
     setCpuSize(4);
@@ -364,6 +370,7 @@ export default function addClusterView() {
                     color="primary"
                     onClick={handleNext}
                     className={classes.button}
+                    disabled={handleDisabled()}
                   >
                     {activeStep === steps.length - 1 ? 'Start Cluster' : 'Next'}
                   </Button>
@@ -380,7 +387,7 @@ export default function addClusterView() {
             {!crcProgress &&
               (<div>
                 <LinearProgress />
-                <Typography style={{ paddingTop: '10px'}}>
+                <Typography style={{ paddingTop: '10px' }}>
                   Setting Up the OpenShift Instance
                 </Typography>
               </div>)}
@@ -396,22 +403,22 @@ export default function addClusterView() {
                       component="span"
                       className={classes.button}
                     >
-                      Open Console
+                      Open OpenShift Console
                     </Button>
                   </a>
                 </span>)}
-            {!crcProgress && crcOut && (
-            <List style={{paddingTop: '5px'}}>
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar>
-                    <ChevronRight />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={crcOut} />
-              </ListItem>
-            </List>)}
-            <Button onClick={handleReset} className={classes.button}>
+              {!crcProgress && crcOut &&
+                (<List style={{ paddingTop: '5px' }}>
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar>
+                        <ChevronRight />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary={crcOut} />
+                  </ListItem>
+                </List>)}
+              <Button onClick={handleReset} className={classes.button}>
               Reset
             </Button>
           </Paper>
