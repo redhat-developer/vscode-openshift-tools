@@ -23,7 +23,7 @@ async function main(): Promise<void> {
     } catch(error) {
         // eslint-disable-next-line no-console
         console.error('Failed to run tests');
-		process.exit(1);
+        process.exit(1);
     }
 }
 
