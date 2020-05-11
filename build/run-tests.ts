@@ -18,7 +18,13 @@ async function main(): Promise<void> {
     const extensionRootPath = path.resolve(__dirname, '../../');
     const extensionDevelopmentPath = path.resolve(extensionRootPath, extension);
     const extensionTestsPath = path.resolve(extensionRootPath, 'out', 'test', tests);
-    await runTests({ extensionDevelopmentPath, extensionTestsPath });
+    try {
+        await runTests({ extensionDevelopmentPath, extensionTestsPath });
+    } catch(error) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to run tests');
+		process.exit(1);
+    }
 }
 
 main();
