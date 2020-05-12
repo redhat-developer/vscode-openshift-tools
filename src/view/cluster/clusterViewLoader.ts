@@ -8,6 +8,8 @@ import * as fs from 'fs';
 import { spawnSync, spawn } from 'child_process';
 import { ExtenisonID } from '../../util/constants';
 
+import treeKill = require('tree-kill');
+
 export default class ClusterViewLoader {
 
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -25,13 +27,10 @@ export default class ClusterViewLoader {
             retainContextWhenHidden: true
         });
         panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, "images/context/cluster-node.png"));
-
-        // TODO: When webview is going to be ready?
         panel.webview.html = ClusterViewLoader.getWebviewContent(ClusterViewLoader.extensionPath);
         panel.webview.postMessage({action: 'cluster', data: ''});
         panel.webview.onDidReceiveMessage((event)  => {
             if (event.action === 'run') {
-
                 const [tool, ...params] = event.data.split(' ');
                 const startCrc = spawnSync(tool, ['setup']);
                 if (!startCrc.error) {
@@ -45,6 +44,9 @@ export default class ClusterViewLoader {
                         console.log(`crc start exited with code ${code}`);
                         panel.webview.postMessage({action: 'crcstatus', data: code})
                     });
+                    if (event.action === 'stop') {
+                        treeKill(child.pid);
+                    }
                 }
             }
         })

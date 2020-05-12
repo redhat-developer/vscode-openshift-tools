@@ -7,6 +7,7 @@ import * as React from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { InsertDriveFile, GetApp, VpnKey, ChevronRight } from '@material-ui/icons';
+import StopIcon from '@material-ui/icons/Stop';
 import {
   Avatar,
   Button,
@@ -117,7 +118,10 @@ export default function addClusterView() {
   const [versionLabel, setVersionLabel] = React.useState('latest');
   const [crcOut, setOut] = React.useState('');
   const [crcProgress, setProgress] = React.useState(false);
-  
+  const [crcBundle, setCrcBundle] = React.useState('');
+  const [activeStep, setActiveStep] = React.useState(0);
+  const steps = getSteps();
+
   const messageListener = (event) => {
     if (event?.data?.action){
       const message = event.data;
@@ -134,12 +138,10 @@ export default function addClusterView() {
       }
     }
 
-  window.addEventListener('message', messageListener);
-     
-  const CrcDownloadUrl = `http://mirror.openshift.com/pub/openshift-v4/clients/crc/${versionLabel}/crc-macos-amd64.tar.xz`;
-  
+  window.addEventListener('message', messageListener);  
   const handleUploadPath = (event) => {
     setBinaryPath(event.target.files[0].path);
+    setCrcBundle('');
   }
 
   const handleUploadPullSecret = (event) => {
@@ -152,6 +154,40 @@ export default function addClusterView() {
 
   const handleMemory = (event) => {
     setMemory(event.target.value);
+  }
+
+  const handleNext = () => {
+    if (activeStep === steps.length - 1) {
+      const crcStartCommand = `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory}`;
+      vscode.postMessage({action: 'run', data: crcStartCommand});
+    }
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleDisabled = () => {
+    if (activeStep === 1 && fileName === '') return true;
+    if (activeStep === 2 && pullSecretPath === '') return true;
+  };
+
+  const handleStopProcess = () => {
+    vscode.postMessage({action: 'stop', data: ''});
+  }
+
+  const handleReset = () => {
+    setActiveStep(0);
+    setVersionLabel('latest');
+    setBinaryPath('');
+    setSecret('');
+    setCpuSize(4);
+    setMemory(8192);
+  };
+
+  const fetchDownloadBinary = () => {
+    return `http://mirror.openshift.com/pub/openshift-v4/clients/crc/${versionLabel}/${crcBundle}`;
   }
 
   const getStepContent = (step: number) => {
@@ -190,8 +226,8 @@ export default function addClusterView() {
                   </ListItemAvatar>
                   <ListItemText
                     primary="Download"
-                    secondary={<span>This will download the crc {versionLabel} bundle.</span>}/>
-                    <a href={CrcDownloadUrl} style={{ textDecoration: 'none'}}>
+                    secondary={<span>This will download the crc {versionLabel} bundle - {crcBundle}</span>}/>
+                    <a href={fetchDownloadBinary()} style={{ textDecoration: 'none'}}>
                       <Button
                         variant="contained"
                         color="default"
@@ -327,35 +363,6 @@ export default function addClusterView() {
     }
   }
 
-  const [activeStep, setActiveStep] = React.useState(0);
-  const steps = getSteps();
-
-  const handleNext = () => {
-    if (activeStep === steps.length - 1) {
-      const crcStartCommand = `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory}`;
-      vscode.postMessage({action: 'run', data: crcStartCommand});
-    }
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  const handleDisabled = () => {
-    if (activeStep === 1 && fileName === '') return true;
-    if (activeStep === 2 && pullSecretPath === '') return true;
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
-    setVersionLabel('latest');
-    setBinaryPath('');
-    setSecret('');
-    setCpuSize(4);
-    setMemory(8192);
-  };
-
   return (
     <div className={classes.root}>
       <Paper elevation={3}>
@@ -399,6 +406,23 @@ export default function addClusterView() {
                 <Typography style={{ paddingTop: '10px' }}>
                   Setting Up the OpenShift Instance
                 </Typography>
+                <List dense={true}>
+                  <ListItem>
+                    <ListItemText
+                      primary="Setting Up the OpenShift Instance"
+                    />
+                    <Button
+                      variant="contained"
+                      color="default"
+                      component="span"
+                      className={classes.button}
+                      onClick={handleStopProcess}
+                      startIcon={<StopIcon />}
+                    >
+                      Stop Process
+                    </Button>
+                  </ListItem>
+                </List>
               </div>)}
               {crcProgress && (
                 <span>
