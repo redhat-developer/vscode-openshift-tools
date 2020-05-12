@@ -74,10 +74,6 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     uploadLabel: {
       marginTop: theme.spacing(2)
-    },
-    pullSecretField: {
-      marginTop: '20px',
-      width: '100%'
     }
   })
 );
@@ -100,7 +96,7 @@ const crcVersions = [
   { crcVersion: "1.7.0", openshiftVersion: "4.3.1"},
   { crcVersion: "1.8.0", openshiftVersion: "4.3.8"},
   { crcVersion: "1.9.0", openshiftVersion: "4.3.10"},
-  { crcVersion: "latest", openshiftVersion: "4.4.3"}
+  { crcVersion: "1.10.0", openshiftVersion: "4.4.3"}
 ];
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -115,10 +111,9 @@ export default function addClusterView() {
   const [pullSecretPath, setSecret] = React.useState('');
   const [cpuSize, setCpuSize] = React.useState(4);
   const [memory, setMemory] = React.useState(8192);
-  const [versionLabel, setVersionLabel] = React.useState('latest');
+  const [versionLabel, setVersionLabel] = React.useState('1.10.0');
   const [crcOut, setOut] = React.useState('');
   const [crcProgress, setProgress] = React.useState(false);
-  const [crcBundle, setCrcBundle] = React.useState('');
   const [activeStep, setActiveStep] = React.useState(0);
   const steps = getSteps();
 
@@ -138,10 +133,12 @@ export default function addClusterView() {
       }
     }
 
-  window.addEventListener('message', messageListener);  
+  window.addEventListener('message', messageListener);
+
+  // const platform = (window as any).platform === 'darwin' ? 'macos' : (window as any).platform;
+
   const handleUploadPath = (event) => {
     setBinaryPath(event.target.files[0].path);
-    setCrcBundle('');
   }
 
   const handleUploadPullSecret = (event) => {
@@ -187,6 +184,11 @@ export default function addClusterView() {
   };
 
   const fetchDownloadBinary = () => {
+    const platform = (window as any).platform;
+    let crcBundle = '';
+    if (platform === 'darwin') crcBundle = `crc-macos-amd64.tar.xz`;
+    if (platform === 'win32') crcBundle = `crc-windows-amd64.zip`;
+    if (platform === 'linux') crcBundle = `crc-linux-amd64.tar.xz`;
     return `http://mirror.openshift.com/pub/openshift-v4/clients/crc/${versionLabel}/${crcBundle}`;
   }
 
@@ -210,6 +212,16 @@ export default function addClusterView() {
               onInputChange={(_, val) => {
                 setVersionLabel(val);
               }}
+              renderOption={(option) => {
+                return (
+                  <React.Fragment>
+                    {option.crcVersion}
+                    <Typography  style={{ color: '#EE0000', marginLeft: 6, fontSize: 10 }}>
+                      {option.crcVersion === '1.10.0' ? 'latest': ''}
+                    </Typography>
+                  </React.Fragment>
+                );
+              }}
               renderInput={(params) => <TextField {...params} label="CRC Version" variant="outlined" />}
             />
           );
@@ -226,7 +238,7 @@ export default function addClusterView() {
                   </ListItemAvatar>
                   <ListItemText
                     primary="Download"
-                    secondary={<span>This will download the crc {versionLabel} bundle - {crcBundle}</span>}/>
+                    secondary={<span>This will download the crc {versionLabel} bundle.</span>}/>
                     <a href={fetchDownloadBinary()} style={{ textDecoration: 'none'}}>
                       <Button
                         variant="contained"
@@ -253,7 +265,6 @@ export default function addClusterView() {
                     <input
                     style={{ display: "none" }}
                     id="contained-button-file"
-                    multiple
                     type="file"
                     onChange={handleUploadPath}
                     />
@@ -297,7 +308,6 @@ export default function addClusterView() {
                 secondary={<span>Download pull secret file from <a href="https://cloud.redhat.com/openshift/install/crc/installer-provisioned">here</a> and upload it.</span>} />
               <div className={classes.uploadLabel}>
                 <input
-                accept="text/*"
                 style={{ display: "none" }}
                 id="contained-button-file"
                 multiple
@@ -317,7 +327,7 @@ export default function addClusterView() {
               <TextField
                 id="outlined-location"
                 label="Pull Secret Location"
-                className={classes.pullSecretField}
+                style={{ marginTop: '20px', width: '100%'}}
                 fullWidth
                 defaultValue={pullSecretPath}
                 InputProps={{
