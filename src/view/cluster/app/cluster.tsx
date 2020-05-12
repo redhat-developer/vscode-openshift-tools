@@ -50,13 +50,14 @@ const useStyles = makeStyles((theme: Theme) =>
     rowBody: {
       padding: '0 10em 0 10em'
     },
+    cardContainer: {
+      display: 'flex',
+      justifyContent: 'center'
+    },
     cardTransform: {
-      width: '30%',
-      float: 'left',
+      width: '27em',
       marginRight: theme.spacing(4),
-      marginLeft: theme.spacing(4),
       position: 'relative',
-      overflow: 'hidden',
       transform: 'scale(0.95)',
       '&:hover': {
         transform: 'scale(1)',
@@ -251,7 +252,7 @@ export default function Header() {
           </Card>
         </div>)}
         {!showWizard && (
-          <div className="row" style={{ paddingLeft: '15em'}}>
+          <div className={classes.cardContainer}>
             <Card1 cardList={cardList}></Card1>
           </div>)}
       </div>
