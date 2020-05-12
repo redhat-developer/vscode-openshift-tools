@@ -67,6 +67,7 @@ export default class ClusterViewLoader {
             style-src vscode-resource: 'unsafe-inline';">`;
         return `${htmlString}`
             .replace('%COMMAND%', '')
+            .replace('%PLATFORM%', process.platform)
             .replace('clusterViewer.js',`${reactAppUri}`)
             .replace('<!-- meta http-equiv="Content-Security-Policy" -->', meta);
     }
