@@ -135,8 +135,9 @@ export default function addClusterView() {
     }
 
   window.addEventListener('message', messageListener);
-     
-  const CrcDownloadUrl = `http://mirror.openshift.com/pub/openshift-v4/clients/crc/${versionLabel}/crc-macos-amd64.tar.xz`;
+
+  const platform = (window as any).platform === 'darwin' ? 'macos' : (window as any).platform;
+  const CrcDownloadUrl = `http://mirror.openshift.com/pub/openshift-v4/clients/crc/${versionLabel}/crc-${platform}-amd64.tar.xz`;
   
   const handleUploadPath = (event) => {
     setBinaryPath(event.target.files[0].path);
