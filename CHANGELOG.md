@@ -1,5 +1,22 @@
 # Change Log
 
+## 0.1.5 (May 14, 2020)
+
+Noteworthy issues fixed in this release:
+  - [#1551](https://github.com/redhat-developer/vscode-openshift-tools/issues/1551) Command to migrate components created with v0.0.23 or earlier
+  - [#1517](https://github.com/redhat-developer/vscode-openshift-tools/issues/1517) Configuration to switch between Terminal View and WebView based view to exec 'Show/Follow Log' and 'Describe' commands
+  - [#1505](https://github.com/redhat-developer/vscode-openshift-tools/issues/1505) Update odo to v1.2.0
+  - [#1495](https://github.com/redhat-developer/vscode-openshift-tools/issues/1495) Auto scrolling support in log viewer when following logs
+  - [#1465](https://github.com/redhat-developer/vscode-openshift-tools/issues/1465) Support for creating 'https' URLs
+  - [#1464](https://github.com/redhat-developer/vscode-openshift-tools/issues/1464) `Describe` command for 'not pushed' components
+  - [#1463](https://github.com/redhat-developer/vscode-openshift-tools/issues/1463) `New Storage` command for 'not pushed' components
+  - [#1458](https://github.com/redhat-developer/vscode-openshift-tools/issues/1458) `Describe` command for URLs
+  - [#1438](https://github.com/redhat-developer/vscode-openshift-tools/issues/1438) The "Please log in to the cluster" button also should open the Login QuickPick
+  - [#1404](https://github.com/redhat-developer/vscode-openshift-tools/issues/1404) Command to open Route URL from Kubernetes Clusters View
+  - [#1319](https://github.com/redhat-developer/vscode-openshift-tools/issues/1319) Use webview based editor to show or follow component's log
+  - [#148](https://github.com/redhat-developer/vscode-openshift-tools/issues/148) When executing command in terminal it should be named properly
+
+
 ## 0.1.4 (February 25, 2020)
 
 Noteworthy changes:
