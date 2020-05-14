@@ -85,6 +85,15 @@ declare global {
 
 const vscode = window.acquireVsCodeApi();
 
+const crcDefaults = {
+	DefaultCPUs: 4,
+	DefaultMemory: 9216,
+	DefaultWebConsoleURL: "https://console-openshift-console.apps-crc.testing",
+	DefaultAPIURL: "https://api.crc.testing:6443",
+	CrcLandingPageURL: "https://cloud.redhat.com/openshift/install/crc/installer-provisioned",
+	DefaultCrcUrlBase: "http://mirror.openshift.com/pub/openshift-v4/clients/crc"
+}
+
 const crcVersions = [
   { crcVersion: "1.0.0", openshiftVersion: "4.2.0"},
   { crcVersion: "1.1.0", openshiftVersion: "4.2.2"},
@@ -109,8 +118,8 @@ export default function addClusterView() {
   const classes = useStyles();
   const [fileName, setBinaryPath] = React.useState('');
   const [pullSecretPath, setSecret] = React.useState('');
-  const [cpuSize, setCpuSize] = React.useState(4);
-  const [memory, setMemory] = React.useState(8192);
+  const [cpuSize, setCpuSize] = React.useState(crcDefaults.DefaultCPUs);
+  const [memory, setMemory] = React.useState(crcDefaults.DefaultMemory);
   const [versionLabel, setVersionLabel] = React.useState('1.10.0');
   const [crcOut, setOut] = React.useState('');
   const [crcProgress, setProgress] = React.useState(false);
@@ -176,11 +185,11 @@ export default function addClusterView() {
 
   const handleReset = () => {
     setActiveStep(0);
-    setVersionLabel('latest');
+    setVersionLabel('1.10.0');
     setBinaryPath('');
     setSecret('');
-    setCpuSize(4);
-    setMemory(8192);
+    setCpuSize(crcDefaults.DefaultCPUs);
+    setMemory(crcDefaults.DefaultMemory);
   };
 
   const fetchDownloadBinary = () => {
@@ -189,7 +198,7 @@ export default function addClusterView() {
     if (platform === 'darwin') crcBundle = `crc-macos-amd64.tar.xz`;
     if (platform === 'win32') crcBundle = `crc-windows-amd64.zip`;
     if (platform === 'linux') crcBundle = `crc-linux-amd64.tar.xz`;
-    return `http://mirror.openshift.com/pub/openshift-v4/clients/crc/${versionLabel}/${crcBundle}`;
+    return `${crcDefaults.DefaultCrcUrlBase}/${versionLabel}/${crcBundle}`;
   }
 
   const getStepContent = (step: number) => {
@@ -204,8 +213,8 @@ export default function addClusterView() {
           });          
           return (
             <Autocomplete
-              id="grouped-demo"
-              options={options.sort((a, b) => b.majorVersion.localeCompare(a.majorVersion))}
+              id="grouped-openshift"
+              options={options.sort().reverse()}
               groupBy={(option) => `OpenShift: ${option.majorVersion}`}
               getOptionLabel={(option) => option.crcVersion}
               style={{ width: 300 }}
@@ -222,7 +231,7 @@ export default function addClusterView() {
                   </React.Fragment>
                 );
               }}
-              renderInput={(params) => <TextField {...params} label="CRC Version" variant="outlined" />}
+              renderInput={(params) => <TextField {...params} label="CRC Version" variant="outlined" fullWidth/>}
             />
           );
         case 1:
@@ -305,7 +314,7 @@ export default function addClusterView() {
                 </ListItemAvatar>
               <ListItemText
                 primary={<span>Provide the pull secret.<sup style={{color: '#BE0000'}}>*</sup></span>}
-                secondary={<span>Download pull secret file from <a href="https://cloud.redhat.com/openshift/install/crc/installer-provisioned">here</a> and upload it.</span>} />
+                secondary={<span>Download pull secret file from <a href={crcDefaults.CrcLandingPageURL}>here</a> and upload it.</span>} />
               <div className={classes.uploadLabel}>
                 <input
                 style={{ display: "none" }}
@@ -376,36 +385,36 @@ export default function addClusterView() {
   return (
     <div className={classes.root}>
       <Paper elevation={3}>
-      <Stepper activeStep={activeStep} orientation="vertical">
-        {steps.map((label, index) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-            <StepContent>
-              {getStepContent(index)}
-              <div className={classes.actionsContainer}>
-                <div>
-                  <Button
-                    disabled={activeStep === 0}
-                    onClick={handleBack}
-                    className={classes.button}
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleNext}
-                    className={classes.button}
-                    disabled={handleDisabled()}
-                  >
-                    {activeStep === steps.length - 1 ? 'Start Cluster' : 'Next'}
-                  </Button>
+        <Stepper activeStep={activeStep} orientation="vertical">
+          {steps.map((label, index) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+              <StepContent>
+                {getStepContent(index)}
+                <div className={classes.actionsContainer}>
+                  <div>
+                    <Button
+                      disabled={activeStep === 0}
+                      onClick={handleBack}
+                      className={classes.button}
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleNext}
+                      className={classes.button}
+                      disabled={handleDisabled()}
+                    >
+                      {activeStep === steps.length - 1 ? 'Start Cluster' : 'Next'}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </StepContent>
-          </Step>
-        ))}
-      </Stepper>
+              </StepContent>
+            </Step>
+          ))}
+        </Stepper>
       </Paper>
       {activeStep === steps.length && (
         <div>
@@ -413,10 +422,7 @@ export default function addClusterView() {
             {!crcProgress &&
               (<div>
                 <LinearProgress />
-                <Typography style={{ paddingTop: '10px' }}>
-                  Setting Up the OpenShift Instance
-                </Typography>
-                <List dense={true}>
+                <List>
                   <ListItem>
                     <ListItemText
                       primary="Setting Up the OpenShift Instance"
@@ -439,7 +445,7 @@ export default function addClusterView() {
                   <Typography style={{ paddingTop: '10px'}}>
                     OpenShift Instance is up. 
                   </Typography>
-                  <a href='https://console-openshift-console.apps-crc.testing' style={{ textDecoration: 'none'}}>
+                  <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none'}}>
                     <Button
                       variant="contained"
                       color="default"
