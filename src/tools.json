@@ -3,27 +3,27 @@
         "description": "OpenShift Do CLI tool",
         "vendor": "Red Hat, Inc.",
         "name": "odo",
-        "version": "1.2.0",
+        "version": "1.2.1",
         "versionRange": "^1.2.0",
         "versionRangeLabel": "version >= 1.2.0 and < 2.0.0",
         "dlFileName": "odo",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.0/odo-windows-amd64.exe.tar.gz",
-                "sha256sum": "d1f8d6d2781591d869576d9b5507d82252ff0492ffd580e14b1045e43a778082",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.1/odo-windows-amd64.exe.tar.gz",
+                "sha256sum": "d46ff16085d289ef42f1dee683cdeb6e0b61cee37495dec6fcd6b70b8b21ab7c",
                 "dlFileName": "odo-windows-amd64.exe.tar.gz",
                 "cmdFileName": "odo.exe"
             },
             "darwin": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.0/odo-darwin-amd64.tar.gz",
-                "sha256sum": "963db0f410f69bf370eb77a84a054223cff0348f731e16c68a408b332960aad1",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.1/odo-darwin-amd64.tar.gz",
+                "sha256sum": "fb36a0f6a48dc2521cd3179ba84eb562328dc5c7241edc99695607829274c254",
                 "dlFileName": "odo-darwin-amd64.tar.gz",
                 "cmdFileName": "odo"
             },
             "linux": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.0/odo-linux-amd64.tar.gz",
-                "sha256sum": "50ce630fb288db487cc2f1ef1d6f2bcdb6c6a9fa5f04e5fc206b4cb03c7e5621",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.1/odo-linux-amd64.tar.gz",
+                "sha256sum": "abe84eab451bd2896af89e74e9ee550b2c639bb0280abd31cfe64666a0099f9d",
                 "dlFileName": "odo-linux-amd64.tar.gz",
                 "cmdFileName": "odo"
             }
