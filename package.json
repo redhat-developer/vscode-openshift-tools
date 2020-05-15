@@ -1163,12 +1163,6 @@
           "default": 0,
           "description": "Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and integrated terminal."
         },
-        "openshiftConnector.disableCheckForMigration": {
-          "title": "Disable check if migration required",
-          "type": "boolean",
-          "default": false,
-          "description": "Disable check if migration is required for resources created with previous version of the extension and migration request message."
-        },
         "openshiftConnector.searchForToolsInPath": {
           "Title": "Search CLI tools in PATH locations before using included binaries",
           "type": "boolean",
@@ -1176,7 +1170,7 @@
           "description": "Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries."
         },
         "openshiftConnector.useWebviewInsteadOfTerminalView": {
-          "Title": "Use Webview based editors to show 'Show Log', 'Follow Log' and 'Describe' commands output.",
+          "Title": "Use Webview based editors to show 'Show Log', 'Follow Log' and 'Describe' commands output",
           "type": "boolean",
           "defaul": false,
           "description": "By default the Terminal View is used to execute OpenShift 'Show Log', 'Follow Log' and 'Describe' commands. Select this option if you want to use Webview based editors for it."
