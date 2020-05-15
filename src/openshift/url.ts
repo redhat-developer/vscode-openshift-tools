@@ -22,8 +22,9 @@ export class Url extends OpenShiftItem{
             const urlName = await Url.getName('URL name', await Url.odo.getRoutes(component));
             if (!urlName) return null;
             const ports: Port[] = await Url.odo.getComponentPorts(component);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const portItems: QuickPickItem[] = ports.map<QuickPickItem>((item: any) => {
-                item.label = `${item.Number}/${item.Protocol}`;
+                item.label = `${item.number}/${item.protocol}`;
                 return item;
             });
             let port: Port | QuickPickItem;
