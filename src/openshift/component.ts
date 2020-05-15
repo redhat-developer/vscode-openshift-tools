@@ -622,7 +622,12 @@ export class Component extends OpenShiftItem {
     )
     static async debug(component: OpenShiftObject): Promise<string | null> {
         if (!component) return null;
-        return Progress.execFunctionWithProgress(`Starting debugger session for the component '${component.getName()}'.`, () => Component.startDebugger(component));
+        if (component.compType === ComponentType.LOCAL) {
+            return Progress.execFunctionWithProgress(`Starting debugger session for the component '${component.getName()}'.`, () => Component.startDebugger(component));
+        }
+        if (component.compType !== ComponentType.GIT || ComponentType.BINARY) {
+            throw new VsCommandError(`You are trying to run Debug on a ${component.compType} component, which is NOT supported. Debug Command is only supported for Local components.`);
+        }
     }
 
     static async startDebugger(component: OpenShiftObject): Promise<string | undefined> {
