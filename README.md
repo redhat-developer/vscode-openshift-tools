@@ -4,7 +4,7 @@
 
 ## Overview
 
-OpenShift Connector extension provides an end-to-end developer experience for Red Hat OpenShift. Using this extension developers can easily create, deploy and live debug applications running on OpenShift.
+OpenShift Connector extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension, developers can easily create, deploy and live debug applications running on OpenShift.
 
 * Demo: https://youtube.com/watch?v=m0wBKuKDYO0
 
@@ -44,7 +44,7 @@ When working with [OpenShift Online](https://www.openshift.com/products/online/)
 
 ### Commands Available in OpenShift Application Explorer View
 
-#### Commands for Cluster
+#### Commands for a Cluster
 
 * `OpenShift: Log in to cluster` - Log in to your server and save login for subsequent use.
     * Credentials : Log in to the given server with the given credentials.
@@ -61,7 +61,7 @@ When working with [OpenShift Online](https://www.openshift.com/products/online/)
 #### Commands for a Project
 
    * `Project -> New Component` - Create a new Component from the Project.
-        * git - Use a git repository as the source for the Component.
+        * git - Use a git repository as a source for the Component.
         * binary - Use binary file as a source for the Component
         * local - Use local directory as a source for the Component.
    * `Project -> New Service` - Perform Service Catalog operations when it is enabled.
@@ -70,7 +70,7 @@ When working with [OpenShift Online](https://www.openshift.com/products/online/)
 #### Commands for an Application
 
    * `Application -> New Component` - Create a new Component inside the selected Application.
-        * git - Use a git repository as the source for the Component.
+        * git - Use a git repository as a source for the Component.
         * binary - Use binary file as a source for the Component
         * local - Use local directory as a source for the Component.
    * `Application -> New Service` - Perform Service Catalog operations when it is enabled.
@@ -82,39 +82,39 @@ When working with [OpenShift Online](https://www.openshift.com/products/online/)
 Components can be in 3 stages:
 
    *  pushed - When the components are deployed into the cluster.
-   *  not pushed - When are the components are in local config but NOT deployed into the cluster.
+   *  not pushed - When the components are in local config but NOT deployed into the cluster.
    *  no context - When there is no context folder associated with the component in the workspace.
 
 Components in different states have different set of commands available.
 
-##### Command for a Pushed Component
+##### Commands for a `Pushed` Component
 
    * `Component -> New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster. Push the component to reflect the changes on the cluster.
    * `Component -> New Storage` - Create Storage and mount to a Component. Push the component to reflect the changes on the cluster.
-   * `Component -> Describe` - Describe the given Component in terminal window.
-   * `Component -> Show Log` - Retrieve the log for the given Component.
-   * `Component -> Follow Log` - Follow logs for the given Component.
+   * `Component -> Describe` - Describe the given Component in terminal window or inside a webview editor.
+   * `Component -> Show Log` - Retrieve the log for the given Component or inside a webview editor
+   * `Component -> Follow Log` - Follow logs for the given Component or inside a webview editor
    * `Component -> Link Component` - Link Component to another Component.
    * `Component -> Link Service` - Link Component to a Service.
    * `Component -> Unlink` - Unlink Component from Component/Service.
-   * `Component -> Open in Browser` - Open the exposed URL in browser.
+   * `Component -> Open in Browser` - Open the exposed URL in default browser.
    * `Component -> Push` - Push the source code to a Component.
    * `Component -> Watch` - Watch for changes, update Component on change. This is not supported for git based components.
    * `Component -> Undeploy` - Undeploys a Component from the cluster. The component still resides in the local config.
    * `Component -> Delete` - Delete an existing Component from the cluster and removes the local config also.
    * `Component -> Debug` - Debug local Java or Node.js Component.
 
-##### Commands for a not Pushed Component
+##### Commands for a `not pushed` Component
 
    * `Component -> New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster.
    * `Component -> New Storage` - Create Storage and mount to a Component. Push the component to reflect the changes on the cluster.
-   * `Component -> Describe` - Describe the given Component in terminal window.
+   * `Component -> Describe` - Describe the given Component in terminal window or inside a webview editor.
    * `Component -> Push` - Push the source code to a Component.
    * `Component -> Delete` - Delete an existing Component from the local config.
 
-##### Commands for a no context Component
+##### Commands for a `no context` Component
 
-   * `Component -> Describe` - Describe the given Component in terminal window.
+   * `Component -> Describe` - Describe the given Component in terminal window or inside a webview editor.
    * `Component -> Import` - If the component was created using old version of the extension (`<=0.0.23`), users can use the `Import` action to migrate to latest version and import the metadata changes.
    * `Component -> Delete` - Delete an existing Component from the local config.
 
@@ -135,7 +135,10 @@ Components in different states have different set of commands available.
 
 **NOTE:** Currently we support creation of one component per folder. Multiple components from a folder might be supported in future releases.
 
-#### Debug Support for Local Node.js and Java Components
+#### Debug Support
+
+   * Supports Local Node.js and Java Components
+   * Does not support git and binary based components
 
 'OpenShift: Debug' command simplifies the way to start debugging for OpenShift Components pushed to a cluster. It is an experimental feature, because it is using experimental OpenShift Do `debug` command under the hood and supports only local Java and Node.js components. The command is available from command palette and context menu for Component nodes in OpenShift Application Explorer view. 
 
@@ -177,8 +180,8 @@ To debug a Java Component, Java Language Support and Java Debugger Extensions ar
 ### CLI Tools
 
 This extension uses two CLI tools to interact with OpenShift cluster:
-* OKD CLI client tool - [oc](https://github.com/openshift/origin/releases)
-* OpenShift Do tool - [odo](https://mirror.openshift.com/pub/openshift-v4/clients/odo)
+* OKD CLI client tool - [oc](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.3.3)
+* OpenShift Do tool - [odo](http://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.1/)
 
 > `oc` and `odo` tools for Windows, Linux and macOS are included into extension package. Once the extension is installed it is ready to use.
 
@@ -195,7 +198,7 @@ OpenShift Connector extension also provides ```Use Project``` command to switch 
 
 ## Breaking Changes Between Previous Releases
 
-### Updating from release 0.0.23 or earlier
+### Updating from release `0.0.23` or earlier
 
 * The Components created with previous versions(<=0.0.23) will no longer be visible in OpenShift Application Explorer view.
 * The Extension will prompt the user to specify the context folder when creating new Components and then add selected folder to workspace.
@@ -215,7 +218,7 @@ This is an open source project open to anyone. This project welcomes contributio
 
 For information on getting started, refer to the [CONTRIBUTING instructions](CONTRIBUTING.md).
 
-Download the most recent `openshift-connector-<version>.vsix` file and install it by following the instructions [here](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix). Stable releases are archived [here](https://download.jboss.org/jbosstools/adapters/snapshots/vscode-openshift-tools/?C=M;O=D).
+Download the most recent `openshift-connector-<version>.vsix` file from the [release](https://github.com/redhat-developer/vscode-openshift-tools/releases) and install it by following the instructions [here](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix). Stable releases are archived [here](https://download.jboss.org/jbosstools/adapters/snapshots/vscode-openshift-tools/?C=M;O=D).
 
 # Feedback & Questions
 
