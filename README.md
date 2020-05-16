@@ -14,13 +14,13 @@ OpenShift Connector extension provides an end-to-end developer experience for Re
 
 This extension can work with local or remote OpenShift clusters.
 
-To start local instance of OpenShift cluster, developers can use the following options:
+To provision local instance of OpenShift cluster, developers can use the following options:
 * [CodeReadyContainers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned) - run single node local OpenShift 4.x cluster
 * [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/) - run single node local OpenShift 3.x cluster 
 
 For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
 
-If developers can not run local OpenShift cluster the extension can work with remote one from various Red Hat products:
+If developers can't run OpenShift cluster locally, the extension can work with remote one provisioned with one of Red Hat products:
 * [Red Hat OpenShift Container Platform](https://www.openshift.com/products/container-platform) - build, deploy and manage your applications across cloud- and on-premise infrastructure
 * [Red Hat OpenShift Dedicated](https://www.openshift.com/products/dedicated/) - single-tenant, high-availability Kubernetes clusters in the public cloud
 * [Microsoft Azure Red Hat OpenShift](https://www.openshift.com/products/azure-openshift) - fully managed Red Hat OpenShift service on Microsoft Azure
@@ -30,34 +30,21 @@ When working with [OpenShift Online](https://www.openshift.com/products/online/)
 
 ## New and Noteworthy
 
-## All Required CLI Tools Included
-
-This release includes binaries for all required CLI tools:
-* OKD CLI Client (`oc`)
-* OpenShift Do (`odo`)
-Once extension is installed it is ready to use. There is no additional configuration steps to download CLI tools binaries.
-
-### Debug Support for Local Node.js and Java Components
-
-This release provides new 'OpenShift: Debug' command to simplify the way to start debugging for OpenShift Components pushed to a cluster. It is an experimental feature, because it is using experimental OpenShift Do `debug` command under the hood and supports only local Java and Node.js components. The command is available from command palette and context menu for Component nodes in OpenShift Application Explorer view. 
-
-#### Debug Node.js Component
-
-Default Visual Studio Code installation includes JavaScript/TypeScript Language Support and Debugger Extensions required to debug a Node.js Component. That means new `OpenShift: Debug` command can be used without installing any additional extensions.
-
-![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/debug-node.gif)
-
-#### Debug Java Component
-
-To debug a Java Component, Java Language Support and Java Debugger Extensions are required. OpenShift Connector extension will prompt the user to install missing extension(s) before it starts Debugger for a Java Component.
-
-![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/debug-java.gif)
+* Latest OpenShift Do CLI tool v1.2.1 included 
+* Webview based viewers for `Show Log`, `Follow Log` and `Describe` commands for Component
+* Terminals created with OpenShift commands have meaningful names for better navigation
+* OpenShift Routes in k8s Clusters View have new command 'Open in Browser'
+* `Describe` command for Component's URL
+* `Describe` and `New Storage` commands for not pushed Components
+* `New URL` command can create secured URLs for Component
 
 ## Commands and Features
 
 `vs-openshift-connector` supports a number of commands & actions for interacting with OpenShift clusters; these are accessible via the command menu (`Cmd+Shift+P` <kbd>⌘⇧P</kbd> on macOS or `Ctrl+Shift+P` <kbd>⌃⇧P</kbd> on Windows and Linux) and may be bound to keys in the normal way.
 
-### General Commands
+### Commands Available in OpenShift Application Explorer View
+
+#### Commands for Cluster
 
 * `OpenShift: Log in to cluster` - Log in to your server and save login for subsequent use.
     * Credentials : Log in to the given server with the given credentials.
@@ -71,7 +58,7 @@ To debug a Java Component, Java Language Support and Java Debugger Extensions ar
 * `OpenShift: Open Console Dashboard` - Opens the OpenShift webconsole URL.
 * `OpenShift: Create` - Creates an OpenShift resource using `.json` or `.yaml` file location from an active editor.
 
-#### Actions Available for an OpenShift Cluster Project
+#### Commands for a Project
 
    * `Project -> New Component` - Create a new Component from the Project.
         * git - Use a git repository as the source for the Component.
@@ -80,7 +67,7 @@ To debug a Java Component, Java Language Support and Java Debugger Extensions ar
    * `Project -> New Service` - Perform Service Catalog operations when it is enabled.
    * `Project -> Delete` - Delete an existing Project.
 
-#### Actions Available for an Application in a Project
+#### Commands for an Application
 
    * `Application -> New Component` - Create a new Component inside the selected Application.
         * git - Use a git repository as the source for the Component.
@@ -90,15 +77,17 @@ To debug a Java Component, Java Language Support and Java Debugger Extensions ar
    * `Application -> Describe` - Describe the given Application in terminal window.
    * `Application -> Delete` - Delete an existing Application.
 
-#### Actions Available for a Component in an Application
+#### Commands for a Component
 
-##### Components can be in 3 stages:
+Components can be in 3 stages:
 
-      pushed - When the components are deployed into the cluster.
-      not pushed - When are the components are in local config but NOT deployed into the cluster.
-      no context - When there is no context folder associated with the component in the workspace.
+   *  pushed - When the components are deployed into the cluster.
+   *  not pushed - When are the components are in local config but NOT deployed into the cluster.
+   *  no context - When there is no context folder associated with the component in the workspace.
 
-#### Actions for a Pushed Component
+Components in different states have different set of commands available.
+
+##### Command for a Pushed Component
 
    * `Component -> New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster. Push the component to reflect the changes on the cluster.
    * `Component -> New Storage` - Create Storage and mount to a Component. Push the component to reflect the changes on the cluster.
@@ -115,38 +104,54 @@ To debug a Java Component, Java Language Support and Java Debugger Extensions ar
    * `Component -> Delete` - Delete an existing Component from the cluster and removes the local config also.
    * `Component -> Debug` - Debug local Java or Node.js Component.
 
-#### Actions for a not Pushed Component
+##### Commands for a not Pushed Component
 
    * `Component -> New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster.
+   * `Component -> New Storage` - Create Storage and mount to a Component. Push the component to reflect the changes on the cluster.
+   * `Component -> Describe` - Describe the given Component in terminal window.
    * `Component -> Push` - Push the source code to a Component.
    * `Component -> Delete` - Delete an existing Component from the local config.
 
-#### Actions for a no context Component
+##### Commands for a no context Component
 
    * `Component -> Describe` - Describe the given Component in terminal window.
-   * `Component -> Delete` - Delete an existing Component from the local config.
    * `Component -> Import` - If the component was created using old version of the extension (`<=0.0.23`), users can use the `Import` action to migrate to latest version and import the metadata changes.
+   * `Component -> Delete` - Delete an existing Component from the local config.
 
-#### Actions available for a URL in a Component
+##### Commands for a URL in a Component
 
    * `URL -> Delete` - Delete a URL from a Component.
    * `URL -> Open URL` - Click on the icon opens the specific URL in Browser.
    * `URL -> Describe` - Describe the given URL for the component in terminal window.
 
-
-#### Actions available for a Storage in a Component
+##### Commands for a Storage
 
    * `Storage -> Delete` - Delete a Storage from a Component.
 
-
-#### Actions available for a Service in an Application
+##### Commands for a Service
 
    * `Service -> Describe` - Describe a Service Type for a selected Component
    * `Service -> Delete` - Delete a Service from an Application
 
 **NOTE:** Currently we support creation of one component per folder. Multiple components from a folder might be supported in future releases.
 
-#### Icons Representation
+#### Debug Support for Local Node.js and Java Components
+
+'OpenShift: Debug' command simplifies the way to start debugging for OpenShift Components pushed to a cluster. It is an experimental feature, because it is using experimental OpenShift Do `debug` command under the hood and supports only local Java and Node.js components. The command is available from command palette and context menu for Component nodes in OpenShift Application Explorer view. 
+
+##### Debug Node.js Component
+
+Default Visual Studio Code installation includes JavaScript/TypeScript Language Support and Debugger Extensions required to debug a Node.js Component. That means new `OpenShift: Debug` command can be used without installing any additional extensions.
+
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/debug-node.gif)
+
+##### Debug Java Component
+
+To debug a Java Component, Java Language Support and Java Debugger Extensions are required. OpenShift Connector extension will prompt the user to install missing extension(s) before it starts Debugger for a Java Component.
+
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/debug-java.gif)
+
+## Icons for OpenShift Application Explorer View Items
 
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/title/readme/icon-login.png" width="15" height="15" /><span style="margin: 20px">Log in to Cluster</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/title/readme/icon-refresh.png" width="15" height="15" /><span style="margin: 20px">Refresh Cluster</span></div>
@@ -161,9 +166,11 @@ To debug a Java Component, Java Language Support and Java Debugger Extensions ar
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/url-node.png" width="15" height="15" /><span style="margin: 20px">URL Resource</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/url-node-open.png" width="15" height="15" /><span style="margin: 20px">Open URL</span></div>
 
-### Extension Configuration Settings
+## Extension Configuration Settings
    * `OpenShift Connector: Show Channel On Output` - Show OpenShift Connector output channel when new text added to output stream
    * `OpenShift Connector: Output verbosity level` - Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and terminal view
+   * `OpenShift Connector: Search CLI tools in PATH locations before using included binaries` - Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries
+   * `OpenShift Connector: Use Webview based editors to show 'Show Log', 'Follow Log' and 'Describe' commands output` - Use Webview based editors instead of Terminal view to show or follow logs
 
 ## Dependencies
 
