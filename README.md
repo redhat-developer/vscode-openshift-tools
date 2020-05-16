@@ -14,13 +14,13 @@ OpenShift Connector extension provides an end-to-end developer experience for Re
 
 This extension can work with local or remote OpenShift clusters.
 
-To start local instance of OpenShift cluster, developers can use the following options:
+To provision local instance of OpenShift cluster, developers can use the following options:
 * [CodeReadyContainers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned) - run single node local OpenShift 4.x cluster
 * [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/) - run single node local OpenShift 3.x cluster 
 
 For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
 
-If developers can't run local OpenShift cluster the extension can work with remote one from various Red Hat products:
+If developers can't run OpenShift cluster locally, the extension can work with remote one provisioned with one of Red Hat products:
 * [Red Hat OpenShift Container Platform](https://www.openshift.com/products/container-platform) - build, deploy and manage your applications across cloud- and on-premise infrastructure
 * [Red Hat OpenShift Dedicated](https://www.openshift.com/products/dedicated/) - single-tenant, high-availability Kubernetes clusters in the public cloud
 * [Microsoft Azure Red Hat OpenShift](https://www.openshift.com/products/azure-openshift) - fully managed Red Hat OpenShift service on Microsoft Azure
