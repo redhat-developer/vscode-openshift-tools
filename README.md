@@ -60,22 +60,22 @@ When working with [OpenShift Online](https://www.openshift.com/products/online/)
 
 #### Commands for a Project
 
-   * `Project -> New Component` - Create a new Component from the Project.
+   * `New Component` - Create a new Component from the Project.
         * git - Use a git repository as a source for the Component.
         * binary - Use binary file as a source for the Component
         * local - Use local directory as a source for the Component.
-   * `Project -> New Service` - Perform Service Catalog operations when it is enabled.
-   * `Project -> Delete` - Delete an existing Project.
+   * `New Service` - Perform Service Catalog operations when it is enabled.
+   * `Delete` - Delete an existing Project.
 
 #### Commands for an Application
 
-   * `Application -> New Component` - Create a new Component inside the selected Application.
+   * `New Component` - Create a new Component inside the selected Application.
         * git - Use a git repository as a source for the Component.
         * binary - Use binary file as a source for the Component
         * local - Use local directory as a source for the Component.
-   * `Application -> New Service` - Perform Service Catalog operations when it is enabled.
-   * `Application -> Describe` - Describe the given Application in terminal window.
-   * `Application -> Delete` - Delete an existing Application.
+   * `New Service` - Perform Service Catalog operations when it is enabled.
+   * `Describe` - Describe the given Application in terminal window.
+   * `Delete` - Delete an existing Application.
 
 #### Commands for a Component
 
@@ -87,51 +87,51 @@ Components can be in 3 stages:
 
 Components in different states have different set of commands available.
 
-##### Commands for a `Pushed` Component
+##### Commands for a `pushed` Component
 
-   * `Component -> New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster. Push the component to reflect the changes on the cluster.
-   * `Component -> New Storage` - Create Storage and mount to a Component. Push the component to reflect the changes on the cluster.
-   * `Component -> Describe` - Describe the given Component in terminal window or inside a webview editor.
-   * `Component -> Show Log` - Retrieve the log for the given Component or inside a webview editor
-   * `Component -> Follow Log` - Follow logs for the given Component or inside a webview editor
-   * `Component -> Link Component` - Link Component to another Component.
-   * `Component -> Link Service` - Link Component to a Service.
-   * `Component -> Unlink` - Unlink Component from Component/Service.
-   * `Component -> Open in Browser` - Open the exposed URL in default browser.
-   * `Component -> Push` - Push the source code to a Component.
-   * `Component -> Watch` - Watch for changes, update Component on change. This is not supported for git based components.
-   * `Component -> Undeploy` - Undeploys a Component from the cluster. The component still resides in the local config.
-   * `Component -> Delete` - Delete an existing Component from the cluster and removes the local config also.
-   * `Component -> Debug` - Debug local Java or Node.js Component.
+   * `New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster. Push the component to reflect the changes on the cluster.
+   * `New Storage` - Create Storage and mount to a Component. Push the component to reflect the changes on the cluster.
+   * `Describe` - Describe the given Component in terminal window or inside a webview editor.
+   * `Show Log` - Retrieve the log for the given Component or inside a webview editor
+   * `Follow Log` - Follow logs for the given Component or inside a webview editor
+   * `Link Component` - Link Component to another Component.
+   * `Link Service` - Link Component to a Service.
+   * `Unlink` - Unlink Component from Component/Service.
+   * `Open in Browser` - Open the exposed URL in default browser.
+   * `Push` - Push the source code to a Component.
+   * `Watch` - Watch for changes, update Component on change. This is not supported for git based components.
+   * `Undeploy` - Undeploys a Component from the cluster. The component still resides in the local config.
+   * `Delete` - Delete an existing Component from the cluster and removes the local config also.
+   * `Debug` - Debug local Java or Node.js Component.
 
 ##### Commands for a `not pushed` Component
 
-   * `Component -> New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster.
-   * `Component -> New Storage` - Create Storage and mount to a Component. Push the component to reflect the changes on the cluster.
-   * `Component -> Describe` - Describe the given Component in terminal window or inside a webview editor.
-   * `Component -> Push` - Push the source code to a Component.
-   * `Component -> Delete` - Delete an existing Component from the local config.
+   * `New URL` - Expose Component to the outside world. The URLs that are generated using this command, can be used to access the deployed Components from outside the Cluster.
+   * `New Storage` - Create Storage and mount to a Component. Push the component to reflect the changes on the cluster.
+   * `Describe` - Describe the given Component in terminal window or inside a webview editor.
+   * `Push` - Push the source code to a Component.
+   * `Delete` - Delete an existing Component from the local config.
 
 ##### Commands for a `no context` Component
 
-   * `Component -> Describe` - Describe the given Component in terminal window or inside a webview editor.
-   * `Component -> Import` - If the component was created using old version of the extension (`<=0.0.23`), users can use the `Import` action to migrate to latest version and import the metadata changes.
-   * `Component -> Delete` - Delete an existing Component from the local config.
+   * `Describe` - Describe the given Component in terminal window or inside a webview editor.
+   * `Import` - If the component was created using old version of the extension (`<=0.0.23`), users can use the `Import` action to migrate to latest version and import the metadata changes.
+   * `Delete` - Delete an existing Component from the local config.
 
 ##### Commands for a URL in a Component
 
-   * `URL -> Delete` - Delete a URL from a Component.
-   * `URL -> Open URL` - Click on the icon opens the specific URL in Browser.
-   * `URL -> Describe` - Describe the given URL for the component in terminal window.
+   * `Delete` - Delete a URL from a Component.
+   * `Open URL` - Click on the icon opens the specific URL in Browser.
+   * `Describe` - Describe the given URL for the component in terminal window.
 
 ##### Commands for a Storage
 
-   * `Storage -> Delete` - Delete a Storage from a Component.
+   * `Delete` - Delete a Storage from a Component.
 
 ##### Commands for a Service
 
-   * `Service -> Describe` - Describe a Service Type for a selected Component
-   * `Service -> Delete` - Delete a Service from an Application
+   * `Describe` - Describe a Service Type for a selected Component
+   * `Delete` - Delete a Service from an Application
 
 **NOTE:** Currently we support creation of one component per folder. Multiple components from a folder might be supported in future releases.
 
