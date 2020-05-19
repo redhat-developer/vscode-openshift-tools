@@ -131,7 +131,7 @@ suite("tools configuration", () => {
         test('keeps tool configuration if there is no platform attribute', () => {
             let config = {
                 odo: {
-                    name: 'OpenShift Do tool',
+                    name: 'odo',
                     version: '0.0.100'
                 }
             };
@@ -141,7 +141,7 @@ suite("tools configuration", () => {
         test('removes tool configuration if platform is not supported', () => {
             let config = {
                 odo: {
-                    name: 'OpenShift Do tool',
+                    name: 'odo',
                     version: '0.0.100',
                     platform: {
                         win32: {

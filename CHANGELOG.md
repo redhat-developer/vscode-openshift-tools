@@ -3,7 +3,7 @@
 ## 0.1.5 (May 18, 2020)
 
 Noteworthy issues fixed in this release:
-  - [#1505](https://github.com/redhat-developer/vscode-openshift-tools/issues/1505) Update OpenShift Do cli to [v1.2.1](https://github.com/openshift/odo/releases/tag/v1.2.1)
+  - [#1505](https://github.com/redhat-developer/vscode-openshift-tools/issues/1505) Update odo to [v1.2.1](https://github.com/openshift/odo/releases/tag/v1.2.1)
   - [#1551](https://github.com/redhat-developer/vscode-openshift-tools/issues/1551) Command to migrate components created with v0.0.23 or earlier
   - [#1517](https://github.com/redhat-developer/vscode-openshift-tools/issues/1517) Configuration to switch between Terminal View and WebView based view to exec 'Show/Follow Log' and 'Describe' commands
   - [#1319](https://github.com/redhat-developer/vscode-openshift-tools/issues/1319) Use webview based editor to show or follow component's log
