@@ -1,6 +1,6 @@
 {
     "odo": {
-        "description": "OpenShift Do CLI tool",
+        "description": "odo CLI",
         "vendor": "Red Hat, Inc.",
         "name": "odo",
         "version": "1.2.1",

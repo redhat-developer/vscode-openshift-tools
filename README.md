@@ -30,7 +30,7 @@ When working with [OpenShift Online](https://www.openshift.com/products/online/)
 
 ## New and Noteworthy
 
-* Latest OpenShift Do CLI tool v1.2.1 included 
+* Latest odo v1.2.1 included 
 * Webview based viewers for `Show Log`, `Follow Log` and `Describe` commands for Component
 * Terminals created with OpenShift commands have meaningful names for better navigation
 * OpenShift Routes in k8s Clusters View have new command 'Open in Browser'
@@ -140,7 +140,7 @@ Components in different states have different set of commands available.
    * Supports Local Node.js and Java Components
    * Does not support git and binary based components
 
-'OpenShift: Debug' command simplifies the way to start debugging for OpenShift Components pushed to a cluster. It is an experimental feature, because it is using experimental OpenShift Do `debug` command under the hood and supports only local Java and Node.js components. The command is available from command palette and context menu for Component nodes in OpenShift Application Explorer view. 
+'OpenShift: Debug' command simplifies the way to start debugging for OpenShift Components pushed to a cluster. It is an experimental feature, because it is using experimental odo `debug` command under the hood and supports only local Java and Node.js components. The command is available from command palette and context menu for Component nodes in OpenShift Application Explorer view. 
 
 ##### Debug Node.js Component
 
@@ -181,7 +181,7 @@ To debug a Java Component, Java Language Support and Java Debugger Extensions ar
 
 This extension uses two CLI tools to interact with OpenShift cluster:
 * OKD CLI client tool - [oc](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.3.3)
-* OpenShift Do tool - [odo](http://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.1/)
+* odo - [odo](http://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.1/)
 
 > `oc` and `odo` tools for Windows, Linux and macOS are included into extension package. Once the extension is installed it is ready to use.
 
