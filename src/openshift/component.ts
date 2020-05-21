@@ -26,7 +26,6 @@ import path = require('path');
 import globby = require('globby');
 
 const waitPort = require('wait-port');
-const getPort = require('get-port');
 
 export class Component extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
@@ -131,7 +130,7 @@ export class Component extends OpenShiftItem {
                 // eslint-disable-next-line no-await-in-loop
                 const getLinkPort = await Component.getLinkPort(component, key);
                 const ports = getLinkPort.status.linkedComponents[component.getName()];
-                if (getPort) {
+                if (ports) {
                     // eslint-disable-next-line no-restricted-syntax
                     for (const port of ports) {
                         // eslint-disable-next-line no-await-in-loop
@@ -691,12 +690,11 @@ export class Component extends OpenShiftItem {
     }
 
     static async startOdoAndConnectDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration): Promise<string> {
-        const port = await getPort();
-        const cp = exec(`"${toolLocation}" debug port-forward --local-port ${port}`, {cwd: component.contextPath.fsPath});
+        const cp = exec(`"${toolLocation}" debug port-forward`, {cwd: component.contextPath.fsPath});
         return new Promise<string>((resolve, reject) => {
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             cp.stdout.on('data', async (data: string) => {
-                const parsedPort = data.trim().match(/(?<localPort>\d+):\d+$/);
+                const parsedPort = data.trim().match(/- (?<localPort>\d+):\d+$/);
                 if (parsedPort?.groups?.localPort) {
                     await waitPort({
                         host: 'localhost',
@@ -706,7 +704,9 @@ export class Component extends OpenShiftItem {
                 }
             });
             cp.stderr.on('data', (data: string) => {
-                reject(data);
+                if (!`${data}`.includes('address already in use')) {
+                    reject(data);
+                }
             });
         }).then((result) => {
             config.port = result;
