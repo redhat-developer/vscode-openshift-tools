@@ -198,6 +198,10 @@ export class Command {
         return `odo describe ${component} --app ${app} --project ${project}`;
     }
 
+    static describeComponentNoContextJson(project: string, app: string, component: string): string {
+        return `${this.describeComponentNoContext(project, app, component)} -o json`;
+    }
+
     static describeComponent(project: string, app: string, component: string): string {
         return `odo describe`;
     }
