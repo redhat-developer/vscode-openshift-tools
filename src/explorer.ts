@@ -46,13 +46,17 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         .onDidChangeTreeDataEmitter.event;
 
     private constructor() {
-        const ku1 = new KubeConfigUtils();
-        this.kubeContext = ku1.getContextObject(ku1.currentContext);
+        try {
+            const ku1 = new KubeConfigUtils();
+            this.kubeContext = ku1.getContextObject(ku1.currentContext);
+        } catch (err) {
+            // ignore config loading error and let odo report it on first call
+        }
         this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
         this.fsw.emitter.on('file-changed', () => {
             const ku2 = new KubeConfigUtils();
             const newKubeCtx = ku2.getContextObject(ku2.currentContext);
-            if (this.kubeContext.cluster !== newKubeCtx.cluster || this.kubeContext.user !== newKubeCtx.user) {
+            if (!this.kubeContext || (this.kubeContext.cluster !== newKubeCtx.cluster || this.kubeContext.user !== newKubeCtx.user)) {
                 this.refresh();
             }
             this.kubeContext = newKubeCtx;
