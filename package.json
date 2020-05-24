@@ -2,7 +2,7 @@
   "name": "vscode-openshift-connector",
   "displayName": "OpenShift Connector",
   "description": "Interacting with Red Hat OpenShift clusters and providing a streamlined developer experience using Visual Studio Code",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "license": "MIT",
   "publisher": "redhat",
   "author": "Red Hat",
@@ -62,7 +62,6 @@
     "byline": "^5.0.0",
     "clsx": "^1.1.0",
     "fs-extra": "^8.1.0",
-    "get-port": "^5.1.0",
     "git-fetch-pack": "^0.1.1",
     "git-transport-protocol": "^0.1.0",
     "globby": "^10.0.1",
@@ -215,6 +214,7 @@
     "onCommand:openshift.component.folder.create",
     "onCommand:openshift.explorer.reportIssue",
     "onCommand:openshift.explorer.switchContext",
+    "onCommand:openshift.migrate.odo00X.components",
     "onCommand:clusters.openshift.project.openConsole",
     "onCommand:clusters.openshift.useProject",
     "onCommand:clusters.openshift.deploy",
@@ -596,6 +596,11 @@
       {
         "command": "openshift.service.delete.palette",
         "title": "Delete Service",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.migrate.odo00X.components",
+        "title": "Migrate Components created with Extension v0.0.23 or earlier",
         "category": "OpenShift"
       },
       {
@@ -1179,12 +1184,6 @@
           "default": 0,
           "description": "Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and integrated terminal."
         },
-        "openshiftConnector.disableCheckForMigration": {
-          "title": "Disable check if migration required",
-          "type": "boolean",
-          "default": false,
-          "description": "Disable check if migration is required for resources created with previous version of the extension and migration request message."
-        },
         "openshiftConnector.searchForToolsInPath": {
           "Title": "Search CLI tools in PATH locations before using included binaries",
           "type": "boolean",
@@ -1192,7 +1191,7 @@
           "description": "Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries."
         },
         "openshiftConnector.useWebviewInsteadOfTerminalView": {
-          "Title": "Use Webview based editors to show 'Show Log', 'Follow Log' and 'Describe' commands output.",
+          "Title": "Use Webview based editors to show 'Show Log', 'Follow Log' and 'Describe' commands output",
           "type": "boolean",
           "defaul": false,
           "description": "By default the Terminal View is used to execute OpenShift 'Show Log', 'Follow Log' and 'Describe' commands. Select this option if you want to use Webview based editors for it."

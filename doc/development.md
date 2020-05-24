@@ -40,7 +40,7 @@ On Windows the fix is to clean up `%USER_PROFILE%\AppData\Roaming\Code\CachedDat
 
 Before applying `xpaas` add-on run apply `redhat-registry-login` with this command
 
-`minishift addon apply redhat-registry-login --env-var REGISTRY_USERNAME=username --env-var REGISTRY_PASSWORD=password`
+`minishift addon apply redhat-registry-login --addon-env REGISTRY_USERNAME=username --addon-env REGISTRY_PASSWORD=password`
 
 where `username` and `password` are your credentials to access registry.redhat.io.
 Then apply `xpaas` with the command below

@@ -46,7 +46,7 @@ function genComponentJson(p: string, a: string, n: string, c: string ) {
               ]
             },
             "status": {
-              "context": "${c}",
+              "context": "${c.replace(/\\/g,'\\\\')}",
               "state": "Not Pushed"
             }
           }
@@ -78,7 +78,7 @@ suite('openshift connector Extension', () => {
 
             if(cmd.includes('--path')) {
                 const args = cmd.split(' ');
-                const name = args[3].substr(args[3].lastIndexOf(path.sep));
+                const name = args[3].substr(args[3].lastIndexOf(path.sep)+1);
                 return { error: undefined, stdout: genComponentJson('myproject', 'app1', name, args[3]), stderr: '' };
             }
 

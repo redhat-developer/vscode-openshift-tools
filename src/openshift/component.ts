@@ -26,7 +26,6 @@ import path = require('path');
 import globby = require('globby');
 
 const waitPort = require('wait-port');
-const getPort = require('get-port');
 
 export class Component extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
@@ -118,7 +117,7 @@ export class Component extends OpenShiftItem {
     }
 
     static async getLinkPort(component: OpenShiftObject, compName: string): Promise<any> {
-        const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), compName), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+        const compData = await Component.odo.execute(Command.describeComponentNoContextJson(component.getParent().getParent().getName(), component.getParent().getName(), compName), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         return JSON.parse(compData.stdout);
     }
 
@@ -131,7 +130,7 @@ export class Component extends OpenShiftItem {
                 // eslint-disable-next-line no-await-in-loop
                 const getLinkPort = await Component.getLinkPort(component, key);
                 const ports = getLinkPort.status.linkedComponents[component.getName()];
-                if (getPort) {
+                if (ports) {
                     // eslint-disable-next-line no-restricted-syntax
                     for (const port of ports) {
                         // eslint-disable-next-line no-await-in-loop
@@ -208,7 +207,7 @@ export class Component extends OpenShiftItem {
     }
 
     private static async getLinkData(component: OpenShiftObject): Promise<any> {
-        const compData = await Component.odo.execute(Command.describeComponentJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
+        const compData = await Component.odo.execute(Command.describeComponentNoContextJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         return JSON.parse(compData.stdout);
     }
 
@@ -622,7 +621,12 @@ export class Component extends OpenShiftItem {
     )
     static async debug(component: OpenShiftObject): Promise<string | null> {
         if (!component) return null;
-        return Progress.execFunctionWithProgress(`Starting debugger session for the component '${component.getName()}'.`, () => Component.startDebugger(component));
+        if (component.compType === ComponentType.LOCAL) {
+            return Progress.execFunctionWithProgress(`Starting debugger session for the component '${component.getName()}'.`, () => Component.startDebugger(component));
+        }
+        if (component.compType !== ComponentType.GIT || ComponentType.BINARY) {
+            throw new VsCommandError(`You are trying to run Debug on a ${component.compType} component, which is NOT supported. Debug Command is only supported for Local components.`);
+        }
     }
 
     static async startDebugger(component: OpenShiftObject): Promise<string | undefined> {
@@ -686,12 +690,11 @@ export class Component extends OpenShiftItem {
     }
 
     static async startOdoAndConnectDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration): Promise<string> {
-        const port = await getPort();
-        const cp = exec(`"${toolLocation}" debug port-forward --local-port ${port}`, {cwd: component.contextPath.fsPath});
+        const cp = exec(`"${toolLocation}" debug port-forward`, {cwd: component.contextPath.fsPath});
         return new Promise<string>((resolve, reject) => {
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             cp.stdout.on('data', async (data: string) => {
-                const parsedPort = data.trim().match(/(?<localPort>\d+):\d+$/);
+                const parsedPort = data.trim().match(/- (?<localPort>\d+):\d+$/);
                 if (parsedPort?.groups?.localPort) {
                     await waitPort({
                         host: 'localhost',
@@ -701,7 +704,9 @@ export class Component extends OpenShiftItem {
                 }
             });
             cp.stderr.on('data', (data: string) => {
-                reject(data);
+                if (!`${data}`.includes('address already in use')) {
+                    reject(data);
+                }
             });
         }).then((result) => {
             config.port = result;

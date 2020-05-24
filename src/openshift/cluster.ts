@@ -46,7 +46,7 @@ export class Cluster extends OpenShiftItem {
 
     @vsCommand('openshift.about')
     static async about(): Promise<void> {
-        await Cluster.odo.executeInTerminal(Command.printOdoVersion(), undefined, 'OpenShift: Show OpenShift Do CLI Tool Version');
+        await Cluster.odo.executeInTerminal(Command.printOdoVersion(), undefined, 'OpenShift: Show odo Version');
     }
 
     @vsCommand('openshift.oc.about')
