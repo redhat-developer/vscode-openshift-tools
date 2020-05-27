@@ -20,6 +20,7 @@ import { TokenStore } from './util/credentialManager';
 import { registerCommands } from './vscommand';
 import { ToolsConfig } from './tools';
 import { extendClusterExplorer } from './k8s/clusterExplorer';
+import { recommendExtensions } from './util/extension-recommendation';
 
 import path = require('path');
 import fsx = require('fs-extra');
@@ -64,6 +65,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             './openshift/service',
             './k8s/console',
             './oc',
+            './util/extension-promotion'
         )),
         commands.registerCommand('clusters.openshift.useProject', (context) =>
             commands.executeCommand('extension.vsKubernetesUseNamespace', context),
@@ -105,6 +107,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     });
 
     extendClusterExplorer();
+
+    recommendExtensions();
 
     workspace.onDidChangeWorkspaceFolders((event: WorkspaceFoldersChangeEvent) => {
         OdoImpl.Instance.loadWorkspaceComponents(event);

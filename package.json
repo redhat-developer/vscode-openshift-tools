@@ -679,6 +679,16 @@
         "command": "clusters.openshift.route.open",
         "title": "Open in Browser",
         "Category": "OpenShift"
+      },
+      {
+        "command": "openshift.close.recommended.extensions",
+        "title": "Close Recommended Extensions",
+        "category": "OpenShift",
+        "enablement": "openshift:recommendedExtensions",
+        "icon": {
+          "dark": "images/title/dark/icon-close.svg",
+          "light": "images/title/light/icon-close.svg"
+        }
       }
     ],
     "keybindings": [
@@ -712,6 +722,11 @@
         {
           "id": "openshiftProjectExplorer",
           "name": "OpenShift Application Explorer"
+        },
+        {
+            "id": "openshiftRecommendedExtensions",
+            "name": "Recommended Extensions",
+            "when": "openshift:recommendedExtensions"
         }
       ]
     },
@@ -850,6 +865,11 @@
           "command": "openshift.explorer.reportIssue",
           "when": "view == openshiftProjectExplorer",
           "group": "navigation@3"
+        },
+        {
+            "command": "openshift.close.recommended.extensions",
+            "when": "view == openshiftRecommendedExtensions",
+            "group": "navigation@0"
         }
       ],
       "view/item/context": [
