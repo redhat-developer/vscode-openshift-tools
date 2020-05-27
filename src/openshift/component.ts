@@ -5,7 +5,7 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation } from 'vscode';
+import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
 import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
 import OpenShiftItem, { selectTargetApplication, selectTargetComponent } from './openshiftItem';
@@ -29,6 +29,23 @@ const waitPort = require('wait-port');
 
 export class Component extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
+    public static debugSessions: Map<Uri, DebugSession> = new Map();
+
+    public static init(context: ExtensionContext): Disposable[] {
+        Component.extensionContext = context;
+        return [
+            debug.onDidStartDebugSession((session) => {
+                if (session.configuration.contextPath) {
+                    Component.debugSessions.set(session.configuration.contextPath, session);
+                }
+            }),
+            debug.onDidTerminateDebugSession((session) => {
+                if (session.configuration.contextPath) {
+                    Component.debugSessions.delete(session.configuration.contextPath);
+                }
+            })
+        ];
+    }
 
     static async getOpenshiftData(context: OpenShiftObject): Promise<OpenShiftObject> {
         return Component.getOpenShiftCmdData(context,
@@ -704,11 +721,12 @@ export class Component extends OpenShiftItem {
                 }
             });
             cp.stderr.on('data', (data: string) => {
-                if (!`${data}`.includes('address already in use')) {
+                if (!`${data}`.includes('the local debug port 5858 is not free')) {
                     reject(data);
                 }
             });
         }).then((result) => {
+            config.contextPath = component.contextPath;
             config.port = result;
             config.odoPid = cp.pid;
             return debug.startDebugging(workspace.getWorkspaceFolder(component.contextPath), config);

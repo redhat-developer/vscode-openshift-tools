@@ -51,7 +51,6 @@ async function verifyBundledBinaries(): Promise<any> {
 export async function activate(extensionContext: ExtensionContext): Promise<any> {
     migrateFromOdo018();
     Cluster.extensionContext = extensionContext;
-    Component.extensionContext = extensionContext;
     TokenStore.extensionContext = extensionContext;
     const disposable = [
         ...(await registerCommands(
@@ -69,6 +68,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             commands.executeCommand('extension.vsKubernetesUseNamespace', context),
         ),
         OpenShiftExplorer.getInstance(),
+        ...Component.init(extensionContext)
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
 
