@@ -80,12 +80,12 @@ export class CliChannel implements Cli {
 
     async execute(cmd: string, opts: cp.ExecOptions = {}): Promise<CliExitData> {
         return new Promise<CliExitData>((resolve) => {
-            this.odoChannel.print(cmd);
             if (opts.maxBuffer === undefined) {
                 opts.maxBuffer = 2 * 1024 * 1024;
             }
             cp.exec(cmd, opts, (error: cp.ExecException, stdout: string, stderr: string) => {
                 const stdoutFiltered = stdout.replace(/---[\s\S]*$/g, '').trim();
+                this.odoChannel.print(cmd);
                 this.odoChannel.print(stdoutFiltered);
                 this.odoChannel.print(stderr);
                 // do not reject it here, because caller in some cases need the error and the streams
