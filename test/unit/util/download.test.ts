@@ -6,10 +6,12 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
+import * as path from 'path';
 import { EventEmitter } from 'events';
 import { wait } from '../../../src/util/async';
 
 import pq = require('proxyquire');
+import os = require('os');
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -48,7 +50,7 @@ suite('Download Util', () => {
 
     test('reports download progress', () => {
         const callback = sandbox.stub();
-        const result = progressMock.downloadFile('url', 'toFile', callback);
+        const result = progressMock.downloadFile('url',path.join(os.tmpdir(),'toFile'), callback);
         return result.then(() => {
             expect(callback).calledWith(33, 33);
             expect(callback).calledWith(66, 33);
