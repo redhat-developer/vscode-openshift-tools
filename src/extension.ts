@@ -65,7 +65,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             './openshift/service',
             './k8s/console',
             './oc',
-            './util/extension-promotion'
+            './util/extension-recommendation'
         )),
         commands.registerCommand('clusters.openshift.useProject', (context) =>
             commands.executeCommand('extension.vsKubernetesUseNamespace', context),

@@ -320,10 +320,6 @@ export class Command {
     static showConsoleUrl(): string {
         return `oc get configmaps console-public -n openshift-config-managed -o json`;
     }
-
-    static getInstalledOperators(): string {
-        return `oc get csv -o json`;
-    }
 }
 
 export class OpenShiftObjectImpl implements OpenShiftObject {

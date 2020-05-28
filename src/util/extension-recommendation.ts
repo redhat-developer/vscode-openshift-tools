@@ -4,18 +4,12 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { OdoImpl, Command } from '../odo';
+import { KubeConfig, ApiextensionsV1beta1Api } from '@kubernetes/client-node';
 import { vsCommand } from '../vscommand';
 
 import recommendation = require('./recommended-extensions.json');
 
 const RECOMMENDED_EXT_CONTEXT = 'openshift:recommendedExtensions';
-
-interface OpenShiftOperator {
-    metadata: {
-        name: string;
-    };
-}
 
 enum VSCodeCommands {
     SetContext = 'setContext',
@@ -97,31 +91,32 @@ async function recommendExtensionsToUser(extensions: RecommendedExtension[]): Pr
 
 }
 
+async function getCRDApiGroups(): Promise<string[] | undefined> {
+    const kc = new KubeConfig();
+    kc.loadFromDefault();
+    const k8sApi = kc.makeApiClient(ApiextensionsV1beta1Api);
+    const res = await k8sApi.listCustomResourceDefinition();
+
+    const result = new Set<string>();
+    res.body.items.forEach(i => result.add(i.spec.group));
+
+    return Array.from(result);
+}
+
 export async function recommendExtensions(): Promise<void> {
     vscode.commands.executeCommand(VSCodeCommands.SetContext, RECOMMENDED_EXT_CONTEXT, false);
-    const result = await OdoImpl.Instance.execute(Command.getInstalledOperators());
-    if (result.error || result.stderr) {
-        return;
-    }
+    const crdApiGroups = await getCRDApiGroups();
 
-    let operators: OpenShiftOperator[] = [];
-    try {
-        operators = JSON.parse(result.stdout).items;
-    } catch {
-        //ignore;
-    }
+    const extensionToPromote = new Set<string>();
 
-    const operatorNames = operators.map((op) => op.metadata.name);
-
-    const extensionToPromote = new Map<string, RecommendedExtension>();
-
+    const recommendationsMap = recommendation.crdApiToExtensions;
     //collect extension id to promote based on installed operators
-    for (const operator of operatorNames) {
-        for (const key in recommendation) {
-            if (recommendation.hasOwnProperty(key)) {
-                const value = recommendation[key];
+    for (const operator of crdApiGroups) {
+        for (const key in recommendationsMap) {
+            if (recommendationsMap.hasOwnProperty(key)) {
+                const value = recommendationsMap[key];
                 if (operator.startsWith(key)) {
-                    value.forEach((val) => extensionToPromote.set(val.id, val));
+                    value.forEach((val) => extensionToPromote.add(val));
                 }
             }
         }
@@ -136,7 +131,15 @@ export async function recommendExtensions(): Promise<void> {
         }
     }
 
-    recommendExtensionsToUser(Array.from(extensionToPromote.values()));
+    // get needed extensions description from json
+    const extDescription: RecommendedExtension[] = [];
+    recommendation.extensions.forEach(ext => {
+        if (extensionToPromote.has(ext.id)) {
+            extDescription.push(ext);
+        }
+    });
+
+    recommendExtensionsToUser(extDescription);
 }
 
 export class ExtPromotionCommands {

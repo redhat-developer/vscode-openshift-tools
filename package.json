@@ -56,7 +56,7 @@
     "build": "npm run clean && npm run lint && npm run compile && npm run verify"
   },
   "dependencies": {
-    "@kubernetes/client-node": "^0.11.1",
+    "@kubernetes/client-node": "^0.12.0",
     "binary-search": "^1.3.6",
     "byline": "^5.0.0",
     "fs-extra": "^8.1.0",
@@ -724,9 +724,9 @@
           "name": "OpenShift Application Explorer"
         },
         {
-            "id": "openshiftRecommendedExtensions",
-            "name": "Recommended Extensions",
-            "when": "openshift:recommendedExtensions"
+          "id": "openshiftRecommendedExtensions",
+          "name": "Recommended Extensions",
+          "when": "openshift:recommendedExtensions"
         }
       ]
     },
@@ -867,9 +867,9 @@
           "group": "navigation@3"
         },
         {
-            "command": "openshift.close.recommended.extensions",
-            "when": "view == openshiftRecommendedExtensions",
-            "group": "navigation@0"
+          "command": "openshift.close.recommended.extensions",
+          "when": "view == openshiftRecommendedExtensions",
+          "group": "navigation@0"
         }
       ],
       "view/item/context": [

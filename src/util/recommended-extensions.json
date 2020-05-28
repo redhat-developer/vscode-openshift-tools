@@ -1,13 +1,19 @@
 {
-    "openshift-pipelines-operator": [
+    "crdApiToExtensions": {
+        "tekton.dev": [
+            "redhat.vscode-tekton-pipelines"
+        ],
+        "operator.knative.dev": [
+            "redhat.vscode-knative"
+        ]
+    },
+    "extensions": [
         {
             "id": "redhat.vscode-tekton-pipelines",
             "label": "Tekton Pipelines",
             "description": "Tekton Pipelines extension by Red Hat",
             "icon": "https://raw.githubusercontent.com/redhat-developer/vscode-tekton/master/images/tekton.png"
-        }
-    ],
-    "serverless-operator": [
+        },
         {
             "id": "redhat.vscode-knative",
             "label": "Knative",
