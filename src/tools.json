@@ -26,6 +26,18 @@
                 "sha256sum": "abe84eab451bd2896af89e74e9ee550b2c639bb0280abd31cfe64666a0099f9d",
                 "dlFileName": "odo-linux-amd64.tar.gz",
                 "cmdFileName": "odo"
+            },
+            "s390x": {
+                "url": "http://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.1/odo-linux-s390x.tar.gz",
+                "sha256sum": "f3a3434293b850f3b37aeb59e421629700a04064e50898f6f5b1dad7a7390a87",
+                "dlFileName": "odo-linux-s390x.tar.gz",
+                "cmdFileName": "odo"
+            },
+            "ppc64le": {
+                "url": "http://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.1/odo-linux-ppc64le.tar.gz",
+                "sha256sum": "82e98bcb2ae86c9585f8a704bd15c4e708a2cd4431774f0ab2f56189916815a3",
+                "dlFileName": "odo-linux-ppc64le.tar.gz",
+                "cmdFileName": "odo"
             }
         }
     },
