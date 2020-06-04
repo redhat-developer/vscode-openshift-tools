@@ -888,7 +888,7 @@ export class OdoImpl implements Odo {
         let items: any[] = [];
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServicesJson(), Platform.getUserHomePath(), false);
         try {
-            items = JSON.parse(result.stdout).items;
+            items = JSON.parse(result.stdout).services.items;
         } catch (err) {
             throw new Error(JSON.parse(result.stderr).message);
         }
@@ -897,7 +897,7 @@ export class OdoImpl implements Odo {
 
     public async getServiceTemplatePlans(svcName: string): Promise<string[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServicesJson(), Platform.getUserHomePath());
-        return this.loadItems(result).filter((value) => value.metadata.name === svcName)[0].spec.planList;
+        return this.loadItems(result, (data) => data.services.items).filter((value) => value.metadata.name === svcName)[0].spec.planList;
 
     }
 
@@ -1222,10 +1222,10 @@ export class OdoImpl implements Odo {
         }
     }
 
-    private loadItems(result: cliInstance.CliExitData): any[] {
+    private loadItems(result: cliInstance.CliExitData, fetch: (data:any) => any = (data) => data.items): any[] {
         let data: any[] = [];
         try {
-            const {items} = JSON.parse(result.stdout);
+            const items = fetch(JSON.parse(result.stdout));
             if (items) data = items;
         } catch (ignore) {
             // ignore parse errors and return empty array
