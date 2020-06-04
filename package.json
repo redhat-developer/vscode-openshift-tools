@@ -76,6 +76,8 @@
     "wait-port": "^0.2.7"
   },
   "devDependencies": {
+    "@material-ui/core": "^4.9.10",
+    "@material-ui/icons": "^4.9.1",
     "@types/byline": "^4.2.31",
     "@types/chai": "^4.2.10",
     "@types/collections": "^5.0.0",
@@ -102,7 +104,7 @@
     "chai": "^4.2.0",
     "codecov": "^3.6.5",
     "css-loader": "^3.5.1",
-    "decache": "^4.5.1",
+    "decache": "^4.6.0",
     "eslint": "5.16.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-prettier": "^6.10.0",
@@ -119,8 +121,6 @@
     "immutable": "^4.0.0-rc.12",
     "istanbul": "^0.4.5",
     "leasot": "^10.1.0",
-    "@material-ui/core": "^4.9.10",
-    "@material-ui/icons": "^4.9.1",
     "mocha": "^6.2.2",
     "mocha-jenkins-reporter": "^0.4.2",
     "npm-run-all": "^4.1.5",
@@ -147,7 +147,7 @@
     "vscode-test": "^1.2.3",
     "webpack": "^4.35.2",
     "webpack-cli": "^3.3.5",
-    "webpack-dev-server": "^3.10.3"
+    "webpack-dev-server": "^3.11.0"
   },
   "activationEvents": [
     "onView:openshiftProjectExplorer",
