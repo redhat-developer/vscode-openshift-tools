@@ -72,19 +72,16 @@ const useStyles = makeStyles((theme: Theme) =>
     cardButton: {
       display: 'block',
       marginBottom: theme.spacing(2)
+    },
+    button: {
+      color: 'white',
+      backgroundColor: '#EE0000',
+      '&:hover': {
+        backgroundColor: '#BE0000',
+      }
     }
   }),
 );
-
-const ColorButton = withStyles((theme: Theme) => ({
-  root: {
-    color: 'white',
-    backgroundColor: '#EE0000',
-    '&:hover': {
-      backgroundColor: '#BE0000',
-    },
-  }
-}))(Button);
 
 const WizardConnector = withStyles({
   alternativeLabel: {
@@ -211,9 +208,21 @@ export default function Header() {
           </CardContent>
           <CardActions className={classes.cardButton}>
             <Tooltip title={list.tooltip} placement="top">
-              <ColorButton href={list.redirectLink} onClick={() => handleView(index)}>
-                {list.buttonText}
-              </ColorButton>
+              <div>
+                {/* <ColorButton href={list.redirectLink} onClick={() => handleView(index)}>
+                  {list.buttonText}
+                </ColorButton> */}
+                <a href={list.redirectLink} onClick={() => handleView(index)} style={{ textDecoration: 'none'}}>
+                  <Button
+                    variant="contained"
+                    color="default"
+                    component="span"
+                    className={classes.button}
+                  >
+                    {list.buttonText}
+                  </Button>
+                </a>
+              </div>
             </Tooltip>
           </CardActions>
         </Card>

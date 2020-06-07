@@ -6,7 +6,8 @@
 import * as React from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { InsertDriveFile, GetApp, VpnKey, ChevronRight } from '@material-ui/icons';
+import { Alert } from '@material-ui/lab';
+import { InsertDriveFile, GetApp, VpnKey } from '@material-ui/icons';
 import StopIcon from '@material-ui/icons/Stop';
 import {
   Avatar,
@@ -44,13 +45,13 @@ const useStyles = makeStyles((theme: Theme) =>
         textTransform: 'none'
       },
       '& .MuiStepIcon-root.MuiStepIcon-active': {
-        color: '#BE0000'
+        color: '#0066CC'
       },
       '& .MuiStepIcon-root.MuiStepIcon-completed': {
-        color: '#BE0000'
+        color: '#0066CC'
       },
       '& .MuiButton-containedPrimary': {
-        backgroundColor: '#BE0000'
+        backgroundColor: '#0066CC'
       },
       '& .MuiStepLabel-iconContainer': {
         paddingRight: theme.spacing(2)
@@ -105,12 +106,13 @@ const crcVersions = [
   { crcVersion: "1.7.0", openshiftVersion: "4.3.1"},
   { crcVersion: "1.8.0", openshiftVersion: "4.3.8"},
   { crcVersion: "1.9.0", openshiftVersion: "4.3.10"},
-  { crcVersion: "1.10.0", openshiftVersion: "4.4.3"}
+  { crcVersion: "1.10.0", openshiftVersion: "4.4.3"},
+  { crcVersion: "1.11.0", openshiftVersion: "4.4.5"}
 ];
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function getSteps() {
-  return ['Select OpenShift Version', 'CRC Binary Path/Download', 'File path of image pull secret', 'Select optional configurations', 'Start the cluster'];
+  return ['Select OpenShift Version', 'CRC Binary Path/Download', 'File path of image pull secret', 'Select optional configurations', 'Setup CRC', 'Start the cluster'];
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -120,9 +122,11 @@ export default function addClusterView() {
   const [pullSecretPath, setSecret] = React.useState('');
   const [cpuSize, setCpuSize] = React.useState(crcDefaults.DefaultCPUs);
   const [memory, setMemory] = React.useState(crcDefaults.DefaultMemory);
-  const [versionLabel, setVersionLabel] = React.useState('1.10.0');
-  const [crcOut, setOut] = React.useState('');
-  const [crcProgress, setProgress] = React.useState(false);
+  const [versionLabel, setVersionLabel] = React.useState('1.11.0');
+  const [crcProgress, setProgress] = React.useState(true);
+  const [crcStopProgress, setStopProgress] = React.useState(false);
+  const [crcError, setCrcError] = React.useState(false);
+  const [crcStopStatus, setStopStatus] = React.useState(false);
   const [activeStep, setActiveStep] = React.useState(0);
   const steps = getSteps();
 
@@ -130,11 +134,26 @@ export default function addClusterView() {
     if (event?.data?.action){
       const message = event.data;
         switch (message.action) {
-          case 'crcoutput' :
-            setOut(message.data);
+          case 'crcstarterror' :
+            setProgress(false);
+            setCrcError(true);
             break;
-          case 'crcstatus' :
-            if(message.data === 0) setProgress(true);
+          case 'crcstartstatus' :
+            setProgress(false);
+            break;
+          case 'crcstoperror' :
+            setStopProgress(false);
+            setCrcError(true);
+            break;
+          case 'crcstopstatus' :
+            if (message.data == 0) {
+              setStopProgress(false);
+              setStopStatus(true);
+            }
+            if (message.data == 1) {
+              setStopProgress(false);
+              setCrcError(true);
+            }
             break;
           default:
             break;
@@ -144,7 +163,6 @@ export default function addClusterView() {
 
   window.addEventListener('message', messageListener);
 
-  // const platform = (window as any).platform === 'darwin' ? 'macos' : (window as any).platform;
 
   const handleUploadPath = (event) => {
     setBinaryPath(event.target.files[0].path);
@@ -165,7 +183,7 @@ export default function addClusterView() {
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
       const crcStartCommand = `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory}`;
-      vscode.postMessage({action: 'run', data: crcStartCommand});
+      vscode.postMessage({action: 'start', data: crcStartCommand});
     }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
@@ -180,16 +198,25 @@ export default function addClusterView() {
   };
 
   const handleStopProcess = () => {
-    vscode.postMessage({action: 'stop', data: ''});
+    setStopProgress(true);
+    vscode.postMessage({action: 'stop', data: `${fileName}`});
+  }
+
+  const handleCrcSetup = () => {
+    vscode.postMessage({action: 'run', data: `${fileName}` })
   }
 
   const handleReset = () => {
     setActiveStep(0);
-    setVersionLabel('1.10.0');
+    setVersionLabel('1.11.0');
     setBinaryPath('');
     setSecret('');
     setCpuSize(crcDefaults.DefaultCPUs);
     setMemory(crcDefaults.DefaultMemory);
+    setProgress(true);
+    setStopProgress(false);
+    setCrcError(false);
+    setStopStatus(false);
   };
 
   const fetchDownloadBinary = () => {
@@ -226,7 +253,7 @@ export default function addClusterView() {
                   <React.Fragment>
                     {option.crcVersion}
                     <Typography  style={{ color: '#EE0000', marginLeft: 6, fontSize: 10 }}>
-                      {option.crcVersion === '1.10.0' ? 'latest': ''}
+                      {option.crcVersion === '1.11.0' ? 'latest': ''}
                     </Typography>
                   </React.Fragment>
                 );
@@ -358,7 +385,7 @@ export default function addClusterView() {
                 size="small"
                 onChange={handleCpuSize}
                 value={cpuSize}
-                InputProps={{ inputProps: { min: 4 } }}
+                InputProps={{ inputProps: { min: crcDefaults.DefaultCPUs } }}
               />
               <TextField
                 id="outlined-number"
@@ -368,11 +395,27 @@ export default function addClusterView() {
                 size="small"
                 onChange={handleMemory}
                 value={memory}
-                InputProps={{ inputProps: { min: 8192 } }}
+                InputProps={{ inputProps: { min: crcDefaults.DefaultMemory } }}
                 helperText="Value in MiB"
               />
             </div>)
         case 4:
+          return (
+            <List>
+              <ListItem>
+              <ListItemText
+                primary={<span>Set up local virtualization and networking infrastructure for the OpenShift cluster.</span>}
+                secondary={<span>Once the setup process is successful, then proceed to start the cluster in Next step.</span>} />
+                <Button 
+                  variant="contained"
+                  color="primary"
+                  onClick={handleCrcSetup}
+                  className={classes.button}>
+                  Setup CRC
+                </Button>
+              </ListItem>
+          </List>)
+        case 5:
           return (
             <Typography>
               Start the cluster. This will also set up local virtualization and networking infrastructure for the OpenShift cluster.
@@ -419,7 +462,7 @@ export default function addClusterView() {
       {activeStep === steps.length && (
         <div>
           <Paper square elevation={3} className={classes.resetContainer}>
-            {!crcProgress &&
+            {(crcProgress && !crcError) &&
               (<div>
                 <LinearProgress />
                 <List>
@@ -427,49 +470,71 @@ export default function addClusterView() {
                     <ListItemText
                       primary="Setting Up the OpenShift Instance"
                     />
-                    <Button
-                      variant="contained"
-                      color="default"
-                      component="span"
-                      className={classes.button}
-                      onClick={handleStopProcess}
-                      startIcon={<StopIcon />}
-                    >
-                      Stop Process
-                    </Button>
                   </ListItem>
                 </List>
               </div>)}
-              {crcProgress && (
-                <span>
-                  <Typography style={{ paddingTop: '10px'}}>
-                    OpenShift Instance is up. 
-                  </Typography>
-                  <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none'}}>
-                    <Button
-                      variant="contained"
-                      color="default"
-                      component="span"
-                      className={classes.button}
-                    >
-                      Open OpenShift Console
-                    </Button>
-                  </a>
-                </span>)}
-              {!crcProgress && crcOut &&
-                (<List style={{ paddingTop: '5px' }}>
+              {crcStopProgress &&
+              (<div>
+                <LinearProgress />
+                <List>
                   <ListItem>
-                    <ListItemAvatar>
-                      <Avatar>
-                        <ChevronRight />
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText primary={crcOut} />
+                    <ListItemText
+                      primary="Stopping OpenShift Instance"
+                    />
                   </ListItem>
-                </List>)}
-              <Button onClick={handleReset} className={classes.button}>
-              Reset
-            </Button>
+                </List>
+              </div>)}
+              {crcError && (
+              <div>
+                <List>
+                  <ListItem>
+                    <Alert variant="filled" severity="error" style={{ backgroundColor: '#a30000'}}>CRC Process errored out. Check Output channel for details.</Alert>
+                  </ListItem>
+                </List>
+              </div>)}
+              {(!crcProgress && !crcError && !crcStopStatus) &&(
+                <div>
+                  <List>
+                    <ListItem>
+                      <Alert variant="filled" severity="success" style={{ backgroundColor: '#0066CC'}}>OpenShift Instance is up.</Alert>
+                    </ListItem>
+                    <ListItem>
+                      <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none'}}>
+                        <Button
+                          variant="contained"
+                          component="span"
+                          className={classes.button}
+                        >
+                          Open OpenShift Console
+                        </Button>
+                      </a>
+                      <Button
+                          variant="contained"
+                          component="span"
+                          className={classes.button}
+                          onClick={handleStopProcess}
+                          startIcon={<StopIcon />}
+                        >
+                          Stop CRC
+                      </Button>
+                    </ListItem>
+                  </List>
+                </div>)}
+                {crcStopStatus && (
+                <div>
+                  <List>
+                    <ListItem>
+                      <Alert variant="filled" severity="success" style={{ backgroundColor: '#0066CC'}}>OpenShift Instance is Stopped.</Alert>
+                    </ListItem>
+                  </List>
+                </div>)}
+                <label htmlFor="contained-button-file">
+                  <Tooltip title="This will reset the wizard configuration to defaults." placement="right">
+                    <Button onClick={handleReset} className={classes.button}>
+                      Reset
+                    </Button>
+                  </Tooltip>
+                </label>
           </Paper>
         </div>
       )}
