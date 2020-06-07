@@ -107,7 +107,7 @@
     "chai": "^4.2.0",
     "codecov": "^3.6.5",
     "css-loader": "^3.5.1",
-    "decache": "^4.5.1",
+    "decache": "^4.6.0",
     "eslint": "5.16.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-prettier": "^6.10.0",
@@ -150,7 +150,7 @@
     "vscode-test": "^1.2.3",
     "webpack": "^4.35.2",
     "webpack-cli": "^3.3.5",
-    "webpack-dev-server": "^3.10.3"
+    "webpack-dev-server": "^3.11.0"
   },
   "activationEvents": [
     "onView:openshiftProjectExplorer",
