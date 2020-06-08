@@ -27,7 +27,6 @@ import { vsCommand } from './vscommand';
 import format =  require('string-format');
 import bs = require('binary-search');
 
-
 const {Collapsed} = TreeItemCollapsibleState;
 
 export interface BuilderImage {
