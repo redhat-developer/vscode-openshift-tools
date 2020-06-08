@@ -12,6 +12,7 @@ import { KubeConfigUtils } from '../util/kubeUtils';
 import { Filters } from "../util/filters";
 import { Progress } from "../util/progress";
 import { vsCommand, VsCommandError } from '../vscommand';
+import ClusterViewLoader from '../view/cluster/clusterViewLoader';
 
 export class Cluster extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
@@ -96,6 +97,12 @@ export class Cluster extends OpenShiftItem {
                 prompt: "Provide new Cluster URL to connect",
                 validateInput: (value: string) => Cluster.validateUrl('Invalid URL provided', value)
             }) : choice.label;
+    }
+
+    @vsCommand('openshift.explorer.addCluster')
+    static add(): Promise<any> {
+        ClusterViewLoader.loadView(`Add OpenShift Cluster`);
+        return;
     }
 
     @vsCommand('openshift.explorer.login')

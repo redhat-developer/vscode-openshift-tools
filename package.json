@@ -43,6 +43,7 @@
     "compile:views": "webpack --mode development --config src/view/webpack.config.js",
     "dev:log-view": "webpack-dev-server --mode development --config src/view/log/webpack.config.js",
     "dev:describe-view": "webpack-dev-server --mode development --config src/view/describe/webpack.config.js",
+    "dev:cluster-view": "webpack-dev-server --mode development --config src/view/cluster/webpack.config.js",
     "watch": "tsc -watch -p ./",
     "clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/logViewer",
     "lint": "eslint . --ext .ts --quiet",
@@ -61,6 +62,7 @@
     "@kubernetes/client-node": "^0.11.1",
     "binary-search": "^1.3.6",
     "byline": "^5.0.0",
+    "clsx": "^1.1.0",
     "fs-extra": "^8.1.0",
     "git-fetch-pack": "^0.1.1",
     "git-transport-protocol": "^0.1.0",
@@ -80,6 +82,7 @@
   "devDependencies": {
     "@material-ui/core": "^4.9.10",
     "@material-ui/icons": "^4.9.1",
+    "@material-ui/lab": "^4.0.0-alpha.52",
     "@types/byline": "^4.2.31",
     "@types/chai": "^4.2.10",
     "@types/collections": "^5.0.0",
@@ -159,6 +162,7 @@
     "onCommand:openshift.output",
     "onCommand:openshift.create",
     "onCommand:openshift.openshiftConsole.palette",
+    "onCommand:openshift.explorer.addCluster",
     "onCommand:openshift.explorer.login",
     "onCommand:openshift.explorer.login.credentialsLogin",
     "onCommand:openshift.explorer.login.tokenLogin",
@@ -271,6 +275,15 @@
         "command": "openshift.explorer.logout",
         "title": "Log out",
         "category": "OpenShift"
+      },
+      {
+        "command": "openshift.explorer.addCluster",
+        "title": "Add OpenShift Cluster",
+        "category": "OpenShift",
+        "icon": {
+          "dark": "images/title/dark/add-cluster.svg",
+          "light": "images/title/light/add-cluster.svg"
+        }
       },
       {
         "command": "openshift.explorer.login",
@@ -782,6 +795,10 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
+          "command": "openshift.explorer.addCluster",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
           "command": "openshift.explorer.login",
           "when": "view == openshiftProjectExplorer"
         },
@@ -868,24 +885,29 @@
       ],
       "view/title": [
         {
-          "command": "openshift.explorer.login",
+          "command": "openshift.explorer.addCluster",
           "when": "view == openshiftProjectExplorer",
           "group": "navigation@0"
         },
         {
-          "command": "openshift.explorer.switchContext",
+          "command": "openshift.explorer.login",
           "when": "view == openshiftProjectExplorer",
           "group": "navigation@1"
         },
         {
-          "command": "openshift.explorer.refresh",
+          "command": "openshift.explorer.switchContext",
           "when": "view == openshiftProjectExplorer",
           "group": "navigation@2"
         },
         {
-          "command": "openshift.explorer.reportIssue",
+          "command": "openshift.explorer.refresh",
           "when": "view == openshiftProjectExplorer",
           "group": "navigation@3"
+        },
+        {
+          "command": "openshift.explorer.reportIssue",
+          "when": "view == openshiftProjectExplorer",
+          "group": "navigation@4"
         }
       ],
       "view/item/context": [
