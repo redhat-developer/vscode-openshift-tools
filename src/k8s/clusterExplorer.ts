@@ -41,7 +41,7 @@ async function customizeAsync(node: k8s.ClusterExplorerV1.ClusterExplorerResourc
   if ((node as any).nodeType === 'context') {
       lastNamespace = await initNamespaceName(node);
       if (await isOpenShift()) {
-          treeItem.iconPath = vscode.Uri.file(path.join(__dirname, "../../images/context/cluster-node.png"));
+          treeItem.iconPath = vscode.Uri.file(path.join(__dirname, "../../../images/context/cluster-node.png"));
       }
   }
   if (node.nodeType === 'resource' && node.resourceKind.manifestKind === 'Project') {

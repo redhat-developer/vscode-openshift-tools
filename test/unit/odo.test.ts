@@ -498,22 +498,24 @@ suite("odo", () => {
                 metadata: {
                     creationTimestamp: null
                 },
-                items: [
-                    {
-                        kind: "ServiceType",
-                        apiVersion: "odo.openshift.io/v1alpha1",
-                        metadata: {
-                            name: "cakephp-mysql-persistent",
-                            creationTimestamp: null
+                services: {
+                    items: [
+                        {
+                            kind: "ServiceType",
+                            apiVersion: "odo.openshift.io/v1alpha1",
+                            metadata: {
+                                name: "cakephp-mysql-persistent",
+                                creationTimestamp: null
+                            },
+                            spec: {
+                                hidden: false,
+                                planList: [
+                                    "default"
+                                ]
+                            }
                         },
-                        spec: {
-                            hidden: false,
-                            planList: [
-                                "default"
-                            ]
-                        }
-                    },
-                ]
+                    ]
+                }
             })
         };
 
