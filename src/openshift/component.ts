@@ -141,7 +141,7 @@ export class Component extends OpenShiftItem {
         }
     }
 
-    static isUsingWebviewEditor() {
+    static isUsingWebviewEditor(): boolean {
         return workspace
             .getConfiguration('openshiftConnector')
             .get<boolean>('useWebviewInsteadOfTerminalView');
@@ -591,7 +591,7 @@ export class Component extends OpenShiftItem {
 
         const binaryFileObj: QuickPickItem[] = paths.map((file) => ({ label: `$(file-zip) ${path.basename(file)}`, description: `${file}`}));
 
-        const binaryFile: any = await window.showQuickPick(binaryFileObj, {placeHolder: "Select binary file", ignoreFocusOut: true});
+        const binaryFile: QuickPickItem = await window.showQuickPick(binaryFileObj, {placeHolder: "Select binary file", ignoreFocusOut: true});
 
         if (!binaryFile) return null;
 
