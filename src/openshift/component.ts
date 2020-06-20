@@ -5,7 +5,7 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation } from 'vscode';
+import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
 import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
 import OpenShiftItem, { selectTargetApplication, selectTargetComponent } from './openshiftItem';
@@ -29,6 +29,23 @@ const waitPort = require('wait-port');
 
 export class Component extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
+    public static debugSessions: Map<string, DebugSession> = new Map();
+
+    public static init(context: ExtensionContext): Disposable[] {
+        Component.extensionContext = context;
+        return [
+            debug.onDidStartDebugSession((session) => {
+                if (session.configuration.contextPath) {
+                    Component.debugSessions.set(session.configuration.contextPath.fsPath, session);
+                }
+            }),
+            debug.onDidTerminateDebugSession((session) => {
+                if (session.configuration?.contextPath) {
+                    Component.debugSessions.delete(session.configuration.contextPath.fsPath);
+                }
+            })
+        ];
+    }
 
     static async getOpenshiftData(context: OpenShiftObject): Promise<OpenShiftObject> {
         return Component.getOpenShiftCmdData(context,
@@ -630,6 +647,13 @@ export class Component extends OpenShiftItem {
     }
 
     static async startDebugger(component: OpenShiftObject): Promise<string | undefined> {
+        if (Component.debugSessions.get(component.contextPath.fsPath)) {
+            const choice = await window.showWarningMessage(`Debugger session is already running for ${component.getName()}.`, 'Show \'Run and Debug\' view');
+            if (choice) {
+                commands.executeCommand('workbench.view.debug');
+            }
+            return null;
+        }
         const components = await Component.odo.getComponentTypesJson();
         const componentBuilder = components.find((builder) => builder.metadata.name === component.builderImage.name);
         const imageStreamRef = await Component.odo.getImageStreamRef(componentBuilder.metadata.name, componentBuilder.metadata.namespace);
@@ -704,11 +728,12 @@ export class Component extends OpenShiftItem {
                 }
             });
             cp.stderr.on('data', (data: string) => {
-                if (!`${data}`.includes('address already in use')) {
+                if (!`${data}`.includes('the local debug port 5858 is not free')) {
                     reject(data);
                 }
             });
         }).then((result) => {
+            config.contextPath = component.contextPath;
             config.port = result;
             config.odoPid = cp.pid;
             return debug.startDebugging(workspace.getWorkspaceFolder(component.contextPath), config);
