@@ -24,6 +24,7 @@ import { vsCommand, VsCommandError } from '../vscommand';
 
 import path = require('path');
 import globby = require('globby');
+import treeKill = require('tree-kill');
 
 const waitPort = require('wait-port');
 
@@ -45,6 +46,13 @@ export class Component extends OpenShiftItem {
                 }
             })
         ];
+    }
+
+    static stopDebugSession(component: OpenShiftObject): void {
+        const ds = Component.debugSessions.get(component.contextPath.fsPath);
+        if (ds) {
+            treeKill(ds.configuration.odoPid);
+        }
     }
 
     static async getOpenshiftData(context: OpenShiftObject): Promise<OpenShiftObject> {
@@ -108,7 +116,9 @@ export class Component extends OpenShiftItem {
                 if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT || component.contextValue === ContextType.COMPONENT_PUSHED) {
                     await Component.unlinkAllComponents(component);
                 }
+                Component.stopDebugSession(component);
                 await Component.odo.deleteComponent(component);
+
             }).then(() => `Component '${name}' successfully deleted`)
             .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Component with error '${err}'`)));
         }
@@ -127,6 +137,7 @@ export class Component extends OpenShiftItem {
         const value = await window.showWarningMessage(`Do you want to undeploy Component '${name}'?`, 'Yes', 'Cancel');
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Undeploying the Component '${component.getName()} '`, async () => {
+                Component.stopDebugSession(component);
                 await Component.odo.undeployComponent(component);
             }).then(() => `Component '${name}' successfully undeployed`)
             .catch((err) => Promise.reject(new VsCommandError(`Failed to undeploy Component with error '${err}'`)));
