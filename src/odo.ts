@@ -801,12 +801,12 @@ export class OdoImpl implements Odo {
                 tag: comp.spec.type.split(':')[1]
             };
             if (item && item.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
-                item.contextPath = Uri.parse(comp.status.context);
+                item.contextPath = Uri.file(comp.status.context);
                 item.deployed = true;
                 item.contextValue = ContextType.COMPONENT_PUSHED;
                 item.builderImage = builderImage;
             } else {
-                deployedComponents.push(new OpenShiftObjectImpl(application, comp.metadata.name, item ? item.contextValue : ContextType.COMPONENT, false, this, Collapsed, Uri.parse(comp.status.context), comp.spec.sourceType, builderImage));
+                deployedComponents.push(new OpenShiftObjectImpl(application, comp.metadata.name, item ? item.contextValue : ContextType.COMPONENT, false, this, Collapsed, Uri.file(comp.status.context), comp.spec.sourceType, builderImage));
             }
         });
 
@@ -1188,11 +1188,11 @@ export class OdoImpl implements Odo {
                         if (app && !!OdoImpl.data.getChildrenByParent(app)) {
                             const comp =  OdoImpl.data.getObjectByPath([app.path, added.metadata.name].join('/'));
                             if (comp && !comp.contextPath) {
-                                comp.contextPath = Uri.parse(added.status.context);
+                                comp.contextPath = Uri.file(added.status.context);
                                 comp.contextValue = ContextType.COMPONENT_PUSHED;
                                 this.subject.next(new OdoEventImpl('changed', comp));
                             } else if (!comp) {
-                                const newComponent = new OpenShiftObjectImpl(app, added.metadata.name, ContextType.COMPONENT, false, this, Collapsed, Uri.parse(added.status.context), added.spec.sourceType,  { name: added.spec.type.split(':')[0], tag: added.spec.type.split(':')[1]});
+                                const newComponent = new OpenShiftObjectImpl(app, added.metadata.name, ContextType.COMPONENT, false, this, Collapsed, Uri.file(added.status.context), added.spec.sourceType,  { name: added.spec.type.split(':')[0], tag: added.spec.type.split(':')[1]});
                                 this.insertAndRefresh(newComponent);
                             }
                         } else if (!app) {
