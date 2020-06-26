@@ -9,6 +9,7 @@ import { ExtenisonID } from '../../util/constants';
 import { OpenShiftObject } from '../../odo';
 import * as odo from '../../odo';
 import treeKill = require('tree-kill');
+import { ChildProcess } from 'child_process';
 
 export default class LogViewLoader {
 
@@ -16,7 +17,7 @@ export default class LogViewLoader {
         return vscode.extensions.getExtension(ExtenisonID).extensionPath
     }
 
-    static async loadView(title: string, cmdFunction: (prj, app, comp) => string, target: OpenShiftObject): Promise<vscode.WebviewPanel> {
+    static async loadView(title: string, cmdFunction: (prj, app, comp) => string, target: OpenShiftObject, existingProcess?: ChildProcess): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(path.join(LogViewLoader.extensionPath, 'out', 'logViewer'));
 
         const panel = vscode.window.createWebviewPanel('logView', title, vscode.ViewColumn.One, {
@@ -31,7 +32,7 @@ export default class LogViewLoader {
         // TODO: When webview is going to be ready?
         panel.webview.html = LogViewLoader.getWebviewContent(LogViewLoader.extensionPath, cmd);
 
-        const process = await odo.getInstance().spawn(cmd, target.contextPath.fsPath);
+        const process = existingProcess? existingProcess : await odo.getInstance().spawn(cmd, target.contextPath.fsPath);
         process.stdout.on('data', (data) => {
             panel.webview.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
         }).on('close', ()=>{
@@ -43,9 +44,11 @@ export default class LogViewLoader {
                 recieveDisposable.dispose();
             }
         })
-        const disposable = panel.onDidDispose(()=> {
-            treeKill(process.pid);
-            disposable.dispose();
+        panel.onDidDispose(()=> {
+            process.stdout.removeAllListeners();
+            if(!existingProcess) {
+                treeKill(process.pid);
+            }
         });
         return panel;
     }

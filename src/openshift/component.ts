@@ -8,6 +8,7 @@
 import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
 import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
+import { Subject } from 'rxjs';
 import OpenShiftItem, { selectTargetApplication, selectTargetComponent } from './openshiftItem';
 import { OpenShiftObject, ContextType } from '../odo';
 import { Command } from "../odo/command";
@@ -30,9 +31,16 @@ import treeKill = require('tree-kill');
 
 const waitPort = require('wait-port');
 
+export class ComponentEvent {
+    readonly type: 'watchStarted' | 'watchTerminated';
+    readonly component: OpenShiftObject;
+    readonly process: ChildProcess;
+}
+
 export class Component extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
     public static debugSessions: Map<string, DebugSession> = new Map();
+    public static readonly watchSubject: Subject<ComponentEvent> = new Subject<ComponentEvent>();
 
     public static init(context: ExtensionContext): Disposable[] {
         Component.extensionContext = context;
@@ -458,9 +466,24 @@ export class Component extends OpenShiftItem {
         'Select a Component you want to watch',
         (target) => target.contextValue === ContextType.COMPONENT_PUSHED
     )
-    static watch(component: OpenShiftObject): Promise<void> {
+    static async watch(component: OpenShiftObject): Promise<void> {
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath, `OpenShift: Watch '${component.getName()}' Component`);
+        const process :ChildProcess = await Component.odo.spawn(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+        Component.watchSubject.next({
+            type: 'watchStarted',
+            component,
+            process
+        });
+        process.on('close', () => Component.watchSubject.next({
+            type: 'watchTerminated',
+            component,
+            process
+        }));
+        process.on('exit', () => Component.watchSubject.next({
+            type: 'watchTerminated',
+            component,
+            process
+        }));
     }
 
     @vsCommand('openshift.component.openUrl', true)

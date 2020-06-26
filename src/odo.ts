@@ -76,10 +76,20 @@ export abstract class OpenShiftObjectImpl implements OpenShiftObject {
         public readonly icon: string,
         // eslint-disable-next-line no-shadow
         public readonly collapsibleState: TreeItemCollapsibleState = Collapsed,
-        public contextPath: Uri = undefined,
+        private contextPathValue: Uri = undefined,
         public readonly compType: string = undefined,
         public readonly builderImage: BuilderImage = undefined) {
         OdoImpl.data.setPathToObject(this);
+        OdoImpl.data.setContextToObject(this);
+    }
+
+    set contextPath(cp: Uri) {
+        this.contextPathValue = cp;
+        OdoImpl.data.setContextToObject(this);
+    }
+
+    get contextPath(): Uri {
+        return this.contextPathValue;
     }
 
     get path(): string {
@@ -290,6 +300,7 @@ export interface Odo {
     deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
     deleteURL(url: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentCustomUrl(component: OpenShiftObject, name: string, port: string, secure?: boolean): Promise<OpenShiftObject>;
+    getOpenShiftObjectByContext(context: string): OpenShiftObject;
     readonly subject: Subject<OdoEvent>;
 }
 
@@ -307,7 +318,7 @@ class OdoModel {
 
     private pathToObject = new Map<string, OpenShiftObject>();
 
-    private contextToObject = new Map<Uri, OpenShiftObject>();
+    private contextToObject = new Map<string, OpenShiftObject>();
 
     private contextToSettings = new Map<string, odo.Component>();
 
@@ -342,14 +353,14 @@ class OdoModel {
 
     public setContextToObject(object: OpenShiftObject): void {
         if (object.contextPath) {
-            if (!this.contextToObject.has(object.contextPath)) {
-                this.contextToObject.set(object.contextPath, object );
+            if (!this.contextToObject.has(object.contextPath.fsPath)) {
+                this.contextToObject.set(object.contextPath.fsPath, object );
             }
         }
     }
 
     public getObjectByContext(context: Uri): OpenShiftObject {
-        return this.contextToObject.get(context);
+        return this.contextToObject.get(context.fsPath);
     }
 
     public setContextToSettings (settings: odo.Component): void {
@@ -392,7 +403,9 @@ class OdoModel {
         const array = await item.getParent().getChildren();
         array.splice(array.indexOf(item), 1);
         this.pathToObject.delete(item.path);
-        this.contextToObject.delete(item.contextPath);
+        this.contextToObject.delete(item.contextPath.fsPath);
+        const ps = this.objectToProcess.get(item);
+        if (ps) ps.kill('SIGINT');
     }
 
     public deleteContext(context: string): void {
@@ -933,6 +946,10 @@ export class OdoImpl implements Odo {
         this.subject.next(new OdoEventImpl('changed', null));
     }
 
+    getOpenShiftObjectByContext(context: string): OpenShiftObject {
+        return OdoImpl.data.getObjectByContext(Uri.file(context));
+    }
+
     async loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): Promise<void> {
         const clusters = (await this.getClusters());
         if(!clusters) return;
@@ -1009,7 +1026,6 @@ export class OdoImpl implements Odo {
             if ((result2.stdout !== '' && sis.length > 0) || (result1.stdout !== '' && dcs.length > 0))  {
                 projectsToMigrate.push(project);
             }
-
         }
         if (projectsToMigrate.length > 0) {
             const choice = await window.showWarningMessage(`Found the resources in cluster that must be updated to work with latest release of OpenShift Connector Extension.`, 'Update', 'Help', 'Cancel');

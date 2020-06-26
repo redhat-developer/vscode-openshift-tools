@@ -20,6 +20,7 @@ import { TokenStore } from './util/credentialManager';
 import { registerCommands } from './vscommand';
 import { ToolsConfig } from './tools';
 import { extendClusterExplorer } from './k8s/clusterExplorer';
+import { WatchSessionsView } from './watch';
 
 import path = require('path');
 import fsx = require('fs-extra');
@@ -68,6 +69,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             commands.executeCommand('extension.vsKubernetesUseNamespace', context),
         ),
         OpenShiftExplorer.getInstance(),
+        WatchSessionsView.getInstance(),
         ...Component.init(extensionContext)
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
