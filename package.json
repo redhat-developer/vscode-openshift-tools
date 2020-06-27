@@ -727,7 +727,7 @@
         },
         {
           "id": "openshiftWatchView",
-          "name": "OpenShift Watch Sessions"
+          "name": "Watch Sessions"
         }
       ]
     },

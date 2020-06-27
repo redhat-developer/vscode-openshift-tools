@@ -34,12 +34,13 @@ const waitPort = require('wait-port');
 export class ComponentEvent {
     readonly type: 'watchStarted' | 'watchTerminated';
     readonly component: OpenShiftObject;
-    readonly process: ChildProcess;
+    readonly process?: ChildProcess;
 }
 
 export class Component extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
     public static debugSessions: Map<string, DebugSession> = new Map();
+    public static watchSessions: Map<string, ChildProcess> = new Map();
     public static readonly watchSubject: Subject<ComponentEvent> = new Subject<ComponentEvent>();
 
     public static init(context: ExtensionContext): Disposable[] {
@@ -459,6 +460,23 @@ export class Component extends OpenShiftItem {
         }
     }
 
+    static addWatchSession(component: OpenShiftObject, process: ChildProcess): void {
+        Component.watchSessions.set(component.contextPath.fsPath, process);
+        Component.watchSubject.next({
+            type: 'watchStarted',
+            component,
+            process
+        });
+    }
+
+    static removeWatchSession(component: OpenShiftObject): void {
+        Component.watchSessions.delete(component.contextPath.fsPath);
+        Component.watchSubject.next({
+            type: 'watchTerminated',
+            component
+        });
+    }
+
     @vsCommand('openshift.component.watch', true)
     @selectTargetComponent(
         'Select a Project',
@@ -468,22 +486,18 @@ export class Component extends OpenShiftItem {
     )
     static async watch(component: OpenShiftObject): Promise<void> {
         if (!component) return null;
-        const process :ChildProcess = await Component.odo.spawn(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
-        Component.watchSubject.next({
-            type: 'watchStarted',
-            component,
-            process
-        });
-        process.on('close', () => Component.watchSubject.next({
-            type: 'watchTerminated',
-            component,
-            process
-        }));
-        process.on('exit', () => Component.watchSubject.next({
-            type: 'watchTerminated',
-            component,
-            process
-        }));
+        if (Component.watchSessions.get(component.contextPath.fsPath)) {
+            const sel = await window.showInformationMessage(`Watch process is already running for '${component.getName()}'`, 'Show Log');
+            if (sel === 'Show Log') {
+                commands.executeCommand('openshift.component.watch.showLog', component.contextPath.fsPath);
+            }
+        } else {
+            const process :ChildProcess = await Component.odo.spawn(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+            Component.addWatchSession(component, process);
+            process.on('exit', () => {
+                Component.removeWatchSession(component);
+            });
+        }
     }
 
     @vsCommand('openshift.component.openUrl', true)
