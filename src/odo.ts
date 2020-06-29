@@ -27,7 +27,6 @@ import { vsCommand } from './vscommand';
 import format =  require('string-format');
 import bs = require('binary-search');
 
-
 const {Collapsed} = TreeItemCollapsibleState;
 
 export interface BuilderImage {
@@ -342,13 +341,13 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
         },
         component: {
             icon: '',
-            tooltip: 'Component: {label}',
+            tooltip: 'Component: {label}\nContext: {contextPath.fsPath}',
             description: '',
             getChildren: () => this.odo.getComponentChildren(this)
         },
         componentNotPushed: {
             icon: '',
-            tooltip: 'Component: {label}',
+            tooltip: 'Component: {label}\nContext: {contextPath.fsPath}',
             description: '',
             getChildren: () => this.odo.getComponentChildren(this)
         },
