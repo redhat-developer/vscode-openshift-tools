@@ -94,7 +94,7 @@ export class WatchSessionsView implements TreeDataProvider<string>, Disposable {
 
     @vsCommand('openshift.component.watch.showLog')
     static showWatchSessionLog(context: string): void {
-        LogViewLoader.loadView(`${context} Watch Log`,  () => "command to watch", WatchSessionsView.odoctl.getOpenShiftObjectByContext(context), WatchSessionsView.sessions.get(context).process);
+        LogViewLoader.loadView(`${context} Watch Log`,  () => `odo watch --context ${context}`, WatchSessionsView.odoctl.getOpenShiftObjectByContext(context), WatchSessionsView.sessions.get(context).process);
     }
 
     refresh(): void {

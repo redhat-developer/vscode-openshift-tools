@@ -30,7 +30,7 @@ export default class LogViewLoader {
         const cmd = cmdFunction(target.getParent().getParent().getName(), target.getParent().getName(), target.getName());
 
         // TODO: When webview is going to be ready?
-        panel.webview.html = LogViewLoader.getWebviewContent(LogViewLoader.extensionPath, cmd);
+        panel.webview.html = LogViewLoader.getWebviewContent(LogViewLoader.extensionPath, cmd.replace(/\\/g, '\\\\'));
 
         const process = existingProcess? existingProcess : await odo.getInstance().spawn(cmd, target.contextPath.fsPath);
         process.stdout.on('data', (data) => {
