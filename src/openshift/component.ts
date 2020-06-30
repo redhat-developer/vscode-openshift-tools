@@ -66,6 +66,13 @@ export class Component extends OpenShiftItem {
         }
     }
 
+    static stopWatchSession(component: OpenShiftObject): void {
+        const ws = Component.watchSessions.get(component.contextPath.fsPath);
+        if (ws) {
+            treeKill(ws.pid);
+        }
+    }
+
     static async getOpenshiftData(context: OpenShiftObject): Promise<OpenShiftObject> {
         return Component.getOpenShiftCmdData(context,
             "In which Project you want to create a Component",
@@ -128,6 +135,7 @@ export class Component extends OpenShiftItem {
                     await Component.unlinkAllComponents(component);
                 }
                 Component.stopDebugSession(component);
+                Component.stopWatchSession(component);
                 await Component.odo.deleteComponent(component);
 
             }).then(() => `Component '${name}' successfully deleted`)
@@ -149,6 +157,7 @@ export class Component extends OpenShiftItem {
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Undeploying the Component '${component.getName()} '`, async () => {
                 Component.stopDebugSession(component);
+                Component.stopWatchSession(component);
                 await Component.odo.undeployComponent(component);
             }).then(() => `Component '${name}' successfully undeployed`)
             .catch((err) => Promise.reject(new VsCommandError(`Failed to undeploy Component with error '${err}'`)));
