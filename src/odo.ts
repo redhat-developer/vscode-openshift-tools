@@ -727,9 +727,8 @@ export class OdoImpl implements Odo {
 
     public async _getProjects(cluster: OpenShiftObject): Promise<OpenShiftObject[]> {
         return this.execute(Command.listProjects()).then((result) => {
-            const projs = this.loadItems<Project>(result).map((value) => value.metadata.name);
-            return projs.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(cluster, value, ContextType.PROJECT, false, OdoImpl.instance));
-
+            const proj = this.loadItems<Project>(result).find((p) => p.status.active);
+            return proj ? [proj.metadata.name].map<OpenShiftObject>((value) => new OpenShiftObjectImpl(cluster, value, ContextType.PROJECT, false, OdoImpl.instance)) : [];
             // TODO: load projects form workspace folders and add missing ones to the model even they
             // are not created in cluster they should be visible in OpenShift Application Tree
         }).catch((error) => {
@@ -984,7 +983,8 @@ export class OdoImpl implements Odo {
     public async createProject(projectName: string): Promise<OpenShiftObject> {
         await OdoImpl.instance.execute(Command.createProject(projectName));
         const clusters = await this.getClusters();
-        return this.insertAndReveal(new OpenShiftObjectImpl(clusters[0], projectName, ContextType.PROJECT, false, this));
+        this.subject.next(new OdoEventImpl('inserted', clusters[0], false));
+        return new OpenShiftObjectImpl(clusters[0], projectName, ContextType.PROJECT, false, this);
     }
 
     public async deleteApplication(app: OpenShiftObject): Promise<OpenShiftObject> {
