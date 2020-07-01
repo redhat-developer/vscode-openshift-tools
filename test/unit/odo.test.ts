@@ -161,6 +161,9 @@ suite("odo", () => {
                             {
                                 metadata: {
                                     name: 'project1'
+                                },
+                                status: {
+                                    active: true
                                 }
                             }
                         ]
