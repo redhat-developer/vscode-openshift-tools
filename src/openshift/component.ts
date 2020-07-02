@@ -9,7 +9,7 @@ import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debu
 import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
 import OpenShiftItem, { selectTargetApplication, selectTargetComponent } from './openshiftItem';
-import { OpenShiftObject, Command, ContextType, ComponentType } from '../odo';
+import { OpenShiftObject, Command, ContextType } from '../odo';
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
 import { Refs, Ref, Type } from '../util/refs';
@@ -21,6 +21,7 @@ import { Catalog } from './catalog';
 import LogViewLoader from '../view/log/LogViewLoader';
 import DescribeViewLoader from '../view/describe/describeViewLoader';
 import { vsCommand, VsCommandError } from '../vscommand';
+import { SourceType } from '../odo/config';
 
 import path = require('path');
 import globby = require('globby');
@@ -649,10 +650,10 @@ export class Component extends OpenShiftItem {
     )
     static async debug(component: OpenShiftObject): Promise<string | null> {
         if (!component) return null;
-        if (component.compType === ComponentType.LOCAL) {
+        if (component.compType === SourceType.LOCAL) {
             return Progress.execFunctionWithProgress(`Starting debugger session for the component '${component.getName()}'.`, () => Component.startDebugger(component));
         }
-        if (component.compType !== ComponentType.GIT || ComponentType.BINARY) {
+        if (component.compType !== SourceType.GIT || SourceType.BINARY) {
             throw new VsCommandError(`You are trying to run Debug on a ${component.compType} component, which is NOT supported. Debug Command is only supported for Local components.`);
         }
     }
@@ -762,9 +763,9 @@ export class Component extends OpenShiftItem {
         const componentResult = await Component.odo.execute(`oc get dc -l app.kubernetes.io/instance=${compName} --namespace ${prjName} -o json`, Platform.getUserHomePath(), false);
         const componentJson = JSON.parse(componentResult.stdout).items[0];
         const componentType = componentJson.metadata.annotations['app.kubernetes.io/component-source-type'];
-        if (componentType === ComponentType.BINARY) {
+        if (componentType === SourceType.BINARY) {
             return 'Import for binary OpenShift Components is not supported.';
-        } if (componentType !== ComponentType.GIT && componentType !== ComponentType.LOCAL) {
+        } if (componentType !== SourceType.GIT && componentType !== SourceType.LOCAL) {
             throw new VsCommandError(`Cannot import unknown Component type '${componentType}'.`);
         }
 
@@ -789,7 +790,7 @@ export class Component extends OpenShiftItem {
                 //      app.kubernetes.io/component-source-type: git
                 //      app.kubernetes.io/url: 'https://github.com/dgolovin/nodejs-ex'
 
-                if (componentType === ComponentType.GIT) {
+                if (componentType === SourceType.GIT) {
                     const bcResult = await Component.odo.execute(`oc get bc/${componentJson.metadata.name} --namespace ${prjName} -o json`);
                     const bcJson = JSON.parse(bcResult.stdout);
                     const compTypeName = componentJson.metadata.labels['app.kubernetes.io/name'];
