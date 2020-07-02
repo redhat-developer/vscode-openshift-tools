@@ -983,7 +983,8 @@ export class OdoImpl implements Odo {
     public async createProject(projectName: string): Promise<OpenShiftObject> {
         await OdoImpl.instance.execute(Command.createProject(projectName));
         const clusters = await this.getClusters();
-        return this.insertAndReveal(new OpenShiftObjectImpl(clusters[0], projectName, ContextType.PROJECT, false, this));
+        this.subject.next(new OdoEventImpl('inserted', clusters[0], false));
+        return new OpenShiftObjectImpl(clusters[0], projectName, ContextType.PROJECT, false, this);
     }
 
     public async deleteApplication(app: OpenShiftObject): Promise<OpenShiftObject> {
