@@ -29,8 +29,8 @@ import { Project } from './odo/project';
 import { Component } from './odo/component';
 import { Url } from './odo/url';
 import { Service } from './odo/service';
+import { Command } from './odo/command';
 
-import format =  require('string-format');
 import bs = require('binary-search');
 
 const {Collapsed} = TreeItemCollapsibleState;
@@ -47,7 +47,6 @@ export interface OpenShiftObject extends QuickPickItem {
     contextValue: ContextType;
     compType?: string;
     contextPath?: Uri;
-    deployed: boolean;
     path?: string;
     builderImage?: BuilderImage;
 }
@@ -66,332 +65,16 @@ export enum ContextType {
     COMPONENT_ROUTE = 'componentRoute'
 }
 
-function verbose(_target: any, key: string, descriptor: any): void {
-	let fnKey: string | undefined;
-	let fn: Function | undefined;
-
-	if (typeof descriptor.value === 'function') {
-		fnKey = 'value';
-		fn = descriptor.value;
-	} else {
-		throw new Error('not supported');
-	}
-
-	descriptor[fnKey] = function (...args: any[]) {
-        const v = workspace.getConfiguration('openshiftConnector').get('outputVerbosityLevel');
-        const command = fn.apply(this, args);
-        return command + (v > 0 ? ` -v ${v}` : '');
-	};
-}
-
-export class Command {
-    static printCatalogComponentImageStreamRefJson(name: string, namespace: string): string {
-        return `oc get imagestream ${name} -n ${namespace} -o json`
-    }
-
-    static listProjects(): string {
-        return `odo project list -o json`;
-    }
-
-    @verbose
-    static listApplications(project: string): string {
-        return `odo application list --project ${project} -o json`;
-    }
-
-    static deleteProject(name: string): string {
-        return `odo project delete ${name} -o json`;
-    }
-
-    @verbose
-    static createProject(name: string): string {
-        return `odo project create ${name}`;
-    }
-
-    static listComponents(project: string, app: string): string {
-        return `odo list --app ${app} --project ${project} -o json`;
-    }
-
-    static listCatalogComponents(): string {
-        return `odo catalog list components`;
-    }
-
-    static listCatalogComponentsJson(): string {
-        return `${Command.listCatalogComponents()} -o json`;
-    }
-
-    static listCatalogServices(): string {
-        return `odo catalog list services`;
-    }
-
-    static listCatalogServicesJson(): string {
-        return `${Command.listCatalogServices()} -o json`;
-    }
-
-    static listStorageNames(): string {
-        return `odo storage list -o json`;
-    }
-
-    static printOcVersion(): string {
-        return 'oc version';
-    }
-
-    static listServiceInstances(project: string, app: string): string {
-        return `odo service list -o json --project ${project} --app ${app}`;
-    }
-
-    static describeApplication(project: string, app: string): string {
-        return `odo app describe ${app} --project ${project}`;
-    }
-
-    static deleteApplication(project: string, app: string): string {
-        return `odo app delete ${app} --project ${project} -f`;
-    }
-
-    static printOdoVersion(): string {
-        return 'odo version';
-    }
-
-    static printOdoVersionAndProjects(): string {
-        return 'odo version && odo project list';
-    }
-
-    static odoLogout(): string {
-        return `odo logout`;
-    }
-
-    static setOpenshiftContext(context: string): string {
-        return `oc config use-context ${context}`;
-    }
-
-    static odoLoginWithUsernamePassword(clusterURL: string, username: string, passwd: string): string {
-        const quote = Platform.OS === 'win32' ? `"` : `'`;
-        return `odo login ${clusterURL} -u ${quote}${username}${quote} -p ${quote}${passwd}${quote} --insecure-skip-tls-verify`;
-    }
-
-    static odoLoginWithToken(clusterURL: string, ocToken: string): string {
-        return `odo login ${clusterURL} --token=${ocToken} --insecure-skip-tls-verify`;
-    }
-
-    @verbose
-    static createStorage(storageName: string, mountPath: string, storageSize: string): string {
-        return `odo storage create ${storageName} --path=${mountPath} --size=${storageSize}`;
-    }
-
-    static deleteStorage(storage: string): string {
-        return `odo storage delete ${storage} -f`;
-    }
-
-    static waitForStorageToBeGone(project: string, app: string, storage: string): string {
-        return `oc wait pvc/${storage}-${app}-pvc --for=delete --namespace ${project}`;
-    }
-
-    static undeployComponent(project: string, app: string, component: string): string {
-        return `odo delete ${component} -f --app ${app} --project ${project}`;
-    }
-
-    static deleteComponent(project: string, app: string, component: string): string {
-        return `odo delete ${component} -f --app ${app} --project ${project} --all`;
-    }
-
-    static describeComponentNoContext(project: string, app: string, component: string): string {
-        return `odo describe ${component} --app ${app} --project ${project}`;
-    }
-
-    static describeComponentNoContextJson(project: string, app: string, component: string): string {
-        return `${this.describeComponentNoContext(project, app, component)} -o json`;
-    }
-
-    static describeComponent(project: string, app: string, component: string): string {
-        return `odo describe`;
-    }
-
-    static describeComponentJson(project: string, app: string, component: string): string {
-        return `${Command.describeComponent(project, app, component)} -o json`;
-    }
-
-    static describeService(service: string): string {
-        return `odo catalog describe service ${service}`;
-    }
-
-    static describeUrl(url: string): string {
-        return `odo url describe ${url}`;
-    }
-
-    static describeStorage(storage: string): string {
-        return `odo storage describe ${storage}`;
-    }
-
-    static showLog(): string {
-        return `odo log`;
-    }
-
-    static showLogAndFollow(): string {
-        return `odo log -f`;
-    }
-
-    static listComponentPorts(project: string, app: string, component: string): string {
-        return `oc get service ${component}-${app} --namespace ${project} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`;
-    }
-
-    static linkComponentTo(project: string, app: string, component: string, componentToLink: string, port?: string): string {
-        return `odo link ${componentToLink} --project ${project} --app ${app} --component ${component} --wait${port ? ` --port ${  port}` : ''}`;
-    }
-
-    static linkServiceTo(project: string, app: string, component: string, serviceToLink: string): string {
-        return `odo link ${serviceToLink} --project ${project} --app ${app} --component ${component} --wait --wait-for-target`;
-    }
-
-    @verbose
-    static pushComponent(configOnly = false): string {
-        return `odo push${configOnly ? ' --config' : ''}`;
-    }
-
-    @verbose
-    static watchComponent(project: string, app: string, component: string): string {
-        return `odo watch ${component} --app ${app} --project ${project}`;
-    }
-
-    @verbose
-    static createLocalComponent(project: string, app: string, type: string, version: string, name: string, folder: string): string {
-        return `odo create ${type}:${version} ${name} --context ${folder} --app ${app} --project ${project}`;
-    }
-
-    @verbose
-    static createGitComponent(project: string, app: string, type: string, version: string, name: string, git: string, ref: string): string {
-        return `odo create ${type}:${version} ${name} --git ${git} --ref ${ref} --app ${app} --project ${project}`;
-    }
-
-    @verbose
-    static createBinaryComponent(project: string, app: string, type: string, version: string, name: string, binary: string, context: string): string {
-        return `odo create ${type}:${version} ${name} --binary ${binary} --app ${app} --project ${project} --context ${context}`;
-    }
-
-    @verbose
-    static createService(project: string, app: string, template: string, plan: string, name: string): string {
-        return `odo service create ${template} --plan ${plan} ${name} --app ${app} --project ${project} -w`;
-    }
-
-    static deleteService(project: string, app: string, name: string): string {
-        return `odo service delete ${name} -f --project ${project} --app ${app}`;
-    }
-
-    static getServiceTemplate(project: string, service: string): string {
-        return `oc get ServiceInstance ${service} --namespace ${project} -o jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/name}"`;
-    }
-
-    static waitForServiceToBeGone(project: string, service: string): string {
-        return `oc wait ServiceInstance/${service} --for delete --namespace ${project}`;
-    }
-
-    @verbose
-    static createComponentCustomUrl(name: string, port: string, secure = false): string {
-        return `odo url create ${name} --port ${port} ${secure? '--secure': ''}`;
-    }
-
-    static getComponentUrl(): string {
-        return `odo url list -o json`;
-    }
-
-    static deleteComponentUrl(name: string): string {
-        return `odo url delete -f ${name} --now`;
-    }
-
-    static getComponentJson(): string {
-        return `odo describe -o json`;
-    }
-
-    static unlinkComponents(project: string, app: string, comp1: string, comp2: string, port: string): string {
-        return `odo unlink --project ${project} --app ${app} ${comp2} --port ${port} --component ${comp1}`;
-    }
-
-    static unlinkService(project: string, app: string, service: string, comp: string): string {
-        return `odo unlink --project ${project} --app ${app} ${service} --component ${comp}`;
-    }
-
-    static getclusterVersion(): string {
-        return `oc get clusterversion -ojson`;
-    }
-
-    static showServerUrl(): string {
-        return `oc whoami --show-server`;
-    }
-
-    static showConsoleUrl(): string {
-        return `oc get configmaps console-public -n openshift-config-managed -o json`;
-    }
-}
-
-export class OpenShiftObjectImpl implements OpenShiftObject {
-
-    private readonly CONTEXT_DATA = {
-        cluster: {
-            icon: 'cluster-node.png',
-            tooltip: '{name}',
-            getChildren: () => this.odo.getProjects()
-        },
-        project: {
-            icon: 'project-node.png',
-            tooltip : 'Project: {label}',
-            getChildren: () => this.odo.getApplications(this)
-        },
-        application: {
-            icon: 'application-node.png',
-            tooltip: 'Application: {label}',
-            getChildren: () => this.odo.getApplicationChildren(this)
-        },
-        component: {
-            icon: '',
-            tooltip: 'Component: {label}\nContext: {contextPath.fsPath}',
-            description: '',
-            getChildren: () => this.odo.getComponentChildren(this)
-        },
-        componentNotPushed: {
-            icon: '',
-            tooltip: 'Component: {label}\nContext: {contextPath.fsPath}',
-            description: '',
-            getChildren: () => this.odo.getComponentChildren(this)
-        },
-        componentNoContext: {
-            icon: '',
-            tooltip: 'Component: {label}',
-            description: '',
-            getChildren: () => this.odo.getComponentChildren(this)
-        },
-        service: {
-            icon: 'service-node.png',
-            tooltip: 'Service: {label}',
-            getChildren: () => []
-        },
-        storage: {
-            icon: 'storage-node.png',
-            tooltip: 'Storage: {label}',
-            getChildren: () => []
-        },
-        clusterDown: {
-            icon: 'cluster-down.png',
-            tooltip: 'Cannot connect to the cluster',
-            getChildren: () => []
-        },
-        loginRequired: {
-            icon: 'cluster-down.png',
-            tooltip: 'Please Log in to the cluster',
-            getChildren: () => []
-        },
-        componentRoute: {
-            icon: 'url-node.png',
-            tooltip: 'URL: {label}',
-            getChildren: () => []
-        }
-    };
+export abstract class OpenShiftObjectImpl implements OpenShiftObject {
 
     private explorerPath: string;
+    protected readonly odo: Odo = getInstance();
 
     constructor(private parent: OpenShiftObject,
         public readonly name: string,
         public readonly contextValue: ContextType,
-        public deployed: boolean,
+        public readonly icon: string,
         // eslint-disable-next-line no-shadow
-        private readonly odo: Odo,
         public readonly collapsibleState: TreeItemCollapsibleState = Collapsed,
         public contextPath: Uri = undefined,
         public readonly compType: string = undefined,
@@ -413,26 +96,15 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
     }
 
     get iconPath(): Uri {
-        if (this.contextValue === ContextType.COMPONENT_PUSHED || this.contextValue === ContextType.COMPONENT || this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
-            if (this.compType === odo.SourceType.GIT) {
-                return Uri.file(path.join(__dirname, "../../images/component", 'git.png'));
-            } if (this.compType === odo.SourceType.LOCAL) {
-                return Uri.file(path.join(__dirname, "../../images/component", 'workspace.png'));
-            } if (this.compType === odo.SourceType.BINARY) {
-                return Uri.file(path.join(__dirname, "../../images/component", 'binary.png'));
-            }
-        } else {
-            return Uri.file(path.join(__dirname, "../../images/context", this.CONTEXT_DATA[this.contextValue].icon));
-        }
+        return Uri.file(path.join(__dirname, "../../images/context", this.icon));
     }
 
     get tooltip(): string {
-        return format(this.CONTEXT_DATA[this.contextValue].tooltip, this);
+        return this.name;
     }
 
     get label(): string {
-        const label = this.contextValue === ContextType.CLUSTER ? this.name.split('//')[1] : this.name;
-        return label;
+        return this.name;
     }
 
     get command(): VSCommand {
@@ -460,12 +132,108 @@ export class OpenShiftObjectImpl implements OpenShiftObject {
         return this.name;
     }
 
-    getChildren(): ProviderResult<OpenShiftObject[]> {
-        return this.CONTEXT_DATA[this.contextValue].getChildren();
+    getChildren(): Promise<OpenShiftObject[]> {
+        return;
     }
 
     getParent(): OpenShiftObject {
         return this.parent;
+    }
+}
+
+export class OpenShiftRoot extends OpenShiftObjectImpl {
+    constructor() {
+        super (undefined, '/', undefined, undefined);
+    }
+}
+
+export class OpenShiftCluster extends OpenShiftObjectImpl {
+    constructor(name: string) {
+        super(undefined, name, ContextType.CLUSTER, 'cluster-node.png');
+    }
+
+    get label(): string {
+        return this.name.split('//')[1];
+    }
+
+    getChildren(): Promise<OpenShiftObject[]> {
+        return this.odo.getProjects();
+    }
+}
+
+export class OpenShiftProject extends OpenShiftObjectImpl {
+    constructor(parent: OpenShiftObject, name: string) {
+        super(parent, name, ContextType.PROJECT, 'project-node.png');
+    }
+
+    getChildren(): Promise<OpenShiftObject[]> {
+        return this.odo.getApplications(this);
+    }
+}
+
+export class OpenShiftApplication extends OpenShiftObjectImpl {
+    constructor(parent: OpenShiftObject, name: string) {
+        super(parent, name, ContextType.APPLICATION, 'application-node.png');
+    }
+
+    getChildren(): Promise<OpenShiftObject[]> {
+        return this.odo.getApplicationChildren(this);
+    }
+}
+
+export class OpenShiftStorage extends OpenShiftObjectImpl {
+    constructor(parent: OpenShiftObject, name: string) {
+        super(parent, name, ContextType.STORAGE, 'storage-node.png', TreeItemCollapsibleState.None);
+    }
+}
+
+export class OpenShiftUrl extends OpenShiftObjectImpl {
+    constructor(parent: OpenShiftObject, name: string) {
+        super(parent, name, ContextType.COMPONENT_ROUTE, 'url-node.png', TreeItemCollapsibleState.None);
+    }
+}
+
+export class OpenShiftClusterDown extends OpenShiftObjectImpl {
+    constructor() {
+        super(undefined, 'Cannot connect to the OpenShift cluster', ContextType.CLUSTER_DOWN, 'cluster-down.png');
+    }
+}
+
+export class OpenShiftLoginRequired extends OpenShiftObjectImpl {
+    constructor() {
+        super(undefined, 'Please log in to the cluster', ContextType.LOGIN_REQUIRED, 'cluster-down.png');
+    }
+}
+
+export class OpenShiftComponent extends OpenShiftObjectImpl {
+    constructor(parent: OpenShiftObject,
+        name: string,
+        contextValue: ContextType,
+        contextPath: Uri = undefined,
+        compType: string = undefined,
+        builderImage: BuilderImage = undefined) {
+        super(parent, name, contextValue, '', Collapsed, contextPath, compType, builderImage);
+    }
+    get iconPath(): Uri {
+        if (this.contextValue === ContextType.COMPONENT_PUSHED || this.contextValue === ContextType.COMPONENT || this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
+            if (this.compType === odo.SourceType.GIT) {
+                return Uri.file(path.join(__dirname, "../../images/component", 'git.png'));
+            } if (this.compType === odo.SourceType.LOCAL) {
+                return Uri.file(path.join(__dirname, "../../images/component", 'workspace.png'));
+            } if (this.compType === odo.SourceType.BINARY) {
+                return Uri.file(path.join(__dirname, "../../images/component", 'binary.png'));
+            }
+        }
+    }
+
+    getChildren(): Promise<OpenShiftObject[]> {
+        return this.odo.getComponentChildren(this);
+    }
+}
+
+export class OpenShiftService extends OpenShiftObjectImpl {
+    constructor(parent: OpenShiftObject, name: string) {
+        super(parent, name, ContextType.SERVICE, 'service-node.png', TreeItemCollapsibleState.None);
     }
 }
 
@@ -635,7 +403,7 @@ class OdoModel {
 export class OdoImpl implements Odo {
     public static data: OdoModel = new OdoModel();
 
-    public static ROOT: OpenShiftObject = new OpenShiftObjectImpl(undefined, '/', undefined, false, undefined);
+    public static ROOT: OpenShiftObject = new OpenShiftRoot();
 
     private static cli: cliInstance.Cli = cliInstance.CliChannel.getInstance();
 
@@ -688,7 +456,7 @@ export class OdoImpl implements Odo {
             return value.includes('Server ');
         }).map((value) => {
             const server: string = value.substr(value.indexOf(' ')+1).trim();
-            return new OpenShiftObjectImpl(null, server, ContextType.CLUSTER, false, OdoImpl.instance, TreeItemCollapsibleState.Expanded);
+            return new OpenShiftCluster(server);
         });
         return clusters;
     }
@@ -699,19 +467,17 @@ export class OdoImpl implements Odo {
             Command.printOdoVersionAndProjects(), process.cwd(), false
         );
         if (this.odoLoginMessages.some((element) => result.stderr ? result.stderr.includes(element) : false)) {
-            const loginErrorMsg = 'Please log in to the cluster';
-            return[new OpenShiftObjectImpl(null, loginErrorMsg, ContextType.LOGIN_REQUIRED, false, OdoImpl.instance, TreeItemCollapsibleState.None)];
+            return[new OpenShiftLoginRequired()];
         }
         if (this.serverDownMessages.some((element) => result.stderr ? result.stderr.includes(element) : false)) {
-            const clusterDownMsg = 'Cannot connect to the OpenShift cluster';
-            return [new OpenShiftObjectImpl(null, clusterDownMsg, ContextType.CLUSTER_DOWN, false, OdoImpl.instance, TreeItemCollapsibleState.None)];
+            return [new OpenShiftClusterDown()];
         }
         commands.executeCommand('setContext', 'isLoggedIn', true);
         clusters = result.stdout.trim().split('\n').filter((value) => {
             return value.includes('Server:');
         }).map((value) => {
             const server: string = value.substr(value.indexOf(':')+1).trim();
-            return new OpenShiftObjectImpl(null, server, ContextType.CLUSTER, false, OdoImpl.instance, TreeItemCollapsibleState.Expanded);
+            return new OpenShiftCluster(server);
         });
         return clusters;
     }
@@ -728,7 +494,7 @@ export class OdoImpl implements Odo {
     public async _getProjects(cluster: OpenShiftObject): Promise<OpenShiftObject[]> {
         return this.execute(Command.listProjects()).then((result) => {
             const proj = this.loadItems<Project>(result).find((p) => p.status.active);
-            return proj ? [proj.metadata.name].map<OpenShiftObject>((value) => new OpenShiftObjectImpl(cluster, value, ContextType.PROJECT, false, OdoImpl.instance)) : [];
+            return proj ? [new OpenShiftProject(cluster, proj.metadata.name)] : [];
             // TODO: load projects form workspace folders and add missing ones to the model even they
             // are not created in cluster they should be visible in OpenShift Application Tree
         }).catch((error) => {
@@ -755,7 +521,7 @@ export class OdoImpl implements Odo {
                 apps.push(component.spec.app);
             }
         });
-        return apps.map<OpenShiftObject>((value) => new OpenShiftObjectImpl(project, value, ContextType.APPLICATION, false, OdoImpl.instance)).sort(compareNodes);
+        return apps.map<OpenShiftObject>((value) => new OpenShiftApplication(project, value)).sort(compareNodes);
     }
 
     public async getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]> {
@@ -779,7 +545,7 @@ export class OdoImpl implements Odo {
         const componentObject = this.loadItems<Component>(result).map(value => ({ name: value.metadata.name, sourceType: value.spec.sourceType }));
 
         const deployedComponents = componentObject.map<OpenShiftObject>((value) => {
-            return new OpenShiftObjectImpl(application, value.name, ContextType.COMPONENT_NO_CONTEXT, true, this, Collapsed, undefined, value.sourceType);
+            return new OpenShiftComponent(application, value.name, ContextType.COMPONENT_NO_CONTEXT, undefined, value.sourceType);
         });
         const targetAppName = application.getName();
         const targetPrjName = application.getParent().getName();
@@ -796,11 +562,10 @@ export class OdoImpl implements Odo {
             };
             if (item && item.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
                 item.contextPath = Uri.file(comp.status.context);
-                item.deployed = true;
                 item.contextValue = ContextType.COMPONENT_PUSHED;
                 item.builderImage = builderImage;
             } else {
-                deployedComponents.push(new OpenShiftObjectImpl(application, comp.metadata.name, item ? item.contextValue : ContextType.COMPONENT, false, this, Collapsed, Uri.file(comp.status.context), comp.spec.sourceType, builderImage));
+                deployedComponents.push(new OpenShiftComponent(application, comp.metadata.name, item ? item.contextValue : ContextType.COMPONENT, Uri.file(comp.status.context), comp.spec.sourceType, builderImage));
             }
         });
 
@@ -860,7 +625,7 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(Command.getComponentUrl(), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath(), false);
         return this.loadItems<Url>(result)
             .filter((value)=> !!value.metadata.name)
-            .map((value) => new OpenShiftObjectImpl(component, value.metadata.name, ContextType.COMPONENT_ROUTE, false, OdoImpl.instance, TreeItemCollapsibleState.None));
+            .map((value) => new OpenShiftUrl(component, value.metadata.name));
     }
 
     async getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
@@ -869,7 +634,7 @@ export class OdoImpl implements Odo {
 
     public async _getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
-        return this.loadItems<Storage>(result).map<OpenShiftObject>((value) => new OpenShiftObjectImpl(component, value.metadata.name, ContextType.STORAGE, false, OdoImpl.instance, TreeItemCollapsibleState.None));
+        return this.loadItems<Storage>(result).map<OpenShiftObject>((value) => new OpenShiftStorage(component, value.metadata.name));
     }
 
     public async getComponentTypeVersions(componentName: string): Promise<any> {
@@ -906,7 +671,7 @@ export class OdoImpl implements Odo {
         try {
             const result: cliInstance.CliExitData = await this.execute(Command.listServiceInstances(projName, appName));
             services = this.loadItems<Storage>(result)
-                .map((value) => new OpenShiftObjectImpl(application, value.metadata.name, ContextType.SERVICE, true, OdoImpl.instance, TreeItemCollapsibleState.None));
+                .map((value) => new OpenShiftService(application, value.metadata.name));
         } catch (ignore) {
             // ignore error in case service catalog is not configured
         }
@@ -984,7 +749,7 @@ export class OdoImpl implements Odo {
         await OdoImpl.instance.execute(Command.createProject(projectName));
         const clusters = await this.getClusters();
         this.subject.next(new OdoEventImpl('inserted', clusters[0], false));
-        return new OpenShiftObjectImpl(clusters[0], projectName, ContextType.PROJECT, false, this);
+        return new OpenShiftProject(clusters[0], projectName);
     }
 
     public async deleteApplication(app: OpenShiftObject): Promise<OpenShiftObject> {
@@ -1038,7 +803,7 @@ export class OdoImpl implements Odo {
             if (!targetApplication) {
                 await this.insertAndReveal(application);
             }
-            await this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, location, 'local', {name: type, tag: version}));
+            await this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, location, 'local', {name: type, tag: version}));
         }
         let wsFolder: WorkspaceFolder;
         if (workspace.workspaceFolders) {
@@ -1064,7 +829,7 @@ export class OdoImpl implements Odo {
             if (!targetApplication) {
                 await this.insertAndReveal(application);
             }
-            await this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, context, odo.SourceType.GIT, {name: type, tag: version}));
+            await this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, context, odo.SourceType.GIT, {name: type, tag: version}));
         }
         workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: context });
         return null;
@@ -1077,7 +842,7 @@ export class OdoImpl implements Odo {
             if (!targetApplication) {
                 await this.insertAndReveal(application);
             }
-            this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.COMPONENT, false, this, Collapsed, context, odo.SourceType.BINARY, {name: type, tag: version}));
+            this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, context, odo.SourceType.BINARY, {name: type, tag: version}));
         }
         workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: context });
         return null;
@@ -1122,7 +887,7 @@ export class OdoImpl implements Odo {
     public async createService(application: OpenShiftObject, templateName: string, planName: string, name: string): Promise<OpenShiftObject> {
         await this.execute(Command.createService(application.getParent().getName(), application.getName(), templateName, planName, name.trim()), Platform.getUserHomePath());
         await this.createApplication(application);
-        return this.insertAndReveal(new OpenShiftObjectImpl(application, name, ContextType.SERVICE, false, this, TreeItemCollapsibleState.None));
+        return this.insertAndReveal(new OpenShiftService(application, name));
     }
 
     public async deleteService(service: OpenShiftObject): Promise<OpenShiftObject> {
@@ -1139,7 +904,7 @@ export class OdoImpl implements Odo {
 
     public async createStorage(component: OpenShiftObject, name: string, mountPath: string, size: string): Promise<OpenShiftObject> {
         await this.execute(Command.createStorage(name, mountPath, size), component.contextPath.fsPath);
-        return this.insertAndReveal(new OpenShiftObjectImpl(component, name, ContextType.STORAGE, false, this, TreeItemCollapsibleState.None));
+        return this.insertAndReveal(new OpenShiftStorage(component, name));
     }
 
     public async deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject> {
@@ -1151,7 +916,7 @@ export class OdoImpl implements Odo {
 
     public async createComponentCustomUrl(component: OpenShiftObject, name: string, port: string, secure = false): Promise<OpenShiftObject> {
         await this.execute(Command.createComponentCustomUrl(name, port, secure), component.contextPath.fsPath);
-        return this.insertAndReveal(new OpenShiftObjectImpl(component, name, ContextType.COMPONENT_ROUTE, false, this, TreeItemCollapsibleState.None));
+        return this.insertAndReveal(new OpenShiftUrl(component, name));
     }
 
     public async deleteURL(route: OpenShiftObject): Promise<OpenShiftObject> {
@@ -1187,11 +952,11 @@ export class OdoImpl implements Odo {
                                 comp.contextValue = ContextType.COMPONENT_PUSHED;
                                 this.subject.next(new OdoEventImpl('changed', comp));
                             } else if (!comp) {
-                                const newComponent = new OpenShiftObjectImpl(app, added.metadata.name, ContextType.COMPONENT, false, this, Collapsed, Uri.file(added.status.context), added.spec.sourceType,  { name: added.spec.type.split(':')[0], tag: added.spec.type.split(':')[1]});
+                                const newComponent = new OpenShiftComponent(app, added.metadata.name, ContextType.COMPONENT, Uri.file(added.status.context), added.spec.sourceType,  { name: added.spec.type.split(':')[0], tag: added.spec.type.split(':')[1]});
                                 this.insertAndRefresh(newComponent);
                             }
                         } else if (!app) {
-                            const newApp = new OpenShiftObjectImpl(prj, added.spec.app, ContextType.APPLICATION, false, this, Collapsed);
+                            const newApp = new OpenShiftApplication(prj, added.spec.app);
                             this.insertAndRefresh(newApp);
                         }
                     }
