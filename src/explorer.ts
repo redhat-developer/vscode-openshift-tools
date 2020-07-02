@@ -56,7 +56,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         this.fsw.emitter.on('file-changed', () => {
             const ku2 = new KubeConfigUtils();
             const newKubeCtx = ku2.getContextObject(ku2.currentContext);
-            if (!this.kubeContext || (this.kubeContext.cluster !== newKubeCtx.cluster || this.kubeContext.user !== newKubeCtx.user)) {
+            if (!this.kubeContext || (this.kubeContext.cluster !== newKubeCtx.cluster || this.kubeContext.user !== newKubeCtx.user || this.kubeContext.namespace !== newKubeCtx.namespace)) {
                 this.refresh();
             }
             this.kubeContext = newKubeCtx;
