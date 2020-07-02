@@ -9,7 +9,8 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
-import { OdoImpl, Command, ContextType } from '../../../src/odo';
+import { OdoImpl, ContextType } from '../../../src/odo';
+import { Command } from "../../../src/odo/command";
 import { Progress } from '../../../src/util/progress';
 import * as Util from '../../../src/util/async';
 import { Refs } from '../../../src/util/refs';
@@ -34,7 +35,7 @@ suite('OpenShift/Component', () => {
     const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
     const projectItem = new TestItem(clusterItem, 'myproject', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app1', ContextType.APPLICATION);
-    const componentItem = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], false, comp1Uri, 'https://host/proj/app/comp1');
+    const componentItem = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1');
     const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
     const errorMessage = 'FATAL ERROR';
     let getProjects: sinon.SinonStub;
@@ -983,12 +984,12 @@ suite('OpenShift/Component', () => {
 
         test('calls the correct odo command', async () => {
             await Component.describe(componentItem);
-            expect(termStub).calledOnceWith(Command.describeComponent(componentItem.getParent().getParent().getName(), componentItem.getParent().getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.describeComponent());
         });
 
         test('works with no context', async () => {
             await Component.describe(null);
-            expect(termStub).calledOnceWith(Command.describeComponent(componentItem.getParent().getParent().getName(), componentItem.getParent().getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.describeComponent());
         });
     });
 

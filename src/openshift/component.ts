@@ -9,7 +9,8 @@ import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debu
 import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
 import OpenShiftItem, { selectTargetApplication, selectTargetComponent } from './openshiftItem';
-import { OpenShiftObject, Command, ContextType } from '../odo';
+import { OpenShiftObject, ContextType } from '../odo';
+import { Command } from "../odo/command";
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
 import { Refs, Ref, Type } from '../util/refs';
