@@ -13,7 +13,7 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { OdoImpl, ContextType, OpenShiftObjectImpl } from '../../src/odo';
+import { OdoImpl, ContextType, OpenShiftObjectImpl, OpenShiftApplication, OpenShiftProject, OpenShiftCluster } from '../../src/odo';
 import { Progress } from '../../src/util/progress';
 
 import packagejson = require('../../package.json');
@@ -57,9 +57,9 @@ function genComponentJson(p: string, a: string, n: string, c: string ) {
 suite('openshift connector Extension', () => {
     let sandbox: sinon.SinonSandbox;
 
-    const clusterItem = new OpenShiftObjectImpl(OdoImpl.ROOT, 'cluster', ContextType.CLUSTER, false, OdoImpl.Instance);
-    const projectItem = new OpenShiftObjectImpl(clusterItem, 'myproject', ContextType.PROJECT, false, OdoImpl.Instance);
-    const appItem = new OpenShiftObjectImpl(projectItem, 'app1', ContextType.APPLICATION, false, OdoImpl.Instance);
+    const clusterItem = new OpenShiftCluster('cluster');
+    const projectItem = new OpenShiftProject(clusterItem, 'myproject');
+    const appItem = new OpenShiftApplication(projectItem, 'app1');
     const fixtureFolder = path.join(__dirname, '..', '..', '..', 'test', 'fixtures').normalize();
     const comp2Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp2'));
     let activated;

@@ -5,7 +5,7 @@
 
 import { window, QuickPickItem, TreeItemCollapsibleState } from 'vscode';
 import * as validator from 'validator';
-import { Odo, OdoImpl, OpenShiftObject, OpenShiftObjectImpl, ContextType } from '../odo';
+import { Odo, OdoImpl, OpenShiftObject, OpenShiftObjectImpl, ContextType, OpenShiftApplication } from '../odo';
 import { OpenShiftExplorer } from '../explorer';
 
 const errorMessage = {
@@ -135,7 +135,7 @@ export default class OpenShiftItem {
             if (context && isCommand(context)) {
                 const newAppName = await context.command();
                 if (newAppName) {
-                    context = new OpenShiftObjectImpl(project, newAppName, ContextType.APPLICATION, false, OdoImpl.Instance, TreeItemCollapsibleState.Collapsed);
+                    context = new OpenShiftApplication(project, newAppName);
                 } else {
                     context = null;
                 }

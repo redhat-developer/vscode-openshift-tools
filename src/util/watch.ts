@@ -17,23 +17,15 @@ export class WatchUtil {
     ): FileContentChangeNotifier {
         const emitter: EventEmitter = new EventEmitter();
         let timer: NodeJS.Timer;
-        let context = '';
         fsxt.ensureDirSync(location);
-        const watcher: fsxt.FSWatcher = fsxt.watch(location, (eventType, changedFile) => {
+        const watcher: fsxt.FSWatcher = fsxt.watch(location, (_, changedFile) => {
             if (filename === changedFile) {
                 if (timer) {
                     clearTimeout(timer);
                 }
                 timer = setTimeout(() => {
                     timer = undefined;
-                    WatchUtil.grep(path.join(location, filename), /current-context:.*/).then(
-                        (newContext: string) => {
-                            if (context !== newContext) {
-                                emitter.emit('file-changed');
-                                context = newContext;
-                            }
-                        },
-                    );
+                    emitter.emit('file-changed');
                 }, 500);
             }
         });
