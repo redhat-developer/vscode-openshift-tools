@@ -31,7 +31,6 @@ import { Url } from './odo/url';
 import { Service } from './odo/service';
 import { Command } from './odo/command';
 
-import format =  require('string-format');
 import bs = require('binary-search');
 
 const {Collapsed} = TreeItemCollapsibleState;
@@ -67,62 +66,6 @@ export enum ContextType {
 }
 
 export abstract class OpenShiftObjectImpl implements OpenShiftObject {
-
-    private readonly CONTEXT_DATA = {
-        project: {
-            icon: 'project-node.png',
-            tooltip : 'Project: {label}',
-            getChildren: () => this.odo.getApplications(this)
-        },
-        application: {
-            icon: 'application-node.png',
-            tooltip: 'Application: {label}',
-            getChildren: () => this.odo.getApplicationChildren(this)
-        },
-        component: {
-            icon: '',
-            tooltip: 'Component: {label}\nContext: {contextPath.fsPath}',
-            description: '',
-            getChildren: () => this.odo.getComponentChildren(this)
-        },
-        componentNotPushed: {
-            icon: '',
-            tooltip: 'Component: {label}\nContext: {contextPath.fsPath}',
-            description: '',
-            getChildren: () => this.odo.getComponentChildren(this)
-        },
-        componentNoContext: {
-            icon: '',
-            tooltip: 'Component: {label}',
-            description: '',
-            getChildren: () => this.odo.getComponentChildren(this)
-        },
-        service: {
-            icon: 'service-node.png',
-            tooltip: 'Service: {label}',
-            getChildren: () => []
-        },
-        storage: {
-            icon: 'storage-node.png',
-            tooltip: 'Storage: {label}',
-            getChildren: () => []
-        },
-        clusterDown: {
-            icon: 'cluster-down.png',
-            tooltip: 'Cannot connect to the cluster',
-            getChildren: () => []
-        },
-        loginRequired: {
-            icon: 'cluster-down.png',
-            tooltip: 'Please Log in to the cluster',
-            getChildren: () => []
-        },
-        componentRoute: {
-            icon: 'url-node.png',
-            tooltip: 'URL: {label}',
-            getChildren: () => []
-        }
-    };
 
     private explorerPath: string;
     protected readonly odo: Odo = getInstance();

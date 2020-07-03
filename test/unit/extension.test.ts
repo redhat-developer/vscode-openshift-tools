@@ -13,7 +13,7 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { OdoImpl, ContextType, OpenShiftObjectImpl, OpenShiftApplication, OpenShiftProject, OpenShiftCluster } from '../../src/odo';
+import { OdoImpl, OpenShiftApplication, OpenShiftProject, OpenShiftCluster } from '../../src/odo';
 import { Progress } from '../../src/util/progress';
 
 import packagejson = require('../../package.json');
@@ -22,7 +22,7 @@ import path = require('path');
 const {expect} = chai;
 chai.use(sinonChai);
 
-function genComponentJson(p: string, a: string, n: string, c: string ) {
+function genComponentJson(p: string, a: string, n: string, c: string ): string {
     return `
     {
         "kind": "List",
