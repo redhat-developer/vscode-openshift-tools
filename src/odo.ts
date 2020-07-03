@@ -195,13 +195,13 @@ export class OpenShiftUrl extends OpenShiftObjectImpl {
 
 export class OpenShiftClusterDown extends OpenShiftObjectImpl {
     constructor() {
-        super(undefined, 'Cannot connect to the cluster', ContextType.CLUSTER_DOWN, 'cluster-down.png');
+        super(undefined, 'Cannot connect to the OpenShift cluster', ContextType.CLUSTER_DOWN, 'cluster-down.png');
     }
 }
 
 export class OpenShiftLoginRequired extends OpenShiftObjectImpl {
     constructor() {
-        super(undefined, 'Please Log in to the cluster', ContextType.LOGIN_REQUIRED, 'cluster-down.png');
+        super(undefined, 'Please log in to the cluster', ContextType.LOGIN_REQUIRED, 'cluster-down.png');
     }
 }
 
@@ -470,7 +470,7 @@ export class OdoImpl implements Odo {
             return[new OpenShiftLoginRequired()];
         }
         if (this.serverDownMessages.some((element) => result.stderr ? result.stderr.includes(element) : false)) {
-            return [new OpenShiftLoginRequired()];
+            return [new OpenShiftClusterDown()];
         }
         commands.executeCommand('setContext', 'isLoggedIn', true);
         clusters = result.stdout.trim().split('\n').filter((value) => {
