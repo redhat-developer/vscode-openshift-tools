@@ -180,6 +180,10 @@ export class OpenShiftProject extends OpenShiftObjectImpl {
     getChildren(): Promise<OpenShiftObject[]> {
         return this.odo.getApplications(this);
     }
+
+    get tooltip(): string {
+        return `Project: ${this.name}`;
+    }
 }
 
 export class OpenShiftApplication extends OpenShiftObjectImpl {
@@ -190,11 +194,19 @@ export class OpenShiftApplication extends OpenShiftObjectImpl {
     getChildren(): Promise<OpenShiftObject[]> {
         return this.odo.getApplicationChildren(this);
     }
+
+    get tooltip(): string {
+        return `Application: ${this.name}`;
+    }
 }
 
 export class OpenShiftStorage extends OpenShiftObjectImpl {
     constructor(parent: OpenShiftObject, name: string) {
         super(parent, name, ContextType.STORAGE, 'storage-node.png', TreeItemCollapsibleState.None);
+    }
+
+    get tooltip(): string {
+        return `Storage: ${this.name}`;
     }
 }
 
@@ -202,6 +214,11 @@ export class OpenShiftUrl extends OpenShiftObjectImpl {
     constructor(parent: OpenShiftObject, name: string) {
         super(parent, name, ContextType.COMPONENT_ROUTE, 'url-node.png', TreeItemCollapsibleState.None);
     }
+
+    get tooltip(): string {
+        return `URL: ${this.name}`;
+    }
+
 }
 
 export class OpenShiftClusterDown extends OpenShiftObjectImpl {
@@ -240,11 +257,19 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
     getChildren(): Promise<OpenShiftObject[]> {
         return this.odo.getComponentChildren(this);
     }
+
+    get tooltip(): string {
+        return `Component: ${this.name}\nContext: ${this.contextPath.fsPath}`;
+    }
 }
 
 export class OpenShiftService extends OpenShiftObjectImpl {
     constructor(parent: OpenShiftObject, name: string) {
         super(parent, name, ContextType.SERVICE, 'service-node.png', TreeItemCollapsibleState.None);
+    }
+
+    get tooltip(): string {
+        return `Service: ${this.name}`;
     }
 }
 
