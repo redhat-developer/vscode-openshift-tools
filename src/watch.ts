@@ -73,7 +73,8 @@ export class WatchSessionsView implements TreeDataProvider<string>, Disposable {
         return {
             label: WatchSessionsView.sessions.get(element).label,
             collapsibleState: TreeItemCollapsibleState.None,
-            contextValue: 'openshift.watch.process'
+            contextValue: 'openshift.watch.process',
+            iconPath: WatchSessionsView.odoctl.getOpenShiftObjectByContext(element).iconPath
         };
     }
 

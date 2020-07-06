@@ -49,6 +49,7 @@ export interface OpenShiftObject extends QuickPickItem {
     contextPath?: Uri;
     path?: string;
     builderImage?: BuilderImage;
+    iconPath?: Uri;
 }
 
 export enum ContextType {
@@ -404,8 +405,6 @@ class OdoModel {
         array.splice(array.indexOf(item), 1);
         this.pathToObject.delete(item.path);
         this.contextToObject.delete(item.contextPath.fsPath);
-        const ps = this.objectToProcess.get(item);
-        if (ps) ps.kill('SIGINT');
     }
 
     public deleteContext(context: string): void {
