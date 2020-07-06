@@ -190,6 +190,8 @@
     "onCommand:openshift.component.push.palette",
     "onCommand:openshift.component.watch",
     "onCommand:openshift.component.watch.palette",
+    "onCommand:openshift.component.watch.terminate",
+    "onCommand:openshift.component.watch.showLog",
     "onCommand:openshift.catalog.listComponents",
     "onCommand:openshift.catalog.listServices",
     "onCommand:openshift.url.create",
@@ -432,6 +434,16 @@
       {
         "command": "openshift.component.linkService",
         "title": "Link Service",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.watch.terminate",
+        "title": "Stop",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.watch.showLog",
+        "title": "Show Log",
         "category": "OpenShift"
       },
       {
@@ -712,6 +724,10 @@
         {
           "id": "openshiftProjectExplorer",
           "name": "Application Explorer"
+        },
+        {
+          "id": "openshiftWatchView",
+          "name": "Watch Sessions"
         }
       ]
     },
@@ -1143,6 +1159,14 @@
         {
           "command": "openshift.explorer.login.credentialsLogin",
           "when": "view == openshiftProjectExplorer && viewItem == loginRequired"
+        },
+        {
+          "command": "openshift.component.watch.terminate",
+          "when": "view == openshiftWatchView && viewItem == openshift.watch.process"
+        },
+        {
+          "command": "openshift.component.watch.showLog",
+          "when": "view == openshiftWatchView && viewItem == openshift.watch.process"
         }
       ]
     },

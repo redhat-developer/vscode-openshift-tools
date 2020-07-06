@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
+import { ChildProcess } from 'child_process';
 import { TestItem } from './testOSItem';
 import { OdoImpl, ContextType } from '../../../src/odo';
 import { Command } from "../../../src/odo/command";
@@ -18,6 +19,7 @@ import OpenShiftItem from '../../../src/openshift/openshiftItem';
 
 import pq = require('proxyquire');
 import globby = require('globby');
+
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -43,6 +45,7 @@ suite('OpenShift/Component', () => {
     let Component: any;
     let fetchTag: sinon.SinonStub;
     let commandStub: sinon.SinonStub;
+    let spawnStub: sinon.SinonStub;
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -51,6 +54,7 @@ suite('OpenShift/Component', () => {
         Component = pq('../../../src/openshift/component', {}).Component;
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });
+        spawnStub = sandbox.stub(OdoImpl.prototype, 'spawn');
         sandbox.stub(OdoImpl.prototype, 'getServices');
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
@@ -1122,15 +1126,17 @@ suite('OpenShift/Component', () => {
         });
 
         test('calls the correct odo command w/ context', async () => {
+            const cpStub = {on: sinon.stub()} as any as ChildProcess;
+            spawnStub.resolves(cpStub);
             await Component.watch(componentItem);
-
-            expect(termStub).calledOnceWith(Command.watchComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(spawnStub).calledOnceWith(Command.watchComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
 
         test('calls the correct odo command w/o context', async () => {
+            const cpStub = {on: sinon.stub()} as any as ChildProcess;
+            spawnStub.resolves(cpStub);
             await Component.watch(null);
-
-            expect(termStub).calledOnceWith(Command.watchComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(spawnStub).calledOnceWith(Command.watchComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
     });
 
