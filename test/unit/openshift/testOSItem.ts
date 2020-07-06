@@ -5,6 +5,7 @@
 
 import { Uri } from "vscode";
 import { OpenShiftObject, ContextType } from "../../../src/odo";
+import { SourceType } from "../../../src/odo/config";
 
 export class TestItem implements OpenShiftObject {
     public treeItem = null;
@@ -16,7 +17,8 @@ export class TestItem implements OpenShiftObject {
         public contextValue: ContextType,
         private children = [],
         public contextPath = Uri.parse('file:///c%3A/Temp'),
-        public path?: string) {
+        public path?: string,
+        public compType: string = SourceType.LOCAL) {
     }
 
     getName(): string {
