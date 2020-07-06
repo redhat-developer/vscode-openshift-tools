@@ -5,7 +5,6 @@
 
 import * as fs from 'fs';
 import * as fsxt from 'fs-extra';
-import * as path from 'path';
 import { EventEmitter } from 'events';
 
 import byline = require('byline');
@@ -17,7 +16,6 @@ export class WatchUtil {
     ): FileContentChangeNotifier {
         const emitter: EventEmitter = new EventEmitter();
         let timer: NodeJS.Timer;
-        let context = '';
         fsxt.ensureDirSync(location);
         const watcher: fsxt.FSWatcher = fsxt.watch(location, (eventType, changedFile) => {
             if (filename === changedFile) {
@@ -26,14 +24,7 @@ export class WatchUtil {
                 }
                 timer = setTimeout(() => {
                     timer = undefined;
-                    WatchUtil.grep(path.join(location, filename), /current-context:.*/).then(
-                        (newContext: string) => {
-                            if (context !== newContext) {
-                                emitter.emit('file-changed');
-                                context = newContext;
-                            }
-                        },
-                    );
+                    emitter.emit('file-changed');
                 }, 500);
             }
         });
