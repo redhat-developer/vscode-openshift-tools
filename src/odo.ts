@@ -220,16 +220,14 @@ export class OpenShiftClusterDown extends OpenShiftObjectImpl {
 
 export class OpenShiftLoginRequired extends OpenShiftObjectImpl {
     constructor() {
-        super(undefined, 'Please log in to the cluster', ContextType.LOGIN_REQUIRED, 'cluster-down.png');
+        super(undefined, 'Please log in to the cluster', ContextType.LOGIN_REQUIRED, 'cluster-down.png', TreeItemCollapsibleState.None);
     }
 
     get command(): VSCommand {
-        if (this.contextValue === ContextType.LOGIN_REQUIRED) {
-            return {
-                command: 'openshift.explorer.login',
-                title: 'Login to the cluster',
-            };
-        }
+        return {
+            command: 'openshift.explorer.login',
+            title: 'Login to the cluster',
+        };
     }
 }
 
