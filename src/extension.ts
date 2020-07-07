@@ -21,10 +21,12 @@ import { registerCommands } from './vscommand';
 import { ToolsConfig } from './tools';
 import { extendClusterExplorer } from './k8s/clusterExplorer';
 import { WatchSessionsView } from './watch';
+import { DebugSessionsView } from './debug';
 
 import path = require('path');
 import fsx = require('fs-extra');
 import treeKill = require('tree-kill');
+
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
@@ -70,6 +72,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         ),
         OpenShiftExplorer.getInstance(),
         WatchSessionsView.getInstance(),
+        DebugSessionsView.getInstance(),
         ...Component.init(extensionContext)
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
