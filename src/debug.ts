@@ -13,7 +13,6 @@ import {
     TreeView,
     window,
     TreeItemCollapsibleState,
-    commands,
     debug,
     DebugSession,
 } from 'vscode';
