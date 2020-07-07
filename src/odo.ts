@@ -118,15 +118,6 @@ export abstract class OpenShiftObjectImpl implements OpenShiftObject {
         return this.name;
     }
 
-    get command(): VSCommand {
-        if (this.contextValue === ContextType.LOGIN_REQUIRED) {
-            return {
-                command: 'openshift.explorer.login',
-                title: 'Login to the cluster',
-            };
-        }
-    }
-
     get description(): string {
         let suffix = '';
         if (this.contextValue === ContextType.COMPONENT) {
@@ -229,7 +220,14 @@ export class OpenShiftClusterDown extends OpenShiftObjectImpl {
 
 export class OpenShiftLoginRequired extends OpenShiftObjectImpl {
     constructor() {
-        super(undefined, 'Please log in to the cluster', ContextType.LOGIN_REQUIRED, 'cluster-down.png');
+        super(undefined, 'Please log in to the cluster', ContextType.LOGIN_REQUIRED, 'cluster-down.png', TreeItemCollapsibleState.None);
+    }
+
+    get command(): VSCommand {
+        return {
+            command: 'openshift.explorer.login',
+            title: 'Login to the cluster',
+        };
     }
 }
 
@@ -573,7 +571,7 @@ export class OdoImpl implements Odo {
         return [... await this._getComponents(application), ... await this._getServices(application)].sort(compareNodes);
     }
 
-    async getComponents(application: OpenShiftObject, condition: (value: OpenShiftObject) => boolean = (value) => value.contextValue === ContextType.COMPONENT || value.contextValue === ContextType.COMPONENT_NO_CONTEXT || value.contextValue === ContextType.COMPONENT_PUSHED): Promise<OpenShiftObject[]> {
+    async getComponents(application: OpenShiftObject, condition: (value: OpenShiftObject) => boolean = (value): boolean => value.contextValue === ContextType.COMPONENT || value.contextValue === ContextType.COMPONENT_NO_CONTEXT || value.contextValue === ContextType.COMPONENT_PUSHED): Promise<OpenShiftObject[]> {
         return (await this.getApplicationChildren(application)).filter(condition);
     }
 
