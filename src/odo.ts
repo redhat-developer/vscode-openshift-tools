@@ -9,8 +9,6 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
 
-/* TODO Review classes hierarchy */
-
 import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Command as VSCommand, Disposable } from 'vscode';
 import * as path from 'path';
 import { Subject } from 'rxjs';
@@ -30,15 +28,11 @@ import { Component } from './odo/component';
 import { Url } from './odo/url';
 import { Service } from './odo/service';
 import { Command } from './odo/command';
+import { BuilderImage } from './odo/builderImage';
 
 import bs = require('binary-search');
 
 const {Collapsed} = TreeItemCollapsibleState;
-
-export interface BuilderImage {
-    readonly name: string;
-    readonly tag: string;
-}
 
 export interface OpenShiftObject extends QuickPickItem {
     getChildren(): ProviderResult<OpenShiftObject[]>;
@@ -288,7 +282,7 @@ export interface Odo {
     getClusters(): Promise<OpenShiftObject[]>;
     getProjects(): Promise<OpenShiftObject[]>;
     loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): Promise<void>;
-    addWorkspaceComponent(WorkspaceFolder: WorkspaceFolder, component: OpenShiftObject);
+    addWorkspaceComponent(WorkspaceFolder: WorkspaceFolder, component: OpenShiftObject): void;
     getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]>;
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponents(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]>;
