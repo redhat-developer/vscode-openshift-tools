@@ -728,6 +728,10 @@
         {
           "id": "openshiftWatchView",
           "name": "Watch Sessions"
+        },
+        {
+          "id": "openshiftDebugView",
+          "name": "Debug Sessions"
         }
       ]
     },
