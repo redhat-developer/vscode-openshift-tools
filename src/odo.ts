@@ -28,7 +28,7 @@ import { Component } from './odo/component';
 import { Url } from './odo/url';
 import { Service } from './odo/service';
 import { Command } from './odo/command';
-import { BuilderImage } from './odo/BuilderImage';
+import { BuilderImage } from './odo/builderImage';
 
 import bs = require('binary-search');
 
