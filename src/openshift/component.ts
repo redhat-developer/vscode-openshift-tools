@@ -8,9 +8,9 @@
 import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
 import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
-import { Subject } from 'rxjs';
+import { EventEmitter } from 'events';
 import OpenShiftItem, { selectTargetApplication, selectTargetComponent } from './openshiftItem';
-import { OpenShiftObject, ContextType } from '../odo';
+import { OpenShiftObject, ContextType, OpenShiftObjectImpl } from '../odo';
 import { Command } from "../odo/command";
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
@@ -31,17 +31,20 @@ import treeKill = require('tree-kill');
 
 const waitPort = require('wait-port');
 
-export class ComponentEvent {
-    readonly type: 'watchStarted' | 'watchTerminated';
-    readonly component: OpenShiftObject;
-    readonly process?: ChildProcess;
-}
-
 export class Component extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
-    public static debugSessions: Map<string, DebugSession> = new Map();
-    public static watchSessions: Map<string, ChildProcess> = new Map();
-    public static readonly watchSubject: Subject<ComponentEvent> = new Subject<ComponentEvent>();
+    public static debugSessions = new Map<string, DebugSession>();
+    public static watchSessions = new Map<string, ChildProcess>();
+    // TODO: Hide subject behind EventEmitter interface
+    private static readonly watchEmitter = new EventEmitter();
+
+    public static onDidWatchStarted(listener: (event: OpenShiftObjectImpl) => void): void {
+        Component.watchEmitter.on('watchStarted', listener);
+    }
+
+    public static onDidWatchStopped(listener: (event: OpenShiftObjectImpl) => void): void {
+        Component.watchEmitter.on('watchStopped', listener);
+    }
 
     public static init(context: ExtensionContext): Disposable[] {
         Component.extensionContext = context;
@@ -471,19 +474,12 @@ export class Component extends OpenShiftItem {
 
     static addWatchSession(component: OpenShiftObject, process: ChildProcess): void {
         Component.watchSessions.set(component.contextPath.fsPath, process);
-        Component.watchSubject.next({
-            type: 'watchStarted',
-            component,
-            process
-        });
+        Component.watchEmitter.emit('watchStarted', component);
     }
 
     static removeWatchSession(component: OpenShiftObject): void {
         Component.watchSessions.delete(component.contextPath.fsPath);
-        Component.watchSubject.next({
-            type: 'watchTerminated',
-            component
-        });
+        Component.watchEmitter.emit('watchStopped', component);
     }
 
     @vsCommand('openshift.component.watch', true)
@@ -511,6 +507,16 @@ export class Component extends OpenShiftItem {
                 Component.removeWatchSession(component);
             });
         }
+    }
+
+    @vsCommand('openshift.component.watch.terminate')
+    static terminateWatchSession(context: string): void {
+        treeKill(Component.watchSessions.get(context).pid, 'SIGSTOP');
+    }
+
+    @vsCommand('openshift.component.watch.showLog')
+    static showWatchSessionLog(context: string): void {
+        LogViewLoader.loadView(`${context} Watch Log`,  () => `odo watch --context ${context}`, Component.odo.getOpenShiftObjectByContext(context), Component.watchSessions.get(context));
     }
 
     @vsCommand('openshift.component.openUrl', true)
