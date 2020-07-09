@@ -20,8 +20,6 @@ import { Component } from './openshift/component';
 export class WatchSessionsView implements TreeDataProvider<string> {
     private sessions: Map<string, TreeItem> = new Map();
 
-    private odoctl: Odo = OdoImpl.Instance;
-
     private treeView: TreeView<string>;
 
     private onDidChangeTreeDataEmitter: EventEmitter<string> =
