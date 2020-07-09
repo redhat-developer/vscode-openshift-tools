@@ -71,7 +71,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             commands.executeCommand('extension.vsKubernetesUseNamespace', context),
         ),
         OpenShiftExplorer.getInstance(),
-        WatchSessionsView.getInstance(),
+        new WatchSessionsView().createTreeView('openshiftWatchView'),
         DebugSessionsView.getInstance(),
         ...Component.init(extensionContext)
     ];
