@@ -113,15 +113,7 @@ export abstract class OpenShiftObjectImpl implements OpenShiftObject {
     }
 
     get description(): string {
-        let suffix = '';
-        if (this.contextValue === ContextType.COMPONENT) {
-            suffix = `${GlyphChars.Space}${GlyphChars.NotPushed} not pushed`;
-        } else if (this.contextValue === ContextType.COMPONENT_PUSHED) {
-            suffix = `${GlyphChars.Space}${GlyphChars.Push} pushed`;
-        } else if (this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
-            suffix = `${GlyphChars.Space}${GlyphChars.NoContext} no context`;
-        }
-        return suffix;
+        return '';
     }
 
     getName(): string {
@@ -252,6 +244,18 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
 
     get tooltip(): string {
         return `Component: ${this.name}\nContext: ${this.contextPath.fsPath}`;
+    }
+
+    get description(): string {
+        let suffix = '';
+        if (this.contextValue === ContextType.COMPONENT) {
+            suffix = `${GlyphChars.Space}${GlyphChars.NotPushed} not pushed`;
+        } else if (this.contextValue === ContextType.COMPONENT_PUSHED) {
+            suffix = `${GlyphChars.Space}${GlyphChars.Push} pushed`;
+        } else if (this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
+            suffix = `${GlyphChars.Space}${GlyphChars.NoContext} no context`;
+        }
+        return suffix;
     }
 }
 
