@@ -671,7 +671,7 @@ export class OdoImpl implements Odo {
         return this.loadItems<Storage>(result).map<OpenShiftObject>((value) => new OpenShiftStorage(component, value.metadata.name));
     }
 
-    public async getComponentTypeVersions(componentName: string): Promise<any> {
+    public async getComponentTypeVersions(componentName: string): Promise<string[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
         const items = this.loadItems<ComponentType>(result).filter((value) => value.metadata.name === componentName);
         return items.length > 0 ? items[0].spec.allTags : [];
