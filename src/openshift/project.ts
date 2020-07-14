@@ -5,11 +5,22 @@
 
 import { window } from 'vscode';
 import OpenShiftItem from './openshiftItem';
-import { OpenShiftObject } from '../odo';
+import { OpenShiftObject, OpenShiftProject, getInstance } from '../odo';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
 
 export class Project extends OpenShiftItem {
+
+    @vsCommand('openshift.project.set', true)
+    static async set(context: OpenShiftObject): Promise<string | null> {
+        let project = context;
+        if (!context) {
+            project = await window.showQuickPick((await getInstance().getProjects()).filter((prj: OpenShiftProject) => !prj.active), {placeHolder: 'Select a Project to acivate'});
+        }
+        return Project.odo.execute(`odo project set ${project.getName()}`).then(() =>
+        Project.explorer.refresh()
+        ).then(() => `Project '${project.getName()}' set as active.`);
+    }
 
     @vsCommand('openshift.project.create')
     static async create(): Promise<string> {

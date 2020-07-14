@@ -332,6 +332,16 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.project.set",
+        "title": "Activate",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.project.set.palette",
+        "title": "Set the active Project",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.app.delete.palette",
         "title": "Delete Application",
         "category": "OpenShift"
@@ -739,6 +749,10 @@
       "commandPalette": [
         {
           "command": "openshift.project.delete",
+          "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.project.set",
           "when": "view == openshiftProjectExplorer"
         },
         {
