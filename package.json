@@ -338,7 +338,7 @@
       },
       {
         "command": "openshift.project.set.palette",
-        "title": "Set the active Project",
+        "title": "Set active Project",
         "category": "OpenShift"
       },
       {
