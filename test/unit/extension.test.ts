@@ -58,7 +58,7 @@ suite('openshift connector Extension', () => {
     let sandbox: sinon.SinonSandbox;
 
     const clusterItem = new OpenShiftCluster('cluster');
-    const projectItem = new OpenShiftProject(clusterItem, 'myproject');
+    const projectItem = new OpenShiftProject(clusterItem, 'myproject', true);
     const appItem = new OpenShiftApplication(projectItem, 'app1');
     const fixtureFolder = path.join(__dirname, '..', '..', '..', 'test', 'fixtures').normalize();
     const comp2Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp2'));

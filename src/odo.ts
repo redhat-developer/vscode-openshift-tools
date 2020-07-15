@@ -145,13 +145,13 @@ export class OpenShiftCluster extends OpenShiftObjectImpl {
         return this.name.split('//')[1];
     }
 
-    getChildren(): Promise<OpenShiftObject[]> {
-        return this.odo.getProjects();
+    async getChildren(): Promise<OpenShiftObject[]> {
+        return [(await this.odo.getProjects()).find((prj:OpenShiftProject)=>prj.active)];
     }
 }
 
 export class OpenShiftProject extends OpenShiftObjectImpl {
-    constructor(parent: OpenShiftObject, name: string) {
+    constructor(parent: OpenShiftObject, name: string, public readonly active: boolean) {
         super(parent, name, ContextType.PROJECT, 'project-node.png');
     }
 
@@ -527,10 +527,7 @@ export class OdoImpl implements Odo {
 
     public async _getProjects(cluster: OpenShiftObject): Promise<OpenShiftObject[]> {
         return this.execute(Command.listProjects()).then((result) => {
-            const proj = this.loadItems<Project>(result).find((p) => p.status.active);
-            return proj ? [new OpenShiftProject(cluster, proj.metadata.name)] : [];
-            // TODO: load projects form workspace folders and add missing ones to the model even they
-            // are not created in cluster they should be visible in OpenShift Application Tree
+            return this.loadItems<Project>(result).map((item) => new OpenShiftProject(cluster, item.metadata.name, item.status.active) );
         }).catch((error) => {
             window.showErrorMessage(`Cannot retrieve projects for current cluster. Error: ${error}`);
             return [];
@@ -783,7 +780,7 @@ export class OdoImpl implements Odo {
         await OdoImpl.instance.execute(Command.createProject(projectName));
         const clusters = await this.getClusters();
         this.subject.next(new OdoEventImpl('inserted', clusters[0], false));
-        return new OpenShiftProject(clusters[0], projectName);
+        return new OpenShiftProject(clusters[0], projectName, true);
     }
 
     public async deleteApplication(app: OpenShiftObject): Promise<OpenShiftObject> {
