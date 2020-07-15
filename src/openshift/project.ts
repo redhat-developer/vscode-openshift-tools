@@ -12,14 +12,11 @@ import { vsCommand, VsCommandError } from '../vscommand';
 export class Project extends OpenShiftItem {
 
     @vsCommand('openshift.project.set', true)
-    static async set(context: OpenShiftObject): Promise<string | null> {
-        let project = context;
-        if (!context) {
-            project = await window.showQuickPick((await getInstance().getProjects()).filter((prj: OpenShiftProject) => !prj.active), {placeHolder: 'Select a Project to acivate'});
-        }
-        return Project.odo.execute(`odo project set ${project.getName()}`).then(() =>
-        Project.explorer.refresh()
-        ).then(() => `Project '${project.getName()}' set as active.`);
+    static async set(): Promise<string | null> {
+        const project = await window.showQuickPick((await getInstance().getProjects()).filter((prj: OpenShiftProject) => !prj.active), {placeHolder: 'Select a Project to activate'});
+        await Project.odo.execute(`odo project set ${project.getName()}`);
+        Project.explorer.refresh();
+        return `Project '${project.getName()}' set as active.`;
     }
 
     @vsCommand('openshift.project.create')
