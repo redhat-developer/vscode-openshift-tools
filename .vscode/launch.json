@@ -48,7 +48,7 @@
             "outFiles": [
                 "${workspaceFolder}/out/test/unit/**/*.js"
             ],
-            "preLaunchTask": "npm: watch"
+            "preLaunchTask": "instrument"
         },
         {
             "name": "Extension integration Tests Debug",

@@ -44,12 +44,11 @@ function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
     const coverConfigPath = paths.join(testsRoot, '..', '..', '..', 'coverconfig.json');
     if (!process.env.OST_DISABLE_COVERAGE && fs.existsSync(coverConfigPath)) {
         coverageRunner = new CoverageRunner(JSON.parse(fs.readFileSync(coverConfigPath, 'utf-8')) as TestRunnerOptions, testsRoot);
-        coverageRunner.setupCoverage();
     }
     return coverageRunner;
 }
 
-export function run(): any {
+export function run(): Promise<void> {
      return new Promise((resolve, reject) => {
         const testsRoot = paths.resolve(__dirname);
         const coverageRunner = loadCoverageRunner(testsRoot);
@@ -61,10 +60,12 @@ export function run(): any {
                 mocha.run(failures => {
                     if (failures > 0) {
                         reject(new Error(`${failures} tests failed.`));
-                    } else {
-                        resolve();
                     }
-                }).on('end', () => coverageRunner && coverageRunner.reportCoverage());
+                }).on('end', () =>
+                    {
+                        coverageRunner && coverageRunner.reportCoverage();
+                        resolve();
+                    });
             }
         });
     });
