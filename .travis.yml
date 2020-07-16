@@ -16,11 +16,9 @@ before_install:
       sh -e /etc/init.d/xvfb start;
       sleep 3;
     fi
-- npm install -g typescript
 
 install:
   - npm install
-  - npm run vscode:prepublish
 
 script:
   - npm run test:coverage
