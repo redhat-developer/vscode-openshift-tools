@@ -23,5 +23,5 @@ install:
   - npm run vscode:prepublish
 
 script:
-  - npm test --silent
+  - npm run test:coverage
   - codecov -f out/coverage/coverage-final.json
