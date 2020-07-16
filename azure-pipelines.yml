@@ -18,9 +18,6 @@ jobs:
         inputs:
           verbose: false
       - script: |
-          npm run vscode:prepublish
-        displayName: 'run prepublish'
-      - script: |
           npm run test:coverage
         displayName: 'Run tests'
       - script: |
@@ -40,9 +37,6 @@ jobs:
         inputs:
           verbose: true
       - script: |
-          npm run vscode:prepublish
-        displayName: 'run prepublish'
-      - script: |
           npm run test:coverage
         displayName: 'Run tests'
       - script: |
@@ -60,9 +54,6 @@ jobs:
         displayName: 'Install dependencies'
         inputs:
           verbose: true
-      - script: |
-          npm run vscode:prepublish
-        displayName: 'run prepublish'
       - script: |
           set -e
           /usr/bin/Xvfb :10 -ac >> /tmp/Xvfb.out 2>&1 &
