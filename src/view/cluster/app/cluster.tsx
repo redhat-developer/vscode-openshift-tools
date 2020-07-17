@@ -6,7 +6,7 @@
 import * as React from 'react';
 import { makeStyles, Theme, createStyles, withStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import { 
+import {
   AppBar,
   Button,
   Card,
@@ -209,9 +209,6 @@ export default function Header() {
           <CardActions className={classes.cardButton}>
             <Tooltip title={list.tooltip} placement="top">
               <div>
-                {/* <ColorButton href={list.redirectLink} onClick={() => handleView(index)}>
-                  {list.buttonText}
-                </ColorButton> */}
                 <a href={list.redirectLink} onClick={() => handleView(index)} style={{ textDecoration: 'none'}}>
                   <Button
                     variant="contained"
