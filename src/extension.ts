@@ -8,7 +8,6 @@ import {
     commands,
     workspace,
     window,
-    debug,
     WorkspaceFoldersChangeEvent,
 } from 'vscode';
 import { OpenShiftExplorer } from './explorer';
@@ -25,8 +24,6 @@ import { DebugSessionsView } from './debug';
 
 import path = require('path');
 import fsx = require('fs-extra');
-import treeKill = require('tree-kill');
-
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
@@ -116,14 +113,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     });
 
     OdoImpl.Instance.loadWorkspaceComponents(null);
-
-    extensionContext.subscriptions.push(
-        debug.onDidTerminateDebugSession((session) => {
-            if (session.configuration.odoPid) {
-                treeKill(session.configuration.odoPid);
-            }
-        }),
-    );
 
     return {
         verifyBundledBinaries,
