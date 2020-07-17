@@ -58,6 +58,9 @@ export class Component extends OpenShiftItem {
                 if (session.configuration?.contextPath) {
                     Component.debugSessions.delete(session.configuration.contextPath.fsPath);
                 }
+                if (session.configuration.odoPid) {
+                    treeKill(session.configuration.odoPid);
+                }
             })
         ];
     }
