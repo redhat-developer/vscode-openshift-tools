@@ -41,7 +41,7 @@ function migrateFromOdo018(): void {
     }
 }
 
-async function verifyBundledBinaries(): Promise<any> {
+async function verifyBundledBinaries(): Promise<{odoPath: string, ocPath: string}> {
     return {
         odoPath: await ToolsConfig.detect('odo'),
         ocPath: await ToolsConfig.detect('oc'),
