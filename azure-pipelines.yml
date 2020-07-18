@@ -21,7 +21,7 @@ jobs:
           npm run test:coverage
         displayName: 'Run tests'
       - script: |
-          node node_modules/codecov/bin/codecov -f coverage/coverage-final.json -t $(CODECOV_TOKEN)
+          node node_modules/codecov/bin/codecov -f out/coverage/coverage-final.json -t $(CODECOV_TOKEN)
         displayName: 'Upload coverage to codecov.io'
   - job: macOS
     pool:
@@ -40,7 +40,7 @@ jobs:
           npm run test:coverage
         displayName: 'Run tests'
       - script: |
-          node node_modules/codecov/bin/codecov -f coverage/coverage-final.json -t $(CODECOV_TOKEN)
+          node node_modules/codecov/bin/codecov -f out/coverage/coverage-final.json -t $(CODECOV_TOKEN)
         displayName: 'Upload coverage to codecov.io'
   - job: Linux
     pool:
@@ -65,5 +65,5 @@ jobs:
         env:
           DISPLAY: :10
       - script: |
-          node node_modules/codecov/bin/codecov -f coverage/coverage-final.json -t $(CODECOV_TOKEN)
+          node node_modules/codecov/bin/codecov -f out/coverage/coverage-final.json -t $(CODECOV_TOKEN)
         displayName: 'Upload coverage to codecov.io'

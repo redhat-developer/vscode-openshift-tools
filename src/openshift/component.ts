@@ -32,10 +32,9 @@ import treeKill = require('tree-kill');
 const waitPort = require('wait-port');
 
 export class Component extends OpenShiftItem {
-    public static extensionContext: ExtensionContext;
-    public static debugSessions = new Map<string, DebugSession>();
-    public static watchSessions = new Map<string, ChildProcess>();
-    // TODO: Hide subject behind EventEmitter interface
+    private static extensionContext: ExtensionContext;
+    private static debugSessions = new Map<string, DebugSession>();
+    private static watchSessions = new Map<string, ChildProcess>();
     private static readonly watchEmitter = new EventEmitter();
 
     public static onDidWatchStarted(listener: (event: OpenShiftObjectImpl) => void): void {
@@ -55,7 +54,7 @@ export class Component extends OpenShiftItem {
                 }
             }),
             debug.onDidTerminateDebugSession((session) => {
-                if (session.configuration?.contextPath) {
+                if (session.configuration.contextPath) {
                     Component.debugSessions.delete(session.configuration.contextPath.fsPath);
                 }
                 if (session.configuration.odoPid) {
