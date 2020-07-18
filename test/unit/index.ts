@@ -12,19 +12,6 @@ require('source-map-support').install();
 
 import Mocha = require('mocha');
 
-// declare var global: any;
-
-// Linux: prevent a weird NPE when mocha on Linux requires the window size from the TTY
-// Since we are not running in a tty environment, we just implement the method statically
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const tty = require('tty');
-
-if (!tty.getWindowSize) {
-    tty.getWindowSize = (): number[] => {
-        return [80, 75];
-    };
-}
-
 const config: any = {
     reporter: 'mocha-jenkins-reporter',
     ui: 'tdd',
@@ -61,11 +48,10 @@ export function run(): Promise<void> {
                     if (failures > 0) {
                         reject(new Error(`${failures} tests failed.`));
                     }
-                }).on('end', () =>
-                    {
-                        coverageRunner && coverageRunner.reportCoverage();
-                        resolve();
-                    });
+                }).on('end', () => {
+                    coverageRunner && coverageRunner.reportCoverage();
+                    resolve();
+                });
             }
         });
     });
