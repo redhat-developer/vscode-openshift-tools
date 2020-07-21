@@ -11,6 +11,7 @@ node('rhel8'){
     def nodeHome = tool 'nodejs-12.13.1'
     env.PATH="${env.PATH}:${nodeHome}/bin"
     sh "npm install"
+    sh "npm install -g vsce"
   }
 
   withEnv(['JUNIT_REPORT_PATH=report.xml']) {
