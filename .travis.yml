@@ -21,4 +21,7 @@ install:
   - npm install
 
 script:
-  - npm run test:coverage && test $TRAVIS_OS_NAME == "linux" && codecov -f out/coverage/coverage-final.json
+  - npm run test:coverage
+
+after_success:
+  - test $TRAVIS_OS_NAME == "linux" && codecov -f out/coverage/coverage-final.json
