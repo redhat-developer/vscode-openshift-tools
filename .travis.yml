@@ -15,11 +15,13 @@ before_install:
       export CXX="g++" CC="gcc" DISPLAY=:99.0;
       sh -e /etc/init.d/xvfb start;
       sleep 3;
-    fi
+  fi
 
 install:
   - npm install
 
 script:
   - npm run test:coverage
-  - codecov -f out/coverage/coverage-final.json
+  - if [ $TRAVIS_OS_NAME == "linux" ]; then
+        codecov -f out/coverage/coverage-final.json
+    fi
