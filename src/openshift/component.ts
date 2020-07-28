@@ -513,7 +513,7 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.watch.terminate')
     static terminateWatchSession(context: string): void {
-        treeKill(Component.watchSessions.get(context).pid, 'SIGSTOP');
+        treeKill(Component.watchSessions.get(context).pid, 'SIGKILL');
     }
 
     @vsCommand('openshift.component.watch.showLog')
