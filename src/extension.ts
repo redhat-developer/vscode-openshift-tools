@@ -14,7 +14,7 @@ import { OpenShiftExplorer } from './explorer';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
 import { Platform } from './util/platform';
-import { OdoImpl, ContextType } from './odo';
+import { OdoImpl, ContextType, OdoEvent } from './odo';
 import { TokenStore } from './util/credentialManager';
 import { registerCommands } from './vscommand';
 import { ToolsConfig } from './tools';
@@ -76,7 +76,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
 
     // TODO: Implement the case when 'odo watch' is running for component and push would be done automatically
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    OdoImpl.Instance.subject.subscribe(async (event) => {
+    OdoImpl.Instance.subject.subscribe(async (event: OdoEvent) => {
         if (event.type === 'inserted' && event.data.contextValue === ContextType.COMPONENT) {
             const choice = await window.showInformationMessage(
                 `Do you want to push new '${event.data.getName()}' Component?`,
