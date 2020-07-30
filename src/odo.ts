@@ -426,7 +426,9 @@ class OdoModel {
         const array = await item.getParent().getChildren();
         array.splice(array.indexOf(item), 1);
         this.pathToObject.delete(item.path);
-        this.contextToObject.delete(item.contextPath.fsPath);
+        if (item.contextPath) {
+            this.contextToObject.delete(item.contextPath.fsPath);
+        }
     }
 
     public deleteContext(context: string): void {
