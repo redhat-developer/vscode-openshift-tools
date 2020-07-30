@@ -12,6 +12,7 @@ import { TestItem } from './openshift/testOSItem';
 import { ContextType } from '../../src/odo';
 
 import sinon = require('sinon');
+import { TreeItem } from 'vscode';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -47,6 +48,8 @@ suite('Watch Sessions View', () => {
         startEmitter.emit('watchStarted', componentItem);
         const children = await view.getChildren();
         expect(children.length).equals(1);
+        expect(view.getParent()).undefined;
+        expect((view.getTreeItem(children[0]) as TreeItem).label).includes(componentItem.getName());
     });
 
     test('removes component from view after stop command executed', async () => {
@@ -55,5 +58,4 @@ suite('Watch Sessions View', () => {
         const children = await view.getChildren();
         expect(children.length).equals(0);
     });
-
 });
