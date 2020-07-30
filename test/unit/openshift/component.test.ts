@@ -9,6 +9,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { ChildProcess } from 'child_process';
+import { EventEmitter } from 'events';
 import { TestItem } from './testOSItem';
 import { OdoImpl, ContextType } from '../../../src/odo';
 import { Command } from "../../../src/odo/command";
@@ -19,7 +20,6 @@ import OpenShiftItem from '../../../src/openshift/openshiftItem';
 
 import pq = require('proxyquire');
 import globby = require('globby');
-
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -51,7 +51,7 @@ suite('OpenShift/Component', () => {
         sandbox = sinon.createSandbox();
         sandbox.stub(vscode.workspace, "updateWorkspaceFolders");
         fetchTag = sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>([['HEAD', 'shanumb']]));
-        Component = pq('../../../src/openshift/component', {}).Component;
+        Component = pq('../../../src/openshift/component', { }).Component;
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });
         spawnStub = sandbox.stub(OdoImpl.prototype, 'spawn');
@@ -1137,6 +1137,28 @@ suite('OpenShift/Component', () => {
             spawnStub.resolves(cpStub);
             await Component.watch(null);
             expect(spawnStub).calledOnceWith(Command.watchComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+        });
+
+        test('adds process to Watch Sessions view and removes it when process exits', async () => {
+            const cpStub = new EventEmitter() as any as ChildProcess;
+            (cpStub as any).pid = 123;
+            spawnStub.resolves(cpStub);
+            const c = pq('../../../src/openshift/component', {
+                'tree-kill': () => {
+                    cpStub.emit('exit')
+                }
+            }).Component;
+            c.aaa = "test";
+            const WatchSessionsViewPQ = pq('../../../src/watch', {
+                './openshift/component': { Component: c}
+            }).WatchSessionsView;
+            const watchView = new WatchSessionsViewPQ();
+            await c.watch(componentItem);
+            let children = watchView.getChildren();
+            expect((children as string[]).length).equals(1);
+            c.terminateWatchSession(componentItem.contextPath.fsPath);
+            children = watchView.getChildren();
+            expect((children as string[]).length).equals(0);
         });
     });
 

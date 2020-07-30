@@ -17,7 +17,7 @@ const config: any = {
     ui: 'tdd',
     timeout: 60000,
     color: true,
-    // grep: 'should load components from workspace folders'
+    //  grep: 'removes watch process from Watch Sessions view when process exits'
 };
 
 if (process.env.BUILD_ID && process.env.BUILD_NUMBER) {
