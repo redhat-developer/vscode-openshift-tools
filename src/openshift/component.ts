@@ -259,7 +259,7 @@ export class Component extends OpenShiftItem {
         }
     }
 
-    private static async getLinkData(component: OpenShiftObject): Promise<any> {
+    static async getLinkData(component: OpenShiftObject): Promise<any> {
         const compData = await Component.odo.execute(Command.describeComponentNoContextJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         return JSON.parse(compData.stdout);
     }
@@ -513,7 +513,7 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.watch.terminate')
     static terminateWatchSession(context: string): void {
-        treeKill(Component.watchSessions.get(context).pid, 'SIGSTOP');
+        treeKill(Component.watchSessions.get(context).pid, 'SIGKILL');
     }
 
     @vsCommand('openshift.component.watch.showLog')
