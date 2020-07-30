@@ -6,13 +6,13 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import { EventEmitter } from 'events';
+import { TreeItem } from 'vscode';
 import { WatchSessionsView } from '../../src/watch';
 import { Component } from '../../src/openshift/component';
 import { TestItem } from './openshift/testOSItem';
 import { ContextType } from '../../src/odo';
 
 import sinon = require('sinon');
-import { TreeItem } from 'vscode';
 
 const {expect} = chai;
 chai.use(sinonChai);
