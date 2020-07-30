@@ -6,6 +6,7 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import { EventEmitter } from 'events';
+import { TreeItem } from 'vscode';
 import { WatchSessionsView } from '../../src/watch';
 import { Component } from '../../src/openshift/component';
 import { TestItem } from './openshift/testOSItem';
@@ -47,6 +48,8 @@ suite('Watch Sessions View', () => {
         startEmitter.emit('watchStarted', componentItem);
         const children = await view.getChildren();
         expect(children.length).equals(1);
+        expect(view.getParent()).undefined;
+        expect((view.getTreeItem(children[0]) as TreeItem).label).includes(componentItem.getName());
     });
 
     test('removes component from view after stop command executed', async () => {
@@ -55,5 +58,4 @@ suite('Watch Sessions View', () => {
         const children = await view.getChildren();
         expect(children.length).equals(0);
     });
-
 });
