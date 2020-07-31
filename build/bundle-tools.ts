@@ -7,6 +7,7 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-console */
 
+import { exit } from 'process';
 import { DownloadUtil } from './download';
 import { Archive } from './archive';
 
@@ -15,6 +16,7 @@ import mkdirp = require('mkdirp');
 import path = require('path');
 import fs = require('fs-extra');
 import configData = require('../src/tools.json');
+
 
 interface PlatformData {
     url: string;
@@ -56,7 +58,11 @@ async function downloadFileAndCreateSha256(
         console.log('Previously downloaded archive SHA256 is correct');
     }
     console.log(`Extracting ${currentFile} to ${path.join(toolsFolder, platform.cmdFileName)}`);
-    await Archive.extract(currentFile, toolsFolder, platform.cmdFileName, platform.filePrefix);
+    if (!platform.cmdFileName.endsWith('.exe') && platform.cmdFileName.includes('.')) {
+        await Archive.extract(currentFile, toolsFolder, platform.cmdFileName, platform.filePrefix);
+    } else {
+        fs.copyFileSync(currentFile, path.join(toolsFolder, platform.cmdFileName));
+    }
 }
 
 async function bundleTools(): Promise<void> {
@@ -85,4 +91,7 @@ async function bundleTools(): Promise<void> {
     }
 }
 
-bundleTools();
+bundleTools().catch((error) => {
+    console.log(error);
+    exit(1);
+});
