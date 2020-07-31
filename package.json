@@ -621,7 +621,7 @@
       },
       {
         "command": "clusters.openshift.project.openConsole",
-        "title": "Open Project in Console",
+        "title": "Open in Console",
         "Category": "OpenShift"
       },
       {
@@ -863,6 +863,22 @@
         },
         {
           "command": "clusters.openshift.route.open",
+          "when": "false"
+        },
+        {
+          "command": "clusters.openshift.project.openConsole",
+          "when": "false"
+        },
+        {
+          "command": "clusters.openshift.imagestream.openConsole",
+          "when": "false"
+        },
+        {
+          "command": "clusters.openshift.deployment.openConsole",
+          "when": "false"
+        },
+        {
+          "command": "clusters.openshift.build.openConsole",
           "when": "false"
         }
       ],
