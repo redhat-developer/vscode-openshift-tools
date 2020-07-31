@@ -72,8 +72,9 @@ declare global {
     }
 }
 
+const vscode = window.acquireVsCodeApi();
+
 function stop() {
-    const vscode = window.acquireVsCodeApi();
     vscode.postMessage({action: 'stop'});
 }
 

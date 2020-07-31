@@ -8,8 +8,10 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
+import { ChildProcess } from 'child_process';
 import { TestItem } from './testOSItem';
-import { OdoImpl, Command, ContextType } from '../../../src/odo';
+import { OdoImpl, ContextType } from '../../../src/odo';
+import { Command } from "../../../src/odo/command";
 import { Progress } from '../../../src/util/progress';
 import * as Util from '../../../src/util/async';
 import { Refs } from '../../../src/util/refs';
@@ -17,6 +19,7 @@ import OpenShiftItem from '../../../src/openshift/openshiftItem';
 
 import pq = require('proxyquire');
 import globby = require('globby');
+
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -34,7 +37,7 @@ suite('OpenShift/Component', () => {
     const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
     const projectItem = new TestItem(clusterItem, 'myproject', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app1', ContextType.APPLICATION);
-    const componentItem = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], false, comp1Uri, 'https://host/proj/app/comp1');
+    const componentItem = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1');
     const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
     const errorMessage = 'FATAL ERROR';
     let getProjects: sinon.SinonStub;
@@ -42,6 +45,7 @@ suite('OpenShift/Component', () => {
     let Component: any;
     let fetchTag: sinon.SinonStub;
     let commandStub: sinon.SinonStub;
+    let spawnStub: sinon.SinonStub;
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -50,6 +54,7 @@ suite('OpenShift/Component', () => {
         Component = pq('../../../src/openshift/component', {}).Component;
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });
+        spawnStub = sandbox.stub(OdoImpl.prototype, 'spawn');
         sandbox.stub(OdoImpl.prototype, 'getServices');
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
@@ -983,12 +988,12 @@ suite('OpenShift/Component', () => {
 
         test('calls the correct odo command', async () => {
             await Component.describe(componentItem);
-            expect(termStub).calledOnceWith(Command.describeComponent(componentItem.getParent().getParent().getName(), componentItem.getParent().getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.describeComponent());
         });
 
         test('works with no context', async () => {
             await Component.describe(null);
-            expect(termStub).calledOnceWith(Command.describeComponent(componentItem.getParent().getParent().getName(), componentItem.getParent().getName(), componentItem.getName()));
+            expect(termStub).calledOnceWith(Command.describeComponent());
         });
     });
 
@@ -1121,15 +1126,17 @@ suite('OpenShift/Component', () => {
         });
 
         test('calls the correct odo command w/ context', async () => {
+            const cpStub = {on: sinon.stub()} as any as ChildProcess;
+            spawnStub.resolves(cpStub);
             await Component.watch(componentItem);
-
-            expect(termStub).calledOnceWith(Command.watchComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(spawnStub).calledOnceWith(Command.watchComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
 
         test('calls the correct odo command w/o context', async () => {
+            const cpStub = {on: sinon.stub()} as any as ChildProcess;
+            spawnStub.resolves(cpStub);
             await Component.watch(null);
-
-            expect(termStub).calledOnceWith(Command.watchComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(spawnStub).calledOnceWith(Command.watchComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
     });
 

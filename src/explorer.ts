@@ -39,11 +39,11 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     private fsw: FileContentChangeNotifier;
     private kubeContext: Context;
 
-    private onDidChangeTreeDataEmitter: EventEmitter<OpenShiftObject> =
+    private eventEmitter: EventEmitter<OpenShiftObject | undefined> =
         new EventEmitter<OpenShiftObject | undefined>();
 
     readonly onDidChangeTreeData: Event<OpenShiftObject | undefined> = this
-        .onDidChangeTreeDataEmitter.event;
+        .eventEmitter.event;
 
     private constructor() {
         try {
@@ -55,11 +55,14 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
         this.fsw.emitter.on('file-changed', () => {
             const ku2 = new KubeConfigUtils();
-            const newKubeCtx = ku2.getContextObject(ku2.currentContext);
-            if (!this.kubeContext || (this.kubeContext.cluster !== newKubeCtx.cluster || this.kubeContext.user !== newKubeCtx.user)) {
+            const newCtx = ku2.getContextObject(ku2.currentContext);
+            if (!this.kubeContext
+                || (this.kubeContext.cluster !== newCtx.cluster
+                    || this.kubeContext.user !== newCtx.user
+                    || this.kubeContext.namespace !== newCtx.user)) {
                 this.refresh();
             }
-            this.kubeContext = newKubeCtx;
+            this.kubeContext = newCtx;
         });
         this.treeView = window.createTreeView('openshiftProjectExplorer', {
             treeDataProvider: this,
@@ -99,7 +102,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         if (!target) {
             OpenShiftExplorer.odoctl.clearCache();
         }
-        this.onDidChangeTreeDataEmitter.fire(target);
+        this.eventEmitter.fire(target);
     }
 
     dispose(): void {

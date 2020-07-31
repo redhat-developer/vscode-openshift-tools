@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------------------------
 #  Copyright (c) Red Hat, Inc. All rights reserved.
 #  Licensed under the MIT License. See LICENSE file in the project root for license information.
-# ----------------------------------------------------------------------------------------------- 
+# -----------------------------------------------------------------------------------------------
 
 jobs:
   - job: Windows
@@ -18,11 +18,8 @@ jobs:
         inputs:
           verbose: false
       - script: |
-          npm run vscode:prepublish
-        displayName: 'run prepublish'
-      - script: |
-          npm test --silent
-        displayName: 'Run tests'  
+          npm run test:coverage
+        displayName: 'Run tests'
       - script: |
           node node_modules/codecov/bin/codecov -f coverage/coverage-final.json -t $(CODECOV_TOKEN)
         displayName: 'Upload coverage to codecov.io'
@@ -40,10 +37,7 @@ jobs:
         inputs:
           verbose: true
       - script: |
-          npm run vscode:prepublish
-        displayName: 'run prepublish'
-      - script: |
-          npm test --silent
+          npm run test:coverage
         displayName: 'Run tests'
       - script: |
           node node_modules/codecov/bin/codecov -f coverage/coverage-final.json -t $(CODECOV_TOKEN)
@@ -61,15 +55,12 @@ jobs:
         inputs:
           verbose: true
       - script: |
-          npm run vscode:prepublish
-        displayName: 'run prepublish'
-      - script: |
           set -e
           /usr/bin/Xvfb :10 -ac >> /tmp/Xvfb.out 2>&1 &
           disown -ar
         displayName: 'Start xvfb'
       - script: |
-          npm test --silent
+          npm run test:coverage
         displayName: 'Run tests'
         env:
           DISPLAY: :10

@@ -301,7 +301,6 @@ export default function addClusterView() {
                     secondary={<span>This will download the crc {crcLatest} bundle.</span>}/>
                     <a href={fetchDownloadBinary()} style={{ textDecoration: 'none'}}>
                       <Button
-                        variant="contained"
                         color="default"
                         component="span"
                         className={classes.button}

@@ -20,10 +20,13 @@ import { TokenStore } from './util/credentialManager';
 import { registerCommands } from './vscommand';
 import { ToolsConfig } from './tools';
 import { extendClusterExplorer } from './k8s/clusterExplorer';
+import { WatchSessionsView } from './watch';
+import { DebugSessionsView } from './debug';
 
 import path = require('path');
 import fsx = require('fs-extra');
 import treeKill = require('tree-kill');
+
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
@@ -51,7 +54,6 @@ async function verifyBundledBinaries(): Promise<any> {
 export async function activate(extensionContext: ExtensionContext): Promise<any> {
     migrateFromOdo018();
     Cluster.extensionContext = extensionContext;
-    Component.extensionContext = extensionContext;
     TokenStore.extensionContext = extensionContext;
     const disposable = [
         ...(await registerCommands(
@@ -69,6 +71,9 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             commands.executeCommand('extension.vsKubernetesUseNamespace', context),
         ),
         OpenShiftExplorer.getInstance(),
+        new WatchSessionsView().createTreeView('openshiftWatchView'),
+        DebugSessionsView.getInstance(),
+        ...Component.init(extensionContext)
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
 

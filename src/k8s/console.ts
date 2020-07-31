@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { Command } from "../odo";
+import { Command } from "../odo/command";
 import { KubeConfigUtils } from "../util/kubeUtils";
 import OpenShiftItem from '../openshift/openshiftItem';
 import { vsCommand } from '../vscommand';

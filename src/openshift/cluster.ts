@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { window, commands, env, QuickPickItem, ExtensionContext, Uri } from 'vscode';
-import { Command } from "../odo";
+import { Command } from "../odo/command";
 import OpenShiftItem from './openshiftItem';
 import { CliExitData, CliChannel } from "../cli";
 import { TokenStore } from "../util/credentialManager";

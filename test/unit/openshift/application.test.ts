@@ -7,7 +7,8 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { OdoImpl, Command, ContextType } from '../../../src/odo';
+import { OdoImpl, ContextType } from '../../../src/odo';
+import { Command } from "../../../src/odo/command";
 import { Application } from '../../../src/openshift/application';
 import { TestItem } from './testOSItem';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
@@ -22,7 +23,7 @@ suite('OpenShift/Application', () => {
     let getProjectNamesStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
-    const compItem = new TestItem(appItem, 'app', ContextType.COMPONENT_NO_CONTEXT, [], true, null);
+    const compItem = new TestItem(appItem, 'app', ContextType.COMPONENT_NO_CONTEXT, [], null);
     compItem.path = 'path/to/component';
     appItem.getChildren().push(compItem);
 

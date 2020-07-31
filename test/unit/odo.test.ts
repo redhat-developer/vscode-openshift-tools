@@ -16,6 +16,7 @@ import { WindowUtil } from '../../src/util/windowUtils';
 import { ToolsConfig } from '../../src/tools';
 import { CliExitData, CliChannel } from '../../src/cli';
 import * as odo from '../../src/odo';
+import * as verbose from "../../src/odo/command";
 
 import jsYaml = require('js-yaml');
 
@@ -161,6 +162,9 @@ suite("odo", () => {
                             {
                                 metadata: {
                                     name: 'project1'
+                                },
+                                status: {
+                                    active: true
                                 }
                             }
                         ]
@@ -289,7 +293,7 @@ suite("odo", () => {
             });
             const result = await odoCli.getServices(app);
 
-            expect(execStub).calledWith(odo.Command.listServiceInstances(project.getName(), app.getName()));
+            expect(execStub).calledWith(verbose.Command.listServiceInstances(project.getName(), app.getName()));
             expect(result.length).equals(3);
             for (let i = 0; i < result.length; i+=1) {
                 expect(result[i].getName()).equals(services[i]);
@@ -608,7 +612,7 @@ suite("odo", () => {
             const stub = sandbox.stub(odoCli, 'execute').resolves({ error: null, stdout: 'logged in', stderr: ''});
             const result = await odoCli.requireLogin();
 
-            expect(stub).calledOnceWith(odo.Command.printOdoVersionAndProjects());
+            expect(stub).calledOnceWith(verbose.Command.printOdoVersionAndProjects());
             expect(result).false;
         });
 

@@ -5,11 +5,13 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation } from 'vscode';
+import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
 import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
+import { EventEmitter } from 'events';
 import OpenShiftItem, { selectTargetApplication, selectTargetComponent } from './openshiftItem';
-import { OpenShiftObject, Command, ContextType, ComponentType } from '../odo';
+import { OpenShiftObject, ContextType, OpenShiftObjectImpl } from '../odo';
+import { Command } from "../odo/command";
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
 import { Refs, Ref, Type } from '../util/refs';
@@ -21,14 +23,58 @@ import { Catalog } from './catalog';
 import LogViewLoader from '../view/log/LogViewLoader';
 import DescribeViewLoader from '../view/describe/describeViewLoader';
 import { vsCommand, VsCommandError } from '../vscommand';
+import { SourceType } from '../odo/config';
 
 import path = require('path');
 import globby = require('globby');
+import treeKill = require('tree-kill');
 
 const waitPort = require('wait-port');
 
 export class Component extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
+    public static debugSessions = new Map<string, DebugSession>();
+    public static watchSessions = new Map<string, ChildProcess>();
+    // TODO: Hide subject behind EventEmitter interface
+    private static readonly watchEmitter = new EventEmitter();
+
+    public static onDidWatchStarted(listener: (event: OpenShiftObjectImpl) => void): void {
+        Component.watchEmitter.on('watchStarted', listener);
+    }
+
+    public static onDidWatchStopped(listener: (event: OpenShiftObjectImpl) => void): void {
+        Component.watchEmitter.on('watchStopped', listener);
+    }
+
+    public static init(context: ExtensionContext): Disposable[] {
+        Component.extensionContext = context;
+        return [
+            debug.onDidStartDebugSession((session) => {
+                if (session.configuration.contextPath) {
+                    Component.debugSessions.set(session.configuration.contextPath.fsPath, session);
+                }
+            }),
+            debug.onDidTerminateDebugSession((session) => {
+                if (session.configuration?.contextPath) {
+                    Component.debugSessions.delete(session.configuration.contextPath.fsPath);
+                }
+            })
+        ];
+    }
+
+    static stopDebugSession(component: OpenShiftObject): void {
+        const ds = Component.debugSessions.get(component.contextPath.fsPath);
+        if (ds) {
+            treeKill(ds.configuration.odoPid);
+        }
+    }
+
+    static stopWatchSession(component: OpenShiftObject): void {
+        const ws = Component.watchSessions.get(component.contextPath.fsPath);
+        if (ws) {
+            treeKill(ws.pid);
+        }
+    }
 
     static async getOpenshiftData(context: OpenShiftObject): Promise<OpenShiftObject> {
         return Component.getOpenShiftCmdData(context,
@@ -91,7 +137,10 @@ export class Component extends OpenShiftItem {
                 if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT || component.contextValue === ContextType.COMPONENT_PUSHED) {
                     await Component.unlinkAllComponents(component);
                 }
+                Component.stopDebugSession(component);
+                Component.stopWatchSession(component);
                 await Component.odo.deleteComponent(component);
+
             }).then(() => `Component '${name}' successfully deleted`)
             .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Component with error '${err}'`)));
         }
@@ -110,6 +159,8 @@ export class Component extends OpenShiftItem {
         const value = await window.showWarningMessage(`Do you want to undeploy Component '${name}'?`, 'Yes', 'Cancel');
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Undeploying the Component '${component.getName()} '`, async () => {
+                Component.stopDebugSession(component);
+                Component.stopWatchSession(component);
                 await Component.odo.undeployComponent(component);
             }).then(() => `Component '${name}' successfully undeployed`)
             .catch((err) => Promise.reject(new VsCommandError(`Failed to undeploy Component with error '${err}'`)));
@@ -141,7 +192,7 @@ export class Component extends OpenShiftItem {
         }
     }
 
-    static isUsingWebviewEditor() {
+    static isUsingWebviewEditor(): boolean {
         return workspace
             .getConfiguration('openshiftConnector')
             .get<boolean>('useWebviewInsteadOfTerminalView');
@@ -421,6 +472,16 @@ export class Component extends OpenShiftItem {
         }
     }
 
+    static addWatchSession(component: OpenShiftObject, process: ChildProcess): void {
+        Component.watchSessions.set(component.contextPath.fsPath, process);
+        Component.watchEmitter.emit('watchStarted', component);
+    }
+
+    static removeWatchSession(component: OpenShiftObject): void {
+        Component.watchSessions.delete(component.contextPath.fsPath);
+        Component.watchEmitter.emit('watchStopped', component);
+    }
+
     @vsCommand('openshift.component.watch', true)
     @selectTargetComponent(
         'Select a Project',
@@ -428,9 +489,34 @@ export class Component extends OpenShiftItem {
         'Select a Component you want to watch',
         (target) => target.contextValue === ContextType.COMPONENT_PUSHED
     )
-    static watch(component: OpenShiftObject): Promise<void> {
+    static async watch(component: OpenShiftObject): Promise<void> {
         if (!component) return null;
-        Component.odo.executeInTerminal(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath, `OpenShift: Watch '${component.getName()}' Component`);
+        if (component.compType !== SourceType.LOCAL && component.compType !== SourceType.BINARY) {
+            window.showInformationMessage(`Watch is supported only for Components with local or binary source type.`)
+            return null;
+        }
+        if (Component.watchSessions.get(component.contextPath.fsPath)) {
+            const sel = await window.showInformationMessage(`Watch process is already running for '${component.getName()}'`, 'Show Log');
+            if (sel === 'Show Log') {
+                commands.executeCommand('openshift.component.watch.showLog', component.contextPath.fsPath);
+            }
+        } else {
+            const process: ChildProcess = await Component.odo.spawn(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+            Component.addWatchSession(component, process);
+            process.on('exit', () => {
+                Component.removeWatchSession(component);
+            });
+        }
+    }
+
+    @vsCommand('openshift.component.watch.terminate')
+    static terminateWatchSession(context: string): void {
+        treeKill(Component.watchSessions.get(context).pid, 'SIGSTOP');
+    }
+
+    @vsCommand('openshift.component.watch.showLog')
+    static showWatchSessionLog(context: string): void {
+        LogViewLoader.loadView(`${context} Watch Log`,  () => `odo watch --context ${context}`, Component.odo.getOpenShiftObjectByContext(context), Component.watchSessions.get(context));
     }
 
     @vsCommand('openshift.component.openUrl', true)
@@ -591,7 +677,7 @@ export class Component extends OpenShiftItem {
 
         const binaryFileObj: QuickPickItem[] = paths.map((file) => ({ label: `$(file-zip) ${path.basename(file)}`, description: `${file}`}));
 
-        const binaryFile: any = await window.showQuickPick(binaryFileObj, {placeHolder: "Select binary file", ignoreFocusOut: true});
+        const binaryFile: QuickPickItem = await window.showQuickPick(binaryFileObj, {placeHolder: "Select binary file", ignoreFocusOut: true});
 
         if (!binaryFile) return null;
 
@@ -621,15 +707,22 @@ export class Component extends OpenShiftItem {
     )
     static async debug(component: OpenShiftObject): Promise<string | null> {
         if (!component) return null;
-        if (component.compType === ComponentType.LOCAL) {
+        if (component.compType === SourceType.LOCAL) {
             return Progress.execFunctionWithProgress(`Starting debugger session for the component '${component.getName()}'.`, () => Component.startDebugger(component));
         }
-        if (component.compType !== ComponentType.GIT || ComponentType.BINARY) {
+        if (component.compType !== SourceType.GIT || SourceType.BINARY) {
             throw new VsCommandError(`You are trying to run Debug on a ${component.compType} component, which is NOT supported. Debug Command is only supported for Local components.`);
         }
     }
 
     static async startDebugger(component: OpenShiftObject): Promise<string | undefined> {
+        if (Component.debugSessions.get(component.contextPath.fsPath)) {
+            const choice = await window.showWarningMessage(`Debugger session is already running for ${component.getName()}.`, 'Show \'Run and Debug\' view');
+            if (choice) {
+                commands.executeCommand('workbench.view.debug');
+            }
+            return null;
+        }
         const components = await Component.odo.getComponentTypesJson();
         const componentBuilder = components.find((builder) => builder.metadata.name === component.builderImage.name);
         const imageStreamRef = await Component.odo.getImageStreamRef(componentBuilder.metadata.name, componentBuilder.metadata.namespace);
@@ -704,11 +797,12 @@ export class Component extends OpenShiftItem {
                 }
             });
             cp.stderr.on('data', (data: string) => {
-                if (!`${data}`.includes('address already in use')) {
+                if (!`${data}`.includes('the local debug port 5858 is not free')) {
                     reject(data);
                 }
             });
         }).then((result) => {
+            config.contextPath = component.contextPath;
             config.port = result;
             config.odoPid = cp.pid;
             return debug.startDebugging(workspace.getWorkspaceFolder(component.contextPath), config);
@@ -726,9 +820,9 @@ export class Component extends OpenShiftItem {
         const componentResult = await Component.odo.execute(`oc get dc -l app.kubernetes.io/instance=${compName} --namespace ${prjName} -o json`, Platform.getUserHomePath(), false);
         const componentJson = JSON.parse(componentResult.stdout).items[0];
         const componentType = componentJson.metadata.annotations['app.kubernetes.io/component-source-type'];
-        if (componentType === ComponentType.BINARY) {
+        if (componentType === SourceType.BINARY) {
             return 'Import for binary OpenShift Components is not supported.';
-        } if (componentType !== ComponentType.GIT && componentType !== ComponentType.LOCAL) {
+        } if (componentType !== SourceType.GIT && componentType !== SourceType.LOCAL) {
             throw new VsCommandError(`Cannot import unknown Component type '${componentType}'.`);
         }
 
@@ -753,7 +847,7 @@ export class Component extends OpenShiftItem {
                 //      app.kubernetes.io/component-source-type: git
                 //      app.kubernetes.io/url: 'https://github.com/dgolovin/nodejs-ex'
 
-                if (componentType === ComponentType.GIT) {
+                if (componentType === SourceType.GIT) {
                     const bcResult = await Component.odo.execute(`oc get bc/${componentJson.metadata.name} --namespace ${prjName} -o json`);
                     const bcJson = JSON.parse(bcResult.stdout);
                     const compTypeName = componentJson.metadata.labels['app.kubernetes.io/name'];
