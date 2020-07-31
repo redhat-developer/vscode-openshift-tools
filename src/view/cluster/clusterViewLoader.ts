@@ -12,7 +12,6 @@ import { WindowUtil } from '../../util/windowUtils';
 // import treeKill = require('tree-kill');
 
 export default class ClusterViewLoader {
-
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     static get extensionPath() {
         return vscode.extensions.getExtension(ExtenisonID).extensionPath
@@ -39,6 +38,7 @@ export default class ClusterViewLoader {
                 const terminal: vscode.Terminal = WindowUtil.createTerminal(`OpenShift: Run CRC Setup`, undefined);
                 terminal.sendText(`${event.data} setup`);
                 terminal.show();
+                vscode.workspace.getConfiguration("openshiftConnector").update("crcBinaryLocation", event.data);
             }
             if (event.action === 'start') {
                 channel.show();
@@ -56,6 +56,7 @@ export default class ClusterViewLoader {
                     panel.webview.postMessage({action: 'crcstarterror', data: chunk})
                 });
                 child.on('close', (code) => {
+                    vscode.workspace.getConfiguration("openshiftConnector").update("crcPullSecretPath", event.pullSecret);
                     // eslint-disable-next-line no-console
                     console.log(`crc start exited with code ${code}`);
                     panel.webview.postMessage({action: 'crcstartstatus', data: code})

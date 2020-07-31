@@ -5,7 +5,6 @@
 
 import * as React from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
-import Autocomplete from '@material-ui/lab/Autocomplete';
 import { Alert } from '@material-ui/lab';
 import { InsertDriveFile, GetApp, VpnKey } from '@material-ui/icons';
 import StopIcon from '@material-ui/icons/Stop';
@@ -31,6 +30,10 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       textAlign: 'left',
+      '& .MuiPaper-root': {
+        backgroundColor: 'var(--vscode-editor-background)',
+        color: 'var(--vscode-foreground)'
+      },
       '& .MuiTextField-root': {
         margin: theme.spacing(1),
         width: '25ch',
@@ -39,10 +42,14 @@ const useStyles = makeStyles((theme: Theme) =>
         paddingLeft: theme.spacing(5)
       },
       '& .MuiStepper-root': {
-        marginLeft: theme.spacing(4)
+        marginLeft: theme.spacing(4),
+        backgroundColor: 'var(--vscode-editor-background)'
       },
       '& .MuiButton-root': {
         textTransform: 'none'
+      },
+      '& .MuiFormLabel-root': {
+        color: 'var(--vscode-input-foreground)'
       },
       '& .MuiStepIcon-root.MuiStepIcon-active': {
         color: '#0066CC'
@@ -55,11 +62,53 @@ const useStyles = makeStyles((theme: Theme) =>
       },
       '& .MuiStepLabel-iconContainer': {
         paddingRight: theme.spacing(2)
+      },
+      '& .MuiStepLabel-label.MuiStepLabel-active': {
+        color: 'var(--vscode-foreground)'
+      },
+      '& .MuiStepLabel-label': {
+        color: 'var(--vscode-foreground)'
+      },
+      '& .MuiTypography-colorTextSecondary': {
+        color: 'var(--vscode-foreground)'
+      },
+      '& .MuiButton-root.Mui-disabled': {
+        color: 'var(--vscode-button-secondaryForeground)'
       }
     },
     button: {
       marginTop: theme.spacing(1),
-      marginRight: theme.spacing(1)
+      marginRight: theme.spacing(1),
+      backgroundColor: 'var(--vscode-button-background)',
+      color: 'var(--vscode-button-foreground)',
+      '&:hover' :{
+        backgroundColor: 'var(--vscode-button-hoverBackground)',
+        cursor: 'pointer'
+      },
+      '&:focus': {
+        backgroundColor: 'var(--vscode-button-hoverBackground)',
+        cursor: 'pointer'
+      },
+      '&:disabled' :{
+        opacity: 0.4
+      }
+    },
+    buttonSecondary: {
+      marginTop: theme.spacing(1),
+      marginRight: theme.spacing(1),
+      backgroundColor: 'var(--vscode-button-secondaryBackground)',
+      color: 'var(--vscode-button-secondaryForeground)',
+      '&:hover' :{
+        backgroundColor: 'var(--vscode-button-secondaryHoverBackground)',
+        cursor: 'pointer'
+      },
+      '&:focus': {
+        backgroundColor: 'var(--vscode-button-secondaryHoverBackground)',
+        cursor: 'pointer'
+      },
+      '&:disabled' :{
+        opacity: 0.4
+      }
     },
     actionsContainer: {
       marginBottom: theme.spacing(2),
@@ -75,6 +124,10 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     uploadLabel: {
       marginTop: theme.spacing(2)
+    },
+    textContainer: {
+      color: 'var(--vscode-input-foreground)',
+      fontFamily: 'var(--vscode-editor-font-family)'
     }
   })
 );
@@ -95,34 +148,20 @@ const crcDefaults = {
 	DefaultCrcUrlBase: "http://mirror.openshift.com/pub/openshift-v4/clients/crc"
 }
 
-const crcVersions = [
-  { crcVersion: "1.0.0", openshiftVersion: "4.2.0"},
-  { crcVersion: "1.1.0", openshiftVersion: "4.2.2"},
-  { crcVersion: "1.2.0", openshiftVersion: "4.2.8"},
-  { crcVersion: "1.3.0", openshiftVersion: "4.2.10"},
-  { crcVersion: "1.4.0", openshiftVersion: "4.2.13"},
-  { crcVersion: "1.5.0", openshiftVersion: "4.2.14"},
-  { crcVersion: "1.6.0", openshiftVersion: "4.3.0"},
-  { crcVersion: "1.7.0", openshiftVersion: "4.3.1"},
-  { crcVersion: "1.8.0", openshiftVersion: "4.3.8"},
-  { crcVersion: "1.9.0", openshiftVersion: "4.3.10"},
-  { crcVersion: "1.10.0", openshiftVersion: "4.4.3"},
-  { crcVersion: "1.11.0", openshiftVersion: "4.4.5"}
-];
-
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function getSteps() {
-  return ['Select OpenShift Version', 'CRC Binary Path/Download', 'File path of image pull secret', 'Select optional configurations', 'Setup CRC', 'Start the cluster'];
+  return ['OpenShift Version', 'CodeReady Containers archive', 'File path of image pull secret', 'Select optional configurations', 'Setup CRC', 'Start the cluster'];
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function addClusterView() {
   const classes = useStyles();
+  const crcLatest = '1.13.0';
+  const crcOpenShift = '4.5.1';
   const [fileName, setBinaryPath] = React.useState('');
   const [pullSecretPath, setSecret] = React.useState('');
   const [cpuSize, setCpuSize] = React.useState(crcDefaults.DefaultCPUs);
   const [memory, setMemory] = React.useState(crcDefaults.DefaultMemory);
-  const [versionLabel, setVersionLabel] = React.useState('1.11.0');
   const [crcProgress, setProgress] = React.useState(true);
   const [crcStopProgress, setStopProgress] = React.useState(false);
   const [crcError, setCrcError] = React.useState(false);
@@ -183,7 +222,7 @@ export default function addClusterView() {
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
       const crcStartCommand = `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory}`;
-      vscode.postMessage({action: 'start', data: crcStartCommand});
+      vscode.postMessage({action: 'start', data: crcStartCommand, pullSecret: pullSecretPath});
     }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
@@ -208,7 +247,6 @@ export default function addClusterView() {
 
   const handleReset = () => {
     setActiveStep(0);
-    setVersionLabel('1.11.0');
     setBinaryPath('');
     setSecret('');
     setCpuSize(crcDefaults.DefaultCPUs);
@@ -225,46 +263,32 @@ export default function addClusterView() {
     if (platform === 'darwin') crcBundle = `crc-macos-amd64.tar.xz`;
     if (platform === 'win32') crcBundle = `crc-windows-amd64.zip`;
     if (platform === 'linux') crcBundle = `crc-linux-amd64.tar.xz`;
-    return `${crcDefaults.DefaultCrcUrlBase}/${versionLabel}/${crcBundle}`;
+    return `${crcDefaults.DefaultCrcUrlBase}/${crcLatest}/${crcBundle}`;
   }
 
   const getStepContent = (step: number) => {
     switch (step) {
-        case 0:
-          const options = crcVersions.map((option) => {
-            const majorVersion = option.openshiftVersion;
-            return {
-              majorVersion: majorVersion.substring(0, majorVersion.lastIndexOf('.')),
-              ...option,
-            };
-          });          
+        case 0:      
           return (
-            <Autocomplete
-              id="grouped-openshift"
-              options={options.sort().reverse()}
-              groupBy={(option) => `OpenShift: ${option.majorVersion}`}
-              getOptionLabel={(option) => option.crcVersion}
-              style={{ width: 300 }}
-              onInputChange={(_, val) => {
-                setVersionLabel(val);
-              }}
-              renderOption={(option) => {
-                return (
-                  <React.Fragment>
-                    {option.crcVersion}
-                    <Typography  style={{ color: '#EE0000', marginLeft: 6, fontSize: 10 }}>
-                      {option.crcVersion === '1.11.0' ? 'latest': ''}
-                    </Typography>
-                  </React.Fragment>
-                );
-              }}
-              renderInput={(params) => <TextField {...params} label="CRC Version" variant="outlined" fullWidth/>}
-            />
+            <List dense>
+              <ListItem>
+                <ListItemText
+                  primary={<span>CRC Version: {crcLatest}</span>}
+                  secondary={'This is the latest version of Red Hat Code Ready Containers'}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary={<span>OpenShift Version: {crcOpenShift}</span>}
+                  secondary={<span>Install OpenShift {crcOpenShift} on a laptop with CodeReady Containers</span>}
+                />
+              </ListItem>
+            </List>
           );
         case 1:
           return (
             <div>
-              <Typography>Download and extract the CodeReady Containers archive for your operating system and provide the binary path.</Typography>
+              <Typography>Download and extract the CodeReady Containers archive for your operating system and place the binary in your $PATH</Typography>
               <List className={classes.uploadLabel}>
                 <ListItem>
                   <ListItemAvatar>
@@ -274,7 +298,7 @@ export default function addClusterView() {
                   </ListItemAvatar>
                   <ListItemText
                     primary="Download"
-                    secondary={<span>This will download the crc {versionLabel} bundle.</span>}/>
+                    secondary={<span>This will download the crc {crcLatest} bundle.</span>}/>
                     <a href={fetchDownloadBinary()} style={{ textDecoration: 'none'}}>
                       <Button
                         variant="contained"
@@ -307,7 +331,7 @@ export default function addClusterView() {
                     <label htmlFor="contained-button-file">
                       <Tooltip title="This is a required field" placement="left">
                         <Button variant="contained" component="span" className={classes.button}>
-                        Select Path
+                          Select Path
                         </Button>
                       </Tooltip>
                     </label>
@@ -318,7 +342,8 @@ export default function addClusterView() {
                     <TextField
                       id="outlined-location"
                       label="Binary Location"
-                      style={{ marginTop: '20px', width: '100%'}}
+                      className={classes.textContainer}
+                      style= {{ marginTop: '20px', width: '100%' }}
                       fullWidth
                       defaultValue={fileName}
                       InputProps={{
@@ -352,8 +377,8 @@ export default function addClusterView() {
                 />
                 <label htmlFor="contained-button-file">
                   <Tooltip title="This is a required field" placement="left">
-                    <Button variant="contained" component="span">
-                    Select Pull Secret file
+                    <Button className={classes.button} component="span">
+                      Select Pull Secret file
                     </Button>
                   </Tooltip>
                 </label>
@@ -363,7 +388,8 @@ export default function addClusterView() {
               <TextField
                 id="outlined-location"
                 label="Pull Secret Location"
-                style={{ marginTop: '20px', width: '100%'}}
+                className={classes.textContainer}
+                style= {{ marginTop: '20px', width: '100%' }}
                 fullWidth
                 defaultValue={pullSecretPath}
                 InputProps={{
@@ -386,6 +412,7 @@ export default function addClusterView() {
                 onChange={handleCpuSize}
                 value={cpuSize}
                 InputProps={{ inputProps: { min: crcDefaults.DefaultCPUs } }}
+                className={classes.textContainer}
               />
               <TextField
                 id="outlined-number"
@@ -397,6 +424,7 @@ export default function addClusterView() {
                 value={memory}
                 InputProps={{ inputProps: { min: crcDefaults.DefaultMemory } }}
                 helperText="Value in MiB"
+                className={classes.textContainer}
               />
             </div>)
         case 4:
@@ -404,11 +432,9 @@ export default function addClusterView() {
             <List>
               <ListItem>
               <ListItemText
-                primary={<span>Set up local virtualization and networking infrastructure for the OpenShift cluster.</span>}
+                primary={<span>Set up your host operating system for the CodeReady Containers virtual machine</span>}
                 secondary={<span>Once the setup process is successful, then proceed to start the cluster in Next step.</span>} />
                 <Button 
-                  variant="contained"
-                  color="primary"
                   onClick={handleCrcSetup}
                   className={classes.button}>
                   Setup CRC
@@ -418,7 +444,7 @@ export default function addClusterView() {
         case 5:
           return (
             <Typography>
-              Start the cluster. This will also set up local virtualization and networking infrastructure for the OpenShift cluster.
+              Start the cluster. This will create a minimal OpenShift {crcOpenShift} cluster on your laptop or desktop computer.
             </Typography>)
         default:
           return 'Unknown step';
@@ -439,15 +465,14 @@ export default function addClusterView() {
                     <Button
                       disabled={activeStep === 0}
                       onClick={handleBack}
-                      className={classes.button}
+                      className={classes.buttonSecondary}
                     >
                       Back
                     </Button>
                     <Button
                       variant="contained"
-                      color="primary"
                       onClick={handleNext}
-                      className={classes.button}
+                      className={classes.buttonSecondary}
                       disabled={handleDisabled()}
                     >
                       {activeStep === steps.length - 1 ? 'Start Cluster' : 'Next'}
@@ -488,7 +513,7 @@ export default function addClusterView() {
               <div>
                 <List>
                   <ListItem>
-                    <Alert variant="filled" severity="error" style={{ backgroundColor: '#a30000'}}>CRC Process errored out. Check Output channel for details.</Alert>
+                    <Alert variant="filled" severity="error" style={{ backgroundColor: 'var(--vscode-inputValidation-errorBackground)', color: 'var(--vscode-inputValidation-errorForeground)'}}>CRC Process errored out. Check Output channel for details.</Alert>
                   </ListItem>
                 </List>
               </div>)}
@@ -496,12 +521,11 @@ export default function addClusterView() {
                 <div>
                   <List>
                     <ListItem>
-                      <Alert variant="filled" severity="success" style={{ backgroundColor: '#0066CC'}}>OpenShift Instance is up.</Alert>
+                      <Alert variant="filled" severity="success" style={{ backgroundColor: 'var(--vscode-editor-background)'}}>OpenShift Instance is up.</Alert>
                     </ListItem>
                     <ListItem>
                       <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none'}}>
                         <Button
-                          variant="contained"
                           component="span"
                           className={classes.button}
                         >
@@ -509,7 +533,6 @@ export default function addClusterView() {
                         </Button>
                       </a>
                       <Button
-                          variant="contained"
                           component="span"
                           className={classes.button}
                           onClick={handleStopProcess}
@@ -524,17 +547,26 @@ export default function addClusterView() {
                 <div>
                   <List>
                     <ListItem>
-                      <Alert variant="filled" severity="success" style={{ backgroundColor: '#0066CC'}}>OpenShift Instance is Stopped.</Alert>
+                      <Alert variant="filled" severity="success" style={{ backgroundColor: 'var(--vscode-editor-background)'}}>OpenShift Instance is Stopped.</Alert>
                     </ListItem>
                   </List>
                 </div>)}
-                <label htmlFor="contained-button-file">
-                  <Tooltip title="This will reset the wizard configuration to defaults." placement="right">
-                    <Button onClick={handleReset} className={classes.button}>
+                <div className={classes.actionsContainer}>
+                  <div>
+                    <Button
+                      onClick={handleBack}
+                      className={classes.button}
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      onClick={handleReset}
+                      className={classes.button}
+                    >
                       Reset
                     </Button>
-                  </Tooltip>
-                </label>
+                  </div>
+                </div>
           </Paper>
         </div>
       )}

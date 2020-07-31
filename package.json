@@ -41,6 +41,7 @@
     "compile": "npm-run-all compile:*",
     "compile:ext": "tsc -p ./",
     "compile:views": "webpack --mode development --config src/view/webpack.config.js",
+    "compile:cluster-views": "webpack --mode development --config src/view/cluster/webpack.config.js",
     "dev:log-view": "webpack-dev-server --mode development --config src/view/log/webpack.config.js",
     "dev:describe-view": "webpack-dev-server --mode development --config src/view/describe/webpack.config.js",
     "dev:cluster-view": "webpack-dev-server --mode development --config src/view/cluster/webpack.config.js",
@@ -1193,8 +1194,20 @@
         "openshiftConnector.useWebviewInsteadOfTerminalView": {
           "Title": "Use Webview based editors to show 'Show Log', 'Follow Log' and 'Describe' commands output",
           "type": "boolean",
-          "defaul": false,
+          "default": false,
           "description": "By default the Terminal View is used to execute OpenShift 'Show Log', 'Follow Log' and 'Describe' commands. Select this option if you want to use Webview based editors for it."
+        },
+        "openshiftConnector.crcBinaryLocation": {
+          "Title": "CRC Binary Location",
+          "type": "string",
+          "default": null,
+          "description": "Provide the path where the crc binary is present."
+        },
+        "openshiftConnector.crcPullSecretPath": {
+          "Title": "CRC Pull Secret Path",
+          "type": "string",
+          "default": null,
+          "description": "Provide the path where the pull secret file is present."
         }
       }
     }

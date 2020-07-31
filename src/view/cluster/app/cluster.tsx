@@ -12,7 +12,6 @@ import {
   Card,
   CardContent,
   CardActions,
-  IconButton,
   List,
   ListItem,
   ListItemText,
@@ -79,6 +78,15 @@ const useStyles = makeStyles((theme: Theme) =>
       '&:hover': {
         backgroundColor: '#BE0000',
       }
+    },
+    cardContent: {
+      background: 'var(--vscode-list-inactiveSelectionBackground)',
+      border: '1px solid var(--vscode-list-inactiveSelectionBackground)',
+      color: 'var(--vscode-foreground)'
+    },
+    header: {
+      color: 'var(--vscode-foreground)',
+      backgroundColor: 'var(--vscode-editor-background)'
     }
   }),
 );
@@ -209,9 +217,6 @@ export default function Header() {
           <CardActions className={classes.cardButton}>
             <Tooltip title={list.tooltip} placement="top">
               <div>
-                {/* <ColorButton href={list.redirectLink} onClick={() => handleView(index)}>
-                  {list.buttonText}
-                </ColorButton> */}
                 <a href={list.redirectLink} onClick={() => handleView(index)} style={{ textDecoration: 'none'}}>
                   <Button
                     variant="contained"
@@ -232,16 +237,14 @@ export default function Header() {
 
   return (
     <div className={classes.App}>
-      <AppBar position="static" style={{backgroundColor: '#1e1e1e'}}>
+      <AppBar position="static" className={classes.header}>
         <Toolbar variant="dense">
-          <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-          </IconButton>
           <Typography variant="h6" className={classes.title}>
-            Create your own Red Hat OpenShift 4 cluster today
+            Install OpenShift 4 on a laptop with CodeReady Containers
           </Typography>
         </Toolbar>
       </AppBar>
-      <Stepper alternativeLabel activeStep={activeStep} connector={<WizardConnector />} style={{background: 'none'}}>
+      <Stepper alternativeLabel activeStep={activeStep} connector={<WizardConnector />} style={{ background: 'none' }}>
         {steps.map((label) => (
           <Step key={label}>
             <StepLabel StepIconComponent={SelectionStepIcon}>{label}</StepLabel>
@@ -250,12 +253,12 @@ export default function Header() {
       </Stepper>
       <div className={classes.container}>
         <div className="row" style={{ height: 60, marginBottom: '3em' }}>
-          <img src="https://assets.openshift.com/hubfs/images/logos/osh/Logo-Red_Hat-OpenShift-A-Reverse-RGB.svg" alt="redhat-openshift"></img>
+          <img src="https://cloud.redhat.com/apps/landing/fonts/openShiftMarketing.svg" alt="redhat-openshift"></img>
         </div>
         {showWizard && (<div className={classes.rowBody}>
-          <Card>
+          <Card className={classes.cardContent}>
             <Typography variant="body2" component="p" style={{padding: '20px'}}>
-              Red Hat CodeReady Containers brings a minimal OpenShift 4.2 or newer cluster to your local laptop or desktop computer.<br></br>You can use this wizard to create OpenShift clusters locally. Clusters take approximately 15 minutes to provision.
+              Red Hat CodeReady Containers brings a minimal OpenShift 4.0 or newer cluster to your local laptop or desktop computer.<br></br>You can use this wizard to create OpenShift clusters locally. Clusters take approximately 15 minutes to provision.
             </Typography>
             <AddClusterView />
           </Card>
