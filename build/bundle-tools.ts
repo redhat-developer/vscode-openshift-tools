@@ -58,7 +58,7 @@ async function downloadFileAndCreateSha256(
         console.log('Previously downloaded archive SHA256 is correct');
     }
     console.log(`Extracting ${currentFile} to ${path.join(toolsFolder, platform.cmdFileName)}`);
-    if (!currentFile.endsWith('.exe') && currentFile.includes('.')) {
+    if (!platform.cmdFileName.endsWith('.exe') && platform.cmdFileName.includes('.')) {
         await Archive.extract(currentFile, toolsFolder, platform.cmdFileName, platform.filePrefix);
     } else {
         fs.copyFileSync(currentFile, path.join(toolsFolder, platform.cmdFileName));
