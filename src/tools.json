@@ -10,15 +10,15 @@
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.4/odo-windows-amd64.exe.tar.gz",
-                "sha256sum": "a313e2770315850b4259cb5768462894321b60f6d445ef5609b3c7a4cbf36189",
-                "dlFileName": "odo-windows-amd64.exe.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.4/odo-windows-amd64.exe",
+                "sha256sum": "753db295722d7b2031b635b05b8df3b58704a82c5623a1d6e0aec2b7b37c1ab4",
+                "dlFileName": "odo.exe",
                 "cmdFileName": "odo.exe"
             },
             "darwin": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.4/odo-darwin-amd64.tar.gz",
-                "sha256sum": "79a8d3dfe074ebfb9099a57a9fc76a5e4c5f9304fa28b3bad228bf666c07bc74",
-                "dlFileName": "odo-darwin-amd64.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.4/odo-darwin-amd64",
+                "sha256sum": "c4fb7cfa0229d702d10d38b5d5f6e6dbe0bc981328f347aebfe3d51bb176a36d",
+                "dlFileName": "odo",
                 "cmdFileName": "odo"
             },
             "linux": {
