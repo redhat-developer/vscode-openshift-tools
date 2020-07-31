@@ -36,11 +36,9 @@ export class ToolsConfig {
         ToolsConfig.tools = ToolsConfig.loadMetadata(configData, Platform.OS);
     }
 
-    public static async detect(cmd: string): Promise<string> {
+    public static detect(cmd: string): Promise<string> {
 
-        let toolLocation: string = ToolsConfig.tools[cmd].location;
-
-        if (toolLocation === undefined) {
+        if (ToolsConfig.tools[cmd].location === undefined) {
             const toolCacheLocation = path.resolve(__dirname, '..', 'tools', Platform.OS, ToolsConfig.tools[cmd].cmdFileName);
             const toolLocations: string[] = [toolCacheLocation];
             if (vscode.workspace.getConfiguration("openshiftConnector").get("searchForToolsInPath")) {
@@ -48,10 +46,15 @@ export class ToolsConfig {
                 toolLocations.unshift(whichLocation && whichLocation.stdout);
             }
 
-            toolLocation = await ToolsConfig.selectTool(toolLocations, ToolsConfig.tools[cmd].versionRange);
-            if (toolLocation && Platform.OS !== 'win32') fs.chmodSync(toolLocation, 0o765);
+            ToolsConfig.tools[cmd].location =
+                ToolsConfig.selectTool(toolLocations, ToolsConfig.tools[cmd].versionRange).then(
+                    (location) => {
+                        if (location && Platform.OS !== 'win32') fs.chmodSync(location, 0o765);
+                        return location;
+                    }
+                );
         }
-        return toolLocation;
+        return ToolsConfig.tools[cmd].location;
     }
 
     public static async getVersion(location: string): Promise<string> {
