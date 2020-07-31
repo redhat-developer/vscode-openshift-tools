@@ -58,6 +58,7 @@ async function downloadFileAndCreateSha256(
         console.log('Previously downloaded archive SHA256 is correct');
     }
     console.log(`Extracting ${currentFile} to ${path.join(toolsFolder, platform.cmdFileName)}`);
+    // this is temp workaround for tar.gz content issue https://github.com/openshift/odo/issues/3668
     if (!currentFile.endsWith('.exe') && currentFile.includes('.')) {
         await Archive.extract(currentFile, toolsFolder, platform.cmdFileName, platform.filePrefix);
     } else {
