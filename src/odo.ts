@@ -19,8 +19,6 @@ import { ToolsConfig } from './tools';
 import { Platform } from './util/platform';
 import * as odo from './odo/config';
 import { GlyphChars } from './util/constants';
-import { Progress } from './util/progress';
-import { vsCommand } from './vscommand';
 import { Application } from './odo/application';
 import { ComponentType } from './odo/componentType';
 import { Project } from './odo/project';
@@ -1029,73 +1027,6 @@ export class OdoImpl implements Odo {
             // ignore parse errors and return empty array
         }
         return data;
-    }
-
-    @vsCommand('openshift.migrate.odo00X.components')
-    static async convertObjectsFromPreviousOdoReleases(): Promise<void> {
-
-        const projectsResult = await getInstance().execute(`oc get project -o jsonpath="{range .items[*]}{.metadata.name}{\\"\\n\\"}{end}"`);
-        const projects = projectsResult.stdout.split('\n');
-        const projectsToMigrate: string[] = [];
-        const getPreviosOdoResourceNames = (resourceId: string, project: string): string => `oc get ${resourceId} -l app.kubernetes.io/component-name -o jsonpath="{range .items[*]}{.metadata.name}{\\"\\n\\"}{end}" --namespace=${project}`;
-
-        for (const project of projects) {
-            const result1 = await getInstance().execute(getPreviosOdoResourceNames('dc', project), __dirname, false);
-            const dcs = result1.stdout.split('\n');
-            const result2 = await getInstance().execute(getPreviosOdoResourceNames('ServiceInstance', project), __dirname, false);
-            const sis = result2.stdout.split('\n');
-            if ((result2.stdout !== '' && sis.length > 0) || (result1.stdout !== '' && dcs.length > 0))  {
-                projectsToMigrate.push(project);
-            }
-        }
-        if (projectsToMigrate.length > 0) {
-            const choice = await window.showWarningMessage(`Found the resources in cluster that must be updated to work with latest release of OpenShift Connector Extension.`, 'Update', 'Help', 'Cancel');
-            if (choice === 'Help') {
-                commands.executeCommand('vscode.open', Uri.parse(`https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0`));
-                getInstance().subject.next(new OdoEventImpl('changed', getInstance().getClusters()[0]));
-            } else if (choice === 'Update') {
-                const errors = [];
-                await Progress.execFunctionWithProgress('Updating cluster resources to work with latest OpenShift Connector release', async (progress) => {
-                    for (const project of projectsToMigrate) {
-                        for (const resourceId of  ['DeploymentConfig', 'Route', 'BuildConfig', 'ImageStream', 'Service', 'pvc', 'Secret', 'ServiceInstance']) {
-                            progress.report({increment: 100/8, message: resourceId});
-                            const result = await getInstance().execute(getPreviosOdoResourceNames(resourceId, project), __dirname, false);
-                            const resourceNames = result.error || result.stdout === '' ? [] : result.stdout.split('\n');
-                            for (const resourceName of resourceNames) {
-                                try {
-                                    const resources = await getInstance().execute(`oc get ${resourceId} ${resourceName} -o json --namespace=${project}`);
-                                    const {labels} = JSON.parse(resources.stdout).metadata;
-                                    let command = `oc label ${resourceId} ${resourceName} --overwrite app.kubernetes.io/instance=${labels['app.kubernetes.io/component-name']}`;
-                                    command += ` app.kubernetes.io/part-of=${labels['app.kubernetes.io/name']}`;
-                                    if (labels['app.kubernetes.io/component-type']) {
-                                        command += ` app.kubernetes.io/name=${labels['app.kubernetes.io/component-type']}`;
-                                    }
-                                    if (labels['app.kubernetes.io/component-version']) {
-                                        command += ` app.openshift.io/runtime-version=${labels['app.kubernetes.io/component-version']}`;
-                                    }
-                                    if (labels['app.kubernetes.io/url-name']) {
-                                        command += ` odo.openshift.io/url-name=${labels['app.kubernetes.io/url-name']}`;
-                                    }
-                                    await getInstance().execute(`${command  } --namespace=${project}`);
-                                    await getInstance().execute(`oc label ${resourceId} ${resourceName} app.kubernetes.io/component-name- --namespace=${project}`);
-                                    await getInstance().execute(`oc label ${resourceId} ${resourceName} odo.openshift.io/migrated=true --namespace=${project}`);
-                                } catch (err) {
-                                    errors.push(err);
-                                }
-                            }
-                        }
-                    }
-                    getInstance().subject.next(new OdoEventImpl('changed', getInstance().getClusters()[0]));
-                });
-                if (errors.length) {
-                    window.showErrorMessage('Not all resources were updated, please see OpenShift output channel for details.');
-                } else {
-                    window.showInformationMessage('Cluster resources have been successfuly updated.');
-                }
-            }
-        } else {
-            window.showInformationMessage('No resources found that require migration.');
-        }
     }
 }
 
