@@ -306,7 +306,8 @@ suite('OpenShift/Storage', () => {
 
             expect(result).equals(`Storage '${storageItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
             expect(execStub.getCall(0).args[0]).equals(Command.deleteStorage(storageItem.getName()));
-            expect(execStub.getCall(1).args[0]).equals(Command.waitForStorageToBeGone(projectItem.getName(), appItem.getName(), storageItem.getName()));
+            expect(execStub.getCall(1).args[0]).equals(Command.pushComponent(true));
+            expect(execStub.getCall(2).args[0]).equals(Command.waitForStorageToBeGone(projectItem.getName(), appItem.getName(), storageItem.getName()));
         });
 
         test('works without set tree item', async () => {
@@ -314,7 +315,8 @@ suite('OpenShift/Storage', () => {
 
             expect(result).equals(`Storage '${storageItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
             expect(execStub.getCall(0).args[0]).equals(Command.deleteStorage(storageItem.getName()));
-            expect(execStub.getCall(1).args[0]).equals(Command.waitForStorageToBeGone(projectItem.getName(), appItem.getName(), storageItem.getName()));
+            expect(execStub.getCall(1).args[0]).equals(Command.pushComponent(true));
+            expect(execStub.getCall(2).args[0]).equals(Command.waitForStorageToBeGone(projectItem.getName(), appItem.getName(), storageItem.getName()));
         });
 
         test('returns null with no storage selected', async () => {

@@ -943,6 +943,7 @@ export class OdoImpl implements Odo {
     public async deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject> {
         const component = storage.getParent();
         await this.execute(Command.deleteStorage(storage.getName()), component.contextPath.fsPath);
+        await this.execute(Command.pushComponent(true), component.contextPath.fsPath);
         await this.execute(Command.waitForStorageToBeGone(storage.getParent().getParent().getParent().getName(), storage.getParent().getParent().getName(), storage.getName()), process.cwd(), false);
         return this.deleteAndRefresh(storage);
     }

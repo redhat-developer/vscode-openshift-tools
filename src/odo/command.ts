@@ -125,6 +125,10 @@ export class Command {
         return `odo storage delete ${storage} -f`;
     }
 
+    static describeStorage(storage: string): string {
+        return `odo storage describe ${storage}`;
+    }
+
     static waitForStorageToBeGone(project: string, app: string, storage: string): string {
         return `oc wait pvc/${storage}-${app}-pvc --for=delete --namespace ${project}`;
     }
@@ -159,10 +163,6 @@ export class Command {
 
     static describeUrl(url: string): string {
         return `odo url describe ${url}`;
-    }
-
-    static describeStorage(storage: string): string {
-        return `odo storage describe ${storage}`;
     }
 
     static showLog(): string {
