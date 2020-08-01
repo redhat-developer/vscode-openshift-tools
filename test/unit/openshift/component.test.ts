@@ -1042,14 +1042,14 @@ suite('OpenShift/Component', () => {
     });
 
     suite('push', () => {
-        let getpushStub: sinon.SinonStub<any[], any>; let showWarningMessageStub: sinon.SinonStub<[string, vscode.MessageOptions, ...vscode.MessageItem[]], Thenable<vscode.MessageItem>>;
+        let getpushStub: sinon.SinonStub<any[], any>;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
-            showWarningMessageStub = sandbox.stub(vscode.window, 'showWarningMessage');
+            sandbox.stub(vscode.window, 'showWarningMessage');
             getpushStub = sandbox.stub(Component, 'getPushCmd').resolves(undefined);
             sandbox.stub(Component, 'setPushCmd');
         });
