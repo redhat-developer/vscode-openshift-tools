@@ -334,8 +334,12 @@
       },
       {
         "command": "openshift.project.set",
-        "title": "Activate",
-        "category": "OpenShift"
+        "title": "Change Active Project",
+        "category": "OpenShift",
+        "icon": {
+          "dark": "images/title/dark/icon-select-project.png",
+          "light": "images/title/light/icon-select-project.png"
+        }
       },
       {
         "command": "openshift.project.set.palette",
@@ -1197,6 +1201,16 @@
         {
           "command": "openshift.component.watch.showLog",
           "when": "view == openshiftWatchView && viewItem == openshift.watch.process"
+        },
+        {
+          "command": "openshift.project.set",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster",
+          "group": "inline"
+        },
+        {
+          "command": "openshift.project.set",
+          "when": "view == openshiftProjectExplorer && viewItem == project",
+          "group": "inline"
         }
       ]
     },
