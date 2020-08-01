@@ -426,42 +426,10 @@ export class Component extends OpenShiftItem {
     )
     static async push(component: OpenShiftObject, configOnly = false): Promise<string | null> {
         if (!component) return null;
-        const choice = await Component.handleMigratedComponent(component);
-        if (!choice) return null;
         Component.setPushCmd(component.contextPath.fsPath, component.getName());
         await Component.odo.executeInTerminal(Command.pushComponent(configOnly), component.contextPath.fsPath, `OpenShift: Push '${component.getName()}' Component`);
         component.contextValue = ContextType.COMPONENT_PUSHED;
         Component.explorer.refresh(component);
-    }
-
-    static async handleMigratedComponent(component: OpenShiftObject): Promise<string | null> {
-        const project = component.getParent().getParent().getName();
-        const app = component.getParent().getName();
-        try {
-            const migrated = await Component.odo.execute(`oc get DeploymentConfig/${component.getName()}-${app} --namespace ${project} -o jsonpath="{$.metadata.labels.odo\\.openshift\\.io/migrated}"`);
-            const undeployRequired = JSON.parse(migrated.stdout);
-            if (undeployRequired) {
-                let choice: string;
-                do {
-                    // eslint-disable-next-line no-await-in-loop
-                    choice = await window.showWarningMessage('This Component must be undeployed before new version is pushed, because it was created and deployed with previous version of the extension.', 'Undeploy', 'Help', 'Cancel');
-                    switch (choice) {
-                        case 'Undeploy':
-                            // eslint-disable-next-line no-await-in-loop
-                            await Component.undeploy(component);
-                            return null;
-                        case 'Help':
-                            commands.executeCommand('vscode.open', Uri.parse(`https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0`));
-                            break;
-                        default:
-                            return null;
-                    }
-                } while (choice === 'Help');
-                return choice;
-            }
-        } catch (ignore) {
-            return 'Continue';
-        }
     }
 
     @vsCommand('openshift.component.lastPush')

@@ -1042,14 +1042,14 @@ suite('OpenShift/Component', () => {
     });
 
     suite('push', () => {
-        let getpushStub: sinon.SinonStub<any[], any>; let showWarningMessageStub: sinon.SinonStub<[string, vscode.MessageOptions, ...vscode.MessageItem[]], Thenable<vscode.MessageItem>>;
+        let getpushStub: sinon.SinonStub<any[], any>;
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(projectItem);
             quickPickStub.onSecondCall().resolves(appItem);
             quickPickStub.onThirdCall().resolves(componentItem);
-            showWarningMessageStub = sandbox.stub(vscode.window, 'showWarningMessage');
+            sandbox.stub(vscode.window, 'showWarningMessage');
             getpushStub = sandbox.stub(Component, 'getPushCmd').resolves(undefined);
             sandbox.stub(Component, 'setPushCmd');
         });
@@ -1078,33 +1078,6 @@ suite('OpenShift/Component', () => {
             await Component.push(null);
 
             expect(termStub).calledOnceWith(Command.pushComponent());
-        });
-
-        test('returns null if user cancel to Migrated Component', async () => {
-            execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({}), stderr: ''});
-            showWarningMessageStub.resolves('Cancel');
-            const result = await Component.push(componentItem);
-
-            expect(result).null;
-        });
-
-        test('returns null if user select Undeploy', async () => {
-            execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({}), stderr: ''});
-            sandbox.stub(Component, 'undeploy');
-            showWarningMessageStub.resolves('Undeploy');
-            const result = await Component.push(componentItem);
-
-            expect(result).null;
-        });
-
-        test('open url if user select on help button', async () => {
-            execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({}), stderr: ''});
-            showWarningMessageStub.onFirstCall().resolves('Help');
-            showWarningMessageStub.onSecondCall().resolves(undefined);
-            const result = await Component.push(componentItem);
-
-            expect(commandStub).calledOnceWith('vscode.open', vscode.Uri.parse('https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0'));
-            expect(result).null;
         });
     });
 
