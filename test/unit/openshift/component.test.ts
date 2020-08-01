@@ -64,7 +64,6 @@ suite('OpenShift/Component', () => {
         getApps = sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
         sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
-        sandbox.stub(OdoImpl, 'convertObjectsFromPreviousOdoReleases');
         commandStub = sandbox.stub(vscode.commands, 'executeCommand');
         sandbox.stub()
     });
