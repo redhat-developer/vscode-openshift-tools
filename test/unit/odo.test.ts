@@ -137,7 +137,6 @@ suite("odo", () => {
 
         setup(() => {
             execStub = sandbox.stub(odoCli, 'execute');
-            sandbox.stub(odo.OdoImpl, 'convertObjectsFromPreviousOdoReleases');
             yamlStub = sandbox.stub(jsYaml, 'safeLoad');
             sandbox.stub(fs, 'readFileSync');
         });
@@ -603,7 +602,6 @@ suite("odo", () => {
                 stdout: oc.join('\n'),
                 stderr: ''
             });
-            sandbox.stub(odo.OdoImpl, 'convertObjectsFromPreviousOdoReleases');
             const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
             assert.equal(cluster[0].getName(), clusterUrl);
         });
