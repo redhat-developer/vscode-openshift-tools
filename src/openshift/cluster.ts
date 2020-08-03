@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window, commands, env, QuickPickItem, ExtensionContext, Uri } from 'vscode';
+import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace } from 'vscode';
 import { Command } from "../odo/command";
 import OpenShiftItem from './openshiftItem';
 import { CliExitData, CliChannel } from "../cli";
@@ -11,6 +11,8 @@ import { TokenStore } from "../util/credentialManager";
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { Filters } from "../util/filters";
 import { Progress } from "../util/progress";
+import { Platform } from '../util/platform';
+import { WindowUtil } from '../util/windowUtils';
 import { vsCommand, VsCommandError } from '../vscommand';
 import ClusterViewLoader from '../view/cluster/clusterViewLoader';
 
@@ -102,6 +104,35 @@ export class Cluster extends OpenShiftItem {
     @vsCommand('openshift.explorer.addCluster')
     static add(): Promise<any> {
         ClusterViewLoader.loadView(`Add OpenShift Cluster`);
+        return;
+    }
+
+    @vsCommand('openshift.explorer.stopCluster')
+    static async stop(): Promise<any> {
+        let pathSelectionDialog;
+        let newPathPrompt;
+        let crcBinary;
+        const crcPath = workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
+        if(crcPath != null) {
+            newPathPrompt = { label: `$(plus) Provide different crc binary path`};
+            pathSelectionDialog = await window.showQuickPick([{label:`${crcPath}`, description: `Fetched from settings`}, newPathPrompt], {placeHolder: "Select CRC path", ignoreFocusOut: true});
+        }
+        if (pathSelectionDialog.label == newPathPrompt.label) {
+            const crcBinaryLocation = await window.showOpenDialog({
+                canSelectFiles: true,
+                canSelectFolders: false,
+                canSelectMany: false,
+                defaultUri: Uri.file(Platform.getUserHomePath()),
+                openLabel: 'Add crc binary path.',
+            });
+            if (!crcBinaryLocation) return null;
+            crcBinary = crcBinaryLocation[0].fsPath;
+        } else {
+            crcBinary = crcPath;
+        }
+        const terminal: Terminal = WindowUtil.createTerminal(`OpenShift: Stop CRC`, undefined);
+            terminal.sendText(`${crcBinary} stop`);
+            terminal.show();
         return;
     }
 

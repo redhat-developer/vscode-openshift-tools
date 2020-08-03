@@ -287,6 +287,11 @@
         }
       },
       {
+        "command": "openshift.explorer.stopCluster",
+        "title": "Stop CRC",
+        "category": "OpenShift"
+      },
+      {
         "command": "openshift.explorer.login",
         "title": "Login into Cluster",
         "category": "OpenShift",
