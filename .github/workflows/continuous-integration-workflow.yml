@@ -45,7 +45,7 @@ jobs:
       - name: Run Test
         uses: GabrielBB/xvfb-action@v1.0
         with:
-          run: npm test --silent
+          run: npm test:coverage --silent
 
       # Upload coverage to codecov.io
       - name: Codecov
