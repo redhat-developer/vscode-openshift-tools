@@ -471,7 +471,7 @@ export class Component extends OpenShiftItem {
                 commands.executeCommand('openshift.component.watch.showLog', component.contextPath.fsPath);
             }
         } else {
-            const process: ChildProcess = await Component.odo.spawn(Command.watchComponent(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath.fsPath);
+            const process: ChildProcess = await Component.odo.spawn(Command.watchComponent(), component.contextPath.fsPath);
             Component.addWatchSession(component, process);
             process.on('exit', () => {
                 Component.removeWatchSession(component);

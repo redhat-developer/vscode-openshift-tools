@@ -204,8 +204,8 @@ export class Command {
     }
 
     @verbose
-    static watchComponent(project: string, app: string, component: string): string {
-        return `odo watch ${component} --app ${app} --project ${project}`;
+    static watchComponent(): string {
+        return `odo watch`;
     }
 
     @verbose

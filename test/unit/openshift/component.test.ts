@@ -1101,14 +1101,14 @@ suite('OpenShift/Component', () => {
             const cpStub = {on: sinon.stub()} as any as ChildProcess;
             spawnStub.resolves(cpStub);
             await Component.watch(componentItem);
-            expect(spawnStub).calledOnceWith(Command.watchComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(spawnStub).calledOnceWith(Command.watchComponent());
         });
 
         test('calls the correct odo command w/o context', async () => {
             const cpStub = {on: sinon.stub()} as any as ChildProcess;
             spawnStub.resolves(cpStub);
             await Component.watch(null);
-            expect(spawnStub).calledOnceWith(Command.watchComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(spawnStub).calledOnceWith(Command.watchComponent());
         });
 
         test('adds process to Watch Sessions view and removes it when process exits', async () => {
