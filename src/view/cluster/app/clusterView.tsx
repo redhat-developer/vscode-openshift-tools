@@ -462,6 +462,7 @@ export default function addClusterView() {
                 <div className={classes.actionsContainer}>
                   <div>
                     <Button
+                      variant="contained"
                       disabled={activeStep === 0}
                       onClick={handleBack}
                       className={classes.buttonSecondary}
