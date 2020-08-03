@@ -47,3 +47,6 @@ jobs:
       - name: Codecov
         uses: codecov/codecov-action@v1.0.12
         if: runner.os == 'Linux'
+        with:
+          file: ./out/coverage/coverage-final.json
+
