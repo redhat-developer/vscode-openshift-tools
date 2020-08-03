@@ -117,7 +117,7 @@ export class Cluster extends OpenShiftItem {
             newPathPrompt = { label: `$(plus) Provide different crc binary path`};
             pathSelectionDialog = await window.showQuickPick([{label:`${crcPath}`, description: `Fetched from settings`}, newPathPrompt], {placeHolder: "Select CRC path", ignoreFocusOut: true});
         }
-        if (pathSelectionDialog.label == newPathPrompt.label) {
+        if (pathSelectionDialog.label === newPathPrompt.label) {
             const crcBinaryLocation = await window.showOpenDialog({
                 canSelectFiles: true,
                 canSelectFolders: false,
