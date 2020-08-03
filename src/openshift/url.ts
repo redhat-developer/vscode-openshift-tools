@@ -62,7 +62,7 @@ export class Url extends OpenShiftItem{
         if (url) {
             const value = await window.showWarningMessage(`Do you want to delete URL '${url.getName()}' from Component '${url.getParent().getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
-                return Progress.execFunctionWithProgress(`Deleting URL ${url.getName()} from Component ${component.getName()}`, () => Url.odo.deleteURL(url))
+                return Progress.execFunctionWithProgress(`Deleting URL ${url.getName()} from Component ${url.getParent().getName()}`, () => Url.odo.deleteURL(url))
                     .then(() => `URL '${url.getName()}' from Component '${url.getParent().getName()}' successfully deleted`)
                     .catch((err) => Promise.reject(new VsCommandError(`Failed to delete URL with error '${err}'`)));
             }
