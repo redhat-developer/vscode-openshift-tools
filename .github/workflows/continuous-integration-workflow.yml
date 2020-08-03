@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-18.04]
-        node: [ '12', '14' ]
+        node: [ '14' ]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -37,15 +37,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # Build extension
-      - name: Run prepublish
-        run: npm run vscode:prepublish
-
       # Run tests
-      - name: Run Test
+      - name: Build and Test
         uses: GabrielBB/xvfb-action@v1.0
         with:
-          run: npm test:coverage --silent
+          run: npm run test:coverage --silent
 
       # Upload coverage to codecov.io
       - name: Codecov
