@@ -6,6 +6,7 @@
 import { Uri } from "vscode";
 import { OpenShiftObject, ContextType } from "../../../src/odo";
 import { SourceType } from "../../../src/odo/config";
+import { BuilderImage } from "../../../src/odo/builderImage";
 
 export class TestItem implements OpenShiftObject {
     public treeItem = null;
@@ -21,6 +22,13 @@ export class TestItem implements OpenShiftObject {
         public compType: string = SourceType.LOCAL) {
     }
 
+    builderImage?: BuilderImage;
+    iconPath?: Uri;
+    description?: string;
+    detail?: string;
+    picked?: boolean;
+    alwaysShow?: boolean;
+
     getName(): string {
         return this.name;
     }
@@ -33,6 +41,10 @@ export class TestItem implements OpenShiftObject {
         return this.children;
     }
 
+    removeChild(item: OpenShiftObject): Promise<void> {
+        return;
+    }
+
     getParent(): OpenShiftObject {
         return this.parent;
     }
@@ -40,4 +52,5 @@ export class TestItem implements OpenShiftObject {
     get label(): string {
         return this.name;
     }
+    ge
 }
