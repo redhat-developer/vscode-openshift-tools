@@ -45,6 +45,13 @@ export class Project extends OpenShiftItem {
             if (value === 'Yes') {
                 result = Progress.execFunctionWithProgress(`Deleting Project '${project.getName()}'`,
                     () => Project.odo.deleteProject(project)
+                        .then(async () => {
+                            const p = await Project.odo.getProjects();
+                            if (p.length>0) {
+                                await Project.odo.execute(`odo project set ${p[0].getName()}`);
+                                Project.explorer.refresh();
+                            }
+                        })
                         .then(() => `Project '${project.getName()}' successfully deleted`)
                         .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Project with error '${err}'`)))
                 );

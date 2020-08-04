@@ -35,6 +35,7 @@ const {Collapsed} = TreeItemCollapsibleState;
 
 export interface OpenShiftObject extends QuickPickItem {
     getChildren(): ProviderResult<OpenShiftObject[]>;
+    removeChild(item: OpenShiftObject): Promise<void>;
     getParent(): OpenShiftObject;
     getName(): string;
     contextValue: ContextType;
@@ -123,6 +124,11 @@ export abstract class OpenShiftObjectImpl implements OpenShiftObject {
         return;
     }
 
+    public async removeChild(item: OpenShiftObject): Promise<void> {
+        const array = await item.getChildren();
+        array.splice(array.indexOf(item), 1);
+    }
+
     getParent(): OpenShiftObject {
         return this.parent;
     }
@@ -145,6 +151,11 @@ export class OpenShiftCluster extends OpenShiftObjectImpl {
 
     async getChildren(): Promise<OpenShiftObject[]> {
         return [(await this.odo.getProjects()).find((prj:OpenShiftProject)=>prj.active)];
+    }
+
+    public async removeChild(item: OpenShiftObject): Promise<void> {
+        const array = await this.odo.getProjects();
+        array.splice(array.indexOf(item), 1);
     }
 }
 
@@ -421,8 +432,7 @@ class OdoModel {
     }
 
     public async delete(item: OpenShiftObject): Promise<void> {
-        const array = await item.getParent().getChildren();
-        array.splice(array.indexOf(item), 1);
+        await item.getParent().removeChild(item);
         this.pathToObject.delete(item.path);
         if (item.contextPath) {
             this.contextToObject.delete(item.contextPath.fsPath);
