@@ -50,12 +50,12 @@
     "lint-nic": "eslint . --ext .ts --no-inline-config",
     "bundle-tools": "node ./out/build/bundle-tools.js --platform",
     "todo": "leasot **/*.ts --ignore node_modules -x",
-    "test": "npm run clean && npm run compile && npm run verify && node ./out/build/run-tests.js unit",
+    "test": "npm run vscode:prepublish && node ./out/build/run-tests.js unit",
     "test:instrument": "shx rm -rf out/src-orig && shx mv out/src out/src-orig && istanbul instrument --complete-copy --embed-source --output out/src out/src-orig",
     "test:coverage": "npm run vscode:prepublish && npm run test:instrument && node ./out/build/run-tests.js unit",
     "update-deps": "ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
-    "build": "npm run clean && npm run lint && npm run compile && npm run verify"
+    "build": "npm run clean && npm run lint && npm run compile "
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.11.1",
