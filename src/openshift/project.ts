@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window, commands } from 'vscode';
+import { window } from 'vscode';
 import OpenShiftItem from './openshiftItem';
 import { OpenShiftObject, OpenShiftProject, getInstance } from '../odo';
 import { Progress } from '../util/progress';
