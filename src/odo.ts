@@ -36,6 +36,7 @@ const {Collapsed} = TreeItemCollapsibleState;
 export interface OpenShiftObject extends QuickPickItem {
     getChildren(): ProviderResult<OpenShiftObject[]>;
     removeChild(item: OpenShiftObject): Promise<void>;
+    addChild(item: OpenShiftObject): Promise<OpenShiftObject>;
     getParent(): OpenShiftObject;
     getName(): string;
     contextValue: ContextType;
@@ -58,6 +59,21 @@ export enum ContextType {
     CLUSTER_DOWN = 'clusterDown',
     LOGIN_REQUIRED = 'loginRequired',
     COMPONENT_ROUTE = 'componentRoute'
+}
+
+function compareNodes(a: OpenShiftObject, b: OpenShiftObject): number {
+    if (!a.contextValue) return -1;
+    if (!b.contextValue) return 1;
+    const acontext = a.contextValue.includes('_') ? a.contextValue.substr(0, a.contextValue.indexOf('_')) : a.contextValue;
+    const bcontext = b.contextValue.includes('_') ? b.contextValue.substr(0, b.contextValue.indexOf('_')) : b.contextValue;
+    const t = acontext.localeCompare(bcontext);
+    return t || a.label.localeCompare(b.label);
+}
+
+function insert(array: OpenShiftObject[], item: OpenShiftObject): OpenShiftObject {
+    const i = bs(array, item, compareNodes);
+    array.splice(Math.abs(i)-1, 0, item);
+    return item;
 }
 
 export abstract class OpenShiftObjectImpl implements OpenShiftObject {
@@ -129,6 +145,11 @@ export abstract class OpenShiftObjectImpl implements OpenShiftObject {
         array.splice(array.indexOf(item), 1);
     }
 
+    public async addChild(item: OpenShiftObject): Promise<OpenShiftObject> {
+        const array = await item.getChildren();
+        return insert(array, item);
+    }
+
     getParent(): OpenShiftObject {
         return this.parent;
     }
@@ -150,12 +171,18 @@ export class OpenShiftCluster extends OpenShiftObjectImpl {
     }
 
     async getChildren(): Promise<OpenShiftObject[]> {
-        return [(await this.odo.getProjects()).find((prj:OpenShiftProject)=>prj.active)];
+        const activeProject = (await this.odo.getProjects()).find((prj:OpenShiftProject)=>prj.active)
+        return activeProject ? [activeProject] : [];
     }
 
     public async removeChild(item: OpenShiftObject): Promise<void> {
         const array = await this.odo.getProjects();
         array.splice(array.indexOf(item), 1);
+    }
+
+    public async addChild(item: OpenShiftObject): Promise<OpenShiftObject> {
+        const array = await this.odo.getProjects();
+        return insert(array, item);
     }
 }
 
@@ -334,15 +361,6 @@ export interface Odo {
     createComponentCustomUrl(component: OpenShiftObject, name: string, port: string, secure?: boolean): Promise<OpenShiftObject>;
     getOpenShiftObjectByContext(context: string): OpenShiftObject;
     readonly subject: Subject<OdoEvent>;
-}
-
-function compareNodes(a: OpenShiftObject, b: OpenShiftObject): number {
-    if (!a.contextValue) return -1;
-    if (!b.contextValue) return 1;
-    const acontext = a.contextValue.includes('_') ? a.contextValue.substr(0, a.contextValue.indexOf('_')) : a.contextValue;
-    const bcontext = b.contextValue.includes('_') ? b.contextValue.substr(0, b.contextValue.indexOf('_')) : b.contextValue;
-    const t = acontext.localeCompare(bcontext);
-    return t || a.label.localeCompare(b.label);
 }
 
 class OdoModel {
@@ -756,21 +774,15 @@ export class OdoImpl implements Odo {
         return this.odoLoginMessages.some((msg) => result.stderr.includes(msg));
     }
 
-    private insert(array: OpenShiftObject[], item: OpenShiftObject): OpenShiftObject {
-        const i = bs(array, item, compareNodes);
-        array.splice(Math.abs(i)-1, 0, item);
-        return item;
-    }
-
     private async insertAndReveal(item: OpenShiftObject): Promise<OpenShiftObject> {
         // await OpenShiftExplorer.getInstance().reveal(this.insert(await item.getParent().getChildren(), item));
-        this.subject.next(new OdoEventImpl('inserted', this.insert(await item.getParent().getChildren(), item), true));
+        this.subject.next(new OdoEventImpl('inserted', await item.getParent().addChild(item), true));
         return item;
     }
 
     private async insertAndRefresh(item: OpenShiftObject): Promise<OpenShiftObject> {
         // await OpenShiftExplorer.getInstance().refresh(this.insert(await item.getParent().getChildren(), item).getParent());
-        this.subject.next(new OdoEventImpl('changed', this.insert(await item.getParent().getChildren(), item).getParent()));
+        this.subject.next(new OdoEventImpl('changed', (await item.getParent().addChild(item)).getParent()));
         return item;
     }
 
@@ -789,8 +801,7 @@ export class OdoImpl implements Odo {
     public async createProject(projectName: string): Promise<OpenShiftObject> {
         await OdoImpl.instance.execute(Command.createProject(projectName));
         const clusters = await this.getClusters();
-        this.subject.next(new OdoEventImpl('inserted', clusters[0], false));
-        return new OpenShiftProject(clusters[0], projectName, true);
+        return this.insertAndReveal(new OpenShiftProject(clusters[0], projectName, true));
     }
 
     public async deleteApplication(app: OpenShiftObject): Promise<OpenShiftObject> {

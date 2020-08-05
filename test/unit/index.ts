@@ -17,7 +17,7 @@ const config: any = {
     ui: 'tdd',
     timeout: 60000,
     color: true,
-    //  grep: 'removes watch process from Watch Sessions view when process exits'
+    // grep: 'calls the appropriate error message if no project found'
 };
 
 if (process.env.BUILD_ID && process.env.BUILD_NUMBER) {

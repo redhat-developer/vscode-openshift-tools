@@ -16,7 +16,6 @@ export class Service extends OpenShiftItem {
     @vsCommand('openshift.service.create')
     static async create(context: OpenShiftObject): Promise<string>  {
         const application = await Service.getOpenShiftCmdData(context,
-            "In which Project you want to create a Service",
             "In which Application you want to create a Service"
         );
         if (!application) return null;
@@ -52,7 +51,6 @@ export class Service extends OpenShiftItem {
 
         if (!service) {
             const application: OpenShiftObject = await Service.getOpenShiftCmdData(service,
-                "From which Project you want to delete Service",
                 "From which Application you want to delete Service"
             );
             if (application) {
@@ -77,7 +75,6 @@ export class Service extends OpenShiftItem {
 
         if (!service) {
             const application: OpenShiftObject = await Service.getOpenShiftCmdData(context,
-                "From which project you want to describe Service",
                 "From which application you want to describe Service");
             if (application) {
                 service = await window.showQuickPick(Service.getServiceNames(application), {placeHolder: "Select Service you want to describe",
