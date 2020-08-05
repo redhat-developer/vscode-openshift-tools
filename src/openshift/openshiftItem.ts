@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window, QuickPickItem, commands } from 'vscode';
+import { window, QuickPickItem } from 'vscode';
 import * as validator from 'validator';
 import { Odo, OdoImpl, OpenShiftObject, ContextType, OpenShiftApplication, OpenShiftProject } from '../odo';
 import { OpenShiftExplorer } from '../explorer';

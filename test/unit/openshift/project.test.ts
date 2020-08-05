@@ -19,7 +19,6 @@ chai.use(sinonChai);
 suite('OpenShift/Project', () => {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
-    let getProjectsStub: sinon.SinonStub;
 
     const cluster = new TestItem(null, 'cluster', ContextType.CLUSTER);
     const projectItem = new TestItem(cluster, 'project', ContextType.PROJECT);
@@ -29,7 +28,7 @@ suite('OpenShift/Project', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
-        getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
+        sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
         sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
@@ -132,11 +131,11 @@ suite('OpenShift/Project', () => {
     });
 
     suite('del', () => {
-        let warnStub: sinon.SinonStub; let quickPickStub: sinon.SinonStub;
+        let warnStub: sinon.SinonStub;
 
         setup(() => {
             warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
-            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick').resolves(projectItem);
+            sandbox.stub(vscode.window, 'showQuickPick').resolves(projectItem);
         });
 
         test('works with context', async () => {

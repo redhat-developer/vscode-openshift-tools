@@ -21,7 +21,6 @@ suite('OpenShift/Service', () => {
     let termStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
     let quickPickStub: sinon.SinonStub;
-    let getProjectNamesStub: sinon.SinonStub;
     let getServicesStub: sinon.SinonStub;
     let getProjectsStub: sinon.SinonStub;
     let getApplicationsStub: sinon.SinonStub;
@@ -40,7 +39,7 @@ suite('OpenShift/Service', () => {
         getServicesStub = sandbox.stub(OdoImpl.prototype, 'getServices').resolves([serviceItem]);
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-        getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
+        sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });
