@@ -204,18 +204,19 @@ suite('OpenShift/URL', () => {
     });
 
     suite('create Url with no context', () => {
-
+        let getProjectsStub;
         setup(() => {
             const urlName = 'customName';
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(componentItem);
+            getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(componentItem);
             inputStub.onFirstCall().resolves(urlName);
         });
 
         test('calls the appropriate error message if no project found', async () => {
             quickPickStub.restore();
             getProjectsNameStub.restore();
+            getProjectsStub.restore();
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
             sandbox.stub(vscode.window, 'showErrorMessage');
             try {
@@ -228,7 +229,6 @@ suite('OpenShift/URL', () => {
         });
 
         test('asks to select port if more that one exposed and returns message', async () => {
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([componentItem]);
             inputStub.onFirstCall().resolves('urlName');
@@ -324,14 +324,13 @@ suite('OpenShift/URL', () => {
         let warnStub: sinon.SinonStub;
 
         setup(() => {
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
             getRouteNameStub.resolves([]);
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(componentItem);
-            quickPickStub.onCall(3).resolves(routeItem);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(componentItem);
+            quickPickStub.onThirdCall().resolves(routeItem);
             warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
         });
 
@@ -350,7 +349,7 @@ suite('OpenShift/URL', () => {
         });
 
         test('returns null with no URL selected', async () => {
-            quickPickStub.onCall(3).resolves();
+            quickPickStub.onCall(2).resolves();
             const result = await Url.del(null);
 
             expect(result).null;
@@ -436,14 +435,13 @@ suite('OpenShift/URL', () => {
     suite('describe', () => {
 
         setup(() => {
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
             getRouteNameStub.resolves([]);
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(componentItem);
-            quickPickStub.onCall(3).resolves(routeItem);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(componentItem);
+            quickPickStub.onThirdCall().resolves(routeItem);
         });
 
         test('calls the correct odo command w/ context', async () => {

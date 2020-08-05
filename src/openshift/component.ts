@@ -80,14 +80,12 @@ export class Component extends OpenShiftItem {
 
     static async getOpenshiftData(context: OpenShiftObject): Promise<OpenShiftObject> {
         return Component.getOpenShiftCmdData(context,
-            "In which Project you want to create a Component",
             "In which Application you want to create a Component"
         );
     }
 
     @vsCommand('openshift.component.create')
     @selectTargetApplication(
-        "In which Project you want to create a Component",
         "In which Application you want to create a Component"
     )
     static async create(application: OpenShiftObject): Promise<string> {
@@ -125,7 +123,6 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.delete', true)
     @selectTargetComponent(
-        "From which Project do you want to delete Component",
         "From which Application you want to delete Component",
         "Select Component to delete"
     )
@@ -150,7 +147,6 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.undeploy', true)
     @selectTargetComponent(
-        "From which Project do you want to undeploy Component",
         "From which Application you want to undeploy Component",
         "Select Component to undeploy",
         (target) => target.contextValue === ContextType.COMPONENT_PUSHED
@@ -202,7 +198,6 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.describe', true)
     @selectTargetComponent(
-        "From which Project you want to describe Component",
         "From which Application you want to describe Component",
         "Select Component you want to describe"
     )
@@ -223,7 +218,6 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.log', true)
     @selectTargetComponent(
-        "In which Project you want to see Log",
         "In which Application you want to see Log",
         "For which Component you want to see Log",
         (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
@@ -242,7 +236,6 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.followLog', true)
     @selectTargetComponent(
-        "In which Project you want to follow Log",
         "In which Application you want to follow Log",
         "For which Component you want to follow Log",
         (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
@@ -291,7 +284,6 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.unlinkComponent.palette')
     @selectTargetComponent(
-        'Select a Project',
         'Select an Application',
         'Select a Component',
         (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
@@ -323,7 +315,6 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.unlinkService.palette')
     @selectTargetComponent(
-        'Select a Project',
         'Select an Application',
         'Select a Component',
         (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
@@ -349,7 +340,6 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.linkComponent')
     @selectTargetComponent(
-        'Select a Project',
         'Select an Application',
         'Select a Component',
         (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
@@ -391,7 +381,6 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.linkService')
     @selectTargetComponent(
-        'Select a Project',
         'Select an Application',
         'Select a Component',
         (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
@@ -419,7 +408,6 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.push', true)
     @selectTargetComponent(
-        'In which Project you want to push the changes',
         'In which Application you want to push the changes',
         'For which Component you want to push the changes',
         (target) => target.contextValue === ContextType.COMPONENT_PUSHED || target.contextValue === ContextType.COMPONENT
@@ -454,7 +442,6 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.watch', true)
     @selectTargetComponent(
-        'Select a Project',
         'Select an Application',
         'Select a Component you want to watch',
         (target) => target.contextValue === ContextType.COMPONENT_PUSHED
@@ -491,7 +478,6 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.openUrl', true)
     @selectTargetComponent(
-        'Select a Project',
         'Select an Application',
         'Select a Component to open in browser',
         (target) => target.contextValue === ContextType.COMPONENT_PUSHED
@@ -533,8 +519,7 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.createFromLocal')
     @selectTargetApplication(
-        "In which Project you want to create a Component",
-        "In which Application you want to create a Component"
+        "Select an Application where you want to create a Component"
     )
     static async createFromLocal(application: OpenShiftObject): Promise<string | null> {
         if (!application) return null;
@@ -559,7 +544,6 @@ export class Component extends OpenShiftItem {
 
     static async createFromFolder(folder: Uri): Promise<string | null> {
         const application = await Component.getOpenShiftCmdData(undefined,
-            "In which Project you want to create a Component",
             "In which Application you want to create a Component"
         );
         if (!application) return null;
@@ -582,7 +566,6 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.createFromGit')
     @selectTargetApplication(
-        "In which Project you want to create a Component",
         "In which Application you want to create a Component"
     )
     static async createFromGit(application: OpenShiftObject): Promise<string | null> {
@@ -630,7 +613,6 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.createFromBinary')
     @selectTargetApplication(
-        "In which Project you want to create a Component",
         "In which Application you want to create a Component"
     )
     static async createFromBinary(application: OpenShiftObject): Promise<string | null> {
@@ -670,7 +652,6 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.debug', true)
     @selectTargetComponent(
-        'Select a Project',
         'Select an Application',
         'Select a Component you want to debug (showing only Components pushed to the cluster)',
         (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED

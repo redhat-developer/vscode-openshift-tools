@@ -55,25 +55,23 @@ suite('OpenShift/Service', () => {
         let progressStub: sinon.SinonStub;
 
         setup(() => {
+            getProjectsStub.resolves([projectItem]);
             sandbox.stub(OdoImpl.prototype, 'getServiceTemplates').resolves([]);
             sandbox.stub(OdoImpl.prototype, 'getServiceTemplatePlans').resolves(['default', 'free', 'paid']);
             quickPickStub.onFirstCall().resolves(appItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(templatePlan);
-            quickPickStub.onCall(3).resolves('default');
+            quickPickStub.onSecondCall().resolves(templatePlan);
+            quickPickStub.onThirdCall().resolves('default');
             inputStub = sandbox.stub(vscode.window, 'showInputBox').resolves(serviceItem.getName());
             progressStub = sandbox.stub(Progress, 'execFunctionWithProgress').resolves();
         });
 
         test('works with correct inputs', async () => {
-            getProjectsStub.resolves([projectItem]);
             getApplicationsStub.resolves([appItem]);
             const result = await Service.create(null);
             expect(result).equals(`Service '${serviceItem.getName()}' successfully created`);
         });
 
         test('validation returns null for correct service name', async () => {
-            getProjectsStub.resolves([projectItem]);
             getApplicationsStub.resolves([appItem]);
             let result: string | Thenable<string>;
             inputStub.callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
@@ -86,7 +84,6 @@ suite('OpenShift/Service', () => {
         });
 
         test('validation returns message for long service name', async () => {
-            getProjectsStub.resolves([projectItem]);
             getApplicationsStub.resolves([appItem]);
             let result: string | Thenable<string>;
             inputStub.callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
@@ -113,8 +110,6 @@ suite('OpenShift/Service', () => {
         });
 
         test('calls the appropriate error message if no project found', async () => {
-            quickPickStub.restore();
-            getProjectNamesStub.restore();
             getProjectsStub.resolves([]);
             sandbox.stub(vscode.window, 'showErrorMessage');
             try {
@@ -282,12 +277,11 @@ suite('OpenShift/Service', () => {
         let warnStub: sinon.SinonStub;
 
         setup(() => {
-            getProjectsStub.resolves([]);
+            getProjectsStub.resolves([projectItem]);
             getApplicationsStub.resolves([]);
             getServicesStub.resolves([]);
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(serviceItem);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(serviceItem);
             warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
             sandbox.stub(Progress, 'execFunctionWithProgress').yields();
         });
@@ -310,14 +304,13 @@ suite('OpenShift/Service', () => {
 
         test('returns null with no application selected', async () => {
             quickPickStub.onFirstCall().resolves();
-            quickPickStub.onSecondCall().resolves();
             const result = await Service.del(null);
 
             expect(result).null;
         });
 
         test('returns null with no service selected', async () => {
-            quickPickStub.onThirdCall().resolves();
+            quickPickStub.onSecondCall().resolves();
             const result = await Service.del(null);
 
             expect(result).null;
@@ -342,9 +335,9 @@ suite('OpenShift/Service', () => {
 
     suite('describe', () => {
         setup(() => {
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(serviceItem);
+            getProjectsStub.resolves([projectItem]);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(serviceItem);
             execStub.resolves({error: undefined, stdout: 'template_name', stderr: ''});
         });
 

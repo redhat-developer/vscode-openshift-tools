@@ -72,19 +72,18 @@ suite('OpenShift/Application', () => {
             });
 
             test('asks to select a project and an application', async () => {
-                const projects = Promise.resolve([projectItem]);
+                sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
                 const apps = Promise.resolve([appItem]);
                 quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-                quickPickStub.onFirstCall().resolves(projectItem);
-                quickPickStub.onSecondCall().resolves(appItem);
+                quickPickStub.onFirstCall().resolves(appItem);
 
                 await Application.describe(null);
 
-                expect(quickPickStub).calledWith(projects, { placeHolder: "From which project you want to describe Application", ignoreFocusOut: true });
                 expect(quickPickStub).calledWith(apps, { placeHolder: "Select Application you want to describe", ignoreFocusOut: true });
             });
 
             test('skips odo command execution if canceled by user', async () => {
+                sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
                 quickPickStub = sandbox.stub(vscode.window, 'showQuickPick').resolves(null);
                 await Application.describe(null);
                 expect(termStub).not.called;
@@ -97,6 +96,7 @@ suite('OpenShift/Application', () => {
 
         setup(() => {
             warnStub = sandbox.stub(vscode.window, 'showWarningMessage');
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([compItem]);
         });
 
@@ -139,7 +139,6 @@ suite('OpenShift/Application', () => {
         test('requests for a project name and exits if not provided', async () => {
             const stub = sandbox.stub(vscode.window, 'showQuickPick');
             stub.onFirstCall().resolves();
-            warnStub.resolves('Yes');
             await Application.del(undefined);
             expect(stub).calledOnce;
             expect(warnStub).is.not.called;
@@ -147,12 +146,9 @@ suite('OpenShift/Application', () => {
 
         test('requests for a project and an application and exits if application is not provided', async () => {
             const stub = sandbox.stub(vscode.window, 'showQuickPick');
-            stub.onFirstCall().resolves(projectItem);
-            stub.onSecondCall().resolves();
-            warnStub.resolves('Yes');
-
+            stub.onFirstCall().resolves();
             await Application.del(undefined);
-            expect(stub).calledTwice;
+            expect(stub).calledOnce;
             expect(warnStub).is.not.called;
         });
     });

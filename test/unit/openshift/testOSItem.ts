@@ -10,7 +10,7 @@ import { BuilderImage } from "../../../src/odo/builderImage";
 
 export class TestItem implements OpenShiftObject {
     public treeItem = null;
-
+    public active = true;
     // eslint-disable-next-line no-useless-constructor
     constructor(
         private parent: OpenShiftObject,
@@ -45,6 +45,10 @@ export class TestItem implements OpenShiftObject {
         return;
     }
 
+    addChild(item: OpenShiftObject): Promise<OpenShiftObject> {
+        return;
+    }
+
     getParent(): OpenShiftObject {
         return this.parent;
     }
@@ -52,5 +56,4 @@ export class TestItem implements OpenShiftObject {
     get label(): string {
         return this.name;
     }
-    ge
 }

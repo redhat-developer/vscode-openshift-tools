@@ -50,10 +50,7 @@ export class Oc {
         if (message) {
             window.showWarningMessage(message);
         } else {
-            const project = await OpenShiftItem.getOpenShiftCmdData(
-                undefined,
-                'Select a Project where to create a new resource',
-            );
+            const project = await OpenShiftItem.getOpenShiftCmdData(undefined);
             if (!project) return null;
             const result = await CliChannel.getInstance().execute(
                 `${toolLocation} create -f ${document.fileName} --namespace ${project.getName()}`,

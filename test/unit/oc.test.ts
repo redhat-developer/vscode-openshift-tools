@@ -8,11 +8,10 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { Oc } from '../../src/oc';
-import { ContextType } from '../../src/odo';
+import { ContextType, OdoImpl } from '../../src/odo';
 import { ToolsConfig } from '../../src/tools';
 import { TestItem } from './openshift/testOSItem';
 import { CliChannel } from '../../src/cli';
-import OpenShiftItem from '../../src/openshift/openshiftItem';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -48,7 +47,7 @@ suite('Oc', () => {
         execStub = sandbox.stub(CliChannel.prototype, 'execute');
         quickPickStub = sandbox.stub(window, 'showQuickPick');
         detectOrDownloadStub = sandbox.stub(ToolsConfig, 'detect').resolves('path');
-        sandbox.stub(OpenShiftItem, 'getProjectNames').resolves(projectItem);
+        sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
     });
 
     teardown(() => {

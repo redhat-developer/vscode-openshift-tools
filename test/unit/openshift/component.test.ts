@@ -56,7 +56,7 @@ suite('OpenShift/Component', () => {
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });
         spawnStub = sandbox.stub(OdoImpl.prototype, 'spawn');
         sandbox.stub(OdoImpl.prototype, 'getServices');
-        sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+        sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
         getComponentsStub = sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
         sandbox.stub(Util, 'wait').resolves();
@@ -76,14 +76,12 @@ suite('OpenShift/Component', () => {
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(undefined);
+            quickPickStub.onFirstCall().resolves(undefined);
         });
 
         test('asks for context and exits if not provided', async () => {
             const result = await Component.create(null);
             expect(result).null;
-            expect(getProjects).calledOnce;
             expect(getApps).calledOnce;
         });
     });
@@ -402,8 +400,7 @@ suite('OpenShift/Component', () => {
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
+            quickPickStub.onFirstCall().resolves(appItem);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
         });
 
@@ -686,9 +683,8 @@ suite('OpenShift/Component', () => {
         setup(() => {
             sandbox.stub(Component, 'unlinkAllComponents');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(componentItem);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(componentItem);
             sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
             execStub.resolves({ error: undefined, stdout: '', stderr: '' });
             sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
@@ -722,22 +718,15 @@ suite('OpenShift/Component', () => {
             }
         });
 
-        test('returns null when no project is selected', async () => {
+        test('returns null when no application is selected', async () => {
             quickPickStub.onFirstCall().resolves();
             const result = await Component.del(null);
 
             expect(result).null;
         });
 
-        test('returns null when no application is selected', async () => {
-            quickPickStub.onSecondCall().resolves();
-            const result = await Component.del(null);
-
-            expect(result).null;
-        });
-
         test('returns null when no component is selected', async () => {
-            quickPickStub.onThirdCall().resolves();
+            quickPickStub.onSecondCall().resolves();
             const result = await Component.del(null);
 
             expect(result).null;
@@ -748,9 +737,8 @@ suite('OpenShift/Component', () => {
         setup(() => {
             sandbox.stub(Component, 'unlinkAllComponents');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(componentItem);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(componentItem);
             sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
             execStub.resolves({ error: undefined, stdout: '', stderr: '' });
             sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
@@ -782,22 +770,16 @@ suite('OpenShift/Component', () => {
             }
         });
 
-        test('returns null when no project is selected', async () => {
+
+        test('returns null when no application is selected', async () => {
             quickPickStub.onFirstCall().resolves();
             const result = await Component.undeploy(null);
 
             expect(result).null;
         });
 
-        test('returns null when no application is selected', async () => {
-            quickPickStub.onSecondCall().resolves();
-            const result = await Component.undeploy(null);
-
-            expect(result).null;
-        });
-
         test('returns null when no component is selected', async () => {
-            quickPickStub.onThirdCall().resolves();
+            quickPickStub.onSecondCall().resolves();
             const result = await Component.undeploy(null);
 
             expect(result).null;
@@ -879,15 +861,14 @@ suite('OpenShift/Component', () => {
     suite('linkComponent with no context', () => {
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(undefined);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(undefined);
         });
 
         test('asks for context and exits if not provided', async () => {
             const result = await Component.linkComponent(null);
             expect(result).null;
-            expect(quickPickStub).calledThrice;
+            expect(quickPickStub).calledTwice;
         });
     });
 
@@ -937,9 +918,8 @@ suite('OpenShift/Component', () => {
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(componentItem);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(componentItem);
         });
 
         test('works from context menu', async () => {
@@ -974,9 +954,8 @@ suite('OpenShift/Component', () => {
     suite('describe', () => {
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(componentItem);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(componentItem);
         });
 
         test('returns null when cancelled', async () => {
@@ -999,9 +978,8 @@ suite('OpenShift/Component', () => {
     suite('log', () => {
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(componentItem);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(componentItem);
         });
 
         test('log calls the correct odo command', async () => {
@@ -1018,9 +996,8 @@ suite('OpenShift/Component', () => {
     suite('followLog', () => {
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(componentItem);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(componentItem);
         });
 
         test('returns null when cancelled', async () => {
@@ -1046,9 +1023,8 @@ suite('OpenShift/Component', () => {
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(componentItem);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(componentItem);
             sandbox.stub(vscode.window, 'showWarningMessage');
             getpushStub = sandbox.stub(Component, 'getPushCmd').resolves(undefined);
             sandbox.stub(Component, 'setPushCmd');
@@ -1085,9 +1061,8 @@ suite('OpenShift/Component', () => {
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(componentItem);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(componentItem);
         });
 
         test('returns null when cancelled', async () => {
@@ -1137,15 +1112,14 @@ suite('OpenShift/Component', () => {
     suite('openUrl', () => {
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(componentItem);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(componentItem);
         });
 
         test('ask for context when called from command bar and exits with null if canceled', async () => {
-            quickPickStub.onThirdCall().resolves(undefined);
+            quickPickStub.onSecondCall().resolves(undefined);
             const result = await Component.openUrl(null);
-            expect(quickPickStub).calledThrice;
+            expect(quickPickStub).calledTwice;
             expect(result).is.null;
         });
 
@@ -1169,7 +1143,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('gets URLs for the component and if there is more than one asks which one to open it in browser and opens selected', async () => {
-            quickPickStub.onCall(3).resolves({label: 'https://url1'});
+            quickPickStub.onThirdCall().resolves({label: 'https://url1'});
             execStub.onCall(0).resolves({error: undefined, stdout: JSON.stringify({
                 items: [
                     {

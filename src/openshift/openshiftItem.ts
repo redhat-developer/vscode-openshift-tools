@@ -3,10 +3,11 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window, QuickPickItem } from 'vscode';
+import { window, QuickPickItem, commands } from 'vscode';
 import * as validator from 'validator';
-import { Odo, OdoImpl, OpenShiftObject, ContextType, OpenShiftApplication } from '../odo';
+import { Odo, OdoImpl, OpenShiftObject, ContextType, OpenShiftApplication, OpenShiftProject } from '../odo';
 import { OpenShiftExplorer } from '../explorer';
+import { VsCommandError } from '../vscommand';
 
 const errorMessage = {
     Project: 'You need at least one Project available. Please create new OpenShift Project and try again.',
@@ -125,10 +126,15 @@ export default class OpenShiftItem {
         return urlList;
     }
 
-    static async getOpenShiftCmdData(treeItem: OpenShiftObject, projectPlaceholder: string, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject | null>  {
+    static async getOpenShiftCmdData(treeItem: OpenShiftObject, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject | null>  {
         let context: OpenShiftObject | QuickPickCommand = treeItem;
         let project: OpenShiftObject;
-        if (!context) context = await window.showQuickPick(OpenShiftItem.getProjectNames(), {placeHolder: projectPlaceholder, ignoreFocusOut: true});
+        if (!context) {
+            context = (await this.odo.getProjects()).find((prj:OpenShiftProject)=>prj.active);
+            if (!context) {
+                throw new VsCommandError(errorMessage.Project);
+            }
+        }
         if (context && context.contextValue === ContextType.PROJECT && appPlaceholder ) {
             project = context;
             context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(OpenShiftItem.getApplicationNames(project, appPlaceholder.includes('create') && compPlaceholder === undefined), {placeHolder: appPlaceholder, ignoreFocusOut: true});
@@ -165,10 +171,10 @@ function selectTargetDecoratorFactory(decorator: (...args:any[]) => Promise<Open
     };
 }
 
-export function selectTargetComponent(prjPlaceHolder, appPlaceHolder, cmpPlaceHolder, condition?: (value: OpenShiftObject) => boolean) {
-    return selectTargetDecoratorFactory(async (context) => OpenShiftItem.getOpenShiftCmdData(context, prjPlaceHolder, appPlaceHolder, cmpPlaceHolder, condition));
+export function selectTargetComponent(appPlaceHolder, cmpPlaceHolder, condition?: (value: OpenShiftObject) => boolean) {
+    return selectTargetDecoratorFactory(async (context) => OpenShiftItem.getOpenShiftCmdData(context, appPlaceHolder, cmpPlaceHolder, condition));
 }
 
-export function selectTargetApplication(prjPlaceHolder, appPlaceHolder) {
-    return selectTargetDecoratorFactory(async (context) => OpenShiftItem.getOpenShiftCmdData(context, prjPlaceHolder, appPlaceHolder));
+export function selectTargetApplication(appPlaceHolder) {
+    return selectTargetDecoratorFactory(async (context) => OpenShiftItem.getOpenShiftCmdData(context, appPlaceHolder));
 }

@@ -137,7 +137,6 @@ suite('OpenShift/Project', () => {
         setup(() => {
             warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick').resolves(projectItem);
-            getProjectsStub.resolves([]);
         });
 
         test('works with context', async () => {
@@ -152,13 +151,6 @@ suite('OpenShift/Project', () => {
 
             expect(result).equals(`Project '${projectItem.getName()}' successfully deleted`);
             expect(execStub.getCall(0).args[0]).equals(Command.deleteProject(projectItem.getName()));
-        });
-
-        test('returns null with no project selected', async () => {
-            quickPickStub.resolves();
-            const result = await Project.del(null);
-
-            expect(result).null;
         });
 
         test('returns null when cancelled', async () => {

@@ -16,7 +16,6 @@ export class Url extends OpenShiftItem{
     @vsCommand('openshift.url.create')
     static async create(context: OpenShiftObject): Promise<string> {
         const component = await Url.getOpenShiftCmdData(context,
-            'Select a Project to create a URL',
             'Select an Application to create a URL',
             'Select a Component you want to create a URL for');
         if (component) {
@@ -53,7 +52,6 @@ export class Url extends OpenShiftItem{
     static async del(treeItem: OpenShiftObject): Promise<string | null> {
         let url = treeItem;
         const component = await Url.getOpenShiftCmdData(url,
-            "From which Project you want to delete URL",
             "From which Application you want to delete URL",
             "From which Component you want to delete URL");
         if (!url && component) {
@@ -95,7 +93,6 @@ export class Url extends OpenShiftItem{
     static async describe(treeItem: OpenShiftObject): Promise<void> {
         let url = treeItem;
         const component = await Url.getOpenShiftCmdData(url,
-            "From which Project you want to describe URL",
             "From which Application you want to describe URL",
             "From which Component you want to describe URL");
         if (!url && component) {
