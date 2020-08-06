@@ -3,27 +3,27 @@
         "description": "odo CLI",
         "vendor": "Red Hat, Inc.",
         "name": "odo",
-        "version": "1.2.4",
-        "versionRange": "^1.2.4",
-        "versionRangeLabel": "version >= 1.2.4 and < 2.0.0",
+        "version": "1.2.5",
+        "versionRange": "^1.2.5",
+        "versionRangeLabel": "version >= 1.2.5 and < 2.0.0",
         "dlFileName": "odo",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.4/odo-windows-amd64.exe",
-                "sha256sum": "753db295722d7b2031b635b05b8df3b58704a82c5623a1d6e0aec2b7b37c1ab4",
-                "dlFileName": "odo.exe",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.5/odo-windows-amd64.exe.tar.gz",
+                "sha256sum": "8efb440b063c26ea5896f925ce07e0a5c2e189e015fa1ff6a5b67bd5ec1b0b3c",
+                "dlFileName": "odo-windows-amd64.exe.tar.gz",
                 "cmdFileName": "odo.exe"
             },
             "darwin": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.4/odo-darwin-amd64",
-                "sha256sum": "c4fb7cfa0229d702d10d38b5d5f6e6dbe0bc981328f347aebfe3d51bb176a36d",
-                "dlFileName": "odo",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.5/odo-darwin-amd64.tar.gz",
+                "sha256sum": "6a0bbe051deed0b7257161c14b096bd11f32e0af68a66e6771fdc34035344d44",
+                "dlFileName": "odo-darwin-amd64.tar.gz",
                 "cmdFileName": "odo"
             },
             "linux": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.4/odo-linux-amd64.tar.gz",
-                "sha256sum": "9ea437325c44fe08e0cc197a45fd129d6c1b9816a39300988f10fbcd41cb5a29",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.5/odo-linux-amd64.tar.gz",
+                "sha256sum": "a0e954b9a58b081295051d3fce507afd47e527d6b2784b1b51bb0546917a3355",
                 "dlFileName": "odo-linux-amd64.tar.gz",
                 "cmdFileName": "odo"
             }
