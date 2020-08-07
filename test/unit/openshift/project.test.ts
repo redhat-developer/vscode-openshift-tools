@@ -20,12 +20,15 @@ suite('OpenShift/Project', () => {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
 
-    const cluster = new TestItem(null, 'cluster', ContextType.CLUSTER);
-    const projectItem = new TestItem(cluster, 'project', ContextType.PROJECT);
-    const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
+    let cluster: TestItem;
+    let projectItem: TestItem;
+    let appItem: TestItem;
     const errorMessage = 'ERROR MESSAGE';
 
     setup(() => {
+        cluster = new TestItem(null, 'cluster', ContextType.CLUSTER);
+        projectItem = new TestItem(cluster, 'project', ContextType.PROJECT);
+        appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
         sandbox = sinon.createSandbox();
         sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
@@ -135,7 +138,6 @@ suite('OpenShift/Project', () => {
 
         setup(() => {
             warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
-            sandbox.stub(vscode.window, 'showQuickPick').resolves(projectItem);
         });
 
         test('works with context', async () => {
