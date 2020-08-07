@@ -46,7 +46,7 @@ export class TestItem implements OpenShiftObject {
     }
 
     addChild(item: OpenShiftObject): Promise<OpenShiftObject> {
-        return;
+        return Promise.resolve(item);
     }
 
     getParent(): OpenShiftObject {
