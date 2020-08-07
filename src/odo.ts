@@ -187,7 +187,7 @@ export class OpenShiftCluster extends OpenShiftObjectImpl {
 }
 
 export class OpenShiftProject extends OpenShiftObjectImpl {
-    constructor(parent: OpenShiftObject, name: string, public readonly active: boolean) {
+    constructor(parent: OpenShiftObject, name: string, public active: boolean) {
         super(parent, name, ContextType.PROJECT, 'project-node.png');
     }
 
@@ -449,8 +449,7 @@ class OdoModel {
         });
     }
 
-    public async delete(item: OpenShiftObject): Promise<void> {
-        await item.getParent().removeChild(item);
+    public delete(item: OpenShiftObject): void {
         this.pathToObject.delete(item.path);
         if (item.contextPath) {
             this.contextToObject.delete(item.contextPath.fsPath);
@@ -775,20 +774,18 @@ export class OdoImpl implements Odo {
     }
 
     private async insertAndReveal(item: OpenShiftObject): Promise<OpenShiftObject> {
-        // await OpenShiftExplorer.getInstance().reveal(this.insert(await item.getParent().getChildren(), item));
         this.subject.next(new OdoEventImpl('inserted', await item.getParent().addChild(item), true));
         return item;
     }
 
     private async insertAndRefresh(item: OpenShiftObject): Promise<OpenShiftObject> {
-        // await OpenShiftExplorer.getInstance().refresh(this.insert(await item.getParent().getChildren(), item).getParent());
         this.subject.next(new OdoEventImpl('changed', (await item.getParent().addChild(item)).getParent()));
         return item;
     }
 
     private async deleteAndRefresh(item: OpenShiftObject): Promise<OpenShiftObject> {
-        await OdoImpl.data.delete(item);
-        // OpenShiftExplorer.getInstance().refresh(item.getParent());
+        await item.getParent().removeChild(item);
+        OdoImpl.data.delete(item);
         this.subject.next(new OdoEventImpl('changed', item.getParent()));
         return item;
     }
@@ -801,6 +798,8 @@ export class OdoImpl implements Odo {
     public async createProject(projectName: string): Promise<OpenShiftObject> {
         await OdoImpl.instance.execute(Command.createProject(projectName));
         const clusters = await this.getClusters();
+        const currentProjects = await this.getProjects()
+        currentProjects.forEach((project:OpenShiftProject) => project.active = false);
         return this.insertAndReveal(new OpenShiftProject(clusters[0], projectName, true));
     }
 
