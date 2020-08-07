@@ -59,7 +59,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
             if (!this.kubeContext
                 || (this.kubeContext.cluster !== newCtx.cluster
                     || this.kubeContext.user !== newCtx.user
-                    || this.kubeContext.namespace !== newCtx.user)) {
+                    || this.kubeContext.namespace !== newCtx.namespace)) {
                 this.refresh();
             }
             this.kubeContext = newCtx;
