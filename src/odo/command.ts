@@ -39,7 +39,7 @@ export class Command {
     }
 
     static deleteProject(name: string): string {
-        return `odo project delete ${name} -o json`;
+        return `odo project delete ${name} -w -o json`;
     }
 
     @verbose
