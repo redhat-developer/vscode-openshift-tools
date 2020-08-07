@@ -637,7 +637,7 @@ export class OdoImpl implements Odo {
 
     public async getComponentTypesJson(): Promise<ComponentType[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
-        return this.loadItems<ComponentType>(result);
+        return this.loadItems<ComponentType>(result, (json) => json.s2iItems);
     }
 
     public async getImageStreamRef(name: string, namespace: string): Promise<ImageStream> {
