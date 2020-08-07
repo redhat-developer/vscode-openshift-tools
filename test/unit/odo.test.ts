@@ -448,7 +448,7 @@ suite("odo", () => {
         const odoCatalog = JSON.stringify({
             kind : "ComponentTypeList",
             apiVersion : "odo.openshift.io/v1alpha1",
-            items: [
+            s2iItems: [
                 {
                     kind : "ComponentType",
                     apiVersion : "odo.openshift.io/v1alpha1",
