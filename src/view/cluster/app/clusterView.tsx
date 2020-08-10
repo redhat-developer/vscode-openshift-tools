@@ -4,13 +4,21 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as React from 'react';
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
+import { createStyles, makeStyles, Theme, withStyles } from '@material-ui/core/styles';
 import { Alert } from '@material-ui/lab';
 import { InsertDriveFile, GetApp, VpnKey } from '@material-ui/icons';
 import StopIcon from '@material-ui/icons/Stop';
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+const prettyBytes = require('pretty-bytes');
 import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  AccordionActions,
   Avatar,
+  Badge,
   Button,
+  Chip,
   Divider,
   LinearProgress,
   List,
@@ -74,6 +82,10 @@ const useStyles = makeStyles((theme: Theme) =>
       },
       '& .MuiButton-root.Mui-disabled': {
         color: 'var(--vscode-button-secondaryForeground)'
+      },
+      '& .MuiBadge-anchorOriginTopLeftCircle' : {
+        top: '46%',
+        left: '40%'
       }
     },
     button: {
@@ -128,9 +140,56 @@ const useStyles = makeStyles((theme: Theme) =>
     textContainer: {
       color: 'var(--vscode-input-foreground)',
       fontFamily: 'var(--vscode-editor-font-family)'
+    },
+    icon: {
+      verticalAlign: "bottom",
+      height: 20,
+      width: 20
+    },
+    details: {
+      alignItems: "center"
+    },
+    column: {
+      flexBasis: "50%"
+    },
+    helper: {
+      borderLeft: `2px solid ${theme.palette.divider}`,
+      padding: theme.spacing(1, 2)
+    },
+    heading: {
+      fontSize: theme.typography.pxToRem(15)
     }
   })
 );
+
+const StyledBadge = withStyles((theme) => ({
+  badge: {
+    backgroundColor: '#44b700',
+    color: '#44b700',
+    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+    '&::after': {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      borderRadius: '50%',
+      animation: '$ripple 1.2s infinite ease-in-out',
+      border: '1px solid currentColor',
+      content: '""',
+    },
+  },
+  '@keyframes ripple': {
+    '0%': {
+      transform: 'scale(.8)',
+      opacity: 1,
+    },
+    '100%': {
+      transform: 'scale(2.4)',
+      opacity: 0,
+    },
+  },
+}))(Badge);
 declare global {
   interface Window {
       acquireVsCodeApi(): any;
@@ -156,8 +215,8 @@ function getSteps() {
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function addClusterView() {
   const classes = useStyles();
-  const crcLatest = '1.13.0';
-  const crcOpenShift = '4.5.1';
+  const crcLatest = '1.14.0';
+  const crcOpenShift = '4.5.4';
   const [fileName, setBinaryPath] = React.useState('');
   const [pullSecretPath, setSecret] = React.useState('');
   const [cpuSize, setCpuSize] = React.useState(crcDefaults.DefaultCPUs);
@@ -167,6 +226,13 @@ export default function addClusterView() {
   const [crcError, setCrcError] = React.useState(false);
   const [crcStopStatus, setStopStatus] = React.useState(false);
   const [activeStep, setActiveStep] = React.useState(0);
+  const [status, setStatus] = React.useState({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: ''});
+  const [settingPresent, setSettingPresent] = React.useState(false);
+
+  React.useEffect(() => {
+    vscode.postMessage({action: 'checkSetting'});
+  }, []);
+
   const steps = getSteps();
 
   const messageListener = (event) => {
@@ -179,6 +245,8 @@ export default function addClusterView() {
             break;
           case 'crcstartstatus' :
             setProgress(false);
+            setStatus({crcStatus: message.status.crcStatus, openshiftStatus: message.status.openshiftStatus, diskUsage: prettyBytes(message.status.diskUsage), cacheUsage: prettyBytes(message.status.cacheUsage), cacheDir: message.status.cacheDir});
+            console.log(message.status);
             break;
           case 'crcstoperror' :
             setStopProgress(false);
@@ -194,6 +262,10 @@ export default function addClusterView() {
               setCrcError(true);
             }
             break;
+          case 'crcsetting' :
+            setSettingPresent(true);
+            setStatus({crcStatus: message.status.crcStatus, openshiftStatus: message.status.openshiftStatus, diskUsage: prettyBytes(message.status.diskUsage), cacheUsage: prettyBytes(message.status.cacheUsage), cacheDir: message.status.cacheDir});
+            break;
           default:
             break;
         }
@@ -201,7 +273,6 @@ export default function addClusterView() {
     }
 
   window.addEventListener('message', messageListener);
-
 
   const handleUploadPath = (event) => {
     setBinaryPath(event.target.files[0].path);
@@ -221,8 +292,10 @@ export default function addClusterView() {
 
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
+      setStopStatus(false);
+      setProgress(true);
       const crcStartCommand = `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory}`;
-      vscode.postMessage({action: 'start', data: crcStartCommand, pullSecret: pullSecretPath});
+      vscode.postMessage({action: 'start', data: crcStartCommand, pullSecret: pullSecretPath, crcLoc: fileName });
     }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
@@ -255,6 +328,8 @@ export default function addClusterView() {
     setStopProgress(false);
     setCrcError(false);
     setStopStatus(false);
+    setStatus({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: ''});
+    setSettingPresent(false);
   };
 
   const fetchDownloadBinary = () => {
@@ -266,14 +341,85 @@ export default function addClusterView() {
     return `${crcDefaults.DefaultCrcUrlBase}/${crcLatest}/${crcBundle}`;
   }
 
+  const RunningStatus = ()=> (
+    <Chip label="Running" size="small"
+      avatar={<StyledBadge
+      overlap="circle"
+      anchorOrigin={{
+        vertical: 'top',
+        horizontal: 'left',
+      }}
+      variant="dot"
+    >
+    </StyledBadge>}/>
+  );
+
+  const StoppedStatus = () => (
+    <Chip label="Stopped" size="small" />
+  )
+
+  const CrcStatusDialog = () => (
+    <>
+      <Accordion defaultExpanded>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1c-content"
+          id="panel1c-header"
+        >
+          <div className={classes.column}>
+            <div className={classes.heading}>
+              <span style={{ marginRight: 10 }}>OpenShift Status</span>
+              {status.openshiftStatus == 'Stopped' ? <StoppedStatus /> : <RunningStatus /> }
+            </div>
+          </div>
+        </AccordionSummary>
+        <AccordionDetails className={classes.details}>
+          <div className={classes.column}>
+            <List dense>
+              <ListItem>
+                <ListItemText primary={<span>Code Ready Containers Status: {status.crcStatus}</span>}/>
+              </ListItem>
+              <ListItem>
+                <ListItemText primary={<span>OpenShift Status: {status.openshiftStatus}</span>}/>
+              </ListItem>
+              <ListItem>
+                <ListItemText primary={<span>Disk Usage: {status.diskUsage}</span>}/>
+              </ListItem>
+              <ListItem>
+                <ListItemText primary={<span>Cache Usage: {status.cacheUsage}</span>}/>
+              </ListItem>
+              <ListItem>
+                <ListItemText primary={<span>Cache Directory: {status.cacheDir}</span>}/>
+              </ListItem>
+            </List>
+          </div>
+          {(status.openshiftStatus != 'Stopped') && (
+          <div className={classes.helper}>
+            <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none'}}>
+              <Button component="span" className={classes.button}>
+                Open OpenShift Console
+              </Button>
+            </a>
+          </div>)}
+        </AccordionDetails>
+        <Divider />
+        <AccordionActions>
+          <Button size="small" component="span" className={classes.button} onClick={handleStopProcess} disabled={crcStopProgress} startIcon={<StopIcon />}>
+            Stop CRC
+          </Button>
+        </AccordionActions>
+      </Accordion>
+    </>
+  );
+
   const getStepContent = (step: number) => {
     switch (step) {
-        case 0:      
+        case 0:
           return (
             <List dense>
               <ListItem>
                 <ListItemText
-                  primary={<span>CRC Version: {crcLatest}</span>}
+                  primary={<span>Code Ready Containers version: {crcLatest}</span>}
                   secondary={'This is the latest version of Red Hat Code Ready Containers'}
                 />
               </ListItem>
@@ -368,11 +514,11 @@ export default function addClusterView() {
                 secondary={<span>Download pull secret file from <a href={crcDefaults.CrcLandingPageURL}>here</a> and upload it.</span>} />
               <div className={classes.uploadLabel}>
                 <input
-                style={{ display: "none" }}
-                id="contained-button-file"
-                multiple
-                type="file"
-                onChange={handleUploadPullSecret}
+                  style={{ display: "none" }}
+                  id="contained-button-file"
+                  multiple
+                  type="file"
+                  onChange={handleUploadPullSecret}
                 />
                 <label htmlFor="contained-button-file">
                   <Tooltip title="This is a required field" placement="left">
@@ -433,7 +579,7 @@ export default function addClusterView() {
               <ListItemText
                 primary={<span>Set up your host operating system for the CodeReady Containers virtual machine</span>}
                 secondary={<span>Once the setup process is successful, then proceed to start the cluster in Next step.</span>} />
-                <Button 
+                <Button
                   onClick={handleCrcSetup}
                   className={classes.button}>
                   Setup CRC
@@ -451,53 +597,55 @@ export default function addClusterView() {
   }
 
   return (
-    <div className={classes.root}>
-      <Paper elevation={3}>
-        <Stepper activeStep={activeStep} orientation="vertical">
-          {steps.map((label, index) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-              <StepContent>
-                {getStepContent(index)}
-                <div className={classes.actionsContainer}>
-                  <div>
-                    <Button
-                      variant="contained"
-                      disabled={activeStep === 0}
-                      onClick={handleBack}
-                      className={classes.buttonSecondary}
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      variant="contained"
-                      onClick={handleNext}
-                      className={classes.buttonSecondary}
-                      disabled={handleDisabled()}
-                    >
-                      {activeStep === steps.length - 1 ? 'Start Cluster' : 'Next'}
-                    </Button>
+    <div>
+      {(!settingPresent) && (
+        <div className={classes.root}>
+        <Paper elevation={3}>
+          <Stepper activeStep={activeStep} orientation="vertical">
+            {steps.map((label, index) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+                <StepContent>
+                  {getStepContent(index)}
+                  <div className={classes.actionsContainer}>
+                    <div>
+                      <Button
+                        variant="contained"
+                        disabled={activeStep === 0}
+                        onClick={handleBack}
+                        className={classes.buttonSecondary}
+                      >
+                        Back
+                      </Button>
+                      <Button
+                        variant="contained"
+                        onClick={handleNext}
+                        className={classes.buttonSecondary}
+                        disabled={handleDisabled()}
+                      >
+                        {activeStep === steps.length - 1 ? 'Start Cluster' : 'Next'}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </StepContent>
-            </Step>
-          ))}
-        </Stepper>
-      </Paper>
-      {activeStep === steps.length && (
-        <div>
-          <Paper square elevation={3} className={classes.resetContainer}>
-            {(crcProgress && !crcError) &&
-              (<div>
-                <LinearProgress />
-                <List>
-                  <ListItem>
-                    <ListItemText
-                      primary="Setting Up the OpenShift Instance"
-                    />
-                  </ListItem>
-                </List>
-              </div>)}
+                </StepContent>
+              </Step>
+            ))}
+          </Stepper>
+        </Paper>
+        {(activeStep === steps.length) && (
+          <div>
+            <Paper square elevation={3} className={classes.resetContainer}>
+              {(crcProgress && !crcError) &&
+                (<div>
+                  <LinearProgress />
+                  <List>
+                    <ListItem>
+                      <ListItemText
+                        primary="Setting Up the OpenShift Instance"
+                      />
+                    </ListItem>
+                  </List>
+                </div>)}
               {crcStopProgress &&
               (<div>
                 <LinearProgress />
@@ -517,59 +665,33 @@ export default function addClusterView() {
                   </ListItem>
                 </List>
               </div>)}
-              {(!crcProgress && !crcError && !crcStopStatus) &&(
-                <div>
-                  <List>
-                    <ListItem>
-                      <Alert variant="filled" severity="success" style={{ backgroundColor: 'var(--vscode-editor-background)'}}>OpenShift Instance is up.</Alert>
-                    </ListItem>
-                    <ListItem>
-                      <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none'}}>
-                        <Button
-                          component="span"
-                          className={classes.button}
-                        >
-                          Open OpenShift Console
-                        </Button>
-                      </a>
-                      <Button
-                          component="span"
-                          className={classes.button}
-                          onClick={handleStopProcess}
-                          startIcon={<StopIcon />}
-                        >
-                          Stop CRC
-                      </Button>
-                    </ListItem>
-                  </List>
-                </div>)}
-                {crcStopStatus && (
-                <div>
-                  <List>
-                    <ListItem>
-                      <Alert variant="filled" severity="success" style={{ backgroundColor: 'var(--vscode-editor-background)'}}>OpenShift Instance is Stopped.</Alert>
-                    </ListItem>
-                  </List>
-                </div>)}
-                <div className={classes.actionsContainer}>
-                  <div>
-                    <Button
-                      onClick={handleBack}
-                      className={classes.button}
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      onClick={handleReset}
-                      className={classes.button}
-                    >
-                      Reset
-                    </Button>
-                  </div>
-                </div>
+              {(!crcProgress && !crcError && !crcStopStatus) && (<CrcStatusDialog />)}
+              {!crcProgress && crcStopStatus && (
+                <Alert variant="filled" severity="success" style={{ backgroundColor: 'var(--vscode-editor-background)'}}>OpenShift Instance is Stopped.</Alert>)}
+              <div className={classes.actionsContainer}>
+                <Button onClick={handleBack} className={classes.button}>
+                  Back
+                </Button>
+                <Button onClick={handleReset} className={classes.button}>
+                  Reset
+                </Button>
+              </div>
+            </Paper>
+          </div>
+        )}
+      </div>)}
+    <div>
+      {(settingPresent) && (
+        <div className={classes.root}>
+          <Paper square elevation={3} className={classes.resetContainer}>
+            <CrcStatusDialog />
+            <Button onClick={handleReset} className={classes.button}>
+              Reset
+            </Button>
           </Paper>
         </div>
       )}
     </div>
+  </div>
   );
 }

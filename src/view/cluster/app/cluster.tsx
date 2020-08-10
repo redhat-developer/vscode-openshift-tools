@@ -4,8 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as React from 'react';
-import { makeStyles, Theme, createStyles, withStyles } from '@material-ui/core/styles';
-import clsx from 'clsx';
+import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { 
   AppBar,
   Button,
@@ -15,15 +14,9 @@ import {
   List,
   ListItem,
   ListItemText,
-  StepConnector,
-  StepIconProps,
-  StepLabel,
-  Stepper,
-  Step,
   Toolbar,
   Tooltip,
   Typography} from '@material-ui/core';
-import Check from '@material-ui/icons/Check';
 
 import AddClusterView from './clusterView';
 
@@ -36,8 +29,10 @@ const useStyles = makeStyles((theme: Theme) =>
       flexGrow: 1,
       fontSize: '1.25em'
     },
-    container: {
-      marginBottom: '8em'
+    iconContainer: {
+      height: 60,
+      marginBottom: '3em',
+      marginTop: '2em'
     },
     textWhite: {
       marginBottom: '20px!important',
@@ -91,53 +86,7 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
-const WizardConnector = withStyles({
-  alternativeLabel: {
-    top: 10,
-    left: 'calc(-50% + 16px)',
-    right: 'calc(50% + 16px)',
-  },
-  active: {
-    '& $line': {
-      borderColor: 'black',
-    },
-  },
-  completed: {
-    '& $line': {
-      borderColor: 'black',
-    },
-  },
-  line: {
-    borderColor: '#eaeaf0',
-    borderTopWidth: 3,
-    borderRadius: 1,
-  },
-})(StepConnector);
-
-const useSelectionStepIconStyles = makeStyles({
-  root: {
-    color: '#eaeaf0',
-    display: 'flex',
-    height: 22,
-    alignItems: 'center',
-  },
-  active: {
-    color: '#EE0000',
-  },
-  circle: {
-    width: 8,
-    height: 8,
-    borderRadius: '50%',
-    backgroundColor: 'currentColor',
-  },
-  completed: {
-    color: '#EE0000',
-    zIndex: 1,
-    fontSize: 18,
-  },
-});
-
-const cardList = [
+const clusterTypes = [
   {
     heading: "Deploy it locally on your laptop",
     description: "Install on Laptop: Red Hat CodeReady Containers.",
@@ -160,42 +109,20 @@ const cardList = [
   }
 ];
 
-function getSteps() {
-  return ['Select infrastructure provider', 'Create cluster'];
-}
-
-function SelectionStepIcon(props: StepIconProps) {
-  const classes = useSelectionStepIconStyles();
-  const { active, completed } = props;
-
-  return (
-    <div
-      className={clsx(classes.root, {
-        [classes.active]: active,
-      })}
-    >
-      {completed ? <Check className={classes.completed} /> : <div className={classes.circle} />}
-    </div>
-  );
-}
-
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function Header() {
   const classes = useStyles();
   const [showWizard, setShowWizard] = React.useState(false);
-  const [activeStep, setActiveStep] = React.useState(0);
-  const steps = getSteps();
 
   const handleView = (index) => {
     if (index === 0) {
       setShowWizard(!showWizard);
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
   };
 
-  const Card1 = ({cardList}) => (
+  const InfrastructureLayout = ({clusterTypes}) => (
     <>
-      {cardList.map((list, index) => (
+      {clusterTypes.map((list, index) => (
         <Card className={classes.cardTransform} key={index}>
           <div className={classes.cardHeader}>
             <Typography variant="caption" display="block" style={{fontSize: '1.25em', color: 'white'}}>
@@ -244,15 +171,8 @@ export default function Header() {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Stepper alternativeLabel activeStep={activeStep} connector={<WizardConnector />} style={{ background: 'none' }}>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel StepIconComponent={SelectionStepIcon}>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-      <div className={classes.container}>
-        <div className="row" style={{ height: 60, marginBottom: '3em' }}>
+      <div>
+        <div className={classes.iconContainer}>
           <img src="https://cloud.redhat.com/apps/landing/fonts/openShiftMarketing.svg" alt="redhat-openshift"></img>
         </div>
         {showWizard && (<div className={classes.rowBody}>
@@ -265,7 +185,7 @@ export default function Header() {
         </div>)}
         {!showWizard && (
           <div className={classes.cardContainer}>
-            <Card1 cardList={cardList}></Card1>
+            <InfrastructureLayout clusterTypes={clusterTypes}></InfrastructureLayout>
           </div>)}
       </div>
     </div>

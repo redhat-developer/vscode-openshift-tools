@@ -8,6 +8,7 @@ import * as fs from 'fs';
 import { spawn } from 'child_process';
 import { ExtenisonID } from '../../util/constants';
 import { WindowUtil } from '../../util/windowUtils';
+import { CliChannel } from '../../cli';
 
 // import treeKill = require('tree-kill');
 
@@ -30,7 +31,7 @@ export default class ClusterViewLoader {
         panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, "images/context/cluster-node.png"));
         panel.webview.html = ClusterViewLoader.getWebviewContent(ClusterViewLoader.extensionPath);
         panel.webview.postMessage({action: 'cluster', data: ''});
-        panel.webview.onDidReceiveMessage((event)  => {
+        panel.webview.onDidReceiveMessage(async (event)  => {
             let child;
             const timestamp = Number(new Date());
             const date = new Date(timestamp);
@@ -55,16 +56,21 @@ export default class ClusterViewLoader {
                     channel.append(chunk);
                     panel.webview.postMessage({action: 'crcstarterror', data: chunk})
                 });
-                child.on('close', (code) => {
+                child.on('close', async (code) => {
                     vscode.workspace.getConfiguration("openshiftConnector").update("crcPullSecretPath", event.pullSecret);
                     // eslint-disable-next-line no-console
                     console.log(`crc start exited with code ${code}`);
-                    panel.webview.postMessage({action: 'crcstartstatus', data: code})
+                    const result =  await CliChannel.getInstance().execute(`${event.crcLoc} status -ojson`);
+                    panel.webview.postMessage({action: 'crcstartstatus', data: code, status: JSON.parse(result.stdout)})
                 });
             }
             if (event.action === 'stop') {
+                let filePath;
                 channel.append(`\nStopping Red Hat Code Ready Containers from webview at ${date}\n`);
-                const stopProcess = spawn(`${event.data}`, ['stop']);
+                if (event.data === '') {
+                    filePath = vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
+                } else filePath = event.data;
+                const stopProcess = spawn(`${filePath}`, ['stop']);
                 stopProcess.stdout.setEncoding('utf8');
                 stopProcess.stderr.setEncoding('utf8');
                 stopProcess.stdout.on('data', (chunk) => {
@@ -79,6 +85,20 @@ export default class ClusterViewLoader {
                     console.log(`crc stop exited with code ${code}`);
                     panel.webview.postMessage({action: 'crcstopstatus', data: code})
                 });
+            }
+            if (event.action === 'crcstatusrequest') {
+                const result =  await CliChannel.getInstance().execute(`${event.crcLoc} status -ojson`);
+                console.log(JSON.parse(result.stdout));
+                panel.webview.postMessage({action: 'crcstatusresponse', status: JSON.parse(result.stdout)})
+            }
+            if (event.action === 'checkSetting') {
+                const binaryFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
+                if (binaryFromSetting) {
+                    console.log(binaryFromSetting)
+                    const result =  await CliChannel.getInstance().execute(`${binaryFromSetting} status -ojson`);
+                    console.log(JSON.parse(result.stdout));
+                    panel.webview.postMessage({action: 'crcsetting', status: JSON.parse(result.stdout)});
+                }
             }
         })
         return panel;
