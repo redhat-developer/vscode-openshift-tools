@@ -141,12 +141,12 @@ export abstract class OpenShiftObjectImpl implements OpenShiftObject {
     }
 
     public async removeChild(item: OpenShiftObject): Promise<void> {
-        const array = await item.getChildren();
+        const array = await this.getChildren();
         array.splice(array.indexOf(item), 1);
     }
 
     public async addChild(item: OpenShiftObject): Promise<OpenShiftObject> {
-        const array = await item.getChildren();
+        const array = await this.getChildren();
         return insert(array, item);
     }
 
