@@ -7,9 +7,10 @@ import * as React from 'react';
 import { createStyles, makeStyles, Theme, withStyles } from '@material-ui/core/styles';
 import { Alert } from '@material-ui/lab';
 import { InsertDriveFile, GetApp, VpnKey } from '@material-ui/icons';
-import StopIcon from '@material-ui/icons/Stop';
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import Skeleton from '@material-ui/lab/Skeleton';
+import PlayArrowIcon from '@material-ui/icons/PlayArrow';
+import RefreshIcon from '@material-ui/icons/Refresh';
+import StopIcon from '@material-ui/icons/Stop';
 const prettyBytes = require('pretty-bytes');
 import {
   Accordion,
@@ -159,6 +160,14 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     heading: {
       fontSize: theme.typography.pxToRem(15)
+    },
+    margin: {
+      margin: theme.spacing(1)
+    },
+    loadingStatusText : {
+      marginBottom: 10,
+      padding: 20,
+      textAlign: 'center'
     }
   })
 );
@@ -247,6 +256,7 @@ export default function addClusterView() {
             break;
           case 'crcstartstatus' :
             setProgress(false);
+            setStatusSkeleton(false);
             setStatus({crcStatus: message.status.crcStatus, openshiftStatus: message.status.openshiftStatus, diskUsage: prettyBytes(message.status.diskUsage), cacheUsage: prettyBytes(message.status.cacheUsage), cacheDir: message.status.cacheDir});
             break;
           case 'crcstoperror' :
@@ -322,6 +332,15 @@ export default function addClusterView() {
     vscode.postMessage({action: 'run', data: `${fileName}` })
   }
 
+  const handleRefresh = () => {
+    setStatusSkeleton(true);
+    if (settingPresent) {
+      vscode.postMessage({action: 'checksetting'});
+    } else {
+      vscode.postMessage({action: 'checkcrcstatus', data: `${fileName}`});
+    }
+  }
+
   const handleReset = () => {
     setActiveStep(0);
     setBinaryPath('');
@@ -335,7 +354,7 @@ export default function addClusterView() {
     setStatus({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: ''});
     setSettingPresent(false);
     setStatusSkeleton(true);
-  };
+  }
 
   const fetchDownloadBinary = () => {
     const platform = (window as any).platform;
@@ -357,19 +376,21 @@ export default function addClusterView() {
       variant="dot"
     >
     </StyledBadge>}/>
-  );
+  )
 
   const StoppedStatus = () => (
     <Chip label="Stopped" size="small" />
   )
 
   const LoadingSkeleton = () => (
-    <div>
-      <Typography variant="body2" color="textSecondary" component="p" style={{ marginBottom: 10, padding: 20, textAlign: "center" }}>
-          A crc configurations was detected in workspace Settings. Fetching the current status of the crc instance.<br></br>If you need to setup a new instance, click on Reset and proceed with wizard workflow.
-      </Typography>
-      <Skeleton variant="text" />
-      <Skeleton variant="rect" height={118} />
+    <div style={{ marginBottom: 5 }}>
+      { (settingPresent) && (
+        <Typography className={classes.loadingStatusText}>A crc configuration is detected in workspace settings. Fetching the current status of the crc instance.<br></br>If you need to setup a new crc instance, click on Reset and proceed with wizard workflow.</Typography>
+      )}
+      { (!settingPresent) && (
+        <Typography className={classes.loadingStatusText}>Refreshing the crc status</Typography>
+      )}
+      <LinearProgress />
     </div>
   )
 
@@ -418,8 +439,11 @@ export default function addClusterView() {
       </AccordionDetails>
       <Divider />
       <AccordionActions>
-        <Button size="small" component="span" className={classes.button} onClick={handleStopProcess} disabled={crcStopProgress} startIcon={<StopIcon />}>
-          Stop CRC
+        {(status.openshiftStatus === 'Stopped') ?
+        (<Button size="small" component="span" className={classes.button} startIcon={<PlayArrowIcon />}>Start Cluster</Button>):
+        (<Button size="small" component="span" className={classes.button} onClick={handleStopProcess} startIcon={<StopIcon />}>Stop Cluster</Button>)}
+        <Button size="small" component="span" className={classes.button} onClick={handleRefresh} startIcon={<RefreshIcon />}>
+          Refresh Status
         </Button>
       </AccordionActions>
     </Accordion>

@@ -85,11 +85,6 @@ export default class ClusterViewLoader {
                     panel.webview.postMessage({action: 'crcstopstatus', data: code})
                 });
             }
-            if (event.action === 'crcstatusrequest') {
-                const result =  await CliChannel.getInstance().execute(`${event.crcLoc} status -ojson`);
-                console.log(JSON.parse(result.stdout));
-                panel.webview.postMessage({action: 'crcstatusresponse', status: JSON.parse(result.stdout)})
-            }
             if (event.action === 'checksetting') {
                 const binaryFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
                 if (binaryFromSetting) {
@@ -97,6 +92,10 @@ export default class ClusterViewLoader {
                     const result =  await CliChannel.getInstance().execute(`${binaryFromSetting} status -ojson`);
                     panel.webview.postMessage({action: 'crcstatus', status: JSON.parse(result.stdout)});
                 }
+            }
+            if (event.action === 'checkcrcstatus') {
+                const result =  await CliChannel.getInstance().execute(`${event.data} status -ojson`);
+                panel.webview.postMessage({action: 'crcstatus', status: JSON.parse(result.stdout)});
             }
         })
         return panel;
