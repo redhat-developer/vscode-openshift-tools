@@ -9,6 +9,7 @@ import { Alert } from '@material-ui/lab';
 import { InsertDriveFile, GetApp, VpnKey } from '@material-ui/icons';
 import StopIcon from '@material-ui/icons/Stop';
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import Skeleton from '@material-ui/lab/Skeleton';
 const prettyBytes = require('pretty-bytes');
 import {
   Accordion,
@@ -228,9 +229,10 @@ export default function addClusterView() {
   const [activeStep, setActiveStep] = React.useState(0);
   const [status, setStatus] = React.useState({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: ''});
   const [settingPresent, setSettingPresent] = React.useState(false);
+  const [statusSkeleton, setStatusSkeleton] = React.useState(true);
 
   React.useEffect(() => {
-    vscode.postMessage({action: 'checkSetting'});
+    vscode.postMessage({action: 'checksetting'});
   }, []);
 
   const steps = getSteps();
@@ -246,7 +248,6 @@ export default function addClusterView() {
           case 'crcstartstatus' :
             setProgress(false);
             setStatus({crcStatus: message.status.crcStatus, openshiftStatus: message.status.openshiftStatus, diskUsage: prettyBytes(message.status.diskUsage), cacheUsage: prettyBytes(message.status.cacheUsage), cacheDir: message.status.cacheDir});
-            console.log(message.status);
             break;
           case 'crcstoperror' :
             setStopProgress(false);
@@ -264,6 +265,9 @@ export default function addClusterView() {
             break;
           case 'crcsetting' :
             setSettingPresent(true);
+            break;
+          case 'crcstatus' :
+            setStatusSkeleton(false);
             setStatus({crcStatus: message.status.crcStatus, openshiftStatus: message.status.openshiftStatus, diskUsage: prettyBytes(message.status.diskUsage), cacheUsage: prettyBytes(message.status.cacheUsage), cacheDir: message.status.cacheDir});
             break;
           default:
@@ -330,6 +334,7 @@ export default function addClusterView() {
     setStopStatus(false);
     setStatus({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: ''});
     setSettingPresent(false);
+    setStatusSkeleton(true);
   };
 
   const fetchDownloadBinary = () => {
@@ -358,57 +363,68 @@ export default function addClusterView() {
     <Chip label="Stopped" size="small" />
   )
 
+  const LoadingSkeleton = () => (
+    <div>
+      <Typography variant="body2" color="textSecondary" component="p" style={{ marginBottom: 10, padding: 20, textAlign: "center" }}>
+          A crc configurations was detected in workspace Settings. Fetching the current status of the crc instance.<br></br>If you need to setup a new instance, click on Reset and proceed with wizard workflow.
+      </Typography>
+      <Skeleton variant="text" />
+      <Skeleton variant="rect" height={118} />
+    </div>
+  )
+
   const CrcStatusDialog = () => (
     <>
-      <Accordion defaultExpanded>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel1c-content"
-          id="panel1c-header"
-        >
-          <div className={classes.column}>
-            <div className={classes.heading}>
-              <span style={{ marginRight: 10 }}>OpenShift Status</span>
-              {status.openshiftStatus == 'Stopped' ? <StoppedStatus /> : <RunningStatus /> }
-            </div>
-          </div>
-        </AccordionSummary>
-        <AccordionDetails className={classes.details}>
-          <div className={classes.column}>
-            <List dense>
-              <ListItem>
-                <ListItemText primary={<span>Code Ready Containers Status: {status.crcStatus}</span>}/>
-              </ListItem>
-              <ListItem>
-                <ListItemText primary={<span>OpenShift Status: {status.openshiftStatus}</span>}/>
-              </ListItem>
-              <ListItem>
-                <ListItemText primary={<span>Disk Usage: {status.diskUsage}</span>}/>
-              </ListItem>
-              <ListItem>
-                <ListItemText primary={<span>Cache Usage: {status.cacheUsage}</span>}/>
-              </ListItem>
-              <ListItem>
-                <ListItemText primary={<span>Cache Directory: {status.cacheDir}</span>}/>
-              </ListItem>
-            </List>
-          </div>
-          {(status.openshiftStatus != 'Stopped') && (
-          <div className={classes.helper}>
-            <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none'}}>
-              <Button component="span" className={classes.button}>
-                Open OpenShift Console
-              </Button>
-            </a>
-          </div>)}
-        </AccordionDetails>
-        <Divider />
-        <AccordionActions>
-          <Button size="small" component="span" className={classes.button} onClick={handleStopProcess} disabled={crcStopProgress} startIcon={<StopIcon />}>
-            Stop CRC
-          </Button>
-        </AccordionActions>
-      </Accordion>
+    {(!statusSkeleton) && (
+    <Accordion defaultExpanded>
+      <AccordionSummary
+        expandIcon={<ExpandMoreIcon />}
+        aria-controls="panel1c-content"
+        id="panel1c-header"
+      >
+        <div className={classes.column}>
+          <span style={{ marginRight: 10 }}>OpenShift Status</span>
+          {status.openshiftStatus == 'Stopped' ? <StoppedStatus /> : <RunningStatus /> }
+        </div>
+      </AccordionSummary>
+      <AccordionDetails className={classes.details}>
+        <div className={classes.column}>
+          <List dense>
+            <ListItem>
+              <ListItemText primary={<span>Code Ready Containers Status: {status.crcStatus}</span>}/>
+            </ListItem>
+            <ListItem>
+              <ListItemText primary={<span>OpenShift Status: {status.openshiftStatus}</span>}/>
+            </ListItem>
+            <ListItem>
+              <ListItemText primary={<span>Disk Usage: {status.diskUsage}</span>}/>
+            </ListItem>
+            <ListItem>
+              <ListItemText primary={<span>Cache Usage: {status.cacheUsage}</span>}/>
+            </ListItem>
+            <ListItem>
+              <ListItemText primary={<span>Cache Directory: {status.cacheDir}</span>}/>
+            </ListItem>
+          </List>
+        </div>
+        {(status.openshiftStatus != 'Stopped') && (
+        <div className={classes.helper}>
+          <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none'}}>
+            <Button component="span" className={classes.button}>
+              Open OpenShift Console
+            </Button>
+          </a>
+        </div>)}
+      </AccordionDetails>
+      <Divider />
+      <AccordionActions>
+        <Button size="small" component="span" className={classes.button} onClick={handleStopProcess} disabled={crcStopProgress} startIcon={<StopIcon />}>
+          Stop CRC
+        </Button>
+      </AccordionActions>
+    </Accordion>
+    )}
+    {(statusSkeleton) && (<LoadingSkeleton />)}
     </>
   );
 
@@ -596,43 +612,47 @@ export default function addClusterView() {
     }
   }
 
+  const WizardSteps = () => (
+    <Paper elevation={3}>
+      <Stepper activeStep={activeStep} orientation="vertical">
+        {steps.map((label, index) => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
+            <StepContent>
+              {getStepContent(index)}
+              <div className={classes.actionsContainer}>
+                <div>
+                  <Button
+                    variant="contained"
+                    disabled={activeStep === 0}
+                    onClick={handleBack}
+                    className={classes.buttonSecondary}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    variant="contained"
+                    onClick={handleNext}
+                    className={classes.buttonSecondary}
+                    disabled={handleDisabled()}
+                  >
+                    {activeStep === steps.length - 1 ? 'Start Cluster' : 'Next'}
+                  </Button>
+                </div>
+              </div>
+            </StepContent>
+          </Step>
+        ))}
+      </Stepper>
+    </Paper>
+  );
+
   return (
     <div>
       {(!settingPresent) && (
         <div className={classes.root}>
-        <Paper elevation={3}>
-          <Stepper activeStep={activeStep} orientation="vertical">
-            {steps.map((label, index) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-                <StepContent>
-                  {getStepContent(index)}
-                  <div className={classes.actionsContainer}>
-                    <div>
-                      <Button
-                        variant="contained"
-                        disabled={activeStep === 0}
-                        onClick={handleBack}
-                        className={classes.buttonSecondary}
-                      >
-                        Back
-                      </Button>
-                      <Button
-                        variant="contained"
-                        onClick={handleNext}
-                        className={classes.buttonSecondary}
-                        disabled={handleDisabled()}
-                      >
-                        {activeStep === steps.length - 1 ? 'Start Cluster' : 'Next'}
-                      </Button>
-                    </div>
-                  </div>
-                </StepContent>
-              </Step>
-            ))}
-          </Stepper>
-        </Paper>
-        {(activeStep === steps.length) && (
+          <WizardSteps />
+          {(activeStep === steps.length) && (
           <div>
             <Paper square elevation={3} className={classes.resetContainer}>
               {(crcProgress && !crcError) &&
@@ -680,7 +700,6 @@ export default function addClusterView() {
           </div>
         )}
       </div>)}
-    <div>
       {(settingPresent) && (
         <div className={classes.root}>
           <Paper square elevation={3} className={classes.resetContainer}>
@@ -692,6 +711,5 @@ export default function addClusterView() {
         </div>
       )}
     </div>
-  </div>
   );
 }

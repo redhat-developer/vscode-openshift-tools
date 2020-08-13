@@ -5,7 +5,7 @@
 
 import * as React from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
-import { 
+import {
   AppBar,
   Button,
   Card,
@@ -177,7 +177,7 @@ export default function Header() {
         </div>
         {showWizard && (<div className={classes.rowBody}>
           <Card className={classes.cardContent}>
-            <Typography variant="body2" component="p" style={{padding: '20px'}}>
+            <Typography variant="body2" component="p" style={{ padding: 20 }}>
               Red Hat CodeReady Containers brings a minimal OpenShift 4.0 or newer cluster to your local laptop or desktop computer.<br></br>You can use this wizard to create OpenShift clusters locally. Clusters take approximately 15 minutes to provision.
             </Typography>
             <AddClusterView />

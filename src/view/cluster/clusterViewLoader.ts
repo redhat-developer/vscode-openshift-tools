@@ -10,8 +10,6 @@ import { ExtenisonID } from '../../util/constants';
 import { WindowUtil } from '../../util/windowUtils';
 import { CliChannel } from '../../cli';
 
-// import treeKill = require('tree-kill');
-
 export default class ClusterViewLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     static get extensionPath() {
@@ -66,6 +64,7 @@ export default class ClusterViewLoader {
             }
             if (event.action === 'stop') {
                 let filePath;
+                channel.show();
                 channel.append(`\nStopping Red Hat Code Ready Containers from webview at ${date}\n`);
                 if (event.data === '') {
                     filePath = vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
@@ -91,13 +90,12 @@ export default class ClusterViewLoader {
                 console.log(JSON.parse(result.stdout));
                 panel.webview.postMessage({action: 'crcstatusresponse', status: JSON.parse(result.stdout)})
             }
-            if (event.action === 'checkSetting') {
+            if (event.action === 'checksetting') {
                 const binaryFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
                 if (binaryFromSetting) {
-                    console.log(binaryFromSetting)
+                    panel.webview.postMessage({action: 'crcsetting'});
                     const result =  await CliChannel.getInstance().execute(`${binaryFromSetting} status -ojson`);
-                    console.log(JSON.parse(result.stdout));
-                    panel.webview.postMessage({action: 'crcsetting', status: JSON.parse(result.stdout)});
+                    panel.webview.postMessage({action: 'crcstatus', status: JSON.parse(result.stdout)});
                 }
             }
         })
