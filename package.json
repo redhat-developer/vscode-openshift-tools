@@ -122,6 +122,7 @@
     "hasha": "5.0.0",
     "html-webpack-plugin": "^4.2.0",
     "immutable": "^4.0.0-rc.12",
+    "isomorphic-git": "^1.7.4",
     "istanbul": "^0.4.5",
     "leasot": "^10.1.0",
     "mocha": "^6.2.2",
