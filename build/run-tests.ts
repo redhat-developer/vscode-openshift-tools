@@ -19,7 +19,15 @@ async function main(): Promise<void> {
     const extensionDevelopmentPath = path.resolve(extensionRootPath, extension);
     const extensionTestsPath = path.resolve(extensionRootPath, 'out', 'test', tests);
     try {
-        await runTests({ extensionDevelopmentPath, extensionTestsPath });
+        await runTests({
+            extensionDevelopmentPath,
+            extensionTestsPath,
+            launchArgs: [
+                // this is required to create multi root workspace to run tests on
+                path.resolve(extensionRootPath,'test', 'fixtures', 'components', 'comp1'),
+                path.resolve(extensionRootPath,'test', 'fixtures', 'components', 'comp2'),
+            ]
+        });
     } catch(error) {
         // eslint-disable-next-line no-console
         console.error('Failed to run tests');
