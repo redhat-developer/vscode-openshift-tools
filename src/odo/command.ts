@@ -44,7 +44,7 @@ export class Command {
 
     @verbose
     static createProject(name: string): string {
-        return `odo project create ${name}`;
+        return `odo project create ${name} -w`;
     }
 
     static listComponents(project: string, app: string): string {
