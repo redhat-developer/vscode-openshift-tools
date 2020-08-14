@@ -17,6 +17,7 @@ import { Progress } from '../../../src/util/progress';
 import * as Util from '../../../src/util/async';
 import { Refs } from '../../../src/util/refs';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
+import { SourceTypeChoice } from '../../../src/openshift/component';
 
 import pq = require('proxyquire');
 import globby = require('globby');
@@ -95,10 +96,7 @@ suite('OpenShift/Component', () => {
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves({
-                label: 'Workspace Directory',
-                description: 'Use workspace directory as a source for the Component'
-            });
+            quickPickStub.onFirstCall().resolves(SourceTypeChoice.LOCAL);
             quickPickStub.onSecondCall().resolves({label: 'file:///c:/Temp', folder: vscode.Uri.parse('file:///c:/Temp')});
             quickPickStub.onThirdCall().resolves(componentType);
             quickPickStub.onCall(3).resolves(version);
@@ -182,7 +180,7 @@ suite('OpenShift/Component', () => {
             setup(() => {
                 sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves(['nodejs']);
                 sandbox.stub(OdoImpl.prototype, 'getComponentTypeVersions').resolves(['latest']);
-                quickPickStub.onFirstCall().resolves({ label: 'Git Repository' });
+                quickPickStub.onFirstCall().resolves(SourceTypeChoice.GIT);
                 quickPickStub.onSecondCall().resolves({
                     description: "Folder which does not have an OpenShift context",
                     label: "$(plus) Add new context folder."
@@ -320,7 +318,7 @@ suite('OpenShift/Component', () => {
             }];
 
             setup(() => {
-                quickPickStub.onFirstCall().resolves({ label: 'Binary File' });
+                quickPickStub.onFirstCall().resolves(SourceTypeChoice.BINARY);
                 quickPickStub.onSecondCall().resolves({
                     description: "Folder which does not have an OpenShift context",
                     label: "$(plus) Add new context folder."
