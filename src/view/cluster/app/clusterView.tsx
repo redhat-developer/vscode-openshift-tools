@@ -168,6 +168,16 @@ const useStyles = makeStyles((theme: Theme) =>
       marginBottom: 10,
       padding: 20,
       textAlign: 'center'
+    },
+    blockquoteText : {
+      display: 'block',
+      flexDirection: 'column',
+      margin: '8px 0',
+      padding: '8px 12px',
+      borderLeftWidth: '5',
+      borderLeftStyle: 'solid',
+      background: 'var(--vscode-textBlockQuote-background)',
+      borderColor: 'var(--vscode-textBlockQuote-border)'
     }
   })
 );
@@ -264,14 +274,10 @@ export default function addClusterView() {
             setCrcError(true);
             break;
           case 'crcstopstatus' :
-            if (message.data == 0) {
-              setStopProgress(false);
-              setStopStatus(true);
-            }
-            if (message.data == 1) {
-              setStopProgress(false);
-              setCrcError(true);
-            }
+            message.data === 0 ? setStopStatus(true) : setCrcError(true);
+            setStopProgress(false);
+            setStatusSkeleton(false);
+            setStatus({crcStatus: message.status.crcStatus, openshiftStatus: message.status.openshiftStatus, diskUsage: prettyBytes(message.status.diskUsage), cacheUsage: prettyBytes(message.status.cacheUsage), cacheDir: message.status.cacheDir});
             break;
           case 'crcsetting' :
             setSettingPresent(true);
@@ -382,20 +388,13 @@ export default function addClusterView() {
     <Chip label="Stopped" size="small" />
   )
 
-  const LoadingSkeleton = () => (
-    <div style={{ marginBottom: 5 }}>
-      { (settingPresent) && (
-        <Typography className={classes.loadingStatusText}>A crc configuration is detected in workspace settings. Fetching the current status of the crc instance.<br></br>If you need to setup a new crc instance, click on Reset and proceed with wizard workflow.</Typography>
-      )}
-      { (!settingPresent) && (
-        <Typography className={classes.loadingStatusText}>Refreshing the crc status</Typography>
-      )}
-      <LinearProgress />
-    </div>
-  )
-
   const CrcStatusDialog = () => (
     <>
+    { (settingPresent) && (
+      <blockquote className={classes.blockquoteText}>
+        <Typography variant='body2'>A crc configuration is detected in workspace settings. If you need to setup a new CRC instance, click on Reset and proceed with wizard workflow.</Typography>
+      </blockquote>
+    )}
     {(!statusSkeleton) && (
     <Accordion defaultExpanded>
       <AccordionSummary
@@ -448,7 +447,12 @@ export default function addClusterView() {
       </AccordionActions>
     </Accordion>
     )}
-    {(statusSkeleton) && (<LoadingSkeleton />)}
+    {(statusSkeleton) && (
+      <div>
+        <Typography paragraph>Refreshing the crc status</Typography>
+        <LinearProgress />
+      </div>
+    )}
     </>
   );
 
@@ -710,8 +714,8 @@ export default function addClusterView() {
                 </List>
               </div>)}
               {(!crcProgress && !crcError && !crcStopStatus) && (<CrcStatusDialog />)}
-              {!crcProgress && crcStopStatus && (
-                <Alert variant="filled" severity="success" style={{ backgroundColor: 'var(--vscode-editor-background)'}}>OpenShift Instance is Stopped.</Alert>)}
+              {/* {!crcProgress && crcStopStatus && (
+                <Alert variant="filled" severity="success" style={{ backgroundColor: 'var(--vscode-editor-background)'}}>OpenShift Instance is Stopped.</Alert>)} */}
               <div className={classes.actionsContainer}>
                 <Button onClick={handleBack} className={classes.button}>
                   Back
