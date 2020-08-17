@@ -42,8 +42,16 @@ export default class ClusterViewLoader {
             if (event.action === 'start') {
                 channel.show();
                 channel.append(`\nStarting Red Hat Code Ready Containers from webview at ${date}\n`);
-                const [tool, ...params] = event.data.split(' ');
-                child = spawn(tool, params);
+                if (event.isSetting) {
+                    const binaryFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
+                    const pullSecretFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcPullSecretPath");
+                    const cpuFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcCpuCores");
+                    const memoryFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcMemoryAllocated");
+                    child = spawn(`${binaryFromSetting}`, ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`]);
+                } else {
+                    const [tool, ...params] = event.data.split(' ');
+                    child = spawn(tool, params);
+                }
                 child.stdout.setEncoding('utf8');
                 child.stderr.setEncoding('utf8');
                 child.stdout.on('data', (chunk) => {
@@ -56,6 +64,8 @@ export default class ClusterViewLoader {
                 });
                 child.on('close', async (code) => {
                     vscode.workspace.getConfiguration("openshiftConnector").update("crcPullSecretPath", event.pullSecret);
+                    vscode.workspace.getConfiguration("openshiftConnector").update("crcCpuCores", event.cpuSize);
+                    vscode.workspace.getConfiguration("openshiftConnector").update("crcMemoryAllocated", event.memory);
                     // eslint-disable-next-line no-console
                     console.log(`crc start exited with code ${code}`);
                     const result =  await CliChannel.getInstance().execute(`${event.crcLoc} status -ojson`);

@@ -1284,6 +1284,18 @@
           "type": "string",
           "default": null,
           "description": "Provide the path where the pull secret file is present."
+        },
+        "openshiftConnector.crcCpuCores": {
+          "Title": "CRC Cpu Cores",
+          "type": "number",
+          "default": null,
+          "description": "Number of CPU cores to allocate to the OpenShift cluster as selected during the first run"
+        },
+        "openshiftConnector.crcMemoryAllocated": {
+          "Title": "CRC Pull Secret Path",
+          "type": "number",
+          "default": null,
+          "description": "MiB of memory to allocate to the OpenShift cluster as selected during the first run"
         }
       }
     }

@@ -312,11 +312,7 @@ export default function addClusterView() {
 
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
-      setStopStatus(false);
-      setProgress(true);
-      setCrcError(false);
-      const crcStartCommand = `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory}`;
-      vscode.postMessage({action: 'start', data: crcStartCommand, pullSecret: pullSecretPath, crcLoc: fileName });
+      handleStartProcess()
     }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
@@ -329,6 +325,18 @@ export default function addClusterView() {
     if (activeStep === 1 && fileName === '') return true;
     if (activeStep === 2 && pullSecretPath === '') return true;
   };
+
+  const handleStartProcess = () => {
+    setStopStatus(false);
+    setProgress(true);
+    setCrcError(false);
+    if (settingPresent) {
+      vscode.postMessage({action: 'start', isSetting: true });
+    } else {
+      const crcStartCommand = `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory}`;
+      vscode.postMessage({action: 'start', data: crcStartCommand, pullSecret: pullSecretPath, crcLoc: fileName, cpuSize: cpuSize, memory: memory, isSetting: false });
+    }
+  }
 
   const handleStopProcess = () => {
     setStopProgress(true);
@@ -435,7 +443,7 @@ export default function addClusterView() {
       <Divider />
       <AccordionActions>
         {(status.openshiftStatus === 'Stopped') ?
-        (<Button size="small" component="span" className={classes.button} startIcon={<PlayArrowIcon />}>Start Cluster</Button>):
+        (<Button size="small" component="span" className={classes.button} onClick={handleStartProcess} startIcon={<PlayArrowIcon />}>Start Cluster</Button>):
         (<Button size="small" component="span" className={classes.button} onClick={handleStopProcess} startIcon={<StopIcon />}>Stop Cluster</Button>)}
         <Button size="small" component="span" className={classes.button} onClick={handleRefresh} startIcon={<RefreshIcon />}>
           Refresh Status
