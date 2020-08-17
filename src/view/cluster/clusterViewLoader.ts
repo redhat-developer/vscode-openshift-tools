@@ -82,7 +82,7 @@ export default class ClusterViewLoader {
                 stopProcess.on('close', async (code) => {
                     // eslint-disable-next-line no-console
                     console.log(`crc stop exited with code ${code}`);
-                    const result =  await CliChannel.getInstance().execute(`${event.crcLoc} status -ojson`);
+                    const result =  await CliChannel.getInstance().execute(`${filePath} status -ojson`);
                     panel.webview.postMessage({action: 'crcstopstatus', data: code, status: JSON.parse(result.stdout)})
                 });
             }

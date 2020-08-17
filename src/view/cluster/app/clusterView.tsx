@@ -172,7 +172,7 @@ const useStyles = makeStyles((theme: Theme) =>
     blockquoteText : {
       display: 'block',
       flexDirection: 'column',
-      margin: '8px 0',
+      margin: '15px 0',
       padding: '8px 12px',
       borderLeftWidth: '5',
       borderLeftStyle: 'solid',
@@ -241,7 +241,7 @@ export default function addClusterView() {
   const [pullSecretPath, setSecret] = React.useState('');
   const [cpuSize, setCpuSize] = React.useState(crcDefaults.DefaultCPUs);
   const [memory, setMemory] = React.useState(crcDefaults.DefaultMemory);
-  const [crcProgress, setProgress] = React.useState(true);
+  const [crcProgress, setProgress] = React.useState(false);
   const [crcStopProgress, setStopProgress] = React.useState(false);
   const [crcError, setCrcError] = React.useState(false);
   const [crcStopStatus, setStopStatus] = React.useState(false);
@@ -274,7 +274,7 @@ export default function addClusterView() {
             setCrcError(true);
             break;
           case 'crcstopstatus' :
-            message.data === 0 ? setStopStatus(true) : setCrcError(true);
+            message.data === 0 ? setStopStatus(false) : setCrcError(true);
             setStopProgress(false);
             setStatusSkeleton(false);
             setStatus({crcStatus: message.status.crcStatus, openshiftStatus: message.status.openshiftStatus, diskUsage: prettyBytes(message.status.diskUsage), cacheUsage: prettyBytes(message.status.cacheUsage), cacheDir: message.status.cacheDir});
@@ -314,6 +314,7 @@ export default function addClusterView() {
     if (activeStep === steps.length - 1) {
       setStopStatus(false);
       setProgress(true);
+      setCrcError(false);
       const crcStartCommand = `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory}`;
       vscode.postMessage({action: 'start', data: crcStartCommand, pullSecret: pullSecretPath, crcLoc: fileName });
     }
@@ -390,12 +391,7 @@ export default function addClusterView() {
 
   const CrcStatusDialog = () => (
     <>
-    { (settingPresent) && (
-      <blockquote className={classes.blockquoteText}>
-        <Typography variant='body2'>A crc configuration is detected in workspace settings. If you need to setup a new CRC instance, click on Reset and proceed with wizard workflow.</Typography>
-      </blockquote>
-    )}
-    {(!statusSkeleton) && (
+    {(!statusSkeleton && !crcStopProgress) && (
     <Accordion defaultExpanded>
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
@@ -453,6 +449,42 @@ export default function addClusterView() {
         <LinearProgress />
       </div>
     )}
+    </>
+  );
+
+  const StartStopLoader = () => (
+    <>
+    {(!crcProgress && !crcError && !crcStopStatus) && (<CrcStatusDialog />)}
+    {(crcProgress && !crcError) &&
+    (<div>
+      <LinearProgress />
+      <List>
+        <ListItem>
+          <ListItemText
+            primary="Starting OpenShift cluster..."
+          />
+        </ListItem>
+      </List>
+    </div>)}
+    {crcStopProgress &&
+    (<div>
+      <LinearProgress />
+      <List>
+        <ListItem>
+          <ListItemText
+            primary="Stopping the OpenShift cluster, this may take a few minutes..."
+          />
+        </ListItem>
+      </List>
+    </div>)}
+    {crcError && (
+    <div>
+      <List>
+        <ListItem>
+          <Alert variant="filled" severity="error" style={{ backgroundColor: 'var(--vscode-inputValidation-errorBackground)', color: 'var(--vscode-inputValidation-errorForeground)'}}>CRC Process errored out. Check Output channel for details.</Alert>
+        </ListItem>
+      </List>
+    </div>)}
     </>
   );
 
@@ -683,39 +715,7 @@ export default function addClusterView() {
           {(activeStep === steps.length) && (
           <div>
             <Paper square elevation={3} className={classes.resetContainer}>
-              {(crcProgress && !crcError) &&
-                (<div>
-                  <LinearProgress />
-                  <List>
-                    <ListItem>
-                      <ListItemText
-                        primary="Setting Up the OpenShift Instance"
-                      />
-                    </ListItem>
-                  </List>
-                </div>)}
-              {crcStopProgress &&
-              (<div>
-                <LinearProgress />
-                <List>
-                  <ListItem>
-                    <ListItemText
-                      primary="Stopping OpenShift Instance"
-                    />
-                  </ListItem>
-                </List>
-              </div>)}
-              {crcError && (
-              <div>
-                <List>
-                  <ListItem>
-                    <Alert variant="filled" severity="error" style={{ backgroundColor: 'var(--vscode-inputValidation-errorBackground)', color: 'var(--vscode-inputValidation-errorForeground)'}}>CRC Process errored out. Check Output channel for details.</Alert>
-                  </ListItem>
-                </List>
-              </div>)}
-              {(!crcProgress && !crcError && !crcStopStatus) && (<CrcStatusDialog />)}
-              {/* {!crcProgress && crcStopStatus && (
-                <Alert variant="filled" severity="success" style={{ backgroundColor: 'var(--vscode-editor-background)'}}>OpenShift Instance is Stopped.</Alert>)} */}
+              <StartStopLoader />
               <div className={classes.actionsContainer}>
                 <Button onClick={handleBack} className={classes.button}>
                   Back
@@ -731,7 +731,10 @@ export default function addClusterView() {
       {(settingPresent) && (
         <div className={classes.root}>
           <Paper square elevation={3} className={classes.resetContainer}>
-            <CrcStatusDialog />
+            <blockquote className={classes.blockquoteText}>
+              <Typography variant='body2'>A crc configuration is detected in workspace settings. If you need to setup a new CRC instance, click on Reset and proceed with wizard workflow.</Typography>
+            </blockquote>
+            <StartStopLoader />
             <Button onClick={handleReset} className={classes.button}>
               Reset
             </Button>
