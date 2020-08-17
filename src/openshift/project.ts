@@ -37,14 +37,20 @@ export class Project extends OpenShiftItem {
     @vsCommand('openshift.project.delete', true)
     static async del(context: OpenShiftObject): Promise<string> {
         let result: Promise<string> = null;
-        const project = await Project.getOpenShiftCmdData(context,
-            "Select Project to delete"
-        );
+        const project = await Project.getOpenShiftCmdData(context);
         if (project) {
             const value = await window.showWarningMessage(`Do you want to delete Project '${project.getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
                 result = Progress.execFunctionWithProgress(`Deleting Project '${project.getName()}'`,
                     () => Project.odo.deleteProject(project)
+                        .then(async () => {
+                            const p = await Project.odo.getProjects();
+                            if (p.length>0) {
+                                // this changes kubeconfig and that triggers full tree refresh
+                                // there is no need to call explorer.refresh() manully
+                                await Project.odo.execute(`odo project set ${p[0].getName()}`);
+                            }
+                        })
                         .then(() => `Project '${project.getName()}' successfully deleted`)
                         .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Project with error '${err}'`)))
                 );

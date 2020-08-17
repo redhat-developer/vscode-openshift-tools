@@ -15,7 +15,6 @@ export class Storage extends OpenShiftItem {
     @vsCommand('openshift.storage.create')
     static async create(context: OpenShiftObject): Promise<string> {
         const component = await Storage.getOpenShiftCmdData(context,
-            "In which Project you want to create a Storage",
             "In which Application you want to create a Storage",
             "In which Component you want to create a Storage",
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED || value.contextValue === ContextType.COMPONENT);
@@ -46,7 +45,6 @@ export class Storage extends OpenShiftItem {
     static async del(treeItem: OpenShiftObject): Promise<string> {
         let storage = treeItem;
         const component = await Storage.getOpenShiftCmdData(storage,
-            "From which Project you want to delete Storage",
             "From which Application you want to delete Storage",
             "From which Component you want to delete Storage");
         if (!storage && component) storage = await window.showQuickPick(Storage.getStorageNames(component), {placeHolder: "Select Storage to delete", ignoreFocusOut: true});

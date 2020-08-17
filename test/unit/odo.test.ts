@@ -137,7 +137,6 @@ suite("odo", () => {
 
         setup(() => {
             execStub = sandbox.stub(odoCli, 'execute');
-            sandbox.stub(odo.OdoImpl, 'convertObjectsFromPreviousOdoReleases');
             yamlStub = sandbox.stub(jsYaml, 'safeLoad');
             sandbox.stub(fs, 'readFileSync');
         });
@@ -449,7 +448,7 @@ suite("odo", () => {
         const odoCatalog = JSON.stringify({
             kind : "ComponentTypeList",
             apiVersion : "odo.openshift.io/v1alpha1",
-            items: [
+            s2iItems: [
                 {
                     kind : "ComponentType",
                     apiVersion : "odo.openshift.io/v1alpha1",
@@ -603,7 +602,6 @@ suite("odo", () => {
                 stdout: oc.join('\n'),
                 stderr: ''
             });
-            sandbox.stub(odo.OdoImpl, 'convertObjectsFromPreviousOdoReleases');
             const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
             assert.equal(cluster[0].getName(), clusterUrl);
         });

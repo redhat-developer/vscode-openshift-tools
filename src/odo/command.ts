@@ -39,12 +39,12 @@ export class Command {
     }
 
     static deleteProject(name: string): string {
-        return `odo project delete ${name} -o json`;
+        return `odo project delete ${name} -w -o json`;
     }
 
     @verbose
     static createProject(name: string): string {
-        return `odo project create ${name}`;
+        return `odo project create ${name} -w`;
     }
 
     static listComponents(project: string, app: string): string {
@@ -125,6 +125,10 @@ export class Command {
         return `odo storage delete ${storage} -f`;
     }
 
+    static describeStorage(storage: string): string {
+        return `odo storage describe ${storage}`;
+    }
+
     static waitForStorageToBeGone(project: string, app: string, storage: string): string {
         return `oc wait pvc/${storage}-${app}-pvc --for=delete --namespace ${project}`;
     }
@@ -159,10 +163,6 @@ export class Command {
 
     static describeUrl(url: string): string {
         return `odo url describe ${url}`;
-    }
-
-    static describeStorage(storage: string): string {
-        return `odo storage describe ${storage}`;
     }
 
     static showLog(): string {
@@ -204,8 +204,8 @@ export class Command {
     }
 
     @verbose
-    static watchComponent(project: string, app: string, component: string): string {
-        return `odo watch ${component} --app ${app} --project ${project}`;
+    static watchComponent(): string {
+        return `odo watch`;
     }
 
     @verbose

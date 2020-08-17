@@ -52,12 +52,12 @@
     "lint-nic": "eslint . --ext .ts --no-inline-config",
     "bundle-tools": "node ./out/build/bundle-tools.js --platform",
     "todo": "leasot **/*.ts --ignore node_modules -x",
-    "test": "npm run clean && npm run compile && npm run verify && node ./out/build/run-tests.js unit",
+    "test": "npm run vscode:prepublish && node ./out/build/run-tests.js unit",
     "test:instrument": "shx rm -rf out/src-orig && shx mv out/src out/src-orig && istanbul instrument --complete-copy --embed-source --output out/src out/src-orig",
     "test:coverage": "npm run vscode:prepublish && npm run test:instrument && node ./out/build/run-tests.js unit",
     "update-deps": "ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
-    "build": "npm run clean && npm run lint && npm run compile && npm run verify"
+    "build": "npm run clean && npm run lint && npm run compile "
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.11.1",
@@ -69,6 +69,7 @@
     "git-transport-protocol": "^0.1.0",
     "globby": "^10.0.1",
     "js-yaml": "^3.13.1",
+    "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
     "openshift-rest-client": "^4.0.0",
     "pretty-bytes": "^5.3.0",
@@ -109,7 +110,7 @@
     "@typescript-eslint/parser": "^2.23.0",
     "bufferutil": "^4.0.1",
     "chai": "^4.2.0",
-    "codecov": "^3.6.5",
+    "codecov": "^3.7.1",
     "css-loader": "^3.5.1",
     "decache": "^4.6.0",
     "eslint": "5.16.0",
@@ -126,6 +127,7 @@
     "hasha": "5.0.0",
     "html-webpack-plugin": "^4.2.0",
     "immutable": "^4.0.0-rc.12",
+    "isomorphic-git": "^1.7.4",
     "istanbul": "^0.4.5",
     "leasot": "^10.1.0",
     "mocha": "^6.2.2",
@@ -220,7 +222,6 @@
     "onCommand:openshift.component.folder.create",
     "onCommand:openshift.explorer.reportIssue",
     "onCommand:openshift.explorer.switchContext",
-    "onCommand:openshift.migrate.odo00X.components",
     "onCommand:clusters.openshift.project.openConsole",
     "onCommand:clusters.openshift.useProject",
     "onCommand:clusters.openshift.deploy",
@@ -355,8 +356,12 @@
       },
       {
         "command": "openshift.project.set",
-        "title": "Activate",
-        "category": "OpenShift"
+        "title": "Change Active Project",
+        "category": "OpenShift",
+        "icon": {
+          "dark": "images/title/dark/icon-select-project.png",
+          "light": "images/title/light/icon-select-project.png"
+        }
       },
       {
         "command": "openshift.project.set.palette",
@@ -630,18 +635,13 @@
         "category": "OpenShift"
       },
       {
-        "command": "openshift.migrate.odo00X.components",
-        "title": "Migrate Components created with Extension v0.0.23 or earlier",
-        "category": "OpenShift"
-      },
-      {
         "command": "clusters.openshift.useProject",
         "title": "Use Project",
         "category": "OpenShift"
       },
       {
         "command": "clusters.openshift.project.openConsole",
-        "title": "Open Project in Console",
+        "title": "Open in Console",
         "Category": "OpenShift"
       },
       {
@@ -887,6 +887,22 @@
         },
         {
           "command": "clusters.openshift.route.open",
+          "when": "false"
+        },
+        {
+          "command": "clusters.openshift.project.openConsole",
+          "when": "false"
+        },
+        {
+          "command": "clusters.openshift.imagestream.openConsole",
+          "when": "false"
+        },
+        {
+          "command": "clusters.openshift.deployment.openConsole",
+          "when": "false"
+        },
+        {
+          "command": "clusters.openshift.build.openConsole",
           "when": "false"
         }
       ],
@@ -1216,6 +1232,16 @@
         {
           "command": "openshift.component.watch.showLog",
           "when": "view == openshiftWatchView && viewItem == openshift.watch.process"
+        },
+        {
+          "command": "openshift.project.set",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster",
+          "group": "inline"
+        },
+        {
+          "command": "openshift.project.set",
+          "when": "view == openshiftProjectExplorer && viewItem == project",
+          "group": "inline"
         }
       ]
     },

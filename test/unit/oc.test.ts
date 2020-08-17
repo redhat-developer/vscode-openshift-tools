@@ -8,7 +8,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { Oc } from '../../src/oc';
-import { ContextType } from '../../src/odo';
+import { ContextType, OdoImpl } from '../../src/odo';
 import { ToolsConfig } from '../../src/tools';
 import { TestItem } from './openshift/testOSItem';
 import { CliChannel } from '../../src/cli';
@@ -48,7 +48,7 @@ suite('Oc', () => {
         execStub = sandbox.stub(CliChannel.prototype, 'execute');
         quickPickStub = sandbox.stub(window, 'showQuickPick');
         detectOrDownloadStub = sandbox.stub(ToolsConfig, 'detect').resolves('path');
-        sandbox.stub(OpenShiftItem, 'getProjectNames').resolves(projectItem);
+        sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
     });
 
     teardown(() => {
@@ -56,6 +56,18 @@ suite('Oc', () => {
     });
 
     test('show warning message if file is not json or yaml', async () => {
+        await Oc.create();
+        expect(warnStub).is.calledOnce;
+    });
+
+    test('show warning message if file is untitled', async () => {
+        sandbox.stub(window, "activeTextEditor").value({
+            document: {
+                fileName: "manifests.yaml",
+                isUntitled: true,
+            },
+        });
+        detectOrDownloadStub.onFirstCall().resolves(undefined);
         await Oc.create();
         expect(warnStub).is.calledOnce;
     });
@@ -130,6 +142,13 @@ suite('Oc', () => {
             savedErr = err;
         }
         expect(savedErr).equals('error');
+    });
+
+    test('errors when there is no active project', async () => {
+        sandbox.stub(OpenShiftItem, "getOpenShiftCmdData").resolves(null);
+        sandbox.stub(window, "activeTextEditor").value(TextEditorMock);
+        quickPickStub.onFirstCall().resolves(projectItem);
+        expect(await Oc.create()).null;
     });
 
 });

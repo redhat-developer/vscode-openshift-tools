@@ -16,7 +16,6 @@ export class Url extends OpenShiftItem{
     @vsCommand('openshift.url.create')
     static async create(context: OpenShiftObject): Promise<string> {
         const component = await Url.getOpenShiftCmdData(context,
-            'Select a Project to create a URL',
             'Select an Application to create a URL',
             'Select a Component you want to create a URL for');
         if (component) {
@@ -53,7 +52,6 @@ export class Url extends OpenShiftItem{
     static async del(treeItem: OpenShiftObject): Promise<string | null> {
         let url = treeItem;
         const component = await Url.getOpenShiftCmdData(url,
-            "From which Project you want to delete URL",
             "From which Application you want to delete URL",
             "From which Component you want to delete URL");
         if (!url && component) {
@@ -62,7 +60,7 @@ export class Url extends OpenShiftItem{
         if (url) {
             const value = await window.showWarningMessage(`Do you want to delete URL '${url.getName()}' from Component '${url.getParent().getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
-                return Progress.execFunctionWithProgress(`Deleting URL ${url.getName()} from Component ${component.getName()}`, () => Url.odo.deleteURL(url))
+                return Progress.execFunctionWithProgress(`Deleting URL ${url.getName()} from Component ${url.getParent().getName()}`, () => Url.odo.deleteURL(url))
                     .then(() => `URL '${url.getName()}' from Component '${url.getParent().getName()}' successfully deleted`)
                     .catch((err) => Promise.reject(new VsCommandError(`Failed to delete URL with error '${err}'`)));
             }
@@ -95,7 +93,6 @@ export class Url extends OpenShiftItem{
     static async describe(treeItem: OpenShiftObject): Promise<void> {
         let url = treeItem;
         const component = await Url.getOpenShiftCmdData(url,
-            "From which Project you want to describe URL",
             "From which Application you want to describe URL",
             "From which Component you want to describe URL");
         if (!url && component) {

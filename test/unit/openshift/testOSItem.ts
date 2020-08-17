@@ -6,10 +6,11 @@
 import { Uri } from "vscode";
 import { OpenShiftObject, ContextType } from "../../../src/odo";
 import { SourceType } from "../../../src/odo/config";
+import { BuilderImage } from "../../../src/odo/builderImage";
 
 export class TestItem implements OpenShiftObject {
     public treeItem = null;
-
+    public active = true;
     // eslint-disable-next-line no-useless-constructor
     constructor(
         private parent: OpenShiftObject,
@@ -21,6 +22,13 @@ export class TestItem implements OpenShiftObject {
         public compType: string = SourceType.LOCAL) {
     }
 
+    builderImage?: BuilderImage;
+    iconPath?: Uri;
+    description?: string;
+    detail?: string;
+    picked?: boolean;
+    alwaysShow?: boolean;
+
     getName(): string {
         return this.name;
     }
@@ -31,6 +39,14 @@ export class TestItem implements OpenShiftObject {
 
     getChildren(): any[] {
         return this.children;
+    }
+
+    removeChild(item: OpenShiftObject): Promise<void> {
+        return;
+    }
+
+    addChild(item: OpenShiftObject): Promise<OpenShiftObject> {
+        return Promise.resolve(item);
     }
 
     getParent(): OpenShiftObject {

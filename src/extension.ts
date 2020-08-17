@@ -8,14 +8,13 @@ import {
     commands,
     workspace,
     window,
-    debug,
     WorkspaceFoldersChangeEvent,
 } from 'vscode';
 import { OpenShiftExplorer } from './explorer';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
 import { Platform } from './util/platform';
-import { OdoImpl, ContextType } from './odo';
+import { OdoImpl, ContextType, OdoEvent } from './odo';
 import { TokenStore } from './util/credentialManager';
 import { registerCommands } from './vscommand';
 import { ToolsConfig } from './tools';
@@ -25,8 +24,6 @@ import { DebugSessionsView } from './debug';
 
 import path = require('path');
 import fsx = require('fs-extra');
-import treeKill = require('tree-kill');
-
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
@@ -44,7 +41,7 @@ function migrateFromOdo018(): void {
     }
 }
 
-async function verifyBundledBinaries(): Promise<any> {
+async function verifyBundledBinaries(): Promise<{odoPath: string, ocPath: string}> {
     return {
         odoPath: await ToolsConfig.detect('odo'),
         ocPath: await ToolsConfig.detect('oc'),
@@ -79,7 +76,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
 
     // TODO: Implement the case when 'odo watch' is running for component and push would be done automatically
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    OdoImpl.Instance.subject.subscribe(async (event) => {
+    OdoImpl.Instance.subject.subscribe(async (event: OdoEvent) => {
         if (event.type === 'inserted' && event.data.contextValue === ContextType.COMPONENT) {
             const choice = await window.showInformationMessage(
                 `Do you want to push new '${event.data.getName()}' Component?`,
@@ -116,14 +113,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     });
 
     OdoImpl.Instance.loadWorkspaceComponents(null);
-
-    extensionContext.subscriptions.push(
-        debug.onDidTerminateDebugSession((session) => {
-            if (session.configuration.odoPid) {
-                treeKill(session.configuration.odoPid);
-            }
-        }),
-    );
 
     return {
         verifyBundledBinaries,

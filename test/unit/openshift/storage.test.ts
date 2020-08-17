@@ -22,6 +22,7 @@ suite('OpenShift/Storage', () => {
     let quickPickStub: sinon.SinonStub;
     let inputStub: sinon.SinonStub;
     let getProjectNamesStub: sinon.SinonStub;
+    let getProjectsStub: sinon.SinonStub;
     let getStorageNamesStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
@@ -45,9 +46,9 @@ suite('OpenShift/Storage', () => {
     suite('create Storage with no context', () => {
 
         setup(() => {
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(componentItem);
+            getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(componentItem);
             getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
             sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
             sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
@@ -64,6 +65,7 @@ suite('OpenShift/Storage', () => {
         test('calls the appropriate error message if no project found', async () => {
             quickPickStub.restore();
             getProjectNamesStub.restore();
+            getProjectsStub.restore();
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
             sandbox.stub(vscode.window, 'showErrorMessage');
             try {
@@ -76,7 +78,6 @@ suite('OpenShift/Storage', () => {
         });
 
         test('calls the appropriate error message if no application found', async () => {
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
             sandbox.stub(vscode.window, 'showErrorMessage');
@@ -95,7 +96,6 @@ suite('OpenShift/Storage', () => {
         });
 
         test('works with valid inputs', async () => {
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([componentItem]);
             const result = await Storage.create(null);
@@ -290,14 +290,13 @@ suite('OpenShift/Storage', () => {
             sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
             sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
             sandbox.stub(OpenShiftItem, 'getStorageNames').resolves([storageItem]);
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
             getStorageNamesStub.resolves([]);
-            quickPickStub.onFirstCall().resolves(projectItem);
-            quickPickStub.onSecondCall().resolves(appItem);
-            quickPickStub.onThirdCall().resolves(componentItem);
-            quickPickStub.onCall(3).resolves(storageItem);
+            quickPickStub.onFirstCall().resolves(appItem);
+            quickPickStub.onSecondCall().resolves(componentItem);
+            quickPickStub.onThirdCall().resolves(storageItem);
             warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
         });
 
@@ -306,7 +305,8 @@ suite('OpenShift/Storage', () => {
 
             expect(result).equals(`Storage '${storageItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
             expect(execStub.getCall(0).args[0]).equals(Command.deleteStorage(storageItem.getName()));
-            expect(execStub.getCall(1).args[0]).equals(Command.waitForStorageToBeGone(projectItem.getName(), appItem.getName(), storageItem.getName()));
+            expect(execStub.getCall(1).args[0]).equals(Command.pushComponent(true));
+            expect(execStub.getCall(2).args[0]).equals(Command.waitForStorageToBeGone(projectItem.getName(), appItem.getName(), storageItem.getName()));
         });
 
         test('works without set tree item', async () => {
@@ -314,11 +314,12 @@ suite('OpenShift/Storage', () => {
 
             expect(result).equals(`Storage '${storageItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
             expect(execStub.getCall(0).args[0]).equals(Command.deleteStorage(storageItem.getName()));
-            expect(execStub.getCall(1).args[0]).equals(Command.waitForStorageToBeGone(projectItem.getName(), appItem.getName(), storageItem.getName()));
+            expect(execStub.getCall(1).args[0]).equals(Command.pushComponent(true));
+            expect(execStub.getCall(2).args[0]).equals(Command.waitForStorageToBeGone(projectItem.getName(), appItem.getName(), storageItem.getName()));
         });
 
         test('returns null with no storage selected', async () => {
-            quickPickStub.onCall(3).resolves();
+            quickPickStub.onCall(2).resolves();
             const result = await Storage.del(null);
 
             expect(result).null;

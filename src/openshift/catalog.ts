@@ -7,11 +7,12 @@ import { Odo, OdoImpl } from '../odo';
 import { Command } from "../odo/command";
 import { Platform } from '../util/platform';
 import { vsCommand } from '../vscommand';
+import { ComponentType } from '../odo/componentType';
 
 export class Catalog {
     private static odo: Odo = OdoImpl.Instance;
 
-    private componentsJson: any[] = [];
+    private componentsJson: ComponentType[] = [];
 
     @vsCommand('openshift.catalog.listComponents')
     static listComponents(): void {
