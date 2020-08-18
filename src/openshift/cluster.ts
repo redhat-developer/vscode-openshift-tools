@@ -113,10 +113,11 @@ export class Cluster extends OpenShiftItem {
         let newPathPrompt;
         let crcBinary;
         const crcPath = workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
-        if(crcPath != null) {
+        if(crcPath) {
             newPathPrompt = { label: `$(plus) Provide different crc binary path`};
-            pathSelectionDialog = await window.showQuickPick([{label:`${crcPath}`, description: `Fetched from settings`}, newPathPrompt], {placeHolder: "Select CRC path", ignoreFocusOut: true});
+            pathSelectionDialog = await window.showQuickPick([{label:`${crcPath}`, description: `Fetched from settings`}, newPathPrompt], {placeHolder: "Select CRC binary path", ignoreFocusOut: true});
         }
+        if(!pathSelectionDialog) return;
         if (pathSelectionDialog.label === newPathPrompt.label) {
             const crcBinaryLocation = await window.showOpenDialog({
                 canSelectFiles: true,
