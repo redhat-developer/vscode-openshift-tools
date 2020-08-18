@@ -110,7 +110,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             }
         }
     });
-    updateStatusBarItem(crcStatusItem, 'Stop CRC');
 
     function updateStatusBarItem(statusBarItem: StatusBarItem, text: string): void {
 		if (!workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation")) {
@@ -120,6 +119,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         statusBarItem.text = `$(debug-stop) ${text}`;
         statusBarItem.show();
     }
+
+    updateStatusBarItem(crcStatusItem, 'Stop CRC');
     extendClusterExplorer();
 
     workspace.onDidChangeWorkspaceFolders((event: WorkspaceFoldersChangeEvent) => {
