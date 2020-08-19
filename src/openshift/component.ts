@@ -31,6 +31,24 @@ import treeKill = require('tree-kill');
 
 const waitPort = require('wait-port');
 
+export class SourceTypeChoice {
+    public static readonly GIT: QuickPickItem = {
+            label: 'Git Repository',
+            description: 'Use an existing git repository as a source for the Component'
+        };
+    public static readonly BINARY: QuickPickItem = {
+            label: 'Binary File',
+            description: 'Use binary file as a source for the Component'
+        };
+    public static readonly LOCAL: QuickPickItem = {
+            label: 'Workspace Directory',
+            description: 'Use workspace directory as a source for the Component'
+        };
+    public static asArray() : QuickPickItem[] {
+        return [SourceTypeChoice.GIT, SourceTypeChoice.BINARY, SourceTypeChoice.LOCAL];
+    }
+};
+
 export class Component extends OpenShiftItem {
     private static extensionContext: ExtensionContext;
     private static debugSessions = new Map<string, DebugSession>();
@@ -90,32 +108,19 @@ export class Component extends OpenShiftItem {
     )
     static async create(application: OpenShiftObject): Promise<string> {
         if (!application) return null;
-        const sourceTypes: QuickPickItem[] = [
-            {
-                label: 'Git Repository',
-                description: 'Use an existing git repository as a source for the Component'
-            },
-            {
-                label: 'Binary File',
-                description: 'Use binary file as a source for the Component'
-            },
-            {
-                label: 'Workspace Directory',
-                description: 'Use workspace directory as a source for the Component'
-            }
-        ];
-        const componentSource = await window.showQuickPick(sourceTypes, {
+
+        const componentSource = await window.showQuickPick(SourceTypeChoice.asArray(), {
             placeHolder: "Select source type for Component",
             ignoreFocusOut: true
         });
         if (!componentSource) return null;
 
         let command: Promise<string>;
-        if (componentSource.label === 'Git Repository') {
+        if (componentSource.label === SourceTypeChoice.GIT.label) {
             command = Component.createFromGit(application);
-        } else if (componentSource.label === 'Binary File') {
+        } else if (componentSource.label === SourceTypeChoice.BINARY.label) {
             command = Component.createFromBinary(application);
-        } else if (componentSource.label === 'Workspace Directory') {
+        } else if (componentSource.label === SourceTypeChoice.LOCAL.label) {
             command = Component.createFromLocal(application);
         }
         return command.catch((err) => Promise.reject(new VsCommandError(`Failed to create Component with error '${err}'`)));
