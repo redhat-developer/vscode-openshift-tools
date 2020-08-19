@@ -93,7 +93,7 @@ const useStyles = makeStyles((theme: Theme) =>
         color: 'var(--vscode-input-foreground)'
       },
       '& .MuiFormHelperText-root' : {
-        color: 'var(--vscode-input-foreground)'f
+        color: 'var(--vscode-input-foreground)'
       }
     },
     button: {
