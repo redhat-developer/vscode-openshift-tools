@@ -7,7 +7,7 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { expect } from 'chai';
 import * as tmp from 'tmp';
-import { Uri, workspace, window, commands, TreeItem } from 'vscode';
+import { Uri, workspace, window, commands } from 'vscode';
 import * as odo from '../../src/odo';
 import { Cluster } from '../../src/openshift/cluster';
 import { Command } from '../../src/odo/command';
@@ -27,7 +27,6 @@ suite('odo integration', () => {
     const urlName = 'url1';
     const nodeJsExGitUrl = 'https://github.com/dgolovin/nodejs-ex.git';
     let project: odo.OpenShiftObject;
-    let app: odo.OpenShiftObject;
     let component: odo.OpenShiftObject;
     let linkedComp1: odo.OpenShiftObject;
     let linkedComp2: odo.OpenShiftObject;
