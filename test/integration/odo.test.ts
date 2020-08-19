@@ -7,7 +7,7 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { expect } from 'chai';
 import * as tmp from 'tmp';
-import { Uri, workspace, window, commands } from 'vscode';
+import { Uri, workspace, window, commands, TreeItem } from 'vscode';
 import * as odo from '../../src/odo';
 import { Cluster } from '../../src/openshift/cluster';
 import { Command } from '../../src/odo/command';
@@ -18,7 +18,6 @@ import http = require('isomorphic-git/http/node');
 import fs = require('fs');
 import git = require('isomorphic-git');
 
-
 suite('odo integration', () => {
     const oi: odo.Odo = odo.getInstance();
     let sb: sinon.SinonSandbox;
@@ -26,14 +25,67 @@ suite('odo integration', () => {
     const componentName = 'component1';
     const appName = 'app1';
     const urlName = 'url1';
+    const nodeJsExGitUrl = 'https://github.com/dgolovin/nodejs-ex.git';
     let project: odo.OpenShiftObject;
     let app: odo.OpenShiftObject;
     let component: odo.OpenShiftObject;
-    let url: odo.OpenShiftObject;
+    let linkedComp1: odo.OpenShiftObject;
+    let linkedComp2: odo.OpenShiftObject;
+    let url1: odo.OpenShiftObject;
+    let url2: odo.OpenShiftObject;
     let storage: odo.OpenShiftObject;
     const storageName = "s1";
     const storageMountPath = "/mnt/s1";
     const storageSize = "1.5Gi";
+
+    async function createProject(projectNameParam: string): Promise<odo.OpenShiftObject> {
+        sb.stub(window, "showInputBox").onFirstCall().resolves(projectNameParam);
+        await commands.executeCommand('openshift.project.create', oi.getClusters()[0]);
+        const projects = await oi.getProjects();
+        const result = projects.find((prj)=>prj.getName() === projectNameParam);
+        return result
+    }
+
+    async function createLocalComponent(projectParam: odo.OpenShiftObject, appNameParam: string, componentNameParam: string, gitUrl: string, dirNameParam: string = tmp.dirSync().name): Promise<odo.OpenShiftObject> {
+        const applications = await oi.getApplications(projectParam);
+        let existingApp = applications.find((item) => item.getName() === appNameParam);
+        if (!existingApp) {
+            existingApp = new odo.OpenShiftApplication(project, appName);
+        }
+        await git.clone({
+            fs,
+            http,
+            dir: dirNameParam,
+            url: gitUrl,
+            singleBranch: true,
+            depth: 1
+        });
+        if ((window.showQuickPick as any).restore) (window.showQuickPick as sinon.SinonStub).restore();
+        const sqpStub = sb.stub(window, "showQuickPick");
+        sqpStub.onFirstCall().resolves(SourceTypeChoice.LOCAL);
+        sqpStub.onSecondCall().resolves(AddWorkspaceFolder);
+        if ((window.showOpenDialog as any).restore) (window.showOpenDialog as sinon.SinonStub).restore();
+        sb.stub(window, 'showOpenDialog').resolves([Uri.file(dirNameParam)]);
+        if ((window.showInputBox as any).restore)(window.showInputBox as sinon.SinonStub).restore();
+        sb.stub(window, 'showInputBox').resolves(componentNameParam);
+        sqpStub.onThirdCall().resolves('nodejs');
+        sqpStub.onCall(3).resolves('latest');
+
+        await commands.executeCommand('openshift.component.create', existingApp);
+        await new Promise<void>((resolve) => {
+            const disposable = workspace.onDidChangeWorkspaceFolders(() => {
+                disposable.dispose();
+                resolve();
+            });
+        });
+        const components = await oi.getComponents(existingApp);
+        return components.find((item) => item.getName() === componentNameParam);
+    }
+
+    async function pushComponent(componentParam: odo.OpenShiftObject): Promise<void> {
+        await oi.execute(Command.pushComponent(), componentParam.contextPath.fsPath);
+        componentParam.contextValue = odo.ContextType.COMPONENT_PUSHED;
+    }
 
     setup(async () => {
         sb = sinon.createSandbox();
@@ -51,51 +103,22 @@ suite('odo integration', () => {
         });
 
         test('getProjects()', async () => {
-            sb.stub(window, "showInputBox").onFirstCall().resolves(projectName);
-            await commands.executeCommand('openshift.project.create', oi.getClusters()[0]);
-            const projects = await oi.getProjects();
-            project = projects.find((prj)=>prj.getName() === projectName);
+            project = await createProject(projectName);;
             expect(project).not.undefined;
         });
 
         test('create component from local folder', async () => {
-            app = new odo.OpenShiftApplication(project, appName);
-            const dir = tmp.dirSync();
-            await git.clone({
-                fs,
-                http,
-                dir: dir.name,
-                url: 'https://github.com/dgolovin/nodejs-ex.git',
-                singleBranch: true,
-                depth: 1
-            });
-            const sqpStub = sb.stub(window, "showQuickPick");
-            sqpStub.onFirstCall().resolves(SourceTypeChoice.LOCAL);
-            sqpStub.onSecondCall().resolves(AddWorkspaceFolder);
-            sb.stub(window, 'showOpenDialog').resolves([Uri.file(dir.name)]);
-            sb.stub(window, 'showInputBox').resolves(componentName);
-            sqpStub.onThirdCall().resolves('nodejs');
-            sqpStub.onCall(3).resolves('latest');
-
-            commands.executeCommand('openshift.component.create', app);
-            await new Promise<void>((resolve) => {
-                const disposable = workspace.onDidChangeWorkspaceFolders(() => {
-                    disposable.dispose();
-                    resolve();
-                });
-            });
-            const components = await oi.getComponents(app);
-            expect(components.length === 1).true;
-            [component] = components;
+            component = await createLocalComponent(project, appName, componentName, nodeJsExGitUrl)
+            expect(component).not.undefined;
         });
 
-        test('create url', async () => {
-            sb.stub(window, 'showInputBox').resolves(urlName);
+        test('create url for not pushed component', async () => {
+            sb.stub(window, 'showInputBox').resolves(`${urlName}1`);
             const sqpStub = sb.stub(window, "showQuickPick");
             sqpStub.onFirstCall().resolves('Yes');
             await commands.executeCommand('openshift.url.create', component);
             const urls = await oi.getRoutes(component);
-            [url] = urls;
+            [url1] = urls;
         });
 
         test('create storage', async () => {
@@ -109,28 +132,65 @@ suite('odo integration', () => {
         });
 
         test('push component', async () => {
-            await oi.execute(Command.pushComponent(), component.contextPath.fsPath);
-            component.contextValue = odo.ContextType.COMPONENT_PUSHED;
+            await pushComponent(component);
+        });
+
+        test('create url for pushed component', async () => {
+            sb.stub(window, 'showInputBox').resolves(`${urlName}2`);
+            const sqpStub = sb.stub(window, "showQuickPick");
+            sqpStub.onFirstCall().resolves('Yes');
+            await commands.executeCommand('openshift.url.create', component);
+            const urls = await oi.getRoutes(component);
+            [,url2] = urls;
+        });
+
+        test('describe component', async () => {
+            await oi.execute(Command.describeComponent(), component.contextPath.fsPath);
+        });
+
+        test('describe app', async () => {
+            await oi.execute(Command.describeApplication(projectName, appName));
         });
 
         test('delete storage', async () => {
-            await oi.deleteStorage(storage)
-        })
+            await oi.deleteStorage(storage);
+        });
 
         test('delete url', async () => {
-            await oi.deleteURL(url)
-        })
+            await oi.deleteURL(url1);
+            await oi.deleteURL(url2);
+        });
 
         test('delete component', async () => {
             await oi.deleteComponent(component);
-        })
+        });
+
+        test('link components', async () => {
+            linkedComp1 = await createLocalComponent(project, appName, `${componentName}1`, nodeJsExGitUrl)
+            await pushComponent(linkedComp1);
+            linkedComp2 = await createLocalComponent(project, appName, `${componentName}2`, nodeJsExGitUrl)
+            await pushComponent(linkedComp2);
+            (window.showQuickPick as sinon.SinonStub).restore();
+            sb.stub(window, 'showQuickPick').onFirstCall().resolves(linkedComp2);
+            await commands.executeCommand('openshift.component.linkComponent', linkedComp1);
+        });
+
+        test('unlink components', async () => {
+            const errMessStub = sb.stub(window, 'showErrorMessage')
+            await commands.executeCommand('openshift.component.unlinkComponent.palette', linkedComp1);
+            expect(errMessStub).has.not.been.called;
+        });
 
         test('delete project', async () => {
-            await oi.deleteProject(project)
-        })
+            await oi.deleteProject(project);
+        });
 
         test('about()', () => {
             Cluster.about();
+        });
+
+        test('logout', async () => {
+            await oi.execute(Command.odoLogout());
         });
     });
 });
