@@ -88,6 +88,12 @@ const useStyles = makeStyles((theme: Theme) =>
       '& .MuiBadge-anchorOriginTopLeftCircle' : {
         top: '46%',
         left: '40%'
+      },
+      '& .MuiInputBase-root' :{
+        color: 'var(--vscode-input-foreground)'
+      },
+      '& .MuiFormHelperText-root' : {
+        color: 'var(--vscode-input-foreground)'f
       }
     },
     button: {
@@ -528,7 +534,7 @@ export default function addClusterView() {
                   </ListItemAvatar>
                   <ListItemText
                     primary="Download"
-                    secondary={<span>This will download the crc {crcLatest} bundle.</span>}/>
+                    secondary={<span>This will download the crc {crcLatest} bundle</span>}/>
                     <a href={fetchDownloadBinary()} style={{ textDecoration: 'none'}}>
                       <Button
                         color="default"
@@ -549,7 +555,7 @@ export default function addClusterView() {
                   </ListItemAvatar>
                   <ListItemText
                     primary={<span>Binary Location<sup style={{color: '#BE0000'}}>*</sup></span>}
-                    secondary="Provide the crc binary location" />
+                    secondary={<span>Provide the crc {crcLatest} binary location</span>} />
                   <div>
                     <input
                     style={{ display: "none" }}
