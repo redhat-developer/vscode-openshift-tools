@@ -731,10 +731,10 @@ export default function addClusterView() {
             <Paper square elevation={3} className={classes.resetContainer}>
               <StartStopLoader />
               <div className={classes.actionsContainer}>
-                <Button onClick={handleBack} className={classes.button}>
+                <Button onClick={handleBack} className={classes.button} disabled={(crcProgress || crcStopProgress)}>
                   Back
                 </Button>
-                <Button onClick={handleReset} className={classes.button}>
+                <Button onClick={handleReset} className={classes.button} disabled={(crcProgress || crcStopProgress)}>
                   Reset
                 </Button>
               </div>
@@ -749,7 +749,7 @@ export default function addClusterView() {
               <Typography variant='body2'>A crc configuration is detected in workspace settings. If you need to setup a new CRC instance, click on Reset and proceed with wizard workflow.</Typography>
             </blockquote>
             <StartStopLoader />
-            <Button onClick={handleReset} className={classes.button}>
+            <Button onClick={handleReset} className={classes.button} disabled={(crcProgress || crcStopProgress)}>
               Reset
             </Button>
           </Paper>

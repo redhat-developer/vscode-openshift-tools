@@ -5,7 +5,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { spawn } from 'child_process';
+import { spawn, ChildProcess } from 'child_process';
 import { ExtenisonID } from '../../util/constants';
 import { WindowUtil } from '../../util/windowUtils';
 import { CliChannel } from '../../cli';
@@ -18,19 +18,25 @@ export default class ClusterViewLoader {
 
     // eslint-disable-next-line @typescript-eslint/require-await
     static async loadView(title: string): Promise<vscode.WebviewPanel> {
+        let panel: vscode.WebviewPanel | undefined = undefined;
+        let startProcess: ChildProcess;
+        let stopProcess: ChildProcess;
         const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
         const localResourceRoot = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'out', 'clusterViewer'));
-
-        const panel = vscode.window.createWebviewPanel('clusterView', title, vscode.ViewColumn.One, {
-            enableScripts: true,
-            localResourceRoots: [localResourceRoot],
-            retainContextWhenHidden: true
-        });
+        if (panel) {
+            // If we already have a panel, show it in the target column
+            panel.reveal(vscode.ViewColumn.One);
+        } else {
+            panel = vscode.window.createWebviewPanel('clusterView', title, vscode.ViewColumn.One, {
+                enableScripts: true,
+                localResourceRoots: [localResourceRoot],
+                retainContextWhenHidden: true
+            });
+        }
         panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, "images/context/cluster-node.png"));
         panel.webview.html = ClusterViewLoader.getWebviewContent(ClusterViewLoader.extensionPath);
         panel.webview.postMessage({action: 'cluster', data: ''});
         panel.webview.onDidReceiveMessage(async (event)  => {
-            let child;
             const timestamp = Number(new Date());
             const date = new Date(timestamp);
             if (event.action === 'run') {
@@ -47,22 +53,22 @@ export default class ClusterViewLoader {
                     const pullSecretFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcPullSecretPath");
                     const cpuFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcCpuCores");
                     const memoryFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcMemoryAllocated");
-                    child = spawn(`${binaryFromSetting}`, ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`]);
+                    startProcess = spawn(`${binaryFromSetting}`, ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`]);
                 } else {
                     const [tool, ...params] = event.data.split(' ');
-                    child = spawn(tool, params);
+                    startProcess = spawn(tool, params);
                 }
-                child.stdout.setEncoding('utf8');
-                child.stderr.setEncoding('utf8');
-                child.stdout.on('data', (chunk) => {
+                startProcess.stdout.setEncoding('utf8');
+                startProcess.stderr.setEncoding('utf8');
+                startProcess.stdout.on('data', (chunk) => {
                     channel.append(chunk);
                 });
-                child.stderr.on('data', (chunk) => {
+                startProcess.stderr.on('data', (chunk) => {
                     console.log(chunk);
                     channel.append(chunk);
                     panel.webview.postMessage({action: 'crcstarterror', data: chunk})
                 });
-                child.on('close', async (code) => {
+                startProcess.on('close', async (code) => {
                     vscode.workspace.getConfiguration("openshiftConnector").update("crcPullSecretPath", event.pullSecret);
                     vscode.workspace.getConfiguration("openshiftConnector").update("crcCpuCores", event.cpuSize);
                     vscode.workspace.getConfiguration("openshiftConnector").update("crcMemoryAllocated", event.memory);
@@ -79,7 +85,7 @@ export default class ClusterViewLoader {
                 if (event.data === '') {
                     filePath = vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
                 } else filePath = event.data;
-                const stopProcess = spawn(`${filePath}`, ['stop']);
+                stopProcess = spawn(`${filePath}`, ['stop']);
                 stopProcess.stdout.setEncoding('utf8');
                 stopProcess.stderr.setEncoding('utf8');
                 stopProcess.stdout.on('data', (chunk) => {
