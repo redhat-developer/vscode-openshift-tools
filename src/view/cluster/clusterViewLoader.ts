@@ -43,7 +43,6 @@ export default class ClusterViewLoader {
                 const terminal: vscode.Terminal = WindowUtil.createTerminal(`OpenShift: Run CRC Setup`, undefined);
                 terminal.sendText(`${event.data} setup`);
                 terminal.show();
-                vscode.workspace.getConfiguration("openshiftConnector").update("crcBinaryLocation", event.data);
             }
             if (event.action === 'start') {
                 channel.show();
@@ -69,12 +68,14 @@ export default class ClusterViewLoader {
                     panel.webview.postMessage({action: 'crcstarterror', data: chunk})
                 });
                 startProcess.on('close', async (code) => {
+                    vscode.workspace.getConfiguration("openshiftConnector").update("crcBinaryLocation", event.crcLoc);
                     vscode.workspace.getConfiguration("openshiftConnector").update("crcPullSecretPath", event.pullSecret);
                     vscode.workspace.getConfiguration("openshiftConnector").update("crcCpuCores", event.cpuSize);
                     vscode.workspace.getConfiguration("openshiftConnector").update("crcMemoryAllocated", event.memory);
                     // eslint-disable-next-line no-console
                     console.log(`crc start exited with code ${code}`);
-                    const result =  await CliChannel.getInstance().execute(`${event.crcLoc} status -ojson`);
+                    const binaryLoc = event.isSetting ? vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation"): event.crcLoc;
+                    const result =  await CliChannel.getInstance().execute(`${binaryLoc} status -ojson`);
                     panel.webview.postMessage({action: 'crcstartstatus', data: code, status: JSON.parse(result.stdout)})
                 });
             }
@@ -107,7 +108,11 @@ export default class ClusterViewLoader {
                 if (binaryFromSetting) {
                     panel.webview.postMessage({action: 'crcsetting'});
                     const result =  await CliChannel.getInstance().execute(`${binaryFromSetting} status -ojson`);
-                    panel.webview.postMessage({action: 'crcstatus', status: JSON.parse(result.stdout)});
+                    if (result.stderr) {
+                        panel.webview.postMessage({action: 'crcstatus', errorStatus: true});
+                    } else {
+                        panel.webview.postMessage({action: 'crcstatus', status: JSON.parse(result.stdout), errorStatus: false});
+                    }
                 }
             }
             if (event.action === 'checkcrcstatus') {

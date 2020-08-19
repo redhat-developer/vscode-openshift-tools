@@ -255,6 +255,7 @@ export default function addClusterView() {
   const [status, setStatus] = React.useState({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: ''});
   const [settingPresent, setSettingPresent] = React.useState(false);
   const [statusSkeleton, setStatusSkeleton] = React.useState(true);
+  const [statusError, setStatusError] = React.useState(false);
 
   React.useEffect(() => {
     vscode.postMessage({action: 'checksetting'});
@@ -290,7 +291,11 @@ export default function addClusterView() {
             break;
           case 'crcstatus' :
             setStatusSkeleton(false);
-            setStatus({crcStatus: message.status.crcStatus, openshiftStatus: message.status.openshiftStatus, diskUsage: prettyBytes(message.status.diskUsage), cacheUsage: prettyBytes(message.status.cacheUsage), cacheDir: message.status.cacheDir});
+            if (message.errorStatus) {
+              setStatusError(true);
+            } else {
+              setStatus({crcStatus: message.status.crcStatus, openshiftStatus: message.status.openshiftStatus, diskUsage: prettyBytes(message.status.diskUsage), cacheUsage: prettyBytes(message.status.cacheUsage), cacheDir: message.status.cacheDir});
+            }
             break;
           default:
             break;
@@ -375,6 +380,7 @@ export default function addClusterView() {
     setStatus({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: ''});
     setSettingPresent(false);
     setStatusSkeleton(true);
+    setStatusError(false);
   }
 
   const fetchDownloadBinary = () => {
@@ -405,7 +411,7 @@ export default function addClusterView() {
 
   const CrcStatusDialog = () => (
     <>
-    {(!statusSkeleton && !crcStopProgress) && (
+    {(!statusSkeleton && !crcStopProgress && !statusError) && (
     <Accordion defaultExpanded>
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
@@ -457,10 +463,15 @@ export default function addClusterView() {
       </AccordionActions>
     </Accordion>
     )}
-    {(statusSkeleton) && (
+    {(statusSkeleton && !statusError) && (
       <div>
         <Typography paragraph>Refreshing the crc status</Typography>
         <LinearProgress />
+      </div>
+    )}
+    {(!statusSkeleton && statusError) && (
+      <div>
+        <Typography paragraph>Oh snap!! It looks like there is an error in settings. Please Reset and start.</Typography>
       </div>
     )}
     </>
