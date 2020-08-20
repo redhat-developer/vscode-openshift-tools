@@ -65,7 +65,7 @@ export default class ClusterViewLoader {
                 startProcess.stderr.on('data', (chunk) => {
                     console.log(chunk);
                     channel.append(chunk);
-                    panel.webview.postMessage({action: 'crcstarterror', data: chunk})
+                    panel.webview.postMessage({action: 'sendcrcstarterror', data: chunk})
                 });
                 startProcess.on('close', async (code) => {
                     vscode.workspace.getConfiguration("openshiftConnector").update("crcBinaryLocation", event.crcLoc);
@@ -75,12 +75,11 @@ export default class ClusterViewLoader {
                     // eslint-disable-next-line no-console
                     console.log(`crc start exited with code ${code}`);
                     const binaryLoc = event.isSetting ? vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation"): event.crcLoc;
-                    const result =  await CliChannel.getInstance().execute(`${binaryLoc} status -ojson`);
-                    panel.webview.postMessage({action: 'crcstartstatus', data: code, status: JSON.parse(result.stdout)})
+                    ClusterViewLoader.checkCrcStatus(binaryLoc, 'crcstartstatus', panel);
                 });
             }
             if (event.action === 'stop') {
-                let filePath;
+                let filePath: string;
                 channel.show();
                 channel.append(`\nStopping Red Hat Code Ready Containers from webview at ${date}\n`);
                 if (event.data === '') {
@@ -94,33 +93,35 @@ export default class ClusterViewLoader {
                 });
                 stopProcess.stderr.on('data', (chunk) => {
                     channel.append(chunk);
-                    panel.webview.postMessage({action: 'crcstoperror', data: chunk})
+                    panel.webview.postMessage({action: 'sendcrcstoperror', data: chunk})
                 });
                 stopProcess.on('close', async (code) => {
                     // eslint-disable-next-line no-console
                     console.log(`crc stop exited with code ${code}`);
-                    const result =  await CliChannel.getInstance().execute(`${filePath} status -ojson`);
-                    panel.webview.postMessage({action: 'crcstopstatus', data: code, status: JSON.parse(result.stdout)})
+                    ClusterViewLoader.checkCrcStatus(filePath, 'crcstopstatus', panel);
                 });
             }
             if (event.action === 'checksetting') {
-                const binaryFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
+                const binaryFromSetting:string = vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
                 if (binaryFromSetting) {
                     panel.webview.postMessage({action: 'crcsetting'});
-                    const result =  await CliChannel.getInstance().execute(`${binaryFromSetting} status -ojson`);
-                    if (result.stderr) {
-                        panel.webview.postMessage({action: 'crcstatus', errorStatus: true});
-                    } else {
-                        panel.webview.postMessage({action: 'crcstatus', status: JSON.parse(result.stdout), errorStatus: false});
-                    }
+                    ClusterViewLoader.checkCrcStatus(binaryFromSetting, 'crcstatus', panel);
                 }
             }
             if (event.action === 'checkcrcstatus') {
-                const result =  await CliChannel.getInstance().execute(`${event.data} status -ojson`);
-                panel.webview.postMessage({action: 'crcstatus', status: JSON.parse(result.stdout)});
+                ClusterViewLoader.checkCrcStatus(event.data, 'crcstatus', panel);
             }
         })
         return panel;
+    }
+
+    private static async checkCrcStatus(filePath: string, postCommand: string, panel: vscode.WebviewPanel | undefined = undefined) {
+        const result =  await CliChannel.getInstance().execute(`${filePath} status -ojson`);
+        if (result.stderr) {
+            panel.webview.postMessage({action: postCommand, errorStatus: true});
+        } else {
+            panel.webview.postMessage({action: postCommand, status: JSON.parse(result.stdout), errorStatus: false});
+        }
     }
 
     private static getWebviewContent(extensionPath: string): string {

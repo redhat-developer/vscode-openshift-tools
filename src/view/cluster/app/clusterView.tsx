@@ -249,7 +249,8 @@ export default function addClusterView() {
   const [memory, setMemory] = React.useState(crcDefaults.DefaultMemory);
   const [crcProgress, setProgress] = React.useState(false);
   const [crcStopProgress, setStopProgress] = React.useState(false);
-  const [crcError, setCrcError] = React.useState(false);
+  const [crcStartError, setCrcStartError] = React.useState(false);
+  const [crcStopError, setCrcStopError] = React.useState(false);
   const [crcStopStatus, setStopStatus] = React.useState(false);
   const [activeStep, setActiveStep] = React.useState(0);
   const [status, setStatus] = React.useState({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: ''});
@@ -267,21 +268,25 @@ export default function addClusterView() {
     if (event?.data?.action){
       const message = event.data;
         switch (message.action) {
-          case 'crcstarterror' :
+          case 'sendcrcstarterror' :
             setProgress(false);
-            setCrcError(true);
+            setCrcStartError(true);
             break;
           case 'crcstartstatus' :
             setProgress(false);
             setStatusSkeleton(false);
             setStatus({crcStatus: message.status.crcStatus, openshiftStatus: message.status.openshiftStatus, diskUsage: prettyBytes(message.status.diskUsage), cacheUsage: prettyBytes(message.status.cacheUsage), cacheDir: message.status.cacheDir});
             break;
-          case 'crcstoperror' :
+          case 'sendcrcstoperror' :
             setStopProgress(false);
-            setCrcError(true);
+            setCrcStopError(true);
             break;
           case 'crcstopstatus' :
-            message.data === 0 ? setStopStatus(false) : setCrcError(true);
+            if (message.errorStatus) {
+              setCrcStopError(true);
+            } else {
+              setStopStatus(false);
+            }
             setStopProgress(false);
             setStatusSkeleton(false);
             setStatus({crcStatus: message.status.crcStatus, openshiftStatus: message.status.openshiftStatus, diskUsage: prettyBytes(message.status.diskUsage), cacheUsage: prettyBytes(message.status.cacheUsage), cacheDir: message.status.cacheDir});
@@ -340,7 +345,7 @@ export default function addClusterView() {
   const handleStartProcess = () => {
     setStopStatus(false);
     setProgress(true);
-    setCrcError(false);
+    setCrcStartError(false);
     if (settingPresent) {
       vscode.postMessage({action: 'start', isSetting: true });
     } else {
@@ -351,6 +356,7 @@ export default function addClusterView() {
 
   const handleStopProcess = () => {
     setStopProgress(true);
+    setCrcStopError(false);
     vscode.postMessage({action: 'stop', data: `${fileName}`});
   }
 
@@ -367,6 +373,15 @@ export default function addClusterView() {
     }
   }
 
+  const handleTryAgain = () => {
+    if (crcStartError) {
+      handleStartProcess();
+    }
+    if (crcStopError) {
+      handleStopProcess();
+    }
+  }
+
   const handleReset = () => {
     setActiveStep(0);
     setBinaryPath('');
@@ -375,7 +390,8 @@ export default function addClusterView() {
     setMemory(crcDefaults.DefaultMemory);
     setProgress(true);
     setStopProgress(false);
-    setCrcError(false);
+    setCrcStartError(false);
+    setCrcStopError(false);
     setStopStatus(false);
     setStatus({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: ''});
     setSettingPresent(false);
@@ -479,8 +495,8 @@ export default function addClusterView() {
 
   const StartStopLoader = () => (
     <>
-    {(!crcProgress && !crcError && !crcStopStatus) && (<CrcStatusDialog />)}
-    {(crcProgress && !crcError) &&
+    {(!crcProgress && !crcStartError && !crcStopError && !crcStopStatus) && (<CrcStatusDialog />)}
+    {(crcProgress && !crcStartError && !statusError) &&
     (<div>
       <LinearProgress />
       <List>
@@ -491,7 +507,7 @@ export default function addClusterView() {
         </ListItem>
       </List>
     </div>)}
-    {crcStopProgress &&
+    {(crcStopProgress && !crcStopError && !statusError) &&
     (<div>
       <LinearProgress />
       <List>
@@ -502,13 +518,22 @@ export default function addClusterView() {
         </ListItem>
       </List>
     </div>)}
-    {crcError && (
+    {(statusError) && (
+      <div>
+        <Typography paragraph>Cannot fetch the status of the cluster.</Typography>
+      </div>
+    )}
+    {(crcStartError || crcStopError) && (
     <div>
-      <List>
-        <ListItem>
-          <Alert variant="filled" severity="error" style={{ backgroundColor: 'var(--vscode-inputValidation-errorBackground)', color: 'var(--vscode-inputValidation-errorForeground)'}}>CRC Process errored out. Check Output channel for details.</Alert>
-        </ListItem>
-      </List>
+      <Alert
+        severity="error"
+        style={{ backgroundColor: 'var(--vscode-inputValidation-errorBackground)', color: 'var(--vscode-inputValidation-errorForeground)'}}
+        action={
+          <Button color="inherit" size="small" onClick={handleTryAgain}>
+            Try Again
+          </Button>
+        }
+      >CRC Process errored out. Check Output channel for details.</Alert>
     </div>)}
     </>
   );
