@@ -7,15 +7,16 @@ import * as sinon from 'sinon';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as tmp from 'tmp';
+import * as path from 'path';
 import { Uri, workspace, window, commands } from 'vscode';
 import * as odo from '../../src/odo';
 import { Cluster } from '../../src/openshift/cluster';
 import { Command } from '../../src/odo/command';
-import { SourceTypeChoice } from '../../src/openshift/component';
+import { SourceTypeChoice, Component } from '../../src/openshift/component';
 import { AddWorkspaceFolder } from '../../src/util/workspace';
 
 import http = require('isomorphic-git/http/node');
-import fs = require('fs');
+import fs = require('fs-extra');
 import git = require('isomorphic-git');
 
 const {expect} = chai;
@@ -32,6 +33,8 @@ suite('odo integration', () => {
     let project: odo.OpenShiftObject;
     let existingApp: odo.OpenShiftObject;
     let component: odo.OpenShiftObject;
+    let componentFromGit: odo.OpenShiftObject;
+    let componentFromBinary: odo.OpenShiftObject;
     let service: odo.OpenShiftObject;
     let linkedComp1: odo.OpenShiftObject;
     let linkedComp2: odo.OpenShiftObject;
@@ -83,6 +86,56 @@ suite('odo integration', () => {
         return components.find((item) => item.getName() === componentNameParam);
     }
 
+    async function createGitComponent(projectParam: odo.OpenShiftObject, appNameParam: string, componentNameParam: string, gitUrl: string, dirNameParam: string = tmp.dirSync().name): Promise<odo.OpenShiftObject> {
+        const applications = await oi.getApplications(projectParam);
+        existingApp = applications.find((item) => item.getName() === appNameParam);
+        if (!existingApp) {
+            existingApp = new odo.OpenShiftApplication(project, appName);
+        }
+        sb.stub(window, 'showQuickPick')
+            .onFirstCall().resolves(SourceTypeChoice.GIT)
+            .onSecondCall().resolves(AddWorkspaceFolder)
+            .onThirdCall().resolves({label: 'master'})
+            .onCall(3).resolves('nodejs')
+            .onCall(4).resolves('latest');
+        sb.stub(window, 'showOpenDialog').resolves([Uri.file(dirNameParam)]);
+        sb.stub(window, 'showInputBox')
+            .onFirstCall().resolves(gitUrl)
+            .onSecondCall().resolves(componentNameParam);
+
+        await commands.executeCommand('openshift.component.create', existingApp);
+        await new Promise<void>((resolve) => {
+            const disposable = workspace.onDidChangeWorkspaceFolders(() => {
+                disposable.dispose();
+                resolve();
+            });
+        });
+        const components = await oi.getComponents(existingApp);
+        return components.find((item) => item.getName() === componentNameParam);
+    }
+
+    async function createBinaryComponent(projectParam: odo.OpenShiftObject, appNameParam: string, componentNameParam: string, binaryFilePath: string, dirNameParam: string = tmp.dirSync().name): Promise<odo.OpenShiftObject> {
+        const applications = await oi.getApplications(projectParam);
+        const binaryFileInContextFolder = path.join(dirNameParam, path.basename(binaryFilePath));
+        fs.copyFileSync(binaryFilePath, binaryFileInContextFolder);
+        existingApp = applications.find((item) => item.getName() === appNameParam);
+        if (!existingApp) {
+            existingApp = new odo.OpenShiftApplication(project, appName);
+        }
+        sb.stub(window, 'showQuickPick')
+            .onFirstCall().resolves(SourceTypeChoice.BINARY)
+            .onSecondCall().resolves(AddWorkspaceFolder)
+            .onThirdCall().resolves({label: 'sample.war', description: binaryFileInContextFolder})
+            .onCall(3).resolves('wildfly')
+            .onCall(4).resolves('latest');
+        sb.stub(window, 'showOpenDialog').resolves([Uri.file(dirNameParam)]);
+        sb.stub(window, 'showInputBox').resolves(componentNameParam);
+
+        await commands.executeCommand('openshift.component.create', existingApp);
+        const components = await oi.getComponents(existingApp);
+        return components.find((item) => item.getName() === componentNameParam);
+    }
+
     async function pushComponent(componentParam: odo.OpenShiftObject): Promise<void> {
         await oi.execute(Command.pushComponent(), componentParam.contextPath.fsPath);
         componentParam.contextValue = odo.ContextType.COMPONENT_PUSHED;
@@ -115,6 +168,17 @@ suite('odo integration', () => {
         test('component from local folder', async () => {
             component = await createLocalComponent(project, appName, componentName, nodeJsExGitUrl)
             expect(component).not.undefined;
+        });
+
+        test('component from git', async () => {
+            componentFromGit = await createGitComponent(project, appName, `${componentName}-from-git`, nodeJsExGitUrl)
+            expect(component).not.undefined;
+        });
+
+        test('component from binary', async () => {
+            componentFromBinary = await createBinaryComponent(project, appName, `${componentName}-from-binary`,
+                path.resolve(__dirname, '..', '..', '..', 'test', 'fixtures', 'components', 'sample.war'));
+            expect(componentFromBinary).not.undefined;
         });
 
         test('url for not pushed component', async () => {
@@ -166,21 +230,49 @@ suite('odo integration', () => {
             await oi.execute(Command.describeService('mongodb-persistent'))
         });
 
+        test('start/stop debugger', async () => {
+            const errMessStub = sb.stub(window, 'showErrorMessage')
+            await commands.executeCommand('openshift.component.debug', component);
+            expect(Component.stopDebugSession(component)).to.be.true;
+            expect(errMessStub).has.not.been.called;
+        });
+
+        test('start/stop watch', async () => {
+            const errMessStub = sb.stub(window, 'showErrorMessage')
+            await commands.executeCommand('openshift.component.watch', component);
+            expect(Component.stopWatchSession(component)).to.be.true;
+            expect(errMessStub).has.not.been.called;
+        });
+
         test('delete storage', async () => {
-            await oi.deleteStorage(storage);
+            sb.stub(window, 'showWarningMessage').resolves('Yes');
+            const errMessStub = sb.stub(window, 'showErrorMessage')
+            await commands.executeCommand('openshift.storage.delete', storage);
+            expect(errMessStub).has.not.been.called;
         });
 
         test('delete url', async () => {
-            await oi.deleteURL(url1);
-            await oi.deleteURL(url2);
+            sb.stub(window, 'showWarningMessage').resolves('Yes');
+            const errMessStub = sb.stub(window, 'showErrorMessage')
+            await commands.executeCommand('openshift.url.delete', url1);
+            await commands.executeCommand('openshift.url.delete', url2);
+            expect(errMessStub).has.not.been.called;
         });
 
         test('delete component', async () => {
-            await oi.deleteComponent(component);
+            sb.stub(window, 'showWarningMessage').resolves('Yes');
+            const errMessStub = sb.stub(window, 'showErrorMessage')
+            await commands.executeCommand('openshift.component.delete', component);
+            await commands.executeCommand('openshift.component.delete', componentFromGit);
+            await commands.executeCommand('openshift.component.delete', componentFromBinary);
+            expect(errMessStub).has.not.been.called;
         });
 
         test('delete service', async () => {
-            await oi.deleteService(service);
+            sb.stub(window, 'showWarningMessage').resolves('Yes');
+            const errMessStub = sb.stub(window, 'showErrorMessage')
+            await commands.executeCommand('openshift.service.delete', service);
+            expect(errMessStub).has.not.been.called;
         });
 
     });
