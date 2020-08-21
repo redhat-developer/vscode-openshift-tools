@@ -54,7 +54,7 @@ suite('odo integration', () => {
     }
 
     async function createLocalComponent(projectParam: odo.OpenShiftObject, appNameParam: string, componentNameParam: string, gitUrl: string, dirNameParam: string = tmp.dirSync().name): Promise<odo.OpenShiftObject> {
-        const applications = await oi.getApplications(projectParam);
+    const applications = await oi.getApplications(projectParam);
         existingApp = applications.find((item) => item.getName() === appNameParam);
         if (!existingApp) {
             existingApp = new odo.OpenShiftApplication(project, appName);
@@ -152,7 +152,7 @@ suite('odo integration', () => {
     }
 
     setup(async () => {
-        await oi.execute(Command.odoLoginWithUsernamePassword('https://10.0.0.186:8443', 'developer', 'developer'));
+        await oi.execute(Command.odoLoginWithUsernamePassword('https://10.0.0.193:8443', 'developer', 'developer'));
     });
 
     teardown(() => {
@@ -319,6 +319,13 @@ suite('odo integration', () => {
             await commands.executeCommand('openshift.component.unlinkService.palette', linkedComp2);
             expect(errMessStub).has.not.been.called;
         });
+
+        test('delete application', async () => {
+            sb.stub(window, 'showWarningMessage').resolves('Yes');
+            await commands.executeCommand('openshift.app.delete', existingApp);
+            const applications = await oi.getApplications(project);
+            expect(applications).is.empty;
+        })
 
         test('delete project', async () => {
             await oi.deleteProject(project);
