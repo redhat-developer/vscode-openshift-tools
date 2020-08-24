@@ -82,18 +82,20 @@ export class Component extends OpenShiftItem {
         ];
     }
 
-    static stopDebugSession(component: OpenShiftObject): void {
+    static stopDebugSession(component: OpenShiftObject): boolean {
         const ds = Component.debugSessions.get(component.contextPath.fsPath);
         if (ds) {
             treeKill(ds.configuration.odoPid);
         }
+        return !!ds;
     }
 
-    static stopWatchSession(component: OpenShiftObject): void {
+    static stopWatchSession(component: OpenShiftObject): boolean {
         const ws = Component.watchSessions.get(component.contextPath.fsPath);
         if (ws) {
             treeKill(ws.pid);
         }
+        return !!ws;
     }
 
     static async getOpenshiftData(context: OpenShiftObject): Promise<OpenShiftObject> {

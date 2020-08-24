@@ -17,7 +17,7 @@ const config: any = {
     ui: 'tdd',
     timeout: 120000,
     color: true,
-    // grep: 'calls the appropriate error message if no project found'
+    // grep: 'project|component from binary'
 };
 
 if (process.env.BUILD_ID && process.env.BUILD_NUMBER) {
