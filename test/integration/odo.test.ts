@@ -8,7 +8,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as tmp from 'tmp';
 import * as path from 'path';
-import { Uri, workspace, window, commands } from 'vscode';
+import { Uri, window, commands } from 'vscode';
 import * as odo from '../../src/odo';
 import { Cluster } from '../../src/openshift/cluster';
 import { Command } from '../../src/odo/command';
