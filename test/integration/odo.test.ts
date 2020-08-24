@@ -76,12 +76,6 @@ suite('odo integration', () => {
         sqpStub.onCall(3).resolves('latest');
 
         await commands.executeCommand('openshift.component.create', existingApp);
-        await new Promise<void>((resolve) => {
-            const disposable = workspace.onDidChangeWorkspaceFolders(() => {
-                disposable.dispose();
-                resolve();
-            });
-        });
         const components = await oi.getComponents(existingApp);
         return components.find((item) => item.getName() === componentNameParam);
     }
@@ -104,12 +98,6 @@ suite('odo integration', () => {
             .onSecondCall().resolves(componentNameParam);
 
         await commands.executeCommand('openshift.component.create', existingApp);
-        await new Promise<void>((resolve) => {
-            const disposable = workspace.onDidChangeWorkspaceFolders(() => {
-                disposable.dispose();
-                resolve();
-            });
-        });
         const components = await oi.getComponents(existingApp);
         return components.find((item) => item.getName() === componentNameParam);
     }
@@ -172,7 +160,7 @@ suite('odo integration', () => {
 
         test('component from git', async () => {
             componentFromGit = await createGitComponent(project, appName, `${componentName}-from-git`, nodeJsExGitUrl)
-            expect(component).not.undefined;
+            expect(componentFromGit).not.undefined;
         });
 
         test('component from binary', async () => {
@@ -261,10 +249,19 @@ suite('odo integration', () => {
 
         test('delete component', async () => {
             sb.stub(window, 'showWarningMessage').resolves('Yes');
-            const errMessStub = sb.stub(window, 'showErrorMessage')
-            await commands.executeCommand('openshift.component.delete', component);
-            await commands.executeCommand('openshift.component.delete', componentFromGit);
-            await commands.executeCommand('openshift.component.delete', componentFromBinary);
+            const errMessStub = sb.stub(window, 'showErrorMessage');
+            if (!!component || !!componentFromGit || !!componentFromBinary) {
+                this.skip();
+            }
+            if (component) {
+                await commands.executeCommand('openshift.component.delete', component);
+            }
+            if (componentFromGit) {
+                await commands.executeCommand('openshift.component.delete', componentFromGit);
+            }
+            if (componentFromBinary) {
+                await commands.executeCommand('openshift.component.delete', componentFromBinary);
+            }
             expect(errMessStub).has.not.been.called;
         });
 
