@@ -1,9 +1,5 @@
 # Change Log
 
-## 0.1.6 (August 26, 2020)
-
-
-
 ## 0.1.5 (May 18, 2020)
 
 Noteworthy issues fixed in this release:
