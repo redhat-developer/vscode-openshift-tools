@@ -28,16 +28,6 @@ If developers can't run OpenShift cluster locally, the extension can work with r
 
 When working with [OpenShift Online](https://www.openshift.com/products/online/) remote cluster only one component can be created for Starter plan and Pro plan with default 2GiB storage. If you want to create multi component application you could opt in for Pro plan with bigger persistence storage (up to 150GiB).
 
-## New and Noteworthy
-
-* Latest odo v1.2.1 included 
-* Webview based viewers for `Show Log`, `Follow Log` and `Describe` commands for Component
-* Terminals created with OpenShift commands have meaningful names for better navigation
-* OpenShift Routes in k8s Clusters View have new command 'Open in Browser'
-* `Describe` command for Component's URL
-* `Describe` and `New Storage` commands for not pushed Components
-* `New URL` command can create secured URLs for Component
-
 ## Commands and Features
 
 `vs-openshift-connector` supports a number of commands & actions for interacting with OpenShift clusters; these are accessible via the command menu (`Cmd+Shift+P` <kbd>⌘⇧P</kbd> on macOS or `Ctrl+Shift+P` <kbd>⌃⇧P</kbd> on Windows and Linux) and may be bound to keys in the normal way.
@@ -57,6 +47,7 @@ When working with [OpenShift Online](https://www.openshift.com/products/online/)
 * `OpenShift: Show Output Channel` - Shows commands running under the hood and their output.
 * `OpenShift: Open Console Dashboard` - Opens the OpenShift webconsole URL.
 * `OpenShift: Create` - Creates an OpenShift resource using `.json` or `.yaml` file location from an active editor.
+* `Set Active Project` - Changes active Project displayed in OpenShift Application View.
 
 #### Commands for a Project
 
@@ -66,12 +57,13 @@ When working with [OpenShift Online](https://www.openshift.com/products/online/)
         * local - Use local directory as a source for the Component.
    * `New Service` - Perform Service Catalog operations when it is enabled.
    * `Delete` - Delete an existing Project.
+   * `Set Active Project` - Changes active Project displayed in OpenShift Application View.
 
 #### Commands for an Application
 
    * `New Component` - Create a new Component inside the selected Application.
         * git - Use a git repository as a source for the Component.
-        * binary - Use binary file as a source for the Component
+        * binary - Use binary file as a source for the Component.
         * local - Use local directory as a source for the Component.
    * `New Service` - Perform Service Catalog operations when it is enabled.
    * `Describe` - Describe the given Application in terminal window.
@@ -101,7 +93,7 @@ Components in different states have different set of commands available.
    * `Push` - Push the source code to a Component.
    * `Watch` - Watch for changes, update Component on change. This is not supported for git based components.
    * `Undeploy` - Undeploys a Component from the cluster. The component still resides in the local config.
-   * `Delete` - Delete an existing Component from the cluster and removes the local config also.
+   * `Delete` - Delete existing Component from the cluster and removes the local config also.
    * `Debug` - Debug local Java or Node.js Component.
 
 ##### Commands for a `not pushed` Component
@@ -110,13 +102,13 @@ Components in different states have different set of commands available.
    * `New Storage` - Create Storage and mount to a Component. Push the component to reflect the changes on the cluster.
    * `Describe` - Describe the given Component in terminal window or inside a webview editor.
    * `Push` - Push the source code to a Component.
-   * `Delete` - Delete an existing Component from the local config.
+   * `Delete` - Delete existing Component the local configuration and remove context from workspace.
 
 ##### Commands for a `no context` Component
 
    * `Describe` - Describe the given Component in terminal window or inside a webview editor.
    * `Import` - If the component was created using old version of the extension (`<=0.0.23`), users can use the `Import` action to migrate to latest version and import the metadata changes.
-   * `Delete` - Delete an existing Component from the local config.
+   * `Delete` - Delete existing Component from the cluster.
 
 ##### Commands for a URL in a Component
 
@@ -181,7 +173,7 @@ To debug a Java Component, Java Language Support and Java Debugger Extensions ar
 
 This extension uses two CLI tools to interact with OpenShift cluster:
 * OKD CLI client tool - [oc](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.3.3)
-* odo - [odo](http://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.1/)
+* odo - [odo](http://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.6/)
 
 > `oc` and `odo` tools for Windows, Linux and macOS are included into extension package. Once the extension is installed it is ready to use.
 

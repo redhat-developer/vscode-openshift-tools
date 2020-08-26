@@ -1,5 +1,24 @@
 # Change Log
 
+## 0.1.6 (August 27, 2020)
+
+Noteworthy changes:
+ - [#1092](https://github.com/redhat-developer/vscode-openshift-tools/issues/1092) Deleting application only deletes components, not services
+ - [#1332](https://github.com/redhat-developer/vscode-openshift-tools/issues/1332) Stop running 'odo debug' when component deleted or undeployed
+ - [#1341](https://github.com/redhat-developer/vscode-openshift-tools/issues/1341) Starting debug twice on the same component should not be allowed
+ - [#1559](https://github.com/redhat-developer/vscode-openshift-tools/issues/1559) Show resources only from current context in OpenShift Application Explorer view
+ - [#1589](https://github.com/redhat-developer/vscode-openshift-tools/issues/1589) It is not easy to map commands to output in `OpenShift Output` channel
+ - [#1596](https://github.com/redhat-developer/vscode-openshift-tools/issues/1596) 'New Service' command fails with odo v1.2.1 because of changes in json output
+ - [#1608](https://github.com/redhat-developer/vscode-openshift-tools/issues/1608) Use '--client' option when detecting tool version to avoid server requests
+ - [#1615](https://github.com/redhat-developer/vscode-openshift-tools/issues/1615) Show context location in tooltip for component nodes in OpenShift Application Explorer
+ - [#1617](https://github.com/redhat-developer/vscode-openshift-tools/issues/1617) Create `Watch Sessions` View to provide control over running 'odo watch' commands
+ - [#1619](https://github.com/redhat-developer/vscode-openshift-tools/issues/1619) Create Simple `Debug Sessions` View to show debug sessions started for components 
+ - [#1636](https://github.com/redhat-developer/vscode-openshift-tools/issues/1636) Add 'OpenShift: Set Active Project' command to change project visible in Application Explorer view
+ - [#1647](https://github.com/redhat-developer/vscode-openshift-tools/issues/1647) Show application and component quickpick lists when command executed from palette
+ - [#1653](https://github.com/redhat-developer/vscode-openshift-tools/issues/1653) OpenShift Icon missing for cluster in Kubernetes view 
+ - [#1697](https://github.com/redhat-developer/vscode-openshift-tools/issues/1697) 'New Component' command does not show component types for odo v1.2.5
+ - [#1711](https://github.com/redhat-developer/vscode-openshift-tools/issues/1711) Update odo to v1.2.6
+
 ## 0.1.5 (May 18, 2020)
 
 Noteworthy issues fixed in this release:
