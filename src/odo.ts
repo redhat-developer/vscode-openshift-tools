@@ -451,7 +451,9 @@ class OdoModel {
 
     public delete(item: OpenShiftObject): void {
         this.pathToObject.delete(item.path);
+        this.parentToChildren.delete(item);
         if (item.contextPath) {
+            this.contextToSettings.delete(item.contextPath.fsPath);
             this.contextToObject.delete(item.contextPath.fsPath);
         }
     }
@@ -901,23 +903,11 @@ export class OdoImpl implements Odo {
 
     public async deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
         const app = component.getParent();
-        if (component.contextValue !== ContextType.COMPONENT) {
-            await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
-        }
+        await this.execute(Command.deleteComponent(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
         await this.deleteAndRefresh(component);
         const children = await app.getChildren();
         if (children.length === 0) {
             this.deleteApplication(app);
-        }
-        if (component.contextPath) {
-            const wsFolder = workspace.getWorkspaceFolder(component.contextPath);
-            workspace.updateWorkspaceFolders(wsFolder.index, 1);
-            await new Promise<Disposable>((resolve) => {
-                const disposabel = workspace.onDidChangeWorkspaceFolders(() => {
-                    disposabel.dispose();
-                    resolve();
-                });
-            });
         }
         return component;
     }

@@ -5,6 +5,7 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
+import * as fs from 'fs-extra';
 import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
 import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
@@ -146,7 +147,19 @@ export class Component extends OpenShiftItem {
                 Component.stopDebugSession(component);
                 Component.stopWatchSession(component);
                 await Component.odo.deleteComponent(component);
-
+                if (component.contextPath && Component.isDeleteCommandRemovingContextFolderFromWorkspace()) {
+                    const wsFolder = workspace.getWorkspaceFolder(component.contextPath);
+                    const wsFoldersLength = workspace.workspaceFolders.length;
+                    workspace.updateWorkspaceFolders(wsFolder.index, 1);
+                    if (wsFoldersLength > 1) {
+                        await new Promise<Disposable>((resolve) => {
+                            const disposable = workspace.onDidChangeWorkspaceFolders(() => {
+                                disposable.dispose();
+                                resolve();
+                            });
+                        });
+                    }
+                }
             }).then(() => `Component '${name}' successfully deleted`)
             .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Component with error '${err}'`)));
         }
@@ -201,6 +214,12 @@ export class Component extends OpenShiftItem {
         return workspace
             .getConfiguration('openshiftConnector')
             .get<boolean>('useWebviewInsteadOfTerminalView');
+    }
+
+    static isDeleteCommandRemovingContextFolderFromWorkspace(): boolean {
+        return workspace
+            .getConfiguration('openshiftConnector')
+            .get<boolean>('removeContextFolderAfterDeletingComponent');
     }
 
     @vsCommand('openshift.component.describe', true)
@@ -549,7 +568,19 @@ export class Component extends OpenShiftItem {
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
+    @vsCommand('openshift.component.createFromWorkspaceFolder')
     static async createFromFolder(folder: Uri): Promise<string | null> {
+        try {
+            if (fs.statSync(path.join(folder.fsPath, '.odo')).isDirectory()) {
+                window.showErrorMessage(
+                    'Selected folder already contains a component. Please select a different folder.',
+                );
+                return;
+            }
+        } catch (ignore) {
+            // ignore errors if folder does not exist
+        }
+
         const application = await Component.getOpenShiftCmdData(undefined,
             "In which Application you want to create a Component"
         );

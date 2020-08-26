@@ -21,13 +21,13 @@ export const AddWorkspaceFolder: QuickPickItem = {
 export async function selectWorkspaceFolder(): Promise<Uri> {
     let folder: WorkspaceFolderItem[] = [];
     if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
+
         folder = workspace.workspaceFolders
             .filter((value) => {
                 let result = true;
                 try {
                     result = !fs
-                        .statSync(path.join(value.uri.fsPath, '.odo', 'config.yaml'))
-                        .isFile();
+                        .statSync(path.join(value.uri.fsPath, '.odo')).isDirectory();
                 } catch (ignore) {
                     // ignore errors if file does not exist
                 }
@@ -57,7 +57,14 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
         if (!folders) return null;
         if (fs.existsSync(path.join(folders[0].fsPath, '.odo', 'config.yaml'))) {
             window.showInformationMessage(
-                'The folder selected already contains a component. Please select a different folder.',
+                'Selected folder already contains a component. Please select a different folder.',
+            );
+            return this.selectWorkspaceFolder();
+        }
+        const wsFolder = workspace.getWorkspaceFolder(folders[0]);
+        if (wsFolder && wsFolder.uri !== folders[0]) {
+            window.showInformationMessage(
+                'Selected folder cannot be used, because it is a sub-folder of existing workspace folder.  Please select a different folder.',
             );
             return this.selectWorkspaceFolder();
         }

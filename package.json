@@ -178,6 +178,7 @@
     "onCommand:openshift.component.createFromLocal",
     "onCommand:openshift.component.createFromGit",
     "onCommand:openshift.component.createFromBinary",
+    "onCommand:openshift.component.createFromWorkspaceFolder",
     "onCommand:openshift.component.describe",
     "onCommand:openshift.component.describe.palette",
     "onCommand:openshift.component.log",
@@ -391,6 +392,11 @@
       {
         "command": "openshift.component.createFromBinary",
         "title": "New Component form binary",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.createFromWorkspaceFolder",
+        "title": "New Component",
         "category": "OpenShift"
       },
       {
@@ -1214,6 +1220,12 @@
           "when": "view == openshiftProjectExplorer && viewItem == project",
           "group": "inline"
         }
+      ],
+      "explorer/context": [
+        {
+          "command": "openshift.component.createFromWorkspaceFolder",
+          "when": "explorerResourceIsFolder && explorerResourceIsRoot"
+        }
       ]
     },
     "configuration": {
@@ -1239,11 +1251,17 @@
           "description": "Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries."
         },
         "openshiftConnector.useWebviewInsteadOfTerminalView": {
-          "Title": "Use Webview based editors to show 'Show Log', 'Follow Log' and 'Describe' commands output",
+          "Title": "Use Webview based editors to show 'Show Log', 'Follow Log' and 'Describe' commands output.",
           "type": "boolean",
           "defaul": false,
           "description": "By default the Terminal View is used to execute OpenShift 'Show Log', 'Follow Log' and 'Describe' commands. Select this option if you want to use Webview based editors for it."
-        }
+        },
+        "openshiftConnector.removeContextFolderAfterDeletingComponent": {
+            "Title": "Remove Component's context folder from workspace after Component is deleted.",
+            "type": "boolean",
+            "defaul": false,
+            "description": "Force 'Delete' command for component to remove Component's context folder from workspace."
+          }
       }
     }
   },
