@@ -140,7 +140,7 @@ suite('odo integration', () => {
     }
 
     setup(async () => {
-        await oi.execute(Command.odoLoginWithUsernamePassword('https://10.0.0.193:8443', 'developer', 'developer'));
+        await oi.execute(Command.odoLoginWithUsernamePassword('https://192.168.42.80:8443', 'developer', 'developer'));
     });
 
     teardown(() => {
@@ -250,9 +250,6 @@ suite('odo integration', () => {
         test('delete component', async () => {
             sb.stub(window, 'showWarningMessage').resolves('Yes');
             const errMessStub = sb.stub(window, 'showErrorMessage');
-            if (!!component || !!componentFromGit || !!componentFromBinary) {
-                this.skip();
-            }
             if (component) {
                 await commands.executeCommand('openshift.component.delete', component);
             }
@@ -276,7 +273,7 @@ suite('odo integration', () => {
 
     suite('linking components', () => {
 
-        test('creat comp1', async () => {
+        test('create comp1', async () => {
             linkedComp1 = await createLocalComponent(project, appName, `${componentName}1`, nodeJsExGitUrl)
             await pushComponent(linkedComp1);
         });
