@@ -40,7 +40,7 @@ export default class ClusterViewLoader {
             const timestamp = Number(new Date());
             const date = new Date(timestamp);
             if (event.action === 'run') {
-                const terminal: vscode.Terminal = WindowUtil.createTerminal(`OpenShift: Run CRC Setup`, undefined);
+                const terminal: vscode.Terminal = WindowUtil.createTerminal(`OpenShift: CRC Setup`, undefined);
                 terminal.sendText(`${event.data} setup`);
                 terminal.show();
             }
@@ -116,11 +116,12 @@ export default class ClusterViewLoader {
     }
 
     private static async checkCrcStatus(filePath: string, postCommand: string, panel: vscode.WebviewPanel | undefined = undefined) {
+        const crcVerInfo = await CliChannel.getInstance().execute(`${filePath} version -ojson`);
         const result =  await CliChannel.getInstance().execute(`${filePath} status -ojson`);
-        if (result.stderr) {
+        if (result.stderr || crcVerInfo.stderr) {
             panel.webview.postMessage({action: postCommand, errorStatus: true});
         } else {
-            panel.webview.postMessage({action: postCommand, status: JSON.parse(result.stdout), errorStatus: false});
+            panel.webview.postMessage({action: postCommand, status: JSON.parse(result.stdout), errorStatus: false, versionInfo: JSON.parse(crcVerInfo.stdout)});
         }
     }
 

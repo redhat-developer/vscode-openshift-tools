@@ -253,7 +253,7 @@ export default function addClusterView() {
   const [crcStopError, setCrcStopError] = React.useState(false);
   const [crcStopStatus, setStopStatus] = React.useState(false);
   const [activeStep, setActiveStep] = React.useState(0);
-  const [status, setStatus] = React.useState({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: ''});
+  const [status, setStatus] = React.useState({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: '', crcVer: '', openshiftVer: ''});
   const [settingPresent, setSettingPresent] = React.useState(false);
   const [statusSkeleton, setStatusSkeleton] = React.useState(true);
   const [statusError, setStatusError] = React.useState(false);
@@ -315,7 +315,9 @@ export default function addClusterView() {
                 openshiftStatus: message.status.openshiftStatus,
                 diskUsage: prettyBytes(message.status.diskUsage),
                 cacheUsage: prettyBytes(message.status.cacheUsage),
-                cacheDir: message.status.cacheDir});
+                cacheDir: message.status.cacheDir,
+                crcVer: message.versionInfo.version,
+                openshiftVer: message.versionInfo.openshiftVersion});
   }
 
   const handleUploadPath = (event) => {
@@ -408,7 +410,7 @@ export default function addClusterView() {
     setCrcStartError(false);
     setCrcStopError(false);
     setStopStatus(false);
-    setStatus({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: ''});
+    setStatus({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: '', crcVer: '', openshiftVer: ''});
     setSettingPresent(false);
     setStatusSkeleton(true);
     setStatusError(false);
@@ -471,6 +473,16 @@ export default function addClusterView() {
             </ListItem>
             <ListItem>
               <ListItemText primary={<span>Cache Directory: {status.cacheDir}</span>}/>
+            </ListItem>
+          </List>
+        </div>
+        <div>
+          <List dense>
+            <ListItem>
+              <ListItemText primary={<span>CRC Version: {status.crcVer}</span>}/>
+            </ListItem>
+            <ListItem>
+              <ListItemText primary={<span>OpenShift Version: {status.openshiftVer}</span>}/>
             </ListItem>
           </List>
         </div>
