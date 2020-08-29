@@ -1,12 +1,14 @@
 # Visual Studio Code OpenShift Connector
 
-[![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version/redhat.vscode-openshift-connector.svg)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector) [![Gitter](https://badges.gitter.im/redhat-developer/openshift-connector.svg)](https://gitter.im/redhat-developer/openshift-connector) [![Build Status](https://dev.azure.com/redhat-developer/vscode-openshift-tools/_apis/build/status/redhat-developer.vscode-openshift-tools?branchName=master)](https://dev.azure.com/redhat-developer/vscode-openshift-tools/_build/latest?definitionId=1&branchName=master) [![Build Status](https://travis-ci.org/redhat-developer/vscode-openshift-tools.svg?branch=master)](https://travis-ci.org/redhat-developer/vscode-openshift-tools) [![Unit Tests Code Coverage](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg) [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/LICENSE)
+[![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version/redhat.vscode-openshift-connector.svg)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector) [![Gitter](https://badges.gitter.im/redhat-developer/openshift-connector.svg)](https://gitter.im/redhat-developer/openshift-connector) [![Build Status](https://github.com/redhat-developer/vscode-openshift-tools/workflows/CI/badge.svg)](https://github.com/redhat-developer/vscode-openshift-tools/actions?query=workflow%3ACI) [![Unit Tests Code Coverage](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg) [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/LICENSE)
 
 ## Overview
 
-OpenShift Connector extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension, developers can easily create, deploy and live debug applications running on OpenShift.
+OpenShift Connector extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:
+ - Developers can easily create, deploy and live debug applications running on OpenShift.
+ - Run local instance of OpenShift 4.x using [Red Hat Code Ready Containers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned).
 
-* Demo: https://youtube.com/watch?v=m0wBKuKDYO0
+### Demo: https://youtube.com/watch?v=m0wBKuKDYO0
 
 [![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/vscode-openshift-tools.gif)](https://youtube.com/watch?v=m0wBKuKDYO0)
 
@@ -16,7 +18,7 @@ This extension can work with local or remote OpenShift clusters.
 
 To provision local instance of OpenShift cluster, developers can use the following options:
 * [CodeReadyContainers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned) - run single node local OpenShift 4.x cluster
-* [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/) - run single node local OpenShift 3.x cluster 
+* [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/) - run single node local OpenShift 3.x cluster
 
 For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
 
@@ -132,7 +134,7 @@ Components in different states have different set of commands available.
    * Supports Local Node.js and Java Components
    * Does not support git and binary based components
 
-'OpenShift: Debug' command simplifies the way to start debugging for OpenShift Components pushed to a cluster. It is an experimental feature, because it is using experimental odo `debug` command under the hood and supports only local Java and Node.js components. The command is available from command palette and context menu for Component nodes in OpenShift Application Explorer view. 
+'OpenShift: Debug' command simplifies the way to start debugging for OpenShift Components pushed to a cluster. It is an experimental feature, because it is using experimental odo `debug` command under the hood and supports only local Java and Node.js components. The command is available from command palette and context menu for Component nodes in OpenShift Application Explorer view.
 
 ##### Debug Node.js Component
 
@@ -148,6 +150,7 @@ To debug a Java Component, Java Language Support and Java Debugger Extensions ar
 
 ## Icons for OpenShift Application Explorer View Items
 
+<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/title/readme/add-cluster.png" width="15" height="15" /><span style="margin: 20px">Add OpenShift Cluster</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/title/readme/icon-login.png" width="15" height="15" /><span style="margin: 20px">Log in to Cluster</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/title/readme/icon-refresh.png" width="15" height="15" /><span style="margin: 20px">Refresh Cluster</span></div>
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/context/cluster-node.png" width="15" height="15" /><span style="margin: 20px">Cluster Resource Node</span></div>
@@ -166,6 +169,12 @@ To debug a Java Component, Java Language Support and Java Debugger Extensions ar
    * `OpenShift Connector: Output verbosity level` - Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and terminal view
    * `OpenShift Connector: Search CLI tools in PATH locations before using included binaries` - Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries
    * `OpenShift Connector: Use Webview based editors to show 'Show Log', 'Follow Log' and 'Describe' commands output` - Use Webview based editors instead of Terminal view to show or follow logs
+   * `Openshift Connector: CRC Binary Location` - Provide the path where the crc binary is present.
+   * `Openshift Connector: CRC Pull Secret Path` - Provide the path where the pull secret file is present.
+   * `Openshift Connector: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
+   * `Openshift Connector: CRC Memory Allocation` - MiB of memory to allocate to the OpenShift cluster as selected during the first run.
+
+Note: Version of CRC (Code Ready Containners) supported by the extension is 1.15.0.
 
 ## Dependencies
 
@@ -180,7 +189,7 @@ This extension uses two CLI tools to interact with OpenShift cluster:
 ### Extensions
 
 This extension depends on Kubernetes Extension from Microsoft which is going to be installed automatically along with OpenShift Connector Extension. Latter is using Kubernetes Extension public API to show
-OpenShift specific resources like Projects, Routes, Deployment Configs, Image Streams and Templates in Kubernetes Clusters View. Those resources are visible only for OpenShift clusters. 
+OpenShift specific resources like Projects, Routes, Deployment Configs, Image Streams and Templates in Kubernetes Clusters View. Those resources are visible only for OpenShift clusters.
 
 OpenShift Connector extension also provides ```Use Project``` command to switch between OpenShift Projects in Kubernetes Clusters View.
 

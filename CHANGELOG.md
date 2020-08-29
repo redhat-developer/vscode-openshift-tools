@@ -1,8 +1,13 @@
 # Change Log
 
-## 0.1.6 (August 27, 2020)
+## 0.1.6 (August 31, 2020)
 
 Noteworthy changes:
+ - [#1235](https://github.com/redhat-developer/vscode-openshift-tools/issues/1235)
+    - Add webview to run Code Ready Containers (CRC) `1.15.0` from extension. This allows to run a local instance of OpenShift `4.5.7` directly from the extension.
+    - Add Extension Settings for CRC binary location, pull secret, optional configurations.
+    - Provide CRC Start/Stop/Refresh actions in the webview.
+    - Add Stop CRC action in Status Bar.
  - [#1092](https://github.com/redhat-developer/vscode-openshift-tools/issues/1092) Deleting application only deletes components, not services
  - [#1332](https://github.com/redhat-developer/vscode-openshift-tools/issues/1332) Stop running 'odo debug' when component deleted or undeployed
  - [#1341](https://github.com/redhat-developer/vscode-openshift-tools/issues/1341) Starting debug twice on the same component should not be allowed
@@ -12,10 +17,10 @@ Noteworthy changes:
  - [#1608](https://github.com/redhat-developer/vscode-openshift-tools/issues/1608) Use '--client' option when detecting tool version to avoid server requests
  - [#1615](https://github.com/redhat-developer/vscode-openshift-tools/issues/1615) Show context location in tooltip for component nodes in OpenShift Application Explorer
  - [#1617](https://github.com/redhat-developer/vscode-openshift-tools/issues/1617) Create `Watch Sessions` View to provide control over running 'odo watch' commands
- - [#1619](https://github.com/redhat-developer/vscode-openshift-tools/issues/1619) Create Simple `Debug Sessions` View to show debug sessions started for components 
+ - [#1619](https://github.com/redhat-developer/vscode-openshift-tools/issues/1619) Create Simple `Debug Sessions` View to show debug sessions started for components
  - [#1636](https://github.com/redhat-developer/vscode-openshift-tools/issues/1636) Add 'OpenShift: Set Active Project' command to change project visible in Application Explorer view
  - [#1647](https://github.com/redhat-developer/vscode-openshift-tools/issues/1647) Show application and component quickpick lists when command executed from palette
- - [#1653](https://github.com/redhat-developer/vscode-openshift-tools/issues/1653) OpenShift Icon missing for cluster in Kubernetes view 
+ - [#1653](https://github.com/redhat-developer/vscode-openshift-tools/issues/1653) OpenShift Icon missing for cluster in Kubernetes view
  - [#1697](https://github.com/redhat-developer/vscode-openshift-tools/issues/1697) 'New Component' command does not show component types for odo v1.2.5
  - [#1711](https://github.com/redhat-developer/vscode-openshift-tools/issues/1711) Update odo to v1.2.6
 
@@ -42,13 +47,13 @@ Noteworthy changes:
   - [#1227](https://github.com/redhat-developer/vscode-openshift-tools/issues/1227) Include odo and oc binaries into extension package for all supported platforms macOS/Linux/Windows
   - [#1388](https://github.com/redhat-developer/vscode-openshift-tools/issues/1388) Update odo to latest release v1.1.0
   - [#1396](https://github.com/redhat-developer/vscode-openshift-tools/issues/1396) Allow to use compatible odo version available from PATH locations
-  - [#1380](https://github.com/redhat-developer/vscode-openshift-tools/issues/1380) Absolute path should be used for commands when running in vscode terminal view 
+  - [#1380](https://github.com/redhat-developer/vscode-openshift-tools/issues/1380) Absolute path should be used for commands when running in vscode terminal view
 
 
 ## 0.1.3 (January 16, 2020)
 
 This release adds `OpenShift: Debug` command for Java and Node.js components. The command is available form command palette and OpenShift Application View context
-menu for nodes representing Components. See issues [#1322](https://github.com/redhat-developer/vscode-openshift-tools/pull/1322) and 
+menu for nodes representing Components. See issues [#1322](https://github.com/redhat-developer/vscode-openshift-tools/pull/1322) and
 [#1328](https://github.com/redhat-developer/vscode-openshift-tools/pull/1328) for details.
 
 It also includes update for OpenShift Do CLI. Version 1.0.2 will be downloaded after extension is updated to this release.
@@ -56,8 +61,8 @@ It also includes update for OpenShift Do CLI. Version 1.0.2 will be downloaded a
 
 ## 0.1.2 (November 18, 2019)
 
-This release brings to you: 
-* [#1277](https://github.com/redhat-developer/vscode-openshift-tools/issues/1277) Latest v1.0.1 version of OpenShift Do CLI tool 
+This release brings to you:
+* [#1277](https://github.com/redhat-developer/vscode-openshift-tools/issues/1277) Latest v1.0.1 version of OpenShift Do CLI tool
 * [#1268](https://github.com/redhat-developer/vscode-openshift-tools/issues/1268) New `OpenShift: Create` command to create resources based on file from active editor
 * Bugfixes for minor issues:
   - [#1262](https://github.com/redhat-developer/vscode-openshift-tools/issues/1262) Keep QuickInputs open after VSCode window lost focus
@@ -67,7 +72,7 @@ This release brings to you:
   - [#1284](https://github.com/redhat-developer/vscode-openshift-tools/issues/1284) With latest VSCode 1.40.0 release oc and odo download fails on sha256 verification
 
 
-## 0.1.1 - 🎃Trick or Treat (November 1, 2019) 
+## 0.1.1 - 🎃Trick or Treat (November 1, 2019)
 
 Halloween Release 🎃
 
@@ -81,9 +86,9 @@ This release is built on top of 0.1.0. If any developer is migrating from `<=0.0
 * [Demo](https://youtube.com/watch?v=m0wBKuKDYO0) video and [blog](https://developers.redhat.com/blog/2019/10/31/openshift-connector-visual-studio-code-extension-for-red-hat-openshift/) updated for `0.1.1` release
 
 ## Changes
-* [#1254](https://github.com/redhat-developer/vscode-openshift-tools/pull/1254) use vscode open command instead of open module for external links    
+* [#1254](https://github.com/redhat-developer/vscode-openshift-tools/pull/1254) use vscode open command instead of open module for external links
 * [#1236](https://github.com/redhat-developer/vscode-openshift-tools/pull/1236) Show progress bar for credentials and token Login
-* [#1229](https://github.com/redhat-developer/vscode-openshift-tools/pull/1229) support deep nesting for binary files 
+* [#1229](https://github.com/redhat-developer/vscode-openshift-tools/pull/1229) support deep nesting for binary files
 * [#1243](https://github.com/redhat-developer/vscode-openshift-tools/pull/1243) remove flags from storage commands
 * [#1211](https://github.com/redhat-developer/vscode-openshift-tools/pull/1211) Add json output for catalog list services
 * [#1213](https://github.com/redhat-developer/vscode-openshift-tools/pull/1213) Added json output for catalog list components to determine component type and version
@@ -125,7 +130,7 @@ This release involves *Breaking Changes* !!
 
 ### Fixes
 * [#1117](https://github.com/redhat-developer/vscode-openshift-tools/pull/1117) Import command for components without context
-* [#1107](https://github.com/redhat-developer/vscode-openshift-tools/pull/1107) Add migration for component/services deployed in active cluster 
+* [#1107](https://github.com/redhat-developer/vscode-openshift-tools/pull/1107) Add migration for component/services deployed in active cluster
 * [#1169](https://github.com/redhat-developer/vscode-openshift-tools/pull/1169) Fix clone the git repository while creating Component
 * [#1158](https://github.com/redhat-developer/vscode-openshift-tools/pull/1158) Fix workflow for git + binary component
 * [#1152](https://github.com/redhat-developer/vscode-openshift-tools/pull/1152) Fix list of urls in Open in Browser action
@@ -144,7 +149,7 @@ This release involves *Breaking Changes* !!
 * [#903](https://github.com/redhat-developer/vscode-openshift-tools/pull/903) Add new login experience using k8 config
 * [#901](https://github.com/redhat-developer/vscode-openshift-tools/pull/901) Fix for Deleting interlinked components breaks the application
 * [#911](https://github.com/redhat-developer/vscode-openshift-tools/pull/911) Integrate Azure Pipelines to CI builds
-* Move public chat discussion to [gitter](https://gitter.im/redhat-developer/openshift-connector) 
+* Move public chat discussion to [gitter](https://gitter.im/redhat-developer/openshift-connector)
 
 ## 0.0.22 (June 18, 2019)
 * [#888](https://github.com/redhat-developer/vscode-openshift-tools/pull/888) Prettify json in OpenShift Output Channel
@@ -190,7 +195,7 @@ This release involves *Breaking Changes* !!
 * Update to use `odo v0.0.20`
 * Support `reference` option for creating components from git repository
 * Add feature to store passwords in Credential Manager
-* Use '-wait' flag when creating service to wait until it is provisioned 
+* Use '-wait' flag when creating service to wait until it is provisioned
 * Add `OpenShift: Show Output Channel` to command palette
 * Allow user to directly create components with 3 different options using command palette
 * Split `OpenShift: Login into Cluster` to two commands
