@@ -241,8 +241,8 @@ function getSteps() {
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function addClusterView() {
   const classes = useStyles();
-  const crcLatest = '1.14.0';
-  const crcOpenShift = '4.5.4';
+  const crcLatest = '1.15.0';
+  const crcOpenShift = '4.5.7';
   const [fileName, setBinaryPath] = React.useState('');
   const [pullSecretPath, setSecret] = React.useState('');
   const [cpuSize, setCpuSize] = React.useState(crcDefaults.DefaultCPUs);
@@ -275,7 +275,7 @@ export default function addClusterView() {
           case 'crcstartstatus' :
             setProgress(false);
             setStatusSkeleton(false);
-            setStatus({crcStatus: message.status.crcStatus, openshiftStatus: message.status.openshiftStatus, diskUsage: prettyBytes(message.status.diskUsage), cacheUsage: prettyBytes(message.status.cacheUsage), cacheDir: message.status.cacheDir});
+            setCrcStatus(message);
             break;
           case 'sendcrcstoperror' :
             setStopProgress(false);
@@ -289,7 +289,7 @@ export default function addClusterView() {
             }
             setStopProgress(false);
             setStatusSkeleton(false);
-            setStatus({crcStatus: message.status.crcStatus, openshiftStatus: message.status.openshiftStatus, diskUsage: prettyBytes(message.status.diskUsage), cacheUsage: prettyBytes(message.status.cacheUsage), cacheDir: message.status.cacheDir});
+            setCrcStatus(message);
             break;
           case 'crcsetting' :
             setSettingPresent(true);
@@ -299,7 +299,7 @@ export default function addClusterView() {
             if (message.errorStatus) {
               setStatusError(true);
             } else {
-              setStatus({crcStatus: message.status.crcStatus, openshiftStatus: message.status.openshiftStatus, diskUsage: prettyBytes(message.status.diskUsage), cacheUsage: prettyBytes(message.status.cacheUsage), cacheDir: message.status.cacheDir});
+              setCrcStatus(message);
             }
             break;
           default:
@@ -309,6 +309,14 @@ export default function addClusterView() {
     }
 
   window.addEventListener('message', messageListener);
+
+  const setCrcStatus = (message) => {
+    setStatus({ crcStatus: message.status.crcStatus,
+                openshiftStatus: message.status.openshiftStatus,
+                diskUsage: prettyBytes(message.status.diskUsage),
+                cacheUsage: prettyBytes(message.status.cacheUsage),
+                cacheDir: message.status.cacheDir});
+  }
 
   const handleUploadPath = (event) => {
     setBinaryPath(event.target.files[0].path);
@@ -350,7 +358,14 @@ export default function addClusterView() {
       vscode.postMessage({action: 'start', isSetting: true });
     } else {
       const crcStartCommand = `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory}`;
-      vscode.postMessage({action: 'start', data: crcStartCommand, pullSecret: pullSecretPath, crcLoc: fileName, cpuSize: cpuSize, memory: memory, isSetting: false });
+      vscode.postMessage({action: 'start',
+                          data: crcStartCommand,
+                          pullSecret: pullSecretPath,
+                          crcLoc: fileName,
+                          cpuSize: cpuSize,
+                          memory: memory,
+                          isSetting: false
+                        });
     }
   }
 
@@ -525,15 +540,18 @@ export default function addClusterView() {
     )}
     {(crcStartError || crcStopError) && (
     <div>
-      <Alert
-        severity="error"
-        style={{ backgroundColor: 'var(--vscode-inputValidation-errorBackground)', color: 'var(--vscode-inputValidation-errorForeground)'}}
-        action={
-          <Button color="inherit" size="small" onClick={handleTryAgain}>
-            Try Again
-          </Button>
-        }
-      >CRC Process errored out. Check Output channel for details.</Alert>
+      <List>
+        <ListItem>
+          <Alert
+          severity="error"
+          action={
+            <Button color="inherit" size="small" onClick={handleTryAgain} className={classes.button}>
+              Run the process again.
+            </Button>
+          }
+        >CRC Process errored out. Check Output channel for details.</Alert>
+        </ListItem>
+      </List>
     </div>)}
     </>
   );
@@ -732,14 +750,14 @@ export default function addClusterView() {
               {getStepContent(index)}
               <div className={classes.actionsContainer}>
                 <div>
+                  { (activeStep != 0) && (
                   <Button
                     variant="contained"
-                    disabled={activeStep === 0}
                     onClick={handleBack}
                     className={classes.buttonSecondary}
                   >
                     Back
-                  </Button>
+                  </Button>)}
                   <Button
                     variant="contained"
                     onClick={handleNext}
@@ -782,7 +800,9 @@ export default function addClusterView() {
         <div className={classes.root}>
           <Paper square elevation={3} className={classes.resetContainer}>
             <blockquote className={classes.blockquoteText}>
-              <Typography variant='body2'>A crc configuration is detected in workspace settings. If you need to setup a new CRC instance, click on Reset and proceed with wizard workflow.</Typography>
+              <Typography variant='body2'>
+                A crc configuration is detected in workspace settings. If you need to setup a new CRC instance, click on Reset and proceed with wizard workflow.
+              </Typography>
             </blockquote>
             <StartStopLoader />
             <Button onClick={handleReset} className={classes.button} disabled={(crcProgress || crcStopProgress)}>
