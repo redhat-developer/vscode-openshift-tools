@@ -56,8 +56,7 @@
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "${workspaceFolder}/test/fixtures/components/comp1",
-                "${workspaceFolder}/test/fixtures/components/comp2",
+                "${workspaceFolder}/test/fixtures/components/components.code-workspace",
                 "--extensionDevelopmentPath=${workspaceFolder}",
                 "--extensionTestsPath=${workspaceFolder}/out/test/integration"
             ],
