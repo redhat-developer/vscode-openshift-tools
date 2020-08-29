@@ -7,7 +7,7 @@ Noteworthy changes:
     - Add webview to run Code Ready Containers (CRC) `1.15.0` from extension. This allows to run a local instance of OpenShift `4.5.7` directly from the extension.
     - Add Extension Settings for CRC binary location, pull secret, optional configurations.
     - Provide CRC Start/Stop/Refresh actions in the webview.
-    - Add Stop CRC action in Status Bar.
+ - [#1707](https://github.com/redhat-developer/vscode-openshift-tools/issues/1707) Add Stop CRC action in Status Bar.
  - [#1092](https://github.com/redhat-developer/vscode-openshift-tools/issues/1092) Deleting application only deletes components, not services
  - [#1332](https://github.com/redhat-developer/vscode-openshift-tools/issues/1332) Stop running 'odo debug' when component deleted or undeployed
  - [#1341](https://github.com/redhat-developer/vscode-openshift-tools/issues/1341) Starting debug twice on the same component should not be allowed

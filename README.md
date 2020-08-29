@@ -174,7 +174,7 @@ To debug a Java Component, Java Language Support and Java Debugger Extensions ar
    * `Openshift Connector: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
    * `Openshift Connector: CRC Memory Allocation` - MiB of memory to allocate to the OpenShift cluster as selected during the first run.
 
-Note: Version of CRC (Code Ready Containners) supported by the extension is 1.15.0.
+Note: Version of CRC (Code Ready Containners) supported by the extension is `1.15.0` (OpenShift Version: `4.5.7`)
 
 ## Dependencies
 
