@@ -31,7 +31,9 @@
     "redhat",
     "clusters",
     "k8s",
-    "redhat"
+    "redhat",
+    "crc",
+    "codereadycontainers"
   ],
   "icon": "images/openshift_extension.png",
   "main": "./out/src/extension",
@@ -41,7 +43,6 @@
     "compile": "npm-run-all compile:*",
     "compile:ext": "tsc -p ./",
     "compile:views": "webpack --mode development --config src/view/webpack.config.js",
-    "compile:cluster-views": "webpack --mode development --config src/view/cluster/webpack.config.js",
     "dev:log-view": "webpack-dev-server --mode development --config src/view/log/webpack.config.js",
     "dev:describe-view": "webpack-dev-server --mode development --config src/view/describe/webpack.config.js",
     "dev:cluster-view": "webpack-dev-server --mode development --config src/view/cluster/webpack.config.js",
@@ -63,7 +64,6 @@
     "@kubernetes/client-node": "^0.11.1",
     "binary-search": "^1.3.6",
     "byline": "^5.0.0",
-    "clsx": "^1.1.0",
     "fs-extra": "^8.1.0",
     "git-fetch-pack": "^0.1.1",
     "git-transport-protocol": "^0.1.0",
@@ -72,7 +72,7 @@
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
     "openshift-rest-client": "^4.0.0",
-    "pretty-bytes": "^5.3.0",
+    "pretty-bytes": "^5.4.0",
     "rxjs": "^6.5.3",
     "semver": "^6.3.0",
     "shelljs": "^0.8.3",
@@ -1292,7 +1292,7 @@
           "description": "Number of CPU cores to allocate to the OpenShift cluster as selected during the first run"
         },
         "openshiftConnector.crcMemoryAllocated": {
-          "Title": "CRC Pull Secret Path",
+          "Title": "CRC Memory Allocation",
           "type": "number",
           "default": null,
           "description": "MiB of memory to allocate to the OpenShift cluster as selected during the first run"
