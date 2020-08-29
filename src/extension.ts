@@ -9,6 +9,8 @@ import {
     workspace,
     window,
     WorkspaceFoldersChangeEvent,
+    StatusBarAlignment,
+    StatusBarItem
 } from 'vscode';
 import { OpenShiftExplorer } from './explorer';
 import { Cluster } from './openshift/cluster';
@@ -52,6 +54,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     migrateFromOdo018();
     Cluster.extensionContext = extensionContext;
     TokenStore.extensionContext = extensionContext;
+	const crcStatusItem = window.createStatusBarItem(StatusBarAlignment.Left);
+	crcStatusItem.command = 'openshift.explorer.stopCluster';
     const disposable = [
         ...(await registerCommands(
             './k8s/route',
@@ -67,6 +71,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         commands.registerCommand('clusters.openshift.useProject', (context) =>
             commands.executeCommand('extension.vsKubernetesUseNamespace', context),
         ),
+        crcStatusItem,
         OpenShiftExplorer.getInstance(),
         new WatchSessionsView().createTreeView('openshiftWatchView'),
         DebugSessionsView.getInstance(),
@@ -106,6 +111,16 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         }
     });
 
+    function updateStatusBarItem(statusBarItem: StatusBarItem, text: string): void {
+		if (!workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation")) {
+			statusBarItem.hide();
+			return;
+		}
+        statusBarItem.text = `$(debug-stop) ${text}`;
+        statusBarItem.show();
+    }
+
+    updateStatusBarItem(crcStatusItem, 'Stop CRC');
     extendClusterExplorer();
 
     workspace.onDidChangeWorkspaceFolders((event: WorkspaceFoldersChangeEvent) => {

@@ -26,5 +26,6 @@
         "test-resources",
         "src/view/log/app",
         "src/view/describe/app",
+        "src/view/cluster/app"
     ]
 }

@@ -5,15 +5,16 @@
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require("path");
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const HtmlWebPackPlugin = require( 'html-webpack-plugin' );
 
 module.exports = {
   entry: {
-    logViewer: "./src/view/log/app/index.tsx"
+    clusterViewer: "./src/view/cluster/app/index.tsx"
   },
   output: {
-    path: path.resolve(__dirname, "..", "..", "..", "out", "logViewer"),
+    path: path.resolve(__dirname, "../../../out", "clusterViewer"),
     filename: "[name].js"
   },
   devtool: "eval-source-map",
@@ -37,6 +38,15 @@ module.exports = {
             loader: "css-loader"
           }
         ]
+      },
+      {
+        test: /\.(svg|png|jpg|gif)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {},
+          },
+        ],
       }
     ]
   },
@@ -44,9 +54,9 @@ module.exports = {
     hints: false
   },
   plugins: [
-     new HtmlWebPackPlugin({
-        template: path.resolve( __dirname, './app/index.html' ),
-        filename: 'index.html'
-     })
-  ]
+    new HtmlWebPackPlugin({
+       template: path.resolve( __dirname, './app/index.html' ),
+       filename: 'index.html'
+    })
+ ]
 };
