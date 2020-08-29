@@ -6,7 +6,7 @@
 
 OpenShift Connector extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:
  - Developers can easily create, deploy and live debug applications running on OpenShift.
- - Run local instance of OpenShift 4.x using [Red Hat Code Ready Containers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned).
+ - Run local instance of OpenShift 4.x using [Red Hat CodeReady Containers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned).
 
 ### Demo: https://youtube.com/watch?v=m0wBKuKDYO0
 
@@ -17,7 +17,7 @@ OpenShift Connector extension provides an end-to-end developer experience for Re
 This extension can work with local or remote OpenShift clusters.
 
 To provision local instance of OpenShift cluster, developers can use the following options:
-* [CodeReadyContainers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned) - run single node local OpenShift 4.x cluster
+* [CodeReady Containers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned) - run single node local OpenShift 4.x cluster
 * [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/) - run single node local OpenShift 3.x cluster
 
 For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
@@ -174,7 +174,7 @@ To debug a Java Component, [Java Language Support](https://marketplace.visualstu
    * `Openshift Connector: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
    * `Openshift Connector: CRC Memory Allocation` - MiB of memory to allocate to the OpenShift cluster as selected during the first run.
 
-**NOTE:** CRC (Code Ready Containners) version supported by the extension is `1.15.0` (OpenShift Version: `4.5.7`)
+**NOTE:** CRC (CodeReady Containers) version supported by the extension is `1.15.0` (OpenShift Version: `4.5.7`)
 
 ## Dependencies
 
@@ -188,7 +188,7 @@ This extension uses two CLI tools to interact with OpenShift cluster:
 
 ### Extensions
 
-This extension depends on Kubernetes Extension from Microsoft which is going to be installed automatically along with OpenShift Connector Extension. Latter is using Kubernetes Extension public API to show
+This extension depends on [Kubernetes Extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) from Microsoft which is going to be installed automatically along with OpenShift Connector Extension. Latter is using Kubernetes Extension public API to show
 OpenShift specific resources like Projects, Routes, Deployment Configs, Image Streams and Templates in Kubernetes Clusters View. Those resources are visible only for OpenShift clusters.
 
 OpenShift Connector extension also provides ```Use Project``` command to switch between OpenShift Projects in Kubernetes Clusters View.
