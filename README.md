@@ -75,9 +75,9 @@ When working with [OpenShift Online](https://www.openshift.com/products/online/)
 
 Components can be in 3 stages:
 
-   *  pushed - When the components are deployed into the cluster.
-   *  not pushed - When the components are in local config but NOT deployed into the cluster.
-   *  no context - When there is no context folder associated with the component in the workspace.
+   *  `pushed` - When the components are deployed into the cluster.
+   *  `not pushed` - When the components are in local config but NOT deployed into the cluster.
+   *  `no context` - When there is no context folder associated with the component in the workspace.
 
 Components in different states have different set of commands available.
 
@@ -134,17 +134,17 @@ Components in different states have different set of commands available.
    * Supports Local Node.js and Java Components
    * Does not support git and binary based components
 
-'OpenShift: Debug' command simplifies the way to start debugging for OpenShift Components pushed to a cluster. It is an experimental feature, because it is using experimental odo `debug` command under the hood and supports only local Java and Node.js components. The command is available from command palette and context menu for Component nodes in OpenShift Application Explorer view.
+`OpenShift: Debug` command simplifies the way to start debugging for OpenShift Components pushed to a cluster. It is an experimental feature, because it is using experimental odo `debug` command under the hood and supports only local Java and Node.js components. The command is available from command palette and context menu for Component nodes in OpenShift Application Explorer view.
 
-##### Debug Node.js Component
+#### Debug Node.js Component
 
 Default Visual Studio Code installation includes JavaScript/TypeScript Language Support and Debugger Extensions required to debug a Node.js Component. That means new `OpenShift: Debug` command can be used without installing any additional extensions.
 
 ![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/debug-node.gif)
 
-##### Debug Java Component
+#### Debug Java Component
 
-To debug a Java Component, Java Language Support and Java Debugger Extensions are required. OpenShift Connector extension will prompt the user to install missing extension(s) before it starts Debugger for a Java Component.
+To debug a Java Component, [Java Language Support](https://marketplace.visualstudio.com/items?itemName=redhat.java) and [Java Debugger](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug) Extensions are required. OpenShift Connector extension will prompt the user to install missing extension(s) before it starts Debugger for a Java Component.
 
 ![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/debug-java.gif)
 
@@ -174,7 +174,7 @@ To debug a Java Component, Java Language Support and Java Debugger Extensions ar
    * `Openshift Connector: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
    * `Openshift Connector: CRC Memory Allocation` - MiB of memory to allocate to the OpenShift cluster as selected during the first run.
 
-Note: Version of CRC (Code Ready Containners) supported by the extension is `1.15.0` (OpenShift Version: `4.5.7`)
+**NOTE:** CRC (Code Ready Containners) verrsion supported by the extension is `1.15.0` (OpenShift Version: `4.5.7`)
 
 ## Dependencies
 
