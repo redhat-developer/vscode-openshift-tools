@@ -24,8 +24,7 @@ async function main(): Promise<void> {
             extensionTestsPath,
             launchArgs: tests === 'integration' ? [
                 // this is required to create multi root workspace to run tests on
-                path.resolve(extensionRootPath,'test', 'fixtures', 'components', 'comp1'),
-                path.resolve(extensionRootPath,'test', 'fixtures', 'components', 'comp2'),
+                path.resolve(extensionRootPath,'test', 'fixtures', 'components', 'components.code-workspace')
             ] : []
         });
     } catch(error) {
