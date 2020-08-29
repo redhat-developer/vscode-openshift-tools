@@ -184,6 +184,7 @@ export class OpenShiftCluster extends OpenShiftObjectImpl {
         const array = await this.odo.getProjects();
         return insert(array, item);
     }
+
 }
 
 export class OpenShiftProject extends OpenShiftObjectImpl {
@@ -796,9 +797,9 @@ export class OdoImpl implements Odo {
     }
 
     public async createProject(projectName: string): Promise<OpenShiftObject> {
-        await OdoImpl.instance.execute(Command.createProject(projectName));
         const clusters = await this.getClusters();
         const currentProjects = await this.getProjects()
+        await OdoImpl.instance.execute(Command.createProject(projectName));
         currentProjects.forEach((project:OpenShiftProject) => project.active = false);
         return this.insertAndReveal(new OpenShiftProject(clusters[0], projectName, true));
     }
@@ -991,7 +992,7 @@ export class OdoImpl implements Odo {
 
     async loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): Promise<void> {
         const clusters = (await this.getClusters());
-        if(!clusters) return;
+        if(!clusters || clusters.length === 0) return;
         if (event === null && workspace.workspaceFolders || event && event.added && event.added.length > 0) {
             const addedFolders = event === null? workspace.workspaceFolders : event.added;
             await OdoImpl.data.addContexts(addedFolders);
