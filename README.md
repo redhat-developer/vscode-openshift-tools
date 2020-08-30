@@ -1,6 +1,11 @@
 # Visual Studio Code OpenShift Connector
 
-[![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version/redhat.vscode-openshift-connector.svg)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector) [![Gitter](https://badges.gitter.im/redhat-developer/openshift-connector.svg)](https://gitter.im/redhat-developer/openshift-connector) [![Build Status](https://github.com/redhat-developer/vscode-openshift-tools/workflows/CI/badge.svg)](https://github.com/redhat-developer/vscode-openshift-tools/actions?query=workflow%3ACI) [![Unit Tests Code Coverage](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg) [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/LICENSE)
+[![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version/redhat.vscode-openshift-connector.svg)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector)
+[![Downloads](https://vsmarketplacebadge.apphb.com/downloads-short/redhat.vscode-openshift-connector.svg)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector)
+[![Gitter](https://badges.gitter.im/redhat-developer/openshift-connector.svg)](https://gitter.im/redhat-developer/openshift-connector)
+[![Build Status](https://github.com/redhat-developer/vscode-openshift-tools/workflows/CI/badge.svg)](https://github.com/redhat-developer/vscode-openshift-tools/actions?query=workflow%3ACI)
+[![Unit Tests Code Coverage](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg)
+[![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/LICENSE)
 
 ## Overview
 
@@ -20,7 +25,7 @@ To provision local instance of OpenShift cluster, developers can use the followi
 * [CodeReady Containers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned) - run single node local OpenShift 4.x cluster
 * [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/) - run single node local OpenShift 3.x cluster
 
-For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-Instance).
+For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-3.x-Instance).
 
 If developers can't run OpenShift cluster locally, the extension can work with remote one provisioned with one of Red Hat products:
 * [Red Hat OpenShift Container Platform](https://www.openshift.com/products/container-platform) - build, deploy and manage your applications across cloud- and on-premise infrastructure
