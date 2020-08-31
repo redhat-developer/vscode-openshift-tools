@@ -1,6 +1,6 @@
 .vscode/**
 .vscode-test/**
-images/vscode-openshift-tools.gif
+images/gif/**
 out/test/**
 out/build/**
 out/test-resources/**
@@ -24,8 +24,6 @@ build/**
 out/build**
 azure-pipelines.yml
 images/demo-featured-image.png
-images/debug-node.gif
-images/debug-java.gif
 test-resources/**
 header.js
 .mocharc.js
