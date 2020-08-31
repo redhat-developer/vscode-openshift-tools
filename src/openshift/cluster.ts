@@ -257,7 +257,7 @@ export class Cluster extends OpenShiftItem {
         });
         if (!ocToken) return null;
         return Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`,
-            () => Cluster.odo.execute(Command.odoLoginWithToken(clusterURL, ocToken))
+            () => Cluster.odo.execute(Command.odoLoginWithToken(clusterURL, ocToken.trim()))
             .then((result) => Cluster.loginMessage(clusterURL, result))
             .catch((error) => Promise.reject(new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(error.message)}'!`)))
         );
