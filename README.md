@@ -15,7 +15,7 @@ OpenShift Connector extension provides an end-to-end developer experience for Re
 
 ### Demo: https://youtube.com/watch?v=m0wBKuKDYO0
 
-[![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/vscode-openshift-tools.gif)](https://youtube.com/watch?v=m0wBKuKDYO0)
+[![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/gif/vscode-openshift-tools.gif)](https://youtube.com/watch?v=m0wBKuKDYO0)
 
 ### Supported OpenShift Clusters
 
@@ -134,6 +134,17 @@ Components in different states have different set of commands available.
 
 **NOTE:** Currently we support creation of one component per folder. Multiple components from a folder might be supported in future releases.
 
+#### Running OpenShift Locally
+The extensions allows to create a webview panel to run local instance of OpenShift 4.5.7 using Red Hat CodeReady Containers. The wizard worrkflow guides to select the different configurations and start a new ckuster directly from the extension. Users can perform the following operations using the wizard:
+
+   * Start a new OpenShift cluster (4.5.7)
+   * Stop the cluster
+   * Refresh the status of the cluster
+   * Open the Console Dashboard
+   * Stop the cluster from Status Bar
+
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/gif/crc-webview.gif)
+
 #### Debug Support
 
    * Supports Local Node.js and Java Components
@@ -145,13 +156,13 @@ Components in different states have different set of commands available.
 
 Default Visual Studio Code installation includes JavaScript/TypeScript Language Support and Debugger Extensions required to debug a Node.js Component. That means new `OpenShift: Debug` command can be used without installing any additional extensions.
 
-![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/debug-node.gif)
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/gif/debug-node.gif)
 
 #### Debug Java Component
 
 To debug a Java Component, [Java Language Support](https://marketplace.visualstudio.com/items?itemName=redhat.java) and [Java Debugger](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug) Extensions are required. OpenShift Connector extension will prompt the user to install missing extension(s) before it starts Debugger for a Java Component.
 
-![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/debug-java.gif)
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/gif/debug-java.gif)
 
 ## Icons for OpenShift Application Explorer View Items
 
