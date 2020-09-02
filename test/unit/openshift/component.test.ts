@@ -179,7 +179,6 @@ suite('OpenShift/Component', () => {
             const uri = 'git uri';
             setup(() => {
                 sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves(['nodejs']);
-                sandbox.stub(OdoImpl.prototype, 'getComponentTypeVersions').resolves(['latest']);
                 quickPickStub.onFirstCall().resolves(SourceTypeChoice.GIT);
                 quickPickStub.onSecondCall().resolves({
                     description: "Folder which does not have an OpenShift context",

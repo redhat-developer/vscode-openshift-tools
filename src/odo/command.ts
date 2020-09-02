@@ -217,7 +217,7 @@ export class Command {
         name: string,
         folder: string,
     ): string {
-        return `odo create ${type}:${version} ${name} --context ${folder} --app ${app} --project ${project}`;
+        return `odo create ${type}${version?':':''}${version?version:''} ${name} ${version?'--s2i':''} --context ${folder} --app ${app} --project ${project}`;
     }
 
     @verbose
@@ -230,7 +230,7 @@ export class Command {
         git: string,
         ref: string,
     ): string {
-        return `odo create ${type}:${version} ${name} --git ${git} --ref ${ref} --app ${app} --project ${project}`;
+        return `odo create ${type}${version?':':''}${version?version:''} ${name} ${version?'--s2i':''} --git ${git} --ref ${ref} --app ${app} --project ${project}`;
     }
 
     @verbose
