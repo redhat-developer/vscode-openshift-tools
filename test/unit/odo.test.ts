@@ -443,7 +443,6 @@ suite("odo", () => {
     });
 
     suite("catalog integration", () => {
-        const nodejs = 'nodejs';
 
         const odoCatalog = JSON.stringify({
             kind : "ComponentTypeList",
@@ -485,12 +484,6 @@ suite("odo", () => {
             expect(result[0]).equals('nodejs');
         });
 
-        test("getComponentTypeVersions returns correct number of tags for component type", async () => {
-            const result = await odoCli.getComponentTypeVersions(nodejs);
-            expect(result.length).equals(4);
-            expect(result[0]).equals("10");
-            expect(result[3]).equals("latest");
-        });
     });
 
     suite("service integration", () => {

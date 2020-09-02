@@ -5,6 +5,7 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
+
 import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
 import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
@@ -19,15 +20,16 @@ import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import { selectWorkspaceFolder } from '../util/workspace';
 import { ToolsConfig } from '../tools';
-import { Catalog } from './catalog';
 import LogViewLoader from '../view/log/LogViewLoader';
 import DescribeViewLoader from '../view/describe/describeViewLoader';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { SourceType } from '../odo/config';
+import { ComponentKind, ComponentType, S2iComponentType } from '../odo/componentType';
 
 import path = require('path');
 import globby = require('globby');
 import treeKill = require('tree-kill');
+
 
 const waitPort = require('wait-port');
 
@@ -537,15 +539,18 @@ export class Component extends OpenShiftItem {
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
-        const catalog = new Catalog();
-        const componentTypeName = await window.showQuickPick(catalog.getComponentNames(), {placeHolder: "Component type", ignoreFocusOut: true});
+        const componentType = await window.showQuickPick(Component.odo.getComponentTypesJson(), {placeHolder: "Component type", ignoreFocusOut: true});
 
-        if (!componentTypeName) return null;
+        if (!componentType) return null;
 
-        const componentTypeVersion = await window.showQuickPick(catalog.getComponentVersions(componentTypeName), {placeHolder: "Component type version", ignoreFocusOut: true});
+        let componentTypeVersion:string;
+        if(componentType.versions.length > 0) {
+            componentTypeVersion = await window.showQuickPick(componentType.versions, {placeHolder: "Component type version", ignoreFocusOut: true});
+        }
 
-        if (!componentTypeVersion) return null;
-        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, workspacePath));
+        if (!componentTypeVersion && componentType.versions.length > 0) return null;
+
+        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentType.name, componentTypeVersion, componentName, workspacePath));
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
@@ -558,16 +563,15 @@ export class Component extends OpenShiftItem {
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
-        const catalog = new Catalog();
-        const componentTypeName = await window.showQuickPick(catalog.getComponentNames(), {placeHolder: "Component type", ignoreFocusOut: true});
+        const componentType = await window.showQuickPick(Component.odo.getComponentTypesJson(), {placeHolder: "Component type", ignoreFocusOut: true});
 
-        if (!componentTypeName) return null;
+        if (!componentType) return null;
 
-        const componentTypeVersion = await window.showQuickPick(catalog.getComponentVersions(componentTypeName), {placeHolder: "Component type version", ignoreFocusOut: true});
+        const componentTypeVersion = await window.showQuickPick(componentType.versions, {placeHolder: "Component type version", ignoreFocusOut: true});
 
         if (!componentTypeVersion) return null;
 
-        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentTypeName, componentTypeVersion, componentName, folder));
+        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentType.name, componentTypeVersion, componentName, folder));
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
@@ -605,16 +609,19 @@ export class Component extends OpenShiftItem {
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
-        const catalog = new Catalog();
-        const componentTypeName = await window.showQuickPick(catalog.getComponentNames(), {placeHolder: "Component type", ignoreFocusOut: true});
 
-        if (!componentTypeName) return null;
+        const componentType = await window.showQuickPick(Component.odo.getComponentTypesJson(), {placeHolder: "Component type", ignoreFocusOut: true});
 
-        const componentTypeVersion = await window.showQuickPick(catalog.getComponentVersions(componentTypeName), {placeHolder: "Component type version", ignoreFocusOut: true});
+        if (!componentType) return null;
 
-        if (!componentTypeVersion) return null;
+        let componentTypeVersion:string;
+        if(componentType.versions.length > 0) {
+            componentTypeVersion = await window.showQuickPick(componentType.versions, {placeHolder: "Component type version", ignoreFocusOut: true});
+        }
 
-        await Component.odo.createComponentFromGit(application, componentTypeName, componentTypeVersion, componentName, repoURI, workspacePath, gitRef.label);
+        if (!componentTypeVersion && componentType.versions.length > 0) return null;
+
+        await Component.odo.createComponentFromGit(application, componentType.name, componentTypeVersion, componentName, repoURI, workspacePath, gitRef.label);
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
@@ -644,16 +651,15 @@ export class Component extends OpenShiftItem {
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
-        const catalog = new Catalog();
-        const componentTypeName = await window.showQuickPick(catalog.getComponentNames(), {placeHolder: "Component type", ignoreFocusOut: true});
+        const componentType = await window.showQuickPick(Component.odo.getComponentTypesJson(), {placeHolder: "Component type", ignoreFocusOut: true});
 
-        if (!componentTypeName) return null;
+        if (!componentType) return null;
 
-        const componentTypeVersion = await window.showQuickPick(catalog.getComponentVersions(componentTypeName), {placeHolder: "Component type version", ignoreFocusOut: true});
+        const componentTypeVersion = await window.showQuickPick(componentType.versions, {placeHolder: "Component type version", ignoreFocusOut: true});
 
         if (!componentTypeVersion) return null;
 
-        await Component.odo.createComponentFromBinary(application, componentTypeName, componentTypeVersion, componentName, Uri.file(binaryFile.description), workspacePath);
+        await Component.odo.createComponentFromBinary(application, componentType.name, componentTypeVersion, componentName, Uri.file(binaryFile.description), workspacePath);
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
@@ -682,9 +688,14 @@ export class Component extends OpenShiftItem {
             return null;
         }
         const components = await Component.odo.getComponentTypesJson();
-        const componentBuilder = components.find((builder) => builder.metadata.name === component.builderImage.name);
-        const imageStreamRef = await Component.odo.getImageStreamRef(componentBuilder.metadata.name, componentBuilder.metadata.namespace);
-        const tag = imageStreamRef.spec.tags.find((element: { name: string }) => element.name === component.builderImage.tag);
+        // TODO: figure out how to do it type safe way
+        const componentBuilder: ComponentType<S2iComponentType> = components.find((comonentType) => comonentType.kind === ComponentKind.S2I ? comonentType.name === component.builderImage.name : false) as ComponentType<S2iComponentType>;
+        if (!componentBuilder) {
+            window.showWarningMessage('Debug command does not support Devfile Components');
+            return;
+        }
+
+        const tag = componentBuilder.info.spec.imageStreamTags.find((element: { name: string }) => element.name === component.builderImage.tag);
         const isJava = tag.annotations.tags.includes('java');
         const isNode = tag.annotations.tags.includes('nodejs');
         const JAVA_EXT = 'redhat.java';

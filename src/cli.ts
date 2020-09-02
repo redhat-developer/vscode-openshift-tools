@@ -11,6 +11,7 @@ export interface CliExitData {
     readonly error: cp.ExecException;
     readonly stdout: string;
     readonly stderr: string;
+    readonly cwd?: string;
 }
 
 export interface Cli {
@@ -91,7 +92,7 @@ export class CliChannel implements Cli {
                 // do not reject it here, because caller in some cases need the error and the streams
                 // to make a decision
                 // Filter update message text which starts with `---`
-                resolve({ error, stdout: stdoutFiltered, stderr });
+                resolve({ error, stdout: stdoutFiltered, stderr, cwd: opts.cwd });
             });
         });
     }

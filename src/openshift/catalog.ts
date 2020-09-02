@@ -7,12 +7,9 @@ import { Odo, OdoImpl } from '../odo';
 import { Command } from "../odo/command";
 import { Platform } from '../util/platform';
 import { vsCommand } from '../vscommand';
-import { ComponentType } from '../odo/componentType';
 
 export class Catalog {
     private static odo: Odo = OdoImpl.Instance;
-
-    private componentsJson: ComponentType[] = [];
 
     @vsCommand('openshift.catalog.listComponents')
     static listComponents(): void {
@@ -22,17 +19,5 @@ export class Catalog {
     @vsCommand('openshift.catalog.listServices')
     static listServices(): void {
         Catalog.odo.executeInTerminal(Command.listCatalogServices(), Platform.getUserHomePath(), 'OpenShift: List Available Services');
-    }
-
-    async getComponentNames(): Promise<string[]> {
-        this.componentsJson = await Catalog.odo.getComponentTypesJson();
-        return this.componentsJson.map((value) => value.metadata.name);
-    }
-
-    getComponentVersions(componentName: string): string[] {
-        const component = this.componentsJson.find(
-            (value) => value.metadata.name === componentName,
-        );
-        return component ? component.spec.allTags : [];
     }
 }
