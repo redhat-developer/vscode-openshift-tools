@@ -280,7 +280,7 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
     }
 
     get tooltip(): string {
-        return `Component: ${this.name}\nContext: ${this.contextPath.fsPath}`;
+        return `Component: ${this.name}\nContext: ${this.contextPath ? this.contextPath.fsPath : 'not set'}`;
     }
 
     get description(): string {
