@@ -63,7 +63,7 @@ function customize(node: k8s.ClusterExplorerV1.ClusterExplorerResourceNode, tree
 }
 
 export async function extendClusterExplorer(): Promise<void> {
-    const clusterExplorerAPI = await k8s.extension.clusterExplorer.v1;
+    const clusterExplorerAPI = await k8s.extension.clusterExplorer.v1_1;
 
     if (clusterExplorerAPI.available) {
         clusterExplorer = clusterExplorerAPI.api;
