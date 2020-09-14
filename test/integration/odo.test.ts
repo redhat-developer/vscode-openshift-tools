@@ -12,7 +12,7 @@ import { Uri, window, commands } from 'vscode';
 import * as odo from '../../src/odo';
 import { Cluster } from '../../src/openshift/cluster';
 import { Command } from '../../src/odo/command';
-import { SourceTypeChoice, Component } from '../../src/openshift/component';
+import { SourceTypeChoice , Component } from '../../src/openshift/component';
 import { AddWorkspaceFolder } from '../../src/util/workspace';
 
 import http = require('isomorphic-git/http/node');
@@ -23,13 +23,18 @@ const {expect} = chai;
 chai.use(sinonChai);
 
 suite('odo integration', () => {
+    const clusterUrl = process.env.CLUSTER_URL || 'https://192.168.42.80:8443';
+    const username = process.env.CLUSTER_USER || 'developer';
+    const password = process.env.CLUSTER_PASSWORD || 'developer';
+    let openshiftVersion;
+
     const oi: odo.Odo = odo.getInstance();
     const sb: sinon.SinonSandbox = sinon.createSandbox();
     const projectName = `project${Math.round(Math.random()*1000)}`;
     const componentName = 'component1';
     const appName = 'app1';
     const urlName = 'url1';
-    const nodeJsExGitUrl = 'https://github.com/dgolovin/nodejs-ex.git';
+    const nodeJsExGitUrl = 'https://github.com/sclorg/nodejs-ex.git';
     let project: odo.OpenShiftObject;
     let existingApp: odo.OpenShiftObject;
     let component: odo.OpenShiftObject;
@@ -54,10 +59,10 @@ suite('odo integration', () => {
     }
 
     async function createLocalComponent(projectParam: odo.OpenShiftObject, appNameParam: string, componentNameParam: string, gitUrl: string, dirNameParam: string = tmp.dirSync().name): Promise<odo.OpenShiftObject> {
-    const applications = await oi.getApplications(projectParam);
+        const applications = await oi.getApplications(projectParam);
         existingApp = applications.find((item) => item.getName() === appNameParam);
         if (!existingApp) {
-            existingApp = new odo.OpenShiftApplication(project, appName);
+            existingApp = new odo.OpenShiftApplication(project, appNameParam);
         }
         await git.clone({
             fs,
@@ -72,8 +77,8 @@ suite('odo integration', () => {
         sqpStub.onSecondCall().resolves(AddWorkspaceFolder);
         sb.stub(window, 'showOpenDialog').resolves([Uri.file(dirNameParam)]);
         sb.stub(window, 'showInputBox').resolves(componentNameParam);
-        sqpStub.onThirdCall().resolves('nodejs');
-        sqpStub.onCall(3).resolves('latest');
+        sqpStub.onThirdCall().resolves({ label: 'nodejs', name: 'nodejs', versions: ['12', 'latest'] });
+        sqpStub.onCall(3).resolves('12');
 
         await commands.executeCommand('openshift.component.create', existingApp);
         const components = await oi.getComponents(existingApp);
@@ -84,14 +89,14 @@ suite('odo integration', () => {
         const applications = await oi.getApplications(projectParam);
         existingApp = applications.find((item) => item.getName() === appNameParam);
         if (!existingApp) {
-            existingApp = new odo.OpenShiftApplication(project, appName);
+            existingApp = new odo.OpenShiftApplication(project, appNameParam);
         }
         sb.stub(window, 'showQuickPick')
             .onFirstCall().resolves(SourceTypeChoice.GIT)
             .onSecondCall().resolves(AddWorkspaceFolder)
             .onThirdCall().resolves({label: 'master'})
-            .onCall(3).resolves('nodejs')
-            .onCall(4).resolves('latest');
+            .onCall(3).resolves({ label: 'nodejs', name: 'nodejs', versions: ['12', 'latest'] })
+            .onCall(4).resolves('12');
         sb.stub(window, 'showOpenDialog').resolves([Uri.file(dirNameParam)]);
         sb.stub(window, 'showInputBox')
             .onFirstCall().resolves(gitUrl)
@@ -105,16 +110,18 @@ suite('odo integration', () => {
     async function createBinaryComponent(projectParam: odo.OpenShiftObject, appNameParam: string, componentNameParam: string, binaryFilePath: string, dirNameParam: string = tmp.dirSync().name): Promise<odo.OpenShiftObject> {
         const applications = await oi.getApplications(projectParam);
         const binaryFileInContextFolder = path.join(dirNameParam, path.basename(binaryFilePath));
+        const templateName = openshiftVersion < '4.5.0' ? 'wildfly' : 'java';
+
         fs.copyFileSync(binaryFilePath, binaryFileInContextFolder);
         existingApp = applications.find((item) => item.getName() === appNameParam);
         if (!existingApp) {
-            existingApp = new odo.OpenShiftApplication(project, appName);
+            existingApp = new odo.OpenShiftApplication(project, appNameParam);
         }
         sb.stub(window, 'showQuickPick')
             .onFirstCall().resolves(SourceTypeChoice.BINARY)
             .onSecondCall().resolves(AddWorkspaceFolder)
             .onThirdCall().resolves({label: 'sample.war', description: binaryFileInContextFolder})
-            .onCall(3).resolves('wildfly')
+            .onCall(3).resolves({ label: templateName, name: templateName, versions: ['8', '11', 'latest'] })
             .onCall(4).resolves('latest');
         sb.stub(window, 'showOpenDialog').resolves([Uri.file(dirNameParam)]);
         sb.stub(window, 'showInputBox').resolves(componentNameParam);
@@ -140,7 +147,13 @@ suite('odo integration', () => {
     }
 
     setup(async () => {
-        await oi.execute(Command.odoLoginWithUsernamePassword('https://192.168.42.80:8443', 'developer', 'developer'));
+        if (!project) {
+            await oi.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
+        }
+        if (!openshiftVersion) {
+            const version = await oi.execute(`oc version`);
+            openshiftVersion = version.stdout.match(/Server Version:\s*(\d+\.\d+\.\d+).*/)[1];
+        }
     });
 
     teardown(() => {
@@ -198,7 +211,8 @@ suite('odo integration', () => {
             [,url2] = urls;
         });
 
-        test('create service', async ()=> {
+        test('create service', async function() {
+            if (openshiftVersion >= '4.5.0') this.skip();
             const errMessStub = sb.stub(window, 'showErrorMessage');
             service = await createService(existingApp, 'mongodb-persistent-instance', 'mongodb-persistent');
             expect(errMessStub).has.not.been.called;
@@ -213,7 +227,8 @@ suite('odo integration', () => {
             await oi.execute(Command.describeApplication(projectName, appName));
         });
 
-        test('describe service', async () => {
+        test('describe service', async function() {
+            if (openshiftVersion >= '4.5.0') this.skip();
             await commands.executeCommand('openshift.service.describe', service);
             await oi.execute(Command.describeService('mongodb-persistent'))
         });
@@ -262,13 +277,13 @@ suite('odo integration', () => {
             expect(errMessStub).has.not.been.called;
         });
 
-        test('delete service', async () => {
+        test('delete service', async function() {
+            if (openshiftVersion >= '4.5.0') this.skip();
             sb.stub(window, 'showWarningMessage').resolves('Yes');
             const errMessStub = sb.stub(window, 'showErrorMessage')
             await commands.executeCommand('openshift.service.delete', service);
             expect(errMessStub).has.not.been.called;
         });
-
     });
 
     suite('linking components', () => {
@@ -283,7 +298,8 @@ suite('odo integration', () => {
             await pushComponent(linkedComp2);
         });
 
-        test('create service1 from mongodb-persistent', async () => {
+        test('create service1 from mongodb-persistent', async function() {
+            if (openshiftVersion >= '4.5.0') this.skip();
             service = await createService(existingApp, 'service1', 'mongodb-persistent');
         });
 
@@ -292,7 +308,8 @@ suite('odo integration', () => {
             await commands.executeCommand('openshift.component.linkComponent', linkedComp1);
         });
 
-        test('link component comp2 and service1', async () => {
+        test('link component comp2 and service1', async function() {
+            if (openshiftVersion >= '4.5.0') this.skip();
             sb.stub(window, 'showQuickPick').onFirstCall().resolves(service);
             await commands.executeCommand('openshift.component.linkService', linkedComp2);
         });
@@ -306,7 +323,8 @@ suite('odo integration', () => {
             expect(errMessStub).has.not.been.called;
         });
 
-        test('unlink component and service', async () => {
+        test('unlink component and service', async function() {
+            if (openshiftVersion >= '4.5.0') this.skip();
             const errMessStub = sb.stub(window, 'showErrorMessage')
             sb.stub(window, 'showQuickPick')
                 .onFirstCall().resolves(service.getName());

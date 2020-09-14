@@ -54,6 +54,7 @@
     "bundle-tools": "node ./out/build/bundle-tools.js --platform",
     "todo": "leasot **/*.ts --ignore node_modules -x",
     "test": "npm run vscode:prepublish && node ./out/build/run-tests.js unit",
+    "test-integration": "npm run vscode:prepublish && node ./out/build/run-tests.js integration",
     "test:instrument": "shx rm -rf out/src-orig && shx mv out/src out/src-orig && istanbul instrument --complete-copy --embed-source --output out/src out/src-orig",
     "test:coverage": "npm run vscode:prepublish && npm run test:instrument && node ./out/build/run-tests.js unit",
     "update-deps": "ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
