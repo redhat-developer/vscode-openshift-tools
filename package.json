@@ -2,7 +2,7 @@
   "name": "vscode-openshift-connector",
   "displayName": "OpenShift Connector",
   "description": "Interacting with Red Hat OpenShift clusters and providing a streamlined developer experience using Visual Studio Code",
-  "version": "0.2.0",
+  "version": "0.1.7",
   "license": "MIT",
   "publisher": "redhat",
   "author": "Red Hat",
@@ -1288,13 +1288,13 @@
         "openshiftConnector.crcCpuCores": {
           "Title": "CRC Cpu Cores",
           "type": "number",
-          "default": null,
+          "default": 4,
           "description": "Number of CPU cores to allocate to the OpenShift cluster as selected during the first run"
         },
         "openshiftConnector.crcMemoryAllocated": {
           "Title": "CRC Memory Allocation",
           "type": "number",
-          "default": null,
+          "default": 9216,
           "description": "MiB of memory to allocate to the OpenShift cluster as selected during the first run"
         }
       }
