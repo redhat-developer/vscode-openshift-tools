@@ -935,6 +935,11 @@
       ],
       "view/item/context": [
         {
+          "command": "openshift.explorer.refresh",
+          "when": "view == openshiftProjectExplorer && viewItem == cluster",
+          "group": "inline"
+        },
+        {
           "command": "clusters.openshift.deployment.openConsole",
           "group": "3@0",
           "when": "view == extension.vsKubernetesExplorer && viewItem == vsKubernetes.resource.dc"

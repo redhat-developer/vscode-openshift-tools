@@ -44,37 +44,26 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
 
     readonly onDidChangeTreeData: Event<OpenShiftObject | undefined> = this
         .eventEmitter.event;
+    private expecingContextUpdate = false;
 
     private constructor() {
-        try {
-            const ku1 = new KubeConfigUtils();
-            this.kubeContext = ku1.getContextObject(ku1.currentContext);
-        } catch (err) {
-            // ignore config loading error and let odo report it on first call
-        }
         this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
         this.fsw.emitter.on('file-changed', () => {
-            const ku2 = new KubeConfigUtils();
-            const newCtx = ku2.getContextObject(ku2.currentContext);
-            if (!this.kubeContext
-                || (this.kubeContext.cluster !== newCtx.cluster
-                    || this.kubeContext.user !== newCtx.user
-                    || this.kubeContext.namespace !== newCtx.namespace)) {
-                OdoImpl.Instance.getProjects().then((projects) => {
-                    if(!projects.find((item:OpenShiftObject) => item.getName() === newCtx.namespace)) {
-                        this.refresh();
-                    }
-                });
+            if (!this.expecingContextUpdate) {
+                this.refresh();
+                this.expecingContextUpdate = false;
             }
-            this.kubeContext = newCtx;
         });
         this.treeView = window.createTreeView('openshiftProjectExplorer', {
             treeDataProvider: this,
         });
         OpenShiftExplorer.odoctl.subject.subscribe((event) => {
-            if (event.reveal) {
+            if (event.type === 'contextIsAboutToChange') {
+                this.expecingContextUpdate = true;
+            } else if (event.type === 'inserted' && event.data) {
                 this.reveal(event.data);
             } else {
+                console.log('refresh after subscriber notification', event.data);
                 this.refresh(event.data);
             }
         });
@@ -89,6 +78,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
 
     // eslint-disable-next-line class-methods-use-this
     getTreeItem(element: OpenShiftObject): TreeItem | Thenable<TreeItem> {
+        console.log('get tree item element', element);
         return element;
     }
 
@@ -103,6 +93,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     }
 
     refresh(target?: OpenShiftObject): void {
+        console.log('refresh call', target);
         if (!target) {
             OpenShiftExplorer.odoctl.clearCache();
         }

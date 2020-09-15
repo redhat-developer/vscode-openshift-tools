@@ -15,6 +15,7 @@ import { Platform } from '../util/platform';
 import { WindowUtil } from '../util/windowUtils';
 import { vsCommand, VsCommandError } from '../vscommand';
 import ClusterViewLoader from '../view/cluster/clusterViewLoader';
+import { OpenShiftObject } from '../odo';
 
 export class Cluster extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
@@ -42,8 +43,8 @@ export class Cluster extends OpenShiftItem {
     }
 
     @vsCommand('openshift.explorer.refresh')
-    static refresh(): void {
-        Cluster.explorer.refresh();
+    static refresh(context: OpenShiftObject): void {
+        Cluster.explorer.refresh(context);
     }
 
     @vsCommand('openshift.about')

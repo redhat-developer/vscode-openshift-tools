@@ -127,7 +127,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         OdoImpl.Instance.loadWorkspaceComponents(event);
     });
 
-    OdoImpl.Instance.loadWorkspaceComponents(null);
+    await OdoImpl.Instance.loadWorkspaceComponents(null);
 
     return {
         verifyBundledBinaries,

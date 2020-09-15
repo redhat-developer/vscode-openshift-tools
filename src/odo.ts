@@ -45,6 +45,7 @@ export interface OpenShiftObject extends QuickPickItem {
     path?: string;
     builderImage?: BuilderImage;
     iconPath?: Uri;
+    collapsibleState: any;
 }
 
 export enum ContextType {
@@ -80,13 +81,14 @@ export abstract class OpenShiftObjectImpl implements OpenShiftObject {
 
     private explorerPath: string;
     protected readonly odo: Odo = getInstance();
+    protected ID = Math.random();
 
     constructor(private parent: OpenShiftObject,
         public readonly name: string,
         public readonly contextValue: ContextType,
         public readonly icon: string,
         // eslint-disable-next-line no-shadow
-        public readonly collapsibleState: TreeItemCollapsibleState = Collapsed,
+        public collapsibleState: TreeItemCollapsibleState = Collapsed,
         private contextPathValue: Uri = undefined,
         public readonly compType: string = undefined,
         public readonly builderImage: BuilderImage = undefined) {
@@ -129,7 +131,7 @@ export abstract class OpenShiftObjectImpl implements OpenShiftObject {
     }
 
     get description(): string {
-        return '';
+        return `${this.ID}`;
     }
 
     getName(): string {
@@ -164,6 +166,7 @@ export class OpenShiftRoot extends OpenShiftObjectImpl {
 export class OpenShiftCluster extends OpenShiftObjectImpl {
     constructor(name: string) {
         super(undefined, name, ContextType.CLUSTER, 'cluster-node.png');
+        console.log('create cluster ID', this.ID)
     }
 
     get label(): string {
@@ -172,11 +175,12 @@ export class OpenShiftCluster extends OpenShiftObjectImpl {
 
     async getChildren(): Promise<OpenShiftObject[]> {
         const activeProject = (await this.odo.getProjects()).find((prj:OpenShiftProject)=>prj.active)
+        console.log('get cluster children ', this, activeProject);
         return activeProject ? [activeProject] : [];
     }
 
     public async removeChild(item: OpenShiftObject): Promise<void> {
-        const array = await this.odo.getProjects();
+        const array: OpenShiftObject[] = await this.odo.getProjects();
         array.splice(array.indexOf(item), 1);
     }
 
@@ -184,7 +188,6 @@ export class OpenShiftCluster extends OpenShiftObjectImpl {
         const array = await this.odo.getProjects();
         return insert(array, item);
     }
-
 }
 
 export class OpenShiftProject extends OpenShiftObjectImpl {
@@ -307,22 +310,22 @@ export class OpenShiftService extends OpenShiftObjectImpl {
     }
 }
 
-type OdoEventType = 'deleted' | 'inserted' | 'changed';
+type OdoEventType = 'contextIsAboutToChange' | 'deleted' | 'inserted' | 'changed';
 
 export interface OdoEvent {
     readonly type: OdoEventType;
-    readonly data: OpenShiftObject;
+    readonly data?: OpenShiftObject;
     readonly reveal: boolean;
 }
 
 class OdoEventImpl implements OdoEvent {
-    constructor(readonly type: OdoEventType, readonly data: OpenShiftObject, readonly reveal: boolean = false) {
+    constructor(readonly type: OdoEventType, readonly data?: OpenShiftObject, readonly reveal: boolean = false) {
     }
 }
 
 export interface Odo {
     getClusters(): Promise<OpenShiftObject[]>;
-    getProjects(): Promise<OpenShiftObject[]>;
+    getProjects(): Promise<OpenShiftProject[]>;
     loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): Promise<void>;
     addWorkspaceComponent(WorkspaceFolder: WorkspaceFolder, component: OpenShiftObject): void;
     getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]>;
@@ -344,7 +347,7 @@ export interface Odo {
     executeInTerminal(command: string, cwd?: string, name?: string): Promise<void>;
     requireLogin(): Promise<boolean>;
     clearCache?(): void;
-    createProject(name: string): Promise<OpenShiftObject>;
+    createProject(name: string): Promise<void>;
     deleteProject(project: OpenShiftObject): Promise<OpenShiftObject>;
     createApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
     deleteApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
@@ -365,7 +368,7 @@ export interface Odo {
 }
 
 class OdoModel {
-    private parentToChildren: Map<OpenShiftObject, OpenShiftObject[]> = new Map();
+    private parentToChildren: Map<OpenShiftObject, Promise<OpenShiftObject[]>> = new Map();
 
     private pathToObject = new Map<string, OpenShiftObject>();
 
@@ -373,15 +376,15 @@ class OdoModel {
 
     private contextToSettings = new Map<string, odo.Component>();
 
-    public setParentToChildren(parent: OpenShiftObject, children: OpenShiftObject[]): OpenShiftObject[] {
+    public setParentToChildren<C extends OpenShiftObject>(parent: OpenShiftObject, children: Promise<C[]>): Promise<C[]> {
         if (!this.parentToChildren.has(parent)) {
             this.parentToChildren.set(parent, children);
         }
         return children;
     }
 
-    public getChildrenByParent(parent: OpenShiftObject): OpenShiftObject[] {
-        return this.parentToChildren.get(parent);
+    public getChildrenByParent<C extends OpenShiftObject>(parent: OpenShiftObject): Promise<C[]> {
+        return this.parentToChildren.get(parent) as Promise<C[]>;
     }
 
     public clearTreeData(): void {
@@ -463,6 +466,7 @@ class OdoModel {
 }
 
 export class OdoImpl implements Odo {
+    public ID = Math.random();
     public static data: OdoModel = new OdoModel();
 
     public static ROOT: OpenShiftObject = new OpenShiftRoot();
@@ -498,7 +502,7 @@ export class OdoImpl implements Odo {
     async getClusters(): Promise<OpenShiftObject[]> {
         let children = OdoImpl.data.getChildrenByParent(OdoImpl.ROOT);
         if (!children) {
-            children = OdoImpl.data.setParentToChildren(OdoImpl.ROOT, await this._getClusters());
+            children = OdoImpl.data.setParentToChildren(OdoImpl.ROOT, this._getClusters());
         }
         return children;
     }
@@ -544,16 +548,16 @@ export class OdoImpl implements Odo {
         return clusters;
     }
 
-    async getProjects(): Promise<OpenShiftObject[]> {
+    async getProjects(): Promise<OpenShiftProject[]> {
         const clusters = await this.getClusters();
-        let projects = OdoImpl.data.getChildrenByParent(clusters[0]);
+        let projects = OdoImpl.data.getChildrenByParent<OpenShiftProject>(clusters[0]);
         if (!projects) {
-            projects = OdoImpl.data.setParentToChildren(clusters[0], await this._getProjects(clusters[0]));
+            projects = OdoImpl.data.setParentToChildren(clusters[0], this._getProjects(clusters[0]));
         }
         return projects;
     }
 
-    public async _getProjects(cluster: OpenShiftObject): Promise<OpenShiftObject[]> {
+    public async _getProjects(cluster: OpenShiftObject): Promise<OpenShiftProject[]> {
         return this.execute(Command.listProjects()).then((result) => {
             return this.loadItems<Project>(result).map((item) => new OpenShiftProject(cluster, item.metadata.name, item.status.active) );
         }).catch((error) => {
@@ -565,7 +569,7 @@ export class OdoImpl implements Odo {
     async getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]> {
         let applications = OdoImpl.data.getChildrenByParent(project);
         if (!applications) {
-            applications = OdoImpl.data.setParentToChildren(project, await this._getApplications(project));
+            applications = OdoImpl.data.setParentToChildren(project, this._getApplications(project));
         }
         return applications;
     }
@@ -586,7 +590,7 @@ export class OdoImpl implements Odo {
     public async getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]> {
         let children = OdoImpl.data.getChildrenByParent(application);
         if (!children) {
-            children = OdoImpl.data.setParentToChildren(application,  await this._getApplicationChildren(application));
+            children = OdoImpl.data.setParentToChildren(application,  this._getApplicationChildren(application));
         }
         return children;
     }
@@ -649,7 +653,7 @@ export class OdoImpl implements Odo {
     public async getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         let children = OdoImpl.data.getChildrenByParent(component);
         if (!children) {
-            children = OdoImpl.data.setParentToChildren(component, await this._getComponentChildren(component));
+            children = OdoImpl.data.setParentToChildren(component, this._getComponentChildren(component));
         }
         return children;
     }
@@ -793,15 +797,29 @@ export class OdoImpl implements Odo {
 
     public async deleteProject(project: OpenShiftObject): Promise<OpenShiftObject> {
         await this.execute(Command.deleteProject(project.getName()));
-        return this.deleteAndRefresh(project);
+        await project.getParent().removeChild(project);
+        OdoImpl.data.delete(project);
+        const p = await this.getProjects();
+        if (p.length>0) {
+            await this.execute(`odo project set ${p[0].getName()}`);
+            p[0].active = true;
+        } else {
+            // when deleting last project there is no projects to mark as active
+            // but for some reason refresh does not remove last deleted project form view
+            //
+            this.subject.next(new OdoEventImpl('changed', project.getParent()));
+        }
+        return project;
     }
 
-    public async createProject(projectName: string): Promise<OpenShiftObject> {
-        const clusters = await this.getClusters();
-        const currentProjects = await this.getProjects()
+    public async createProject(projectName: string): Promise<void> {
+        this.subject.next(new OdoEventImpl('contextIsAboutToChange'));
         await OdoImpl.instance.execute(Command.createProject(projectName));
-        currentProjects.forEach((project:OpenShiftProject) => project.active = false);
-        return this.insertAndReveal(new OpenShiftProject(clusters[0], projectName, true));
+        const cluster = (await this.getClusters())[0] as OpenShiftCluster;
+        const projects = await this.getProjects();
+        projects.forEach((item: OpenShiftProject) => item.active = false);
+        const newProject = await cluster.addChild(new OpenShiftProject(cluster, projectName, true));
+        this.subject.next(new OdoEventImpl('inserted', newProject));
     }
 
     public async deleteApplication(app: OpenShiftObject): Promise<OpenShiftObject> {
@@ -991,7 +1009,7 @@ export class OdoImpl implements Odo {
     }
 
     async loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): Promise<void> {
-        const clusters = (await this.getClusters());
+        const clusters = await this.getClusters();
         if(!clusters || clusters.length === 0) return;
         if (event === null && workspace.workspaceFolders || event && event.added && event.added.length > 0) {
             const addedFolders = event === null? workspace.workspaceFolders : event.added;
