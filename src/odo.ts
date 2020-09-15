@@ -364,7 +364,7 @@ export interface Odo {
 }
 
 class OdoModel {
-    private parentToChildren: Map<OpenShiftObject, OpenShiftObject[]> = new Map();
+    private parentToChildren: Map<OpenShiftObject, Promise<OpenShiftObject[]>> = new Map();
 
     private pathToObject = new Map<string, OpenShiftObject>();
 
@@ -372,14 +372,14 @@ class OdoModel {
 
     private contextToSettings = new Map<string, odo.Component>();
 
-    public setParentToChildren(parent: OpenShiftObject, children: OpenShiftObject[]): OpenShiftObject[] {
+    public setParentToChildren(parent: OpenShiftObject, children: Promise<OpenShiftObject[]>): Promise<OpenShiftObject[]> {
         if (!this.parentToChildren.has(parent)) {
             this.parentToChildren.set(parent, children);
         }
         return children;
     }
 
-    public getChildrenByParent(parent: OpenShiftObject): OpenShiftObject[] {
+    public getChildrenByParent(parent: OpenShiftObject): Promise<OpenShiftObject[]> {
         return this.parentToChildren.get(parent);
     }
 
@@ -497,7 +497,7 @@ export class OdoImpl implements Odo {
     async getClusters(): Promise<OpenShiftObject[]> {
         let children = OdoImpl.data.getChildrenByParent(OdoImpl.ROOT);
         if (!children) {
-            children = OdoImpl.data.setParentToChildren(OdoImpl.ROOT, await this._getClusters());
+            children = OdoImpl.data.setParentToChildren(OdoImpl.ROOT, this._getClusters());
         }
         return children;
     }
@@ -547,7 +547,7 @@ export class OdoImpl implements Odo {
         const clusters = await this.getClusters();
         let projects = OdoImpl.data.getChildrenByParent(clusters[0]);
         if (!projects) {
-            projects = OdoImpl.data.setParentToChildren(clusters[0], await this._getProjects(clusters[0]));
+            projects = OdoImpl.data.setParentToChildren(clusters[0], this._getProjects(clusters[0]));
         }
         return projects;
     }
@@ -564,7 +564,7 @@ export class OdoImpl implements Odo {
     async getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]> {
         let applications = OdoImpl.data.getChildrenByParent(project);
         if (!applications) {
-            applications = OdoImpl.data.setParentToChildren(project, await this._getApplications(project));
+            applications = OdoImpl.data.setParentToChildren(project, this._getApplications(project));
         }
         return applications;
     }
@@ -585,7 +585,7 @@ export class OdoImpl implements Odo {
     public async getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]> {
         let children = OdoImpl.data.getChildrenByParent(application);
         if (!children) {
-            children = OdoImpl.data.setParentToChildren(application,  await this._getApplicationChildren(application));
+            children = OdoImpl.data.setParentToChildren(application,  this._getApplicationChildren(application));
         }
         return children;
     }
@@ -648,7 +648,7 @@ export class OdoImpl implements Odo {
     public async getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         let children = OdoImpl.data.getChildrenByParent(component);
         if (!children) {
-            children = OdoImpl.data.setParentToChildren(component, await this._getComponentChildren(component));
+            children = OdoImpl.data.setParentToChildren(component, this._getComponentChildren(component));
         }
         return children;
     }
