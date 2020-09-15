@@ -6,7 +6,6 @@
 import * as React from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import {
-  AppBar,
   Button,
   Card,
   CardContent,
@@ -14,7 +13,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  Toolbar,
   Tooltip,
   Typography} from '@material-ui/core';
 
@@ -78,10 +76,6 @@ const useStyles = makeStyles((theme: Theme) =>
       background: 'var(--vscode-list-inactiveSelectionBackground)',
       border: '1px solid var(--vscode-list-inactiveSelectionBackground)',
       color: 'var(--vscode-foreground)'
-    },
-    header: {
-      color: 'var(--vscode-foreground)',
-      backgroundColor: 'var(--vscode-editor-background)'
     }
   }),
 );
@@ -164,30 +158,21 @@ export default function Header() {
 
   return (
     <div className={classes.App}>
-      <AppBar position="static" className={classes.header}>
-        <Toolbar variant="dense">
-          <Typography variant="h6" className={classes.title}>
-            Install OpenShift 4 on a laptop with CodeReady Containers
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <div>
-        <div className={classes.iconContainer}>
-          <img src="https://cloud.redhat.com/apps/landing/fonts/openShiftMarketing.svg" alt="redhat-openshift"></img>
-        </div>
-        {showWizard && (<div className={classes.rowBody}>
-          <Card className={classes.cardContent}>
-            <Typography variant="body2" component="p" style={{ padding: 20 }}>
-              Red Hat CodeReady Containers brings a minimal OpenShift 4.0 or newer cluster to your local laptop or desktop computer.<br></br>You can use this wizard to create OpenShift clusters locally. Clusters take approximately 15 minutes to provision.
-            </Typography>
-            <AddClusterView />
-          </Card>
-        </div>)}
-        {!showWizard && (
-          <div className={classes.cardContainer}>
-            <InfrastructureLayout clusterTypes={clusterTypes}></InfrastructureLayout>
-          </div>)}
+      <div className={classes.iconContainer}>
+        <img src="https://cloud.redhat.com/apps/landing/fonts/openShiftMarketing.svg" alt="redhat-openshift"></img>
       </div>
+      {showWizard && (<div className={classes.rowBody}>
+        <Card className={classes.cardContent}>
+          <Typography variant="body2" component="p" style={{ padding: 20 }}>
+            Red Hat CodeReady Containers brings a minimal OpenShift 4.0 or newer cluster to your local laptop or desktop computer.<br></br>You can use this wizard to create OpenShift clusters locally. Clusters take approximately 15 minutes to provision.
+          </Typography>
+          <AddClusterView />
+        </Card>
+      </div>)}
+      {!showWizard && (
+        <div className={classes.cardContainer}>
+          <InfrastructureLayout clusterTypes={clusterTypes}></InfrastructureLayout>
+        </div>)}
     </div>
   );
 }
