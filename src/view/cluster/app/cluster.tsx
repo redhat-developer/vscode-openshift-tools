@@ -70,7 +70,8 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: '#EE0000',
       '&:hover': {
         backgroundColor: '#BE0000',
-      }
+      },
+      textTransform: "none"
     },
     cardContent: {
       background: 'var(--vscode-list-inactiveSelectionBackground)',
@@ -84,21 +85,21 @@ const clusterTypes = [
   {
     heading: "Deploy it locally on your laptop",
     description: "Install on Laptop: Red Hat CodeReady Containers.",
-    smallInfo: "A minimal, preconfigured Red Hat OpenShift 4 cluster on your laptop or desktop for development and testing",
-    url: "https://www.openshift.com/hubfs/images/icons/Icon-Red_Hat-Hardware-Laptop-A-Black-RGB.svg",
+    smallInfo: "A minimal, preconfigured Red Hat OpenShift 4 cluster on your laptop or desktop for development and testing.",
+    imageUrl: ["https://www.openshift.com/hubfs/images/icons/Icon-Red_Hat-Hardware-Laptop-A-Black-RGB.svg"],
     urlAlt: "Red Hat OpenShift",
     redirectLink: "",
-    buttonText: "Create cluster",
+    buttonText: "Create/Refresh Cluster",
     tooltip: "You can create OpenShift cluster using this wizard."
   },
   {
     heading: "Deploy it in your public cloud",
-    description: "Install Red Hat OpenShift 4 in your account on any of the supported public cloud providers.",
-    smallInfo: "This includes Amazon Web Services (AWS), Microsoft Azure, and Google Cloud. Coming soon: IBM Cloud, Ali Cloud.",
-    url: "https://www.openshift.com/hubfs/images/icons/Icon-Red_Hat-Software_and_technologies-Cloud-A-Black-RGB.svg",
+    description: "Install Red Hat OpenShift 4 in your account with a supported public cloud providers.",
+    smallInfo: "This includes Amazon Web Services (AWS), Microsoft Azure, and Google Cloud.",
+    imageUrl: ["https://www.openshift.com/hubfs/images/logos/logo_aws.svg", "https://www.openshift.com/hubfs/images/logos/logo-try-cloud.svg", "https://www.openshift.com/hubfs/images/logos/logo_google_cloud.svg"],
     urlAlt: "Red Hat OpenShift 4",
-    redirectLink: "https://cloud.redhat.com/openshift/install",
-    buttonText: "Try it in the cloud",
+    redirectLink: "https://cloud.redhat.com/openshift/install#public-cloud",
+    buttonText: "Try it in your cloud",
     tooltip: "For complete installation, follow the official documentation."
   }
 ];
@@ -125,7 +126,9 @@ export default function Header() {
           </div>
           <CardContent style= {{ height: 240 }}>
             <Typography style={{ padding: '10px' }}>
-              <img src={list.url} alt={list.urlAlt} style={{ height: 45 }}></img>
+              {list.imageUrl.map((url: string, index: string | number) => (
+                <img src={url} key={index} style={{ marginLeft: '.625rem', marginRight: '.625rem' }}></img>
+              ))}
             </Typography>
             <List>
               <ListItem>
