@@ -803,7 +803,7 @@
         },
         {
           "command": "openshift.explorer.addCluster",
-          "when": "view == openshiftProjectExplorer"
+          "when": "view == openshiftProjectExplorer && isWindows || isLinux || isMac"
         },
         {
           "command": "openshift.explorer.login",
@@ -909,7 +909,7 @@
       "view/title": [
         {
           "command": "openshift.explorer.addCluster",
-          "when": "view == openshiftProjectExplorer",
+          "when": "view == openshiftProjectExplorer && isWindows || isLinux || isMac",
           "group": "navigation@0"
         },
         {
