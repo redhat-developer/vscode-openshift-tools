@@ -49,7 +49,7 @@ Then apply `xpaas` with the command below
 
 # Running local OpenShift Cluster
 
-## Code Ready Containers
+## CodeReady Containers
 
 TBD
 

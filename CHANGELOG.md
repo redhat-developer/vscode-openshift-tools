@@ -4,7 +4,7 @@
 
 Noteworthy changes:
  - [#1235](https://github.com/redhat-developer/vscode-openshift-tools/issues/1235)
-    - Add webview to run Code Ready Containers (CRC) `1.15.0` from extension. This allows to run a local instance of OpenShift `4.5.7` directly from the extension.
+    - Add webview to run CodeReady Containers (CRC) `1.15.0` from extension. This allows to run a local instance of OpenShift `4.5.7` directly from the extension.
     - Add Extension Settings for CRC binary location, pull secret, optional configurations.
     - Provide CRC Start/Stop/Refresh actions in the webview.
  - [#1707](https://github.com/redhat-developer/vscode-openshift-tools/issues/1707) Add Stop CRC action in Status Bar.
@@ -80,7 +80,7 @@ This release is built on top of 0.1.0. If any developer is migrating from `<=0.0
 
 ## Updates
 * Extension uses [OpenShift Do(odo) 1.0.0 GA](https://github.com/openshift/odo/releases/tag/v1.0.0)
-* Support [Red Hat Code Ready Containers 1.0](https://access.redhat.com/documentation/en-us/red_hat_codeready_containers/1.0/html/getting_started_guide/index) for OpenShift 4.x clusters
+* Support [Red Hat CodeReady Containers 1.0](https://access.redhat.com/documentation/en-us/red_hat_codeready_containers/1.0/html/getting_started_guide/index) for OpenShift 4.x clusters
 * Update download path for odo-v1.0.0 binary
 * Icons for OpenShift Connector are working for Eclipse Che extension
 * [Demo](https://youtube.com/watch?v=m0wBKuKDYO0) video and [blog](https://developers.redhat.com/blog/2019/10/31/openshift-connector-visual-studio-code-extension-for-red-hat-openshift/) updated for `0.1.1` release
