@@ -46,7 +46,7 @@ export default class ClusterViewLoader {
             }
             if (event.action === 'start') {
                 channel.show();
-                channel.append(`\nStarting Red Hat Code Ready Containers from webview at ${date}\n`);
+                channel.append(`\nStarting Red Hat CodeReady Containers from webview at ${date}\n`);
                 if (event.isSetting) {
                     const binaryFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
                     const pullSecretFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcPullSecretPath");
@@ -81,7 +81,7 @@ export default class ClusterViewLoader {
             if (event.action === 'stop') {
                 let filePath: string;
                 channel.show();
-                channel.append(`\nStopping Red Hat Code Ready Containers from webview at ${date}\n`);
+                channel.append(`\nStopping Red Hat CodeReady Containers from webview at ${date}\n`);
                 if (event.data === '') {
                     filePath = vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
                 } else filePath = event.data;

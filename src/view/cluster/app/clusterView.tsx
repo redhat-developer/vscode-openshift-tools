@@ -247,6 +247,7 @@ export default function addClusterView() {
   const [pullSecretPath, setSecret] = React.useState('');
   const [cpuSize, setCpuSize] = React.useState(crcDefaults.DefaultCPUs);
   const [memory, setMemory] = React.useState(crcDefaults.DefaultMemory);
+  const [crcNameserver, setCrcNameserver] = React.useState('');
   const [crcProgress, setProgress] = React.useState(false);
   const [crcStopProgress, setStopProgress] = React.useState(false);
   const [crcStartError, setCrcStartError] = React.useState(false);
@@ -336,6 +337,10 @@ export default function addClusterView() {
     setMemory(event.target.value);
   }
 
+  const handleNameserver = (event) => {
+    setCrcNameserver(event.target.value);
+  }
+
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
       handleStartProcess()
@@ -359,7 +364,9 @@ export default function addClusterView() {
     if (settingPresent) {
       vscode.postMessage({action: 'start', isSetting: true });
     } else {
-      const crcStartCommand = `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory}`;
+      const crcStartCommand = (crcNameserver === '') ? `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory}`:
+          `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory} -n ${crcNameserver}`;
+
       vscode.postMessage({action: 'start',
                           data: crcStartCommand,
                           pullSecret: pullSecretPath,
@@ -405,6 +412,7 @@ export default function addClusterView() {
     setSecret('');
     setCpuSize(crcDefaults.DefaultCPUs);
     setMemory(crcDefaults.DefaultMemory);
+    setCrcNameserver('');
     setProgress(true);
     setStopProgress(false);
     setCrcStartError(false);
@@ -426,20 +434,16 @@ export default function addClusterView() {
   }
 
   const RunningStatus = ()=> (
-    <Chip label="Running" size="small"
+    <Chip label={status.openshiftStatus} size="small"
       avatar={<StyledBadge
       overlap="circle"
-      anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'left',
-      }}
-      variant="dot"
-    >
-    </StyledBadge>}/>
+      anchorOrigin={{ vertical: 'top', horizontal: 'left'}}
+      variant="dot"></StyledBadge>}
+    />
   )
 
   const StoppedStatus = () => (
-    <Chip label="Stopped" size="small" />
+    <Chip label={status.openshiftStatus} size="small" />
   )
 
   const CrcStatusDialog = () => (
@@ -460,7 +464,7 @@ export default function addClusterView() {
         <div className={classes.column}>
           <List dense>
             <ListItem>
-              <ListItemText primary={<span>Code Ready Containers Status: {status.crcStatus}</span>}/>
+              <ListItemText primary={<span>CodeReady Containers Status: {status.crcStatus}</span>}/>
             </ListItem>
             <ListItem>
               <ListItemText primary={<span>OpenShift Status: {status.openshiftStatus}</span>}/>
@@ -575,8 +579,7 @@ export default function addClusterView() {
             <List dense>
               <ListItem>
                 <ListItemText
-                  primary={<span>Code Ready Containers version: {crcLatest}</span>}
-                  secondary={'This is the latest version of Red Hat Code Ready Containers'}
+                  primary={<span>CodeReady Containers version: {crcLatest}</span>}
                 />
               </ListItem>
               <ListItem>
@@ -725,6 +728,17 @@ export default function addClusterView() {
                 value={memory}
                 InputProps={{ inputProps: { min: crcDefaults.DefaultMemory } }}
                 helperText="Value in MiB"
+                className={classes.textContainer}
+              />
+              <TextField
+                id="outlined-string"
+                label="Nameserver"
+                type="string"
+                variant="outlined"
+                size="small"
+                onChange={handleNameserver}
+                value={crcNameserver}
+                helperText="IPv4 address of nameserver"
                 className={classes.textContainer}
               />
             </div>)
