@@ -10,7 +10,8 @@ import {
     window,
     WorkspaceFoldersChangeEvent,
     StatusBarAlignment,
-    StatusBarItem
+    StatusBarItem,
+    env
 } from 'vscode';
 import { OpenShiftExplorer } from './explorer';
 import { Cluster } from './openshift/cluster';
@@ -51,6 +52,8 @@ async function verifyBundledBinaries(): Promise<{odoPath: string, ocPath: string
 }
 
 export async function activate(extensionContext: ExtensionContext): Promise<any> {
+    commands.executeCommand('setContext', 'isVSCode', env.uiKind);
+    // UIKind.Desktop ==1 & UIKind.Web ==2. These conditinns are checked for browser based & electron based.
     migrateFromOdo018();
     Cluster.extensionContext = extensionContext;
     TokenStore.extensionContext = extensionContext;
