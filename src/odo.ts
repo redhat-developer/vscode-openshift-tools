@@ -265,13 +265,15 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
     }
     get iconPath(): Uri {
         if (this.contextValue === ContextType.COMPONENT_PUSHED || this.contextValue === ContextType.COMPONENT || this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
+            let iconPath: Uri;
             if (this.compType === odo.SourceType.GIT) {
-                return Uri.file(path.join(__dirname, "../../images/component", 'git.png'));
-            } if (this.compType === odo.SourceType.LOCAL) {
-                return Uri.file(path.join(__dirname, "../../images/component", 'workspace.png'));
-            } if (this.compType === odo.SourceType.BINARY) {
-                return Uri.file(path.join(__dirname, "../../images/component", 'binary.png'));
+                iconPath = Uri.file(path.join(__dirname, "../../images/component", 'git.png'));
+            } else if (this.compType === odo.SourceType.BINARY) {
+                iconPath = Uri.file(path.join(__dirname, "../../images/component", 'binary.png'));
+            } else {
+                iconPath = Uri.file(path.join(__dirname, "../../images/component", 'workspace.png'));
             }
+            return iconPath;
         }
     }
 
@@ -1061,8 +1063,6 @@ export class OdoImpl implements Odo {
         return data;
     }
 }
-
-
 
 export function getInstance(): Odo {
   return OdoImpl.Instance;
