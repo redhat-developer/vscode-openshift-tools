@@ -22,3 +22,8 @@
 // TODO: How to set ports for url created for devfile component
 
 // TODO: Fix workflow for creating components based on git repository
+
+// TODO: Filter out folders with s2i and devfile components when selecting context for new component
+
+// TODO: How to distinguish s2i and Devfile OpenShiftObjects
+// by sourceType is undefined
