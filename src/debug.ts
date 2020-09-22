@@ -91,8 +91,8 @@ export class DebugSessionsView implements TreeDataProvider<string>, Disposable {
         return undefined;
     }
 
-    refresh(): void {
-        this.onDidChangeTreeDataEmitter.fire();
+    refresh(element?: string): void {
+        this.onDidChangeTreeDataEmitter.fire(element);
     }
 
     dispose(): void {

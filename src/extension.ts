@@ -53,7 +53,7 @@ async function verifyBundledBinaries(): Promise<{odoPath: string, ocPath: string
 
 export async function activate(extensionContext: ExtensionContext): Promise<any> {
     commands.executeCommand('setContext', 'isVSCode', env.uiKind);
-    // UIKind.Desktop ==1 & UIKind.Web ==2. These conditinns are checked for browser based & electron based.
+    // UIKind.Desktop ==1 & UIKind.Web ==2. These conditions are checked for browser based & electron based IDE.
     migrateFromOdo018();
     Cluster.extensionContext = extensionContext;
     TokenStore.extensionContext = extensionContext;
