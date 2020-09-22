@@ -609,8 +609,9 @@ export class Component extends OpenShiftItem {
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
-
-        const componentType = await window.showQuickPick(Component.odo.getComponentTypesJson(), {placeHolder: "Component type", ignoreFocusOut: true});
+        const componentTypesPromise = Component.odo.getComponentTypesJson();
+        const s2iComponentTypes = componentTypesPromise.then((items) => items.filter((item) => item.kind === ComponentKind.S2I));
+        const componentType = await window.showQuickPick(s2iComponentTypes, {placeHolder: "Component type", ignoreFocusOut: true});
 
         if (!componentType) return null;
 
@@ -651,7 +652,7 @@ export class Component extends OpenShiftItem {
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
-        const componentType = await window.showQuickPick(Component.odo.getComponentTypesJson(), {placeHolder: "Component type", ignoreFocusOut: true});
+        const componentType = await window.showQuickPick((await Component.odo.getComponentTypesJson()).filter((item) => item.kind === ComponentKind.S2I), {placeHolder: "Component type", ignoreFocusOut: true});
 
         if (!componentType) return null;
 
