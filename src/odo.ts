@@ -625,9 +625,13 @@ export class OdoImpl implements Odo {
             if (jsonItem) {
                 item = deployedComponents.find((component) => component.getName() === comp.metadata.name);
             }
-            const builderImage = {
+            const builderImage = comp.spec.type.includes(':') ?
+            {
                 name: comp.spec.type.split(':')[0],
                 tag: comp.spec.type.split(':')[1]
+            } : {
+                name: comp.spec.type,
+                tag: 'latest'
             };
             if (item && item.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
                 item.contextPath = Uri.file(comp.status.context);
