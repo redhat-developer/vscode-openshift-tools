@@ -20,7 +20,7 @@ import { Platform } from './util/platform';
 import * as odo from './odo/config';
 import { GlyphChars } from './util/constants';
 import { Application } from './odo/application';
-import { ComponentType, ComponentTypesJson, S2iComponentType, DevfileComponentType, S2iAdapter, DevfileAdapter, OdoComponentType } from './odo/componentType';
+import { ComponentType, ComponentTypesJson, S2iComponentType, DevfileComponentType, S2iAdapter, DevfileAdapter, OdoComponentType, ComponentKind } from './odo/componentType';
 import { Project } from './odo/project';
 import { ComponentsJson, DevfileComponentAdapter, S2iComponentAdapter } from './odo/component';
 import { Url } from './odo/url';
@@ -260,6 +260,7 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
         contextValue: ContextType,
         contextPath: Uri = undefined,
         compType: string = undefined,
+        public readonly kind: ComponentKind,
         builderImage: BuilderImage = undefined) {
         super(parent, name, contextValue, '', Collapsed, contextPath, compType, builderImage);
     }
@@ -294,7 +295,11 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
         } else if (this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
             suffix = `${GlyphChars.Space}${GlyphChars.NoContext} no context`;
         }
-        return suffix;
+        return `${suffix}`;
+    }
+
+    get label(): string {
+        return `${this.name} (${this.kind})`;
     }
 }
 
@@ -604,12 +609,12 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(Command.listComponents(application.getParent().getName(), application.getName()), Platform.getUserHomePath());
         const componentsJson = this.loadJSON<ComponentsJson>(result.stdout);
         const components = [
-            ...componentsJson.s2i_components.map((item) => new S2iComponentAdapter(item)),
-            ...componentsJson.devfile_components.map((item) => new DevfileComponentAdapter(item))
+            ...componentsJson.s2iComponents.map((item) => new S2iComponentAdapter(item)),
+            ...componentsJson.devfileComponents.map((item) => new DevfileComponentAdapter(item))
         ];
 
         const deployedComponents = components.map<OpenShiftComponent>((value) => {
-            return new OpenShiftComponent(application, value.name, ContextType.COMPONENT_NO_CONTEXT, undefined, value.sourceType);
+            return new OpenShiftComponent(application, value.name, ContextType.COMPONENT_NO_CONTEXT, undefined, value.sourceType, value.kind);
         });
         const targetAppName = application.getName();
         const targetPrjName = application.getParent().getName();
@@ -629,7 +634,7 @@ export class OdoImpl implements Odo {
                 item.contextValue = ContextType.COMPONENT_PUSHED;
                 item.builderImage = builderImage;
             } else {
-                deployedComponents.push(new OpenShiftComponent(application, comp.metadata.name, item ? item.contextValue : ContextType.COMPONENT, Uri.file(comp.status.context), comp.spec.sourceType, builderImage));
+                deployedComponents.push(new OpenShiftComponent(application, comp.metadata.name, item ? item.contextValue : ContextType.COMPONENT, Uri.file(comp.status.context), comp.spec.sourceType, comp.spec.sourceType ? ComponentKind.S2I : ComponentKind.DEVFILE, builderImage));
             }
         });
 
@@ -858,7 +863,7 @@ export class OdoImpl implements Odo {
             if (!targetApplication) {
                 await this.insertAndReveal(application);
             }
-            await this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, location, 'local', {name: type, tag: version}));
+            await this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, location, 'local', version ? ComponentKind.S2I : ComponentKind.DEVFILE, {name: type, tag: version}));
         }
         let wsFolder: WorkspaceFolder;
         if (workspace.workspaceFolders) {
@@ -884,7 +889,7 @@ export class OdoImpl implements Odo {
             if (!targetApplication) {
                 await this.insertAndReveal(application);
             }
-            await this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, context, odo.SourceType.GIT, version ? {name: type, tag: version} : undefined));
+            await this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, context, odo.SourceType.GIT, version ? ComponentKind.S2I : ComponentKind.DEVFILE, version ? {name: type, tag: version} : undefined));
         }
         workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: context });
         return null;
@@ -897,7 +902,7 @@ export class OdoImpl implements Odo {
             if (!targetApplication) {
                 await this.insertAndReveal(application);
             }
-            this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, context, odo.SourceType.BINARY, {name: type, tag: version}));
+            this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, context, odo.SourceType.BINARY, version ? ComponentKind.S2I : ComponentKind.DEVFILE, {name: type, tag: version}));
         }
         workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: context });
         return null;
@@ -1012,7 +1017,7 @@ export class OdoImpl implements Odo {
                                 comp.contextValue = ContextType.COMPONENT_PUSHED;
                                 this.subject.next(new OdoEventImpl('changed', comp));
                             } else if (!comp) {
-                                const newComponent = new OpenShiftComponent(app, added.metadata.name, ContextType.COMPONENT, Uri.file(added.status.context), added.spec.sourceType,  { name: added.spec.type.split(':')[0], tag: added.spec.type.split(':')[1]});
+                                const newComponent = new OpenShiftComponent(app, added.metadata.name, ContextType.COMPONENT, Uri.file(added.status.context), added.spec.sourceType, added.spec.type.split(':')[1] ? ComponentKind.S2I : ComponentKind.DEVFILE,  { name: added.spec.type.split(':')[0], tag: added.spec.type.split(':')[1]});
                                 this.insertAndRefresh(newComponent);
                             }
                         } else if (!app) {

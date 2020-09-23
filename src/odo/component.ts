@@ -50,9 +50,9 @@ export interface ComponentsJson {
 		creationTimestamp: string;
     },
     // eslint-disable-next-line camelcase
-    s2i_components: S2iComponent[];
+    s2iComponents: S2iComponent[];
     // eslint-disable-next-line camelcase
-    devfile_components: DevfileComponent[];
+    devfileComponents: DevfileComponent[];
 }
 
 export interface Component <I> {
