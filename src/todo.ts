@@ -9,8 +9,7 @@
 // * in commands
 
 // TODO: recognize s2i and devfile components based on 'odo describe --context' output
-
-// TODO: verify how URL are listed for undeployed s2i component in master branch
+// by sourceType is undefined
 
 // TODO: let create devfile components only from workspace folders because other kind of components
 // are not supported
@@ -25,5 +24,4 @@
 
 // TODO: Filter out folders with s2i and devfile components when selecting context for new component
 
-// TODO: How to distinguish s2i and Devfile OpenShiftObjects
-// by sourceType is undefined
+// TODO: Ban the linking for Devfile Components
