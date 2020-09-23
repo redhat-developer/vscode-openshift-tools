@@ -11,7 +11,7 @@ import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
 import { EventEmitter } from 'events';
 import OpenShiftItem, { selectTargetApplication, selectTargetComponent } from './openshiftItem';
-import { OpenShiftObject, ContextType, OpenShiftObjectImpl } from '../odo';
+import { OpenShiftObject, ContextType, OpenShiftObjectImpl, OpenShiftComponent } from '../odo';
 import { Command } from "../odo/command";
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
@@ -135,14 +135,14 @@ export class Component extends OpenShiftItem {
         "From which Application you want to delete Component",
         "Select Component to delete"
     )
-    static async del(component: OpenShiftObject): Promise<string> {
+    static async del(component: OpenShiftComponent): Promise<string> {
         if (!component) return null;
         const name: string = component.getName();
         const value = await window.showWarningMessage(`Do you want to delete Component '${name}'?`, 'Yes', 'Cancel');
 
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Deleting the Component '${component.getName()} '`, async () => {
-                if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT || component.contextValue === ContextType.COMPONENT_PUSHED) {
+                if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT || component.contextValue === ContextType.COMPONENT_PUSHED || component.kind === ComponentKind.S2I) {
                     await Component.unlinkAllComponents(component);
                 }
                 Component.stopDebugSession(component);
@@ -267,7 +267,10 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.unlink')
-    static async unlink(context: OpenShiftObject): Promise<string | null> {
+    static async unlink(context: OpenShiftComponent): Promise<string | null> {
+        if (context.kind === ComponentKind.DEVFILE) {
+            return 'Unlink command is not supported for Devfile Components.';
+        }
         const unlinkActions = [
             {
                 label: 'Component',
@@ -295,10 +298,13 @@ export class Component extends OpenShiftItem {
     @selectTargetComponent(
         'Select an Application',
         'Select a Component',
-        (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        (value: OpenShiftComponent) => value.contextValue === ContextType.COMPONENT_PUSHED && value.kind === ComponentKind.S2I
     )
-    static async unlinkComponent(component: OpenShiftObject): Promise<string | null> {
+    static async unlinkComponent(component: OpenShiftComponent): Promise<string | null> {
         if (!component) return null;
+        if (component.kind === ComponentKind.DEVFILE) {
+            return 'Unlink Component command is not supported for Devfile Components.';
+        }
 
         const linkComponent = await Component.getLinkData(component);
         const getLinkComponent = linkComponent.status.linkedComponents;
@@ -326,11 +332,13 @@ export class Component extends OpenShiftItem {
     @selectTargetComponent(
         'Select an Application',
         'Select a Component',
-        (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        (value: OpenShiftComponent) => value.contextValue === ContextType.COMPONENT_PUSHED && value.kind === ComponentKind.S2I
     )
-    static async unlinkService(component: OpenShiftObject): Promise<string | null> {
+    static async unlinkService(component: OpenShiftComponent): Promise<string | null> {
         if (!component) return null;
-
+        if (component.kind === ComponentKind.DEVFILE) {
+            return 'Unlink Service Command is not supported for Devfile Components.';
+        }
         const linkService = await Component.getLinkData(component);
         const getLinkService = linkService.status.linkedServices;
 
@@ -351,14 +359,17 @@ export class Component extends OpenShiftItem {
     @selectTargetComponent(
         'Select an Application',
         'Select a Component',
-        (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        (value: OpenShiftComponent) => value.contextValue === ContextType.COMPONENT_PUSHED && value.kind === ComponentKind.S2I
     )
-    static async linkComponent(component: OpenShiftObject): Promise<string | null> {
+    static async linkComponent(component: OpenShiftComponent): Promise<string | null> {
         if (!component) return null;
+        if (component.kind === ComponentKind.DEVFILE) {
+            return 'Link Component command is not supported for Devfile Components.';
+        }
 
-        const componentPresent = (await Component.odo.getComponents(component.getParent())).filter((target) => target.contextValue !== ContextType.COMPONENT);
+        const componentPresent = (await Component.odo.getComponents(component.getParent())).filter((target: OpenShiftComponent) => target.contextValue !== ContextType.COMPONENT && target.kind === ComponentKind.S2I);
 
-        if (componentPresent.length === 1) throw Error('You have no Components available to link, please create new OpenShift Component and try again.');
+        if (componentPresent.length === 1) throw Error('You have no S2I Components available to link, please create new OpenShift Component and try again.');
 
         const componentToLink = await window.showQuickPick(componentPresent.filter((comp)=> comp.getName() !== component.getName()), {placeHolder: "Select a Component to link", ignoreFocusOut: true});
 
@@ -392,10 +403,13 @@ export class Component extends OpenShiftItem {
     @selectTargetComponent(
         'Select an Application',
         'Select a Component',
-        (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        (value: OpenShiftComponent) => value.contextValue === ContextType.COMPONENT_PUSHED && value.kind === ComponentKind.S2I
     )
-    static async linkService(component: OpenShiftObject): Promise<string | null> {
+    static async linkService(component: OpenShiftComponent): Promise<string | null> {
         if (!component) return null;
+        if (component.kind === ComponentKind.DEVFILE) {
+            return 'Link Service command is not supported for Devfile Components.';
+        }
         const serviceToLink: OpenShiftObject = await window.showQuickPick(Component.getServiceNames(component.getParent()), {placeHolder: "Select a service to link", ignoreFocusOut: true});
         if (!serviceToLink) return null;
 
@@ -668,10 +682,13 @@ export class Component extends OpenShiftItem {
     @selectTargetComponent(
         'Select an Application',
         'Select a Component you want to debug (showing only Components pushed to the cluster)',
-        (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
+        (value: OpenShiftComponent) => value.contextValue === ContextType.COMPONENT_PUSHED && value.kind === ComponentKind.S2I
     )
-    static async debug(component: OpenShiftObject): Promise<string | null> {
+    static async debug(component: OpenShiftComponent): Promise<string | null> {
         if (!component) return null;
+        if (component.kind === ComponentKind.DEVFILE) {
+            return 'Debug command is not supported for Devfile Components.';
+        }
         if (component.compType === SourceType.LOCAL) {
             return Progress.execFunctionWithProgress(`Starting debugger session for the component '${component.getName()}'.`, () => Component.startDebugger(component));
         }
