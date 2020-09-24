@@ -136,7 +136,7 @@ export default class ClusterViewLoader {
         const meta = `<meta http-equiv="Content-Security-Policy"
         content="connect-src *;
             default-src 'none';
-            img-src 'self' https:;
+            img-src ${panel.webview.cspSource} https:;
             script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;
             style-src 'self' vscode-resource: 'unsafe-inline';">`;
         return `${htmlString}`
