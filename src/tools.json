@@ -10,21 +10,21 @@
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://github.com/openshift/odo/releases/download/v2.0.0-alpha-2/odo-windows-amd64.exe",
-                "sha256sum": "1e36dc87b0a8ce0095ec192de98b864379d7ac09bd9f4d50ff0d2cc065ffe31c",
-                "dlFileName": "odo-windows-amd64.exe",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.0/odo-windows-amd64.exe.tar.gz",
+                "sha256sum": "d4a09941346759647e294b04c6b481d2d9b6057042b1c8f593c4130d42f8042f",
+                "dlFileName": "odo-windows-amd64.exe.tar.gz",
                 "cmdFileName": "odo.exe"
             },
             "darwin": {
-                "url": "https://github.com/openshift/odo/releases/download/v2.0.0-alpha-2/odo-darwin-amd64",
-                "sha256sum": "bbf5d758353cd973cc8b08d2a973f7057bd8cce36676f3403d708b0f65ea97cc",
-                "dlFileName": "odo-darwin-amd64",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.0/odo-darwin-amd64.tar.gz",
+                "sha256sum": "6deac1ce27b1624df1e37963d83c63b5089f1f60e33146a74cbe80cb1c9dae92",
+                "dlFileName": "odo-darwin-amd64.tar.gz",
                 "cmdFileName": "odo"
             },
             "linux": {
-                "url": "https://github.com/openshift/odo/releases/download/v2.0.0-alpha-2/odo-linux-amd64",
-                "sha256sum": "bf4c10ece01031b1e488fe9ca46ca6307fffa1f947f865a3704cce48c6ba3ed5",
-                "dlFileName": "odo-linux-amd64",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.0/odo-linux-amd64.tar.gz",
+                "sha256sum": "ebac8c42d4a994cfbcb970253b5e7047d5f3bf038227b716dd87b2bd635ca504",
+                "dlFileName": "odo-linux-amd64.tar.gz",
                 "cmdFileName": "odo"
             }
         }
