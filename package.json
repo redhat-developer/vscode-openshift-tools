@@ -121,6 +121,7 @@
     "eslint-plugin-import": "2.18.2",
     "eslint-plugin-json": "^2.1.0",
     "eslint-plugin-prettier": "^3.1.1",
+    "file-loader": "^6.1.0",
     "glob": "^7.1.6",
     "got": "^10.6.0",
     "handlebars": "^4.7.3",
