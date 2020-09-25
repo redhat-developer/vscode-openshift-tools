@@ -34,7 +34,7 @@ export default class ClusterViewLoader {
             });
         }
         panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, "images/context/cluster-node.png"));
-        panel.webview.html = ClusterViewLoader.getWebviewContent(ClusterViewLoader.extensionPath);
+        panel.webview.html = ClusterViewLoader.getWebviewContent(ClusterViewLoader.extensionPath, panel);
         panel.webview.postMessage({action: 'cluster', data: ''});
         panel.webview.onDidReceiveMessage(async (event)  => {
             const timestamp = Number(new Date());
@@ -125,20 +125,20 @@ export default class ClusterViewLoader {
         }
     }
 
-    private static getWebviewContent(extensionPath: string): string {
+    private static getWebviewContent(extensionPath: string, panel: vscode.WebviewPanel): string {
         // Local path to main script run in the webview
         const reactAppRootOnDisk = path.join(extensionPath, 'out', 'clusterViewer');
         const reactAppPathOnDisk = vscode.Uri.file(
             path.join(reactAppRootOnDisk, 'clusterViewer.js'),
         );
-        const reactAppUri = reactAppPathOnDisk.with({ scheme: 'vscode-resource' });
+        const reactAppUri = panel.webview.asWebviewUri(reactAppPathOnDisk);
         const htmlString:Buffer = fs.readFileSync(path.join(reactAppRootOnDisk, 'index.html'));
         const meta = `<meta http-equiv="Content-Security-Policy"
         content="connect-src *;
             default-src 'none';
-            img-src https:;
+            img-src ${panel.webview.cspSource} https: 'self' data:;
             script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;
-            style-src vscode-resource: 'unsafe-inline';">`;
+            style-src 'self' vscode-resource: 'unsafe-inline';">`;
         return `${htmlString}`
             .replace('%COMMAND%', '')
             .replace('%PLATFORM%', process.platform)

@@ -17,6 +17,7 @@ import {
   Typography} from '@material-ui/core';
 
 import AddClusterView from './clusterView';
+const imageSrc = require('./images/logo.png');
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -162,7 +163,7 @@ export default function Header() {
   return (
     <div className={classes.App}>
       <div className={classes.iconContainer}>
-        <img src="https://cloud.redhat.com/apps/landing/fonts/openShiftMarketing.svg" alt="redhat-openshift"></img>
+        <img src={imageSrc} alt="redhat-openshift"></img>
       </div>
       {showWizard && (<div className={classes.rowBody}>
         <Card className={classes.cardContent}>
