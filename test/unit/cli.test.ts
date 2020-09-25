@@ -39,7 +39,7 @@ suite('Cli', () => {
         const result = await cli.execute(command, options);
 
         expect(execStub).calledWithExactly(command, options, sinon.match.func);
-        expect(result).deep.equals({ error: null, stdout, stderr: '' });
+        expect(result).deep.equals({ error: null, stdout, stderr: '', cwd: 'cwd' });
     });
 
     test('execute uses a 2MB buffer by default', async () => {
@@ -53,6 +53,6 @@ suite('Cli', () => {
         execStub.yields(error, stdout, stderr);
         const result = await cli.execute(command);
 
-        expect(result).deep.equals({ error, stdout, stderr });
+        expect(result).deep.equals({ error, stdout, stderr , cwd: undefined});
     });
 });

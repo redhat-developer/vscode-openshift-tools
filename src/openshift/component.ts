@@ -24,7 +24,7 @@ import LogViewLoader from '../view/log/LogViewLoader';
 import DescribeViewLoader from '../view/describe/describeViewLoader';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { SourceType } from '../odo/config';
-import { ComponentKind, ComponentType, S2iComponentType } from '../odo/componentType';
+import { ComponentKind, ComponentType, DevfileComponentType, S2iComponentType } from '../odo/componentType';
 
 import path = require('path');
 import globby = require('globby');
