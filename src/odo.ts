@@ -45,6 +45,7 @@ export interface OpenShiftObject extends QuickPickItem {
     path?: string;
     builderImage?: BuilderImage;
     iconPath?: Uri;
+    kind?: ComponentKind;
 }
 
 export enum ContextType {
