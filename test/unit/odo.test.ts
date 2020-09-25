@@ -270,25 +270,61 @@ suite("odo", () => {
 
         test('getServices returns services for an application', async () => {
             const services = ['service1', 'service2', 'service3'];
-            execStub.resolves({ error: null, stderr: '', stdout: JSON.stringify({
-                    kind: "ServiceList",
-                    items: [{
-                        metadata: {
-                            name: "service1"
-                        }, spec: {
-                        }
-                    }, {
-                        metadata: {
-                            name: "service2"
-                        }, spec: {
-                        }
-                    }, {
-                        metadata: {
-                            name: "service3"
-                        }, spec: {
-                        }
-                    }]
-                })
+            // eslint-disable-next-line @typescript-eslint/require-await
+            execStub.callsFake(async (cmd: string, cwd: string)=> {
+                if (cmd.includes('odo service list')) {
+                    return {
+                        error: null,
+                        stderr: '',
+                        stdout: JSON.stringify({
+                            kind: "ServiceList",
+                            items: [{
+                                metadata: {
+                                    name: "service1"
+                                }, spec: {
+                                }
+                            }, {
+                                metadata: {
+                                    name: "service2"
+                                }, spec: {
+                                }
+                            }, {
+                                metadata: {
+                                    name: "service3"
+                                }, spec: {
+                                }
+                            }]
+                        }),
+                        cwd
+                    };
+                }
+
+                if(cmd.includes('odo list')) {
+                    return {
+                        error: undefined,
+                        stdout: `
+                            {
+                                "kind": "List",
+                                "apiVersion": "odo.openshift.io/v1alpha1",
+                                "metadata": {},
+                                "s2iComponents": [],
+                                "devfileComponents": []
+                            }`,
+                        stderr: '',
+                        cwd};
+                }
+
+                if (cmd.includes('list --app')) {
+                    return { error: undefined, stdout: `
+                    {
+                        "kind": "List",
+                        "apiVersion": "odo.openshift.io/v1alpha1",
+                        "metadata": {},
+                        "s2iComponents": [],
+                        "devfileComponents": []
+                      }`, stderr: '', cwd}
+                }
+                return { error: undefined, stdout: '', stderr: ''};
             });
             const result = await odoCli.getServices(app);
 
