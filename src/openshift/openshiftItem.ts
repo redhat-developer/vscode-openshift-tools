@@ -126,7 +126,7 @@ export default class OpenShiftItem {
         return urlList;
     }
 
-    static async getOpenShiftCmdData(treeItem: OpenShiftObject, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject | null>  {
+    static async getOpenShiftCmdData<T extends OpenShiftObject>(treeItem: T, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean): Promise<T | null>  {
         let context: OpenShiftObject | QuickPickCommand = treeItem;
         let project: OpenShiftObject;
         if (!context) {
@@ -148,7 +148,7 @@ export default class OpenShiftItem {
             }
         }
         if (context && !isCommand(context) && context.contextValue === ContextType.APPLICATION && compPlaceholder) context = await window.showQuickPick(OpenShiftItem.getComponentNames(context, condition), {placeHolder: compPlaceholder, ignoreFocusOut: true});
-        return context as OpenShiftObject;
+        return context as T;
     }
 }
 

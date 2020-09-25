@@ -10,36 +10,64 @@ import OpenShiftItem from './openshiftItem';
 import { Progress } from "../util/progress";
 import { Port } from '../odo/config';
 import { vsCommand, VsCommandError } from '../vscommand';
+import { ComponentKind } from '../odo/componentType';
 
 export class Url extends OpenShiftItem{
 
     @vsCommand('openshift.url.create')
     static async create(context: OpenShiftObject): Promise<string> {
-        const component = await Url.getOpenShiftCmdData(context,
+        const component:OpenShiftObject = await Url.getOpenShiftCmdData(context,
             'Select an Application to create a URL',
             'Select a Component you want to create a URL for');
         if (component) {
             const urlName = await Url.getName('URL name', await Url.odo.getRoutes(component));
             if (!urlName) return null;
-            const ports: Port[] = await Url.odo.getComponentPorts(component);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const portItems: QuickPickItem[] = ports.map<QuickPickItem>((item: any) => {
-                item.label = `${item.number}/${item.protocol}`;
-                return item;
-            });
-            let port: Port | QuickPickItem;
-            if (ports.length === 1) {
-                [ port ] = ports;
-            } else if (ports.length > 1) {
-                port = await window.showQuickPick(portItems, {placeHolder: "Select port to expose"});
+
+            let port: string;
+            if (component.kind === ComponentKind.S2I) {
+                const ports: Port[] = await Url.odo.getComponentPorts(component);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const portItems: QuickPickItem[] = ports.map<QuickPickItem>((item: any) => {
+                    item.label = `${item.number}/${item.protocol}`;
+                    return item;
+                });
+                if (ports.length === 1) {
+                    port = ports[0].number.toString();
+                } else if (ports.length > 1) {
+                    const selectedPort = await window.showQuickPick(portItems, {placeHolder: "Select port to expose"});
+                    port = selectedPort ? (selectedPort as unknown as Port).number.toString() : undefined;
+                } else {
+                    throw new VsCommandError(`Component '${component.getName()}' has no ports declared.`);
+                }
             } else {
-                throw new VsCommandError(`Component '${component.getName()}' has no ports declared.`);
+                port = await window.showInputBox({
+                    placeHolder: 'Enter port number (1024 .. 65535)',
+                    ignoreFocusOut: true,
+                    validateInput: (enteredPort): string => {
+                        let message: string | undefined;
+                        let enteredPortNumber: number | undefined;
+                        if (enteredPort.length > 0) {
+                            if (!new RegExp(/\D+/).test(enteredPort.trim())) {
+                                enteredPortNumber = Number.parseInt(enteredPort, 10);
+                            }
+                            if (!enteredPortNumber) {
+                                message = 'Entered port is not a number';
+                            } else if (enteredPortNumber < 1024 || enteredPortNumber > 65535) {
+                                message = 'Entered port number is out of range';
+                            }
+                        } else {
+                            message = 'Please enter port number';
+                        }
+                        return message;
+                    }
+                });
             }
             if (!port) return null;
+            const parsedNumber = Number.parseInt(port, 10);
             const secure = await window.showQuickPick(['Yes', 'No'], {placeHolder: "Do you want to secure new URL?"});
             if (secure) {
                 return Progress.execFunctionWithProgress(`Creating a URL '${urlName}' for the Component '${component.getName()}'`,
-                    () => Url.odo.createComponentCustomUrl(component, `${urlName}`, `${(port as any).number}`, secure === 'Yes')
+                    () => Url.odo.createComponentCustomUrl(component, `${urlName}`, `${parsedNumber}`, secure === 'Yes')
                         .then(() => `URL '${urlName}' for component '${component.getName()}' successfully created`)
                         .catch((err) => Promise.reject(new VsCommandError(`Failed to create URL '${urlName}' for component '${component.getName()}'. ${err.message}`)))
                 );
