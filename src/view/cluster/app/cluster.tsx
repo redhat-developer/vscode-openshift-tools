@@ -17,7 +17,6 @@ import {
   Typography} from '@material-ui/core';
 
 import AddClusterView from './clusterView';
-// import Logo from './images/logo.png';
 const imageSrc = require('./images/logo.png');
 
 const useStyles = makeStyles((theme: Theme) =>
