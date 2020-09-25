@@ -25,33 +25,26 @@ chai.use(sinonChai);
 function genComponentJson(p: string, a: string, n: string, c: string ): string {
     return `
     {
-        "kind": "List",
+        "kind": "Component",
         "apiVersion": "odo.openshift.io/v1alpha1",
-        "metadata": {},
-        "items": [
-          {
-            "kind": "Component",
-            "apiVersion": "odo.openshift.io/v1alpha1",
-            "metadata": {
-              "name": "${n}",
-              "namespace": "${p}",
-              "creationTimestamp": null
-            },
-            "spec": {
-              "app": "app1",
-              "type": "nodejs:10",
-              "sourceType": "git",
-              "ports": [
-                "8080/TCP"
-              ]
-            },
-            "status": {
-              "context": "${c.replace(/\\/g,'\\\\')}",
-              "state": "Not Pushed"
-            }
-          }
-        ]
-      }`
+        "metadata": {
+            "name": "${n}",
+            "namespace": "${p}",
+            "creationTimestamp": null
+        },
+        "spec": {
+            "app": "app1",
+            "type": "nodejs:10",
+            "sourceType": "git",
+            "ports": [
+            "8080/TCP"
+            ]
+        },
+        "status": {
+            "context": "${c.replace(/\\/g,'\\\\')}",
+            "state": "Not Pushed"
+        }
+    }`;
 }
 
 suite('openshift connector Extension', () => {
@@ -71,15 +64,15 @@ suite('openshift connector Extension', () => {
             uri: comp2Uri, index: 1, name: 'comp2'
         }]);
         // eslint-disable-next-line @typescript-eslint/require-await
-        sandbox.stub(OdoImpl.prototype, 'execute').callsFake(async (cmd: string)=> {
+        sandbox.stub(OdoImpl.prototype, 'execute').callsFake(async (cmd: string, cwd: string)=> {
             if (cmd.includes('version')) {
                 return { error: undefined, stdout: "Server: https://api.crc.testing:6443", stderr: '' };
             }
 
-            if(cmd.includes('--path')) {
+            if(cmd.includes('describe')) {
                 const args = cmd.split(' ');
                 const name = args[3].substr(args[3].lastIndexOf(path.sep)+1);
-                return { error: undefined, stdout: genComponentJson('myproject', 'app1', name, args[3]), stderr: '' };
+                return { error: undefined, stdout: genComponentJson('myproject', 'app1', name, args[3]), stderr: '', cwd  };
             }
 
             if (cmd.includes('list --app')) {
@@ -88,7 +81,8 @@ suite('openshift connector Extension', () => {
                     "kind": "List",
                     "apiVersion": "odo.openshift.io/v1alpha1",
                     "metadata": {},
-                    "items": []
+                    "s2iComponents": [],
+                    "devfileComponents": []
                   }`, stderr: ''}
             }
             return { error: undefined, stdout: '', stderr: ''};
