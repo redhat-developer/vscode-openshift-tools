@@ -32,6 +32,11 @@ suite('OpenShift/URL', () => {
     const routeItem = new TestItem(componentItem, 'route', ContextType.COMPONENT_ROUTE);
     const errorMessage = 'ERROR';
 
+    const ports = [
+        {number: 8080, protocol: 'TCP'},
+        {number: 8081, protocol: 'TCP'}
+    ];
+
     const noPortsOutput = `{
         "apiVersion": "v1",
         "kind": "Service",
@@ -231,16 +236,15 @@ suite('OpenShift/URL', () => {
         test('asks to select port if more that one exposed and returns message', async () => {
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
             sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([componentItem]);
+            sandbox.stub(OdoImpl.prototype, 'getComponentPorts').resolves(ports);
             inputStub.onFirstCall().resolves('urlName');
             execStub.onFirstCall().resolves({error: null, stdout: routesOutput, stderr: ''});
             execStub.onSecondCall().resolves({error: null, stdout: storagesOutput, stderr: ''});
             execStub.onThirdCall().resolves({error: null, stdout: portsOutput, stderr: ''});
             execStub.onCall(3).resolves({error: null, stdout: '', stderr: ''});
-            quickPickStub.resolves('port1');
+            quickPickStub.resolves(ports[0]);
             const result = await Url.create(null);
-
             expect(result).equals(`URL 'urlName' for component '${componentItem.getName()}' successfully created`);
-            expect(execStub.callCount).equals(4);
         });
 
         test('rejects when fails to create Url', () => {
@@ -265,16 +269,10 @@ suite('OpenShift/URL', () => {
             inputStub.onFirstCall().resolves('urlName');
             execStub.onFirstCall().resolves({error: null, stdout: portsOutput, stderr: ''});
             execStub.onSecondCall().resolves({error: null, stdout: '', stderr: ''});
-            quickPickStub.resolves({
-                name: "8080-tcp",
-                port: 8080,
-                protocol: "TCP",
-                targetPort: 8080
-            });
+            sandbox.stub(OdoImpl.prototype, 'getComponentPorts').resolves(ports);
+            quickPickStub.resolves(ports[0]);
             const result = await Url.create(componentItem);
-
             expect(result).equals(`URL 'urlName' for component '${componentItem.getName()}' successfully created`);
-            expect(execStub).calledTwice;
         });
 
         test('rejects when fails to create Url', async () => {
