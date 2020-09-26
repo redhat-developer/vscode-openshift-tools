@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 
-import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
+import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable, RelativePattern } from 'vscode';
 import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
 import { EventEmitter } from 'events';
@@ -268,6 +268,7 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.unlink')
     static async unlink(context: OpenShiftComponent): Promise<string | null> {
+        if (!context) return null;
         if (context.kind === ComponentKind.DEVFILE) {
             return 'Unlink command is not supported for Devfile Components.';
         }
