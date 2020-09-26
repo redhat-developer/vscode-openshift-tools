@@ -87,7 +87,7 @@ suite('OpenShift/Component', () => {
     });
 
     suite('create', () => {
-        const componentType = 'nodejs';
+        const componentType = 'nodejs (s2i)';
         const version = 'latest';
         const ref = 'master';
         const folder = { uri: { fsPath: 'folder' } };
@@ -819,7 +819,7 @@ suite('OpenShift/Component', () => {
             try {
                 await Component.linkComponent(componentItem);
             } catch (err) {
-                expect(err.message).equals('You have no Components available to link, please create new OpenShift Component and try again.');
+                expect(err.message).equals('You have no S2I Components available to link, please create new OpenShift Component and try again.');
                 return;
             }
             expect.fail();

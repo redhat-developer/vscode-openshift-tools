@@ -364,7 +364,7 @@ suite("odo", () => {
 
         test('getApplicationChildren returns both components and services for an application', async () => {
             execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({
-                items: [
+                s2iComponents: [
                     {
                         metadata: {
                             name: 'component1',
@@ -517,7 +517,7 @@ suite("odo", () => {
         test("getComponentTypes returns correct component type names", async () => {
             const result = await odoCli.getComponentTypes();
             expect(result.length).equals(1);
-            expect(result[0]).equals('nodejs');
+            expect(result[0]).equals('nodejs (s2i)');
         });
 
     });
