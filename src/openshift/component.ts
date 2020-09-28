@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 
-import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable, RelativePattern } from 'vscode';
+import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
 import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
 import { EventEmitter } from 'events';
@@ -24,7 +24,7 @@ import LogViewLoader from '../view/log/LogViewLoader';
 import DescribeViewLoader from '../view/describe/describeViewLoader';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { SourceType } from '../odo/config';
-import { ComponentKind, ComponentType, DevfileComponentType, S2iComponentType } from '../odo/componentType';
+import { ComponentKind, ComponentType,  S2iComponentType } from '../odo/componentType';
 
 import path = require('path');
 import globby = require('globby');
