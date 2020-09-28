@@ -17,7 +17,7 @@ const config: any = {
     ui: 'tdd',
     timeout: 60000,
     color: true,
-    // grep: 'getServices returns an empty list if an error occurs',
+    // grep: 'happy path works',
 };
 
 if (process.env.BUILD_ID && process.env.BUILD_NUMBER) {

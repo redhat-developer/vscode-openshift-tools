@@ -18,6 +18,7 @@ import * as Util from '../../../src/util/async';
 import { Refs } from '../../../src/util/refs';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
 import { SourceTypeChoice } from '../../../src/openshift/component';
+import { ComponentKind, S2iAdapter } from '../../../src/odo/componentType';
 
 import pq = require('proxyquire');
 import globby = require('globby');
@@ -87,7 +88,52 @@ suite('OpenShift/Component', () => {
     });
 
     suite('create', () => {
-        const componentType = 'nodejs (s2i)';
+        const componentType = new S2iAdapter({
+			kind: "ComponentType",
+			apiVersion: "odo.dev/v1alpha1",
+			metadata: {
+				name: "nodejs",
+				namespace: "openshift",
+				creationTimestamp: null
+			},
+			spec: {
+				allTags: [
+					"10",
+					"12",
+					"latest"
+				],
+				nonHiddenTags: [
+					"10",
+					"12",
+					"latest"
+				],
+				supportedTags: [
+					"10",
+					"12",
+					"latest"
+				],
+				imageStreamTags: [
+					{
+						name: "10",
+						annotations: {
+							description: "Build and run Node.js 10 applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/sclorg/s2i-nodejs-container/blob/master/10/README.md.",
+							"openshift.io/display-name": "Node.js 10",
+							tags: "builder,nodejs",
+							version: "10"
+						}
+					},
+					{
+						name: "12",
+						annotations: {
+							description: "Build and run Node.js 12 applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/sclorg/s2i-nodejs-container/blob/master/12/README.md.",
+							"openshift.io/display-name": "Node.js 12",
+							tags: "builder,nodejs",
+							version: "12"
+						}
+					}
+				]
+			}
+		});
         const version = 'latest';
         const ref = 'master';
         const folder = { uri: { fsPath: 'folder' } };
@@ -137,7 +183,7 @@ suite('OpenShift/Component', () => {
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
                 expect(progressFunctionStub).calledOnceWith(
                     `Creating new Component '${componentItem.getName()}'`);
-                expect(execStub).calledWith(Command.createLocalComponent(appItem.getParent().getName(), appItem.getName(), componentType, version, componentItem.getName(), folder.uri.fsPath));
+                expect(execStub).calledWith(Command.createLocalComponent(appItem.getParent().getName(), appItem.getName(), componentType.name, version, componentItem.getName(), folder.uri.fsPath));
             });
 
             test('returns null when no option is selected from quick pick', async () => {
@@ -209,7 +255,7 @@ suite('OpenShift/Component', () => {
                 const result =  await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
-                expect(execStub).calledWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), uri, ref));
+                expect(execStub).calledWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType.name, version, componentItem.getName(), uri, ref));
             });
 
             test('returns null when no git repo selected', async () => {
@@ -337,7 +383,7 @@ suite('OpenShift/Component', () => {
                 const result = await Component.create(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
-                expect(execStub).calledWith(Command.createBinaryComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), paths, files[0].fsPath));
+                expect(execStub).calledWith(Command.createBinaryComponent(projectItem.getName(), appItem.getName(), componentType.name, version, componentItem.getName(), paths, files[0].fsPath));
             });
 
             test('returns null when no option is selected from quick pick', async () => {
