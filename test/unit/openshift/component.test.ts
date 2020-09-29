@@ -18,6 +18,7 @@ import * as Util from '../../../src/util/async';
 import { Refs } from '../../../src/util/refs';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
 import { SourceTypeChoice } from '../../../src/openshift/component';
+import { S2iAdapter } from '../../../src/odo/componentType';
 
 import pq = require('proxyquire');
 import globby = require('globby');
