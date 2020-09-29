@@ -49,6 +49,7 @@ suite('OpenShift/Project', () => {
         });
 
         test('works with valid inputs', async () => {
+            sandbox.stub(OdoImpl.Instance.subject, 'next');
             const result = await Project.create();
 
             expect(result).equals(`Project '${projectItem.getName()}' successfully created`);
@@ -79,6 +80,7 @@ suite('OpenShift/Project', () => {
                 result = options.validateInput('goodvalue');
                 return Promise.resolve('goodvalue');
             });
+            sandbox.stub(OdoImpl.Instance.subject, 'next');
             await Project.create();
 
             expect(result).is.undefined;
@@ -101,8 +103,9 @@ suite('OpenShift/Project', () => {
             inputStub.restore();
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('name&name');
-                return Promise.resolve('name&name');
+                return Promise.resolve('projectNameValidatorTest');
             });
+            sandbox.stub(OdoImpl.Instance.subject,"next");
             await Project.create();
 
             expect(result).equals('Not a valid Project name. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character');
@@ -115,6 +118,7 @@ suite('OpenShift/Project', () => {
                 result = options.validateInput('project');
                 return Promise.resolve('project');
             });
+            sandbox.stub(OdoImpl.Instance.subject, 'next');
             await Project.create();
 
             expect(result).equals('This name is already used, please enter different name.');
@@ -125,8 +129,9 @@ suite('OpenShift/Project', () => {
             inputStub.restore();
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('n123456789012345678901234567890123456789012345678901234567890123');
-                return Promise.resolve('n123456789012345678901234567890123456789012345678901234567890123');
+                return Promise.resolve('projectLongNameValidatorTest');
             });
+            sandbox.stub(OdoImpl.Instance.subject,"next");
             await Project.create();
 
             expect(result).equals('Project name should be between 2-63 characters');
