@@ -58,6 +58,12 @@ node('rhel8'){
           sh 'vsce publish -p ${TOKEN} --packagePath' + " ${vsix[0].path}"
       }
 
+      // Open-vsx Marketplace
+      sh "npm install -g ovsx"
+      withCredentials([[$class: 'StringBinding', credentialsId: 'open-vsx-access-token', variable: 'OVSX_TOKEN']]) {
+        sh 'ovsx publish -p ${OVSX_TOKEN}' + " ${vsix[0].path}"
+      }
+
       stage "Promote the build to stable"
       sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.vsix* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
       sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.tgz* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
