@@ -12,6 +12,7 @@ import { OdoImpl, ContextType } from '../../../src/odo';
 import { Command } from "../../../src/odo/command";
 import { Url } from '../../../src/openshift/url';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
+import { ComponentKind } from '../../../src/odo/componentType';
 
 import pq = require('proxyquire');
 
@@ -25,6 +26,8 @@ suite('OpenShift/URL', () => {
     let termStub: sinon.SinonStub;
     let execStub: sinon.SinonStub;
     let getProjectsNameStub: sinon.SinonStub;
+    let getApplicationNamesStub: sinon.SinonStub;
+    let getComponentsNameStub: sinon.SinonStub;
     let getRouteNameStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
@@ -149,57 +152,14 @@ suite('OpenShift/URL', () => {
         }
     }`;
 
-    const routesOutput = `{
-    "kind": "List",
-    "apiVersion": "odo.openshift.io/v1alpha1",
-    "metadata": {},
-    "items": [
-        {
-            "kind": "url",
-            "apiVersion": "odo.openshift.io/v1alpha1",
-            "metadata": {
-                "name": "url1",
-                "creationTimestamp": null
-            },
-            "spec": {
-                "path": "url1-app-myproject.10.0.0.46.nip.io",
-                "protocol": "http",
-                "port": 8080
-            }
-        }
-    ]}`;
-
-    const storagesOutput = `{
-        "kind": "List",
-        "apiVersion": "odo.openshift.io/v1aplha1",
-        "metadata": {},
-        "items": [
-            {
-                "kind": "Storage",
-                "apiVersion": "odo.openshift.io/v1alpha1",
-                "metadata": {
-                    "name": "s2",
-                    "creationTimestamp": null
-                },
-                "spec": {
-                    "size": "1Gi",
-                    "path": "C:/Program Files/Git/mnt/s2"
-                },
-                "status": {
-                    "mounted": true
-                }
-            }
-        ]
-    }`;
-
     setup(() => {
         sandbox = sinon.createSandbox();
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
         inputStub = sandbox.stub(vscode.window, 'showInputBox');
         getProjectsNameStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         getRouteNameStub = sandbox.stub(OpenShiftItem, 'getRoutes').resolves([routeItem]);
-        sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
-        sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
+        getApplicationNamesStub = sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
+        getComponentsNameStub = sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: '', stdout: '', stderr: ''});
     });
@@ -210,6 +170,7 @@ suite('OpenShift/URL', () => {
 
     suite('create Url with no context', () => {
         let getProjectsStub;
+
         setup(() => {
             const urlName = 'customName';
             getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
@@ -233,18 +194,13 @@ suite('OpenShift/URL', () => {
             expect.fail();
         });
 
-        test('asks to select port if more that one exposed and returns message', async () => {
-            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
-            sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([componentItem]);
-            sandbox.stub(OdoImpl.prototype, 'getComponentPorts').resolves(ports);
-            inputStub.onFirstCall().resolves('urlName');
-            execStub.onFirstCall().resolves({error: null, stdout: routesOutput, stderr: ''});
-            execStub.onSecondCall().resolves({error: null, stdout: storagesOutput, stderr: ''});
-            execStub.onThirdCall().resolves({error: null, stdout: portsOutput, stderr: ''});
-            execStub.onCall(3).resolves({error: null, stdout: '', stderr: ''});
-            quickPickStub.resolves(ports[0]);
+        test('asks to select component where url should be created', async () => {
+            inputStub.onFirstCall().resolves(null);
             const result = await Url.create(null);
-            expect(result).equals(`URL 'urlName' for component '${componentItem.getName()}' successfully created`);
+            expect(result).equals(null);
+            expect(getProjectsStub).calledOnce;
+            expect(getApplicationNamesStub).calledOnce;
+            expect(getComponentsNameStub).calledOnce;
         });
 
         test('rejects when fails to create Url', () => {
@@ -312,10 +268,20 @@ suite('OpenShift/URL', () => {
                 expect(result).equal('Not a valid URL name. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character');
                 return Promise.resolve('');
             });
-
             await Url.create(componentItem);
-
         });
+
+        test('asks to enter port number for devfile components', async () => {
+            const urlName = 'urlName';
+            const urlPort = '8888';
+            inputStub.onFirstCall().resolves(urlName);
+            inputStub.onSecondCall().resolves(urlPort);
+            execStub.onFirstCall().resolves({error: null, stdout: noPortsOutput, stderr: ''});
+            const devComp = new TestItem(appItem, 'component', ContextType.COMPONENT_PUSHED, [], undefined, undefined, 'nodejs:latest', ComponentKind.DEVFILE);
+            quickPickStub.resolves('No');
+            await Url.create(devComp);
+            execStub.calledWith(Command.createComponentCustomUrl(urlName, urlPort));
+        })
     });
 
     suite('del', () => {
