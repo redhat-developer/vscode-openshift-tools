@@ -196,7 +196,7 @@ suite('OpenShift/Storage', () => {
             let result: string | Thenable<string>;
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('goodvalue');
-                return Promise.resolve('goodvalue');
+                return Promise.resolve('projecGoodNameValidatoTest');
             });
             inputStub.onSecondCall().resolves();
             await Storage.create(componentItem);
@@ -245,7 +245,7 @@ suite('OpenShift/Storage', () => {
             inputStub.restore();
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('name&name');
-                return Promise.resolve('name&name');
+                return Promise.resolve('storageNameValidatorTest');
             });
             await Storage.create(componentItem);
 
@@ -269,7 +269,7 @@ suite('OpenShift/Storage', () => {
             inputStub.restore();
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                 result = options.validateInput('n123456789012345678901234567890123456789012345678901234567890123');
-                return Promise.resolve('n123456789012345678901234567890123456789012345678901234567890123');
+                return Promise.resolve('storageLongNameValidatorTest');
             });
             await Storage.create(componentItem);
 
