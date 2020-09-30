@@ -11,7 +11,7 @@
 
 OpenShift Connector extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:
  - Developers can easily create, deploy and live debug applications running on OpenShift.
- - Run local instance of OpenShift 4.x using [Red Hat CodeReady Containers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned).
+ - Run local instance of OpenShift 4.5 using [Red Hat CodeReady Containers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned).
 
 ### Demo: https://youtube.com/watch?v=m0wBKuKDYO0
 
@@ -28,9 +28,15 @@ To provision local instance of OpenShift cluster, developers can use the followi
 For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-3.x-Instance).
 
 If developers can't run OpenShift cluster locally, the extension can work with remote one provisioned with one of Red Hat products:
+
+In the public cloud,
+* [Run on Microsoft Azure](https://cloud.redhat.com/openshift/install/azure)
+* [Run on Amazon Web Services](https://cloud.redhat.com/openshift/install/aws)
+* [Run on Google Cloud Platform](https://cloud.redhat.com/openshift/install/gcp)
+
+In your datacenter,
 * [Red Hat OpenShift Container Platform](https://www.openshift.com/products/container-platform) - build, deploy and manage your applications across cloud- and on-premise infrastructure
 * [Red Hat OpenShift Dedicated](https://www.openshift.com/products/dedicated/) - single-tenant, high-availability Kubernetes clusters in the public cloud
-* [Microsoft Azure Red Hat OpenShift](https://www.openshift.com/products/azure-openshift) - fully managed Red Hat OpenShift service on Microsoft Azure
 * [Red Hat OpenShift Online](https://www.openshift.com/products/online/) - the fastest way for developers to build, host and scale applications in the public cloud
 
 When working with [OpenShift Online](https://www.openshift.com/products/online/) remote cluster only one component can be created for Starter plan and Pro plan with default 2GiB storage. If you want to create multi component application you could opt in for Pro plan with bigger persistence storage (up to 150GiB).
@@ -190,7 +196,7 @@ To debug a Java Component, [Java Language Support](https://marketplace.visualstu
    * `Openshift Connector: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
    * `Openshift Connector: CRC Memory Allocation` - MiB of memory to allocate to the OpenShift cluster as selected during the first run.
 
-**NOTE:** CRC (CodeReady Containers) version supported by the extension is `1.15.0` (OpenShift Version: `4.5.7`)
+**NOTE:** CRC (Red Hat CodeReady Containers) version supported by the extension is `1.16.0` (OpenShift Version: `4.5.9`)
 
 ## Dependencies
 
@@ -198,7 +204,7 @@ To debug a Java Component, [Java Language Support](https://marketplace.visualstu
 
 This extension uses two CLI tools to interact with OpenShift cluster:
 * OKD CLI client tool - [oc](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.3.3)
-* odo - [odo](http://mirror.openshift.com/pub/openshift-v4/clients/odo/v1.2.6/)
+* odo - [odo](https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.0)
 
 > `oc` and `odo` tools for Windows, Linux and macOS are included into extension package. Once the extension is installed it is ready to use.
 
