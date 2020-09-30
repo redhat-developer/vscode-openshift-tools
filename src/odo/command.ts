@@ -243,7 +243,7 @@ export class Command {
         binary: string,
         context: string,
     ): string {
-        return `odo create ${type}:${version} ${name} --binary ${binary} --app ${app} --project ${project} --context ${context}`;
+        return `odo create ${type}:${version} ${name} ${version?'--s2i':''} --binary ${binary} --app ${app} --project ${project} --context ${context}`;
     }
 
     @verbose
