@@ -281,7 +281,26 @@ suite('OpenShift/URL', () => {
             quickPickStub.resolves('No');
             await Url.create(devComp);
             execStub.calledWith(Command.createComponentCustomUrl(urlName, urlPort));
-        })
+        });
+
+        test('verify entered port is number in 1024 .. 65535 range', async () => {
+            let result: string | Thenable<string>;
+            const urlName = 'urlName';
+            inputStub.onFirstCall().resolves(urlName);
+            inputStub.onSecondCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
+                result = options.validateInput('');
+                expect(result).contains('Please');
+                result = options.validateInput('1');
+                expect(result).contains('out of range');
+                result = options.validateInput('s12');
+                expect(result).contains('not a number');
+                result = options.validateInput('8888');
+                expect(result).undefined;
+                return null;
+            });
+            const devComp = new TestItem(appItem, 'component', ContextType.COMPONENT_PUSHED, [], undefined, undefined, 'nodejs:latest', ComponentKind.DEVFILE);
+            await Url.create(devComp);
+        });
     });
 
     suite('del', () => {
