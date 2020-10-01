@@ -40,24 +40,24 @@ To install OpenShift Container Platform 4 in the public cloud, in your datacente
 
 ## Commands and Features
 
-`vs-openshift-connector` supports a number of commands & actions for interacting with OpenShift clusters; these are accessible via the command menu (`Cmd+Shift+P` <kbd>⌘⇧P</kbd> on macOS or `Ctrl+Shift+P` <kbd>⌃⇧P</kbd> on Windows and Linux) and may be bound to keys in the normal way.
+The extension supports a number of commands to interact with OpenShift clusters and resources. The commands are accessible via the command palette (`Cmd+Shift+P` <kbd>⌘⇧P</kbd> on macOS or `Ctrl+Shift+P` <kbd>⌃⇧P</kbd> on Windows and Linux), Visual Studio Code View title buttons and tree context menus.
 
 ### Commands Available in OpenShift Application Explorer View
 
 #### Commands for a Cluster
 
-* `OpenShift: Log in to cluster` - Log in to your server and save login for subsequent use.
-    * Credentials : Log in to the given server with the given credentials.
+* `Log in to cluster` - Log in to your cluster and save login for subsequent use.
+    * Credentials : Log in to the given cluster with the given credentials.
     * Token : Login using bearer token for authentication to the API server.
-* `OpenShift: List catalog components` - List all available Component Types.
-* `OpenShift: List catalog services` - Lists all available Services e.g. mysql-persistent.
-* `OpenShift: New Project` - Create new project inside the OpenShift Cluster.
-* `OpenShift: About` - Provides the information about the OpenShift tools.
-* `OpenShift: Log out` - Logs out of the current OpenShift Cluster.
-* `OpenShift: Show Output Channel` - Shows commands running under the hood and their output.
-* `OpenShift: Open Console Dashboard` - Opens the OpenShift webconsole URL.
-* `OpenShift: Create` - Creates an OpenShift resource using `.json` or `.yaml` file location from an active editor.
-* `Set Active Project` - Changes active Project displayed in OpenShift Application View.
+* `List catalog components` - List all available Component Types.
+* `List catalog services` - List all available Services e.g. mysql-persistent.
+* `New Project` - Create new Project inside the OpenShift Cluster.
+* `About` - Provide the information about the OpenShift tools.
+* `Log out` - Log out of the current OpenShift Cluster.
+* `Show Output Channel` - Show commands running under the hood and their output.
+* `Open Console Dashboard` - Open the OpenShift Developer Console in default browser.
+* `Create` - Create an OpenShift resource using `.json` or `.yaml` file location from an active editor.
+* `Set Active Project` - Change active Project displayed in OpenShift Application View.
 
 #### Commands for a Project
 
@@ -67,7 +67,7 @@ To install OpenShift Container Platform 4 in the public cloud, in your datacente
         * local - Use local directory as a source for the Component.
    * `New Service` - Perform Service Catalog operations when it is enabled.
    * `Delete` - Delete an existing Project.
-   * `Set Active Project` - Changes active Project displayed in OpenShift Application View.
+   * `Set Active Project` - Change active Project displayed in OpenShift Application View.
 
 #### Commands for an Application
 
@@ -123,7 +123,7 @@ Components in different states have different set of commands available.
 ##### Commands for a URL in a Component
 
    * `Delete` - Delete a URL from a Component.
-   * `Open URL` - Click on the icon opens the specific URL in Browser.
+   * `Open URL` - Open the specific URL in Browser.
    * `Describe` - Describe the given URL for the component in terminal window.
 
 ##### Commands for a Storage
