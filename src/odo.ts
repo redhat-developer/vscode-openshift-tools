@@ -280,7 +280,7 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
     }
 
     getChildren(): Promise<OpenShiftObject[]> {
-        return this.odo.getComponentChildren(this);
+        return this.contextValue === ContextType.COMPONENT_NO_CONTEXT ? Promise.resolve([]) : this.odo.getComponentChildren(this);
     }
 
     get tooltip(): string {
