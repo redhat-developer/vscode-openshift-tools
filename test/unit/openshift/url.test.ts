@@ -13,8 +13,7 @@ import { Command } from "../../../src/odo/command";
 import { Url } from '../../../src/openshift/url';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
 import { ComponentKind } from '../../../src/odo/componentType';
-
-import pq = require('proxyquire');
+import * as Cli from '../../../src/cli';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -151,6 +150,32 @@ suite('OpenShift/URL', () => {
             "loadBalancer": {}
         }
     }`;
+
+    function genUlrListExecResult(state: string): Cli.CliExitData {
+        return {error: undefined, stdout: JSON.stringify({
+            kind: "List",
+            apiVersion: "odo.openshift.io/v1alpha1",
+            metadata: {},
+            items: [
+                {
+                    kind: "url",
+                    apiVersion: "odo.openshift.io/v1alpha1",
+                    metadata: {
+                        name: "route",
+                        creationTimestamp: null
+                    },
+                    spec: {
+                        path: "route-nodejs-app-myproject.192.168.64.59.nip.io",
+                        protocol: "http",
+                        port: 8080
+                    },
+                    status: {
+                        state
+                    }
+                }
+            ]
+        }), stderr: ''}
+    }
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -358,60 +383,22 @@ suite('OpenShift/URL', () => {
 
     suite('open', () => {
 
-        const openStub: sinon.SinonStub = sinon.stub();
-        let UrlMock;
+        let openStub: sinon.SinonStub;
 
         setup(() => {
-            UrlMock = pq('../../../src/openshift/url', {
-                open: openStub
-            }).Url;
-
-            execStub.resolves({error: undefined, stdout: JSON.stringify({
-                kind: "List",
-                apiVersion: "odo.openshift.io/v1alpha1",
-                metadata: {},
-                items: [
-                    {
-                        kind: "url",
-                        apiVersion: "odo.openshift.io/v1alpha1",
-                        metadata: {
-                            name: "route",
-                            creationTimestamp: null
-                        },
-                        spec: {
-                            path: "route-nodejs-app-myproject.192.168.64.59.nip.io",
-                            protocol: "http",
-                            port: 8080
-                        }
-                    }
-                ]
-            }), stderr: ''});
+            openStub = sandbox.stub(vscode.commands, "executeCommand").resolves();
         });
 
-        test('open url in browser', async () => {
-            execStub.onFirstCall().resolves({error: null, stderr: '', stdout: `{
-                "kind": "List",
-                "apiVersion": "odo.openshift.io/v1alpha1",
-                "metadata": {},
-                "items": [
-                    {
-                        "kind": "url",
-                        "apiVersion": "odo.openshift.io/v1alpha1",
-                        "metadata": {
-                            "name": "route",
-                            "creationTimestamp": null
-                        },
-                        "spec": {
-                            "port": 8080
-                        },
-                        "status": {
-                            "state": "Pushed"
-                        }
-                    }
-                ]
-            }`});
-            await UrlMock.open(routeItem);
+        test('open url in browser it is pushed to cluster', async () => {
+            execStub.resolves(genUlrListExecResult('Pushed'));
+            await Url.open(routeItem);
             openStub.calledOnceWith('http://route-nodejs-app-myproject.192.168.64.59.nip.io');
+        });
+
+        test('shows warning if it is not pushed to cluster', async () => {
+            execStub.resolves(genUlrListExecResult('Not pushed'));
+            const result = await Url.open(routeItem);
+            expect(result).equals('Selected URL is not created in cluster. Use \'Push\' command before opening URL in browser.');
         });
     });
 
