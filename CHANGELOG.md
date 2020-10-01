@@ -7,9 +7,9 @@ Noteworthy changes:
   - [#1754](https://github.com/redhat-developer/vscode-openshift-tools/issues/1754) - Provide RedHat OpenShift logo in 'Add OpenShift Cluster' editor for dark and light color themes
   - [#1751](https://github.com/redhat-developer/vscode-openshift-tools/issues/1751) - Run CRC webview only in vscode and not on Che instance
   - [#1740](https://github.com/redhat-developer/vscode-openshift-tools/issues/1740) - Migrate to crc 0.1.16 release
-  - [#1735](https://github.com/redhat-developer/vscode-openshift-tools/issues/1735) - Update Start Start CRC Editor to match 'Try OpenShift page
+  - [#1735](https://github.com/redhat-developer/vscode-openshift-tools/issues/1735) - Update Start Start CRC Editor to match 'Try OpenShift' page
   - [#1731](https://github.com/redhat-developer/vscode-openshift-tools/issues/1731) - Use vscode-kubernetes-tools-api v1.2.0
-  - [#1729](https://github.com/redhat-developer/vscode-openshift-tools/issues/1729) - Components without context does not show up in application explorer
+  - [#1729](https://github.com/redhat-developer/vscode-openshift-tools/issues/1729) - Components without context don't show up in application explorer
 
 ## 0.1.6 (August 31, 2020)
 
