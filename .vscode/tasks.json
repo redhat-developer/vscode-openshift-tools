@@ -26,7 +26,10 @@
         {
             "label": "instrument",
             "type": "shell",
-            "command": ["\"${workspaceFolder}/node_modules/.bin/shx rm -rf ${workspaceFolder}/out/src-orig && ${workspaceFolder}/node_modules/.bin/shx mv ${workspaceFolder}/out/src ${workspaceFolder}/out/src-orig && ${workspaceFolder}/node_modules/.bin/istanbul instrument --complete-copy --embed-source --output out/src out/src-orig\""],
+            "command": ["${workspaceFolder}/node_modules/.bin/shx rm -rf ${workspaceFolder}/out/src-orig && ${workspaceFolder}/node_modules/.bin/shx mv ${workspaceFolder}/out/src ${workspaceFolder}/out/src-orig && ${workspaceFolder}/node_modules/.bin/istanbul instrument --complete-copy --embed-source --output out/src out/src-orig"],
+            "windows": {
+                "command": ["\"${workspaceFolder}/node_modules/.bin/shx rm -rf ${workspaceFolder}/out/src-orig && ${workspaceFolder}/node_modules/.bin/shx mv ${workspaceFolder}/out/src ${workspaceFolder}/out/src-orig && ${workspaceFolder}/node_modules/.bin/istanbul instrument --complete-copy --embed-source --output out/src out/src-orig\""],
+            },
             "dependsOn": "compile"
         }
     ]
