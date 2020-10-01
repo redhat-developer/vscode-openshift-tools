@@ -144,10 +144,10 @@ future releases.
 #### Running OpenShift Locally
 
 The extension provides a view to run local instance of OpenShift. To open the view use `Add OpenShift Cluster` button 
-![ addclusterbutton ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/add-cluster-button.png)
+![ addclusterbutton ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/add-cluster-button.gif)
 from `OpenShift: Application Explorer` view title.
 
-![ addcluster ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/add-cluster.png)
+![ addcluster ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/add-cluster.gif)
 
 The view guides you through the steps required to create and start OpenShift 4 single node cluster on your workstation 
 using Red Hat CodeReady Containers:
