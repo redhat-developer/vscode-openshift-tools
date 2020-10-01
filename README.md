@@ -52,7 +52,7 @@ When working with [OpenShift Online](https://www.openshift.com/products/online/)
 * `OpenShift: Log in to cluster` - Log in to your server and save login for subsequent use.
     * Credentials : Log in to the given server with the given credentials.
     * Token : Login using bearer token for authentication to the API server.
-* `OpenShift: List catalog components` - List all available Component Types from OpenShift's Image Builder.
+* `OpenShift: List catalog components` - List all available Component Types.
 * `OpenShift: List catalog services` - Lists all available Services e.g. mysql-persistent.
 * `OpenShift: New Project` - Create new project inside the OpenShift Cluster.
 * `OpenShift: About` - Provides the information about the OpenShift tools.
@@ -84,7 +84,7 @@ When working with [OpenShift Online](https://www.openshift.com/products/online/)
 
 #### Commands for a Component
 
-Components can be in 3 stages:
+Components can be in one of 3 states:
 
    *  `pushed` - When the components are deployed into the cluster.
    *  `not pushed` - When the components are in local config but NOT deployed into the cluster.
@@ -138,16 +138,32 @@ Components in different states have different set of commands available.
    * `Describe` - Describe a Service Type for a selected Component
    * `Delete` - Delete a Service from an Application
 
-**NOTE:** Currently we support creation of one component per folder. Multiple components from a folder might be supported in future releases.
+**NOTE:** Currently we support creation of one component per folder. Multiple components from a folder might be supported in
+future releases.
 
 #### Running OpenShift Locally
-The extensions allows to create a webview panel to run local instance of OpenShift 4.5.7 using Red Hat CodeReady Containers. The wizard worrkflow guides to select the different configurations and start a new ckuster directly from the extension. Users can perform the following operations using the wizard:
 
-   * Start a new OpenShift cluster (4.5.7)
-   * Stop the cluster
-   * Refresh the status of the cluster
-   * Open the Console Dashboard
-   * Stop the cluster from Status Bar
+The extension provides a view to run local instance of OpenShift. To open the view use `Add OpenShift Cluster` button 
+![ addclusterbutton ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/add-cluster-button.png)
+from `OpenShift: Application Explorer` view title.
+
+![ addcluster ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/add-cluster.png)
+
+The view guides you through the steps required to create and start OpenShift 4 single node cluster on your workstation 
+using Red Hat CodeReady Containers:
+
+   * Download Red Hat CodeReady Containers
+   * Configure Red Hat CodeReady Containers
+   * Set Virtual Machine parameters: number of CPUs and memory amount
+   * Setup Red Hat CodeReady Containers
+   * Run Red Hat CodeReady Containers commands to control the cluster
+
+The view provides UI to control cluster's state:
+
+   * Start cluster
+   * Stop cluster
+   * Open OpenShift Developer Console for cluster
+   * Refresh cluster's state
 
 ![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/gif/crc-webview.gif)
 
