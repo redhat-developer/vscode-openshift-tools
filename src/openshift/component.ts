@@ -220,7 +220,7 @@ export class Component extends OpenShiftItem {
                 command(component.getParent().getParent().getName(),
                 component.getParent().getName(),
                 component.getName()),
-                component.contextPath.fsPath,
+                component.contextPath ? component.contextPath.fsPath : undefined,
                 `OpenShift: Describe '${component.getName()}' Component`);
         }
     }
