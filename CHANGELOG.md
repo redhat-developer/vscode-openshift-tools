@@ -4,6 +4,7 @@
 
 Noteworthy changes:
   - [#1507](https://github.com/redhat-developer/vscode-openshift-tools/issues/1507) - Support odo 2.0.0 devfile components
+  - [#1771](https://github.com/redhat-developer/vscode-openshift-tools/issues/1771) - Describe command fails for components without context
   - [#1754](https://github.com/redhat-developer/vscode-openshift-tools/issues/1754) - Provide RedHat OpenShift logo in 'Add OpenShift Cluster' editor for dark and light color themes
   - [#1751](https://github.com/redhat-developer/vscode-openshift-tools/issues/1751) - Run CRC webview only in vscode and not on Che instance
   - [#1740](https://github.com/redhat-developer/vscode-openshift-tools/issues/1740) - Migrate to crc 0.1.16 release
