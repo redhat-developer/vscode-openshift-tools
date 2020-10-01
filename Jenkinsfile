@@ -53,10 +53,10 @@ node('rhel8'){
     }
 
     stage("Publish to Marketplace") {
-      // withCredentials([[$class: 'StringBinding', credentialsId: 'vscode_java_marketplace', variable: 'TOKEN']]) {
-      //     def vsix = findFiles(glob: '**.vsix')
-      //     sh 'vsce publish -p ${TOKEN} --packagePath' + " ${vsix[0].path}"
-      // }
+      withCredentials([[$class: 'StringBinding', credentialsId: 'vscode_java_marketplace', variable: 'TOKEN']]) {
+        def vsix = findFiles(glob: '**.vsix')
+        sh 'vsce publish -p ${TOKEN} --packagePath' + " ${vsix[0].path}"
+      }
 
       // Open-vsx Marketplace
       sh "npm install -g ovsx"
