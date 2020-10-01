@@ -248,7 +248,7 @@ In case of any queries, please use the [Feedback & Question](#Feedback-&-Questio
 
 See the [change log](CHANGELOG.md).
 
-# Contributing
+## Contributing
 
 This is an open source project open to anyone. This project welcomes contributions and suggestions!
 
@@ -256,12 +256,12 @@ For information on getting started, refer to the [CONTRIBUTING instructions](CON
 
 Download the most recent `openshift-connector-<version>.vsix` file from the [release](https://github.com/redhat-developer/vscode-openshift-tools/releases) and install it by following the instructions [here](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix). Stable releases are archived [here](https://download.jboss.org/jbosstools/adapters/stable/vscode-openshift-tools/).
 
-# Feedback & Questions
+## Feedback & Questions
 
 If you discover an issue please file a bug and we will fix it as soon as possible.
 * File a bug in [GitHub Issues](https://github.com/redhat-developer/vscode-openshift-tools/issues).
 * Chat with us on [Gitter](https://gitter.im/redhat-developer/openshift-connector).
 
-# License
+## License
 
 MIT, See [LICENSE](LICENSE) for more information.
