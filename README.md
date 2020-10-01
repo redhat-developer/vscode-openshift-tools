@@ -29,17 +29,14 @@ For detail analysis of how to setup and run local OpenShift Cluster using minish
 
 If developers can't run OpenShift cluster locally, the extension can work with remote one provisioned with one of Red Hat products:
 
-In the public cloud,
-* [Run on Microsoft Azure](https://cloud.redhat.com/openshift/install/azure)
-* [Run on Amazon Web Services](https://cloud.redhat.com/openshift/install/aws)
-* [Run on Google Cloud Platform](https://cloud.redhat.com/openshift/install/gcp)
-
-In your datacenter,
 * [Red Hat OpenShift Container Platform](https://www.openshift.com/products/container-platform) - build, deploy and manage your applications across cloud- and on-premise infrastructure
 * [Red Hat OpenShift Dedicated](https://www.openshift.com/products/dedicated/) - single-tenant, high-availability Kubernetes clusters in the public cloud
+* [Microsoft Azure Red Hat OpenShift](https://www.openshift.com/products/azure-openshift) - fully managed Red Hat OpenShift service on Microsoft Azure
 * [Red Hat OpenShift Online](https://www.openshift.com/products/online/) - the fastest way for developers to build, host and scale applications in the public cloud
 
-When working with [OpenShift Online](https://www.openshift.com/products/online/) remote cluster only one component can be created for Starter plan and Pro plan with default 2GiB storage. If you want to create multi component application you could opt in for Pro plan with bigger persistence storage (up to 150GiB).
+To install OpenShift Container Platform 4 in the public cloud, in your datacenter or on your laptop please visit [Red Hat OpenShift Cluster Manager](https://cloud.redhat.com/openshift/install).
+
+**NOTE:** When working with [OpenShift Online](https://www.openshift.com/products/online/) remote cluster only one component can be created for Starter plan and Pro plan with default 2GiB storage. If you want to create multi component application you could opt in for Pro plan with bigger persistence storage (up to 150GiB).
 
 ## Commands and Features
 
