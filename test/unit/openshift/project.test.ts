@@ -176,4 +176,21 @@ suite('OpenShift/Project', () => {
             }
         });
     });
+
+    suite('set', () => {
+
+        test('makes selected project active', async () => {
+            sandbox.stub(vscode.window, 'showQuickPick').resolves(projectItem);
+            const result = await Project.set();
+            expect(execStub).calledWith(`odo project set ${projectItem.getName()}`)
+            expect(result).equals(`Project '${projectItem.getName()}' set as active.`)
+        });
+
+        test('exits without action if project selection was canceled', async () => {
+            sandbox.stub(vscode.window, 'showQuickPick').resolves(undefined);
+            const result = await Project.set();
+            expect(result).null;
+            expect(execStub).not.called;
+        });
+    });
 });
