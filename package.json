@@ -412,7 +412,7 @@
       },
       {
         "command": "openshift.component.createFromBinary",
-        "title": "New Component form binary",
+        "title": "New Component from binary",
         "category": "OpenShift"
       },
       {
