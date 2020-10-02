@@ -51,7 +51,7 @@ suite('OpenShift/Storage', () => {
             quickPickStub.onSecondCall().resolves(componentItem);
             getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
             sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
-            sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
+            sandbox.stub(OdoImpl.prototype, 'getApplicationChildren').resolves([componentItem]);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
             inputStub.onFirstCall().resolves(storageItem.getName());
             inputStub.onSecondCall().resolves(mountPath);
@@ -288,11 +288,10 @@ suite('OpenShift/Storage', () => {
         setup(() => {
             getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
             sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
-            sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
             sandbox.stub(OpenShiftItem, 'getStorageNames').resolves([storageItem]);
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
-            sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
+            sandbox.stub(OdoImpl.prototype, 'getApplicationChildren').resolves([componentItem]);
             getStorageNamesStub.resolves([]);
             quickPickStub.onFirstCall().resolves(appItem);
             quickPickStub.onSecondCall().resolves(componentItem);
