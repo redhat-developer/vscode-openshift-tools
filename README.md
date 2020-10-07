@@ -3,7 +3,7 @@
 [![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version/redhat.vscode-openshift-connector.svg)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector)
 [![Downloads](https://vsmarketplacebadge.apphb.com/downloads-short/redhat.vscode-openshift-connector.svg)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector)
 [![Gitter](https://badges.gitter.im/redhat-developer/openshift-connector.svg)](https://gitter.im/redhat-developer/openshift-connector)
-[![Build Status](https://github.com/redhat-developer/vscode-openshift-tools/workflows/CI/badge.svg)](https://github.com/redhat-developer/vscode-openshift-tools/actions?query=workflow%3ACI)
+[![Build Status](https://img.shields.io/github/workflow/status/redhat-developer/vscode-openshift-tools/CI)](https://github.com/redhat-developer/vscode-openshift-tools/actions?query=workflow%3ACI)
 [![Unit Tests Code Coverage](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/LICENSE)
 
