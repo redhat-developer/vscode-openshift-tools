@@ -19,9 +19,11 @@ import { Refs } from '../../../src/util/refs';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
 import { SourceTypeChoice } from '../../../src/openshift/component';
 import { S2iAdapter } from '../../../src/odo/componentType';
+import { SourceType } from '../../../src/odo/config';
 
 import pq = require('proxyquire');
 import globby = require('globby');
+
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -40,6 +42,7 @@ suite('OpenShift/Component', () => {
     const projectItem = new TestItem(clusterItem, 'myproject', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app1', ContextType.APPLICATION);
     const componentItem = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1');
+    const devfileComponentItem = new TestItem(appItem, 'compDev', ContextType.COMPONENT_PUSHED,[], comp2Uri, '/path',  SourceType.GIT)
     const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
     const errorMessage = 'FATAL ERROR';
     let getApps: sinon.SinonStub;
@@ -1504,6 +1507,22 @@ suite('OpenShift/Component', () => {
             expect(execStub).calledWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), gitUrl, gitRef));
             expect(result).equals(`Component '${componentItem.getName()}' was successfully imported.`);
 
+        });
+    });
+
+    suite('debug', () => {
+        test('without context exits if no component selected', async () => {
+            sandbox.stub(OpenShiftItem, 'getOpenShiftCmdData').resolves(null);
+            const result = await Component.debug();
+            expect(result).is.null;
+            expect(execStub).not.called;
+        });
+
+        test('called for git and binary components shows warning that only local components supported', async () => {
+            const warningStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves();
+            const result = await Component.debug(devfileComponentItem);
+            expect(result).is.null;
+            expect(warningStub).calledOnce;
         });
     });
 });
