@@ -91,7 +91,8 @@
         "files": ["*.test.ts"],
         "rules": {
             "no-unused-expressions": "off",
-            "@typescript-eslint/unbound-method" : "off"
+            "@typescript-eslint/unbound-method" : "off",
+            "max-nested-callbacks" : "off"
         }
     }
   ]
