@@ -687,42 +687,49 @@ export class Component extends OpenShiftItem {
     )
     static async debug(component: OpenShiftComponent): Promise<string | null> {
         if (!component) return null;
-        if (component.kind === ComponentKind.DEVFILE) {
-            return 'Debug command is not supported for Devfile Components.';
-        }
         if (component.compType === SourceType.LOCAL) {
             return Progress.execFunctionWithProgress(`Starting debugger session for the component '${component.getName()}'.`, () => Component.startDebugger(component));
         }
-        if (component.compType !== SourceType.GIT || SourceType.BINARY) {
-            throw new VsCommandError(`You are trying to run Debug on a ${component.compType} component, which is NOT supported. Debug Command is only supported for Local components.`);
-        }
+        window.showWarningMessage('Debug is supported only for local components.');
+        return null;
     }
 
     static async startDebugger(component: OpenShiftObject): Promise<string | undefined> {
+        let result: undefined | string | PromiseLike<string> = null;
         if (Component.debugSessions.get(component.contextPath.fsPath)) {
             const choice = await window.showWarningMessage(`Debugger session is already running for ${component.getName()}.`, 'Show \'Run and Debug\' view');
             if (choice) {
                 commands.executeCommand('workbench.view.debug');
             }
-            return null;
+            return result;
         }
         const components = await Component.odo.getComponentTypesJson();
-        // TODO: figure out how to do it type safe way
-        const componentBuilder: ComponentType<S2iComponentType> = components.find((comonentType) => comonentType.kind === ComponentKind.S2I ? comonentType.name === component.builderImage.name : false) as ComponentType<S2iComponentType>;
-        if (!componentBuilder) {
-            window.showWarningMessage('Debug command does not support Devfile Components');
-            return;
+        const componentBuilder: ComponentType<S2iComponentType> = components.find((comonentType) => comonentType.kind === component.kind? comonentType.name === component.builderImage.name : false) as ComponentType<S2iComponentType>;
+        let isJava: boolean;
+        let isNode: boolean;
+
+        if (componentBuilder && componentBuilder.kind === ComponentKind.S2I) { // s2i component has been selected for debug
+            const tag = componentBuilder.info.spec.imageStreamTags.find((element: { name: string }) => element.name === component.builderImage.tag);
+            if (tag) {
+                isJava = tag.annotations.tags.includes('java');
+                isNode = tag.annotations.tags.includes('nodejs');
+            } else {
+                await window.showWarningMessage('Cannot detect language for selected component.');
+                return result;
+            }
+        } else if (componentBuilder && componentBuilder.kind === ComponentKind.DEVFILE){
+            isJava = component.builderImage.name.includes('java');
+            isNode = component.builderImage.name.includes('nodejs');
+        } else {
+            await window.showWarningMessage('Cannot detect language for selected component.');
+            return result;
         }
 
-        const tag = componentBuilder.info.spec.imageStreamTags.find((element: { name: string }) => element.name === component.builderImage.tag);
-        const isJava = tag.annotations.tags.includes('java');
-        const isNode = tag.annotations.tags.includes('nodejs');
-        const JAVA_EXT = 'redhat.java';
-        const JAVA_DEBUG_EXT = 'vscjava.vscode-java-debug';
-        let result: undefined | string | PromiseLike<string>;
         if (isJava || isNode) {
             const toolLocation = await ToolsConfig.detect(`odo`);
             if (isJava) {
+                const JAVA_EXT = 'redhat.java';
+                const JAVA_DEBUG_EXT = 'vscjava.vscode-java-debug';
                 const jlsIsActive = extensions.getExtension(JAVA_EXT);
                 const jdIsActive = extensions.getExtension(JAVA_DEBUG_EXT);
                 if (!jlsIsActive || !jdIsActive) {
@@ -761,7 +768,7 @@ export class Component extends OpenShiftItem {
                     request: 'attach',
                     address: 'localhost',
                     localRoot: component.contextPath.fsPath,
-                    remoteRoot: '/opt/app-root/src'
+                    remoteRoot: component.kind === ComponentKind.S2I ? '/opt/app-root/src' : '/project'
                 });
             }
         } else {
@@ -771,15 +778,16 @@ export class Component extends OpenShiftItem {
     }
 
     static async startOdoAndConnectDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration): Promise<string> {
-        const cp = exec(`"${toolLocation}" debug port-forward`, {cwd: component.contextPath.fsPath});
+        const debugCmd = `"${toolLocation}" debug port-forward`;
+        const cp = exec(debugCmd, {cwd: component.contextPath.fsPath});
         return new Promise<string>((resolve, reject) => {
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             cp.stdout.on('data', async (data: string) => {
                 const parsedPort = data.trim().match(/- (?<localPort>\d+):\d+$/);
                 if (parsedPort?.groups?.localPort) {
                     await waitPort({
-                        host: 'localhost',
-                        port: parseInt(parsedPort.groups.localPort, 10)
+                         host: 'localhost',
+                         port: parseInt(parsedPort.groups.localPort, 10)
                     });
                     resolve(parsedPort.groups.localPort);
                 }
