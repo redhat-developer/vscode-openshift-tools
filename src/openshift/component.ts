@@ -783,7 +783,6 @@ export class Component extends OpenShiftItem {
         return new Promise<string>((resolve, reject) => {
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             cp.stdout.on('data', async (data: string) => {
-                console.log(data);
                 const parsedPort = data.trim().match(/- (?<localPort>\d+):\d+$/);
                 if (parsedPort?.groups?.localPort) {
                     await waitPort({
@@ -794,7 +793,6 @@ export class Component extends OpenShiftItem {
                 }
             });
             cp.stderr.on('data', (data: string) => {
-                console.log(data);
                 if (!`${data}`.includes('the local debug port 5858 is not free')) {
                     reject(data);
                 }
