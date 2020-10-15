@@ -9,31 +9,26 @@ import * as paths from 'path';
 
 import Mocha = require('mocha');
 
-
-const config: any = {
+const config: Mocha.MochaOptions = {
     reporter: 'mocha-jenkins-reporter',
     ui: 'tdd',
     timeout: 15000,
     color: true
 };
 
-if (process.env.BUILD_ID && process.env.BUILD_NUMBER) {
-    config.reporter = 'mocha-jenkins-reporter';
-}
-
 const mocha = new Mocha(config);
 
-export function run(): any {
+export function run(): Promise<void> {
      return new Promise((resolve, reject) => {
         const testsRoot = paths.resolve(__dirname);
-        glob('**/**.test.js', { cwd: testsRoot }, (error, files): any => {
+        glob('**/**.test.js', { cwd: testsRoot }, (error, files): void => {
             if (error) {
                 reject(error);
             } else {
                 files.forEach((f): Mocha => mocha.addFile(paths.join(testsRoot, f)));
                 mocha.run(failures => {
                     if (failures > 0) {
-                        reject(new Error(`${failures} tests failed.`));
+                        reject(new Error(`${failures} test${failures === 1 ? 's' : ''} failed.`));
                     } else {
                         resolve();
                     }
