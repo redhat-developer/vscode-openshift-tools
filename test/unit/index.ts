@@ -12,17 +12,13 @@ require('source-map-support').install();
 
 import Mocha = require('mocha');
 
-const config: any = {
+const config: Mocha.MochaOptions = {
     reporter: 'mocha-jenkins-reporter',
     ui: 'tdd',
     timeout: 60000,
     color: true,
     // grep: 'happy path works',
 };
-
-if (process.env.BUILD_ID && process.env.BUILD_NUMBER) {
-    config.reporter = 'mocha-jenkins-reporter';
-}
 
 const mocha = new Mocha(config);
 
@@ -39,7 +35,7 @@ export function run(): Promise<void> {
      return new Promise((resolve, reject) => {
         const testsRoot = paths.resolve(__dirname);
         const coverageRunner = loadCoverageRunner(testsRoot);
-        glob('**/**.test.js', { cwd: testsRoot }, (error, files): any => {
+        glob('**/**.test.js', { cwd: testsRoot }, (error, files): void => {
             if (error) {
                 reject(error);
             } else {
