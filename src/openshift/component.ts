@@ -85,7 +85,7 @@ export class Component extends OpenShiftItem {
     }
 
     static stopDebugSession(component: OpenShiftObject): boolean {
-        const ds = Component.debugSessions.get(component.contextPath.fsPath);
+        const ds = component.contextPath ? Component.debugSessions.get(component.contextPath.fsPath) : undefined;
         if (ds) {
             treeKill(ds.configuration.odoPid);
         }
@@ -93,7 +93,7 @@ export class Component extends OpenShiftItem {
     }
 
     static stopWatchSession(component: OpenShiftObject): boolean {
-        const ws = Component.watchSessions.get(component.contextPath.fsPath);
+        const ws = component.contextPath ? Component.watchSessions.get(component.contextPath.fsPath) : undefined;
         if (ws) {
             treeKill(ws.pid);
         }
