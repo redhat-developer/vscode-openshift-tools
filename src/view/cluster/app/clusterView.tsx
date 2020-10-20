@@ -364,8 +364,8 @@ export default function addClusterView() {
     if (settingPresent) {
       vscode.postMessage({action: 'start', isSetting: true });
     } else {
-      const crcStartCommand = (crcNameserver === '') ? `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory}`:
-          `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory} -n ${crcNameserver}`;
+      const crcStartCommand = (crcNameserver === '') ? `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory} -ojson`:
+          `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory} -n ${crcNameserver} -ojson`;
 
       vscode.postMessage({action: 'start',
                           data: crcStartCommand,

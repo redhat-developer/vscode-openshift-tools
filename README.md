@@ -209,7 +209,7 @@ To debug a Java Component, [Java Language Support](https://marketplace.visualstu
    * `Openshift Connector: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
    * `Openshift Connector: CRC Memory Allocation` - MiB of memory to allocate to the OpenShift cluster as selected during the first run.
 
-**NOTE:** CRC (Red Hat CodeReady Containers) version supported by the extension is `1.16.0` (OpenShift Version: `4.5.9`)
+**NOTE:** CRC (Red Hat CodeReady Containers) version supported by the extension is `1.17.0` (OpenShift Version: `4.5.14`)
 
 ## Dependencies
 
