@@ -52,7 +52,7 @@ export default class ClusterViewLoader {
                     const pullSecretFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcPullSecretPath");
                     const cpuFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcCpuCores");
                     const memoryFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcMemoryAllocated");
-                    startProcess = spawn(`${binaryFromSetting}`, ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`]);
+                    startProcess = spawn(`${binaryFromSetting}`, ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`, '-ojson']);
                 } else {
                     const [tool, ...params] = event.data.split(' ');
                     startProcess = spawn(tool, params);
@@ -65,7 +65,6 @@ export default class ClusterViewLoader {
                 startProcess.stderr.on('data', (chunk) => {
                     console.log(chunk);
                     channel.append(chunk);
-                    panel.webview.postMessage({action: 'sendcrcstarterror', data: chunk})
                 });
                 startProcess.on('close', async (code) => {
                     vscode.workspace.getConfiguration("openshiftConnector").update("crcBinaryLocation", event.crcLoc);
@@ -74,6 +73,9 @@ export default class ClusterViewLoader {
                     vscode.workspace.getConfiguration("openshiftConnector").update("crcMemoryAllocated", event.memory);
                     // eslint-disable-next-line no-console
                     console.log(`crc start exited with code ${code}`);
+                    if (code!= 0) {
+                        panel.webview.postMessage({action: 'sendcrcstarterror'})
+                    }
                     const binaryLoc = event.isSetting ? vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation"): event.crcLoc;
                     ClusterViewLoader.checkCrcStatus(binaryLoc, 'crcstartstatus', panel);
                 });
