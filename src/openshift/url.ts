@@ -108,12 +108,12 @@ export class Url extends OpenShiftItem{
             // in case of incorrect json output, ignore an error
         }
         if (result && result.length > 0) {
-            urlObject = result.filter((value) => (value.metadata.name === treeItem.getName()));
+            urlObject = result.filter((value) => (value.metadata.name === treeItem.getName() || value.metadata.name === treeItem.getName().replace('/', '-')));
         }
         if (urlObject[0].status.state === 'Pushed') {
             await commands.executeCommand('vscode.open', Uri.parse(`${urlObject[0].spec.protocol}://${urlObject[0].spec.host}`));
         } else {
-            return 'Selected URL is not created in cluster. Use \'Push\' command before opening URL in browser.';
+            return 'Selected URL is not created in cluster yet. Use \'Push\' command before opening URL in browser.';
         }
     }
 
