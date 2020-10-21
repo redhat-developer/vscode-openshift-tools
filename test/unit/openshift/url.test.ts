@@ -398,7 +398,7 @@ suite('OpenShift/URL', () => {
         test('shows warning if it is not pushed to cluster', async () => {
             execStub.resolves(genUlrListExecResult('Not pushed'));
             const result = await Url.open(routeItem);
-            expect(result).equals('Selected URL is not created in cluster. Use \'Push\' command before opening URL in browser.');
+            expect(result).equals('Selected URL is not created in cluster yet. Use \'Push\' command before opening URL in browser.');
         });
     });
 
