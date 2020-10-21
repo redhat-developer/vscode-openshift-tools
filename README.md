@@ -1,4 +1,4 @@
-# Visual Studio Code OpenShift Connector
+# OpenShift Connector
 
 [![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version/redhat.vscode-openshift-connector.svg)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector)
 [![Downloads](https://vsmarketplacebadge.apphb.com/downloads-short/redhat.vscode-openshift-connector.svg)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector)
