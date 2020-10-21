@@ -81,10 +81,11 @@ export abstract class OpenShiftObjectImpl implements OpenShiftObject {
 
     private explorerPath: string;
     protected readonly odo: Odo = getInstance();
+    protected locked = false;
 
     constructor(private parent: OpenShiftObject,
         public readonly name: string,
-        public readonly contextValue: ContextType,
+        public contextValue: ContextType,
         public readonly icon: string,
         // eslint-disable-next-line no-shadow
         public readonly collapsibleState: TreeItemCollapsibleState = Collapsed,
@@ -153,6 +154,14 @@ export abstract class OpenShiftObjectImpl implements OpenShiftObject {
 
     getParent(): OpenShiftObject {
         return this.parent;
+    }
+
+    public lock(): void {
+        this.locked = true;
+    }
+
+    public unlock(): void {
+        this.locked = false;
     }
 }
 
@@ -266,8 +275,10 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
         super(parent, name, contextValue, '', Collapsed, contextPath, compType, builderImage);
     }
     get iconPath(): Uri {
-        if (this.contextValue === ContextType.COMPONENT_PUSHED || this.contextValue === ContextType.COMPONENT || this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
-            let iconPath: Uri;
+        let iconPath: Uri;
+        if (this.locked) {
+            iconPath = Uri.file(path.join(__dirname, "../../images/component", 'progress.gif'));
+        } else if (this.contextValue === ContextType.COMPONENT_PUSHED || this.contextValue === ContextType.COMPONENT || this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
             if (this.compType === odo.SourceType.GIT) {
                 iconPath = Uri.file(path.join(__dirname, "../../images/component", 'git.png'));
             } else if (this.compType === odo.SourceType.BINARY) {
@@ -275,8 +286,8 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
             } else {
                 iconPath = Uri.file(path.join(__dirname, "../../images/component", 'workspace.png'));
             }
-            return iconPath;
         }
+        return iconPath;
     }
 
     getChildren(): Promise<OpenShiftObject[]> {
@@ -289,7 +300,9 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
 
     get description(): string {
         let suffix = '';
-        if (this.contextValue === ContextType.COMPONENT) {
+        if (this.locked) {
+            suffix = 'command is running ...';
+        } else if (this.contextValue === ContextType.COMPONENT) {
             suffix = `${GlyphChars.Space}${GlyphChars.NotPushed} not pushed`;
         } else if (this.contextValue === ContextType.COMPONENT_PUSHED) {
             suffix = `${GlyphChars.Space}${GlyphChars.Push} pushed`;
@@ -752,11 +765,41 @@ export class OdoImpl implements Odo {
     }
 
     public async executeInTerminal(command: string, cwd: string = process.cwd(), name = 'OpenShift'): Promise<void> {
-        const cmd = command.split(' ')[0];
-        const toolLocation = await ToolsConfig.detect(cmd);
-        const terminal: Terminal = WindowUtil.createTerminal(name, cwd);
-        terminal.sendText(toolLocation === cmd ? command : command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`), true);
+        const process = await this.spawn(command, cwd);
+        const terminal: Terminal = WindowUtil.createPseudoTerminal(name);
+        terminal.sendText('Pushing component to the cluster');
+        process.stdout.on('data', (data) => {
+            `${data}`.split('\n').forEach( event => {
+                const out = JSON.parse(event);
+                if (out.devFileCommandExecutionBegin) {
+                    terminal.sendText(`> ${out.devFileCommandExecutionBegin.commandLine}`);
+                } else if (out.logText) {
+                    if (out.logText.stream === 'stdout') {
+                        terminal.sendText(out.logText.text);
+                    } else {
+                        terminal.sendText(`\x1b[31m${out.logText.text}\x1b[0m`);
+                    }
+                }
+                // out.split('\n').forEach(line => terminal.sendText(line));
+            });
+        });
+        process.stderr.on('data', (data) => {
+            const out = JSON.stringify(JSON.parse(`${data}`), null, 4);
+            out.split('\n').forEach(line => terminal.sendText(`\x1b[31m${line}\x1b[0m`));
+        });
+        const result = new Promise<void>((res, rej) => {
+            process.on("exit", (code: number) => {
+                if (code === 0) {
+                    terminal.sendText("Push command successfully finished.");
+                } else {
+                    terminal.sendText(`Push command returned error code ${code}.`);
+                }
+                res();
+            });
+            process.on('error',rej);
+        });
         terminal.show();
+        return result;
     }
 
     public async execute(command: string, cwd?: string, fail = true): Promise<cliInstance.CliExitData> {

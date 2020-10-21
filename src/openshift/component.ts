@@ -436,10 +436,14 @@ export class Component extends OpenShiftItem {
         'For which Component you want to push the changes',
         (target) => target.contextValue === ContextType.COMPONENT_PUSHED || target.contextValue === ContextType.COMPONENT
     )
-    static async push(component: OpenShiftObject, configOnly = false): Promise<string | null> {
+    static async push(component: OpenShiftComponent, configOnly = false): Promise<string | null> {
         if (!component) return null;
         Component.setPushCmd(component.contextPath.fsPath, component.getName());
+        component.lock();
+        OpenShiftItem.explorer.refresh(component);
         await Component.odo.executeInTerminal(Command.pushComponent(configOnly), component.contextPath.fsPath, `OpenShift: Push '${component.getName()}' Component`);
+        component.unlock();
+        OpenShiftItem.explorer.refresh(component);
         component.contextValue = ContextType.COMPONENT_PUSHED;
         Component.explorer.refresh(component);
     }

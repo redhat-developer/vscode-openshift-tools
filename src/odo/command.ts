@@ -200,7 +200,7 @@ export class Command {
 
     @verbose
     static pushComponent(configOnly = false): string {
-        return `odo push --debug${configOnly ? ' --config' : ''}`;
+        return `odo push --debug${configOnly ? ' --config' : ''} -o json`;
     }
 
     @verbose
