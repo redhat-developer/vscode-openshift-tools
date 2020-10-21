@@ -655,8 +655,8 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
         const compTypesJson = this.loadJSON<ComponentTypesJson>(result.stdout);
         return [
-            ...compTypesJson?.s2iItems ? compTypesJson.s2iItems.map((item) => new S2iAdapter(item)) : [],
-            ...compTypesJson?.devfileItems ? compTypesJson.devfileItems.map((item) => new DevfileAdapter(item)) : []
+            ...compTypesJson?.devfileItems ? compTypesJson.devfileItems.map((item) => new DevfileAdapter(item)) : [],
+            ...compTypesJson?.s2iItems ? compTypesJson.s2iItems.map((item) => new S2iAdapter(item)) : []
         ];
     }
 
