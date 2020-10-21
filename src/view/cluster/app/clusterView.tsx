@@ -603,7 +603,7 @@ export default function addClusterView() {
                   </ListItemAvatar>
                   <ListItemText
                     primary="Download"
-                    secondary={<span>This will download the crc {crcLatest} bundle</span>}/>
+                    secondary={<span>This will download the CodeReady Containers {crcLatest} archive</span>}/>
                     <a href={fetchDownloadBinary()} style={{ textDecoration: 'none'}}>
                       <Button
                         color="default"
@@ -624,7 +624,7 @@ export default function addClusterView() {
                   </ListItemAvatar>
                   <ListItemText
                     primary={<span>Binary Location<sup style={{color: '#BE0000'}}>*</sup></span>}
-                    secondary={<span>Provide the crc {crcLatest} binary location</span>} />
+                    secondary={<span>Provide the CodeReady Containers {crcLatest} binary location</span>} />
                   <div>
                     <input
                     style={{ display: "none" }}

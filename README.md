@@ -204,7 +204,7 @@ To debug a Java Component, [Java Language Support](https://marketplace.visualstu
    * `OpenShift Connector: Output verbosity level` - Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and terminal view
    * `OpenShift Connector: Search CLI tools in PATH locations before using included binaries` - Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries
    * `OpenShift Connector: Use Webview based editors to show 'Show Log', 'Follow Log' and 'Describe' commands output` - Use Webview based editors instead of Terminal view to show or follow logs
-   * `Openshift Connector: CRC Binary Location` - Provide the path where the crc binary is present.
+   * `Openshift Connector: CRC Binary Location` - Provide the path where the CodeReady Containers binary file is present.
    * `Openshift Connector: CRC Pull Secret Path` - Provide the path where the pull secret file is present.
    * `Openshift Connector: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
    * `Openshift Connector: CRC Memory Allocation` - MiB of memory to allocate to the OpenShift cluster as selected during the first run.
