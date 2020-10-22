@@ -623,8 +623,8 @@ export default function addClusterView() {
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
-                    primary={<span>Binary Location<sup style={{color: '#BE0000'}}>*</sup></span>}
-                    secondary={<span>Provide the CodeReady Containers {crcLatest} binary location</span>} />
+                    primary={<span>Executable Location<sup style={{color: '#BE0000'}}>*</sup></span>}
+                    secondary={<span>Provide the CodeReady Containers {crcLatest} executable location</span>} />
                   <div>
                     <input
                     style={{ display: "none" }}
@@ -645,7 +645,7 @@ export default function addClusterView() {
                 {fileName && (
                     <TextField
                       id="outlined-location"
-                      label="Binary Location"
+                      label="Executable Location"
                       className={classes.textContainer}
                       style= {{ marginTop: '20px', width: '100%' }}
                       fullWidth
