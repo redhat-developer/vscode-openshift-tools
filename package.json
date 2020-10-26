@@ -1256,10 +1256,10 @@
           "description": "By default the Terminal View is used to execute OpenShift 'Show Log', 'Follow Log' and 'Describe' commands. Select this option if you want to use Webview based editors for it."
         },
         "openshiftConnector.crcBinaryLocation": {
-          "Title": "CRC Binary Location",
+          "Title": "CRC Executable Location",
           "type": "string",
           "default": null,
-          "description": "Provide the path where the crc binary is present."
+          "description": "Provide the path where the crc executable is present."
         },
         "openshiftConnector.crcPullSecretPath": {
           "Title": "CRC Pull Secret Path",
