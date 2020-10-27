@@ -43,15 +43,15 @@ export default class OpenShiftItem {
         return openshiftObject && `This name is already used, please enter different name.`;
     }
 
-    static getName(message: string, data: Array<OpenShiftObject>, offset?: string): Thenable<string> {
+    static async getName(message: string, data: Promise<Array<OpenShiftObject>>, offset?: string): Promise<string> {
         return window.showInputBox({
             prompt: `Provide ${message}`,
             ignoreFocusOut: true,
-            validateInput: (value: string) => {
+            validateInput: async (value: string) => {
                 let validationMessage = OpenShiftItem.emptyName(`Empty ${message}`, value.trim());
                 if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character`, value);
                 if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${message} should be between 2-63 characters`, value, offset ? offset.length : 0);
-                if (!validationMessage) validationMessage = OpenShiftItem.validateUniqueName(data, value);
+                if (!validationMessage) validationMessage = OpenShiftItem.validateUniqueName(await data, value);
                 return validationMessage;
             }
         });
@@ -95,11 +95,12 @@ export default class OpenShiftItem {
     }
 
     static async getApplicationNames(project: OpenShiftObject, createCommand = false): Promise<Array<OpenShiftObject | QuickPickCommand>> {
-        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getApplications(project);
-        if (applicationList.length === 0 && !createCommand) throw Error(errorMessage.Component);
-        return createCommand ? [new QuickPickCommand(`$(plus) Create new Application...`, async () => {
-            return OpenShiftItem.getName('Application name', applicationList);
-        }), ...applicationList] : applicationList;
+        return OpenShiftItem.odo.getApplications(project).then((applicationList) => {
+            if (applicationList.length === 0 && !createCommand) throw Error(errorMessage.Component);
+            return createCommand ? [new QuickPickCommand(`$(plus) Create new Application...`, async () => {
+                return OpenShiftItem.getName('Application name', Promise.resolve(applicationList));
+            }), ...applicationList] : applicationList;
+        });
     }
 
     static async getComponentNames(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]> {

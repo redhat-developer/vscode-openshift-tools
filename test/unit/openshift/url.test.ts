@@ -286,10 +286,10 @@ suite('OpenShift/URL', () => {
         test('checks if URL name is not empty', async () => {
             execStub.onFirstCall().resolves({error: null, stdout: noPortsOutput, stderr: ''});
             let result: string | Thenable<string>;
-            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
-                result = options.validateInput('');
+            inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
+                result = await options.validateInput('');
                 expect(result).equal('Empty URL name');
-                result = options.validateInput('Urlname');
+                result = await options.validateInput('Urlname');
                 expect(result).equal('Not a valid URL name. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character');
                 return Promise.resolve('');
             });

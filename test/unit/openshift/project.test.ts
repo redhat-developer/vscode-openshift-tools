@@ -76,8 +76,8 @@ suite('OpenShift/Project', () => {
         test('validator returns undefined for valid project name', async () => {
             let result: string | Thenable<string>;
             inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
-                result = options.validateInput('goodvalue');
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
+                result = await options.validateInput('goodvalue');
                 return Promise.resolve('goodvalue');
             });
             sandbox.stub(OdoImpl.Instance.subject, 'next');
@@ -89,8 +89,8 @@ suite('OpenShift/Project', () => {
         test('validator returns error message for empty project name', async () => {
             let result: string | Thenable<string>;
             inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
-                result = options.validateInput('');
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
+                result = await options.validateInput('');
                 return Promise.resolve('');
             });
             await Project.create();
@@ -101,8 +101,8 @@ suite('OpenShift/Project', () => {
         test('validator returns error message for none alphanumeric project name', async () => {
             let result: string | Thenable<string>;
             inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
-                result = options.validateInput('name&name');
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
+                result = await options.validateInput('name&name');
                 return Promise.resolve('projectNameValidatorTest');
             });
             sandbox.stub(OdoImpl.Instance.subject,"next");
@@ -114,8 +114,8 @@ suite('OpenShift/Project', () => {
         test('validator returns error message if same name of project found', async () => {
             let result: string | Thenable<string>;
             inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
-                result = options.validateInput('project');
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
+                result = await options.validateInput('project');
                 return Promise.resolve('project');
             });
             sandbox.stub(OdoImpl.Instance.subject, 'next');
@@ -127,8 +127,8 @@ suite('OpenShift/Project', () => {
         test('validator returns error message for project name longer than 63 characters', async () => {
             let result: string | Thenable<string>;
             inputStub.restore();
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
-                result = options.validateInput('n123456789012345678901234567890123456789012345678901234567890123');
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
+                result = await options.validateInput('n123456789012345678901234567890123456789012345678901234567890123');
                 return Promise.resolve('projectLongNameValidatorTest');
             });
             sandbox.stub(OdoImpl.Instance.subject,"next");
