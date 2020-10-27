@@ -11,6 +11,7 @@ import { Progress } from "../util/progress";
 import { Port } from '../odo/config';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { ComponentKind } from '../odo/componentType';
+import { Url as OdoUrl } from '../odo/url';
 
 export class Url extends OpenShiftItem{
 
@@ -20,7 +21,7 @@ export class Url extends OpenShiftItem{
             'Select an Application to create a URL',
             'Select a Component you want to create a URL for');
         if (component) {
-            const urlName = await Url.getName('URL name', await Url.odo.getRoutes(component));
+            const urlName = await Url.getName('URL name', Url.odo.getRoutes(component));
             if (!urlName) return null;
 
             let port: string;
@@ -100,8 +101,8 @@ export class Url extends OpenShiftItem{
     static async open(treeItem: OpenShiftObject): Promise<string> {
         const component = treeItem.getParent();
         const urlDetails = await Url.odo.execute(Command.getComponentUrl(), component.contextPath.fsPath);
-        let urlObject: any;
-        let result: any[];
+        let urlObject: OdoUrl[];
+        let result: OdoUrl[];
         try {
             result = JSON.parse(urlDetails.stdout).items;
         } catch (ignore) {
