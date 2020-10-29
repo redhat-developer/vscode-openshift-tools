@@ -821,11 +821,6 @@ export class Component extends OpenShiftItem {
                     resolve(parsedPort.groups.localPort);
                 }
             });
-            cp.stderr.on('data', (data: string) => {
-                if (!`${data}`.includes('the local debug port 5858 is not free')) {
-                    reject(data);
-                }
-            });
         }).then((result) => {
             config.contextPath = component.contextPath;
             if (config.type === 'python') {
