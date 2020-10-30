@@ -73,8 +73,8 @@ suite('OpenShift/Service', () => {
         test('validation returns null for correct service name', async () => {
             getApplicationsStub.resolves([appItem]);
             let result: string | Thenable<string>;
-            inputStub.callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
-                result = options.validateInput('goodvalue');
+            inputStub.callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
+                result = await options.validateInput('goodvalue');
                 return Promise.resolve('goodvalue');
             });
             quickPickStub.resolves(templateName);
@@ -85,8 +85,8 @@ suite('OpenShift/Service', () => {
         test('validation returns message for long service name', async () => {
             getApplicationsStub.resolves([appItem]);
             let result: string | Thenable<string>;
-            inputStub.callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
-                result = options.validateInput('goodvaluebutwaytolongtobeusedasservicenameincubernetescluster');
+            inputStub.callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
+                result = await options.validateInput('goodvaluebutwaytolongtobeusedasservicenameincubernetescluster');
                 return Promise.resolve(null);
             });
             quickPickStub.resolves(templateName);
@@ -161,8 +161,8 @@ suite('OpenShift/Service', () => {
 
         test('validator returns undefined for valid service name', async () => {
             let result: string | Thenable<string>;
-            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
-                result = options.validateInput('goodvalue');
+            inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
+                result = await options.validateInput('goodvalue');
                 return Promise.resolve('goodvalue');
             });
             await Service.create(appItem);
@@ -172,8 +172,8 @@ suite('OpenShift/Service', () => {
 
         test('validator returns error message for empty service name', async () => {
             let result: string | Thenable<string>;
-            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
-                result = options.validateInput('');
+            inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
+                result = await options.validateInput('');
                 return Promise.resolve('');
             });
             await Service.create(appItem);
@@ -183,8 +183,8 @@ suite('OpenShift/Service', () => {
 
         test('validator returns error message for none alphanumeric service name', async () => {
             let result: string | Thenable<string>;
-            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
-                result = options.validateInput('name&name');
+            inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
+                result = await options.validateInput('name&name');
                 return Promise.resolve('serviceTestValidatorName');
             });
             await Service.create(appItem);
@@ -194,8 +194,8 @@ suite('OpenShift/Service', () => {
 
         test('validator returns error message if same name of service found', async () => {
             let result: string | Thenable<string>;
-            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
-                result = options.validateInput('service');
+            inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
+                result = await options.validateInput('service');
                 return Promise.resolve('service');
             });
             await Service.create(appItem);
@@ -205,8 +205,8 @@ suite('OpenShift/Service', () => {
 
         test('validator returns error message for service name longer than 63 characters', async () => {
             let result: string | Thenable<string>;
-            inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
-                result = options.validateInput('n123456789012345678901234567890123456789012345678901234567890123');
+            inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
+                result = await options.validateInput('n123456789012345678901234567890123456789012345678901234567890123');
                 return Promise.resolve('serviceLongNameValidatorTest');
             });
             await Service.create(appItem);

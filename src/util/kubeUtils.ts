@@ -16,10 +16,18 @@ export class KubeConfigUtils extends KubeConfig {
     public getServers(): QuickPickItem[] {
         const currentCluster = this.getCurrentCluster();
         const clusters = this.clusters || [];
-        return clusters.map((c: Cluster) => ({
+        const qpItems = clusters.map((c: Cluster) => ({
             label: c.server,
             description: currentCluster && c.name === currentCluster.name ? 'Current Context' : '',
         }));
+        const filterMap = new Set();
+        return qpItems.filter((item) => {
+            const notDuplicate = !filterMap.has(item.label);
+            if(notDuplicate)  {
+               filterMap.add(item.label);
+            }
+            return notDuplicate;
+        });
     }
 
     public getClusterUsers(clusterServer: string): QuickPickItem[] {

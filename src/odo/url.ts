@@ -10,9 +10,12 @@ export interface Url {
     apiVersion: string;
     metadata: ComponentMetadata;
     spec: {
+        host: string;
+        protocol: string;
         port: number;
         secure: boolean;
         kind: string;
+        path: string;
     };
     status: {
         state: string;

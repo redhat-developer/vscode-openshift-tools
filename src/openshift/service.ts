@@ -37,7 +37,7 @@ export class Service extends OpenShiftItem {
             window.showErrorMessage('No Service Plans available for selected Service Template');
         }
         if (!serviceTemplatePlanName) return null;
-        const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(application);
+        const serviceList = OpenShiftItem.odo.getServices(application);
         const serviceName = await Service.getName('Service name', serviceList, application.getName());
         if (!serviceName) return null;
         return Progress.execFunctionWithProgress(`Creating a new Service '${serviceName}'`, () => Service.odo.createService(application, serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))

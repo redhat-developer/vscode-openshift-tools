@@ -25,7 +25,7 @@ export class Project extends OpenShiftItem {
 
     @vsCommand('openshift.project.create')
     static async create(): Promise<string> {
-        const projectList: Array<OpenShiftObject> = await OpenShiftItem.odo.getProjects();
+        const projectList = OpenShiftItem.odo.getProjects();
         let projectName = await Project.getName('Project name', projectList);
         if (!projectName) return null;
         projectName = projectName.trim();

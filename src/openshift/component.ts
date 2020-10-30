@@ -5,7 +5,6 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-
 import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
 import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
@@ -15,7 +14,7 @@ import { OpenShiftObject, ContextType, OpenShiftObjectImpl, OpenShiftComponent }
 import { Command } from "../odo/command";
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
-import { Refs, Ref, Type } from '../util/refs';
+import { Refs, Type } from '../util/refs';
 import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import { selectWorkspaceFolder } from '../util/workspace';
@@ -25,11 +24,11 @@ import DescribeViewLoader from '../view/describe/describeViewLoader';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { SourceType } from '../odo/config';
 import { ComponentKind, ComponentType,  S2iComponentType } from '../odo/componentType';
+import { Url } from '../odo/url';
 
 import path = require('path');
 import globby = require('globby');
 import treeKill = require('tree-kill');
-
 
 const waitPort = require('wait-port');
 
@@ -508,7 +507,7 @@ export class Component extends OpenShiftItem {
     )
     static async openUrl(component: OpenShiftObject): Promise<ChildProcess | string> {
         if (!component) return null;
-        const app: OpenShiftObject = component.getParent();
+        const app = component.getParent();
         const urlItems = await Component.listUrl(component);
         if (urlItems === null) {
             const value = await window.showInformationMessage(`No URL for Component '${component.getName()}' in Application '${app.getName()}'. Do you want to create a URL and open it?`, 'Create', 'Cancel');
@@ -519,10 +518,10 @@ export class Component extends OpenShiftItem {
 
         if (urlItems !== null) {
             let selectRoute: QuickPickItem;
-            const unpushedUrl = urlItems.filter((value: { status: { state: string } }) => value.status.state === 'Not Pushed');
-            const pushedUrl = urlItems.filter((value: { status: { state: string } }) => value.status.state === 'Pushed');
+            const unpushedUrl = urlItems.filter((value: Url) => value.status.state === 'Not Pushed');
+            const pushedUrl = urlItems.filter((value: Url) => value.status.state === 'Pushed');
             if (pushedUrl.length > 0) {
-                const hostName: QuickPickItem[] = pushedUrl.map((value: { spec: { protocol: string; host: string; port: any } }) => ({ label: `${value.spec.protocol}://${value.spec.host}`, description: `Target Port is ${value.spec.port}`}));
+                const hostName: QuickPickItem[] = pushedUrl.map((value: Url) => ({ label: `${value.spec.protocol}://${value.spec.host}`, description: `Target Port is ${value.spec.port}`}));
                 if (hostName.length >1) {
                     selectRoute = await window.showQuickPick(hostName, {placeHolder: "This Component has multiple URLs. Select the desired URL to open in browser.", ignoreFocusOut: true});
                     if (!selectRoute) return null;
@@ -536,7 +535,7 @@ export class Component extends OpenShiftItem {
         }
     }
 
-    static async listUrl(component: OpenShiftObject): Promise<any> {
+    static async listUrl(component: OpenShiftObject): Promise<Url[]> {
         const UrlDetails = await Component.odo.execute(Command.getComponentUrl(), component.contextPath.fsPath);
         return JSON.parse(UrlDetails.stdout).items;
     }
@@ -550,7 +549,7 @@ export class Component extends OpenShiftItem {
         const workspacePath = await selectWorkspaceFolder();
         if (!workspacePath) return null;
 
-        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
+        const componentList = Component.odo.getComponents(application);
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
@@ -569,12 +568,13 @@ export class Component extends OpenShiftItem {
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
+    // Use explorerResourceIsRoot context to detect selection for workspace forlder in explorer
     static async createFromFolder(folder: Uri): Promise<string | null> {
         const application = await Component.getOpenShiftCmdData(undefined,
             "In which Application you want to create a Component"
         );
         if (!application) return null;
-        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
+        const componentList = Component.odo.getComponents(application);
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
@@ -615,12 +615,12 @@ export class Component extends OpenShiftItem {
 
         if (!repoURI) return null;
 
-        const references: Map<string, Ref> = await Refs.fetchTag(repoURI);
+        const references = await Refs.fetchTag(repoURI);
         const gitRef = await window.showQuickPick([...references.values()].map(value => ({label: value.name, description: value.type === Type.TAG? `Tag at ${value.hash}` : value.hash })) , {placeHolder: "Select git reference (branch/tag)", ignoreFocusOut: true});
 
         if (!gitRef) return null;
 
-        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
+        const componentList = Component.odo.getComponents(application);
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
@@ -663,7 +663,7 @@ export class Component extends OpenShiftItem {
 
         if (!binaryFile) return null;
 
-        const componentList: Array<OpenShiftObject> = await Component.odo.getComponents(application);
+        const componentList = Component.odo.getComponents(application);
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
@@ -707,25 +707,25 @@ export class Component extends OpenShiftItem {
         const componentBuilder: ComponentType<S2iComponentType> = components.find((comonentType) => comonentType.kind === component.kind? comonentType.name === component.builderImage.name : false) as ComponentType<S2iComponentType>;
         let isJava: boolean;
         let isNode: boolean;
+        let isPython: boolean;
 
         if (componentBuilder && componentBuilder.kind === ComponentKind.S2I) { // s2i component has been selected for debug
             const tag = componentBuilder.info.spec.imageStreamTags.find((element: { name: string }) => element.name === component.builderImage.tag);
             if (tag) {
                 isJava = tag.annotations.tags.includes('java');
                 isNode = tag.annotations.tags.includes('nodejs');
+                isPython = tag.annotations.tags.includes('python');
             } else {
                 await window.showWarningMessage('Cannot detect language for selected component.');
                 return result;
             }
-        } else if (componentBuilder && componentBuilder.kind === ComponentKind.DEVFILE){
+        } else {
             isJava = component.builderImage.name.includes('java');
             isNode = component.builderImage.name.includes('nodejs');
-        } else {
-            await window.showWarningMessage('Cannot detect language for selected component.');
-            return result;
+            isPython = component.builderImage.name.includes('python');
         }
 
-        if (isJava || isNode) {
+        if (isJava || isNode || isPython) {
             const toolLocation = await ToolsConfig.detect(`odo`);
             if (isJava) {
                 const JAVA_EXT = 'redhat.java';
@@ -748,7 +748,7 @@ export class Component extends OpenShiftItem {
                             if (!jlsIsActive) await commands.executeCommand('workbench.extensions.installExtension', JAVA_EXT);
                             if (!jdIsActive) await commands.executeCommand('workbench.extensions.installExtension', JAVA_DEBUG_EXT);
                         });
-                        await window.showInformationMessage("Please reload window to activate installed extensions.", 'Reload');
+                        await window.showInformationMessage("Please reload the window to activate installed extensions.", 'Reload');
                         await commands.executeCommand("workbench.action.reloadWindow");
                     }
                 }
@@ -758,6 +758,35 @@ export class Component extends OpenShiftItem {
                         type: 'java',
                         request: 'attach',
                         hostName: 'localhost',
+                        projectName: path.basename(component.contextPath.fsPath)
+                    });
+                }
+            } else if (isPython) {
+                const PYTHON_EXT = 'ms-python.python';
+                const pythonExtIsInstalled = extensions.getExtension('ms-python.python');
+                if (!pythonExtIsInstalled) {
+                    const response = await window.showWarningMessage('Python extension is required to debug component', 'Install');
+                    if (response === 'Install') {
+                        await window.withProgress({ location: ProgressLocation.Notification }, async (progress) => {
+                            progress.report({ message: 'Installing extensions required to debug Python Component ...'});
+                            await commands.executeCommand('workbench.extensions.installExtension', PYTHON_EXT);
+                        });
+                        await window.showInformationMessage("Please reload the window to activate installed extension.", 'Reload');
+                        await commands.executeCommand("workbench.action.reloadWindow");
+                    }
+                }
+                if (pythonExtIsInstalled) {
+                    result = Component.startOdoAndConnectDebugger(toolLocation, component,  {
+                        name: `Attach to '${component.getName()}' component.`,
+                        type: 'python',
+                        request: 'attach',
+                        connect: {
+                            host: 'localhost'
+                        },
+                        pathMappings: [{
+                            localRoot: component.contextPath.fsPath,
+                            remoteRoot: "/projects"
+                        }],
                         projectName: path.basename(component.contextPath.fsPath)
                     });
                 }
@@ -772,7 +801,7 @@ export class Component extends OpenShiftItem {
                 });
             }
         } else {
-            window.showWarningMessage('Debug command supports only local Java and Node.Js components.');
+            window.showWarningMessage('Debug command supports only local Java, Node.Js and Python components.');
         }
         return result;
     }
@@ -792,14 +821,13 @@ export class Component extends OpenShiftItem {
                     resolve(parsedPort.groups.localPort);
                 }
             });
-            cp.stderr.on('data', (data: string) => {
-                if (!`${data}`.includes('the local debug port 5858 is not free')) {
-                    reject(data);
-                }
-            });
         }).then((result) => {
             config.contextPath = component.contextPath;
-            config.port = result;
+            if (config.type === 'python') {
+                config.connect.port = result;
+            } else {
+                config.port = result;
+            }
             config.odoPid = cp.pid;
             return debug.startDebugging(workspace.getWorkspaceFolder(component.contextPath), config);
         }).then((result: boolean) =>

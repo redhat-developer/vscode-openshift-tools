@@ -639,7 +639,15 @@ export class OdoImpl implements Odo {
                 item.contextValue = ContextType.COMPONENT_PUSHED;
                 item.builderImage = builderImage;
             } else {
-                deployedComponents.push(new OpenShiftComponent(application, comp.metadata.name, item ? item.contextValue : ContextType.COMPONENT, Uri.file(comp.status.context), comp.spec.sourceType, comp.spec.sourceType ? ComponentKind.S2I : ComponentKind.DEVFILE, builderImage));
+                deployedComponents.push(
+                    new OpenShiftComponent(
+                        application,
+                        comp.metadata.name, item ? item.contextValue : ContextType.COMPONENT,
+                        Uri.file(comp.status.context),
+                        comp.spec.sourceType ? comp.spec.sourceType : odo.SourceType.LOCAL,
+                        comp.spec.sourceType ? ComponentKind.S2I : ComponentKind.DEVFILE, builderImage
+                    )
+                );
             }
         });
 
@@ -653,7 +661,7 @@ export class OdoImpl implements Odo {
 
     public async getComponentTypesJson(): Promise<OdoComponentType[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
-        const compTypesJson = this.loadJSON<ComponentTypesJson>(result.stdout);
+        const compTypesJson: ComponentTypesJson = this.loadJSON(result.stdout);
         return [
             ...compTypesJson?.devfileItems ? compTypesJson.devfileItems.map((item) => new DevfileAdapter(item)) : [],
             ...compTypesJson?.s2iItems ? compTypesJson.s2iItems.map((item) => new S2iAdapter(item)) : []
