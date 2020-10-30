@@ -9,6 +9,12 @@ import { spawn, ChildProcess } from 'child_process';
 import { ExtenisonID } from '../../util/constants';
 import { WindowUtil } from '../../util/windowUtils';
 import { CliChannel } from '../../cli';
+import * as odo from '../../odo';
+import { Progress } from "../../util/progress";
+import { Command } from "../../odo/command";
+import { Cluster } from "../../openshift/cluster"
+import { VsCommandError } from '../../vscommand';
+
 
 export default class ClusterViewLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -63,7 +69,6 @@ export default class ClusterViewLoader {
                     channel.append(chunk);
                 });
                 startProcess.stderr.on('data', (chunk) => {
-                    console.log(chunk);
                     channel.append(chunk);
                 });
                 startProcess.on('close', async (code) => {
@@ -113,17 +118,37 @@ export default class ClusterViewLoader {
             if (event.action === 'checkcrcstatus') {
                 ClusterViewLoader.checkCrcStatus(event.data, 'crcstatus', panel);
             }
+
+            if (event.action === 'crclogin') {
+                const clusterURL = event.url;
+                const username = event.data.username;
+                const passwd = event.data.password;
+                Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`,
+                () => odo.getInstance().execute(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd))
+                .then((result) => Cluster.loginMessage(clusterURL, result))
+                .catch((error) => Promise.reject(new VsCommandError(`Failed to login to cluster '${clusterURL}' with ${error}`)))
+                );
+            }
         })
         return panel;
     }
 
     private static async checkCrcStatus(filePath: string, postCommand: string, panel: vscode.WebviewPanel | undefined = undefined) {
+        let crcCredArray = [];
         const crcVerInfo = await CliChannel.getInstance().execute(`${filePath} version -ojson`);
         const result =  await CliChannel.getInstance().execute(`${filePath} status -ojson`);
+        const crcCreds = await CliChannel.getInstance().execute(`${filePath} console --credentials -ojson`);
+        crcCredArray.push(JSON.parse(crcCreds.stdout).clusterConfig);
         if (result.stderr || crcVerInfo.stderr) {
             panel.webview.postMessage({action: postCommand, errorStatus: true});
         } else {
-            panel.webview.postMessage({action: postCommand, status: JSON.parse(result.stdout), errorStatus: false, versionInfo: JSON.parse(crcVerInfo.stdout)});
+            panel.webview.postMessage({
+                action: postCommand,
+                status: JSON.parse(result.stdout),
+                errorStatus: false,
+                versionInfo: JSON.parse(crcVerInfo.stdout),
+                creds: crcCredArray
+            });
         }
     }
 
