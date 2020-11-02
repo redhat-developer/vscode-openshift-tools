@@ -188,7 +188,7 @@ suite('odo integration', () => {
             sqpStub.onFirstCall().resolves('Yes');
             await commands.executeCommand('openshift.url.create', component);
             const urls = await oi.getRoutes(component);
-            [url1] = urls;
+            url1 = urls.find(value => value.getName() === `${urlName}1`);
         });
 
         test('storage for not pushed component', async () => {
@@ -208,14 +208,14 @@ suite('odo integration', () => {
             sqpStub.onFirstCall().resolves('Yes');
             await commands.executeCommand('openshift.url.create', component);
             const urls = await oi.getRoutes(component);
-            [,url2] = urls;
+            url2 = urls.find(value => value.getName() === `${urlName}2`);
         });
 
         test('create service', async function() {
             if (openshiftVersion >= '4.5.0') this.skip();
             const errMessStub = sb.stub(window, 'showErrorMessage');
             service = await createService(existingApp, 'mongodb-persistent-instance', 'mongodb-persistent');
-            expect(errMessStub).has.not.been.called;
+            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
             expect(service).is.not.undefined;
         });
 
@@ -237,21 +237,21 @@ suite('odo integration', () => {
             const errMessStub = sb.stub(window, 'showErrorMessage')
             await commands.executeCommand('openshift.component.debug', component);
             expect(Component.stopDebugSession(component)).to.be.true;
-            expect(errMessStub).has.not.been.called;
+            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
         });
 
         test('start/stop watch', async () => {
             const errMessStub = sb.stub(window, 'showErrorMessage')
             await commands.executeCommand('openshift.component.watch', component);
             expect(Component.stopWatchSession(component)).to.be.true;
-            expect(errMessStub).has.not.been.called;
+            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
         });
 
         test('delete storage', async () => {
             sb.stub(window, 'showWarningMessage').resolves('Yes');
             const errMessStub = sb.stub(window, 'showErrorMessage')
             await commands.executeCommand('openshift.storage.delete', storage);
-            expect(errMessStub).has.not.been.called;
+            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
         });
 
         test('delete url', async () => {
@@ -259,7 +259,7 @@ suite('odo integration', () => {
             const errMessStub = sb.stub(window, 'showErrorMessage')
             await commands.executeCommand('openshift.url.delete', url1);
             await commands.executeCommand('openshift.url.delete', url2);
-            expect(errMessStub).has.not.been.called;
+            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
         });
 
         test('delete component', async () => {
@@ -274,7 +274,7 @@ suite('odo integration', () => {
             if (componentFromBinary) {
                 await commands.executeCommand('openshift.component.delete', componentFromBinary);
             }
-            expect(errMessStub).has.not.been.called;
+            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
         });
 
         test('delete service', async function() {
@@ -282,7 +282,7 @@ suite('odo integration', () => {
             sb.stub(window, 'showWarningMessage').resolves('Yes');
             const errMessStub = sb.stub(window, 'showErrorMessage')
             await commands.executeCommand('openshift.service.delete', service);
-            expect(errMessStub).has.not.been.called;
+            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
         });
     });
 
@@ -320,7 +320,7 @@ suite('odo integration', () => {
                 .onFirstCall().resolves(linkedComp2.getName())
                 .onSecondCall().resolves("8080");
             await commands.executeCommand('openshift.component.unlinkComponent.palette', linkedComp1);
-            expect(errMessStub).has.not.been.called;
+            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
         });
 
         test('unlink component and service', async function() {
@@ -329,7 +329,7 @@ suite('odo integration', () => {
             sb.stub(window, 'showQuickPick')
                 .onFirstCall().resolves(service.getName());
             await commands.executeCommand('openshift.component.unlinkService.palette', linkedComp2);
-            expect(errMessStub).has.not.been.called;
+            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
         });
 
         test('delete application', async () => {
