@@ -55,63 +55,25 @@ export interface ComponentTypesJson {
     devfileItems: DevfileComponentType[];
 }
 
-export interface ComponentType <I> {
+export interface ComponentType {
     label: string;
     description: string;
     name: string;
     kind: ComponentKind;
-    versions: string[];
-    info: I;
+    version: string;
 }
 
-export type OdoComponentType = ComponentType<S2iComponentType | DevfileComponentType>;
-
-abstract class ComponentTypeAdapter<I> implements ComponentType<I> {
-    constructor(public readonly info: I, public readonly kind: ComponentKind) {
+export class ComponentTypeAdapter implements ComponentType {
+    constructor(
+        public readonly kind: ComponentKind,
+        public readonly name: string,
+        public readonly version: string,
+        public readonly description: string,
+        public readonly tags?: string) {
     }
 
     get label(): string {
-        return `${this.name} (${this.kind})`;
+        const versionSuffix = this.version? `/${this.version}` : '' ;
+        return `${this.name}${versionSuffix} (${this.kind})`;
     }
-
-    abstract get name(): string;
-    abstract get description(): string;
-    abstract get versions(): string[];
-}
-
-export class S2iAdapter extends ComponentTypeAdapter<S2iComponentType> implements ComponentType<S2iComponentType> {
-
-    constructor(public readonly info: S2iComponentType) {
-        super(info, ComponentKind.S2I);
-    }
-
-    get name(): string {
-        return this.info.metadata.name;
-    }
-
-    get description(): string {
-        return ''
-    }
-
-    get versions(): string[] {
-        return this.info.spec.allTags;
-    }
-
-}
-
-export class DevfileAdapter extends ComponentTypeAdapter<DevfileComponentType> {
-
-    constructor(public readonly info: DevfileComponentType) {
-        super(info, ComponentKind.DEVFILE);
-    }
-
-    get name(): string {
-        return this.info.Name;
-    }
-
-    get description(): string {
-        return this.info.Description;
-    }
-
-    public readonly versions: string[] = [];
 }

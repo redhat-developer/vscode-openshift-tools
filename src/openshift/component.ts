@@ -23,7 +23,7 @@ import LogViewLoader from '../view/log/LogViewLoader';
 import DescribeViewLoader from '../view/describe/describeViewLoader';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { SourceType } from '../odo/config';
-import { ComponentKind, ComponentType,  S2iComponentType } from '../odo/componentType';
+import { ComponentKind, ComponentTypeAdapter } from '../odo/componentType';
 import { Url } from '../odo/url';
 
 import path = require('path');
@@ -553,18 +553,11 @@ export class Component extends OpenShiftItem {
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
-        const componentType = await window.showQuickPick(Component.odo.getComponentTypesJson(), {placeHolder: "Component type", ignoreFocusOut: true});
+        const componentType = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type", ignoreFocusOut: true});
 
         if (!componentType) return null;
 
-        let componentTypeVersion:string;
-        if(componentType.versions.length > 0) {
-            componentTypeVersion = await window.showQuickPick(componentType.versions, {placeHolder: "Component type version", ignoreFocusOut: true});
-        }
-
-        if (!componentTypeVersion && componentType.versions.length > 0) return null;
-
-        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentType.name, componentTypeVersion, componentName, workspacePath));
+        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentType.name, componentType.version, componentName, workspacePath));
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
@@ -578,15 +571,11 @@ export class Component extends OpenShiftItem {
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
-        const componentType = await window.showQuickPick(Component.odo.getComponentTypesJson(), {placeHolder: "Component type", ignoreFocusOut: true});
+        const componentType = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type", ignoreFocusOut: true});
 
         if (!componentType) return null;
 
-        const componentTypeVersion = await window.showQuickPick(componentType.versions, {placeHolder: "Component type version", ignoreFocusOut: true});
-
-        if (!componentTypeVersion) return null;
-
-        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentType.name, componentTypeVersion, componentName, folder));
+        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentType.name, componentType.version, componentName, folder));
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
@@ -624,20 +613,13 @@ export class Component extends OpenShiftItem {
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
-        const componentTypesPromise = Component.odo.getComponentTypesJson();
+        const componentTypesPromise = Component.odo.getComponentTypes();
         const s2iComponentTypes = componentTypesPromise.then((items) => items.filter((item) => item.kind === ComponentKind.S2I));
         const componentType = await window.showQuickPick(s2iComponentTypes, {placeHolder: "Component type", ignoreFocusOut: true});
 
         if (!componentType) return null;
 
-        let componentTypeVersion:string;
-        if(componentType.versions.length > 0) {
-            componentTypeVersion = await window.showQuickPick(componentType.versions, {placeHolder: "Component type version", ignoreFocusOut: true});
-        }
-
-        if (!componentTypeVersion && componentType.versions.length > 0) return null;
-
-        await Component.odo.createComponentFromGit(application, componentType.name, componentTypeVersion, componentName, repoURI, workspacePath, gitRef.label);
+        await Component.odo.createComponentFromGit(application, componentType.name, componentType.version, componentName, repoURI, workspacePath, gitRef.label);
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
@@ -667,15 +649,11 @@ export class Component extends OpenShiftItem {
         const componentName = await Component.getName('Component name', componentList, application.getName());
 
         if (!componentName) return null;
-        const componentType = await window.showQuickPick((await Component.odo.getComponentTypesJson()).filter((item) => item.kind === ComponentKind.S2I), {placeHolder: "Component type", ignoreFocusOut: true});
+        const componentType = await window.showQuickPick((await Component.odo.getComponentTypes()).filter((item) => item.kind === ComponentKind.S2I), {placeHolder: "Component type", ignoreFocusOut: true});
 
         if (!componentType) return null;
 
-        const componentTypeVersion = await window.showQuickPick(componentType.versions, {placeHolder: "Component type version", ignoreFocusOut: true});
-
-        if (!componentTypeVersion) return null;
-
-        await Component.odo.createComponentFromBinary(application, componentType.name, componentTypeVersion, componentName, Uri.file(binaryFile.description), workspacePath);
+        await Component.odo.createComponentFromBinary(application, componentType.name, componentType.version, componentName, Uri.file(binaryFile.description), workspacePath);
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
@@ -703,18 +681,17 @@ export class Component extends OpenShiftItem {
             }
             return result;
         }
-        const components = await Component.odo.getComponentTypesJson();
-        const componentBuilder: ComponentType<S2iComponentType> = components.find((comonentType) => comonentType.kind === component.kind? comonentType.name === component.builderImage.name : false) as ComponentType<S2iComponentType>;
+        const components = await Component.odo.getComponentTypes();
+        const componentBuilder: ComponentTypeAdapter = components.find((comonentType) => comonentType.kind === component.kind? comonentType.name === component.builderImage.name : false);
         let isJava: boolean;
         let isNode: boolean;
         let isPython: boolean;
 
         if (componentBuilder && componentBuilder.kind === ComponentKind.S2I) { // s2i component has been selected for debug
-            const tag = componentBuilder.info.spec.imageStreamTags.find((element: { name: string }) => element.name === component.builderImage.tag);
-            if (tag) {
-                isJava = tag.annotations.tags.includes('java');
-                isNode = tag.annotations.tags.includes('nodejs');
-                isPython = tag.annotations.tags.includes('python');
+            if (componentBuilder.tags) {
+                isJava = componentBuilder.tags.includes('java');
+                isNode = componentBuilder.tags.includes('nodejs');
+                isPython = componentBuilder.tags.includes('python');
             } else {
                 await window.showWarningMessage('Cannot detect language for selected component.');
                 return result;

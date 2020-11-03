@@ -18,12 +18,11 @@ import * as Util from '../../../src/util/async';
 import { Refs } from '../../../src/util/refs';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
 import { SourceTypeChoice } from '../../../src/openshift/component';
-import { S2iAdapter } from '../../../src/odo/componentType';
 import { SourceType } from '../../../src/odo/config';
+import { ComponentKind, ComponentTypeAdapter } from '../../../src/odo/componentType';
 
 import pq = require('proxyquire');
 import globby = require('globby');
-
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -91,52 +90,7 @@ suite('OpenShift/Component', () => {
     });
 
     suite('create', () => {
-        const componentType = new S2iAdapter({
-			kind: "ComponentType",
-			apiVersion: "odo.dev/v1alpha1",
-			metadata: {
-				name: "nodejs",
-				namespace: "openshift",
-				creationTimestamp: null
-			},
-			spec: {
-				allTags: [
-					"10",
-					"12",
-					"latest"
-				],
-				nonHiddenTags: [
-					"10",
-					"12",
-					"latest"
-				],
-				supportedTags: [
-					"10",
-					"12",
-					"latest"
-				],
-				imageStreamTags: [
-					{
-						name: "10",
-						annotations: {
-							description: "Build and run Node.js 10 applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/sclorg/s2i-nodejs-container/blob/master/10/README.md.",
-							"openshift.io/display-name": "Node.js 10",
-							tags: "builder,nodejs",
-							version: "10"
-						}
-					},
-					{
-						name: "12",
-						annotations: {
-							description: "Build and run Node.js 12 applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/sclorg/s2i-nodejs-container/blob/master/12/README.md.",
-							"openshift.io/display-name": "Node.js 12",
-							tags: "builder,nodejs",
-							version: "12"
-						}
-					}
-				]
-			}
-		});
+        const componentType = new ComponentTypeAdapter(ComponentKind.S2I, 'nodejs', 'latest', 'builder,nodejs');
         const version = 'latest';
         const ref = 'master';
         const folder = { uri: { fsPath: 'folder' } };
@@ -148,7 +102,6 @@ suite('OpenShift/Component', () => {
             quickPickStub.onFirstCall().resolves(SourceTypeChoice.LOCAL);
             quickPickStub.onSecondCall().resolves({label: 'file:///c:/Temp', folder: vscode.Uri.parse('file:///c:/Temp')});
             quickPickStub.onThirdCall().resolves(componentType);
-            quickPickStub.onCall(3).resolves(version);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
             progressFunctionStub = sandbox.stub(Progress, 'execFunctionWithProgress').yields();
             sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
@@ -215,13 +168,6 @@ suite('OpenShift/Component', () => {
 
                 expect(result).null;
             });
-
-            test('returns null when no component type version selected', async () => {
-                quickPickStub.onCall(3).resolves(undefined);
-                const result = await Component.create(appItem);
-
-                expect(result).null;
-            });
         });
 
         suite('from git repository', () => {
@@ -284,13 +230,6 @@ suite('OpenShift/Component', () => {
 
             test('returns null when no component type selected', async () => {
                 quickPickStub.onCall(3).resolves();
-                const result = await Component.create(appItem);
-
-                expect(result).null;
-            });
-
-            test('returns null when no component type version selected', async () => {
-                quickPickStub.onCall(4).resolves();
                 const result = await Component.create(appItem);
 
                 expect(result).null;
@@ -428,13 +367,6 @@ suite('OpenShift/Component', () => {
 
                 expect(result).null;
             });
-
-            test('returns null when no component type version selected', async () => {
-                quickPickStub.onCall(4).resolves();
-                const result = await Component.create(appItem);
-
-                expect(result).null;
-            });
         });
     });
 
@@ -463,13 +395,6 @@ suite('OpenShift/Component', () => {
 
         test('return null when no component name is provided', async () => {
             inputStub.resolves();
-            const result = await Component.createFromFolder(folder);
-            expect(result).null;
-        });
-
-        test('return null when no component version selected', async () => {
-            inputStub.resolves(componentItem.getName());
-            quickPickStub.onThirdCall().resolves('nodejs');
             const result = await Component.createFromFolder(folder);
             expect(result).null;
         });
