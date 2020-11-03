@@ -514,12 +514,6 @@ suite("odo", () => {
             sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves(componentCatalog);
         });
 
-        test("getComponentTypes returns correct component type names", async () => {
-            const result = await odoCli.getComponentTypes();
-            expect(result.length).equals(1);
-            expect(result[0]).equals('nodejs (s2i)');
-        });
-
     });
 
     suite("service integration", () => {

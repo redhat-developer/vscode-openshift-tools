@@ -20,7 +20,7 @@ import { Platform } from './util/platform';
 import * as odo from './odo/config';
 import { GlyphChars } from './util/constants';
 import { Application } from './odo/application';
-import { ComponentType, ComponentTypesJson, S2iComponentType, DevfileComponentType, S2iAdapter, DevfileAdapter, OdoComponentType, ComponentKind } from './odo/componentType';
+import { ComponentType, ComponentTypesJson, ComponentKind, ComponentTypeAdapter } from './odo/componentType';
 import { Project } from './odo/project';
 import { ComponentsJson, DevfileComponentAdapter, S2iComponentAdapter } from './odo/component';
 import { Url } from './odo/url';
@@ -335,8 +335,7 @@ export interface Odo {
     getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]>;
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponents(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]>;
-    getComponentTypes(): Promise<string[]>;
-    getComponentTypesJson(): Promise<ComponentType<S2iComponentType | DevfileComponentType>[]>;
+    getComponentTypes(): Promise<ComponentTypeAdapter[]>;
     getImageStreamRef(name: string, namespace: string): Promise<ImageStream>;
     getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]>;
@@ -654,17 +653,28 @@ export class OdoImpl implements Odo {
         return deployedComponents;
     }
 
-    public async getComponentTypes(): Promise<string[]> {
-        const items = await this.getComponentTypesJson();
-        return items.map((value:OdoComponentType) => value.label);
-    }
-
-    public async getComponentTypesJson(): Promise<OdoComponentType[]> {
+    public async getComponentTypes(): Promise<ComponentType[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
         const compTypesJson: ComponentTypesJson = this.loadJSON(result.stdout);
+        const devfileItems = compTypesJson?.devfileItems ? compTypesJson.devfileItems.map((item) => new ComponentTypeAdapter(ComponentKind.DEVFILE, item.Name, undefined, item.Description)) : [];
+        const s2iItems: ComponentTypeAdapter[] = [];
+
+        if (compTypesJson?.s2iItems) {
+            compTypesJson.s2iItems.forEach(element => {
+                if (element?.spec?.nonHiddenTags) {
+                    element.spec.nonHiddenTags.forEach(tag => {
+                        const foundTag = element.spec.imageStreamTags.find(imageTag => imageTag.name === tag);
+                        if (foundTag) {
+                            s2iItems.push(new ComponentTypeAdapter(ComponentKind.S2I, element.metadata.name, tag, foundTag?.annotations?.description, foundTag.annotations.tags));
+                        }
+                    });
+                }
+            });
+        }
+
         return [
-            ...compTypesJson?.devfileItems ? compTypesJson.devfileItems.map((item) => new DevfileAdapter(item)) : [],
-            ...compTypesJson?.s2iItems ? compTypesJson.s2iItems.map((item) => new S2iAdapter(item)) : []
+            ...devfileItems,
+            ...s2iItems
         ];
     }
 
