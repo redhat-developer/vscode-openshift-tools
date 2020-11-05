@@ -1,0 +1,16 @@
+kind: LocalConfig
+apiversion: odo.dev/v1alpha1
+ComponentSettings:
+  Type: httpd:latest
+  SourceLocation: sample.war
+  SourceType: binary
+  Ports:
+  - 8080/TCP
+  - 8443/TCP
+  Application: app
+  Project: p4
+  Name: binary-component
+  Url:
+  - Name: url1-binary
+    Port: 8080
+    Secure: true
