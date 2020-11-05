@@ -137,8 +137,8 @@ export class Command {
         return `odo delete ${component} -f --app ${app} --project ${project}`;
     }
 
-    static deleteComponent(project: string, app: string, component: string): string {
-        return `odo delete ${component} -f --app ${app} --project ${project} --all`;
+    static deleteComponent(project: string, app: string, component: string, s2i = false): string {
+        return `odo delete ${component} -f --app ${app} --project ${project} --all ${s2i? ' --s2i' : ''}`;
     }
 
     static describeComponentNoContext(project: string, app: string, component: string): string {

@@ -742,7 +742,7 @@ suite('OpenShift/Component', () => {
             const result = await Component.del(componentItem);
 
             expect(result).equals(`Component '${componentItem.getName()}' successfully deleted`);
-            expect(execStub).calledWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(execStub).calledWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), true));
         });
 
         test('works with no context', async () => {
@@ -750,7 +750,7 @@ suite('OpenShift/Component', () => {
             const result = await Component.del(null);
 
             expect(result).equals(`Component '${componentItem.getName()}' successfully deleted`);
-            expect(execStub).calledWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(execStub).calledWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), true));
         });
 
         test('wraps errors in additional info', async () => {
