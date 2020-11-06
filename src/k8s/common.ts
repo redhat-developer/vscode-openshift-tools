@@ -40,3 +40,12 @@ export async function getChildrenNode(command: string, kind: string, abbreviatio
     }
     return [];
 }
+
+export async function asJson<T>(command: string): Promise<T> {
+    const kubectl = await k8s.extension.kubectl.v1;
+    if (kubectl.available) {
+        const result = await kubectl.api.invokeCommand(`${command} -o json`);
+        return JSON.parse(result.stdout) as T;
+    }
+    return;
+}

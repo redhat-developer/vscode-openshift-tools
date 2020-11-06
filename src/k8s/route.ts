@@ -6,25 +6,24 @@
 import { KubeConfig } from '@kubernetes/client-node';
 import { Uri, commands } from 'vscode';
 import { vsCommand, VsCommandError } from '../vscommand';
-
-const openshiftRestClient = require('openshift-rest-client').OpenshiftClient;
+import { asJson } from './common';
 
  export class Route {
 
+    public static command = {
+        getRoute(namespace: string, name: string): string {
+            return `get route ${name} -n ${namespace}`;
+        }
+    };
+
     public static getUrl(namespace: string, name: string): Promise<string> {
-        return openshiftRestClient().then((client: any) => {
-            return client.apis["route.openshift.io"].v1
-              .namespaces(namespace)
-              .routes(name)
-              .get()
-              .then((response: any) => {
-                const hostName = response?.body?.spec.host;
-                if (hostName === undefined) {
-                    throw new VsCommandError(`Cannot identify host name for Route '${name}'`);
-                }
-                return response.body.spec.tls ? `https://${hostName}` : `http://${hostName}`;
-              });
-          });
+        return asJson(Route.command.getRoute(namespace, name)).then((response: any) => {
+            const hostName = response?.spec.host;
+            if (hostName === undefined) {
+                throw new VsCommandError(`Cannot identify host name for Route '${name}'`);
+            }
+            return response.spec.tls ? `https://${hostName}` : `http://${hostName}`;
+        });
     }
 
     @vsCommand('clusters.openshift.route.open')
