@@ -383,19 +383,19 @@ suite('OpenShift/Component', () => {
 
         test('returns null when no option is selected from quick pick', async () => {
             quickPickStub.onFirstCall().resolves(undefined);
-            const result = await Component.createFromFolder(null);
+            const result = await Component.createFromRootWorkspaceFolder(null);
             expect(result).null;
         });
 
         test('return null when no component type selected', async () => {
             inputStub.resolves(componentItem.getName());
-            const result = await Component.createFromFolder(folder);
+            const result = await Component.createFromRootWorkspaceFolder(folder);
             expect(result).null;
         });
 
         test('return null when no component name is provided', async () => {
             inputStub.resolves();
-            const result = await Component.createFromFolder(folder);
+            const result = await Component.createFromRootWorkspaceFolder(folder);
             expect(result).null;
         });
 
@@ -403,7 +403,7 @@ suite('OpenShift/Component', () => {
             inputStub.resolves(componentItem.getName());
             quickPickStub.onThirdCall().resolves('nodejs');
             quickPickStub.resolves('latest');
-            const result = await Component.createFromFolder(folder);
+            const result = await Component.createFromRootWorkspaceFolder(folder);
             expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
         });
     });

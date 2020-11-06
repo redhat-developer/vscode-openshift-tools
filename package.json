@@ -186,6 +186,7 @@
     "onCommand:openshift.component.createFromLocal",
     "onCommand:openshift.component.createFromGit",
     "onCommand:openshift.component.createFromBinary",
+    "onCommand:openshift.component.createFromRootWorkspaceFolder",
     "onCommand:openshift.component.describe",
     "onCommand:openshift.component.describe.palette",
     "onCommand:openshift.component.log",
@@ -401,6 +402,11 @@
       {
         "command": "openshift.component.createFromLocal",
         "title": "New Component from local folder",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.createFromRootWorkspaceFolder",
+        "title": "New OpenShift Component",
         "category": "OpenShift"
       },
       {
@@ -758,6 +764,12 @@
       ]
     },
     "menus": {
+      "explorer/context": [
+        {
+          "command": "openshift.component.createFromRootWorkspaceFolder",
+          "when" : "explorerResourceIsFolder && explorerResourceIsRoot"
+        }
+      ],
       "commandPalette": [
         {
           "command": "openshift.project.delete",
@@ -774,6 +786,10 @@
         {
           "command": "openshift.component.create",
           "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.createFromRootWorkspaceFolder",
+          "when": "view == workbench.view.explorer"
         },
         {
           "command": "clusters.openshift.build.delete",
