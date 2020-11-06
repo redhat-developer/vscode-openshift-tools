@@ -562,20 +562,37 @@ export class Component extends OpenShiftItem {
     }
 
     // Use explorerResourceIsRoot context to detect selection for workspace forlder in explorer
-    static async createFromFolder(folder: Uri): Promise<string | null> {
+    @vsCommand('openshift.component.createFromRootWorkspaceFolder')
+    static async createFromRootWorkspaceFolder(folder: Uri, componentTypeName?: string, componentKind = ComponentKind.DEVFILE): Promise<string | null> {
         const application = await Component.getOpenShiftCmdData(undefined,
-            "In which Application you want to create a Component"
+            "Select an Application where you want to create a Component"
         );
+
         if (!application) return null;
-        const componentList = Component.odo.getComponents(application);
-        const componentName = await Component.getName('Component name', componentList, application.getName());
+
+        const componentName = await Component.getName(
+            'Component name',
+            Component.odo.getComponents(application),
+            application.getName()
+        );
 
         if (!componentName) return null;
-        const componentType = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type", ignoreFocusOut: true});
+
+        let componentType: ComponentTypeAdapter;
+        const componentTypes = Component.odo.getComponentTypes();
+        if (componentTypeName) {
+            componentType = (await componentTypes).find(type => type.name === componentTypeName && type.kind === componentKind);
+        }
+        if (!componentType) {
+            componentType = await window.showQuickPick(componentTypes, { placeHolder: "Component type", ignoreFocusOut: true });
+        }
 
         if (!componentType) return null;
 
-        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentType.name, componentType.version, componentName, folder));
+        await Progress.execFunctionWithProgress(
+            `Creating new Component '${componentName}'`,
+            () => Component.odo.createComponentFromFolder(application, componentType.name, componentType.version, componentName, folder)
+        );
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
