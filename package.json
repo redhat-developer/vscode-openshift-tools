@@ -20,6 +20,21 @@
       "url": "https://badges.gitter.im/redhat-developer/openshift-connector.svg",
       "href": "https://gitter.im/redhat-developer/openshift-connector",
       "description": "Join us at #openshift-connector channel"
+    },
+    {
+      "url": "https://img.shields.io/github/workflow/status/redhat-developer/vscode-openshift-tools/CI",
+      "href": "https://github.com/redhat-developer/vscode-openshift-tools/actions?query=workflow%3ACI",
+      "description": "Build status"
+    },
+    {
+      "url": "https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg",
+      "href": "https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/",
+      "description": "Unit tests code coverage"
+    },
+    {
+      "url" : "https://img.shields.io/badge/license-MIT-brightgreen.svg",
+      "href": "https://github.com/redhat-developer/vscode-openshift-tools/blob/master/LICENSE",
+      "description": "License"
     }
   ],
   "categories": [
