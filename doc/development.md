@@ -31,6 +31,18 @@ src/openshift/component.ts
 
 # Known Problems
 
+## Trigger github-actions build after failure related to infrastructure
+
+If build fails because it cannot download oc and odo binaries, there is no way to trigger new
+build through github.com ui. To trigger new build just use
+
+```
+git commit --allow-empty -m "restart github-actions build"
+git push
+```
+
+Then after build is green squash commit while releasing your PR changes to the master branch.
+
 ## Running tests on Windows fails with error `Uncaught TypeError: Cannot read property 'phase' of null`
 
 This is most likely related to run extension tests after installing extension from .vsix file.
