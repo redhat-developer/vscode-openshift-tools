@@ -2,7 +2,7 @@
   "name": "vscode-openshift-connector",
   "displayName": "OpenShift Connector",
   "description": "Simplified app dev for Kubernetes or Red Hat OpenShift",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "publisher": "redhat",
   "author": "Red Hat",
