@@ -221,6 +221,13 @@ This extension uses two CLI tools to interact with OpenShift cluster:
 
 > `oc` and `odo` tools for Windows, Linux and macOS are included into extension package. Once the extension is installed it is ready to use.
 
+Starting from `v0.2.0` extension includes `odo` CLI tool `v2.0.0` and supports devfile in addition to S2I (software-to-image) components. Devfiles are new way of deploying a component with odo.
+Follow the links below for additional information:
+
+* [Understanding odo](https://odo.dev/docs/understanding-odo/)
+* [Devfile file reference](https://odo.dev/file-reference/)
+* [Deploying your first application using odo](https://odo.dev/docs/deploying-a-devfile-using-odo/)
+
 ### Extensions
 
 This extension depends on [Kubernetes Extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) from Microsoft which is going to be installed automatically along with OpenShift Connector Extension. Latter is using Kubernetes Extension public API to show
