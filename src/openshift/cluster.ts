@@ -263,7 +263,7 @@ export class Cluster extends OpenShiftItem {
         );
     }
 
-    private static async loginMessage(clusterURL: string, result: CliExitData): Promise<string | undefined> {
+    static async loginMessage(clusterURL: string, result: CliExitData): Promise<string | undefined> {
         if (result.stderr === "") {
             Cluster.explorer.refresh();
             await commands.executeCommand('setContext', 'isLoggedIn', true);

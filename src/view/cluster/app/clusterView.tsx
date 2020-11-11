@@ -11,6 +11,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import StopIcon from '@material-ui/icons/Stop';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 const prettyBytes = require('pretty-bytes');
 import {
   Accordion,
@@ -158,11 +159,11 @@ const useStyles = makeStyles((theme: Theme) =>
       alignItems: "center"
     },
     column: {
-      flexBasis: "50%"
+      flexBasis: "40%"
     },
     helper: {
       borderLeft: `2px solid ${theme.palette.divider}`,
-      padding: theme.spacing(1, 2)
+      padding: theme.spacing(1, 1)
     },
     heading: {
       fontSize: theme.typography.pxToRem(15)
@@ -254,7 +255,7 @@ export default function addClusterView() {
   const [crcStopError, setCrcStopError] = React.useState(false);
   const [crcStopStatus, setStopStatus] = React.useState(false);
   const [activeStep, setActiveStep] = React.useState(0);
-  const [status, setStatus] = React.useState({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: '', crcVer: '', openshiftVer: ''});
+  const [status, setStatus] = React.useState({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: '', crcVer: '', openshiftVer: '', creds: []});
   const [settingPresent, setSettingPresent] = React.useState(false);
   const [statusSkeleton, setStatusSkeleton] = React.useState(true);
   const [statusError, setStatusError] = React.useState(false);
@@ -318,7 +319,9 @@ export default function addClusterView() {
                 cacheUsage: prettyBytes(message.status.cacheUsage),
                 cacheDir: message.status.cacheDir,
                 crcVer: message.versionInfo.version,
-                openshiftVer: message.versionInfo.openshiftVersion});
+                openshiftVer: message.versionInfo.openshiftVersion,
+                creds: message.creds
+              });
   }
 
   const handleUploadPath = (event) => {
@@ -388,6 +391,10 @@ export default function addClusterView() {
     vscode.postMessage({action: 'run', data: `${fileName}` })
   }
 
+  const handleCrcLogin = (loginDetails, clusterUrl) => {
+    vscode.postMessage({action: 'crclogin', data: loginDetails, url: clusterUrl })
+  }
+
   const handleRefresh = () => {
     setStatusSkeleton(true);
     if (settingPresent) {
@@ -418,7 +425,7 @@ export default function addClusterView() {
     setCrcStartError(false);
     setCrcStopError(false);
     setStopStatus(false);
-    setStatus({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: '', crcVer: '', openshiftVer: ''});
+    setStatus({crcStatus: '', openshiftStatus: '', diskUsage: '', cacheUsage: '', cacheDir: '', crcVer: '', openshiftVer: '', creds: []});
     setSettingPresent(false);
     setStatusSkeleton(true);
     setStatusError(false);
@@ -490,14 +497,15 @@ export default function addClusterView() {
             </ListItem>
           </List>
         </div>
-        {(status.openshiftStatus != 'Stopped') && (
+        { status.creds?.map((label) => (
         <div className={classes.helper}>
-          <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none'}}>
-            <Button component="span" className={classes.button}>
-              Open OpenShift Console
+            <Button variant="outlined" size="small" className={classes.button} key="admin" onClick={() => {handleCrcLogin(label.adminCredentials, label.url)}}>
+              <ExitToAppIcon fontSize="small"/>Login using {label.adminCredentials.username}
             </Button>
-          </a>
-        </div>)}
+            <Button variant="outlined" size="small" className={classes.button} key="developer" onClick={() => {handleCrcLogin(label.developerCredentials, label.url)}}>
+              <ExitToAppIcon fontSize="small"/>Login using {label.developerCredentials.username}
+            </Button>
+        </div>))}
       </AccordionDetails>
       <Divider />
       <AccordionActions>
@@ -507,6 +515,14 @@ export default function addClusterView() {
         <Button size="small" component="span" className={classes.button} onClick={handleRefresh} startIcon={<RefreshIcon />}>
           Refresh Status
         </Button>
+        {(status.openshiftStatus != 'Stopped') && (
+        <div>
+          <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none'}}>
+            <Button size="small" component="span" className={classes.button}>
+              Open Console Dashboard
+            </Button>
+          </a>
+        </div>)}
       </AccordionActions>
     </Accordion>
     )}
