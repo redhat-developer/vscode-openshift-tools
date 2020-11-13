@@ -102,13 +102,12 @@ export class Cluster extends OpenShiftItem {
     }
 
     @vsCommand('openshift.explorer.addCluster')
-    static add(): Promise<any> {
+    static add(): void {
         ClusterViewLoader.loadView(`Add OpenShift Cluster`);
-        return;
     }
 
     @vsCommand('openshift.explorer.stopCluster')
-    static async stop(): Promise<any> {
+    static async stop(): Promise<void> {
         let pathSelectionDialog;
         let newPathPrompt;
         let crcBinary;
@@ -175,13 +174,16 @@ export class Cluster extends OpenShiftItem {
     }
 
     @vsCommand('openshift.explorer.login.credentialsLogin')
-    static async credentialsLogin(skipConfirmation = false): Promise<string> {
+    static async credentialsLogin(skipConfirmation = false, userClusterUrl?: string, userName?: string, userPassword?: string): Promise<string> {
         let password: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
 
         if (response !== 'Yes') return null;
 
-        const clusterURL = await Cluster.getUrl();
+        let clusterURL = userClusterUrl;
+        if (!clusterURL) {
+            clusterURL = await Cluster.getUrl();
+        }
 
         if (!clusterURL) return null;
 
@@ -193,33 +195,45 @@ export class Cluster extends OpenShiftItem {
 
         if (!choice) return null;
 
-        const username =  (choice.label === addUser.label) ?
-            await window.showInputBox({
-                ignoreFocusOut: true,
-                prompt: "Provide Username for basic authentication to the API server",
-                value: "",
-                validateInput: (value: string) => Cluster.emptyName('User name cannot be empty', value)
-            }) : choice.label;
-
-        if (getUserName) password = await TokenStore.getItem('login', username);
+        let username = userName;
+        if (!username)  {
+            if (choice.label === addUser.label) {
+                username = await window.showInputBox({
+                    ignoreFocusOut: true,
+                    prompt: "Provide Username for basic authentication to the API server",
+                    value: "",
+                    validateInput: (value: string) => Cluster.emptyName('User name cannot be empty', value)
+                })
+            } else {
+                username = choice.label;
+            }
+        }
 
         if (!username) return null;
 
-        const passwd  = await window.showInputBox({
-            ignoreFocusOut: true,
-            password: true,
-            prompt: "Provide Password for basic authentication to the API server",
-            value: password
-        });
+        if (getUserName) password = await TokenStore.getItem('login', username);
+
+        let passwd = userPassword;
+        if (!passwd) {
+            passwd = await window.showInputBox({
+                ignoreFocusOut: true,
+                password: true,
+                prompt: "Provide Password for basic authentication to the API server",
+                value: password
+            });
+        }
 
         if (!passwd) return null;
 
-        return Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`,
-            () => Cluster.odo.execute(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd))
-            .then((result) => Cluster.save(username, passwd, password, result))
-            .then((result) => Cluster.loginMessage(clusterURL, result))
-            .catch((error) => Promise.reject(new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.message)}'!`)))
-        );
+        try {
+            const result = await Progress.execFunctionWithProgress(
+                `Login to the cluster: ${clusterURL}`,
+                () => Cluster.odo.execute(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd)));
+            await Cluster.save(username, passwd, password, result);
+            return Cluster.loginMessage(clusterURL, result);
+        } catch (error) {
+            throw new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.message)}'!`);
+        }
     }
 
     static async readFromClipboard(): Promise<string> {
