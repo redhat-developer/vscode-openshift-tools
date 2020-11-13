@@ -61,7 +61,6 @@
     "import/no-unresolved": ["error"],
     "import/no-duplicates": ["error"],
     "import/prefer-default-export": 0,
-    "import/no-cycle": ["warn"],
     "max-nested-callbacks": [1, 4],
     "max-classes-per-file": [0],
     "no-alert": 2,

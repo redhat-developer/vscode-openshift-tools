@@ -9,12 +9,6 @@ import { spawn, ChildProcess } from 'child_process';
 import { ExtenisonID } from '../../util/constants';
 import { WindowUtil } from '../../util/windowUtils';
 import { CliChannel } from '../../cli';
-import * as odo from '../../odo';
-import { Progress } from "../../util/progress";
-import { Command } from "../../odo/command";
-import { Cluster } from "../../openshift/cluster"
-import { VsCommandError } from '../../vscommand';
-
 
 export default class ClusterViewLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -120,13 +114,11 @@ export default class ClusterViewLoader {
             }
 
             if (event.action === 'crclogin') {
-                const clusterURL = event.url;
-                const username = event.data.username;
-                const passwd = event.data.password;
-                Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`,
-                () => odo.getInstance().execute(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd))
-                .then((result) => Cluster.loginMessage(clusterURL, result))
-                .catch((error) => Promise.reject(new VsCommandError(`Failed to login to cluster '${clusterURL}' with ${error}`)))
+                vscode.commands.executeCommand(
+                    'openshift.explorer.login.credentialsLogin',
+                    event.url,
+                    event.data.username,
+                    event.data.password
                 );
             }
         })
