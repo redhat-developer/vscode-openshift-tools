@@ -116,6 +116,7 @@ export default class ClusterViewLoader {
             if (event.action === 'crclogin') {
                 vscode.commands.executeCommand(
                     'openshift.explorer.login.credentialsLogin',
+                    true,
                     event.url,
                     event.data.username,
                     event.data.password
