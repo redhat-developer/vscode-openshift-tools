@@ -38,8 +38,10 @@ async function execute(command: VsCommandFunction, ...params: any[]): Promise<an
     } catch (err) {
         if (err instanceof VsCommandError) {
             window.showErrorMessage(err.message);
+        } else if (err instanceof Error) {
+            window.showErrorMessage(err.toString());
         } else {
-            throw err;
+            window.showErrorMessage(err);
         }
     }
 }
@@ -48,7 +50,7 @@ export async function registerCommands(...modules: string[]): Promise<Disposable
     await Promise.all(modules.map((module) => import(module)));
     return vsCommands.map((cmd) => {
         return commands.registerCommand(cmd.commandId, (...params) =>
-            execute(cmd.method, ...params),
+           execute(cmd.method, ...params)
         );
     });
 }
