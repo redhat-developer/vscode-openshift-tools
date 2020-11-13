@@ -187,16 +187,17 @@ export class Cluster extends OpenShiftItem {
 
         if (!clusterURL) return null;
 
-        const getUserName = await TokenStore.getUserName();
-        const k8sConfig = new KubeConfigUtils();
-        const users = k8sConfig.getClusterUsers(clusterURL);
-        const addUser: QuickPickItem = { label: `$(plus) Add new user...`};
-        const choice = await window.showQuickPick([addUser, ...users], {placeHolder: "Select username for basic authentication to the API server", ignoreFocusOut: true});
-
-        if (!choice) return null;
-
         let username = userName;
+        const getUserName = await TokenStore.getUserName();
+
         if (!username)  {
+            const k8sConfig = new KubeConfigUtils();
+            const users = k8sConfig.getClusterUsers(clusterURL);
+            const addUser: QuickPickItem = { label: `$(plus) Add new user...`};
+            const choice = await window.showQuickPick([addUser, ...users], {placeHolder: "Select username for basic authentication to the API server", ignoreFocusOut: true});
+
+            if (!choice) return null;
+
             if (choice.label === addUser.label) {
                 username = await window.showInputBox({
                     ignoreFocusOut: true,
@@ -230,7 +231,7 @@ export class Cluster extends OpenShiftItem {
                 `Login to the cluster: ${clusterURL}`,
                 () => Cluster.odo.execute(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd)));
             await Cluster.save(username, passwd, password, result);
-            return Cluster.loginMessage(clusterURL, result);
+            return await Cluster.loginMessage(clusterURL, result);
         } catch (error) {
             throw new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.message)}'!`);
         }

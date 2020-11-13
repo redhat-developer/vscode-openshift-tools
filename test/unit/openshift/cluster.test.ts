@@ -195,7 +195,7 @@ suite('Openshift/Cluster', () => {
                 execStub.resolves(errorData);
                 let expectedErr: { message: any };
                 try {
-                    await Cluster.credentialsLogin();
+                    await Cluster.credentialsLogin(true);
                 } catch (err) {
                     expectedErr = err;
                 }
