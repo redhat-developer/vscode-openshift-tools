@@ -216,8 +216,9 @@ export class Command {
         version: string,
         name: string,
         folder: string,
+        starter: boolean,
     ): string {
-        return `odo create ${type}${version?':':''}${version?version:''} ${name} ${version?'--s2i':''} --context ${folder} --app ${app} --project ${project}`;
+        return `odo create ${type}${version?':':''}${version?version:''} ${name} ${version?'--s2i':''} --context ${folder} --app ${app} --project ${project} ${starter ? '--starter' : ''}`;
     }
 
     @verbose
