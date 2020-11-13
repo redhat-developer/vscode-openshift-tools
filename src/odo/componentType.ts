@@ -4,6 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { Url } from "url";
+import { Ctx, Data } from "./componentTypeDescription";
 import { ComponentMetadata } from "./config";
 
 export enum ComponentKind {
@@ -61,6 +62,11 @@ export interface ComponentType {
     name: string;
     kind: ComponentKind;
     version: string;
+}
+
+export interface ComponentTypeDescription {
+    Ctx: Ctx;
+    Data: Data;
 }
 
 export class ComponentTypeAdapter implements ComponentType {

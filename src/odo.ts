@@ -354,7 +354,7 @@ export interface Odo {
     createApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
     deleteApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, repoUri: string, context: Uri, ref: string): Promise<OpenShiftObject>;
-    createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, path: Uri): Promise<OpenShiftObject>;
+    createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, path: Uri, starter?: boolean): Promise<OpenShiftObject>;
     createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, path: Uri, context: Uri): Promise<OpenShiftObject>;
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     undeployComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
@@ -656,8 +656,12 @@ export class OdoImpl implements Odo {
     public async getComponentTypes(): Promise<ComponentType[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
         const compTypesJson: ComponentTypesJson = this.loadJSON(result.stdout);
-        const devfileItems = compTypesJson?.devfileItems ? compTypesJson.devfileItems.map((item) => new ComponentTypeAdapter(ComponentKind.DEVFILE, item.Name, undefined, item.Description)) : [];
+        const devfileItems: ComponentTypeAdapter[] = [];
         const s2iItems: ComponentTypeAdapter[] = [];
+
+        if (compTypesJson?.devfileItems) {
+            compTypesJson.devfileItems.map((item) => devfileItems.push(new ComponentTypeAdapter(ComponentKind.DEVFILE, item.Name, undefined, item.Description)));
+        }
 
         if (compTypesJson?.s2iItems) {
             compTypesJson.s2iItems.forEach(element => {
@@ -879,8 +883,8 @@ export class OdoImpl implements Odo {
         return application;
     }
 
-    public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: Uri): Promise<OpenShiftObject> {
-        await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath), location.fsPath);
+    public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: Uri, starter = false): Promise<OpenShiftObject> {
+        await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath, starter), location.fsPath);
         if (workspace.workspaceFolders) {
             const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
             if (!targetApplication) {
