@@ -587,8 +587,9 @@ export class Component extends OpenShiftItem {
             componentType = await window.showQuickPick(componentTypes, { placeHolder: "Component type", ignoreFocusOut: true });
         }
 
-        let createStarter = false;
+        if (!componentType) return null;
 
+        let createStarter = false;
         if (componentType.kind === ComponentKind.DEVFILE) {
             const paths = globby.sync(`${folder.fsPath.replace('\\', '/')}/*`, {dot: true, onlyFiles: false});
             if (paths.length === 0) {

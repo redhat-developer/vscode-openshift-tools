@@ -374,8 +374,10 @@ suite('OpenShift/Component', () => {
         let inputStub: sinon.SinonStub;
         const pathOne: string = path.join('some', 'path');
         const folder: vscode.Uri = vscode.Uri.file(pathOne);
+        const componentType = new ComponentTypeAdapter(ComponentKind.S2I, 'nodejs', 'latest', 'builder,nodejs');
 
         setup(() => {
+
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(appItem);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
@@ -389,6 +391,7 @@ suite('OpenShift/Component', () => {
 
         test('return null when no component type selected', async () => {
             inputStub.resolves(componentItem.getName());
+            quickPickStub.onSecondCall().resolves(null);
             const result = await Component.createFromRootWorkspaceFolder(folder);
             expect(result).null;
         });
@@ -401,8 +404,7 @@ suite('OpenShift/Component', () => {
 
         test('happy path works', async () => {
             inputStub.resolves(componentItem.getName());
-            quickPickStub.onThirdCall().resolves('nodejs');
-            quickPickStub.resolves('latest');
+            quickPickStub.onSecondCall().resolves(componentType);
             const result = await Component.createFromRootWorkspaceFolder(folder);
             expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
         });
