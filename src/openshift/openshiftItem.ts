@@ -138,7 +138,12 @@ export default class OpenShiftItem {
         }
         if (context && context.contextValue === ContextType.PROJECT && appPlaceholder ) {
             project = context;
-            context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(OpenShiftItem.getApplicationNames(project, appPlaceholder.includes('create') && compPlaceholder === undefined), {placeHolder: appPlaceholder, ignoreFocusOut: true});
+            const applicationList = await OpenShiftItem.getApplicationNames(project, appPlaceholder.includes('create') && compPlaceholder === undefined);
+            if ( applicationList.length === 1 && isCommand(applicationList[0])) {
+                context = applicationList[0];
+            } else {
+                context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(applicationList, {placeHolder: appPlaceholder, ignoreFocusOut: true});
+            }
             if (context && isCommand(context)) {
                 const newAppName = await context.command();
                 if (newAppName) {

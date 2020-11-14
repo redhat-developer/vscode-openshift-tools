@@ -73,7 +73,7 @@ suite('OpenShift/Application', () => {
 
             test('asks to select a project and an application', async () => {
                 sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
-                const apps = Promise.resolve([appItem]);
+                const apps = [appItem];
                 quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
                 quickPickStub.onFirstCall().resolves(appItem);
 
