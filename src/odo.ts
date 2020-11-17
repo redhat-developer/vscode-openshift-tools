@@ -609,7 +609,7 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(Command.listComponents(application.getParent().getName(), application.getName()), Platform.getUserHomePath());
         const componentsJson = this.loadJSON<ComponentsJson>(result.stdout);
         const components = [
-            ...componentsJson?.s2iComponents ? componentsJson.s2iComponents.map((item) => new S2iComponentAdapter(item)) : [],
+            ...componentsJson?.s2iComponents ? componentsJson.s2iComponents.filter(item => !!item?.spec?.sourceType).map((item) => new S2iComponentAdapter(item)) : [],
             ...componentsJson?.devfileComponents ? componentsJson.devfileComponents.map((item) => new DevfileComponentAdapter(item)) : []
         ];
 
