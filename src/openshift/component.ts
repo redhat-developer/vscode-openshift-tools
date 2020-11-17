@@ -9,6 +9,8 @@ import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debu
 import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
 import { EventEmitter } from 'events';
+import { existsSync, readFileSync } from 'fs';
+import * as YAML from 'yaml'
 import OpenShiftItem, { selectTargetApplication, selectTargetComponent } from './openshiftItem';
 import { OpenShiftObject, ContextType, OpenShiftObjectImpl, OpenShiftComponent } from '../odo';
 import { Command } from "../odo/command";
@@ -549,58 +551,69 @@ export class Component extends OpenShiftItem {
         const workspacePath = await selectWorkspaceFolder();
         if (!workspacePath) return null;
 
-        const componentList = Component.odo.getComponents(application);
-        const componentName = await Component.getName('Component name', componentList, application.getName());
-
-        if (!componentName) return null;
-        const componentType = await window.showQuickPick(Component.odo.getComponentTypes(), {placeHolder: "Component type", ignoreFocusOut: true});
-
-        if (!componentType) return null;
-
-        await Progress.execFunctionWithProgress(`Creating new Component '${componentName}'`, () => Component.odo.createComponentFromFolder(application, componentType.name, componentType.version, componentName, workspacePath));
-        return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
+        return Component.createFromRootWorkspaceFolder(workspacePath, [], application);
     }
 
     // Use explorerResourceIsRoot context to detect selection for workspace forlder in explorer
     @vsCommand('openshift.component.createFromRootWorkspaceFolder')
-    static async createFromRootWorkspaceFolder(folder: Uri, componentTypeName?: string, componentKind = ComponentKind.DEVFILE): Promise<string | null> {
-        const application = await Component.getOpenShiftCmdData(undefined,
+    static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], context: OpenShiftObject, componentTypeName?: string, componentKind = ComponentKind.DEVFILE): Promise<string | null> {
+        const application = await Component.getOpenShiftCmdData(context,
             "Select an Application where you want to create a Component"
         );
 
         if (!application) return null;
+        const devFileLocation = path.join(folder.fsPath, 'devfile.yaml');
+        const useExistingDevfile = existsSync(devFileLocation);
+
+        let initialNameValue: string;
+        if (useExistingDevfile) {
+            const file = readFileSync(devFileLocation, 'utf8');
+            const devfileYaml = YAML.parse(file.toString());
+            initialNameValue = devfileYaml?.metadata.name;
+        }
 
         const componentName = await Component.getName(
             'Component name',
             Component.odo.getComponents(application),
-            application.getName()
+            application.getName(),
+            initialNameValue
         );
 
         if (!componentName) return null;
 
-        let componentType: ComponentTypeAdapter;
-        const componentTypes = Component.odo.getComponentTypes();
-        if (componentTypeName) {
-            componentType = (await componentTypes).find(type => type.name === componentTypeName && type.kind === componentKind);
-        }
-        if (!componentType) {
-            componentType = await window.showQuickPick(componentTypes, { placeHolder: "Component type", ignoreFocusOut: true });
-        }
-
-        if (!componentType) return null;
-
         let createStarter = false;
-        if (componentType.kind === ComponentKind.DEVFILE) {
-            const paths = globby.sync(`${folder.fsPath.replace('\\', '/')}/*`, {dot: true, onlyFiles: false});
-            if (paths.length === 0) {
-                const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: 'Initialize Component using default Starter Project?'});
-                createStarter = create === 'Yes';
+        let componentType: ComponentTypeAdapter;
+        if (!useExistingDevfile) {
+            const componentTypes = Component.odo.getComponentTypes();
+            if (componentTypeName) {
+                componentType = (await componentTypes).find(type => type.name === componentTypeName && type.kind === componentKind);
+            }
+            if (!componentType) {
+                componentType = await window.showQuickPick(componentTypes, { placeHolder: "Component type", ignoreFocusOut: true });
+            }
+
+            if (!componentType) return null;
+
+            if (componentType.kind === ComponentKind.DEVFILE) {
+                const paths = globby.sync(`${folder.fsPath.replace('\\', '/')}/*`, {dot: true, onlyFiles: false});
+                if (paths.length === 0) {
+                    const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: 'Initialize Component using default Starter Project?'});
+                    createStarter = create === 'Yes';
+                }
             }
         }
 
         await Progress.execFunctionWithProgress(
             `Creating new Component '${componentName}'`,
-            () => Component.odo.createComponentFromFolder(application, componentType.name, componentType.version, componentName, folder, createStarter)
+            () => Component.odo.createComponentFromFolder(
+                application,
+                componentType? componentType.name : undefined,
+                componentType? componentType.version : undefined,
+                componentName,
+                folder,
+                createStarter,
+                useExistingDevfile
+            )
         );
         return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }

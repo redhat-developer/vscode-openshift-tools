@@ -354,7 +354,7 @@ export interface Odo {
     createApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
     deleteApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, repoUri: string, context: Uri, ref: string): Promise<OpenShiftObject>;
-    createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, path: Uri, starter?: boolean): Promise<OpenShiftObject>;
+    createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, path: Uri, starter?: boolean, useExistingDevfile?: boolean): Promise<OpenShiftObject>;
     createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, path: Uri, context: Uri): Promise<OpenShiftObject>;
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     undeployComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
@@ -883,14 +883,14 @@ export class OdoImpl implements Odo {
         return application;
     }
 
-    public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: Uri, starter = false): Promise<OpenShiftObject> {
-        await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath, starter), location.fsPath);
+    public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: Uri, starter = false, useExistingDevfile = false): Promise<OpenShiftObject> {
+        await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath, starter, useExistingDevfile), location.fsPath);
         if (workspace.workspaceFolders) {
             const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
             if (!targetApplication) {
                 await this.insertAndReveal(application);
             }
-            await this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, location, 'local', version ? ComponentKind.S2I : ComponentKind.DEVFILE, {name: type, tag: version}));
+            await this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, location, 'local', version ? ComponentKind.S2I : ComponentKind.DEVFILE, {name: type? type : name , tag: version}));
         }
         let wsFolder: WorkspaceFolder;
         if (workspace.workspaceFolders) {

@@ -43,8 +43,9 @@ export default class OpenShiftItem {
         return openshiftObject && `This name is already used, please enter different name.`;
     }
 
-    static async getName(message: string, data: Promise<Array<OpenShiftObject>>, offset?: string): Promise<string> {
+    static async getName(message: string, data: Promise<Array<OpenShiftObject>>, offset?: string, value = ''): Promise<string> {
         return window.showInputBox({
+            value,
             prompt: `Provide ${message}`,
             ignoreFocusOut: true,
             validateInput: async (value: string) => {

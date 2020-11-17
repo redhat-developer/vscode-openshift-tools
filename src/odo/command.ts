@@ -212,13 +212,14 @@ export class Command {
     static createLocalComponent(
         project: string,
         app: string,
-        type: string,
+        type = '', // will use empty string in case of undefined type passed in
         version: string,
         name: string,
         folder: string,
         starter: boolean,
+        useExistingDevfile = false
     ): string {
-        return `odo create ${type}${version?':':''}${version?version:''} ${name} ${version?'--s2i':''} --context ${folder} --app ${app} --project ${project} ${starter ? '--starter' : ''}`;
+        return `odo create ${type}${version?':':''}${version?version:''} ${name} ${version?'--s2i':''} --context ${folder} --app ${app} --project ${project}${starter ? ' --starter' : ''}${useExistingDevfile ? ' --devfile devfile.yaml' : ''}`;
     }
 
     @verbose
