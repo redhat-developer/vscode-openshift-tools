@@ -371,7 +371,8 @@ suite("odo", () => {
                             namespace: 'project'
                         },
                         spec: {
-                            source: 'https://'
+                            source: 'https://',
+                            sourceType: 'git'
                         }
                     }
                 ]
