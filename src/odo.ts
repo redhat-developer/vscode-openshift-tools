@@ -9,7 +9,7 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
 
-import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Command as VSCommand, Disposable } from 'vscode';
+import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Command as VSCommand } from 'vscode';
 import * as path from 'path';
 import { Subject } from 'rxjs';
 import { ChildProcess } from 'child_process';
@@ -856,20 +856,29 @@ export class OdoImpl implements Odo {
         if (callDelete) {
             await this.execute(Command.deleteApplication(app.getParent().getName(), app.getName()));
         }
-        // Chain workspace folder deltions, because when updateWorkspaceFoder called next call is possible only after
+        // Chain workspace folder deletions, because when updateWorkspaceFoder called next call is possible only after
         // listener registered with onDidChangeWorkspaceFolders called.
         let result = Promise.resolve();
+        // To avoid workspace restart during deletion first have to check if there is wsFolder with index 0
+        const rootFolder = allContexts.find(folder => folder.index === 0);
         allContexts.forEach((wsFolder) => {
-            result = result.then(() => {
-                workspace.updateWorkspaceFolders(wsFolder.index, 1);
-                return new Promise<void>((resolve) => {
-                    const disposable = workspace.onDidChangeWorkspaceFolders(() => {
-                        disposable.dispose();
-                        resolve();
+            if (rootFolder !== wsFolder) {
+                result = result.then(() => {
+                    workspace.updateWorkspaceFolders(wsFolder.index, 1);
+                    return new Promise<void>((resolve) => {
+                        const disposable = workspace.onDidChangeWorkspaceFolders(() => {
+                            disposable.dispose();
+                            resolve();
+                        });
                     });
                 });
-            });
+            }
         });
+        if (rootFolder) {
+            result = result.then(() => {
+                workspace.updateWorkspaceFolders(rootFolder.index, 1)
+            });
+        }
         return result.then(() => {
             return this.deleteAndRefresh(app);
         });
@@ -954,13 +963,16 @@ export class OdoImpl implements Odo {
         }
         if (component.contextPath) {
             const wsFolder = workspace.getWorkspaceFolder(component.contextPath);
+            workspace.workspaceFolders.length > 1;
             workspace.updateWorkspaceFolders(wsFolder.index, 1);
-            await new Promise<Disposable>((resolve) => {
-                const disposabel = workspace.onDidChangeWorkspaceFolders(() => {
-                    disposabel.dispose();
-                    resolve();
+            if (wsFolder.index !== 0) { // when first folder is deleted, no need to wait, bz workspace is going to restart
+                await new Promise<void>((resolve) => {
+                    const disposable = workspace.onDidChangeWorkspaceFolders(() => {
+                        disposable.dispose();
+                        resolve();
+                    });
                 });
-            });
+            }
         }
         return component;
     }
