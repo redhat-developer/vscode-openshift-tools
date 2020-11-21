@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.2.1 (December 3, 2020)
+
+New features and bugfixes:
+  - TBD
+
 ## 0.2.0 (September 30, 2020)
 
 Noteworthy changes:
