@@ -77,7 +77,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         crcStatusItem,
         OpenShiftExplorer.getInstance(),
         new WatchSessionsView().createTreeView('openshiftWatchView'),
-        DebugSessionsView.getInstance(),
+        new DebugSessionsView().createTreeView('openshiftDebugView'),
         ...Component.init(extensionContext)
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
