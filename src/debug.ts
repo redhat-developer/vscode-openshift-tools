@@ -25,7 +25,6 @@ class DebugSessionEntry {
 }
 
 export class DebugSessionsView implements TreeDataProvider<string>, Disposable {
-    private static instance: DebugSessionsView;
     private static sessions: Map<string, DebugSessionEntry> = new Map();
 
     private static odoctl: Odo = OdoImpl.Instance;
@@ -38,10 +37,7 @@ export class DebugSessionsView implements TreeDataProvider<string>, Disposable {
     readonly onDidChangeTreeData: Event<string | undefined> = this
         .onDidChangeTreeDataEmitter.event;
 
-    private constructor() {
-        this.treeView = window.createTreeView('openshiftDebugView', {
-            treeDataProvider: this,
-        });
+    public constructor() {
         debug.onDidStartDebugSession((session) => {
             if (session.configuration.contextPath) {
                 const osObj = DebugSessionsView.odoctl.getOpenShiftObjectByContext(session.configuration.contextPath.fsPath);
@@ -60,11 +56,13 @@ export class DebugSessionsView implements TreeDataProvider<string>, Disposable {
         })
     }
 
-    static getInstance(): DebugSessionsView {
-        if (!DebugSessionsView.instance) {
-            DebugSessionsView.instance = new DebugSessionsView();
+    createTreeView(id: string): TreeView<string> {
+        if (!this.treeView) {
+            this.treeView = window.createTreeView(id, {
+                treeDataProvider: this,
+            });
         }
-        return DebugSessionsView.instance;
+        return this.treeView;
     }
 
     // eslint-disable-next-line class-methods-use-this
