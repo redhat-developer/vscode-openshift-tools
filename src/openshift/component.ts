@@ -474,7 +474,7 @@ export class Component extends OpenShiftItem {
     static async watch(component: OpenShiftObject): Promise<void> {
         if (!component) return null;
         if (component.compType !== SourceType.LOCAL && component.compType !== SourceType.BINARY) {
-            window.showInformationMessage(`Watch is supported only for Components with local or binary source type.`)
+            window.showInformationMessage('Watch is supported only for Components with local or binary source type.')
             return null;
         }
         if (Component.watchSessions.get(component.contextPath.fsPath)) {

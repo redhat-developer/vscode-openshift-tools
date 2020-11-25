@@ -1044,6 +1044,13 @@ suite('OpenShift/Component', () => {
             expect(result).null;
         });
 
+        test('shows warning message if called for git component', async () => {
+            const gitComponent = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', SourceType.GIT);
+            const simStub = sandbox.stub(vscode.window, 'showInformationMessage');
+            await Component.watch(gitComponent);
+            expect(simStub).calledOnceWith('Watch is supported only for Components with local or binary source type.');
+        });
+
         test('calls the correct odo command w/ context', async () => {
             const cpStub = {on: sinon.stub()} as any as ChildProcess;
             spawnStub.resolves(cpStub);
