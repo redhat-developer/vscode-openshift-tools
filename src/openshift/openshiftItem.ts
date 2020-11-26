@@ -50,7 +50,7 @@ export default class OpenShiftItem {
             ignoreFocusOut: true,
             validateInput: async (value: string) => {
                 let validationMessage = OpenShiftItem.emptyName(`Empty ${message}`, value.trim());
-                if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character`, value);
+                if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`, value);
                 if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${message} should be between 2-63 characters`, value, offset ? offset.length : 0);
                 if (!validationMessage) validationMessage = OpenShiftItem.validateUniqueName(await data, value);
                 return validationMessage;

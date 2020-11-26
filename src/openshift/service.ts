@@ -6,7 +6,7 @@
 import { window } from 'vscode';
 import OpenShiftItem from './openshiftItem';
 import { OpenShiftObject } from '../odo';
-import { Command } from "../odo/command";
+import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
 import { Platform } from '../util/platform';
 import { vsCommand, VsCommandError } from '../vscommand';
@@ -16,11 +16,11 @@ export class Service extends OpenShiftItem {
     @vsCommand('openshift.service.create')
     static async create(context: OpenShiftObject): Promise<string>  {
         const application = await Service.getOpenShiftCmdData(context,
-            "In which Application you want to create a Service"
+            'In which Application you want to create a Service'
         );
         if (!application) return null;
         const serviceTemplateName = await window.showQuickPick(Service.odo.getServiceTemplates(), {
-            placeHolder: "Service Template Name",
+            placeHolder: 'Service Template Name',
             ignoreFocusOut: true
         });
         if (!serviceTemplateName) return null;
@@ -30,7 +30,7 @@ export class Service extends OpenShiftItem {
             [serviceTemplatePlanName] = plans;
         } else if (plans.length > 1) {
             serviceTemplatePlanName = await window.showQuickPick(plans, {
-                placeHolder: "Service Template Plan Name",
+                placeHolder: 'Service Template Plan Name',
                 ignoreFocusOut: true
             });
         } else {
@@ -51,10 +51,10 @@ export class Service extends OpenShiftItem {
 
         if (!service) {
             const application: OpenShiftObject = await Service.getOpenShiftCmdData(service,
-                "From which Application you want to delete Service"
+                'From which Application you want to delete Service'
             );
             if (application) {
-                service = await window.showQuickPick(Service.getServiceNames(application), {placeHolder: "Select Service to delete",
+                service = await window.showQuickPick(Service.getServiceNames(application), {placeHolder: 'Select Service to delete',
                 ignoreFocusOut: true});
             }
         }
@@ -75,9 +75,9 @@ export class Service extends OpenShiftItem {
 
         if (!service) {
             const application: OpenShiftObject = await Service.getOpenShiftCmdData(context,
-                "From which application you want to describe Service");
+                'From which application you want to describe Service');
             if (application) {
-                service = await window.showQuickPick(Service.getServiceNames(application), {placeHolder: "Select Service you want to describe",
+                service = await window.showQuickPick(Service.getServiceNames(application), {placeHolder: 'Select Service you want to describe',
                 ignoreFocusOut: true});
             }
         }

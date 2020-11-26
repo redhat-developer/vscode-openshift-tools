@@ -6,7 +6,7 @@
 import { window } from 'vscode';
 import OpenShiftItem from './openshiftItem';
 import { OpenShiftObject } from '../odo';
-import { Command } from "../odo/command";
+import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
 
@@ -22,7 +22,7 @@ export class Application extends OpenShiftItem {
     @vsCommand('openshift.app.delete', true)
     static async del(treeItem: OpenShiftObject): Promise<string> {
         const application = await Application.getOpenShiftCmdData(treeItem,
-            "Select Application to delete");
+            'Select Application to delete');
         if (application) {
             const appName = application.getName();
             const value = await window.showWarningMessage(`Do you want to delete Application '${appName}'?`, 'Yes', 'Cancel');
