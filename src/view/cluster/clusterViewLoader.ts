@@ -33,7 +33,7 @@ export default class ClusterViewLoader {
                 retainContextWhenHidden: true
             });
         }
-        panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, "images/context/cluster-node.png"));
+        panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'images/context/cluster-node.png'));
         panel.webview.html = ClusterViewLoader.getWebviewContent(ClusterViewLoader.extensionPath, panel);
         panel.webview.postMessage({action: 'cluster', data: ''});
         panel.webview.onDidReceiveMessage(async (event)  => {
@@ -48,10 +48,10 @@ export default class ClusterViewLoader {
                 channel.show();
                 channel.append(`\nStarting Red Hat CodeReady Containers from webview at ${date}\n`);
                 if (event.isSetting) {
-                    const binaryFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
-                    const pullSecretFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcPullSecretPath");
-                    const cpuFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcCpuCores");
-                    const memoryFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcMemoryAllocated");
+                    const binaryFromSetting= vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
+                    const pullSecretFromSetting= vscode.workspace.getConfiguration('openshiftConnector').get('crcPullSecretPath');
+                    const cpuFromSetting= vscode.workspace.getConfiguration('openshiftConnector').get('crcCpuCores');
+                    const memoryFromSetting= vscode.workspace.getConfiguration('openshiftConnector').get('crcMemoryAllocated');
                     startProcess = spawn(`${binaryFromSetting}`, ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`, '-ojson']);
                 } else {
                     const [tool, ...params] = event.data.split(' ');
@@ -66,16 +66,16 @@ export default class ClusterViewLoader {
                     channel.append(chunk);
                 });
                 startProcess.on('close', async (code) => {
-                    vscode.workspace.getConfiguration("openshiftConnector").update("crcBinaryLocation", event.crcLoc);
-                    vscode.workspace.getConfiguration("openshiftConnector").update("crcPullSecretPath", event.pullSecret);
-                    vscode.workspace.getConfiguration("openshiftConnector").update("crcCpuCores", event.cpuSize);
-                    vscode.workspace.getConfiguration("openshiftConnector").update("crcMemoryAllocated", event.memory);
+                    vscode.workspace.getConfiguration('openshiftConnector').update('crcBinaryLocation', event.crcLoc);
+                    vscode.workspace.getConfiguration('openshiftConnector').update('crcPullSecretPath', event.pullSecret);
+                    vscode.workspace.getConfiguration('openshiftConnector').update('crcCpuCores', event.cpuSize);
+                    vscode.workspace.getConfiguration('openshiftConnector').update('crcMemoryAllocated', event.memory);
                     // eslint-disable-next-line no-console
                     console.log(`crc start exited with code ${code}`);
                     if (code!= 0) {
                         panel.webview.postMessage({action: 'sendcrcstarterror'})
                     }
-                    const binaryLoc = event.isSetting ? vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation"): event.crcLoc;
+                    const binaryLoc = event.isSetting ? vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation'): event.crcLoc;
                     ClusterViewLoader.checkCrcStatus(binaryLoc, 'crcstartstatus', panel);
                 });
             }
@@ -84,7 +84,7 @@ export default class ClusterViewLoader {
                 channel.show();
                 channel.append(`\nStopping Red Hat CodeReady Containers from webview at ${date}\n`);
                 if (event.data === '') {
-                    filePath = vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
+                    filePath = vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
                 } else filePath = event.data;
                 stopProcess = spawn(`${filePath}`, ['stop']);
                 stopProcess.stdout.setEncoding('utf8');
@@ -103,7 +103,7 @@ export default class ClusterViewLoader {
                 });
             }
             if (event.action === 'checksetting') {
-                const binaryFromSetting:string = vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
+                const binaryFromSetting:string = vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
                 if (binaryFromSetting) {
                     panel.webview.postMessage({action: 'crcsetting'});
                     ClusterViewLoader.checkCrcStatus(binaryFromSetting, 'crcstatus', panel);
@@ -153,16 +153,16 @@ export default class ClusterViewLoader {
         );
         const reactAppUri = panel.webview.asWebviewUri(reactAppPathOnDisk);
         const htmlString:Buffer = fs.readFileSync(path.join(reactAppRootOnDisk, 'index.html'));
-        const meta = `<meta http-equiv="Content-Security-Policy"
-        content="connect-src *;
+        const meta = `<meta http-equiv='Content-Security-Policy'
+        content='connect-src *;
             default-src 'none';
             img-src ${panel.webview.cspSource} https: 'self' data:;
             script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;
-            style-src 'self' vscode-resource: 'unsafe-inline';">`;
+            style-src 'self' vscode-resource: 'unsafe-inline';'>`;
         return `${htmlString}`
             .replace('%COMMAND%', '')
             .replace('%PLATFORM%', process.platform)
             .replace('clusterViewer.js',`${reactAppUri}`)
-            .replace('<!-- meta http-equiv="Content-Security-Policy" -->', meta);
+            .replace('<!-- meta http-equiv='Content-Security-Policy' -->', meta);
     }
 }

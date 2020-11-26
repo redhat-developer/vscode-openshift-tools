@@ -3,18 +3,18 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { QuickPickItem, window } from "vscode";
+import { QuickPickItem, window } from 'vscode';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
-import { OdoImpl, Odo } from "../odo";
-import { Progress } from "../util/progress";
+import { OdoImpl, Odo } from '../odo';
+import { Progress } from '../util/progress';
 import * as common from './common';
-import { vsCommand, VsCommandError } from "../vscommand";
+import { vsCommand, VsCommandError } from '../vscommand';
 
 export class Build {
 
     public static command = {
       getAllBuilds(parent: ClusterExplorerV1.ClusterExplorerNode): string {
-          return `get build -o jsonpath="{range .items[?(.metadata.labels.buildconfig=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/build\\.number}{\\"\\n\\"}{end}"`;
+          return `get build -o jsonpath='{range .items[?(.metadata.labels.buildconfig=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/build\\.number}{\\'\\n\\'}{end}'`;
       },
       startBuild(buildConfig: string): string {
           return `oc start-build ${buildConfig}`;
@@ -65,7 +65,7 @@ export class Build {
         if (context) {
             build = context.impl.name;
         } else {
-            const buildConfig = await common.selectResourceByName(Build.getBuildConfigNames("You have no BuildConfigs available"), "Select a BuildConfig to see the builds");
+            const buildConfig = await common.selectResourceByName(Build.getBuildConfigNames('You have no BuildConfigs available'), 'Select a BuildConfig to see the builds');
             if (buildConfig)  {
                 const selBuild = await window.showQuickPick(this.getBuildNames(buildConfig), {placeHolder: text, ignoreFocusOut: true});
                 build = selBuild ? selBuild.label : null;
@@ -78,7 +78,7 @@ export class Build {
     static async startBuild(context: { name: string}): Promise<string> {
         let buildName: string = context ? context.name : undefined;
         let result: Promise<string> = null;
-        if (!buildName) buildName = await common.selectResourceByName(await Build.getBuildConfigNames("You have no BuildConfigs available to start a build"), "Select a BuildConfig to start a build");
+        if (!buildName) buildName = await common.selectResourceByName(await Build.getBuildConfigNames('You have no BuildConfigs available to start a build'), 'Select a BuildConfig to start a build');
         if (buildName) {
             result = Progress.execFunctionWithProgress(`Starting build`, () => Build.odo.execute(Build.command.startBuild(buildName)))
                 .then(() => `Build '${buildName}' successfully started`)
@@ -89,7 +89,7 @@ export class Build {
 
     @vsCommand('clusters.openshift.build.showLog', true)
     static async showLog(context: { impl: any}): Promise<string> {
-        const build = await Build.selectBuild(context, "Select a Build to see the logs");
+        const build = await Build.selectBuild(context, 'Select a Build to see the logs');
         if (build) {
             Build.odo.executeInTerminal(Build.command.showLog(build, '-build'), undefined, `OpenShift: Show '${build}' Build Log`);
         }
@@ -102,7 +102,7 @@ export class Build {
         if (context) {
             resourceId = context.impl.name;
         } else {
-            const name = await Build.selectBuild(context, "Select build to rebuild");
+            const name = await Build.selectBuild(context, 'Select build to rebuild');
             if (name) {
                 resourceId = name;
             }
@@ -115,7 +115,7 @@ export class Build {
 
     @vsCommand('clusters.openshift.build.followLog')
     static async followLog(context: { impl: any}): Promise<string> {
-        const build = await Build.selectBuild(context, "Select a build to follow the logs");
+        const build = await Build.selectBuild(context, 'Select a build to follow the logs');
         if (build) {
             Build.odo.executeInTerminal(Build.command.followLog(build, '-build'), undefined, `OpenShift: Follow '${build}' Build Log`);
         }
@@ -125,7 +125,7 @@ export class Build {
     @vsCommand('clusters.openshift.build.delete', true)
     static async delete(context: { impl: any}): Promise<string> {
         let result: null | string | Promise<string> | PromiseLike<string> = null;
-        const build = await Build.selectBuild(context, "Select a build to delete");
+        const build = await Build.selectBuild(context, 'Select a build to delete');
         if (build) {
             result = Progress.execFunctionWithProgress(`Deleting build`, () => Build.odo.execute(Build.command.delete(build)))
                 .then(() => `Build '${build}' successfully deleted`)

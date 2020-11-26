@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
+import * as React from 'react';
 
 const logViewContext = {
     autoScroll: false

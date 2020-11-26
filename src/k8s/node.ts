@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { ClusterExplorerV1 } from "vscode-kubernetes-tools-api";
+import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import * as vscode from 'vscode';
 
 export class Node implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorerResourceNode {
@@ -18,7 +18,7 @@ export class Node implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterEx
         this.resourceId = this.id;
     }
 
-    nodeType: "resource";
+    nodeType: 'resource';
 
     readonly resourceKind: ClusterExplorerV1.ResourceKind = {
         manifestKind: this.manifest,
@@ -38,7 +38,7 @@ export class Node implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterEx
         item.command = {
             arguments: [this],
             command: 'extension.vsKubernetesLoad',
-            title: "Load"
+            title: 'Load'
         };
         return item;
     }

@@ -118,7 +118,7 @@ export abstract class OpenShiftObjectImpl implements OpenShiftObject {
     }
 
     get iconPath(): Uri {
-        return Uri.file(path.join(__dirname, "../../images/context", this.icon));
+        return Uri.file(path.join(__dirname, '../../images/context', this.icon));
     }
 
     get tooltip(): string {
@@ -269,11 +269,11 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
         if (this.contextValue === ContextType.COMPONENT_PUSHED || this.contextValue === ContextType.COMPONENT || this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
             let iconPath: Uri;
             if (this.compType === odo.SourceType.GIT) {
-                iconPath = Uri.file(path.join(__dirname, "../../images/component", 'git.png'));
+                iconPath = Uri.file(path.join(__dirname, '../../images/component', 'git.png'));
             } else if (this.compType === odo.SourceType.BINARY) {
-                iconPath = Uri.file(path.join(__dirname, "../../images/component", 'binary.png'));
+                iconPath = Uri.file(path.join(__dirname, '../../images/component', 'binary.png'));
             } else {
-                iconPath = Uri.file(path.join(__dirname, "../../images/component", 'workspace.png'));
+                iconPath = Uri.file(path.join(__dirname, '../../images/component', 'workspace.png'));
             }
             return iconPath;
         }
@@ -482,7 +482,7 @@ export class OdoImpl implements Odo {
         'the server has asked for the client to provide credentials',
         'Please login to your server',
         'Unauthorized',
-        'User "system:anonymous" cannot list resource "projects"'
+        'User \'system:anonymous\' cannot list resource \'projects\''
     ];
 
     private readonly serverDownMessages = [
@@ -777,7 +777,7 @@ export class OdoImpl implements Odo {
         const cmd = command.split(' ')[0];
         const toolLocation = await ToolsConfig.detect(cmd);
         const terminal: Terminal = WindowUtil.createTerminal(name, cwd);
-        terminal.sendText(toolLocation === cmd ? command : command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`), true);
+        terminal.sendText(toolLocation === cmd ? command : command.replace(cmd, `'${toolLocation}'`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& '${toolLocation}'`), true);
         terminal.show();
     }
 
@@ -785,7 +785,7 @@ export class OdoImpl implements Odo {
         const cmd = command.split(' ')[0];
         const toolLocation = await ToolsConfig.detect(cmd);
         return OdoImpl.cli.execute(
-            toolLocation ? command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`) : command,
+            toolLocation ? command.replace(cmd, `'${toolLocation}'`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& '${toolLocation}'`) : command,
             cwd ? {cwd} : { }
         ).then(async (result) => {
             return result.error && fail ?  Promise.reject(result.error) : result;

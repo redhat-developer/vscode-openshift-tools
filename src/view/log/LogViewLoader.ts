@@ -25,7 +25,7 @@ export default class LogViewLoader {
             localResourceRoots: [localResourceRoot],
             retainContextWhenHidden: true
         });
-        panel.iconPath = vscode.Uri.file(path.join(LogViewLoader.extensionPath, "images/context/cluster-node.png"));
+        panel.iconPath = vscode.Uri.file(path.join(LogViewLoader.extensionPath, 'images/context/cluster-node.png'));
 
         const cmd = cmdFunction(target.getParent().getParent().getName(), target.getParent().getName(), target.getName());
 
@@ -61,15 +61,15 @@ export default class LogViewLoader {
         );
         const reactAppUri = reactAppPathOnDisk.with({ scheme: 'vscode-resource' });
         const htmlString:Buffer = fs.readFileSync(path.join(reactAppRootOnDisk, 'index.html'));
-        const meta = `<meta http-equiv="Content-Security-Policy"
-        content="connect-src *;
+        const meta = `<meta http-equiv='Content-Security-Policy'
+        content='connect-src *;
             default-src 'none';
             img-src https:;
             script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;
-            style-src vscode-resource: 'unsafe-inline';">`;
+            style-src vscode-resource: 'unsafe-inline';'>`;
         return `${htmlString}`
             .replace('%COMMAND%', cmdText)
             .replace('logViewer.js',`${reactAppUri}`)
-            .replace('<!-- meta http-equiv="Content-Security-Policy" -->', meta);
+            .replace('<!-- meta http-equiv='Content-Security-Policy' -->', meta);
     }
 }

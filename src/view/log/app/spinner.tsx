@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
+import * as React from 'react';
 
 import Loader from 'react-loader-spinner';
 import { createStyles, makeStyles, Theme, createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
@@ -15,8 +15,8 @@ import Switch from '@material-ui/core/Switch';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import IconButton from '@material-ui/core/IconButton';
-import { blue } from "@material-ui/core/colors";
-import { withStyles } from "@material-ui/core/styles";
+import { blue } from '@material-ui/core/colors';
+import { withStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -52,13 +52,13 @@ const theme = createMuiTheme({
 const AutoScrollSwitch = withStyles({
     switchBase: {
       color: blue[900],
-      "&$checked": {
+      '&$checked': {
         color: blue[900]
       },
-      "&$checked + $track": {
+      '&$checked + $track': {
         backgroundColor: blue[900]
       },
-      "& + $track": {
+      '& + $track': {
         backgroundColor: blue[50]
       }
     },
@@ -93,21 +93,21 @@ export default function spinner(props: any): JSX.Element {
     return display ? (
         <ThemeProvider theme={theme}>
         <div className={classes.root}>
-            <AppBar position="static" style={{backgroundColor: '#1e1e1e'}}>
-                <Toolbar variant="dense">
-                    <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-                        <Loader type="Bars" color="#00BFFF" height={20} width={20} />
+            <AppBar position='static' style={{backgroundColor: '#1e1e1e'}}>
+                <Toolbar variant='dense'>
+                    <IconButton edge='start' className={classes.menuButton} color='inherit' aria-label='menu'>
+                        <Loader type='Bars' color='#00BFFF' height={20} width={20} />
                     </IconButton>
-                    <Typography variant="h6" className={classes.title}>
+                    <Typography variant='h6' className={classes.title}>
                     Streaming Log
                     </Typography>
                     <FormGroup row>
                         <FormControlLabel
-                            control={<AutoScrollSwitch onChange={props.toggleAutoScroll} size="small"/>}
-                            label={<Typography variant="h6" className={classes.title}>Auto Scrolling</Typography>}
+                            control={<AutoScrollSwitch onChange={props.toggleAutoScroll} size='small'/>}
+                            label={<Typography variant='h6' className={classes.title}>Auto Scrolling</Typography>}
                         />
                     </FormGroup>
-                    <Button color="inherit" className={classes.stopButton} onClick={stop}>Stop Streaming</Button>
+                    <Button color='inherit' className={classes.stopButton} onClick={stop}>Stop Streaming</Button>
                 </Toolbar>
             </AppBar>
         </div>

@@ -7,7 +7,7 @@ import * as React from 'react';
 import { createStyles, makeStyles, Theme, withStyles } from '@material-ui/core/styles';
 import { Alert } from '@material-ui/lab';
 import { InsertDriveFile, GetApp, VpnKey } from '@material-ui/icons';
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import StopIcon from '@material-ui/icons/Stop';
@@ -151,15 +151,15 @@ const useStyles = makeStyles((theme: Theme) =>
       fontFamily: 'var(--vscode-editor-font-family)'
     },
     icon: {
-      verticalAlign: "bottom",
+      verticalAlign: 'bottom',
       height: 20,
       width: 20
     },
     details: {
-      alignItems: "center"
+      alignItems: 'center'
     },
     column: {
-      flexBasis: "40%"
+      flexBasis: '40%'
     },
     helper: {
       borderLeft: `2px solid ${theme.palette.divider}`,
@@ -203,7 +203,7 @@ const StyledBadge = withStyles((theme) => ({
       borderRadius: '50%',
       animation: '$ripple 1.2s infinite ease-in-out',
       border: '1px solid currentColor',
-      content: '""',
+      content: '''',
     },
   },
   '@keyframes ripple': {
@@ -228,10 +228,10 @@ const vscode = window.acquireVsCodeApi();
 const crcDefaults = {
 	DefaultCPUs: 4,
 	DefaultMemory: 9216,
-	DefaultWebConsoleURL: "https://console-openshift-console.apps-crc.testing",
-	DefaultAPIURL: "https://api.crc.testing:6443",
-	CrcLandingPageURL: "https://cloud.redhat.com/openshift/install/crc/installer-provisioned",
-	DefaultCrcUrlBase: "http://mirror.openshift.com/pub/openshift-v4/clients/crc"
+	DefaultWebConsoleURL: 'https://console-openshift-console.apps-crc.testing',
+	DefaultAPIURL: 'https://api.crc.testing:6443',
+	CrcLandingPageURL: 'https://cloud.redhat.com/openshift/install/crc/installer-provisioned',
+	DefaultCrcUrlBase: 'http://mirror.openshift.com/pub/openshift-v4/clients/crc'
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -441,16 +441,16 @@ export default function addClusterView() {
   }
 
   const RunningStatus = ()=> (
-    <Chip label={status.openshiftStatus} size="small"
+    <Chip label={status.openshiftStatus} size='small'
       avatar={<StyledBadge
-      overlap="circle"
+      overlap='circle'
       anchorOrigin={{ vertical: 'top', horizontal: 'left'}}
-      variant="dot"></StyledBadge>}
+      variant='dot'></StyledBadge>}
     />
   )
 
   const StoppedStatus = () => (
-    <Chip label={status.openshiftStatus} size="small" />
+    <Chip label={status.openshiftStatus} size='small' />
   )
 
   const CrcStatusDialog = () => (
@@ -459,8 +459,8 @@ export default function addClusterView() {
     <Accordion defaultExpanded>
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
-        aria-controls="panel1c-content"
-        id="panel1c-header"
+        aria-controls='panel1c-content'
+        id='panel1c-header'
       >
         <div className={classes.column}>
           <span style={{ marginRight: 10 }}>OpenShift Status</span>
@@ -499,26 +499,26 @@ export default function addClusterView() {
         </div>
         { status.creds?.map((label) => (
         <div className={classes.helper}>
-            <Button variant="outlined" size="small" className={classes.button} key="admin" onClick={() => {handleCrcLogin(label.adminCredentials, label.url)}}>
-              <ExitToAppIcon fontSize="small"/>Login using {label.adminCredentials.username}
+            <Button variant='outlined' size='small' className={classes.button} key='admin' onClick={() => {handleCrcLogin(label.adminCredentials, label.url)}}>
+              <ExitToAppIcon fontSize='small'/>Login using {label.adminCredentials.username}
             </Button>
-            <Button variant="outlined" size="small" className={classes.button} key="developer" onClick={() => {handleCrcLogin(label.developerCredentials, label.url)}}>
-              <ExitToAppIcon fontSize="small"/>Login using {label.developerCredentials.username}
+            <Button variant='outlined' size='small' className={classes.button} key='developer' onClick={() => {handleCrcLogin(label.developerCredentials, label.url)}}>
+              <ExitToAppIcon fontSize='small'/>Login using {label.developerCredentials.username}
             </Button>
         </div>))}
       </AccordionDetails>
       <Divider />
       <AccordionActions>
         {(status.openshiftStatus === 'Stopped') ?
-        (<Button size="small" component="span" className={classes.button} onClick={handleStartProcess} startIcon={<PlayArrowIcon />}>Start Cluster</Button>):
-        (<Button size="small" component="span" className={classes.button} onClick={handleStopProcess} startIcon={<StopIcon />}>Stop Cluster</Button>)}
-        <Button size="small" component="span" className={classes.button} onClick={handleRefresh} startIcon={<RefreshIcon />}>
+        (<Button size='small' component='span' className={classes.button} onClick={handleStartProcess} startIcon={<PlayArrowIcon />}>Start Cluster</Button>):
+        (<Button size='small' component='span' className={classes.button} onClick={handleStopProcess} startIcon={<StopIcon />}>Stop Cluster</Button>)}
+        <Button size='small' component='span' className={classes.button} onClick={handleRefresh} startIcon={<RefreshIcon />}>
           Refresh Status
         </Button>
         {(status.openshiftStatus != 'Stopped') && (
         <div>
           <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none'}}>
-            <Button size="small" component="span" className={classes.button}>
+            <Button size='small' component='span' className={classes.button}>
               Open Console Dashboard
             </Button>
           </a>
@@ -549,7 +549,7 @@ export default function addClusterView() {
       <List>
         <ListItem>
           <ListItemText
-            primary="Starting OpenShift cluster..."
+            primary='Starting OpenShift cluster...'
           />
         </ListItem>
       </List>
@@ -560,7 +560,7 @@ export default function addClusterView() {
       <List>
         <ListItem>
           <ListItemText
-            primary="Stopping the OpenShift cluster, this may take a few minutes..."
+            primary='Stopping the OpenShift cluster, this may take a few minutes...'
           />
         </ListItem>
       </List>
@@ -575,9 +575,9 @@ export default function addClusterView() {
       <List>
         <ListItem>
           <Alert
-          severity="error"
+          severity='error'
           action={
-            <Button color="inherit" size="small" onClick={handleTryAgain} className={classes.button}>
+            <Button color='inherit' size='small' onClick={handleTryAgain} className={classes.button}>
               Run the process again.
             </Button>
           }
@@ -618,12 +618,12 @@ export default function addClusterView() {
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
-                    primary="Download"
+                    primary='Download'
                     secondary={<span>This will download the CodeReady Containers {crcLatest} archive</span>}/>
                     <a href={fetchDownloadBinary()} style={{ textDecoration: 'none'}}>
                       <Button
-                        color="default"
-                        component="span"
+                        color='default'
+                        component='span'
                         className={classes.button}
                         startIcon={<GetApp />}
                       >
@@ -631,7 +631,7 @@ export default function addClusterView() {
                       </Button>
                     </a>
                 </ListItem>
-                <Divider variant="inset" component="li" />
+                <Divider variant='inset' component='li' />
                 <ListItem>
                   <ListItemAvatar>
                     <Avatar>
@@ -643,25 +643,25 @@ export default function addClusterView() {
                     secondary={<span>Provide the CodeReady Containers {crcLatest} executable location</span>} />
                   <div>
                     <input
-                    style={{ display: "none" }}
-                    id="contained-button-file"
-                    type="file"
+                    style={{ display: 'none' }}
+                    id='contained-button-file'
+                    type='file'
                     onChange={handleUploadPath}
                     />
-                    <label htmlFor="contained-button-file">
-                      <Tooltip title="This is a required field" placement="left">
-                        <Button variant="contained" component="span" className={classes.button}>
+                    <label htmlFor='contained-button-file'>
+                      <Tooltip title='This is a required field' placement='left'>
+                        <Button variant='contained' component='span' className={classes.button}>
                           Select Path
                         </Button>
                       </Tooltip>
                     </label>
                   </div>
                 </ListItem>
-                <Divider variant="inset" component="li" />
+                <Divider variant='inset' component='li' />
                 {fileName && (
                     <TextField
-                      id="outlined-location"
-                      label="Executable Location"
+                      id='outlined-location'
+                      label='Executable Location'
                       className={classes.textContainer}
                       style= {{ marginTop: '20px', width: '100%' }}
                       fullWidth
@@ -669,8 +669,8 @@ export default function addClusterView() {
                       InputProps={{
                         readOnly: true,
                       }}
-                      variant="outlined"
-                      size="small"
+                      variant='outlined'
+                      size='small'
                     />
                   )}
             </List>
@@ -689,15 +689,15 @@ export default function addClusterView() {
                 secondary={<span>Download pull secret file from <a href={crcDefaults.CrcLandingPageURL}>here</a> and upload it.</span>} />
               <div className={classes.uploadLabel}>
                 <input
-                  style={{ display: "none" }}
-                  id="contained-button-file"
+                  style={{ display: 'none' }}
+                  id='contained-button-file'
                   multiple
-                  type="file"
+                  type='file'
                   onChange={handleUploadPullSecret}
                 />
-                <label htmlFor="contained-button-file">
-                  <Tooltip title="This is a required field" placement="left">
-                    <Button className={classes.button} component="span">
+                <label htmlFor='contained-button-file'>
+                  <Tooltip title='This is a required field' placement='left'>
+                    <Button className={classes.button} component='span'>
                       Select Pull Secret file
                     </Button>
                   </Tooltip>
@@ -706,8 +706,8 @@ export default function addClusterView() {
             </ListItem>
             {pullSecretPath && (
               <TextField
-                id="outlined-location"
-                label="Pull Secret Location"
+                id='outlined-location'
+                label='Pull Secret Location'
                 className={classes.textContainer}
                 style= {{ marginTop: '20px', width: '100%' }}
                 fullWidth
@@ -715,8 +715,8 @@ export default function addClusterView() {
                 InputProps={{
                   readOnly: true,
                 }}
-                variant="outlined"
-                size="small"
+                variant='outlined'
+                size='small'
               />
             )}
           </List>)
@@ -724,37 +724,37 @@ export default function addClusterView() {
           return (
             <div>
               <TextField
-                id="outlined-number"
-                label="CPU cores"
-                type="number"
-                variant="outlined"
-                size="small"
+                id='outlined-number'
+                label='CPU cores'
+                type='number'
+                variant='outlined'
+                size='small'
                 onChange={handleCpuSize}
                 value={cpuSize}
                 InputProps={{ inputProps: { min: crcDefaults.DefaultCPUs } }}
                 className={classes.textContainer}
               />
               <TextField
-                id="outlined-number"
-                label="Memory to allocate"
-                type="number"
-                variant="outlined"
-                size="small"
+                id='outlined-number'
+                label='Memory to allocate'
+                type='number'
+                variant='outlined'
+                size='small'
                 onChange={handleMemory}
                 value={memory}
                 InputProps={{ inputProps: { min: crcDefaults.DefaultMemory } }}
-                helperText="Value in MiB"
+                helperText='Value in MiB'
                 className={classes.textContainer}
               />
               <TextField
-                id="outlined-string"
-                label="Nameserver"
-                type="string"
-                variant="outlined"
-                size="small"
+                id='outlined-string'
+                label='Nameserver'
+                type='string'
+                variant='outlined'
+                size='small'
                 onChange={handleNameserver}
                 value={crcNameserver}
-                helperText="IPv4 address of nameserver"
+                helperText='IPv4 address of nameserver'
                 className={classes.textContainer}
               />
             </div>)
@@ -784,7 +784,7 @@ export default function addClusterView() {
 
   const WizardSteps = () => (
     <Paper elevation={3}>
-      <Stepper activeStep={activeStep} orientation="vertical">
+      <Stepper activeStep={activeStep} orientation='vertical'>
         {steps.map((label, index) => (
           <Step key={label}>
             <StepLabel>{label}</StepLabel>
@@ -794,14 +794,14 @@ export default function addClusterView() {
                 <div>
                   { (activeStep != 0) && (
                   <Button
-                    variant="contained"
+                    variant='contained'
                     onClick={handleBack}
                     className={classes.buttonSecondary}
                   >
                     Back
                   </Button>)}
                   <Button
-                    variant="contained"
+                    variant='contained'
                     onClick={handleNext}
                     className={classes.buttonSecondary}
                     disabled={handleDisabled()}

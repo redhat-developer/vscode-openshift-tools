@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
+import * as React from 'react';
 
 // import Loader from 'react-loader-spinner';
 import { createStyles, makeStyles, Theme, createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
@@ -66,9 +66,9 @@ export default function describeView(props: any): JSX.Element {
     return (
         <ThemeProvider theme={theme}>
           <div className={classes.root}>
-              <AppBar position="static" style={{backgroundColor: '#1e1e1e'}}>
-                  <Toolbar variant="dense">
-                      <Typography variant="h6" className={classes.title}>
+              <AppBar position='static' style={{backgroundColor: '#1e1e1e'}}>
+                  <Toolbar variant='dense'>
+                      <Typography variant='h6' className={classes.title}>
                       Describe Component
                       </Typography>
                       {/* <FormGroup row>
@@ -77,11 +77,11 @@ export default function describeView(props: any): JSX.Element {
                               <Switch
                                 checked={state.togglejson}
                                 onChange={handleChange}
-                                name="togglejson"
-                                size="small"
+                                name='togglejson'
+                                size='small'
                               />
                             }
-                          label={<Typography variant="h6" className={classes.title}>Show Json</Typography>}
+                          label={<Typography variant='h6' className={classes.title}>Show Json</Typography>}
                         />
                       </FormGroup> */}
                   </Toolbar>

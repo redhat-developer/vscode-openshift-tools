@@ -4,13 +4,13 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace } from 'vscode';
-import { Command } from "../odo/command";
+import { Command } from '../odo/command';
 import OpenShiftItem from './openshiftItem';
-import { CliExitData, CliChannel } from "../cli";
-import { TokenStore } from "../util/credentialManager";
+import { CliExitData, CliChannel } from '../cli';
+import { TokenStore } from '../util/credentialManager';
 import { KubeConfigUtils } from '../util/kubeUtils';
-import { Filters } from "../util/filters";
-import { Progress } from "../util/progress";
+import { Filters } from '../util/filters';
+import { Progress } from '../util/progress';
 import { Platform } from '../util/platform';
 import { WindowUtil } from '../util/windowUtils';
 import { vsCommand, VsCommandError } from '../vscommand';
@@ -26,7 +26,7 @@ export class Cluster extends OpenShiftItem {
             return Cluster.odo.execute(Command.odoLogout())
             .catch((error) => Promise.reject(new VsCommandError(`Failed to logout of the current cluster with '${error}'!`)))
             .then(async (result) => {
-                if (result.stderr === "") {
+                if (result.stderr === '') {
                     Cluster.explorer.refresh();
                     commands.executeCommand('setContext', 'isLoggedIn', false);
                     const logoutInfo = await window.showInformationMessage(`Successfully logged out. Do you want to login to a new cluster`, 'Yes', 'No');
@@ -79,7 +79,7 @@ export class Cluster extends OpenShiftItem {
         const k8sConfig = new KubeConfigUtils();
         const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
         const contextName: QuickPickItem[] = contexts.map((ctx) => ({ label: `${ctx.name}`}));
-        const choice = await window.showQuickPick(contextName, {placeHolder: "Select a new OpenShift context"});
+        const choice = await window.showQuickPick(contextName, {placeHolder: 'Select a new OpenShift context'});
         if (!choice) return null;
         await Cluster.odo.execute(Command.setOpenshiftContext(choice.label));
         return `Cluster context is changed to: ${choice.label}`;
@@ -90,13 +90,13 @@ export class Cluster extends OpenShiftItem {
         const clusterURl = await Cluster.getUrlFromClipboard();
         const createUrl: QuickPickItem = { label: `$(plus) Provide new URL...`};
         const clusterItems = k8sConfig.getServers();
-        const choice = await window.showQuickPick([createUrl, ...clusterItems], {placeHolder: "Provide Cluster URL to connect", ignoreFocusOut: true});
+        const choice = await window.showQuickPick([createUrl, ...clusterItems], {placeHolder: 'Provide Cluster URL to connect', ignoreFocusOut: true});
         if (!choice) return null;
         return (choice.label === createUrl.label) ?
             window.showInputBox({
                 value: clusterURl,
                 ignoreFocusOut: true,
-                prompt: "Provide new Cluster URL to connect",
+                prompt: 'Provide new Cluster URL to connect',
                 validateInput: (value: string) => Cluster.validateUrl('Invalid URL provided', value)
             }) : choice.label;
     }
@@ -111,10 +111,10 @@ export class Cluster extends OpenShiftItem {
         let pathSelectionDialog;
         let newPathPrompt;
         let crcBinary;
-        const crcPath = workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
+        const crcPath = workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
         if(crcPath) {
             newPathPrompt = { label: `$(plus) Provide different crc binary path`};
-            pathSelectionDialog = await window.showQuickPick([{label:`${crcPath}`, description: `Fetched from settings`}, newPathPrompt], {placeHolder: "Select CRC binary path", ignoreFocusOut: true});
+            pathSelectionDialog = await window.showQuickPick([{label:`${crcPath}`, description: `Fetched from settings`}, newPathPrompt], {placeHolder: 'Select CRC binary path', ignoreFocusOut: true});
         }
         if(!pathSelectionDialog) return;
         if (pathSelectionDialog.label === newPathPrompt.label) {
@@ -194,15 +194,15 @@ export class Cluster extends OpenShiftItem {
             const k8sConfig = new KubeConfigUtils();
             const users = k8sConfig.getClusterUsers(clusterURL);
             const addUser: QuickPickItem = { label: `$(plus) Add new user...`};
-            const choice = await window.showQuickPick([addUser, ...users], {placeHolder: "Select username for basic authentication to the API server", ignoreFocusOut: true});
+            const choice = await window.showQuickPick([addUser, ...users], {placeHolder: 'Select username for basic authentication to the API server', ignoreFocusOut: true});
 
             if (!choice) return null;
 
             if (choice.label === addUser.label) {
                 username = await window.showInputBox({
                     ignoreFocusOut: true,
-                    prompt: "Provide Username for basic authentication to the API server",
-                    value: "",
+                    prompt: 'Provide Username for basic authentication to the API server',
+                    value: '',
                     validateInput: (value: string) => Cluster.emptyName('User name cannot be empty', value)
                 })
             } else {
@@ -219,7 +219,7 @@ export class Cluster extends OpenShiftItem {
             passwd = await window.showInputBox({
                 ignoreFocusOut: true,
                 password: true,
-                prompt: "Provide Password for basic authentication to the API server",
+                prompt: 'Provide Password for basic authentication to the API server',
                 value: password
             });
         }
@@ -238,7 +238,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     static async readFromClipboard(): Promise<string> {
-        let r = "";
+        let r = '';
         try {
             r = await env.clipboard.readText();
         } catch (ignore) {
@@ -266,7 +266,7 @@ export class Cluster extends OpenShiftItem {
         }
         const ocToken = await window.showInputBox({
             value: token,
-            prompt: "Provide Bearer token for authentication to the API server",
+            prompt: 'Provide Bearer token for authentication to the API server',
             ignoreFocusOut: true,
             password: true
         });
@@ -279,7 +279,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     static async loginMessage(clusterURL: string, result: CliExitData): Promise<string | undefined> {
-        if (result.stderr === "") {
+        if (result.stderr === '') {
             Cluster.explorer.refresh();
             await commands.executeCommand('setContext', 'isLoggedIn', true);
             return `Successfully logged in to '${clusterURL}'`;

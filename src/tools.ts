@@ -6,8 +6,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { which } from "shelljs";
-import { Platform } from "./util/platform";
+import { which } from 'shelljs';
+import { Platform } from './util/platform';
 import { CliChannel } from './cli';
 
 import semver = require('semver');
@@ -41,7 +41,7 @@ export class ToolsConfig {
         if (ToolsConfig.tools[cmd].location === undefined) {
             const toolCacheLocation = path.resolve(__dirname, '..', 'tools', Platform.OS, ToolsConfig.tools[cmd].cmdFileName);
             const toolLocations: string[] = [toolCacheLocation];
-            if (vscode.workspace.getConfiguration("openshiftConnector").get("searchForToolsInPath")) {
+            if (vscode.workspace.getConfiguration('openshiftConnector').get('searchForToolsInPath')) {
                 const whichLocation = which(cmd);
                 toolLocations.unshift(whichLocation && whichLocation.stdout);
             }
@@ -60,7 +60,7 @@ export class ToolsConfig {
     public static async getVersion(location: string): Promise<string> {
         let detectedVersion: string;
         if (fs.existsSync(location)) {
-            const result = await CliChannel.getInstance().execute(`"${location}" version --client`);
+            const result = await CliChannel.getInstance().execute(`'${location}' version --client`);
             if (result.stdout) {
                 const versionRegExp = /.*([0-9]+\.[0-9]+\.[0-9]+).*/;
                 const toolVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
