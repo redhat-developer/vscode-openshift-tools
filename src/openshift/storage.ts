@@ -4,10 +4,10 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { window } from 'vscode';
-import { isEmpty } from "validator";
-import OpenShiftItem from "./openshiftItem";
-import { OpenShiftObject, ContextType } from "../odo";
-import { Progress } from "../util/progress";
+import { isEmpty } from 'validator';
+import OpenShiftItem from './openshiftItem';
+import { OpenShiftObject, ContextType } from '../odo';
+import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
 
 export class Storage extends OpenShiftItem {
@@ -15,8 +15,8 @@ export class Storage extends OpenShiftItem {
     @vsCommand('openshift.storage.create')
     static async create(context: OpenShiftObject): Promise<string> {
         const component = await Storage.getOpenShiftCmdData(context,
-            "In which Application you want to create a Storage",
-            "In which Component you want to create a Storage",
+            'In which Application you want to create a Storage',
+            'In which Component you want to create a Storage',
             (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED || value.contextValue === ContextType.COMPONENT);
         if (!component) return null;
         const storageList = OpenShiftItem.odo.getStorageNames(component);
@@ -24,7 +24,7 @@ export class Storage extends OpenShiftItem {
 
         if (!storageName) return null;
 
-        const mountPath = await window.showInputBox({prompt: "Specify the mount path",
+        const mountPath = await window.showInputBox({prompt: 'Specify the mount path',
         ignoreFocusOut: true,
         validateInput: (value: string) => {
             if (isEmpty(value.trim())) {
@@ -45,9 +45,9 @@ export class Storage extends OpenShiftItem {
     static async del(treeItem: OpenShiftObject): Promise<string> {
         let storage = treeItem;
         const component = await Storage.getOpenShiftCmdData(storage,
-            "From which Application you want to delete Storage",
-            "From which Component you want to delete Storage");
-        if (!storage && component) storage = await window.showQuickPick(Storage.getStorageNames(component), {placeHolder: "Select Storage to delete", ignoreFocusOut: true});
+            'From which Application you want to delete Storage',
+            'From which Component you want to delete Storage');
+        if (!storage && component) storage = await window.showQuickPick(Storage.getStorageNames(component), {placeHolder: 'Select Storage to delete', ignoreFocusOut: true});
         if (storage) {
             const value = await window.showWarningMessage(`Do you want to delete Storage '${storage.getName()}' from Component '${storage.getParent().getName()}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {

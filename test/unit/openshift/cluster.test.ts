@@ -8,7 +8,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { OdoImpl, ContextType } from '../../../src/odo';
-import { Command } from "../../../src/odo/command";
+import { Command } from '../../../src/odo/command';
 import { Cluster } from '../../../src/openshift/cluster';
 import { OpenShiftExplorer } from '../../../src/explorer';
 import { CliExitData } from '../../../src/cli';
@@ -72,8 +72,8 @@ suite('Openshift/Cluster', () => {
     suite('login', () => {
 
         setup(() => {
-            quickPickStub.onFirstCall().resolves({description: "Current Context", label: testUrl});
-            quickPickStub.onSecondCall().resolves({description: "Current Context", label: testUser});
+            quickPickStub.onFirstCall().resolves({description: 'Current Context', label: testUrl});
+            quickPickStub.onSecondCall().resolves({description: 'Current Context', label: testUser});
         });
 
         test('exits if login confirmation declined', async () => {
@@ -94,8 +94,8 @@ suite('Openshift/Cluster', () => {
 
         test('wraps incoming errors', async () => {
             quickPickStub.resolves('Credentials');
-            quickPickStub.onSecondCall().resolves({description: "Current Context", label: testUrl});
-            quickPickStub.onThirdCall().resolves({description: "Current Context", label: testUser});
+            quickPickStub.onSecondCall().resolves({description: 'Current Context', label: testUrl});
+            quickPickStub.onThirdCall().resolves({description: 'Current Context', label: testUser});
             inputStub.resolves(password);
             commandStub.rejects(fatalError);
             let expectedErr: { message: any };
@@ -148,7 +148,7 @@ suite('Openshift/Cluster', () => {
                 expect(result).null;
             });
 
-            test("doesn't ask to save password if old and new passwords are the same", async () => {
+            test('doesn\'t ask to save password if old and new passwords are the same', async () => {
                 infoStub.resolves('Yes');
                 sandbox.stub(TokenStore, 'getItem').resolves(password);
                 const result = await Cluster.credentialsLogin();
@@ -178,7 +178,7 @@ suite('Openshift/Cluster', () => {
             });
 
             (keytar ? test : test.skip)('returns with no username set', async () => {
-                quickPickStub.onSecondCall().resolves({description: "Current Context", label: undefined});
+                quickPickStub.onSecondCall().resolves({description: 'Current Context', label: undefined});
                 const status = await Cluster.credentialsLogin();
 
                 expect(status).null;
@@ -204,7 +204,7 @@ suite('Openshift/Cluster', () => {
 
             test('checks cluster url name is valid url', async () => {
                 let result: string | Thenable<string>;
-                quickPickStub.onFirstCall().resolves({description: "Current Context", label: `$(plus) Provide new URL...`});
+                quickPickStub.onFirstCall().resolves({description: 'Current Context', label: '$(plus) Provide new URL...'});
                 inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                     result = options.validateInput('http://127.0.0.1:9999');
                     return Promise.resolve('http://127.0.0.1:9999');
@@ -215,8 +215,8 @@ suite('Openshift/Cluster', () => {
 
             test('checks user name is not empty', async () => {
                 let result: string | Thenable<string>;
-                quickPickStub.onFirstCall().resolves({description: "Current Context", label: testUrl});
-                quickPickStub.onSecondCall().resolves({description: "Current Context", label: `$(plus) Add new user...`});
+                quickPickStub.onFirstCall().resolves({description: 'Current Context', label: testUrl});
+                quickPickStub.onSecondCall().resolves({description: 'Current Context', label: '$(plus) Add new user...'});
                 inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                     result = options.validateInput('goodvalue');
                     return Promise.resolve('goodvalue');
@@ -263,7 +263,7 @@ suite('Openshift/Cluster', () => {
             });
 
             test('returns with no url set', async () => {
-                quickPickStub.onFirstCall().resolves({description: "Current Context", label: undefined});
+                quickPickStub.onFirstCall().resolves({description: 'Current Context', label: undefined});
                 const status = await Cluster.tokenLogin();
 
                 expect(status).null;
@@ -348,8 +348,8 @@ suite('Openshift/Cluster', () => {
             execStub.onSecondCall().resolves(errorData);
             infoStub.resolves('Yes');
             quickPickStub.onFirstCall().resolves('Credentials');
-            quickPickStub.onSecondCall().resolves({description: "Current Context", label: testUrl});
-            quickPickStub.onThirdCall().resolves({description: "Current Context", label: testUrl});
+            quickPickStub.onSecondCall().resolves({description: 'Current Context', label: testUrl});
+            quickPickStub.onThirdCall().resolves({description: 'Current Context', label: testUrl});
             inputStub.resolves(password);
             let expectedErr: { message: any };
             try {

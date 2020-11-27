@@ -40,7 +40,7 @@ export default class OpenShiftItem {
 
     static validateUniqueName(data: Array<OpenShiftObject>, value: string): string {
         const openshiftObject =  data.find((item) => item.getName() === value);
-        return openshiftObject && `This name is already used, please enter different name.`;
+        return openshiftObject && 'This name is already used, please enter different name.';
     }
 
     static async getName(message: string, data: Promise<Array<OpenShiftObject>>, offset?: string, defaultValue = ''): Promise<string> {
@@ -50,7 +50,7 @@ export default class OpenShiftItem {
             ignoreFocusOut: true,
             validateInput: async (value: string) => {
                 let validationMessage = OpenShiftItem.emptyName(`Empty ${message}`, value.trim());
-                if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character`, value);
+                if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`, value);
                 if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${message} should be between 2-63 characters`, value, offset ? offset.length : 0);
                 if (!validationMessage) validationMessage = OpenShiftItem.validateUniqueName(await data, value);
                 return validationMessage;
@@ -98,7 +98,7 @@ export default class OpenShiftItem {
     static async getApplicationNames(project: OpenShiftObject, createCommand = false): Promise<Array<OpenShiftObject | QuickPickCommand>> {
         return OpenShiftItem.odo.getApplications(project).then((applicationList) => {
             if (applicationList.length === 0 && !createCommand) throw Error(errorMessage.Component);
-            return createCommand ? [new QuickPickCommand(`$(plus) Create new Application...`, async () => {
+            return createCommand ? [new QuickPickCommand('$(plus) Create new Application...', async () => {
                 return OpenShiftItem.getName('Application name', Promise.resolve(applicationList));
             }), ...applicationList] : applicationList;
         });

@@ -9,7 +9,7 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
 import { OdoImpl, ContextType } from '../../../src/odo';
-import { Command } from "../../../src/odo/command";
+import { Command } from '../../../src/odo/command';
 import { Storage } from '../../../src/openshift/storage';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
 
@@ -249,7 +249,7 @@ suite('OpenShift/Storage', () => {
             });
             await Storage.create(componentItem);
 
-            expect(result).equals('Not a valid Storage name. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character');
+            expect(result).equals('Not a valid Storage name. Please use lower case alphanumeric characters or \'-\', start with an alphabetic character, and end with an alphanumeric character');
         });
 
         test('validator returns error message if same name of storage found', async () => {

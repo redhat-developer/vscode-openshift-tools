@@ -27,7 +27,7 @@ export interface S2iComponent {
 }
 
 export interface DevfileComponent {
-    kind: "DevfileComponent";
+    kind: 'DevfileComponent';
     apiVersion: string;
     metadata: {
         name: string;

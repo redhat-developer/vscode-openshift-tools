@@ -13,14 +13,14 @@ import * as fsex from 'fs-extra';
 import { Platform } from '../../src/util/platform';
 import { CliExitData, CliChannel } from '../../src/cli';
 
-import hasha = require("hasha");
+import hasha = require('hasha');
 import pq = require('proxyquire');
 import sinonChai = require('sinon-chai');
 import path = require('path');
 
 chai.use(sinonChai);
 
-suite("tools configuration", () => {
+suite('tools configuration', () => {
     let sb: sinon.SinonSandbox;
     let chmodSyncStub: sinon.SinonStub;
     let ToolsConfig: any;

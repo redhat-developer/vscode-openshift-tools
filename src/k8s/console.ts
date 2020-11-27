@@ -4,8 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { Command } from "../odo/command";
-import { KubeConfigUtils } from "../util/kubeUtils";
+import { Command } from '../odo/command';
+import { KubeConfigUtils } from '../util/kubeUtils';
 import OpenShiftItem from '../openshift/openshiftItem';
 import { vsCommand } from '../vscommand';
 
@@ -34,7 +34,7 @@ export class Console extends OpenShiftItem {
     static async openBuildConfig(context: { name: string}): Promise<unknown> {
         let url = '';
         if (!context) {
-            vscode.window.showErrorMessage("Cannot load the build config");
+            vscode.window.showErrorMessage('Cannot load the build config');
             return;
         }
         const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
@@ -51,7 +51,7 @@ export class Console extends OpenShiftItem {
     static async openDeploymentConfig(context: { name: string}): Promise<unknown> {
         let url = '';
         if (!context) {
-            vscode.window.showErrorMessage("Cannot load the deployment config");
+            vscode.window.showErrorMessage('Cannot load the deployment config');
             return;
         }
         const project = Console.getCurrentProject();
@@ -68,7 +68,7 @@ export class Console extends OpenShiftItem {
     static async openImageStream(context: { name: string}): Promise<unknown> {
         let url = '';
         if (!context) {
-            vscode.window.showErrorMessage("Cannot load the image stream");
+            vscode.window.showErrorMessage('Cannot load the image stream');
             return;
         }
         const project = Console.getCurrentProject();
@@ -85,7 +85,7 @@ export class Console extends OpenShiftItem {
     static async openProject(context: { name: string}): Promise<unknown> {
         let url = '';
         if (!context) {
-            vscode.window.showErrorMessage("Cannot load the Project");
+            vscode.window.showErrorMessage('Cannot load the Project');
             return;
         }
         const project = Console.getCurrentProject();

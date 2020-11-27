@@ -16,14 +16,14 @@ import { WindowUtil } from '../../src/util/windowUtils';
 import { ToolsConfig } from '../../src/tools';
 import { CliExitData, CliChannel } from '../../src/cli';
 import * as odo from '../../src/odo';
-import * as verbose from "../../src/odo/command";
+import * as verbose from '../../src/odo/command';
 
 import jsYaml = require('js-yaml');
 
 const {expect} = chai;
 chai.use(sinonChai);
 
-suite("odo", () => {
+suite('odo', () => {
     const odoCli: odo.Odo = odo.OdoImpl.Instance;
     let sandbox: sinon.SinonSandbox;
     const errorMessage = 'Error';
@@ -113,7 +113,7 @@ suite("odo", () => {
 
         test('executeInTerminal send command to terminal and shows it', async () => {
             const termFake: Terminal = {
-                name:  "name",
+                name:  'name',
                 processId: Promise.resolve(1),
                 sendText: sinon.stub(),
                 show: sinon.stub(),
@@ -277,20 +277,20 @@ suite("odo", () => {
                         error: null,
                         stderr: '',
                         stdout: JSON.stringify({
-                            kind: "ServiceList",
+                            kind: 'ServiceList',
                             items: [{
                                 metadata: {
-                                    name: "service1"
+                                    name: 'service1'
                                 }, spec: {
                                 }
                             }, {
                                 metadata: {
-                                    name: "service2"
+                                    name: 'service2'
                                 }, spec: {
                                 }
                             }, {
                                 metadata: {
-                                    name: "service3"
+                                    name: 'service3'
                                 }, spec: {
                                 }
                             }]
@@ -346,9 +346,9 @@ suite("odo", () => {
         test('getServiceTemplates throws exception if service catalog is not enabled', async () => {
             execStub.resolves({error: null, stdout: '', stderr:
                 JSON.stringify({
-                    kind: "Error",
-                    apiVersion: "odo.openshift.io/v1alpha1",
-                    message: "unable to list services because Service Catalog is not enabled in your cluster"
+                    kind: 'Error',
+                    apiVersion: 'odo.openshift.io/v1alpha1',
+                    message: 'unable to list services because Service Catalog is not enabled in your cluster'
                 })
             });
             let e: Error;
@@ -358,7 +358,7 @@ suite("odo", () => {
                 e = err;
             }
 
-            expect(e.message).equals("unable to list services because Service Catalog is not enabled in your cluster");
+            expect(e.message).equals('unable to list services because Service Catalog is not enabled in your cluster');
 
         });
 
@@ -378,10 +378,10 @@ suite("odo", () => {
                 ]
             }), stderr: ''});
             const stdout = JSON.stringify({
-                kind: "ServiceList",
+                kind: 'ServiceList',
                 items: [{
                     metadata: {
-                        name: "service1"
+                        name: 'service1'
                     }
                 }]
             });
@@ -400,12 +400,12 @@ suite("odo", () => {
                         items: [
                             {
                                 metadata: {
-                                    name: "storage1"
+                                    name: 'storage1'
                                 }
                             },
                             {
                                 metadata: {
-                                    name: "storage2"
+                                    name: 'storage2'
                                 }
                             }
                         ]
@@ -425,12 +425,12 @@ suite("odo", () => {
                         items: [
                             {
                                 metadata: {
-                                    name: "route1"
+                                    name: 'route1'
                                 }
                             },
                             {
                                 metadata: {
-                                    name: "route2"
+                                    name: 'route2'
                                 }
                             }
                         ]
@@ -448,12 +448,12 @@ suite("odo", () => {
                 items: [
                     {
                         metadata: {
-                            name: "route1"
+                            name: 'route1'
                         }
                     },
                     {
                         metadata: {
-                            name: "route2"
+                            name: 'route2'
                         }
                     }
                 ]
@@ -462,12 +462,12 @@ suite("odo", () => {
                 items: [
                     {
                         metadata: {
-                            name: "storage1"
+                            name: 'storage1'
                         }
                     },
                     {
                         metadata: {
-                            name: "storage2"
+                            name: 'storage2'
                         }
                     }
                 ]
@@ -479,26 +479,26 @@ suite("odo", () => {
         });
     });
 
-    suite("catalog integration", () => {
+    suite('catalog integration', () => {
 
         const odoCatalog = JSON.stringify({
-            kind : "ComponentTypeList",
-            apiVersion : "odo.openshift.io/v1alpha1",
+            kind : 'ComponentTypeList',
+            apiVersion : 'odo.openshift.io/v1alpha1',
             s2iItems: [
                 {
-                    kind : "ComponentType",
-                    apiVersion : "odo.openshift.io/v1alpha1",
+                    kind : 'ComponentType',
+                    apiVersion : 'odo.openshift.io/v1alpha1',
                     metadata: {
-                        name : "nodejs",
-                        namespace : "openshift",
+                        name : 'nodejs',
+                        namespace : 'openshift',
                         creationTimestamp : null
                     },
                     spec: {
                         allTags: [
-                            "10",
-                            "8",
-                            "8-RHOAR",
-                            "latest",
+                            '10',
+                            '8',
+                            '8-RHOAR',
+                            'latest',
                         ]
                     }
                 }
@@ -517,27 +517,27 @@ suite("odo", () => {
 
     });
 
-    suite("service integration", () => {
+    suite('service integration', () => {
         const data: CliExitData = { error: undefined, stderr: null, stdout:
             JSON.stringify({
-                kind: "ServiceTypeList",
-                apiVersion: "odo.openshift.io/v1alpha1",
+                kind: 'ServiceTypeList',
+                apiVersion: 'odo.openshift.io/v1alpha1',
                 metadata: {
                     creationTimestamp: null
                 },
                 services: {
                     items: [
                         {
-                            kind: "ServiceType",
-                            apiVersion: "odo.openshift.io/v1alpha1",
+                            kind: 'ServiceType',
+                            apiVersion: 'odo.openshift.io/v1alpha1',
                             metadata: {
-                                name: "cakephp-mysql-persistent",
+                                name: 'cakephp-mysql-persistent',
                                 creationTimestamp: null
                             },
                             spec: {
                                 hidden: false,
                                 planList: [
-                                    "default"
+                                    'default'
                                 ]
                             }
                         },
@@ -550,14 +550,14 @@ suite("odo", () => {
             sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves(data);
         });
 
-        test("getServiceTemplates returns correct number of services", async () => {
+        test('getServiceTemplates returns correct number of services', async () => {
             const result: string[] = await odoCli.getServiceTemplates();
             expect(result.length).equals(1);
-            expect(result[0]).equals("cakephp-mysql-persistent");
+            expect(result[0]).equals('cakephp-mysql-persistent');
         });
 
-        test("getServiceTemplatePlans returns correct number of plans for service", async () => {
-            const result: string[] = await odoCli.getServiceTemplatePlans("cakephp-mysql-persistent");
+        test('getServiceTemplatePlans returns correct number of plans for service', async () => {
+            const result: string[] = await odoCli.getServiceTemplatePlans('cakephp-mysql-persistent');
             assert.equal(result.length, 1);
             assert.equal(result[0], 'default');
         });
@@ -603,7 +603,7 @@ suite("odo", () => {
                 stderr: 'Please log in to the cluster'
             });
             const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
-            assert.equal(cluster[0].getName(), "Please log in to the cluster");
+            assert.equal(cluster[0].getName(), 'Please log in to the cluster');
         });
 
         test('show message if cluster is down', async () => {
@@ -613,7 +613,7 @@ suite("odo", () => {
                 stderr: 'Unable to connect to OpenShift cluster, is it down?'
             });
             const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
-            assert.equal(cluster[0].getName(), "Cannot connect to the OpenShift cluster");
+            assert.equal(cluster[0].getName(), 'Cannot connect to the OpenShift cluster');
         });
 
         test('extension uses oc version to get cluster url as a backup plan', async () => {

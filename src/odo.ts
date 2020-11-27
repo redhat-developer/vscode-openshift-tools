@@ -118,7 +118,7 @@ export abstract class OpenShiftObjectImpl implements OpenShiftObject {
     }
 
     get iconPath(): Uri {
-        return Uri.file(path.join(__dirname, "../../images/context", this.icon));
+        return Uri.file(path.join(__dirname, '../../images/context', this.icon));
     }
 
     get tooltip(): string {
@@ -269,11 +269,11 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
         if (this.contextValue === ContextType.COMPONENT_PUSHED || this.contextValue === ContextType.COMPONENT || this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
             let iconPath: Uri;
             if (this.compType === odo.SourceType.GIT) {
-                iconPath = Uri.file(path.join(__dirname, "../../images/component", 'git.png'));
+                iconPath = Uri.file(path.join(__dirname, '../../images/component', 'git.png'));
             } else if (this.compType === odo.SourceType.BINARY) {
-                iconPath = Uri.file(path.join(__dirname, "../../images/component", 'binary.png'));
+                iconPath = Uri.file(path.join(__dirname, '../../images/component', 'binary.png'));
             } else {
-                iconPath = Uri.file(path.join(__dirname, "../../images/component", 'workspace.png'));
+                iconPath = Uri.file(path.join(__dirname, '../../images/component', 'workspace.png'));
             }
             return iconPath;
         }
@@ -437,7 +437,7 @@ class OdoModel {
         const execs: Promise<cliInstance.CliExitData>[] = [];
         folders.forEach((folder)=> {
             try {
-                execs.push(OdoImpl.Instance.execute(`odo describe -o json`, folder.uri.fsPath, false));
+                execs.push(OdoImpl.Instance.execute('odo describe -o json', folder.uri.fsPath, false));
             } catch (ignore) {
                 // ignore execution errors
             }

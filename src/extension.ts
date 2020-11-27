@@ -115,7 +115,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     });
 
     function updateStatusBarItem(statusBarItem: StatusBarItem, text: string): void {
-		if (!workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation")) {
+		if (!workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation')) {
 			statusBarItem.hide();
 			return;
 		}

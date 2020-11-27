@@ -66,7 +66,7 @@ suite('openshift connector Extension', () => {
         // eslint-disable-next-line @typescript-eslint/require-await
         sandbox.stub(OdoImpl.prototype, 'execute').callsFake(async (cmd: string, cwd: string)=> {
             if (cmd.includes('version')) {
-                return { error: undefined, stdout: "Server: https://api.crc.testing:6443", stderr: '' };
+                return { error: undefined, stdout: 'Server: https://api.crc.testing:6443', stderr: '' };
             }
 
             if(cmd.includes('describe')) {
@@ -158,6 +158,6 @@ suite('openshift connector Extension', () => {
         const semStub = sandbox.stub(vscode.window, 'showErrorMessage');
         sandbox.stub(Progress, 'execFunctionWithProgress').rejects(Error('message'));
         await vscode.commands.executeCommand('openshift.app.delete', appItem);
-        expect(semStub).calledWith(`Failed to delete Application with error 'Error: message'`);
+        expect(semStub).calledWith('Failed to delete Application with error \'Error: message\'');
     });
 });

@@ -9,7 +9,7 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
 import { OdoImpl, ContextType } from '../../../src/odo';
-import { Command } from "../../../src/odo/command";
+import { Command } from '../../../src/odo/command';
 import { Url } from '../../../src/openshift/url';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
 import { ComponentKind } from '../../../src/odo/componentType';
@@ -153,20 +153,20 @@ suite('OpenShift/URL', () => {
 
     function genUlrListExecResult(state: string): Cli.CliExitData {
         return {error: undefined, stdout: JSON.stringify({
-            kind: "List",
-            apiVersion: "odo.openshift.io/v1alpha1",
+            kind: 'List',
+            apiVersion: 'odo.openshift.io/v1alpha1',
             metadata: {},
             items: [
                 {
-                    kind: "url",
-                    apiVersion: "odo.openshift.io/v1alpha1",
+                    kind: 'url',
+                    apiVersion: 'odo.openshift.io/v1alpha1',
                     metadata: {
-                        name: "route",
+                        name: 'route',
                         creationTimestamp: null
                     },
                     spec: {
-                        path: "route-nodejs-app-myproject.192.168.64.59.nip.io",
-                        protocol: "http",
+                        path: 'route-nodejs-app-myproject.192.168.64.59.nip.io',
+                        protocol: 'http',
                         port: 8080
                     },
                     status: {
@@ -231,7 +231,7 @@ suite('OpenShift/URL', () => {
         test('rejects when fails to create Url', () => {
             inputStub.onFirstCall().resolves();
             execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
-            execStub.onSecondCall().resolves({error: "Error", stdout: portsOutput, stderr: ''});
+            execStub.onSecondCall().resolves({error: 'Error', stdout: portsOutput, stderr: ''});
             return Url.create(null).catch((err) => {
                 expect(err).equals(`Failed to create URL for component '${componentItem.getName()}'`);
             });
@@ -290,7 +290,7 @@ suite('OpenShift/URL', () => {
                 result = await options.validateInput('');
                 expect(result).equal('Empty URL name');
                 result = await options.validateInput('Urlname');
-                expect(result).equal('Not a valid URL name. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character');
+                expect(result).equal('Not a valid URL name. Please use lower case alphanumeric characters or \'-\', start with an alphabetic character, and end with an alphanumeric character');
                 return Promise.resolve('');
             });
             await Url.create(componentItem);
@@ -386,7 +386,7 @@ suite('OpenShift/URL', () => {
         let openStub: sinon.SinonStub;
 
         setup(() => {
-            openStub = sandbox.stub(vscode.commands, "executeCommand").resolves();
+            openStub = sandbox.stub(vscode.commands, 'executeCommand').resolves();
         });
 
         test('open url in browser it is pushed to cluster', async () => {

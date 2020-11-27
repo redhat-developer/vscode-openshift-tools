@@ -5,9 +5,9 @@
 
 import { window, QuickPickItem, commands, Uri } from 'vscode';
 import { OpenShiftObject } from '../odo';
-import { Command } from "../odo/command";
+import { Command } from '../odo/command';
 import OpenShiftItem from './openshiftItem';
-import { Progress } from "../util/progress";
+import { Progress } from '../util/progress';
 import { Port } from '../odo/config';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { ComponentKind } from '../odo/componentType';
@@ -35,7 +35,7 @@ export class Url extends OpenShiftItem{
                 if (ports.length === 1) {
                     port = ports[0].number.toString();
                 } else if (ports.length > 1) {
-                    const selectedPort = await window.showQuickPick(portItems, {placeHolder: "Select port to expose"});
+                    const selectedPort = await window.showQuickPick(portItems, {placeHolder: 'Select port to expose'});
                     port = selectedPort ? (selectedPort as unknown as Port).number.toString() : undefined;
                 } else {
                     throw new VsCommandError(`Component '${component.getName()}' has no ports declared.`);
@@ -65,7 +65,7 @@ export class Url extends OpenShiftItem{
             }
             if (!port) return null;
             const parsedNumber = Number.parseInt(port, 10);
-            const secure = await window.showQuickPick(['Yes', 'No'], {placeHolder: "Do you want to secure new URL?"});
+            const secure = await window.showQuickPick(['Yes', 'No'], {placeHolder: 'Do you want to secure new URL?'});
             if (secure) {
                 return Progress.execFunctionWithProgress(`Creating a URL '${urlName}' for the Component '${component.getName()}'`,
                     () => Url.odo.createComponentCustomUrl(component, `${urlName}`, `${parsedNumber}`, secure === 'Yes')
@@ -81,8 +81,8 @@ export class Url extends OpenShiftItem{
     static async del(treeItem: OpenShiftObject): Promise<string | null> {
         let url = treeItem;
         const component = await Url.getOpenShiftCmdData(url,
-            "From which Application you want to delete URL",
-            "From which Component you want to delete URL");
+            'From which Application you want to delete URL',
+            'From which Component you want to delete URL');
         if (!url && component) {
             url = await window.showQuickPick(Url.odo.getRoutes(component), {placeHolder: `Select the URL to delete from the component ${component.getName()}`, ignoreFocusOut: true});
         }
@@ -122,8 +122,8 @@ export class Url extends OpenShiftItem{
     static async describe(treeItem: OpenShiftObject): Promise<void> {
         let url = treeItem;
         const component = await Url.getOpenShiftCmdData(url,
-            "From which Application you want to describe URL",
-            "From which Component you want to describe URL");
+            'From which Application you want to describe URL',
+            'From which Component you want to describe URL');
         if (!url && component) {
             url = await window.showQuickPick(Url.odo.getRoutes(component), {placeHolder: `Select the URL to describe from the component ${component.getName()}`, ignoreFocusOut: true});
         }

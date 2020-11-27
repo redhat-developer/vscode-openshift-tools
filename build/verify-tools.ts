@@ -20,7 +20,6 @@ import cp = require('child_process');
 import configData = require('../src/tools.json');
 import os = require('os');
 
-
 /**
  * Download reqURL to targetFolder and save it to fileName. Verify the downloaded file sha256 is matching sha256sum
  * @param targetFolder

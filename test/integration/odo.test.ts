@@ -188,7 +188,7 @@ suite('odo integration', () => {
             await oi.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
         }
         if (!openshiftVersion) {
-            const version = await oi.execute(`oc version`);
+            const version = await oi.execute('oc version');
             const match = version.stdout.match(/Server Version:\s*(\d+\.\d+\.\d+).*/);
             if (match && match.length > 1) {
                 openshiftVersion = match[1];

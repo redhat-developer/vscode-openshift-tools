@@ -87,7 +87,7 @@ suite('OpenShiftItem', () => {
             sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
             sandbox.stub(OpenShiftItem, 'getName').resolves();
             const appNames = await OpenShiftItem.getApplicationNames(projectItem, true);
-            expect(appNames[0].label).equals(`$(plus) Create new Application...`);
+            expect(appNames[0].label).equals('$(plus) Create new Application...');
         });
 
         test('throws error if there are no application available', async ()=> {
