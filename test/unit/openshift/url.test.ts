@@ -290,7 +290,7 @@ suite('OpenShift/URL', () => {
                 result = await options.validateInput('');
                 expect(result).equal('Empty URL name');
                 result = await options.validateInput('Urlname');
-                expect(result).equal('Not a valid URL name. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character');
+                expect(result).equal('Not a valid URL name. Please use lower case alphanumeric characters or \'-\', start with an alphabetic character, and end with an alphanumeric character');
                 return Promise.resolve('');
             });
             await Url.create(componentItem);

@@ -108,7 +108,7 @@ suite('OpenShift/Project', () => {
             sandbox.stub(OdoImpl.Instance.subject,'next');
             await Project.create();
 
-            expect(result).equals('Not a valid Project name. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character');
+            expect(result).equals('Not a valid Project name. Please use lower case alphanumeric characters or \'-\', start with an alphabetic character, and end with an alphanumeric character');
         });
 
         test('validator returns error message if same name of project found', async () => {

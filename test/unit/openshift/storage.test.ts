@@ -249,7 +249,7 @@ suite('OpenShift/Storage', () => {
             });
             await Storage.create(componentItem);
 
-            expect(result).equals('Not a valid Storage name. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character');
+            expect(result).equals('Not a valid Storage name. Please use lower case alphanumeric characters or \'-\', start with an alphabetic character, and end with an alphanumeric character');
         });
 
         test('validator returns error message if same name of storage found', async () => {
