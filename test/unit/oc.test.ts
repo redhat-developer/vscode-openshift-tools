@@ -20,9 +20,9 @@ chai.use(sinonChai);
 suite('Oc', () => {
     let sandbox: sinon.SinonSandbox;
     let detectOrDownloadStub: sinon.SinonStub<[string], Promise<string>>;
-    let warnStub: sinon.SinonStub<[string, import("vscode").MessageOptions, ...import("vscode").MessageItem[]], Thenable<import("vscode").MessageItem>>;
+    let warnStub: sinon.SinonStub<[string, import('vscode').MessageOptions, ...import('vscode').MessageItem[]], Thenable<import('vscode').MessageItem>>;
     let execStub: sinon.SinonStub;
-    let quickPickStub: sinon.SinonStub<[import("vscode").QuickPickItem[] | Thenable<import("vscode").QuickPickItem[]>, import("vscode").QuickPickOptions?, import("vscode").CancellationToken?], Thenable<import("vscode").QuickPickItem>>;
+    let quickPickStub: sinon.SinonStub<[import('vscode').QuickPickItem[] | Thenable<import('vscode').QuickPickItem[]>, import('vscode').QuickPickOptions?, import('vscode').CancellationToken?], Thenable<import('vscode').QuickPickItem>>;
     const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
     const projectItem = new TestItem(clusterItem, 'myproject', ContextType.PROJECT);
 
@@ -37,7 +37,7 @@ suite('Oc', () => {
     `;
     const TextEditorMock = {
         document: {
-            fileName: "manifests.yaml",
+            fileName: 'manifests.yaml',
             getText: sinon.stub().returns(sampleYaml),
         },
     };
@@ -61,9 +61,9 @@ suite('Oc', () => {
     });
 
     test('show warning message if file is untitled', async () => {
-        sandbox.stub(window, "activeTextEditor").value({
+        sandbox.stub(window, 'activeTextEditor').value({
             document: {
-                fileName: "manifests.yaml",
+                fileName: 'manifests.yaml',
                 isUntitled: true,
             },
         });
@@ -73,9 +73,9 @@ suite('Oc', () => {
     });
 
     test('show warning message if oc command not found', async () => {
-        sandbox.stub(window, "activeTextEditor").value({
+        sandbox.stub(window, 'activeTextEditor').value({
             document: {
-                fileName: "manifests.yaml",
+                fileName: 'manifests.yaml',
             },
         });
         detectOrDownloadStub.onFirstCall().resolves(undefined);
@@ -87,13 +87,13 @@ suite('Oc', () => {
         execStub.resolves({
             error: undefined,
             stderr: '',
-            stdout: "imagestream.image.openshift.io/spring-petclinic created\ndeploymentconfig.apps.openshift.io/spring-petclinic created"
+            stdout: 'imagestream.image.openshift.io/spring-petclinic created\ndeploymentconfig.apps.openshift.io/spring-petclinic created'
         });
         sandbox.stub(window, 'showInformationMessage').resolves('Save');
         quickPickStub.onFirstCall().resolves(projectItem);
-        sandbox.stub(window, "activeTextEditor").value({
+        sandbox.stub(window, 'activeTextEditor').value({
             document: {
-                fileName: "manifests.yaml",
+                fileName: 'manifests.yaml',
                 isDirty: true,
                 save: sinon.stub().returns(true)
             },
@@ -104,9 +104,9 @@ suite('Oc', () => {
 
     test('show warning message if file content is changed', async () => {
         const infoMsg = sandbox.stub(window, 'showInformationMessage').resolves(undefined);
-        sandbox.stub(window, "activeTextEditor").value({
+        sandbox.stub(window, 'activeTextEditor').value({
             document: {
-                fileName: "manifests.yaml",
+                fileName: 'manifests.yaml',
                 isDirty: true,
             },
         });
@@ -119,9 +119,9 @@ suite('Oc', () => {
         execStub.resolves({
             error: undefined,
             stderr: '',
-            stdout: "imagestream.image.openshift.io/spring-petclinic created\ndeploymentconfig.apps.openshift.io/spring-petclinic created"
+            stdout: 'imagestream.image.openshift.io/spring-petclinic created\ndeploymentconfig.apps.openshift.io/spring-petclinic created'
         });
-        sandbox.stub(window, "activeTextEditor").value(TextEditorMock);
+        sandbox.stub(window, 'activeTextEditor').value(TextEditorMock);
         quickPickStub.onFirstCall().resolves(projectItem);
         const result = await Oc.create();
         expect(result).equals('Resources were successfully created.');
@@ -132,9 +132,9 @@ suite('Oc', () => {
         execStub.resolves({
             error: 'error',
             stderr: '',
-            stdout: ""
+            stdout: ''
         });
-        sandbox.stub(window, "activeTextEditor").value(TextEditorMock);
+        sandbox.stub(window, 'activeTextEditor').value(TextEditorMock);
         quickPickStub.onFirstCall().resolves(projectItem);
         try {
             await Oc.create();
@@ -145,8 +145,8 @@ suite('Oc', () => {
     });
 
     test('errors when there is no active project', async () => {
-        sandbox.stub(OpenShiftItem, "getOpenShiftCmdData").resolves(null);
-        sandbox.stub(window, "activeTextEditor").value(TextEditorMock);
+        sandbox.stub(OpenShiftItem, 'getOpenShiftCmdData').resolves(null);
+        sandbox.stub(window, 'activeTextEditor').value(TextEditorMock);
         quickPickStub.onFirstCall().resolves(projectItem);
         expect(await Oc.create()).null;
     });

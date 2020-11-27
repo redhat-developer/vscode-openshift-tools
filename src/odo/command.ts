@@ -30,7 +30,7 @@ export class Command {
     }
 
     static listProjects(): string {
-        return `odo project list -o json`;
+        return 'odo project list -o json';
     }
 
     @verbose
@@ -52,7 +52,7 @@ export class Command {
     }
 
     static listCatalogComponents(): string {
-        return `odo catalog list components`;
+        return 'odo catalog list components';
     }
 
     static listCatalogComponentsJson(): string {
@@ -60,7 +60,7 @@ export class Command {
     }
 
     static listCatalogServices(): string {
-        return `odo catalog list services`;
+        return 'odo catalog list services';
     }
 
     static listCatalogServicesJson(): string {
@@ -68,7 +68,7 @@ export class Command {
     }
 
     static listStorageNames(): string {
-        return `odo storage list -o json`;
+        return 'odo storage list -o json';
     }
 
     static printOcVersion(): string {
@@ -96,7 +96,7 @@ export class Command {
     }
 
     static odoLogout(): string {
-        return `odo logout`;
+        return 'odo logout';
     }
 
     static setOpenshiftContext(context: string): string {
@@ -108,7 +108,7 @@ export class Command {
         username: string,
         passwd: string,
     ): string {
-        const quote = Platform.OS === 'win32' ? `"` : `'`;
+        const quote = Platform.OS === 'win32' ? '"' : '\'';
         return `odo login ${clusterURL} -u ${quote}${username}${quote} -p ${quote}${passwd}${quote} --insecure-skip-tls-verify`;
     }
 
@@ -150,7 +150,7 @@ export class Command {
     }
 
     static describeComponent(): string {
-        return `odo describe`;
+        return 'odo describe';
     }
 
     static describeComponentJson(): string {
@@ -166,11 +166,11 @@ export class Command {
     }
 
     static showLog(): string {
-        return `odo log`;
+        return 'odo log';
     }
 
     static showLogAndFollow(): string {
-        return `odo log -f`;
+        return 'odo log -f';
     }
 
     static listComponentPorts(project: string, app: string, component: string): string {
@@ -205,7 +205,7 @@ export class Command {
 
     @verbose
     static watchComponent(): string {
-        return `odo watch`;
+        return 'odo watch';
     }
 
     @verbose
@@ -277,7 +277,7 @@ export class Command {
     }
 
     static getComponentUrl(): string {
-        return `odo url list -o json`;
+        return 'odo url list -o json';
     }
 
     static deleteComponentUrl(name: string): string {
@@ -285,7 +285,7 @@ export class Command {
     }
 
     static getComponentJson(): string {
-        return `odo describe -o json`;
+        return 'odo describe -o json';
     }
 
     static unlinkComponents(
@@ -303,14 +303,14 @@ export class Command {
     }
 
     static getclusterVersion(): string {
-        return `oc get clusterversion -ojson`;
+        return 'oc get clusterversion -ojson';
     }
 
     static showServerUrl(): string {
-        return `oc whoami --show-server`;
+        return 'oc whoami --show-server';
     }
 
     static showConsoleUrl(): string {
-        return `oc get configmaps console-public -n openshift-config-managed -o json`;
+        return 'oc get configmaps console-public -n openshift-config-managed -o json';
     }
 }

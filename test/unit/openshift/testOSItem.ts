@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Uri } from "vscode";
-import { OpenShiftObject, ContextType } from "../../../src/odo";
-import { SourceType } from "../../../src/odo/config";
-import { BuilderImage } from "../../../src/odo/builderImage";
-import { ComponentKind } from "../../../src/odo/componentType";
+import { Uri } from 'vscode';
+import { OpenShiftObject, ContextType } from '../../../src/odo';
+import { SourceType } from '../../../src/odo/config';
+import { BuilderImage } from '../../../src/odo/builderImage';
+import { ComponentKind } from '../../../src/odo/componentType';
 
 export class TestItem implements OpenShiftObject {
     public treeItem = null;

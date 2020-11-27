@@ -7,7 +7,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { OdoImpl } from '../../../src/odo';
-import { Command } from "../../../src/odo/command";
+import { Command } from '../../../src/odo/command';
 import { Catalog } from '../../../src/openshift/catalog';
 import { Platform } from '../../../src/util/platform';
 

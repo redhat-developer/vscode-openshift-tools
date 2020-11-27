@@ -8,7 +8,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { OdoImpl, ContextType } from '../../../src/odo';
-import { Command } from "../../../src/odo/command";
+import { Command } from '../../../src/odo/command';
 import { TestItem } from './testOSItem';
 import { Project } from '../../../src/openshift/project';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
@@ -105,7 +105,7 @@ suite('OpenShift/Project', () => {
                 result = await options.validateInput('name&name');
                 return Promise.resolve('projectNameValidatorTest');
             });
-            sandbox.stub(OdoImpl.Instance.subject,"next");
+            sandbox.stub(OdoImpl.Instance.subject,'next');
             await Project.create();
 
             expect(result).equals('Not a valid Project name. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character');
@@ -131,7 +131,7 @@ suite('OpenShift/Project', () => {
                 result = await options.validateInput('n123456789012345678901234567890123456789012345678901234567890123');
                 return Promise.resolve('projectLongNameValidatorTest');
             });
-            sandbox.stub(OdoImpl.Instance.subject,"next");
+            sandbox.stub(OdoImpl.Instance.subject,'next');
             await Project.create();
 
             expect(result).equals('Project name should be between 2-63 characters');

@@ -41,7 +41,7 @@ export interface ComponentStatus {
 }
 
 export interface Component {
-    apiVersion: "odo.openshift.io/v1alpha1";
+    apiVersion: 'odo.openshift.io/v1alpha1';
     metadata: ComponentMetadata;
     spec: ComponentSpec;
     status: ComponentStatus;

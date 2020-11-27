@@ -8,7 +8,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { OdoImpl, ContextType } from '../../../src/odo';
-import { Command } from "../../../src/odo/command";
+import { Command } from '../../../src/odo/command';
 import { Application } from '../../../src/openshift/application';
 import { TestItem } from './testOSItem';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
@@ -79,7 +79,7 @@ suite('OpenShift/Application', () => {
 
                 await Application.describe(null);
 
-                expect(quickPickStub).calledWith(apps, { placeHolder: "Select Application you want to describe", ignoreFocusOut: true });
+                expect(quickPickStub).calledWith(apps, { placeHolder: 'Select Application you want to describe', ignoreFocusOut: true });
             });
 
             test('skips odo command execution if canceled by user', async () => {
@@ -133,7 +133,7 @@ suite('OpenShift/Application', () => {
             } catch (err) {
                 expectedError = err;
             }
-            expect(expectedError.message).equals(`Failed to delete Application with error 'ERROR'`);
+            expect(expectedError.message).equals('Failed to delete Application with error \'ERROR\'');
         });
 
         test('requests for a project name and exits if not provided', async () => {

@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Url } from "url";
-import { Ctx, Data } from "./componentTypeDescription";
-import { ComponentMetadata } from "./config";
+import { Url } from 'url';
+import { Ctx, Data } from './componentTypeDescription';
+import { ComponentMetadata } from './config';
 
 export enum ComponentKind {
     S2I = 's2i',
@@ -16,7 +16,7 @@ export interface ImageStreamTag {
     name: string,
     annotations: {
         description: string;
-        "openshift.io/display-name": string;
+        'openshift.io/display-name': string;
         tags: string;
         version: string;
     }

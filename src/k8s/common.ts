@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { QuickPickItem, window } from "vscode";
+import { QuickPickItem, window } from 'vscode';
 
 import * as k8s from 'vscode-kubernetes-tools-api';
 import * as Odo from '../odo';

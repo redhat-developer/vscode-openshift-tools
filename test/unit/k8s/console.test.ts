@@ -26,15 +26,15 @@ suite('K8s/console', () => {
         extraInfo: undefined,
         isExpandable: false,
         metadata: undefined,
-        name: "cpm1-app1",
+        name: 'cpm1-app1',
         namespace: null,
-        nodeCategory: "kubernetes-explorer-node",
-        nodeType: "resource"
+        nodeCategory: 'kubernetes-explorer-node',
+        nodeType: 'resource'
     };
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '' });
         commandStub = sandbox.stub(vscode.commands, 'executeCommand');
     });
 
@@ -47,11 +47,11 @@ suite('K8s/console', () => {
         test('Open the Build Config Url for 4.x cluster', async () => {
             execStub.onFirstCall().resolves({
                 error: null,
-                stderr: "",
+                stderr: '',
                 stdout: JSON.stringify({
-                    apiVersion: "v1",
+                    apiVersion: 'v1',
                     data: {
-                        consoleURL: "https://console-openshift-console.apps-crc.testing"
+                        consoleURL: 'https://console-openshift-console.apps-crc.testing'
                     }
                 })
             });
@@ -64,8 +64,8 @@ suite('K8s/console', () => {
             execStub.onFirstCall().rejects('error');
             execStub.onSecondCall().resolves({
                 error: null,
-                stderr: "",
-                stdout: "https://162.165.64.43:8443"
+                stderr: '',
+                stdout: 'https://162.165.64.43:8443'
             });
             await Console.openBuildConfig(context);
             expect(commandStub).calledOnceWith('vscode.open', vscode.Uri.parse(`https://162.165.64.43:8443/console/project/${project}/browse/builds/cpm1-app1?tab=history`));
@@ -79,11 +79,11 @@ suite('K8s/console', () => {
         test('Open the Deployment Config Url for 4.x cluster', async () => {
             execStub.onFirstCall().resolves({
                 error: null,
-                stderr: "",
+                stderr: '',
                 stdout: JSON.stringify({
-                    apiVersion: "v1",
+                    apiVersion: 'v1',
                     data: {
-                        consoleURL: "https://console-openshift-console.apps-crc.testing"
+                        consoleURL: 'https://console-openshift-console.apps-crc.testing'
                     }
                 })
             });
@@ -96,8 +96,8 @@ suite('K8s/console', () => {
             execStub.onFirstCall().rejects('error');
             execStub.onSecondCall().resolves({
                 error: null,
-                stderr: "",
-                stdout: "https://162.165.64.43:8443"
+                stderr: '',
+                stdout: 'https://162.165.64.43:8443'
             });
             await Console.openDeploymentConfig(context);
             expect(commandStub).calledOnceWith('vscode.open', vscode.Uri.parse(`https://162.165.64.43:8443/console/project/${project}/browse/dc/cpm1-app1?tab=history`));
@@ -111,11 +111,11 @@ suite('K8s/console', () => {
         test('Open the Image Stream Url for 4.x cluster', async () => {
             execStub.onFirstCall().resolves({
                 error: null,
-                stderr: "",
+                stderr: '',
                 stdout: JSON.stringify({
-                    apiVersion: "v1",
+                    apiVersion: 'v1',
                     data: {
-                        consoleURL: "https://console-openshift-console.apps-crc.testing"
+                        consoleURL: 'https://console-openshift-console.apps-crc.testing'
                     }
                 })
             });
@@ -128,8 +128,8 @@ suite('K8s/console', () => {
             execStub.onFirstCall().rejects('error');
             execStub.onSecondCall().resolves({
                 error: null,
-                stderr: "",
-                stdout: "https://162.165.64.43:8443"
+                stderr: '',
+                stdout: 'https://162.165.64.43:8443'
             });
             await Console.openImageStream(context);
             expect(commandStub).calledOnceWith('vscode.open', vscode.Uri.parse(`https://162.165.64.43:8443/console/project/${project}/browse/images/cpm1-app1`));
@@ -143,11 +143,11 @@ suite('K8s/console', () => {
         test('Open the Project Url for 4.x cluster', async () => {
             execStub.onFirstCall().resolves({
                 error: null,
-                stderr: "",
+                stderr: '',
                 stdout: JSON.stringify({
-                    apiVersion: "v1",
+                    apiVersion: 'v1',
                     data: {
-                        consoleURL: "https://console-openshift-console.apps-crc.testing"
+                        consoleURL: 'https://console-openshift-console.apps-crc.testing'
                     }
                 })
             });
@@ -159,8 +159,8 @@ suite('K8s/console', () => {
             execStub.onFirstCall().rejects('error');
             execStub.onSecondCall().resolves({
                 error: null,
-                stderr: "",
-                stdout: "https://162.165.64.43:8443"
+                stderr: '',
+                stdout: 'https://162.165.64.43:8443'
             });
             await Console.openProject(context);
             expect(commandStub).calledOnceWith('vscode.open', vscode.Uri.parse(`https://162.165.64.43:8443/console/project/${project}/overview`));

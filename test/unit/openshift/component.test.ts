@@ -12,7 +12,7 @@ import { ChildProcess } from 'child_process';
 import { EventEmitter } from 'events';
 import { TestItem } from './testOSItem';
 import { OdoImpl, ContextType } from '../../../src/odo';
-import { Command } from "../../../src/odo/command";
+import { Command } from '../../../src/odo/command';
 import { Progress } from '../../../src/util/progress';
 import * as Util from '../../../src/util/async';
 import { Refs } from '../../../src/util/refs';
@@ -52,11 +52,11 @@ suite('OpenShift/Component', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        sandbox.stub(vscode.workspace, "updateWorkspaceFolders");
+        sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
         fetchTag = sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>([['HEAD', 'shanumb']]));
         Component = pq('../../../src/openshift/component', { }).Component;
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '' });
         spawnStub = sandbox.stub(OdoImpl.prototype, 'spawn');
         sandbox.stub(OdoImpl.prototype, 'getServices');
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
@@ -176,8 +176,8 @@ suite('OpenShift/Component', () => {
                 sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves(['nodejs']);
                 quickPickStub.onFirstCall().resolves(SourceTypeChoice.GIT);
                 quickPickStub.onSecondCall().resolves({
-                    description: "Folder which does not have an OpenShift context",
-                    label: "$(plus) Add new context folder."
+                    description: 'Folder which does not have an OpenShift context',
+                    label: '$(plus) Add new context folder.'
                 });
                 inputStub.onFirstCall().resolves(uri);
                 quickPickStub.onThirdCall().resolves('master');
@@ -296,23 +296,23 @@ suite('OpenShift/Component', () => {
             const files = [{
                 _formatted: undefined,
                 _fsPath: undefined,
-                authority: "",
-                fragment: "",
+                authority: '',
+                fragment: '',
                 fsPath,
                 path: paths,
-                query: "",
-                scheme: "file"
+                query: '',
+                scheme: 'file'
             }];
 
             setup(() => {
                 quickPickStub.onFirstCall().resolves(SourceTypeChoice.BINARY);
                 quickPickStub.onSecondCall().resolves({
-                    description: "Folder which does not have an OpenShift context",
-                    label: "$(plus) Add new context folder."
+                    description: 'Folder which does not have an OpenShift context',
+                    label: '$(plus) Add new context folder.'
                 });
                 quickPickStub.onThirdCall().resolves({
                     description: paths,
-                    label: `$(file-zip) sb.jar`
+                    label: '$(file-zip) sb.jar'
                 });
                 quickPickStub.onCall(3).resolves(componentType);
                 quickPickStub.onCall(4).resolves(version);
@@ -442,22 +442,22 @@ suite('OpenShift/Component', () => {
                 description: 'Unlink Component'
             });
             getLinkDataStub = sandbox.stub(Component, 'getLinkData').resolves({
-                kind: "Component",
-                apiVersion: "odo.openshift.io/v1alpha1",
+                kind: 'Component',
+                apiVersion: 'odo.openshift.io/v1alpha1',
                 metadata: {
                     creationTimestamp: null,
-                    name: "comp1",
-                    namespace: "myproject"
+                    name: 'comp1',
+                    namespace: 'myproject'
                 },
                 spec: {
-                    type: "nodejs",
-                    source: "file:///Users/nodejs-ex"
+                    type: 'nodejs',
+                    source: 'file:///Users/nodejs-ex'
                 },
                 status: {
                     linkedComponents: {
-                        comp2: ["8080"]
+                        comp2: ['8080']
                     },
-                    state: "Pushed"
+                    state: 'Pushed'
                 }
             });
             execStub.resolves({ error: undefined, stdout: mockData, stderr: '' });
@@ -476,7 +476,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('works from context menu', async () => {
-            quickPickStub.resolves("comp2");
+            quickPickStub.resolves('comp2');
             const result = await Component.unlink(componentItem);
 
             expect(result).equals(`Component 'comp2' has been successfully unlinked from the Component '${componentItem.getName()}'`);
@@ -505,15 +505,15 @@ suite('OpenShift/Component', () => {
 
         test('calls the appropriate error message when no link component found', async () => {
             getLinkDataStub.onFirstCall().resolves({
-                kind: "Component",
-                apiVersion: "odo.openshift.io/v1alpha1",
+                kind: 'Component',
+                apiVersion: 'odo.openshift.io/v1alpha1',
                 metadata: {
-                    name: "comp2",
+                    name: 'comp2',
                     creationTimestamp: null
                 },
                 spec: {
-                    type: "nodejs",
-                    source: "file:///Users/nodejs-ex"
+                    type: 'nodejs',
+                    source: 'file:///Users/nodejs-ex'
                 },
                 status: {
                     active: false
@@ -568,7 +568,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('works from context menu', async () => {
-            quickPickStub.resolves("service1");
+            quickPickStub.resolves('service1');
             const result = await Component.unlink(componentItem);
 
             expect(result).equals(`Service 'service1' has been successfully unlinked from the Component '${componentItem.getName()}'`);
@@ -589,15 +589,15 @@ suite('OpenShift/Component', () => {
 
         test('errors when a command fails', async () => {
             sandbox.stub(Component, 'getLinkData').resolves({
-                kind: "Component",
-                apiVersion: "odo.openshift.io/v1alpha1",
+                kind: 'Component',
+                apiVersion: 'odo.openshift.io/v1alpha1',
                 metadata: {
-                    name: "comp2",
+                    name: 'comp2',
                     creationTimestamp: null
                 },
                 spec: {
-                    type: "nodejs",
-                    source: "file:///Users/nodejs-ex"
+                    type: 'nodejs',
+                    source: 'file:///Users/nodejs-ex'
                 },
                 status: {
                     linkedServices: {
@@ -619,15 +619,15 @@ suite('OpenShift/Component', () => {
 
         test('calls the appropriate error message when no link component found', async () => {
             sandbox.stub(Component, 'getLinkData').resolves({
-                kind: "Component",
-                apiVersion: "odo.openshift.io/v1alpha1",
+                kind: 'Component',
+                apiVersion: 'odo.openshift.io/v1alpha1',
                 metadata: {
-                    name: "comp2",
+                    name: 'comp2',
                     creationTimestamp: null
                 },
                 spec: {
-                    type: "nodejs",
-                    source: "file:///Users/nodejs-ex"
+                    type: 'nodejs',
+                    source: 'file:///Users/nodejs-ex'
                 },
                 status: {
                     active: false
@@ -742,7 +742,6 @@ suite('OpenShift/Component', () => {
             }
         });
 
-
         test('returns null when no application is selected', async () => {
             quickPickStub.onFirstCall().resolves();
             const result = await Component.undeploy(null);
@@ -766,7 +765,7 @@ suite('OpenShift/Component', () => {
 
         test('works from context menu', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.resolves({ error: null, stderr: "", stdout: '8080, ' });
+            execStub.resolves({ error: null, stderr: '', stdout: '8080, ' });
             const result = await Component.linkComponent(componentItem);
 
             expect(result).equals(`Component '${componentItem.getName()}' successfully linked with Component '${componentItem.getName()}'`);
@@ -775,7 +774,7 @@ suite('OpenShift/Component', () => {
         test('works from context menu if more than one ports is available', async () => {
             getComponentsStub.resolves([componentItem, componentItem]);
             quickPickStub.resolves(componentItem);
-            execStub.resolves({ error: null, stderr: "", stdout: '8080, 8081, ' });
+            execStub.resolves({ error: null, stderr: '', stdout: '8080, 8081, ' });
             const result = await Component.linkComponent(componentItem);
 
             expect(result).equals(`Component '${componentItem.getName()}' successfully linked with Component '${componentItem.getName()}'`);
@@ -804,7 +803,7 @@ suite('OpenShift/Component', () => {
 
         test('errors when no ports available', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.resolves({ error: null, stderr: "", stdout: "" });
+            execStub.resolves({ error: null, stderr: '', stdout: '' });
             let savedErr: any;
             try {
                 await Component.linkComponent(componentItem);
@@ -817,7 +816,7 @@ suite('OpenShift/Component', () => {
 
         test('errors when a subcommand fails', async () => {
             quickPickStub.resolves(componentItem);
-            execStub.onFirstCall().resolves({ error: null, stderr: "", stdout: '8080, ' });
+            execStub.onFirstCall().resolves({ error: null, stderr: '', stdout: '8080, ' });
             execStub.onSecondCall().rejects(errorMessage);
             let savedErr: any;
 
@@ -1074,7 +1073,7 @@ suite('OpenShift/Component', () => {
                     cpStub.emit('exit')
                 }
             }).Component;
-            c.aaa = "test";
+            c.aaa = 'test';
             const WatchSessionsViewPQ = pq('../../../src/watch', {
                 './openshift/component': { Component: c}
             }).WatchSessionsView;
@@ -1217,10 +1216,10 @@ suite('OpenShift/Component', () => {
         test('returns information message for unpushed URL in the local config' , async () => {
             const unpushedUrl = {
                 items: [{
-                    apiVersion: "odo.openshift.io/v1alpha1",
-                    kind: "url",
+                    apiVersion: 'odo.openshift.io/v1alpha1',
+                    kind: 'url',
                     status: {
-                        state: "Not Pushed"
+                        state: 'Not Pushed'
                     }
                 }]
             };
@@ -1237,24 +1236,24 @@ suite('OpenShift/Component', () => {
 
         const componentResult = {
             error: null,
-            stderr: "",
+            stderr: '',
             stdout: JSON.stringify({
-                apiVersion: "v1",
+                apiVersion: 'v1',
                 items: [
                     {
-                        apiVersion: "apps.openshift.io/v1",
-                        kind: "DeploymentConfig",
+                        apiVersion: 'apps.openshift.io/v1',
+                        kind: 'DeploymentConfig',
                         metadata: {
                             annotations: {
-                                "app.kubernetes.io/component-source-type": "git",
-                                "app.openshift.io/vcs-uri": "https://github.com/sclorg/nodejs-ex"
+                                'app.kubernetes.io/component-source-type': 'git',
+                                'app.openshift.io/vcs-uri': 'https://github.com/sclorg/nodejs-ex'
                             },
                             labels: {
-                                app: "app",
-                                "app.kubernetes.io/instance": "comp4",
-                                "app.kubernetes.io/name": "nodejs",
-                                "app.kubernetes.io/part-of": "app",
-                                "app.openshift.io/runtime-version": "latest"
+                                app: 'app',
+                                'app.kubernetes.io/instance': 'comp4',
+                                'app.kubernetes.io/name': 'nodejs',
+                                'app.kubernetes.io/part-of': 'app',
+                                'app.openshift.io/runtime-version': 'latest'
                             }
                         },
                         spec: {
@@ -1264,17 +1263,17 @@ suite('OpenShift/Component', () => {
                                         {
                                             volumeMounts: [
                                                 {
-                                                    mountPath: "/path",
-                                                    name: "storage1-app-pvc-zeclz-volume"
+                                                    mountPath: '/path',
+                                                    name: 'storage1-app-pvc-zeclz-volume'
                                                 }
                                             ]
                                         }
                                     ],
                                     volumes: [
                                         {
-                                            name: "storage1-app-pvc-zeclz-volume",
+                                            name: 'storage1-app-pvc-zeclz-volume',
                                             persistentVolumeClaim: {
-                                                claimName: "storage1-app-pvc"
+                                                claimName: 'storage1-app-pvc'
                                             }
                                         }
                                     ]
@@ -1288,37 +1287,37 @@ suite('OpenShift/Component', () => {
         };
         const bcResult = {
             error: null,
-            stderr: "",
+            stderr: '',
             stdout: JSON.stringify({
-                apiVersion: "build.openshift.io/v1",
-                kind: "BuildConfig",
+                apiVersion: 'build.openshift.io/v1',
+                kind: 'BuildConfig',
                 spec: {
                     source: {
                         git: {
-                            ref: "master",
-                            uri: "https://github.com/sclorg/nodejs-ex"
+                            ref: 'master',
+                            uri: 'https://github.com/sclorg/nodejs-ex'
                         },
-                        type: "Git"
+                        type: 'Git'
                     }
                 }
             })
         };
         const pvcResult = {
             error: null,
-            stderr: "",
+            stderr: '',
             stdout: JSON.stringify({
                 metadata: {
                     labels: {
-                        app: "app",
-                        "app.kubernetes.io/instance": "comp4",
-                        "app.kubernetes.io/part-of": "app",
-                        "app.kubernetes.io/storage-name": "storage1"
+                        app: 'app',
+                        'app.kubernetes.io/instance': 'comp4',
+                        'app.kubernetes.io/part-of': 'app',
+                        'app.kubernetes.io/storage-name': 'storage1'
                     }
                 },
                 spec: {
                     resources: {
                         requests: {
-                            storage: "1Gi"
+                            storage: '1Gi'
                         }
                     }
                 }
@@ -1326,18 +1325,18 @@ suite('OpenShift/Component', () => {
         };
         const routeResult = {
             error: null,
-            stderr: "",
+            stderr: '',
             stdout: JSON.stringify({
-                apiVersion: "v1",
+                apiVersion: 'v1',
                 items: [
                     {
-                        apiVersion: "route.openshift.io/v1",
-                        kind: "Route",
+                        apiVersion: 'route.openshift.io/v1',
+                        kind: 'Route',
                         metadata: {
                             labels: {
-                                "app.kubernetes.io/instance": "comp4",
-                                "app.kubernetes.io/part-of": "app",
-                                "odo.openshift.io/url-name": "url1"
+                                'app.kubernetes.io/instance': 'comp4',
+                                'app.kubernetes.io/part-of': 'app',
+                                'odo.openshift.io/url-name': 'url1'
                             }
                         },
                         spec: {
@@ -1347,18 +1346,18 @@ suite('OpenShift/Component', () => {
                         }
                     }
                 ],
-                kind: "List",
+                kind: 'List',
                 metadata: {
-                    resourceVersion: "",
-                    selfLink: ""
+                    resourceVersion: '',
+                    selfLink: ''
                 }
             })
         };
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves({
-                description: "Folder which does not have an OpenShift context",
-                label: "$(plus) Add new context folder."
+                description: 'Folder which does not have an OpenShift context',
+                label: '$(plus) Add new context folder.'
             });
             execStub.onFirstCall().resolves(componentResult);
             execStub.onSecondCall().resolves(bcResult);
@@ -1376,14 +1375,14 @@ suite('OpenShift/Component', () => {
         test('returns if binary Openshift Component is not supported', async () => {
             execStub.onFirstCall().resolves({
                 error: null,
-                stderr: "",
+                stderr: '',
                 stdout: JSON.stringify({
                     items: [
                         {
                             metadata: {
                                 annotations: {
-                                    "app.kubernetes.io/component-source-type": 'binary',
-                                    "app.openshift.io/vcs-uri": "https://github.com/sclorg/nodejs-ex"
+                                    'app.kubernetes.io/component-source-type': 'binary',
+                                    'app.openshift.io/vcs-uri': 'https://github.com/sclorg/nodejs-ex'
                                 }
                             }
                         }
@@ -1398,14 +1397,14 @@ suite('OpenShift/Component', () => {
             let expectedError: Error;
             execStub.onFirstCall().resolves({
                 error: null,
-                stderr: "",
+                stderr: '',
                 stdout: JSON.stringify({
                     items: [
                         {
                             metadata: {
                                 annotations: {
-                                    "app.kubernetes.io/component-source-type": 'mock',
-                                    "app.openshift.io/vcs-uri": "https://github.com/sclorg/nodejs-ex"
+                                    'app.kubernetes.io/component-source-type': 'mock',
+                                    'app.openshift.io/vcs-uri': 'https://github.com/sclorg/nodejs-ex'
                                 }
                             }
                         }
@@ -1417,7 +1416,7 @@ suite('OpenShift/Component', () => {
             } catch (error) {
                 expectedError = error;
             }
-            expect(expectedError.message).equals(`Cannot import unknown Component type 'mock'.`);
+            expect(expectedError.message).equals('Cannot import unknown Component type \'mock\'.');
         });
 
         test('throw error when import failed', async () => {
@@ -1433,10 +1432,10 @@ suite('OpenShift/Component', () => {
         });
 
         test('Successfully imported for git component', async () => {
-            const gitUrl = "https://github.com/sclorg/nodejs-ex";
+            const gitUrl = 'https://github.com/sclorg/nodejs-ex';
             const gitRef = 'master';
             const componentType = 'nodejs';
-            const version = "latest";
+            const version = 'latest';
             const result = await Component.import(componentItem);
             expect(execStub).calledWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType, version, componentItem.getName(), gitUrl, gitRef));
             expect(result).equals(`Component '${componentItem.getName()}' was successfully imported.`);

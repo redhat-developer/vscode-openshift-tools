@@ -15,7 +15,7 @@ export class Application extends OpenShiftItem {
     @vsCommand('openshift.app.describe', true)
     static async describe(treeItem: OpenShiftObject): Promise<void> {
         const application = await Application.getOpenShiftCmdData(treeItem,
-            "Select Application you want to describe");
+            'Select Application you want to describe');
         if (application) Application.odo.executeInTerminal(Command.describeApplication(application.getParent().getName(), application.getName()), undefined, `OpenShift: Describe '${application.getName()}' Application`);
     }
 

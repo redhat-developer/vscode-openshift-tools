@@ -323,7 +323,7 @@ export class Component extends OpenShiftItem {
 
         if (!port) return null;
 
-        return Progress.execFunctionWithProgress(`Unlinking Component`,
+        return Progress.execFunctionWithProgress('Unlinking Component',
             () => Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), compName, port), component.contextPath.fsPath)
                 .then(() => `Component '${compName}' has been successfully unlinked from the Component '${component.getName()}'`)
                 .catch((err) => Promise.reject(new VsCommandError(`Failed to unlink Component with error '${err}'`)))
@@ -350,7 +350,7 @@ export class Component extends OpenShiftItem {
 
         if (!serviceName) return null;
 
-        return Progress.execFunctionWithProgress(`Unlinking Service`,
+        return Progress.execFunctionWithProgress('Unlinking Service',
             () => Component.odo.execute(Command.unlinkService(component.getParent().getParent().getName(), component.getParent().getName(), serviceName, component.getName()), component.contextPath.fsPath)
                 .then(() => `Service '${serviceName}' has been successfully unlinked from the Component '${component.getName()}'`)
                 .catch((err) => Promise.reject(new VsCommandError(`Failed to unlink Service with error '${err}'`)))
@@ -742,7 +742,7 @@ export class Component extends OpenShiftItem {
         }
 
         if (isJava || isNode || isPython) {
-            const toolLocation = await ToolsConfig.detect(`odo`);
+            const toolLocation = await ToolsConfig.detect('odo');
             if (isJava) {
                 const JAVA_EXT = 'redhat.java';
                 const JAVA_DEBUG_EXT = 'vscjava.vscode-java-debug';

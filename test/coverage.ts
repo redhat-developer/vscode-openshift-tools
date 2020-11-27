@@ -29,7 +29,7 @@ export interface TestRunnerOptions {
 
 export class CoverageRunner {
 
-    private coverageVar = `__coverage__`;
+    private coverageVar = '__coverage__';
 
     constructor(private options: TestRunnerOptions, private testsRoot: string) {
     }

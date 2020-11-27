@@ -19,7 +19,7 @@ async function isOpenShift(): Promise<boolean> {
   let isOS = false;
   if (kubectl.available) {
       const sr = await kubectl.api.invokeCommand('api-versions');
-      isOS = sr && sr.code === 0 && sr.stdout.includes("apps.openshift.io/v1");
+      isOS = sr && sr.code === 0 && sr.stdout.includes('apps.openshift.io/v1');
   }
   return isOS;
 }
@@ -41,7 +41,7 @@ async function customizeAsync(node: k8s.ClusterExplorerV1.ClusterExplorerResourc
   if ((node as any).nodeType === 'context') {
       lastNamespace = await initNamespaceName(node);
       if (await isOpenShift()) {
-          treeItem.iconPath = vscode.Uri.file(path.join(__dirname, "../../../images/context/cluster-node.png"));
+          treeItem.iconPath = vscode.Uri.file(path.join(__dirname, '../../../images/context/cluster-node.png'));
       }
   }
   if (node.nodeType === 'resource' && node.resourceKind.manifestKind === 'Project') {
@@ -68,12 +68,12 @@ export async function extendClusterExplorer(): Promise<void> {
     if (clusterExplorerAPI.available) {
         clusterExplorer = clusterExplorerAPI.api;
         const nodeContributors = [
-            clusterExplorer.nodeSources.resourceFolder("Projects", "Projects", "Project", "project").if(isOpenShift).at(undefined),
-            clusterExplorer.nodeSources.resourceFolder("Templates", "Templates", "Template", "template").if(isOpenShift).at(undefined),
-            clusterExplorer.nodeSources.resourceFolder("ImageStreams", "ImageStreams", "ImageStream", "ImageStream").if(isOpenShift).at("Workloads"),
-            clusterExplorer.nodeSources.resourceFolder("Routes", "Routes", "Route", "route").if(isOpenShift).at("Network"),
-            clusterExplorer.nodeSources.resourceFolder("DeploymentConfigs", "DeploymentConfigs", "DeploymentConfig", "dc").if(isOpenShift).at("Workloads"),
-            clusterExplorer.nodeSources.resourceFolder("BuildConfigs", "BuildConfigs", "BuildConfig", "bc").if(isOpenShift).at("Workloads"),
+            clusterExplorer.nodeSources.resourceFolder('Projects', 'Projects', 'Project', 'project').if(isOpenShift).at(undefined),
+            clusterExplorer.nodeSources.resourceFolder('Templates', 'Templates', 'Template', 'template').if(isOpenShift).at(undefined),
+            clusterExplorer.nodeSources.resourceFolder('ImageStreams', 'ImageStreams', 'ImageStream', 'ImageStream').if(isOpenShift).at('Workloads'),
+            clusterExplorer.nodeSources.resourceFolder('Routes', 'Routes', 'Route', 'route').if(isOpenShift).at('Network'),
+            clusterExplorer.nodeSources.resourceFolder('DeploymentConfigs', 'DeploymentConfigs', 'DeploymentConfig', 'dc').if(isOpenShift).at('Workloads'),
+            clusterExplorer.nodeSources.resourceFolder('BuildConfigs', 'BuildConfigs', 'BuildConfig', 'bc').if(isOpenShift).at('Workloads'),
             Build.getNodeContributor(),
             DeploymentConfig.getNodeContributor()
         ];

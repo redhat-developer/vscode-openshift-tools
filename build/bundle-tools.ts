@@ -17,7 +17,6 @@ import path = require('path');
 import fs = require('fs-extra');
 import configData = require('../src/tools.json');
 
-
 interface PlatformData {
     url: string;
     sha256sum:string;

@@ -8,7 +8,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { OdoImpl, ContextType } from '../../../src/odo';
-import { Command } from "../../../src/odo/command";
+import { Command } from '../../../src/odo/command';
 import { TestItem } from './testOSItem';
 import { Progress } from '../../../src/util/progress';
 import { Service } from '../../../src/openshift/service';
@@ -42,7 +42,7 @@ suite('OpenShift/Service', () => {
         sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '' });
     });
 
     teardown(() => {

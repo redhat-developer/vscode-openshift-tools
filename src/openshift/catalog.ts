@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { Odo, OdoImpl } from '../odo';
-import { Command } from "../odo/command";
+import { Command } from '../odo/command';
 import { Platform } from '../util/platform';
 import { vsCommand } from '../vscommand';
 

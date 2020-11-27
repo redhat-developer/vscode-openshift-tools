@@ -9,7 +9,7 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { TestItem } from './testOSItem';
 import { OdoImpl, ContextType } from '../../../src/odo';
-import { Command } from "../../../src/odo/command";
+import { Command } from '../../../src/odo/command';
 import { Storage } from '../../../src/openshift/storage';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
 

@@ -63,33 +63,33 @@ suite('K8s/deployment', () => {
     }`;
 
     const context = {
-        id: "dummy",
+        id: 'dummy',
         impl: {
-            id: "rc/comp1-app-2",
+            id: 'rc/comp1-app-2',
             kind: {
-                manifestKind: "ReplicationController",
-                abbreviation: "rc"
+                manifestKind: 'ReplicationController',
+                abbreviation: 'rc'
             },
-            namespace: "myproject",
-            name: "comp1-app-2",
+            namespace: 'myproject',
+            name: 'comp1-app-2',
             number: 2,
-            manifest: "ReplicationController",
+            manifest: 'ReplicationController',
             metadata: undefined,
-            node: "rc",
-            resourceId: "rc/comp1-app-2"
+            node: 'rc',
+            resourceId: 'rc/comp1-app-2'
         },
         resourceKind: {
-            manifestKind: "ReplicationController",
-            abbreviation: "rc"
+            manifestKind: 'ReplicationController',
+            abbreviation: 'rc'
         },
-        nodeCategory: "kubernetes-explorer-node",
-        nodeType: "extension"
+        nodeCategory: 'kubernetes-explorer-node',
+        nodeType: 'extension'
     };
 
     setup(() => {
         sandbox = sinon.createSandbox();
         termStub =  sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: "" });
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '' });
         sandbox.stub(Progress, 'execFunctionWithProgress').yields();
     });
 
@@ -102,16 +102,16 @@ suite('K8s/deployment', () => {
         let kubectlV1Stub: sinon.SinonStub<any[], any>;
         const parent = {
             metadata: undefined,
-            name: "comp1-app",
+            name: 'comp1-app',
             namespace: null,
-            nodeType: "resource",
+            nodeType: 'resource',
             resourceKind: {
-                abbreviation: "dc",
-                description: "",
-                displayName: "DeploymentConfigs",
-                label: "DeploymentConfigs",
-                manifestKind: "DeploymentConfig",
-                pluralDisplayName: "DeploymentConfigs"
+                abbreviation: 'dc',
+                description: '',
+                displayName: 'DeploymentConfigs',
+                label: 'DeploymentConfigs',
+                manifestKind: 'DeploymentConfig',
+                pluralDisplayName: 'DeploymentConfigs'
             }
         } as k8s.ClusterExplorerV1.ClusterExplorerNode;
 
@@ -144,18 +144,18 @@ suite('K8s/deployment', () => {
 
     suite('Deploy', () => {
         const deployCtx = {
-            name: "nodejs-comp-nodejs-app",
+            name: 'nodejs-comp-nodejs-app',
             metadata: undefined,
             namespace: null,
-            nodeCategory: "Kubernetes-explorer-node",
-            nodeType: "resource",
-            resourceId: "bc/nodejs-comp-nodejs-app"
+            nodeCategory: 'Kubernetes-explorer-node',
+            nodeType: 'resource',
+            resourceId: 'bc/nodejs-comp-nodejs-app'
         };
 
         setup(() => {
             execStub.resolves({ error: undefined, stdout: mockData, stderr: '' });
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.resolves({label: "nodejs-comp-nodejs-app"});
+            quickPickStub.resolves({label: 'nodejs-comp-nodejs-app'});
         });
 
         test('works from context menu', async () => {
@@ -204,23 +204,23 @@ suite('K8s/deployment', () => {
     suite('Show Log', () => {
 
         const showLogCtx = {
-            name: "nodejs-comp-nodejs-app",
+            name: 'nodejs-comp-nodejs-app',
             metadata: undefined,
             namespace: null,
-            nodeCategory: "Kubernetes-explorer-node",
-            nodeType: "resource",
-            resourceId: "bc/nodejs-comp-nodejs-app"
+            nodeCategory: 'Kubernetes-explorer-node',
+            nodeType: 'resource',
+            resourceId: 'bc/nodejs-comp-nodejs-app'
         };
 
         setup(() => {
             execStub.resolves({ error: null, stdout: mockData, stderr: '' });
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.resolves({label: "nodejs-comp-nodejs-app"});
+            quickPickStub.resolves({label: 'nodejs-comp-nodejs-app'});
         });
 
         test('works from context menu', async () => {
             await DeploymentConfig.showLog(showLogCtx);
-            expect(termStub).calledOnceWith(DeploymentConfig.command.showDeploymentConfigLog("nodejs-comp-nodejs-app"));
+            expect(termStub).calledOnceWith(DeploymentConfig.command.showDeploymentConfigLog('nodejs-comp-nodejs-app'));
         });
 
         test('works with no context', async () => {
@@ -239,16 +239,16 @@ suite('K8s/deployment', () => {
 
         setup(() => {
             execStub.resolves({ error: null, stdout: mockData, stderr: '' });
-            const deploymentConfig = {label: "comp1-app"};
-            sandbox.stub(DeploymentConfig, 'getReplicaNames').resolves(["comp1-app-1", "comp1-app-2"]);
+            const deploymentConfig = {label: 'comp1-app'};
+            sandbox.stub(DeploymentConfig, 'getReplicaNames').resolves(['comp1-app-1', 'comp1-app-2']);
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(deploymentConfig);
-            quickPickStub.onSecondCall().resolves("comp1-app-1");
+            quickPickStub.onSecondCall().resolves('comp1-app-1');
         });
 
         test('works from context menu', async () => {
             await DeploymentConfig.rcShowLog(context);
-            expect(termStub).calledOnceWith(DeploymentConfig.command.showLog("comp1-app-2"));
+            expect(termStub).calledOnceWith(DeploymentConfig.command.showLog('comp1-app-2'));
         });
 
         test('works with no context', async () => {
@@ -265,11 +265,11 @@ suite('K8s/deployment', () => {
 
     suite('Delete', ()=> {
 
-        const deploymentData = `comp1-app-1\\ncomp1-app-2`;
+        const deploymentData = 'comp1-app-1\\ncomp1-app-2';
 
         setup(() => {
             execStub.resolves({ error: null, stdout: deploymentData, stderr: '' });
-            sandbox.stub(DeploymentConfig, 'getDeploymentConfigNames').resolves("comp1-app-2");
+            sandbox.stub(DeploymentConfig, 'getDeploymentConfigNames').resolves('comp1-app-2');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
         });
 
@@ -281,8 +281,8 @@ suite('K8s/deployment', () => {
         });
 
         test('works with no context', async () => {
-            quickPickStub.onFirstCall().resolves({label: "comp1-app-2"});
-            quickPickStub.onSecondCall().resolves("comp1-app-2");
+            quickPickStub.onFirstCall().resolves({label: 'comp1-app-2'});
+            quickPickStub.onSecondCall().resolves('comp1-app-2');
             const result = await DeploymentConfig.delete(null);
 
             expect(result).equals(`Replica '${context.impl.name}' successfully deleted`);

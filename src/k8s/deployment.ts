@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { QuickPickItem, window } from "vscode";
+import { QuickPickItem, window } from 'vscode';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
-import { Progress } from "../util/progress";
+import { Progress } from '../util/progress';
 import * as common from './common';
-import { OdoImpl, Odo } from "../odo";
-import { vsCommand, VsCommandError } from "../vscommand";
+import { OdoImpl, Odo } from '../odo';
+import { vsCommand, VsCommandError } from '../vscommand';
 
 export class DeploymentConfig {
 
@@ -20,7 +20,7 @@ export class DeploymentConfig {
             return `oc rollout latest dc/${build}`;
         },
         getDeploymentConfigs(): string {
-            return `oc get deploymentConfig -o json`;
+            return 'oc get deploymentConfig -o json';
         },
         showDeploymentConfigLog(deploymentConfig: string): string {
             return `oc logs dc/${deploymentConfig}`;
@@ -58,7 +58,7 @@ export class DeploymentConfig {
     static async deploy(context: { name: string }): Promise<string> {
         let deployName: string = context ? context.name : undefined;
         let result: Promise<string> = null;
-        if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to deploy"), "Select a DeploymentConfig to deploy");
+        if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames('You have no DeploymentConfigs available to deploy'), 'Select a DeploymentConfig to deploy');
         if (deployName) {
             result = Progress.execFunctionWithProgress(`Creating Deployment for '${deployName}'.`, () => DeploymentConfig.odo.execute(DeploymentConfig.command.deploy(deployName)))
                 .then(() => `Deployment successfully created for '${deployName}'.`)
@@ -70,7 +70,7 @@ export class DeploymentConfig {
     static async getReplicasList(cmd: string): Promise<string[]> {
         const result = await DeploymentConfig.odo.execute(cmd);
         const replica: string = result.stdout;
-        const replicationList = replica.split("\n");
+        const replicationList = replica.split('\n');
         return replicationList;
     }
 
@@ -81,7 +81,7 @@ export class DeploymentConfig {
 
     @vsCommand('clusters.openshift.deploy.rcShowLog', true)
     static async rcShowLog(context: { impl: any }): Promise<string> {
-        const replica = await DeploymentConfig.selectReplica(context, "Select a Replica to see the logs");
+        const replica = await DeploymentConfig.selectReplica(context, 'Select a Replica to see the logs');
         if (replica) {
             DeploymentConfig.odo.executeInTerminal(DeploymentConfig.command.showLog(replica), undefined, `OpenShift: Show '${replica}' Replica Log`);
         }
@@ -91,7 +91,7 @@ export class DeploymentConfig {
     @vsCommand('clusters.openshift.deploy.dc.showLog', true)
     static async showLog(context: { name: string }): Promise<string> {
         let deployName: string = context ? context.name : null;
-        if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames("You have no DeploymentConfigs available to see logs"), "Select a DeploymentConfig to see logs");
+        if (!deployName) deployName = await common.selectResourceByName(DeploymentConfig.getDeploymentConfigNames('You have no DeploymentConfigs available to see logs'), 'Select a DeploymentConfig to see logs');
         if (deployName) {
             DeploymentConfig.odo.executeInTerminal(DeploymentConfig.command.showDeploymentConfigLog(deployName), undefined, `OpenShift: Show '${deployName}' DeploymentConfig Log`);
         }
@@ -103,7 +103,7 @@ export class DeploymentConfig {
         if (context) {
             replica = context.impl.name;
         } else {
-            const deploymentConfig = await common.selectResourceByName(this.getDeploymentConfigNames("You have no DeploymentConfigs available"), "Select a DeploymentConfig to see the Replica");
+            const deploymentConfig = await common.selectResourceByName(this.getDeploymentConfigNames('You have no DeploymentConfigs available'), 'Select a DeploymentConfig to see the Replica');
             if (!deploymentConfig) return null;
             const selreplica = await window.showQuickPick(this.getReplicaNames(deploymentConfig), {placeHolder: replicaPlaceHolder, ignoreFocusOut: true});
             replica = selreplica || null;
@@ -114,9 +114,9 @@ export class DeploymentConfig {
     @vsCommand('clusters.openshift.deploy.delete', true)
     static async delete(context: { impl: any }): Promise<string> {
         let result: null | string | Promise<string> | PromiseLike<string> = null;
-        const replica = await DeploymentConfig.selectReplica(context, "Select a Replica to delete");
+        const replica = await DeploymentConfig.selectReplica(context, 'Select a Replica to delete');
         if (replica) {
-            result = Progress.execFunctionWithProgress(`Deleting replica`, () => DeploymentConfig.odo.execute(DeploymentConfig.command.delete(replica)))
+            result = Progress.execFunctionWithProgress('Deleting replica', () => DeploymentConfig.odo.execute(DeploymentConfig.command.delete(replica)))
                 .then(() => `Replica '${replica}' successfully deleted`)
                 .catch((err) => Promise.reject(new VsCommandError(`Failed to delete replica with error '${err}'`)));
         }

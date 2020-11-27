@@ -14,7 +14,7 @@ export class Oc {
     @vsCommand('openshift.create')
     public static async create(): Promise<string | null> {
         const document = window.activeTextEditor ? window.activeTextEditor.document : undefined;
-        const pleaseSave = "Please save your changes before executing 'OpenShift: Create' command.";
+        const pleaseSave = 'Please save your changes before executing \'OpenShift: Create\' command.';
         let message: string;
 
         if (
@@ -22,7 +22,7 @@ export class Oc {
             !(document.fileName.endsWith('.yaml') || document.fileName.endsWith('.json'))
         ) {
             message =
-                "'OpenShift: Create' command requires .yaml or .json a file opened in editor.";
+                '\'OpenShift: Create\' command requires .yaml or .json a file opened in editor.';
         }
 
         if (!message && document.isUntitled) {
@@ -43,7 +43,7 @@ export class Oc {
         if (!message) {
             toolLocation = await ToolsConfig.detect('oc');
             if (!toolLocation) {
-                message = "Cannot run 'oc create'. OKD CLI client tool cannot be found.";
+                message = 'Cannot run \'oc create\'. OKD CLI client tool cannot be found.';
             }
         }
 
