@@ -43,11 +43,6 @@ git push
 
 Then after build is green squash commit while releasing your PR changes to the master branch.
 
-## Running tests on Windows fails with error `Uncaught TypeError: Cannot read property 'phase' of null`
-
-This is most likely related to run extension tests after installing extension from .vsix file.
-On Windows the fix is to clean up `%USER_PROFILE%\AppData\Roaming\Code\CachedData` folder.
-
 ## Local cluster started with minishift v1.29.0+ has no access to images from registry.redhat.io
 
 Before applying `xpaas` add-on run apply `redhat-registry-login` with this command
@@ -58,6 +53,10 @@ where `username` and `password` are your credentials to access registry.redhat.i
 Then apply `xpaas` with the command below
 
 `minishift addon apply xpaas`
+
+### Could not open '...crc/cache/crc_libvirt_4.5.14/crc.qcow2': Permission denied'
+
+Follow [this comment](https://github.com/code-ready/crc/issues/1578#issuecomment-706323186) before starting crc again.
 
 # Running local OpenShift Cluster
 
