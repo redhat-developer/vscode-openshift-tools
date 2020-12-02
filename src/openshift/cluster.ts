@@ -139,6 +139,13 @@ export class Cluster extends OpenShiftItem {
     @vsCommand('openshift.explorer.login')
     static async login(): Promise<string> {
         const response = await Cluster.requestLoginConfirmation();
+
+        if (response !== 'Yes') return null;
+
+        const clusterURL = await Cluster.getUrl();
+
+        if (!clusterURL) return null;
+
         const loginActions = [
             {
                 label: 'Credentials',
@@ -149,10 +156,9 @@ export class Cluster extends OpenShiftItem {
                 description: 'Log in to the given server using bearer token'
             }
         ];
-        if (response !== 'Yes') return null;
         const loginActionSelected = await window.showQuickPick(loginActions, {placeHolder: 'Select a way to log in to the cluster.', ignoreFocusOut: true});
         if (!loginActionSelected) return null;
-        return loginActionSelected.label === 'Credentials' ? Cluster.credentialsLogin(true) : Cluster.tokenLogin(true);
+        return loginActionSelected.label === 'Credentials' ? Cluster.credentialsLogin(true, clusterURL) : Cluster.tokenLogin(clusterURL, true);
     }
 
     private static async requestLoginConfirmation(skipConfirmation = false): Promise<string> {
@@ -254,16 +260,18 @@ export class Cluster extends OpenShiftItem {
     }
 
     @vsCommand('openshift.explorer.login.tokenLogin')
-    static async tokenLogin(skipConfirmation = false): Promise<string | null> {
+    static async tokenLogin(clusterURL: string, skipConfirmation = false): Promise<string | null> {
         let token: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
+
         if (response !== 'Yes') return null;
-        const clusterURL = await Cluster.getUrl();
-        if (!clusterURL) return null;
+
         const clusterUrlFromClipboard = await Cluster.getUrlFromClipboard();
+
         if (clusterUrlFromClipboard === clusterURL.trim()) {
             token = Cluster.getToken(await Cluster.readFromClipboard());
         }
+
         const ocToken = await window.showInputBox({
             value: token,
             prompt: 'Provide Bearer token for authentication to the API server',
