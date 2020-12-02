@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as vscode from 'vscode';
+import { Uri, window, extensions, WebviewPanel, ViewColumn } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ExtenisonID } from '../../util/constants';
@@ -14,18 +14,18 @@ import { ChildProcess } from 'child_process';
 export default class LogViewLoader {
 
     static get extensionPath() {
-        return vscode.extensions.getExtension(ExtenisonID).extensionPath
+        return extensions.getExtension(ExtenisonID).extensionPath
     }
 
-    static async loadView(title: string, cmdFunction: (prj, app, comp) => string, target: OpenShiftObject, existingProcess?: ChildProcess): Promise<vscode.WebviewPanel> {
-        const localResourceRoot = vscode.Uri.file(path.join(LogViewLoader.extensionPath, 'out', 'logViewer'));
+    static async loadView(title: string, cmdFunction: (prj, app, comp) => string, target: OpenShiftObject, existingProcess?: ChildProcess): Promise<WebviewPanel> {
+        const localResourceRoot = Uri.file(path.join(LogViewLoader.extensionPath, 'out', 'logViewer'));
 
-        const panel = vscode.window.createWebviewPanel('logView', title, vscode.ViewColumn.One, {
+        const panel = window.createWebviewPanel('logView', title, ViewColumn.One, {
             enableScripts: true,
             localResourceRoots: [localResourceRoot],
             retainContextWhenHidden: true
         });
-        panel.iconPath = vscode.Uri.file(path.join(LogViewLoader.extensionPath, "images/context/cluster-node.png"));
+        panel.iconPath = Uri.file(path.join(LogViewLoader.extensionPath, "images/context/cluster-node.png"));
 
         const cmd = cmdFunction(target.getParent().getParent().getName(), target.getParent().getName(), target.getName());
 
@@ -56,7 +56,7 @@ export default class LogViewLoader {
     private static getWebviewContent(extensionPath: string, cmdText: string): string {
         // Local path to main script run in the webview
         const reactAppRootOnDisk = path.join(extensionPath, 'out', 'logViewer');
-        const reactAppPathOnDisk = vscode.Uri.file(
+        const reactAppPathOnDisk = Uri.file(
             path.join(reactAppRootOnDisk, 'logViewer.js'),
         );
         const reactAppUri = reactAppPathOnDisk.with({ scheme: 'vscode-resource' });
