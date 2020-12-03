@@ -31,7 +31,7 @@ export class Cluster extends OpenShiftItem {
                     commands.executeCommand('setContext', 'isLoggedIn', false);
                     const logoutInfo = await window.showInformationMessage('Successfully logged out. Do you want to login to a new cluster', 'Yes', 'No');
                     if (logoutInfo === 'Yes') {
-                        return Cluster.login();
+                        return Cluster.login(undefined, true);
                     }
                     return null;
                 }
@@ -137,8 +137,15 @@ export class Cluster extends OpenShiftItem {
     }
 
     @vsCommand('openshift.explorer.login')
-    static async login(): Promise<string> {
-        const response = await Cluster.requestLoginConfirmation();
+    static async login(context?: any, skipConfirmation = false): Promise<string> {
+        const response = await Cluster.requestLoginConfirmation(skipConfirmation);
+
+        if (response !== 'Yes') return null;
+
+        const clusterURL = await Cluster.getUrl();
+
+        if (!clusterURL) return null;
+
         const loginActions = [
             {
                 label: 'Credentials',
@@ -149,10 +156,9 @@ export class Cluster extends OpenShiftItem {
                 description: 'Log in to the given server using bearer token'
             }
         ];
-        if (response !== 'Yes') return null;
         const loginActionSelected = await window.showQuickPick(loginActions, {placeHolder: 'Select a way to log in to the cluster.', ignoreFocusOut: true});
         if (!loginActionSelected) return null;
-        return loginActionSelected.label === 'Credentials' ? Cluster.credentialsLogin(true) : Cluster.tokenLogin(true);
+        return loginActionSelected.label === 'Credentials' ? Cluster.credentialsLogin(true, clusterURL) : Cluster.tokenLogin(clusterURL, true);
     }
 
     private static async requestLoginConfirmation(skipConfirmation = false): Promise<string> {
@@ -254,16 +260,28 @@ export class Cluster extends OpenShiftItem {
     }
 
     @vsCommand('openshift.explorer.login.tokenLogin')
-    static async tokenLogin(skipConfirmation = false): Promise<string | null> {
+    static async tokenLogin(userClusterUrl: string, skipConfirmation = false): Promise<string | null> {
         let token: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
+
         if (response !== 'Yes') return null;
-        const clusterURL = await Cluster.getUrl();
-        if (!clusterURL) return null;
-        const clusterUrlFromClipboard = await Cluster.getUrlFromClipboard();
-        if (clusterUrlFromClipboard === clusterURL.trim()) {
-            token = Cluster.getToken(await Cluster.readFromClipboard());
+
+        let clusterURL = userClusterUrl;
+        let clusterUrlFromClipboard: string;
+
+        if (!clusterURL) {
+            clusterUrlFromClipboard = await Cluster.getUrlFromClipboard();
         }
+
+        if (!clusterURL && clusterUrlFromClipboard || clusterURL?.trim() === clusterUrlFromClipboard) {
+            token = Cluster.getToken(await Cluster.readFromClipboard());
+            clusterURL = clusterUrlFromClipboard;
+        }
+
+        if (!clusterURL) {
+            clusterURL = await Cluster.getUrl();
+        }
+
         const ocToken = await window.showInputBox({
             value: token,
             prompt: 'Provide Bearer token for authentication to the API server',
@@ -271,6 +289,7 @@ export class Cluster extends OpenShiftItem {
             password: true
         });
         if (!ocToken) return null;
+
         return Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`,
             () => Cluster.odo.execute(Command.odoLoginWithToken(clusterURL, ocToken.trim()))
             .then((result) => Cluster.loginMessage(clusterURL, result))

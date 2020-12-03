@@ -17,7 +17,7 @@ const config: Mocha.MochaOptions = {
     ui: 'tdd',
     timeout: 60000,
     color: true,
-    // grep: 'happy path works',
+    // grep: 'returns with no url set',
 };
 
 const mocha = new Mocha(config);

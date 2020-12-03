@@ -41,7 +41,11 @@ suite('Openshift/Cluster', () => {
     const fatalErrorText = 'FATAL ERROR';
     const fatalError = new Error(fatalErrorText);
     const errorData: CliExitData = {
-        error: undefined,
+        error: {
+            code: 1,
+            name: 'Error',
+            message: 'FATAL ERROR'
+        },
         stderr: fatalErrorText,
         stdout: 'output'
     };
@@ -130,47 +134,51 @@ suite('Openshift/Cluster', () => {
             test('logins to new cluster if user answer yes to a warning', async () => {
                 loginStub.resolves(false);
                 infoStub.resolves('Yes');
-                const result = await Cluster.credentialsLogin();
+                const result = await Cluster.credentialsLogin(false, testUrl);
                 expect(result).equals(`Successfully logged in to '${testUrl}'`);
             });
 
             test('returns null if cluster url is not provided', async () => {
                 infoStub.resolves('Yes');
                 quickPickStub.onFirstCall().resolves(null);
-                const result = await Cluster.credentialsLogin();
+                const result = await Cluster.credentialsLogin(null);
                 expect(result).null;
             });
 
             test('returns null if username is not provided', async () => {
                 infoStub.resolves('Yes');
-                quickPickStub.onSecondCall().resolves(null);
-                const result = await Cluster.credentialsLogin();
+                quickPickStub.onFirstCall().resolves(null);
+                const result = await Cluster.credentialsLogin(null);
                 expect(result).null;
             });
 
             test('doesn\'t ask to save password if old and new passwords are the same', async () => {
                 infoStub.resolves('Yes');
                 sandbox.stub(TokenStore, 'getItem').resolves(password);
-                const result = await Cluster.credentialsLogin();
+                const result = await Cluster.credentialsLogin(false, testUrl);
                 expect(result).equals(`Successfully logged in to '${testUrl}'`);
             });
 
             test('exits if the user cancels url input box', async () => {
                 loginStub.resolves(false);
                 inputStub.onFirstCall().resolves(null);
-                const result = await Cluster.credentialsLogin();
+                const result = await Cluster.credentialsLogin(null);
                 expect(result).null;
             });
 
             test('exits if the user refuses to login to new cluster', async () => {
                 loginStub.resolves(false);
                 infoStub.resolves('No');
-                const result = await Cluster.credentialsLogin();
+                const result = await Cluster.credentialsLogin(null);
                 expect(result).null;
             });
 
             test('happy path works', async () => {
-                const status = await Cluster.credentialsLogin();
+                infoStub.resolves('No');
+                quickPickStub.onFirstCall().resolves({label: testUser});
+                quickPickStub.onSecondCall().resolves({label: 'Credentials'});
+                inputStub.resolves('password');
+                const status = await Cluster.credentialsLogin(false, testUrl);
 
                 expect(status).equals(`Successfully logged in to '${testUrl}'`);
                 expect(execStub).calledOnceWith(Command.odoLoginWithUsernamePassword(testUrl, testUser, password));
@@ -186,7 +194,7 @@ suite('Openshift/Cluster', () => {
 
             test('returns with no password set', async () => {
                 inputStub.resolves();
-                const status = await Cluster.credentialsLogin();
+                const status = await Cluster.credentialsLogin(null);
 
                 expect(status).null;
             });
@@ -209,19 +217,20 @@ suite('Openshift/Cluster', () => {
                     result = options.validateInput('http://127.0.0.1:9999');
                     return Promise.resolve('http://127.0.0.1:9999');
                 });
-                await Cluster.credentialsLogin();
+                await Cluster.login();
                 expect(result).is.null;
             });
 
             test('checks user name is not empty', async () => {
                 let result: string | Thenable<string>;
                 quickPickStub.onFirstCall().resolves({description: 'Current Context', label: testUrl});
-                quickPickStub.onSecondCall().resolves({description: 'Current Context', label: '$(plus) Add new user...'});
+                quickPickStub.onSecondCall().resolves({label: 'Credentials'});
+                quickPickStub.onThirdCall().resolves({description: 'Current Context', label: '$(plus) Add new user...'});
                 inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                     result = options.validateInput('goodvalue');
                     return Promise.resolve('goodvalue');
                 });
-                await Cluster.credentialsLogin();
+                await Cluster.login();
                 expect(result).is.null;
             });
         });
@@ -236,42 +245,35 @@ suite('Openshift/Cluster', () => {
             test('logins to new cluster if user answer yes to a warning', async () => {
                 loginStub.resolves(false);
                 infoStub.resolves('Yes');
-                const result = await Cluster.tokenLogin();
+                const result = await Cluster.tokenLogin(testUrl);
                 expect(result).equals(`Successfully logged in to '${testUrl}'`);
             });
 
             test('exits if the user cancels url input box', async () => {
                 loginStub.resolves(false);
                 inputStub.onFirstCall().resolves(null);
-                const result = await Cluster.tokenLogin();
+                const result = await Cluster.tokenLogin(testUrl);
                 expect(result).null;
             });
 
             test('exits if the user refuses to login to new cluster', async () => {
                 loginStub.resolves(false);
                 infoStub.resolves('No');
-                const result = await Cluster.tokenLogin();
+                const result = await Cluster.tokenLogin(null);
                 expect(result).null;
             });
 
             test('happy path works', async () => {
-                const status = await Cluster.tokenLogin();
+                const status = await Cluster.tokenLogin(testUrl);
 
                 expect(status).equals(`Successfully logged in to '${testUrl}'`);
                 expect(execStub).calledOnceWith(Command.odoLoginWithToken(testUrl, token));
                 expect(commandStub).calledOnceWith('setContext', 'isLoggedIn', true);
             });
 
-            test('returns with no url set', async () => {
-                quickPickStub.onFirstCall().resolves({description: 'Current Context', label: undefined});
-                const status = await Cluster.tokenLogin();
-
-                expect(status).null;
-            });
-
             test('returns with no token set', async () => {
                 inputStub.onFirstCall().resolves();
-                const status = await Cluster.tokenLogin();
+                const status = await Cluster.tokenLogin(testUrl);
 
                 expect(status).null;
             });
@@ -280,7 +282,7 @@ suite('Openshift/Cluster', () => {
                 execStub.rejects(fatalError);
                 let expectedErr: { message: any };
                 try {
-                    await Cluster.tokenLogin();
+                    await Cluster.tokenLogin(testUrl);
                 } catch (error) {
                     expectedErr = error;
                 }
@@ -293,10 +295,11 @@ suite('Openshift/Cluster', () => {
         let warnStub: sinon.SinonStub;
 
         setup(() => {
-            warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Logout');
+            warnStub = sandbox.stub(vscode.window, 'showWarningMessage');
         });
 
         test('simple logout works', async () => {
+            warnStub.onFirstCall().resolves('Logout');
             infoStub.onFirstCall().resolves('No');
             const status = await Cluster.logout();
 
@@ -306,6 +309,7 @@ suite('Openshift/Cluster', () => {
         });
 
         test('logout and log back in works', async () => {
+            warnStub.onFirstCall().resolves('Logout');
             infoStub.onFirstCall().resolves('Yes');
             const logStub: sinon.SinonStub = sandbox.stub(Cluster, 'login').resolves('Logged in');
             const status = await Cluster.logout();
@@ -322,6 +326,7 @@ suite('Openshift/Cluster', () => {
         });
 
         test('handles errors from odo', async () => {
+            warnStub.onFirstCall().resolves('Logout');
             execStub.rejects(fatalErrorText);
             let expectedErr: any;
             try {
@@ -334,6 +339,7 @@ suite('Openshift/Cluster', () => {
         });
 
         test('handles errors from odo stderr', async () => {
+            warnStub.onFirstCall().resolves('Logout');
             execStub.resolves(errorData);
             let expectedErr: any;
             try {
@@ -345,11 +351,14 @@ suite('Openshift/Cluster', () => {
         });
 
         test('throws errors from subsequent login', async () => {
-            execStub.onSecondCall().resolves(errorData);
+            sandbox.stub(TokenStore, 'getUserName');
+            sandbox.stub(TokenStore, 'setItem');
+            execStub.onSecondCall().rejects({message: 'FATAL ERROR'});
+            warnStub.onFirstCall().resolves('Logout');
             infoStub.resolves('Yes');
-            quickPickStub.onFirstCall().resolves('Credentials');
-            quickPickStub.onSecondCall().resolves({description: 'Current Context', label: testUrl});
-            quickPickStub.onThirdCall().resolves({description: 'Current Context', label: testUrl});
+            quickPickStub.onFirstCall().resolves({description: 'Current Context', label: testUrl});
+            quickPickStub.onSecondCall().resolves({label: 'Credentials'});
+            quickPickStub.onThirdCall().resolves({description: 'Current Context', label: 'username'});
             inputStub.resolves(password);
             let expectedErr: { message: any };
             try {

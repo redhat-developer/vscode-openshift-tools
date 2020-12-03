@@ -482,14 +482,15 @@ export class OdoImpl implements Odo {
         'the server has asked for the client to provide credentials',
         'Please login to your server',
         'Unauthorized',
-        'User "system:anonymous" cannot list resource "projects"'
+        'User "system:anonymous" cannot list resource "projects"',
+        '"system:anonymous"',
     ];
 
     private readonly serverDownMessages = [
         'Unable to connect to OpenShift cluster, is it down?',
         'no such host',
         'no route to host',
-        'connection refused'
+        'connection refused',
     ];
 
     public readonly subject: Subject<OdoEvent> = new Subject<OdoEvent>();
