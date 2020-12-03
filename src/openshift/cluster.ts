@@ -31,7 +31,7 @@ export class Cluster extends OpenShiftItem {
                     commands.executeCommand('setContext', 'isLoggedIn', false);
                     const logoutInfo = await window.showInformationMessage('Successfully logged out. Do you want to login to a new cluster', 'Yes', 'No');
                     if (logoutInfo === 'Yes') {
-                        return Cluster.login();
+                        return Cluster.login(undefined, true);
                     }
                     return null;
                 }
@@ -137,8 +137,8 @@ export class Cluster extends OpenShiftItem {
     }
 
     @vsCommand('openshift.explorer.login')
-    static async login(): Promise<string> {
-        const response = await Cluster.requestLoginConfirmation();
+    static async login(context?: any, skipConfirmation = false): Promise<string> {
+        const response = await Cluster.requestLoginConfirmation(skipConfirmation);
 
         if (response !== 'Yes') return null;
 
@@ -260,16 +260,26 @@ export class Cluster extends OpenShiftItem {
     }
 
     @vsCommand('openshift.explorer.login.tokenLogin')
-    static async tokenLogin(clusterURL: string, skipConfirmation = false): Promise<string | null> {
+    static async tokenLogin(userClusterUrl: string, skipConfirmation = false): Promise<string | null> {
         let token: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
 
         if (response !== 'Yes') return null;
 
-        const clusterUrlFromClipboard = await Cluster.getUrlFromClipboard();
+        let clusterURL = userClusterUrl;
+        let clusterUrlFromClipboard: string;
 
-        if (clusterUrlFromClipboard === clusterURL.trim()) {
+        if (!clusterURL) {
+            clusterUrlFromClipboard = await Cluster.getUrlFromClipboard();
+        }
+
+        if (!clusterURL && clusterUrlFromClipboard || clusterURL?.trim() === clusterUrlFromClipboard) {
             token = Cluster.getToken(await Cluster.readFromClipboard());
+            clusterURL = clusterUrlFromClipboard;
+        }
+
+        if (!clusterURL) {
+            clusterURL = await Cluster.getUrl();
         }
 
         const ocToken = await window.showInputBox({
@@ -279,6 +289,7 @@ export class Cluster extends OpenShiftItem {
             password: true
         });
         if (!ocToken) return null;
+
         return Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`,
             () => Cluster.odo.execute(Command.odoLoginWithToken(clusterURL, ocToken.trim()))
             .then((result) => Cluster.loginMessage(clusterURL, result))
