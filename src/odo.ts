@@ -775,7 +775,7 @@ export class OdoImpl implements Odo {
     }
 
     public async executeInTerminal(command: string, cwd: string = process.cwd(), name = 'OpenShift'): Promise<void> {
-        const cmd = command.split(' ')[0];
+        const [cmd] = command.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
         const terminal: Terminal = WindowUtil.createTerminal(name, cwd);
         terminal.sendText(toolLocation === cmd ? command : command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`), true);
@@ -783,7 +783,7 @@ export class OdoImpl implements Odo {
     }
 
     public async execute(command: string, cwd?: string, fail = true): Promise<cliInstance.CliExitData> {
-        const cmd = command.split(' ')[0];
+        const [cmd] = command.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
         return OdoImpl.cli.execute(
             toolLocation ? command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`) : command,

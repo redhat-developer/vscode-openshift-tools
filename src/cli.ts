@@ -85,6 +85,7 @@ export class CliChannel implements Cli {
                 opts.maxBuffer = 2 * 1024 * 1024;
             }
             cp.exec(cmd, opts, (error: cp.ExecException, stdout: string, stderr: string) => {
+                // filter out info about update
                 const stdoutFiltered = stdout.replace(/---[\s\S]*$/g, '').trim();
                 this.odoChannel.print(cmd);
                 this.odoChannel.print(stdoutFiltered);
