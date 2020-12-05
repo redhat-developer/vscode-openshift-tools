@@ -43,6 +43,7 @@ async function execute(command: VsCommandFunction, ...params: any[]): Promise<an
         } else {
             window.showErrorMessage(err);
         }
+        throw err;
     }
 }
 

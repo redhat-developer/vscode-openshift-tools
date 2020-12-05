@@ -157,7 +157,13 @@ suite('openshift connector Extension', () => {
         sandbox.stub(vscode.window, 'showInformationMessage');
         const semStub = sandbox.stub(vscode.window, 'showErrorMessage');
         sandbox.stub(Progress, 'execFunctionWithProgress').rejects(Error('message'));
-        await vscode.commands.executeCommand('openshift.app.delete', appItem);
+        let error;
+        try {
+            await vscode.commands.executeCommand('openshift.app.delete', appItem);
+        } catch (err) {
+            error = err;
+        }
+        expect(error).not.null;
         expect(semStub).calledWith('Failed to delete Application with error \'Error: message\'');
     });
 });
