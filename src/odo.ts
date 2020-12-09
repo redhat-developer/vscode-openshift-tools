@@ -437,7 +437,7 @@ class OdoModel {
         const execs: Promise<cliInstance.CliExitData>[] = [];
         folders.forEach((folder)=> {
             try {
-                execs.push(OdoImpl.Instance.execute('odo describe -o json', folder.uri.fsPath, false));
+                execs.push(OdoImpl.Instance.execute(Command.describeComponentJson(), folder.uri.fsPath, false));
             } catch (ignore) {
                 // ignore execution errors
             }
