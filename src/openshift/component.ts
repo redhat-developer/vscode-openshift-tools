@@ -555,16 +555,16 @@ export class Component extends OpenShiftItem {
     }
 
     /**
-	 * Create a component
-	 *
-	 * @param folder The folder to use as component context folder
-	 * @param selection The folders selected in case of multiple selection in Explorer view.
-	 * @param context
+     * Create a component
+     *
+     * @param folder The folder to use as component context folder
+     * @param selection The folders selected in case of multiple selection in Explorer view.
+     * @param context
      * @param componentTypeName
      * @param componentKind
-	 * @return A thenable that resolves to the message to show or empty string if components is already exists or null if command is canceled.
+     * @return A thenable that resolves to the message to show or empty string if components is already exists or null if command is canceled.
      * @throws VsCommandError or Error in case of error in cli or code
-	 */
+     */
 
     @vsCommand('openshift.component.createFromRootWorkspaceFolder')
     static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], context: OpenShiftObject, componentTypeName?: string, componentKind = ComponentKind.DEVFILE): Promise<string | null> {
