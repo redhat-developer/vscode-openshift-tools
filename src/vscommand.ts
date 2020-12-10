@@ -5,6 +5,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { stringify } from 'querystring';
 import { commands, Disposable, window } from 'vscode';
 
 type VsCommandFunction = (...args: any[]) => Promise<any> | any;
@@ -25,16 +26,16 @@ export class VsCommandError extends Error {
 const vsCommands: VsCommand[] = [];
 
 function displayResult(result?: unknown): unknown {
-    if (result && typeof result === 'string') {
+    if (result && typeof result === 'string' && result.length > 0) {
         window.showInformationMessage(result);
     }
     return result;
 }
 
-async function execute(command: VsCommandFunction, ...params: any[]): Promise<any> {
+async function execute(command: VsCommandFunction, ...params: any[]): Promise<unknown> {
     try {
         const res = command.call(null, ...params);
-        return res ? displayResult(res.then ? await res : res) : undefined;
+        return displayResult(await Promise.resolve(res));
     } catch (err) {
         if (err instanceof VsCommandError) {
             window.showErrorMessage(err.message);
