@@ -5,7 +5,6 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { stringify } from 'querystring';
 import { commands, Disposable, window } from 'vscode';
 
 type VsCommandFunction = (...args: any[]) => Promise<any> | any;
