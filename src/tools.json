@@ -3,27 +3,27 @@
         "description": "odo CLI",
         "vendor": "Red Hat, Inc.",
         "name": "odo",
-        "version": "2.0.2",
+        "version": "2.0.3",
         "versionRange": "^2.0.0",
         "versionRangeLabel": "version >= 2.0.0",
         "dlFileName": "odo",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.2/odo-windows-amd64.exe.tar.gz",
-                "sha256sum": "76b45646f44969d3f6118ef713fcaede7c7133a6ce1de5957010c5e8529635bf",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.3/odo-windows-amd64.exe.tar.gz",
+                "sha256sum": "acb77917844ada381f8e84c83f54def7ad85712d089c685415bb188fcaf254df",
                 "dlFileName": "odo-windows-amd64.exe.tar.gz",
                 "cmdFileName": "odo.exe"
             },
             "darwin": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.2/odo-darwin-amd64.tar.gz",
-                "sha256sum": "9e0e847187b5d8f1f966facd154813078d27a49e6c0f200a0ab1d40f49f2552a",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.3/odo-darwin-amd64.tar.gz",
+                "sha256sum": "a192f1bee0b21b1ac811e17a34f78c4564df9654ad53f817c7c3c8edf08d91a0",
                 "dlFileName": "odo-darwin-amd64.tar.gz",
                 "cmdFileName": "odo"
             },
             "linux": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.2/odo-linux-amd64.tar.gz",
-                "sha256sum": "b96a86175abd3fcb6c3074834df20777d678290a4870e654bb39b0203023c11e",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.3/odo-linux-amd64.tar.gz",
+                "sha256sum": "7a2277de6b1626c25ba9d73146895db9bc832c93fa04d6fb158c17966d3a1dc4",
                 "dlFileName": "odo-linux-amd64.tar.gz",
                 "cmdFileName": "odo"
             }
