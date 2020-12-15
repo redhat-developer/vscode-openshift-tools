@@ -62,10 +62,17 @@ Follow [this comment](https://github.com/code-ready/crc/issues/1578#issuecomment
 
 ## CodeReady Containers
 
-TBD
+1. Download form https://mirror.openshift.com/pub/openshift-v4/clients/crc/
+2. Unpack
+3. 'crc setup'
+4. 'crc start -p /path/to/pull-secret.txt
 
 ## minishift
 
-TBD
+1. Download
+2. Setup
+3. Configure password for redhat registry
+4. Install xpaas add-on
+5. Enable server catalog
 
 
