@@ -6,10 +6,10 @@
 import * as vscode from 'vscode';
 
 export class Progress {
-    static async execFunctionWithProgress(
+    static async execFunctionWithProgress<R>(
         title: string,
-        func: (progress: vscode.Progress<{ increment: number; message: string }>) => Promise<any>,
-    ): Promise<any> {
+        func: (progress: vscode.Progress<{ increment: number; message: string }>) => Promise<R>,
+    ): Promise<R> {
         return vscode.window.withProgress(
             {
                 cancellable: false,
