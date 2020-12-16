@@ -20,6 +20,7 @@ import OpenShiftItem from '../../../src/openshift/openshiftItem';
 import { SourceTypeChoice } from '../../../src/openshift/component';
 import { SourceType } from '../../../src/odo/config';
 import { ComponentKind, ComponentTypeAdapter } from '../../../src/odo/componentType';
+import { AddWorkspaceFolder } from '../../../src/util/workspace';
 
 import pq = require('proxyquire');
 import globby = require('globby');
@@ -155,6 +156,14 @@ suite('OpenShift/Component', () => {
                 expect(result).null;
             });
 
+            test('returns null when no new context folder selected', async () => {
+                quickPickStub.onSecondCall().resolves(AddWorkspaceFolder);
+                sandbox.stub(vscode.window, 'showOpenDialog').resolves(null);
+                const result = await Component.create(appItem);
+
+                expect(result).null;
+            });
+
             test('returns null when no component name selected', async () => {
                 inputStub.resolves();
                 const result = await Component.create(appItem);
@@ -175,10 +184,7 @@ suite('OpenShift/Component', () => {
             setup(() => {
                 sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves(['nodejs']);
                 quickPickStub.onFirstCall().resolves(SourceTypeChoice.GIT);
-                quickPickStub.onSecondCall().resolves({
-                    description: 'Folder which does not have an OpenShift context',
-                    label: '$(plus) Add new context folder.'
-                });
+                quickPickStub.onSecondCall().resolves(AddWorkspaceFolder);
                 inputStub.onFirstCall().resolves(uri);
                 quickPickStub.onThirdCall().resolves('master');
                 quickPickStub.onCall(3).resolves(componentType);
@@ -306,10 +312,7 @@ suite('OpenShift/Component', () => {
 
             setup(() => {
                 quickPickStub.onFirstCall().resolves(SourceTypeChoice.BINARY);
-                quickPickStub.onSecondCall().resolves({
-                    description: 'Folder which does not have an OpenShift context',
-                    label: '$(plus) Add new context folder.'
-                });
+                quickPickStub.onSecondCall().resolves(AddWorkspaceFolder);
                 quickPickStub.onThirdCall().resolves({
                     description: paths,
                     label: '$(file-zip) sb.jar'
@@ -1355,10 +1358,7 @@ suite('OpenShift/Component', () => {
         };
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves({
-                description: 'Folder which does not have an OpenShift context',
-                label: '$(plus) Add new context folder.'
-            });
+            quickPickStub.onFirstCall().resolves(AddWorkspaceFolder);
             execStub.onFirstCall().resolves(componentResult);
             execStub.onSecondCall().resolves(bcResult);
             execStub.onCall(3).resolves(pvcResult);

@@ -52,7 +52,7 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
 
     let workspacePath: Uri;
 
-    if (choice.label === AddWorkspaceFolder.label) {
+    if (choice === AddWorkspaceFolder) {
         const folders = await window.showOpenDialog({
             canSelectFiles: false,
             canSelectFolders: true,
