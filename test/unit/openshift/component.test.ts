@@ -24,6 +24,7 @@ import { AddWorkspaceFolder } from '../../../src/util/workspace';
 
 import pq = require('proxyquire');
 import globby = require('globby');
+import fs = require('fs-extra');
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -162,6 +163,31 @@ suite('OpenShift/Component', () => {
                 const result = await Component.create(appItem);
 
                 expect(result).null;
+            });
+
+            test('returns null when no new context folder selected', async () => {
+                quickPickStub.onSecondCall().resolves(AddWorkspaceFolder);
+                sandbox.stub(vscode.window, 'showOpenDialog').resolves(null);
+                const result = await Component.create(appItem);
+
+                expect(result).null;
+            });
+
+            test('ask again to select new context folder if selected one has odo component in it', async () => {
+                quickPickStub.restore();
+                quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+                quickPickStub.onFirstCall().resolves(SourceTypeChoice.LOCAL);
+                quickPickStub.onSecondCall().resolves(AddWorkspaceFolder);
+                quickPickStub.onThirdCall().resolves(AddWorkspaceFolder)
+                const sod = sandbox.stub(vscode.window, 'showOpenDialog');
+                sod.onFirstCall().resolves([vscode.Uri.parse('file:///c%3A/Temp')]);
+                sandbox.stub(fs,'existsSync').returns(true);
+                const sim = sandbox.stub(vscode.window, 'showInformationMessage').resolves();
+                sod.onSecondCall().resolves(null);
+                const result = await Component.create(appItem);
+
+                expect(result).null;
+                expect(sim).calledWith('The folder selected already contains a component. Please select a different folder.');
             });
 
             test('returns null when no component name selected', async () => {
