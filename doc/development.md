@@ -75,4 +75,28 @@ Follow [this comment](https://github.com/code-ready/crc/issues/1578#issuecomment
 4. Install xpaas add-on
 5. Enable server catalog
 
+## Debug Developer Console (DC) frontend
 
+# Build DC following documentation
+# Add frontend subfolder into vscode
+# Run the 'bridge`
+# Add launch configuration to .vscode/launch.json
+
+```
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome against localhost",
+      "url": "http://localhost:9000",
+      "webRoot": "${workspaceFolder}"
+    }
+  ]
+}
+```
+# Run debugger from command pallet
