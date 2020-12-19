@@ -30,4 +30,11 @@ suite('Window Utility', () => {
         expect(termStub).calledOnce;
     });
 
+    test('createTerminal creates a terminal object using cmd shell on windows', () => {
+        sandbox.stub(process, 'platform').value('win32');
+        sandbox.stub(process, 'env').value({ComSpec: 'path'});
+        WindowUtil.createTerminal('name', process.cwd());
+        expect(termStub).calledOnceWith({cwd: process.cwd(), name: 'name', shellPath: 'path'});
+    });
+
 });
