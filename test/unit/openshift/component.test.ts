@@ -437,6 +437,23 @@ suite('OpenShift/Component', () => {
             const result = await Component.createFromRootWorkspaceFolder(folder);
             expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
         });
+
+        test('skips component type selection if componentTypeName provided and type exists', async () => {
+            inputStub.resolves(componentItem.getName());
+            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
+                new ComponentTypeAdapter(
+                    ComponentKind.DEVFILE,
+                    'componentType1',
+                    undefined,
+                    'description',
+                    ''
+                )
+            ]);
+            const result = await Component.createFromRootWorkspaceFolder(folder, [], undefined, 'componentType1');
+            expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+            expect(quickPickStub).calledTwice;
+            expect(quickPickStub).have.not.calledWith({ placeHolder: 'Component type' })
+        });
     });
 
     suite('unlinkComponent', () => {
