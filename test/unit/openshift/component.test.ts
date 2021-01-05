@@ -406,7 +406,6 @@ suite('OpenShift/Component', () => {
         const componentType = new ComponentTypeAdapter(ComponentKind.S2I, 'nodejs', 'latest', 'builder,nodejs');
 
         setup(() => {
-
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(appItem);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
@@ -453,6 +452,18 @@ suite('OpenShift/Component', () => {
             expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
             expect(quickPickStub).calledTwice;
             expect(quickPickStub).have.not.calledWith({ placeHolder: 'Component type' })
+        });
+
+        test('skips component type selection if devfile exists and use devfile name as initial value for component name', async () => {
+            sandbox.stub(fs, 'existsSync').returns(true);
+            const getNameStub = sandbox.stub(Component, 'getName').returns(componentItem.getName());
+            sandbox.stub(fs, 'readFileSync').returns(
+                'metadata:\n'  +
+                '  name: componentName'
+            );
+            const result = await Component.createFromRootWorkspaceFolder(folder, [], undefined, 'componentType1');
+            expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+            expect(getNameStub).calledWith('Component name', Component.odo.getComponents(appItem), appItem.getName(), 'componentName');
         });
     });
 
