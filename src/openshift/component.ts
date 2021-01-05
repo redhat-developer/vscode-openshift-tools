@@ -9,7 +9,6 @@ import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debu
 import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
 import { EventEmitter } from 'events';
-import { existsSync, readFileSync } from 'fs';
 import * as YAML from 'yaml'
 import OpenShiftItem, { selectTargetApplication, selectTargetComponent } from './openshiftItem';
 import { OpenShiftObject, ContextType, OpenShiftObjectImpl, OpenShiftComponent } from '../odo';
@@ -31,6 +30,7 @@ import { Url } from '../odo/url';
 import path = require('path');
 import globby = require('globby');
 import treeKill = require('tree-kill');
+import fs = require('fs-extra');
 
 const waitPort = require('wait-port');
 
@@ -575,13 +575,15 @@ export class Component extends OpenShiftItem {
 
         if (!application) return null;
         const devFileLocation = path.join(folder.fsPath, 'devfile.yaml');
-        const useExistingDevfile = existsSync(devFileLocation);
+        const useExistingDevfile = fs.existsSync(devFileLocation);
 
         let initialNameValue: string;
         if (useExistingDevfile) {
-            const file = readFileSync(devFileLocation, 'utf8');
+            const file = fs.readFileSync(devFileLocation, 'utf8');
             const devfileYaml = YAML.parse(file.toString());
-            initialNameValue = devfileYaml?.metadata.name;
+            if (devfileYaml && devfileYaml.metadata && devfileYaml.metadata.name) {
+                initialNameValue = devfileYaml.metadata.name;
+            }
         }
 
         const componentName = await Component.getName(
