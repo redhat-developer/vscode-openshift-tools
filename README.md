@@ -11,32 +11,33 @@
 
 OpenShift Connector extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:
  - Developers can easily create, deploy and live debug applications running on OpenShift.
- - Run local instance of OpenShift 4.5 using [Red Hat CodeReady Containers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned).
+ - Run local instance of OpenShift 4.5 using [Red Hat CodeReady Containers](http://red.ht/39kEznd).
 
 ### Demo: https://youtube.com/watch?v=m0wBKuKDYO0
 
-[![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/gif/vscode-openshift-tools.gif)](https://youtube.com/watch?v=m0wBKuKDYO0)
+[![ screencast ](https://bit.ly/3pZsquB)](https://youtube.com/watch?v=m0wBKuKDYO0)
 
 ### Supported OpenShift Clusters
 
 This extension can work with local or remote OpenShift clusters.
 
 To provision local instance of OpenShift cluster, developers can use the following options:
-* [CodeReady Containers](https://cloud.redhat.com/openshift/install/crc/installer-provisioned) - run single node local OpenShift 4.x cluster
-* [minishift](https://github.com/minishift/minishift/releases) / [CDK](https://developers.redhat.com/products/cdk/download/) - run single node local OpenShift 3.x cluster
+* [CodeReady Containers](* [Red Hat CodeReady Containers](http://red.ht/39kEznd) - run single node local OpenShift 4.x cluster
+) - run single node local OpenShift 4.x cluster
+* [minishift](http://bit.ly/3rSvzOx) / [CDK](http://red.ht/3opF1XC) - run single node local OpenShift 3.x cluster
 
-For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Starting-Local-OpenShift-3.x-Instance).
+For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](http://bit.ly/3be4jUv).
 
 If developers can't run OpenShift cluster locally, the extension can work with remote one provisioned with one of Red Hat products:
 
-* [Red Hat OpenShift Container Platform](https://www.openshift.com/products/container-platform) - build, deploy and manage your applications across cloud- and on-premise infrastructure
-* [Red Hat OpenShift Dedicated](https://www.openshift.com/products/dedicated/) - single-tenant, high-availability Kubernetes clusters in the public cloud
-* [Microsoft Azure Red Hat OpenShift](https://www.openshift.com/products/azure-openshift) - fully managed Red Hat OpenShift service on Microsoft Azure
-* [Red Hat OpenShift Online](https://www.openshift.com/products/online/) - the fastest way for developers to build, host and scale applications in the public cloud
+* [Red Hat OpenShift Container Platform](http://red.ht/3rUUzoe) - build, deploy and manage your applications across cloud- and on-premise infrastructure
+* [Red Hat OpenShift Dedicated](http://red.ht/3bdr7E8) - single-tenant, high-availability Kubernetes clusters in the public cloud
+* [Microsoft Azure Red Hat OpenShift](http://red.ht/3oeVPjM) - fully managed Red Hat OpenShift service on Microsoft Azure
+* [Red Hat OpenShift Online](http://red.ht/3bbSVso) - the fastest way for developers to build, host and scale applications in the public cloud
 
-To install OpenShift Container Platform 4 in the public cloud, in your datacenter or on your laptop please visit [Red Hat OpenShift Cluster Manager](https://cloud.redhat.com/openshift/install).
+To install OpenShift Container Platform 4 in the public cloud, in your datacenter or on your laptop please visit [Red Hat OpenShift Cluster Manager](http://red.ht/3rSwjTP).
 
-**NOTE:** When working with [OpenShift Online](https://www.openshift.com/products/online/) remote cluster only one component can be created for Starter plan and Pro plan with default 2GiB storage. If you want to create multi component application you could opt in for Pro plan with bigger persistence storage (up to 150GiB).
+**NOTE:** When working with [Red Hat OpenShift Online](http://red.ht/3bbSVso) remote cluster only one component can be created for Starter plan and Pro plan with default 2GiB storage. If you want to create multi component application you could opt in for Pro plan with bigger persistence storage (up to 150GiB).
 
 ## Commands and Features
 
@@ -216,17 +217,17 @@ To debug a Java Component, [Java Language Support](https://marketplace.visualstu
 ### CLI Tools
 
 This extension uses two CLI tools to interact with OpenShift cluster:
-* OKD CLI client tool - [oc](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.3.3)
-* odo - [odo](https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.0)
+* OKD CLI client tool - [oc](http://red.ht/3s0jSW7)
+* odo - [odo](http://red.ht/2XghCvy)
 
 > `oc` and `odo` tools for Windows, Linux and macOS are included into extension package. Once the extension is installed it is ready to use.
 
 Starting from `v0.2.0` extension includes `odo` CLI tool `v2.0.0` and supports devfile in addition to S2I (software-to-image) components. Devfiles are new way of deploying a component with odo.
 Follow the links below for additional information:
 
-* [Understanding odo](https://odo.dev/docs/understanding-odo/)
-* [Devfile file reference](https://odo.dev/file-reference/)
-* [Deploying your first application using odo](https://odo.dev/docs/deploying-a-devfile-using-odo/)
+* [Understanding odo](https://bit.ly/3ovRTuY)
+* [Devfile file reference](http://bit.ly/3hNrhTP)
+* [Deploying your first application using odo](http://bit.ly/2MurLCG)
 
 ### Extensions
 
