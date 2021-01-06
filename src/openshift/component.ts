@@ -609,7 +609,8 @@ export class Component extends OpenShiftItem {
             if (!componentType) return null;
 
             if (componentType.kind === ComponentKind.DEVFILE) {
-                const paths = globby.sync(`${folder.fsPath.replace('\\', '/')}/*`, {dot: true, onlyFiles: false});
+                const globbyPath = `${folder.fsPath.replace('\\', '/')}/`;
+                const paths = globby.sync(`${globbyPath}*`, {dot: true, onlyFiles: false});
                 if (paths.length === 0) {
                     const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: 'Initialize Component using default Starter Project?'});
                     createStarter = create === 'Yes';
