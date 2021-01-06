@@ -107,7 +107,6 @@ suite('OpenShift/Component', () => {
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
             progressFunctionStub = sandbox.stub(Progress, 'execFunctionWithProgress').yields();
             sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
-
         });
 
         test('returns null when cancelled', async () => {
@@ -1510,6 +1509,37 @@ suite('OpenShift/Component', () => {
             const result = await Component.debug(devfileComponentItem);
             expect(result).is.null;
             expect(warningStub).calledOnce;
+        });
+
+        test('add/remove debug session to collection when debug started/stopped', () => {
+            let didStart: (session) => void;
+            let didTerminate: (session) => void;
+            const treeKillStub = sinon.stub();
+            Component = pq('../../../src/openshift/component', {
+                vscode: {
+                    debug: {
+                        onDidStartDebugSession: (didStartParam: (session) => void): void => {
+                            didStart = didStartParam;
+                        },
+                        onDidTerminateDebugSession: (didTerminateParam: (session) => void): void => {
+                            didTerminate = didTerminateParam;
+                        }
+                    }
+                },
+                'tree-kill': treeKillStub
+            }).Component;
+            Component.init();
+            const session = {
+                configuration: {
+                    contextPath: {
+                        fsPath: '/path/to/component'
+                    },
+                    odoPid: 1
+                }
+            };
+            didStart(session);
+            didTerminate(session);
+            expect(treeKillStub).calledWith(1);
         });
     });
 });
