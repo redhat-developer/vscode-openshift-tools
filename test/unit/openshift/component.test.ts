@@ -818,6 +818,28 @@ suite('OpenShift/Component', () => {
             expect(treeKillStub).calledOnceWith(1);
         });
 
+        test('stops watch command if running', async () => {
+            const cpStub = new EventEmitter() as any as ChildProcess;
+            (cpStub as any).pid = 123;
+            spawnStub.resolves(cpStub);
+            const c = pq('../../../src/openshift/component', {
+                'tree-kill': () => {
+                    cpStub.emit('exit');
+                }
+            }).Component;
+            const WatchSessionsViewPQ = pq('../../../src/watch', {
+                './openshift/component': { Component: c}
+            }).WatchSessionsView;
+            const watchView = new WatchSessionsViewPQ();
+            await c.watch(componentItem);
+
+            let children = watchView.getChildren();
+            expect((children as string[]).length).equals(1);
+            await c.undeploy(componentItem);
+            children = watchView.getChildren();
+            expect((children as string[]).length).equals(0);
+        });
+
         test('wraps errors in additional info', async () => {
             execStub.rejects(errorMessage);
 
