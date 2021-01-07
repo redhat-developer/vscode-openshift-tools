@@ -788,6 +788,36 @@ suite('OpenShift/Component', () => {
             expect(execStub).calledWith(Command.undeployComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
         });
 
+        test('stops debug commands if running', async () => {
+            let didStart: (session) => void;
+            const treeKillStub = sinon.stub();
+            Component = pq('../../../src/openshift/component', {
+                vscode: {
+                    debug: {
+                        onDidStartDebugSession: (didStartParam: (session) => void): void => {
+                            didStart = didStartParam;
+                        },
+                        onDidTerminateDebugSession: sinon.stub()
+                    }
+                },
+                'tree-kill': treeKillStub
+            }).Component;
+            Component.init();
+            const session = {
+                configuration: {
+                    contextPath: componentItem.contextPath,
+                    odoPid: 1
+                }
+            };
+            didStart(session);
+
+            const result = await Component.undeploy(componentItem);
+
+            expect(result).equals(`Component '${componentItem.getName()}' successfully undeployed`);
+            expect(execStub).calledWith(Command.undeployComponent(projectItem.getName(), appItem.getName(), componentItem.getName()));
+            expect(treeKillStub).calledOnceWith(1);
+        });
+
         test('wraps errors in additional info', async () => {
             execStub.rejects(errorMessage);
 
@@ -1126,7 +1156,7 @@ suite('OpenShift/Component', () => {
             spawnStub.resolves(cpStub);
             const c = pq('../../../src/openshift/component', {
                 'tree-kill': () => {
-                    cpStub.emit('exit')
+                    cpStub.emit('exit');
                 }
             }).Component;
             c.aaa = 'test';
