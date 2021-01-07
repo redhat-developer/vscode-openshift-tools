@@ -101,12 +101,6 @@ export class Component extends OpenShiftItem {
         return !!ws;
     }
 
-    static async getOpenshiftData(context: OpenShiftObject): Promise<OpenShiftObject> {
-        return Component.getOpenShiftCmdData(context,
-            'In which Application you want to create a Component'
-        );
-    }
-
     @vsCommand('openshift.component.create')
     @selectTargetApplication(
         'In which Application you want to create a Component'
