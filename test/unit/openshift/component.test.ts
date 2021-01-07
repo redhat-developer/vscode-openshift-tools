@@ -1596,12 +1596,12 @@ suite('OpenShift/Component', () => {
         });
 
         test('shows warning for not supported languages', async () => {
-            componentItem.builderImage = {
+            s2iComponentItem.builderImage = {
                 name: 'not-known-component-type',
                 tag: 'tag'
             };
             const warningStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves();
-            const result = await Component.debug(componentItem);
+            const result = await Component.debug(s2iComponentItem);
             expect(result).is.null;
             expect(warningStub).calledOnce;
         });
