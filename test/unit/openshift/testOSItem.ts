@@ -24,7 +24,7 @@ export class TestItem implements OpenShiftObject {
         public kind: ComponentKind = ComponentKind.S2I) {
     }
 
-    builderImage?: BuilderImage;
+    public builderImage?: BuilderImage;
     iconPath?: Uri;
     description?: string;
     detail?: string;

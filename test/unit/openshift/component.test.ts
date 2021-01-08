@@ -44,6 +44,7 @@ suite('OpenShift/Component', () => {
     const appItem = new TestItem(projectItem, 'app1', ContextType.APPLICATION);
     const componentItem = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1');
     const devfileComponentItem = new TestItem(appItem, 'compDev', ContextType.COMPONENT_PUSHED,[], comp2Uri, '/path',  SourceType.GIT)
+    const s2iComponentItem = new TestItem(appItem, 'compDev', ContextType.COMPONENT_PUSHED,[], comp2Uri, '/path',  SourceType.LOCAL)
     const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
     const errorMessage = 'FATAL ERROR';
     let getApps: sinon.SinonStub;
@@ -1592,6 +1593,17 @@ suite('OpenShift/Component', () => {
             didStart(session);
             didTerminate(session);
             expect(treeKillStub).calledWith(1);
+        });
+
+        test('shows warning for not supported languages', async () => {
+            s2iComponentItem.builderImage = {
+                name: 'not-known-component-type',
+                tag: 'tag'
+            };
+            const warningStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves();
+            const result = await Component.debug(s2iComponentItem);
+            expect(result).is.null;
+            expect(warningStub).calledOnce;
         });
     });
 });
