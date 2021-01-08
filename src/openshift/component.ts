@@ -735,15 +735,10 @@ export class Component extends OpenShiftItem {
         let isNode: boolean;
         let isPython: boolean;
 
-        if (componentBuilder && componentBuilder.kind === ComponentKind.S2I) { // s2i component has been selected for debug
-            if (componentBuilder.tags) {
-                isJava = componentBuilder.tags.includes('java');
-                isNode = componentBuilder.tags.includes('nodejs');
-                isPython = componentBuilder.tags.includes('python');
-            } else {
-                await window.showWarningMessage('Cannot detect language for selected component.');
-                return result;
-            }
+        if (componentBuilder && componentBuilder.tags && componentBuilder.kind === ComponentKind.S2I) { // s2i component has been selected for debug
+            isJava = componentBuilder.tags.includes('java');
+            isNode = componentBuilder.tags.includes('nodejs');
+            isPython = componentBuilder.tags.includes('python');
         } else {
             isJava = component.builderImage.name.includes('java');
             isNode = component.builderImage.name.includes('nodejs');

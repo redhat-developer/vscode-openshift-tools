@@ -1595,15 +1595,50 @@ suite('OpenShift/Component', () => {
             expect(treeKillStub).calledWith(1);
         });
 
-        test('shows warning for not supported languages', async () => {
+        test('shows warning if supported language is not detected for s2i component', async () => {
+            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
+            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
+                new ComponentTypeAdapter(
+                    ComponentKind.S2I,
+                    'componentType1',
+                    undefined,
+                    'description',
+                    'lang1,lang2,lang3'
+                ),
+                new ComponentTypeAdapter(
+                    ComponentKind.S2I,
+                    'componentType2',
+                    undefined,
+                    'description'
+                ),
+                new ComponentTypeAdapter(
+                    ComponentKind.DEVFILE,
+                    'componentType3',
+                    undefined,
+                    'description'
+                )
+            ]);
             s2iComponentItem.builderImage = {
-                name: 'not-known-component-type',
+                name: 'componentType1',
                 tag: 'tag'
             };
             const warningStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves();
-            const result = await Component.debug(s2iComponentItem);
-            expect(result).is.null;
-            expect(warningStub).calledOnce;
+            await Component.debug(s2iComponentItem);
+
+            s2iComponentItem.builderImage = {
+                name: 'componentType2',
+                tag: 'tag'
+            };
+            await Component.debug(s2iComponentItem);
+
+            devfileComponentItem2.builderImage = {
+                name: 'componentType3',
+                tag: undefined
+            };
+            await Component.debug(devfileComponentItem2);
+
+            expect(warningStub).calledThrice;
+            expect(warningStub).calledWith('Debug command supports only local Java, Node.Js and Python components.');
         });
     });
 });
