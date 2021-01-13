@@ -735,6 +735,7 @@ export class Component extends OpenShiftItem {
         let isNode: boolean;
         let isPython: boolean;
 
+        // TODO: https://github.com/redhat-developer/vscode-openshift-tools/issues/38
         if (componentBuilder && componentBuilder.tags && componentBuilder.kind === ComponentKind.S2I) { // s2i component has been selected for debug
             isJava = componentBuilder.tags.includes('java');
             isNode = componentBuilder.tags.includes('nodejs');
