@@ -26,6 +26,7 @@ import pq = require('proxyquire');
 import globby = require('globby');
 import fs = require('fs-extra');
 
+
 const {expect} = chai;
 chai.use(sinonChai);
 
@@ -1595,7 +1596,7 @@ suite('OpenShift/Component', () => {
             expect(treeKillStub).calledWith(1);
         });
 
-        test('shows warning if supported language is not detected for s2i component', async () => {
+        test('shows warning if supported language is not detected for component', async () => {
             const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
             sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
                 new ComponentTypeAdapter(
@@ -1639,6 +1640,48 @@ suite('OpenShift/Component', () => {
 
             expect(warningStub).calledThrice;
             expect(warningStub).calledWith('Debug command supports only local Java, Node.Js and Python components.');
+        });
+
+        test('starts java debugger for devfile component with java in builder image', async () => {
+            const startDebugging = sandbox.stub().resolves(true);
+            const waitPort = sandbox.stub().resolves()
+            Component = pq('../../../src/openshift/component', {
+                vscode: {
+                    debug: {
+                        startDebugging
+                    }
+                },
+                'child_process': {
+                    exec: () => ({
+                        stdout: {
+                            on: async (event: string, cb: (data: string) => Promise<void>) => {
+                                await cb('- 8888:7777');
+                            }
+                        },
+                    }),
+                },
+                'wait-port': waitPort,
+            }).Component;
+
+            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
+            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
+                new ComponentTypeAdapter(
+                    ComponentKind.S2I,
+                    'componentType1',
+                    undefined,
+                    'description',
+                    'java'
+                )
+            ]);
+            devfileComponentItem2.builderImage = {
+                name: 'java',
+                tag: undefined
+            };
+            sandbox.stub(vscode.extensions, 'getExtension').returns({} as vscode.Extension<any>);
+            const resultPromise = Component.debug(devfileComponentItem2);
+            const result = await resultPromise;
+            expect(startDebugging).calledOnce;
+            expect(result).equals('Debugger session has successfully started.');
         });
     });
 });
