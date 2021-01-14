@@ -1664,17 +1664,43 @@ suite('OpenShift/Component', () => {
             }).Component;
 
             const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
-            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
-                new ComponentTypeAdapter(
-                    ComponentKind.S2I,
-                    'componentType1',
-                    undefined,
-                    'description',
-                    'java'
-                )
-            ]);
+            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
             devfileComponentItem2.builderImage = {
                 name: 'java',
+                tag: undefined
+            };
+            sandbox.stub(vscode.extensions, 'getExtension').returns({} as vscode.Extension<any>);
+            const resultPromise = Component.debug(devfileComponentItem2);
+            const result = await resultPromise;
+            expect(startDebugging).calledOnce;
+            expect(result).equals('Debugger session has successfully started.');
+        });
+
+        test('starts python debugger for devfile component with python in builder image', async () => {
+            const startDebugging = sandbox.stub().resolves(true);
+            const waitPort = sandbox.stub().resolves()
+            Component = pq('../../../src/openshift/component', {
+                vscode: {
+                    debug: {
+                        startDebugging
+                    }
+                },
+                'child_process': {
+                    exec: () => ({
+                        stdout: {
+                            on: async (event: string, cb: (data: string) => Promise<void>) => {
+                                await cb('- 8888:7777');
+                            }
+                        },
+                    }),
+                },
+                'wait-port': waitPort,
+            }).Component;
+
+            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
+            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
+            devfileComponentItem2.builderImage = {
+                name: 'python',
                 tag: undefined
             };
             sandbox.stub(vscode.extensions, 'getExtension').returns({} as vscode.Extension<any>);
