@@ -831,7 +831,7 @@ export class Component extends OpenShiftItem {
         const debugCmd = `'${toolLocation}' debug port-forward`;
         const cp = exec(debugCmd, {cwd: component.contextPath.fsPath});
         return new Promise<string>((resolve) => {
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises\
             cp.stdout.on('data', async (data: string) => {
                 const parsedPort = data.trim().match(/- (?<localPort>\d+):\d+$/);
                 if (parsedPort?.groups?.localPort) {
