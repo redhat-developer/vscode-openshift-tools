@@ -10,6 +10,8 @@ import { ExtenisonID } from '../../util/constants';
 import { WindowUtil } from '../../util/windowUtils';
 import { CliChannel } from '../../cli';
 
+let panel: vscode.WebviewPanel;
+
 export default class ClusterViewLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     static get extensionPath() {
@@ -18,7 +20,7 @@ export default class ClusterViewLoader {
 
     // eslint-disable-next-line @typescript-eslint/require-await
     static async loadView(title: string): Promise<vscode.WebviewPanel> {
-        let panel: vscode.WebviewPanel | undefined = undefined;
+
         let startProcess: ChildProcess;
         let stopProcess: ChildProcess;
         const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
@@ -36,6 +38,9 @@ export default class ClusterViewLoader {
         panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, "images/context/cluster-node.png"));
         panel.webview.html = ClusterViewLoader.getWebviewContent(ClusterViewLoader.extensionPath, panel);
         panel.webview.postMessage({action: 'cluster', data: ''});
+        panel.onDidDispose(()=> {
+            panel = undefined;
+        });
         panel.webview.onDidReceiveMessage(async (event)  => {
             const timestamp = Number(new Date());
             const date = new Date(timestamp);
