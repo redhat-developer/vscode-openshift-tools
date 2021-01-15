@@ -242,7 +242,7 @@ function getSteps() {
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function addClusterView() {
   const classes = useStyles();
-  const crcLatest = '1.17.0';
+  const crcLatest = '1.20.0';
   const crcOpenShift = '4.5.14';
   const [fileName, setBinaryPath] = React.useState('');
   const [pullSecretPath, setSecret] = React.useState('');

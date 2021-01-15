@@ -135,8 +135,6 @@ export default class ClusterViewLoader {
         let crcCredArray = [];
         const crcVerInfo = await CliChannel.getInstance().execute(`${filePath} version -ojson`);
         const result =  await CliChannel.getInstance().execute(`${filePath} status -ojson`);
-        const crcCreds = await CliChannel.getInstance().execute(`${filePath} console --credentials -ojson`);
-        crcCredArray.push(JSON.parse(crcCreds.stdout).clusterConfig);
         if (result.stderr || crcVerInfo.stderr) {
             panel.webview.postMessage({action: postCommand, errorStatus: true});
         } else {
@@ -147,6 +145,14 @@ export default class ClusterViewLoader {
                 versionInfo: JSON.parse(crcVerInfo.stdout),
                 creds: crcCredArray
             });
+        }
+        const crcCreds = await CliChannel.getInstance().execute(`${filePath} console --credentials -ojson`);
+        if (!crcCreds.error) {
+            try {
+                crcCredArray.push(JSON.parse(crcCreds.stdout).clusterConfig);
+            } catch(err) {
+                // show error message?
+            }
         }
     }
 
