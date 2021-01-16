@@ -724,7 +724,6 @@ export default function addClusterView() {
           return (
             <div>
               <TextField
-                id="outlined-number"
                 label="CPU cores"
                 type="number"
                 variant="outlined"
@@ -735,7 +734,6 @@ export default function addClusterView() {
                 className={classes.textContainer}
               />
               <TextField
-                id="outlined-number"
                 label="Memory to allocate"
                 type="number"
                 variant="outlined"
@@ -747,7 +745,6 @@ export default function addClusterView() {
                 className={classes.textContainer}
               />
               <TextField
-                id="outlined-string"
                 label="Nameserver"
                 type="string"
                 variant="outlined"
@@ -821,7 +818,7 @@ export default function addClusterView() {
     <div>
       {(!settingPresent) && (
         <div className={classes.root}>
-          <WizardSteps />
+          {WizardSteps()}
           {(activeStep === steps.length) && (
           <div>
             <Paper square elevation={3} className={classes.resetContainer}>
