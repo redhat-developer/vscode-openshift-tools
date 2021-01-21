@@ -18,7 +18,6 @@ import {
   
 import AddClusterView from './clusterView';
 import clusterStyle from './cluster.style';
-import './images/logo.png';
 
 const useStyles = makeStyles(clusterStyle);
 
