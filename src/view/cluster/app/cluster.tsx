@@ -15,11 +15,10 @@ import {
   ListItemText,
   Tooltip,
   Typography} from '@material-ui/core';
-
+  
 import AddClusterView from './clusterView';
 import clusterStyle from './cluster.style';
-
-const imageSrc = require('./images/logo.png');
+import './images/logo.png';
 
 const useStyles = makeStyles(clusterStyle);
 
@@ -104,7 +103,7 @@ export default function Header() {
   return (
     <div className={classes.App}>
       <div className={classes.iconContainer}>
-        <img src={imageSrc} alt="redhat-openshift"></img>
+        <img src='assets/logo.png' alt="redhat-openshift"></img>
       </div>
       {showWizard && (<div className={classes.rowBody}>
         <Card className={classes.cardContent}>

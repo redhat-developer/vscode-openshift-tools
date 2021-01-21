@@ -42,12 +42,6 @@ import * as ClusterViewStyles from './clusterView.style';
 const useStyles = makeStyles(ClusterViewStyles.useStyles);
 const StyledBadge = withStyles(ClusterViewStyles.badgeStyles)(Badge);
 
-declare global {
-  interface Window {
-      acquireVsCodeApi(): any;
-  }
-}
-
 const vscode = window.acquireVsCodeApi();
 
 const crcDefaults = {

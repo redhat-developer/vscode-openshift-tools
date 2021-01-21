@@ -5,11 +5,6 @@
 import { LazyLog, LazyLogProps } from 'react-lazylog';
 import { List } from 'immutable'
 
-declare global {
-    interface Window {
-        acquireVsCodeApi(): any;
-    }
-}
 export interface LogProps extends LazyLogProps {
     enableSearch: boolean;
 }
