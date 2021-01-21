@@ -26,32 +26,34 @@ module.exports = {
       {
         test: /\.(ts|tsx)$/,
         loader: "ts-loader",
-        options: {}
       },
       {
         test: /\.css$/,
         use: [
           {
-            loader: "style-loader"
+            loader: "style-loader",
           },
           {
-            loader: "css-loader"
-          }
+            loader: "css-loader",
+          },
         ]
       },
       {
-        test: /\.(jpe?g|png|ttf|eot|svg|woff(2)?)(\?[a-z0-9=&.]+)?$/,
-        use: 'base64-inline-loader?limit=1000&name=[name].[ext]'
-      }
+        test: /\.(png|jpg|jpeg|gif|svg|woff2?|ttf|eot|otf)(\?.*$|$)/,
+        loader: 'file-loader',
+        options: {
+          name: 'assets/[name].[ext]',
+        },
+      },
     ]
   },
   performance: {
-    hints: false
+    hints: false,
   },
   plugins: [
     new HtmlWebPackPlugin({
-       template: path.resolve( __dirname, './app/index.html' ),
-       filename: 'index.html'
+       template: path.resolve( __dirname, 'app', 'index.html' ),
+       filename: 'index.html',
     })
- ]
+  ],
 };

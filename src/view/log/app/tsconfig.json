@@ -10,11 +10,15 @@
         ],
         "jsx": "react",
         "sourceMap": true,
-        "rootDir": "..",
         "noUnusedLocals": true,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
-        "experimentalDecorators": true
+        "experimentalDecorators": true,
+        "baseUrl": ".",
+        "typeRoots": [
+            "../../../../node_modules/@types",
+            "../../@types"
+        ],
     },
     "exclude": [
         "node_modules"

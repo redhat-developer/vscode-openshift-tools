@@ -174,6 +174,7 @@ export default class ClusterViewLoader {
             .replace('%COMMAND%', '')
             .replace('%PLATFORM%', process.platform)
             .replace('clusterViewer.js',`${reactAppUri}`)
+            .replace('%BASE_URL%', `${reactAppUri}`)
             .replace('<!-- meta http-equiv="Content-Security-Policy" -->', meta);
     }
 }

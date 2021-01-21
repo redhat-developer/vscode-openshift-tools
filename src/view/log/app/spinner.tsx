@@ -66,12 +66,6 @@ const AutoScrollSwitch = withStyles({
     track: {},
   })(Switch);
 
-declare global {
-    interface Window {
-        acquireVsCodeApi(): any;
-    }
-}
-
 const vscode = window.acquireVsCodeApi();
 
 function stop() {
