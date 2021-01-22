@@ -5,4 +5,5 @@
 
 interface Window {
     acquireVsCodeApi(): any;
+    cmdText: string;
 }
