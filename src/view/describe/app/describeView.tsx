@@ -39,14 +39,6 @@ const theme = createMuiTheme({
     },
   });
 
-declare global {
-    interface Window {
-        acquireVsCodeApi(): any;
-    }
-}
-
-// s
-
 // Do not change any type, that would lead to props validation error
 // during the compile:views
 export default function describeView(props: any): JSX.Element {

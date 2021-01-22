@@ -10,7 +10,7 @@ export interface LogProps extends LazyLogProps {
 }
 
 export default class Log extends LazyLog {
-    private wholeLog;
+    private wholeLog: string;
     constructor(props: any) {
         super(props);
         this.wholeLog = `${this.props.text}\n`;

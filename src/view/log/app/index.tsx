@@ -9,12 +9,6 @@ import Spinner from './spinner';
 import Log from './log';
 import { LogViewContext } from './context';
 
-declare global {
-    interface Window {
-        cmdText: string;
-    }
-}
-
 class LogView extends React.Component {
     private toggleAutoScroll = () => {
         console.log('toggling autoscroll')
