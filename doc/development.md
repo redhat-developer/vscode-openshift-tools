@@ -58,6 +58,25 @@ Then apply `xpaas` with the command below
 
 Follow [this comment](https://github.com/code-ready/crc/issues/1578#issuecomment-706323186) before starting crc again.
 
+### Error creating VM related to 'crc' domain
+
+Error creating machine: Error creating the VM: Error creating machine: Error in driver during machine creation: virError(Code=9, Domain=20, Message='operation failed: domain 'crc' already exists with uuid 82555a58-9fae-47f9-aad9-e78b32a02308')
+
+To resolve the problem delete 'crc' domain using
+
+`virsh destroy crc`
+
+### Error when `vrish destroy crc` domain 
+
+```virsh # destroy crc
+error: Failed to destroy domain crc
+error: Requested operation is not valid: domain is not running
+```
+
+use
+
+`vrish undefine crc`
+
 # Running local OpenShift Cluster
 
 ## CodeReady Containers
