@@ -20,9 +20,15 @@ export class Archive {
     ): Promise<void> {
         return new Promise((resolve, reject) => {
             if (zipFile.endsWith('.tar.gz')) {
-                Archive.untar(zipFile, extractTo, cmdFileName, prefix)
-                    .then(resolve)
-                    .catch(reject);
+                if (zipFile.includes('windows')) {
+                    Archive.unzip(zipFile, extractTo, cmdFileName)
+                        .then(resolve)
+                        .catch(reject);
+                } else {
+                    Archive.untar(zipFile, extractTo, cmdFileName, prefix)
+                        .then(resolve)
+                        .catch(reject);
+                }
             } else if (zipFile.endsWith('.gz')) {
                 Archive.gunzip(zipFile, extractTo)
                     .then(resolve)
