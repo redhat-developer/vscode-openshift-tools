@@ -366,6 +366,7 @@ export interface Odo {
     deleteURL(url: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentCustomUrl(component: OpenShiftObject, name: string, port: string, secure?: boolean): Promise<OpenShiftObject>;
     getOpenShiftObjectByContext(context: string): OpenShiftObject;
+    loadItems<I>(result: cliInstance.CliExitData, fetch: (data) => I[]): I[];
     readonly subject: Subject<OdoEvent>;
 }
 
@@ -1094,7 +1095,7 @@ export class OdoImpl implements Odo {
         }
     }
 
-    private loadItems<I>(result: cliInstance.CliExitData, fetch: (data) => I[] = (data): I[] => data.items): I[] {
+    public loadItems<I>(result: cliInstance.CliExitData, fetch: (data) => I[] = (data): I[] => data.items): I[] {
         let data: I[] = [];
         try {
             const items = fetch(JSON.parse(result.stdout));

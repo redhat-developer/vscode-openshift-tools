@@ -162,7 +162,7 @@ export class Command {
     }
 
     static describeCatalogComponent(component: string): string {
-        return `odo catalog describe сomponent ${component} -o json`;
+        return `odo catalog describe component ${component} -o json`;
     }
 
     static describeUrl(url: string): string {
