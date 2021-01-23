@@ -451,7 +451,7 @@ suite('OpenShift/Component', () => {
             ]);
             const result = await Component.createFromRootWorkspaceFolder(folder, [], undefined, 'componentType1');
             expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
-            expect(quickPickStub).calledTwice;
+            expect(quickPickStub).calledOnce;
             expect(quickPickStub).have.not.calledWith({ placeHolder: 'Component type' })
         });
 
