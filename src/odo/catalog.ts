@@ -8,7 +8,7 @@ export interface ComponentDescription {
     metadata: {
         name: string;
         version: string;
-    },
+    };
     components: [
         {
             name: 'runtime';
@@ -39,17 +39,8 @@ export interface ComponentDescription {
                 size: string;
             }
         }
-    ],
-    starterProjects: [
-        {
-            name: string;
-            git: {
-                remotes: {
-                    origin: string;
-                }
-            }
-        }
-    ],
+    ];
+    starterProjects: StarterProjectDescription[];
     commands: [
         {
             id: string;
@@ -62,5 +53,14 @@ export interface ComponentDescription {
                 component: string;
             }
         }
-    ]
+    ];
+}
+
+export interface StarterProjectDescription {
+    name: string;
+    git: {
+        remotes: {
+            origin: string;
+        }
+    }
 }

@@ -26,11 +26,13 @@ import { vsCommand, VsCommandError } from '../vscommand';
 import { SourceType } from '../odo/config';
 import { ComponentKind, ComponentTypeAdapter } from '../odo/componentType';
 import { Url } from '../odo/url';
+import { ComponentDescription, StarterProjectDescription } from '../odo/catalog';
 
 import path = require('path');
 import globby = require('globby');
 import treeKill = require('tree-kill');
 import fs = require('fs-extra');
+
 
 const waitPort = require('wait-port');
 
@@ -606,8 +608,12 @@ export class Component extends OpenShiftItem {
                 const globbyPath = `${folder.fsPath.replace('\\', '/')}/`;
                 const paths = globby.sync(`${globbyPath}*`, {dot: true, onlyFiles: false});
                 if (paths.length === 0) {
-                    const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: 'Initialize Component using default Starter Project?'});
-                    createStarter = create === 'Yes';
+                    const descr = await this.odo.execute(Command.describeCatalogComponent(componentType.name));
+                    const starterProjects: StarterProjectDescription[] =this.odo.loadItems<StarterProjectDescription>(descr,(data:{Data:ComponentDescription})=>data.Data.starterProjects);
+                    if(starterProjects?.length && starterProjects?.length > 0) {
+                        const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: 'Initialize Component using default Starter Project?'});
+                        createStarter = create === 'Yes';
+                    }
                 }
             }
         }
