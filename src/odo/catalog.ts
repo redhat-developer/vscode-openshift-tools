@@ -58,6 +58,7 @@ export interface ComponentDescription {
 
 export interface StarterProjectDescription {
     name: string;
+    description?: string;
     git: {
         remotes: {
             origin: string;

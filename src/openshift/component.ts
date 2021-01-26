@@ -609,12 +609,23 @@ export class Component extends OpenShiftItem {
                 const paths = globby.sync(`${globbyPath}*`, {dot: true, onlyFiles: false});
                 if (paths.length === 0) {
                     const descr = await this.odo.execute(Command.describeCatalogComponent(componentType.name));
-                    const starterProjects: StarterProjectDescription[] =this.odo.loadItems<StarterProjectDescription>(descr,(data:{Data:ComponentDescription})=>data.Data.starterProjects);
+                    const starterProjects: StarterProjectDescription[] = this.odo.loadItems<StarterProjectDescription>(descr,(data:{Data:ComponentDescription})=>data.Data.starterProjects);
                     if(starterProjects?.length && starterProjects?.length > 0) {
-                        const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: `Initialize Component using '${starterProjects[0].name}' Starter Project?`});
+                        const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: `Initialize Component using ${starterProjects.length === 1 ? '\''.concat(starterProjects[0].name.concat('\' ')) : ''}Starter Project?`});
                         if (create === 'Yes') {
-                            createStarter = starterProjects[0].name;
-                        };
+                            if (starterProjects.length === 1) {
+                                createStarter = starterProjects[0].name;
+                            } else {
+                                const selectedStarter = await window.showQuickPick(
+                                    starterProjects.map(prj => ({label: prj.name, description: prj.description})),
+                                    {placeHolder: 'Select Starter Project to initialize Component'}
+                                );
+                                if (!selectedStarter) return null;
+                                createStarter = selectedStarter.label;
+                            }
+                        } else if (!create) {
+                            return null;
+                        }
                     }
                 }
             }
