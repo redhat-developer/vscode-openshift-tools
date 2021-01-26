@@ -220,10 +220,10 @@ export class Command {
         version: string,
         name: string,
         folder: string,
-        starter: boolean,
+        starter: string = undefined,
         useExistingDevfile = false
     ): string {
-        return `odo create ${type}${version?':':''}${version?version:''} ${name} ${version?'--s2i':''} --context ${folder} --app ${app} --project ${project}${starter ? ' --starter' : ''}${useExistingDevfile ? ' --devfile devfile.yaml' : ''}`;
+        return `odo create ${type}${version?':':''}${version?version:''} ${name} ${version?'--s2i':''} --context ${folder} --app ${app} --project ${project}${starter ? ` --starter=${starter}` : ''}${useExistingDevfile ? ' --devfile devfile.yaml' : ''}`;
     }
 
     @verbose

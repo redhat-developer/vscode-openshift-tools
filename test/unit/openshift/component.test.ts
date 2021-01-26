@@ -142,7 +142,7 @@ suite('OpenShift/Component', () => {
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
                 expect(progressFunctionStub).calledOnceWith(
                     `Creating new Component '${componentItem.getName()}'`);
-                expect(execStub).calledWith(Command.createLocalComponent(appItem.getParent().getName(), appItem.getName(), componentType.name, version, componentItem.getName(), folder.uri.fsPath, false));
+                expect(execStub).calledWith(Command.createLocalComponent(appItem.getParent().getName(), appItem.getName(), componentType.name, version, componentItem.getName(), folder.uri.fsPath));
             });
 
             test('returns null when no option is selected from quick pick', async () => {
