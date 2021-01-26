@@ -591,7 +591,7 @@ export class Component extends OpenShiftItem {
 
         if (!componentName) return null;
 
-        let createStarter = false;
+        let createStarter: string;
         let componentType: ComponentTypeAdapter;
         if (!useExistingDevfile) {
             const componentTypes = Component.odo.getComponentTypes();
@@ -611,8 +611,10 @@ export class Component extends OpenShiftItem {
                     const descr = await this.odo.execute(Command.describeCatalogComponent(componentType.name));
                     const starterProjects: StarterProjectDescription[] =this.odo.loadItems<StarterProjectDescription>(descr,(data:{Data:ComponentDescription})=>data.Data.starterProjects);
                     if(starterProjects?.length && starterProjects?.length > 0) {
-                        const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: 'Initialize Component using default Starter Project?'});
-                        createStarter = create === 'Yes';
+                        const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: `Initialize Component using '${starterProjects[0].name}' Starter Project?`});
+                        if (create === 'Yes') {
+                            createStarter = starterProjects[0].name;
+                        };
                     }
                 }
             }
@@ -907,7 +909,7 @@ export class Component extends OpenShiftItem {
                     const gitRef = bcJson.spec.source.git.ref || 'master';
                     await Component.odo.execute(Command.createGitComponent(prjName, appName, compTypeName, compTypeVersion, compName, gitUrl, gitRef), workspaceFolder.fsPath);
                 } else { // componentType === ComponentType.Local
-                    await Component.odo.execute(Command.createLocalComponent(prjName, appName, componentJson.metadata.labels['app.kubernetes.io/name'], componentJson.metadata.labels['app.openshift.io/runtime-version'], compName, workspaceFolder.fsPath, false));
+                    await Component.odo.execute(Command.createLocalComponent(prjName, appName, componentJson.metadata.labels['app.kubernetes.io/name'], componentJson.metadata.labels['app.openshift.io/runtime-version'], compName, workspaceFolder.fsPath));
                 }
                 // import storage if present
                 if (componentJson.spec.template.spec.containers[0].volumeMounts) {
