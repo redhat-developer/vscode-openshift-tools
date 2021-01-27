@@ -608,8 +608,8 @@ export class Component extends OpenShiftItem {
                 const globbyPath = `${folder.fsPath.replace('\\', '/')}/`;
                 const paths = globby.sync(`${globbyPath}*`, {dot: true, onlyFiles: false});
                 if (paths.length === 0) {
-                    const descr = await this.odo.execute(Command.describeCatalogComponent(componentType.name));
-                    const starterProjects: StarterProjectDescription[] = this.odo.loadItems<StarterProjectDescription>(descr,(data:{Data:ComponentDescription})=>data.Data.starterProjects);
+                    const descr = await Component.odo.execute(Command.describeCatalogComponent(componentType.name));
+                    const starterProjects: StarterProjectDescription[] = Component.odo.loadItems<StarterProjectDescription>(descr,(data:{Data:ComponentDescription})=>data.Data.starterProjects);
                     if(starterProjects?.length && starterProjects?.length > 0) {
                         const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: `Initialize Component using ${starterProjects.length === 1 ? '\''.concat(starterProjects[0].name.concat('\' ')) : ''}Starter Project?`});
                         if (create === 'Yes') {
