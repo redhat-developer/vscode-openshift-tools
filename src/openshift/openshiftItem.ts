@@ -171,17 +171,17 @@ function selectTargetDecoratorFactory(decorator: (...args:any[]) => Promise<Open
             throw new Error('not supported');
         }
 
-       descriptor[fnKey] = async function (...args: any[]) {
+       descriptor[fnKey] = async function (...args: any[]): Promise<any> {
             args[0] = await decorator(args[0]);
             return fn.apply(this, args);
         };
     };
 }
 
-export function selectTargetComponent(appPlaceHolder, cmpPlaceHolder, condition?: (value: OpenShiftObject) => boolean) {
+export function selectTargetComponent(appPlaceHolder, cmpPlaceHolder, condition?: (value: OpenShiftObject) => boolean): (_target: any, key: string, descriptor: any) => void {
     return selectTargetDecoratorFactory(async (context) => OpenShiftItem.getOpenShiftCmdData(context, appPlaceHolder, cmpPlaceHolder, condition));
 }
 
-export function selectTargetApplication(appPlaceHolder) {
+export function selectTargetApplication(appPlaceHolder): (_target: any, key: string, descriptor: any) => void {
     return selectTargetDecoratorFactory(async (context) => OpenShiftItem.getOpenShiftCmdData(context, appPlaceHolder));
 }
