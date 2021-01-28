@@ -59,6 +59,11 @@ export default class ClusterViewLoader {
                     const memoryFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcMemoryAllocated");
                     startProcess = spawn(`${binaryFromSetting}`, ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`, '-ojson']);
                 } else {
+                    const configuration = vscode.workspace.getConfiguration("openshiftConnector");
+                    configuration.update("crcBinaryLocation", event.crcLoc, vscode.ConfigurationTarget.Global);
+                    configuration.update("crcPullSecretPath", event.pullSecret, vscode.ConfigurationTarget.Global);
+                    configuration.update("crcCpuCores", event.cpuSize, vscode.ConfigurationTarget.Global);
+                    configuration.update("crcMemoryAllocated", Number.parseInt(event.memory), vscode.ConfigurationTarget.Global);
                     const [tool, ...params] = event.data.split(' ');
                     startProcess = spawn(tool, params);
                 }
@@ -71,10 +76,6 @@ export default class ClusterViewLoader {
                     channel.append(chunk);
                 });
                 startProcess.on('close', async (code) => {
-                    vscode.workspace.getConfiguration("openshiftConnector").update("crcBinaryLocation", event.crcLoc);
-                    vscode.workspace.getConfiguration("openshiftConnector").update("crcPullSecretPath", event.pullSecret);
-                    vscode.workspace.getConfiguration("openshiftConnector").update("crcCpuCores", event.cpuSize);
-                    vscode.workspace.getConfiguration("openshiftConnector").update("crcMemoryAllocated", event.memory);
                     // eslint-disable-next-line no-console
                     console.log(`crc start exited with code ${code}`);
                     if (code!= 0) {
