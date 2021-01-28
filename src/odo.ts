@@ -461,6 +461,7 @@ class OdoModel {
         this.pathToObject.delete(item.path);
         if (item.contextPath) {
             this.contextToObject.delete(item.contextPath.fsPath);
+            this.deleteContext(item.contextPath.fsPath);
         }
     }
 
@@ -948,33 +949,19 @@ export class OdoImpl implements Odo {
 
     public async deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
         const app = component.getParent();
-        if (component.contextValue !== ContextType.COMPONENT) {
-            await this.execute(
-                Command.deleteComponent(
-                    app.getParent().getName(),
-                    app.getName(), component.getName(),
-                    component.kind === ComponentKind.S2I
-                ),
-                component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()
-            );
-        }
+        await this.execute(
+            Command.deleteComponent(
+                app.getParent().getName(),
+                app.getName(), component.getName(),
+                component.kind === ComponentKind.S2I
+            ),
+            component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()
+        );
+
         await this.deleteAndRefresh(component);
         const children = await app.getChildren();
         if (children.length === 0) {
             this.deleteApplication(app);
-        }
-        if (component.contextPath) {
-            const wsFolder = workspace.getWorkspaceFolder(component.contextPath);
-            workspace.workspaceFolders.length > 1;
-            workspace.updateWorkspaceFolders(wsFolder.index, 1);
-            if (wsFolder.index !== 0) { // when first folder is deleted, no need to wait, bz workspace is going to restart
-                await new Promise<void>((resolve) => {
-                    const disposable = workspace.onDidChangeWorkspaceFolders(() => {
-                        disposable.dispose();
-                        resolve();
-                    });
-                });
-            }
         }
         return component;
     }
