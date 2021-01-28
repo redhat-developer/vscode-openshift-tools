@@ -507,28 +507,32 @@ export class Component extends OpenShiftItem {
         if (!component) return null;
         const app = component.getParent();
         const urlItems = await Component.listUrl(component);
-        if (urlItems === null) {
-            const value = await window.showInformationMessage(`No URL for Component '${component.getName()}' in Application '${app.getName()}'. Do you want to create a URL and open it?`, 'Create', 'Cancel');
-            if (value === 'Create') {
-                await commands.executeCommand('openshift.url.create', component);
-            }
-        }
-
-        if (urlItems !== null) {
+        if (urlItems) {
             let selectRoute: QuickPickItem;
-            const unpushedUrl = urlItems.filter((value: Url) => value.status.state === 'Not Pushed');
             const pushedUrl = urlItems.filter((value: Url) => value.status.state === 'Pushed');
             if (pushedUrl.length > 0) {
                 const hostName: QuickPickItem[] = pushedUrl.map((value: Url) => ({ label: `${value.spec.protocol}://${value.spec.host}`, description: `Target Port is ${value.spec.port}`}));
-                if (hostName.length >1) {
+                let targetUrl:string;
+                if (hostName.length > 1) {
                     selectRoute = await window.showQuickPick(hostName, {placeHolder: 'This Component has multiple URLs. Select the desired URL to open in browser.', ignoreFocusOut: true});
-                    if (!selectRoute) return null;
-                    return commands.executeCommand('vscode.open', Uri.parse(`${selectRoute.label}`));
+                    if (selectRoute) {
+                        targetUrl = selectRoute.label;
+                    } else {
+                        return null; // url selection was canceled
+                    };
+                } else {
+                    targetUrl = hostName[0].label;
                 }
-                    return commands.executeCommand('vscode.open', Uri.parse(`${hostName[0].label}`));
-
-            } if (unpushedUrl.length > 0) {
+                return commands.executeCommand('vscode.open', Uri.parse(targetUrl));
+            }
+            const unpushedUrl = urlItems.filter((value: Url) => value.status.state === 'Not Pushed');
+            if (unpushedUrl.length > 0) {
                 return `${unpushedUrl.length} unpushed URL in the local config. Use 'Push' command before opening URL in browser.`;
+            }
+        } else {
+            const value = await window.showInformationMessage(`No URL for Component '${component.getName()}' in Application '${app.getName()}'. Do you want to create a URL and open it?`, 'Create', 'Cancel');
+            if (value === 'Create') {
+                await commands.executeCommand('openshift.url.create', component);
             }
         }
     }
