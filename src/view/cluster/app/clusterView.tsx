@@ -152,11 +152,11 @@ export default function addClusterView() {
   }
 
   const handleCpuSize = (event) => {
-    setCpuSize(event.target.value);
+    setCpuSize(Number.parseInt(event.target.value));
   }
 
   const handleMemory = (event) => {
-    setMemory(event.target.value);
+    setMemory(Number.parseInt(event.target.value));
   }
 
   const handleNameserver = (event) => {
