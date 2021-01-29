@@ -25,7 +25,7 @@ const mocha = new Mocha(config);
 function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
     let coverageRunner: CoverageRunner;
     const coverConfigPath = paths.join(testsRoot, '..', '..', '..', 'coverconfig.json');
-    if (!process.env.OST_DISABLE_COVERAGE && fs.existsSync(coverConfigPath)) {
+    if (process.env.OST_DISABLE_COVERAGE !== 'yes' && fs.existsSync(coverConfigPath)) {
         coverageRunner = new CoverageRunner(JSON.parse(fs.readFileSync(coverConfigPath, 'utf-8')) as TestRunnerOptions, testsRoot);
     }
     return coverageRunner;

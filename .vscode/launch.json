@@ -33,7 +33,7 @@
             ],
             "preLaunchTask": "npm: watch",
             "env": {
-                "OST_DISABLE_COVERAGE": "true"
+                "OST_DISABLE_COVERAGE": "yes"
             }
         },
         {
@@ -48,7 +48,10 @@
             "outFiles": [
                 "${workspaceFolder}/out/test/unit/**/*.js"
             ],
-            "preLaunchTask": "instrument"
+            "preLaunchTask": "instrument",
+            "env": {
+                "OST_DISABLE_COVERAGE": "no"
+            }
         },
         {
             "name": "Extension integration Tests Debug",
