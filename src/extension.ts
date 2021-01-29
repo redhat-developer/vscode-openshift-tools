@@ -13,6 +13,7 @@ import {
     StatusBarItem,
     env
 } from 'vscode';
+import sendTelemetry from './telemetry';
 import { OpenShiftExplorer } from './explorer';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
@@ -131,6 +132,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     });
 
     OdoImpl.Instance.loadWorkspaceComponents(null);
+
+    sendTelemetry('activation');
 
     return {
         verifyBundledBinaries,

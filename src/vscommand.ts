@@ -6,6 +6,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { commands, Disposable, window } from 'vscode';
+import sendTelemetry from './telemetry';
 
 type VsCommandFunction = (...args: any[]) => Promise<any> | any;
 
@@ -33,8 +34,8 @@ function displayResult(result?: unknown): unknown {
 
 async function execute(command: VsCommandFunction, ...params: any[]): Promise<unknown> {
     try {
-        const res = command.call(null, ...params);
-        return displayResult(await Promise.resolve(res));
+        const resPromise = command.call(null, ...params);
+        return displayResult(await Promise.resolve(resPromise));
     } catch (err) {
         if (err instanceof VsCommandError) {
             window.showErrorMessage(err.message);
@@ -52,9 +53,21 @@ export async function registerCommands(...modules: string[]): Promise<Disposable
     // because it triggers javascript loading when extension is activated
     await Promise.all(modules.map((module) => import(module)));
     return vsCommands.map((cmd) => {
-        return commands.registerCommand(cmd.commandId, (...params) =>
-           execute(cmd.method, ...params)
-        );
+        return commands.registerCommand(cmd.commandId, async (...params) => {
+            const telemetryProps: any = {
+                identifier: cmd.commandId,
+            };
+            const startTime = Date.now();
+            try {
+                await execute(cmd.method, ...params);
+            } catch (err) {
+                telemetryProps.error = err.toString();
+                throw err;
+            } finally {
+                telemetryProps.duration = Date.now() - startTime;
+                sendTelemetry('command', telemetryProps);
+            }
+        });
     });
 }
 
