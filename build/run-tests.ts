@@ -25,7 +25,9 @@ async function main(): Promise<void> {
             launchArgs: tests === 'integration' ? [
                 // this is required to create multi root workspace to run tests on
                 path.resolve(extensionRootPath,'test', 'fixtures', 'components', 'components.code-workspace')
-            ] : []
+            ] : [
+                path.resolve(extensionRootPath,'test', 'fixtures', 'components', 'empty.code-workspace')
+            ]
         });
     } catch(error) {
         // eslint-disable-next-line no-console
