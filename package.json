@@ -1314,6 +1314,5 @@
     }
   },
   "extensionDependencies": [
-    "redhat.vscode-common"
   ]
 }
