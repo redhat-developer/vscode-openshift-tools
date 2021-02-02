@@ -1313,7 +1313,5 @@
       }
     }
   },
-  "extensionDependencies": [
-    "redhat.vscode-commons"
-  ]
+  "extensionDependencies": []
 }
