@@ -54,17 +54,21 @@ export async function registerCommands(...modules: string[]): Promise<Disposable
     await Promise.all(modules.map((module) => import(module)));
     return vsCommands.map((cmd) => {
         return commands.registerCommand(cmd.commandId, async (...params) => {
-            const telemetryProps: any = {
+            let telemetryProps: any = {
                 identifier: cmd.commandId,
             };
+            let result: any;
             const startTime = Date.now();
             try {
-                await execute(cmd.method, ...params);
+                result =  await execute(cmd.method, ...params);
             } catch (err) {
                 telemetryProps.error = err.toString();
                 throw err;
             } finally {
                 telemetryProps.duration = Date.now() - startTime;
+                if (result.properties) {
+                    telemetryProps = {...telemetryProps, ...result.properties };
+                }
                 sendTelemetry('command', telemetryProps);
             }
         });
