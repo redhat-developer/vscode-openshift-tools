@@ -66,7 +66,7 @@ export async function registerCommands(...modules: string[]): Promise<Disposable
                 throw err;
             } finally {
                 telemetryProps.duration = Date.now() - startTime;
-                if (result.properties) {
+                if (result?.properties) {
                     telemetryProps = {...telemetryProps, ...result.properties };
                 }
                 sendTelemetry('command', telemetryProps);
