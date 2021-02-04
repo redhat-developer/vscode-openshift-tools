@@ -649,9 +649,9 @@ export class Component extends OpenShiftItem {
         );
         const result:any = new String(`Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`);
         result.properties = {
-            'component_kind': componentType.version ? ComponentKind.S2I: ComponentKind.DEVFILE,
-            'component_type': componentType.name,
-            'component_version': componentType.version,
+            'component_kind': componentType?.version ? ComponentKind.S2I: ComponentKind.DEVFILE,
+            'component_type': componentType?.name,
+            'component_version': componentType?.version,
             'starter_project': createStarter,
             'use_existing_devfile': useExistingDevfile,
         };

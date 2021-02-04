@@ -139,7 +139,7 @@ suite('OpenShift/Component', () => {
             test('happy path works', async () => {
                 const result = await Component.create(appItem);
 
-                expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+                expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
                 expect(progressFunctionStub).calledOnceWith(
                     `Creating new Component '${componentItem.getName()}'`);
                 expect(execStub).calledWith(Command.createLocalComponent(appItem.getParent().getName(), appItem.getName(), componentType.name, version, componentItem.getName(), folder.uri.fsPath));
@@ -435,7 +435,7 @@ suite('OpenShift/Component', () => {
             inputStub.resolves(componentItem.getName());
             quickPickStub.onSecondCall().resolves(componentType);
             const result = await Component.createFromRootWorkspaceFolder(folder);
-            expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
         });
 
         test('skips component type selection if componentTypeName provided and type exists', async () => {
@@ -450,7 +450,7 @@ suite('OpenShift/Component', () => {
                 )
             ]);
             const result = await Component.createFromRootWorkspaceFolder(folder, [], undefined, 'componentType1');
-            expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
             expect(quickPickStub).calledOnce;
             expect(quickPickStub).have.not.calledWith({ placeHolder: 'Component type' })
         });
@@ -463,7 +463,7 @@ suite('OpenShift/Component', () => {
                 '  name: componentName'
             );
             const result = await Component.createFromRootWorkspaceFolder(folder, [], undefined, 'componentType1');
-            expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
             expect(getNameStub).calledWith('Component name', Component.odo.getComponents(appItem), appItem.getName(), 'componentName');
         });
     });
