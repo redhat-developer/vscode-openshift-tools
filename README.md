@@ -19,6 +19,12 @@ OpenShift Connector extension provides an end-to-end developer experience for Re
 
 ### Supported OpenShift Clusters
 
+#### Developer Sandbox
+
+The extension allows the users to Get free access to the Developer Sandbox for Red Hat OpenShift. From `Add Cluster View`, users will be redirected to the dev sandbox instance. The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools.
+
+#### Local instance of OpenShift
+
 This extension can work with local or remote OpenShift clusters.
 
 To provision local instance of OpenShift cluster, developers can use the following options:
@@ -27,6 +33,8 @@ To provision local instance of OpenShift cluster, developers can use the followi
 * [minishift](http://bit.ly/3rSvzOx) / [CDK](http://red.ht/3opF1XC) - run single node local OpenShift 3.x cluster
 
 For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](http://bit.ly/3be4jUv).
+
+#### Public cloud providers
 
 If developers can't run OpenShift cluster locally, the extension can work with remote one provisioned with one of Red Hat products:
 
@@ -141,13 +149,13 @@ future releases.
 
 #### Running OpenShift Locally
 
-The extension provides a view to run local instance of OpenShift. To open the view use `Add OpenShift Cluster` button 
+The extension provides a view to run local instance of OpenShift. To open the view use `Add OpenShift Cluster` button
 ![ addclusterbutton ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/add-cluster-button.gif)
 from `OpenShift: Application Explorer` view title.
 
 ![ addcluster ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/add-cluster.gif)
 
-The view guides you through the steps required to create and start OpenShift 4 single node cluster on your workstation 
+The view guides you through the steps required to create and start OpenShift 4 single node cluster on your workstation
 using Red Hat CodeReady Containers:
 
    * Download Red Hat CodeReady Containers
