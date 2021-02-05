@@ -30,6 +30,7 @@ import { BuilderImage } from './odo/builderImage';
 import { ImageStream } from './odo/imageStream';
 
 import bs = require('binary-search');
+import { VsCommandError } from './vscommand';
 
 const {Collapsed} = TreeItemCollapsibleState;
 
@@ -746,7 +747,10 @@ export class OdoImpl implements Odo {
         try {
             items = JSON.parse(result.stdout).services.items;
         } catch (err) {
-            throw new Error(JSON.parse(result.stderr).message);
+            throw new VsCommandError(JSON.parse(result.stderr).message);
+        }
+        if (!Array.isArray(items) || Array.isArray(items) && items.length === 0) {
+            throw new VsCommandError('No deployable services found.');
         }
         return items.map((value) => value.metadata.name);
     }
