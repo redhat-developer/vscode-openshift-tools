@@ -28,9 +28,9 @@ import { Service } from './odo/service';
 import { Command } from './odo/command';
 import { BuilderImage } from './odo/builderImage';
 import { ImageStream } from './odo/imageStream';
+import { VsCommandError } from './vscommand';
 
 import bs = require('binary-search');
-import { VsCommandError } from './vscommand';
 
 const {Collapsed} = TreeItemCollapsibleState;
 
