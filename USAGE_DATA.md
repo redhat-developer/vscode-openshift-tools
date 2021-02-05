@@ -14,7 +14,7 @@
 
 #### OpenShift: New Component
 
-In addition to command's usage date (see above) `New Component` command also reports:
+In addition to command's usage data (see above) `New Component` command also reports:
 
 * component_kind - devfile or S2I (Software to Image)
 * component_type - name of the component type from devfile registry or catalog
