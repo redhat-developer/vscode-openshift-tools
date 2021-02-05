@@ -28,6 +28,7 @@ node('rhel8'){
   stage('Package') {
     packageJson.extensionDependencies = ["ms-kubernetes-tools.vscode-kubernetes-tools", "redhat.vscode-commons"]
     writeJSON file: 'package.json', json: packageJson, pretty: 4
+    sh 'node ./out/build/update-readme.js'
     sh "vsce package -o openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix"
     sh "sha256sum *.vsix > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix.sha256"
     sh "npm pack && mv vscode-openshift-connector-${packageJson.version}.tgz openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.tgz"
