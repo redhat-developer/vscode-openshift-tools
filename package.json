@@ -1313,6 +1313,5 @@
       }
     }
   },
-  "extensionDependencies": [
-  ]
+  "extensionDependencies": []
 }
