@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window } from 'vscode';
+import { commands, QuickPickItem, window } from 'vscode';
 import OpenShiftItem from './openshiftItem';
-import { OpenShiftObject, OpenShiftProject, getInstance } from '../odo';
+import { OpenShiftObject, OpenShiftProject, getInstance as getOdoInstance } from '../odo';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
 
@@ -14,8 +14,21 @@ export class Project extends OpenShiftItem {
     @vsCommand('openshift.project.set', true)
     static async set(): Promise<string | null> {
         let message = null;
-        const project = await window.showQuickPick((await getInstance().getProjects()).filter((prj: OpenShiftProject) => !prj.active), {placeHolder: 'Select a Project to activate'});
-        if (project) {
+        const createNewProject = {
+            label: 'Create new Project',
+            description: 'Create new Project and make it active'
+        };
+        const projectsAndCommand = getOdoInstance().getProjects()
+            .then((projects) =>projects.filter((prj: OpenShiftProject) => !prj.active))
+            .then((projects: (QuickPickItem | OpenShiftObject)[]) => {
+                return [createNewProject, ...projects];
+            });
+        const selectedItem = await window.showQuickPick(projectsAndCommand, {placeHolder: 'Select Project to activate or create new one'});
+        if (!selectedItem) return null;
+        if (selectedItem === createNewProject) {
+            await commands.executeCommand('openshift.project.create');
+        } else {
+            const project = selectedItem as OpenShiftObject;
             await Project.odo.execute(`odo project set ${project.getName()}`);
             Project.explorer.refresh();
             message = `Project '${project.getName()}' set as active.`;
