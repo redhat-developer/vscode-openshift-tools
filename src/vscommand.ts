@@ -38,13 +38,15 @@ async function execute(command: VsCommandFunction, ...params: any[]): Promise<un
         return displayResult(await Promise.resolve(resPromise));
     } catch (err) {
         if (err instanceof VsCommandError) {
+            // exception thrown by extension command with meaningful message
+            // just show it and return
             window.showErrorMessage(err.message);
-        } else if (err instanceof Error) {
-            window.showErrorMessage(err.toString());
         } else {
-            window.showErrorMessage(err);
+            // Unexpected exception happened. Let vscode handle the error reporting.
+            // This does not work when command started by pressing button in view title
+            // TODO: Wrap view title commands in try/catch and re-throw as VsCommandError
+            throw err;
         }
-        throw err;
     }
 }
 
