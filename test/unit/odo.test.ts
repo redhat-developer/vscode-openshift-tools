@@ -401,11 +401,17 @@ suite('odo', () => {
                             {
                                 metadata: {
                                     name: 'storage1'
+                                },
+                                spec: {
+                                    path: '/mnt/path1'
                                 }
                             },
                             {
                                 metadata: {
                                     name: 'storage2'
+                                },
+                                spec: {
+                                    path: '/mnt/path1'
                                 }
                             }
                         ]
@@ -426,11 +432,17 @@ suite('odo', () => {
                             {
                                 metadata: {
                                     name: 'route1'
+                                },
+                                spec: {
+                                    path: '/mnt/path1'
                                 }
                             },
                             {
                                 metadata: {
                                     name: 'route2'
+                                },
+                                spec: {
+                                    path: '/mnt/path2'
                                 }
                             }
                         ]
@@ -448,6 +460,26 @@ suite('odo', () => {
                 items: [
                     {
                         metadata: {
+                            name: 'storage1'
+                        },
+                        spec: {
+                            path: '/mnt/path1'
+                        }
+                    },
+                    {
+                        metadata: {
+                            name: 'storage2'
+                        },
+                        spec: {
+                            path: '/mnt/path2'
+                        }
+                    }
+                ]
+            }), stderr: ''});
+            execStub.onSecondCall().resolves({error: undefined, stdout: JSON.stringify({
+                items: [
+                    {
+                        metadata: {
                             name: 'route1'
                         }
                     },
@@ -458,24 +490,10 @@ suite('odo', () => {
                     }
                 ]
             }), stderr: ''});
-            execStub.onSecondCall().resolves({error: undefined, stdout: JSON.stringify({
-                items: [
-                    {
-                        metadata: {
-                            name: 'storage1'
-                        }
-                    },
-                    {
-                        metadata: {
-                            name: 'storage2'
-                        }
-                    }
-                ]
-            }), stderr: ''});
             const result = await odoCli.getComponentChildren(component);
 
-            expect(result[2].getName()).deep.equals('route1');
-            expect(result[0].getName()).deep.equals('storage1');
+            expect(result[2].getName()).deep.equals('storage1');
+            expect(result[0].getName()).deep.equals('route1');
         });
     });
 
