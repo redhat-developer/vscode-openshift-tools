@@ -29,6 +29,7 @@ import { Command } from './odo/command';
 import { BuilderImage } from './odo/builderImage';
 import { ImageStream } from './odo/imageStream';
 import { VsCommandError } from './vscommand';
+import { Storage } from './odo/storage';
 
 import bs = require('binary-search');
 
@@ -217,7 +218,7 @@ export class OpenShiftApplication extends OpenShiftObjectImpl {
 }
 
 export class OpenShiftStorage extends OpenShiftObjectImpl {
-    constructor(parent: OpenShiftObject, name: string) {
+    constructor(parent: OpenShiftObject, name: string, public readonly mountPath: string) {
         super(parent, name, ContextType.STORAGE, 'storage-node.png', TreeItemCollapsibleState.None);
     }
 
@@ -341,7 +342,7 @@ export interface Odo {
     getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponentPorts(component: OpenShiftObject): Promise<odo.Port[]>;
-    getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]>;
+    getStorageNames(component: OpenShiftObject): Promise<OpenShiftStorage[]>;
     getServiceTemplates(): Promise<string[]>;
     getServiceTemplatePlans(svc: string): Promise<string[]>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
@@ -732,13 +733,13 @@ export class OdoImpl implements Odo {
             .map((value) => new OpenShiftUrl(component, value.metadata.name));
     }
 
-    async getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        return (await this.getComponentChildren(component)).filter((value) => value.contextValue === ContextType.STORAGE);
+    async getStorageNames(component: OpenShiftObject): Promise<OpenShiftStorage[]> {
+        return (await this.getComponentChildren(component)).filter((value) => value.contextValue === ContextType.STORAGE) as OpenShiftStorage[];
     }
 
     public async _getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
-        return this.loadItems<Storage>(result).map<OpenShiftObject>((value) => new OpenShiftStorage(component, value.metadata.name));
+        return this.loadItems<Storage>(result).map<OpenShiftObject>((value) => new OpenShiftStorage(component, value.metadata.name, value.spec.path));
     }
 
     public async getServiceTemplates(): Promise<string[]> {
@@ -1003,7 +1004,7 @@ export class OdoImpl implements Odo {
 
     public async createStorage(component: OpenShiftObject, name: string, mountPath: string, size: string): Promise<OpenShiftObject> {
         await this.execute(Command.createStorage(name, mountPath, size), component.contextPath.fsPath);
-        return this.insertAndReveal(new OpenShiftStorage(component, name));
+        return this.insertAndReveal(new OpenShiftStorage(component, name, mountPath));
     }
 
     public async deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject> {

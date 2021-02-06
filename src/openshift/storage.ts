@@ -6,7 +6,7 @@
 import { window } from 'vscode';
 import { isEmpty } from 'validator';
 import OpenShiftItem from './openshiftItem';
-import { OpenShiftObject, ContextType } from '../odo';
+import { OpenShiftObject, ContextType, OpenShiftStorage } from '../odo';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
 
@@ -26,7 +26,11 @@ export class Storage extends OpenShiftItem {
 
         const mountPath = await window.showInputBox({prompt: 'Specify the mount path',
         ignoreFocusOut: true,
-        validateInput: (value: string) => {
+        validateInput: async (value: string) => {
+            const storages = await storageList;
+            if (storages.find(storage => storage.mountPath === value)) {
+                return 'Mount path is already taken';
+            }
             if (isEmpty(value.trim())) {
                 return 'Invalid mount path';
             }
