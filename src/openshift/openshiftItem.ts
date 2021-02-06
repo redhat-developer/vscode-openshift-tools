@@ -91,7 +91,7 @@ export default class OpenShiftItem {
 
     static async getProjectNames(): Promise<OpenShiftObject[]> {
         const projectList: Array<OpenShiftObject> = await OpenShiftItem.odo.getProjects();
-        if (projectList.length === 0) throw Error(errorMessage.Project);
+        if (projectList.length === 0) throw new VsCommandError(errorMessage.Project);
         return projectList;
     }
 
@@ -106,25 +106,25 @@ export default class OpenShiftItem {
 
     static async getComponentNames(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]> {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application, condition);
-        if (applicationList.length === 0) throw Error(errorMessage.Component);
+        if (applicationList.length === 0) throw new VsCommandError(errorMessage.Component);
         return applicationList;
     }
 
     static async getServiceNames(application: OpenShiftObject): Promise<OpenShiftObject[]> {
         const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(application);
-        if (serviceList.length === 0) throw Error(errorMessage.Service);
+        if (serviceList.length === 0) throw new VsCommandError(errorMessage.Service);
         return serviceList;
     }
 
     static async getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         const storageList: Array<OpenShiftObject> = await OpenShiftItem.odo.getStorageNames(component);
-        if (storageList.length === 0) throw Error(errorMessage.Storage);
+        if (storageList.length === 0) throw new VsCommandError(errorMessage.Storage);
         return storageList;
     }
 
     static async getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         const urlList: Array<OpenShiftObject> = await OpenShiftItem.odo.getRoutes(component);
-        if (urlList.length === 0) throw Error(errorMessage.Route);
+        if (urlList.length === 0) throw new VsCommandError(errorMessage.Route);
         return urlList;
     }
 
