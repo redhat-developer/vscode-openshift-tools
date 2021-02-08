@@ -367,7 +367,7 @@ export class Component extends OpenShiftItem {
 
         const componentPresent = (await Component.odo.getComponents(component.getParent())).filter((target: OpenShiftComponent) => target.contextValue !== ContextType.COMPONENT && target.kind === ComponentKind.S2I);
 
-        if (componentPresent.length === 1) throw Error('You have no S2I Components available to link, please create new OpenShift Component and try again.');
+        if (componentPresent.length === 1) throw new VsCommandError('You have no S2I Components available to link, please create new OpenShift Component and try again.');
 
         const componentToLink = await window.showQuickPick(componentPresent.filter((comp)=> comp.getName() !== component.getName()), {placeHolder: 'Select a Component to link', ignoreFocusOut: true});
 
@@ -447,7 +447,7 @@ export class Component extends OpenShiftItem {
         if (getPushCmd.pushCmd && getPushCmd.contextPath) {
             Component.odo.executeInTerminal(getPushCmd.pushCmd, getPushCmd.contextPath, `OpenShift: Push '${getPushCmd.name}' Component`);
         } else {
-            throw Error('No existing push command found');
+            throw new VsCommandError('No existing push command found');
         }
     }
 
