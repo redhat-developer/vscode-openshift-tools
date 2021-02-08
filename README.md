@@ -11,7 +11,7 @@
 
 OpenShift Connector extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:
  - Developers can easily create, deploy and live debug applications running on OpenShift.
- - Run local instance of OpenShift 4.5 using [Red Hat CodeReady Containers](http://red.ht/39kEznd).
+ - Run local instance of OpenShift 4.6 using [Red Hat CodeReady Containers](https://code-ready.github.io/crc/).
 
 ### Demo: https://www.youtube.com/watch?v=HEsYgDqD1rM
 
