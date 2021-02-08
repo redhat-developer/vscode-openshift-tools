@@ -13,7 +13,7 @@ OpenShift Connector extension provides an end-to-end developer experience for Re
  - Developers can easily create, deploy and live debug applications running on OpenShift.
  - Run local instance of OpenShift 4.5 using [Red Hat CodeReady Containers](http://red.ht/39kEznd).
 
-### Demo: https://youtube.com/watch?v=m0wBKuKDYO0
+### Demo: https://www.youtube.com/watch?v=HEsYgDqD1rM
 
 [![ screencast ](https://bit.ly/3pZsquB)](https://youtube.com/watch?v=m0wBKuKDYO0)
 
@@ -28,8 +28,7 @@ The extension allows the users to Get free access to the Developer Sandbox for R
 This extension can work with local or remote OpenShift clusters.
 
 To provision local instance of OpenShift cluster, developers can use the following options:
-* [CodeReady Containers](* [Red Hat CodeReady Containers](http://red.ht/39kEznd) - run single node local OpenShift 4.x cluster
-) - run single node local OpenShift 4.x cluster
+* [Red Hat CodeReady Containers](https://code-ready.github.io/crc/) - run single node local OpenShift 4.x cluster
 * [minishift](http://bit.ly/3rSvzOx) / [CDK](http://red.ht/3opF1XC) - run single node local OpenShift 3.x cluster
 
 For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](http://bit.ly/3be4jUv).
