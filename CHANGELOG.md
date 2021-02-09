@@ -1,9 +1,13 @@
 # Change Log
 
-## 0.2.1 (December 3, 2020)
+## 0.2.1 (February 9, 2021)
 
 New features and bugfixes:
-  - TBD
+  - [#1868](https://github.com/redhat-developer/vscode-openshift-tools/issues/1868) Telemetry Reporting
+  - [#1855](https://github.com/redhat-developer/vscode-openshift-tools/issues/1855) Devfile Starter Projects support
+  - [#1896](https://github.com/redhat-developer/vscode-openshift-tools/issues/1896) Developer Sandbox for RedHat OpenShift
+  - [#1907](https://github.com/redhat-developer/vscode-openshift-tools/issues/1907) Update to odo 2.0.4
+  - [#1912](https://github.com/redhat-developer/vscode-openshift-tools/issues/1912) Update CRC download link to v1.21.0
 
 ## 0.2.0 (September 30, 2020)
 
