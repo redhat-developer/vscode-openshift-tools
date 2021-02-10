@@ -46,7 +46,19 @@ To install OpenShift Container Platform 4 in the public cloud, in your datacente
 
 **NOTE:** When working with [Red Hat OpenShift Online](http://red.ht/3bbSVso) remote cluster only one component can be created for Starter plan and Pro plan with default 2GiB storage. If you want to create multi component application you could opt in for Pro plan with bigger persistence storage (up to 150GiB).
 
-## Commands and Features
+## Core Concepts
+
+* `Project`: A project is your source code, tests, and libraries organized in a separate single unit.
+
+* `Application`: An application is a program designed for end users. An application consists of multiple microservices or components that work individually to build the entire application. Examples of applications: e-Shop, Hotel Reservation System, Online Booking
+
+* `Component`: A component is a set of Kubernetes resources which host code or data. Each component can be run and deployed separately. Examples of components: Warehouse API Backend, Inventory API, Web Frontend, Payment Backend
+
+* `Service`: A service is software that your component links to or depends on. Examples of services: MariaDB, MySQL.
+
+* `Devfile`: A portable file responsible for your entire reproducable development environment.
+
+##  Commands and Features
 
 The extension supports a number of commands to interact with OpenShift clusters and resources. The commands are accessible via the command palette (`Cmd+Shift+P` <kbd>⌘⇧P</kbd> on macOS or `Ctrl+Shift+P` <kbd>⌃⇧P</kbd> on Windows and Linux), Visual Studio Code View title buttons and tree context menus.
 
@@ -132,7 +144,7 @@ Components in different states have different set of commands available.
 
    * `Delete` - Delete a URL from a Component.
    * `Open URL` - Open the specific URL in Browser.
-   * `Describe` - Describe the given URL for the component in terminal window.
+   * `Describe` - Describe the given URL for the Component in terminal window.
 
 ##### Commands for a Storage
 
@@ -146,7 +158,7 @@ Components in different states have different set of commands available.
 **NOTE:** Currently we support creation of one component per folder. Multiple components from a folder might be supported in
 future releases.
 
-#### Running OpenShift Locally
+### Running OpenShift Locally
 
 The extension provides a view to run local instance of OpenShift. To open the view use `Add OpenShift Cluster` button
 ![ addclusterbutton ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/add-cluster-button.gif)
@@ -171,7 +183,7 @@ The view provides UI to control cluster's state:
 
 ![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/gif/crc-webview.gif)
 
-#### Debug Support
+### Debug Support
 
    * Supports Local Node.js and Java Components
    * Does not support git and binary based components
@@ -224,11 +236,11 @@ To debug a Java Component, [Java Language Support](https://marketplace.visualstu
 
 This extension uses two CLI tools to interact with OpenShift cluster:
 * OKD CLI client tool - [oc](http://red.ht/3s0jSW7)
-* odo - [odo](http://red.ht/2XghCvy)
+* odo - [odo](https://red.ht/3p7usI3)
 
 > `oc` and `odo` tools for Windows, Linux and macOS are included into extension package. Once the extension is installed it is ready to use.
 
-Starting from `v0.2.0` extension includes `odo` CLI tool `v2.0.0` and supports devfile in addition to S2I (software-to-image) components. Devfiles are new way of deploying a component with odo.
+The extension version `0.2.2` includes `odo` CLI tool `v2.0.4` and supports devfile in addition to S2I (Source-to-Image) components. Devfiles are new way of deploying a component with odo.
 Follow the links below for additional information:
 
 * [Understanding odo](https://bit.ly/3ovRTuY)
