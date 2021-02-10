@@ -157,8 +157,7 @@ from `OpenShift: Application Explorer` view title.
 The view guides you through the steps required to create and start OpenShift 4 single node cluster on your workstation
 using Red Hat CodeReady Containers:
 
-   * Download Red Hat CodeReady Containers
-   * Configure Red Hat CodeReady Containers
+   * Download & Configure Red Hat CodeReady Containers
    * Set Virtual Machine parameters: number of CPUs and memory amount
    * Setup Red Hat CodeReady Containers
    * Run Red Hat CodeReady Containers commands to control the cluster

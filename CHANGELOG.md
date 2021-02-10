@@ -1,13 +1,19 @@
 # Change Log
 
+## 0.2.2 (February 10, 2021)
+New features and bugfixes:
+  - [#1952](https://github.com/redhat-developer/vscode-openshift-tools/issues/1952) Fix OpenShift icon broken image
+  - [#1953](https://github.com/redhat-developer/vscode-openshift-tools/issues/1953) Update to CodeReady Containers (CRC) `1.22.0` to use OpenShift `4.6.15`
+
+
 ## 0.2.1 (February 9, 2021)
 
 New features and bugfixes:
   - [#1868](https://github.com/redhat-developer/vscode-openshift-tools/issues/1868) Telemetry Reporting
   - [#1855](https://github.com/redhat-developer/vscode-openshift-tools/issues/1855) Devfile Starter Projects support
-  - [#1896](https://github.com/redhat-developer/vscode-openshift-tools/issues/1896) Developer Sandbox for RedHat OpenShift
-  - [#1907](https://github.com/redhat-developer/vscode-openshift-tools/issues/1907) Update to odo 2.0.4
-  - [#1912](https://github.com/redhat-developer/vscode-openshift-tools/issues/1912) Update CRC download link to v1.21.0
+  - [#1896](https://github.com/redhat-developer/vscode-openshift-tools/issues/1896) Developer Sandbox for Red Hat OpenShift
+  - [#1907](https://github.com/redhat-developer/vscode-openshift-tools/issues/1907) Update to odo `2.0.4`
+  - [#1912](https://github.com/redhat-developer/vscode-openshift-tools/issues/1912) Update CodeReady Containers (CRC) download link to v1.21.0
 
 ## 0.2.0 (September 30, 2020)
 
