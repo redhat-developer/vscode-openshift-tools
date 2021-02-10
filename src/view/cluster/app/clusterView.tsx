@@ -61,8 +61,8 @@ function getSteps() {
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function addClusterView() {
   const classes = useStyles();
-  const crcLatest = '1.21.0';
-  const crcOpenShift = '4.6.9';
+  const crcLatest = '1.22.0';
+  const crcOpenShift = '4.6.15';
   const [fileName, setBinaryPath] = React.useState('');
   const [pullSecretPath, setSecret] = React.useState('');
   const [cpuSize, setCpuSize] = React.useState(crcDefaults.DefaultCPUs);
@@ -428,7 +428,7 @@ export default function addClusterView() {
         case 1:
           return (
             <div>
-              <Typography>Download and extract the CodeReady Containers archive for your operating system and place the binary in your $PATH</Typography>
+              <Typography>Download and extract the CodeReady Containers archive for your operating system and place the executable in your $PATH</Typography>
               <List className={classes.uploadLabel}>
                 <ListItem>
                   <ListItemAvatar>
@@ -659,7 +659,7 @@ export default function addClusterView() {
           <Paper square elevation={3} className={classes.resetContainer}>
             <blockquote className={classes.blockquoteText}>
               <Typography variant='body2'>
-                A crc configuration is detected in workspace settings. If you need to setup a new CRC instance, click on Reset and proceed with wizard workflow.
+                CRC configuration is detected in workspace settings. If you need to setup a new CRC instance, click on Reset and proceed with wizard workflow.
               </Typography>
             </blockquote>
             <StartStopLoader />
