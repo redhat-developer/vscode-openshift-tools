@@ -1,6 +1,7 @@
 # Change Log
 
 ## 0.2.2 (February 10, 2021)
+
 New features and bugfixes:
   - [#1952](https://github.com/redhat-developer/vscode-openshift-tools/issues/1952) Fix OpenShift icon broken image
   - [#1953](https://github.com/redhat-developer/vscode-openshift-tools/issues/1953) Update to CodeReady Containers (CRC) `1.22.0` to use OpenShift `4.6.15`
