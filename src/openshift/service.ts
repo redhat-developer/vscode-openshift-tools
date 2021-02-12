@@ -42,7 +42,7 @@ export class Service extends OpenShiftItem {
         if (!serviceName) return null;
         return Progress.execFunctionWithProgress(`Creating a new Service '${serviceName}'`, () => Service.odo.createService(application, serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))
             .then(() => `Service '${serviceName}' successfully created`)
-            .catch((err) => Promise.reject(new VsCommandError(`Failed to create Service with error '${err}'`)));
+            .catch((err) => Promise.reject(new VsCommandError(`Failed to create Service with error '${err}'`, 'Failed to create Service')));
     }
 
     @vsCommand('openshift.service.delete', true)
@@ -63,7 +63,7 @@ export class Service extends OpenShiftItem {
             if (answer === 'Yes') {
                 return Progress.execFunctionWithProgress(`Deleting Service '${service.getName()}' from Application '${service.getParent().getName()}'`, () => Service.odo.deleteService(service))
                     .then(() => `Service '${service.getName()}' successfully deleted`)
-                    .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Service with error '${err}'`)));
+                    .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Service with error '${err}'`, 'Failed to delete Service')));
             }
         }
         return null;
@@ -86,7 +86,7 @@ export class Service extends OpenShiftItem {
             if (template) {
                 Service.odo.executeInTerminal(Command.describeService(template), Platform.getUserHomePath(), `OpenShift: Describe '${service.getName()}' Service`);
             } else {
-                throw new VsCommandError(`Cannot get Service Type name for Service '${service.getName()}'`);
+                throw new VsCommandError(`Cannot get Service Type name for Service '${service.getName()}'`, 'Cannot get Service Type name for Service');
             }
         }
     }

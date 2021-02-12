@@ -82,7 +82,7 @@ export class Build {
         if (buildName) {
             result = Progress.execFunctionWithProgress('Starting build', () => Build.odo.execute(Build.command.startBuild(buildName)))
                 .then(() => `Build '${buildName}' successfully started`)
-                .catch((err) => Promise.reject(new VsCommandError(`Failed to start build with error '${err}'`)));
+                .catch((err) => Promise.reject(new VsCommandError(`Failed to start build with error '${err}'`, 'Failed to start build')));
         }
         return result;
     }
@@ -129,7 +129,7 @@ export class Build {
         if (build) {
             result = Progress.execFunctionWithProgress('Deleting build', () => Build.odo.execute(Build.command.delete(build)))
                 .then(() => `Build '${build}' successfully deleted`)
-                .catch((err) => Promise.reject(new VsCommandError(`Failed to delete build with error '${err}'`)));
+                .catch((err) => Promise.reject(new VsCommandError(`Failed to delete build with error '${err}'`, 'Failed to delete build')));
         }
         return result;
     }

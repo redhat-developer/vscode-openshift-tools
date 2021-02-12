@@ -17,7 +17,7 @@ interface VsCommand {
 }
 
 export class VsCommandError extends Error {
-    constructor(message: string, public parent?: Error) {
+    constructor(message: string, public readonly telemetryMessage = message, public parent?: Error) {
         super(message);
         Object.setPrototypeOf(this, new.target.prototype);
     }
@@ -32,24 +32,6 @@ function displayResult(result?: unknown): unknown {
     return result;
 }
 
-async function execute(command: VsCommandFunction, ...params: any[]): Promise<unknown> {
-    try {
-        const resPromise = command.call(null, ...params);
-        return displayResult(await Promise.resolve(resPromise));
-    } catch (err) {
-        if (err instanceof VsCommandError) {
-            // exception thrown by extension command with meaningful message
-            // just show it and return
-            window.showErrorMessage(err.message);
-        } else {
-            // Unexpected exception happened. Let vscode handle the error reporting.
-            // This does not work when command started by pressing button in view title
-            // TODO: Wrap view title commands in try/catch and re-throw as VsCommandError
-            throw err;
-        }
-    }
-}
-
 export async function registerCommands(...modules: string[]): Promise<Disposable[]> {
     // this step is required to get all annotations processed and this is drawback,
     // because it triggers javascript loading when extension is activated
@@ -62,12 +44,26 @@ export async function registerCommands(...modules: string[]): Promise<Disposable
             let result: any;
             const startTime = Date.now();
             try {
-                result =  await execute(cmd.method, ...params);
+                result = await Promise.resolve(cmd.method.call(null, ...params));
+                displayResult(result);
             } catch (err) {
-                telemetryProps.error = err.toString();
-                throw err;
+                if (err instanceof VsCommandError) {
+                    // exception thrown by extension command with meaningful message
+                    // just show it and return
+                    telemetryProps.error = err.telemetryMessage;
+                    window.showErrorMessage(err.message);
+                } else {
+                    // Unexpected exception happened. Let vscode handle the error reporting.
+                    // This does not work when command started by pressing button in view title
+                    // TODO: Wrap view title commands in try/catch and re-throw as VsCommandError
+                    // TODO: telemetry cannot send not known exception stacktrace or message
+                    // because it can contain user's sensitive information
+                    telemetryProps.error = 'Not extension declared exception happened';
+                    throw err;
+                }
             } finally {
                 telemetryProps.duration = Date.now() - startTime;
+                telemetryProps.cancelled = result === null;
                 if (result?.properties) {
                     telemetryProps = {...telemetryProps, ...result.properties };
                 }

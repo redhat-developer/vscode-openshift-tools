@@ -38,7 +38,7 @@ export class Url extends OpenShiftItem{
                     const selectedPort = await window.showQuickPick(portItems, {placeHolder: 'Select port to expose'});
                     port = selectedPort ? (selectedPort as unknown as Port).number.toString() : undefined;
                 } else {
-                    throw new VsCommandError(`Component '${component.getName()}' has no ports declared.`);
+                    throw new VsCommandError(`Component '${component.getName()}' has no ports declared.`, 'Component has no ports declared');
                 }
             } else {
                 port = await window.showInputBox({
@@ -70,7 +70,7 @@ export class Url extends OpenShiftItem{
                 return Progress.execFunctionWithProgress(`Creating a URL '${urlName}' for the Component '${component.getName()}'`,
                     () => Url.odo.createComponentCustomUrl(component, `${urlName}`, `${parsedNumber}`, secure === 'Yes')
                         .then(() => `URL '${urlName}' for component '${component.getName()}' successfully created`)
-                        .catch((err) => Promise.reject(new VsCommandError(`Failed to create URL '${urlName}' for component '${component.getName()}'. ${err.message}`)))
+                        .catch((err) => Promise.reject(new VsCommandError(`Failed to create URL '${urlName}' for component '${component.getName()}'. ${err.message}`, 'Failed to create URL')))
                 );
             }
         }
@@ -91,7 +91,7 @@ export class Url extends OpenShiftItem{
             if (value === 'Yes') {
                 return Progress.execFunctionWithProgress(`Deleting URL ${url.getName()} from Component ${url.getParent().getName()}`, () => Url.odo.deleteURL(url))
                     .then(() => `URL '${url.getName()}' from Component '${url.getParent().getName()}' successfully deleted`)
-                    .catch((err) => Promise.reject(new VsCommandError(`Failed to delete URL with error '${err}'`)));
+                    .catch((err) => Promise.reject(new VsCommandError(`Failed to delete URL with error '${err}'`, 'Failed to delete URL')));
             }
         }
         return null;

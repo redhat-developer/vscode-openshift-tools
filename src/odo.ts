@@ -743,12 +743,13 @@ export class OdoImpl implements Odo {
     }
 
     public async getServiceTemplates(): Promise<string[]> {
+        // TODO: error reporting does not look right
         let items: any[] = [];
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServicesJson(), Platform.getUserHomePath(), false);
         try {
             items = JSON.parse(result.stdout).services.items;
         } catch (err) {
-            throw new VsCommandError(JSON.parse(result.stderr).message);
+            throw new VsCommandError(JSON.parse(result.stderr).message, 'Error when parsing command\'s stdout output');
         }
         if (!Array.isArray(items) || Array.isArray(items) && items.length === 0) {
             throw new VsCommandError('No deployable services found.');
