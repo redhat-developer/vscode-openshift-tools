@@ -6,7 +6,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { commands, Disposable, window } from 'vscode';
+import * as stackTraceParser from 'stacktrace-parser';
 import sendTelemetry from './telemetry';
+import { ExtenisonID } from './util/constants';
 
 type VsCommandFunction = (...args: any[]) => Promise<any> | any;
 
@@ -43,10 +45,20 @@ export async function registerCommands(...modules: string[]): Promise<Disposable
             };
             let result: any;
             const startTime = Date.now();
+            let stackTrace = {};
             try {
                 result = await Promise.resolve(cmd.method.call(null, ...params));
                 displayResult(result);
             } catch (err) {
+                if (err.stack) {
+                    const stack = stackTraceParser.parse(err.stack);
+                    if (stack.length > 0) {
+                        const files = stack.map((value) => `${value.file.substring(value.file.lastIndexOf(ExtenisonID)-1)}:${value.lineNumber}:${value.column}`);
+                        stackTrace = {
+                            'stack_trace': files.join('\n')
+                        };
+                    }
+                }
                 if (err instanceof VsCommandError) {
                     // exception thrown by extension command with meaningful message
                     // just show it and return
@@ -58,15 +70,15 @@ export async function registerCommands(...modules: string[]): Promise<Disposable
                     // TODO: Wrap view title commands in try/catch and re-throw as VsCommandError
                     // TODO: telemetry cannot send not known exception stacktrace or message
                     // because it can contain user's sensitive information
-                    telemetryProps.error = 'Not extension declared exception happened';
                     throw err;
                 }
             } finally {
                 telemetryProps.duration = Date.now() - startTime;
                 telemetryProps.cancelled = result === null;
                 if (result?.properties) {
-                    telemetryProps = {...telemetryProps, ...result.properties };
+                    telemetryProps = {...telemetryProps, ...result.properties};
                 }
+                telemetryProps = {...telemetryProps, ...stackTrace };
                 sendTelemetry('command', telemetryProps);
             }
         });
