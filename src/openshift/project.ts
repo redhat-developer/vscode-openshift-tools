@@ -44,7 +44,7 @@ export class Project extends OpenShiftItem {
         projectName = projectName.trim();
         return Project.odo.createProject(projectName)
             .then(() => `Project '${projectName}' successfully created`)
-            .catch((error) => Promise.reject(new VsCommandError(`Failed to create Project with error '${error}'`)));
+            .catch((error) => Promise.reject(new VsCommandError(`Failed to create Project with error '${error}'`, 'Failed to create Project')));
     }
 
     @vsCommand('openshift.project.delete', true)
@@ -65,7 +65,7 @@ export class Project extends OpenShiftItem {
                             }
                         })
                         .then(() => `Project '${project.getName()}' successfully deleted`)
-                        .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Project with error '${err}'`)))
+                        .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Project with error '${err}'`,'Failed to delete Project')))
                 );
             }
         }

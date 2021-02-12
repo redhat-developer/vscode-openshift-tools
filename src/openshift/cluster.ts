@@ -24,7 +24,7 @@ export class Cluster extends OpenShiftItem {
         const value = await window.showWarningMessage('Do you want to logout of cluster?', 'Logout', 'Cancel');
         if (value === 'Logout') {
             return Cluster.odo.execute(Command.odoLogout())
-            .catch((error) => Promise.reject(new VsCommandError(`Failed to logout of the current cluster with '${error}'!`)))
+            .catch((error) => Promise.reject(new VsCommandError(`Failed to logout of the current cluster with '${error}'!`, 'Failed to logout of the current cluster')))
             .then(async (result) => {
                 if (result.stderr === '') {
                     Cluster.explorer.refresh();
@@ -35,7 +35,7 @@ export class Cluster extends OpenShiftItem {
                     }
                     return null;
                 }
-                throw new VsCommandError(`Failed to logout of the current cluster with '${result.stderr}'!`);
+                throw new VsCommandError(`Failed to logout of the current cluster with '${result.stderr}'!`, 'Failed to logout of the current cluster');
             });
         }
         return null;
@@ -239,7 +239,7 @@ export class Cluster extends OpenShiftItem {
             await Cluster.save(username, passwd, password, result);
             return await Cluster.loginMessage(clusterURL, result);
         } catch (error) {
-            throw new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.message)}'!`);
+            throw new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.message)}'!`, 'Failed to login to cluster');
         }
     }
 
@@ -293,7 +293,7 @@ export class Cluster extends OpenShiftItem {
         return Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`,
             () => Cluster.odo.execute(Command.odoLoginWithToken(clusterURL, ocToken.trim()))
             .then((result) => Cluster.loginMessage(clusterURL, result))
-            .catch((error) => Promise.reject(new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(error.message)}'!`)))
+            .catch((error) => Promise.reject(new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(error.message)}'!`, 'Failed to login to cluster')))
         );
     }
 
@@ -303,6 +303,6 @@ export class Cluster extends OpenShiftItem {
             await commands.executeCommand('setContext', 'isLoggedIn', true);
             return `Successfully logged in to '${clusterURL}'`;
         }
-        throw new VsCommandError(result.stderr);
+        throw new VsCommandError(result.stderr, 'Failed to login to cluster with output in stderror');
     }
 }

@@ -124,7 +124,7 @@ export class Component extends OpenShiftItem {
         } else if (componentSource.label === SourceTypeChoice.LOCAL.label) {
             command = Component.createFromLocal(application);
         }
-        return command.catch((err) => Promise.reject(new VsCommandError(`Failed to create Component with error '${err}'`)));
+        return command.catch((err) => Promise.reject(new VsCommandError(`Failed to create Component with error '${err}'`, 'Failed to create Component with error')));
     }
 
     @vsCommand('openshift.component.delete', true)
@@ -147,7 +147,7 @@ export class Component extends OpenShiftItem {
                 await Component.odo.deleteComponent(component);
 
             }).then(() => `Component '${name}' successfully deleted`)
-            .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Component with error '${err}'`)));
+            .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Component with error '${err}'`, 'Failed to delete Component with error')));
         }
     }
 
@@ -167,7 +167,7 @@ export class Component extends OpenShiftItem {
                 Component.stopWatchSession(component);
                 await Component.odo.undeployComponent(component);
             }).then(() => `Component '${name}' successfully undeployed`)
-            .catch((err) => Promise.reject(new VsCommandError(`Failed to undeploy Component with error '${err}'`)));
+            .catch((err) => Promise.reject(new VsCommandError(`Failed to undeploy Component with error '${err}'`, 'Failed to undeploy Component with error')));
         }
     }
 
@@ -322,7 +322,7 @@ export class Component extends OpenShiftItem {
         return Progress.execFunctionWithProgress('Unlinking Component',
             () => Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), compName, port), component.contextPath.fsPath)
                 .then(() => `Component '${compName}' has been successfully unlinked from the Component '${component.getName()}'`)
-                .catch((err) => Promise.reject(new VsCommandError(`Failed to unlink Component with error '${err}'`)))
+                .catch((err) => Promise.reject(new VsCommandError(`Failed to unlink Component with error '${err}'`, 'Failed to unlink Component with error')))
         );
     }
 
@@ -349,7 +349,7 @@ export class Component extends OpenShiftItem {
         return Progress.execFunctionWithProgress('Unlinking Service',
             () => Component.odo.execute(Command.unlinkService(component.getParent().getParent().getName(), component.getParent().getName(), serviceName, component.getName()), component.contextPath.fsPath)
                 .then(() => `Service '${serviceName}' has been successfully unlinked from the Component '${component.getName()}'`)
-                .catch((err) => Promise.reject(new VsCommandError(`Failed to unlink Service with error '${err}'`)))
+                .catch((err) => Promise.reject(new VsCommandError(`Failed to unlink Service with error '${err}'`, 'Failed to unlink Service with error')))
         );
     }
 
@@ -380,13 +380,13 @@ export class Component extends OpenShiftItem {
         } else if (ports.length > 1) {
             port = await window.showQuickPick(ports, {placeHolder: 'Select Port to link', ignoreFocusOut: true});
         } else {
-            return Promise.reject(new VsCommandError(`Component '${component.getName()}' has no Ports declared.`));
+            return Promise.reject(new VsCommandError(`Component '${component.getName()}' has no Ports declared.`, 'Component has no Ports declared'));
         }
 
         return Progress.execFunctionWithProgress(`Link Component '${componentToLink.getName()}' with Component '${component.getName()}'`,
             () => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), componentToLink.getName(), port), component.contextPath.fsPath)
                 .then(() => `Component '${componentToLink.getName()}' successfully linked with Component '${component.getName()}'`)
-                .catch((err) => Promise.reject(new VsCommandError(`Failed to link component with error '${err}'`)))
+                .catch((err) => Promise.reject(new VsCommandError(`Failed to link component with error '${err}'`,'Failed to link component')))
         );
     }
 
@@ -414,7 +414,7 @@ export class Component extends OpenShiftItem {
         return Progress.execFunctionWithProgress(`Link Service '${serviceToLink.getName()}' with Component '${component.getName()}'`,
             () => Component.odo.execute(Command.linkServiceTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), serviceToLink.getName()), component.contextPath.fsPath)
                 .then(() => `Service '${serviceToLink.getName()}' successfully linked with Component '${component.getName()}'`)
-                .catch((err) => Promise.reject(new VsCommandError(`Failed to link Service with error '${err}'`)))
+                .catch((err) => Promise.reject(new VsCommandError(`Failed to link Service with error '${err}'`, 'Failed to link Service')))
         );
     }
 
@@ -899,7 +899,7 @@ export class Component extends OpenShiftItem {
         if (componentType === SourceType.BINARY) {
             return 'Import for binary OpenShift Components is not supported.';
         } if (componentType !== SourceType.GIT && componentType !== SourceType.LOCAL) {
-            throw new VsCommandError(`Cannot import unknown Component type '${componentType}'.`);
+            throw new VsCommandError(`Cannot import unknown Component type '${componentType}'.`, 'Cannot import unknown Component type');
         }
 
         const workspaceFolder = await selectWorkspaceFolder();
@@ -980,7 +980,7 @@ export class Component extends OpenShiftItem {
                 }
                 return `Component '${compName}' was successfully imported.`;
             } catch (errGetCompJson) {
-                throw new VsCommandError(`Component import failed with error '${errGetCompJson.message}'.`);
+                throw new VsCommandError(`Component import failed with error '${errGetCompJson.message}'.`,'Component import failed');
             }
         }); // create component with the same name
     }

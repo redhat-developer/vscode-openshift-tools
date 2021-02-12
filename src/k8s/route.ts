@@ -20,7 +20,7 @@ import { asJson } from './common';
         return asJson(Route.command.getRoute(namespace, name)).then((response: any) => {
             const hostName = response?.spec.host;
             if (hostName === undefined) {
-                throw new VsCommandError(`Cannot identify host name for Route '${name}'`);
+                throw new VsCommandError(`Cannot identify host name for Route '${name}'`, 'Cannot identify host name for Route');
             }
             return response.spec.tls ? `https://${hostName}` : `http://${hostName}`;
         });

@@ -62,7 +62,7 @@ export class DeploymentConfig {
         if (deployName) {
             result = Progress.execFunctionWithProgress(`Creating Deployment for '${deployName}'.`, () => DeploymentConfig.odo.execute(DeploymentConfig.command.deploy(deployName)))
                 .then(() => `Deployment successfully created for '${deployName}'.`)
-                .catch((err) => Promise.reject(new VsCommandError(`Failed to create Deployment with error '${err}'.`)));
+                .catch((err) => Promise.reject(new VsCommandError(`Failed to create Deployment with error '${err}'.`, 'Failed to create Deployment')));
         }
         return result;
     }
@@ -118,7 +118,7 @@ export class DeploymentConfig {
         if (replica) {
             result = Progress.execFunctionWithProgress('Deleting replica', () => DeploymentConfig.odo.execute(DeploymentConfig.command.delete(replica)))
                 .then(() => `Replica '${replica}' successfully deleted`)
-                .catch((err) => Promise.reject(new VsCommandError(`Failed to delete replica with error '${err}'`)));
+                .catch((err) => Promise.reject(new VsCommandError(`Failed to delete replica with error '${err}'`, 'Failed to delete replica')));
         }
         return result;
     }
