@@ -70,6 +70,7 @@ export async function registerCommands(...modules: string[]): Promise<Disposable
                     // TODO: Wrap view title commands in try/catch and re-throw as VsCommandError
                     // TODO: telemetry cannot send not known exception stacktrace or message
                     // because it can contain user's sensitive information
+                    telemetryProps.error = 'Unexpected error';
                     throw err;
                 }
             } finally {
