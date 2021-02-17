@@ -100,7 +100,6 @@ export default class ClusterViewLoader {
                 });
                 stopProcess.stderr.on('data', (chunk) => {
                     channel.append(chunk);
-                    panel.webview.postMessage({action: 'sendcrcstoperror', data: chunk})
                 });
                 stopProcess.on('close', async (code) => {
                     // eslint-disable-next-line no-console
