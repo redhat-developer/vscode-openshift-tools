@@ -12,6 +12,8 @@ import { CliChannel } from '../../cli';
 
 let panel: vscode.WebviewPanel;
 
+const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
+
 export default class ClusterViewLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     static get extensionPath() {
@@ -23,7 +25,6 @@ export default class ClusterViewLoader {
 
         let startProcess: ChildProcess;
         let stopProcess: ChildProcess;
-        const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
         const localResourceRoot = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'out', 'clusterViewer'));
         if (panel) {
             // If we already have a panel, show it in the target column
@@ -58,7 +59,7 @@ export default class ClusterViewLoader {
                     const memoryFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcMemoryAllocated");
                     const crcOptions = ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`, '-ojson'];
                     startProcess = spawn(`${binaryFromSetting}`, crcOptions);
-                    channel.append(`\n$${binaryFromSetting} ${crcOptions.join(' ')}\n`);
+                    channel.append(`\n\n${binaryFromSetting} ${crcOptions.join(' ')}\n`);
                 } else {
                     const configuration = vscode.workspace.getConfiguration("openshiftConnector");
                     configuration.update("crcBinaryLocation", event.crcLoc, vscode.ConfigurationTarget.Global);
@@ -67,7 +68,7 @@ export default class ClusterViewLoader {
                     configuration.update("crcMemoryAllocated", Number.parseInt(event.memory), vscode.ConfigurationTarget.Global);
                     const [tool, ...params] = event.data.split(' ');
                     startProcess = spawn(tool, params);
-                    channel.append(`${tool} ${params.join(' ')}`);
+                    channel.append(`\n\n${tool} ${params.join(' ')}\n`);
                 }
                 startProcess.stdout.setEncoding('utf8');
                 startProcess.stderr.setEncoding('utf8');
@@ -90,12 +91,13 @@ export default class ClusterViewLoader {
             if (event.action === 'stop') {
                 let filePath: string;
                 channel.show();
-                channel.append(`\nStopping Red Hat CodeReady Containers from webview at ${date}\n`);
                 if (event.data === '') {
                     filePath = vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
-                } else filePath = event.data;
+                } else {
+                    filePath = event.data;
+                }
                 stopProcess = spawn(`${filePath}`, ['stop']);
-                channel.append(`\n$${filePath} stop\n`);
+                channel.append(`\n\n$${filePath} stop\n`);
                 stopProcess.stdout.setEncoding('utf8');
                 stopProcess.stderr.setEncoding('utf8');
                 stopProcess.stdout.on('data', (chunk) => {
@@ -137,12 +139,11 @@ export default class ClusterViewLoader {
 
     private static async checkCrcStatus(filePath: string, postCommand: string, panel: vscode.WebviewPanel | undefined = undefined) {
         let crcCredArray = [];
-        const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
         const crcVerInfo = await CliChannel.getInstance().execute(`${filePath} version -ojson`);
-        channel.append(`$${filePath} version -ojson`);
+        channel.append(`\n\n${filePath} version -ojson\n`);
         channel.append(crcVerInfo.stdout);
         const result =  await CliChannel.getInstance().execute(`${filePath} status -ojson`);
-        channel.append(`$${filePath} status -ojson`);
+        channel.append(`\n\n${filePath} status -ojson\n`);
         channel.append(result.stdout);
         if (result.stderr || crcVerInfo.stderr) {
             panel.webview.postMessage({action: postCommand, errorStatus: true});
