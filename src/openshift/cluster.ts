@@ -31,7 +31,7 @@ export class Cluster extends OpenShiftItem {
                     commands.executeCommand('setContext', 'isLoggedIn', false);
                     const logoutInfo = await window.showInformationMessage('Successfully logged out. Do you want to login to a new cluster', 'Yes', 'No');
                     if (logoutInfo === 'Yes') {
-                        return Cluster.login(undefined, true);
+                        return Cluster.login();
                     }
                     return null;
                 }
@@ -137,10 +137,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     @vsCommand('openshift.explorer.login')
-    static async login(context?: any, skipConfirmation = false): Promise<string> {
-        const response = await Cluster.requestLoginConfirmation(skipConfirmation);
-
-        if (response !== 'Yes') return null;
+    static async login(): Promise<string> {
 
         const clusterURL = await Cluster.getUrl();
 
@@ -158,15 +155,7 @@ export class Cluster extends OpenShiftItem {
         ];
         const loginActionSelected = await window.showQuickPick(loginActions, {placeHolder: 'Select a way to log in to the cluster.', ignoreFocusOut: true});
         if (!loginActionSelected) return null;
-        return loginActionSelected.label === 'Credentials' ? Cluster.credentialsLogin(true, clusterURL) : Cluster.tokenLogin(clusterURL, true);
-    }
-
-    private static async requestLoginConfirmation(skipConfirmation = false): Promise<string> {
-        let response = 'Yes';
-        if (!skipConfirmation && !await Cluster.odo.requireLogin()) {
-            response = await window.showInformationMessage('You are already logged in the cluster. Do you want to login to a different cluster?', 'Yes', 'No');
-        }
-        return response;
+        return loginActionSelected.label === 'Credentials' ? Cluster.credentialsLogin(clusterURL) : Cluster.tokenLogin(clusterURL, true);
     }
 
     private static async save(username: string, password: string, checkpassword: string, result: CliExitData): Promise<CliExitData> {
@@ -180,11 +169,8 @@ export class Cluster extends OpenShiftItem {
     }
 
     @vsCommand('openshift.explorer.login.credentialsLogin')
-    static async credentialsLogin(skipConfirmation = false, userClusterUrl?: string, userName?: string, userPassword?: string): Promise<string> {
+    static async credentialsLogin(userClusterUrl?: string, userName?: string, userPassword?: string): Promise<string> {
         let password: string;
-        const response = await Cluster.requestLoginConfirmation(skipConfirmation);
-
-        if (response !== 'Yes') return null;
 
         let clusterURL = userClusterUrl;
         if (!clusterURL) {
@@ -262,9 +248,6 @@ export class Cluster extends OpenShiftItem {
     @vsCommand('openshift.explorer.login.tokenLogin')
     static async tokenLogin(userClusterUrl: string, skipConfirmation = false): Promise<string | null> {
         let token: string;
-        const response = await Cluster.requestLoginConfirmation(skipConfirmation);
-
-        if (response !== 'Yes') return null;
 
         let clusterURL = userClusterUrl;
         let clusterUrlFromClipboard: string;

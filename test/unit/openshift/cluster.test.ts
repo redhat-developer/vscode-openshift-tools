@@ -134,7 +134,7 @@ suite('Openshift/Cluster', () => {
             test('logins to new cluster if user answer yes to a warning', async () => {
                 loginStub.resolves(false);
                 infoStub.resolves('Yes');
-                const result = await Cluster.credentialsLogin(false, testUrl);
+                const result = await Cluster.credentialsLogin(testUrl);
                 expect(result).equals(`Successfully logged in to '${testUrl}'`);
             });
 
@@ -155,7 +155,7 @@ suite('Openshift/Cluster', () => {
             test('doesn\'t ask to save password if old and new passwords are the same', async () => {
                 infoStub.resolves('Yes');
                 sandbox.stub(TokenStore, 'getItem').resolves(password);
-                const result = await Cluster.credentialsLogin(false, testUrl);
+                const result = await Cluster.credentialsLogin(testUrl);
                 expect(result).equals(`Successfully logged in to '${testUrl}'`);
             });
 
@@ -166,19 +166,12 @@ suite('Openshift/Cluster', () => {
                 expect(result).null;
             });
 
-            test('exits if the user refuses to login to new cluster', async () => {
-                loginStub.resolves(false);
-                infoStub.resolves('No');
-                const result = await Cluster.credentialsLogin(null);
-                expect(result).null;
-            });
-
             test('happy path works', async () => {
                 infoStub.resolves('No');
                 quickPickStub.onFirstCall().resolves({label: testUser});
                 quickPickStub.onSecondCall().resolves({label: 'Credentials'});
                 inputStub.resolves('password');
-                const status = await Cluster.credentialsLogin(false, testUrl);
+                const status = await Cluster.credentialsLogin(testUrl);
 
                 expect(status).equals(`Successfully logged in to '${testUrl}'`);
                 expect(execStub).calledOnceWith(Command.odoLoginWithUsernamePassword(testUrl, testUser, password));
@@ -203,7 +196,7 @@ suite('Openshift/Cluster', () => {
                 execStub.resolves(errorData);
                 let expectedErr: { message: any };
                 try {
-                    await Cluster.credentialsLogin(true);
+                    await Cluster.credentialsLogin();
                 } catch (err) {
                     expectedErr = err;
                 }
@@ -253,13 +246,6 @@ suite('Openshift/Cluster', () => {
                 loginStub.resolves(false);
                 inputStub.onFirstCall().resolves(null);
                 const result = await Cluster.tokenLogin(testUrl);
-                expect(result).null;
-            });
-
-            test('exits if the user refuses to login to new cluster', async () => {
-                loginStub.resolves(false);
-                infoStub.resolves('No');
-                const result = await Cluster.tokenLogin(null);
                 expect(result).null;
             });
 
