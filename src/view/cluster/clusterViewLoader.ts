@@ -43,8 +43,6 @@ export default class ClusterViewLoader {
             panel = undefined;
         });
         panel.webview.onDidReceiveMessage(async (event)  => {
-            const timestamp = Number(new Date());
-            const date = new Date(timestamp);
             if (event.action === 'run') {
                 const terminal: vscode.Terminal = WindowUtil.createTerminal(`OpenShift: CRC Setup`, undefined);
                 terminal.sendText(`${event.data} setup`);
