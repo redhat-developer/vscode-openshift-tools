@@ -7,7 +7,7 @@
 
 import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
 import { ChildProcess , exec } from 'child_process';
-import { isURL } from 'validator';
+import validator from 'validator';
 import { EventEmitter } from 'events';
 import * as YAML from 'yaml'
 import OpenShiftItem, { selectTargetApplication, selectTargetComponent } from './openshiftItem';
@@ -674,7 +674,7 @@ export class Component extends OpenShiftItem {
             validateInput: (value: string) => {
                 return delayer.trigger(async () => {
                     if (!value.trim()) return 'Empty Git repository URL';
-                    if (!isURL(value)) return 'Invalid URL provided';
+                    if (!validator.isURL(value)) return 'Invalid URL provided';
                     const references = await Refs.fetchTag(value);
                     if (!references.get('HEAD')) return 'There is no git repository at provided URL.';
                 });
