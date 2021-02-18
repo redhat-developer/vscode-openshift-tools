@@ -48,28 +48,33 @@ node('rhel8'){
     }
   }
 
-  if(publishToMarketPlace.equals('true')){
+  if(publishToMarketPlace.equals('true') || publishToOVSX.equals('true')) {
     timeout(time:5, unit:'DAYS') {
       input message:'Approve deployment?', submitter: 'msuman,degolovi'
     }
 
-    stage("Publish to Marketplace") {
-      withCredentials([[$class: 'StringBinding', credentialsId: 'vscode_java_marketplace', variable: 'TOKEN']]) {
-        def vsix = findFiles(glob: '**.vsix')
-        sh 'vsce publish -p ${TOKEN} --packagePath' + " ${vsix[0].path}"
-      }
+    if(publishToMarketPlace.equals('true')) {
+      stage("Publish to Marketplace") {
+        withCredentials([[$class: 'StringBinding', credentialsId: 'vscode_java_marketplace', variable: 'TOKEN']]) {
+          def vsix = findFiles(glob: '**.vsix')
+          sh 'vsce publish -p ${TOKEN} --packagePath' + " ${vsix[0].path}"
+        }
 
-      // Open-vsx Marketplace
-      sh "npm install -g ovsx"
-      withCredentials([[$class: 'StringBinding', credentialsId: 'open-vsx-access-token', variable: 'OVSX_TOKEN']]) {
-        def vsix = findFiles(glob: '**.vsix')
-        sh 'ovsx publish -p ${OVSX_TOKEN}' + " ${vsix[0].path}"
+        stage "Promote the build to stable"
+        sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.vsix* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
+        sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.tgz* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
+        archive includes:"**.vsix*,**.tgz*"
       }
+    }
 
-      stage "Promote the build to stable"
-      sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.vsix* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
-      sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.tgz* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
-      archive includes:"**.vsix*,**.tgz*"
+    if (publishToOVSX.equals('true')) {
+      stage("Publish to OVSX") {
+        sh "npm install -g ovsx"
+        withCredentials([[$class: 'StringBinding', credentialsId: 'open-vsx-access-token', variable: 'OVSX_TOKEN']]) {
+          def vsix = findFiles(glob: '**.vsix')
+          sh 'ovsx publish -p ${OVSX_TOKEN}' + " ${vsix[0].path}"
+        }
+      }
     }
   }
 }
