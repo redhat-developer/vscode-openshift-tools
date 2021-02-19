@@ -1,9 +1,15 @@
 # Change Log
 
-## 0.2.3 (March 1, 2021)
+## 0.2.4 (February 25, 2021)
+
+  - [#1970](https://github.com/redhat-developer/vscode-openshift-tools/issues/1970) TypeError: Cannot read property 'pushCmd' of undefined
+  - [#1972](https://github.com/redhat-developer/vscode-openshift-tools/issues/1972) Update odo to v2.0.5
+
+
+## 0.2.3 (February 18, 2021)
 
   - [#1966](https://github.com/redhat-developer/vscode-openshift-tools/issues/1966) Print CRC commands to 'CRC Logs' channel
-  - [#1953](https://github.com/redhat-developer/vscode-openshift-tools/issues/1953) Upgrade to crc 1.22.0 release
+  - [#1959](https://github.com/redhat-developer/vscode-openshift-tools/issues/1959) Telemetry should report errors without user related info
 
 ## 0.2.2 (February 10, 2021)
 
