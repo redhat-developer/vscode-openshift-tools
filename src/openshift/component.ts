@@ -442,12 +442,12 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.lastPush')
-    static async lastPush(): Promise<void> {
+    static async lastPush(): Promise<string> {
         const getPushCmd = await Component.getPushCmd();
-        if (getPushCmd.pushCmd && getPushCmd.contextPath) {
+        if (getPushCmd?.pushCmd && getPushCmd.contextPath) {
             Component.odo.executeInTerminal(getPushCmd.pushCmd, getPushCmd.contextPath, `OpenShift: Push '${getPushCmd.name}' Component`);
         } else {
-            throw new VsCommandError('No existing push command found');
+            return 'Execute regular Push command for a Component before you can repeat it';
         }
     }
 
