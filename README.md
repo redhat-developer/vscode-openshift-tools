@@ -21,7 +21,7 @@ OpenShift Connector extension provides an end-to-end developer experience for Re
 
 #### Developer Sandbox
 
-The extension allows the users to Get free access to the Developer Sandbox for Red Hat OpenShift. From `Add Cluster View`, users will be redirected to the dev sandbox instance. The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools.
+The extension allows users free access to the [Developer Sandbox for Red Hat OpenShift](http://workspaces.openshift.com/). From `Add Cluster View`, users will be redirected to the dev sandbox instance. The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools.
 
 #### Local instance of OpenShift
 
