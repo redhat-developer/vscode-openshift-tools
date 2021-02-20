@@ -7,6 +7,7 @@ import { QuickPickItem, window } from 'vscode';
 
 import * as k8s from 'vscode-kubernetes-tools-api';
 import * as Odo from '../odo';
+import { VsCommandError } from '../vscommand';
 import { Node } from './node';
 
 function convertItemToQuickPick(item: any): QuickPickItem {
@@ -19,7 +20,7 @@ export async function getQuickPicks(cmd: string, errorMessage: string, converter
     const result = await Odo.getInstance().execute(cmd);
     const json = JSON.parse(result.stdout);
     if (json.items.length === 0) {
-        throw Error(errorMessage);
+        throw new VsCommandError(errorMessage);
     }
     return json.items.map(converter);
 }
