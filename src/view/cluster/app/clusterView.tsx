@@ -134,7 +134,7 @@ export default function addClusterView() {
   const setCrcStatus = (message) => {
     setStatus({ crcStatus: message.status.crcStatus,
                 openshiftStatus: message.status.openshiftStatus,
-                diskUsage: prettyBytes(message.status.diskUsage),
+                diskUsage: message.status.diskUsage ? prettyBytes(message.status.diskUsage) : 'N/A',
                 cacheUsage: prettyBytes(message.status.cacheUsage),
                 cacheDir: message.status.cacheDir,
                 crcVer: message.versionInfo.version,
