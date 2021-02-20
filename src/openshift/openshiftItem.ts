@@ -97,7 +97,7 @@ export default class OpenShiftItem {
 
     static async getApplicationNames(project: OpenShiftObject, createCommand = false): Promise<Array<OpenShiftObject | QuickPickCommand>> {
         return OpenShiftItem.odo.getApplications(project).then((applicationList) => {
-            if (applicationList.length === 0 && !createCommand) throw Error(errorMessage.Component);
+            if (applicationList.length === 0 && !createCommand) throw new VsCommandError(errorMessage.Component);
             return createCommand ? [new QuickPickCommand('$(plus) Create new Application...', async () => {
                 return OpenShiftItem.getName('Application name', Promise.resolve(applicationList));
             }), ...applicationList] : applicationList;
