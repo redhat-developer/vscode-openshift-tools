@@ -240,7 +240,7 @@ export class OpenShiftUrl extends OpenShiftObjectImpl {
 
 export class OpenShiftClusterDown extends OpenShiftObjectImpl {
     constructor() {
-        super(undefined, 'Cannot connect to the OpenShift cluster', ContextType.CLUSTER_DOWN, 'cluster-down.png', TreeItemCollapsibleState.None));
+        super(undefined, 'Cannot connect to the OpenShift cluster', ContextType.CLUSTER_DOWN, 'cluster-down.png', TreeItemCollapsibleState.None);
     }
 }
 
