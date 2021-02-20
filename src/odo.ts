@@ -539,12 +539,12 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(
             Command.printOdoVersionAndProjects(), process.cwd(), false
         );
-        if (this.odoLoginMessages.some((element) => result.stderr ? result.stderr.includes(element) : false)) {
-            return[new OpenShiftLoginRequired()];
-        }
-        if (this.serverDownMessages.some((element) => result.stderr ? result.stderr.includes(element) : false)) {
-            return [new OpenShiftClusterDown()];
-        }
+        // if (this.odoLoginMessages.some((element) => result.stderr ? result.stderr.includes(element) : false)) {
+        //     return[new OpenShiftLoginRequired()];
+        // }
+        // if (this.serverDownMessages.some((element) => result.stderr ? result.stderr.includes(element) : false)) {
+        //     return [new OpenShiftClusterDown()];
+        // }
         commands.executeCommand('setContext', 'isLoggedIn', true);
         clusters = result.stdout.trim().split('\n').filter((value) => {
             return value.includes('Server:');

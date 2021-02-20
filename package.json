@@ -780,6 +780,12 @@
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "openshiftProjectExplorer",
+        "contents": "You are not logged in to a Cluster or it is not accessible\n[Login](command:openshift.explorer.login)\n[Switch Kubernetes context](command:openshift.explorer.switchContext)\n[Provision OpenShift Cluster](command:openshift.explorer.addCluster)"
+      }
+    ],
     "menus": {
       "explorer/context": [
         {
