@@ -490,13 +490,6 @@ export class OdoImpl implements Odo {
         '"system:anonymous"',
     ];
 
-    // private readonly serverDownMessages = [
-    //     'Unable to connect to OpenShift cluster, is it down?',
-    //     'no such host',
-    //     'no route to host',
-    //     'connection refused',
-    // ];
-
     public readonly subject: Subject<OdoEvent> = new Subject<OdoEvent>();
 
     public static get Instance(): Odo {
@@ -539,12 +532,6 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(
             Command.printOdoVersionAndProjects(), process.cwd(), false
         );
-        // if (this.odoLoginMessages.some((element) => result.stderr ? result.stderr.includes(element) : false)) {
-        //     return[new OpenShiftLoginRequired()];
-        // }
-        // if (this.serverDownMessages.some((element) => result.stderr ? result.stderr.includes(element) : false)) {
-        //     return [new OpenShiftClusterDown()];
-        // }
         commands.executeCommand('setContext', 'isLoggedIn', true);
         clusters = result.stdout.trim().split('\n').filter((value) => {
             return value.includes('Server:');
