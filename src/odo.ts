@@ -490,12 +490,12 @@ export class OdoImpl implements Odo {
         '"system:anonymous"',
     ];
 
-    private readonly serverDownMessages = [
-        'Unable to connect to OpenShift cluster, is it down?',
-        'no such host',
-        'no route to host',
-        'connection refused',
-    ];
+    // private readonly serverDownMessages = [
+    //     'Unable to connect to OpenShift cluster, is it down?',
+    //     'no such host',
+    //     'no route to host',
+    //     'connection refused',
+    // ];
 
     public readonly subject: Subject<OdoEvent> = new Subject<OdoEvent>();
 
