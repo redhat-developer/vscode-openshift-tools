@@ -614,26 +614,6 @@ suite('odo', () => {
             assert.equal(cluster[0].getName(), clusterUrl);
         });
 
-        test('show error message if cluster is not login', async () => {
-            sandbox.stub(odo.OdoImpl.prototype, 'execute').onFirstCall().resolves({
-                error: undefined,
-                stdout: '',
-                stderr: 'Please log in to the cluster'
-            });
-            const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
-            assert.equal(cluster[0].getName(), 'Please log in to the cluster');
-        });
-
-        test('show message if cluster is down', async () => {
-            sandbox.stub(odo.OdoImpl.prototype, 'execute').onFirstCall().resolves({
-                error: undefined,
-                stdout: '',
-                stderr: 'Unable to connect to OpenShift cluster, is it down?'
-            });
-            const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
-            assert.equal(cluster[0].getName(), 'Cannot connect to the OpenShift cluster');
-        });
-
         test('extension uses oc version to get cluster url as a backup plan', async () => {
             sandbox.stub(odo.OdoImpl.prototype, 'execute').onFirstCall().resolves({
                 error: undefined,
