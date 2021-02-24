@@ -414,7 +414,11 @@
       {
         "command": "openshift.component.create",
         "title": "New Component",
-        "category": "OpenShift"
+        "category": "OpenShift",
+        "icon": {
+          "light": "images/title/light/workspace-new.png",
+          "dark": "images/title/dark/workspace-new.png"
+        }
       },
       {
         "command": "openshift.component.createFromLocal",
@@ -1222,7 +1226,7 @@
         {
           "command": "openshift.url.open",
           "when": "view == openshiftProjectExplorer && viewItem == componentRoute",
-          "group": "inline"
+          "group": "inline@0"
         },
         {
           "command": "clusters.openshift.useProject",
@@ -1261,6 +1265,16 @@
         {
           "command": "openshift.project.set",
           "when": "view == openshiftProjectExplorer && viewItem == project",
+          "group": "inline"
+        },
+        {
+          "command": "openshift.component.create",
+          "when": "view == openshiftProjectExplorer && viewItem == project",
+          "group": "inline"
+        },
+        {
+          "command": "openshift.component.create",
+          "when": "view == openshiftProjectExplorer && viewItem == application",
           "group": "inline"
         }
       ]
