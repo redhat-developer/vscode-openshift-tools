@@ -781,6 +781,10 @@
         {
           "id": "openshiftDebugView",
           "name": "Debug Sessions"
+        },
+        {
+          "id": "componentTypesView",
+          "name": "Component Types"
         }
       ]
     },
