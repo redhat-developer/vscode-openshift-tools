@@ -499,11 +499,6 @@ export class OdoImpl implements Odo {
     }
 
     public async _getClusters(): Promise<OpenShiftObject[]> {
-        let clusters: OpenShiftObject[] = await this.getClustersWithOdo();
-        return clusters;
-    }
-
-    private async getClustersWithOdo(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
         const result: cliInstance.CliExitData = await this.execute(
             Command.printOdoVersion(), process.cwd(), false
