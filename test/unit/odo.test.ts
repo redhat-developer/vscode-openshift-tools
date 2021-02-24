@@ -146,15 +146,10 @@ suite('odo', () => {
             yamlStub.returns({ ActiveApplications: activeProjs });
             execStub.onFirstCall().resolves({
                 error: undefined,
-                stdout: 'Server https://172.17.185.52:8443',
+                stdout: 'Server: https://172.17.185.52:8443',
                 stderr: ''
             });
             execStub.onSecondCall().resolves({
-                error: undefined,
-                stdout: 'Server https://172.17.185.52:8443',
-                stderr: ''
-            });
-            execStub.onThirdCall().resolves({
                 error: undefined,
                 stdout: JSON.stringify({
                         items: [
@@ -590,54 +585,27 @@ suite('odo', () => {
             `Server: ${clusterUrl}`,
             'Kubernetes: v1.11.0+d4cacc0'
         ];
-        const odoVersionOutLoggedOut = [
-            'odo v0.0.15 (2f7ed497)',
-            '',
-            'Kubernetes: v1.11.0+d4cacc0'
-        ];
-        const oc = [
-            'oc v3.9.0+191fece',
-            'kubernetes v1.9.1+a0ce1bc657',
-            'features: Basic-Auth',
-            '',
-            `Server ${clusterUrl}`,
-            'kubernetes v1.11.0+d4cacc0'
-        ];
 
-        test('extension first uses odo version to get cluster url', async () => {
+        test('extension uses odo version to get cluster url', async () => {
             sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves({
                 error: undefined,
                 stdout: odoVersionOutLoggedIn.join('\n'),
                 stderr: ''
             });
             const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
-            assert.equal(cluster[0].getName(), clusterUrl);
-        });
-
-        test('extension uses oc version to get cluster url as a backup plan', async () => {
-            sandbox.stub(odo.OdoImpl.prototype, 'execute').onFirstCall().resolves({
-                error: undefined,
-                stdout: odoVersionOutLoggedOut.join('\n'),
-                stderr: ''
-            }).onSecondCall().resolves({
-                error: undefined,
-                stdout: oc.join('\n'),
-                stderr: ''
-            });
-            const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
-            assert.equal(cluster[0].getName(), clusterUrl);
+            expect(cluster[0].getName()).equals(clusterUrl);
         });
 
         test('extension uses odo version to determine if login is required', async () => {
             const stub = sandbox.stub(odoCli, 'execute').resolves({ error: null, stdout: 'logged in', stderr: ''});
             const result = await odoCli.requireLogin();
 
-            expect(stub).calledOnceWith(verbose.Command.printOdoVersionAndProjects());
+            expect(stub).calledOnceWith('oc whoami');
             expect(result).false;
         });
 
         test('requireLogin returns true if odo is not logged in to the cluster', async () => {
-            sandbox.stub(odoCli, 'execute').resolves({ error: null, stdout: '', stderr: 'Please log in to the cluster'});
+            sandbox.stub(odoCli, 'execute').resolves({ error: new Error('Not logged in!'), stdout: '', stderr: ''});
             const result = await odoCli.requireLogin();
 
             expect(result).true;

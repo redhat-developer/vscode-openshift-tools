@@ -481,15 +481,6 @@ export class OdoImpl implements Odo {
 
     private static instance: Odo;
 
-    private readonly odoLoginMessages = [
-        'Please log in to the cluster',
-        'the server has asked for the client to provide credentials',
-        'Please login to your server',
-        'Unauthorized',
-        'User "system:anonymous" cannot list resource "projects"',
-        '"system:anonymous"',
-    ];
-
     public readonly subject: Subject<OdoEvent> = new Subject<OdoEvent>();
 
     public static get Instance(): Odo {
@@ -508,37 +499,17 @@ export class OdoImpl implements Odo {
     }
 
     public async _getClusters(): Promise<OpenShiftObject[]> {
-        let clusters: OpenShiftObject[] = await this.getClustersWithOdo();
-        if (clusters.length === 0) {
-            clusters = await this.getClustersWithOc();
-        }
-        return clusters;
-    }
-
-    private async getClustersWithOc(): Promise<OpenShiftObject[]> {
-        let clusters: OpenShiftObject[] = [];
-        const result: cliInstance.CliExitData = await this.execute(Command.printOcVersion(), process.cwd(), false);
-        clusters = result.stdout.trim().split('\n').filter((value) => {
-            return value.includes('Server ');
-        }).map((value) => {
-            const server: string = value.substr(value.indexOf(' ')+1).trim();
-            return new OpenShiftCluster(server);
-        });
-        return clusters;
-    }
-
-    private async getClustersWithOdo(): Promise<OpenShiftObject[]> {
         let clusters: OpenShiftObject[] = [];
         const result: cliInstance.CliExitData = await this.execute(
-            Command.printOdoVersionAndProjects(), process.cwd(), false
+            Command.printOdoVersion(), process.cwd(), false
         );
-        commands.executeCommand('setContext', 'isLoggedIn', true);
-        clusters = result.stdout.trim().split('\n').filter((value) => {
-            return value.includes('Server:');
-        }).map((value) => {
-            const server: string = value.substr(value.indexOf(':')+1).trim();
-            return new OpenShiftCluster(server);
-        });
+        commands.executeCommand('setContext', 'isLoggedIn', false);
+        clusters = result.stdout.trim().split('\n')
+            .filter((value) => value.includes('Server:'))
+            .map((value) => {
+                commands.executeCommand('setContext', 'isLoggedIn', true);
+                return new OpenShiftCluster(value.substr(value.indexOf(':')+1).trim())
+            });
         return clusters;
     }
 
@@ -801,8 +772,8 @@ export class OdoImpl implements Odo {
     }
 
     public async requireLogin(): Promise<boolean> {
-        const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersionAndProjects(), process.cwd(), false);
-        return this.odoLoginMessages.some((msg) => result.stderr.includes(msg));
+        const result: cliInstance.CliExitData = await this.execute('oc whoami', process.cwd(), false);
+        return !!result.error;
     }
 
     private async insertAndReveal(item: OpenShiftObject): Promise<OpenShiftObject> {
