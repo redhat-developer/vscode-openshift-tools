@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { copy } from 'fs-extra';
 import { Url } from 'url';
 import { Ctx, Data } from './componentTypeDescription';
 import { ComponentMetadata } from './config';
