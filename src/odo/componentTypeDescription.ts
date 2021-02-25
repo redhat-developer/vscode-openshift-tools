@@ -30,9 +30,14 @@ export interface Kubernetes {
     name: string;
 }
 
+export function isStarterProject(prj: any): prj is StarterProject {
+    return prj.name && prj.git;
+}
+
 export interface StarterProject {
     name: string;
     git: Git;
+    description?: string;
 }
 
 export interface Git {
