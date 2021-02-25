@@ -84,7 +84,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         } else if(isStarterProject(element)) {
             return {
                 label: element.name,
-                tooltip: `<b>Starter Project<b>\n${element.description}`,
+                tooltip: `Starter Project:\n${element.description}`,
             }
         } else {
             return {
