@@ -756,6 +756,11 @@
         "command": "openshift.componentType.openStarterProjectRepository",
         "title": "Open Sample Project repository",
         "category": "OpenShift"
+      },
+      {
+        "command": "openshift.componentType.cloneStarterProjectRepository",
+        "title": "Clone Sample Project repository to workspace",
+        "category": "OpenShift"
       }
     ],
     "keybindings": [
@@ -1304,6 +1309,10 @@
         },
         {
           "command": "openshift.componentType.openStarterProjectRepository",
+          "when": "view == openshiftComponentTypesView && viewItem == s2iImageStreamTag || viewItem == devfileStarterProject"
+        },
+        {
+          "command": "openshift.componentType.cloneStarterProjectRepository",
           "when": "view == openshiftComponentTypesView && viewItem == s2iImageStreamTag || viewItem == devfileStarterProject"
         }
       ]
