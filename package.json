@@ -180,6 +180,7 @@
   "activationEvents": [
     "onView:openshiftProjectExplorer",
     "onView:extension.vsKubernetesExplorer",
+    "onView:openshiftComponentTypesView",
     "onCommand:openshift.about",
     "onCommand:openshift.oc.about",
     "onCommand:openshift.output",
@@ -191,6 +192,7 @@
     "onCommand:openshift.explorer.login.tokenLogin",
     "onCommand:openshift.explorer.logout",
     "onCommand:openshift.explorer.refresh",
+    "onCommand:openshift.componentTypesView.refresh",
     "onCommand:openshift.project.create",
     "onCommand:openshift.project.delete",
     "onCommand:openshift.project.delete.palette",
@@ -341,7 +343,7 @@
       },
       {
         "command": "openshift.explorer.refresh",
-        "title": "Refresh View",
+        "title": "Refresh Application Explorer View",
         "category": "OpenShift",
         "icon": {
           "dark": "images/title/dark/icon-refresh.svg",
@@ -739,7 +741,16 @@
       {
         "command": "clusters.openshift.route.open",
         "title": "Open in Browser",
-        "Category": "OpenShift"
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.componentTypesView.refresh",
+        "title": "Refresh",
+        "category": "OpenShift",
+        "icon": {
+          "dark": "images/title/dark/icon-refresh.svg",
+          "light": "images/title/light/icon-refresh.svg"
+        }
       }
     ],
     "keybindings": [
@@ -775,16 +786,16 @@
           "name": "Application Explorer"
         },
         {
+          "id": "openshiftComponentTypesView",
+          "name": "Component Types"
+        },
+        {
           "id": "openshiftWatchView",
           "name": "Watch Sessions"
         },
         {
           "id": "openshiftDebugView",
           "name": "Debug Sessions"
-        },
-        {
-          "id": "componentTypesView",
-          "name": "Component Types"
         }
       ]
     },
@@ -940,6 +951,11 @@
         }
       ],
       "view/title": [
+        {
+          "command": "openshift.componentTypesView.refresh",
+          "when": "view == openshiftComponentTypesView",
+          "group": "navigation"
+        },
         {
           "command": "openshift.explorer.addCluster",
           "when": "view == openshiftProjectExplorer && isVSCode == 1",

@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { copy } from 'fs-extra';
 import { Url } from 'url';
 import { Ctx, Data } from './componentTypeDescription';
 import { ComponentMetadata } from './config';
@@ -19,7 +20,20 @@ export interface ImageStreamTag {
         'openshift.io/display-name': string;
         tags: string;
         version: string;
+        sampleRepo: string;
     }
+}
+
+export function isS2iComponent(comp: any): comp is S2iComponentType {
+    return comp.kind && (typeof comp.kind) === 'string';
+}
+
+export function isDevfileComponent(comp: any): comp is DevfileComponentType {
+    return comp.Registry;
+}
+
+export function isImageStreamTag(tag: any): tag is ImageStreamTag {
+    return tag.name && tag.annotations;
 }
 
 export interface S2iComponentType {
