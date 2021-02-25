@@ -188,10 +188,26 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         let url: string = ComponentTypesView.getSampleRepositoryUrl(element);
         if (url) {
             try {
-                await commands.executeCommand('vscode.open', Uri.parse(`ssss${url}`, true));
+                await commands.executeCommand('vscode.open', Uri.parse(url, true));
             } catch (err) {
                 // TODO: report actual url only for default odo repository
                 throw new VsCommandError(err.toString(), 'Unable to open s`ample project repository');
+            }
+        } else {
+            return 'Cannot find sample project repository url';
+        }
+    }
+
+    @vsCommand('openshift.componentType.cloneStarterProjectRepository')
+    public static async cloneRepository(element: ComponentType): Promise<void | string> {
+        let url: string = ComponentTypesView.getSampleRepositoryUrl(element);
+        if (url) {
+            try {
+                Uri.parse(url);
+                await commands.executeCommand('git.clone', url);
+            } catch (err) {
+                // TODO: report actual url only for default odo repository
+                throw new VsCommandError(err.toString(), 'Unable to clone sample project repository');
             }
         } else {
             return 'Cannot find sample project repository url';
