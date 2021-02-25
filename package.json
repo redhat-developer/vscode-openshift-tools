@@ -751,6 +751,11 @@
           "dark": "images/title/dark/icon-refresh.svg",
           "light": "images/title/light/icon-refresh.svg"
         }
+      },
+      {
+        "command": "openshift.componentType.openStarterProjectRepository",
+        "title": "Open Sample Project repository",
+        "category": "OpenShift"
       }
     ],
     "keybindings": [
@@ -1296,6 +1301,10 @@
           "command": "openshift.component.create",
           "when": "view == openshiftProjectExplorer && viewItem == application",
           "group": "inline"
+        },
+        {
+          "command": "openshift.componentType.openStarterProjectRepository",
+          "when": "view == openshiftComponentTypesView && viewItem == s2iImageStreamTag || viewItem == devfileStarterProject"
         }
       ]
     },

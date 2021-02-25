@@ -12,6 +12,7 @@ import {
     window,
     Uri,
     TreeItemCollapsibleState,
+    commands,
 } from 'vscode';
 import * as path from 'path';
 import { CliExitData } from './cli';
@@ -34,9 +35,16 @@ import {
     isStarterProject,
     StarterProject
 } from './odo/componentTypeDescription';
-import { vsCommand } from './vscommand';
+import { vsCommand, VsCommandError } from './vscommand';
 
 type ComponentType = S2iComponentType | DevfileComponentType | ImageStreamTag | StarterProject;
+
+export enum ContextType {
+    S2I_COMPONENT_TYPE = 's2iComponentType',
+    DEVFILE_COMPONENT_TYPE = 'devfileComponentType',
+    S2I_IMAGE_STREAM_TAG = 's2iImageStreamTag',
+    DEVFILE_STARTER_PROJECT = 'devfileStarterProject',
+}
 
 export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
@@ -73,23 +81,43 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         if(isS2iComponent(element)) {
             return {
                 label: `${element.metadata.name} (s2i)`,
-                iconPath: Uri.file(path.join(__dirname, '..','..','images', 'component', 'workspace.png')),
+                contextValue: ContextType.S2I_COMPONENT_TYPE,
+                iconPath: {
+                    dark: Uri.file(path.join(__dirname, '..','..','images', 'component', 'component-type-dark.png')),
+                    light: Uri.file(path.join(__dirname, '..','..','images', 'component', 'component-type-light.png'))
+                },
                 collapsibleState: TreeItemCollapsibleState.Collapsed,
             };
         } else if(isImageStreamTag(element)) {
             return {
                 label: element.name,
+                contextValue: ContextType.S2I_IMAGE_STREAM_TAG,
                 tooltip: element.annotations.description,
+                description: element.annotations.description,
+                iconPath: {
+                    dark: Uri.file(path.join(__dirname, '..','..','images', 'component', 'start-project-dark.png')),
+                    light: Uri.file(path.join(__dirname, '..','..','images', 'component', 'start-project-light.png'))
+                },
             }
         } else if(isStarterProject(element)) {
             return {
                 label: element.name,
-                tooltip: `Starter Project:\n${element.description}`,
+                contextValue: ContextType.DEVFILE_STARTER_PROJECT,
+                tooltip: element.description,
+                description: element.description,
+                iconPath: {
+                    dark: Uri.file(path.join(__dirname, '..','..','images', 'component', 'start-project-dark.png')),
+                    light: Uri.file(path.join(__dirname, '..','..','images', 'component', 'start-project-light.png'))
+                },
             }
         } else {
             return {
                 label: `${element.Name} (devfile)`,
-                iconPath: Uri.file(path.join(__dirname, '..','..','images', 'component', 'workspace.png')),
+                contextValue: ContextType.DEVFILE_COMPONENT_TYPE,
+                iconPath: {
+                    dark: Uri.file(path.join(__dirname, '..','..','images', 'component', 'component-type-dark.png')),
+                    light: Uri.file(path.join(__dirname, '..','..','images', 'component', 'component-type-light.png'))
+                },
                 tooltip: element.Description,
                 collapsibleState: TreeItemCollapsibleState.Collapsed,
             };
@@ -110,21 +138,24 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     // eslint-disable-next-line class-methods-use-this
     async getChildren(parent: ComponentType): Promise<ComponentType[]> {
+        let children: ComponentType[];
         if (!parent) {
             const result: CliExitData = await this.odo.execute(Command.listCatalogComponentsJson());
-            const children = this.loadItems<ComponentTypesJson, ComponentType>(result, (data) => [...data.s2iItems, ...data.devfileItems]);
-            return children;
+            children = this.loadItems<ComponentTypesJson, ComponentType>(result, (data) => [...data.s2iItems, ...data.devfileItems]);
         } else if (isS2iComponent(parent)) {
-            return parent.spec.imageStreamTags;
-        } else if (isStarterProject(parent)) {
-            return null;
-        } else if (isImageStreamTag(parent)) {
-            return null;
+            children = parent.spec.imageStreamTags;
         } else if (isDevfileComponent(parent)){
             const result: CliExitData = await this.odo.execute(Command.describeCatalogComponent(parent.Name));
-            const children = this.loadItems<ComponentTypeDescription, StarterProject>(result, (data) => data.Data.starterProjects);
-            return children;
+            children = this.loadItems<ComponentTypeDescription, StarterProject>(result, (data) => data.Data.starterProjects);
         }
+        if (!parent) {
+            children = children.sort((a, b) => {
+                const aTi = this.getTreeItem(a) as TreeItem;
+                const bTi = this.getTreeItem(b) as TreeItem;
+                return aTi.label.localeCompare(bTi.label);
+            });          
+        } 
+        return children;
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -139,5 +170,31 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     @vsCommand('openshift.componentTypesView.refresh')
     public static refresh(): void {
         ComponentTypesView.instance.refresh();
+    }
+
+
+    public static getSampleRepositoryUrl(element): string {
+        let url: string;
+        if(isImageStreamTag(element)) {
+            url = element.annotations.sampleRepo;
+        } else if(isStarterProject(element)) {
+            url = Object.values(element.git.remotes).find((prop) => typeof prop === 'string');
+        }
+        return url;
+    }
+
+    @vsCommand('openshift.componentType.openStarterProjectRepository')
+    public static async openRepositoryURL(element: ComponentType): Promise<void | string> {
+        let url: string = ComponentTypesView.getSampleRepositoryUrl(element);
+        if (url) {
+            try {
+                await commands.executeCommand('vscode.open', Uri.parse(`ssss${url}`, true));
+            } catch (err) {
+                // TODO: report actual url only for default odo repository
+                throw new VsCommandError(err.toString(), 'Unable to open s`ample project repository');
+            }
+        } else {
+            return 'Cannot find sample project repository url';
+        }
     }
 }
