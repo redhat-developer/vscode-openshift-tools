@@ -668,8 +668,8 @@ export class Component extends OpenShiftItem {
             `Creating new Component '${componentName}'`,
             () => Component.odo.createComponentFromFolder(
                 application,
-                componentType.name,
-                componentType.version,
+                componentType? componentType.name : undefined, // in case of using existing devfile
+                componentType? componentType.version : undefined,
                 componentName,
                 folder,
                 createStarter,
