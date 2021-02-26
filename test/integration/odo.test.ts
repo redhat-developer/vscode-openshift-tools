@@ -15,8 +15,8 @@ import { Command } from '../../src/odo/command';
 import { SourceTypeChoice, Component } from '../../src/openshift/component';
 import { AddWorkspaceFolder } from '../../src/util/workspace';
 import { ComponentKind, ComponentTypeAdapter } from '../../src/odo/componentType';
-
 import cp = require('child_process');
+
 import fs = require('fs-extra');
 
 const { expect } = chai;

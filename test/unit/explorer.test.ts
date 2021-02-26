@@ -9,7 +9,6 @@ import { commands, Uri } from 'vscode';
 import { OpenShiftExplorer } from '../../src/explorer';
 import { OdoImpl, ContextType } from '../../src/odo';
 import { TestItem } from './openshift/testOSItem';
-
 import sinon = require('sinon');
 
 const {expect} = chai;

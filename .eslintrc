@@ -6,7 +6,6 @@
     "jasmine": true
   },
   "extends": [
-    "airbnb-base",
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
@@ -61,6 +60,16 @@
     "import/no-unresolved": ["error"],
     "import/no-duplicates": ["error"],
     "import/prefer-default-export": 0,
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "jsx": "never",
+        "ts": "never",
+        "tsx": "never"
+      }
+    ],
     "max-nested-callbacks": [1, 4],
     "max-classes-per-file": [0],
     "no-alert": 2,

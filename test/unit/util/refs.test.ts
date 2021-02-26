@@ -8,7 +8,6 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { EventEmitter } from 'events';
 import { Ref } from '../../../src/util/refs';
-
 import pq = require('proxyquire');
 
 chai.use(sinonChai);

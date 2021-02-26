@@ -27,12 +27,11 @@ import { SourceType } from '../odo/config';
 import { ComponentKind, ComponentTypeAdapter } from '../odo/componentType';
 import { Url } from '../odo/url';
 import { ComponentDescription, StarterProjectDescription } from '../odo/catalog';
-
 import path = require('path');
+
 import globby = require('globby');
 import treeKill = require('tree-kill');
 import fs = require('fs-extra');
-
 
 const waitPort = require('wait-port');
 

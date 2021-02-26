@@ -2,14 +2,13 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-
 /* eslint-disable guard-for-in */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-console */
 
 import { exit } from 'process';
-import { DownloadUtil } from './download';
 import { Archive } from './archive';
+import { DownloadUtil } from './download';
 
 import hasha = require('hasha');
 import mkdirp = require('mkdirp');

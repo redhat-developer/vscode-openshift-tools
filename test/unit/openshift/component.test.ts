@@ -21,11 +21,10 @@ import { SourceTypeChoice } from '../../../src/openshift/component';
 import { SourceType } from '../../../src/odo/config';
 import { ComponentKind, ComponentTypeAdapter } from '../../../src/odo/componentType';
 import { AddWorkspaceFolder } from '../../../src/util/workspace';
-
 import pq = require('proxyquire');
+
 import globby = require('globby');
 import fs = require('fs-extra');
-
 
 const {expect} = chai;
 chai.use(sinonChai);

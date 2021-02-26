@@ -15,9 +15,9 @@ import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { OdoImpl, OpenShiftApplication, OpenShiftProject, OpenShiftCluster } from '../../src/odo';
 import { Progress } from '../../src/util/progress';
+import path = require('path');
 
 import packagejson = require('../../package.json');
-import path = require('path');
 
 const {expect} = chai;
 chai.use(sinonChai);

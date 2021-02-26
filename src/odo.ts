@@ -30,7 +30,6 @@ import { BuilderImage } from './odo/builderImage';
 import { ImageStream } from './odo/imageStream';
 import { VsCommandError } from './vscommand';
 import { Storage } from './odo/storage';
-
 import bs = require('binary-search');
 
 const {Collapsed} = TreeItemCollapsibleState;
