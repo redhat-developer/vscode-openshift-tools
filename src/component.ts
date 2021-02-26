@@ -142,10 +142,12 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         if (!parent) {
             const result: CliExitData = await this.odo.execute(Command.listCatalogComponentsJson());
             children = this.loadItems<ComponentTypesJson, ComponentType>(result, (data) => {
-                data.s2iItems.forEach((s2iItem) => {
-                    s2iItem.spec.imageStreamTags = s2iItem.spec.imageStreamTags.filter(tag => s2iItem.spec.nonHiddenTags.includes(tag.name));
-                })
-                return [...data.s2iItems, ...data.devfileItems]
+                if (data.s2iItems) { // filter hidden tags
+                    data.s2iItems.forEach((s2iItem) => s2iItem.spec.imageStreamTags = s2iItem.spec.imageStreamTags.filter(tag => s2iItem.spec.nonHiddenTags.includes(tag.name)));
+                } else { // when not logged or disconnected form cluster s2i items are not available
+                    data.s2iItems = [];
+                }
+                return [...data.s2iItems, ...data.devfileItems];
             });
 
         } else if (isS2iComponent(parent)) {
