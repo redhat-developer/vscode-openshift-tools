@@ -141,12 +141,25 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         let children: ComponentType[];
         if (!parent) {
             const result: CliExitData = await this.odo.execute(Command.listCatalogComponentsJson());
-            children = this.loadItems<ComponentTypesJson, ComponentType>(result, (data) => [...data.s2iItems, ...data.devfileItems]);
+            children = this.loadItems<ComponentTypesJson, ComponentType>(result, (data) => {
+                data.s2iItems.forEach((s2iItem) => {
+                    s2iItem.spec.imageStreamTags = s2iItem.spec.imageStreamTags.filter(tag => s2iItem.spec.nonHiddenTags.includes(tag.name));
+                })
+                return [...data.s2iItems, ...data.devfileItems]
+            });
+
         } else if (isS2iComponent(parent)) {
-            children = parent.spec.imageStreamTags;
+            children = parent.spec.imageStreamTags.map((tag:ImageStreamTag) => {
+                tag.typeName = parent.metadata.name;
+                return tag;
+            });
         } else if (isDevfileComponent(parent)){
             const result: CliExitData = await this.odo.execute(Command.describeCatalogComponent(parent.Name));
             children = this.loadItems<ComponentTypeDescription, StarterProject>(result, (data) => data.Data.starterProjects);
+            children = children.map((starter:StarterProject) => {
+                starter.typeName = parent.Name;;
+                return starter;
+            });
         }
         if (!parent) {
             children = children.sort((a, b) => {

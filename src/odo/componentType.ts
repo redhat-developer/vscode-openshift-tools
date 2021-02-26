@@ -14,6 +14,7 @@ export enum ComponentKind {
 
 export interface ImageStreamTag {
     name: string,
+    typeName?: string;
     annotations: {
         description: string;
         'openshift.io/display-name': string;
