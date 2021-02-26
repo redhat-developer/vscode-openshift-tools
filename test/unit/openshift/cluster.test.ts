@@ -15,7 +15,6 @@ import { CliExitData } from '../../../src/cli';
 import { TestItem } from './testOSItem';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
 import { getVscodeModule, TokenStore } from '../../../src/util/credentialManager';
-
 import pq = require('proxyquire');
 
 const {expect} = chai;

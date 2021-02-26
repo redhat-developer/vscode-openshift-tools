@@ -9,6 +9,7 @@
 
 import paths = require('path');
 import fs = require('fs');
+
 const istanbul = require('istanbul');
 const remapIstanbul = require('remap-istanbul');
 

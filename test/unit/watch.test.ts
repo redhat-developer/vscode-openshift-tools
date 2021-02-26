@@ -11,7 +11,6 @@ import { WatchSessionsView } from '../../src/watch';
 import { Component } from '../../src/openshift/component';
 import { TestItem } from './openshift/testOSItem';
 import { ContextType } from '../../src/odo';
-
 import sinon = require('sinon');
 
 const {expect} = chai;

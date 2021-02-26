@@ -9,7 +9,6 @@ import { DebugSession, TreeItem, debug, Disposable } from 'vscode';
 import { DebugSessionsView } from '../../src/debug';
 import { TestItem } from './openshift/testOSItem';
 import { ContextType, OdoImpl } from '../../src/odo';
-
 import sinon = require('sinon');
 
 const {expect} = chai;

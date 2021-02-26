@@ -17,7 +17,6 @@ import { ToolsConfig } from '../../src/tools';
 import { CliExitData, CliChannel } from '../../src/cli';
 import * as odo from '../../src/odo';
 import * as verbose from '../../src/odo/command';
-
 import jsYaml = require('js-yaml');
 
 const {expect} = chai;

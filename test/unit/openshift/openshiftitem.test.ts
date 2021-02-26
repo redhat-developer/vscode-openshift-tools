@@ -10,7 +10,6 @@ import OpenShiftItem from '../../../src/openshift/openshiftItem';
 import { OdoImpl, ContextType } from '../../../src/odo';
 import { wait } from '../../../src/util/async';
 import { TestItem } from './testOSItem';
-
 import sinon = require('sinon');
 
 const {expect} = chai;

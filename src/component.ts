@@ -21,7 +21,7 @@ import {
     Odo
 } from './odo';
 import { Command } from './odo/command';
-import { 
+import {
     ComponentTypeDescription,
     ComponentTypesJson,
     DevfileComponentType,
@@ -88,7 +88,8 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 },
                 collapsibleState: TreeItemCollapsibleState.Collapsed,
             };
-        } else if(isImageStreamTag(element)) {
+        }
+        if(isImageStreamTag(element)) {
             return {
                 label: element.name,
                 contextValue: ContextType.S2I_IMAGE_STREAM_TAG,
@@ -99,7 +100,8 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                     light: Uri.file(path.join(__dirname, '..','..','images', 'component', 'start-project-light.png'))
                 },
             }
-        } else if(isStarterProject(element)) {
+        }
+        if(isStarterProject(element)) {
             return {
                 label: element.name,
                 contextValue: ContextType.DEVFILE_STARTER_PROJECT,
@@ -110,18 +112,17 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                     light: Uri.file(path.join(__dirname, '..','..','images', 'component', 'start-project-light.png'))
                 },
             }
-        } else {
-            return {
-                label: `${element.Name} (devfile)`,
-                contextValue: ContextType.DEVFILE_COMPONENT_TYPE,
-                iconPath: {
-                    dark: Uri.file(path.join(__dirname, '..','..','images', 'component', 'component-type-dark.png')),
-                    light: Uri.file(path.join(__dirname, '..','..','images', 'component', 'component-type-light.png'))
-                },
-                tooltip: element.Description,
-                collapsibleState: TreeItemCollapsibleState.Collapsed,
-            };
         }
+        return {
+            label: `${element.Name} (devfile)`,
+            contextValue: ContextType.DEVFILE_COMPONENT_TYPE,
+            iconPath: {
+                dark: Uri.file(path.join(__dirname, '..','..','images', 'component', 'component-type-dark.png')),
+                light: Uri.file(path.join(__dirname, '..','..','images', 'component', 'component-type-light.png'))
+            },
+            tooltip: element.Description,
+            collapsibleState: TreeItemCollapsibleState.Collapsed,
+        };
     }
 
     public loadItems<I,O>(result: CliExitData, fetch: (data:I) => O[] ): O[] {
@@ -134,7 +135,6 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         }
         return data;
     }
-
 
     // eslint-disable-next-line class-methods-use-this
     async getChildren(parent: ComponentType): Promise<ComponentType[]> {
@@ -153,8 +153,8 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 const aTi = this.getTreeItem(a) as TreeItem;
                 const bTi = this.getTreeItem(b) as TreeItem;
                 return aTi.label.localeCompare(bTi.label);
-            });          
-        } 
+            });
+        }
         return children;
     }
 
@@ -172,7 +172,6 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         ComponentTypesView.instance.refresh();
     }
 
-
     public static getSampleRepositoryUrl(element): string {
         let url: string;
         if(isImageStreamTag(element)) {
@@ -185,7 +184,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     @vsCommand('openshift.componentType.openStarterProjectRepository')
     public static async openRepositoryURL(element: ComponentType): Promise<void | string> {
-        let url: string = ComponentTypesView.getSampleRepositoryUrl(element);
+        const url: string = ComponentTypesView.getSampleRepositoryUrl(element);
         if (url) {
             try {
                 await commands.executeCommand('vscode.open', Uri.parse(url, true));
@@ -200,7 +199,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     @vsCommand('openshift.componentType.cloneStarterProjectRepository')
     public static async cloneRepository(element: ComponentType): Promise<void | string> {
-        let url: string = ComponentTypesView.getSampleRepositoryUrl(element);
+        const url: string = ComponentTypesView.getSampleRepositoryUrl(element);
         if (url) {
             try {
                 Uri.parse(url);

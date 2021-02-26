@@ -9,7 +9,6 @@ import * as sinon from 'sinon';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { WatchUtil } from '../../../src/util/watch';
-
 import tmp = require('tmp');
 
 const {expect} = chai;

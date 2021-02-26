@@ -13,6 +13,7 @@ import {
     StatusBarItem,
     env
 } from 'vscode';
+import path = require('path');
 import sendTelemetry from './telemetry';
 import { OpenShiftExplorer } from './explorer';
 import { Cluster } from './openshift/cluster';
@@ -25,10 +26,9 @@ import { ToolsConfig } from './tools';
 import { extendClusterExplorer } from './k8s/clusterExplorer';
 import { WatchSessionsView } from './watch';
 import { DebugSessionsView } from './debug';
-
-import path = require('path');
-import fsx = require('fs-extra');
 import { ComponentTypesView } from './component';
+
+import fsx = require('fs-extra');
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated

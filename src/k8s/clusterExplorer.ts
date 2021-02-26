@@ -7,7 +7,6 @@ import * as vscode from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { Build } from './build';
 import { DeploymentConfig } from './deployment';
-
 import path = require('path');
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined;

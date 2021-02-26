@@ -9,8 +9,8 @@ import * as vscode from 'vscode';
 import { which } from 'shelljs';
 import { Platform } from './util/platform';
 import { CliChannel } from './cli';
-
 import semver = require('semver');
+
 import configData = require('./tools.json');
 
 export class ToolsConfig {
