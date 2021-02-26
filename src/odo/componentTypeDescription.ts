@@ -38,6 +38,7 @@ export interface StarterProject {
     name: string;
     git: Git;
     description?: string;
+    typeName?: string;
 }
 
 export interface Git {

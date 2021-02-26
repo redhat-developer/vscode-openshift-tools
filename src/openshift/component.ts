@@ -11,7 +11,7 @@ import { isURL } from 'validator';
 import { EventEmitter } from 'events';
 import * as YAML from 'yaml'
 import OpenShiftItem, { selectTargetApplication, selectTargetComponent } from './openshiftItem';
-import { OpenShiftObject, ContextType, OpenShiftObjectImpl, OpenShiftComponent } from '../odo';
+import { OpenShiftObject, ContextType, OpenShiftObjectImpl, OpenShiftComponent, OpenShiftApplication } from '../odo';
 import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
@@ -24,7 +24,7 @@ import LogViewLoader from '../view/log/LogViewLoader';
 import DescribeViewLoader from '../view/describe/describeViewLoader';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { SourceType } from '../odo/config';
-import { ComponentKind, ComponentTypeAdapter } from '../odo/componentType';
+import { ComponentKind, ComponentTypeAdapter, DevfileComponentType, ImageStreamTag, isDevfileComponent, isImageStreamTag } from '../odo/componentType';
 import { Url } from '../odo/url';
 import { ComponentDescription, StarterProjectDescription } from '../odo/catalog';
 import path = require('path');
@@ -32,6 +32,7 @@ import path = require('path');
 import globby = require('globby');
 import treeKill = require('tree-kill');
 import fs = require('fs-extra');
+import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
 
 const waitPort = require('wait-port');
 
@@ -106,7 +107,7 @@ export class Component extends OpenShiftItem {
     @selectTargetApplication(
         'In which Application you want to create a Component'
     )
-    static async create(application: OpenShiftObject): Promise<string> {
+    static async create(application: OpenShiftApplication): Promise<string> {
         if (!application) return null;
 
         const componentSource = await window.showQuickPick(SourceTypeChoice.asArray(), {
@@ -541,16 +542,37 @@ export class Component extends OpenShiftItem {
         return JSON.parse(UrlDetails.stdout).items;
     }
 
+    @vsCommand('openshift.componentType.newComponent')
+    public static async createComponentFromCatalogEntry(context: DevfileComponentType | StarterProject | ImageStreamTag): Promise<string> {
+        const application = await Component.getOpenShiftCmdData(undefined,
+            'Select an Application where you want to create a Component'
+        );
+        let componentTypeName: string,
+            version: string,
+            starterProjectName:string;
+        if (isDevfileComponent(context)) {
+            componentTypeName = context.Name;
+        } else if (isImageStreamTag(context)) {
+            componentTypeName = context.typeName;
+            version = context.name;
+        } else if (isStarterProject(context)){
+            componentTypeName = context.typeName;
+            starterProjectName = context.name;
+        }
+
+        return Component.createFromLocal(application, [], componentTypeName, version, starterProjectName);
+    }
+
     @vsCommand('openshift.component.createFromLocal')
     @selectTargetApplication(
         'Select an Application where you want to create a Component'
     )
-    static async createFromLocal(application: OpenShiftObject): Promise<string | null> {
+    static async createFromLocal(application: OpenShiftApplication, selection?: OpenShiftObject[], componentTypeName?:string, version?:string, starterProjectName?:string): Promise<string | null> {
         if (!application) return null;
         const workspacePath = await selectWorkspaceFolder();
         if (!workspacePath) return null;
 
-        return Component.createFromRootWorkspaceFolder(workspacePath, [], application);
+        return Component.createFromRootWorkspaceFolder(workspacePath, [], application, componentTypeName, version? ComponentKind.S2I : ComponentKind.DEVFILE, version, starterProjectName);
     }
 
     /**
@@ -566,15 +588,19 @@ export class Component extends OpenShiftItem {
      */
 
     @vsCommand('openshift.component.createFromRootWorkspaceFolder')
-    static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], context: OpenShiftObject, componentTypeName?: string, componentKind = ComponentKind.DEVFILE): Promise<string | null> {
+    static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], context: OpenShiftApplication, componentTypeName?: string, componentKind = ComponentKind.DEVFILE, version?: string, starterProjectName?: string): Promise<string | null> {
 
         const application = await Component.getOpenShiftCmdData(context,
             'Select an Application where you want to create a Component'
         );
 
         if (!application) return null;
+
+        let useExistingDevfile = false;
         const devFileLocation = path.join(folder.fsPath, 'devfile.yaml');
-        const useExistingDevfile = fs.existsSync(devFileLocation);
+        if (componentKind === ComponentKind.DEVFILE)  {
+            useExistingDevfile = fs.existsSync(devFileLocation);
+        }
 
         let initialNameValue: string;
         if (useExistingDevfile) {
@@ -597,9 +623,9 @@ export class Component extends OpenShiftItem {
         let createStarter: string;
         let componentType: ComponentTypeAdapter;
         if (!useExistingDevfile) {
-            const componentTypes = Component.odo.getComponentTypes();
+            const componentTypes = await Component.odo.getComponentTypes();
             if (componentTypeName) {
-                componentType = (await componentTypes).find(type => type.name === componentTypeName && type.kind === componentKind);
+                componentType = componentTypes.find(type => type.name === componentTypeName && type.kind === componentKind && (!version || type.version === version));
             }
             if (!componentType) {
                 componentType = await window.showQuickPick(componentTypes, { placeHolder: 'Component type', ignoreFocusOut: true });
@@ -611,23 +637,27 @@ export class Component extends OpenShiftItem {
                 const globbyPath = `${folder.fsPath.replace('\\', '/')}/`;
                 const paths = globby.sync(`${globbyPath}*`, {dot: true, onlyFiles: false});
                 if (paths.length === 0) {
-                    const descr = await Component.odo.execute(Command.describeCatalogComponent(componentType.name));
-                    const starterProjects: StarterProjectDescription[] = Component.odo.loadItems<StarterProjectDescription>(descr,(data:{Data:ComponentDescription})=>data.Data.starterProjects);
-                    if(starterProjects?.length && starterProjects?.length > 0) {
-                        const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: `Initialize Component using ${starterProjects.length === 1 ? '\''.concat(starterProjects[0].name.concat('\' ')) : ''}Starter Project?`});
-                        if (create === 'Yes') {
-                            if (starterProjects.length === 1) {
-                                createStarter = starterProjects[0].name;
-                            } else {
-                                const selectedStarter = await window.showQuickPick(
-                                    starterProjects.map(prj => ({label: prj.name, description: prj.description})),
-                                    {placeHolder: 'Select Starter Project to initialize Component'}
-                                );
-                                if (!selectedStarter) return null;
-                                createStarter = selectedStarter.label;
+                    if (starterProjectName) {
+                        createStarter = starterProjectName;
+                    } else {
+                        const descr = await Component.odo.execute(Command.describeCatalogComponent(componentType.name));
+                        const starterProjects: StarterProjectDescription[] = Component.odo.loadItems<StarterProjectDescription>(descr,(data:{Data:ComponentDescription})=>data.Data.starterProjects);
+                        if(starterProjects?.length && starterProjects?.length > 0) {
+                            const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: `Initialize Component using ${starterProjects.length === 1 ? '\''.concat(starterProjects[0].name.concat('\' ')) : ''}Starter Project?`});
+                            if (create === 'Yes') {
+                                if (starterProjects.length === 1) {
+                                    createStarter = starterProjects[0].name;
+                                } else {
+                                    const selectedStarter = await window.showQuickPick(
+                                        starterProjects.map(prj => ({label: prj.name, description: prj.description})),
+                                        {placeHolder: 'Select Starter Project to initialize Component'}
+                                    );
+                                    if (!selectedStarter) return null;
+                                    createStarter = selectedStarter.label;
+                                }
+                            } else if (!create) {
+                                return null;
                             }
-                        } else if (!create) {
-                            return null;
                         }
                     }
                 }
@@ -638,8 +668,8 @@ export class Component extends OpenShiftItem {
             `Creating new Component '${componentName}'`,
             () => Component.odo.createComponentFromFolder(
                 application,
-                componentType? componentType.name : undefined,
-                componentType? componentType.version : undefined,
+                componentType.name,
+                componentType.version,
                 componentName,
                 folder,
                 createStarter,
