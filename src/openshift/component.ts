@@ -11,7 +11,7 @@ import { isURL } from 'validator';
 import { EventEmitter } from 'events';
 import * as YAML from 'yaml'
 import OpenShiftItem, { selectTargetApplication, selectTargetComponent } from './openshiftItem';
-import { OpenShiftObject, ContextType, OpenShiftObjectImpl, OpenShiftComponent, OpenShiftApplication } from '../odo';
+import { OpenShiftObject, ContextType, OpenShiftObjectImpl, OpenShiftComponent, OpenShiftApplication, OdoImpl } from '../odo';
 import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
@@ -888,6 +888,7 @@ export class Component extends OpenShiftItem {
     }
 
     static async startOdoAndConnectDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration): Promise<string> {
+        await Component.odo.execute(Command.pushComponent(true, true), component.contextPath.fsPath);
         const debugCmd = `'${toolLocation}' debug port-forward`;
         const cp = exec(debugCmd, {cwd: component.contextPath.fsPath});
         return new Promise<string>((resolve) => {

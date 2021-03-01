@@ -203,8 +203,8 @@ export class Command {
     }
 
     @verbose
-    static pushComponent(configOnly = false): string {
-        return `odo push --debug${configOnly ? ' --config' : ''}`;
+    static pushComponent(configOnly = false, debug = false): string {
+        return `odo push${debug ? ' --debug' : ''}${configOnly ? ' --config' : ''}`;
     }
 
     @verbose
