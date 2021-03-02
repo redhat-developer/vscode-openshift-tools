@@ -34,7 +34,7 @@
         "vendor": "Red Hat, Inc.",
         "name": "oc",
         "cmdFileName": "oc",
-        "version": "4.6.0",
+        "version": "4.6.17",
         "versionRange": "^4.6.0",
         "versionRangeLabel": "version 4.6.0 and < 5.0.0",
         "filePrefix": "",
