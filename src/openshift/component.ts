@@ -11,7 +11,7 @@ import { isURL } from 'validator';
 import { EventEmitter } from 'events';
 import * as YAML from 'yaml'
 import OpenShiftItem, { selectTargetApplication, selectTargetComponent } from './openshiftItem';
-import { OpenShiftObject, ContextType, OpenShiftObjectImpl, OpenShiftComponent, OpenShiftApplication, OdoImpl } from '../odo';
+import { OpenShiftObject, ContextType, OpenShiftObjectImpl, OpenShiftComponent, OpenShiftApplication } from '../odo';
 import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
