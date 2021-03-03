@@ -35,10 +35,13 @@ export class KubeConfigUtils extends KubeConfig {
         const cluster = this.findCluster(clusterServer);
         const users = this.getUsers();
         const clusterUsers = users.filter((item) => cluster && item.name.includes(cluster.name));
-        return clusterUsers.map((u: User) => ({
-            label: u.name.split('/')[0],
-            description: u === currentUser ? 'Current Context' : '',
-        }));
+        return clusterUsers.map((u: User) => {
+            const userName = u.name.split('/')[0];
+            return {
+                label: userName === 'kube:admin' ? 'kubeadmin' : userName,
+                description: u === currentUser ? 'Current Context' : '',
+            };
+        });
     }
 
     public findCluster(clusterServer: string): Cluster {
