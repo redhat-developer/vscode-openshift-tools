@@ -18,8 +18,7 @@ import * as path from 'path';
 import { CliExitData } from './cli';
 import {
     getInstance,
-    Odo,
-    OpenShiftCluster
+    Odo
 } from './odo';
 import { Command } from './odo/command';
 import {
@@ -33,7 +32,6 @@ import {
     isRegistry,
     isS2iComponent,
     Registry,
-    RegistryList,
     S2iComponentType
 } from './odo/componentType';
 import {
