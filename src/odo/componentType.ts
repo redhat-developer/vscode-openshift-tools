@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { Cluster } from '@kubernetes/client-node/dist/config_types';
 import { Url } from 'url';
 import { Ctx, Data } from './componentTypeDescription';
 import { ComponentMetadata } from './config';
@@ -10,6 +11,16 @@ import { ComponentMetadata } from './config';
 export enum ComponentKind {
     S2I = 's2i',
     DEVFILE = 'devfile'
+}
+
+export interface RegistryList {
+    registries: Registry[];
+}
+
+export interface Registry {
+    readonly Name: string;
+    readonly URL: string;
+    readonly Secure: boolean;
 }
 
 export interface ImageStreamTag {
@@ -36,6 +47,14 @@ export function isImageStreamTag(tag: any): tag is ImageStreamTag {
     return tag.name && tag.annotations;
 }
 
+export function isCluster(cluster: any): cluster is Cluster {
+    return cluster.name && cluster.server && cluster.skipTLSVerify !== undefined;
+}
+
+export function isRegistry(registry: any): registry is Registry {
+    return registry.Name && registry.URL && registry.Secure !== undefined;
+}
+
 export interface S2iComponentType {
     kind: 'ComponentType';
     apiVersion: string;
@@ -55,6 +74,7 @@ export interface RegistryRef {
 
 export interface DevfileComponentType {
     Name: string;
+    DisplayName: string;
     Description: string;
     Link: string;
     Registry: RegistryRef;
