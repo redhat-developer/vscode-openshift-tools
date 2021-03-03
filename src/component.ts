@@ -26,9 +26,12 @@ import {
     ComponentTypesJson,
     DevfileComponentType,
     ImageStreamTag,
+    isCluster,
     isDevfileComponent,
     isImageStreamTag,
+    isRegistry,
     isS2iComponent,
+    Registry,
     S2iComponentType
 } from './odo/componentType';
 import {
@@ -36,14 +39,21 @@ import {
     StarterProject
 } from './odo/componentTypeDescription';
 import { vsCommand, VsCommandError } from './vscommand';
+import { Cluster } from '@kubernetes/client-node/dist/config_types';
+import { KubeConfig } from '@kubernetes/client-node';
 
-type ComponentType = S2iComponentType | DevfileComponentType | ImageStreamTag | StarterProject;
+type ComponentType = S2iComponentType | DevfileComponentType | ImageStreamTag | StarterProject | Cluster | Registry;
 
 export enum ContextType {
     S2I_COMPONENT_TYPE = 's2iComponentType',
     DEVFILE_COMPONENT_TYPE = 'devfileComponentType',
     S2I_IMAGE_STREAM_TAG = 's2iImageStreamTag',
     DEVFILE_STARTER_PROJECT = 'devfileStarterProject',
+    DEVFILE_REGISTRY = 'devfileRegistry',
+    OFFLINE_CLUSTER = 'clusterOffline',
+    ONLINE_LOGGEDOFF_CLUSER = 'clusterLoggedoffOnline',
+    ONLINE_LOOGEDIN_CLUSER = 'clusterLoggedinOnline',
+    OFFLINE_OR_LOGGEDOUT_CLUSTER = 'clusterOfflineOrLoggedout',
 }
 
 export class ComponentTypesView implements TreeDataProvider<ComponentType> {
@@ -59,6 +69,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         .onDidChangeTreeDataEmitter.event;
 
     readonly odo: Odo = getInstance();
+    private registries: Registry[];
 
     createTreeView(id: string): TreeView<ComponentType> {
         if (!this.treeView) {
@@ -78,6 +89,19 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     // eslint-disable-next-line class-methods-use-this
     getTreeItem(element: ComponentType): TreeItem | Thenable<TreeItem> {
+        if(isCluster(element)) {
+            return {
+                label: `${element.server}`,
+                collapsibleState: TreeItemCollapsibleState.Collapsed,
+            }
+        }
+        if (isRegistry(element)) {
+            return {
+                label: element.Name,
+                description: element.URL,
+                collapsibleState: TreeItemCollapsibleState.Collapsed,
+            }
+        }
         if(isS2iComponent(element)) {
             return {
                 label: `${element.metadata.name} (s2i)`,
@@ -91,7 +115,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         }
         if(isImageStreamTag(element)) {
             return {
-                label: element.name,
+                label: element.annotations['openshift.io/display-name']? element.annotations['openshift.io/display-name'] : element.name,
                 contextValue: ContextType.S2I_IMAGE_STREAM_TAG,
                 tooltip: element.annotations.description,
                 description: element.annotations.description,
@@ -114,14 +138,14 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             }
         }
         return {
-            label: `${element.Name} (devfile)`,
+            label: `${element.DisplayName} (devfile)`,
             contextValue: ContextType.DEVFILE_COMPONENT_TYPE,
             iconPath: {
                 dark: Uri.file(path.join(__dirname, '..','..','images', 'component', 'component-type-dark.png')),
                 light: Uri.file(path.join(__dirname, '..','..','images', 'component', 'component-type-light.png'))
             },
             tooltip: element.Description,
-            collapsibleState: TreeItemCollapsibleState.Collapsed,
+            collapsibleState: this.registries.length > 1? TreeItemCollapsibleState.None : TreeItemCollapsibleState.Collapsed,
         };
     }
 
@@ -136,19 +160,39 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return data;
     }
 
+    private async getRegistries(): Promise<Registry[]> {
+        if(!this.registries) {
+            this.registries  =await this.odo.getRegistries();
+        }
+        return this.registries;
+    }
+
     // eslint-disable-next-line class-methods-use-this
     async getChildren(parent: ComponentType): Promise<ComponentType[]> {
         let children: ComponentType[];
+
         if (!parent) {
+            const config = new KubeConfig();
+            config.loadFromDefault();
+            const cluster = config.getCurrentCluster();
+            this.registries = await this.getRegistries();
+            children = [cluster,...this.registries];
+        } else if (isCluster(parent)) {
             const result: CliExitData = await this.odo.execute(Command.listCatalogComponentsJson());
-            children = this.loadItems<ComponentTypesJson, ComponentType>(result, (data) => {
+            const builders = this.loadItems<ComponentTypesJson, ComponentType>(result, (data) => {
                 if (data.s2iItems) { // filter hidden tags
                     data.s2iItems.forEach((s2iItem) => s2iItem.spec.imageStreamTags = s2iItem.spec.imageStreamTags.filter(tag => s2iItem.spec.nonHiddenTags.includes(tag.name)));
                 } else { // when not logged or disconnected form cluster s2i items are not available
                     data.s2iItems = [];
                 }
-                return [...data.s2iItems, ...data.devfileItems];
+                return data.s2iItems;
             });
+            children = [];
+            builders.forEach((builder: S2iComponentType) => children.splice(children.length,0, ...builder.spec.imageStreamTags));
+        } else if (isRegistry(parent) ) {
+            const result: CliExitData = await this.odo.execute(Command.listCatalogComponentsJson());
+            children = this.loadItems<ComponentTypesJson, DevfileComponentType>(result, (data) => data.devfileItems);
+            children = children.filter((element:DevfileComponentType) => element.Registry.Name === parent.Name);
 
         } else if (isS2iComponent(parent)) {
             children = parent.spec.imageStreamTags.map((tag:ImageStreamTag) => {
@@ -158,16 +202,10 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         } else if (isDevfileComponent(parent)){
             const result: CliExitData = await this.odo.execute(Command.describeCatalogComponent(parent.Name));
             children = this.loadItems<ComponentTypeDescription, StarterProject>(result, (data) => data.Data.starterProjects);
+
             children = children.map((starter:StarterProject) => {
                 starter.typeName = parent.Name;;
                 return starter;
-            });
-        }
-        if (!parent) {
-            children = children.sort((a, b) => {
-                const aTi = this.getTreeItem(a) as TreeItem;
-                const bTi = this.getTreeItem(b) as TreeItem;
-                return aTi.label.localeCompare(bTi.label);
             });
         }
         return children;
@@ -179,6 +217,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     }
 
     refresh(): void {
+        this.registries = undefined;
         this.onDidChangeTreeDataEmitter.fire();
     }
 

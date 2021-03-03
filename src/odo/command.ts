@@ -51,6 +51,10 @@ export class Command {
         return `odo list --app ${app} --project ${project} -o json`;
     }
 
+    static listRegistries(): string {
+        return 'odo registry list -o json';
+    }
+
     static listCatalogComponents(): string {
         return 'odo catalog list components';
     }

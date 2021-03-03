@@ -20,7 +20,7 @@ import { Platform } from './util/platform';
 import * as odo from './odo/config';
 import { GlyphChars } from './util/constants';
 import { Application } from './odo/application';
-import { ComponentType, ComponentTypesJson, ComponentKind, ComponentTypeAdapter } from './odo/componentType';
+import { ComponentType, ComponentTypesJson, ComponentKind, ComponentTypeAdapter, Registry, RegistryList } from './odo/componentType';
 import { Project } from './odo/project';
 import { ComponentsJson, DevfileComponentAdapter, S2iComponentAdapter } from './odo/component';
 import { Url } from './odo/url';
@@ -31,6 +31,7 @@ import { ImageStream } from './odo/imageStream';
 import { VsCommandError } from './vscommand';
 import { Storage } from './odo/storage';
 import bs = require('binary-search');
+import { CliExitData } from './cli';
 
 const {Collapsed} = TreeItemCollapsibleState;
 
@@ -368,6 +369,7 @@ export interface Odo {
     createComponentCustomUrl(component: OpenShiftObject, name: string, port: string, secure?: boolean): Promise<OpenShiftObject>;
     getOpenShiftObjectByContext(context: string): OpenShiftObject;
     loadItems<I>(result: cliInstance.CliExitData, fetch: (data) => I[]): I[];
+    getRegistries(): Promise<Registry[]>;
     readonly subject: Subject<OdoEvent>;
 }
 
@@ -472,6 +474,7 @@ class OdoModel {
 }
 
 export class OdoImpl implements Odo {
+
     public static data: OdoModel = new OdoModel();
 
     public static ROOT: OpenShiftObject = new OpenShiftRoot();
@@ -1065,6 +1068,23 @@ export class OdoImpl implements Odo {
         }
         return data;
     }
+
+    public loadItemsFrom<I,O>(result: CliExitData, fetch: (data:I) => O[] ): O[] {
+        let data: O[] = [];
+        try {
+            const items = fetch(JSON.parse(result.stdout));
+            if (items) data = items;
+        } catch (ignore) {
+            // ignore parse errors and return empty array
+        }
+        return data;
+    }
+
+    public async getRegistries(): Promise<Registry[]> {
+        const result = await this.execute(Command.listRegistries());
+        return this.loadItemsFrom<RegistryList, Registry>(result, (data) => data.registries);
+    }
+
 }
 
 export function getInstance(): Odo {
