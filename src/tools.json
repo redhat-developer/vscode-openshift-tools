@@ -40,19 +40,19 @@
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable-4.6/openshift-client-windows-4.6.17.zip",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.6.17/openshift-client-windows-4.6.17.zip",
                 "sha256sum": "51b53ffad662e068494a74fc3263b40c1219809134880f902ca0f5ddb9d60c20",
                 "dlFileName": "openshift-client-windows-4.6.17.zip",
                 "cmdFileName": "oc.exe"
             },
             "darwin": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable-4.6/openshift-client-mac-4.6.17.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.6.17/openshift-client-mac-4.6.17.tar.gz",
                 "sha256sum": "2c3260c61cff5c21f2f07a78c197afdc7b8d2ef86f1919c4854036c7d1e5ab09",
                 "dlFileName": "openshift-client-mac-4.6.17.tar.gz",
                 "cmdFileName": "oc"
             },
             "linux": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable-4.6/openshift-client-linux-4.6.17.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.6.17/openshift-client-linux-4.6.17.tar.gz",
                 "sha256sum": "aaa300a538e2ddcd40cf0f0760ec5b0eeb7516b8e080dbf2644f7e3039feb17d",
                 "dlFileName": "openshift-client-linux-4.6.17.tar.gz",
                 "cmdFileName": "oc"
