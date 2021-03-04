@@ -47,6 +47,10 @@ export function isImageStreamTag(tag: any): tag is ImageStreamTag {
     return tag.name && tag.annotations;
 }
 
+export function isSampleProject(repo: any): repo is SampleProject {
+    return repo?.sampleRepo;
+}
+
 export function isCluster(cluster: any): cluster is Cluster {
     return cluster.name && cluster.server && cluster.skipTLSVerify !== undefined;
 }
@@ -65,6 +69,10 @@ export interface S2iComponentType {
         supportedTags: string[];
         imageStreamTags: ImageStreamTag[];
     },
+}
+
+export interface SampleProject {
+    sampleRepo: string;
 }
 
 export interface RegistryRef {

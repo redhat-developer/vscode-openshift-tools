@@ -754,12 +754,12 @@
       },
       {
         "command": "openshift.componentType.openStarterProjectRepository",
-        "title": "Open Sample Project repository",
+        "title": "Open in Browser",
         "category": "OpenShift"
       },
       {
         "command": "openshift.componentType.cloneStarterProjectRepository",
-        "title": "Clone Sample Project repository to workspace",
+        "title": "Clone to Workspace",
         "category": "OpenShift"
       },
       {
@@ -1314,12 +1314,12 @@
         },
         {
           "command": "openshift.componentType.openStarterProjectRepository",
-          "when": "view == openshiftComponentTypesView && viewItem == s2iImageStreamTag || viewItem == devfileStarterProject",
+          "when": "view == openshiftComponentTypesView && viewItem == s2iSampleProject || viewItem == devfileStarterProject",
           "group": "1@0"
         },
         {
           "command": "openshift.componentType.cloneStarterProjectRepository",
-          "when": "view == openshiftComponentTypesView && viewItem == s2iImageStreamTag || viewItem == devfileStarterProject",
+          "when": "view == openshiftComponentTypesView && viewItem == s2iSampleProject || viewItem == devfileStarterProject",
           "group": "1@1"
         },
         {
