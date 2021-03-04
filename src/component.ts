@@ -31,8 +31,10 @@ import {
     isImageStreamTag,
     isRegistry,
     isS2iComponent,
+    isSampleProject,
     Registry,
-    S2iComponentType
+    S2iComponentType,
+    SampleProject
 } from './odo/componentType';
 import {
     isStarterProject,
@@ -42,12 +44,15 @@ import { vsCommand, VsCommandError } from './vscommand';
 import { Cluster } from '@kubernetes/client-node/dist/config_types';
 import { KubeConfig } from '@kubernetes/client-node';
 
-type ComponentType = S2iComponentType | DevfileComponentType | ImageStreamTag | StarterProject | Cluster | Registry;
+type ExampleProject = SampleProject | StarterProject;
+type ComponentType = DevfileComponentType | ImageStreamTag | ExampleProject | Cluster | Registry;
+
 
 export enum ContextType {
     S2I_COMPONENT_TYPE = 's2iComponentType',
     DEVFILE_COMPONENT_TYPE = 'devfileComponentType',
     S2I_IMAGE_STREAM_TAG = 's2iImageStreamTag',
+    S2I_SAMPLE_PROJECT = 's2iSampleProject',
     DEVFILE_STARTER_PROJECT = 'devfileStarterProject',
     DEVFILE_REGISTRY = 'devfileRegistry',
     OFFLINE_CLUSTER = 'clusterOffline',
@@ -93,12 +98,13 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             return {
                 label: `${element.server}`,
                 collapsibleState: TreeItemCollapsibleState.Collapsed,
+                tooltip: `Current Cluster\n Server: ${element.server}`,
             }
         }
         if (isRegistry(element)) {
             return {
                 label: element.Name,
-                description: element.URL,
+                tooltip: `Devfile Registry\nName: ${element.Name}\nURL: ${element.URL}`,
                 collapsibleState: TreeItemCollapsibleState.Collapsed,
             }
         }
@@ -113,23 +119,38 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 collapsibleState: TreeItemCollapsibleState.Collapsed,
             };
         }
-        if(isImageStreamTag(element)) {
+        if (isSampleProject(element)) {
+            const to = element.sampleRepo.lastIndexOf('.git');
+            const from = element.sampleRepo.lastIndexOf('/');
+            const projectName = element.sampleRepo.substring(from+1,to >0? to : undefined);
             return {
-                label: element.annotations['openshift.io/display-name']? element.annotations['openshift.io/display-name'] : element.name,
-                contextValue: ContextType.S2I_IMAGE_STREAM_TAG,
-                tooltip: element.annotations.description,
-                description: element.annotations.description,
+                label: projectName,
+                contextValue: ContextType.S2I_SAMPLE_PROJECT,
+                tooltip: `Sample Project\nName: ${projectName}\nRepository: ${element.sampleRepo}`,
                 iconPath: {
                     dark: Uri.file(path.join(__dirname, '..','..','images', 'component', 'start-project-dark.png')),
                     light: Uri.file(path.join(__dirname, '..','..','images', 'component', 'start-project-light.png'))
                 },
             }
         }
+        if(isImageStreamTag(element)) {
+            return {
+                label: element.annotations['openshift.io/display-name']? element.annotations['openshift.io/display-name'] : element.name,
+                contextValue: ContextType.S2I_IMAGE_STREAM_TAG,
+                tooltip: `Component Type\nName: ${element.name}\nKind: S2I\nDescription: ${element?.annotations.description?element.annotations.description:'n/a'}`,
+                description: element.annotations.description,
+                iconPath: {
+                    dark: Uri.file(path.join(__dirname, '..','..','images', 'component', 'component-type-dark.png')),
+                    light: Uri.file(path.join(__dirname, '..','..','images', 'component', 'component-type-light.png'))
+                },
+                collapsibleState: isSampleProject(element)? TreeItemCollapsibleState.Collapsed : TreeItemCollapsibleState.Collapsed,
+            }
+        }
         if(isStarterProject(element)) {
             return {
                 label: element.name,
                 contextValue: ContextType.DEVFILE_STARTER_PROJECT,
-                tooltip: element.description,
+                tooltip: `Starter Project\nName: ${element.name}\nDescription: ${element.description?element.description:'n/a'}`,
                 description: element.description,
                 iconPath: {
                     dark: Uri.file(path.join(__dirname, '..','..','images', 'component', 'start-project-dark.png')),
@@ -138,13 +159,14 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             }
         }
         return {
-            label: `${element.DisplayName} (devfile)`,
+            label: `${element.DisplayName}`,
             contextValue: ContextType.DEVFILE_COMPONENT_TYPE,
             iconPath: {
                 dark: Uri.file(path.join(__dirname, '..','..','images', 'component', 'component-type-dark.png')),
                 light: Uri.file(path.join(__dirname, '..','..','images', 'component', 'component-type-light.png'))
             },
-            tooltip: element.Description,
+            tooltip: `Component Type\nName: ${element.Name}\nKind: devfile\nDescription: ${element.Description ? element.Description : 'n/a'}`,
+            description: element.Description,
             collapsibleState: this.registries.length > 1? TreeItemCollapsibleState.None : TreeItemCollapsibleState.Collapsed,
         };
     }
@@ -179,7 +201,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             children = [cluster,...this.registries];
         } else if (isCluster(parent)) {
             const result: CliExitData = await this.odo.execute(Command.listCatalogComponentsJson());
-            const builders = this.loadItems<ComponentTypesJson, ComponentType>(result, (data) => {
+            const builders = this.loadItems<ComponentTypesJson, S2iComponentType>(result, (data) => {
                 if (data.s2iItems) { // filter hidden tags
                     data.s2iItems.forEach((s2iItem) => s2iItem.spec.imageStreamTags = s2iItem.spec.imageStreamTags.filter(tag => s2iItem.spec.nonHiddenTags.includes(tag.name)));
                 } else { // when not logged or disconnected form cluster s2i items are not available
@@ -193,7 +215,6 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             const result: CliExitData = await this.odo.execute(Command.listCatalogComponentsJson());
             children = this.loadItems<ComponentTypesJson, DevfileComponentType>(result, (data) => data.devfileItems);
             children = children.filter((element:DevfileComponentType) => element.Registry.Name === parent.Name);
-
         } else if (isS2iComponent(parent)) {
             children = parent.spec.imageStreamTags.map((tag:ImageStreamTag) => {
                 tag.typeName = parent.metadata.name;
@@ -202,11 +223,12 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         } else if (isDevfileComponent(parent)){
             const result: CliExitData = await this.odo.execute(Command.describeCatalogComponent(parent.Name));
             children = this.loadItems<ComponentTypeDescription, StarterProject>(result, (data) => data.Data.starterProjects);
-
             children = children.map((starter:StarterProject) => {
                 starter.typeName = parent.Name;;
                 return starter;
             });
+        } else if (isImageStreamTag(parent)) {
+            children = [parent.annotations];
         }
         return children;
     }
@@ -226,10 +248,10 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         ComponentTypesView.instance.refresh();
     }
 
-    public static getSampleRepositoryUrl(element): string {
+    public static getSampleRepositoryUrl(element: ExampleProject): string {
         let url: string;
-        if(isImageStreamTag(element)) {
-            url = element.annotations.sampleRepo;
+        if(isSampleProject(element)) {
+            url = element.sampleRepo;
         } else if(isStarterProject(element)) {
             url = Object.values(element.git.remotes).find((prop) => typeof prop === 'string');
         }
@@ -237,7 +259,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     }
 
     @vsCommand('openshift.componentType.openStarterProjectRepository')
-    public static async openRepositoryURL(element: ComponentType): Promise<void | string> {
+    public static async openRepositoryURL(element: ExampleProject): Promise<void | string> {
         const url: string = ComponentTypesView.getSampleRepositoryUrl(element);
         if (url) {
             try {
@@ -252,7 +274,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     }
 
     @vsCommand('openshift.componentType.cloneStarterProjectRepository')
-    public static async cloneRepository(element: ComponentType): Promise<void | string> {
+    public static async cloneRepository(element: ExampleProject): Promise<void | string> {
         const url: string = ComponentTypesView.getSampleRepositoryUrl(element);
         if (url) {
             try {
