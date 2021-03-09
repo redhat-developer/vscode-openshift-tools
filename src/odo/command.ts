@@ -25,6 +25,11 @@ function verbose(_target: any, key: string, descriptor: any): void {
 }
 
 export class Command {
+
+    static viewEnv(): string {
+        return 'odo env view -o json';
+    }
+
     static printCatalogComponentImageStreamRefJson(name: string, namespace: string): string {
         return `oc get imagestream ${name} -n ${namespace} -o json`;
     }

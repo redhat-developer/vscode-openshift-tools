@@ -667,6 +667,8 @@ export class Component extends OpenShiftItem {
             }
         }
 
+        const refreshComponentsView = workspace.getWorkspaceFolder(folder);
+
         await Progress.execFunctionWithProgress(
             `Creating new Component '${componentName}'`,
             () => Component.odo.createComponentFromFolder(
@@ -679,6 +681,12 @@ export class Component extends OpenShiftItem {
                 useExistingDevfile
             )
         );
+
+        // when creating component based on existing workspace folder refresh components view
+        if (refreshComponentsView) {
+            commands.executeCommand('openshift.componentsView.refresh');
+        }
+
         const result:any = new String(`Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`);
         result.properties = {
             'component_kind': componentType?.version ? ComponentKind.S2I: ComponentKind.DEVFILE,

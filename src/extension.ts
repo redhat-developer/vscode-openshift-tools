@@ -26,9 +26,10 @@ import { ToolsConfig } from './tools';
 import { extendClusterExplorer } from './k8s/clusterExplorer';
 import { WatchSessionsView } from './watch';
 import { DebugSessionsView } from './debug';
-import { ComponentTypesView } from './component';
+import { ComponentTypesView } from './componentTypesView';
 
 import fsx = require('fs-extra');
+import { ComponentsTreeDataProvider } from './componentsView';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
@@ -72,7 +73,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             './openshift/service',
             './k8s/console',
             './oc',
-            './component',
+            './componentTypesView',
+            './componentsView'
         )),
         commands.registerCommand('clusters.openshift.useProject', (context) =>
             commands.executeCommand('extension.vsKubernetesUseNamespace', context),
@@ -83,6 +85,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         new DebugSessionsView().createTreeView('openshiftDebugView'),
         ...Component.init(extensionContext),
         ComponentTypesView.instance.createTreeView('openshiftComponentTypesView'),
+        ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
 
