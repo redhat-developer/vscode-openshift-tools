@@ -127,7 +127,7 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
     @vsCommand('openshift.component.revealInExplorer')
     public static async revealInExplorer(context: Entry): Promise<void> {
         if (isWorkspaceFolderComponent(context)) {
-            await vsc.commands.executeCommand('workbench.action.openView');
+            await vsc.commands.executeCommand('workbench.view.explorer', );
             await vsc.commands.executeCommand('revealInExplorer', context.contextUri);
         }
     }

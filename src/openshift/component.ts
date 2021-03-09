@@ -145,7 +145,7 @@ export class Component extends OpenShiftItem {
                 Component.stopDebugSession(component);
                 Component.stopWatchSession(component);
                 await Component.odo.deleteComponent(component);
-
+                commands.executeCommand('openshift.componentsView.refresh');
             }).then(() => `Component '${name}' successfully deleted`)
             .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Component with error '${err}'`, 'Failed to delete Component with error')));
         }
