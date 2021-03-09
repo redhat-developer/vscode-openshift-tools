@@ -125,9 +125,10 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
     }
 
     @vsCommand('openshift.component.revealInExplorer')
-    public static revealInExplorer(context: Entry): void {
+    public static async revealInExplorer(context: Entry): Promise<void> {
         if (isWorkspaceFolderComponent(context)) {
-            vsc.commands.executeCommand('revealInExplorer', context.contextUri);
+            await vsc.commands.executeCommand('workbench.action.openView');
+            await vsc.commands.executeCommand('revealInExplorer', context.contextUri);
         }
     }
     createTreeView(id: string): vsc.TreeView<Entry> {
