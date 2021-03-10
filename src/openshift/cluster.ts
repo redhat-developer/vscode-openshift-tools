@@ -164,7 +164,8 @@ export class Cluster extends OpenShiftItem {
     private static async requestLoginConfirmation(skipConfirmation = false): Promise<string> {
         let response = 'Yes';
         if (!skipConfirmation && !await Cluster.odo.requireLogin()) {
-            response = await window.showInformationMessage('You are already logged in the cluster. Do you want to login to a different cluster?', 'Yes', 'No');
+            const cluster = new KubeConfigUtils().getCurrentCluster();
+            response = await window.showInformationMessage(`You are already logged into ${cluster.server} cluster. Do you want to login to a different cluster?`, 'Yes', 'No');
         }
         return response;
     }
@@ -303,6 +304,6 @@ export class Cluster extends OpenShiftItem {
             await commands.executeCommand('setContext', 'isLoggedIn', true);
             return `Successfully logged in to '${clusterURL}'`;
         }
-        throw new VsCommandError(result.stderr, 'Failed to login to cluster with output in stderror');
+        throw new VsCommandError(result.stderr, 'Failed to login to cluster with output in stderr');
     }
 }
