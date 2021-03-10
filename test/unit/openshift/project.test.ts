@@ -33,7 +33,6 @@ suite('OpenShift/Project', () => {
         sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
-        sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
     });
 

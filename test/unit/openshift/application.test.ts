@@ -31,7 +31,6 @@ suite('OpenShift/Application', () => {
         sandbox = sinon.createSandbox();
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: null, stdout: '', stderr: ''});
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
-        getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(vscode.window, 'showInputBox');
     });
@@ -59,7 +58,6 @@ suite('OpenShift/Application', () => {
         suite('called from command palette', () => {
 
             test('calls the appropriate error message when no project found', async () => {
-                getProjectNamesStub.restore();
                 sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
                 try {
                     await Application.describe(null);

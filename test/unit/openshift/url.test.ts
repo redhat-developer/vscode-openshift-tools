@@ -181,7 +181,6 @@ suite('OpenShift/URL', () => {
         sandbox = sinon.createSandbox();
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
         inputStub = sandbox.stub(vscode.window, 'showInputBox');
-        getProjectsNameStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         getRouteNameStub = sandbox.stub(OpenShiftItem, 'getRoutes').resolves([routeItem]);
         getApplicationNamesStub = sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         getComponentsNameStub = sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
@@ -206,7 +205,6 @@ suite('OpenShift/URL', () => {
 
         test('calls the appropriate error message if no project found', async () => {
             quickPickStub.restore();
-            getProjectsNameStub.restore();
             getProjectsStub.restore();
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
             sandbox.stub(vscode.window, 'showErrorMessage');
