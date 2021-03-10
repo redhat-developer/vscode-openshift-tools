@@ -21,7 +21,6 @@ suite('OpenShift/Storage', () => {
     let execStub: sinon.SinonStub;
     let quickPickStub: sinon.SinonStub;
     let inputStub: sinon.SinonStub;
-    let getProjectNamesStub: sinon.SinonStub;
     let getProjectsStub: sinon.SinonStub;
     let getStorageNamesStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project', ContextType.PROJECT);

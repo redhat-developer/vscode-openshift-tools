@@ -20,7 +20,6 @@ suite('OpenShift/Application', () => {
     let quickPickStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
-    let getProjectNamesStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
     const compItem = new TestItem(appItem, 'app', ContextType.COMPONENT_NO_CONTEXT, [], null);
