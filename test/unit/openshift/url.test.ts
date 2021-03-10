@@ -27,7 +27,8 @@ suite('OpenShift/URL', () => {
     let getApplicationNamesStub: sinon.SinonStub;
     let getComponentsNameStub: sinon.SinonStub;
     let getRouteNameStub: sinon.SinonStub;
-    const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
+    const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
+    const projectItem = new TestItem(clusterItem, 'project', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
     const componentItem = new TestItem(appItem, 'component', ContextType.COMPONENT_PUSHED);
     const routeItem = new TestItem(componentItem, 'route', ContextType.COMPONENT_ROUTE);
@@ -180,6 +181,7 @@ suite('OpenShift/URL', () => {
         sandbox = sinon.createSandbox();
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
         inputStub = sandbox.stub(vscode.window, 'showInputBox');
+        sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([clusterItem]);
         getRouteNameStub = sandbox.stub(OpenShiftItem, 'getRoutes').resolves([routeItem]);
         getApplicationNamesStub = sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         getComponentsNameStub = sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);

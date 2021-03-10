@@ -616,7 +616,7 @@ export class Component extends OpenShiftItem {
 
         const componentName = await Component.getName(
             'Component name',
-            Component.odo.getComponents(application),
+            application.getParent().getParent() ? Component.odo.getComponents(application): Promise.resolve([]),
             application.getName(),
             initialNameValue
         );

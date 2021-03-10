@@ -62,6 +62,7 @@ suite('OpenShift/Component', () => {
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '' });
         spawnStub = sandbox.stub(OdoImpl.prototype, 'spawn');
         sandbox.stub(OdoImpl.prototype, 'getServices');
+        sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([clusterItem]);
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
         getComponentsStub = sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);

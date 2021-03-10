@@ -863,12 +863,15 @@ export class OdoImpl implements Odo {
 
     public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: Uri, starter: string = undefined, useExistingDevfile = false): Promise<OpenShiftObject> {
         await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath, starter, useExistingDevfile), location.fsPath);
-        if (workspace.workspaceFolders) {
+        if (workspace.workspaceFolders && application.getParent().getParent()) { // if there are workspace folders and cluster is acvessible
             const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
             if (!targetApplication) {
                 await this.insertAndReveal(application);
             }
             await this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, location, 'local', version ? ComponentKind.S2I : ComponentKind.DEVFILE, {name: type? type : name , tag: version}));
+        } else {
+            OdoImpl.data.delete(application);
+            OdoImpl.data.delete(application.getParent());
         }
         let wsFolder: WorkspaceFolder;
         if (workspace.workspaceFolders) {

@@ -90,12 +90,19 @@ export default class OpenShiftItem {
     }
 
     static async getApplicationNames(project: OpenShiftObject, createCommand = false): Promise<Array<OpenShiftObject | QuickPickCommand>> {
-        return OpenShiftItem.odo.getApplications(project).then((applicationList) => {
-            if (applicationList.length === 0 && !createCommand) throw new VsCommandError(errorMessage.Component);
-            return createCommand ? [new QuickPickCommand('$(plus) Create new Application...', async () => {
-                return OpenShiftItem.getName('Application name', Promise.resolve(applicationList));
-            }), ...applicationList] : applicationList;
-        });
+        if (project.getParent()) {
+            return OpenShiftItem.odo.getApplications(project).then((applicationList) => {
+                if (applicationList.length === 0 && !createCommand) throw new VsCommandError(errorMessage.Component);
+                return createCommand ? [new QuickPickCommand('$(plus) Create new Application...', async () => {
+                    return OpenShiftItem.getName('Application name', Promise.resolve(applicationList));
+                }), ...applicationList] : applicationList;
+            });
+        }
+        return [
+            new QuickPickCommand('$(plus) Create new Application...', async () => {
+                return OpenShiftItem.getName('Application name', Promise.resolve([]));
+            })
+        ];
     }
 
     static async getComponentNames(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]> {
@@ -126,12 +133,23 @@ export default class OpenShiftItem {
         let context: OpenShiftObject | QuickPickCommand = treeItem;
         let project: OpenShiftObject;
         if (!context) {
-            context = (await this.odo.getProjects()).find((prj:OpenShiftProject)=>prj.active);
-            if (!context) {
-                throw new VsCommandError(errorMessage.Project);
+            const clusters = await this.odo.getClusters();
+            if (clusters.length) { // connected to cluster because odo version printed out server url
+                const projects = await this.odo.getProjects();
+                context = projects.find((prj:OpenShiftProject)=>prj.active);
+                if (!context) {
+                    throw new VsCommandError(errorMessage.Project)
+                }
+            } else { // cluster is not accessible or user not logged in
+                const projectName = await OpenShiftItem.getName('Project Name', Promise.resolve([]))
+                    if (projectName) {
+                        context = new OpenShiftProject(undefined, projectName, true);
+                    } else {
+                        context = null;
+                    }
             }
         }
-        if (context && context.contextValue === ContextType.PROJECT && appPlaceholder ) {
+        if (context && !isCommand(context) && context.contextValue === ContextType.PROJECT && appPlaceholder ) {
             project = context;
             const applicationList = await OpenShiftItem.getApplicationNames(project, appPlaceholder.includes('create') && compPlaceholder === undefined);
             if ( applicationList.length === 1 && isCommand(applicationList[0])) {
