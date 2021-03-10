@@ -547,6 +547,9 @@ export class Component extends OpenShiftItem {
         const application = await Component.getOpenShiftCmdData(undefined,
             'Select an Application where you want to create a Component'
         );
+
+        if (!application) return null;
+
         let componentTypeName: string,
             version: string,
             starterProjectName:string;
