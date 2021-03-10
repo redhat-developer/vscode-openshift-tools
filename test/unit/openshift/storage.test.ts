@@ -21,7 +21,6 @@ suite('OpenShift/Storage', () => {
     let execStub: sinon.SinonStub;
     let quickPickStub: sinon.SinonStub;
     let inputStub: sinon.SinonStub;
-    let getProjectNamesStub: sinon.SinonStub;
     let getProjectsStub: sinon.SinonStub;
     let getStorageNamesStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
@@ -49,7 +48,6 @@ suite('OpenShift/Storage', () => {
             getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
             quickPickStub.onFirstCall().resolves(appItem);
             quickPickStub.onSecondCall().resolves(componentItem);
-            getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
             sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
             sandbox.stub(OdoImpl.prototype, 'getApplicationChildren').resolves([componentItem]);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
@@ -64,7 +62,6 @@ suite('OpenShift/Storage', () => {
 
         test('calls the appropriate error message if no project found', async () => {
             quickPickStub.restore();
-            getProjectNamesStub.restore();
             getProjectsStub.restore();
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
             sandbox.stub(vscode.window, 'showErrorMessage');
@@ -286,7 +283,6 @@ suite('OpenShift/Storage', () => {
         let warnStub: sinon.SinonStub;
 
         setup(() => {
-            getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
             sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
             sandbox.stub(OpenShiftItem, 'getStorageNames').resolves([storageItem]);
             sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);

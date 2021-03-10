@@ -20,7 +20,6 @@ suite('OpenShift/Application', () => {
     let quickPickStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
-    let getProjectNamesStub: sinon.SinonStub;
     const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
     const compItem = new TestItem(appItem, 'app', ContextType.COMPONENT_NO_CONTEXT, [], null);
@@ -31,7 +30,6 @@ suite('OpenShift/Application', () => {
         sandbox = sinon.createSandbox();
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: null, stdout: '', stderr: ''});
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
-        getProjectNamesStub = sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(vscode.window, 'showInputBox');
     });
@@ -59,7 +57,6 @@ suite('OpenShift/Application', () => {
         suite('called from command palette', () => {
 
             test('calls the appropriate error message when no project found', async () => {
-                getProjectNamesStub.restore();
                 sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
                 try {
                     await Application.describe(null);

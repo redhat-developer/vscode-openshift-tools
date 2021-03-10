@@ -89,12 +89,6 @@ export default class OpenShiftItem {
         return (tokenRegex) ? tokenRegex[1] : null;
     }
 
-    static async getProjectNames(): Promise<OpenShiftObject[]> {
-        const projectList: Array<OpenShiftObject> = await OpenShiftItem.odo.getProjects();
-        if (projectList.length === 0) throw new VsCommandError(errorMessage.Project);
-        return projectList;
-    }
-
     static async getApplicationNames(project: OpenShiftObject, createCommand = false): Promise<Array<OpenShiftObject | QuickPickCommand>> {
         return OpenShiftItem.odo.getApplications(project).then((applicationList) => {
             if (applicationList.length === 0 && !createCommand) throw new VsCommandError(errorMessage.Component);

@@ -37,27 +37,6 @@ suite('OpenShiftItem', () => {
         return wait();
     });
 
-    suite('getProjectNames', ()=> {
-
-        test('returns an array of application names for the project if there is at least one project', async ()=> {
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
-            const appNames = await OpenShiftItem.getProjectNames();
-            expect(appNames[0].getName()).equals('project');
-
-        });
-
-        test('throws error if there are no projects available', async ()=> {
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
-            try {
-                await OpenShiftItem.getProjectNames();
-            } catch (err) {
-                expect(err.message).equals('You need at least one Project available. Please create new OpenShift Project and try again.');
-                return;
-            }
-            fail('should throw error in case projects array is empty');
-        });
-    });
-
     suite('validateMatches', ()=> {
 
         test('returns validation message if provided value is not in lower case alphanumeric characters or "-"', ()=> {

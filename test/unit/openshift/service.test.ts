@@ -39,7 +39,6 @@ suite('OpenShift/Service', () => {
         getServicesStub = sandbox.stub(OdoImpl.prototype, 'getServices').resolves([serviceItem]);
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-        sandbox.stub(OpenShiftItem, 'getProjectNames').resolves([projectItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '' });
