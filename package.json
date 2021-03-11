@@ -766,6 +766,21 @@
         "command": "openshift.componentType.newComponent",
         "title": "New Component",
         "category": "OpenShift"
+      },
+      {
+        "command": "openshift.explorer.addCluster.openLaunchSandboxPage",
+        "title": "Launch Developer Sandbox",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.explorer.addCluster.openCreateClusterPage",
+        "title": "Deploy it in your public cloud",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.explorer.addCluster.openCrcAddClusterPage",
+        "title": "Open Add CRC Cluster Wizard",
+        "category": "OpenShift"
       }
     ],
     "keybindings": [
@@ -962,6 +977,10 @@
         },
         {
           "command": "clusters.openshift.build.openConsole",
+          "when": "false"
+        },
+        {
+          "command": "openshift.explorer.addCluster.openCrcAddClusterPage",
           "when": "false"
         }
       ],

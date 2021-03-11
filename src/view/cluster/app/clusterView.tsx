@@ -42,8 +42,6 @@ import * as ClusterViewStyles from './clusterView.style';
 const useStyles = makeStyles(ClusterViewStyles.useStyles);
 const StyledBadge = withStyles(ClusterViewStyles.badgeStyles)(Badge);
 
-const vscode = window.acquireVsCodeApi();
-
 const crcDefaults = {
 	DefaultCPUs: 4,
 	DefaultMemory: 9216,
@@ -59,7 +57,7 @@ function getSteps() {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export default function addClusterView() {
+export default function addClusterView(props) {
   const classes = useStyles();
   const crcLatest = '1.22.0';
   const crcOpenShift = '4.6.15';
@@ -80,7 +78,7 @@ export default function addClusterView() {
   const [statusError, setStatusError] = React.useState(false);
 
   React.useEffect(() => {
-    vscode.postMessage({action: 'checksetting'});
+    props.vscode.postMessage({action: 'checksetting'});
   }, []);
 
   const steps = getSteps();
@@ -184,12 +182,12 @@ export default function addClusterView() {
     setProgress(true);
     setCrcStartError(false);
     if (settingPresent) {
-      vscode.postMessage({action: 'start', isSetting: true });
+      props.vscode.postMessage({action: 'start', isSetting: true });
     } else {
       const crcStartCommand = (crcNameserver === '') ? `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory} -ojson`:
           `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory} -n ${crcNameserver} -ojson`;
 
-      vscode.postMessage({action: 'start',
+      props.vscode.postMessage({action: 'start',
                           data: crcStartCommand,
                           pullSecret: pullSecretPath,
                           crcLoc: fileName,
@@ -203,23 +201,23 @@ export default function addClusterView() {
   const handleStopProcess = () => {
     setStopProgress(true);
     setCrcStopError(false);
-    vscode.postMessage({action: 'stop', data: `${fileName}`});
+    props.vscode.postMessage({action: 'stop', data: `${fileName}`});
   }
 
   const handleCrcSetup = () => {
-    vscode.postMessage({action: 'run', data: `${fileName}` })
+    props.vscode.postMessage({action: 'run', data: `${fileName}` })
   }
 
   const handleCrcLogin = (loginDetails, clusterUrl) => {
-    vscode.postMessage({action: 'crclogin', data: loginDetails, url: clusterUrl })
+    props.vscode.postMessage({action: 'crclogin', data: loginDetails, url: clusterUrl })
   }
 
   const handleRefresh = () => {
     setStatusSkeleton(true);
     if (settingPresent) {
-      vscode.postMessage({action: 'checksetting'});
+      props.scode.postMessage({action: 'checksetting'});
     } else {
-      vscode.postMessage({action: 'checkcrcstatus', data: `${fileName}`});
+      props.vscode.postMessage({action: 'checkcrcstatus', data: `${fileName}`});
     }
   }
 

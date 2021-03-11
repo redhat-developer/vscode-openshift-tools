@@ -55,6 +55,8 @@ const clusterTypes = [
   }
 ];
 
+const vscodeApi = window.acquireVsCodeApi();
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function Header() {
   const classes = useStyles();
@@ -63,6 +65,23 @@ export default function Header() {
   const handleView = (index) => {
     if (index === 0) {
       setShowWizard(!showWizard);
+      vscodeApi.postMessage({
+        action: 'openCrcAddClusterPage',
+      });
+    } else if (index === 1) {
+      vscodeApi.postMessage({
+        action: 'openLaunchSandboxPage',
+        params: {
+          url: clusterTypes[index].redirectLink
+        }
+      });
+    } else if (index === 2) {
+      vscodeApi.postMessage({
+        action: 'openCreateClusterPage',
+        params: {
+          url: clusterTypes[index].redirectLink
+        }
+      });
     }
   };
 
@@ -92,7 +111,7 @@ export default function Header() {
           <CardActions className={classes.cardButton}>
             <Tooltip title={list.tooltip} placement="top">
               <div>
-                <a href={list.redirectLink} onClick={() => handleView(index)} style={{ textDecoration: 'none'}}>
+                <a onClick={() => handleView(index)} style={{ textDecoration: 'none'}}>
                   <Button
                     variant="contained"
                     color="default"
@@ -120,7 +139,7 @@ export default function Header() {
           <Typography variant="body2" component="p" style={{ padding: 20 }}>
             Red Hat CodeReady Containers brings a minimal OpenShift 4 cluster on your laptop or desktop computer.<br></br>You can use this wizard to create OpenShift cluster locally. Cluster take approximately 15 minutes to provision.
           </Typography>
-          <AddClusterView />
+          <AddClusterView vscode={vscodeApi}/>
         </Card>
       </div>)}
       {!showWizard && (
