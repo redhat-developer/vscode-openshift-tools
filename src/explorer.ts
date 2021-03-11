@@ -101,6 +101,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     refresh(target?: OpenShiftObject): void {
         if (!target) {
             OpenShiftExplorer.odoctl.clearCache();
+            commands.executeCommand('openshift.componentTypesView.refresh');
         }
         this.eventEmitter.fire(target);
     }
