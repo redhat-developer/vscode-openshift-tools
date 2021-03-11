@@ -9,6 +9,7 @@ import { spawn, ChildProcess } from 'child_process';
 import { ExtenisonID } from '../../util/constants';
 import { WindowUtil } from '../../util/windowUtils';
 import { CliChannel } from '../../cli';
+import { vsCommand } from '../../vscommand';
 
 let panel: vscode.WebviewPanel;
 
@@ -18,6 +19,21 @@ export default class ClusterViewLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     static get extensionPath() {
         return vscode.extensions.getExtension(ExtenisonID).extensionPath
+    }
+
+    @vsCommand('openshift.explorer.addCluster.openLaunchSandboxPage')
+    static async openLaunchSandboxPage(url: string) {
+        await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+    }
+
+    @vsCommand('openshift.explorer.addCluster.openCreateClusterPage')
+    static async openCreateClusterPage(url: string) {
+        await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+    }
+
+    @vsCommand('openshift.explorer.addCluster.openCrcAddClusterPage')
+    static async openCrcAddClusterPage(url: string) {
+        // fake command to report crc selection through telemetry
     }
 
     // eslint-disable-next-line @typescript-eslint/require-await
@@ -43,6 +59,10 @@ export default class ClusterViewLoader {
             panel = undefined;
         });
         panel.webview.onDidReceiveMessage(async (event)  => {
+            if (['openLaunchSandboxPage', 'openCreateClusterPage', 'openCrcAddClusterPage'].includes(event.action)) {
+                await vscode.commands.executeCommand(`openshift.explorer.addCluster.${event.action}`, event.params?.url);
+            }
+
             if (event.action === 'run') {
                 const terminal: vscode.Terminal = WindowUtil.createTerminal(`OpenShift: CRC Setup`, undefined);
                 terminal.sendText(`${event.data} setup`);
