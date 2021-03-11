@@ -180,7 +180,7 @@ suite('Openshift/Cluster', () => {
 
                 expect(status).equals(`Successfully logged in to '${testUrl}'`);
                 expect(execStub).calledOnceWith(Command.odoLoginWithUsernamePassword(testUrl, testUser, password));
-                expect(commandStub).calledOnceWith('setContext', 'isLoggedIn', true);
+                expect(commandStub).calledWith('setContext', 'isLoggedIn', true);
             });
 
             (keytar ? test : test.skip)('returns with no username set', async () => {
@@ -266,7 +266,7 @@ suite('Openshift/Cluster', () => {
 
                 expect(status).equals(`Successfully logged in to '${testUrl}'`);
                 expect(execStub).calledOnceWith(Command.odoLoginWithToken(testUrl, token));
-                expect(commandStub).calledOnceWith('setContext', 'isLoggedIn', true);
+                expect(commandStub).calledWith('setContext', 'isLoggedIn', true);
             });
 
             test('returns with no token set', async () => {
@@ -303,7 +303,7 @@ suite('Openshift/Cluster', () => {
 
             expect(status).null;
             expect(execStub).calledOnceWith('odo logout');
-            expect(commandStub).calledOnceWith('setContext', 'isLoggedIn', false);
+            expect(commandStub).calledWith('setContext', 'isLoggedIn', false);
         });
 
         test('logout and log back in works', async () => {
