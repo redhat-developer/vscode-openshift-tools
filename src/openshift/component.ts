@@ -920,6 +920,20 @@ export class Component extends OpenShiftItem {
         );
     }
 
+    @vsCommand('openshift.component.test', true)
+    @selectTargetComponent(
+        'Select an Application',
+        'Select a Component you want to debug (showing only Components pushed to the cluster)',
+        (value: OpenShiftComponent) => value.contextValue === ContextType.COMPONENT_PUSHED && value.kind === ComponentKind.DEVFILE
+    )
+    static async test(component: OpenShiftComponent): Promise<string | void> {
+        if (!component) return null;
+        if (component.kind === ComponentKind.S2I) {
+            return 'Test command does not supported for S2I components';
+        }
+        await Component.odo.executeInTerminal(Command.testComponent(), component.contextPath.fsPath, `OpenShift: Test '${component.getName()}' Component`);
+    }
+
     @vsCommand('openshift.component.import')
     static async import(component: OpenShiftObject): Promise<string | null> {
         const prjName = component.getParent().getParent().getName();
