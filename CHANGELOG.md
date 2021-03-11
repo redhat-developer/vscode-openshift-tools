@@ -1,10 +1,27 @@
 # Change Log
 
-## 0.2.4 (February 25, 2021)
+## 0.2.4 (March 15, 2021)
 
-  - [#1970](https://github.com/redhat-developer/vscode-openshift-tools/issues/1970) TypeError: Cannot read property 'pushCmd' of undefined
-  - [#1972](https://github.com/redhat-developer/vscode-openshift-tools/issues/1972) Update odo to v2.0.5
-
+* [#2020](https://github.com/redhat-developer/vscode-openshift-tools/issues/2020) Add telemetry reporting for cluster selection in 'Add OpenShift Cluster' editor
+* [#2016](https://github.com/redhat-developer/vscode-openshift-tools/issues/2016) Update odo to v2.0.7
+* [#2015](https://github.com/redhat-developer/vscode-openshift-tools/issues/2015) New Component from Component Types view flow needs to be cancelled twice to close
+* [#2010](https://github.com/redhat-developer/vscode-openshift-tools/issues/2010) Component Types View is not updated after cluster gets accessible and user logged in
+* [#2009](https://github.com/redhat-developer/vscode-openshift-tools/issues/2009) Ask for project and application names when cluster is not accessible or user not logged in
+* [#2008](https://github.com/redhat-developer/vscode-openshift-tools/issues/2008) 'Components View' to show components in current workspace
+* [#2003](https://github.com/redhat-developer/vscode-openshift-tools/issues/2003) Component Types View structure and node names improvement
+* [#1999](https://github.com/redhat-developer/vscode-openshift-tools/issues/1999) Add Current Cluster and Registry nodes to 'Component Types' View 
+* [#1997](https://github.com/redhat-developer/vscode-openshift-tools/issues/1997) Can't reuse saved kubeadmin username 
+* [#1995](https://github.com/redhat-developer/vscode-openshift-tools/issues/1995) Component Types view is empty if not logged in to a cluster or it is not accessible
+* [#1990](https://github.com/redhat-developer/vscode-openshift-tools/issues/1990) 'LoggedIn` context set incorrectly to 'true' even if cluster is not accessible or user not logged in
+* [#1988](https://github.com/redhat-developer/vscode-openshift-tools/issues/1988) Update oc CLI to latest stable 4.6 release
+* [#1983](https://github.com/redhat-developer/vscode-openshift-tools/issues/1983) CRC status does not show any info like status, cache usage and etc.
+* [#1978](https://github.com/redhat-developer/vscode-openshift-tools/issues/1978) Create welcome content for Application Explorer view
+* [#1976](https://github.com/redhat-developer/vscode-openshift-tools/issues/1976) odo push --debug does not work for nodejs Devfile Components
+* [#1974](https://github.com/redhat-developer/vscode-openshift-tools/issues/1974) Add 'Test' command to run default test for Devfile Component in OpenShift Application Explorer
+* [#1972](https://github.com/redhat-developer/vscode-openshift-tools/issues/1972) Update odo to v2.0.5
+* [#1970](https://github.com/redhat-developer/vscode-openshift-tools/issues/1970) TypeError: Cannot read property 'pushCmd' of undefined
+* [#1931](https://github.com/redhat-developer/vscode-openshift-tools/issues/1931) Create 'Component Types' View
+* [#1795](https://github.com/redhat-developer/vscode-openshift-tools/issues/1795) Already logged in message: which cluster?
 
 ## 0.2.3 (February 18, 2021)
 
