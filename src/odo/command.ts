@@ -256,6 +256,10 @@ export class Command {
         return `odo create ${type}:${version} ${name} ${version?'--s2i':''} --binary ${binary} --app ${app} --project ${project} --context ${context}`;
     }
 
+    static testComponent() {
+        return 'odo test --show-log';
+    };
+
     @verbose
     static createService(
         project: string,

@@ -781,7 +781,18 @@
         "command": "openshift.explorer.addCluster.openCrcAddClusterPage",
         "title": "Open Add CRC Cluster Wizard",
         "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.test",
+        "title": "Test",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.test.palette",
+        "title": "Test Component",
+        "category": "OpenShift"
       }
+
     ],
     "keybindings": [
       {
@@ -858,6 +869,10 @@
         {
           "command": "openshift.component.create",
           "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.test",
+          "when": "false"
         },
         {
           "command": "openshift.component.createFromRootWorkspaceFolder",
@@ -1236,6 +1251,11 @@
           "command": "openshift.component.debug",
           "when": "view == openshiftProjectExplorer && viewItem == component",
           "group": "c4@5"
+        },
+        {
+          "command": "openshift.component.test",
+          "when": "view == openshiftProjectExplorer && viewItem == component",
+          "group": "c4@6"
         },
         {
           "command": "openshift.component.delete",
