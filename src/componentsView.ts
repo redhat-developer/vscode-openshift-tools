@@ -51,13 +51,15 @@ function isWorkspaceFolderComponent(entry: any): entry is WorkspaceFolderCompone
 
 async function getComponentsInWorkspace(): Promise<WorkspaceFolderComponent[]> {
     const execs: Promise<CliExitData>[] = [];
-    vsc.workspace.workspaceFolders.forEach((folder)=> {
-        try {
-            execs.push(getInstance().execute(Command.viewEnv(), folder.uri.fsPath, false));
-        } catch (ignore) {
-            // ignore execution errors
-        }
-    });
+    if (vsc.workspace.workspaceFolders) {
+        vsc.workspace.workspaceFolders.forEach((folder)=> {
+            try {
+                execs.push(getInstance().execute(Command.viewEnv(), folder.uri.fsPath, false));
+            } catch (ignore) {
+                // ignore execution errors
+            }
+        });
+    }
     const results = await Promise.all(execs);
     return results.map((result) => {
         try {
