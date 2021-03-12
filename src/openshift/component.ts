@@ -104,6 +104,10 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.create')
+    @clusterRequired()
+    @selectTargetApplication(
+        'In which Application you want to create a Component'
+    )
     static async create(application: OpenShiftApplication): Promise<string> {
         if (!application) return null;
 
@@ -115,11 +119,11 @@ export class Component extends OpenShiftItem {
 
         let command: Promise<string>;
         if (componentSource.label === SourceTypeChoice.GIT.label) {
-            command = Promise.resolve(commands.executeCommand('openshift.component.createFromGit', application));
+            command = Component.createFromGit(application);
         } else if (componentSource.label === SourceTypeChoice.BINARY.label) {
-            command = Promise.resolve(commands.executeCommand('openshift.component.createFromBinary', application));
+            command = Component.createFromBinary(application);
         } else if (componentSource.label === SourceTypeChoice.LOCAL.label) {
-            command = Promise.resolve(commands.executeCommand('openshift.component.createFromLocal', application));
+            command = Component.createFromLocal(application);
         }
         return command.catch((err) => Promise.reject(new VsCommandError(`Failed to create Component with error '${err}'`, 'Failed to create Component with error')));
     }
