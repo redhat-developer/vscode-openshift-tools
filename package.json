@@ -862,6 +862,10 @@
       {
         "view": "openshiftProjectExplorer",
         "contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context ](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)"
+      },
+      {
+        "view": "openshiftComponentsView",
+        "contents": "You have no OpenShift Components in your workspace yet.\n[New Component](command:openshift.component.createFromLocal)"
       }
     ],
     "menus": {
