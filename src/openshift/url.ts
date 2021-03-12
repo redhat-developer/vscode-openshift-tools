@@ -6,7 +6,7 @@
 import { window, QuickPickItem, commands, Uri } from 'vscode';
 import { OpenShiftObject } from '../odo';
 import { Command } from '../odo/command';
-import OpenShiftItem from './openshiftItem';
+import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { Progress } from '../util/progress';
 import { Port } from '../odo/config';
 import { vsCommand, VsCommandError } from '../vscommand';
@@ -16,6 +16,7 @@ import { Url as OdoUrl } from '../odo/url';
 export class Url extends OpenShiftItem{
 
     @vsCommand('openshift.url.create')
+    @clusterRequired()
     static async create(context: OpenShiftObject): Promise<string> {
         const component:OpenShiftObject = await Url.getOpenShiftCmdData(context,
             'Select an Application to create a URL',
@@ -78,6 +79,7 @@ export class Url extends OpenShiftItem{
     }
 
     @vsCommand('openshift.url.delete', true)
+    @clusterRequired()
     static async del(treeItem: OpenShiftObject): Promise<string | null> {
         let url = treeItem;
         const component = await Url.getOpenShiftCmdData(url,
@@ -98,6 +100,7 @@ export class Url extends OpenShiftItem{
     }
 
     @vsCommand('openshift.url.open')
+    @clusterRequired()
     static async open(treeItem: OpenShiftObject): Promise<string> {
         const component = treeItem.getParent();
         const urlDetails = await Url.odo.execute(Command.getComponentUrl(), component.contextPath.fsPath);
@@ -119,6 +122,7 @@ export class Url extends OpenShiftItem{
     }
 
     @vsCommand('openshift.url.describe', true)
+    @clusterRequired()
     static async describe(treeItem: OpenShiftObject): Promise<void> {
         let url = treeItem;
         const component = await Url.getOpenShiftCmdData(url,

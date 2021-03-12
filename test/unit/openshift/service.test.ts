@@ -25,7 +25,8 @@ suite('OpenShift/Service', () => {
     let getProjectsStub: sinon.SinonStub;
     let getApplicationsStub: sinon.SinonStub;
     let execStub: sinon.SinonStub;
-    const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
+    const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
+    const projectItem = new TestItem(clusterItem, 'project', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'application', ContextType.APPLICATION);
     const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
     const templateName = 'template';
@@ -34,6 +35,7 @@ suite('OpenShift/Service', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
+        sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([clusterItem]);
         getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects');
         getApplicationsStub = sandbox.stub(OdoImpl.prototype, 'getApplications');
         getServicesStub = sandbox.stub(OdoImpl.prototype, 'getServices').resolves([serviceItem]);

@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window, QuickPickItem } from 'vscode';
+import { window, QuickPickItem, commands } from 'vscode';
 import * as validator from 'validator';
-import { Odo, OdoImpl, OpenShiftObject, ContextType, OpenShiftApplication, OpenShiftProject } from '../odo';
+import { Odo, getInstance, OpenShiftObject, ContextType, OpenShiftApplication, OpenShiftProject } from '../odo';
 import { OpenShiftExplorer } from '../explorer';
 import { VsCommandError } from '../vscommand';
 
@@ -34,7 +34,7 @@ function isCommand(item: QuickPickItem | QuickPickCommand): item is QuickPickCom
 }
 
 export default class OpenShiftItem {
-    protected static readonly odo: Odo = OdoImpl.Instance;
+    protected static readonly odo: Odo = getInstance();
 
     protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
 
@@ -90,12 +90,19 @@ export default class OpenShiftItem {
     }
 
     static async getApplicationNames(project: OpenShiftObject, createCommand = false): Promise<Array<OpenShiftObject | QuickPickCommand>> {
-        return OpenShiftItem.odo.getApplications(project).then((applicationList) => {
-            if (applicationList.length === 0 && !createCommand) throw new VsCommandError(errorMessage.Component);
-            return createCommand ? [new QuickPickCommand('$(plus) Create new Application...', async () => {
-                return OpenShiftItem.getName('Application name', Promise.resolve(applicationList));
-            }), ...applicationList] : applicationList;
-        });
+        if (project.getParent()) {
+            return OpenShiftItem.odo.getApplications(project).then((applicationList) => {
+                if (applicationList.length === 0 && !createCommand) throw new VsCommandError(errorMessage.Component);
+                return createCommand ? [new QuickPickCommand('$(plus) Create new Application...', async () => {
+                    return OpenShiftItem.getName('Application name', Promise.resolve(applicationList));
+                }), ...applicationList] : applicationList;
+            });
+        }
+        return [
+            new QuickPickCommand('$(plus) Create new Application...', async () => {
+                return OpenShiftItem.getName('Application name', Promise.resolve([]));
+            })
+        ];
     }
 
     static async getComponentNames(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]> {
@@ -126,12 +133,23 @@ export default class OpenShiftItem {
         let context: OpenShiftObject | QuickPickCommand = treeItem;
         let project: OpenShiftObject;
         if (!context) {
-            context = (await this.odo.getProjects()).find((prj:OpenShiftProject)=>prj.active);
-            if (!context) {
-                throw new VsCommandError(errorMessage.Project);
+            const clusters = await this.odo.getClusters();
+            if (clusters.length) { // connected to cluster because odo version printed out server url
+                const projects = await this.odo.getProjects();
+                context = projects.find((prj:OpenShiftProject)=>prj.active);
+                if (!context) {
+                    throw new VsCommandError(errorMessage.Project)
+                }
+            } else { // cluster is not accessible or user not logged in
+                const projectName = await OpenShiftItem.getName('Project Name', Promise.resolve([]))
+                    if (projectName) {
+                        context = new OpenShiftProject(undefined, projectName, true);
+                    } else {
+                        context = null;
+                    }
             }
         }
-        if (context && context.contextValue === ContextType.PROJECT && appPlaceholder ) {
+        if (context && !isCommand(context) && context.contextValue === ContextType.PROJECT && appPlaceholder ) {
             project = context;
             const applicationList = await OpenShiftItem.getApplicationNames(project, appPlaceholder.includes('create') && compPlaceholder === undefined);
             if ( applicationList.length === 1 && isCommand(applicationList[0])) {
@@ -178,4 +196,38 @@ export function selectTargetComponent(appPlaceHolder, cmpPlaceHolder, condition?
 
 export function selectTargetApplication(appPlaceHolder): (_target: any, key: string, descriptor: any) => void {
     return selectTargetDecoratorFactory(async (context) => OpenShiftItem.getOpenShiftCmdData(context, appPlaceHolder));
+}
+
+export function clusterRequired() {
+    return function (_target: any, key: string, descriptor: any): void {
+        let fnKey: string | undefined;
+        let fn: Function | undefined;
+
+        if (typeof descriptor.value === 'function') {
+            fnKey = 'value';
+            fn = descriptor.value;
+        } else {
+            throw new Error('not supported');
+        }
+
+       descriptor[fnKey] = async function (...args: any[]): Promise<any> {
+            let clusters = await getInstance().getClusters()
+            if (clusters.length === 0) {
+                const lOrC = await window.showInformationMessage('Login in to a Cluster to run this command.', 'Login', 'Add OpenShift Cluster', 'Cancel');
+                if(lOrC === 'Login') {
+                    const loginResult = await commands.executeCommand('openshift.explorer.login');
+                    if (typeof loginResult === 'string') {
+                        window.showInformationMessage(loginResult);
+                    }
+                    clusters = await getInstance().getClusters();
+                } else if (lOrC === 'Add OpenShift Cluster') {
+                    return commands.executeCommand('openshift.explorer.addCluster');
+                }
+            }
+            if (clusters.length) {
+                return fn.apply(this, args);
+            }
+            return;
+        };
+    };
 }

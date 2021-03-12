@@ -791,6 +791,20 @@
         "command": "openshift.component.test.palette",
         "title": "Test Component",
         "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.revealInExplorer",
+        "title": "Reveal in Explorer",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.componentsView.refresh",
+        "title": "Refresh Components View",
+        "category": "OpenShift",
+        "icon": {
+          "dark": "images/title/dark/icon-refresh.svg",
+          "light": "images/title/light/icon-refresh.svg"
+        }
       }
 
     ],
@@ -825,6 +839,10 @@
         {
           "id": "openshiftProjectExplorer",
           "name": "Application Explorer"
+        },
+        {
+          "id": "openshiftComponentsView",
+          "name": "Components"
         },
         {
           "id": "openshiftComponentTypesView",
@@ -997,12 +1015,25 @@
         {
           "command": "openshift.explorer.addCluster.openCrcAddClusterPage",
           "when": "false"
+        },
+        {
+          "command": "openshift.component.revealInExplorer",
+          "when": "false"
+        },
+        {
+          "command": "openshift.componentType.newComponent",
+          "when": "false"
         }
       ],
       "view/title": [
         {
           "command": "openshift.componentTypesView.refresh",
           "when": "view == openshiftComponentTypesView",
+          "group": "navigation"
+        },
+        {
+          "command": "openshift.componentsView.refresh",
+          "when": "view == openshiftComponentsView",
           "group": "navigation"
         },
         {
@@ -1365,6 +1396,10 @@
           "command": "openshift.componentType.newComponent",
           "when": "view == openshiftComponentTypesView && viewItem == s2iImageStreamTag || viewItem == devfileStarterProject || viewItem == devfileComponentType",
           "group": "0@0"
+        },
+        {
+          "command": "openshift.component.revealInExplorer",
+          "when": "view == openshiftComponentsView && viewItem == openshift.component"
         }
       ]
     },

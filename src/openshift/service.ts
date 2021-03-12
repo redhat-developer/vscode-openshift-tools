@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { window } from 'vscode';
-import OpenShiftItem from './openshiftItem';
+import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { OpenShiftObject } from '../odo';
 import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
@@ -14,6 +14,7 @@ import { vsCommand, VsCommandError } from '../vscommand';
 export class Service extends OpenShiftItem {
 
     @vsCommand('openshift.service.create')
+    @clusterRequired()
     static async create(context: OpenShiftObject): Promise<string>  {
         const application = await Service.getOpenShiftCmdData(context,
             'In which Application you want to create a Service'
@@ -46,6 +47,7 @@ export class Service extends OpenShiftItem {
     }
 
     @vsCommand('openshift.service.delete', true)
+    @clusterRequired()
     static async del(treeItem: OpenShiftObject): Promise<string> {
         let service = treeItem;
 
@@ -70,6 +72,7 @@ export class Service extends OpenShiftItem {
     }
 
     @vsCommand('openshift.service.describe', true)
+    @clusterRequired()
     static async describe(context: OpenShiftObject): Promise<void> {
         let service = context;
 

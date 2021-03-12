@@ -6,10 +6,11 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { OdoImpl } from '../../../src/odo';
+import { ContextType, OdoImpl } from '../../../src/odo';
 import { Command } from '../../../src/odo/command';
 import { Catalog } from '../../../src/openshift/catalog';
 import { Platform } from '../../../src/util/platform';
+import { TestItem } from './testOSItem';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -20,6 +21,7 @@ suite('OpenShift/Catalog', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
+        sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([new TestItem(undefined, 'cluster', ContextType.CLUSTER)]);
         execStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal').resolves();
     });
 
@@ -27,14 +29,14 @@ suite('OpenShift/Catalog', () => {
         sandbox.restore();
     });
 
-    test('listComponents calls odo catalog list components', () => {
-        Catalog.listComponents();
+    test('listComponents calls odo catalog list components', async () => {
+        await Promise.resolve(Catalog.listComponents());
 
         expect(execStub).calledOnceWith(Command.listCatalogComponents());
     });
 
-    test('listServices calls odo catalog list services', () => {
-        Catalog.listServices();
+    test('listServices calls odo catalog list services', async () => {
+        await Promise.resolve(Catalog.listServices());
 
         expect(execStub).calledOnceWith(Command.listCatalogServices(), Platform.getUserHomePath());
     });

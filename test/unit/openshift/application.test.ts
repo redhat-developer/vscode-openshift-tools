@@ -20,7 +20,8 @@ suite('OpenShift/Application', () => {
     let quickPickStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
-    const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
+    const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
+    const projectItem = new TestItem(clusterItem, 'project', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
     const compItem = new TestItem(appItem, 'app', ContextType.COMPONENT_NO_CONTEXT, [], null);
     compItem.path = 'path/to/component';
@@ -29,6 +30,7 @@ suite('OpenShift/Application', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: null, stdout: '', stderr: ''});
+        sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([clusterItem]);
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(vscode.window, 'showInputBox');

@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { window } from 'vscode';
-import OpenShiftItem from './openshiftItem';
+import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { OpenShiftObject } from '../odo';
 import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
@@ -13,6 +13,7 @@ import { vsCommand, VsCommandError } from '../vscommand';
 export class Application extends OpenShiftItem {
 
     @vsCommand('openshift.app.describe', true)
+    @clusterRequired()
     static async describe(treeItem: OpenShiftObject): Promise<void> {
         const application = await Application.getOpenShiftCmdData(treeItem,
             'Select Application you want to describe');
@@ -20,6 +21,7 @@ export class Application extends OpenShiftItem {
     }
 
     @vsCommand('openshift.app.delete', true)
+    @clusterRequired()
     static async del(treeItem: OpenShiftObject): Promise<string> {
         const application = await Application.getOpenShiftCmdData(treeItem,
             'Select Application to delete');

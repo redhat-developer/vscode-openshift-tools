@@ -6,12 +6,13 @@
 import { window } from 'vscode';
 import { CliChannel } from './cli';
 import { ToolsConfig } from './tools';
-import OpenShiftItem from './openshift/openshiftItem';
+import OpenShiftItem, { clusterRequired } from './openshift/openshiftItem';
 import { vsCommand } from './vscommand';
 
 export class Oc {
 
     @vsCommand('openshift.create')
+    @clusterRequired()
     public static async create(): Promise<string | null> {
         const document = window.activeTextEditor ? window.activeTextEditor.document : undefined;
         const pleaseSave = 'Please save your changes before executing \'OpenShift: Create\' command.';

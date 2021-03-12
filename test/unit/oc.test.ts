@@ -48,6 +48,7 @@ suite('Oc', () => {
         execStub = sandbox.stub(CliChannel.prototype, 'execute');
         quickPickStub = sandbox.stub(window, 'showQuickPick');
         detectOrDownloadStub = sandbox.stub(ToolsConfig, 'detect').resolves('path');
+        sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([clusterItem]);
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
     });
 

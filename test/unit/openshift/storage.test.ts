@@ -23,7 +23,8 @@ suite('OpenShift/Storage', () => {
     let inputStub: sinon.SinonStub;
     let getProjectsStub: sinon.SinonStub;
     let getStorageNamesStub: sinon.SinonStub;
-    const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
+    const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
+    const projectItem = new TestItem(clusterItem, 'project', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
     const componentItem = new TestItem(appItem, 'component', ContextType.COMPONENT);
     const storageItem = new TestItem(componentItem, 'storage', ContextType.STORAGE);
@@ -33,6 +34,7 @@ suite('OpenShift/Storage', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
+        sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([clusterItem]);
         getStorageNamesStub = sandbox.stub(OdoImpl.prototype, 'getStorageNames').resolves([storageItem]);
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: '', stdout: '', stderr: ''});
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
