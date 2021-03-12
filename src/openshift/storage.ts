@@ -5,7 +5,7 @@
 
 import { window } from 'vscode';
 import { isEmpty } from 'validator';
-import OpenShiftItem from './openshiftItem';
+import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { OpenShiftObject, ContextType } from '../odo';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
@@ -13,6 +13,7 @@ import { vsCommand, VsCommandError } from '../vscommand';
 export class Storage extends OpenShiftItem {
 
     @vsCommand('openshift.storage.create')
+    @clusterRequired()
     static async create(context: OpenShiftObject): Promise<string> {
         const component = await Storage.getOpenShiftCmdData(context,
             'In which Application you want to create a Storage',
@@ -46,6 +47,7 @@ export class Storage extends OpenShiftItem {
     }
 
     @vsCommand('openshift.storage.delete', true)
+    @clusterRequired()
     static async del(treeItem: OpenShiftObject): Promise<string> {
         let storage = treeItem;
         const component = await Storage.getOpenShiftCmdData(storage,

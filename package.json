@@ -1019,6 +1019,10 @@
         {
           "command": "openshift.component.revealInExplorer",
           "when": "false"
+        },
+        {
+          "command": "openshift.componentType.newComponent",
+          "when": "false"
         }
       ],
       "view/title": [

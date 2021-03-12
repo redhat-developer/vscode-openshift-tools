@@ -10,7 +10,7 @@ import { ChildProcess , exec } from 'child_process';
 import { isURL } from 'validator';
 import { EventEmitter } from 'events';
 import * as YAML from 'yaml'
-import OpenShiftItem, { selectTargetApplication, selectTargetComponent } from './openshiftItem';
+import OpenShiftItem, { clusterRequired, selectTargetApplication, selectTargetComponent } from './openshiftItem';
 import { OpenShiftObject, ContextType, OpenShiftObjectImpl, OpenShiftComponent, OpenShiftApplication } from '../odo';
 import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
@@ -104,9 +104,6 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.create')
-    @selectTargetApplication(
-        'In which Application you want to create a Component'
-    )
     static async create(application: OpenShiftApplication): Promise<string> {
         if (!application) return null;
 
@@ -118,16 +115,17 @@ export class Component extends OpenShiftItem {
 
         let command: Promise<string>;
         if (componentSource.label === SourceTypeChoice.GIT.label) {
-            command = Component.createFromGit(application);
+            command = Promise.resolve(commands.executeCommand('openshift.component.createFromGit', application));
         } else if (componentSource.label === SourceTypeChoice.BINARY.label) {
-            command = Component.createFromBinary(application);
+            command = Promise.resolve(commands.executeCommand('openshift.component.createFromBinary', application));
         } else if (componentSource.label === SourceTypeChoice.LOCAL.label) {
-            command = Component.createFromLocal(application);
+            command = Promise.resolve(commands.executeCommand('openshift.component.createFromLocal', application));
         }
         return command.catch((err) => Promise.reject(new VsCommandError(`Failed to create Component with error '${err}'`, 'Failed to create Component with error')));
     }
 
     @vsCommand('openshift.component.delete', true)
+    @clusterRequired()
     @selectTargetComponent(
         'From which Application you want to delete Component',
         'Select Component to delete'
@@ -152,6 +150,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.undeploy', true)
+    @clusterRequired()
     @selectTargetComponent(
         'From which Application you want to undeploy Component',
         'Select Component to undeploy',
@@ -203,6 +202,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.describe', true)
+    @clusterRequired()
     @selectTargetComponent(
         'From which Application you want to describe Component',
         'Select Component you want to describe'
@@ -223,6 +223,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.log', true)
+    @clusterRequired()
     @selectTargetComponent(
         'In which Application you want to see Log',
         'For which Component you want to see Log',
@@ -241,6 +242,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.followLog', true)
+    @clusterRequired()
     @selectTargetComponent(
         'In which Application you want to follow Log',
         'For which Component you want to follow Log',
@@ -264,6 +266,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.unlink')
+    @clusterRequired()
     static async unlink(context: OpenShiftComponent): Promise<string | null> {
         if (!context) return null;
         if (context.kind === ComponentKind.DEVFILE) {
@@ -293,6 +296,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.unlinkComponent.palette')
+    @clusterRequired()
     @selectTargetComponent(
         'Select an Application',
         'Select a Component',
@@ -327,6 +331,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.unlinkService.palette')
+    @clusterRequired()
     @selectTargetComponent(
         'Select an Application',
         'Select a Component',
@@ -354,6 +359,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.linkComponent')
+    @clusterRequired()
     @selectTargetComponent(
         'Select an Application',
         'Select a Component',
@@ -398,6 +404,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.linkService')
+    @clusterRequired()
     @selectTargetComponent(
         'Select an Application',
         'Select a Component',
@@ -428,6 +435,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.push', true)
+    @clusterRequired()
     @selectTargetComponent(
         'In which Application you want to push the changes',
         'For which Component you want to push the changes',
@@ -442,6 +450,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.lastPush')
+    @clusterRequired()
     static async lastPush(): Promise<string> {
         const getPushCmd = await Component.getPushCmd();
         if (getPushCmd?.pushCmd && getPushCmd.contextPath) {
@@ -462,6 +471,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.watch', true)
+    @clusterRequired()
     @selectTargetComponent(
         'Select an Application',
         'Select a Component you want to watch',
@@ -493,11 +503,13 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.watch.showLog')
+    @clusterRequired()
     static showWatchSessionLog(context: string): void {
         LogViewLoader.loadView(`${context} Watch Log`,  () => `odo watch --context ${context}`, Component.odo.getOpenShiftObjectByContext(context), Component.watchSessions.get(context));
     }
 
     @vsCommand('openshift.component.openUrl', true)
+    @clusterRequired()
     @selectTargetComponent(
         'Select an Application',
         'Select a Component to open in browser',
@@ -699,6 +711,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.createFromGit')
+    @clusterRequired()
     @selectTargetApplication(
         'In which Application you want to create a Component'
     )
@@ -743,6 +756,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.createFromBinary')
+    @clusterRequired()
     @selectTargetApplication(
         'In which Application you want to create a Component'
     )
@@ -777,6 +791,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.debug', true)
+    @clusterRequired()
     @selectTargetComponent(
         'Select an Application',
         'Select a Component you want to debug (showing only Components pushed to the cluster)',
@@ -929,6 +944,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.test', true)
+    @clusterRequired()
     @selectTargetComponent(
         'Select an Application',
         'Select a Component you want to debug (showing only Components pushed to the cluster)',
@@ -943,6 +959,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.import')
+    // @clusterRequired() - not required because available only from context menu in application explorer
     static async import(component: OpenShiftObject): Promise<string | null> {
         const prjName = component.getParent().getParent().getName();
         const appName = component.getParent().getName();

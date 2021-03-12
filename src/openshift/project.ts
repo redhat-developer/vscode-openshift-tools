@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { commands, QuickPickItem, window } from 'vscode';
-import OpenShiftItem from './openshiftItem';
+import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { OpenShiftObject, OpenShiftProject, getInstance as getOdoInstance } from '../odo';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
@@ -12,6 +12,7 @@ import { vsCommand, VsCommandError } from '../vscommand';
 export class Project extends OpenShiftItem {
 
     @vsCommand('openshift.project.set', true)
+    @clusterRequired()
     static async set(): Promise<string | null> {
         let message = null;
         const createNewProject = {
@@ -37,6 +38,7 @@ export class Project extends OpenShiftItem {
     }
 
     @vsCommand('openshift.project.create')
+    @clusterRequired()
     static async create(): Promise<string> {
         const projectList = OpenShiftItem.odo.getProjects();
         let projectName = await Project.getName('Project name', projectList);
@@ -48,6 +50,7 @@ export class Project extends OpenShiftItem {
     }
 
     @vsCommand('openshift.project.delete', true)
+    @clusterRequired()
     static async del(context: OpenShiftObject): Promise<string> {
         let result: Promise<string> = null;
         const project = await Project.getOpenShiftCmdData(context);

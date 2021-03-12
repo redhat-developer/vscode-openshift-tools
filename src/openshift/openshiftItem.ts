@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window, QuickPickItem } from 'vscode';
+import { window, QuickPickItem, commands } from 'vscode';
 import * as validator from 'validator';
-import { Odo, OdoImpl, OpenShiftObject, ContextType, OpenShiftApplication, OpenShiftProject } from '../odo';
+import { Odo, getInstance, OpenShiftObject, ContextType, OpenShiftApplication, OpenShiftProject } from '../odo';
 import { OpenShiftExplorer } from '../explorer';
 import { VsCommandError } from '../vscommand';
 
@@ -34,7 +34,7 @@ function isCommand(item: QuickPickItem | QuickPickCommand): item is QuickPickCom
 }
 
 export default class OpenShiftItem {
-    protected static readonly odo: Odo = OdoImpl.Instance;
+    protected static readonly odo: Odo = getInstance();
 
     protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
 
@@ -196,4 +196,38 @@ export function selectTargetComponent(appPlaceHolder, cmpPlaceHolder, condition?
 
 export function selectTargetApplication(appPlaceHolder): (_target: any, key: string, descriptor: any) => void {
     return selectTargetDecoratorFactory(async (context) => OpenShiftItem.getOpenShiftCmdData(context, appPlaceHolder));
+}
+
+export function clusterRequired() {
+    return function (_target: any, key: string, descriptor: any): void {
+        let fnKey: string | undefined;
+        let fn: Function | undefined;
+
+        if (typeof descriptor.value === 'function') {
+            fnKey = 'value';
+            fn = descriptor.value;
+        } else {
+            throw new Error('not supported');
+        }
+
+       descriptor[fnKey] = async function (...args: any[]): Promise<any> {
+            let clusters = await getInstance().getClusters()
+            if (clusters.length === 0) {
+                const lOrC = await window.showInformationMessage('Login in to a Cluster to run this command.', 'Login', 'Add OpenShift Cluster', 'Cancel');
+                if(lOrC === 'Login') {
+                    const loginResult = await commands.executeCommand('openshift.explorer.login');
+                    if (typeof loginResult === 'string') {
+                        window.showInformationMessage(loginResult);
+                    }
+                    clusters = await getInstance().getClusters();
+                } else if (lOrC === 'Add OpenShift Cluster') {
+                    return commands.executeCommand('openshift.explorer.addCluster');
+                }
+            }
+            if (clusters.length) {
+                return fn.apply(this, args);
+            }
+            return;
+        };
+    };
 }

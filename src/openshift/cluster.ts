@@ -5,7 +5,7 @@
 
 import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace } from 'vscode';
 import { Command } from '../odo/command';
-import OpenShiftItem from './openshiftItem';
+import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { CliExitData, CliChannel } from '../cli';
 import { TokenStore } from '../util/credentialManager';
 import { KubeConfigUtils } from '../util/kubeUtils';
@@ -62,6 +62,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     @vsCommand('openshift.openshiftConsole', true)
+    @clusterRequired()
     static async openshiftConsole(): Promise<void> {
         let consoleUrl: string;
         try {
@@ -158,7 +159,7 @@ export class Cluster extends OpenShiftItem {
         ];
         const loginActionSelected = await window.showQuickPick(loginActions, {placeHolder: 'Select a way to log in to the cluster.', ignoreFocusOut: true});
         if (!loginActionSelected) return null;
-        return loginActionSelected.label === 'Credentials' ? Cluster.credentialsLogin(true, clusterURL) : Cluster.tokenLogin(clusterURL, true);
+        return loginActionSelected.label === 'Credentials' ? await Cluster.credentialsLogin(true, clusterURL) : await Cluster.tokenLogin(clusterURL, true);
     }
 
     private static async requestLoginConfirmation(skipConfirmation = false): Promise<string> {
