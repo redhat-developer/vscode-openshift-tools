@@ -16,7 +16,7 @@ import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
 import { Refs, Type } from '../util/refs';
-import { Delayer } from '../util/async';
+import { Delayer, wait } from '../util/async';
 import { Platform } from '../util/platform';
 import { selectWorkspaceFolder } from '../util/workspace';
 import { ToolsConfig } from '../tools';
@@ -639,28 +639,42 @@ export class Component extends OpenShiftItem {
 
         if (!componentName) return null;
 
+        const progressIndicator  = window.createQuickPick();
+
         let createStarter: string;
         let componentType: ComponentTypeAdapter;
         if (!useExistingDevfile) {
+            progressIndicator.busy = true;
+            progressIndicator.placeholder = 'Loading available Component types';
+            progressIndicator.show();
+            await wait(5000);
             const componentTypes = await Component.odo.getComponentTypes();
             if (componentTypeName) {
                 componentType = componentTypes.find(type => type.name === componentTypeName && type.kind === componentKind && (!version || type.version === version));
             }
             if (!componentType) {
-                componentType = await window.showQuickPick(componentTypes, { placeHolder: 'Component type', ignoreFocusOut: true });
+                componentType = await window.showQuickPick(componentTypes, { placeHolder: 'Select Component type', ignoreFocusOut: true });
+            } else {
+                progressIndicator.hide();
             }
 
             if (!componentType) return null;
 
             if (componentType.kind === ComponentKind.DEVFILE) {
+                progressIndicator.placeholder = 'Checking if context folder is empty'
+                progressIndicator.show();
                 const globbyPath = `${folder.fsPath.replace('\\', '/')}/`;
                 const paths = globby.sync(`${globbyPath}*`, {dot: true, onlyFiles: false});
+                progressIndicator.hide();
                 if (paths.length === 0) {
                     if (starterProjectName) {
                         createStarter = starterProjectName;
                     } else {
+                        progressIndicator.placeholder = 'Loading Starter Projects for selected Component Type'
+                        progressIndicator.show();
                         const descr = await Component.odo.execute(Command.describeCatalogComponent(componentType.name));
                         const starterProjects: StarterProjectDescription[] = Component.odo.loadItems<StarterProjectDescription>(descr,(data:{Data:ComponentDescription})=>data.Data.starterProjects);
+                        progressIndicator.hide();
                         if(starterProjects?.length && starterProjects?.length > 0) {
                             const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: `Initialize Component using ${starterProjects.length === 1 ? '\''.concat(starterProjects[0].name.concat('\' ')) : ''}Starter Project?`});
                             if (create === 'Yes') {
