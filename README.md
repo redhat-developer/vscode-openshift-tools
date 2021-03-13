@@ -13,6 +13,15 @@ OpenShift Connector extension provides an end-to-end developer experience for Re
  - Developers can easily create, deploy and live debug applications running on OpenShift.
  - Run local instance of OpenShift 4.6 using [Red Hat CodeReady Containers](https://code-ready.github.io/crc/).
 
+## New and noteworthy
+
+* View to browse Component Catalog and Registries (see [#1931](https://github.com/redhat-developer/vscode-openshift-tools/issues/1931))
+* View to show Components in current workspace (see [#2008](https://github.com/redhat-developer/vscode-openshift-tools/issues/2008))
+* Reveal in Explorer command to navigate from Component item in Components View to the component's source code
+* Create Components while logged off Cluster
+* OKD CLI v4.6.17 included
+* ODO CLI v2.0.7 included
+
 ### Demo: https://www.youtube.com/watch?v=HEsYgDqD1rM
 
 [![ screencast ](https://bit.ly/3pZsquB)](https://youtube.com/watch?v=m0wBKuKDYO0)
