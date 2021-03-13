@@ -237,7 +237,7 @@ To debug a Java Component, [Java Language Support](https://marketplace.visualstu
    * `Openshift Connector: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
    * `Openshift Connector: CRC Memory Allocation` - MiB of memory to allocate to the OpenShift cluster as selected during the first run.
 
-**NOTE:** CRC (Red Hat CodeReady Containers) version supported by the extension is `1.17.0` (OpenShift Version: `4.5.14`)
+**NOTE:** CRC (Red Hat CodeReady Containers) version supported by the extension is `1.22.0` (OpenShift Version: `4.6.15`)
 
 ## Dependencies
 
@@ -249,7 +249,7 @@ This extension uses two CLI tools to interact with OpenShift cluster:
 
 > `oc` and `odo` tools for Windows, Linux and macOS are included into extension package. Once the extension is installed it is ready to use.
 
-The extension version `0.2.2` includes `odo` CLI tool `v2.0.4` and supports devfile in addition to S2I (Source-to-Image) components. Devfiles are new way of deploying a component with odo.
+The extension version `0.2.4` includes `odo` CLI tool `v2.0.7` and supports devfile in addition to S2I (Source-to-Image) components. Devfiles are new way of deploying a component with odo.
 Follow the links below for additional information:
 
 * [Understanding odo](https://bit.ly/3ovRTuY)
