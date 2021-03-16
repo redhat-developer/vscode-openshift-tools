@@ -1021,6 +1021,14 @@
           "when": "false"
         },
         {
+          "command": "openshift.explorer.addCluster.openLaunchSandboxPage",
+          "when": "false"
+        },
+        {
+          "command": "openshift.explorer.addCluster.openCreateClusterPage",
+          "when": "false"
+        },
+        {
           "command": "openshift.component.revealInExplorer",
           "when": "false"
         },
