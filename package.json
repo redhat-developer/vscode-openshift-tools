@@ -745,7 +745,7 @@
       },
       {
         "command": "openshift.componentTypesView.refresh",
-        "title": "Refresh",
+        "title": "Refresh Components Types View",
         "category": "OpenShift",
         "icon": {
           "dark": "images/title/dark/icon-refresh.svg",
@@ -806,7 +806,6 @@
           "light": "images/title/light/icon-refresh.svg"
         }
       }
-
     ],
     "keybindings": [
       {
@@ -894,6 +893,22 @@
         },
         {
           "command": "openshift.component.test",
+          "when": "false"
+        },
+        {
+          "command": "openshift.component.watch.terminate",
+          "when": "false"
+        },
+        {
+          "command": "openshift.url.open",
+          "when": "false"
+        },
+        {
+          "command": "openshift.componentType.openStarterProjectRepository",
+          "when": "false"
+        },
+        {
+          "command": "openshift.componentType.cloneStarterProjectRepository",
           "when": "false"
         },
         {
