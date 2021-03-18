@@ -74,7 +74,8 @@
     "test:coverage": "npm run vscode:prepublish && npm run test:instrument && node ./out/build/run-tests.js unit",
     "update-deps": "ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
-    "build": "npm run clean && npm run lint && npm run compile "
+    "build": "npm run clean && npm run lint && npm run compile",
+    "smoke-test": "npm run compile:ext && extest setup-and-run out/test/ui/smoke-test.js -o test/ui/settings.json -m test/ui/.mocharc.js"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.13.0",
@@ -173,6 +174,7 @@
     "typescript": "^3.8.3",
     "unzip-stream": "^0.3.0",
     "utf-8-validate": "^5.0.2",
+    "vscode-extension-tester": "^4.0.1",
     "vscode-test": "^1.2.3",
     "webpack": "^4.35.2",
     "webpack-cli": "^3.3.5",
