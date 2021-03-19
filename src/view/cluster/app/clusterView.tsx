@@ -53,14 +53,14 @@ const crcDefaults = {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function getSteps() {
-  return ['OpenShift Version', 'CodeReady Containers archive', 'File path of image pull secret', 'Select optional configurations', 'Setup CRC', 'Start the cluster'];
+  return ['CodeReady Containers archive', 'File path of image pull secret', 'Select optional configurations', 'Setup CRC', 'Start the cluster'];
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function addClusterView(props) {
   const classes = useStyles();
-  const crcLatest = '1.22.0';
-  const crcOpenShift = '4.6.15';
+  const crcLatest = '1.23.1';
+  const crcOpenShift = '4.7.0';
   const [fileName, setBinaryPath] = React.useState('');
   const [pullSecretPath, setSecret] = React.useState('');
   const [cpuSize, setCpuSize] = React.useState(crcDefaults.DefaultCPUs);
@@ -283,6 +283,12 @@ export default function addClusterView(props) {
           <span style={{ marginRight: 10 }}>OpenShift Status</span>
           {status.openshiftStatus == 'Stopped' ? <StoppedStatus /> : <RunningStatus /> }
         </div>
+        <div className={classes.column}>
+          <span style={{ marginRight: 10 }}>CRC Version: {status.crcVer}</span>
+        </div>
+        <div className={classes.column}>
+          <span>OpenShift Version: {status.openshiftVer}</span>
+        </div>
       </AccordionSummary>
       <AccordionDetails className={classes.details}>
         <div className={classes.column}>
@@ -409,22 +415,6 @@ export default function addClusterView(props) {
     switch (step) {
         case 0:
           return (
-            <List dense>
-              <ListItem>
-                <ListItemText
-                  primary={<span>CodeReady Containers version: {crcLatest}</span>}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary={<span>OpenShift Version: {crcOpenShift}</span>}
-                  secondary={<span>Install OpenShift {crcOpenShift} on a laptop with CodeReady Containers</span>}
-                />
-              </ListItem>
-            </List>
-          );
-        case 1:
-          return (
             <div>
               <Typography>Download and extract the CodeReady Containers archive for your operating system and place the executable in your $PATH</Typography>
               <List className={classes.uploadLabel}>
@@ -492,7 +482,7 @@ export default function addClusterView(props) {
                   )}
             </List>
           </div>)
-        case 2:
+        case 1:
           return (
             <List>
               <ListItem>
@@ -537,7 +527,7 @@ export default function addClusterView(props) {
               />
             )}
           </List>)
-        case 3:
+        case 2:
           return (
             <div>
               <TextField
@@ -572,7 +562,7 @@ export default function addClusterView(props) {
                 className={classes.textContainer}
               />
             </div>)
-        case 4:
+        case 3:
           return (
             <List>
               <ListItem>
@@ -586,7 +576,7 @@ export default function addClusterView(props) {
                 </Button>
               </ListItem>
           </List>)
-        case 5:
+        case 4:
           return (
             <Typography>
               Start the cluster. This will create a minimal OpenShift {crcOpenShift} cluster on your laptop or desktop computer.
@@ -598,6 +588,11 @@ export default function addClusterView(props) {
 
   const WizardSteps = () => (
     <Paper elevation={3}>
+      <blockquote className={classes.blockquoteText}>
+        <Typography variant="body2" component="p" style={{textAlign: 'center'}}>
+          Install OpenShift {crcOpenShift} on your system using CodeReady Containers {crcLatest}.
+        </Typography>
+      </blockquote>
       <Stepper activeStep={activeStep} orientation="vertical">
         {steps.map((label, index) => (
           <Step key={label}>

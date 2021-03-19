@@ -149,10 +149,10 @@ createStyles({
     flexDirection: 'column',
     margin: '15px 0',
     padding: '8px 12px',
-    borderLeftWidth: '5',
-    borderLeftStyle: 'solid',
     background: 'var(--vscode-textBlockQuote-background)',
-    borderColor: 'var(--vscode-textBlockQuote-border)'
+  },
+  menuButton: {
+    marginRight: theme.spacing(2)
   }
 });
 
