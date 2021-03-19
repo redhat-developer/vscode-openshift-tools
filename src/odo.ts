@@ -704,6 +704,7 @@ export class OdoImpl implements Odo {
 
     public async getServiceTemplates(): Promise<string[]> {
         // TODO: error reporting does not look right
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let items: any[] = [];
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServicesJson(), Platform.getUserHomePath(), false);
         try {

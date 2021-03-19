@@ -35,26 +35,32 @@ export interface ImageStreamTag {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isS2iComponent(comp: any): comp is S2iComponentType {
     return comp.kind && (typeof comp.kind) === 'string';
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isDevfileComponent(comp: any): comp is DevfileComponentType {
     return comp.Registry;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isImageStreamTag(tag: any): tag is ImageStreamTag {
     return tag.name && tag.annotations;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isSampleProject(repo: any): repo is SampleProject {
     return repo?.sampleRepo;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isCluster(cluster: any): cluster is Cluster {
     return cluster.name && cluster.server && cluster.skipTLSVerify !== undefined;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isRegistry(registry: any): registry is Registry {
     return registry.Name && registry.URL && registry.Secure !== undefined;
 }
