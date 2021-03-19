@@ -25,7 +25,7 @@ OpenShift Connector extension provides an end-to-end developer experience for Re
 
 ### Demo: https://www.youtube.com/watch?v=HEsYgDqD1rM
 
-[![ screencast ](https://bit.ly/3c2MFDr)](https://youtube.com/watch?v=m0wBKuKDYO0)
+[![ screencast ](https://bit.ly/38XQpUW)](https://youtube.com/watch?v=m0wBKuKDYO0)
 
 ### Supported OpenShift Clusters
 
