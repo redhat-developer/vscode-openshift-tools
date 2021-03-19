@@ -47,7 +47,6 @@ import { KubeConfig } from '@kubernetes/client-node';
 type ExampleProject = SampleProject | StarterProject;
 type ComponentType = DevfileComponentType | ImageStreamTag | ExampleProject | Cluster | Registry;
 
-
 export enum ContextType {
     S2I_COMPONENT_TYPE = 's2iComponentType',
     DEVFILE_COMPONENT_TYPE = 'devfileComponentType',
