@@ -1,7 +1,8 @@
 # Change Log
 
-## 0.2.4 (March 15, 2021)
+## 0.2.4 (March 20, 2021)
 
+* [#2046](https://github.com/redhat-developer/vscode-openshift-tools/issues/2046) Update Red Hat CodeReady Containers to 1.23.1 to use OpenShift 4.7.0
 * [#2020](https://github.com/redhat-developer/vscode-openshift-tools/issues/2020) Add telemetry reporting for cluster selection in 'Add OpenShift Cluster' editor
 * [#2016](https://github.com/redhat-developer/vscode-openshift-tools/issues/2016) Update odo to v2.0.7
 * [#2015](https://github.com/redhat-developer/vscode-openshift-tools/issues/2015) New Component from Component Types view flow needs to be cancelled twice to close
@@ -9,8 +10,8 @@
 * [#2009](https://github.com/redhat-developer/vscode-openshift-tools/issues/2009) Ask for project and application names when cluster is not accessible or user not logged in
 * [#2008](https://github.com/redhat-developer/vscode-openshift-tools/issues/2008) 'Components View' to show components in current workspace
 * [#2003](https://github.com/redhat-developer/vscode-openshift-tools/issues/2003) Component Types View structure and node names improvement
-* [#1999](https://github.com/redhat-developer/vscode-openshift-tools/issues/1999) Add Current Cluster and Registry nodes to 'Component Types' View 
-* [#1997](https://github.com/redhat-developer/vscode-openshift-tools/issues/1997) Can't reuse saved kubeadmin username 
+* [#1999](https://github.com/redhat-developer/vscode-openshift-tools/issues/1999) Add Current Cluster and Registry nodes to 'Component Types' View
+* [#1997](https://github.com/redhat-developer/vscode-openshift-tools/issues/1997) Can't reuse saved kubeadmin username
 * [#1995](https://github.com/redhat-developer/vscode-openshift-tools/issues/1995) Component Types view is empty if not logged in to a cluster or it is not accessible
 * [#1990](https://github.com/redhat-developer/vscode-openshift-tools/issues/1990) 'LoggedIn` context set incorrectly to 'true' even if cluster is not accessible or user not logged in
 * [#1988](https://github.com/redhat-developer/vscode-openshift-tools/issues/1988) Update oc CLI to latest stable 4.6 release

@@ -11,7 +11,7 @@
 
 OpenShift Connector extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:
  - Developers can easily create, deploy and live debug applications running on OpenShift.
- - Run local instance of OpenShift 4.6 using [Red Hat CodeReady Containers](https://code-ready.github.io/crc/).
+ - Run local instance of OpenShift 4.7 using [Red Hat CodeReady Containers](https://code-ready.github.io/crc/).
 
 ## New and noteworthy
 
@@ -237,7 +237,7 @@ To debug a Java Component, [Java Language Support](https://marketplace.visualstu
    * `Openshift Connector: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
    * `Openshift Connector: CRC Memory Allocation` - MiB of memory to allocate to the OpenShift cluster as selected during the first run.
 
-**NOTE:** CRC (Red Hat CodeReady Containers) version supported by the extension is `1.22.0` (OpenShift Version: `4.6.15`)
+**NOTE:** CRC (Red Hat CodeReady Containers) version supported by the extension is `1.23.1` (OpenShift Version: `4.7.0`)
 
 ## Dependencies
 
