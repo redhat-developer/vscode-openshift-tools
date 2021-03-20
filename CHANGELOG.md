@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.2.4 (March 20, 2021)
+## 0.2.4 (March 21, 2021)
 
 * [#2046](https://github.com/redhat-developer/vscode-openshift-tools/issues/2046) Update Red Hat CodeReady Containers to 1.23.1 to use OpenShift 4.7.0
 * [#2020](https://github.com/redhat-developer/vscode-openshift-tools/issues/2020) Add telemetry reporting for cluster selection in 'Add OpenShift Cluster' editor
