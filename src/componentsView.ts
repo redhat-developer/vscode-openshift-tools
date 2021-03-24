@@ -14,7 +14,6 @@ import { Command } from './odo/command';
 import { EnvInfo } from './odo/env';
 import { vsCommand } from './vscommand';
 
-
 export interface WorkspaceEntry {
     uri: vsc.Uri;
     type: vsc.FileType;
@@ -133,6 +132,7 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
             await vsc.commands.executeCommand('revealInExplorer', context.contextUri);
         }
     }
+
     createTreeView(id: string): vsc.TreeView<Entry> {
         if (!this.treeView) {
             this.treeView = vsc.window.createTreeView(id, {

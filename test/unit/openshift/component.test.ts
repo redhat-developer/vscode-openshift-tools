@@ -70,7 +70,7 @@ suite('OpenShift/Component', () => {
         getApps = sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
         sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
-        commandStub = sandbox.stub(vscode.commands, 'executeCommand');
+        commandStub = sandbox.stub(vscode.commands, 'executeCommand').resolves();
         sandbox.stub()
     });
 
@@ -90,6 +90,15 @@ suite('OpenShift/Component', () => {
             expect(result).null;
             expect(getApps).calledOnce;
         });
+    });
+
+    suite('reveal in explorer', () => {
+
+        test('called revealInExplorer with component\'s context', async () => {
+            await Component.revealContextInExplorer(componentItem);
+            expect(commandStub).calledWith('revealInExplorer', componentItem.contextPath);
+        });
+
     });
 
     suite('create', () => {
