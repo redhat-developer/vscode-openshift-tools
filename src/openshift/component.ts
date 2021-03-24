@@ -976,6 +976,12 @@ export class Component extends OpenShiftItem {
         await Component.odo.executeInTerminal(Command.testComponent(), component.contextPath.fsPath, `OpenShift: Test '${component.getName()}' Component`);
     }
 
+    @vsCommand('openshift.component.revealContextInExplorer')
+    public static async revealContextInExplorer(context: OpenShiftComponent): Promise<void> {
+        await commands.executeCommand('workbench.view.explorer');
+        await commands.executeCommand('revealInExplorer', context.contextPath);
+    }
+
     @vsCommand('openshift.component.import')
     // @clusterRequired() - not required because available only from context menu in application explorer
     static async import(component: OpenShiftObject): Promise<string | null> {

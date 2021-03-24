@@ -783,6 +783,10 @@
         "category": "OpenShift"
       },
       {
+        "command": "openshift.component.revealContextInExplorer",
+        "title": "Reveal in Explorer"
+      },
+      {
         "command": "openshift.component.test",
         "title": "Test",
         "category": "OpenShift"
@@ -1054,6 +1058,10 @@
         {
           "command": "openshift.component.watch.showLog",
           "when": "false"
+        },
+        {
+          "command": "openshift.component.revealContextInExplorer",
+          "when": "false"
         }
       ],
       "view/title": [
@@ -1320,19 +1328,24 @@
           "group": "c4@6"
         },
         {
-          "command": "openshift.component.delete",
-          "when": "view == openshiftProjectExplorer && viewItem == componentNoContext",
+          "command": "openshift.component.revealContextInExplorer",
+          "when": "view == openshiftProjectExplorer && viewItem == component || viewItem == componentNotPushed",
           "group": "c5@1"
+        },
+        {
+          "command": "openshift.component.delete",
+          "when": "view == openshiftProjectExplorer && viewItem == componentNoContext || ",
+          "group": "c6@1"
         },
         {
           "command": "openshift.component.delete",
           "when": "view == openshiftProjectExplorer && viewItem == component",
-          "group": "c5@1"
+          "group": "c6@1"
         },
         {
           "command": "openshift.component.delete",
           "when": "view == openshiftProjectExplorer && viewItem == componentNotPushed",
-          "group": "c5@1"
+          "group": "c6@1"
         },
         {
           "command": "openshift.service.create",
