@@ -47,6 +47,7 @@ suite('OpenShift/Component', () => {
     const s2iComponentItem = new TestItem(appItem, 'compDev', ContextType.COMPONENT_PUSHED,[], comp2Uri, '/path',  SourceType.LOCAL)
     const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
     const errorMessage = 'FATAL ERROR';
+    let getApps: sinon.SinonStub;
     let Component: any;
     let fetchTag: sinon.SinonStub;
     let commandStub: sinon.SinonStub;
@@ -66,9 +67,10 @@ suite('OpenShift/Component', () => {
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
         getComponentsStub = sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
         sandbox.stub(Util, 'wait').resolves();
+        getApps = sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
         sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
-        commandStub = sandbox.stub(vscode.commands, 'executeCommand');
+        commandStub = sandbox.stub(vscode.commands, 'executeCommand').resolves();
         sandbox.stub()
     });
 
@@ -76,9 +78,27 @@ suite('OpenShift/Component', () => {
         sandbox.restore();
     });
 
-    suite('reveal in explorer called revealInExplorer with component\'s context', () => {
-        Component.revealContextInExplorer(componentItem);
-        expect(commandStub).calledWith(componentItem.contextPath);
+    suite('create component with no context', () => {
+
+        setup(() => {
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onFirstCall().resolves(undefined);
+        });
+
+        test('asks for context and exits if not provided', async () => {
+            const result = await Component.create(null);
+            expect(result).null;
+            expect(getApps).calledOnce;
+        });
+    });
+
+    suite('reveal in explorer', () => {
+
+        test('called revealInExplorer with component\'s context', async () => {
+            await Component.revealContextInExplorer(componentItem);
+            expect(commandStub).calledWith('revealInExplorer', componentItem.contextPath);
+        });
+
     });
 
     suite('create', () => {
