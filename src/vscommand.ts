@@ -75,7 +75,7 @@ export async function registerCommands(...modules: string[]): Promise<Disposable
                     } else {
                         telemetryProps.error = 'Unexpected error';
                     }
-                    throw err;
+                    window.showErrorMessage(err.toString());
                 }
             } finally {
                 telemetryProps.duration = Date.now() - startTime;
