@@ -17,7 +17,6 @@ import { Progress } from '../../../src/util/progress';
 import * as Util from '../../../src/util/async';
 import { Refs } from '../../../src/util/refs';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
-import { SourceTypeChoice } from '../../../src/openshift/component';
 import { SourceType } from '../../../src/odo/config';
 import { ComponentKind, ComponentTypeAdapter } from '../../../src/odo/componentType';
 import { AddWorkspaceFolder } from '../../../src/util/workspace';
