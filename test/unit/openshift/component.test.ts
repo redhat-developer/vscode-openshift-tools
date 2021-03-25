@@ -111,9 +111,8 @@ suite('OpenShift/Component', () => {
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves(SourceTypeChoice.LOCAL);
-            quickPickStub.onSecondCall().resolves({label: 'file:///c:/Temp', folder: vscode.Uri.parse('file:///c:/Temp')});
-            quickPickStub.onThirdCall().resolves(componentType);
+            quickPickStub.onFirstCall().resolves({label: 'file:///c:/Temp', folder: vscode.Uri.parse('file:///c:/Temp')});
+            quickPickStub.onSecondCall().resolves(componentType);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
             progressFunctionStub = sandbox.stub(Progress, 'execFunctionWithProgress').yields();
             sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
@@ -127,7 +126,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('errors when a subcommand fails', async () => {
-            quickPickStub.onSecondCall().rejects(errorMessage);
+            quickPickStub.onFirstCall().rejects(errorMessage);
             let expectedError: Error;
             try {
                 await Component.create(appItem);
@@ -141,7 +140,7 @@ suite('OpenShift/Component', () => {
 
             setup(() => {
                 inputStub.resolves(componentItem.getName());
-                quickPickStub.onSecondCall().resolves({label: folder.uri.fsPath, uri: folder.uri});
+                quickPickStub.onFirstCall().resolves({label: folder.uri.fsPath, uri: folder.uri});
             });
 
             test('happy path works', async () => {
@@ -160,14 +159,14 @@ suite('OpenShift/Component', () => {
             });
 
             test('returns null when no folder selected', async () => {
-                quickPickStub.onSecondCall().resolves(undefined);
+                quickPickStub.onFirstCall().resolves(undefined);
                 const result = await Component.create(appItem);
 
                 expect(result).null;
             });
 
             test('returns null when no new context folder selected', async () => {
-                quickPickStub.onSecondCall().resolves(AddWorkspaceFolder);
+                quickPickStub.onFirstCall().resolves(AddWorkspaceFolder);
                 sandbox.stub(vscode.window, 'showOpenDialog').resolves(null);
                 const result = await Component.create(appItem);
 
@@ -175,7 +174,7 @@ suite('OpenShift/Component', () => {
             });
 
             test('returns null when no new context folder selected', async () => {
-                quickPickStub.onSecondCall().resolves(AddWorkspaceFolder);
+                quickPickStub.onFirstCall().resolves(AddWorkspaceFolder);
                 sandbox.stub(vscode.window, 'showOpenDialog').resolves(null);
                 const result = await Component.create(appItem);
 
@@ -185,9 +184,8 @@ suite('OpenShift/Component', () => {
             test('ask again to select new context folder if selected one has odo component in it', async () => {
                 quickPickStub.restore();
                 quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-                quickPickStub.onFirstCall().resolves(SourceTypeChoice.LOCAL);
-                quickPickStub.onSecondCall().resolves(AddWorkspaceFolder);
-                quickPickStub.onThirdCall().resolves(AddWorkspaceFolder)
+                quickPickStub.onFirstCall().resolves(AddWorkspaceFolder);
+                quickPickStub.onSecondCall().resolves(AddWorkspaceFolder)
                 const sod = sandbox.stub(vscode.window, 'showOpenDialog');
                 sod.onFirstCall().resolves([vscode.Uri.parse('file:///c%3A/Temp')]);
                 sandbox.stub(fs,'existsSync').returns(true);
@@ -207,7 +205,7 @@ suite('OpenShift/Component', () => {
             });
 
             test('returns null when no component type selected', async () => {
-                quickPickStub.onThirdCall().resolves(undefined);
+                quickPickStub.onSecondCall().resolves(undefined);
                 const result = await Component.create(appItem);
 
                 expect(result).null;
@@ -218,12 +216,11 @@ suite('OpenShift/Component', () => {
             const uri = 'git uri';
             setup(() => {
                 sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves(['nodejs']);
-                quickPickStub.onFirstCall().resolves(SourceTypeChoice.GIT);
-                quickPickStub.onSecondCall().resolves(AddWorkspaceFolder);
+                quickPickStub.onFirstCall().resolves(AddWorkspaceFolder);
                 inputStub.onFirstCall().resolves(uri);
-                quickPickStub.onThirdCall().resolves('master');
-                quickPickStub.onCall(3).resolves(componentType);
-                quickPickStub.onCall(4).resolves(version);
+                quickPickStub.onSecondCall().resolves('master');
+                quickPickStub.onThirdCall().resolves(componentType);
+                quickPickStub.onCall(3).resolves(version);
                 inputStub.onSecondCall().resolves(componentItem.getName());
                 sandbox.stub(vscode.window, 'showInformationMessage').resolves();
                 sandbox.stub(vscode.window, 'showOpenDialog').resolves([vscode.Uri.parse('file:///c%3A/Temp')]);
@@ -242,7 +239,7 @@ suite('OpenShift/Component', () => {
             });
 
             test('happy path works', async () => {
-                const result =  await Component.create(appItem);
+                const result =  await Component.createFromGit(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
                 expect(execStub).calledWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType.name, version, componentItem.getName(), uri, ref));
@@ -250,28 +247,28 @@ suite('OpenShift/Component', () => {
 
             test('returns null when no git repo selected', async () => {
                 inputStub.onFirstCall().resolves();
-                const result = await Component.create(appItem);
+                const result = await Component.createFromGit(appItem);
 
                 expect(result).null;
             });
 
             test('returns null when no component name selected', async () => {
-                inputStub.onSecondCall().resolves();
-                const result = await Component.create(appItem);
+                inputStub.onFirstCall().resolves();
+                const result = await Component.createFromGit(appItem);
 
                 expect(result).null;
             });
 
             test('returns null when no git reference selected', async () => {
-                quickPickStub.onThirdCall().resolves();
-                const result = await Component.create(appItem);
+                quickPickStub.onSecondCall().resolves();
+                const result = await Component.createFromGit(appItem);
 
                 expect(result).null;
             });
 
             test('returns null when no component type selected', async () => {
-                quickPickStub.onCall(3).resolves();
-                const result = await Component.create(appItem);
+                quickPickStub.onCall(2).resolves();
+                const result = await Component.createFromGit(appItem);
 
                 expect(result).null;
             });
@@ -283,7 +280,7 @@ suite('OpenShift/Component', () => {
                     return Promise.resolve('https://github.com/redhat-developer/vscode-openshift-tools');
                 });
 
-                await Component.create(appItem);
+                await Component.createFromGit(appItem);
                 expect(result).to.be.undefined;
             });
 
@@ -295,7 +292,7 @@ suite('OpenShift/Component', () => {
                     return Promise.resolve('https://github.com');
                 });
 
-                await Component.create(appItem);
+                await Component.createFromGit(appItem);
                 expect(result).equals('There is no git repository at provided URL.');
             });
 
@@ -306,7 +303,7 @@ suite('OpenShift/Component', () => {
                     return Promise.resolve('github');
                 });
 
-                await Component.create(appItem);
+                await Component.createFromGit(appItem);
                 expect(result).equals('Invalid URL provided');
             });
 
@@ -317,7 +314,7 @@ suite('OpenShift/Component', () => {
                     return Promise.resolve('');
                 });
 
-                await Component.create(appItem);
+                await Component.createFromGit(appItem);
                 expect(result).equals('Empty Git repository URL');
             });
         });
@@ -346,47 +343,47 @@ suite('OpenShift/Component', () => {
             }];
 
             setup(() => {
-                quickPickStub.onFirstCall().resolves(SourceTypeChoice.BINARY);
-                quickPickStub.onSecondCall().resolves(AddWorkspaceFolder);
-                quickPickStub.onThirdCall().resolves({
+                quickPickStub.onFirstCall().resolves(AddWorkspaceFolder);
+                quickPickStub.onSecondCall().resolves({
                     description: paths,
                     label: '$(file-zip) sb.jar'
                 });
-                quickPickStub.onCall(3).resolves(componentType);
-                quickPickStub.onCall(4).resolves(version);
+                quickPickStub.onThirdCall().resolves(componentType);
+                quickPickStub.onCall(3).resolves(version);
                 sandbox.stub(vscode.window, 'showOpenDialog').resolves(files);
                 globbyStub = sandbox.stub(globby, 'sync').returns([paths]);
                 inputStub.resolves(componentItem.getName());
             });
 
             test('happy path works', async () => {
-                const result = await Component.create(appItem);
+                const result = await Component.createFromBinary(appItem);
 
                 expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
                 expect(execStub).calledWith(Command.createBinaryComponent(projectItem.getName(), appItem.getName(), componentType.name, version, componentItem.getName(), paths, files[0].fsPath));
             });
 
             test('returns null when no option is selected from quick pick', async () => {
-                quickPickStub.onFirstCall().resolves(undefined);
+                quickPickStub.onSecondCall().resolves(undefined);
                 const result = await Component.createFromBinary(null);
                 expect(result).null;
             });
 
             test('returns information message if no binary file present in the context', async () => {
+                quickPickStub.onFirstCall().resolves(AddWorkspaceFolder);
                 globbyStub.onFirstCall().returns([]);
-                const result = await Component.createFromBinary(null);
+                const result = await Component.createFromBinary(appItem);
                 expect(result).equals('No binary file present in the context folder selected. We currently only support .jar and .war files. If you need support for any other file, please raise an issue.');
             });
 
             test('returns null when no work space folder selected', async () => {
-                quickPickStub.onSecondCall().resolves(undefined);
-                const result = await Component.create(appItem);
+                quickPickStub.onFirstCall().resolves(undefined);
+                const result = await Component.createFromBinary(appItem);
 
                 expect(result).null;
             });
 
             test('returns null when no binary file selected', async () => {
-                quickPickStub.onThirdCall().resolves(undefined);
+                quickPickStub.onSecondCall().resolves(undefined);
                 const result = await Component.create(appItem);
 
                 expect(result).null;
@@ -400,8 +397,8 @@ suite('OpenShift/Component', () => {
             });
 
             test('returns null when no component type selected', async () => {
-                quickPickStub.onCall(3).resolves();
-                const result = await Component.create(appItem);
+                quickPickStub.onThirdCall().resolves();
+                const result = await Component.createFromBinary(appItem);
 
                 expect(result).null;
             });
