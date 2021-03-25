@@ -111,21 +111,7 @@ export class Component extends OpenShiftItem {
     static async create(application: OpenShiftApplication): Promise<string> {
         if (!application) return null;
 
-        const componentSource = await window.showQuickPick(SourceTypeChoice.asArray(), {
-            placeHolder: 'Select source type for Component',
-            ignoreFocusOut: true
-        });
-        if (!componentSource) return null;
-
-        let command: Promise<string>;
-        if (componentSource.label === SourceTypeChoice.GIT.label) {
-            command = Component.createFromGit(application);
-        } else if (componentSource.label === SourceTypeChoice.BINARY.label) {
-            command = Component.createFromBinary(application);
-        } else if (componentSource.label === SourceTypeChoice.LOCAL.label) {
-            command = Component.createFromLocal(application);
-        }
-        return command.catch((err) => Promise.reject(new VsCommandError(`Failed to create Component with error '${err}'`, 'Failed to create Component with error')));
+        return Component.createFromLocal(application).catch((err) => Promise.reject(new VsCommandError(`Failed to create Component with error '${err}'`, 'Failed to create Component with error')));
     }
 
     @vsCommand('openshift.component.delete', true)
