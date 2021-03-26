@@ -10,7 +10,7 @@ const HtmlWebPackPlugin = require( 'html-webpack-plugin' );
 
 module.exports = {
   entry: {
-    describeViewer: "./src/view/describe/app/index.tsx"
+    describeViewer: "./src/webview/describe/app/index.tsx"
   },
   output: {
     path: path.resolve(__dirname, "../../../out", "describeViewer"),

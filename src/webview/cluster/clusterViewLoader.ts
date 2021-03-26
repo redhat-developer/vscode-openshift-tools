@@ -52,7 +52,7 @@ export default class ClusterViewLoader {
                 retainContextWhenHidden: true
             });
         }
-        panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, "images/context/cluster-node.png"));
+        panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'images/context/cluster-node.png'));
         panel.webview.html = ClusterViewLoader.getWebviewContent(ClusterViewLoader.extensionPath, panel);
         panel.webview.postMessage({action: 'cluster', data: ''});
         panel.onDidDispose(()=> {
@@ -64,26 +64,26 @@ export default class ClusterViewLoader {
             }
 
             if (event.action === 'run') {
-                const terminal: vscode.Terminal = WindowUtil.createTerminal(`OpenShift: CRC Setup`, undefined);
+                const terminal: vscode.Terminal = WindowUtil.createTerminal('OpenShift: CRC Setup', undefined);
                 terminal.sendText(`${event.data} setup`);
                 terminal.show();
             }
             if (event.action === 'start') {
                 channel.show();
                 if (event.isSetting) {
-                    const binaryFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
-                    const pullSecretFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcPullSecretPath");
-                    const cpuFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcCpuCores");
-                    const memoryFromSetting= vscode.workspace.getConfiguration("openshiftConnector").get("crcMemoryAllocated");
+                    const binaryFromSetting= vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
+                    const pullSecretFromSetting= vscode.workspace.getConfiguration('openshiftConnector').get('crcPullSecretPath');
+                    const cpuFromSetting= vscode.workspace.getConfiguration('openshiftConnector').get('crcCpuCores');
+                    const memoryFromSetting= vscode.workspace.getConfiguration('openshiftConnector').get('crcMemoryAllocated');
                     const crcOptions = ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`, '-ojson'];
                     startProcess = spawn(`${binaryFromSetting}`, crcOptions);
                     channel.append(`\n\n${binaryFromSetting} ${crcOptions.join(' ')}\n`);
                 } else {
-                    const configuration = vscode.workspace.getConfiguration("openshiftConnector");
-                    configuration.update("crcBinaryLocation", event.crcLoc, vscode.ConfigurationTarget.Global);
-                    configuration.update("crcPullSecretPath", event.pullSecret, vscode.ConfigurationTarget.Global);
-                    configuration.update("crcCpuCores", event.cpuSize, vscode.ConfigurationTarget.Global);
-                    configuration.update("crcMemoryAllocated", Number.parseInt(event.memory), vscode.ConfigurationTarget.Global);
+                    const configuration = vscode.workspace.getConfiguration('openshiftConnector');
+                    configuration.update('crcBinaryLocation', event.crcLoc, vscode.ConfigurationTarget.Global);
+                    configuration.update('crcPullSecretPath', event.pullSecret, vscode.ConfigurationTarget.Global);
+                    configuration.update('crcCpuCores', event.cpuSize, vscode.ConfigurationTarget.Global);
+                    configuration.update('crcMemoryAllocated', Number.parseInt(event.memory, 10), vscode.ConfigurationTarget.Global);
                     const [tool, ...params] = event.data.split(' ');
                     startProcess = spawn(tool, params);
                     channel.append(`\n\n${tool} ${params.join(' ')}\n`);
@@ -96,13 +96,13 @@ export default class ClusterViewLoader {
                 startProcess.stderr.on('data', (chunk) => {
                     channel.append(chunk);
                 });
-                startProcess.on('close', async (code) => {
+                startProcess.on('close', (code) => {
                     // eslint-disable-next-line no-console
                     console.log(`crc start exited with code ${code}`);
-                    if (code!= 0) {
+                    if (code !== 0) {
                         panel.webview.postMessage({action: 'sendcrcstarterror'})
                     }
-                    const binaryLoc = event.isSetting ? vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation"): event.crcLoc;
+                    const binaryLoc = event.isSetting ? vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation'): event.crcLoc;
                     ClusterViewLoader.checkCrcStatus(binaryLoc, 'crcstartstatus', panel);
                 });
             }
@@ -110,7 +110,7 @@ export default class ClusterViewLoader {
                 let filePath: string;
                 channel.show();
                 if (event.data === '') {
-                    filePath = vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
+                    filePath = vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
                 } else {
                     filePath = event.data;
                 }
@@ -124,14 +124,14 @@ export default class ClusterViewLoader {
                 stopProcess.stderr.on('data', (chunk) => {
                     channel.append(chunk);
                 });
-                stopProcess.on('close', async (code) => {
+                stopProcess.on('close', (code) => {
                     // eslint-disable-next-line no-console
                     console.log(`crc stop exited with code ${code}`);
                     ClusterViewLoader.checkCrcStatus(filePath, 'crcstopstatus', panel);
                 });
             }
             if (event.action === 'checksetting') {
-                const binaryFromSetting:string = vscode.workspace.getConfiguration("openshiftConnector").get("crcBinaryLocation");
+                const binaryFromSetting:string = vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
                 if (binaryFromSetting) {
                     panel.webview.postMessage({action: 'crcsetting'});
                     ClusterViewLoader.checkCrcStatus(binaryFromSetting, 'crcstatus', panel);
@@ -154,8 +154,8 @@ export default class ClusterViewLoader {
         return panel;
     }
 
-    private static async checkCrcStatus(filePath: string, postCommand: string, panel: vscode.WebviewPanel | undefined = undefined) {
-        let crcCredArray = [];
+    private static async checkCrcStatus(filePath: string, postCommand: string, p: vscode.WebviewPanel | undefined = undefined) {
+        const crcCredArray = [];
         const crcVerInfo = await CliChannel.getInstance().execute(`${filePath} version -ojson`);
         channel.append(`\n\n${filePath} version -ojson\n`);
         channel.append(crcVerInfo.stdout);
@@ -163,9 +163,9 @@ export default class ClusterViewLoader {
         channel.append(`\n\n${filePath} status -ojson\n`);
         channel.append(result.stdout);
         if (result.stderr || crcVerInfo.stderr) {
-            panel.webview.postMessage({action: postCommand, errorStatus: true});
+            p.webview.postMessage({action: postCommand, errorStatus: true});
         } else {
-            panel.webview.postMessage({
+            p.webview.postMessage({
                 action: postCommand,
                 status: JSON.parse(result.stdout),
                 errorStatus: false,
@@ -183,18 +183,18 @@ export default class ClusterViewLoader {
         }
     }
 
-    private static getWebviewContent(extensionPath: string, panel: vscode.WebviewPanel): string {
+    private static getWebviewContent(extensionPath: string, p: vscode.WebviewPanel): string {
         // Local path to main script run in the webview
         const reactAppRootOnDisk = path.join(extensionPath, 'out', 'clusterViewer');
         const reactAppPathOnDisk = vscode.Uri.file(
             path.join(reactAppRootOnDisk, 'clusterViewer.js'),
         );
-        const reactAppUri = panel.webview.asWebviewUri(reactAppPathOnDisk);
+        const reactAppUri = p.webview.asWebviewUri(reactAppPathOnDisk);
         const htmlString:Buffer = fs.readFileSync(path.join(reactAppRootOnDisk, 'index.html'));
         const meta = `<meta http-equiv="Content-Security-Policy"
         content="connect-src *;
             default-src 'none';
-            img-src ${panel.webview.cspSource} https: 'self' data:;
+            img-src ${p.webview.cspSource} https: 'self' data:;
             script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;
             style-src 'self' vscode-resource: 'unsafe-inline';">`;
         return `${htmlString}`

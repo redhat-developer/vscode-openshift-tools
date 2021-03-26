@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as React from "react";
+import * as React from 'react';
 
 import Loader from 'react-loader-spinner';
-import { createStyles, makeStyles, Theme, createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import { createStyles, makeStyles, Theme, createMuiTheme, ThemeProvider, withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -15,8 +15,7 @@ import Switch from '@material-ui/core/Switch';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import IconButton from '@material-ui/core/IconButton';
-import { blue } from "@material-ui/core/colors";
-import { withStyles } from "@material-ui/core/styles";
+import { blue } from '@material-ui/core/colors';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -52,13 +51,13 @@ const theme = createMuiTheme({
 const AutoScrollSwitch = withStyles({
     switchBase: {
       color: blue[900],
-      "&$checked": {
+      '&$checked': {
         color: blue[900]
       },
-      "&$checked + $track": {
+      '&$checked + $track': {
         backgroundColor: blue[900]
       },
-      "& + $track": {
+      '& + $track': {
         backgroundColor: blue[50]
       }
     },

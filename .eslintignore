@@ -6,7 +6,7 @@ public/lib
 node_modules
 Godeps
 test-resources
-src/view/log
-src/view/describe
-src/view/cluster
-src/view/webpack.config.js
+src/webview/log
+src/webview/describe
+src/webview/cluster
+src/webview/webpack.config.js

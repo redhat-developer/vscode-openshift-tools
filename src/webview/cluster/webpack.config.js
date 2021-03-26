@@ -11,7 +11,7 @@ const HtmlWebPackPlugin = require( 'html-webpack-plugin' );
 
 module.exports = {
   entry: {
-    clusterViewer: "./src/view/cluster/app/index.tsx"
+    clusterViewer: "./src/webview/cluster/app/index.tsx"
   },
   output: {
     path: path.resolve(__dirname, "../../../out", "clusterViewer"),
