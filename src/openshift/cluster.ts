@@ -14,7 +14,7 @@ import { Progress } from '../util/progress';
 import { Platform } from '../util/platform';
 import { WindowUtil } from '../util/windowUtils';
 import { vsCommand, VsCommandError } from '../vscommand';
-import ClusterViewLoader from '../view/cluster/clusterViewLoader';
+import ClusterViewLoader from '../webview/cluster/clusterViewLoader';
 
 export class Cluster extends OpenShiftItem {
     public static extensionContext: ExtensionContext;

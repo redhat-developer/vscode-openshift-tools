@@ -7,12 +7,11 @@ import * as React from 'react';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { Alert } from '@material-ui/lab';
 import { InsertDriveFile, GetApp, VpnKey } from '@material-ui/icons';
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import StopIcon from '@material-ui/icons/Stop';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-const prettyBytes = require('pretty-bytes');
 import {
   Accordion,
   AccordionSummary,
@@ -36,8 +35,9 @@ import {
   TextField,
   Tooltip,
   Typography } from '@material-ui/core';
-
 import * as ClusterViewStyles from './clusterView.style';
+
+const prettyBytes = require('pretty-bytes');
 
 const useStyles = makeStyles(ClusterViewStyles.useStyles);
 const StyledBadge = withStyles(ClusterViewStyles.badgeStyles)(Badge);
@@ -45,10 +45,10 @@ const StyledBadge = withStyles(ClusterViewStyles.badgeStyles)(Badge);
 const crcDefaults = {
 	DefaultCPUs: 4,
 	DefaultMemory: 9216,
-	DefaultWebConsoleURL: "https://console-openshift-console.apps-crc.testing",
-	DefaultAPIURL: "https://api.crc.testing:6443",
-	CrcLandingPageURL: "https://cloud.redhat.com/openshift/install/crc/installer-provisioned",
-	DefaultCrcUrlBase: "http://mirror.openshift.com/pub/openshift-v4/clients/crc"
+	DefaultWebConsoleURL: 'https://console-openshift-console.apps-crc.testing',
+	DefaultAPIURL: 'https://api.crc.testing:6443',
+	CrcLandingPageURL: 'https://cloud.redhat.com/openshift/install/crc/installer-provisioned',
+	DefaultCrcUrlBase: 'http://mirror.openshift.com/pub/openshift-v4/clients/crc'
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -82,6 +82,18 @@ export default function addClusterView(props) {
   }, []);
 
   const steps = getSteps();
+
+  const setCrcStatus = (message) => {
+    setStatus({ crcStatus: message.status.crcStatus,
+                openshiftStatus: message.status.openshiftStatus,
+                diskUsage: message.status.diskUsage ? prettyBytes(message.status.diskUsage) : 'N/A',
+                cacheUsage: prettyBytes(message.status.cacheUsage),
+                cacheDir: message.status.cacheDir,
+                crcVer: message.versionInfo.version,
+                openshiftVer: message.versionInfo.openshiftVersion,
+                creds: message.creds
+              });
+  }
 
   const messageListener = (event) => {
     if (event?.data?.action){
@@ -129,18 +141,6 @@ export default function addClusterView(props) {
 
   window.addEventListener('message', messageListener);
 
-  const setCrcStatus = (message) => {
-    setStatus({ crcStatus: message.status.crcStatus,
-                openshiftStatus: message.status.openshiftStatus,
-                diskUsage: message.status.diskUsage ? prettyBytes(message.status.diskUsage) : 'N/A',
-                cacheUsage: prettyBytes(message.status.cacheUsage),
-                cacheDir: message.status.cacheDir,
-                crcVer: message.versionInfo.version,
-                openshiftVer: message.versionInfo.openshiftVersion,
-                creds: message.creds
-              });
-  }
-
   const handleUploadPath = (event) => {
     setBinaryPath(event.target.files[0].path);
   }
@@ -150,15 +150,36 @@ export default function addClusterView(props) {
   }
 
   const handleCpuSize = (event) => {
-    setCpuSize(Number.parseInt(event.target.value));
+    setCpuSize(Number.parseInt(event.target.value, 10));
   }
 
   const handleMemory = (event) => {
-    setMemory(Number.parseInt(event.target.value));
+    setMemory(Number.parseInt(event.target.value, 10));
   }
 
   const handleNameserver = (event) => {
     setCrcNameserver(event.target.value);
+  }
+
+  const handleStartProcess = () => {
+    setStopStatus(false);
+    setProgress(true);
+    setCrcStartError(false);
+    if (settingPresent) {
+      props.vscode.postMessage({action: 'start', isSetting: true });
+    } else {
+      const crcStartCommand = (crcNameserver === '') ? `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory} -ojson`:
+          `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory} -n ${crcNameserver} -ojson`;
+
+      props.vscode.postMessage({action: 'start',
+                          data: crcStartCommand,
+                          pullSecret: pullSecretPath,
+                          crcLoc: fileName,
+                          cpuSize,
+                          memory,
+                          isSetting: false
+                        });
+    }
   }
 
   const handleNext = () => {
@@ -176,27 +197,6 @@ export default function addClusterView(props) {
     if (activeStep === 1 && fileName === '') return true;
     if (activeStep === 2 && pullSecretPath === '') return true;
   };
-
-  const handleStartProcess = () => {
-    setStopStatus(false);
-    setProgress(true);
-    setCrcStartError(false);
-    if (settingPresent) {
-      props.vscode.postMessage({action: 'start', isSetting: true });
-    } else {
-      const crcStartCommand = (crcNameserver === '') ? `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory} -ojson`:
-          `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory} -n ${crcNameserver} -ojson`;
-
-      props.vscode.postMessage({action: 'start',
-                          data: crcStartCommand,
-                          pullSecret: pullSecretPath,
-                          crcLoc: fileName,
-                          cpuSize: cpuSize,
-                          memory: memory,
-                          isSetting: false
-                        });
-    }
-  }
 
   const handleStopProcess = () => {
     setStopProgress(true);
@@ -251,9 +251,9 @@ export default function addClusterView(props) {
   const fetchDownloadBinary = () => {
     const platform = (window as any).platform;
     let crcBundle = '';
-    if (platform === 'darwin') crcBundle = `crc-macos-amd64.tar.xz`;
-    if (platform === 'win32') crcBundle = `crc-windows-amd64.zip`;
-    if (platform === 'linux') crcBundle = `crc-linux-amd64.tar.xz`;
+    if (platform === 'darwin') crcBundle = 'crc-macos-amd64.tar.xz';
+    if (platform === 'win32') crcBundle = 'crc-windows-amd64.zip';
+    if (platform === 'linux') crcBundle = 'crc-linux-amd64.tar.xz';
     return `${crcDefaults.DefaultCrcUrlBase}/${crcLatest}/${crcBundle}`;
   }
 
@@ -281,7 +281,7 @@ export default function addClusterView(props) {
       >
         <div className={classes.column}>
           <span style={{ marginRight: 10 }}>OpenShift Status</span>
-          {status.openshiftStatus == 'Stopped' ? <StoppedStatus /> : <RunningStatus /> }
+          {status.openshiftStatus === 'Stopped' ? <StoppedStatus /> : <RunningStatus /> }
         </div>
         <div className={classes.column}>
           <span style={{ marginRight: 10 }}>CRC Version: {status.crcVer}</span>
@@ -338,7 +338,7 @@ export default function addClusterView(props) {
         <Button size="small" component="span" className={classes.button} onClick={handleRefresh} startIcon={<RefreshIcon />}>
           Refresh Status
         </Button>
-        {(status.openshiftStatus != 'Stopped') && (
+        {(status.openshiftStatus !== 'Stopped') && (
         <div>
           <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none'}}>
             <Button size="small" component="span" className={classes.button}>
@@ -450,7 +450,7 @@ export default function addClusterView(props) {
                     secondary={<span>Provide the CodeReady Containers {crcLatest} executable location</span>} />
                   <div>
                     <input
-                    style={{ display: "none" }}
+                    style={{ display: 'none' }}
                     id="contained-button-file"
                     type="file"
                     onChange={handleUploadPath}
@@ -496,7 +496,7 @@ export default function addClusterView(props) {
                 secondary={<span>Download pull secret file from <a href={crcDefaults.CrcLandingPageURL}>here</a> and upload it.</span>} />
               <div className={classes.uploadLabel}>
                 <input
-                  style={{ display: "none" }}
+                  style={{ display: 'none' }}
                   id="contained-button-file"
                   multiple
                   type="file"
@@ -601,7 +601,7 @@ export default function addClusterView(props) {
               {getStepContent(index)}
               <div className={classes.actionsContainer}>
                 <div>
-                  { (activeStep != 0) && (
+                  { (activeStep !== 0) && (
                   <Button
                     variant="contained"
                     onClick={handleBack}
