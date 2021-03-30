@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src <%= cspSource %>; script-src <%= cspSource %>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="<%= cssUri %>">
+  <title>Welcome to OpenShift Tools</title>
+</head>
+
+<body>
+  <div class="section-div">
+    <input type="checkbox" id="showWhenUsingExtension" <% if (checkboxValue) { %> checked <% } %>>
+    <label for="showWhenUsingExtension">Show welcome page when using OpenShift1 Tools</label>
+  </div>
+  <div class="section-div">
+    <div class="title-wrapper">
+      <h2 class="title-header">OpenShift Tools for <%= appName %></h2>
+      <% if (status) { %>
+        <span class="preview"><%= status %></span>
+      <% } %>
+    </div>
+    <p class="no-bottom-margin">Welcome! This extension provides tools to get you up and running with OpenShift application development in <%= appName %>.</p>
+    <p class="no-bottom-margin">Both Maven and Gradle Quarkus projects are supported.</p>
+  </div>
+
+  <div class="section-div">
+    <h2 class="section-title">Get started</h2>
+    <p>Create a new OpenShift Component.</p>
+    <a href="command:openshift.component.create"><button>Create OpenShift Component</button></a>
+  </div>
+
+</body>
+<script src="<%= jsUri %>"></script>
+</html>

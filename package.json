@@ -98,6 +98,7 @@
     "tree-kill": "^1.2.2",
     "validator": "^12.2.0",
     "vscode-kubernetes-tools-api": "1.2.0",
+    "vscode-welcome-view": "^0.0.2",
     "wait-port": "^0.2.7",
     "yaml": "^1.10.0"
   },
@@ -1451,6 +1452,12 @@
       "type": "object",
       "title": "OpenShift Connector",
       "properties": {
+        "openshiftConnector.showWelcomePage": {
+          "title": "Show Welcome Page",
+          "type": "boolean",
+          "default": true,
+          "description": "Show Welcome Page when using OpenShift Connector Extension"
+        },
         "openshiftConnector.showChannelOnOutput": {
           "title": "Show channel on output",
           "type": "boolean",
