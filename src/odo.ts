@@ -634,7 +634,7 @@ export class OdoImpl implements Odo {
                     element.spec.nonHiddenTags.forEach(tag => {
                         const foundTag = element.spec.imageStreamTags.find(imageTag => imageTag.name === tag);
                         if (foundTag) {
-                            s2iItems.push(new ComponentTypeAdapter(ComponentKind.S2I, element.metadata.name, tag, foundTag?.annotations?.description, foundTag.annotations.tags));
+                            s2iItems.push(new ComponentTypeAdapter(ComponentKind.S2I, element.metadata.name, tag, foundTag?.annotations?.description, foundTag?.annotations.tags));
                         }
                     });
                 }
