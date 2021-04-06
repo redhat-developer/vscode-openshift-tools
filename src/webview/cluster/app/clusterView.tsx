@@ -107,6 +107,7 @@ export default function addClusterView(props) {
             setProgress(false);
             setStatusSkeleton(false);
             setCrcStatus(message);
+            setSettingPresent(true);
             break;
           case 'sendcrcstoperror' :
             setStopProgress(false);
