@@ -525,7 +525,7 @@ export class OdoImpl implements Odo {
     }
 
     public async _getProjects(cluster: OpenShiftObject): Promise<OpenShiftObject[]> {
-        return this.execute(Command.listProjects()).then((result) => {
+        return this.execute(Command.listProjects(), Command.listProjects()).then((result) => {
             return this.loadItems<Project>(result).map((item) => new OpenShiftProject(cluster, item.metadata.name, item.status.active) );
         }).catch((error) => {
             window.showErrorMessage(`Cannot retrieve projects for current cluster. Error: ${error}`);
@@ -619,7 +619,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getComponentTypes(): Promise<ComponentType[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson(), Command.listCatalogComponentsJson());
         const compTypesJson: ComponentTypesJson = this.loadJSON(result.stdout);
         const devfileItems: ComponentTypeAdapter[] = [];
         const s2iItems: ComponentTypeAdapter[] = [];
@@ -721,7 +721,6 @@ export class OdoImpl implements Odo {
     public async getServiceTemplatePlans(svcName: string): Promise<string[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServicesJson(), Platform.getUserHomePath());
         return this.loadItems<Service>(result, (data) => data.services.items).filter((value) => value.metadata.name === svcName)[0].spec.planList;
-
     }
 
     async getServices(application: OpenShiftObject): Promise<OpenShiftObject[]> {
@@ -747,21 +746,21 @@ export class OdoImpl implements Odo {
         const [cmd] = command.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
         const terminal: Terminal = WindowUtil.createTerminal(name, cwd);
-        terminal.sendText(toolLocation === cmd ? command : command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`), true);
+        terminal.sendText(toolLocation === cmd ? command : command.replace(cmd, `"${toolLocation}"`), true);
         terminal.show();
     }
 
     public async execute(command: string, cwd?: string, fail = true): Promise<cliInstance.CliExitData> {
         const [cmd] = command.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
-        return OdoImpl.cli.execute(
-            toolLocation ? command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`) : command,
+        const result = await OdoImpl.cli.execute(
+            toolLocation ? command.replace(cmd, `"${toolLocation}"`) : command,
             cwd ? {cwd} : { }
-        ).then(async (result) => {
-            return result.error && fail ?  Promise.reject(result.error) : result;
-        }).catch((err) => {
-            return fail ? Promise.reject(err) : Promise.resolve({error: null, stdout: '', stderr: ''});
-        });
+        );
+        if (result.error && fail) {
+            throw result.error;
+        }
+        return result;
     }
 
     public async spawn(command: string, cwd?: string): Promise<ChildProcess> {
