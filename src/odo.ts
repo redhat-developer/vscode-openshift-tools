@@ -747,7 +747,7 @@ export class OdoImpl implements Odo {
         const [cmd] = command.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
         const terminal: Terminal = WindowUtil.createTerminal(name, cwd);
-        terminal.sendText(toolLocation === cmd ? command : command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`), true);
+        terminal.sendText(toolLocation === cmd ? command : command.replace(cmd, `"${toolLocation}"`), true);
         terminal.show();
     }
 
