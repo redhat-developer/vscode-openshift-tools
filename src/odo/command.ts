@@ -100,10 +100,6 @@ export class Command {
         return 'odo version';
     }
 
-    static printOdoVersionAndProjects(): string {
-        return 'odo version && odo project list';
-    }
-
     static odoLogout(): string {
         return 'odo logout';
     }

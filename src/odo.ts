@@ -755,7 +755,7 @@ export class OdoImpl implements Odo {
         const [cmd] = command.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
         return OdoImpl.cli.execute(
-            toolLocation ? command.replace(cmd, `"${toolLocation}"`).replace(new RegExp(`&& ${cmd}`, 'g'), `&& "${toolLocation}"`) : command,
+            toolLocation ? command.replace(cmd, `"${toolLocation}"`) : command,
             cwd ? {cwd} : { }
         ).then(async (result) => {
             return result.error && fail ?  Promise.reject(result.error) : result;
