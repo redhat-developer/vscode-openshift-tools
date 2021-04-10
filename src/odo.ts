@@ -25,7 +25,7 @@ import { Project } from './odo/project';
 import { ComponentsJson, DevfileComponentAdapter, S2iComponentAdapter } from './odo/component';
 import { Url } from './odo/url';
 import { Service } from './odo/service';
-import { Command } from './odo/command';
+import { Command, CommandText } from './odo/command';
 import { BuilderImage } from './odo/builderImage';
 import { ImageStream } from './odo/imageStream';
 import { VsCommandError } from './vscommand';
@@ -97,8 +97,8 @@ export abstract class OpenShiftObjectImpl implements OpenShiftObject {
         OdoImpl.data.setContextToObject(this);
     }
 
-    set contextPath(cp: Uri) {
-        this.contextPathValue = cp;
+    set contextPath(cpt: Uri) {
+        this.contextPathValue = cpt;
         OdoImpl.data.setContextToObject(this);
     }
 
@@ -346,9 +346,9 @@ export interface Odo {
     getServiceTemplates(): Promise<string[]>;
     getServiceTemplatePlans(svc: string): Promise<string[]>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
-    execute(command: string, cwd?: string, fail?: boolean): Promise<cliInstance.CliExitData>;
+    execute(command: CommandText, cwd?: string, fail?: boolean): Promise<cliInstance.CliExitData>;
     spawn(command: string, cwd?: string): Promise<ChildProcess>;
-    executeInTerminal(command: string, cwd?: string, name?: string): Promise<void>;
+    executeInTerminal(command: CommandText, cwd?: string, name?: string): Promise<void>;
     requireLogin(): Promise<boolean>;
     clearCache?(): void;
     createProject(name: string): Promise<OpenShiftObject>;
@@ -743,25 +743,37 @@ export class OdoImpl implements Odo {
         return services;
     }
 
-    public async executeInTerminal(command: string, cwd: string = process.cwd(), name = 'OpenShift'): Promise<void> {
-        const [cmd] = command.split(' ');
+    public async executeInTerminal(command: CommandText, cwd: string = process.cwd(), name = 'OpenShift'): Promise<void> {
+        const [cmd] = `${command}`.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
         const terminal: Terminal = WindowUtil.createTerminal(name, cwd);
-        terminal.sendText(toolLocation === cmd ? command : command.replace(cmd, `"${toolLocation}"`), true);
+        terminal.sendText(toolLocation === cmd ? `${command}` : `${command}`.replace(cmd, `"${toolLocation}"`), true);
         terminal.show();
     }
 
-    public async execute(command: string, cwd?: string, fail = true): Promise<cliInstance.CliExitData> {
-        const [cmd] = command.split(' ');
+    public async execute(command: CommandText, cwd?: string, fail = true): Promise<cliInstance.CliExitData> {
+        const commandActual = `${command}`;
+        const commandPrivacy = `${command.privacyMode(true)}`;
+        const [cmd] = commandActual.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
-        return OdoImpl.cli.execute(
-            toolLocation ? command.replace(cmd, `"${toolLocation}"`) : command,
-            cwd ? {cwd} : { }
-        ).then(async (result) => {
-            return result.error && fail ?  Promise.reject(result.error) : result;
-        }).catch((err) => {
-            return fail ? Promise.reject(err) : Promise.resolve({error: null, stdout: '', stderr: ''});
-        });
+        let result: cliInstance.CliExitData;
+        try {
+             result = await OdoImpl.cli.execute(
+                toolLocation ? commandActual.replace(cmd, `"${toolLocation}"`) : commandActual,
+                cwd ? {cwd} : { }
+            );
+        } catch (ex) {
+            if (fail) {
+                throw new VsCommandError(`${ex}`, `Error when running command: ${commandPrivacy}`, ex);
+            } else {
+                return {error: null, stdout: '', stderr: ''};
+            }
+        };
+        if (result.error && fail) {
+            throw new VsCommandError(`${result.error}`, `Error when running command: ${commandPrivacy}`, result.error);
+        };
+        return result;
+
     }
 
     public async spawn(command: string, cwd?: string): Promise<ChildProcess> {
@@ -775,7 +787,7 @@ export class OdoImpl implements Odo {
     }
 
     public async requireLogin(): Promise<boolean> {
-        const result: cliInstance.CliExitData = await this.execute('oc whoami', process.cwd(), false);
+        const result: cliInstance.CliExitData = await this.execute(new CommandText('oc whoami'), process.cwd(), false);
         return !!result.error;
     }
 

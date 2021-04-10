@@ -51,7 +51,7 @@ export async function registerCommands(...modules: string[]): Promise<Disposable
                 displayResult(result);
             } catch (err) {
                 if (err.stack) {
-                    const stack = stackTraceParser.parse(err.stack);
+                    const stack = stackTraceParser.parse(err.stack); // TODO: add recursive stacktrace parsing for parent errors
                     if (stack.length > 0) {
                         const files = stack.map((value) => `${value.file.substring(value.file.lastIndexOf(ExtenisonID)-1)}:${value.lineNumber}:${value.column}`);
                         stackTrace = {

@@ -10,6 +10,7 @@ import { OpenShiftObject } from '../../odo';
 import * as odo from '../../odo';
 import treeKill = require('tree-kill');
 import { ChildProcess } from 'child_process';
+import { CommandText } from '../../odo/command';
 
 export default class LogViewLoader {
 
@@ -17,7 +18,7 @@ export default class LogViewLoader {
         return extensions.getExtension(ExtenisonID).extensionPath
     }
 
-    static async loadView(title: string, cmdFunction: (prj, app, comp) => string, target: OpenShiftObject, existingProcess?: ChildProcess): Promise<WebviewPanel> {
+    static async loadView(title: string, cmdFunction: (prj, app, comp) => CommandText, target: OpenShiftObject, existingProcess?: ChildProcess): Promise<WebviewPanel> {
         const localResourceRoot = Uri.file(path.join(LogViewLoader.extensionPath, 'out', 'logViewer'));
 
         const panel = window.createWebviewPanel('logView', title, ViewColumn.One, {
@@ -30,9 +31,9 @@ export default class LogViewLoader {
         const cmd = cmdFunction(target.getParent().getParent().getName(), target.getParent().getName(), target.getName());
 
         // TODO: When webview is going to be ready?
-        panel.webview.html = LogViewLoader.getWebviewContent(LogViewLoader.extensionPath, cmd.replace(/\\/g, '\\\\'));
+        panel.webview.html = LogViewLoader.getWebviewContent(LogViewLoader.extensionPath, `${cmd}`.replace(/\\/g, '\\\\'));
 
-        const process = existingProcess? existingProcess : await odo.getInstance().spawn(cmd, target.contextPath.fsPath);
+        const process = existingProcess? existingProcess : await odo.getInstance().spawn(`${cmd}`, target.contextPath.fsPath);
         process.stdout.on('data', (data) => {
             panel.webview.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
         }).on('close', ()=>{

@@ -302,7 +302,7 @@ suite('Openshift/Cluster', () => {
             const status = await Cluster.logout();
 
             expect(status).null;
-            expect(execStub).calledOnceWith('odo logout');
+            expect(execStub).calledOnceWith(Command.odoLogout());
             expect(commandStub).calledWith('setContext', 'isLoggedIn', false);
         });
 

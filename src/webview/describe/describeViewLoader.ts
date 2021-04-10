@@ -8,6 +8,7 @@ import * as fs from 'fs';
 import { ExtenisonID } from '../../util/constants';
 import { OpenShiftObject } from '../../odo';
 import * as odo from '../../odo';
+import { CommandText } from '../../odo/command';
 
 export default class DescribeViewLoader {
 
@@ -15,7 +16,7 @@ export default class DescribeViewLoader {
         return extensions.getExtension(ExtenisonID).extensionPath
     }
 
-    static async loadView(title: string, cmdFunction: (prj, app, comp) => string, target: OpenShiftObject): Promise<WebviewPanel> {
+    static async loadView(title: string, cmdFunction: (prj, app, comp) => CommandText, target: OpenShiftObject): Promise<WebviewPanel> {
         const localResourceRoot = Uri.file(path.join(DescribeViewLoader.extensionPath, 'out', 'describeViewer'));
 
         const panel = window.createWebviewPanel('describeView', title, ViewColumn.One, {
@@ -28,9 +29,9 @@ export default class DescribeViewLoader {
         const cmd = cmdFunction(target.getParent().getParent().getName(), target.getParent().getName(), target.getName());
 
         // TODO: When webview is going to be ready?
-        panel.webview.html = DescribeViewLoader.getWebviewContent(DescribeViewLoader.extensionPath, cmd);
+        panel.webview.html = DescribeViewLoader.getWebviewContent(DescribeViewLoader.extensionPath, `${cmd}`);
 
-        const process = await odo.getInstance().spawn(cmd, target.contextPath.fsPath);
+        const process = await odo.getInstance().spawn(`${cmd}`, target.contextPath.fsPath);
         process.stdout.on('data', (data) => {
             panel.webview.postMessage({action: 'describe', data: `${data}`.trim().split('\n')});
         });

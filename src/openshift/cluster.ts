@@ -241,7 +241,11 @@ export class Cluster extends OpenShiftItem {
             await Cluster.save(username, passwd, password, result);
             return await Cluster.loginMessage(clusterURL, result);
         } catch (error) {
-            throw new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.message)}'!`, 'Failed to login to cluster');
+            if (error instanceof VsCommandError) {
+                throw new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.message)}'!`, `Failed to login to cluster. ${error.telemetryMessage}`);
+            } else {
+                throw new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.message)}'!`, 'Failed to login to cluster');
+            }
         }
     }
 
