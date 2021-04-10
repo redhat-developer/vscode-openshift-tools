@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { commands, workspace } from 'vscode';
+import { workspace } from 'vscode';
 import { Platform } from '../util/platform';
 
 function verbose(_target: any, key: string, descriptor: any): void {
