@@ -103,7 +103,7 @@ export class Command {
             'odo application list',
             undefined, [
                 new CommandOption('--project', project),
-                new CommandOption('-o', 'json')
+                new CommandOption('-o', 'json', false)
             ]
         );
     }
@@ -296,7 +296,7 @@ export class Command {
 
     static describeComponentNoContextJson(project: string, app: string, component: string): CommandText {
         return this.describeComponentNoContext(project, app, component)
-            .addOption(new CommandOption('-o', 'json'));
+            .addOption(new CommandOption('-o', 'json', false));
     }
 
     static describeComponent(): CommandText {
@@ -304,7 +304,7 @@ export class Command {
     }
 
     static describeComponentJson(): CommandText {
-        return Command.describeComponent().addOption(new CommandOption('-o', 'json'));
+        return Command.describeComponent().addOption(new CommandOption('-o', 'json', false));
     }
 
     static describeService(service: string): CommandText {
@@ -315,7 +315,7 @@ export class Command {
     static describeCatalogComponent(component: string): CommandText {
         return new CommandText('odo catalog describe component',
             component, [
-                new CommandOption('-o', 'json')
+                new CommandOption('-o', 'json', false)
             ]
         );
     }
@@ -336,7 +336,7 @@ export class Command {
         return new CommandText('oc get service',
             `${component}-${app}`, [
                 new CommandOption('--namespace', project),
-                new CommandOption('-o', 'jsonpath="{range .spec.ports[*]}{.port}{\',\'}{end}"')
+                new CommandOption('-o', 'jsonpath="{range .spec.ports[*]}{.port}{\',\'}{end}"', false)
             ]
         );
     }
@@ -415,7 +415,7 @@ export class Command {
             cTxt.addOption(new CommandOption('--starter', starter, false));
         }
         if (useExistingDevfile) {
-            cTxt.addOption(new CommandOption('--devfile', 'devfile.yaml'));
+            cTxt.addOption(new CommandOption('--devfile', 'devfile.yaml', false));
         }
         return cTxt;
     }
@@ -497,7 +497,7 @@ export class Command {
         return new CommandText('oc get ServiceInstance',
             service, [
                 new CommandOption('--namespace', project),
-                new CommandOption('-o', 'jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/name}"')
+                new CommandOption('-o', 'jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/name}"', false)
             ]
         );
     }
@@ -505,7 +505,7 @@ export class Command {
     static waitForServiceToBeGone(project: string, service: string): CommandText {
         return new CommandText('oc wait',
             `ServiceInstance/${service}`, [
-                new CommandOption('--for', 'delete'),
+                new CommandOption('--for', 'delete', false),
                 new CommandOption('--namespace', project)
             ]
         );
@@ -569,7 +569,7 @@ export class Command {
     }
 
     static getclusterVersion(): CommandText {
-        return new CommandText('oc get clusterversion -ojson');
+        return new CommandText('oc get clusterversion -o json');
     }
 
     static showServerUrl(): CommandText {
