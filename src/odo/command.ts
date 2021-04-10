@@ -33,14 +33,13 @@ export class CommandOption {
 
     toString(): string {
         if (this.privacy) {
-            this.toPrivateString();
-        } else {
-            return `${this.name}${this.value ? ` ${this.quote}${this.value}${this.quote}` : '' }`;
+            return this.toPrivateString();
         }
+        return `${this.name}${this.value ? ` ${this.quote}${this.value}${this.quote}` : '' }`;
     }
 
     toPrivateString(): string {
-        return `${this.name}${this.value && this.redacted? 'REDACTED' : '' }`
+        return `${this.name}${this.value && this.redacted? ' REDACTED' : '' }`
     }
 
     privacyMode(set: boolean): void {
