@@ -11,7 +11,7 @@ import * as path from 'path';
 import { Uri, window, commands, extensions } from 'vscode';
 import * as odo from '../../src/odo';
 import { Cluster } from '../../src/openshift/cluster';
-import { Command } from '../../src/odo/command';
+import { Command, CommandText } from '../../src/odo/command';
 import { Component } from '../../src/openshift/component';
 import { AddWorkspaceFolder } from '../../src/util/workspace';
 import { ComponentKind, ComponentTypeAdapter } from '../../src/odo/componentType';
@@ -183,7 +183,7 @@ suite('odo integration', () => {
             await oi.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
         }
         if (!openshiftVersion) {
-            const version = await oi.execute('oc version');
+            const version = await oi.execute(new CommandText('oc version'));
             const match = version.stdout.match(/Server Version:\s*(\d+\.\d+\.\d+).*/);
             if (match && match.length > 1) {
                 openshiftVersion = match[1];

@@ -8,7 +8,7 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import { OdoImpl, ContextType } from '../../../src/odo';
-import { Command } from '../../../src/odo/command';
+import { Command, CommandText } from '../../../src/odo/command';
 import { TestItem } from './testOSItem';
 import { Project } from '../../../src/openshift/project';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
@@ -148,14 +148,14 @@ suite('OpenShift/Project', () => {
             const result = await Project.del(projectItem);
 
             expect(result).equals(`Project '${projectItem.getName()}' successfully deleted`);
-            expect(execStub.getCall(0).args[0]).equals(Command.deleteProject(projectItem.getName()));
+            expect(`${execStub.getCall(0).args[0]}`).equals(`${Command.deleteProject(projectItem.getName())}`);
         });
 
         test('works without context', async () => {
             const result = await Project.del(null);
 
             expect(result).equals(`Project '${projectItem.getName()}' successfully deleted`);
-            expect(execStub.getCall(0).args[0]).equals(Command.deleteProject(projectItem.getName()));
+            expect(`${execStub.getCall(0).args[0]}`).equals(`${Command.deleteProject(projectItem.getName())}`);
         });
 
         test('returns null when cancelled', async () => {
@@ -181,8 +181,8 @@ suite('OpenShift/Project', () => {
         test('makes selected project active', async () => {
             sandbox.stub(vscode.window, 'showQuickPick').resolves(projectItem);
             const result = await Project.set();
-            expect(execStub).calledWith(`odo project set ${projectItem.getName()}`)
-            expect(result).equals(`Project '${projectItem.getName()}' set as active.`)
+            expect(execStub).calledWith(new CommandText('odo project set', projectItem.getName()));
+            expect(result).equals(`Project '${projectItem.getName()}' set as active.`);
         });
 
         test('exits without action if project selection was canceled', async () => {

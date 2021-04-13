@@ -18,6 +18,7 @@ import { CliExitData, CliChannel } from '../../src/cli';
 import * as odo from '../../src/odo';
 import * as verbose from '../../src/odo/command';
 import jsYaml = require('js-yaml');
+import { CommandText } from '../../src/odo/command';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -58,7 +59,7 @@ suite('odo', () => {
 
     suite('command execution', () => {
         let execStub: sinon.SinonStub; let toolsStub: sinon.SinonStub;
-        const command = 'odo do whatever you do';
+        const command = new verbose.CommandText('odo do whatever you do');
 
         setup(() => {
             execStub = sandbox.stub(CliChannel.prototype, 'execute');
@@ -70,7 +71,7 @@ suite('odo', () => {
             execStub.resolves(data);
             const result = await odoCli.execute(command);
 
-            expect(execStub).calledOnceWith(command);
+            expect(execStub).calledOnceWith(`${command}`);
             expect(result).deep.equals(data);
         });
 
@@ -80,7 +81,7 @@ suite('odo', () => {
             toolsStub.resolves(toolPath);
             await odoCli.execute(command);
 
-            expect(execStub).calledOnceWith(command.replace('odo', `"${toolPath}"`));
+            expect(execStub).calledOnceWith(`${command}`.replace('odo', `"${toolPath}"`));
         });
 
         test('execute allows to set its working directory', async () => {
@@ -88,7 +89,7 @@ suite('odo', () => {
             const cwd = 'path/to/some/dir';
             await odoCli.execute(command, cwd);
 
-            expect(execStub).calledOnceWith(command, { cwd });
+            expect(execStub).calledOnceWith(`${command}`, { cwd });
         });
 
         test('execute rejects if an error occurs in the shell command', async () => {
@@ -98,7 +99,7 @@ suite('odo', () => {
                 await odoCli.execute(command);
                 expect.fail();
             } catch (error) {
-                expect(error).equals(err);
+                expect(error.parent).equals(err);
             }
         });
 
@@ -122,7 +123,7 @@ suite('odo', () => {
             toolsStub.restore();
             toolsStub = sandbox.stub(ToolsConfig, 'detect').resolves(path.join('segment1', 'segment2'));
             const ctStub = sandbox.stub(WindowUtil, 'createTerminal').returns(termFake);
-            await odoCli.executeInTerminal('cmd');
+            await odoCli.executeInTerminal(new CommandText('cmd'));
             expect(termFake.sendText).calledOnce;
             expect(termFake.show).calledOnce;
             expect(ctStub).calledWith('OpenShift', process.cwd());
@@ -266,7 +267,7 @@ suite('odo', () => {
             const services = ['service1', 'service2', 'service3'];
             // eslint-disable-next-line @typescript-eslint/require-await
             execStub.callsFake(async (cmd: string, cwd: string)=> {
-                if (cmd.includes('odo service list')) {
+                if (`${cmd}`.includes('odo service list')) {
                     return {
                         error: null,
                         stderr: '',
@@ -293,7 +294,7 @@ suite('odo', () => {
                     };
                 }
 
-                if(cmd.includes('odo list')) {
+                if(`${cmd}`.includes('odo list')) {
                     return {
                         error: undefined,
                         stdout: `
@@ -308,7 +309,7 @@ suite('odo', () => {
                         cwd};
                 }
 
-                if (cmd.includes('list --app')) {
+                if (`${cmd}`.includes('list --app')) {
                     return { error: undefined, stdout: `
                     {
                         "kind": "List",
@@ -599,7 +600,7 @@ suite('odo', () => {
             const stub = sandbox.stub(odoCli, 'execute').resolves({ error: null, stdout: 'logged in', stderr: ''});
             const result = await odoCli.requireLogin();
 
-            expect(stub).calledOnceWith('oc whoami');
+            expect(stub).calledOnceWith(new CommandText('oc whoami'));
             expect(result).false;
         });
 

@@ -12,7 +12,7 @@ import { EventEmitter } from 'events';
 import * as YAML from 'yaml'
 import OpenShiftItem, { clusterRequired, selectTargetApplication, selectTargetComponent } from './openshiftItem';
 import { OpenShiftObject, ContextType, OpenShiftObjectImpl, OpenShiftComponent, OpenShiftApplication } from '../odo';
-import { Command } from '../odo/command';
+import { Command, CommandOption, CommandText } from '../odo/command';
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
 import { Refs, Type } from '../util/refs';
@@ -415,7 +415,7 @@ export class Component extends OpenShiftItem {
         );
     }
 
-    static getPushCmd(): Thenable<{pushCmd: string; contextPath: string; name: string}> {
+    static getPushCmd(): Thenable<{pushCmd: CommandText; contextPath: string; name: string}> {
         return this.extensionContext.globalState.get('PUSH');
     }
 
@@ -479,7 +479,7 @@ export class Component extends OpenShiftItem {
                 commands.executeCommand('openshift.component.watch.showLog', component.contextPath.fsPath);
             }
         } else {
-            const process: ChildProcess = await Component.odo.spawn(Command.watchComponent(), component.contextPath.fsPath);
+            const process: ChildProcess = await Component.odo.spawn(Command.watchComponent().toString(), component.contextPath.fsPath);
             Component.addWatchSession(component, process);
             process.on('exit', () => {
                 Component.removeWatchSession(component);
@@ -495,7 +495,7 @@ export class Component extends OpenShiftItem {
     @vsCommand('openshift.component.watch.showLog')
     @clusterRequired()
     static showWatchSessionLog(context: string): void {
-        LogViewLoader.loadView(`${context} Watch Log`,  () => `odo watch --context ${context}`, Component.odo.getOpenShiftObjectByContext(context), Component.watchSessions.get(context));
+        LogViewLoader.loadView(`${context} Watch Log`,  () => new CommandText('odo watch').addOption(new CommandOption('--context', context)), Component.odo.getOpenShiftObjectByContext(context), Component.watchSessions.get(context));
     }
 
     @vsCommand('openshift.component.openUrl', true)
@@ -975,7 +975,14 @@ export class Component extends OpenShiftItem {
         const appName = component.getParent().getName();
         const compName = component.getName();
         // get pvcs and urls based on label selector
-        const componentResult = await Component.odo.execute(`oc get dc -l app.kubernetes.io/instance=${compName} --namespace ${prjName} -o json`, Platform.getUserHomePath(), false);
+        const componentResult = await Component.odo.execute(
+            new CommandText('oc get dc', undefined, [
+                new CommandOption('-l', `app.kubernetes.io/instance=${compName}`),
+                new CommandOption('--namespace', prjName),
+                new CommandOption('-o', 'json')
+            ]),
+            Platform.getUserHomePath(),
+            false);
         const componentJson = JSON.parse(componentResult.stdout).items[0];
         const componentType = componentJson.metadata.annotations['app.kubernetes.io/component-source-type'];
         if (componentType === SourceType.BINARY) {
@@ -1006,7 +1013,7 @@ export class Component extends OpenShiftItem {
                 //      app.kubernetes.io/url: 'https://github.com/dgolovin/nodejs-ex'
 
                 if (componentType === SourceType.GIT) {
-                    const bcResult = await Component.odo.execute(`oc get bc/${componentJson.metadata.name} --namespace ${prjName} -o json`);
+                    const bcResult = await Component.odo.execute(new CommandText('oc get', `bc/${componentJson.metadata.name}`, [new CommandOption('--namespace', prjName), new CommandOption('-o', 'json', false)]));
                     const bcJson = JSON.parse(bcResult.stdout);
                     const compTypeName = componentJson.metadata.labels['app.kubernetes.io/name'];
                     const compTypeVersion = componentJson.metadata.labels['app.openshift.io/runtime-version'];
@@ -1031,7 +1038,7 @@ export class Component extends OpenShiftItem {
                     for (const storage of storageData) {
                         try {
                             // eslint-disable-next-line no-await-in-loop
-                            const pvcResult = await Component.odo.execute(`oc get pvc/${storage.pvcName} --namespace ${prjName} -o json`, Platform.getUserHomePath(), false);
+                            const pvcResult = await Component.odo.execute(new CommandText('oc get', `pvc/${storage.pvcName}`, [new CommandOption('--namespace', prjName), new CommandOption('-o', 'json')]), Platform.getUserHomePath(), false);
                             const pvcJson = JSON.parse(pvcResult.stdout);
                             const storageName = pvcJson.metadata.labels['app.kubernetes.io/storage-name'];
                             const size = pvcJson.spec.resources.requests.storage;
@@ -1044,7 +1051,7 @@ export class Component extends OpenShiftItem {
                 }
                 // import routes if present
                 try {
-                    const routeResult = await Component.odo.execute(`oc get route -l app.kubernetes.io/instance=${compName},app.kubernetes.io/part-of=${appName} --namespace ${prjName} -o json`, Platform.getUserHomePath(), false);
+                    const routeResult = await Component.odo.execute(new CommandText('oc get route', undefined, [ new CommandOption('-l', `app.kubernetes.io/instance=${compName},app.kubernetes.io/part-of=${appName}`), new CommandOption('--namespace', prjName), new CommandOption('-o', 'json')]), Platform.getUserHomePath(), false);
                     const routeJson = JSON.parse(routeResult.stdout);
                     const routeData: Partial<{name: string; port: string}>[] = routeJson.items.map((element: any) => ({name: element.metadata.labels['odo.openshift.io/url-name'], port: element.spec.port.targetPort}));
                     // eslint-disable-next-line no-restricted-syntax

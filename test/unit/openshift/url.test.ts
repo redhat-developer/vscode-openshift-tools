@@ -345,14 +345,14 @@ suite('OpenShift/URL', () => {
             const result = await Url.del(routeItem);
 
             expect(result).equals(`URL '${routeItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
-            expect(execStub.getCall(0).args[0]).equals(Command.deleteComponentUrl(routeItem.getName()));
+            expect(`${execStub.getCall(0).args[0]}`).equals(`${Command.deleteComponentUrl(routeItem.getName())}`);
         });
 
         test('works without set tree item', async () => {
             const result = await Url.del(null);
 
             expect(result).equals(`URL '${routeItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
-            expect(execStub.getCall(0).args[0]).equals(Command.deleteComponentUrl(routeItem.getName()));
+            expect(`${execStub.getCall(0).args[0]}`).equals(`${Command.deleteComponentUrl(routeItem.getName())}`);
         });
 
         test('returns null with no URL selected', async () => {

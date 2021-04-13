@@ -8,6 +8,7 @@ import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { OpenShiftObject, OpenShiftProject, getInstance as getOdoInstance } from '../odo';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
+import { CommandText } from '../odo/command';
 
 export class Project extends OpenShiftItem {
 
@@ -30,7 +31,7 @@ export class Project extends OpenShiftItem {
             await commands.executeCommand('openshift.project.create');
         } else {
             const project = selectedItem as OpenShiftObject;
-            await Project.odo.execute(`odo project set ${project.getName()}`);
+            await Project.odo.execute(new CommandText('odo project set', project.getName()));
             Project.explorer.refresh();
             message = `Project '${project.getName()}' set as active.`;
         }
@@ -64,7 +65,7 @@ export class Project extends OpenShiftItem {
                             if (p.length>0) {
                                 // this changes kubeconfig and that triggers full tree refresh
                                 // there is no need to call explorer.refresh() manully
-                                await Project.odo.execute(`odo project set ${p[0].getName()}`);
+                                await Project.odo.execute(new CommandText('odo project set', p[0].getName()));
                             }
                         })
                         .then(() => `Project '${project.getName()}' successfully deleted`)

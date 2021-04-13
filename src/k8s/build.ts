@@ -9,33 +9,50 @@ import { OdoImpl, Odo } from '../odo';
 import { Progress } from '../util/progress';
 import * as common from './common';
 import { vsCommand, VsCommandError } from '../vscommand';
+import { CommandOption, CommandText } from '../odo/command';
 
 export class Build {
 
     public static command = {
-      getAllBuilds(parent: ClusterExplorerV1.ClusterExplorerNode): string {
-          return `get build -o jsonpath="{range .items[?(.metadata.labels.buildconfig=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/build\\.number}{\\"\\n\\"}{end}"`;
+      getAllBuilds(parent: ClusterExplorerV1.ClusterExplorerNode): CommandText {
+          return new CommandText('get build',
+            undefined, [
+                new CommandOption('-o', `jsonpath="{range .items[?(.metadata.labels.buildconfig=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/build\\.number}{\\"\\n\\"}{end}"`)
+            ]
+          );
       },
-      startBuild(buildConfig: string): string {
-          return `oc start-build ${buildConfig}`;
+      startBuild(buildConfig: string): CommandText {
+          return new CommandText('oc start-build', buildConfig);
       },
-      getBuilds(build: string): string {
-          return `oc get build -l buildconfig=${build} -o json`;
+      getBuilds(build: string): CommandText {
+          return new CommandText('oc get build',
+            undefined, [
+                new CommandOption('-l', `buildconfig=${build}`),
+                new CommandOption('-o', 'json', false)
+            ]
+        );
       },
-      showLog(build: string, text: string): string {
-          return `oc logs ${build}${text}`;
+      showLog(build: string, text: string): CommandText {
+          return new CommandText('oc logs', `${build}${text}`);
       },
-      rebuildFrom(resourceId: string): string {
-          return `oc start-build --from-build ${resourceId}`;
+      rebuildFrom(resourceId: string): CommandText {
+          return new CommandText('oc start-build',
+            undefined, [
+                new CommandOption('--from-build', resourceId)
+            ]
+        );
       },
-      followLog(build: string, text: string): string {
-          return `oc logs ${build}${text} -f`;
+      followLog(build: string, text: string): CommandText {
+          return new CommandText('oc logs', `${build}${text}`, [
+              new CommandOption('-f')
+          ]
+        );
       },
-      delete(build: string): string {
-          return `oc delete build ${build}`;
+      delete(build: string): CommandText {
+          return new CommandText('oc delete build',build);
       },
-      getBuildConfigs(): string {
-          return 'oc get buildConfig -o json';
+      getBuildConfigs(): CommandText {
+          return new CommandText('oc get buildConfig -o json');
       }
   };
 

@@ -290,16 +290,16 @@ suite('OpenShift/Service', () => {
             const result = await Service.del(serviceItem);
 
             expect(result).equals(`Service '${serviceItem.getName()}' successfully deleted`);
-            expect(execStub.getCall(0).args[0]).equals(Command.deleteService(projectItem.getName(), appItem.getName(), serviceItem.getName()));
-            expect(execStub.getCall(1).args[0]).equals(Command.waitForServiceToBeGone(projectItem.getName(), serviceItem.getName()));
+            expect(`${execStub.getCall(0).args[0]}`).equals(`${Command.deleteService(projectItem.getName(), appItem.getName(), serviceItem.getName())}`);
+            expect(`${execStub.getCall(1).args[0]}`).equals(`${Command.waitForServiceToBeGone(projectItem.getName(), serviceItem.getName())}`);
         });
 
         test('works without context item', async () => {
             const result = await Service.del(null);
 
             expect(result).equals(`Service '${serviceItem.getName()}' successfully deleted`);
-            expect(execStub.getCall(0).args[0]).equals(Command.deleteService(projectItem.getName(), appItem.getName(), serviceItem.getName()));
-            expect(execStub.getCall(1).args[0]).equals(Command.waitForServiceToBeGone(projectItem.getName(), serviceItem.getName()));
+            expect(`${execStub.getCall(0).args[0]}`).equals(`${Command.deleteService(projectItem.getName(), appItem.getName(), serviceItem.getName())}`);
+            expect(`${execStub.getCall(1).args[0]}`).equals(`${Command.waitForServiceToBeGone(projectItem.getName(), serviceItem.getName())}`);
         });
 
         test('returns null with no application selected', async () => {
