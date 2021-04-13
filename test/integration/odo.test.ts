@@ -12,7 +12,7 @@ import { Uri, window, commands, extensions } from 'vscode';
 import * as odo from '../../src/odo';
 import { Cluster } from '../../src/openshift/cluster';
 import { Command } from '../../src/odo/command';
-import { SourceTypeChoice, Component } from '../../src/openshift/component';
+import { Component } from '../../src/openshift/component';
 import { AddWorkspaceFolder } from '../../src/util/workspace';
 import { ComponentKind, ComponentTypeAdapter } from '../../src/odo/componentType';
 import cp = require('child_process');
@@ -81,13 +81,12 @@ suite('odo integration', () => {
         }
         await clone(gitUrl, dirNameParam);
         const sqpStub = sb.stub(window, 'showQuickPick');
-        sqpStub.onFirstCall().resolves(SourceTypeChoice.LOCAL);
-        sqpStub.onSecondCall().resolves(AddWorkspaceFolder);
+        sqpStub.onFirstCall().resolves(AddWorkspaceFolder);
         sb.stub(window, 'showOpenDialog').resolves([Uri.file(dirNameParam)]);
         sb.stub(window, 'showInputBox').resolves(componentNameParam);
         sqpStub
-            .onThirdCall()
-            .resolves(new ComponentTypeAdapter(ComponentKind.S2I, 'nodejs', '12', '', 'nodejs'));
+            .onSecondCall()
+            .resolves(new ComponentTypeAdapter(ComponentKind.S2I, 'nodejs', 'latest', '', 'nodejs'));
 
         await commands.executeCommand('openshift.component.create', existingApp);
         const components = await oi.getComponents(existingApp);
@@ -108,13 +107,11 @@ suite('odo integration', () => {
         }
         sb.stub(window, 'showQuickPick')
             .onFirstCall()
-            .resolves(SourceTypeChoice.GIT)
-            .onSecondCall()
             .resolves(AddWorkspaceFolder)
-            .onThirdCall()
+            .onSecondCall()
             .resolves({ label: 'master' })
-            .onCall(3)
-            .resolves(new ComponentTypeAdapter(ComponentKind.S2I, 'nodejs', '12', '', 'nodejs'));
+            .onThirdCall()
+            .resolves(new ComponentTypeAdapter(ComponentKind.S2I, 'nodejs', 'latest', '', 'nodejs'));
         sb.stub(window, 'showOpenDialog').resolves([Uri.file(dirNameParam)]);
         sb.stub(window, 'showInputBox')
             .onFirstCall()
@@ -122,7 +119,7 @@ suite('odo integration', () => {
             .onSecondCall()
             .resolves(componentNameParam);
 
-        await commands.executeCommand('openshift.component.create', existingApp);
+        await commands.executeCommand('openshift.component.createFromGit', existingApp);
         const components = await oi.getComponents(existingApp);
         return components.find((item) => item.getName() === componentNameParam);
     }
@@ -145,19 +142,17 @@ suite('odo integration', () => {
         }
         sb.stub(window, 'showQuickPick')
             .onFirstCall()
-            .resolves(SourceTypeChoice.BINARY)
-            .onSecondCall()
             .resolves(AddWorkspaceFolder)
-            .onThirdCall()
+            .onSecondCall()
             .resolves({ label: 'sample.war', description: binaryFileInContextFolder })
-            .onCall(3)
+            .onThirdCall()
             .resolves(
                 new ComponentTypeAdapter(ComponentKind.S2I, templateName, 'latest', '', 'java'),
             );
         sb.stub(window, 'showOpenDialog').resolves([Uri.file(dirNameParam)]);
         sb.stub(window, 'showInputBox').resolves(componentNameParam);
 
-        await commands.executeCommand('openshift.component.create', existingApp);
+        await commands.executeCommand('openshift.component.createFromBinary', existingApp);
         const components = await oi.getComponents(existingApp);
         return components.find((item) => item.getName() === componentNameParam);
     }
