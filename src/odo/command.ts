@@ -35,7 +35,7 @@ export class CommandOption {
         if (this.privacy) {
             return this.toPrivateString();
         }
-        return `${this.name}${this.value ? ` ${this.quote}${this.value}${this.quote}` : '' }`;
+        return `${this.name}${this.value ? `=${this.quote}${this.value}${this.quote}` : '' }`;
     }
 
     toPrivateString(): string {
