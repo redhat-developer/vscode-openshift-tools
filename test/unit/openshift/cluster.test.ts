@@ -25,7 +25,7 @@ const keytar: any = getVscodeModule('keytar');
 suite('Openshift/Cluster', () => {
     let sandbox: sinon.SinonSandbox;
         let execStub: sinon.SinonStub;
-        let commandStub: sinon.SinonStub;
+        let commandStub: sinon.SinonSpy;
         let inputStub: sinon.SinonStub;
         let infoStub: sinon.SinonStub;
         let loginStub: sinon.SinonStub;
@@ -38,7 +38,6 @@ suite('Openshift/Cluster', () => {
     };
 
     const fatalErrorText = 'FATAL ERROR';
-    const fatalError = new Error(fatalErrorText);
     const errorData: CliExitData = {
         error: {
             code: 1,
@@ -99,7 +98,8 @@ suite('Openshift/Cluster', () => {
             quickPickStub.onSecondCall().resolves({description: 'Current Context', label: testUrl});
             quickPickStub.onThirdCall().resolves({description: 'Current Context', label: testUser});
             inputStub.resolves(password);
-            commandStub.rejects(fatalError);
+            const fatalError = new Error(fatalErrorText);
+            execStub.rejects(fatalError);
             let expectedErr: { message: any };
             try {
                 await Cluster.login();
@@ -277,6 +277,7 @@ suite('Openshift/Cluster', () => {
             });
 
             test('handles incoming errors the same way as credentials login', async () => {
+                const fatalError = new Error(fatalErrorText);
                 execStub.rejects(fatalError);
                 let expectedErr: { message: any };
                 try {
