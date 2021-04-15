@@ -27,7 +27,6 @@ import { Url } from './odo/url';
 import { Service } from './odo/service';
 import { Command, CommandText } from './odo/command';
 import { BuilderImage } from './odo/builderImage';
-import { ImageStream } from './odo/imageStream';
 import { VsCommandError } from './vscommand';
 import { Storage } from './odo/storage';
 import bs = require('binary-search');
@@ -338,7 +337,6 @@ export interface Odo {
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponents(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]>;
     getComponentTypes(): Promise<ComponentTypeAdapter[]>;
-    getImageStreamRef(name: string, namespace: string): Promise<ImageStream>;
     getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponentPorts(component: OpenShiftObject): Promise<odo.Port[]>;
@@ -645,11 +643,6 @@ export class OdoImpl implements Odo {
             ...devfileItems,
             ...s2iItems
         ];
-    }
-
-    public async getImageStreamRef(name: string, namespace: string): Promise<ImageStream> {
-        const result: cliInstance.CliExitData = await this.execute(Command.printCatalogComponentImageStreamRefJson(name, namespace));
-        return JSON.parse(result.stdout);
     }
 
     public async getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]> {

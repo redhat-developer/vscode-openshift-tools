@@ -35,7 +35,7 @@ export function run(): Promise<void> {
      return new Promise((resolve, reject) => {
         const testsRoot = paths.resolve(__dirname);
         const coverageRunner = loadCoverageRunner(testsRoot);
-        glob('**/**.test.js', { cwd: testsRoot }, (error, files): void => {
+        glob('**/odo.test.js', { cwd: testsRoot }, (error, files): void => {
             if (error) {
                 reject(error);
             } else {

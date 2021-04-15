@@ -70,7 +70,7 @@
             "outFiles": [
                 "${workspaceFolder}/out/test/integration/**/*.js"
             ],
-            "preLaunchTask": "npm: watch",
+            "preLaunchTask": "instrument",
             "env": {
                 "VSCODE_REDHAT_TELEMETRY_DEBUG":"true"
             }

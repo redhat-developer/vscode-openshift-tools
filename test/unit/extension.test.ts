@@ -71,9 +71,8 @@ suite('openshift connector Extension', () => {
             }
 
             if(`${cmd}`.includes('describe')) {
-                const args = `${cmd}`.split(' ');
-                const name = args[3].substr(args[3].lastIndexOf(path.sep)+1);
-                return { error: undefined, stdout: genComponentJson('myproject', 'app1', name, args[3]), stderr: '', cwd  };
+                const name = cwd.substr(cwd.lastIndexOf(path.sep)+1);
+                return { error: undefined, stdout: genComponentJson('myproject', 'app1', name, cwd), stderr: '', cwd  };
             }
 
             if (`${cmd}`.includes('list --app')) {
