@@ -22,7 +22,6 @@ suite('OpenShift/URL', () => {
     let sandbox: sinon.SinonSandbox;
     let quickPickStub: sinon.SinonStub;
     let inputStub: sinon.SinonStub;
-    let termStub: sinon.SinonStub;
     let execStub: sinon.SinonStub;
     let getApplicationNamesStub: sinon.SinonStub;
     let getComponentsNameStub: sinon.SinonStub;
