@@ -247,10 +247,6 @@ export class Command {
         );
     }
 
-    static describeStorage(storage: string): CommandText {
-        return new CommandText('odo storage describe', storage);
-    }
-
     static waitForStorageToBeGone(project: string, app: string, storage: string): CommandText {
         return new CommandText('oc wait',
             `pvc/${storage}-${app}-pvc`, [
@@ -318,10 +314,6 @@ export class Command {
                 new CommandOption('-o', 'json', false)
             ]
         );
-    }
-
-    static describeUrl(url: string): CommandText {
-        return new CommandText('odo url describe', url);
     }
 
     static showLog(): CommandText {
