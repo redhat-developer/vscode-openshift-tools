@@ -1415,11 +1415,6 @@
           "group": "inline"
         },
         {
-          "command": "openshift.project.set",
-          "when": "view == openshiftProjectExplorer && viewItem == project",
-          "group": "inline"
-        },
-        {
           "command": "openshift.component.create",
           "when": "view == openshiftProjectExplorer && viewItem == project",
           "group": "inline"
