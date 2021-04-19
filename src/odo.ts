@@ -749,24 +749,14 @@ export class OdoImpl implements Odo {
         const commandPrivacy = `${command.privacyMode(true)}`;
         const [cmd] = commandActual.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
-        let result: cliInstance.CliExitData;
-        try {
-             result = await OdoImpl.cli.execute(
-                toolLocation ? commandActual.replace(cmd, `"${toolLocation}"`) : commandActual,
-                cwd ? {cwd} : { }
-            );
-        } catch (ex) {
-            if (fail) {
-                throw new VsCommandError(`${ex}`, `Error when running command: ${commandPrivacy}`, ex);
-            } else {
-                return {error: null, stdout: '', stderr: ''};
-            }
-        };
+        const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
+            toolLocation ? commandActual.replace(cmd, `"${toolLocation}"`) : commandActual,
+            cwd ? {cwd} : { }
+        );
         if (result.error && fail) {
             throw new VsCommandError(`${result.error}`, `Error when running command: ${commandPrivacy}`, result.error);
         };
         return result;
-
     }
 
     public async spawn(command: string, cwd?: string): Promise<ChildProcess> {
