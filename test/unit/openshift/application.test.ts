@@ -12,6 +12,7 @@ import { Command } from '../../../src/odo/command';
 import { Application } from '../../../src/openshift/application';
 import { TestItem } from './testOSItem';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
+import { VsCommandError } from '../../../src/vscommand';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -125,7 +126,7 @@ suite('OpenShift/Application', () => {
 
         test('throws an error message when odo command failed', async () => {
             warnStub.resolves('Yes');
-            execStub.rejects('ERROR');
+            execStub.rejects(new VsCommandError('ERROR', 'ERROR'));
             let expectedError;
             try {
                 await Application.del(appItem);

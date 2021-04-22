@@ -754,7 +754,7 @@ export class OdoImpl implements Odo {
             cwd ? {cwd} : { }
         );
         if (result.error && fail) {
-            throw new VsCommandError(`${result.error}`, `Error when running command: ${commandPrivacy}`, result.error);
+            throw new VsCommandError(`${result.error.message}`, `Error when running command: ${commandPrivacy}`, result.error);
         };
         return result;
     }
@@ -859,7 +859,7 @@ export class OdoImpl implements Odo {
 
     public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, name: string, location: Uri, starter: string = undefined, useExistingDevfile = false): Promise<OpenShiftObject> {
         await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath, starter, useExistingDevfile), location.fsPath);
-        if (workspace.workspaceFolders && application.getParent().getParent()) { // if there are workspace folders and cluster is acvessible
+        if (workspace.workspaceFolders && application.getParent().getParent()) { // if there are workspace folders and cluster is accessible
             const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
             if (!targetApplication) {
                 await this.insertAndReveal(application);

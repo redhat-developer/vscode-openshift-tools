@@ -27,3 +27,21 @@ export default async function sendTelemetry(actionName: string, properties?: any
     }
     return service?.send(createTrackingEvent(actionName, properties));
 }
+
+export interface CommonCommandProps {
+    identifier: string;
+    error: string;
+    'stack_trace': string;
+    duration: number;
+    cancelled: boolean;
+}
+
+export interface NewComponentCommandProps {
+    'component_kind': string;
+    'component_type': string;
+    'component_version': string;
+    'starter_project': string;
+    'use_existing_devfile': boolean;
+}
+
+export type AllProps = Partial<CommonCommandProps & NewComponentCommandProps>;
