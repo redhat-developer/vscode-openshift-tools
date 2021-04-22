@@ -27,12 +27,12 @@ import { SourceType } from '../odo/config';
 import { ComponentKind, ComponentTypeAdapter, DevfileComponentType, ImageStreamTag, isDevfileComponent, isImageStreamTag } from '../odo/componentType';
 import { Url } from '../odo/url';
 import { ComponentDescription, StarterProjectDescription } from '../odo/catalog';
+import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
 import path = require('path');
-
 import globby = require('globby');
 import treeKill = require('tree-kill');
 import fs = require('fs-extra');
-import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
+import { NewComponentCommandProps } from '../telemetry';
 
 const waitPort = require('wait-port');
 
@@ -111,7 +111,7 @@ export class Component extends OpenShiftItem {
     static async create(application: OpenShiftApplication): Promise<string> {
         if (!application) return null;
 
-        return Component.createFromLocal(application).catch((err) => Promise.reject(new VsCommandError(`Failed to create Component with error '${err}'`, 'Failed to create Component with error')));
+        return Component.createFromLocal(application);
     }
 
     @vsCommand('openshift.component.delete', true)
@@ -684,34 +684,45 @@ export class Component extends OpenShiftItem {
         }
 
         const refreshComponentsView = workspace.getWorkspaceFolder(folder);
-
-        await Progress.execFunctionWithProgress(
-            `Creating new Component '${componentName}'`,
-            () => Component.odo.createComponentFromFolder(
-                application,
-                componentType? componentType.name : undefined, // in case of using existing devfile
-                componentType? componentType.version : undefined,
-                componentName,
-                folder,
-                createStarter,
-                useExistingDevfile
-            )
-        );
-
-        // when creating component based on existing workspace folder refresh components view
-        if (refreshComponentsView) {
-            commands.executeCommand('openshift.componentsView.refresh');
-        }
-
-        const result:any = new String(`Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`);
-        result.properties = {
+        const creatComponentProperties: NewComponentCommandProps  = {
             'component_kind': componentType?.version ? ComponentKind.S2I: ComponentKind.DEVFILE,
             'component_type': componentType?.name,
             'component_version': componentType?.version,
             'starter_project': createStarter,
             'use_existing_devfile': useExistingDevfile,
         };
-        return result;
+        try {
+            await Progress.execFunctionWithProgress(
+                `Creating new Component '${componentName}'`,
+                () => Component.odo.createComponentFromFolder(
+                    application,
+                    componentType? componentType.name : undefined, // in case of using existing devfile
+                    componentType? componentType.version : undefined,
+                    componentName,
+                    folder,
+                    createStarter,
+                    useExistingDevfile
+                )
+            );
+
+            // when creating component based on existing workspace folder refresh components view
+            if (refreshComponentsView) {
+                commands.executeCommand('openshift.componentsView.refresh');
+            }
+
+            const result:any = new String(`Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+            result.properties = creatComponentProperties;
+            return result;
+        } catch (err) {
+            if (err instanceof VsCommandError) {
+                throw new VsCommandError(
+                    `Error occurred while creating Component '${componentName}': ${err.message}`,
+                    `Error occurred while creating Component: ${err.telemetryMessage}`, err,
+                    creatComponentProperties
+                );
+            }
+            throw err;
+        }
     }
 
     @vsCommand('openshift.component.createFromGit')

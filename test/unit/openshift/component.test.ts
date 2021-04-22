@@ -125,14 +125,14 @@ suite('OpenShift/Component', () => {
         });
 
         test('errors when a subcommand fails', async () => {
-            quickPickStub.onFirstCall().rejects(errorMessage);
+            quickPickStub.onFirstCall().rejects(new Error(errorMessage));
             let expectedError: Error;
             try {
                 await Component.create(appItem);
             } catch (error) {
                 expectedError = error;
             }
-            expect(expectedError.message).equals(`Failed to create Component with error '${errorMessage}'`);
+            expect(expectedError.message).equals(errorMessage);
         });
 
         suite('from local workspace', () => {
