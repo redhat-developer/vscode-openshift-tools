@@ -27,11 +27,10 @@ import { extendClusterExplorer } from './k8s/clusterExplorer';
 import { WatchSessionsView } from './watch';
 import { DebugSessionsView } from './debug';
 import { ComponentTypesView } from './componentTypesView';
-import { WelcomeWebview } from 'vscode-welcome-view';
+import { WelcomePage } from './welcomePage';
 import { ComponentsTreeDataProvider } from './componentsView';
 
 import fsx = require('fs-extra');
-import { ExtenisonID } from './util/constants';
 
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -58,9 +57,7 @@ async function verifyBundledBinaries(): Promise<{odoPath: string, ocPath: string
 }
 
 export async function activate(extensionContext: ExtensionContext): Promise<any> {
-    if(workspace.getConfiguration('openshiftConnector').get('showWelcomePage')) {
-        WelcomeWebview.createOrShow(ExtenisonID, extensionContext.extensionPath, path.join('welcome', 'app', 'assets'), 'openshiftConnector.showWelcomePage');
-    }
+    WelcomePage.createOrShow();
     commands.executeCommand('setContext', 'isVSCode', env.uiKind);
     // UIKind.Desktop ==1 & UIKind.Web ==2. These conditions are checked for browser based & electron based IDE.
     migrateFromOdo018();
