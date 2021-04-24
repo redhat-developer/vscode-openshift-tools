@@ -812,6 +812,11 @@
           "dark": "images/title/dark/icon-refresh.svg",
           "light": "images/title/light/icon-refresh.svg"
         }
+      },
+      {
+        "command": "openshift.welcome",
+        "title": "Welcome",
+        "category": "OpenShift"
       }
     ],
     "keybindings": [
