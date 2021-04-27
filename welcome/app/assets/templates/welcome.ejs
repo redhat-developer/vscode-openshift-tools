@@ -3,20 +3,20 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src <%= cspSource %>; script-src <%= cspSource %>">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src <%= cspSource %>; img-src <%= cspSource %>; script-src <%= cspSource %>">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="<%= cssUri %>">
-  <title>Welcome to OpenShift Connector Extension</title>
+  <link rel="stylesheet" href="<%= baseUri %>/templates/welcome.css">
+  <title>Welcome to OpenShift Connector</title>
 </head>
 
 <body>
-  <div class="section-div">
-    <input type="checkbox" id="showWhenUsingExtension" <% if (checkboxValue) { %> checked <% } %>>
-    <label for="showWhenUsingExtension">Show Welcome page when using OpenShift Connector Extension</label>
-  </div>
+  
+<div class="welcome-sections">
   <div class="section-div">
     <div class="title-wrapper">
-      <h2 class="title-header">OpenShift Connector for <%= appName %></h2>
+      <img src="<%= baseUri %>/icons/extension.png" class="extension-icon">
+      <h2 class="title-header">OpenShift Connector Extension</h2>
       <% if (status) { %>
         <span class="preview"><%= status %></span>
       <% } %>
@@ -27,18 +27,80 @@
     for various languages and frameworks.</p>
   </div>
 
-  <div class="section-div">
-    <h2 class="section-title">Get started</h2>
-    <p>
-      <ul>
-        <li><a href="command:openshift.component.createFromLocal">Create a new OpenShift Component</a></li>
-        <li><a href="command:command:openshift.explorer.login">Login in to a Cluster</a></li>
-        <li><a href="command:openshift.explorer.switchContext">Select Kubernetes Context</a></li>
-        <li><a href="command:openshift.explorer.addCluster">Add a new OpenShift Cluster</a></li>
-      </ul>
-    </p>
+  <div class="section-row">
+    <img src="<%= baseUri %>/icons/create.png" class="section-icon" >
+    <div class="section-content">
+      <div class="section-name">Create New Component</div>
+      <p>
+        <ul>
+          <li><a href="command:openshift.component.createFromLocal">Create a New OpenShift Component</a></li>
+        </ul>
+      </p>
+    </div>
   </div>
 
+  <div class="section-row">
+    <img src="<%= baseUri %>/icons/cluster.png" class="section-icon" >
+    <div class="section-content">
+      <div class="section-name">Create or Use Existing Cluster</div>
+      <p>
+        <ul>
+          <li><a href="command:openshift.explorer.addCluster">Add a New OpenShift Cluster</a></li>
+          <li><a href="command:openshift.explorer.login">Login in to a Cluster</a></li>
+          <li><a href="command:openshift.explorer.switchContext">Select Kubernetes Context</a></li>
+        </ul>
+      </p>
+    </div>
+  </div>  
+
+  <div class="section-row">
+    <img src="<%= baseUri %>/icons/run.png" class="section-icon" >
+    <div class="section-content">
+      <div class="section-name">Run/Debug Locally or in Cluster</div>
+      <p>
+        <ul>
+          <li>Run and debug your component locally using VSCode Extensions</li>
+          <li><a href="command:openshift.component.createFromLocal">Create New Component</a> from your source code and <a href="command:openshift.component.push">push</a> it to cluster</li>
+          <li><a href="command:openshift.component.debug">Debug</a> compnent running in cluster</li>
+        </ul>
+      </p>
+    </div>
+  </div>
+
+  <div class="section-row">
+    <img src="<%= baseUri %>/icons/feedback.png" class="section-icon" >
+    <div class="section-content">
+      <div class="section-name">Tell Us What You Think</div>
+      <p>
+        <ul>
+          <li><a href="command:openshift.explorer.reportIssue"></a>Report an issue</a> in extension's github.com repository</li>
+        </ul>
+      </p>
+    </div>
+  </div>
+
+  <div class="section-row">
+    <img src="<%= baseUri %>/icons/links.png" class="section-icon" >
+    <div class="section-content">
+      <div class="section-name">Additional Information</div>
+      <p>
+        <ul>
+          <li><a href="https://code-ready.github.io/crc/">Red Hat CodeReady Containers</a> - run single node local OpenShift 4.x cluster</li>
+          <li><a href="http://bit.ly/3rSvzOx">minishift</a>/<a href="http://red.ht/3opF1XC">CDK</a> - run single node local OpenShift 3.x cluster</li>
+          <li><a href="http://red.ht/3rUUzoe">Red Hat OpenShift Container Platform</a> - build, deploy and manage your applications across cloud- and on-premise infrastructure</li>
+          <li><a href="http://red.ht/3bdr7E8">Red Hat OpenShift Dedicated</a> - single-tenant, high-availability Kubernetes clusters in the public cloud</li>
+          <li><a href="http://red.ht/3oeVPjM">Microsoft Azure Red Hat OpenShift</a> - fully managed Red Hat OpenShift service on Microsoft Azure</li>
+          <li><a href="http://red.ht/3bbSVso">Red Hat OpenShift Online</a> - the fastest way for developers to build, host and scale applications in the public cloud</li>
+        </ul>
+      </p>
+    </div>
+  </div>
+
+  <div class="section-div">
+    <input type="checkbox" id="showWhenUsingExtension" <% if (checkboxValue) { %> checked <% } %>>
+    <label for="showWhenUsingExtension">Show Welcome page when OpenShift Connector Extension is activated</label>
+  </div>
+</div>
 </body>
 <script src="<%= jsUri %>"></script>
 </html>
