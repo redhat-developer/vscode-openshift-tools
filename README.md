@@ -238,9 +238,27 @@ To debug a Java Component, [Java Language Support](https://marketplace.visualstu
    * `Openshift Connector: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
    * `Openshift Connector: CRC Memory Allocation` - MiB of memory to allocate to the OpenShift cluster as selected during the first run.
 
+## OpenShift Resources
+
+This Extension uses Kubernetes Extension API to show OpenShift specific resources like Projects, Routes, Deployment Configs, Image Streams, Templates and others in Kubernetes Clusters View.
+
+OpenShift Connector extension provides ```Use Project``` command to switch between OpenShift Projects. It is available for Project items in Kubernetes Clusters View.
+
+![ useproject ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/use-project.png)
+
+**NOTE:** This extension is in Preview mode. The extension support for OpenShift is strictly experimental - assumptions may break, commands and behavior may change!
+
 **NOTE:** CRC (Red Hat CodeReady Containers) version supported by the extension is `1.23.1` (OpenShift Version: `4.7.0`)
 
 ## Dependencies
+
+### Extensions
+
+When installing the extension directly from the VSCode marketplace all the dependencies are installed automatically. For disconnected environments before installing the extension download and install dependencies in the order listed below:
+
+* [RedHat Commons](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-commons) ([download vsix](https://marketplace.visualstudio.com/_apis/public/gallery/publishers/redhat/vsextensions/vscode-commons/0.0.6/vspackage))
+* [YAML Extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) ([download vsix](https://marketplace.visualstudio.com/_apis/public/gallery/publishers/redhat/vsextensions/vscode-yaml/0.18.0/vspackage))
+* [Kubernetes Extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) ([download vsix](https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ms-kubernetes-tools/vsextensions/vscode-kubernetes-tools/1.3.0/vspackage))
 
 ### CLI Tools
 
@@ -256,17 +274,6 @@ Follow the links below for additional information:
 * [Understanding odo](https://bit.ly/3ovRTuY)
 * [Devfile file reference](http://bit.ly/3hNrhTP)
 * [Deploying your first application using odo](http://bit.ly/2MurLCG)
-
-### Extensions
-
-This extension depends on [Kubernetes Extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) from Microsoft which is going to be installed automatically along with OpenShift Connector Extension. Latter is using Kubernetes Extension public API to show
-OpenShift specific resources like Projects, Routes, Deployment Configs, Image Streams and Templates in Kubernetes Clusters View. Those resources are visible only for OpenShift clusters.
-
-OpenShift Connector extension also provides ```Use Project``` command to switch between OpenShift Projects in Kubernetes Clusters View.
-
-![ useproject ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/use-project.png)
-
-**NOTE:** This extension is in Preview mode. The extension support for OpenShift is strictly experimental - assumptions may break, commands and behavior may change!
 
 ## Breaking Changes Between Previous Releases
 
