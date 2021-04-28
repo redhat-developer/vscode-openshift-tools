@@ -256,9 +256,9 @@ OpenShift Connector extension provides ```Use Project``` command to switch betwe
 
 When installing the extension directly from the VSCode marketplace all the dependencies are installed automatically. For disconnected environments before installing the extension download and install dependencies in the order listed below:
 
-* [RedHat Commons](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-commons) ((download vsix)[https://marketplace.visualstudio.com/_apis/public/gallery/publishers/redhat/vsextensions/vscode-commons/0.0.6/vspackage])
-* [YAML Extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) ((download vsix)[https://marketplace.visualstudio.com/_apis/public/gallery/publishers/redhat/vsextensions/vscode-yaml/0.18.0/vspackage])
-* [Kubernetes Extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) ((download vsix)[https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ms-kubernetes-tools/vsextensions/vscode-kubernetes-tools/1.3.0/vspackage])
+* [RedHat Commons](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-commons) ([download vsix](https://marketplace.visualstudio.com/_apis/public/gallery/publishers/redhat/vsextensions/vscode-commons/0.0.6/vspackage))
+* [YAML Extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) ([download vsix](https://marketplace.visualstudio.com/_apis/public/gallery/publishers/redhat/vsextensions/vscode-yaml/0.18.0/vspackage))
+* [Kubernetes Extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) ([download vsix](https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ms-kubernetes-tools/vsextensions/vscode-kubernetes-tools/1.3.0/vspackage))
 
 ### CLI Tools
 
