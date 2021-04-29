@@ -736,22 +736,29 @@ export class OdoImpl implements Odo {
         return services;
     }
 
+    public createEnv(): {} {
+        const env = {...process.env };
+        env.GLOBALODOCONFIG = path.resolve(__dirname,'..', '..', 'preference.yaml');
+        return env;
+    }
+
     public async executeInTerminal(command: CommandText, cwd: string = process.cwd(), name = 'OpenShift'): Promise<void> {
         const [cmd] = `${command}`.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
-        const terminal: Terminal = WindowUtil.createTerminal(name, cwd);
+        const terminal: Terminal = WindowUtil.createTerminal(name, cwd, this.createEnv());
         terminal.sendText(toolLocation === cmd ? `${command}` : `${command}`.replace(cmd, `"${toolLocation}"`), true);
         terminal.show();
     }
 
     public async execute(command: CommandText, cwd?: string, fail = true): Promise<cliInstance.CliExitData> {
+        const env = this.createEnv();
         const commandActual = `${command}`;
         const commandPrivacy = `${command.privacyMode(true)}`;
         const [cmd] = commandActual.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
         const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
             toolLocation ? commandActual.replace(cmd, `"${toolLocation}"`) : commandActual,
-            cwd ? {cwd} : { }
+            cwd ? {cwd, env} : { env }
         );
         if (result.error && fail) {
             throw new VsCommandError(`${result.error.message}`, `Error when running command: ${commandPrivacy}`, result.error);
