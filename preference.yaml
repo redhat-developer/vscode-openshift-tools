@@ -1,0 +1,8 @@
+kind: Preference
+apiversion: odo.dev/v1alpha1
+OdoSettings:
+  RegistryList:
+  - Name: DefaultDevfileRegistry
+    URL: https://github.com/odo-devfiles/registry
+    secure: false
+  ConsentTelemetry: false

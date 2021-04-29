@@ -89,7 +89,7 @@ suite('odo', () => {
             const cwd = 'path/to/some/dir';
             await odoCli.execute(command, cwd);
 
-            expect(execStub).calledOnceWith(`${command}`, { cwd });
+            expect(execStub).calledOnceWith(`${command}`, { cwd, env: (odo.getInstance() as odo.OdoImpl).createEnv() });
         });
 
         test('execute rejects if an error occurs in the shell command', async () => {

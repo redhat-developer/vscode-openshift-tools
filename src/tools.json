@@ -3,27 +3,27 @@
         "description": "odo CLI",
         "vendor": "Red Hat, Inc.",
         "name": "odo",
-        "version": "2.0.7",
-        "versionRange": "^2.0.7",
-        "versionRangeLabel": "version >= 2.0.7",
+        "version": "2.1.0",
+        "versionRange": "^2.1.0",
+        "versionRangeLabel": "version >= 2.1.0",
         "dlFileName": "odo",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.7/odo-windows-amd64.exe.zip",
-                "sha256sum": "68a1ffd6034ed6ab92ece663a4c95310e2fc8b3c1d4723b31c1f85e6ad77ba2c",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.1.0/odo-windows-amd64.exe.zip",
+                "sha256sum": "77739939e2bbf1662b22fdee402b1a352b80ce3e84fa3dbe549ba532b1283de6",
                 "dlFileName": "odo-windows-amd64.exe.zip",
                 "cmdFileName": "odo.exe"
             },
             "darwin": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.7/odo-darwin-amd64.tar.gz",
-                "sha256sum": "29fe926b4f45ad64eb5d4d555dbf94c4b87e0417520a5d9bd33bdbb25dee2be8",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.1.0/odo-darwin-amd64.tar.gz",
+                "sha256sum": "10f2b4f748bb33c3d4bd9486c62472e9ee51703709d2e4f235460ef5ff686b86",
                 "dlFileName": "odo-darwin-amd64.tar.gz",
                 "cmdFileName": "odo"
             },
             "linux": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.7/odo-linux-amd64.tar.gz",
-                "sha256sum": "e36d27259cf15b34f9fc4303c429f7a52d817b086125ac41505b518a7c6fbd16",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.1.0/odo-linux-amd64.tar.gz",
+                "sha256sum": "46474a5979b2733b0ddb22eb34fd2f3920698566fd5b6a6188272b7e1e4fc7cb",
                 "dlFileName": "odo-linux-amd64.tar.gz",
                 "cmdFileName": "odo"
             }
