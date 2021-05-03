@@ -57,7 +57,7 @@ export function isSampleProject(repo: any): repo is SampleProject {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isCluster(cluster: any): cluster is Cluster {
-    return cluster.name && cluster.server && cluster.skipTLSVerify !== undefined;
+    return cluster.name && cluster.server;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

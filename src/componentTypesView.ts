@@ -43,6 +43,7 @@ import {
 import { vsCommand, VsCommandError } from './vscommand';
 import { Cluster } from '@kubernetes/client-node/dist/config_types';
 import { KubeConfig } from '@kubernetes/client-node';
+import { Platform } from './util/platform';
 
 type ExampleProject = SampleProject | StarterProject;
 type ComponentType = DevfileComponentType | ImageStreamTag | ExampleProject | Cluster | Registry;
@@ -191,7 +192,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     // eslint-disable-next-line class-methods-use-this
     async getChildren(parent: ComponentType): Promise<ComponentType[]> {
         let children: ComponentType[];
-
+        const addEnv = this.odo.getKubeconfigEnv();
         if (!parent) {
             const config = new KubeConfig();
             config.loadFromDefault();
@@ -211,7 +212,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             children = [];
             builders.forEach((builder: S2iComponentType) => children.splice(children.length,0, ...builder.spec.imageStreamTags));
         } else if (isRegistry(parent) ) {
-            const result: CliExitData = await this.odo.execute(Command.listCatalogComponentsJson());
+            const result = await this.odo.execute(Command.listCatalogComponentsJson(),Platform.getUserHomePath(), true, addEnv);
             children = this.loadItems<ComponentTypesJson, DevfileComponentType>(result, (data) => data.devfileItems);
             children = children.filter((element:DevfileComponentType) => element.Registry.Name === parent.Name);
         } else if (isS2iComponent(parent)) {
@@ -220,7 +221,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 return tag;
             });
         } else if (isDevfileComponent(parent)){
-            const result: CliExitData = await this.odo.execute(Command.describeCatalogComponent(parent.Name));
+            const result: CliExitData = await this.odo.execute(Command.describeCatalogComponent(parent.Name), Platform.getUserHomePath(), true, addEnv);
             children = this.loadItems<ComponentTypeDescription, StarterProject>(result, (data) => data.Data.starterProjects);
             children = children.map((starter:StarterProject) => {
                 starter.typeName = parent.Name;;

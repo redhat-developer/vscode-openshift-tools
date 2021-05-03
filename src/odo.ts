@@ -31,6 +31,9 @@ import { VsCommandError } from './vscommand';
 import { Storage } from './odo/storage';
 import bs = require('binary-search');
 import { CliExitData } from './cli';
+import { KubeConfigUtils } from './util/kubeUtils';
+import { KubeConfig } from '@kubernetes/client-node';
+import { pathExistsSync } from 'fs-extra';
 
 const {Collapsed} = TreeItemCollapsibleState;
 
@@ -329,6 +332,7 @@ class OdoEventImpl implements OdoEvent {
 }
 
 export interface Odo {
+    getKubeconfigEnv(): {};
     getClusters(): Promise<OpenShiftObject[]>;
     getProjects(): Promise<OpenShiftObject[]>;
     loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): Promise<void>;
@@ -344,7 +348,7 @@ export interface Odo {
     getServiceTemplates(): Promise<string[]>;
     getServiceTemplatePlans(svc: string): Promise<string[]>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
-    execute(command: CommandText, cwd?: string, fail?: boolean): Promise<cliInstance.CliExitData>;
+    execute(command: CommandText, cwd?: string, fail?: boolean, addEnv?: {}): Promise<cliInstance.CliExitData>;
     spawn(command: string, cwd?: string): Promise<ChildProcess>;
     executeInTerminal(command: CommandText, cwd?: string, name?: string): Promise<void>;
     requireLogin(): Promise<boolean>;
@@ -616,8 +620,29 @@ export class OdoImpl implements Odo {
         return deployedComponents;
     }
 
+    public getKubeconfigEnv(): {} {
+        const addEnv: {KUBECONFIG?: string} = {};
+        let kc: KubeConfig;
+        // TODO: Remove when odo works without kubeconfig present
+        try {
+            kc = new KubeConfigUtils();
+        } catch (err) {
+            // ignore error
+        }
+
+        const configPath = path.join(Platform.getUserHomePath(), '.kube', 'config');
+
+        if (kc && !pathExistsSync(configPath)) { // config is loaded, yay! But there is still use case for missing config file
+            // use fake config to let odo get component types from registry
+            addEnv.KUBECONFIG = path.resolve(__dirname, '..', '..', 'config', 'kubeconfig');
+        }
+        return addEnv;
+    }
+
     public async getComponentTypes(): Promise<ComponentType[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson());
+        // if kc is produced, KUBECONFIG env var is empty or pointing
+
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson(), undefined, true, this.getKubeconfigEnv());
         const compTypesJson: ComponentTypesJson = this.loadJSON(result.stdout);
         const devfileItems: ComponentTypeAdapter[] = [];
         const s2iItems: ComponentTypeAdapter[] = [];
@@ -738,7 +763,7 @@ export class OdoImpl implements Odo {
 
     public createEnv(): {} {
         const env = {...process.env };
-        env.GLOBALODOCONFIG = path.resolve(__dirname,'..', '..', 'preference.yaml');
+        env.GLOBALODOCONFIG = path.resolve(__dirname,'..', '..', 'config', 'preference.yaml');
         return env;
     }
 
@@ -750,7 +775,7 @@ export class OdoImpl implements Odo {
         terminal.show();
     }
 
-    public async execute(command: CommandText, cwd?: string, fail = true): Promise<cliInstance.CliExitData> {
+    public async execute(command: CommandText, cwd?: string, fail = true, addEnv = {}): Promise<cliInstance.CliExitData> {
         const env = this.createEnv();
         const commandActual = `${command}`;
         const commandPrivacy = `${command.privacyMode(true)}`;
@@ -758,7 +783,7 @@ export class OdoImpl implements Odo {
         const toolLocation = await ToolsConfig.detect(cmd);
         const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
             toolLocation ? commandActual.replace(cmd, `"${toolLocation}"`) : commandActual,
-            cwd ? {cwd, env} : { env }
+            cwd ? {cwd, env: {...env, ...addEnv}} : { env: {...env, ...addEnv} }
         );
         if (result.error && fail) {
             throw new VsCommandError(`${result.error.message}`, `Error when running command: ${commandPrivacy}`, result.error);
