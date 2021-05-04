@@ -221,10 +221,11 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 return tag;
             });
         } else if (isDevfileComponent(parent)){
-            const result: CliExitData = await this.odo.execute(Command.describeCatalogComponent(parent.Name), Platform.getUserHomePath(), true, addEnv);
-            children = this.loadItems<ComponentTypeDescription, StarterProject>(result, (data) => data.Data.starterProjects);
-            children = children.map((starter:StarterProject) => {
-                starter.typeName = parent.Name;;
+            const result: CliExitData =     await this.odo.execute(Command.describeCatalogComponent(parent.Name), Platform.getUserHomePath(), true, addEnv);
+            const descriptions = this.loadItems<ComponentTypeDescription[], ComponentTypeDescription>(result, (data) => data);
+            const description = descriptions.find((element)=> element.RegistryName === parent.Registry.Name && element.Devfile.metadata.name === parent.Name);
+            children = description.Devfile?.starterProjects.map((starter:StarterProject) => {
+                starter.typeName = parent.Name;
                 return starter;
             });
         } else if (isImageStreamTag(parent)) {

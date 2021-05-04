@@ -113,8 +113,8 @@ export interface ComponentType {
 }
 
 export interface ComponentTypeDescription {
-    Ctx: Ctx;
-    Data: Data;
+    RegistryName: string;
+    Devfile: Data;
 }
 
 export class ComponentTypeAdapter implements ComponentType {
