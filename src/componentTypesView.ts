@@ -167,7 +167,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             },
             tooltip: `Component Type\nName: ${element.Name}\nKind: devfile\nDescription: ${element.Description ? element.Description : 'n/a'}`,
             description: element.Description,
-            collapsibleState: this.registries.length > 1? TreeItemCollapsibleState.None : TreeItemCollapsibleState.Collapsed,
+            collapsibleState: TreeItemCollapsibleState.Collapsed,
         };
     }
 
@@ -184,7 +184,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     private async getRegistries(): Promise<Registry[]> {
         if(!this.registries) {
-            this.registries  =await this.odo.getRegistries();
+            this.registries  = await this.odo.getRegistries();
         }
         return this.registries;
     }
@@ -221,10 +221,10 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 return tag;
             });
         } else if (isDevfileComponent(parent)){
-            const result: CliExitData =     await this.odo.execute(Command.describeCatalogComponent(parent.Name), Platform.getUserHomePath(), true, addEnv);
+            const result: CliExitData = await this.odo.execute(Command.describeCatalogComponent(parent.Name), Platform.getUserHomePath(), true, addEnv);
             const descriptions = this.loadItems<ComponentTypeDescription[], ComponentTypeDescription>(result, (data) => data);
             const description = descriptions.find((element)=> element.RegistryName === parent.Registry.Name && element.Devfile.metadata.name === parent.Name);
-            children = description.Devfile?.starterProjects.map((starter:StarterProject) => {
+            children = description?.Devfile?.starterProjects.map((starter:StarterProject) => {
                 starter.typeName = parent.Name;
                 return starter;
             });
