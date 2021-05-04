@@ -5,7 +5,7 @@
 
 import { Cluster } from '@kubernetes/client-node/dist/config_types';
 import { Url } from 'url';
-import { Ctx, Data } from './componentTypeDescription';
+import { Data } from './componentTypeDescription';
 import { ComponentMetadata } from './config';
 
 export enum ComponentKind {
