@@ -184,6 +184,7 @@
     "onView:openshiftProjectExplorer",
     "onView:extension.vsKubernetesExplorer",
     "onView:openshiftComponentTypesView",
+    "onCommand:openshift.welcome",
     "onCommand:openshift.about",
     "onCommand:openshift.oc.about",
     "onCommand:openshift.output",
