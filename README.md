@@ -13,16 +13,6 @@ OpenShift Connector extension provides an end-to-end developer experience for Re
  - Developers can easily create, deploy and live debug applications running on OpenShift.
  - Run local instance of OpenShift 4.7 using [Red Hat CodeReady Containers](https://code-ready.github.io/crc/).
 
-## New and noteworthy
-
-* View to browse Component Catalog and Registries (see [#1931](https://github.com/redhat-developer/vscode-openshift-tools/issues/1931))
-* View to show Components in current workspace (see [#2008](https://github.com/redhat-developer/vscode-openshift-tools/issues/2008))
-* Reveal in Explorer command to navigate from Component item in Components View to the component's source code
-* Create Components while logged off Cluster
-* Supports creation of local OpenShift Cluster 4.7.0
-* OKD CLI v4.6.17 included
-* ODO CLI v2.0.7 included
-
 ### Demo: https://www.youtube.com/watch?v=HEsYgDqD1rM
 
 ![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/gif/vscode-openshift-tools.gif)
@@ -58,15 +48,11 @@ To install OpenShift Container Platform 4 in the public cloud, in your datacente
 
 ## Core Concepts
 
-* `Project`: A project is your source code, tests, and libraries organized in a separate single unit.
-
+* `Project`: A project is your source code, tests, and libraries organized in a separate single unit
 * `Application`: An application is a program designed for end users. An application consists of multiple microservices or components that work individually to build the entire application. Examples of applications: e-Shop, Hotel Reservation System, Online Booking
-
 * `Component`: A component is a set of Kubernetes resources which host code or data. Each component can be run and deployed separately. Examples of components: Warehouse API Backend, Inventory API, Web Frontend, Payment Backend
-
-* `Service`: A service is software that your component links to or depends on. Examples of services: MariaDB, MySQL.
-
-* `Devfile`: A portable file responsible for your entire reproducable development environment.
+* `Service`: A service is software that your component links to or depends on. Examples of services: MariaDB, MySQL
+* `Devfile`: A portable file responsible for your entire reproducable development environment
 
 ##  Commands and Features
 
@@ -233,10 +219,10 @@ To debug a Java Component, [Java Language Support](https://marketplace.visualstu
    * `OpenShift Connector: Output verbosity level` - Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and terminal view
    * `OpenShift Connector: Search CLI tools in PATH locations before using included binaries` - Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries
    * `OpenShift Connector: Use Webview based editors to show 'Show Log', 'Follow Log' and 'Describe' commands output` - Use Webview based editors instead of Terminal view to show or follow logs
-   * `Openshift Connector: CRC Executable Location` - Provide the path where the CodeReady Containers executable file is present.
-   * `Openshift Connector: CRC Pull Secret Path` - Provide the path where the pull secret file is present.
-   * `Openshift Connector: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
-   * `Openshift Connector: CRC Memory Allocation` - MiB of memory to allocate to the OpenShift cluster as selected during the first run.
+   * `OpenShift Connector: CRC Executable Location` - Provide the path where the CodeReady Containers executable file is present.
+   * `OpenShift Connector: CRC Pull Secret Path` - Provide the path where the pull secret file is present.
+   * `OpenShift Connector: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
+   * `OpenShift Connector: CRC Memory Allocation` - MiB of memory to allocate to the OpenShift cluster as selected during the first run.
 
 ## OpenShift Resources
 
@@ -268,7 +254,6 @@ This extension uses two CLI tools to interact with OpenShift cluster:
 
 > `oc` and `odo` tools for Windows, Linux and macOS are included into extension package. Once the extension is installed it is ready to use.
 
-The extension version `0.2.4` includes `odo` CLI tool `v2.0.7` and supports devfile in addition to S2I (Source-to-Image) components. Devfiles are new way of deploying a component with odo.
 Follow the links below for additional information:
 
 * [Understanding odo](https://bit.ly/3ovRTuY)
