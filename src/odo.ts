@@ -1032,7 +1032,7 @@ export class OdoImpl implements Odo {
 
     async loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): Promise<void> {
         const clusters = (await this.getClusters());
-        if(!clusters) return;
+        if(!clusters || clusters.length === 0) return;
         if (event === null && workspace.workspaceFolders || event && event.added && event.added.length > 0) {
             const addedFolders = event === null? workspace.workspaceFolders : event.added;
             await OdoImpl.data.addContexts(addedFolders);
