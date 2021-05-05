@@ -1,5 +1,26 @@
 # Change Log
 
+## 0.2.5 (May 5, 2021)
+
+* [#2110](https://github.com/redhat-developer/vscode-openshift-tools/issues/2110) OpenShift: welcome command does not activate the extension
+* [#2105](https://github.com/redhat-developer/vscode-openshift-tools/issues/2105) Migrate Components View to odo v2.1.0
+* [#2100](https://github.com/redhat-developer/vscode-openshift-tools/issues/2100) Update odo to v2.1.0
+* [#2097](https://github.com/redhat-developer/vscode-openshift-tools/issues/2097) README.md should include itemized dependencies
+* [#2093](https://github.com/redhat-developer/vscode-openshift-tools/issues/2093) `OpenShift: Welcome` command to open Welcome page
+* [#2085](https://github.com/redhat-developer/vscode-openshift-tools/issues/2085) Nodejs devfile reports invalid arguments
+* [#2074](https://github.com/redhat-developer/vscode-openshift-tools/issues/2074) `Cannot read property 'tags' of null` error in `openshift.component.createFromLocal` command
+* [#2073](https://github.com/redhat-developer/vscode-openshift-tools/issues/2073) 'Add Cluster Editor' show cluster in 'Starting' state after successful start
+* [#2062](https://github.com/redhat-developer/vscode-openshift-tools/issues/2062) `OpenShift: Push Component` command shows only 'not pushed' components
+* [#2061](https://github.com/redhat-developer/vscode-openshift-tools/issues/2061) VSCode Commands called from navigation/inline group or with welcome page button don't report exceptions
+* [#2044](https://github.com/redhat-developer/vscode-openshift-tools/issues/2044) Component Types view is empty when no kube config exists
+* [#2036](https://github.com/redhat-developer/vscode-openshift-tools/issues/2036) Validation for component name should work even if `odo list` fails
+* [#2034](https://github.com/redhat-developer/vscode-openshift-tools/issues/2034) Support single root workspace
+* [#2027](https://github.com/redhat-developer/vscode-openshift-tools/issues/2027) New Component command called form App Explorer should create Local Component
+* [#2011](https://github.com/redhat-developer/vscode-openshift-tools/issues/2011) Add `Reveal in Explorer` command for components in Application Explorer view
+* [#1980](https://github.com/redhat-developer/vscode-openshift-tools/issues/1980) Ameliorate getting started experience
+* [#1844](https://github.com/redhat-developer/vscode-openshift-tools/issues/1844) Commands called from palette fail when user is not logged into the cluster
+* [#1219](https://github.com/redhat-developer/vscode-openshift-tools/issues/1219) Show Welcome page when the extension loads
+
 ## 0.2.4 (March 21, 2021)
 
 * [#2046](https://github.com/redhat-developer/vscode-openshift-tools/issues/2046) Update Red Hat CodeReady Containers to 1.23.1 to use OpenShift 4.7.0
