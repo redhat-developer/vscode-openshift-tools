@@ -761,22 +761,16 @@ export class OdoImpl implements Odo {
         return services;
     }
 
-    public createEnv(): {} {
-        const env = {...process.env };
-        env.GLOBALODOCONFIG = path.resolve(__dirname,'..', '..', 'config', 'preference.yaml');
-        return env;
-    }
-
     public async executeInTerminal(command: CommandText, cwd: string = process.cwd(), name = 'OpenShift'): Promise<void> {
         const [cmd] = `${command}`.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
-        const terminal: Terminal = WindowUtil.createTerminal(name, cwd, this.createEnv());
+        const terminal: Terminal = WindowUtil.createTerminal(name, cwd);
         terminal.sendText(toolLocation === cmd ? `${command}` : `${command}`.replace(cmd, `"${toolLocation}"`), true);
         terminal.show();
     }
 
     public async execute(command: CommandText, cwd?: string, fail = true, addEnv = {}): Promise<cliInstance.CliExitData> {
-        const env = this.createEnv();
+        const env = {...process.env };
         const commandActual = `${command}`;
         const commandPrivacy = `${command.privacyMode(true)}`;
         const [cmd] = commandActual.split(' ');
@@ -1032,7 +1026,7 @@ export class OdoImpl implements Odo {
 
     async loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): Promise<void> {
         const clusters = (await this.getClusters());
-        if(!clusters || clusters.length === 0) return;
+        if(!clusters) return;
         if (event === null && workspace.workspaceFolders || event && event.added && event.added.length > 0) {
             const addedFolders = event === null? workspace.workspaceFolders : event.added;
             await OdoImpl.data.addContexts(addedFolders);
