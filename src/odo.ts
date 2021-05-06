@@ -648,7 +648,7 @@ export class OdoImpl implements Odo {
         const s2iItems: ComponentTypeAdapter[] = [];
 
         if (compTypesJson?.devfileItems) {
-            compTypesJson.devfileItems.map((item) => devfileItems.push(new ComponentTypeAdapter(ComponentKind.DEVFILE, item.Name, undefined, item.Description)));
+            compTypesJson.devfileItems.map((item) => devfileItems.push(new ComponentTypeAdapter(ComponentKind.DEVFILE, item.Name, undefined, item.Description, undefined, item.Registry.Name)));
         }
 
         if (compTypesJson?.s2iItems) {

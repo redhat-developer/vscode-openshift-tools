@@ -633,13 +633,12 @@ export class Component extends OpenShiftItem {
             progressIndicator.busy = true;
             progressIndicator.placeholder = 'Loading available Component types';
             progressIndicator.show();
-            await wait(5000);
             const componentTypes = await Component.odo.getComponentTypes();
             if (componentTypeName) {
                 componentType = componentTypes.find(type => type.name === componentTypeName && type.kind === componentKind && (!version || type.version === version));
             }
             if (!componentType) {
-                componentType = await window.showQuickPick(componentTypes, { placeHolder: 'Select Component type', ignoreFocusOut: true });
+                componentType = await window.showQuickPick(componentTypes.sort((c1, c2) => c1.label.localeCompare(c2.label)), { placeHolder: 'Select Component type', ignoreFocusOut: true });
             } else {
                 progressIndicator.hide();
             }
@@ -659,7 +658,10 @@ export class Component extends OpenShiftItem {
                         progressIndicator.placeholder = 'Loading Starter Projects for selected Component Type'
                         progressIndicator.show();
                         const descr = await Component.odo.execute(Command.describeCatalogComponent(componentType.name));
-                        const starterProjects: StarterProjectDescription[] = Component.odo.loadItems<StarterProjectDescription>(descr,(data:ComponentTypeDescription[])=>data[0].Devfile.starterProjects);
+                        const starterProjects: StarterProjectDescription[] = Component.odo.loadItems<StarterProjectDescription>(descr,(data:ComponentTypeDescription[])=> {
+                            const dfCompType = data.find((comp)=>comp.RegistryName === componentType.registryName);
+                            return dfCompType.Devfile.starterProjects
+                        });
                         progressIndicator.hide();
                         if(starterProjects?.length && starterProjects?.length > 0) {
                             const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: `Initialize Component using ${starterProjects.length === 1 ? '\''.concat(starterProjects[0].name.concat('\' ')) : ''}Starter Project?`});
