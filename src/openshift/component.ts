@@ -24,7 +24,7 @@ import LogViewLoader from '../webview/log/LogViewLoader';
 import DescribeViewLoader from '../webview/describe/describeViewLoader';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { SourceType } from '../odo/config';
-import { ComponentKind, ComponentTypeAdapter, DevfileComponentType, ImageStreamTag, isDevfileComponent, isImageStreamTag } from '../odo/componentType';
+import { ComponentKind, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, ImageStreamTag, isDevfileComponent, isImageStreamTag } from '../odo/componentType';
 import { Url } from '../odo/url';
 import { ComponentDescription, StarterProjectDescription } from '../odo/catalog';
 import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
@@ -659,7 +659,7 @@ export class Component extends OpenShiftItem {
                         progressIndicator.placeholder = 'Loading Starter Projects for selected Component Type'
                         progressIndicator.show();
                         const descr = await Component.odo.execute(Command.describeCatalogComponent(componentType.name));
-                        const starterProjects: StarterProjectDescription[] = Component.odo.loadItems<StarterProjectDescription>(descr,(data:{Data:ComponentDescription})=>data.Data.starterProjects);
+                        const starterProjects: StarterProjectDescription[] = Component.odo.loadItems<StarterProjectDescription>(descr,(data:ComponentTypeDescription[])=>data[0].Devfile.starterProjects);
                         progressIndicator.hide();
                         if(starterProjects?.length && starterProjects?.length > 0) {
                             const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: `Initialize Component using ${starterProjects.length === 1 ? '\''.concat(starterProjects[0].name.concat('\' ')) : ''}Starter Project?`});
