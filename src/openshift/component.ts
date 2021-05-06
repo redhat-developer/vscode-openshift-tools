@@ -16,7 +16,7 @@ import { Command, CommandOption, CommandText } from '../odo/command';
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
 import { Refs, Type } from '../util/refs';
-import { Delayer, wait } from '../util/async';
+import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import { selectWorkspaceFolder } from '../util/workspace';
 import { ToolsConfig } from '../tools';
