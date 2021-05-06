@@ -1,7 +1,9 @@
 # Change Log
 
-## 0.2.5 (May 5, 2021)
+## 0.2.5 (May 6, 2021)
 
+* [#2117](https://github.com/redhat-developer/vscode-openshift-tools/issues/2117) `New Component` command does not support multiple registries
+* [#2115](https://github.com/redhat-developer/vscode-openshift-tools/issues/2115) `New Component` command stopped asking to use starter project after migration to odo v2.1.0
 * [#2110](https://github.com/redhat-developer/vscode-openshift-tools/issues/2110) OpenShift: welcome command does not activate the extension
 * [#2105](https://github.com/redhat-developer/vscode-openshift-tools/issues/2105) Migrate Components View to odo v2.1.0
 * [#2100](https://github.com/redhat-developer/vscode-openshift-tools/issues/2100) Update odo to v2.1.0
