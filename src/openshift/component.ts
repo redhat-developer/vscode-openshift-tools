@@ -16,7 +16,7 @@ import { Command, CommandOption, CommandText } from '../odo/command';
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
 import { Refs, Type } from '../util/refs';
-import { Delayer, wait } from '../util/async';
+import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import { selectWorkspaceFolder } from '../util/workspace';
 import { ToolsConfig } from '../tools';
@@ -24,9 +24,9 @@ import LogViewLoader from '../webview/log/LogViewLoader';
 import DescribeViewLoader from '../webview/describe/describeViewLoader';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { SourceType } from '../odo/config';
-import { ComponentKind, ComponentTypeAdapter, DevfileComponentType, ImageStreamTag, isDevfileComponent, isImageStreamTag } from '../odo/componentType';
+import { ComponentKind, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, ImageStreamTag, isDevfileComponent, isImageStreamTag } from '../odo/componentType';
 import { Url } from '../odo/url';
-import { ComponentDescription, StarterProjectDescription } from '../odo/catalog';
+import { StarterProjectDescription } from '../odo/catalog';
 import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
 import path = require('path');
 import globby = require('globby');
@@ -633,13 +633,12 @@ export class Component extends OpenShiftItem {
             progressIndicator.busy = true;
             progressIndicator.placeholder = 'Loading available Component types';
             progressIndicator.show();
-            await wait(5000);
             const componentTypes = await Component.odo.getComponentTypes();
             if (componentTypeName) {
                 componentType = componentTypes.find(type => type.name === componentTypeName && type.kind === componentKind && (!version || type.version === version));
             }
             if (!componentType) {
-                componentType = await window.showQuickPick(componentTypes, { placeHolder: 'Select Component type', ignoreFocusOut: true });
+                componentType = await window.showQuickPick(componentTypes.sort((c1, c2) => c1.label.localeCompare(c2.label)), { placeHolder: 'Select Component type', ignoreFocusOut: true });
             } else {
                 progressIndicator.hide();
             }
@@ -659,7 +658,10 @@ export class Component extends OpenShiftItem {
                         progressIndicator.placeholder = 'Loading Starter Projects for selected Component Type'
                         progressIndicator.show();
                         const descr = await Component.odo.execute(Command.describeCatalogComponent(componentType.name));
-                        const starterProjects: StarterProjectDescription[] = Component.odo.loadItems<StarterProjectDescription>(descr,(data:{Data:ComponentDescription})=>data.Data.starterProjects);
+                        const starterProjects: StarterProjectDescription[] = Component.odo.loadItems<StarterProjectDescription>(descr,(data:ComponentTypeDescription[])=> {
+                            const dfCompType = data.find((comp)=>comp.RegistryName === componentType.registryName);
+                            return dfCompType.Devfile.starterProjects
+                        });
                         progressIndicator.hide();
                         if(starterProjects?.length && starterProjects?.length > 0) {
                             const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: `Initialize Component using ${starterProjects.length === 1 ? '\''.concat(starterProjects[0].name.concat('\' ')) : ''}Starter Project?`});

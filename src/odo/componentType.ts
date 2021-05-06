@@ -123,11 +123,13 @@ export class ComponentTypeAdapter implements ComponentType {
         public readonly name: string,
         public readonly version: string,
         public readonly description: string,
-        public readonly tags?: string) {
+        public readonly tags?: string,
+        public readonly registryName?: string) {
+
     }
 
     get label(): string {
-        const versionSuffix = this.version? `/${this.version}` : '' ;
+        const versionSuffix = this.version? `/${this.version}` : `/${this.registryName}` ;
         return `${this.name}${versionSuffix} (${this.kind})`;
     }
 }
