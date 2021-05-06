@@ -26,7 +26,7 @@ import { vsCommand, VsCommandError } from '../vscommand';
 import { SourceType } from '../odo/config';
 import { ComponentKind, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, ImageStreamTag, isDevfileComponent, isImageStreamTag } from '../odo/componentType';
 import { Url } from '../odo/url';
-import { ComponentDescription, StarterProjectDescription } from '../odo/catalog';
+import { StarterProjectDescription } from '../odo/catalog';
 import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
 import path = require('path');
 import globby = require('globby');
