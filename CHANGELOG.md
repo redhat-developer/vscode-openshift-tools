@@ -1,7 +1,8 @@
 # Change Log
 
-## 0.2.5 (May 6, 2021)
+## 0.2.5 (May 7, 2021)
 
+* [#2119](https://github.com/redhat-developer/vscode-openshift-tools/issues/2119) svg icons stopped working after vscode update to VSCode v1.56.0
 * [#2117](https://github.com/redhat-developer/vscode-openshift-tools/issues/2117) `New Component` command does not support multiple registries
 * [#2115](https://github.com/redhat-developer/vscode-openshift-tools/issues/2115) `New Component` command stopped asking to use starter project after migration to odo v2.1.0
 * [#2110](https://github.com/redhat-developer/vscode-openshift-tools/issues/2110) OpenShift: welcome command does not activate the extension
