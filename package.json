@@ -383,8 +383,8 @@
         "title": "Change Active Project",
         "category": "OpenShift",
         "icon": {
-          "dark": "images/title/dark/icon-select-project.png",
-          "light": "images/title/light/icon-select-project.png"
+          "dark": "images/title/dark/icon-select-project.svg",
+          "light": "images/title/light/icon-select-project.svg"
         }
       },
       {
@@ -422,8 +422,8 @@
         "title": "New Component",
         "category": "OpenShift",
         "icon": {
-          "light": "images/title/light/workspace-new.png",
-          "dark": "images/title/dark/workspace-new.png"
+          "light": "images/title/light/workspace-new.svg",
+          "dark": "images/title/dark/workspace-new.svg"
         }
       },
       {
