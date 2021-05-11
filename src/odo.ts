@@ -761,16 +761,22 @@ export class OdoImpl implements Odo {
         return services;
     }
 
+    public createEnv(): {} {
+        const env = {...process.env };
+        env.ODO_DISABLE_TELEMETRY = 'true';
+        return env;
+    }
+
     public async executeInTerminal(command: CommandText, cwd: string = process.cwd(), name = 'OpenShift'): Promise<void> {
         const [cmd] = `${command}`.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
-        const terminal: Terminal = WindowUtil.createTerminal(name, cwd);
+        const terminal: Terminal = WindowUtil.createTerminal(name, cwd, this.createEnv());
         terminal.sendText(toolLocation === cmd ? `${command}` : `${command}`.replace(cmd, `"${toolLocation}"`), true);
         terminal.show();
     }
 
     public async execute(command: CommandText, cwd?: string, fail = true, addEnv = {}): Promise<cliInstance.CliExitData> {
-        const env = {...process.env };
+        const env = this.createEnv();
         const commandActual = `${command}`;
         const commandPrivacy = `${command.privacyMode(true)}`;
         const [cmd] = commandActual.split(' ');
