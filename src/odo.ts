@@ -763,8 +763,8 @@ export class OdoImpl implements Odo {
 
     public createEnv(): {} {
         const env = {...process.env };
-        env.GLOBALODOCONFIG = path.resolve(__dirname,'..', '..', 'config', 'preference.yaml');
-        return env;
+        env.ODO_DISABLE_TELEMETRY = "true";
+        return env; 
     }
 
     public async executeInTerminal(command: CommandText, cwd: string = process.cwd(), name = 'OpenShift'): Promise<void> {
