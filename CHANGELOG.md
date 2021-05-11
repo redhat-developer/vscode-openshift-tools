@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.2.6 (May 10, 2021)
+
+* [#2130](https://github.com/redhat-developer/vscode-openshift-tools/pull/2130) Fix typo in Welcome page
+* [#2131](https://github.com/redhat-developer/vscode-openshift-tools/pull/2131) Disable odo telemetry for commands executed from the extension
+
 ## 0.2.5 (May 7, 2021)
 
 * [#2119](https://github.com/redhat-developer/vscode-openshift-tools/issues/2119) svg icons stopped working after vscode update to VSCode v1.56.0
