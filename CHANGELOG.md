@@ -2,6 +2,7 @@
 
 ## 0.2.6 (May 10, 2021)
 
+* [#2121](https://github.com/redhat-developer/vscode-openshift-tools/issues/2121) Open Welcome page in the active view column
 * [#2130](https://github.com/redhat-developer/vscode-openshift-tools/pull/2130) Fix typo in Welcome page
 * [#2131](https://github.com/redhat-developer/vscode-openshift-tools/pull/2131) Disable odo telemetry for commands executed from the extension
 
