@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.7 (May 27, 2021)
+
+TBD: List resolved issues
+
 ## 0.2.6 (May 10, 2021)
 
 * [#2121](https://github.com/redhat-developer/vscode-openshift-tools/issues/2121) Open Welcome page in the active view column
