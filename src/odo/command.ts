@@ -57,7 +57,7 @@ export class CommandText {
     }
 
     toString(): string {
-        return `${this.command}${this.parameter? ` ${this.privacy? 'REDACTED' : this.parameter}`: ''}${this.options? ` ${this.options.join(' ')}`: ''}`;
+        return `${this.command}${this.parameter? ` ${this.privacy? 'REDACTED' : this.parameter}`: ''}${this.options && this.options.length > 0? ` ${this.options.join(' ')}`: ''}`;
     }
 
     privacyMode(set: boolean): CommandText {
