@@ -581,6 +581,31 @@ export class Component extends OpenShiftItem {
     }
 
     /**
+     * Create and push or just push existing component to the cluster
+     * 
+     * @param folder where component source code is
+     * @param component type name in registry
+     * 
+     */
+
+    @clusterRequired() // request to login to cluster and then execute command
+    static async deployRootWorkspaceFolder(folder: Uri, componentTypeName: string): Promise<void> {
+
+        // TODO: Possible use cases to handle
+        // 1. Components project and current project is different
+        // 2. Component type name is not present in any of the registries
+        // 3. Component type name is present in several registries
+        let component = Component.odo.getOpenShiftObjectByContext(folder.fsPath);
+        if(!component) {
+            await Component.createFromRootWorkspaceFolder(folder, undefined, undefined, componentTypeName);
+            component = Component.odo.getOpenShiftObjectByContext(folder.fsPath);
+        }
+        if (component) {
+            await Component.push(component);
+        }
+    }
+
+    /**
      * Create a component
      *
      * @param folder The folder to use as component context folder
@@ -591,7 +616,7 @@ export class Component extends OpenShiftItem {
      * @return A thenable that resolves to the message to show or empty string if components is already exists or null if command is canceled.
      * @throws VsCommandError or Error in case of error in cli or code
      */
-
+    
     @vsCommand('openshift.component.createFromRootWorkspaceFolder')
     static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], context: OpenShiftApplication, componentTypeName?: string, componentKind = ComponentKind.DEVFILE, version?: string, starterProjectName?: string): Promise<string | null> {
 

@@ -82,6 +82,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         commands.registerCommand('clusters.openshift.useProject', (context) =>
             commands.executeCommand('extension.vsKubernetesUseNamespace', context),
         ),
+        commands.registerCommand('openshift.component.deployRootWorkspaceFolder', Component.deployRootWorkspaceFolder),
         crcStatusItem,
         OpenShiftExplorer.getInstance(),
         new WatchSessionsView().createTreeView('openshiftWatchView'),
