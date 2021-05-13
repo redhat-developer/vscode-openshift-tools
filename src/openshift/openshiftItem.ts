@@ -220,15 +220,13 @@ export function clusterRequired() {
        descriptor[fnKey] = async function (...args: any[]): Promise<any> {
             let clusters = await getInstance().getClusters()
             if (clusters.length === 0) {
-                const lOrC = await window.showInformationMessage('Login in to a Cluster to run this command.', 'Login', 'Add OpenShift Cluster', 'Cancel');
+                const lOrC = await window.showInformationMessage('Login in to a Cluster to run this command.', 'Login', 'Cancel');
                 if(lOrC === 'Login') {
                     const loginResult = await commands.executeCommand('openshift.explorer.login');
                     if (typeof loginResult === 'string') {
                         window.showInformationMessage(loginResult);
                     }
                     clusters = await getInstance().getClusters();
-                } else if (lOrC === 'Add OpenShift Cluster') {
-                    return commands.executeCommand('openshift.explorer.addCluster');
                 }
             }
             if (clusters.length) {

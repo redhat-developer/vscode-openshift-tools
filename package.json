@@ -228,6 +228,7 @@
     "onCommand:openshift.component.watch.palette",
     "onCommand:openshift.component.watch.terminate",
     "onCommand:openshift.component.watch.showLog",
+    "onCommand:openshift.component.deployRootWorkspaceFolder",
     "onCommand:openshift.catalog.listComponents",
     "onCommand:openshift.catalog.listServices",
     "onCommand:openshift.url.create",
@@ -435,6 +436,9 @@
         "command": "openshift.component.createFromRootWorkspaceFolder",
         "title": "New OpenShift Component",
         "category": "OpenShift"
+      },
+      {
+        "command": "openshift.component.deployRootWorkspaceFolder"
       },
       {
         "command": "openshift.component.createFromGit",
@@ -1003,6 +1007,10 @@
         {
           "command": "openshift.component.push",
           "when": "view == openshiftProjectExplorer"
+        },
+        {
+          "command": "openshift.component.deployRootWorkspaceFolder",
+          "when": "false"
         },
         {
           "command": "openshift.storage.delete",
