@@ -581,12 +581,14 @@ export class Component extends OpenShiftItem {
     }
 
     /**
+     * Command ID: openshift.component.deployRootWorkspaceFolder
      * Create and push or just push existing component to the cluster
      * 
      * @param folder where component source code is
      * @param component type name in registry
      * 
      */
+
 
     @clusterRequired() // request to login to cluster and then execute command
     static async deployRootWorkspaceFolder(folder: Uri, componentTypeName: string): Promise<void> {
