@@ -183,6 +183,7 @@ suite('odo commands integration', () => {
                     newAppName,
                     'nodejs',
                     'latest',
+                    undefined,
                     newNodeJsComponent,
                     componentLocation
                 )
