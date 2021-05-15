@@ -391,6 +391,7 @@ export class Command {
         app: string,
         type = '', // will use empty string in case of undefined type passed in
         version: string,
+        registryName: string,
         name: string,
         folder: string,
         starter: string = undefined,
@@ -399,6 +400,9 @@ export class Command {
         const cTxt = new CommandText('odo create', `${type}${version?':':''}${version?version:''} ${name}`);
         if (version) {
             cTxt.addOption(new CommandOption('--s2i'));
+        }
+        if (registryName) {
+            cTxt.addOption(new CommandOption('--registry', registryName));
         }
         cTxt.addOption(new CommandOption('--context', folder))
             .addOption(new CommandOption('--app', app))

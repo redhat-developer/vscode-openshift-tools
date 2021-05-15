@@ -698,8 +698,9 @@ export class Component extends OpenShiftItem {
                 `Creating new Component '${componentName}'`,
                 () => Component.odo.createComponentFromFolder(
                     application,
-                    componentType? componentType.name : undefined, // in case of using existing devfile
-                    componentType? componentType.version : undefined,
+                    componentType?.name, // in case of using existing devfile
+                    componentType?.version,
+                    componentType?.registryName,
                     componentName,
                     folder,
                     createStarter,
@@ -1034,7 +1035,13 @@ export class Component extends OpenShiftItem {
                     const gitRef = bcJson.spec.source.git.ref || 'master';
                     await Component.odo.execute(Command.createGitComponent(prjName, appName, compTypeName, compTypeVersion, compName, gitUrl, gitRef), workspaceFolder.fsPath);
                 } else { // componentType === ComponentType.Local
-                    await Component.odo.execute(Command.createLocalComponent(prjName, appName, componentJson.metadata.labels['app.kubernetes.io/name'], componentJson.metadata.labels['app.openshift.io/runtime-version'], compName, workspaceFolder.fsPath));
+                    await Component.odo.execute(Command.createLocalComponent(
+                        prjName,
+                        appName,
+                        componentJson.metadata.labels['app.kubernetes.io/name'],
+                        componentJson.metadata.labels['app.openshift.io/runtime-version'],
+                        undefined,
+                        compName, workspaceFolder.fsPath));
                 }
                 // import storage if present
                 if (componentJson.spec.template.spec.containers[0].volumeMounts) {
