@@ -1049,7 +1049,7 @@ export class OdoImpl implements Odo {
                                 comp.contextValue = ContextType.COMPONENT_PUSHED;
                                 this.subject.next(new OdoEventImpl('changed', comp));
                             } else if (!comp) {
-                                const newComponent = new OpenShiftComponent(app, added.metadata.name, ContextType.COMPONENT, Uri.file(added.status.context), added.spec.sourceType, added.spec.type.split(':')[1] ? ComponentKind.S2I : ComponentKind.DEVFILE,  { name: added.spec.type.split(':')[0], tag: added.spec.type.split(':')[1]});
+                                const newComponent = new OpenShiftComponent(app, added.metadata.name, ContextType.COMPONENT, Uri.file(added.status.context), added.spec.sourceType, added.spec.sourceType ? ComponentKind.S2I : ComponentKind.DEVFILE,  { name: added.spec.type.split(':')[0], tag: added.spec.type.split(':')[1]});
                                 this.insertAndRefresh(newComponent);
                             }
                         } else if (!app) {
