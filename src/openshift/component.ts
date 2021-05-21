@@ -591,11 +591,6 @@ export class Component extends OpenShiftItem {
 
     @clusterRequired() // request to login to cluster and then execute command
     static async deployRootWorkspaceFolder(folder: Uri, componentTypeName: string): Promise<void> {
-
-        // TODO: Possible use cases to handle
-        // 1. Components project and current project is different
-        // 2. Component type name is not present in any of the registries
-        // 3. Component type name is present in several registries
         let component = Component.odo.getOpenShiftObjectByContext(folder.fsPath);
         if(!component) {
             await Component.createFromRootWorkspaceFolder(folder, undefined, undefined, componentTypeName);
@@ -655,24 +650,30 @@ export class Component extends OpenShiftItem {
 
         let createStarter: string;
         let componentType: ComponentTypeAdapter;
+        let componentTypeCandidates: ComponentTypeAdapter[];
         if (!useExistingDevfile) {
             progressIndicator.busy = true;
-            progressIndicator.placeholder = 'Loading available Component types';
+            progressIndicator.placeholder = componentTypeName ? `Checking if '${componentTypeName}' Component type is available` : 'Loading available Component types';
             progressIndicator.show();
             const componentTypes = await Component.odo.getComponentTypes();
             if (componentTypeName) {
-                componentType = componentTypes.find(type => type.name === componentTypeName && type.kind === componentKind && (!version || type.version === version));
-            }
-            if (!componentType) {
-                componentType = await window.showQuickPick(componentTypes.sort((c1, c2) => c1.label.localeCompare(c2.label)), { placeHolder: 'Select Component type', ignoreFocusOut: true });
+                componentTypeCandidates = componentTypes.filter(type => type.name === componentTypeName && type.kind === componentKind && (!version || type.version === version));
+                if (componentTypeCandidates?.length === 0) {
+                    componentType = await window.showQuickPick(componentTypes.sort((c1, c2) => c1.label.localeCompare(c2.label)), { placeHolder: `Cannot find Component type '${componentTypeName}', select one below to use instead`, ignoreFocusOut: true });
+                } else if (componentTypeCandidates?.length > 1) {
+                    componentType = await window.showQuickPick(componentTypeCandidates.sort((c1, c2) => c1.label.localeCompare(c2.label)), { placeHolder: `Found more than one Component types '${componentTypeName}', select one below to use`, ignoreFocusOut: true });
+                } else {
+                    [componentType] = componentTypeCandidates;
+                    progressIndicator.hide();
+                }
             } else {
-                progressIndicator.hide();
+                componentType = await window.showQuickPick(componentTypes.sort((c1, c2) => c1.label.localeCompare(c2.label)), { placeHolder: 'Select Component type', ignoreFocusOut: true });
             }
 
             if (!componentType) return null;
 
             if (componentType.kind === ComponentKind.DEVFILE) {
-                progressIndicator.placeholder = 'Checking if context folder is empty'
+                progressIndicator.placeholder = 'Checking if provided context folder is empty'
                 progressIndicator.show();
                 const globbyPath = `${folder.fsPath.replace('\\', '/')}/`;
                 const paths = globby.sync(`${globbyPath}*`, {dot: true, onlyFiles: false});
@@ -689,7 +690,7 @@ export class Component extends OpenShiftItem {
                             return dfCompType.Devfile.starterProjects
                         });
                         progressIndicator.hide();
-                        if(starterProjects?.length && starterProjects?.length > 0) {
+                        if(starterProjects?.length && starterProjects.length > 0) {
                             const create = await window.showQuickPick(['Yes', 'No'] , {placeHolder: `Initialize Component using ${starterProjects.length === 1 ? '\''.concat(starterProjects[0].name.concat('\' ')) : ''}Starter Project?`});
                             if (create === 'Yes') {
                                 if (starterProjects.length === 1) {

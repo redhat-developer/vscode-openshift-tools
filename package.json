@@ -438,7 +438,8 @@
         "category": "OpenShift"
       },
       {
-        "command": "openshift.component.deployRootWorkspaceFolder"
+        "command": "openshift.component.deployRootWorkspaceFolder",
+        "title": "Deploy and push folder to OpenShift"
       },
       {
         "command": "openshift.component.createFromGit",
