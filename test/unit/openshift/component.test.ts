@@ -24,6 +24,7 @@ import pq = require('proxyquire');
 
 import globby = require('globby');
 import fs = require('fs-extra');
+import { Platform } from '../../../src/util/platform';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -404,6 +405,43 @@ suite('OpenShift/Component', () => {
         });
     });
 
+    suite('deployRootWorkspaceFolder', () => {
+        setup(() => {
+        });
+
+        test('starts new component workflow if provided folder is not odo component and pushes new component', async () => {
+            const o = new TestItem(undefined, 'object', ContextType.COMPONENT);
+            const getOso = sandbox.stub(OdoImpl.prototype, 'getOpenShiftObjectByContext')
+            getOso.onFirstCall().returns(undefined);
+            getOso.onSecondCall().returns(o)
+            sandbox.stub(Component, 'createFromRootWorkspaceFolder').resolves('Created successfully!');
+            const push = sandbox.stub(Component, 'push').resolves();
+            await Component.deployRootWorkspaceFolder(vscode.Uri.file(Platform.getUserHomePath()), 'component-type');
+            expect(push).calledWith(o);
+        });
+        
+        test('skips new component workflow and push component to cluster if provided folder has component already', async () => {
+            const o = new TestItem(undefined, 'object', ContextType.COMPONENT);
+            const getOso = sandbox.stub(OdoImpl.prototype, 'getOpenShiftObjectByContext')
+            getOso.onFirstCall().returns(o);
+            const create = sandbox.stub(Component, 'createFromRootWorkspaceFolder').resolves('Created successfully!');
+            const push = sandbox.stub(Component, 'push').resolves();
+            await Component.deployRootWorkspaceFolder(vscode.Uri.file(Platform.getUserHomePath()), 'component-type');
+            expect(create).not.called;
+            expect(push).calledWith(o);
+        });
+
+        test('starts new component workflow if provided folder is not odo component and does not call push if workflow canceled', async() => {
+            const getOso = sandbox.stub(OdoImpl.prototype, 'getOpenShiftObjectByContext')
+            getOso.onFirstCall().returns(undefined);
+            getOso.onSecondCall().returns(null);
+            sandbox.stub(Component, 'createFromRootWorkspaceFolder').resolves(null);
+            const push = sandbox.stub(Component, 'push').resolves();
+            await Component.deployRootWorkspaceFolder(vscode.Uri.file(Platform.getUserHomePath()), 'component-type');
+            expect(push).not.called;
+        });
+    });
+
     suite('createFromFolder', () => {
         let inputStub: sinon.SinonStub;
         const pathOne: string = path.join('some', 'path');
@@ -442,7 +480,7 @@ suite('OpenShift/Component', () => {
             expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
         });
 
-        test('skips component type selection if componentTypeName provided and type exists', async () => {
+        test('skips component type selection if componentTypeName provided and only one type found in registries', async () => {
             inputStub.resolves(componentItem.getName());
             sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
                 new ComponentTypeAdapter(
@@ -459,6 +497,53 @@ suite('OpenShift/Component', () => {
             expect(quickPickStub).have.not.calledWith({ placeHolder: 'Component type' })
         });
 
+        test('when componentTypeName provided and there are more than one type found in registries, asks to pick component type from list of found types', async () => {
+            inputStub.resolves(componentItem.getName());
+            const componentType1 = new ComponentTypeAdapter(
+                ComponentKind.DEVFILE,
+                'componentType1',
+                undefined,
+                'description',
+                '',
+                'reg1'
+            );
+            const componentType2 = new ComponentTypeAdapter(
+                ComponentKind.DEVFILE,
+                'componentType1',
+                undefined,
+                'description',
+                '',
+                'reg2'
+            );
+            quickPickStub.onSecondCall().resolves(componentType1)
+            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
+                componentType1, componentType2
+            ]);
+            const result = await Component.createFromRootWorkspaceFolder(folder, [], undefined, 'componentType1');
+            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+            expect(quickPickStub).calledTwice;
+            expect(quickPickStub).calledWith([componentType1,componentType2]);
+        });
+
+        test('when componentTypeName provided and there is no type found in registries, asks to select from all available component types', async () => {
+            inputStub.resolves(componentItem.getName());
+            const componentType = new ComponentTypeAdapter(
+                ComponentKind.DEVFILE,
+                'componentType2',
+                undefined,
+                'description',
+                ''
+            );
+            quickPickStub.onSecondCall().resolves(componentType)
+            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
+                componentType
+            ]);
+            const result = await Component.createFromRootWorkspaceFolder(folder, [], undefined, 'componentType1');
+            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+            expect(quickPickStub).calledTwice;
+            expect(quickPickStub).calledWith([componentType]);
+        });
+
         test('skips component type selection if devfile exists and use devfile name as initial value for component name', async () => {
             sandbox.stub(fs, 'existsSync').returns(true);
             const getNameStub = sandbox.stub(Component, 'getName').returns(componentItem.getName());
@@ -470,6 +555,8 @@ suite('OpenShift/Component', () => {
             expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
             expect(getNameStub).calledWith('Component name', Component.odo.getComponents(appItem), appItem.getName(), 'componentName');
         });
+
+
     });
 
     suite('unlinkComponent', () => {
