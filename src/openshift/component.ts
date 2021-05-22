@@ -593,7 +593,7 @@ export class Component extends OpenShiftItem {
     static async deployRootWorkspaceFolder(folder: Uri, componentTypeName: string): Promise<void> {
         let component = Component.odo.getOpenShiftObjectByContext(folder.fsPath);
         if(!component) {
-            await Component.createFromRootWorkspaceFolder(folder, undefined, undefined, componentTypeName);
+            await Component.createFromRootWorkspaceFolder(folder, undefined, undefined, componentTypeName, ComponentKind.DEVFILE, undefined, undefined, false);
             component = Component.odo.getOpenShiftObjectByContext(folder.fsPath);
         }
         if (component) {
@@ -614,7 +614,12 @@ export class Component extends OpenShiftItem {
      */
 
     @vsCommand('openshift.component.createFromRootWorkspaceFolder')
-    static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], context: OpenShiftApplication, componentTypeName?: string, componentKind = ComponentKind.DEVFILE, version?: string, starterProjectName?: string): Promise<string | null> {
+
+    static async fake(folder: Uri): Promise<string> {
+        return commands.executeCommand('openshift.component.deployRootWorkspaceFolder', folder, 'java-quarkus');
+    }
+
+    static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], context: OpenShiftApplication, componentTypeName?: string, componentKind = ComponentKind.DEVFILE, version?: string, starterProjectName?: string, notification = true): Promise<string | null> {
 
         const application = await Component.getOpenShiftCmdData(context,
             'Select an Application where you want to create a Component'
@@ -731,7 +736,8 @@ export class Component extends OpenShiftItem {
                     componentName,
                     folder,
                     createStarter,
-                    useExistingDevfile
+                    useExistingDevfile,
+                    notification
                 )
             );
 
