@@ -614,11 +614,6 @@ export class Component extends OpenShiftItem {
      */
 
     @vsCommand('openshift.component.createFromRootWorkspaceFolder')
-
-    static async fake(folder: Uri): Promise<string> {
-        return commands.executeCommand('openshift.component.deployRootWorkspaceFolder', folder, 'java-quarkus');
-    }
-
     static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], context: OpenShiftApplication, componentTypeName?: string, componentKind = ComponentKind.DEVFILE, version?: string, starterProjectName?: string, notification = true): Promise<string | null> {
 
         const application = await Component.getOpenShiftCmdData(context,
