@@ -703,8 +703,6 @@ export class Component extends OpenShiftItem {
                                     if (!selectedStarter) return null;
                                     createStarter = selectedStarter.label;
                                 }
-                            } else if (!create) {
-                                return null;
                             }
                         }
                     }
