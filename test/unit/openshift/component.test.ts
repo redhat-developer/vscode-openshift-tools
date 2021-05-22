@@ -406,8 +406,6 @@ suite('OpenShift/Component', () => {
     });
 
     suite('deployRootWorkspaceFolder', () => {
-        setup(() => {
-        });
 
         test('starts new component workflow if provided folder is not odo component and pushes new component', async () => {
             const o = new TestItem(undefined, 'object', ContextType.COMPONENT);
@@ -419,8 +417,8 @@ suite('OpenShift/Component', () => {
             await Component.deployRootWorkspaceFolder(vscode.Uri.file(Platform.getUserHomePath()), 'component-type');
             expect(push).calledWith(o);
         });
-        
-        test('skips new component workflow and push component to cluster if provided folder has component already', async () => {
+
+        test('skips new component workflow and pushes component to cluster if provided folder has component already', async () => {
             const o = new TestItem(undefined, 'object', ContextType.COMPONENT);
             const getOso = sandbox.stub(OdoImpl.prototype, 'getOpenShiftObjectByContext')
             getOso.onFirstCall().returns(o);
@@ -527,21 +525,21 @@ suite('OpenShift/Component', () => {
 
         test('when componentTypeName provided and there is no type found in registries, asks to select from all available component types', async () => {
             inputStub.resolves(componentItem.getName());
-            const componentType = new ComponentTypeAdapter(
+            const componentType1 = new ComponentTypeAdapter(
                 ComponentKind.DEVFILE,
                 'componentType2',
                 undefined,
                 'description',
                 ''
             );
-            quickPickStub.onSecondCall().resolves(componentType)
+            quickPickStub.onSecondCall().resolves(componentType1)
             sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
-                componentType
+                componentType1
             ]);
             const result = await Component.createFromRootWorkspaceFolder(folder, [], undefined, 'componentType1');
             expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
             expect(quickPickStub).calledTwice;
-            expect(quickPickStub).calledWith([componentType]);
+            expect(quickPickStub).calledWith([componentType1]);
         });
 
         test('skips component type selection if devfile exists and use devfile name as initial value for component name', async () => {
