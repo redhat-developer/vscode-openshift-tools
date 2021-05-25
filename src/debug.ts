@@ -90,7 +90,7 @@ export class DebugSessionsView implements TreeDataProvider<string>, Disposable {
     }
 
     refresh(): void {
-        this.onDidChangeTreeDataEmitter.fire();
+        this.onDidChangeTreeDataEmitter.fire(undefined);
     }
 
     dispose(): void {

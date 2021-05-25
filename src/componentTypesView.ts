@@ -265,7 +265,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         if (cleanCache) {
             this.registries = undefined;
         }
-        this.onDidChangeTreeDataEmitter.fire();
+        this.onDidChangeTreeDataEmitter.fire(null);
     }
 
     @vsCommand('openshift.componentTypesView.refresh')
