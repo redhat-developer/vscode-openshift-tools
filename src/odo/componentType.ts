@@ -5,6 +5,7 @@
 
 import { Cluster } from '@kubernetes/client-node/dist/config_types';
 import { Url } from 'url';
+import { Component } from '../openshift/component';
 import { Data } from './componentTypeDescription';
 import { ComponentMetadata } from './config';
 
@@ -33,6 +34,13 @@ export interface ImageStreamTag {
         version: string;
         sampleRepo: string;
     }
+}
+
+export function ascDevfileFirst(c1: ComponentType, c2: ComponentType): number {
+    if(c1.kind !== c2.kind) {
+        return c1.kind === ComponentKind.DEVFILE? -1: 1;
+    }
+    return c1.label.localeCompare(c2.label)
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
