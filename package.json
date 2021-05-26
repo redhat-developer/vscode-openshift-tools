@@ -13,7 +13,7 @@
   },
   "bugs": "https://github.com/redhat-developer/vscode-openshift-tools/issues",
   "engines": {
-    "vscode": "^1.40.0"
+    "vscode": "^1.54.0"
   },
   "badges": [
     {
@@ -87,6 +87,7 @@
     "git-fetch-pack": "^0.1.1",
     "git-transport-protocol": "^0.1.0",
     "globby": "^10.0.1",
+    "got": "^10.6.0",
     "js-yaml": "^3.13.1",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
@@ -126,7 +127,7 @@
     "@types/targz": "^1.0.0",
     "@types/tmp": "0.1.0",
     "@types/validator": "^10.11.3",
-    "@types/vscode": "1.40.0",
+    "@types/vscode": "^1.54.0",
     "@typescript-eslint/eslint-plugin": "^2.23.0",
     "@typescript-eslint/parser": "^2.23.0",
     "bufferutil": "^4.0.1",
@@ -144,7 +145,6 @@
     "eslint-plugin-prettier": "^3.1.1",
     "file-loader": "^6.1.0",
     "glob": "^7.1.6",
-    "got": "^10.6.0",
     "handlebars": "^4.7.7",
     "hasha": "5.0.0",
     "html-webpack-plugin": "^4.2.0",
@@ -823,6 +823,11 @@
         "command": "openshift.welcome",
         "title": "Welcome",
         "category": "OpenShift"
+      },
+      {
+        "command": "openshift.sandbox.login",
+        "title": "Login to sandbox",
+        "category": "OpenDhift"
       }
     ],
     "keybindings": [
@@ -1526,5 +1531,7 @@
       }
     }
   },
-  "extensionDependencies": []
+  "extensionDependencies": [
+    "redhat.vscode-redhat-account"
+  ]
 }

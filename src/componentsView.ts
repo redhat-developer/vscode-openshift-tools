@@ -117,7 +117,7 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
     }
 
     private refresh(): void {
-        this.onDidChangeTreeDataEmitter.fire();
+        this.onDidChangeTreeDataEmitter.fire(undefined);
     }
 
     @vsCommand('openshift.componentsView.refresh')
