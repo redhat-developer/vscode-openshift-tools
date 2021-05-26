@@ -5,7 +5,6 @@
 
 import { Cluster } from '@kubernetes/client-node/dist/config_types';
 import { Url } from 'url';
-import { Component } from '../openshift/component';
 import { Data } from './componentTypeDescription';
 import { ComponentMetadata } from './config';
 
