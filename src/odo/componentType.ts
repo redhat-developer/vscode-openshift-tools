@@ -35,6 +35,13 @@ export interface ImageStreamTag {
     }
 }
 
+export function ascDevfileFirst(c1: ComponentType, c2: ComponentType): number {
+    if(c1.kind !== c2.kind) {
+        return c1.kind === ComponentKind.DEVFILE? -1: 1;
+    }
+    return c1.label.localeCompare(c2.label)
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isS2iComponent(comp: any): comp is S2iComponentType {
     return comp.kind && (typeof comp.kind) === 'string';

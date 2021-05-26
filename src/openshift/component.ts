@@ -24,7 +24,7 @@ import LogViewLoader from '../webview/log/LogViewLoader';
 import DescribeViewLoader from '../webview/describe/describeViewLoader';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { SourceType } from '../odo/config';
-import { ComponentKind, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, ImageStreamTag, isDevfileComponent, isImageStreamTag } from '../odo/componentType';
+import { ascDevfileFirst, ComponentKind, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, ImageStreamTag, isDevfileComponent, isImageStreamTag } from '../odo/componentType';
 import { Url } from '../odo/url';
 import { StarterProjectDescription } from '../odo/catalog';
 import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
@@ -659,15 +659,15 @@ export class Component extends OpenShiftItem {
             if (componentTypeName) {
                 componentTypeCandidates = componentTypes.filter(type => type.name === componentTypeName && type.kind === componentKind && (!version || type.version === version));
                 if (componentTypeCandidates?.length === 0) {
-                    componentType = await window.showQuickPick(componentTypes.sort((c1, c2) => c1.label.localeCompare(c2.label)), { placeHolder: `Cannot find Component type '${componentTypeName}', select one below to use instead`, ignoreFocusOut: true });
+                    componentType = await window.showQuickPick(componentTypes.sort(ascDevfileFirst), { placeHolder: `Cannot find Component type '${componentTypeName}', select one below to use instead`, ignoreFocusOut: true });
                 } else if (componentTypeCandidates?.length > 1) {
-                    componentType = await window.showQuickPick(componentTypeCandidates.sort((c1, c2) => c1.label.localeCompare(c2.label)), { placeHolder: `Found more than one Component types '${componentTypeName}', select one below to use`, ignoreFocusOut: true });
+                    componentType = await window.showQuickPick(componentTypeCandidates.sort(ascDevfileFirst), { placeHolder: `Found more than one Component types '${componentTypeName}', select one below to use`, ignoreFocusOut: true });
                 } else {
                     [componentType] = componentTypeCandidates;
                     progressIndicator.hide();
                 }
             } else {
-                componentType = await window.showQuickPick(componentTypes.sort((c1, c2) => c1.label.localeCompare(c2.label)), { placeHolder: 'Select Component type', ignoreFocusOut: true });
+                componentType = await window.showQuickPick(componentTypes.sort(ascDevfileFirst), { placeHolder: 'Select Component type', ignoreFocusOut: true });
             }
 
             if (!componentType) return null;
