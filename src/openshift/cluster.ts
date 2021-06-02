@@ -2,6 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+/* eslint-disable camelcase */
 
 import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace } from 'vscode';
 import { Command } from '../odo/command';
@@ -15,6 +16,11 @@ import { Platform } from '../util/platform';
 import { WindowUtil } from '../util/windowUtils';
 import { vsCommand, VsCommandError } from '../vscommand';
 import ClusterViewLoader from '../webview/cluster/clusterViewLoader';
+
+interface Versions {
+    'openshift_version':  string;
+    'kubernetes_version': string;
+}
 
 export class Cluster extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
@@ -137,6 +143,32 @@ export class Cluster extends OpenShiftItem {
         return;
     }
 
+    public static async getVersions(): Promise<Versions> {
+        const result = await Cluster.odo.execute(Command.printOcVersionJson(), undefined, false);
+        const versions: Versions = {
+            'kubernetes_version': undefined,
+            'openshift_version': undefined
+        };
+        if (!result.error) {
+            try {
+                // try to fetch versions for stdout
+                const versionsJson = JSON.parse(result.stdout);
+                if (versionsJson?.serverVersion?.major && versionsJson?.serverVersion?.minor) {
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    versions.kubernetes_version = `${versionsJson.serverVersion.major}.${versionsJson.serverVersion.minor}`;
+                }
+                if (versionsJson?.openshiftVersion) {
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    versions.openshift_version = versionsJson.openshiftVersion;
+                }
+
+            } catch(err) {
+                // ignore and return undefined
+            }
+        }
+        return versions;
+    }
+
     @vsCommand('openshift.explorer.login')
     static async login(context?: any, skipConfirmation = false): Promise<string> {
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
@@ -159,7 +191,16 @@ export class Cluster extends OpenShiftItem {
         ];
         const loginActionSelected = await window.showQuickPick(loginActions, {placeHolder: 'Select a way to log in to the cluster.', ignoreFocusOut: true});
         if (!loginActionSelected) return null;
-        return loginActionSelected.label === 'Credentials' ? await Cluster.credentialsLogin(true, clusterURL) : await Cluster.tokenLogin(clusterURL, true);
+        let result:any = loginActionSelected.label === 'Credentials' ? await Cluster.credentialsLogin(true, clusterURL) : await Cluster.tokenLogin(clusterURL, true);
+        if (result) {
+            const versions = await Cluster.getVersions();
+            if (versions) {
+                result = new String(result);
+                // get cluster information using 'oc version'
+                result.properties = versions;
+            }
+        }
+        return result;
     }
 
     private static async requestLoginConfirmation(skipConfirmation = false): Promise<string> {

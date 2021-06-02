@@ -165,6 +165,10 @@ export class Command {
         return new CommandText('oc version');
     }
 
+    static printOcVersionJson(): CommandText {
+        return new CommandText('oc version -ojson');
+    }
+
     static listServiceInstances(project: string, app: string): CommandText {
         return new CommandText('odo service list',
             undefined, [
