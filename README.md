@@ -119,8 +119,10 @@ Components in different states have different set of commands available.
    * `Push` - Push the source code to a Component.
    * `Watch` - Watch for changes, update Component on change. This is not supported for git based components.
    * `Undeploy` - Undeploys a Component from the cluster. The component still resides in the local config.
-   * `Delete` - Delete existing Component from the cluster and removes the local config also.
    * `Debug` - Debug local Java or Node.js Component.
+   * `Test` - Run test for the Component in cluster.
+   * `Reveal in Explorer` - Show Component's context folder in Explorer view
+   * `Delete` - Delete existing Component from the cluster and removes the local config also.
 
 ##### Commands for a `not pushed` Component
 
