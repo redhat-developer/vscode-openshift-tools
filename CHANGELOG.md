@@ -1,8 +1,15 @@
 # Change Log
 
-## 0.2.7 (May 27, 2021)
+## 0.2.7 (Jun 3, 2021)
 
-TBD: List resolved issues
+* [#2154](https://github.com/redhat-developer/vscode-openshift-tools/issues/2154) Migrate to odo 2.2.1
+* [#2153](https://github.com/redhat-developer/vscode-openshift-tools/issues/2153) Sort s2i and devfile component in Quickpick view for ComponentTypes
+* [#2149](https://github.com/redhat-developer/vscode-openshift-tools/issues/2149) Add telemetry information for OpenShift cluster version
+* [#2148](https://github.com/redhat-developer/vscode-openshift-tools/issues/2148) Show build log for 'OpenShift: Push' command
+* [#2146](https://github.com/redhat-developer/vscode-openshift-tools/issues/2146) Creating new s2i component without version added as devfile kind
+* [#2141](https://github.com/redhat-developer/vscode-openshift-tools/issues/2141) Multiple registries support: Use --registry option when creating component
+* [#2137](https://github.com/redhat-developer/vscode-openshift-tools/issues/2137) `OpenShift: Watch` command fails to start
+* [#2107](https://github.com/redhat-developer/vscode-openshift-tools/issues/2107) Test and fix `Deploy to OpenShift` command for Quarkus project
 
 ## 0.2.6 (May 10, 2021)
 
