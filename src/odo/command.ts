@@ -380,6 +380,8 @@ export class Command {
         }
         if (configOnly) {
             cTxt.addOption(new CommandOption('--config'));
+        } else {
+            cTxt.addOption(new CommandOption('--show-log'));
         }
         return cTxt;
     }
