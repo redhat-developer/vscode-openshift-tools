@@ -302,10 +302,6 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
         }
         return `${suffix}`;
     }
-
-    get label(): string {
-        return `${this.name} (${this.kind})`;
-    }
 }
 
 export class OpenShiftService extends OpenShiftObjectImpl {
