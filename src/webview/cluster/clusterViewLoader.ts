@@ -162,7 +162,7 @@ export default class ClusterViewLoader {
         const result =  await CliChannel.getInstance().execute(`${filePath} status -ojson`);
         channel.append(`\n\n${filePath} status -ojson\n`);
         channel.append(result.stdout);
-        if (result.stderr || crcVerInfo.stderr) {
+        if (result.error || crcVerInfo.error) {
             p.webview.postMessage({action: postCommand, errorStatus: true});
         } else {
             p.webview.postMessage({
