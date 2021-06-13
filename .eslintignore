@@ -11,3 +11,4 @@ src/webview/describe
 src/webview/cluster
 src/webview/webpack.config.js
 out
+src/webview/create-service
