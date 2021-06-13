@@ -460,6 +460,7 @@ class OdoModel {
 
     public delete(item: OpenShiftObject): void {
         this.pathToObject.delete(item.path);
+        this.parentToChildren.delete(item);
         if (item.contextPath) {
             this.contextToObject.delete(item.contextPath.fsPath);
             this.deleteContext(item.contextPath.fsPath);
@@ -835,49 +836,50 @@ export class OdoImpl implements Odo {
         return this.insertAndReveal(new OpenShiftProject(clusters[0], projectName, true));
     }
 
-    public async deleteApplication(app: OpenShiftObject): Promise<OpenShiftObject> {
-        const allComps = await OdoImpl.instance.getComponents(app);
-        const allContexts = [];
-        let callDelete = false;
-        allComps.forEach((component) => {
-            OdoImpl.data.delete(component); // delete component from model
-            if (!callDelete && component.contextValue === ContextType.COMPONENT_PUSHED || component.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
-                callDelete = true; // if there is at least one component deployed in application `odo app delete` command should be called
-            }
-            if (component.contextPath) { // if component has context folder save it to remove from settings cache
-                allContexts.push(workspace.getWorkspaceFolder(component.contextPath));
-            }
-        });
-
-        if (callDelete) {
-            await this.execute(Command.deleteApplication(app.getParent().getName(), app.getName()));
-        }
-        // Chain workspace folder deletions, because when updateWorkspaceFoder called next call is possible only after
-        // listener registered with onDidChangeWorkspaceFolders called.
+    public async deleteComponentsWithoutRefresh(components: OpenShiftObject[]): Promise<void> {
         let result = Promise.resolve();
-        // To avoid workspace restart during deletion first have to check if there is wsFolder with index 0
-        const rootFolder = allContexts.find(folder => folder.index === 0);
-        allContexts.forEach((wsFolder) => {
-            if (rootFolder !== wsFolder) {
-                result = result.then(() => {
-                    workspace.updateWorkspaceFolders(wsFolder.index, 1);
-                    return new Promise<void>((resolve) => {
-                        const disposable = workspace.onDidChangeWorkspaceFolders(() => {
-                            disposable.dispose();
-                            resolve();
-                        });
-                    });
-                });
+        components
+            .forEach((component) => {
+                result = result.then(async ()=> {
+                    if (component.contextPath) { // call odo only for local components in workspace
+                        await this.execute(
+                            Command.deleteComponent(
+                                component.getParent().getParent().getName(),
+                                component.getParent().getName(), component.getName(),
+                                !!component.contextPath,
+                                component.kind === ComponentKind.S2I
+                            ),
+                            component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()
+                        );
+                    }
+                    await component.getParent().removeChild(component);
+                    OdoImpl.data.delete(component);
+                }
+            );
+        });
+        await result;
+    }
+
+    public async deleteApplication(app: OpenShiftObject): Promise<OpenShiftObject> {
+        const allComps = await OdoImpl.instance.getApplicationChildren(app);
+
+        // find out if there is at least one deployed component/service and `odo app delete` should be called
+        const callAppDelete = !!allComps.find(
+            (item) => [ContextType.COMPONENT_PUSHED, ContextType.COMPONENT_NO_CONTEXT, ContextType.SERVICE].includes(item.contextValue)
+        );
+
+        try { // first delete all application related resources in cluster
+            if (callAppDelete) {
+                await this.execute(Command.deleteApplication(app.getParent().getName(), app.getName()));
             }
-        });
-        if (rootFolder) {
-            result = result.then(() => {
-                workspace.updateWorkspaceFolders(rootFolder.index, 1)
-            });
-        }
-        return result.then(() => {
+            await this.deleteComponentsWithoutRefresh(allComps);
             return this.deleteAndRefresh(app);
-        });
+        } catch (error) {
+            // if error occurs during application deletion, app object has to be refreshed to new state
+            this.subject.next(new OdoEventImpl('changed', app));
+            throw error;
+        }
+
     }
 
     public async createApplication(application: OpenShiftObject): Promise<OpenShiftObject> {

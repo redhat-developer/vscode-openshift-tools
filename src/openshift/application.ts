@@ -42,9 +42,9 @@ export class Application extends OpenShiftItem {
                     await Progress.execFunctionWithProgress(`Deleting the Application '${appName}'`, () => Application.odo.deleteApplication(application));
                     return `Application '${appName}' successfully deleted`
                 } catch (err) {
-                    const telemetryMessage = err instanceof VsCommandError ? err.telemetryMessage : err.message;
+                    const telemetryMessage = err instanceof VsCommandError ? ` ${err.telemetryMessage}` : '';
                     throw new VsCommandError(`Failed to delete Application with error '${err.message}'`,
-                            `Failed to delete Application with error ${telemetryMessage}`, err);
+                            `Failed to delete Application with error${telemetryMessage}`, err);
                 }
             }
         }
