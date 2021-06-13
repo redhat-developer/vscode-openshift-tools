@@ -26,6 +26,7 @@
         "test-resources",
         "src/webview/log/app",
         "src/webview/describe/app",
-        "src/webview/cluster/app"
+        "src/webview/cluster/app",
+        "src/webview/create-service/app"
     ]
 }
