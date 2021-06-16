@@ -17,16 +17,18 @@ export function createTrackingEvent(name: string, properties: any = {}): Telemet
 }
 
 export async function startTelemetry(context: ExtensionContext): Promise<void> {
-    const redHatService = await getRedHatService(context);
-    telemetryService = await redHatService.getTelemetryService();
-    return telemetryService.sendStartupEvent();
+    try {
+        const redHatService = await getRedHatService(context);
+        telemetryService = await redHatService.getTelemetryService();
+    } catch(error) {
+        // eslint-disable-next-line no-console
+        console.log(`${error}`);
+    }
+    return telemetryService?.sendStartupEvent();
 }
 
 export default async function sendTelemetry(actionName: string, properties?: any): Promise<void> {
-    if (!telemetryService) {
-        throw Error('Telemetry service has not been started yet!');
-    }
-    return telemetryService.send(createTrackingEvent(actionName, properties));
+    return telemetryService?.send(createTrackingEvent(actionName, properties));
 }
 
 export interface CommonCommandProps {
