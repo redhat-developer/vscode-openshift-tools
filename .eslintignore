@@ -9,4 +9,5 @@ test-resources
 src/webview/log
 src/webview/describe
 src/webview/cluster
+src/webview/create-service
 src/webview/webpack.config.js
