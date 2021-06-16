@@ -14,7 +14,7 @@ import {
     env
 } from 'vscode';
 import path = require('path');
-import sendTelemetry from './telemetry';
+import { startTelemetry } from './telemetry';
 import { OpenShiftExplorer } from './explorer';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
@@ -143,7 +143,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
 
     OdoImpl.Instance.loadWorkspaceComponents(null);
 
-    sendTelemetry('activation');
+    startTelemetry(extensionContext);
 
     return {
         verifyBundledBinaries,

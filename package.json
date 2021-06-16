@@ -79,7 +79,7 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.13.0",
-    "@redhat-developer/vscode-redhat-telemetry": "0.0.13",
+    "@redhat-developer/vscode-redhat-telemetry": "0.1.1",
     "base64-inline-loader": "^1.1.1",
     "binary-search": "^1.3.6",
     "byline": "^5.0.0",
@@ -1469,6 +1469,12 @@
       "type": "object",
       "title": "OpenShift Connector",
       "properties": {
+        "redhat.telemetry.enabled": {
+          "type": "boolean",
+          "default": null,
+          "markdownDescription": "Enable usage data and errors to be sent to Red Hat servers. Read our [privacy statement](https://developers.redhat.com/article/tool-data-collection).",
+          "scope": "window"
+        },
         "openshiftConnector.showWelcomePage": {
           "title": "Show Welcome Page",
           "type": "boolean",
