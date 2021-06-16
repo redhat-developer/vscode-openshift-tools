@@ -3,14 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { getTelemetryService, TelemetryEvent, TelemetryService } from '@redhat-developer/vscode-redhat-telemetry';
-import { ExtenisonID } from './util/constants';
+import { getRedHatService, TelemetryEvent, TelemetryService } from '@redhat-developer/vscode-redhat-telemetry';
+import { ExtensionContext } from 'vscode';
 
-const telemetryService: Promise<TelemetryService> = getTelemetryService(ExtenisonID);
-
-export async function getTelemetryServiceInstance(): Promise<TelemetryService> {
-    return telemetryService;
-}
+let telemetryService: TelemetryService;
 
 export function createTrackingEvent(name: string, properties: any = {}): TelemetryEvent {
     return {
@@ -20,12 +16,17 @@ export function createTrackingEvent(name: string, properties: any = {}): Telemet
     }
 }
 
+export async function startTelemetry(context: ExtensionContext): Promise<void> {
+    const redHatService = await getRedHatService(context);
+    telemetryService = await redHatService.getTelemetryService();
+    return telemetryService.sendStartupEvent();
+}
+
 export default async function sendTelemetry(actionName: string, properties?: any): Promise<void> {
-    const service = await getTelemetryServiceInstance();
-    if (actionName === 'activation') {
-        return service?.sendStartupEvent();
+    if (!telemetryService) {
+        throw Error('Telemetry service has not been started yet!');
     }
-    return service?.send(createTrackingEvent(actionName, properties));
+    return telemetryService.send(createTrackingEvent(actionName, properties));
 }
 
 export interface CommonCommandProps {
