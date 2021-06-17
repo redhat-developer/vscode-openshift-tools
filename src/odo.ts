@@ -895,7 +895,7 @@ export class OdoImpl implements Odo {
             if (!targetApplication) {
                 await this.insertAndReveal(application);
             }
-            await this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, location, 'local', version ? ComponentKind.S2I : ComponentKind.DEVFILE, {name: type? type : name , tag: version}), notification);
+            await this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, location, 'local', ComponentKind.DEVFILE, {name: type? type : name , tag: version}), notification);
         } else {
             OdoImpl.data.delete(application);
             OdoImpl.data.delete(application.getParent());
