@@ -635,6 +635,8 @@ export class Component extends OpenShiftItem {
             if (devfileYaml && devfileYaml.metadata && devfileYaml.metadata.name) {
                 initialNameValue = devfileYaml.metadata.name;
             }
+        } else {
+            initialNameValue = path.basename(folder.fsPath);
         }
 
         const componentName = await Component.getName(
