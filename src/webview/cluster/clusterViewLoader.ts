@@ -159,7 +159,7 @@ export default class ClusterViewLoader {
         });
         stopProcess.on('close', (code) => {
             // eslint-disable-next-line no-console
-            console.log(`crc stop exited with code ${code}`);Adult Krav Maga 6pm
+            console.log(`crc stop exited with code ${code}`);
             ClusterViewLoader.checkCrcStatus(filePath, 'crcstopstatus', panel);
         });
     }
