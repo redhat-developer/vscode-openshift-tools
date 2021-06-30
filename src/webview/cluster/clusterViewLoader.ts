@@ -235,8 +235,8 @@ export default class ClusterViewLoader {
         const reactAppUri = p.webview.asWebviewUri(reactAppPathOnDisk);
         const htmlString:Buffer = fs.readFileSync(path.join(reactAppRootOnDisk, 'index.html'));
         const meta = `<meta http-equiv="Content-Security-Policy"
-        content="connect-src *;
-            object-src https://console-openshift-console.apps-crc.testing/;
+            content="connect-src *;
+            default-src 'none';
             img-src ${p.webview.cspSource} https: 'self' data:;
             script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;
             style-src 'self' vscode-resource: 'unsafe-inline';">`;
