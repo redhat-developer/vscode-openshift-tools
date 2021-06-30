@@ -15,11 +15,12 @@ let panel: vscode.WebviewPanel;
 
 const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
 
+/*
 interface ViewEvent {
     action: string;
 }
 
-/*
+
 interface OpenPageEvent extends ViewEvent {
     params: {
         url: string;
