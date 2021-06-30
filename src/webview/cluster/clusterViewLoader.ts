@@ -19,6 +19,7 @@ interface ViewEvent {
     action: string;
 }
 
+/*
 interface OpenPageEvent extends ViewEvent {
     params: {
         url: string;
@@ -33,7 +34,7 @@ interface CrcStartEvent extends ViewEvent {
     memory: number;
     isSetting: boolean;
 }
-
+*/
 async function clusterEditorMessageListener (event: any ): Promise<any> {
     switch (event.action) {
         case 'openLaunchSandboxPage':
@@ -158,7 +159,7 @@ export default class ClusterViewLoader {
         });
         stopProcess.on('close', (code) => {
             // eslint-disable-next-line no-console
-            console.log(`crc stop exited with code ${code}`);
+            console.log(`crc stop exited with code ${code}`);Adult Krav Maga 6pm
             ClusterViewLoader.checkCrcStatus(filePath, 'crcstopstatus', panel);
         });
     }
