@@ -15,17 +15,96 @@ let panel: vscode.WebviewPanel;
 
 const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
 
+/*
+interface ViewEvent {
+    action: string;
+}
+
+
+interface OpenPageEvent extends ViewEvent {
+    params: {
+        url: string;
+    }
+}
+
+interface CrcStartEvent extends ViewEvent {
+    data: string;
+    pullSecret: string;
+    crcLoc: string;
+    cpuSize: number;
+    memory: number;
+    isSetting: boolean;
+}
+*/
 async function clusterEditorMessageListener (event: any ): Promise<any> {
-    if (['openLaunchSandboxPage', 'openCreateClusterPage', 'openCrcAddClusterPage'].includes(event.action)) {
-        await vscode.commands.executeCommand(`openshift.explorer.addCluster.${event.action}`, event.params?.url);
+    switch (event.action) {
+        case 'openLaunchSandboxPage':
+        case 'openCreateClusterPage':
+        case 'openCrcAddClusterPage':
+        case 'crcSetup':
+        case 'crcStart':
+        case 'crcStop':
+            await vscode.commands.executeCommand(`openshift.explorer.addCluster.${event.action}`, event);
+            break;
+
+        case 'crcSaveSettings':
+            ClusterViewLoader.crcSaveSettings(event);
+            break;
+
+        case 'checksetting':
+            const binaryFromSetting:string = vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
+            if (binaryFromSetting) {
+                panel.webview.postMessage({action: 'crcsetting'});
+                ClusterViewLoader.checkCrcStatus(binaryFromSetting, 'crcstatus', panel);
+            }
+            break;
+
+        case 'checkcrcstatus':
+            ClusterViewLoader.checkCrcStatus(event.data, 'crcstatus', panel);
+            break
+
+        case 'crcLogin':
+            vscode.commands.executeCommand(
+                'openshift.explorer.login.credentialsLogin',
+                true,
+                event.url,
+                event.data.username,
+                event.data.password
+            );
+            break;
+    }
+}
+
+export default class ClusterViewLoader {
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    static get extensionPath() {
+        return vscode.extensions.getExtension(ExtenisonID).extensionPath
     }
 
-    if (event.action === 'run') {
+    @vsCommand('openshift.explorer.addCluster.openLaunchSandboxPage')
+    static async openLaunchSandboxPage(url: string) {
+        await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+    }
+
+    @vsCommand('openshift.explorer.addCluster.openCreateClusterPage')
+    static async openCreateClusterPage(url: string) {
+        await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+    }
+
+    @vsCommand('openshift.explorer.addCluster.openCrcAddClusterPage')
+    static async openCrcAddClusterPage() {
+        // fake command to report crc selection through telemetry
+    }
+
+    @vsCommand('openshift.explorer.addCluster.crcSetup')
+    static async crcSetup(event: any) {
         const terminal: vscode.Terminal = WindowUtil.createTerminal('OpenShift: CRC Setup', undefined);
         terminal.sendText(`${event.data} setup`);
         terminal.show();
     }
-    if (event.action === 'start') {
+    
+    @vsCommand('openshift.explorer.addCluster.crcStart')
+    static async crcStart(event: any) {
         let startProcess: ChildProcess;
         channel.show();
         if (event.isSetting) {
@@ -37,11 +116,6 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             startProcess = spawn(`${binaryFromSetting}`, crcOptions);
             channel.append(`\n\n${binaryFromSetting} ${crcOptions.join(' ')}\n`);
         } else {
-            const configuration = vscode.workspace.getConfiguration('openshiftConnector');
-            configuration.update('crcBinaryLocation', event.crcLoc, vscode.ConfigurationTarget.Global);
-            configuration.update('crcPullSecretPath', event.pullSecret, vscode.ConfigurationTarget.Global);
-            configuration.update('crcCpuCores', event.cpuSize, vscode.ConfigurationTarget.Global);
-            configuration.update('crcMemoryAllocated', Number.parseInt(event.memory, 10), vscode.ConfigurationTarget.Global);
             const [tool, ...params] = event.data.split(' ');
             startProcess = spawn(tool, params);
             channel.append(`\n\n${tool} ${params.join(' ')}\n`);
@@ -64,7 +138,9 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             ClusterViewLoader.checkCrcStatus(binaryLoc, 'crcstartstatus', panel);
         });
     }
-    if (event.action === 'stop') {
+
+    @vsCommand('openshift.explorer.addCluster.crcStop')
+    static async crcStop(event) {
         let filePath: string;
         channel.show();
         if (event.data === '') {
@@ -88,47 +164,14 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             ClusterViewLoader.checkCrcStatus(filePath, 'crcstopstatus', panel);
         });
     }
-    if (event.action === 'checksetting') {
-        const binaryFromSetting:string = vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
-        if (binaryFromSetting) {
-            panel.webview.postMessage({action: 'crcsetting'});
-            ClusterViewLoader.checkCrcStatus(binaryFromSetting, 'crcstatus', panel);
-        }
-    }
-    if (event.action === 'checkcrcstatus') {
-        ClusterViewLoader.checkCrcStatus(event.data, 'crcstatus', panel);
-    }
 
-    if (event.action === 'crclogin') {
-        vscode.commands.executeCommand(
-            'openshift.explorer.login.credentialsLogin',
-            true,
-            event.url,
-            event.data.username,
-            event.data.password
-        );
-    }
-}
-
-export default class ClusterViewLoader {
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    static get extensionPath() {
-        return vscode.extensions.getExtension(ExtenisonID).extensionPath
-    }
-
-    @vsCommand('openshift.explorer.addCluster.openLaunchSandboxPage')
-    static async openLaunchSandboxPage(url: string) {
-        await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
-    }
-
-    @vsCommand('openshift.explorer.addCluster.openCreateClusterPage')
-    static async openCreateClusterPage(url: string) {
-        await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
-    }
-
-    @vsCommand('openshift.explorer.addCluster.openCrcAddClusterPage')
-    static async openCrcAddClusterPage(url: string) {
-        // fake command to report crc selection through telemetry
+    static async crcSaveSettings(event) {
+        const cfg = vscode.workspace.getConfiguration('openshiftConnector');
+        await cfg.update('crcBinaryLocation', event.crcLoc, vscode.ConfigurationTarget.Global);
+        await cfg.update('crcPullSecretPath', event.pullSecret, vscode.ConfigurationTarget.Global);
+        await cfg.update('crcCpuCores', event.cpuSize, vscode.ConfigurationTarget.Global);
+        await cfg.update('crcMemoryAllocated', Number.parseInt(event.memory, 10), vscode.ConfigurationTarget.Global);
+        await cfg.update('crcNameserver', event.nameserver);
     }
 
     // eslint-disable-next-line @typescript-eslint/require-await
@@ -192,7 +235,7 @@ export default class ClusterViewLoader {
         const reactAppUri = p.webview.asWebviewUri(reactAppPathOnDisk);
         const htmlString:Buffer = fs.readFileSync(path.join(reactAppRootOnDisk, 'index.html'));
         const meta = `<meta http-equiv="Content-Security-Policy"
-        content="connect-src *;
+            content="connect-src *;
             default-src 'none';
             img-src ${p.webview.cspSource} https: 'self' data:;
             script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;

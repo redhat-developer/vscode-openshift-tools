@@ -84,15 +84,16 @@ export default function addClusterView(props) {
   const steps = getSteps();
 
   const setCrcStatus = (message) => {
-    setStatus({ crcStatus: message.status.crcStatus,
-                openshiftStatus: message.status.openshiftStatus,
-                diskUsage: message.status.diskUsage ? prettyBytes(message.status.diskUsage) : 'N/A',
-                cacheUsage: prettyBytes(message.status.cacheUsage),
-                cacheDir: message.status.cacheDir,
-                crcVer: message.versionInfo.version,
-                openshiftVer: message.versionInfo.openshiftVersion,
-                creds: message.creds
-              });
+    setStatus({
+      crcStatus: message.status.crcStatus,
+      openshiftStatus: message.status.openshiftStatus,
+      diskUsage: message.status.diskUsage ? prettyBytes(message.status.diskUsage) : 'N/A',
+      cacheUsage: prettyBytes(message.status.cacheUsage),
+      cacheDir: message.status.cacheDir,
+      crcVer: message.versionInfo.version,
+      openshiftVer: message.versionInfo.openshiftVersion,
+      creds: message.creds
+    });
   }
 
   const messageListener = (event) => {
@@ -167,25 +168,41 @@ export default function addClusterView(props) {
     setProgress(true);
     setCrcStartError(false);
     if (settingPresent) {
-      props.vscode.postMessage({action: 'start', isSetting: true });
+      props.vscode.postMessage({action: 'crcStart', isSetting: true });
     } else {
       const crcStartCommand = (crcNameserver === '') ? `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory} -ojson`:
           `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory} -n ${crcNameserver} -ojson`;
 
-      props.vscode.postMessage({action: 'start',
-                          data: crcStartCommand,
-                          pullSecret: pullSecretPath,
-                          crcLoc: fileName,
-                          cpuSize,
-                          memory,
-                          isSetting: false
-                        });
+      props.vscode.postMessage({
+        action: 'crcStart',
+        data: crcStartCommand,
+        pullSecret: pullSecretPath,
+        crcLoc: fileName,
+        cpuSize,
+        memory,
+        nameserver: crcNameserver,
+        isSetting: false
+      });
     }
+  }
+  const SaveSettings = 2;
+
+  const handleSaveSettings = ()=> {
+    props.vscode.postMessage({
+      action: 'crcSaveSettings',
+      pullSecret: pullSecretPath,
+      crcLoc: fileName,
+      cpuSize,
+      memory,
+      nameserver: crcNameserver
+    });
   }
 
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
       handleStartProcess()
+    } else if (activeStep === SaveSettings) {
+      handleSaveSettings();
     }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
@@ -202,21 +219,21 @@ export default function addClusterView(props) {
   const handleStopProcess = () => {
     setStopProgress(true);
     setCrcStopError(false);
-    props.vscode.postMessage({action: 'stop', data: `${fileName}`});
+    props.vscode.postMessage({action: 'crcStop', data: `${fileName}`});
   }
 
   const handleCrcSetup = () => {
-    props.vscode.postMessage({action: 'run', data: `${fileName}` })
+    props.vscode.postMessage({action: 'crcSetup', data: `${fileName}` })
   }
 
   const handleCrcLogin = (loginDetails, clusterUrl) => {
-    props.vscode.postMessage({action: 'crclogin', data: loginDetails, url: clusterUrl })
+    props.vscode.postMessage({action: 'crcLogin', data: loginDetails, url: clusterUrl })
   }
 
   const handleRefresh = () => {
     setStatusSkeleton(true);
     if (settingPresent) {
-      props.scode.postMessage({action: 'checksetting'});
+      props.vscode.postMessage({action: 'checksetting'});
     } else {
       props.vscode.postMessage({action: 'checkcrcstatus', data: `${fileName}`});
     }
