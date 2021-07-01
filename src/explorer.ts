@@ -52,8 +52,12 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         } catch (err) {
             // ignore config loading error and let odo report it on first call
         }
-        this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
-        this.fsw.emitter.on('file-changed', () => {
+        try {
+            this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
+        } catch (err) {
+            window.showWarningMessage('Couldn\'t install watcher for Kubernetes configuration file. OpenShift Application Explorer view won\'t be updated automatically.');
+        }
+        this.fsw?.emitter?.on('file-changed', () => {
             const ku2 = new KubeConfigUtils();
             const newCtx = ku2.getContextObject(ku2.currentContext);
             if (!this.kubeContext
@@ -107,7 +111,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     }
 
     dispose(): void {
-        this.fsw.watcher.close();
+        this?.fsw.watcher.close();
         this.treeView.dispose();
     }
 
