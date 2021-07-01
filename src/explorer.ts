@@ -111,7 +111,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     }
 
     dispose(): void {
-        this?.fsw.watcher.close();
+        this.fsw?.watcher?.close();
         this.treeView.dispose();
     }
 
