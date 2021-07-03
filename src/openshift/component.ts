@@ -54,6 +54,14 @@ export class SourceTypeChoice {
     }
 };
 
+function createCancelledResult(stepName: string): any {
+    const cancelledResult:any = new String('');
+    cancelledResult.properties = {
+        'cancelled_step': stepName
+    }
+    return cancelledResult;
+}
+
 export class Component extends OpenShiftItem {
     private static extensionContext: ExtensionContext;
     private static debugSessions = new Map<string, DebugSession>();
@@ -573,9 +581,9 @@ export class Component extends OpenShiftItem {
         'Select an Application where you want to create a Component'
     )
     static async createFromLocal(application: OpenShiftApplication, selection?: OpenShiftObject[], componentTypeName?:string, version?:string, starterProjectName?:string): Promise<string | null> {
-        if (!application) return null;
+        if (!application) return createCancelledResult('applicationName');
         const workspacePath = await selectWorkspaceFolder();
-        if (!workspacePath) return null;
+        if (!workspacePath) return createCancelledResult('contextFolder');
 
         return Component.createFromRootWorkspaceFolder(workspacePath, [], application, componentTypeName, version? ComponentKind.S2I : ComponentKind.DEVFILE, version, starterProjectName);
     }
@@ -590,15 +598,17 @@ export class Component extends OpenShiftItem {
      */
 
     @clusterRequired() // request to login to cluster and then execute command
-    static async deployRootWorkspaceFolder(folder: Uri, componentTypeName: string): Promise<void> {
+    static async deployRootWorkspaceFolder(folder: Uri, componentTypeName: string): Promise<string> {
+        let result:any;
         let component = Component.odo.getOpenShiftObjectByContext(folder.fsPath);
         if(!component) {
-            await Component.createFromRootWorkspaceFolder(folder, undefined, undefined, componentTypeName, ComponentKind.DEVFILE, undefined, undefined, false);
+            result = await Component.createFromRootWorkspaceFolder(folder, undefined, undefined, componentTypeName, ComponentKind.DEVFILE, undefined, undefined, false);
             component = Component.odo.getOpenShiftObjectByContext(folder.fsPath);
         }
         if (component) {
             await Component.push(component);
         }
+        return result;
     }
 
     /**
@@ -615,12 +625,11 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.createFromRootWorkspaceFolder')
     static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], context: OpenShiftApplication, componentTypeName?: string, componentKind = ComponentKind.DEVFILE, version?: string, starterProjectName?: string, notification = true): Promise<string | null> {
-
         const application = await Component.getOpenShiftCmdData(context,
             'Select an Application where you want to create a Component'
         );
 
-        if (!application) return null;
+        if (!application) return createCancelledResult('application');
 
         let useExistingDevfile = false;
         const devFileLocation = path.join(folder.fsPath, 'devfile.yaml');
@@ -646,7 +655,7 @@ export class Component extends OpenShiftItem {
             initialNameValue
         );
 
-        if (!componentName) return null;
+        if (!componentName) return createCancelledResult('componentName');
 
         const progressIndicator  = window.createQuickPick();
 
@@ -672,7 +681,7 @@ export class Component extends OpenShiftItem {
                 componentType = await window.showQuickPick(componentTypes.sort(ascDevfileFirst), { placeHolder: 'Select Component type', ignoreFocusOut: true });
             }
 
-            if (!componentType) return null;
+            if (!componentType) return createCancelledResult('componentType');
 
             if (componentType.kind === ComponentKind.DEVFILE) {
                 progressIndicator.placeholder = 'Checking if provided context folder is empty'
@@ -702,11 +711,11 @@ export class Component extends OpenShiftItem {
                                         starterProjects.map(prj => ({label: prj.name, description: prj.description})),
                                         {placeHolder: 'Select Starter Project to initialize Component'}
                                     );
-                                    if (!selectedStarter) return null;
+                                    if (!selectedStarter) return createCancelledResult('selectStarterProject');
                                     createStarter = selectedStarter.label;
                                 }
                             } else if (!create) {
-                                return null;
+                                return createCancelledResult('useStaterProjectRequest');;
                             }
                         }
                     }
