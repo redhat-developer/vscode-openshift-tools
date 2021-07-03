@@ -34,11 +34,10 @@ export class VsCommandError extends Error {
 
 const vsCommands: VsCommand[] = [];
 
-function displayResult(result?: unknown): unknown {
-    if (result && typeof result === 'string' && result.length > 0) {
-        window.showInformationMessage(result);
+function displayResult(result: unknown): void {
+    if (result && `${result}`) {
+        window.showInformationMessage(`${result}`);
     }
-    return result;
 }
 
 export async function registerCommands(...modules: string[]): Promise<Disposable[]> {
@@ -81,7 +80,7 @@ export async function registerCommands(...modules: string[]): Promise<Disposable
                 exception = err;
             } finally {
                 telemetryProps.duration = Date.now() - startTime;
-                telemetryProps.cancelled = result === null;
+                telemetryProps.cancelled = result === null || !`${result}`;
                 if (result?.properties) {
                     telemetryProps = {...telemetryProps, ...result.properties};
                 }
