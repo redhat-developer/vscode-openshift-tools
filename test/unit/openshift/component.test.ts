@@ -118,11 +118,12 @@ suite('OpenShift/Component', () => {
             sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
         });
 
-        test('returns null when cancelled', async () => {
+        test('returns empty string and step name in cancelled_step property when cancelled', async () => {
             quickPickStub.onFirstCall().resolves(undefined);
             const result = await Component.create(appItem);
 
-            expect(result).null;
+            expect(result.toString()).equals('');
+            expect(result.properties.cancelled_step).equals('contextFolder');
         });
 
         test('errors when a subcommand fails', async () => {
@@ -152,33 +153,35 @@ suite('OpenShift/Component', () => {
                 expect(execStub).calledWith(Command.createLocalComponent(appItem.getParent().getName(), appItem.getName(), componentType.name, version, undefined, componentItem.getName(), folder.uri.fsPath));
             });
 
-            test('returns null when no option is selected from quick pick', async () => {
+            test('returns empty string and step name in cancelled_step property when no option is selected from quick pick', async () => {
                 quickPickStub.onFirstCall().resolves(undefined);
                 const result = await Component.createFromLocal(null);
-                expect(result).null;
+
+                expect(result.toString()).equals('');
+                expect(result.properties.cancelled_step).equals('applicationName')
             });
 
-            test('returns null when no folder selected', async () => {
+            test('returns empty string and step name in cancelled_step property when no folder selected', async () => {
                 quickPickStub.onFirstCall().resolves(undefined);
                 const result = await Component.create(appItem);
 
-                expect(result).null;
+                expect(result.toString()).equals('');
             });
 
-            test('returns null when no new context folder selected', async () => {
+            test('returns empty string and step name in cancelled_step property when no new context folder selected', async () => {
                 quickPickStub.onFirstCall().resolves(AddWorkspaceFolder);
                 sandbox.stub(vscode.window, 'showOpenDialog').resolves(null);
                 const result = await Component.create(appItem);
 
-                expect(result).null;
+                expect(result.toString()).equals('');
             });
 
-            test('returns null when no new context folder selected', async () => {
+            test('returns empty string and step name in cancelled_step property when no new context folder selected', async () => {
                 quickPickStub.onFirstCall().resolves(AddWorkspaceFolder);
                 sandbox.stub(vscode.window, 'showOpenDialog').resolves(null);
                 const result = await Component.create(appItem);
 
-                expect(result).null;
+                expect(result.toString()).equals('');
             });
 
             test('ask again to select new context folder if selected one has odo component in it', async () => {
@@ -193,22 +196,22 @@ suite('OpenShift/Component', () => {
                 sod.onSecondCall().resolves(null);
                 const result = await Component.create(appItem);
 
-                expect(result).null;
+                expect(result.toString()).equals('');
                 expect(sim).calledWith('The folder selected already contains a component. Please select a different folder.');
             });
 
-            test('returns null when no component name selected', async () => {
+            test('returns empty string and step name in cancelled_step property when no component name selected', async () => {
                 inputStub.resolves();
                 const result = await Component.create(appItem);
 
-                expect(result).null;
+                expect(result.toString()).equals('');
             });
 
-            test('returns null when no component type selected', async () => {
+            test('returns empty string and step name in cancelled_step property when no component type selected', async () => {
                 quickPickStub.onSecondCall().resolves(undefined);
                 const result = await Component.create(appItem);
 
-                expect(result).null;
+                expect(result.toString()).equals('');
             });
         });
 
@@ -382,18 +385,18 @@ suite('OpenShift/Component', () => {
                 expect(result).null;
             });
 
-            test('returns null when no binary file selected', async () => {
+            test('returns empty string and step name in cancelled_step property when no binary file selectedd', async () => {
                 quickPickStub.onSecondCall().resolves(undefined);
                 const result = await Component.create(appItem);
 
-                expect(result).null;
+                expect(result.toString()).equals('');
             });
 
-            test('returns null when no component name selected', async () => {
+            test('returns empty string and step name in cancelled_step property when no component name selected', async () => {
                 inputStub.resolves();
                 const result = await Component.create(appItem);
 
-                expect(result).null;
+                expect(result.toString()).equals('');
             });
 
             test('returns null when no component type selected', async () => {
@@ -452,23 +455,23 @@ suite('OpenShift/Component', () => {
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
         });
 
-        test('returns null when no option is selected from quick pick', async () => {
+        test('returns empty string and step name in cancelled_step property when no option selected from quick pick', async () => {
             quickPickStub.onFirstCall().resolves(undefined);
             const result = await Component.createFromRootWorkspaceFolder(null);
-            expect(result).null;
+            expect(result.toString()).equals('');
         });
 
-        test('return null when no component type selected', async () => {
+        test('returns empty string and step name in cancelled_step property when no component type selected', async () => {
             inputStub.resolves(componentItem.getName());
             quickPickStub.onSecondCall().resolves(null);
             const result = await Component.createFromRootWorkspaceFolder(folder);
-            expect(result).null;
+            expect(result.toString()).equals('');
         });
 
-        test('return null when no component name is provided', async () => {
+        test('returns empty string and step name in cancelled_step property when no component name is provided', async () => {
             inputStub.resolves();
             const result = await Component.createFromRootWorkspaceFolder(folder);
-            expect(result).null;
+            expect(result.toString()).equals('');
         });
 
         test('happy path works', async () => {
