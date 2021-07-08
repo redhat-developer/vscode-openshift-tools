@@ -949,6 +949,7 @@ export class OdoImpl implements Odo {
             Command.deleteComponent(
                 app.getParent().getName(),
                 app.getName(), component.getName(),
+                !!component.contextPath,
                 component.kind === ComponentKind.S2I
             ),
             component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()
