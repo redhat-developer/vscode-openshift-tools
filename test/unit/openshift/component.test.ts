@@ -824,7 +824,7 @@ suite('OpenShift/Component', () => {
 
         test('works with no context', async () => {
             sandbox.stub(vscode.workspace, 'onDidChangeWorkspaceFolders').callsFake(onDidFake);
-            const componentItemNoContext = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], undefined, 'https://host/proj/app/comp1');
+            const componentItemNoContext = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], null, 'https://host/proj/app/comp1');
             quickPickStub.onSecondCall().resolves(componentItemNoContext);
             const result = await Component.del(null);
 
