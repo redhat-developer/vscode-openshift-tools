@@ -270,15 +270,18 @@ export class Command {
         );
     }
 
-    static deleteComponent(project: string, app: string, component: string, s2i = false): CommandText {
+    static deleteComponent(project: string, app: string, component: string, context: boolean, s2i = false): CommandText {
         const ct = new CommandText('odo delete',
-            component, [
+            context ? undefined : component, [ // if there is not context name is required
                 new CommandOption('-f'),
-                new CommandOption('--app', app),
-                new CommandOption('--project',project),
-                new CommandOption('--all')
             ]
         );
+        if (!context) { // if there is no context state app and project name
+            ct.addOption(new CommandOption('--app', app))
+                .addOption(new CommandOption('--project',project))
+        } else {
+            ct.addOption(new CommandOption('--all'));
+        }
         if (s2i) {
             ct.addOption(new CommandOption('--s2i'));
         }
