@@ -35,13 +35,10 @@ class Application extends Labeled {
 
 type Entry = Project | Application | WorkspaceEntry | WorkspaceFolderComponent;
 
-export interface WorkspaceFolderComponent {
+export interface WorkspaceFolderComponent extends vsc.TreeItem{
     project: string;
     application: string;
     contextUri: vsc.Uri;
-    label: string;
-    description?: string;
-    tooltip?: string;
 }
 
 function isWorkspaceFolderComponent(entry: any): entry is WorkspaceFolderComponent {
@@ -97,7 +94,8 @@ async function getComponentsInWorkspace(): Promise<WorkspaceFolderComponent[]> {
                 contextUri,
                 description,
                 tooltip,
-                contextValue: 'openshift.component'
+                contextValue: 'openshift.component',
+                iconPath: vsc.Uri.file(path.join(__dirname, '../../images/component', 'workspace.png'))
             }
         } catch (err) {
             // ignore unexpected parsing errors
