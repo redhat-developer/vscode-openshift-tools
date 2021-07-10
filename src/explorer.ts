@@ -26,6 +26,7 @@ import { Odo, OpenShiftObject, OdoImpl } from './odo';
 import { WatchUtil, FileContentChangeNotifier } from './util/watch';
 import { KubeConfigUtils } from './util/kubeUtils';
 import { vsCommand } from './vscommand';
+import { ComponentTypesView } from './componentTypesView';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
@@ -105,7 +106,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     refresh(target?: OpenShiftObject): void {
         if (!target) {
             OpenShiftExplorer.odoctl.clearCache();
-            commands.executeCommand('openshift.componentTypesView.refresh');
+            ComponentTypesView.refresh();
         }
         this.eventEmitter.fire(target);
     }
