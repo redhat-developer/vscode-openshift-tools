@@ -1505,12 +1505,6 @@
       "type": "object",
       "title": "OpenShift Connector",
       "properties": {
-        "redhat.telemetry.enabled": {
-          "type": "boolean",
-          "default": null,
-          "markdownDescription": "Enable usage data and errors to be sent to Red Hat servers. Read our [privacy statement](https://developers.redhat.com/article/tool-data-collection).",
-          "scope": "window"
-        },
         "openshiftConnector.showWelcomePage": {
           "title": "Show Welcome Page",
           "type": "boolean",
