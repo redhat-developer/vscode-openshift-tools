@@ -67,12 +67,7 @@ export enum ContextType {
 }
 
 function compareNodes(a: OpenShiftObject, b: OpenShiftObject): number {
-    if (!a.contextValue) return -1;
-    if (!b.contextValue) return 1;
-    const acontext = a.contextValue.includes('_') ? a.contextValue.substr(0, a.contextValue.indexOf('_')) : a.contextValue;
-    const bcontext = b.contextValue.includes('_') ? b.contextValue.substr(0, b.contextValue.indexOf('_')) : b.contextValue;
-    const t = acontext.localeCompare(bcontext);
-    return t || a.label.localeCompare(b.label);
+    return a.label.localeCompare(b.label);
 }
 
 function insert(array: OpenShiftObject[], item: OpenShiftObject): OpenShiftObject {
