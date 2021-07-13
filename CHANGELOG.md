@@ -1,5 +1,22 @@
 # Change Log
 
+## 0.2.8 (July 12, 2021)
+
+* [#2202](https://github.com/redhat-developer/vscode-openshift-tools/issues/2202) Sort components/services alphabetically under application node
+* [#2197](https://github.com/redhat-developer/vscode-openshift-tools/issues/2197) Warning about 'redhat.telemetry.enabled' property with vscode 1.58.0 release
+* [#2195](https://github.com/redhat-developer/vscode-openshift-tools/issues/2195) Add 'New Component' button to Components View title
+* [#2193](https://github.com/redhat-developer/vscode-openshift-tools/issues/2193) Components View has no icons for components in workspace
+* [#2191](https://github.com/redhat-developer/vscode-openshift-tools/issues/2191) Cannot delete component with odo v2.2.2
+* [#2190](https://github.com/redhat-developer/vscode-openshift-tools/issues/2190) Migrate to odo v2.2.3
+* [#2188](https://github.com/redhat-developer/vscode-openshift-tools/issues/2188) Report cancellation step name or number in telemetry event where is applicable
+* [#2186](https://github.com/redhat-developer/vscode-openshift-tools/issues/2186) Update odo to v2.2.2
+* [#2184](https://github.com/redhat-developer/vscode-openshift-tools/issues/2184) Extension fails to load if limit of FSWatchers is reached
+* [#2181](https://github.com/redhat-developer/vscode-openshift-tools/issues/2181) Use context folder base name as default value for component's name input
+* [#2168](https://github.com/redhat-developer/vscode-openshift-tools/issues/2168) crc message about new version availability force 'Add OpenShift Cluster' editor into error state
+* [#2166](https://github.com/redhat-developer/vscode-openshift-tools/issues/2166) Remove vscode-common from extension dependencies
+* [#2022](https://github.com/redhat-developer/vscode-openshift-tools/issues/2022) Do not delete context folders from workspace when deleting application
+* [#1962](https://github.com/redhat-developer/vscode-openshift-tools/issues/1962) Add telemetry events for 'Add OpenShift Cluster' editor commands
+
 ## 0.2.7 (Jun 3, 2021)
 
 * [#2154](https://github.com/redhat-developer/vscode-openshift-tools/issues/2154) Migrate to odo 2.2.1
