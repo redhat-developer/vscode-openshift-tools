@@ -175,7 +175,7 @@
     "unzip-stream": "^0.3.0",
     "utf-8-validate": "^5.0.2",
     "vscode-extension-tester": "^4.0.1",
-    "vscode-test": "^1.2.3",
+    "vscode-test": "^1.5.2",
     "webpack": "^4.35.2",
     "webpack-cli": "^3.3.5",
     "webpack-dev-server": "^3.11.0"

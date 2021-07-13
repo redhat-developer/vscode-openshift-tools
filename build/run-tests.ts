@@ -27,7 +27,8 @@ async function main(): Promise<void> {
                 path.resolve(extensionRootPath,'test', 'fixtures', 'components', 'components.code-workspace')
             ] : [
                 path.resolve(extensionRootPath,'test', 'fixtures', 'components', 'empty.code-workspace')
-            ]
+            ],
+            version: '1.56.0'
         });
     } catch(error) {
         // eslint-disable-next-line no-console
