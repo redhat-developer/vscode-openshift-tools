@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.2.8 (July 12, 2021)
+## 0.2.8 (July 13, 2021)
 
 * [#2202](https://github.com/redhat-developer/vscode-openshift-tools/issues/2202) Sort components/services alphabetically under application node
 * [#2197](https://github.com/redhat-developer/vscode-openshift-tools/issues/2197) Warning about 'redhat.telemetry.enabled' property with vscode 1.58.0 release
