@@ -839,6 +839,20 @@
         }
       },
       {
+        "command": "openshift.componentTypesView.registry.add",
+        "title": "Add Registry",
+        "category": "OpenShift",
+        "icon": {
+          "dark": "images/title/dark/add-cluster.svg",
+          "light": "images/title/light/add-cluster.svg"
+        }
+      },
+      {
+        "command": "openshift.componentTypesView.registry.remove",
+        "title": "Remove",
+        "category": "OpenSift"
+      },
+      {
         "command": "openshift.welcome",
         "title": "Welcome",
         "category": "OpenShift"
@@ -1111,9 +1125,22 @@
         {
           "command": "openshift.component.revealContextInExplorer",
           "when": "false"
+        },
+        {
+          "command": "openshift.componentTypesView.registry.add",
+          "when": "false"
+        },
+        {
+          "command": "openshift.componentTypesView.registry.remove",
+          "when": "false"
         }
       ],
       "view/title": [
+        {
+          "command": "openshift.componentTypesView.registry.add",
+          "when": "view == openshiftComponentTypesView",
+          "group": "navigation"
+        },
         {
           "command": "openshift.componentTypesView.refresh",
           "when": "view == openshiftComponentTypesView",
@@ -1494,6 +1521,10 @@
           "command": "openshift.componentType.newComponent",
           "when": "view == openshiftComponentTypesView && viewItem == s2iImageStreamTag || viewItem == devfileStarterProject || viewItem == devfileComponentType",
           "group": "0@0"
+        },
+        {
+          "command": "openshift.componentTypesView.registry.remove",
+          "when": "view == openshiftComponentTypesView && viewItem == devfileRegistry"
         },
         {
           "command": "openshift.component.revealInExplorer",

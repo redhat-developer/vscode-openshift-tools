@@ -141,6 +141,18 @@ export class Command {
         return new CommandText('odo registry list -o json');
     }
 
+    static addRegistry(name: string, url: string, token: string): CommandText {
+        const cTxt =  new CommandText('odo registry add', `${name} ${url}`);
+        if (token) {
+            cTxt.addOption(new CommandOption('--token', token));
+        }
+        return cTxt;
+    }
+
+    static removeRegistry(name: string): CommandText {
+        return new CommandText('odo registry delete', name, [new CommandOption('-f')]);
+    }
+
     static listCatalogComponents(): CommandText {
         return new CommandText('odo catalog list components');
     }
