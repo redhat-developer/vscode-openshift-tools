@@ -364,6 +364,8 @@ export interface Odo {
     loadItems<I>(result: cliInstance.CliExitData, fetch: (data) => I[]): I[];
     getRegistries(): Promise<Registry[]>;
     readonly subject: Subject<OdoEvent>;
+    addRegistry(name: string, url: string, token: string): Promise<Registry>;
+    removeRegistry(name: string): Promise<void>;
 }
 
 class OdoModel {
@@ -1113,6 +1115,18 @@ export class OdoImpl implements Odo {
         return this.loadItemsFrom<RegistryList, Registry>(result, (data) => data.registries);
     }
 
+    public async addRegistry(name: string, url: string, token: string): Promise<Registry> {
+        await this.execute(Command.addRegistry(name, url, token));
+        return {
+            Name: name,
+            Secure: true,
+            URL: url
+        };
+    }
+
+    public async removeRegistry(name: string): Promise<void> {
+        await this.execute(Command.removeRegistry(name));
+    }
 }
 
 export function getInstance(): Odo {

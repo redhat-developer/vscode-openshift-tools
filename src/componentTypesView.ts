@@ -18,7 +18,8 @@ import * as path from 'path';
 import { CliExitData } from './cli';
 import {
     getInstance,
-    Odo
+    Odo,
+    OdoImpl
 } from './odo';
 import { Command } from './odo/command';
 import {
@@ -44,6 +45,7 @@ import { vsCommand, VsCommandError } from './vscommand';
 import { Cluster } from '@kubernetes/client-node/dist/config_types';
 import { KubeConfig } from '@kubernetes/client-node';
 import { Platform } from './util/platform';
+import * as validator from 'validator';
 
 type ExampleProject = SampleProject | StarterProject;
 type ComponentType = DevfileComponentType | ImageStreamTag | ExampleProject | Cluster | Registry;
@@ -104,6 +106,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         if (isRegistry(element)) {
             return {
                 label: element.Name,
+                contextValue: ContextType.DEVFILE_REGISTRY,
                 tooltip: `Devfile Registry\nName: ${element.Name}\nURL: ${element.URL}`,
                 collapsibleState: TreeItemCollapsibleState.Collapsed,
             }
@@ -182,6 +185,21 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return data;
     }
 
+    addRegistry(newRegistry: Registry): void {
+        this.registries.push(newRegistry);
+        this.refresh(false);
+        this.reveal(newRegistry);
+
+    }
+
+    removeRegistry(targetRegistry: Registry): void {
+        this.registries.splice(
+            this.registries.findIndex((registry) => registry.Name === targetRegistry.Name),
+            1
+        );
+        this.refresh(false);
+    }
+
     private async getRegistries(): Promise<Registry[]> {
         if(!this.registries) {
             this.registries  = await this.odo.getRegistries();
@@ -239,8 +257,14 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return undefined;
     }
 
-    refresh(): void {
-        this.registries = undefined;
+    reveal(item: Registry): void {
+        this.treeView.reveal(item);
+    }
+
+    refresh(cleanCache = true): void {
+        if (cleanCache) {
+            this.registries = undefined;
+        }
         this.onDidChangeTreeDataEmitter.fire();
     }
 
@@ -287,6 +311,71 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             }
         } else {
             return 'Cannot find sample project repository url';
+        }
+    }
+
+    @vsCommand('openshift.componentTypesView.registry.add')
+    public static async addRegistryCmd(): Promise<void> {
+        // ask for registry
+        const regName = await window.showInputBox({
+            prompt: 'Provide registry name to display in the view',
+            placeHolder: 'Registry Name',
+            validateInput: async (value) => {
+                const trimmedValue =  value.trim();
+                if (trimmedValue.length === 0) {
+                    return 'Registry name cannot be empty'
+                }
+                if (!validator.matches(trimmedValue, '^[a-zA-Z0-9]+$')) {
+                    return 'Registry name can have only alphabet characters and numbers';
+                }
+                const registries  = await ComponentTypesView.instance.getRegistries();
+                if(registries.find((registry) => registry.Name === value)) {
+                    return `Registry name '${value}' is already used`;
+                }
+            }
+        });
+
+        if (!regName) return null;
+
+        const regURL = await window.showInputBox({ignoreFocusOut: true,
+            prompt: 'Provide registry URL to display in the view',
+            placeHolder: 'Registry URL',
+            validateInput: async (value) => {
+                const trimmedValue = value.trim();
+                if (!validator.isURL(trimmedValue)) {
+                    return 'Entered URL is invalid'
+                }
+                const registries  = await ComponentTypesView.instance.getRegistries();
+                if(registries.find((registry) => registry.URL === value)) {
+                    return `Registry with entered URL '${value}' already exists`;
+                }
+            }
+        });
+
+        if (!regURL) return null;
+
+        const secure = await window.showQuickPick(['Yes', 'No'], {
+            placeHolder: 'Is it a secure registry?'
+        });
+
+        if (!secure) return null;
+
+        let token: string;
+        if (secure === 'Yes') {
+            token = await window.showInputBox({placeHolder: 'Token to access the registry'});
+            if (!token) return null;
+        }
+
+        const newRegistry = await OdoImpl.Instance.addRegistry(regName, regURL, token);
+        ComponentTypesView.instance.addRegistry(newRegistry);
+    }
+
+    @vsCommand('openshift.componentTypesView.registry.remove')
+    public static async removeRegistry(registry: Registry): Promise<void> {
+        const yesNo = await window.showInformationMessage(`Remove registry '${registry.Name}'?`, 'Yes', 'No');
+        if (yesNo === 'Yes') {
+            await OdoImpl.Instance.removeRegistry(registry.Name);
+            ComponentTypesView.instance.removeRegistry(registry);
         }
     }
 }
