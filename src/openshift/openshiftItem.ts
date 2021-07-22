@@ -26,11 +26,12 @@ export class QuickPickCommand implements QuickPickItem {
         public picked?: boolean,
         public alwaysShow?: boolean,
         public getName?: () => string
-    ) { }
+    ) {
+    }
 }
 
 function isCommand(item: QuickPickItem | QuickPickCommand): item is QuickPickCommand {
-    return (item as any).command;
+    return !!(item as any).command;
 }
 
 export default class OpenShiftItem {
@@ -78,12 +79,12 @@ export default class OpenShiftItem {
     }
 
     static validateMatches(message: string, value: string): string | null {
-        return (validator.matches(value, '^[a-z]([-a-z0-9]*[a-z0-9])*$')) ? null : message;
+        return validator.matches(value, '^[a-z]([-a-z0-9]*[a-z0-9])*$') ? null : message;
     }
 
     static clusterURL(value: string): string | null {
         const urlRegex = value.match('(https?://[^ ]*)');
-        return (urlRegex) ? urlRegex[0] : null;
+        return urlRegex ? urlRegex[0] : null;
     }
 
     static ocLoginCommandMatches(value: string): string | null {
@@ -93,46 +94,63 @@ export default class OpenShiftItem {
 
     static getToken(value: string): string | null {
         const tokenRegex = value.match(/--token\s*=\s*(\S*).*/);
-        return (tokenRegex) ? tokenRegex[1] : null;
+        return tokenRegex ? tokenRegex[1] : null;
     }
 
     static async getApplicationNames(project: OpenShiftObject, createCommand = false): Promise<Array<OpenShiftObject | QuickPickCommand>> {
         if (project.getParent()) {
-            return OpenShiftItem.odo.getApplications(project).then((applicationList) => {
-                if (applicationList.length === 0 && !createCommand) throw new VsCommandError(errorMessage.Component);
-                return createCommand ? [new QuickPickCommand('$(plus) Create new Application...', async () => {
-                    return OpenShiftItem.getName('Application name', Promise.resolve(applicationList));
-                }), ...applicationList] : applicationList;
-            });
+            const applicationList = await OpenShiftItem.odo.getApplications(project);
+            if (applicationList.length === 0 && !createCommand) {
+                throw new VsCommandError(errorMessage.Component);
+            }
+            if (createCommand) {
+                return [
+                    new QuickPickCommand(
+                        '$(plus) Create new Application...',
+                        async () => OpenShiftItem.getName('Application name', Promise.resolve(applicationList))
+                    ),
+                    ...applicationList
+                ];
+            }
+            return applicationList;
         }
         return [
-            new QuickPickCommand('$(plus) Create new Application...', async () => {
-                return OpenShiftItem.getName('Application name', Promise.resolve([]));
-            })
+            new QuickPickCommand(
+                '$(plus) Create new Application...',
+                async () => OpenShiftItem.getName('Application name', Promise.resolve([]))
+            )
         ];
     }
 
     static async getComponentNames(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]> {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application, condition);
-        if (applicationList.length === 0) throw new VsCommandError(errorMessage.Component);
+        if (applicationList.length === 0) {
+            throw new VsCommandError(errorMessage.Component);
+        }
         return applicationList;
     }
 
     static async getServiceNames(application: OpenShiftObject): Promise<OpenShiftObject[]> {
         const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(application);
-        if (serviceList.length === 0) throw new VsCommandError(errorMessage.Service);
+        if (serviceList.length === 0) {
+            throw new VsCommandError(errorMessage.Service);
+        }
         return serviceList;
     }
 
     static async getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         const storageList: Array<OpenShiftObject> = await OpenShiftItem.odo.getStorageNames(component);
-        if (storageList.length === 0) throw new VsCommandError(errorMessage.Storage);
+        if (storageList.length === 0) {
+            throw new VsCommandError(errorMessage.Storage);
+        }
         return storageList;
     }
 
     static async getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         const urlList: Array<OpenShiftObject> = await OpenShiftItem.odo.getRoutes(component);
-        if (urlList.length === 0) throw new VsCommandError(errorMessage.Route);
+        if (urlList.length === 0) {
+            throw new VsCommandError(errorMessage.Route);
+        }
         return urlList;
     }
 
@@ -173,7 +191,9 @@ export default class OpenShiftItem {
                 }
             }
         }
-        if (context && !isCommand(context) && context.contextValue === ContextType.APPLICATION && compPlaceholder) context = await window.showQuickPick(OpenShiftItem.getComponentNames(context, condition), {placeHolder: compPlaceholder, ignoreFocusOut: true});
+        if (context && !isCommand(context) && context.contextValue === ContextType.APPLICATION && compPlaceholder) {
+            context = await window.showQuickPick(OpenShiftItem.getComponentNames(context, condition), {placeHolder: compPlaceholder, ignoreFocusOut: true});
+        }
         return context as T;
     }
 }
