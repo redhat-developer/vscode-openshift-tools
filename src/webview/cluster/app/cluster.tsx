@@ -30,7 +30,7 @@ const clusterTypes = [
     imageUrl: ['https://www.openshift.com/hubfs/images/icons/Icon-Red_Hat-Hardware-Laptop-A-Black-RGB.svg'],
     urlAlt: 'crc',
     redirectLink: '',
-    buttonText: 'Create/Refresh Cluster',
+    buttonText: 'Create/Refresh cluster',
     tooltip: 'You can create OpenShift cluster using this wizard.'
   },
   {
