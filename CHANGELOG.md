@@ -1,5 +1,17 @@
 # Change Log
 
+## 0.2.9 (July 29, 2021)
+
+### New Features
+
+* [#2005](https://github.com/redhat-developer/vscode-openshift-tools/issues/2005) Add/Remove/Update Registry commands for Component Types View and Command Palette
+
+### Bug fixes
+
+* [#2213](https://github.com/redhat-developer/vscode-openshift-tools/issues/2213) DevSandbox page fails 
+* [#2177](https://github.com/redhat-developer/vscode-openshift-tools/issues/2177) Objects deleted from App Explorer tree have not deleted from parent->children cache
+* [#2167](https://github.com/redhat-developer/vscode-openshift-tools/issues/2167) Option to prevent removing project folder from workspace when deleting component
+
 ## 0.2.8 (July 13, 2021)
 
 * [#2202](https://github.com/redhat-developer/vscode-openshift-tools/issues/2202) Sort components/services alphabetically under application node
