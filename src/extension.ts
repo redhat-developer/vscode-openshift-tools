@@ -68,6 +68,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     const disposable = [
         ...(await registerCommands(
             './k8s/route',
+            './k8s/crd',
             './openshift/catalog',
             './openshift/project',
             './openshift/application',

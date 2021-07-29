@@ -5,15 +5,15 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { spawn, ChildProcess } from 'child_process';
+// import { spawn, ChildProcess } from 'child_process';
 import { ExtenisonID } from '../../util/constants';
-import { WindowUtil } from '../../util/windowUtils';
-import { CliChannel } from '../../cli';
-import { vsCommand } from '../../vscommand';
+// import { WindowUtil } from '../../util/windowUtils';
+// import { CliChannel } from '../../cli';
+// import { vsCommand } from '../../vscommand';
 
 let panel: vscode.WebviewPanel;
 
-const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
+// const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
 
 async function clusterEditorMessageListener (event: any ): Promise<any> {
     //temp empty
