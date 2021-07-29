@@ -111,7 +111,7 @@ export default function Header() {
           <CardActions className={classes.cardButton}>
             <Tooltip title={list.tooltip} placement="top">
               <div>
-                <a onClick={() => handleView(index)} style={{ textDecoration: 'none'}}>
+                <a onClick={() => handleView(index)} style={{ textDecoration: 'none'}} href={clusterTypes[index].redirectLink}>
                   <Button
                     variant="contained"
                     color="default"

@@ -83,12 +83,12 @@ export default class ClusterViewLoader {
 
     @vsCommand('openshift.explorer.addCluster.openLaunchSandboxPage')
     static async openLaunchSandboxPage(url: string) {
-        await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+        // fake command to report crc selection through telemetry
     }
 
     @vsCommand('openshift.explorer.addCluster.openCreateClusterPage')
     static async openCreateClusterPage(url: string) {
-        await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+        // fake command to report crc selection through telemetry
     }
 
     @vsCommand('openshift.explorer.addCluster.openCrcAddClusterPage')
