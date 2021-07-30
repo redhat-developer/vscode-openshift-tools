@@ -323,7 +323,7 @@ class OdoEventImpl implements OdoEvent {
 }
 
 export interface Odo {
-    getKubeconfigEnv(): {};
+    getKubeconfigEnv(): any;
     getClusters(): Promise<OpenShiftObject[]>;
     getProjects(): Promise<OpenShiftObject[]>;
     loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): Promise<void>;
@@ -339,7 +339,7 @@ export interface Odo {
     getServiceTemplates(): Promise<string[]>;
     getServiceTemplatePlans(svc: string): Promise<string[]>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
-    execute(command: CommandText, cwd?: string, fail?: boolean, addEnv?: {}): Promise<cliInstance.CliExitData>;
+    execute(command: CommandText, cwd?: string, fail?: boolean, addEnv?: any): Promise<cliInstance.CliExitData>;
     spawn(command: string, cwd?: string): Promise<ChildProcess>;
     executeInTerminal(command: CommandText, cwd?: string, name?: string): Promise<void>;
     requireLogin(): Promise<boolean>;
@@ -614,7 +614,7 @@ export class OdoImpl implements Odo {
         return deployedComponents;
     }
 
-    public getKubeconfigEnv(): {} {
+    public getKubeconfigEnv(): any {
         const addEnv: {KUBECONFIG?: string} = {};
         let kc: KubeConfig;
         // TODO: Remove when odo works without kubeconfig present
@@ -755,7 +755,7 @@ export class OdoImpl implements Odo {
         return services;
     }
 
-    public createEnv(): {} {
+    public createEnv(): any {
         const env = {...process.env };
         env.ODO_DISABLE_TELEMETRY = 'true';
         return env;

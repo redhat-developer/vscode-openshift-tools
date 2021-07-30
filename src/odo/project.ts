@@ -9,7 +9,7 @@ export interface Project {
     kind: 'Project';
     apiVersion: string;
     metadata: ComponentMetadata;
-    spec: { };
+    spec: any;
     status: {
         active: boolean;
     };

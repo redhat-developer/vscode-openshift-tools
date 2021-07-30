@@ -5,7 +5,6 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable camelcase */
-/* eslint-disable @typescript-eslint/camelcase */
 
 import { commands, Disposable, window } from 'vscode';
 import * as stackTraceParser from 'stacktrace-parser';
@@ -94,7 +93,7 @@ export async function registerCommands(...modules: string[]): Promise<Disposable
     });
 }
 
-export function vsCommand(commandId: string, palette = false): Function {
+export function vsCommand(commandId: string, palette = false): (_target: any, key: string, descriptor: any)=> void {
     return (_target: any, key: string, descriptor: any): void => {
         if (!(typeof descriptor.value === 'function')) {
             throw new Error('not supported');
