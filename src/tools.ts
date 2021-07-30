@@ -15,9 +15,9 @@ import configData = require('./tools.json');
 
 export class ToolsConfig {
 
-    public static tools: object = ToolsConfig.loadMetadata(configData, Platform.OS);
+    public static tools: any = ToolsConfig.loadMetadata(configData, Platform.OS);
 
-    public static loadMetadata(requirements, platform): object {
+    public static loadMetadata(requirements, platform): any {
         const reqs = JSON.parse(JSON.stringify(requirements));
         Object.keys(requirements).forEach((object) => {
             if (reqs[object].platform) {

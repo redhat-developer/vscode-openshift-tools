@@ -372,7 +372,7 @@ suite('Openshift/Cluster', () => {
     suite('about', () => {
         test('calls the proper odo command in terminal', () => {
             const stub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
-            Cluster.about();
+            void Cluster.about();
 
             expect(stub).calledOnceWith(Command.printOdoVersion());
         });

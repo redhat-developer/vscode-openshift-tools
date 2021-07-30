@@ -2,7 +2,6 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-/* eslint-disable camelcase */
 
 import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace } from 'vscode';
 import { Command } from '../odo/command';
@@ -154,11 +153,11 @@ export class Cluster extends OpenShiftItem {
                 // try to fetch versions for stdout
                 const versionsJson = JSON.parse(result.stdout);
                 if (versionsJson?.serverVersion?.major && versionsJson?.serverVersion?.minor) {
-                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    // eslint-disable-next-line camelcase
                     versions.kubernetes_version = `${versionsJson.serverVersion.major}.${versionsJson.serverVersion.minor}`;
                 }
                 if (versionsJson?.openshiftVersion) {
-                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    // eslint-disable-next-line camelcase
                     versions.openshift_version = versionsJson.openshiftVersion;
                 }
 
