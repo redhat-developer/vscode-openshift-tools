@@ -10,7 +10,7 @@ import Describe from './describe';
 
 declare global {
     interface Window {
-        cmdText: string;
+        cmdText?: string;
     }
 }
 

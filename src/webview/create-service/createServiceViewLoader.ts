@@ -7,19 +7,31 @@ import * as path from 'path';
 import * as fs from 'fs';
 // import { spawn, ChildProcess } from 'child_process';
 import { ExtenisonID } from '../../util/constants';
+import { JSONSchema7 } from 'json-schema';
 // import { WindowUtil } from '../../util/windowUtils';
 // import { CliChannel } from '../../cli';
 // import { vsCommand } from '../../vscommand';
+
+const emptySchema: JSONSchema7 = {
+    title: "Todo",
+    type: "object",
+    required: ["title"],
+    properties: {
+      title: {type: "string", title: "Title", default: "A new task"},
+      description: {type: "string", title: "Title", default: "Description"},
+      done: {type: "boolean", title: "Done?", default: false}
+    }
+  };
 
 let panel: vscode.WebviewPanel;
 
 // const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
 
-async function clusterEditorMessageListener (event: any ): Promise<any> {
+async function createServiceMessageListener (event: any ): Promise<any> {
     //temp empty
 }
 
-export default class ClusterViewLoader {
+export default class CreateServiceViewLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     static get extensionPath() {
         return vscode.extensions.getExtension(ExtenisonID).extensionPath
@@ -27,7 +39,7 @@ export default class ClusterViewLoader {
 
     // eslint-disable-next-line @typescript-eslint/require-await
     static async loadView(title: string): Promise<vscode.WebviewPanel> {
-        const localResourceRoot = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'out', 'createServiceView'));
+        const localResourceRoot = vscode.Uri.file(path.join(CreateServiceViewLoader.extensionPath, 'out', 'createServiceView'));
         if (panel) {
             // If we already have a panel, show it in the target column
             panel.reveal(vscode.ViewColumn.One);
@@ -38,13 +50,13 @@ export default class ClusterViewLoader {
                 retainContextWhenHidden: true
             });
         }
-        panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'images/context/cluster-node.png'));
-        panel.webview.html = ClusterViewLoader.getWebviewContent(ClusterViewLoader.extensionPath, panel);
-        panel.webview.postMessage({action: 'cluster', data: ''});
+        panel.iconPath = vscode.Uri.file(path.join(CreateServiceViewLoader.extensionPath, 'images/context/cluster-node.png'));
+        panel.webview.html = CreateServiceViewLoader.getWebviewContent(CreateServiceViewLoader.extensionPath, panel);
+        panel.webview.postMessage({action: 'schema', schema: JSON.stringify(emptySchema)});
         panel.onDidDispose(()=> {
             panel = undefined;
         });
-        panel.webview.onDidReceiveMessage(clusterEditorMessageListener);
+        panel.webview.onDidReceiveMessage(createServiceMessageListener);
         return panel;
     }
 

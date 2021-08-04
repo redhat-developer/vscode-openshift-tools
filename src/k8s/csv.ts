@@ -3,37 +3,62 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { CommandOption, CommandText } from '../odo/command';
-import { Component } from '../openshift/component';
 import OpenShiftItem from '../openshift/openshiftItem';
-import { vsCommand } from '../vscommand';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import * as common from './common';
+import { ClusterServiceVersionKind, CRDDescription, CustomResourceDefinitionKind } from './olm/types';
+import { TreeItem } from 'vscode';
+import { vsCommand } from '../vscommand';
+import CreateServiceViewLoader from '../webview/create-service/createServiceViewLoader';
 
-export class ClusterServiceVersion extends OpenShiftItem {
+class CsvNode implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorerExtensionNode {
+    
+    readonly nodeType: 'extension';
 
-    public static command = {
-        getCrd (csvName: string): CommandText {
-            return new CommandText('oc get csv', csvName, [new CommandOption('-o', 'json')]);
-        }
+    constructor(public readonly crdDescription: CRDDescription) {
+    }
+    
+    getChildren(): Promise<ClusterExplorerV1.Node[]> {
+        return;
     }
 
-    static getNodeContributor(): ClusterExplorerV1.NodeContributor {
+    getTreeItem(): TreeItem {
         return {
-          contributesChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): boolean {
-            return !!parent && parent.nodeType === 'resource' && parent.resourceKind.manifestKind === 'CustomResourceDefinition';
-          },
-          async getChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): Promise<ClusterExplorerV1.Node[]> {
-            return common.getChildrenNode(CustomResourceDefinition.command.getReplicationControllers(parent), 'ReplicationController', 'rc');
-          }
-        };
-      }
+            label: this.crdDescription.displayName,
+            contextValue:  'openshift.resource.csv.crdDescription'
+        }
+    }
+}
 
-    @vsCommand('openshift.oc.get')
-    static getCustomResourceDefinition(definition: any): Promise<void> {
-        Component.odo.executeInTerminal(
-            CustomResourceDefinition.command.getCrd(definition.id)
-        );
-        return;
+export class ClusterServiceVersion extends OpenShiftItem {
+    public static command = {
+        getCsv(csvName: string): string {
+            return `get csv ${csvName}`
+        },
+        getCrd(crdName: string): string {
+            return `get crd ${crdName}`
+        },
+    };
+
+    public static getNodeContributor(): ClusterExplorerV1.NodeContributor {
+        return {
+            contributesChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): boolean {
+                return parent?.nodeType === 'resource' &&
+                    parent?.resourceKind?.manifestKind === 'ClusterServiceVersion';
+            },
+            async getChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): Promise<ClusterExplorerV1.Node[]> {
+                const getCsvCmd = ClusterServiceVersion.command.getCsv((parent as any).name);
+                const result: ClusterServiceVersionKind = await common.asJson(getCsvCmd);
+                return result.spec.customresourcedefinitions.owned.map((crd) => new CsvNode(crd));
+            },
+        };
+    }
+
+    @vsCommand('clusters.openshift.csv.create')
+    static async createNewService(context: any): Promise<void> {
+        const getCrdCmd = ClusterServiceVersion.command.getCrd(context.impl.crdDescription.name);
+        const result: CustomResourceDefinitionKind = await common.asJson(getCrdCmd);
+        const panel = await CreateServiceViewLoader.loadView('Create Service');
+        panel.webview.postMessage({action: 'schema', schema: JSON.stringify(result.spec.versions[0].schema.openAPIV3Schema)})
     }
 }
