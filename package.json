@@ -859,6 +859,11 @@
         "command": "openshift.oc.get",
         "title": "Load",
         "category": "OpenShift"
+      },
+      {
+        "command": "clusters.openshift.csv.create",
+        "title": "Create Service ...",
+        "category": "OpenShift"
       }
     ],
     "keybindings": [
@@ -1189,9 +1194,9 @@
       ],
       "view/item/context": [
         {
-          "command": "openshift.oc.get",
+          "command": "clusters.openshift.csv.create",
           "group": "1@1",
-          "when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.kind/i"
+          "when": "view == extension.vsKubernetesExplorer && viewItem == openshift.resource.csv.crdDescription"
         },
         {
           "command": "clusters.openshift.deployment.openConsole",

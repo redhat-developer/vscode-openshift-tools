@@ -6,8 +6,10 @@
 import OpenShiftItem from '../openshift/openshiftItem';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import * as common from './common';
-import { ClusterServiceVersionKind, CRDDescription } from './olm/types';
+import { ClusterServiceVersionKind, CRDDescription, CustomResourceDefinitionKind } from './olm/types';
 import { TreeItem } from 'vscode';
+import { vsCommand } from '../vscommand';
+import CreateServiceViewLoader from '../webview/create-service/createServiceViewLoader';
 
 class CsvNode implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorerExtensionNode {
 
@@ -54,5 +56,13 @@ export class ClusterServiceVersion extends OpenShiftItem {
                 return result.spec.customresourcedefinitions.owned.map((crd) => new CsvNode(crd));
             },
         };
+    }
+
+    @vsCommand('clusters.openshift.csv.create')
+    static async createNewService(context: any): Promise<void> {
+        const getCrdCmd = ClusterServiceVersion.command.getCrd(context.impl.crdDescription.name);
+        const result: CustomResourceDefinitionKind = await common.asJson(getCrdCmd);
+        const panel = await CreateServiceViewLoader.loadView('Create Service');
+        panel.webview.postMessage({action: 'schema', schema: JSON.stringify(result.spec.versions[0].schema.openAPIV3Schema)})
     }
 }
