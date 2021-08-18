@@ -19,15 +19,19 @@ module.exports = {
   },
   devtool: "eval-source-map",
   resolve: {
-    extensions: [".js", ".ts", ".tsx", ".json"]
+    extensions: [".js", ".ts", ".tsx", ".jsx", ".json"]
   },
   module: {
     rules: [
-      {
-        test: /\.(ts|tsx)$/,
-        loader: "ts-loader",
-      },
-      {
+        {
+            test: /\.(ts|tsx)$/,
+            loader: "ts-loader",
+            options: {
+
+                configFile: path.resolve(__dirname, 'app', 'tsconfig.json'),
+            },
+        },
+       {
         test: /\.css$/,
         use: [
           {
@@ -45,6 +49,31 @@ module.exports = {
           name: 'assets/[name].[ext]',
         },
       },
+      {
+        test: /\.s?css$/,
+        exclude: /.*\/node_modules\/.*/,
+        use: [
+          {
+            loader: 'css-loader',
+            options: {
+              sourceMap: true,
+            },
+          },
+          {
+            loader: 'resolve-url-loader',
+            options: {
+              sourceMap: true,
+            },
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true,
+              outputStyle: 'compressed',
+            },
+          },
+        ],
+      }
     ]
   },
   performance: {

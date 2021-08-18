@@ -52,7 +52,6 @@ export default class CreateServiceViewLoader {
         }
         panel.iconPath = vscode.Uri.file(path.join(CreateServiceViewLoader.extensionPath, 'images/context/cluster-node.png'));
         panel.webview.html = CreateServiceViewLoader.getWebviewContent(CreateServiceViewLoader.extensionPath, panel);
-        panel.webview.postMessage({action: 'schema', schema: JSON.stringify(emptySchema)});
         panel.onDidDispose(()=> {
             panel = undefined;
         });
@@ -73,7 +72,7 @@ export default class CreateServiceViewLoader {
             default-src 'none';
             img-src ${p.webview.cspSource} https: 'self' data:;
             script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;
-            style-src 'self' vscode-resource: 'unsafe-inline';">`;
+            style-src https: 'self' vscode-resource: 'unsafe-inline';">`;
         return `${htmlString}`
             .replace('%COMMAND%', '')
             .replace('%PLATFORM%', process.platform)

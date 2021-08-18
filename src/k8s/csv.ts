@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import * as _ from 'lodash';
 import OpenShiftItem from '../openshift/openshiftItem';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import * as common from './common';
@@ -10,14 +11,15 @@ import { ClusterServiceVersionKind, CRDDescription, CustomResourceDefinitionKind
 import { TreeItem } from 'vscode';
 import { vsCommand } from '../vscommand';
 import CreateServiceViewLoader from '../webview/create-service/createServiceViewLoader';
+import { DEFAULT_K8S_SCHEMA, getUISchema } from './utils';
 
 class CsvNode implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorerExtensionNode {
-    
+
     readonly nodeType: 'extension';
 
     constructor(public readonly crdDescription: CRDDescription) {
     }
-    
+
     getChildren(): Promise<ClusterExplorerV1.Node[]> {
         return;
     }
@@ -56,9 +58,22 @@ export class ClusterServiceVersion extends OpenShiftItem {
 
     @vsCommand('clusters.openshift.csv.create')
     static async createNewService(context: any): Promise<void> {
+        const crdDescription = context.impl.crdDescription;
         const getCrdCmd = ClusterServiceVersion.command.getCrd(context.impl.crdDescription.name);
         const result: CustomResourceDefinitionKind = await common.asJson(getCrdCmd);
+
         const panel = await CreateServiceViewLoader.loadView('Create Service');
-        panel.webview.postMessage({action: 'schema', schema: JSON.stringify(result.spec.versions[0].schema.openAPIV3Schema)})
+        const openAPIV3SchemaAll = result.spec.versions[0].schema.openAPIV3Schema;
+        const openAPIV3Schema = _.defaultsDeep({}, DEFAULT_K8S_SCHEMA, _.omit(openAPIV3SchemaAll, 'properties.status'));
+
+        const uiSchema = getUISchema(
+            openAPIV3Schema,
+            crdDescription
+        );
+        panel.webview.onDidReceiveMessage(async ()=> {
+            await panel.webview.postMessage(
+                {action: 'load', openAPIV3Schema, uiSchema, crdDescription}
+            );
+        });
     }
 }
