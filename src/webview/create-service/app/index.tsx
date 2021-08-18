@@ -5,8 +5,8 @@
 
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
-import { DynamicForm } from './dynamicForm';
+import { CreateForm } from './createForm';
 
 ReactDOM.render((
-  <DynamicForm />
+  <CreateForm />
 ), document.getElementById('root'));
