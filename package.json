@@ -58,6 +58,7 @@
     "compile": "npm-run-all compile:*",
     "compile:ext": "tsc -p ./",
     "compile:views": "webpack --mode development --config src/webview/webpack.config.js",
+    "compile:create-service": "webpack --mode development --config src/webview/create-service/webpack.config.js",
     "dev:log-view": "webpack-dev-server --mode development --config src/webview/log/webpack.config.js",
     "dev:describe-view": "webpack-dev-server --mode development --config src/webview/describe/webpack.config.js",
     "dev:cluster-view": "webpack-dev-server --mode development --config src/webview/cluster/webpack.config.js",
@@ -81,6 +82,7 @@
   "dependencies": {
     "@kubernetes/client-node": "^0.13.0",
     "@redhat-developer/vscode-redhat-telemetry": "0.1.1",
+    "babel-loader": "^8.2.2",
     "base64-inline-loader": "^1.1.1",
     "binary-search": "^1.3.6",
     "byline": "^5.0.0",
@@ -90,6 +92,7 @@
     "git-transport-protocol": "^0.1.0",
     "globby": "^10.0.1",
     "js-yaml": "^3.13.1",
+    "lodash-es": "^4.17.21",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
     "pretty-bytes": "^5.4.0",
@@ -106,10 +109,13 @@
     "yaml": "^1.10.0"
   },
   "devDependencies": {
+    "@blueprintjs/core": "^3.47.0",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
-    "@rjsf/core": "^2.5.1",
+    "@patternfly/patternfly": "^4.125.3",
+    "@patternfly/react-core": "^4.135.0",
+    "@rjsf/material-ui": "^3.1.0",
     "@types/byline": "^4.2.31",
     "@types/chai": "^4.2.10",
     "@types/collections": "^5.0.0",
