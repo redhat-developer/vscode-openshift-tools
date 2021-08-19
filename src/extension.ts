@@ -58,7 +58,7 @@ async function verifyBundledBinaries(): Promise<{odoPath: string, ocPath: string
 
 export async function activate(extensionContext: ExtensionContext): Promise<any> {
     WelcomePage.createOrShow();
-    commands.executeCommand('setContext', 'isVSCode', env.uiKind);
+    await commands.executeCommand('setContext', 'isVSCode', env.uiKind);
     // UIKind.Desktop ==1 & UIKind.Web ==2. These conditions are checked for browser based & electron based IDE.
     migrateFromOdo018();
     Cluster.extensionContext = extensionContext;
@@ -68,7 +68,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     const disposable = [
         ...(await registerCommands(
             './k8s/route',
-            './k8s/crd',
             './openshift/catalog',
             './openshift/project',
             './openshift/application',

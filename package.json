@@ -58,11 +58,9 @@
     "compile": "npm-run-all compile:*",
     "compile:ext": "tsc -p ./",
     "compile:views": "webpack --mode development --config src/webview/webpack.config.js",
-    "compile:create-service": "webpack --mode development --config src/webview/create-service/webpack.config.js",
     "dev:log-view": "webpack-dev-server --mode development --config src/webview/log/webpack.config.js",
     "dev:describe-view": "webpack-dev-server --mode development --config src/webview/describe/webpack.config.js",
     "dev:cluster-view": "webpack-dev-server --mode development --config src/webview/cluster/webpack.config.js",
-    "dev:create-service-view": "webpack-dev-server --mode development --config src/webview/create-service/webpack.config.js",
     "watch": "tsc -watch -p ./",
     "clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/logViewer",
     "lint": "eslint . --ext .ts --quiet",
@@ -82,17 +80,14 @@
   "dependencies": {
     "@kubernetes/client-node": "^0.13.0",
     "@redhat-developer/vscode-redhat-telemetry": "0.1.1",
-    "babel-loader": "^8.2.2",
     "base64-inline-loader": "^1.1.1",
     "binary-search": "^1.3.6",
     "byline": "^5.0.0",
-    "chokidar": "^3.5.1",
     "fs-extra": "^8.1.0",
     "git-fetch-pack": "^0.1.1",
     "git-transport-protocol": "^0.1.0",
     "globby": "^10.0.1",
     "js-yaml": "^3.13.1",
-    "lodash-es": "^4.17.21",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
     "pretty-bytes": "^5.4.0",
@@ -109,13 +104,9 @@
     "yaml": "^1.10.0"
   },
   "devDependencies": {
-    "@blueprintjs/core": "^3.47.0",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
-    "@patternfly/patternfly": "^4.125.3",
-    "@patternfly/react-core": "^4.135.0",
-    "@rjsf/material-ui": "^3.1.0",
     "@types/byline": "^4.2.31",
     "@types/chai": "^4.2.10",
     "@types/collections": "^5.0.0",
@@ -867,16 +858,6 @@
         "command": "openshift.welcome",
         "title": "Welcome",
         "category": "OpenShift"
-      },
-      {
-        "command": "openshift.oc.get",
-        "title": "Load",
-        "category": "OpenShift"
-      },
-      {
-        "command": "clusters.openshift.csv.create",
-        "title": "Create Service ...",
-        "category": "OpenShift"
       }
     ],
     "keybindings": [
@@ -1154,10 +1135,6 @@
         {
           "command": "openshift.componentTypesView.registry.remove",
           "when": "false"
-        },
-        {
-          "command": "openshift.oc.get",
-          "when": "false"
         }
       ],
       "view/title": [
@@ -1208,11 +1185,6 @@
         }
       ],
       "view/item/context": [
-        {
-          "command": "clusters.openshift.csv.create",
-          "group": "1@1",
-          "when": "view == extension.vsKubernetesExplorer && viewItem == openshift.resource.csv.crdDescription"
-        },
         {
           "command": "clusters.openshift.deployment.openConsole",
           "group": "3@0",
