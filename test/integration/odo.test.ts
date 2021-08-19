@@ -184,7 +184,7 @@ suite('odo integration', () => {
         }
         if (!openshiftVersion) {
             const version = await oi.execute(new CommandText('oc version'));
-            const match = version.stdout.match(/Server Version:\s*(\d+\.\d+\.\d+).*/);
+            const match = /Server Version:\s*(\d+\.\d+\.\d+).*/.exec(version.stdout);
             if (match && match.length > 1) {
                 openshiftVersion = match[1];
             } else {

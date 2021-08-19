@@ -11,7 +11,7 @@ import { VIEWS, MENUS, BUTTONS, INPUTS, COMPONENTS, NOTIFICATIONS } from '../com
 export function createComponentTest(contextFolder: string) {
     describe('Component creation', () => {
         const cluster = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
-        const clusterName = cluster.match(/https?:\/\/(.*)/)[1];
+        const clusterName = (/https?:\/\/(.*)/.exec(cluster))[1];
         const user = process.env.CLUSTER_USER || 'developer';
         const password = process.env.CLUSTER_PASSWORD || 'developer';
         let view: SideBarView;

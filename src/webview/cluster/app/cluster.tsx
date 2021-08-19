@@ -55,7 +55,7 @@ const clusterTypes = [
   }
 ];
 
-const vscodeApi = window.acquireVsCodeApi();
+const vscodeApi = window.vscodeApi;
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function Header() {
