@@ -5,8 +5,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable header/header */
 
-
-import { UiSchema } from '@rjsf/core';
 import * as Immutable from 'immutable';
 import { JSONSchema7 } from 'json-schema';
 import * as _ from 'lodash';
@@ -21,7 +19,7 @@ export enum JSONSchemaType {
     null = 'null',
     array = 'array',
     object = 'object',
-  }
+}
 
 export const DEFAULT_K8S_SCHEMA: JSONSchema7 = {
   type: JSONSchemaType.object,
@@ -71,7 +69,6 @@ export const stringPathToUISchemaPath = (path: string): string[] =>
   (_.toPath(path) ?? []).map((subPath) => {
     return /^\d+$/.test(subPath) ? 'items' : subPath;
   });
-
 
 // Recursive helper for getSchemaAtPath
 const recursiveGetSchemaAtPath = (
