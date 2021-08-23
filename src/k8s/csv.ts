@@ -76,7 +76,7 @@ export class ClusterServiceVersion extends OpenShiftItem {
         );
         panel.webview.onDidReceiveMessage(async ()=> {
             await panel.webview.postMessage(
-                {action: 'load', openAPIV3Schema, uiSchema, crdDescription}
+                {action: 'load', openAPIV3Schema, uiSchema, crdDescription, formData}
             );
         });
     }

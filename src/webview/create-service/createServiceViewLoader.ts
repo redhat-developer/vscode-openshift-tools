@@ -7,21 +7,9 @@ import * as path from 'path';
 import * as fs from 'fs';
 // import { spawn, ChildProcess } from 'child_process';
 import { ExtenisonID } from '../../util/constants';
-import { JSONSchema7 } from 'json-schema';
 // import { WindowUtil } from '../../util/windowUtils';
 // import { CliChannel } from '../../cli';
 // import { vsCommand } from '../../vscommand';
-
-const emptySchema: JSONSchema7 = {
-    title: "Todo",
-    type: "object",
-    required: ["title"],
-    properties: {
-      title: {type: "string", title: "Title", default: "A new task"},
-      description: {type: "string", title: "Title", default: "Description"},
-      done: {type: "boolean", title: "Done?", default: false}
-    }
-  };
 
 let panel: vscode.WebviewPanel;
 
