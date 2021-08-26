@@ -205,7 +205,6 @@
     "onCommand:openshift.app.describe",
     "onCommand:openshift.app.create",
     "onCommand:openshift.app.delete",
-    "onCommand:openshift.component.import",
     "onCommand:openshift.component.create",
     "onCommand:openshift.component.createFromLocal",
     "onCommand:openshift.component.createFromGit",
@@ -412,11 +411,6 @@
       {
         "command": "openshift.app.delete",
         "title": "Delete",
-        "category": "OpenShift"
-      },
-      {
-        "command": "openshift.component.import",
-        "title": "Import",
         "category": "OpenShift"
       },
       {
@@ -936,10 +930,6 @@
           "when": "view == openshiftProjectExplorer"
         },
         {
-          "command": "openshift.component.import",
-          "when": "view == openshiftProjectExplorer"
-        },
-        {
           "command": "openshift.component.create",
           "when": "view == openshiftProjectExplorer"
         },
@@ -1343,11 +1333,6 @@
           "command": "openshift.component.describe",
           "when": "view == openshiftProjectExplorer && viewItem == componentNoContext",
           "group": "c2@1"
-        },
-        {
-          "command": "openshift.component.import",
-          "when": "view == openshiftProjectExplorer && viewItem == componentNoContext",
-          "group": "c2@2"
         },
         {
           "command": "openshift.component.log",
