@@ -361,6 +361,7 @@ export interface Odo {
     deleteURL(url: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentCustomUrl(component: OpenShiftObject, name: string, port: string, secure?: boolean): Promise<OpenShiftObject>;
     getOpenShiftObjectByContext(context: string): OpenShiftObject;
+    getSettingsByContext(context: string): odo.Component;
     loadItems<I>(result: cliInstance.CliExitData, fetch: (data) => I[]): I[];
     getRegistries(): Promise<Registry[]>;
     readonly subject: Subject<OdoEvent>;
@@ -1027,6 +1028,10 @@ export class OdoImpl implements Odo {
 
     getOpenShiftObjectByContext(context: string): OpenShiftObject {
         return OdoImpl.data.getObjectByContext(Uri.file(context));
+    }
+
+    getSettingsByContext(context: string): odo.Component {
+        return OdoImpl.data.getSettingsByContext(context);
     }
 
     async loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): Promise<void> {

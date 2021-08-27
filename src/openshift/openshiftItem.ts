@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 /* eslint-disable @typescript-eslint/ban-types */
 
-import { window, QuickPickItem, commands } from 'vscode';
+import { window, QuickPickItem, commands, workspace } from 'vscode';
 import * as validator from 'validator';
 import { Odo, getInstance, OpenShiftObject, ContextType, OpenShiftApplication, OpenShiftProject } from '../odo';
 import { OpenShiftExplorer } from '../explorer';
@@ -159,12 +159,34 @@ export default class OpenShiftItem {
         let context: OpenShiftObject | QuickPickCommand = treeItem;
         let project: OpenShiftObject;
         if (!context) {
+
             const clusters = await this.odo.getClusters();
             if (clusters.length) { // connected to cluster because odo version printed out server url
                 const projects = await this.odo.getProjects();
                 context = projects.find((prj:OpenShiftProject)=>prj.active);
                 if (!context) {
                     throw new VsCommandError(errorMessage.Project)
+                }
+                // first try to get target component out of active editor
+                const currentEditorFile = window?.activeTextEditor?.document?.uri;
+                if (currentEditorFile) {
+                    const contextFolder = workspace.getWorkspaceFolder(currentEditorFile);
+                    if (contextFolder) {
+                        const oso = this.odo.getOpenShiftObjectByContext(contextFolder.uri.fsPath);
+                        if (!oso) {
+                            const applications = await this.odo.getApplications(context);
+                            const settings = this.odo.getSettingsByContext(contextFolder.uri.fsPath);
+                            if (settings) {
+                                const app = applications.find((a) => a.getName() === settings.spec.app);
+                                if(app) {
+                                    await this.odo.getComponents(app);
+                                    context = this.odo.getOpenShiftObjectByContext(contextFolder.uri.fsPath);
+                                }
+                            }
+                        } else if (context?.getName() === oso?.getParent()?.getParent()?.getName()) {
+                            context = oso;
+                        }
+                    }
                 }
             } else { // cluster is not accessible or user not logged in
                 const projectName = await OpenShiftItem.getName('Project Name', Promise.resolve([]))
