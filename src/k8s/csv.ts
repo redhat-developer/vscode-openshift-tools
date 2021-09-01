@@ -69,7 +69,7 @@ export class ClusterServiceVersion extends OpenShiftItem {
         const panel = await CreateServiceViewLoader.loadView('Create Service');
         const openAPIV3SchemaAll = result.spec.versions[0].schema.openAPIV3Schema;
         const openAPIV3Schema = _.defaultsDeep({}, DEFAULT_K8S_SCHEMA, _.omit(openAPIV3SchemaAll, 'properties.status'));
-        
+
         const uiSchema = getUISchema(
             openAPIV3Schema,
             crdDescription
