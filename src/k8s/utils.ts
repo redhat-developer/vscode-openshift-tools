@@ -148,6 +148,7 @@ export const getUISchema = (jsonSchema, providedAPI) => {
       'ui:order': ['name', 'labels', '*'],
     },
     spec: {
+      'ui:description': '', // hide description for spec
       ...descriptorsToUISchema(providedAPI?.specDescriptors, jsonSchema?.properties?.spec),
       'ui:options': {
         label: false,
