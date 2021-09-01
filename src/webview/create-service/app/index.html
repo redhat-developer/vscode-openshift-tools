@@ -19,8 +19,21 @@
                 color: var(--vscode-editor-foreground)
             }
 
-            .form-group {
-                margin-bottom: 0px !important;
+            fieldset[id^="root_"] {
+                border-left: 2px solid;
+                padding-left: 12px;
+            }
+
+            fieldset#root_metadata {
+                border-left: unset;
+            }
+
+            fieldset#root_spec {
+                border-left: unset;
+            }
+
+            fieldset#root_spec_ {
+                border-left: unset;
             }
 
             .form-control {
@@ -31,10 +44,19 @@
                 background-color: var(--vscode-input-background) !important;
                 color: var(--vscode-input-foreground) !important;
             }
+
             .label {
                 color: var(--vscode-input-foreground) !important;
                 font-size: 17px;
                 padding: unset !important;
+            }
+
+            div > p {
+                font-size: 12px;
+            }
+
+            fieldset > p {
+                font-size: 17px;
             }
 
             p {
@@ -54,7 +76,7 @@
             }
 
             .control-label {
-                margin-top: 17px !important;
+                margin-top: 3px !important;
                 margin-bottom: 3px !important;
                 color: var(--vscode-input-foreground) !important;
             }

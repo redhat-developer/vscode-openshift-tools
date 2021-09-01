@@ -10,7 +10,7 @@ export function CreateForm(props) {
 
     const [baseSchema, setBaseSchema] = React.useState({});
     const [uiSchema, setUiSchema] = React.useState({});
-    const [formData, setFormData] = Ract.useState({});
+    const [formData, setFormData] = React.useState({});
     const [crdDescription, setCrdDescription] = React.useState({} as any);
 
     window.addEventListener('message', (event: any) => {
