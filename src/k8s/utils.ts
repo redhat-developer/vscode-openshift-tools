@@ -8,6 +8,7 @@
 import * as Immutable from 'immutable';
 import { JSONSchema7 } from 'json-schema';
 import * as _ from 'lodash';
+import { ObjectUnsubscribedError } from 'rxjs';
 
 import { SpecCapability, Descriptor } from './olm/types';
 
@@ -124,8 +125,37 @@ export const descriptorsToUISchema = (
   return uiSchemaFromDescriptors;
 };
 
+function camelcaseToTitle(name: string): string {
+    return name.replace(name.charAt(0),name.charAt(0).toLocaleUpperCase()).match(/[a-z]+|[A-Z][a-z]+/g).join(' ');
+}
+
+function genterateTitlesForSchema(uiSchema, schema): void {
+    Object.keys(schema.properties ? schema.properties : {}).forEach((name) => {
+        const schemaProperty = schema.properties[name];
+        if (schemaProperty.type === 'object') {
+            if (!uiSchema[name]) {
+                uiSchema[name] = {};
+            }
+            genterateTitlesForSchema(uiSchema[name], schemaProperty);
+        } else {
+            if (!uiSchema[name]) {
+                uiSchema[name] = {};
+            }
+            if (schemaProperty.type === 'boolean') {
+                schemaProperty.title = camelcaseToTitle(name);
+            } else {
+                uiSchema[name]['ui:title'] = camelcaseToTitle(name);
+            }
+        }
+    });
+}
+
 // Use jsonSchema, descriptors, and some defaults to generate a uiSchema
 export const getUISchema = (jsonSchema, providedAPI) => {
+  const hiddenMetaPropsUiSchema = hideAllExistingProperties(jsonSchema?.properties?.metadata as JSONSchema7);
+  const specUiSchema = descriptorsToUISchema(providedAPI?.specDescriptors, jsonSchema?.properties?.spec)
+  // Extend ui-schema by adding ui:title for properties without descriptor.
+  const extSpecUiSchema = genterateTitlesForSchema(specUiSchema, jsonSchema?.properties?.spec);
   return {
     apiVersion: {
         'ui:widget': 'hidden'
@@ -134,7 +164,7 @@ export const getUISchema = (jsonSchema, providedAPI) => {
         'ui:widget': 'hidden'
     },
     metadata: {
-      ...hideAllExistingProperties(jsonSchema?.properties?.metadata as JSONSchema7),
+      ...hiddenMetaPropsUiSchema,
       name: {
         'ui:title': 'Name',
       },
@@ -149,7 +179,7 @@ export const getUISchema = (jsonSchema, providedAPI) => {
     },
     spec: {
       'ui:description': '', // hide description for spec
-      ...descriptorsToUISchema(providedAPI?.specDescriptors, jsonSchema?.properties?.spec),
+      ...specUiSchema,
       'ui:options': {
         label: false,
       },
