@@ -11,7 +11,7 @@
                 window.vscodeApi = acquireVsCodeApi();
             }
         </script>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
         <style>
             html, body {
                 overflow: visible;
@@ -45,6 +45,9 @@
                 color: var(--vscode-input-foreground) !important;
             }
 
+            .form-group {
+                margin-bottom: 6px;
+            }
             .label {
                 color: var(--vscode-input-foreground) !important;
                 font-size: 17px;
@@ -94,8 +97,22 @@
             }
 
             .btn {
-                margin-top: 17px;
-                margin-bottom: 17px;
+                border-radius: unset !important;
+                padding: 3px 5px !important;
+                color: var(--vscode-button-foreground) !important;
+                background-color: var(--vscode-button-background) !important;
+                border: var(--vscode-button-border) !important;
+            }
+
+            .btn-danger {
+            }
+
+            .array-item-remove {
+                margin-top: 25px;
+            }
+
+            form {
+                padding-bottom: 10px;
             }
 
             .box {
