@@ -8,7 +8,6 @@
 import * as Immutable from 'immutable';
 import { JSONSchema7 } from 'json-schema';
 import * as _ from 'lodash';
-import { ObjectUnsubscribedError } from 'rxjs';
 
 import { SpecCapability, Descriptor } from './olm/types';
 
@@ -155,7 +154,7 @@ export const getUISchema = (jsonSchema, providedAPI) => {
   const hiddenMetaPropsUiSchema = hideAllExistingProperties(jsonSchema?.properties?.metadata as JSONSchema7);
   const specUiSchema = descriptorsToUISchema(providedAPI?.specDescriptors, jsonSchema?.properties?.spec)
   // Extend ui-schema by adding ui:title for properties without descriptor.
-  const extSpecUiSchema = genterateTitlesForSchema(specUiSchema, jsonSchema?.properties?.spec);
+  genterateTitlesForSchema(specUiSchema, jsonSchema?.properties?.spec);
   return {
     apiVersion: {
         'ui:widget': 'hidden'
