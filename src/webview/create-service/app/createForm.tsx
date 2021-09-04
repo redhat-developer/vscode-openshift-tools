@@ -1,7 +1,7 @@
 import 'react-dom';
 import * as React from 'react';
 import Form from '@rjsf/core';
-
+import 'bootstrap/dist/css/bootstrap.min.css';
 // import { JSONSchema7 } from 'json-schema';
 
 const log = (type) => console.log.bind(console, type);
