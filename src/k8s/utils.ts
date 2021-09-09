@@ -9,7 +9,8 @@ import * as Immutable from 'immutable';
 import { JSONSchema7 } from 'json-schema';
 import * as _ from 'lodash';
 
-import { SpecCapability, Descriptor } from './olm/types';
+import { SpecCapability, Descriptor, CustomResourceDefinitionKind } from './olm/types';
+import { loadYaml } from '@kubernetes/client-node';
 
 export enum JSONSchemaType {
     string = 'string',
@@ -124,29 +125,56 @@ export const descriptorsToUISchema = (
   return uiSchemaFromDescriptors;
 };
 
-function camelcaseToTitle(name: string): string {
+function camelCaseToTitle(name: string): string {
     return name.replace(name.charAt(0),name.charAt(0).toLocaleUpperCase()).match(/[a-z]+|[A-Z][a-z]+/g).join(' ');
 }
 
-function genterateTitlesForSchema(uiSchema, schema): void {
+function generateTitlesForSchema(uiSchema, schema): void {
     Object.keys(schema.properties ? schema.properties : {}).forEach((name) => {
         const schemaProperty = schema.properties[name];
         if (schemaProperty.type === 'object') {
             if (!uiSchema[name]) {
                 uiSchema[name] = {};
             }
-            genterateTitlesForSchema(uiSchema[name], schemaProperty);
+            generateTitlesForSchema(uiSchema[name], schemaProperty);
         } else {
             if (!uiSchema[name]) {
                 uiSchema[name] = {};
             }
             if (schemaProperty.type === 'boolean') {
-                schemaProperty.title = camelcaseToTitle(name);
+                schemaProperty.title = camelCaseToTitle(name);
+                schemaProperty.default = false;
             } else {
-                uiSchema[name]['ui:title'] = camelcaseToTitle(name);
+                uiSchema[name]['ui:title'] = camelCaseToTitle(name);
             }
         }
     });
+}
+
+export function generateDefaults(jsonSchema, jsonData) {
+    if (!jsonSchema.properties) {
+        jsonSchema.properties = {};
+    }
+    Object.keys(jsonData).forEach(key => {
+        const nextValue = jsonData[key];
+        if(typeof nextValue === 'object' && nextValue !== null && !Array.isArray(nextValue)) {
+            if (!jsonSchema.properties[key]) {
+                jsonSchema.properties[key] = {};
+            }
+            generateDefaults(jsonSchema.properties[key], jsonData[key]);
+        } else {
+            if (nextValue !== undefined && jsonSchema.properties[key]) {
+                jsonSchema.properties[key].default = nextValue;
+            }
+        }
+    });
+}
+export function randomString(length = 8): string {
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result = `${result}${String.fromCharCode(97 + (Math.round(25 * Math.random())))}`;
+    }
+    return result;
 }
 
 // Use jsonSchema, descriptors, and some defaults to generate a uiSchema
@@ -154,7 +182,7 @@ export const getUISchema = (jsonSchema, providedAPI) => {
   const hiddenMetaPropsUiSchema = hideAllExistingProperties(jsonSchema?.properties?.metadata as JSONSchema7);
   const specUiSchema = descriptorsToUISchema(providedAPI?.specDescriptors, jsonSchema?.properties?.spec)
   // Extend ui-schema by adding ui:title for properties without descriptor.
-  genterateTitlesForSchema(specUiSchema, jsonSchema?.properties?.spec);
+  generateTitlesForSchema(specUiSchema, jsonSchema?.properties?.spec);
   return {
     apiVersion: {
         'ui:widget': 'hidden'
