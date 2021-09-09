@@ -11,13 +11,14 @@ import { ClusterServiceVersionKind, CRDDescription, CustomResourceDefinitionKind
 import { TreeItem } from 'vscode';
 import { vsCommand } from '../vscommand';
 import CreateServiceViewLoader from '../webview/create-service/createServiceViewLoader';
-import { DEFAULT_K8S_SCHEMA, getUISchema } from './utils';
+import { DEFAULT_K8S_SCHEMA, getUISchema, randomString, generateDefaults } from './utils';
+import { loadYaml } from '@kubernetes/client-node';
 
 class CsvNode implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorerExtensionNode {
 
     readonly nodeType: 'extension';
 
-    constructor(public readonly crdDescription: CRDDescription) {
+    constructor(public readonly crdDescription: CRDDescription, public readonly csv: ClusterServiceVersionKind) {
     }
 
     getChildren(): Promise<ClusterExplorerV1.Node[]> {
@@ -54,26 +55,31 @@ export class ClusterServiceVersion extends OpenShiftItem {
             },
             async getChildren(parent: ClusterExplorerV1.ClusterExplorerNode | undefined): Promise<ClusterExplorerV1.Node[]> {
                 const getCsvCmd = ClusterServiceVersion.command.getCsv((parent as any).name);
-                const result: ClusterServiceVersionKind = await common.asJson(getCsvCmd);
-                return result.spec.customresourcedefinitions.owned.map((crd) => new CsvNode(crd));
+                const csv: ClusterServiceVersionKind = await common.asJson(getCsvCmd);
+                return csv.spec.customresourcedefinitions.owned.map((crd) => new CsvNode(crd, csv));
             },
         };
     }
 
     @vsCommand('clusters.openshift.csv.create')
-    static async createNewService(context: any): Promise<void> {
-        const crdDescription = context.impl.crdDescription;
-        const getCrdCmd = ClusterServiceVersion.command.getCrd(context.impl.crdDescription.name);
-        const result: CustomResourceDefinitionKind = await common.asJson(getCrdCmd);
+    static async createNewService(crdOwnedNode: any): Promise<void> {6
+        const crdDescription = crdOwnedNode.impl.crdDescription;
+        const getCrdCmd = ClusterServiceVersion.command.getCrd(crdOwnedNode.impl.crdDescription.name);
+        const crdResouce: CustomResourceDefinitionKind = await common.asJson(getCrdCmd);
 
-        const panel = await CreateServiceViewLoader.loadView('Create Service');
-        const openAPIV3SchemaAll = result.spec.versions[0].schema.openAPIV3Schema;
+        const openAPIV3SchemaAll = crdResouce.spec.versions.find((version) => version.name === crdDescription.version).schema.openAPIV3Schema;
+        const examplesYaml: string = crdOwnedNode.impl.csv.metadata?.annotations?.['alm-examples'];
+        const examples: any[] = examplesYaml ? loadYaml(examplesYaml) : undefined;
+        const example = examples ? examples.find(item => item.apiVersion === `${crdResouce.spec.group}/${crdDescription.version}` && item.kind === crdResouce.spec.names.kind) : {};
+        generateDefaults(openAPIV3SchemaAll, example);
         const openAPIV3Schema = _.defaultsDeep({}, DEFAULT_K8S_SCHEMA, _.omit(openAPIV3SchemaAll, 'properties.status'));
-
         const uiSchema = getUISchema(
             openAPIV3Schema,
             crdDescription
         );
+
+        const panel = await CreateServiceViewLoader.loadView('Create Service');
+
         panel.webview.onDidReceiveMessage(async ()=> {
             await panel.webview.postMessage(
                 {action: 'load', openAPIV3Schema, uiSchema, crdDescription, formData: {}}

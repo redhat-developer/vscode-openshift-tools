@@ -34,7 +34,7 @@ export function CreateForm(props) {
             onChange={log("changed")}
             onSubmit={log("submitted")}
             onError={log("errors")}
-            showErrorList={false}
+            showErrorList={true}
             liveValidate
         />
     </div>
