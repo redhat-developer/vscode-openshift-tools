@@ -108,7 +108,9 @@ export const descriptorsToUISchema = (
       }
 
       const uiSchemaPath = stringPathToUISchemaPath(descriptor.path);
-
+      if (descriptor.displayName){
+        schemaForDescriptor.title = descriptor.displayName;
+      }
       return uiSchemaAccumulator.withMutations((mutable) => {
         mutable.mergeDeepIn(
           uiSchemaPath,
@@ -141,10 +143,10 @@ function generateTitlesForSchema(uiSchema, schema): void {
             if (!uiSchema[name]) {
                 uiSchema[name] = {};
             }
-            if (schemaProperty.type === 'boolean') {
+            if (schemaProperty.type === 'boolean' && !schemaProperty.title) {
                 schemaProperty.title = camelCaseToTitle(name);
                 schemaProperty.default = false;
-            } else {
+            } else if (!uiSchema[name]['ui:title']) {
                 uiSchema[name]['ui:title'] = camelCaseToTitle(name);
             }
         }
