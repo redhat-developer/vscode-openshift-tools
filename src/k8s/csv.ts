@@ -21,9 +21,13 @@ class CsvNode implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplor
     }
 
     getTreeItem(): TreeItem {
+        const displayName = this.crdDescription.displayName? this.crdDescription.displayName : '';
+        const nameVersion = `${this.crdDescription.name}/${this.crdDescription.version}`;
+        const label = displayName ? `${displayName} (${nameVersion})` : nameVersion;
         return {
-            label: this.crdDescription.displayName,
-            contextValue:  'openshift.resource.csv.crdDescription'
+            label,
+            contextValue:  'openshift.resource.csv.crdDescription',
+            tooltip: `Name: ${this.crdDescription.name}\nVersion: ${this.crdDescription.version}\nKind: ${this.crdDescription.kind}\nDescription: ${this.crdDescription.description || 'N/A'}`
         }
     }
 }
