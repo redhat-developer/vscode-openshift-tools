@@ -67,12 +67,15 @@ export class ClusterServiceVersion extends OpenShiftItem {
         const getCrdCmd = ClusterServiceVersion.command.getCrd(crdOwnedNode.impl.crdDescription.name);
         const crdResouce: CustomResourceDefinitionKind = await common.asJson(getCrdCmd);
 
-        const openAPIV3SchemaAll = crdResouce.spec.versions.find((version) => version.name === crdDescription.version).schema.openAPIV3Schema;
+        const openAPIV3SchemaAll:any = crdResouce.spec.versions.find((version) => version.name === crdDescription.version).schema.openAPIV3Schema;
         const examplesYaml: string = crdOwnedNode.impl.csv.metadata?.annotations?.['alm-examples'];
         const examples: any[] = examplesYaml ? loadYaml(examplesYaml) : undefined;
         const example = examples ? examples.find(item => item.apiVersion === `${crdResouce.spec.group}/${crdDescription.version}` && item.kind === crdResouce.spec.names.kind) : {};
         generateDefaults(openAPIV3SchemaAll, example);
         const openAPIV3Schema = _.defaultsDeep({}, DEFAULT_K8S_SCHEMA, _.omit(openAPIV3SchemaAll, 'properties.status'));
+        openAPIV3Schema.properties.metadata.properties.name.default =
+            example?.metadata.name ? `${example?.metadata.name}-${randomString()}` : `example${randomString()}`;
+
         const uiSchema = getUISchema(
             openAPIV3Schema,
             crdDescription
