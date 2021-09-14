@@ -957,7 +957,7 @@ export class Component extends OpenShiftItem {
             } else {
                 result = Component.startOdoAndConnectDebugger(toolLocation, component,  {
                     name: `Attach to '${component.getName()}' component.`,
-                    type: 'node2',
+                    type: 'pwa-node',
                     request: 'attach',
                     address: 'localhost',
                     localRoot: component.contextPath.fsPath,
