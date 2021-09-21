@@ -1,13 +1,20 @@
 import 'react-dom';
 import * as React from 'react';
-import Form from '@rjsf/core';
+import Form, { ISubmitEvent } from '@rjsf/core';
 import 'bootstrap/dist/css/bootstrap.min.css';
-// import { JSONSchema7 } from 'json-schema';
 
-const log = (type) => console.log.bind(console, type);
+function onSubmit(e: ISubmitEvent<any>) {
+    // disable Create button while service is created
+    // extension should send message back to unlock the button in case of failure
+    // or close the editor in case of success
+    window.vscodeApi.postMessage({
+        command: 'create',
+        formData: e.formData
+    });
+}
 
 export function CreateForm(props) {
-
+    let changed = false;
     const [baseSchema, setBaseSchema] = React.useState({});
     const [uiSchema, setUiSchema] = React.useState({});
     const [formData, setFormData] = React.useState({});
@@ -20,6 +27,9 @@ export function CreateForm(props) {
             setCrdDescription(event.data.crdDescription);
             setFormData(event.data.formData);
         }
+        if(event?.data?.action  === 'error') {
+            // unlock Create and cancel button
+        }
     });
     return <div className='form-title'>
         <h1 className='label'>Create {crdDescription.displayName}</h1>
@@ -31,11 +41,17 @@ export function CreateForm(props) {
                 'Labels': () => <></>}} // to suppress Labels field in first release
             schema={baseSchema} 
             uiSchema={uiSchema}
-            onChange={log("changed")}
-            onSubmit={log("submitted")}
-            onError={log("errors")}
-            showErrorList={true}
+            onChange={()=> {changed = true}}
+            onSubmit={onSubmit}
             liveValidate
-        />
+        ><div>
+            <button type="submit">Create</button>
+            <button type="button" onClick={() => {
+                window.vscodeApi.postMessage({
+                    command: 'cancel',
+                    changed
+                })}}>Cancel</button>
+        </div>
+        </Form>
     </div>
 }

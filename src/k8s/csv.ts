@@ -4,15 +4,20 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as _ from 'lodash';
+import * as fs from 'fs';
 import OpenShiftItem from '../openshift/openshiftItem';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import * as common from './common';
 import { ClusterServiceVersionKind, CRDDescription, CustomResourceDefinitionKind } from './olm/types';
-import { TreeItem } from 'vscode';
+import { TreeItem, WebviewPanel, window } from 'vscode';
 import { vsCommand } from '../vscommand';
 import CreateServiceViewLoader from '../webview/create-service/createServiceViewLoader';
 import { DEFAULT_K8S_SCHEMA, getUISchema, randomString, generateDefaults } from './utils';
 import { loadYaml } from '@kubernetes/client-node';
+import { JSONSchema7 } from 'json-schema';
+
+
+const tempfile = require('tmp');
 
 class CsvNode implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorerExtensionNode {
 
@@ -37,14 +42,24 @@ class CsvNode implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplor
     }
 }
 
+interface K8sCrdNode {
+    impl: {
+        crdDescription: CRDDescription;
+        csv: ClusterServiceVersionKind;
+    }
+}
+
 export class ClusterServiceVersion extends OpenShiftItem {
     public static command = {
         getCsv(csvName: string): string {
-            return `get csv ${csvName}`
+            return `get csv ${csvName}`;
         },
         getCrd(crdName: string): string {
-            return `get crd ${crdName}`
+            return `get crd ${crdName}`;
         },
+        getCreateCommand(file: string): string {
+            return `create -f ${file}`;
+        }
     };
 
     public static getNodeContributor(): ClusterExplorerV1.NodeContributor {
@@ -61,27 +76,56 @@ export class ClusterServiceVersion extends OpenShiftItem {
         };
     }
 
+    static createFormMessageListener(panel: WebviewPanel) {
+        return async (event: any) => {
+            if (event.command === 'cancel') {
+                if (event.changed === true) {
+                    const choice = await window.showWarningMessage('Discard all the changes in the form?', 'Yes', 'No');
+                    if (choice === 'No') {
+                        return;
+                    }
+                }
+                panel.dispose();
+            }
+            if (event.command === 'create') {
+                // serialize event.formData to temporary file
+                const jsonString = JSON.stringify(event.formData, null, 4);
+                const tempJsonFile = tempfile.fileSync({postfix: '.json'});
+                fs.writeFileSync(tempJsonFile.name, jsonString);
+                // call oc create -f path/to/file until odo does support creating services without component
+                const result = await common.execKubectl(ClusterServiceVersion.command.getCreateCommand(tempJsonFile.name));
+                if (result.code) {
+                    window.showErrorMessage(result.stdout);
+                } else {
+                    window.showInformationMessage(result.stdout);
+                }
+                // if oc exit without error close the form
+                // show error message in case of error and keep form open
+            }
+        }
+    }
+
     @vsCommand('clusters.openshift.csv.create')
-    static async createNewService(crdOwnedNode: any): Promise<void> {6
-        const crdDescription = crdOwnedNode.impl.crdDescription;
+    static async createNewService(crdOwnedNode: K8sCrdNode): Promise<void> {
+        const crdDescription:CRDDescription = crdOwnedNode.impl.crdDescription;
         const getCrdCmd = ClusterServiceVersion.command.getCrd(crdOwnedNode.impl.crdDescription.name);
         const crdResouce: CustomResourceDefinitionKind = await common.asJson(getCrdCmd);
 
-        const openAPIV3SchemaAll:any = crdResouce.spec.versions.find((version) => version.name === crdDescription.version).schema.openAPIV3Schema;
+        const openAPIV3SchemaAll: JSONSchema7 = crdResouce.spec.versions.find((version) => version.name === crdDescription.version).schema.openAPIV3Schema;
         const examplesYaml: string = crdOwnedNode.impl.csv.metadata?.annotations?.['alm-examples'];
         const examples: any[] = examplesYaml ? loadYaml(examplesYaml) : undefined;
         const example = examples ? examples.find(item => item.apiVersion === `${crdResouce.spec.group}/${crdDescription.version}` && item.kind === crdResouce.spec.names.kind) : {};
         generateDefaults(openAPIV3SchemaAll, example);
         const openAPIV3Schema = _.defaultsDeep({}, DEFAULT_K8S_SCHEMA, _.omit(openAPIV3SchemaAll, 'properties.status'));
         openAPIV3Schema.properties.metadata.properties.name.default =
-            example?.metadata.name ? `${example?.metadata.name}-${randomString()}` : `example${randomString()}`;
+            example?.metadata.name ? `${example.metadata.name}-${randomString()}` : `${crdDescription.kind}-${randomString()}`;
 
         const uiSchema = getUISchema(
             openAPIV3Schema,
             crdDescription
         );
 
-        const panel = await CreateServiceViewLoader.loadView('Create Service');
+        const panel = await CreateServiceViewLoader.loadView('Create Service', ClusterServiceVersion.createFormMessageListener);
 
         panel.webview.onDidReceiveMessage(async ()=> {
             await panel.webview.postMessage(
