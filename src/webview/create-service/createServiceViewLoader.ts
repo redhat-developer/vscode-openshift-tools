@@ -11,13 +11,7 @@ import { ExtenisonID } from '../../util/constants';
 // import { CliChannel } from '../../cli';
 // import { vsCommand } from '../../vscommand';
 
-let panel: vscode.WebviewPanel;
-
 // const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
-
-async function createServiceMessageListener (event: any ): Promise<any> {
-    //temp empty
-}
 
 export default class CreateServiceViewLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -26,24 +20,21 @@ export default class CreateServiceViewLoader {
     }
 
     // eslint-disable-next-line @typescript-eslint/require-await
-    static async loadView(title: string): Promise<vscode.WebviewPanel> {
+    static async loadView(title: string, listenerFactory: (panel: vscode.WebviewPanel) => (event) => Promise<void>): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(path.join(CreateServiceViewLoader.extensionPath, 'out', 'createServiceView'));
-        if (panel) {
-            // If we already have a panel, show it in the target column
-            panel.reveal(vscode.ViewColumn.One);
-        } else {
-            panel = vscode.window.createWebviewPanel('createServiceView', title, vscode.ViewColumn.One, {
-                enableScripts: true,
-                localResourceRoots: [localResourceRoot],
-                retainContextWhenHidden: true
-            });
-        }
+
+        let panel: vscode.WebviewPanel = vscode.window.createWebviewPanel('createServiceView', title, vscode.ViewColumn.One, {
+            enableScripts: true,
+            localResourceRoots: [localResourceRoot],
+            retainContextWhenHidden: true
+        });
+
         panel.iconPath = vscode.Uri.file(path.join(CreateServiceViewLoader.extensionPath, 'images/context/cluster-node.png'));
         panel.webview.html = CreateServiceViewLoader.getWebviewContent(CreateServiceViewLoader.extensionPath, panel);
         panel.onDidDispose(()=> {
             panel = undefined;
         });
-        panel.webview.onDidReceiveMessage(createServiceMessageListener);
+        panel.webview.onDidReceiveMessage(listenerFactory(panel));
         return panel;
     }
 

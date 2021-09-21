@@ -10,6 +10,7 @@ import * as Odo from '../odo';
 import { CommandText } from '../odo/command';
 import { VsCommandError } from '../vscommand';
 import { Node } from './node';
+import { KubeConfigUtils } from '../util/kubeUtils';
 
 function convertItemToQuickPick(item: any): QuickPickItem {
     const qp = item;
@@ -50,4 +51,13 @@ export async function asJson<T>(command: string): Promise<T> {
         return JSON.parse(result.stdout) as T;
     }
     return;
+}
+
+export async function execKubectl(command: string) {
+    const kubectl = await k8s.extension.kubectl.v1;
+    if (kubectl.available) {
+        const result = await kubectl.api.invokeCommand(`${command}`);
+        return result;
+    }
+    throw new Error('Cannot find kubectl command.');
 }
