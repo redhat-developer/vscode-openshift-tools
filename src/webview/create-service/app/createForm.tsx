@@ -3,22 +3,25 @@ import * as React from 'react';
 import Form, { ISubmitEvent } from '@rjsf/core';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-function onSubmit(e: ISubmitEvent<any>) {
-    // disable Create button while service is created
-    // extension should send message back to unlock the button in case of failure
-    // or close the editor in case of success
-    window.vscodeApi.postMessage({
-        command: 'create',
-        formData: e.formData
-    });
-}
-
 export function CreateForm(props) {
+    console.log('creating form again');
     let changed = false;
     const [baseSchema, setBaseSchema] = React.useState({});
     const [uiSchema, setUiSchema] = React.useState({});
     const [formData, setFormData] = React.useState({});
     const [crdDescription, setCrdDescription] = React.useState({} as any);
+    const [step, setStep] = React.useState('ready');
+
+    const onSubmit = (e: ISubmitEvent<any>): void => {
+        // disable Create button while service is created
+        // extension should send message back to unlock the button in case of failure
+        // or close the editor in case of success
+        setStep('creating');
+        window.vscodeApi.postMessage({
+            command: 'create',
+            formData: e.formData
+        });
+    }
 
     window.addEventListener('message', (event: any) => {
         if(event?.data?.action  === 'load') {
@@ -26,32 +29,42 @@ export function CreateForm(props) {
             setUiSchema(event.data.uiSchema);
             setCrdDescription(event.data.crdDescription);
             setFormData(event.data.formData);
+            setStep('loaded');
         }
         if(event?.data?.action  === 'error') {
-            // unlock Create and cancel button
+            setStep('loaded');
         }
     });
-    return <div className='form-title'>
-        <h1 className='label'>Create {crdDescription.displayName}</h1>
-        <p className='field-description'>{crdDescription.description}</p>
-        <Form
-            formData={formData}
-            fields={{
-                'TitleField': () => <></>, // to supress object editor title 
-                'Labels': () => <></>}} // to suppress Labels field in first release
-            schema={baseSchema} 
-            uiSchema={uiSchema}
-            onChange={()=> {changed = true}}
-            onSubmit={onSubmit}
-            liveValidate
-        ><div>
-            <button type="submit">Create</button>
-            <button type="button" onClick={() => {
-                window.vscodeApi.postMessage({
-                    command: 'cancel',
-                    changed
-                })}}>Cancel</button>
-        </div>
-        </Form>
-    </div>
+    return <>
+        {step === 'ready' && (
+            <h2>Loading ....</h2> 
+        )}
+       
+        {(step === 'loaded' || step === 'creating') && (
+            <div className='form-title'>
+                <h1 className='label'>Create {crdDescription.displayName}</h1>
+                <p className='field-description'>{crdDescription.description}</p>
+                <Form
+                    formData={formData}
+                    fields={{
+                        'TitleField': () => <></>, // to supress object editor title 
+                        'Labels': () => <></>}} // to suppress Labels field in first release
+                    schema={baseSchema} 
+                    uiSchema={uiSchema}
+                    onChange={()=> {changed = true}}
+                    onSubmit={onSubmit}
+                    liveValidate
+                    disabled={step === 'creating'}
+                ><div>
+                    <button type="submit" disabled={step === 'creating'}>Create</button>
+                    <button type="button" disabled={step === 'creating'}onClick={() => {
+                        window.vscodeApi.postMessage({
+                            command: 'cancel',
+                            changed
+                        })}}>Cancel</button>
+                </div>
+                </Form>
+            </div>   
+        )}
+    </>;
 }

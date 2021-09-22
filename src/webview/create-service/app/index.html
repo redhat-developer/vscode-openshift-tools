@@ -134,7 +134,7 @@
             }
         </style>
     </head>
-    <body onload="window.vscodeApi.postMessage('')">
+    <body onload="window.vscodeApi.postMessage({command: 'ready'})">
         <div class="box" id="root"></div>
     </body>
 </html>
