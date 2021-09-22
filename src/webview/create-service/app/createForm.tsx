@@ -56,9 +56,10 @@ export function CreateForm(props) {
                     onSubmit={onSubmit}
                     liveValidate
                     disabled={step === 'creating'}
+                    showErrorList={false}
                 ><div>
-                    <button type="submit" disabled={step === 'creating'}>Create</button>
-                    <button type="button" disabled={step === 'creating'}onClick={() => {
+                    <button type="submit" className="btn btn-submit" disabled={step === 'creating'}>Create</button>
+                    <button type="button" className="btn btn-submit" disabled={step === 'creating'}onClick={() => {
                         window.vscodeApi.postMessage({
                             command: 'cancel',
                             changed
