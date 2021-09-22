@@ -17,6 +17,7 @@ export function CreateForm(props) {
         // extension should send message back to unlock the button in case of failure
         // or close the editor in case of success
         setStep('creating');
+        setFormData(e.formData);
         window.vscodeApi.postMessage({
             command: 'create',
             formData: e.formData
