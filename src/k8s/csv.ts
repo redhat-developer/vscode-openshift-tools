@@ -94,10 +94,14 @@ export class ClusterServiceVersion extends OpenShiftItem {
                 fs.writeFileSync(tempJsonFile.name, jsonString);
                 // call oc create -f path/to/file until odo does support creating services without component
                 const result = await common.execKubectl(ClusterServiceVersion.command.getCreateCommand(tempJsonFile.name));
+                // add waiting for Deployment to be created using wait --for=condition
+                // no need to wait until it is available
                 if (result.code) {
-                    window.showErrorMessage(result.stdout);
+                    window.showErrorMessage(result.stderr);
+                    panel.webview.postMessage({action: 'error'});
                 } else {
                     window.showInformationMessage(result.stdout);
+                    panel.dispose();
                 }
                 // if oc exit without error close the form
                 // show error message in case of error and keep form open
@@ -127,10 +131,12 @@ export class ClusterServiceVersion extends OpenShiftItem {
 
         const panel = await CreateServiceViewLoader.loadView('Create Service', ClusterServiceVersion.createFormMessageListener);
 
-        panel.webview.onDidReceiveMessage(async ()=> {
-            await panel.webview.postMessage(
-                {action: 'load', openAPIV3Schema, uiSchema, crdDescription, formData: {}}
-            );
+        panel.webview.onDidReceiveMessage(async (event)=> {
+            if(event.command === 'ready') {
+                await panel.webview.postMessage(
+                    {action: 'load', openAPIV3Schema, uiSchema, crdDescription, formData: {}}
+                );
+            }
         });
     }
 }
