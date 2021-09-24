@@ -19,10 +19,6 @@ export interface WorkspaceEntry {
     type: vsc.FileType;
 }
 
-function isWorkspaceEntry(entry: any): entry is WorkspaceEntry {
-    return entry.uri && entry.type;
-}
-
 class Labeled {
     constructor(public label: string) {}
 }
