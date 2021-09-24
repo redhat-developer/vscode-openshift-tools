@@ -27,6 +27,7 @@ import { WatchUtil, FileContentChangeNotifier } from './util/watch';
 import { KubeConfigUtils } from './util/kubeUtils';
 import { vsCommand } from './vscommand';
 import { ComponentTypesView } from './componentTypesView';
+import { isThenable } from './util/async';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
@@ -95,7 +96,19 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
 
     // eslint-disable-next-line class-methods-use-this
     getChildren(element?: OpenShiftObject): ProviderResult<OpenShiftObject[]> {
-        return element ? element.getChildren() : OpenShiftExplorer.odoctl.getClusters();
+        let result;
+        if (element) {
+            result = element.getChildren();
+        } else {
+            result = OpenShiftExplorer.odoctl.getClusters();
+        }
+        if (isThenable(result)) {
+            result = result.then(async (value: OpenShiftObject[]) => {
+                await commands.executeCommand('setContext', 'openshift.app.explorer.init', value.length === 0);
+                return value;
+            })
+        }
+        return result;
     }
 
     // eslint-disable-next-line class-methods-use-this
