@@ -911,7 +911,8 @@
       },
       {
         "view": "openshiftComponentsView",
-        "contents": "You have no OpenShift Components in your workspace yet.\n[New Component](command:openshift.component.createFromLocal)"
+        "contents": "You have no OpenShift Components in your workspace yet.\n[New Component](command:openshift.component.createFromLocal)",
+        "enablement": "openshift.component.explorer.init"
       }
     ],
     "menus": {

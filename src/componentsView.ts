@@ -41,7 +41,7 @@ export interface WorkspaceFolderComponent extends vsc.TreeItem{
     contextUri: vsc.Uri;
 }
 
-function isWorkspaceFolderComponent(entry: any): entry is WorkspaceFolderComponent {
+function isWorkspaceFolderComponent(entry): entry is WorkspaceFolderComponent {
     return entry.contextUri;
 }
 
@@ -154,13 +154,10 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
     }
 
     getChildren(element?: Entry): vsc.ProviderResult<Entry[]> {
-        if (element) {
-            if (isWorkspaceFolderComponent(element)) {
-                return [];
-            } else if (isWorkspaceEntry(element)) {
-                return []
-            }
-        }
-        return getComponentsInWorkspace();
+        const result = element ? [] : getComponentsInWorkspace();
+        return Promise.resolve(result).then(async result1 => {
+            await vsc.commands.executeCommand('setContext', 'openshift.component.explorer.init', result1.length === 0);
+            return result;
+        })
     }
 }
