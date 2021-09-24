@@ -27,7 +27,6 @@ import { WatchUtil, FileContentChangeNotifier } from './util/watch';
 import { KubeConfigUtils } from './util/kubeUtils';
 import { vsCommand } from './vscommand';
 import { ComponentTypesView } from './componentTypesView';
-import { isThenable } from './util/async';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
