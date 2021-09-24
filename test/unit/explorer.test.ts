@@ -38,7 +38,7 @@ suite('OpenShift Application Explorer', () => {
         appItem.getChildren().push(serviceItem);
         const clusters = await oseInstance.getChildren();
         expect(clusters[0]).equals(clusterItem);
-        const services = oseInstance.getChildren(appItem);
+        const services = await oseInstance.getChildren(appItem);
         expect(services[0]).equals(serviceItem);
         expect(oseInstance.getParent(appItem)).equals(projectItem);
         expect(oseInstance.getTreeItem(serviceItem)).equals(serviceItem);
