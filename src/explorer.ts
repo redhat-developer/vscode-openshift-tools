@@ -96,19 +96,12 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
 
     // eslint-disable-next-line class-methods-use-this
     getChildren(element?: OpenShiftObject): ProviderResult<OpenShiftObject[]> {
-        let result;
-        if (element) {
-            result = element.getChildren();
-        } else {
-            result = OpenShiftExplorer.odoctl.getClusters();
-        }
-        if (isThenable(result)) {
-            result = result.then(async (value: OpenShiftObject[]) => {
-                await commands.executeCommand('setContext', 'openshift.app.explorer.init', value.length === 0);
-                return value;
-            })
-        }
-        return result;
+        const result = element ? element.getChildren() : OpenShiftExplorer.odoctl.getClusters();
+        return Promise.resolve(result) // convert to promise, for the case of none thenable value
+            .then(async result1 => {
+                await commands.executeCommand('setContext', 'openshift.app.explorer.init', result1.length === 0);
+                return result1;
+            });
     }
 
     // eslint-disable-next-line class-methods-use-this
