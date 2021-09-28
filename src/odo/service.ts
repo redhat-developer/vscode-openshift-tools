@@ -13,3 +13,10 @@ export interface Service {
         planList: string[];
     };
 }
+
+export interface ServiceOperatorShortInfo {
+    name: string;
+    version: string;
+    displayName: string;
+    description: string;
+}

@@ -8,14 +8,14 @@ import * as fs from 'fs';
 import OpenShiftItem from '../openshift/openshiftItem';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import * as common from './common';
-import { ClusterServiceVersionKind, CRDDescription, CustomResourceDefinitionKind } from './olm/types';
+import { ClusterServiceVersionKind, CRDDescription, CustomResourceDefinitionKind, CommonCapability } from './olm/types';
 import { TreeItem, WebviewPanel, window } from 'vscode';
 import { vsCommand } from '../vscommand';
 import CreateServiceViewLoader from '../webview/create-service/createServiceViewLoader';
 import { DEFAULT_K8S_SCHEMA, getUISchema, randomString, generateDefaults } from './utils';
 import { loadYaml } from '@kubernetes/client-node';
 import { JSONSchema7 } from 'json-schema';
-
+import { getInstance } from '../odo';
 
 const tempfile = require('tmp');
 
@@ -100,6 +100,16 @@ export class ClusterServiceVersion extends OpenShiftItem {
                     window.showErrorMessage(result.stderr);
                     panel.webview.postMessage({action: 'error'});
                 } else {
+                    const clusters = await getInstance().getClusters();
+                    if (clusters.length === 0) {
+                        // could be expired session
+                        return;
+                    }
+                    const projects = await clusters[0].getChildren();
+                    const apps = projects[0].getChildren()[0]
+                    apps.forEach((app) => {
+                        // OpenShiftItem.odo.createService(app, event.formData);
+                    })
                     window.showInformationMessage(result.stdout);
                     panel.dispose();
                 }
@@ -109,14 +119,18 @@ export class ClusterServiceVersion extends OpenShiftItem {
         }
     }
 
+    // oc delete Database database1
+
     @vsCommand('clusters.openshift.csv.create')
     static async createNewService(crdOwnedNode: K8sCrdNode): Promise<void> {
-        const crdDescription:CRDDescription = crdOwnedNode.impl.crdDescription;
-        const getCrdCmd = ClusterServiceVersion.command.getCrd(crdOwnedNode.impl.crdDescription.name);
-        const crdResouce: CustomResourceDefinitionKind = await common.asJson(getCrdCmd);
+        return this.createNewServiceFromDescriptor(crdOwnedNode.impl.crdDescription, crdOwnedNode.impl.csv);
+    }
 
+    static async createNewServiceFromDescriptor(crdDescription: CRDDescription, csv): Promise<void> {
+        const getCrdCmd = ClusterServiceVersion.command.getCrd(crdDescription.name);
+        const crdResouce: CustomResourceDefinitionKind = await common.asJson(getCrdCmd);
         const openAPIV3SchemaAll: JSONSchema7 = crdResouce.spec.versions.find((version) => version.name === crdDescription.version).schema.openAPIV3Schema;
-        const examplesYaml: string = crdOwnedNode.impl.csv.metadata?.annotations?.['alm-examples'];
+        const examplesYaml: string = csv.metadata?.annotations?.['alm-examples'];
         const examples: any[] = examplesYaml ? loadYaml(examplesYaml) : undefined;
         const example = examples ? examples.find(item => item.apiVersion === `${crdResouce.spec.group}/${crdDescription.version}` && item.kind === crdResouce.spec.names.kind) : {};
         generateDefaults(openAPIV3SchemaAll, example);
