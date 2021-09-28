@@ -24,7 +24,7 @@ import { ComponentType, ComponentTypesJson, ComponentKind, ComponentTypeAdapter,
 import { Project } from './odo/project';
 import { ComponentsJson, DevfileComponentAdapter, S2iComponentAdapter } from './odo/component';
 import { Url } from './odo/url';
-import { Service } from './odo/service';
+import { Service, ServiceOperatorShortInfo } from './odo/service';
 import { Command, CommandText } from './odo/command';
 import { BuilderImage } from './odo/builderImage';
 import { VsCommandError } from './vscommand';
@@ -34,7 +34,11 @@ import { CliExitData } from './cli';
 import { KubeConfigUtils } from './util/kubeUtils';
 import { KubeConfig } from '@kubernetes/client-node';
 import { pathExistsSync } from 'fs-extra';
+import * as fs from 'fs';
+import * as common from './k8s/common';
+import { ClusterServiceVersionKind, CRDDescription, ClusterServiceVersionIcon } from './k8s/olm/types';
 
+const tempfile = require('tmp');
 const {Collapsed} = TreeItemCollapsibleState;
 
 export interface OpenShiftObject extends QuickPickItem {
@@ -336,8 +340,8 @@ export interface Odo {
     getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponentPorts(component: OpenShiftObject): Promise<odo.Port[]>;
     getStorageNames(component: OpenShiftObject): Promise<OpenShiftStorage[]>;
-    getServiceTemplates(): Promise<string[]>;
-    getServiceTemplatePlans(svc: string): Promise<string[]>;
+    getServiceOperators(): Promise<ServiceOperatorShortInfo[]>;
+    getClusterServiceVersion(svc: string): Promise<ClusterServiceVersionKind>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     execute(command: CommandText, cwd?: string, fail?: boolean, addEnv?: any): Promise<cliInstance.CliExitData>;
     spawn(command: string, cwd?: string): Promise<ChildProcess>;
@@ -541,6 +545,7 @@ export class OdoImpl implements Odo {
     public async _getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listApplications(project.getName()));
         let apps: string[] = this.loadItems<Application>(result).map((value) => value.metadata.name);
+        apps.push('app');
         apps = [...new Set(apps)]; // remove duplicates form array
         // extract apps from local not yet deployed components
         OdoImpl.data.getSettings().forEach((component) => {
@@ -715,25 +720,35 @@ export class OdoImpl implements Odo {
         return this.loadItems<Storage>(result).map<OpenShiftObject>((value) => new OpenShiftStorage(component, value.metadata.name, value.spec.path));
     }
 
-    public async getServiceTemplates(): Promise<string[]> {
+    public async getServiceOperators(): Promise<ServiceOperatorShortInfo[]> {
         // TODO: error reporting does not look right
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let items: any[] = [];
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServicesJson(), Platform.getUserHomePath(), false);
+        let items: ServiceOperatorShortInfo[];
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogOperatorBackedServices(), Platform.getUserHomePath(), false);
         try {
-            items = JSON.parse(result.stdout).services.items;
+            const sbos = result.stdout ? result.stdout.split('\n') : [];
+            items = sbos.map((sbo) => {
+                const props = sbo.split('\t');
+                return {
+                    name: props[0],
+                    displayName: props[2],
+                    version: props[1],
+                    description: props[3]
+                };
+            })
         } catch (err) {
             throw new VsCommandError(JSON.parse(result.stderr).message, 'Error when parsing command\'s stdout output');
         }
-        if (!Array.isArray(items) || Array.isArray(items) && items.length === 0) {
+        if (items.length === 0) {
             throw new VsCommandError('No deployable services found.');
         }
-        return items.map((value) => value.metadata.name);
+        return items;
     }
 
-    public async getServiceTemplatePlans(svcName: string): Promise<string[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogServicesJson(), Platform.getUserHomePath());
-        return this.loadItems<Service>(result, (data) => data.services.items).filter((value) => value.metadata.name === svcName)[0].spec.planList;
+    public async getClusterServiceVersion(operatorName: string): Promise<ClusterServiceVersionKind> {
+        const result: cliInstance.CliExitData = await this.execute(Command.getClusterServiceVersionJson(operatorName), Platform.getUserHomePath());
+        return JSON.parse(result.stdout)
+
 
     }
 
@@ -976,10 +991,17 @@ export class OdoImpl implements Odo {
         return this.deleteAndRefresh(component);
     }
 
-    public async createService(application: OpenShiftObject, templateName: string, planName: string, name: string): Promise<OpenShiftObject> {
-        await this.execute(Command.createService(application.getParent().getName(), application.getName(), templateName, planName, name.trim()), Platform.getUserHomePath());
-        await this.createApplication(application);
-        return this.insertAndReveal(new OpenShiftService(application, name));
+    public async createService(application: OpenShiftObject, formData: any): Promise<OpenShiftObject> {
+        // await this.execute(Command.createService(application.getParent().getName(), application.getName(), templateName, planName, name.trim()), Platform.getUserHomePath());
+        // await this.createApplication(application);
+        // return this.insertAndReveal(new OpenShiftService(application, name));
+
+        const jsonString = JSON.stringify(formData, null, 4);
+        const tempJsonFile = tempfile.fileSync({postfix: '.json'});
+        fs.writeFileSync(tempJsonFile.name, jsonString);
+        // call oc create -f path/to/file until odo does support creating services without component
+        this.execute(Command.createServiceCommand(tempJsonFile.name));
+        return this.insertAndReveal(new OpenShiftService(application, `${formData.kind}/${formData.metadata.name}`));
     }
 
     public async deleteService(service: OpenShiftObject): Promise<OpenShiftObject> {

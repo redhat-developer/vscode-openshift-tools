@@ -348,7 +348,7 @@ suite('odo', () => {
             });
             let e: Error;
             try {
-                await odoCli.getServiceTemplates();
+                await odoCli.getServiceOperators();
             } catch (err) {
                 e = err;
             }
@@ -564,7 +564,7 @@ suite('odo', () => {
         });
 
         test('getServiceTemplates returns correct number of services', async () => {
-            const result: string[] = await odoCli.getServiceTemplates();
+            const result: string[] = await odoCli.getServiceOperators();
             expect(result.length).equals(1);
             expect(result[0]).equals('cakephp-mysql-persistent');
         });

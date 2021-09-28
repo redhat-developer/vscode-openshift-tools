@@ -74,6 +74,14 @@ export class CommandText {
 }
 
 export class Command {
+    static createServiceCommand(fileName: string): CommandText {
+        return new CommandText(
+            'oc create',
+            undefined, [
+                new CommandOption('-f', fileName)
+            ]
+        )
+    }
 
     static viewEnv(): CommandText {
         return new CommandText(
@@ -164,6 +172,10 @@ export class Command {
 
     static listCatalogServices(): CommandText {
         return new CommandText('odo catalog list services');
+    }
+
+    static listCatalogOperatorBackedServices(): CommandText {
+        return new CommandText('oc get csv -o jsonpath="{range .items[*]}{.metadata.name}{\'\\t\'}{.spec.version}{\'\\t\'}{.spec.displayName}{\'\\t\'}{.metadata.annotations.description}{\'\\n\'}{end}"');
     }
 
     static listCatalogServicesJson(): CommandText {
@@ -344,10 +356,12 @@ export class Command {
         return Command.showLog().addOption(new CommandOption('-f'));
     }
 
+
     static listComponentPorts(project: string, app: string, component: string): CommandText {
         return new CommandText('oc get service',
             `${component}-${app}`, [
                 new CommandOption('--namespace', project),
+                // see https://kubernetes.io/docs/reference/kubectl/jsonpath/ for examples
                 new CommandOption('-o', 'jsonpath="{range .spec.ports[*]}{.port}{\',\'}{end}"', false)
             ]
         );
@@ -596,5 +610,13 @@ export class Command {
 
     static showConsoleUrl(): CommandText {
         return new CommandText('oc get configmaps console-public -n openshift-config-managed -o json');
+    }
+
+    static getClusterServiceVersionJson(name: string) {
+        return new CommandText('oc get csv',
+            name, [
+                new CommandOption('-o', 'json')
+            ]
+        );
     }
 }
