@@ -12,6 +12,7 @@ export interface Service {
     spec: {
         planList: string[];
     };
+    [index: string]: any;
 }
 
 export interface ServiceOperatorShortInfo {

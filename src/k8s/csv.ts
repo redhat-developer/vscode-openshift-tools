@@ -4,18 +4,17 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as _ from 'lodash';
-import * as fs from 'fs';
 import OpenShiftItem from '../openshift/openshiftItem';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import * as common from './common';
-import { ClusterServiceVersionKind, CRDDescription, CustomResourceDefinitionKind, CommonCapability } from './olm/types';
+import { ClusterServiceVersionKind, CRDDescription, CustomResourceDefinitionKind, CommonCapability, ClusterServiceVersionIcon } from './olm/types';
 import { TreeItem, WebviewPanel, window } from 'vscode';
 import { vsCommand } from '../vscommand';
 import CreateServiceViewLoader from '../webview/create-service/createServiceViewLoader';
 import { DEFAULT_K8S_SCHEMA, getUISchema, randomString, generateDefaults } from './utils';
 import { loadYaml } from '@kubernetes/client-node';
 import { JSONSchema7 } from 'json-schema';
-import { getInstance } from '../odo';
+import { getInstance, OpenShiftObject } from '../odo';
 
 const tempfile = require('tmp');
 
@@ -76,7 +75,7 @@ export class ClusterServiceVersion extends OpenShiftItem {
         };
     }
 
-    static createFormMessageListener(panel: WebviewPanel) {
+    static createFormMessageListener(app: OpenShiftObject, panel: WebviewPanel) {
         return async (event: any) => {
             if (event.command === 'cancel') {
                 if (event.changed === true) {
@@ -88,33 +87,23 @@ export class ClusterServiceVersion extends OpenShiftItem {
                 panel.dispose();
             }
             if (event.command === 'create') {
-                // serialize event.formData to temporary file
-                const jsonString = JSON.stringify(event.formData, null, 4);
-                const tempJsonFile = tempfile.fileSync({postfix: '.json'});
-                fs.writeFileSync(tempJsonFile.name, jsonString);
-                // call oc create -f path/to/file until odo does support creating services without component
-                const result = await common.execKubectl(ClusterServiceVersion.command.getCreateCommand(tempJsonFile.name));
                 // add waiting for Deployment to be created using wait --for=condition
                 // no need to wait until it is available
-                if (result.code) {
-                    window.showErrorMessage(result.stderr);
-                    panel.webview.postMessage({action: 'error'});
-                } else {
-                    const clusters = await getInstance().getClusters();
-                    if (clusters.length === 0) {
-                        // could be expired session
-                        return;
-                    }
-                    const projects = await clusters[0].getChildren();
-                    const apps = projects[0].getChildren()[0]
-                    apps.forEach((app) => {
-                        // OpenShiftItem.odo.createService(app, event.formData);
-                    })
-                    window.showInformationMessage(result.stdout);
-                    panel.dispose();
+                const clusters = await getInstance().getClusters();
+                if (clusters.length === 0) {
+                    // could be expired session
+                    return;
                 }
-                // if oc exit without error close the form
-                // show error message in case of error and keep form open
+
+                try {
+                    await OpenShiftItem.odo.createService(app, event.formData);
+                    window.showInformationMessage(`Service ${event.formData.metadata.name} successfully created.` );
+                    panel.dispose();
+                } catch (err) {
+                    window.showErrorMessage(err);
+                    panel.webview.postMessage({action: 'error'});
+                }
+
             }
         }
     }
@@ -123,10 +112,12 @@ export class ClusterServiceVersion extends OpenShiftItem {
 
     @vsCommand('clusters.openshift.csv.create')
     static async createNewService(crdOwnedNode: K8sCrdNode): Promise<void> {
-        return this.createNewServiceFromDescriptor(crdOwnedNode.impl.crdDescription, crdOwnedNode.impl.csv);
+        const apps = getInstance().getClusters()[0].getChildren()[0].getApplications();
+        const app = apps.find(item => item.getName() === 'app');
+        return this.createNewServiceFromDescriptor(crdOwnedNode.impl.crdDescription, crdOwnedNode.impl.csv, app);
     }
 
-    static async createNewServiceFromDescriptor(crdDescription: CRDDescription, csv): Promise<void> {
+    static async createNewServiceFromDescriptor(crdDescription: CRDDescription, csv: ClusterServiceVersionKind, application: OpenShiftObject): Promise<void> {
         const getCrdCmd = ClusterServiceVersion.command.getCrd(crdDescription.name);
         const crdResouce: CustomResourceDefinitionKind = await common.asJson(getCrdCmd);
         const openAPIV3SchemaAll: JSONSchema7 = crdResouce.spec.versions.find((version) => version.name === crdDescription.version).schema.openAPIV3Schema;
@@ -143,13 +134,16 @@ export class ClusterServiceVersion extends OpenShiftItem {
             crdDescription
         );
 
-        const panel = await CreateServiceViewLoader.loadView('Create Service', ClusterServiceVersion.createFormMessageListener);
+        const panel = await CreateServiceViewLoader.loadView('Create Service', ClusterServiceVersion.createFormMessageListener.bind(undefined, application));
 
         panel.webview.onDidReceiveMessage(async (event)=> {
             if(event.command === 'ready') {
-                await panel.webview.postMessage(
-                    {action: 'load', openAPIV3Schema, uiSchema, crdDescription, formData: {}}
-                );
+                await panel.webview.postMessage({
+                    action: 'load', openAPIV3Schema,
+                    uiSchema,
+                    crdDescription,
+                    formData: {}
+                });
             }
         });
     }
