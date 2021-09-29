@@ -410,9 +410,6 @@ export class Component extends OpenShiftItem {
     )
     static async linkService(component: OpenShiftComponent): Promise<string | null> {
         if (!component) return null;
-        if (component.kind === ComponentKind.DEVFILE) {
-            return 'Link Service command is not supported for Devfile Components.';
-        }
         const serviceToLink: OpenShiftObject = await window.showQuickPick(Component.getServiceNames(component.getParent()), {placeHolder: 'Select a service to link', ignoreFocusOut: true});
         if (!serviceToLink) return null;
 
