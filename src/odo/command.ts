@@ -393,9 +393,6 @@ export class Command {
     ): CommandText {
         return new CommandText('odo link',
             serviceToLink, [
-                new CommandOption('--project', project),
-                new CommandOption('--app', app),
-                new CommandOption('--component', component),
                 new CommandOption('--wait'),
                 new CommandOption('--wait-for-target')
             ]
