@@ -37,11 +37,11 @@ export class Service extends OpenShiftItem {
         const selectedCrd = await window.showQuickPick(csv.spec.customresourcedefinitions.owned.map(crd=> {
             return {label: `${crd.displayName} ${crd.version}`, target: crd};
         }), {
-            placeHolder: 'Service Template Plan Name',
+            placeHolder: 'Service Name',
             ignoreFocusOut: true
         });
         if (!selectedCrd) return null;
-        await ClusterServiceVersion.createNewServiceFromDescriptor(selectedCrd.target, csv);
+        await ClusterServiceVersion.createNewServiceFromDescriptor(selectedCrd.target, csv, application);
     }
 
     @vsCommand('openshift.service.delete', true)
