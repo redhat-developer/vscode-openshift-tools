@@ -587,14 +587,8 @@ export class Command {
         );
     }
 
-    static unlinkService(project: string, app: string, service: string, comp: string): CommandText {
-        return new CommandText('odo unlink',
-            service, [
-                new CommandOption('--project', project),
-                new CommandOption('--app', app),
-                new CommandOption('--component', comp)
-            ]
-        );
+    static unlinkService(project: string, service: string): CommandText {
+        return new CommandText('odo unlink', service);
     }
 
     static getclusterVersion(): CommandText {

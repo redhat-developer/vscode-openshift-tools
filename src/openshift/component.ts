@@ -267,9 +267,6 @@ export class Component extends OpenShiftItem {
     @clusterRequired()
     static async unlink(context: OpenShiftComponent): Promise<string | null> {
         if (!context) return null;
-        if (context.kind === ComponentKind.DEVFILE) {
-            return 'Unlink command is not supported for Devfile Components.';
-        }
         const unlinkActions = [
             {
                 label: 'Component',
@@ -337,11 +334,8 @@ export class Component extends OpenShiftItem {
     )
     static async unlinkService(component: OpenShiftComponent): Promise<string | null> {
         if (!component) return null;
-        if (component.kind === ComponentKind.DEVFILE) {
-            return 'Unlink Service Command is not supported for Devfile Components.';
-        }
         const linkService = await Component.getLinkData(component);
-        const getLinkService = linkService.status.linkedServices;
+        const getLinkService = linkService.status.linkedServices.map(serviceLink => serviceLink.ServiceName);
 
         if (!getLinkService) throw new VsCommandError('No linked Services found');
 
@@ -350,7 +344,7 @@ export class Component extends OpenShiftItem {
         if (!serviceName) return null;
 
         return Progress.execFunctionWithProgress('Unlinking Service',
-            () => Component.odo.execute(Command.unlinkService(component.getParent().getParent().getName(), component.getParent().getName(), serviceName, component.getName()), component.contextPath.fsPath)
+            () => Component.odo.execute(Command.unlinkService(component.getParent().getParent().getName(), serviceName), component.contextPath.fsPath)
                 .then(() => `Service '${serviceName}' has been successfully unlinked from the Component '${component.getName()}'`)
                 .catch((err) => Promise.reject(new VsCommandError(`Failed to unlink Service with error '${err}'`, 'Failed to unlink Service with error')))
         );
