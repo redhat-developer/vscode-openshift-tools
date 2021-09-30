@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 import OpenShiftItem from '../openshift/openshiftItem';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import * as common from './common';
-import { ClusterServiceVersionKind, CRDDescription, CustomResourceDefinitionKind, CommonCapability, ClusterServiceVersionIcon } from './olm/types';
+import { ClusterServiceVersionKind, CRDDescription, CustomResourceDefinitionKind } from './olm/types';
 import { TreeItem, WebviewPanel, window } from 'vscode';
 import { vsCommand } from '../vscommand';
 import CreateServiceViewLoader from '../webview/create-service/createServiceViewLoader';
@@ -15,8 +15,6 @@ import { DEFAULT_K8S_SCHEMA, getUISchema, randomString, generateDefaults } from 
 import { loadYaml } from '@kubernetes/client-node';
 import { JSONSchema7 } from 'json-schema';
 import { getInstance, OpenShiftObject } from '../odo';
-
-const tempfile = require('tmp');
 
 class CsvNode implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorerExtensionNode {
 

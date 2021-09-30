@@ -35,8 +35,7 @@ import { KubeConfigUtils } from './util/kubeUtils';
 import { KubeConfig } from '@kubernetes/client-node';
 import { pathExistsSync } from 'fs-extra';
 import * as fs from 'fs';
-import * as common from './k8s/common';
-import { ClusterServiceVersionKind, CRDDescription, ClusterServiceVersionIcon } from './k8s/olm/types';
+import { ClusterServiceVersionKind } from './k8s/olm/types';
 
 const tempfile = require('tmp');
 const {Collapsed} = TreeItemCollapsibleState;

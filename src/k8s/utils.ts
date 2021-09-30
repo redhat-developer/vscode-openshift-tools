@@ -9,8 +9,7 @@ import * as Immutable from 'immutable';
 import { JSONSchema7 } from 'json-schema';
 import * as _ from 'lodash';
 
-import { SpecCapability, Descriptor, CustomResourceDefinitionKind } from './olm/types';
-import { loadYaml } from '@kubernetes/client-node';
+import { SpecCapability, Descriptor } from './olm/types';
 
 export enum JSONSchemaType {
     string = 'string',
