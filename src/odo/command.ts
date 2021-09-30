@@ -512,14 +512,8 @@ export class Command {
         );
     }
 
-    static deleteService(project: string, app: string, name: string): CommandText {
-        return new CommandText('odo service delete',
-            name, [
-                new CommandOption('-f'),
-                new CommandOption('--project', project),
-                new CommandOption('--app', app)
-            ]
-        );
+    static deleteService(name: string): CommandText {
+        return new CommandText('oc delete', name);
     }
 
     static getServiceTemplate(project: string, service: string): CommandText {
