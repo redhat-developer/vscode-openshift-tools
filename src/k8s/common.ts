@@ -10,7 +10,6 @@ import * as Odo from '../odo';
 import { CommandText } from '../odo/command';
 import { VsCommandError } from '../vscommand';
 import { Node } from './node';
-import { KubeConfigUtils } from '../util/kubeUtils';
 
 function convertItemToQuickPick(item: any): QuickPickItem {
     const qp = item;

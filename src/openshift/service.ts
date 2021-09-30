@@ -3,12 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window, QuickPickItem } from 'vscode';
+import { window } from 'vscode';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { OpenShiftObject } from '../odo';
-import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
-import { Platform } from '../util/platform';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { ServiceOperatorShortInfo } from '../odo/service';
 import { ClusterServiceVersionKind } from '../k8s/olm/types';
