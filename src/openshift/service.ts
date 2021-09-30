@@ -68,32 +68,4 @@ export class Service extends OpenShiftItem {
         }
         return null;
     }
-
-    @vsCommand('openshift.service.describe', true)
-    @clusterRequired()
-    static async describe(context: OpenShiftObject): Promise<void> {
-        let service = context;
-
-        if (!service) {
-            const application: OpenShiftObject = await Service.getOpenShiftCmdData(context,
-                'From which application you want to describe Service');
-            if (application) {
-                service = await window.showQuickPick(Service.getServiceNames(application), {placeHolder: 'Select Service you want to describe',
-                ignoreFocusOut: true});
-            }
-        }
-        if (service) {
-            const template = await Service.getTemplate(service);
-            if (template) {
-                Service.odo.executeInTerminal(Command.describeService(template), Platform.getUserHomePath(), `OpenShift: Describe '${service.getName()}' Service`);
-            } else {
-                throw new VsCommandError(`Cannot get Service Type name for Service '${service.getName()}'`, 'Cannot get Service Type name for Service');
-            }
-        }
-    }
-
-    static async getTemplate(service: OpenShiftObject): Promise<string> {
-        const result = await Service.odo.execute(Command.getServiceTemplate(service.getParent().getParent().getName(), service.getName()));
-        return result.stdout.trim();
-    }
 }
