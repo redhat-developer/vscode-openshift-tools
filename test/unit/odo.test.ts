@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
@@ -219,8 +218,8 @@ suite('odo', () => {
             });
             const result = await odoCli.getApplications(project);
 
-            expect(result.length).equals(1);
-            expect(result[0].getName()).equals('app1');
+            expect(result.length).equals(2);
+            expect(result[1].getName()).equals('app1');
         });
 
         test('getApplications returns empty list if no odo apps are present', async () => {
@@ -236,7 +235,7 @@ suite('odo', () => {
             });
             const result = await odoCli.getApplications(project);
 
-            expect(result).empty;
+            expect(result).length(1);
         });
 
         test('getComponents returns components list for an application', async () => {
@@ -257,10 +256,10 @@ suite('odo', () => {
                 ),
                 stderr: ''
             });
-            const result = await odoCli.getApplications(app);
+            const result = await odoCli.getApplications(project);
 
-            expect(result.length).equals(1);
-            expect(result[0].getName()).equals('component1');
+            expect(result).length(2);
+            expect(result[1].getName()).equals('component1');
         });
 
         test('getServices returns services for an application', async () => {
@@ -336,25 +335,6 @@ suite('odo', () => {
             const result = await odoCli.getServices(app);
 
             expect(result).empty;
-        });
-
-        test('getServiceTemplates throws exception if service catalog is not enabled', async () => {
-            execStub.resolves({error: null, stdout: '', stderr:
-                JSON.stringify({
-                    kind: 'Error',
-                    apiVersion: 'odo.openshift.io/v1alpha1',
-                    message: 'unable to list services because Service Catalog is not enabled in your cluster'
-                })
-            });
-            let e: Error;
-            try {
-                await odoCli.getServiceOperators();
-            } catch (err) {
-                e = err;
-            }
-
-            expect(e.message).equals('unable to list services because Service Catalog is not enabled in your cluster');
-
         });
 
         test('getApplicationChildren returns both components and services for an application', async () => {

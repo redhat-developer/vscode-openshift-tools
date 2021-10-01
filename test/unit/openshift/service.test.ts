@@ -68,8 +68,6 @@ suite('OpenShift/Service', () => {
     });
 
     suite('create service with no context', () => {
-        let inputStub: sinon.SinonStub;
-        let progressStub: sinon.SinonStub;
 
         setup(() => {
             getProjectsStub.resolves([projectItem]);
@@ -78,8 +76,6 @@ suite('OpenShift/Service', () => {
             quickPickStub.onFirstCall().resolves(appItem);
             quickPickStub.onSecondCall().resolves(serviceOperator);
             quickPickStub.onThirdCall().resolves(csv.spec.customresourcedefinitions.owned[0]);
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').resolves(serviceItem.getName());
-            progressStub = sandbox.stub(Progress, 'execFunctionWithProgress').resolves();
         });
 
         test('returns null with no CRD selected', async () => {
