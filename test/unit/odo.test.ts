@@ -562,18 +562,6 @@ suite('odo', () => {
         setup(() => {
             sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves(data);
         });
-
-        test('getServiceTemplates returns correct number of services', async () => {
-            const result: string[] = await odoCli.getServiceOperators();
-            expect(result.length).equals(1);
-            expect(result[0]).equals('cakephp-mysql-persistent');
-        });
-
-        test('getServiceTemplatePlans returns correct number of plans for service', async () => {
-            const result: string[] = await odoCli.getServiceTemplatePlans('cakephp-mysql-persistent');
-            assert.equal(result.length, 1);
-            assert.equal(result[0], 'default');
-        });
     });
 
     suite('odo and oc current cluster detection integration', () => {
