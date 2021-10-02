@@ -576,9 +576,9 @@ suite('OpenShift/Component', () => {
             },
             "status": {
                 "active": false,
-                "linkedServices": {
-                    "service1": ["8080"]
-                },
+                "linkedServices": [{
+                    "ServiceName": "service1"
+                }],
                 "linkedComponents": {
                     "comp1": ["8080"]
                 }
@@ -699,9 +699,9 @@ suite('OpenShift/Component', () => {
             },
             "status": {
                 "active": false,
-                "linkedServices": {
-                    "service1": ["8080"]
-                },
+                "linkedServices": [{
+                    "ServiceName": "service1"
+                }],
                 "linkedComponents": {
                     "comp1": ["8080"]
                 }
@@ -750,9 +750,9 @@ suite('OpenShift/Component', () => {
                     source: 'file:///Users/nodejs-ex'
                 },
                 status: {
-                    linkedServices: {
-                        service: 'service'
-                    }
+                    linkedServices: [{
+                            'ServiceName' : 'service'
+                    }]
                 }
             });
             quickPickStub.onFirstCall().resolves('service');

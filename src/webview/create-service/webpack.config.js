@@ -48,31 +48,6 @@ module.exports = {
         options: {
           name: 'assets/[name].[ext]',
         },
-      },
-      {
-        test: /\.s?css$/,
-        exclude: /.*\/node_modules\/.*/,
-        use: [
-          {
-            loader: 'css-loader',
-            options: {
-              sourceMap: true,
-            },
-          },
-          {
-            loader: 'resolve-url-loader',
-            options: {
-              sourceMap: true,
-            },
-          },
-          {
-            loader: 'sass-loader',
-            options: {
-              sourceMap: true,
-              outputStyle: 'compressed',
-            },
-          },
-        ],
       }
     ]
   },

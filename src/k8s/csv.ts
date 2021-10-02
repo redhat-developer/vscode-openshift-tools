@@ -110,9 +110,10 @@ export class ClusterServiceVersion extends OpenShiftItem {
 
     @vsCommand('clusters.openshift.csv.create')
     static async createNewService(crdOwnedNode: K8sCrdNode): Promise<void> {
-        const apps = getInstance().getClusters()[0].getChildren()[0].getApplications();
+        const projects = await getInstance().getProjects();
+        const apps = await getInstance().getApplications(projects[0]);
         const app = apps.find(item => item.getName() === 'app');
-        return this.createNewServiceFromDescriptor(crdOwnedNode.impl.crdDescription, crdOwnedNode.impl.csv, app);
+        return ClusterServiceVersion.createNewServiceFromDescriptor(crdOwnedNode.impl.crdDescription, crdOwnedNode.impl.csv, app);
     }
 
     static async createNewServiceFromDescriptor(crdDescription: CRDDescription, csv: ClusterServiceVersionKind, application: OpenShiftObject): Promise<void> {
