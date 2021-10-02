@@ -335,7 +335,7 @@ export class Component extends OpenShiftItem {
     static async unlinkService(component: OpenShiftComponent): Promise<string | null> {
         if (!component) return null;
         const linkService = await Component.getLinkData(component);
-        const getLinkService = linkService.status.linkedServices.map(serviceLink => serviceLink.ServiceName);
+        const getLinkService = linkService?.status?.linkedServices?.map(serviceLink => serviceLink.ServiceName);
 
         if (!getLinkService) throw new VsCommandError('No linked Services found');
 
