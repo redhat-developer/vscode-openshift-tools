@@ -172,7 +172,7 @@ export function generateDefaults(jsonSchema, jsonData) {
 }
 
 export function randomString(): string {
-    return _.sampleSize(_.toArray('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'), 5).join('');
+    return _.sampleSize(_.toArray('abcdefghijklmnopqrstuvwxyz0123456789'), 5).join('');
 }
 
 // Use jsonSchema, descriptors, and some defaults to generate a uiSchema
