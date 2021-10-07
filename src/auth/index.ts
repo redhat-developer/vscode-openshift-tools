@@ -19,9 +19,40 @@ export class Auth {
         console.log(session);
         const data = await got.get('https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com/api/v1/signup', {
             headers: {
-                Authorization: `Bearer ${(session as any).idToken}`
-            }
+                 Authorization: `Bearer ${(session as any).idToken}`
+             }
         });
-        console.log(data.body);
+        console.log(data);
+        // try {
+        //     const data1 = got.put('https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com/api/v1/signup/verification', {
+        //         headers: {
+        //             Authorization: `Bearer ${(session as any).idToken}`
+        //         },
+        //         json : {
+        //             country_code: '+01',
+        //             phone_number: '9252121749'
+        //         }
+        //     }).then((value) => {
+        //         console.log(value);
+        //     });
+        // } catch(err) {
+        //     console.log(err);
+        // }
+        // const request = require('request');
+        // request.put({
+        //     url: 'https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com/api/v1/signup/verification',
+        //     headers: {
+        //         Authorization: `Bearer ${(session as any).idToken}`
+        //     },
+        //     json: {
+        //         country_code: '+01',
+        //         phone_number: '9252121749'
+        //     }
+        // }, (err, res, body) => {
+        //     if (err) {
+        //         return console.log(err);
+        //     }
+        //     console.log(body);
+        // });
     }
 }
