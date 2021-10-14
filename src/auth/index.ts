@@ -21,7 +21,7 @@ export class Auth {
             headers: {
                  Authorization: `Bearer ${(session as any).idToken}`
              }
-        });
+        }).json();
         console.log(data);
         // try {
         //     const data1 = got.put('https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com/api/v1/signup/verification', {
@@ -46,7 +46,7 @@ export class Auth {
         //     },
         //     json: {
         //         country_code: '+01',
-        //         phone_number: '9252121749'
+        //         phone_number: '5417083275'
         //     }
         // }, (err, res, body) => {
         //     if (err) {
@@ -54,5 +54,16 @@ export class Auth {
         //     }
         //     console.log(body);
         // });
-    }
+        //     request.get({
+        //         url: 'https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com/api/v1/signup/verification/259769',
+        //         headers: {
+        //             Authorization: `Bearer ${(session as any).idToken}`
+        //         }
+        //     }, (err, res, body) => {
+        //         if (err) {
+        //             return console.log(err);
+        //         }
+        //         console.log(body);
+        //     });
+        }
 }
