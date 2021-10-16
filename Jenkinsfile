@@ -2,13 +2,14 @@
 
 node('rhel8'){
 
-  def packageJson = readJSON file: 'package.json'
   def vscodeVersion = ""
   stage('Checkout repo') {
     deleteDir()
     git url: 'https://github.com/redhat-developer/vscode-openshift-tools.git',
       branch: "${BRANCH}"
   }
+
+  def packageJson = readJSON file: 'package.json'
 
   stage('Install requirements') {
     def nodeHome = tool 'nodejs-15.14.0'
