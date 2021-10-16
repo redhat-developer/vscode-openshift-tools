@@ -78,7 +78,7 @@ async function bundleTools(): Promise<void> {
     for (const key in configData) {
         const tool = configData[key];
         for (const OS in tool.platform) {
-            if (currentPlatform === 'all' || OS === process.platform) {
+            if (currentPlatform === 'all' || OS === currentPlatform) {
                 console.log(`Bundle '${tool.description}' for ${OS}`);
                 const osSpecificLocation = path.join(outFolder, 'tools', OS);
                 // eslint-disable-next-line no-await-in-loop
