@@ -62,12 +62,6 @@ node('rhel8'){
     }
   }
 
-  stage('vsix package smoke test') {
-      wrap([$class: 'Xvnc']) {
-        sh "node ./out/build/install-vscode.js 1.56.0 && .vscode-test/vscode-linux-x64-1.56.0/VSCode-linux-x64/bin/code --install-extension openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix && node ./out/build/run-tests.js vsix-test test/fake-extension/"
-      }
-  }
-
   if(params.UPLOAD_LOCATION) {
     stage('Snapshot') {
       def filesToPush = findFiles(glob: '**.vsix')
