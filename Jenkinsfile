@@ -49,22 +49,22 @@ node('rhel8'){
   }
 
   withEnv(['TARGET=linux']) {
-    stage('Package linux-amd64') {
-        sh "vsce package --target linux-amd64 -o openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-linux-amd64.vsix"
-        sh "sha256sum *-linux-amd64.vsix > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-linux-amd64.vsix.sha256"
+    stage('Package linux-x64') {
+        sh "vsce package --target linux-x64 -o openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-linux-x64.vsix"
+        sh "sha256sum *-linux-x64.vsix > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-linux-x64.vsix.sha256"
     }
   }
 
   withEnv(['TARGET=darwin']) {
-    stage('Package darwin-amd64') {
-        sh "vsce package --target darwin-amd64 -o openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-darwin-amd64.vsix"
-        sh "sha256sum *-darwin-amd64.vsix > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-darwin-amd64.vsix.sha256"
+    stage('Package darwin-x64') {
+        sh "vsce package --target darwin-x64 -o openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-darwin-x64.vsix"
+        sh "sha256sum *-darwin-x64.vsix > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-darwin-x64.vsix.sha256"
     }
   }
 
   stage('vsix package smoke test') {
       wrap([$class: 'Xvnc']) {
-        sh "node ./out/build/install-vscode.js 1.56.0 && .vscode-test/vscode-linux-x64-1.56.0/VSCode-linux-x64/bin/code --install-extension openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-linux-amd64.vsix && node ./out/build/run-tests.js vsix-test test/fake-extension/"
+        sh "node ./out/build/install-vscode.js 1.56.0 && .vscode-test/vscode-linux-x64-1.56.0/VSCode-linux-x64/bin/code --install-extension openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix && node ./out/build/run-tests.js vsix-test test/fake-extension/"
       }
   }
 
