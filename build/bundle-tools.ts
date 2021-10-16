@@ -67,9 +67,12 @@ async function downloadFileAndCreateSha256(
 async function bundleTools(): Promise<void> {
     const outFolder = path.resolve('.', 'out');
     const toolsCacheFolder = path.join(outFolder, 'tools-cache');
-    const currentPlatform = process.argv.find((arg) => arg === '--platform')
+    let currentPlatform = process.env.TARGET;
+    if (!currentPlatform) {
+        currentPlatform = process.argv.find((arg) => arg === '--platform')
         ? process.platform
         : 'all';
+    }
     console.log(currentPlatform);
     console.info(`Download tools to '${toolsCacheFolder}'`);
     for (const key in configData) {
