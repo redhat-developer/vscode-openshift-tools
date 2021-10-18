@@ -77,10 +77,9 @@ node('rhel8'){
     if(publishToMarketPlace.equals('true')) {
       stage("Publish to Marketplace") {
         withCredentials([[$class: 'StringBinding', credentialsId: 'vscode_java_marketplace', variable: 'TOKEN']]) {
-          def vsix = findFiles(glob: '*-*.vsix')
-          sh 'echo vsce publish -p ${TOKEN} --packagePath' + " ${vsix[0].path}"
-          sh 'echo vsce publish -p ${TOKEN} --packagePath' + " ${vsix[1].path}"
-          sh 'echo vsce publish -p ${TOKEN} --packagePath' + " ${vsix[2].path}"
+          sh "echo vsce publish -p ${TOKEN} --packagePath openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-darwin-x64.vsix"
+          sh "echo vsce publish -p ${TOKEN} --packagePath openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-linux-x64.vsix"
+          sh "echo vsce publish -p ${TOKEN} --packagePath openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-win32-x64.vsix"
         }
 
         stage "Promote the build to stable"
@@ -94,8 +93,7 @@ node('rhel8'){
       stage("Publish to OVSX") {
         sh "npm install -g ovsx"
         withCredentials([[$class: 'StringBinding', credentialsId: 'open-vsx-access-token', variable: 'OVSX_TOKEN']]) {
-          def vsix = findFiles(glob: '*-ovsx.vsix')
-          sh 'echo ovsx publish -p ${OVSX_TOKEN}' + " ${vsix[0].path}"
+          sh "echo ovsx publish -p ${OVSX_TOKEN} openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix"
         }
       }
     }
