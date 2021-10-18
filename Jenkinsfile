@@ -77,14 +77,14 @@ node('rhel8'){
     if(publishToMarketPlace.equals('true')) {
       stage("Publish to Marketplace") {
         withCredentials([[$class: 'StringBinding', credentialsId: 'vscode_java_marketplace', variable: 'TOKEN']]) {
-          sh "echo vsce publish -p ${TOKEN} --packagePath openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-darwin-x64.vsix"
-          sh "echo vsce publish -p ${TOKEN} --packagePath openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-linux-x64.vsix"
-          sh "echo vsce publish -p ${TOKEN} --packagePath openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-win32-x64.vsix"
+          sh "vsce publish -p ${TOKEN} --packagePath openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-darwin-x64.vsix"
+          sh "vsce publish -p ${TOKEN} --packagePath openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-linux-x64.vsix"
+          sh "vsce publish -p ${TOKEN} --packagePath openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-win32-x64.vsix"
         }
 
         stage "Promote the build to stable"
-        sh "echo rsync -Pzrlt --rsh=ssh --protocol=28 *.vsix* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
-        sh "echo rsync -Pzrlt --rsh=ssh --protocol=28 *.tgz* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
+        sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.vsix* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
+        sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.tgz* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
         archive includes:"**.vsix*,**.tgz*"
       }
     }
@@ -93,7 +93,7 @@ node('rhel8'){
       stage("Publish to OVSX") {
         sh "npm install -g ovsx"
         withCredentials([[$class: 'StringBinding', credentialsId: 'open-vsx-access-token', variable: 'OVSX_TOKEN']]) {
-          sh "echo ovsx publish -p ${OVSX_TOKEN} openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix"
+          sh "ovsx publish -p ${OVSX_TOKEN} openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix"
         }
       }
     }
