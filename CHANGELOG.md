@@ -1,5 +1,20 @@
 # Change Log
 
+## 0.2.10 (October 18, 2021)
+
+* [#2249](https://github.com/redhat-developer/vscode-openshift-tools/issues/2249) Update oc to latest release v4.8.15
+* [#2248](https://github.com/redhat-developer/vscode-openshift-tools/issues/2248) `tools` directory size: only download/bundle right OS?
+* [#2241](https://github.com/redhat-developer/vscode-openshift-tools/issues/2241) Welcome View for Application Explorer should not be available before extension is activated
+* [#2237](https://github.com/redhat-developer/vscode-openshift-tools/issues/2237) Migrate to odo 2.3.1
+* [#2235](https://github.com/redhat-developer/vscode-openshift-tools/issues/2235) Support Platform Specific vsix files
+* [#2233](https://github.com/redhat-developer/vscode-openshift-tools/issues/2233) Debug command for NodeJS components is broken after VSCode update to v1.60.0
+* [#2225](https://github.com/redhat-developer/vscode-openshift-tools/issues/2225) Push command should use current editor to detect component's context path
+* [#2221](https://github.com/redhat-developer/vscode-openshift-tools/issues/2221) Add 'Operators' group node to k8s Clusters view
+* [#2219](https://github.com/redhat-developer/vscode-openshift-tools/issues/2219) Create/Refresh Cluster button opens a page on browser
+* [#2211](https://github.com/redhat-developer/vscode-openshift-tools/issues/2211) Update odo to v2.3.0
+* [#2176](https://github.com/redhat-developer/vscode-openshift-tools/issues/2176) Components created out of s2i image builder have wrong component type
+* [#2013](https://github.com/redhat-developer/vscode-openshift-tools/issues/2013) Import fails for devfile components
+
 ## 0.2.9 (July 29, 2021)
 
 ### New Features
