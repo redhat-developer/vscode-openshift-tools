@@ -13,6 +13,8 @@ tsconfig.json
 vsc-extension-quickstart.md
 tslint.json
 *.vsix
+*.sha256
+*.tgz
 test/**
 out/coverage/**
 coverconfig.json
@@ -28,3 +30,4 @@ test-resources/**
 header.js
 .mocharc.js
 .eslintignore
+.github/**
