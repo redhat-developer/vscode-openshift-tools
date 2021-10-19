@@ -152,7 +152,7 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
     getChildren(element?: Entry): vsc.ProviderResult<Entry[]> {
         const result = element ? [] : getComponentsInWorkspace();
         return Promise.resolve(result).then(async result1 => {
-            await vsc.commands.executeCommand('setContext', 'openshift.component.explorer.init', result1.length === 0);
+            await vsc.commands.executeCommand('setContext', 'openshift.component.explorer.init', true);
             return result;
         })
     }
