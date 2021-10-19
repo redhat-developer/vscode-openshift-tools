@@ -97,7 +97,6 @@
     "lodash": "^4.17.21",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
-    "npm": "^8.1.0",
     "pretty-bytes": "^5.4.0",
     "rxjs": "^6.5.3",
     "semver": "^6.3.0",
