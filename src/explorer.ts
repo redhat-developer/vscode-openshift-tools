@@ -98,7 +98,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         const result = element ? element.getChildren() : OpenShiftExplorer.odoctl.getClusters();
         return Promise.resolve(result) // convert to promise, for the case of none thenable value
             .then(async result1 => {
-                await commands.executeCommand('setContext', 'openshift.app.explorer.init', result1.length === 0);
+                await commands.executeCommand('setContext', 'openshift.app.explorer.init', true);
                 return result1;
             });
     }
