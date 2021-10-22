@@ -14,7 +14,7 @@ import {
     env
 } from 'vscode';
 import path = require('path');
-import sendTelemetry from './telemetry';
+import { startTelemetry } from './telemetry';
 import { OpenShiftExplorer } from './explorer';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
@@ -27,9 +27,11 @@ import { extendClusterExplorer } from './k8s/clusterExplorer';
 import { WatchSessionsView } from './watch';
 import { DebugSessionsView } from './debug';
 import { ComponentTypesView } from './componentTypesView';
+import { WelcomePage } from './welcomePage';
+import { ComponentsTreeDataProvider } from './componentsView';
 
 import fsx = require('fs-extra');
-import { ComponentsTreeDataProvider } from './componentsView';
+
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
@@ -55,7 +57,8 @@ async function verifyBundledBinaries(): Promise<{odoPath: string, ocPath: string
 }
 
 export async function activate(extensionContext: ExtensionContext): Promise<any> {
-    commands.executeCommand('setContext', 'isVSCode', env.uiKind);
+    WelcomePage.createOrShow();
+    await commands.executeCommand('setContext', 'isVSCode', env.uiKind);
     // UIKind.Desktop ==1 & UIKind.Web ==2. These conditions are checked for browser based & electron based IDE.
     migrateFromOdo018();
     Cluster.extensionContext = extensionContext;
@@ -79,6 +82,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         commands.registerCommand('clusters.openshift.useProject', (context) =>
             commands.executeCommand('extension.vsKubernetesUseNamespace', context),
         ),
+        commands.registerCommand('openshift.component.deployRootWorkspaceFolder', Component.deployRootWorkspaceFolder),
         crcStatusItem,
         OpenShiftExplorer.getInstance(),
         new WatchSessionsView().createTreeView('openshiftWatchView'),
@@ -139,7 +143,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
 
     OdoImpl.Instance.loadWorkspaceComponents(null);
 
-    sendTelemetry('activation');
+    startTelemetry(extensionContext);
 
     return {
         verifyBundledBinaries,

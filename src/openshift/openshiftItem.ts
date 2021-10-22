@@ -2,8 +2,9 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/ban-types */
 
-import { window, QuickPickItem, commands } from 'vscode';
+import { window, QuickPickItem, commands, workspace } from 'vscode';
 import * as validator from 'validator';
 import { Odo, getInstance, OpenShiftObject, ContextType, OpenShiftApplication, OpenShiftProject } from '../odo';
 import { OpenShiftExplorer } from '../explorer';
@@ -26,11 +27,12 @@ export class QuickPickCommand implements QuickPickItem {
         public picked?: boolean,
         public alwaysShow?: boolean,
         public getName?: () => string
-    ) { }
+    ) {
+    }
 }
 
 function isCommand(item: QuickPickItem | QuickPickCommand): item is QuickPickCommand {
-    return (item as any).command;
+    return !!(item as any).command;
 }
 
 export default class OpenShiftItem {
@@ -52,7 +54,14 @@ export default class OpenShiftItem {
                 let validationMessage = OpenShiftItem.emptyName(`Empty ${message}`, value.trim());
                 if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`, value);
                 if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${message} should be between 2-63 characters`, value, offset ? offset.length : 0);
-                if (!validationMessage) validationMessage = OpenShiftItem.validateUniqueName(await data, value);
+                if (!validationMessage) {
+                    try {
+                        const existingResources = await data;
+                        validationMessage = OpenShiftItem.validateUniqueName(existingResources, value);
+                    } catch (err) {
+                        //ignore to keep other validation to work
+                    }
+                }
                 return validationMessage;
             }
         });
@@ -71,12 +80,12 @@ export default class OpenShiftItem {
     }
 
     static validateMatches(message: string, value: string): string | null {
-        return (validator.matches(value, '^[a-z]([-a-z0-9]*[a-z0-9])*$')) ? null : message;
+        return validator.matches(value, '^[a-z]([-a-z0-9]*[a-z0-9])*$') ? null : message;
     }
 
     static clusterURL(value: string): string | null {
         const urlRegex = value.match('(https?://[^ ]*)');
-        return (urlRegex) ? urlRegex[0] : null;
+        return urlRegex ? urlRegex[0] : null;
     }
 
     static ocLoginCommandMatches(value: string): string | null {
@@ -86,46 +95,63 @@ export default class OpenShiftItem {
 
     static getToken(value: string): string | null {
         const tokenRegex = value.match(/--token\s*=\s*(\S*).*/);
-        return (tokenRegex) ? tokenRegex[1] : null;
+        return tokenRegex ? tokenRegex[1] : null;
     }
 
     static async getApplicationNames(project: OpenShiftObject, createCommand = false): Promise<Array<OpenShiftObject | QuickPickCommand>> {
         if (project.getParent()) {
-            return OpenShiftItem.odo.getApplications(project).then((applicationList) => {
-                if (applicationList.length === 0 && !createCommand) throw new VsCommandError(errorMessage.Component);
-                return createCommand ? [new QuickPickCommand('$(plus) Create new Application...', async () => {
-                    return OpenShiftItem.getName('Application name', Promise.resolve(applicationList));
-                }), ...applicationList] : applicationList;
-            });
+            const applicationList = await OpenShiftItem.odo.getApplications(project);
+            if (applicationList.length === 0 && !createCommand) {
+                throw new VsCommandError(errorMessage.Component);
+            }
+            if (createCommand) {
+                return [
+                    new QuickPickCommand(
+                        '$(plus) Create new Application...',
+                        async () => OpenShiftItem.getName('Application name', Promise.resolve(applicationList))
+                    ),
+                    ...applicationList
+                ];
+            }
+            return applicationList;
         }
         return [
-            new QuickPickCommand('$(plus) Create new Application...', async () => {
-                return OpenShiftItem.getName('Application name', Promise.resolve([]));
-            })
+            new QuickPickCommand(
+                '$(plus) Create new Application...',
+                async () => OpenShiftItem.getName('Application name', Promise.resolve([]))
+            )
         ];
     }
 
     static async getComponentNames(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]> {
         const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application, condition);
-        if (applicationList.length === 0) throw new VsCommandError(errorMessage.Component);
+        if (applicationList.length === 0) {
+            throw new VsCommandError(errorMessage.Component);
+        }
         return applicationList;
     }
 
     static async getServiceNames(application: OpenShiftObject): Promise<OpenShiftObject[]> {
         const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(application);
-        if (serviceList.length === 0) throw new VsCommandError(errorMessage.Service);
+        if (serviceList.length === 0) {
+            throw new VsCommandError(errorMessage.Service);
+        }
         return serviceList;
     }
 
     static async getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         const storageList: Array<OpenShiftObject> = await OpenShiftItem.odo.getStorageNames(component);
-        if (storageList.length === 0) throw new VsCommandError(errorMessage.Storage);
+        if (storageList.length === 0) {
+            throw new VsCommandError(errorMessage.Storage);
+        }
         return storageList;
     }
 
     static async getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         const urlList: Array<OpenShiftObject> = await OpenShiftItem.odo.getRoutes(component);
-        if (urlList.length === 0) throw new VsCommandError(errorMessage.Route);
+        if (urlList.length === 0) {
+            throw new VsCommandError(errorMessage.Route);
+        }
         return urlList;
     }
 
@@ -133,12 +159,34 @@ export default class OpenShiftItem {
         let context: OpenShiftObject | QuickPickCommand = treeItem;
         let project: OpenShiftObject;
         if (!context) {
+
             const clusters = await this.odo.getClusters();
             if (clusters.length) { // connected to cluster because odo version printed out server url
                 const projects = await this.odo.getProjects();
                 context = projects.find((prj:OpenShiftProject)=>prj.active);
                 if (!context) {
                     throw new VsCommandError(errorMessage.Project)
+                }
+                // first try to get target component out of active editor
+                const currentEditorFile = window?.activeTextEditor?.document?.uri;
+                if (currentEditorFile) {
+                    const contextFolder = workspace.getWorkspaceFolder(currentEditorFile);
+                    if (contextFolder) {
+                        const oso = this.odo.getOpenShiftObjectByContext(contextFolder.uri.fsPath);
+                        if (!oso) {
+                            const applications = await this.odo.getApplications(context);
+                            const settings = this.odo.getSettingsByContext(contextFolder.uri.fsPath);
+                            if (settings) {
+                                const app = applications.find((a) => a.getName() === settings.spec.app);
+                                if(app) {
+                                    await this.odo.getComponents(app);
+                                    context = this.odo.getOpenShiftObjectByContext(contextFolder.uri.fsPath);
+                                }
+                            }
+                        } else if (context?.getName() === oso?.getParent()?.getParent()?.getName()) {
+                            context = oso;
+                        }
+                    }
                 }
             } else { // cluster is not accessible or user not logged in
                 const projectName = await OpenShiftItem.getName('Project Name', Promise.resolve([]))
@@ -166,7 +214,9 @@ export default class OpenShiftItem {
                 }
             }
         }
-        if (context && !isCommand(context) && context.contextValue === ContextType.APPLICATION && compPlaceholder) context = await window.showQuickPick(OpenShiftItem.getComponentNames(context, condition), {placeHolder: compPlaceholder, ignoreFocusOut: true});
+        if (context && !isCommand(context) && context.contextValue === ContextType.APPLICATION && compPlaceholder) {
+            context = await window.showQuickPick(OpenShiftItem.getComponentNames(context, condition), {placeHolder: compPlaceholder, ignoreFocusOut: true});
+        }
         return context as T;
     }
 }
@@ -213,15 +263,13 @@ export function clusterRequired() {
        descriptor[fnKey] = async function (...args: any[]): Promise<any> {
             let clusters = await getInstance().getClusters()
             if (clusters.length === 0) {
-                const lOrC = await window.showInformationMessage('Login in to a Cluster to run this command.', 'Login', 'Add OpenShift Cluster', 'Cancel');
+                const lOrC = await window.showInformationMessage('Login in to a Cluster to run this command.', 'Login', 'Cancel');
                 if(lOrC === 'Login') {
                     const loginResult = await commands.executeCommand('openshift.explorer.login');
                     if (typeof loginResult === 'string') {
                         window.showInformationMessage(loginResult);
                     }
                     clusters = await getInstance().getClusters();
-                } else if (lOrC === 'Add OpenShift Cluster') {
-                    return commands.executeCommand('openshift.explorer.addCluster');
                 }
             }
             if (clusters.length) {

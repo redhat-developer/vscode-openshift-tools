@@ -1,6 +1,76 @@
 # Change Log
 
-## 0.2.4 (March 20, 2021)
+## 0.2.9 (July 29, 2021)
+
+### New Features
+
+* [#2005](https://github.com/redhat-developer/vscode-openshift-tools/issues/2005) Add/Remove/Update Registry commands for Component Types View and Command Palette
+
+### Bug fixes
+
+* [#2213](https://github.com/redhat-developer/vscode-openshift-tools/issues/2213) DevSandbox page fails 
+* [#2177](https://github.com/redhat-developer/vscode-openshift-tools/issues/2177) Objects deleted from App Explorer tree have not deleted from parent->children cache
+* [#2167](https://github.com/redhat-developer/vscode-openshift-tools/issues/2167) Option to prevent removing project folder from workspace when deleting component
+
+## 0.2.8 (July 13, 2021)
+
+* [#2202](https://github.com/redhat-developer/vscode-openshift-tools/issues/2202) Sort components/services alphabetically under application node
+* [#2197](https://github.com/redhat-developer/vscode-openshift-tools/issues/2197) Warning about 'redhat.telemetry.enabled' property with vscode 1.58.0 release
+* [#2195](https://github.com/redhat-developer/vscode-openshift-tools/issues/2195) Add 'New Component' button to Components View title
+* [#2193](https://github.com/redhat-developer/vscode-openshift-tools/issues/2193) Components View has no icons for components in workspace
+* [#2191](https://github.com/redhat-developer/vscode-openshift-tools/issues/2191) Cannot delete component with odo v2.2.2
+* [#2190](https://github.com/redhat-developer/vscode-openshift-tools/issues/2190) Migrate to odo v2.2.3
+* [#2188](https://github.com/redhat-developer/vscode-openshift-tools/issues/2188) Report cancellation step name or number in telemetry event where is applicable
+* [#2186](https://github.com/redhat-developer/vscode-openshift-tools/issues/2186) Update odo to v2.2.2
+* [#2184](https://github.com/redhat-developer/vscode-openshift-tools/issues/2184) Extension fails to load if limit of FSWatchers is reached
+* [#2181](https://github.com/redhat-developer/vscode-openshift-tools/issues/2181) Use context folder base name as default value for component's name input
+* [#2168](https://github.com/redhat-developer/vscode-openshift-tools/issues/2168) crc message about new version availability force 'Add OpenShift Cluster' editor into error state
+* [#2166](https://github.com/redhat-developer/vscode-openshift-tools/issues/2166) Remove vscode-common from extension dependencies
+* [#2022](https://github.com/redhat-developer/vscode-openshift-tools/issues/2022) Do not delete context folders from workspace when deleting application
+* [#1962](https://github.com/redhat-developer/vscode-openshift-tools/issues/1962) Add telemetry events for 'Add OpenShift Cluster' editor commands
+
+## 0.2.7 (Jun 3, 2021)
+
+* [#2154](https://github.com/redhat-developer/vscode-openshift-tools/issues/2154) Migrate to odo 2.2.1
+* [#2153](https://github.com/redhat-developer/vscode-openshift-tools/issues/2153) Sort s2i and devfile component in Quickpick view for ComponentTypes
+* [#2149](https://github.com/redhat-developer/vscode-openshift-tools/issues/2149) Add telemetry information for OpenShift cluster version
+* [#2148](https://github.com/redhat-developer/vscode-openshift-tools/issues/2148) Show build log for 'OpenShift: Push' command
+* [#2146](https://github.com/redhat-developer/vscode-openshift-tools/issues/2146) Creating new s2i component without version added as devfile kind
+* [#2141](https://github.com/redhat-developer/vscode-openshift-tools/issues/2141) Multiple registries support: Use --registry option when creating component
+* [#2137](https://github.com/redhat-developer/vscode-openshift-tools/issues/2137) `OpenShift: Watch` command fails to start
+* [#2107](https://github.com/redhat-developer/vscode-openshift-tools/issues/2107) Test and fix `Deploy to OpenShift` command for Quarkus project
+
+## 0.2.6 (May 10, 2021)
+
+* [#2121](https://github.com/redhat-developer/vscode-openshift-tools/issues/2121) Open Welcome page in the active view column
+* [#2130](https://github.com/redhat-developer/vscode-openshift-tools/pull/2130) Fix typo in Welcome page
+* [#2131](https://github.com/redhat-developer/vscode-openshift-tools/pull/2131) Disable odo telemetry for commands executed from the extension
+
+## 0.2.5 (May 7, 2021)
+
+* [#2119](https://github.com/redhat-developer/vscode-openshift-tools/issues/2119) svg icons stopped working after vscode update to VSCode v1.56.0
+* [#2117](https://github.com/redhat-developer/vscode-openshift-tools/issues/2117) `New Component` command does not support multiple registries
+* [#2115](https://github.com/redhat-developer/vscode-openshift-tools/issues/2115) `New Component` command stopped asking to use starter project after migration to odo v2.1.0
+* [#2110](https://github.com/redhat-developer/vscode-openshift-tools/issues/2110) OpenShift: welcome command does not activate the extension
+* [#2105](https://github.com/redhat-developer/vscode-openshift-tools/issues/2105) Migrate Components View to odo v2.1.0
+* [#2100](https://github.com/redhat-developer/vscode-openshift-tools/issues/2100) Update odo to v2.1.0
+* [#2097](https://github.com/redhat-developer/vscode-openshift-tools/issues/2097) README.md should include itemized dependencies
+* [#2093](https://github.com/redhat-developer/vscode-openshift-tools/issues/2093) `OpenShift: Welcome` command to open Welcome page
+* [#2085](https://github.com/redhat-developer/vscode-openshift-tools/issues/2085) Nodejs devfile reports invalid arguments
+* [#2074](https://github.com/redhat-developer/vscode-openshift-tools/issues/2074) `Cannot read property 'tags' of null` error in `openshift.component.createFromLocal` command
+* [#2073](https://github.com/redhat-developer/vscode-openshift-tools/issues/2073) 'Add Cluster Editor' show cluster in 'Starting' state after successful start
+* [#2062](https://github.com/redhat-developer/vscode-openshift-tools/issues/2062) `OpenShift: Push Component` command shows only 'not pushed' components
+* [#2061](https://github.com/redhat-developer/vscode-openshift-tools/issues/2061) VSCode Commands called from navigation/inline group or with welcome page button don't report exceptions
+* [#2044](https://github.com/redhat-developer/vscode-openshift-tools/issues/2044) Component Types view is empty when no kube config exists
+* [#2036](https://github.com/redhat-developer/vscode-openshift-tools/issues/2036) Validation for component name should work even if `odo list` fails
+* [#2034](https://github.com/redhat-developer/vscode-openshift-tools/issues/2034) Support single root workspace
+* [#2027](https://github.com/redhat-developer/vscode-openshift-tools/issues/2027) New Component command called form App Explorer should create Local Component
+* [#2011](https://github.com/redhat-developer/vscode-openshift-tools/issues/2011) Add `Reveal in Explorer` command for components in Application Explorer view
+* [#1980](https://github.com/redhat-developer/vscode-openshift-tools/issues/1980) Ameliorate getting started experience
+* [#1844](https://github.com/redhat-developer/vscode-openshift-tools/issues/1844) Commands called from palette fail when user is not logged into the cluster
+* [#1219](https://github.com/redhat-developer/vscode-openshift-tools/issues/1219) Show Welcome page when the extension loads
+
+## 0.2.4 (March 21, 2021)
 
 * [#2046](https://github.com/redhat-developer/vscode-openshift-tools/issues/2046) Update Red Hat CodeReady Containers to 1.23.1 to use OpenShift 4.7.0
 * [#2020](https://github.com/redhat-developer/vscode-openshift-tools/issues/2020) Add telemetry reporting for cluster selection in 'Add OpenShift Cluster' editor

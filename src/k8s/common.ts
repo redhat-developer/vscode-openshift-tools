@@ -7,6 +7,7 @@ import { QuickPickItem, window } from 'vscode';
 
 import * as k8s from 'vscode-kubernetes-tools-api';
 import * as Odo from '../odo';
+import { CommandText } from '../odo/command';
 import { VsCommandError } from '../vscommand';
 import { Node } from './node';
 
@@ -16,7 +17,7 @@ function convertItemToQuickPick(item: any): QuickPickItem {
     return qp;
 }
 
-export async function getQuickPicks(cmd: string, errorMessage: string, converter: (item: any) => QuickPickItem = convertItemToQuickPick): Promise<QuickPickItem[]> {
+export async function getQuickPicks(cmd: CommandText, errorMessage: string, converter: (item: any) => QuickPickItem = convertItemToQuickPick): Promise<QuickPickItem[]> {
     const result = await Odo.getInstance().execute(cmd);
     const json = JSON.parse(result.stdout);
     if (json.items.length === 0) {
@@ -30,7 +31,7 @@ export async function selectResourceByName(config: Promise<QuickPickItem[]> | Qu
     return resource ? resource.label : null;
 }
 
-export async function getChildrenNode(command: string, kind: string, abbreviation: string): Promise<k8s.ClusterExplorerV1.Node[]> {
+export async function getChildrenNode(command: CommandText, kind: string, abbreviation: string): Promise<k8s.ClusterExplorerV1.Node[]> {
     const kubectl = await k8s.extension.kubectl.v1;
     if (kubectl.available) {
         const result = await kubectl.api.invokeCommand(`${command}`);
@@ -49,4 +50,13 @@ export async function asJson<T>(command: string): Promise<T> {
         return JSON.parse(result.stdout) as T;
     }
     return;
+}
+
+export async function execKubectl(command: string) {
+    const kubectl = await k8s.extension.kubectl.v1;
+    if (kubectl.available) {
+        const result = await kubectl.api.invokeCommand(`${command}`);
+        return result;
+    }
+    throw new Error('Cannot find kubectl command.');
 }

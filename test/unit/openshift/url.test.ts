@@ -22,7 +22,6 @@ suite('OpenShift/URL', () => {
     let sandbox: sinon.SinonSandbox;
     let quickPickStub: sinon.SinonStub;
     let inputStub: sinon.SinonStub;
-    let termStub: sinon.SinonStub;
     let execStub: sinon.SinonStub;
     let getApplicationNamesStub: sinon.SinonStub;
     let getComponentsNameStub: sinon.SinonStub;
@@ -185,7 +184,7 @@ suite('OpenShift/URL', () => {
         getRouteNameStub = sandbox.stub(OpenShiftItem, 'getRoutes').resolves([routeItem]);
         getApplicationNamesStub = sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         getComponentsNameStub = sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
-        termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
+        sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: '', stdout: '', stderr: ''});
     });
 
@@ -345,14 +344,14 @@ suite('OpenShift/URL', () => {
             const result = await Url.del(routeItem);
 
             expect(result).equals(`URL '${routeItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
-            expect(execStub.getCall(0).args[0]).equals(Command.deleteComponentUrl(routeItem.getName()));
+            expect(`${execStub.getCall(0).args[0]}`).equals(`${Command.deleteComponentUrl(routeItem.getName())}`);
         });
 
         test('works without set tree item', async () => {
             const result = await Url.del(null);
 
             expect(result).equals(`URL '${routeItem.getName()}' from Component '${componentItem.getName()}' successfully deleted`);
-            expect(execStub.getCall(0).args[0]).equals(Command.deleteComponentUrl(routeItem.getName()));
+            expect(`${execStub.getCall(0).args[0]}`).equals(`${Command.deleteComponentUrl(routeItem.getName())}`);
         });
 
         test('returns null with no URL selected', async () => {
@@ -398,37 +397,6 @@ suite('OpenShift/URL', () => {
             execStub.resolves(genUlrListExecResult('Not pushed'));
             const result = await Url.open(routeItem);
             expect(result).equals('Selected URL is not created in cluster yet. Use \'Push\' command before opening URL in browser.');
-        });
-    });
-
-    suite('describe', () => {
-
-        setup(() => {
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
-            sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
-            sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([]);
-            getRouteNameStub.resolves([]);
-            quickPickStub.onFirstCall().resolves(appItem);
-            quickPickStub.onSecondCall().resolves(componentItem);
-            quickPickStub.onThirdCall().resolves(routeItem);
-        });
-
-        test('calls the correct odo command w/ context', async () => {
-            await Url.describe(routeItem);
-
-            expect(termStub).calledOnceWith(Command.describeUrl(routeItem.getName()));
-        });
-
-        test('calls the correct odo command w/o context', async () => {
-            await Url.describe(null);
-
-            expect(termStub).calledOnceWith(Command.describeUrl(routeItem.getName()));
-        });
-
-        test('does not call the odo command if canceled', async () => {
-            sandbox.stub(Url, 'getOpenShiftCmdData').resolves(null);
-            await Url.describe(null);
-            expect(termStub).not.called;
         });
     });
 });

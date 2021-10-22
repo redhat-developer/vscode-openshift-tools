@@ -14,14 +14,9 @@ import { Command } from './odo/command';
 import { EnvInfo } from './odo/env';
 import { vsCommand } from './vscommand';
 
-
 export interface WorkspaceEntry {
     uri: vsc.Uri;
     type: vsc.FileType;
-}
-
-function isWorkspaceEntry(entry: any): entry is WorkspaceEntry {
-    return entry.uri && entry.type;
 }
 
 class Labeled {
@@ -36,16 +31,13 @@ class Application extends Labeled {
 
 type Entry = Project | Application | WorkspaceEntry | WorkspaceFolderComponent;
 
-export interface WorkspaceFolderComponent {
+export interface WorkspaceFolderComponent extends vsc.TreeItem{
     project: string;
     application: string;
     contextUri: vsc.Uri;
-    label: string;
-    description?: string;
-    tooltip?: string;
 }
 
-function isWorkspaceFolderComponent(entry: any): entry is WorkspaceFolderComponent {
+function isWorkspaceFolderComponent(entry): entry is WorkspaceFolderComponent {
     return entry.contextUri;
 }
 
@@ -98,7 +90,8 @@ async function getComponentsInWorkspace(): Promise<WorkspaceFolderComponent[]> {
                 contextUri,
                 description,
                 tooltip,
-                contextValue: 'openshift.component'
+                contextValue: 'openshift.component',
+                iconPath: vsc.Uri.file(path.join(__dirname, '../../images/component', 'workspace.png'))
             }
         } catch (err) {
             // ignore unexpected parsing errors
@@ -133,6 +126,7 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
             await vsc.commands.executeCommand('revealInExplorer', context.contextUri);
         }
     }
+
     createTreeView(id: string): vsc.TreeView<Entry> {
         if (!this.treeView) {
             this.treeView = vsc.window.createTreeView(id, {
@@ -156,13 +150,10 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
     }
 
     getChildren(element?: Entry): vsc.ProviderResult<Entry[]> {
-        if (element) {
-            if (isWorkspaceFolderComponent(element)) {
-                return [];
-            } else if (isWorkspaceEntry(element)) {
-                return []
-            }
-        }
-        return getComponentsInWorkspace();
+        const result = element ? [] : getComponentsInWorkspace();
+        return Promise.resolve(result).then(async result1 => {
+            await vsc.commands.executeCommand('setContext', 'openshift.component.explorer.init', result1.length === 0);
+            return result;
+        })
     }
 }

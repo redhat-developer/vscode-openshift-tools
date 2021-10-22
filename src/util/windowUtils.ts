@@ -6,10 +6,12 @@
 import { window, Terminal, TerminalOptions } from 'vscode';
 
 export class WindowUtil {
-    static createTerminal(name: string, cwd?: string): Terminal {
+    static createTerminal(name: string, cwd?: string, env = process.env): Terminal {
+
         const options: TerminalOptions = {
             cwd,
-            name
+            name,
+            env
         };
         if (process.platform === 'win32') {
             options.shellPath = process.env.ComSpec;

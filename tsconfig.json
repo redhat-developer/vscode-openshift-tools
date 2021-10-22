@@ -24,8 +24,9 @@
         "node_modules",
         ".vscode-test",
         "test-resources",
-        "src/view/log/app",
-        "src/view/describe/app",
-        "src/view/cluster/app"
+        "src/webview/log/app",
+        "src/webview/describe/app",
+        "src/webview/cluster/app",
+        "src/webview/create-service/app"
     ]
 }

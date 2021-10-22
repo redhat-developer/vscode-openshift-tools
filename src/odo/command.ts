@@ -2,6 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/ban-types */
 
 import { workspace } from 'vscode';
 import { Platform } from '../util/platform';
@@ -20,174 +21,350 @@ function verbose(_target: any, key: string, descriptor: any): void {
     descriptor[fnKey] = function(...args: any[]): any {
         const v = workspace.getConfiguration('openshiftConnector').get('outputVerbosityLevel');
         const command = fn.apply(this, args);
-        return command + (v > 0 ? ` -v ${v}` : '');
+        return v > 0 ? command.addOption('-v', v): command;
     };
 }
 
+const QUOTE = Platform.OS === 'win32' ? '"' : '\'';
+
+export class CommandOption {
+    protected privacy = false;
+    constructor(public readonly name: string, public readonly value?: string, public readonly redacted = true, public readonly quoted = false) {
+    }
+
+    toString(): string {
+        if (this.privacy) {
+            return this.toPrivateString();
+        }
+        return `${this.name}${this.value ? `=${this.quote}${this.value}${this.quote}` : '' }`;
+    }
+
+    toPrivateString(): string {
+        return `${this.name}${this.value && this.redacted? ' REDACTED' : '' }`
+    }
+
+    privacyMode(set: boolean): void {
+        this.privacy = set;
+    }
+
+    get quote(): string {
+        return this.quoted? QUOTE : '';
+    }
+}
+
+export class CommandText {
+    private privacy = false;
+    constructor(public readonly command: string, public readonly parameter?: string, public readonly options: CommandOption[] = []) {
+    }
+
+    toString(): string {
+        return `${this.command}${this.parameter? ` ${this.privacy? 'REDACTED' : this.parameter}`: ''}${this.options && this.options.length > 0? ` ${this.options.join(' ')}`: ''}`;
+    }
+
+    privacyMode(set: boolean): CommandText {
+        this.privacy = set;
+        this.options.forEach(element => element.privacyMode(true));
+        return this;
+    }
+
+    addOption(option: CommandOption): CommandText {
+       this.options.push(option);
+       return this;
+    }
+}
+
 export class Command {
-
-    static viewEnv(): string {
-        return 'odo env view -o json';
+    static createServiceCommand(fileName: string): CommandText {
+        return new CommandText(
+            'oc create',
+            undefined, [
+                new CommandOption('-f', fileName)
+            ]
+        )
     }
 
-    static printCatalogComponentImageStreamRefJson(name: string, namespace: string): string {
-        return `oc get imagestream ${name} -n ${namespace} -o json`;
+    static viewEnv(): CommandText {
+        return new CommandText(
+            'odo env view',
+            undefined, [
+                new CommandOption('-o', 'json', false)
+            ]
+        );
     }
 
-    static listProjects(): string {
-        return 'odo project list -o json';
+    static printCatalogComponentImageStreamRefJson(name: string, namespace: string): CommandText {
+        return new CommandText(
+            'oc get imagestream',
+            name, [
+                new CommandOption('-n', namespace),
+                new CommandOption('-o', 'json', false)
+            ]
+        );
+    }
+
+    static listProjects(): CommandText {
+        return new CommandText('odo project list -o json');
     }
 
     @verbose
-    static listApplications(project: string): string {
-        return `odo application list --project ${project} -o json`;
+    static listApplications(project: string): CommandText {
+        return new CommandText(
+            'odo application list',
+            undefined, [
+                new CommandOption('--project', project),
+                new CommandOption('-o', 'json', false)
+            ]
+        );
     }
 
-    static deleteProject(name: string): string {
-        return `odo project delete ${name} -w -o json`;
+    static deleteProject(name: string): CommandText {
+        return new CommandText(
+            'odo project delete',
+            name, [
+                new CommandOption('-w'),
+                new CommandOption('-o', 'json', false)
+            ]
+        );
     }
 
     @verbose
-    static createProject(name: string): string {
-        return `odo project create ${name} -w`;
+    static createProject(name: string): CommandText {
+        return new CommandText('odo project create',
+            name, [
+                new CommandOption('-w')
+            ]
+        );
     }
 
-    static listComponents(project: string, app: string): string {
-        return `odo list --app ${app} --project ${project} -o json`;
+    static listComponents(project: string, app: string): CommandText {
+        return new CommandText('odo list',
+            undefined, [
+                new CommandOption('--app', app),
+                new CommandOption('--project', project),
+                new CommandOption('-o', 'json', false)
+            ]
+        );
     }
 
-    static listRegistries(): string {
-        return 'odo registry list -o json';
+    static listRegistries(): CommandText {
+        return new CommandText('odo registry list -o json');
     }
 
-    static listCatalogComponents(): string {
-        return 'odo catalog list components';
+    static addRegistry(name: string, url: string, token: string): CommandText {
+        const cTxt =  new CommandText('odo registry add', `${name} ${url}`);
+        if (token) {
+            cTxt.addOption(new CommandOption('--token', token));
+        }
+        return cTxt;
     }
 
-    static listCatalogComponentsJson(): string {
-        return `${Command.listCatalogComponents()} -o json`;
+    static removeRegistry(name: string): CommandText {
+        return new CommandText('odo registry delete', name, [new CommandOption('-f')]);
     }
 
-    static listCatalogServices(): string {
-        return 'odo catalog list services';
+    static listCatalogComponents(): CommandText {
+        return new CommandText('odo catalog list components');
     }
 
-    static listCatalogServicesJson(): string {
-        return `${Command.listCatalogServices()} -o json`;
+    static listCatalogComponentsJson(): CommandText {
+        return new CommandText(`${Command.listCatalogComponents()} -o json`);
     }
 
-    static listStorageNames(): string {
-        return 'odo storage list -o json';
+    static listCatalogServices(): CommandText {
+        return new CommandText('odo catalog list services');
     }
 
-    static printOcVersion(): string {
-        return 'oc version';
+    static listCatalogOperatorBackedServices(): CommandText {
+        return new CommandText('oc get csv -o jsonpath="{range .items[*]}{.metadata.name}{\'\\t\'}{.spec.version}{\'\\t\'}{.spec.displayName}{\'\\t\'}{.metadata.annotations.description}{\'\\n\'}{end}"');
     }
 
-    static listServiceInstances(project: string, app: string): string {
-        return `odo service list -o json --project ${project} --app ${app}`;
+    static listCatalogServicesJson(): CommandText {
+        return new CommandText(`${Command.listCatalogServices()} -o json`);
     }
 
-    static describeApplication(project: string, app: string): string {
-        return `odo app describe ${app} --project ${project}`;
+    static listStorageNames(): CommandText {
+        return new CommandText('odo storage list -o json');
     }
 
-    static deleteApplication(project: string, app: string): string {
-        return `odo app delete ${app} --project ${project} -f`;
+    static printOcVersion(): CommandText {
+        return new CommandText('oc version');
     }
 
-    static printOdoVersion(): string {
-        return 'odo version';
+    static printOcVersionJson(): CommandText {
+        return new CommandText('oc version -ojson');
     }
 
-    static printOdoVersionAndProjects(): string {
-        return 'odo version && odo project list';
+    static listServiceInstances(project: string, app: string): CommandText {
+        return new CommandText('odo service list',
+            undefined, [
+                new CommandOption('-o', 'json', false),
+                new CommandOption('--project', project),
+                new CommandOption('--app', app)
+            ]
+        );
     }
 
-    static odoLogout(): string {
-        return 'odo logout';
+    static describeApplication(project: string, app: string): CommandText {
+        return new CommandText('odo app describe',
+            app, [
+                new CommandOption('--project', project)
+            ]
+        );
     }
 
-    static setOpenshiftContext(context: string): string {
-        return `oc config use-context ${context}`;
+    static deleteApplication(project: string, app: string): CommandText {
+        return new CommandText ('odo app delete',
+            app, [
+                new CommandOption('--project', project),
+                new CommandOption('-f')
+            ]
+        );
+    }
+
+    static printOdoVersion(): CommandText {
+        return new CommandText('odo version');
+    }
+
+    static odoLogout(): CommandText {
+        return new CommandText('odo logout');
+    }
+
+    static setOpenshiftContext(context: string): CommandText {
+        return new CommandText('oc config use-context',
+            context
+        );
     }
 
     static odoLoginWithUsernamePassword(
         clusterURL: string,
         username: string,
         passwd: string,
-    ): string {
-        const quote = Platform.OS === 'win32' ? '"' : '\'';
-        return `odo login ${clusterURL} -u ${quote}${username}${quote} -p ${quote}${passwd}${quote} --insecure-skip-tls-verify`;
+    ): CommandText {
+        return new CommandText('odo login',
+            clusterURL, [
+                new CommandOption('-u', username, true, true),
+                new CommandOption('-p', passwd, true, true),
+                new CommandOption('--insecure-skip-tls-verify')
+            ]
+        );
     }
 
-    static odoLoginWithToken(clusterURL: string, ocToken: string): string {
-        return `odo login ${clusterURL} --token=${ocToken} --insecure-skip-tls-verify`;
+    static odoLoginWithToken(clusterURL: string, ocToken: string): CommandText {
+        return new CommandText('odo login',
+            clusterURL, [
+                new CommandOption('--token',ocToken),
+                new CommandOption('--insecure-skip-tls-verify')
+            ]
+        );
     }
 
     @verbose
-    static createStorage(storageName: string, mountPath: string, storageSize: string): string {
-        return `odo storage create ${storageName} --path=${mountPath} --size=${storageSize}`;
+    static createStorage(storageName: string, mountPath: string, storageSize: string): CommandText {
+        return new CommandText('odo storage create',
+            storageName, [
+                new CommandOption('--path', mountPath),
+                new CommandOption('--size', storageSize)
+            ]
+        );
     }
 
-    static deleteStorage(storage: string): string {
-        return `odo storage delete ${storage} -f`;
+    static deleteStorage(storage: string): CommandText {
+        return new CommandText('odo storage delete',
+            storage, [
+                new CommandOption('-f')
+            ]
+        );
     }
 
-    static describeStorage(storage: string): string {
-        return `odo storage describe ${storage}`;
+    static waitForStorageToBeGone(project: string, app: string, storage: string): CommandText {
+        return new CommandText('oc wait',
+            `pvc/${storage}-${app}-pvc`, [
+                new CommandOption('--for=delete'),
+                new CommandOption('--namespace', project)
+            ]
+        );
     }
 
-    static waitForStorageToBeGone(project: string, app: string, storage: string): string {
-        return `oc wait pvc/${storage}-${app}-pvc --for=delete --namespace ${project}`;
+    static undeployComponent(project: string, app: string, component: string): CommandText {
+        return new CommandText('odo delete',
+            component, [
+                new CommandOption('-f'),
+                new CommandOption('--app', app),
+                new CommandOption('--project', project)
+            ]
+        );
     }
 
-    static undeployComponent(project: string, app: string, component: string): string {
-        return `odo delete ${component} -f --app ${app} --project ${project}`;
+    static deleteComponent(project: string, app: string, component: string, context: boolean, s2i = false): CommandText {
+        const ct = new CommandText('odo delete',
+            context ? undefined : component, [ // if there is not context name is required
+                new CommandOption('-f'),
+            ]
+        );
+        if (!context) { // if there is no context state app and project name
+            ct.addOption(new CommandOption('--app', app))
+                .addOption(new CommandOption('--project',project))
+        } else {
+            ct.addOption(new CommandOption('--all'));
+        }
+        if (s2i) {
+            ct.addOption(new CommandOption('--s2i'));
+        }
+        return ct;
     }
 
-    static deleteComponent(project: string, app: string, component: string, s2i = false): string {
-        return `odo delete ${component} -f --app ${app} --project ${project} --all ${s2i? ' --s2i' : ''}`;
+    static describeComponentNoContext(project: string, app: string, component: string): CommandText {
+        return new CommandText('odo describe',
+            component, [
+                new CommandOption('--app', app),
+                new CommandOption('--project', project)
+            ]
+        );
     }
 
-    static describeComponentNoContext(project: string, app: string, component: string): string {
-        return `odo describe ${component} --app ${app} --project ${project}`;
+    static describeComponentNoContextJson(project: string, app: string, component: string): CommandText {
+        return this.describeComponentNoContext(project, app, component)
+            .addOption(new CommandOption('-o', 'json', false));
     }
 
-    static describeComponentNoContextJson(project: string, app: string, component: string): string {
-        return `${this.describeComponentNoContext(project, app, component)} -o json`;
+    static describeComponent(): CommandText {
+        return new CommandText('odo describe');
     }
 
-    static describeComponent(): string {
-        return 'odo describe';
+    static describeComponentJson(): CommandText {
+        return Command.describeComponent().addOption(new CommandOption('-o', 'json', false));
     }
 
-    static describeComponentJson(): string {
-        return `${Command.describeComponent()} -o json`;
+    static describeService(service: string): CommandText {
+        return new CommandText('odo catalog describe service', service);
+
     }
 
-    static describeService(service: string): string {
-        return `odo catalog describe service ${service}`;
+    static describeCatalogComponent(component: string): CommandText {
+        return new CommandText('odo catalog describe component',
+            component, [
+                new CommandOption('-o', 'json', false)
+            ]
+        );
     }
 
-    static describeCatalogComponent(component: string): string {
-        return `odo catalog describe component ${component} -o json`;
+    static showLog(): CommandText {
+        return new CommandText('odo log');
     }
 
-    static describeUrl(url: string): string {
-        return `odo url describe ${url}`;
+    static showLogAndFollow(): CommandText {
+        return Command.showLog().addOption(new CommandOption('-f'));
     }
 
-    static showLog(): string {
-        return 'odo log';
-    }
 
-    static showLogAndFollow(): string {
-        return 'odo log -f';
-    }
-
-    static listComponentPorts(project: string, app: string, component: string): string {
-        return `oc get service ${component}-${app} --namespace ${project} -o jsonpath="{range .spec.ports[*]}{.port}{','}{end}"`;
+    static listComponentPorts(project: string, app: string, component: string): CommandText {
+        return new CommandText('oc get service',
+            `${component}-${app}`, [
+                new CommandOption('--namespace', project),
+                // see https://kubernetes.io/docs/reference/kubectl/jsonpath/ for examples
+                new CommandOption('-o', 'jsonpath="{range .spec.ports[*]}{.port}{\',\'}{end}"', false)
+            ]
+        );
     }
 
     static linkComponentTo(
@@ -196,10 +373,16 @@ export class Command {
         component: string,
         componentToLink: string,
         port?: string,
-    ): string {
-        return `odo link ${componentToLink} --project ${project} --app ${app} --component ${component} --wait${
-            port ? ` --port ${port}` : ''
-        }`;
+    ): CommandText {
+        const cTxt = new CommandText('odo link', componentToLink);
+        cTxt.addOption(new CommandOption('--project',project))
+            .addOption(new CommandOption('--app',app))
+            .addOption(new CommandOption('--component', component))
+            .addOption(new CommandOption('--wait'));
+        if (port) {
+            cTxt.addOption(new CommandOption('--port', port));
+        }
+        return cTxt;
     }
 
     static linkServiceTo(
@@ -207,18 +390,32 @@ export class Command {
         app: string,
         component: string,
         serviceToLink: string,
-    ): string {
-        return `odo link ${serviceToLink} --project ${project} --app ${app} --component ${component} --wait --wait-for-target`;
+    ): CommandText {
+        return new CommandText('odo link',
+            serviceToLink, [
+                new CommandOption('--wait'),
+                new CommandOption('--wait-for-target')
+            ]
+        );
     }
 
     @verbose
-    static pushComponent(configOnly = false, debug = false): string {
-        return `odo push${debug ? ' --debug' : ''}${configOnly ? ' --config' : ''}`;
+    static pushComponent(configOnly = false, debug = false): CommandText {
+        const cTxt = new CommandText('odo push');
+        if (debug) {
+            cTxt.addOption(new CommandOption('--debug'));
+        }
+        if (configOnly) {
+            cTxt.addOption(new CommandOption('--config'));
+        } else {
+            cTxt.addOption(new CommandOption('--show-log'));
+        }
+        return cTxt;
     }
 
     @verbose
-    static watchComponent(): string {
-        return 'odo watch';
+    static watchComponent(): CommandText {
+        return new CommandText('odo watch');
     }
 
     @verbose
@@ -227,12 +424,29 @@ export class Command {
         app: string,
         type = '', // will use empty string in case of undefined type passed in
         version: string,
+        registryName: string,
         name: string,
         folder: string,
         starter: string = undefined,
         useExistingDevfile = false
-    ): string {
-        return `odo create ${type}${version?':':''}${version?version:''} ${name} ${version?'--s2i':''} --context ${folder} --app ${app} --project ${project}${starter ? ` --starter=${starter}` : ''}${useExistingDevfile ? ' --devfile devfile.yaml' : ''}`;
+    ): CommandText {
+        const cTxt = new CommandText('odo create', `${type}${version?':':''}${version?version:''} ${name}`);
+        if (version) {
+            cTxt.addOption(new CommandOption('--s2i'));
+        }
+        if (registryName) {
+            cTxt.addOption(new CommandOption('--registry', registryName));
+        }
+        cTxt.addOption(new CommandOption('--context', folder))
+            .addOption(new CommandOption('--app', app))
+            .addOption(new CommandOption('--project', project));
+        if (starter) {
+            cTxt.addOption(new CommandOption('--starter', starter, false));
+        }
+        if (useExistingDevfile) {
+            cTxt.addOption(new CommandOption('--devfile', 'devfile.yaml', false));
+        }
+        return cTxt;
     }
 
     @verbose
@@ -244,8 +458,15 @@ export class Command {
         name: string,
         git: string,
         ref: string,
-    ): string {
-        return `odo create ${type}${version?':':''}${version?version:''} ${name} ${version?'--s2i':''} --git ${git} --ref ${ref} --app ${app} --project ${project}`;
+    ): CommandText {
+        const cTxt = new CommandText('odo create', `${type}${version?':':''}${version?version:''} ${name}`);
+        if (version) {
+            cTxt.addOption(new CommandOption('--s2i'));
+        }
+        return cTxt.addOption(new CommandOption('--git', git))
+            .addOption(new CommandOption('--ref', ref))
+            .addOption(new CommandOption('--app', app))
+            .addOption(new CommandOption('--project', project));
     }
 
     @verbose
@@ -257,12 +478,20 @@ export class Command {
         name: string,
         binary: string,
         context: string,
-    ): string {
-        return `odo create ${type}:${version} ${name} ${version?'--s2i':''} --binary ${binary} --app ${app} --project ${project} --context ${context}`;
+    ): CommandText {
+        const cTxt = new CommandText('odo create', `${type}:${version} ${name}`);
+        if (version) {
+            cTxt.addOption(new CommandOption('--s2i'));
+        }
+        cTxt.addOption(new CommandOption('--binary', binary))
+            .addOption(new CommandOption('--app', app))
+            .addOption(new CommandOption('--project', project))
+            .addOption(new CommandOption('--context',context));
+        return cTxt;
     }
 
-    static testComponent() {
-        return 'odo test --show-log';
+    static testComponent(): CommandText {
+        return new CommandText('odo test --show-log');
     };
 
     @verbose
@@ -272,37 +501,67 @@ export class Command {
         template: string,
         plan: string,
         name: string,
-    ): string {
-        return `odo service create ${template} --plan ${plan} ${name} --app ${app} --project ${project} -w`;
+    ): CommandText {
+        return new CommandText('odo service create',
+            `${template} ${name}`, [
+                new CommandOption('--plan', plan),
+                new CommandOption('--app', app),
+                new CommandOption('--project', project),
+                new CommandOption('-w')
+            ]
+        );
     }
 
-    static deleteService(project: string, app: string, name: string): string {
-        return `odo service delete ${name} -f --project ${project} --app ${app}`;
+    static deleteService(name: string): CommandText {
+        return new CommandText('oc delete', name);
     }
 
-    static getServiceTemplate(project: string, service: string): string {
-        return `oc get ServiceInstance ${service} --namespace ${project} -o jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/name}"`;
+    static getServiceTemplate(project: string, service: string): CommandText {
+        return new CommandText('oc get ServiceInstance',
+            service, [
+                new CommandOption('--namespace', project),
+                new CommandOption('-o', 'jsonpath="{$.metadata.labels.app\\.kubernetes\\.io/name}"', false)
+            ]
+        );
     }
 
-    static waitForServiceToBeGone(project: string, service: string): string {
-        return `oc wait ServiceInstance/${service} --for delete --namespace ${project}`;
+    static waitForServiceToBeGone(project: string, service: string): CommandText {
+        return new CommandText('oc wait',
+            `ServiceInstance/${service}`, [
+                new CommandOption('--for', 'delete', false),
+                new CommandOption('--namespace', project)
+            ]
+        );
     }
 
     @verbose
-    static createComponentCustomUrl(name: string, port: string, secure = false): string {
-        return `odo url create ${name} --port ${port} ${secure ? '--secure' : ''}`;
+    static createComponentCustomUrl(name: string, port: string, secure = false): CommandText {
+        const cTxt = new CommandText('odo url create',
+            name, [
+                new CommandOption('--port', port)
+            ]
+        );
+        if (secure) {
+            cTxt.addOption(new CommandOption('--secure'));
+        }
+        return cTxt;
     }
 
-    static getComponentUrl(): string {
-        return 'odo url list -o json';
+    static getComponentUrl(): CommandText {
+        return new CommandText('odo url list -o json');
     }
 
-    static deleteComponentUrl(name: string): string {
-        return `odo url delete -f ${name} --now`;
+    static deleteComponentUrl(name: string): CommandText {
+        return new CommandText('odo url delete',
+            name, [
+                new CommandOption('-f'),
+                new CommandOption('--now')
+            ]
+        );
     }
 
-    static getComponentJson(): string {
-        return 'odo describe -o json';
+    static getComponentJson(): CommandText {
+        return new CommandText('odo describe -o json');
     }
 
     static unlinkComponents(
@@ -311,23 +570,38 @@ export class Command {
         comp1: string,
         comp2: string,
         port: string,
-    ): string {
-        return `odo unlink --project ${project} --app ${app} ${comp2} --port ${port} --component ${comp1}`;
+    ): CommandText {
+        return new CommandText('odo unlink',
+            comp2, [
+                new CommandOption('--project', project),
+                new CommandOption('--app', app),
+                new CommandOption('--port', port),
+                new CommandOption('--component', comp1)
+            ]
+        );
     }
 
-    static unlinkService(project: string, app: string, service: string, comp: string): string {
-        return `odo unlink --project ${project} --app ${app} ${service} --component ${comp}`;
+    static unlinkService(project: string, service: string): CommandText {
+        return new CommandText('odo unlink', service);
     }
 
-    static getclusterVersion(): string {
-        return 'oc get clusterversion -ojson';
+    static getclusterVersion(): CommandText {
+        return new CommandText('oc get clusterversion -o json');
     }
 
-    static showServerUrl(): string {
-        return 'oc whoami --show-server';
+    static showServerUrl(): CommandText {
+        return new CommandText('oc whoami --show-server');
     }
 
-    static showConsoleUrl(): string {
-        return 'oc get configmaps console-public -n openshift-config-managed -o json';
+    static showConsoleUrl(): CommandText {
+        return new CommandText('oc get configmaps console-public -n openshift-config-managed -o json');
+    }
+
+    static getClusterServiceVersionJson(name: string) {
+        return new CommandText('oc get csv',
+            name, [
+                new CommandOption('-o', 'json')
+            ]
+        );
     }
 }

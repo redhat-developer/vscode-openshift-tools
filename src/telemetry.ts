@@ -3,14 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { getTelemetryService, TelemetryEvent, TelemetryService } from '@redhat-developer/vscode-redhat-telemetry';
-import { ExtenisonID } from './util/constants';
+import { getRedHatService, TelemetryEvent, TelemetryService } from '@redhat-developer/vscode-redhat-telemetry';
+import { ExtensionContext } from 'vscode';
 
-const telemetryService: Promise<TelemetryService> = getTelemetryService(ExtenisonID);
-
-export async function getTelemetryServiceInstance(): Promise<TelemetryService> {
-    return telemetryService;
-}
+let telemetryService: TelemetryService;
 
 export function createTrackingEvent(name: string, properties: any = {}): TelemetryEvent {
     return {
@@ -20,10 +16,35 @@ export function createTrackingEvent(name: string, properties: any = {}): Telemet
     }
 }
 
-export default async function sendTelemetry(actionName: string, properties?: any): Promise<void> {
-    const service = await getTelemetryServiceInstance();
-    if (actionName === 'activation') {
-        return service?.sendStartupEvent();
+export async function startTelemetry(context: ExtensionContext): Promise<void> {
+    try {
+        const redHatService = await getRedHatService(context);
+        telemetryService = await redHatService.getTelemetryService();
+    } catch(error) {
+        // eslint-disable-next-line no-console
+        console.log(`${error}`);
     }
-    return service?.send(createTrackingEvent(actionName, properties));
+    return telemetryService?.sendStartupEvent();
 }
+
+export default async function sendTelemetry(actionName: string, properties?: any): Promise<void> {
+    return telemetryService?.send(createTrackingEvent(actionName, properties));
+}
+
+export interface CommonCommandProps {
+    identifier: string;
+    error: string;
+    'stack_trace': string;
+    duration: number;
+    cancelled: boolean;
+}
+
+export interface NewComponentCommandProps {
+    'component_kind': string;
+    'component_type': string;
+    'component_version': string;
+    'starter_project': string;
+    'use_existing_devfile': boolean;
+}
+
+export type AllProps = Partial<CommonCommandProps & NewComponentCommandProps>;

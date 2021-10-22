@@ -5,7 +5,7 @@
 
 import { Cluster } from '@kubernetes/client-node/dist/config_types';
 import { Url } from 'url';
-import { Ctx, Data } from './componentTypeDescription';
+import { Data } from './componentTypeDescription';
 import { ComponentMetadata } from './config';
 
 export enum ComponentKind {
@@ -35,6 +35,13 @@ export interface ImageStreamTag {
     }
 }
 
+export function ascDevfileFirst(c1: ComponentType, c2: ComponentType): number {
+    if(c1.kind !== c2.kind) {
+        return c1.kind === ComponentKind.DEVFILE? -1: 1;
+    }
+    return c1.label.localeCompare(c2.label)
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isS2iComponent(comp: any): comp is S2iComponentType {
     return comp.kind && (typeof comp.kind) === 'string';
@@ -57,7 +64,7 @@ export function isSampleProject(repo: any): repo is SampleProject {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isCluster(cluster: any): cluster is Cluster {
-    return cluster.name && cluster.server && cluster.skipTLSVerify !== undefined;
+    return cluster.name && cluster.server;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -113,8 +120,8 @@ export interface ComponentType {
 }
 
 export interface ComponentTypeDescription {
-    Ctx: Ctx;
-    Data: Data;
+    RegistryName: string;
+    Devfile: Data;
 }
 
 export class ComponentTypeAdapter implements ComponentType {
@@ -123,11 +130,13 @@ export class ComponentTypeAdapter implements ComponentType {
         public readonly name: string,
         public readonly version: string,
         public readonly description: string,
-        public readonly tags?: string) {
+        public readonly tags?: string,
+        public readonly registryName?: string) {
+
     }
 
     get label(): string {
-        const versionSuffix = this.version? `/${this.version}` : '' ;
+        const versionSuffix = this.version? `/${this.version}` : `/${this.registryName}` ;
         return `${this.name}${versionSuffix} (${this.kind})`;
     }
 }

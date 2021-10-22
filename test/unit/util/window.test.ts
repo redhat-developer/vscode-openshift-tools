@@ -34,7 +34,7 @@ suite('Window Utility', () => {
         sandbox.stub(process, 'platform').value('win32');
         sandbox.stub(process, 'env').value({ComSpec: 'path'});
         WindowUtil.createTerminal('name', process.cwd());
-        expect(termStub).calledOnceWith({cwd: process.cwd(), name: 'name', shellPath: 'path'});
+        expect(termStub).calledOnceWith({cwd: process.cwd(), name: 'name', shellPath: 'path', env: {ComSpec: 'path'}});
     });
 
 });

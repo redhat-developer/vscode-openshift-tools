@@ -17,7 +17,16 @@ export class Application extends OpenShiftItem {
     static async describe(treeItem: OpenShiftObject): Promise<void> {
         const application = await Application.getOpenShiftCmdData(treeItem,
             'Select Application you want to describe');
-        if (application) Application.odo.executeInTerminal(Command.describeApplication(application.getParent().getName(), application.getName()), undefined, `OpenShift: Describe '${application.getName()}' Application`);
+        if (application) {
+            Application.odo.executeInTerminal(
+                Command.describeApplication(
+                    application.getParent().getName(),
+                    application.getName()
+                ),
+                undefined,
+                `OpenShift: Describe '${application.getName()}' Application`
+            );
+        }
     }
 
     @vsCommand('openshift.app.delete', true)
@@ -29,9 +38,14 @@ export class Application extends OpenShiftItem {
             const appName = application.getName();
             const value = await window.showWarningMessage(`Do you want to delete Application '${appName}'?`, 'Yes', 'Cancel');
             if (value === 'Yes') {
-                return Progress.execFunctionWithProgress(`Deleting the Application '${appName}'`, () => Application.odo.deleteApplication(application))
-                    .then(() => `Application '${appName}' successfully deleted`)
-                    .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Application with error '${err}'`, 'Failed to delete Application')));
+                try {
+                    await Progress.execFunctionWithProgress(`Deleting the Application '${appName}'`, () => Application.odo.deleteApplication(application));
+                    return `Application '${appName}' successfully deleted`
+                } catch (err) {
+                    const telemetryMessage = err instanceof VsCommandError ? ` ${err.telemetryMessage}` : '';
+                    throw new VsCommandError(`Failed to delete Application with error '${err.message}'`,
+                            `Failed to delete Application with error${telemetryMessage}`, err);
+                }
             }
         }
         return null;

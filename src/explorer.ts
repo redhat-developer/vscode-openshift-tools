@@ -26,6 +26,7 @@ import { Odo, OpenShiftObject, OdoImpl } from './odo';
 import { WatchUtil, FileContentChangeNotifier } from './util/watch';
 import { KubeConfigUtils } from './util/kubeUtils';
 import { vsCommand } from './vscommand';
+import { ComponentTypesView } from './componentTypesView';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
@@ -52,8 +53,12 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         } catch (err) {
             // ignore config loading error and let odo report it on first call
         }
-        this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
-        this.fsw.emitter.on('file-changed', () => {
+        try {
+            this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
+        } catch (err) {
+            window.showWarningMessage('Couldn\'t install watcher for Kubernetes configuration file. OpenShift Application Explorer view won\'t be updated automatically.');
+        }
+        this.fsw?.emitter?.on('file-changed', () => {
             const ku2 = new KubeConfigUtils();
             const newCtx = ku2.getContextObject(ku2.currentContext);
             if (!this.kubeContext
@@ -90,7 +95,12 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
 
     // eslint-disable-next-line class-methods-use-this
     getChildren(element?: OpenShiftObject): ProviderResult<OpenShiftObject[]> {
-        return element ? element.getChildren() : OpenShiftExplorer.odoctl.getClusters();
+        const result = element ? element.getChildren() : OpenShiftExplorer.odoctl.getClusters();
+        return Promise.resolve(result) // convert to promise, for the case of none thenable value
+            .then(async result1 => {
+                await commands.executeCommand('setContext', 'openshift.app.explorer.init', result1.length === 0);
+                return result1;
+            });
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -101,13 +111,13 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     refresh(target?: OpenShiftObject): void {
         if (!target) {
             OpenShiftExplorer.odoctl.clearCache();
-            commands.executeCommand('openshift.componentTypesView.refresh');
+            ComponentTypesView.refresh();
         }
         this.eventEmitter.fire(target);
     }
 
     dispose(): void {
-        this.fsw.watcher.close();
+        this.fsw?.watcher?.close();
         this.treeView.dispose();
     }
 

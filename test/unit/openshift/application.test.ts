@@ -12,6 +12,7 @@ import { Command } from '../../../src/odo/command';
 import { Application } from '../../../src/openshift/application';
 import { TestItem } from './testOSItem';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
+import { VsCommandError } from '../../../src/vscommand';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -20,10 +21,11 @@ suite('OpenShift/Application', () => {
     let quickPickStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
+    let getProjectsStub: sinon.SinonStub;
     const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
     const projectItem = new TestItem(clusterItem, 'project', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
-    const compItem = new TestItem(appItem, 'app', ContextType.COMPONENT_NO_CONTEXT, [], null);
+    const compItem = new TestItem(appItem, 'component', ContextType.COMPONENT_NO_CONTEXT, [], null);
     compItem.path = 'path/to/component';
     appItem.getChildren().push(compItem);
 
@@ -31,6 +33,7 @@ suite('OpenShift/Application', () => {
         sandbox = sinon.createSandbox();
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: null, stdout: '', stderr: ''});
         sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([clusterItem]);
+        getProjectsStub = sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(vscode.window, 'showInputBox');
@@ -59,7 +62,7 @@ suite('OpenShift/Application', () => {
         suite('called from command palette', () => {
 
             test('calls the appropriate error message when no project found', async () => {
-                sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([]);
+                getProjectsStub.onFirstCall().resolves([]);
                 try {
                     await Application.describe(null);
                 } catch (err) {
@@ -71,7 +74,6 @@ suite('OpenShift/Application', () => {
             });
 
             test('asks to select a project and an application', async () => {
-                sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
                 const apps = [appItem];
                 quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
                 quickPickStub.onFirstCall().resolves(appItem);
@@ -82,7 +84,6 @@ suite('OpenShift/Application', () => {
             });
 
             test('skips odo command execution if canceled by user', async () => {
-                sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
                 quickPickStub = sandbox.stub(vscode.window, 'showQuickPick').resolves(null);
                 await Application.describe(null);
                 expect(termStub).not.called;
@@ -95,8 +96,9 @@ suite('OpenShift/Application', () => {
 
         setup(() => {
             warnStub = sandbox.stub(vscode.window, 'showWarningMessage');
-            sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
-            sandbox.stub(OdoImpl.prototype, 'getComponents').resolves([compItem]);
+            getProjectsStub.onFirstCall().resolves([projectItem]);
+            const pushedCompItem = new TestItem(appItem, 'app', ContextType.COMPONENT_PUSHED, []);
+            sandbox.stub(OdoImpl.prototype, 'getApplicationChildren').resolves([pushedCompItem]);
         });
 
         test('calls the appropriate odo command if confirmed', async () => {
@@ -104,7 +106,7 @@ suite('OpenShift/Application', () => {
 
             await Application.del(appItem);
 
-            expect(execStub).calledOnceWith(Command.deleteApplication(projectItem.getName(), appItem.getName()));
+            expect(execStub).calledWith(Command.deleteApplication(projectItem.getName(), appItem.getName()));
         });
 
         test('returns a confirmation message text when successful', async () => {
@@ -125,7 +127,7 @@ suite('OpenShift/Application', () => {
 
         test('throws an error message when odo command failed', async () => {
             warnStub.resolves('Yes');
-            execStub.rejects('ERROR');
+            execStub.rejects(new VsCommandError('ERROR', 'ERROR'));
             let expectedError;
             try {
                 await Application.del(appItem);

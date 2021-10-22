@@ -8,7 +8,7 @@ node('rhel8'){
   }
 
   stage('Install requirements') {
-    def nodeHome = tool 'nodejs-12.13.1'
+    def nodeHome = tool 'nodejs-15.14.0'
     env.PATH="${env.PATH}:${nodeHome}/bin"
     sh "npm install"
     sh "npm install -g vsce"
@@ -26,7 +26,7 @@ node('rhel8'){
   def packageJson = readJSON file: 'package.json'
 
   stage('Package') {
-    packageJson.extensionDependencies = ["ms-kubernetes-tools.vscode-kubernetes-tools", "redhat.vscode-commons"]
+    packageJson.extensionDependencies = ["ms-kubernetes-tools.vscode-kubernetes-tools"]
     writeJSON file: 'package.json', json: packageJson, pretty: 4
     sh 'node ./out/build/update-readme.js'
     sh "vsce package -o openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix"
@@ -37,7 +37,7 @@ node('rhel8'){
 
   stage('vsix package smoke test') {
       wrap([$class: 'Xvnc']) {
-        sh "node ./out/build/install-vscode.js openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix && node ./out/build/run-tests.js vsix-test test/fake-extension/"
+        sh "node ./out/build/install-vscode.js 1.56.0 && .vscode-test/vscode-linux-x64-1.56.0/VSCode-linux-x64/bin/code --install-extension openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.vsix && node ./out/build/run-tests.js vsix-test test/fake-extension/"
       }
   }
 

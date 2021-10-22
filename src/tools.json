@@ -3,27 +3,27 @@
         "description": "odo CLI",
         "vendor": "Red Hat, Inc.",
         "name": "odo",
-        "version": "2.0.7",
-        "versionRange": "^2.0.7",
-        "versionRangeLabel": "version >= 2.0.7",
+        "version": "2.3.1",
+        "versionRange": "^2.3.1",
+        "versionRangeLabel": "version >= 2.3.1",
         "dlFileName": "odo",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.7/odo-windows-amd64.exe.zip",
-                "sha256sum": "68a1ffd6034ed6ab92ece663a4c95310e2fc8b3c1d4723b31c1f85e6ad77ba2c",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/v2.3.1/odo-windows-amd64.exe.zip",
+                "sha256sum": "58d1d2718f28d3aeacfc3ca74baccf73c24a711c5f422d45106527478c7f4403",
                 "dlFileName": "odo-windows-amd64.exe.zip",
                 "cmdFileName": "odo.exe"
             },
             "darwin": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.7/odo-darwin-amd64.tar.gz",
-                "sha256sum": "29fe926b4f45ad64eb5d4d555dbf94c4b87e0417520a5d9bd33bdbb25dee2be8",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/v2.3.1/odo-darwin-amd64.tar.gz",
+                "sha256sum": "e851c190ed06e2dc2049f07fcf595b0d5ad2ac409032397c44c4964e89cbe196",
                 "dlFileName": "odo-darwin-amd64.tar.gz",
                 "cmdFileName": "odo"
             },
             "linux": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/odo/v2.0.7/odo-linux-amd64.tar.gz",
-                "sha256sum": "e36d27259cf15b34f9fc4303c429f7a52d817b086125ac41505b518a7c6fbd16",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/v2.3.1/odo-linux-amd64.tar.gz",
+                "sha256sum": "f7980ebe668b7b070cfad246d019831de7f6cd4e9228162b025214578bead98d",
                 "dlFileName": "odo-linux-amd64.tar.gz",
                 "cmdFileName": "odo"
             }
@@ -34,27 +34,27 @@
         "vendor": "Red Hat, Inc.",
         "name": "oc",
         "cmdFileName": "oc",
-        "version": "4.6.17",
-        "versionRange": "^4.6.0",
-        "versionRangeLabel": "version 4.6.0 and < 5.0.0",
+        "version": "4.8.15",
+        "versionRange": "^4.8.15",
+        "versionRangeLabel": "version 4.8.15 and < 5.0.0",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.6.17/openshift-client-windows-4.6.17.zip",
-                "sha256sum": "51b53ffad662e068494a74fc3263b40c1219809134880f902ca0f5ddb9d60c20",
-                "dlFileName": "openshift-client-windows-4.6.17.zip",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.8.15/openshift-client-windows-4.8.15.zip",
+                "sha256sum": "38159f565a2c5c7f085c68a9a1a74bf9e9ed94d4d8a159e4a6eaec5cbc07a22f",
+                "dlFileName": "openshift-client-windows-4.8.15.zip",
                 "cmdFileName": "oc.exe"
             },
             "darwin": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.6.17/openshift-client-mac-4.6.17.tar.gz",
-                "sha256sum": "2c3260c61cff5c21f2f07a78c197afdc7b8d2ef86f1919c4854036c7d1e5ab09",
-                "dlFileName": "openshift-client-mac-4.6.17.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.8.15/openshift-client-mac-4.8.15.tar.gz",
+                "sha256sum": "b8b10e2cb083379ada301a08e23a3d1f3cade87b2a2a3c966aaba1ced496c8a3",
+                "dlFileName": "openshift-client-mac-4.8.15.tar.gz",
                 "cmdFileName": "oc"
             },
             "linux": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.6.17/openshift-client-linux-4.6.17.tar.gz",
-                "sha256sum": "aaa300a538e2ddcd40cf0f0760ec5b0eeb7516b8e080dbf2644f7e3039feb17d",
-                "dlFileName": "openshift-client-linux-4.6.17.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.8.15/openshift-client-linux-4.8.15.tar.gz",
+                "sha256sum": "b19af658e3affc7a551a0cc8e53d21585b94ce80e340c806d677a63fdacaff62",
+                "dlFileName": "openshift-client-linux-4.8.15.tar.gz",
                 "cmdFileName": "oc"
             }
         }

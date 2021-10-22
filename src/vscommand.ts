@@ -4,10 +4,11 @@
  *-----------------------------------------------------------------------------------------------*/
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable camelcase */
 
 import { commands, Disposable, window } from 'vscode';
 import * as stackTraceParser from 'stacktrace-parser';
-import sendTelemetry from './telemetry';
+import sendTelemetry, { AllProps, CommonCommandProps } from './telemetry';
 import { ExtenisonID } from './util/constants';
 
 type VsCommandFunction = (...args: any[]) => Promise<any> | any;
@@ -18,8 +19,13 @@ interface VsCommand {
     method: VsCommandFunction;
 }
 
+export interface Result<ReturnType> {
+    value: ReturnType;
+    properties: AllProps;
+}
+
 export class VsCommandError extends Error {
-    constructor(message: string, public readonly telemetryMessage = message, public parent?: Error) {
+    constructor(message: string, public readonly telemetryMessage = message, public readonly parent?, public readonly telemetryProps: AllProps = {}) {
         super(message);
         Object.setPrototypeOf(this, new.target.prototype);
     }
@@ -27,11 +33,10 @@ export class VsCommandError extends Error {
 
 const vsCommands: VsCommand[] = [];
 
-function displayResult(result?: unknown): unknown {
-    if (result && typeof result === 'string' && result.length > 0) {
-        window.showInformationMessage(result);
+function displayResult(result: unknown): void {
+    if (result && `${result}`) {
+        window.showInformationMessage(`${result}`);
     }
-    return result;
 }
 
 export async function registerCommands(...modules: string[]): Promise<Disposable[]> {
@@ -40,57 +45,55 @@ export async function registerCommands(...modules: string[]): Promise<Disposable
     await Promise.all(modules.map((module) => import(module)));
     return vsCommands.map((cmd) => {
         return commands.registerCommand(cmd.commandId, async (...params) => {
-            let telemetryProps: any = {
+            let telemetryProps: Partial<CommonCommandProps> = {
                 identifier: cmd.commandId,
             };
             let result: any;
+            let exception: any;
             const startTime = Date.now();
-            let stackTrace = {};
             try {
                 result = await Promise.resolve(cmd.method.call(null, ...params));
                 displayResult(result);
             } catch (err) {
+                let stack:stackTraceParser.StackFrame[];
                 if (err.stack) {
-                    const stack = stackTraceParser.parse(err.stack);
+                    stack = stackTraceParser.parse(err.stack); // TODO: add recursive stacktrace parsing for parent errors
                     if (stack.length > 0) {
                         const files = stack.map((value) => `${value.file.substring(value.file.lastIndexOf(ExtenisonID)-1)}:${value.lineNumber}:${value.column}`);
-                        stackTrace = {
-                            'stack_trace': files.join('\n')
-                        };
+                        telemetryProps.stack_trace  = files.join('\n')
                     }
                 }
                 if (err instanceof VsCommandError) {
                     // exception thrown by extension command with meaningful message
                     // just show it and return
                     telemetryProps.error = err.telemetryMessage;
-                    window.showErrorMessage(err.message);
                 } else {
-                    // Unexpected exception happened. Let vscode handle the error reporting.
-                    // This does not work when command started by pressing button in view title
-                    // TODO: Wrap view title commands in try/catch and re-throw as VsCommandError
-                    // TODO: telemetry cannot send not known exception stacktrace or message
-                    // because it can contain user's sensitive information
+                    // Unexpected exception happened.
                     if (err instanceof TypeError) {
                         telemetryProps.error = err.message;
                     } else {
                         telemetryProps.error = 'Unexpected error';
                     }
-                    throw err;
                 }
+                window.showErrorMessage(err.message);
+                exception = err;
             } finally {
                 telemetryProps.duration = Date.now() - startTime;
-                telemetryProps.cancelled = result === null;
+                telemetryProps.cancelled = result === null || !`${result}`;
                 if (result?.properties) {
                     telemetryProps = {...telemetryProps, ...result.properties};
                 }
-                telemetryProps = {...telemetryProps, ...stackTrace };
+                if (exception?.telemetryProps) {
+                    telemetryProps = {...telemetryProps, ...exception.telemetryProps};
+                }
                 sendTelemetry('command', telemetryProps);
             }
+            return result;
         });
     });
 }
 
-export function vsCommand(commandId: string, palette = false): Function {
+export function vsCommand(commandId: string, palette = false): (_target: any, key: string, descriptor: any)=> void {
     return (_target: any, key: string, descriptor: any): void => {
         if (!(typeof descriptor.value === 'function')) {
             throw new Error('not supported');

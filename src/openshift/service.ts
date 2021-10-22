@@ -6,10 +6,12 @@
 import { window } from 'vscode';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { OpenShiftObject } from '../odo';
-import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
-import { Platform } from '../util/platform';
 import { vsCommand, VsCommandError } from '../vscommand';
+import { ServiceOperatorShortInfo } from '../odo/service';
+import { ClusterServiceVersionKind } from '../k8s/olm/types';
+
+import { ClusterServiceVersion } from '../k8s/csv';
 
 export class Service extends OpenShiftItem {
 
@@ -20,30 +22,24 @@ export class Service extends OpenShiftItem {
             'In which Application you want to create a Service'
         );
         if (!application) return null;
-        const serviceTemplateName = await window.showQuickPick(Service.odo.getServiceTemplates(), {
-            placeHolder: 'Service Template Name',
+        const sbos = await Service.odo.getServiceOperators();
+        const operator = await window.showQuickPick(sbos.map((sbo:ServiceOperatorShortInfo) => {
+                return {name: sbo.name, label: `${sbo.displayName} ${sbo.version}`, description: sbo.description};
+            }), {
+            placeHolder: 'Service Operator Name',
+                ignoreFocusOut: true
+        });
+        if (!operator) return null;
+
+        const csv: ClusterServiceVersionKind = await Service.odo.getClusterServiceVersion(operator.name);
+        const selectedCrd = await window.showQuickPick(csv.spec.customresourcedefinitions.owned.map(crd=> {
+            return {label: `${crd.displayName} ${crd.version}`, target: crd};
+        }), {
+            placeHolder: 'Service Name',
             ignoreFocusOut: true
         });
-        if (!serviceTemplateName) return null;
-        const plans: string[] = await Service.odo.getServiceTemplatePlans(serviceTemplateName);
-        let serviceTemplatePlanName: string;
-        if (plans.length === 1) {
-            [serviceTemplatePlanName] = plans;
-        } else if (plans.length > 1) {
-            serviceTemplatePlanName = await window.showQuickPick(plans, {
-                placeHolder: 'Service Template Plan Name',
-                ignoreFocusOut: true
-            });
-        } else {
-            window.showErrorMessage('No Service Plans available for selected Service Template');
-        }
-        if (!serviceTemplatePlanName) return null;
-        const serviceList = OpenShiftItem.odo.getServices(application);
-        const serviceName = await Service.getName('Service name', serviceList, application.getName());
-        if (!serviceName) return null;
-        return Progress.execFunctionWithProgress(`Creating a new Service '${serviceName}'`, () => Service.odo.createService(application, serviceTemplateName, serviceTemplatePlanName, serviceName.trim()))
-            .then(() => `Service '${serviceName}' successfully created`)
-            .catch((err) => Promise.reject(new VsCommandError(`Failed to create Service with error '${err}'`, 'Failed to create Service')));
+        if (!selectedCrd) return null;
+        await ClusterServiceVersion.createNewServiceFromDescriptor(selectedCrd.target, csv, application);
     }
 
     @vsCommand('openshift.service.delete', true)
@@ -69,33 +65,5 @@ export class Service extends OpenShiftItem {
             }
         }
         return null;
-    }
-
-    @vsCommand('openshift.service.describe', true)
-    @clusterRequired()
-    static async describe(context: OpenShiftObject): Promise<void> {
-        let service = context;
-
-        if (!service) {
-            const application: OpenShiftObject = await Service.getOpenShiftCmdData(context,
-                'From which application you want to describe Service');
-            if (application) {
-                service = await window.showQuickPick(Service.getServiceNames(application), {placeHolder: 'Select Service you want to describe',
-                ignoreFocusOut: true});
-            }
-        }
-        if (service) {
-            const template = await Service.getTemplate(service);
-            if (template) {
-                Service.odo.executeInTerminal(Command.describeService(template), Platform.getUserHomePath(), `OpenShift: Describe '${service.getName()}' Service`);
-            } else {
-                throw new VsCommandError(`Cannot get Service Type name for Service '${service.getName()}'`, 'Cannot get Service Type name for Service');
-            }
-        }
-    }
-
-    static async getTemplate(service: OpenShiftObject): Promise<string> {
-        const result = await Service.odo.execute(Command.getServiceTemplate(service.getParent().getParent().getName(), service.getName()));
-        return result.stdout.trim();
     }
 }

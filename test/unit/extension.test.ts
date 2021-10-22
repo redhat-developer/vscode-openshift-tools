@@ -18,6 +18,7 @@ import { Progress } from '../../src/util/progress';
 import path = require('path');
 
 import packagejson = require('../../package.json');
+import { CommandText } from '../../src/odo/command';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -64,18 +65,17 @@ suite('openshift connector Extension', () => {
             uri: comp2Uri, index: 1, name: 'comp2'
         }]);
         // eslint-disable-next-line @typescript-eslint/require-await
-        sandbox.stub(OdoImpl.prototype, 'execute').callsFake(async (cmd: string, cwd: string)=> {
-            if (cmd.includes('version')) {
+        sandbox.stub(OdoImpl.prototype, 'execute').callsFake(async (cmd: CommandText, cwd: string)=> {
+            if (`${cmd}`.includes('version')) {
                 return { error: undefined, stdout: 'Server: https://api.crc.testing:6443', stderr: '' };
             }
 
-            if(cmd.includes('describe')) {
-                const args = cmd.split(' ');
-                const name = args[3].substr(args[3].lastIndexOf(path.sep)+1);
-                return { error: undefined, stdout: genComponentJson('myproject', 'app1', name, args[3]), stderr: '', cwd  };
+            if(`${cmd}`.includes('describe')) {
+                const name = cwd.substr(cwd.lastIndexOf(path.sep)+1);
+                return { error: undefined, stdout: genComponentJson('myproject', 'app1', name, cwd), stderr: '', cwd  };
             }
 
-            if (cmd.includes('list --app')) {
+            if (`${cmd}`.includes('list --app')) {
                 return { error: undefined, stdout: `
                 {
                     "kind": "List",
@@ -156,14 +156,9 @@ suite('openshift connector Extension', () => {
         sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
         sandbox.stub(vscode.window, 'showInformationMessage');
         const semStub = sandbox.stub(vscode.window, 'showErrorMessage');
-        sandbox.stub(Progress, 'execFunctionWithProgress').rejects(Error('message'));
-        let error;
-        try {
-            await vscode.commands.executeCommand('openshift.app.delete', appItem);
-        } catch (err) {
-            error = err;
-        }
-        expect(error).not.null;
-        expect(semStub).calledWith('Failed to delete Application with error \'Error: message\'');
+        const error = new Error('message');
+        sandbox.stub(Progress, 'execFunctionWithProgress').rejects(error);
+        await vscode.commands.executeCommand('openshift.app.delete', appItem);
+        expect(semStub).calledWith(`Failed to delete Application with error '${error.message}'`);
     });
 });

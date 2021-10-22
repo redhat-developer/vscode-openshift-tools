@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
@@ -18,6 +17,7 @@ import { CliExitData, CliChannel } from '../../src/cli';
 import * as odo from '../../src/odo';
 import * as verbose from '../../src/odo/command';
 import jsYaml = require('js-yaml');
+import { CommandText } from '../../src/odo/command';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -58,7 +58,7 @@ suite('odo', () => {
 
     suite('command execution', () => {
         let execStub: sinon.SinonStub; let toolsStub: sinon.SinonStub;
-        const command = 'odo do whatever you do';
+        const command = new verbose.CommandText('odo do whatever you do');
 
         setup(() => {
             execStub = sandbox.stub(CliChannel.prototype, 'execute');
@@ -70,7 +70,7 @@ suite('odo', () => {
             execStub.resolves(data);
             const result = await odoCli.execute(command);
 
-            expect(execStub).calledOnceWith(command);
+            expect(execStub).calledOnceWith(`${command}`);
             expect(result).deep.equals(data);
         });
 
@@ -80,7 +80,7 @@ suite('odo', () => {
             toolsStub.resolves(toolPath);
             await odoCli.execute(command);
 
-            expect(execStub).calledOnceWith(command.replace('odo', `"${toolPath}"`));
+            expect(execStub).calledOnceWith(`${command}`.replace('odo', `"${toolPath}"`));
         });
 
         test('execute allows to set its working directory', async () => {
@@ -88,7 +88,7 @@ suite('odo', () => {
             const cwd = 'path/to/some/dir';
             await odoCli.execute(command, cwd);
 
-            expect(execStub).calledOnceWith(command, { cwd });
+            expect(execStub).calledOnceWith(`${command}`, { cwd, env: (odo.getInstance() as odo.OdoImpl).createEnv() });
         });
 
         test('execute rejects if an error occurs in the shell command', async () => {
@@ -98,7 +98,7 @@ suite('odo', () => {
                 await odoCli.execute(command);
                 expect.fail();
             } catch (error) {
-                expect(error).equals(err);
+                expect(error.parent).equals(err);
             }
         });
 
@@ -122,7 +122,7 @@ suite('odo', () => {
             toolsStub.restore();
             toolsStub = sandbox.stub(ToolsConfig, 'detect').resolves(path.join('segment1', 'segment2'));
             const ctStub = sandbox.stub(WindowUtil, 'createTerminal').returns(termFake);
-            await odoCli.executeInTerminal('cmd');
+            await odoCli.executeInTerminal(new CommandText('cmd'));
             expect(termFake.sendText).calledOnce;
             expect(termFake.show).calledOnce;
             expect(ctStub).calledWith('OpenShift', process.cwd());
@@ -218,8 +218,8 @@ suite('odo', () => {
             });
             const result = await odoCli.getApplications(project);
 
-            expect(result.length).equals(1);
-            expect(result[0].getName()).equals('app1');
+            expect(result.length).equals(2);
+            expect(result[1].getName()).equals('app1');
         });
 
         test('getApplications returns empty list if no odo apps are present', async () => {
@@ -235,7 +235,7 @@ suite('odo', () => {
             });
             const result = await odoCli.getApplications(project);
 
-            expect(result).empty;
+            expect(result).length(1);
         });
 
         test('getComponents returns components list for an application', async () => {
@@ -256,17 +256,17 @@ suite('odo', () => {
                 ),
                 stderr: ''
             });
-            const result = await odoCli.getApplications(app);
+            const result = await odoCli.getApplications(project);
 
-            expect(result.length).equals(1);
-            expect(result[0].getName()).equals('component1');
+            expect(result).length(2);
+            expect(result[1].getName()).equals('component1');
         });
 
         test('getServices returns services for an application', async () => {
             const services = ['service1', 'service2', 'service3'];
             // eslint-disable-next-line @typescript-eslint/require-await
             execStub.callsFake(async (cmd: string, cwd: string)=> {
-                if (cmd.includes('odo service list')) {
+                if (`${cmd}`.includes('odo service list')) {
                     return {
                         error: null,
                         stderr: '',
@@ -293,7 +293,7 @@ suite('odo', () => {
                     };
                 }
 
-                if(cmd.includes('odo list')) {
+                if(`${cmd}`.includes('odo list')) {
                     return {
                         error: undefined,
                         stdout: `
@@ -308,7 +308,7 @@ suite('odo', () => {
                         cwd};
                 }
 
-                if (cmd.includes('list --app')) {
+                if (`${cmd}`.includes('list --app')) {
                     return { error: undefined, stdout: `
                     {
                         "kind": "List",
@@ -335,25 +335,6 @@ suite('odo', () => {
             const result = await odoCli.getServices(app);
 
             expect(result).empty;
-        });
-
-        test('getServiceTemplates throws exception if service catalog is not enabled', async () => {
-            execStub.resolves({error: null, stdout: '', stderr:
-                JSON.stringify({
-                    kind: 'Error',
-                    apiVersion: 'odo.openshift.io/v1alpha1',
-                    message: 'unable to list services because Service Catalog is not enabled in your cluster'
-                })
-            });
-            let e: Error;
-            try {
-                await odoCli.getServiceTemplates();
-            } catch (err) {
-                e = err;
-            }
-
-            expect(e.message).equals('unable to list services because Service Catalog is not enabled in your cluster');
-
         });
 
         test('getApplicationChildren returns both components and services for an application', async () => {
@@ -561,18 +542,6 @@ suite('odo', () => {
         setup(() => {
             sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves(data);
         });
-
-        test('getServiceTemplates returns correct number of services', async () => {
-            const result: string[] = await odoCli.getServiceTemplates();
-            expect(result.length).equals(1);
-            expect(result[0]).equals('cakephp-mysql-persistent');
-        });
-
-        test('getServiceTemplatePlans returns correct number of plans for service', async () => {
-            const result: string[] = await odoCli.getServiceTemplatePlans('cakephp-mysql-persistent');
-            assert.equal(result.length, 1);
-            assert.equal(result[0], 'default');
-        });
     });
 
     suite('odo and oc current cluster detection integration', () => {
@@ -599,7 +568,7 @@ suite('odo', () => {
             const stub = sandbox.stub(odoCli, 'execute').resolves({ error: null, stdout: 'logged in', stderr: ''});
             const result = await odoCli.requireLogin();
 
-            expect(stub).calledOnceWith('oc whoami');
+            expect(stub).calledOnceWith(new CommandText('oc whoami'));
             expect(result).false;
         });
 

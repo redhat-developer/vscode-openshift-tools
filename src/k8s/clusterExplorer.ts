@@ -8,6 +8,7 @@ import * as k8s from 'vscode-kubernetes-tools-api';
 import { Build } from './build';
 import { DeploymentConfig } from './deployment';
 import path = require('path');
+import { ClusterServiceVersion } from './csv';
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined;
 
@@ -73,8 +74,11 @@ export async function extendClusterExplorer(): Promise<void> {
             clusterExplorer.nodeSources.resourceFolder('Routes', 'Routes', 'Route', 'route').if(isOpenShift).at('Network'),
             clusterExplorer.nodeSources.resourceFolder('DeploymentConfigs', 'DeploymentConfigs', 'DeploymentConfig', 'dc').if(isOpenShift).at('Workloads'),
             clusterExplorer.nodeSources.resourceFolder('BuildConfigs', 'BuildConfigs', 'BuildConfig', 'bc').if(isOpenShift).at('Workloads'),
+            clusterExplorer.nodeSources.groupingFolder('Operators', 'Operators').if(isOpenShift).at(undefined),
+            clusterExplorer.nodeSources.resourceFolder('ClusterServiceVersion', 'ClusterServiceVersions', 'ClusterServiceVersion', 'csv').if(isOpenShift).at('Operators'),
             Build.getNodeContributor(),
-            DeploymentConfig.getNodeContributor()
+            DeploymentConfig.getNodeContributor(),
+            ClusterServiceVersion.getNodeContributor()
         ];
         nodeContributors.forEach(element => {
             clusterExplorer.registerNodeContributor(element);

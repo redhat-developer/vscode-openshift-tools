@@ -9,30 +9,37 @@ import { Progress } from '../util/progress';
 import * as common from './common';
 import { OdoImpl, Odo } from '../odo';
 import { vsCommand, VsCommandError } from '../vscommand';
+import { CommandOption, CommandText } from '../odo/command';
 
 export class DeploymentConfig {
 
     public static command = {
-        getReplicationControllers(parent: ClusterExplorerV1.ClusterExplorerNode): string {
-            return `get rc -o jsonpath="{range .items[?(.metadata.annotations.openshift\\.io/deployment-config\\.name=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/deployment-config\\.latest-version}{\\"\\n\\"}{end}"`;
+        getReplicationControllers(parent: ClusterExplorerV1.ClusterExplorerNode): CommandText {
+            return new CommandText('get rc',
+                undefined, [
+                    new CommandOption('-o', `jsonpath="{range .items[?(.metadata.annotations.openshift\\.io/deployment-config\\.name=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/deployment-config\\.latest-version}{\\"\\n\\"}{end}"`)
+                ]
+            );
         },
-        deploy(build: string): string {
-            return `oc rollout latest dc/${build}`;
+        deploy(build: string): CommandText {
+            return new CommandText('oc rollout latest', `dc/${build}`);
         },
-        getDeploymentConfigs(): string {
-            return 'oc get deploymentConfig -o json';
+        getDeploymentConfigs(): CommandText {
+            return new CommandText('oc get deploymentConfig -o json');
         },
-        showDeploymentConfigLog(deploymentConfig: string): string {
-            return `oc logs dc/${deploymentConfig}`;
+        showDeploymentConfigLog(deploymentConfig: string): CommandText {
+            return new CommandText('oc logs', `dc/${deploymentConfig}`);
         },
-        getReplicas(deploymentConfig: string): string {
-            return `oc get rc -o jsonpath="{range .items[?(.metadata.annotations.openshift\\.io/deployment-config\\.name=='${deploymentConfig}')]}{.metadata.name}{\\"\\n\\"}{end}"`;
+        getReplicas(deploymentConfig: string): CommandText {
+            return new CommandText('oc get rc', undefined, [
+                new CommandOption('-o', `jsonpath="{range .items[?(.metadata.annotations.openshift\\.io/deployment-config\\.name=='${deploymentConfig}')]}{.metadata.name}{\\"\\n\\"}{end}"`)
+            ]);
         },
-        delete(replica: string): string {
-            return `oc delete rc ${replica}`;
+        delete(replica: string): CommandText {
+            return new CommandText('oc delete rc',replica);
         },
-        showLog(replica: string): string {
-            return `oc logs rc/${replica}`;
+        showLog(replica: string): CommandText {
+            return new CommandText('oc logs', `rc/${replica}`);
         }
     };
 
@@ -67,7 +74,7 @@ export class DeploymentConfig {
         return result;
     }
 
-    static async getReplicasList(cmd: string): Promise<string[]> {
+    static async getReplicasList(cmd: CommandText): Promise<string[]> {
         const result = await DeploymentConfig.odo.execute(cmd);
         const replica: string = result.stdout;
         const replicationList = replica.split('\n');
