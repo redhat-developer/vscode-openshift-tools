@@ -40,21 +40,21 @@
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.8.15/openshift-client-windows-4.8.15.zip",
-                "sha256sum": "38159f565a2c5c7f085c68a9a1a74bf9e9ed94d4d8a159e4a6eaec5cbc07a22f",
-                "dlFileName": "openshift-client-windows-4.8.15.zip",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.9.0/openshift-client-windows-4.9.0.zip",
+                "sha256sum": "bd25c231eba8b2da5bcabcf78c6f28b856ec2fee61e414b164aa6a33a6731a23",
+                "dlFileName": "openshift-client-windows-4.9.0.zip",
                 "cmdFileName": "oc.exe"
             },
             "darwin": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.8.15/openshift-client-mac-4.8.15.tar.gz",
-                "sha256sum": "b8b10e2cb083379ada301a08e23a3d1f3cade87b2a2a3c966aaba1ced496c8a3",
-                "dlFileName": "openshift-client-mac-4.8.15.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.9.0/openshift-client-mac-4.9.0.tar.gz",
+                "sha256sum": "7e4b0880c2b46e5b49809a4c5388b439d2c5b5369354ea0be667d2173bc36534",
+                "dlFileName": "openshift-client-mac-4.9.0.tar.gz",
                 "cmdFileName": "oc"
             },
             "linux": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.8.15/openshift-client-linux-4.8.15.tar.gz",
-                "sha256sum": "b19af658e3affc7a551a0cc8e53d21585b94ce80e340c806d677a63fdacaff62",
-                "dlFileName": "openshift-client-linux-4.8.15.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.9.0/openshift-client-linux-4.9.0.tar.gz",
+                "sha256sum": "f922ab07e18e4d0b59ec8f038d6240233357d5e704f9c2faea37dae006ca1e09",
+                "dlFileName": "openshift-client-linux-4.9.0.tar.gz",
                 "cmdFileName": "oc"
             }
         }
