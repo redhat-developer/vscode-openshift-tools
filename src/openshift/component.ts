@@ -877,7 +877,7 @@ export class Component extends OpenShiftItem {
         } else {
             isJava = component.builderImage.name.includes('java');
             isNode = component.builderImage.name.includes('nodejs');
-            isPython = component.builderImage.name.includes('python');
+            isPython = component.builderImage.name.includes('python') || component.builderImage.name.includes('django');
         }
 
         if (isJava || isNode || isPython) {
@@ -890,11 +890,11 @@ export class Component extends OpenShiftItem {
                 if (!jlsIsActive || !jdIsActive) {
                     let warningMsg;
                     if (jlsIsActive && !jdIsActive) {
-                        warningMsg = 'Debugger for Java is required to debug component';
+                        warningMsg = 'Debugger for Java (Publisher: Microsoft) extension is required to debug component';
                     } else if (!jlsIsActive && jdIsActive) {
-                        warningMsg = 'Language Support for Java is required to debug component';
+                        warningMsg = 'Language support for Java ™ (Publisher: Red Hat) extension is required to support debugging.';
                     } else {
-                        warningMsg = 'Language Support and Debugger for Java are required to debug component';
+                        warningMsg = 'Language support for Java ™ and Debugger for Java extensions are required to debug component';
                     }
                     const response = await window.showWarningMessage(warningMsg, 'Install');
                     if (response === 'Install') {
@@ -920,7 +920,7 @@ export class Component extends OpenShiftItem {
                 const PYTHON_EXT = 'ms-python.python';
                 const pythonExtIsInstalled = extensions.getExtension('ms-python.python');
                 if (!pythonExtIsInstalled) {
-                    const response = await window.showWarningMessage('Python extension is required to debug component', 'Install');
+                    const response = await window.showWarningMessage('Python extension (Publisher: Microsoft) is required to support debugging.', 'Install');
                     if (response === 'Install') {
                         await window.withProgress({ location: ProgressLocation.Notification }, async (progress) => {
                             progress.report({ message: 'Installing extensions required to debug Python Component ...'});
@@ -956,14 +956,14 @@ export class Component extends OpenShiftItem {
                 });
             }
         } else {
-            window.showWarningMessage('Debug command supports only local Java, Node.Js and Python components.');
+            void window.showWarningMessage('Debug command currently supports local components with Java, Node.Js and Python component types.');
         }
         return result;
     }
 
     static async startOdoAndConnectDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration): Promise<string> {
         await Component.odo.execute(Command.pushComponent(true, true), component.contextPath.fsPath);
-        const debugCmd = `${toolLocation}' debug port-forward`;
+        const debugCmd = `"${toolLocation}" debug port-forward`;
         const cp = exec(debugCmd, {cwd: component.contextPath.fsPath});
         return new Promise<string>((resolve,reject) => {
             cp.stdout.on('data', (data: string) => {
@@ -992,6 +992,7 @@ export class Component extends OpenShiftItem {
         }).then((result) => {
             config.contextPath = component.contextPath;
             if (config.type === 'python') {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 config.connect.port = result;
             } else {
                 config.port = result;
