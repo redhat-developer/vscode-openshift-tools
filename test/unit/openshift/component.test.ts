@@ -1530,7 +1530,7 @@ suite('OpenShift/Component', () => {
 
         test('starts java debugger for devfile component with java in builder image', async () => {
             const startDebugging = sandbox.stub().resolves(true);
-            const waitPort = sandbox.stub().resolves()
+            const waitPort = sandbox.stub().resolves(true);
             Component = pq('../../../src/openshift/component', {
                 vscode: {
                     debug: {
@@ -1543,6 +1543,14 @@ suite('OpenShift/Component', () => {
                             on: async (event: string, cb: (data: string) => Promise<void>) => {
                                 await cb('- 8888:7777');
                             }
+                        },
+                        stderr: {
+                            on: async (event: string, cb: (data: string) => Promise<void>) => {
+                                await cb('Error stream output');
+                            }
+                        },
+                        on: (event: string, cb: () => Promise<void>) => {
+                            if (event !== 'error') cb();
                         },
                     }),
                 },
@@ -1564,7 +1572,7 @@ suite('OpenShift/Component', () => {
 
         test('starts python debugger for devfile component with python in builder image', async () => {
             const startDebugging = sandbox.stub().resolves(true);
-            const waitPort = sandbox.stub().resolves()
+            const waitPort = sandbox.stub().resolves(true)
             Component = pq('../../../src/openshift/component', {
                 vscode: {
                     debug: {
@@ -1577,6 +1585,14 @@ suite('OpenShift/Component', () => {
                             on: async (event: string, cb: (data: string) => Promise<void>) => {
                                 await cb('- 8888:7777');
                             }
+                        },
+                        stderr: {
+                            on: async (event: string, cb: (data: string) => Promise<void>) => {
+                                await cb('Error stream output');
+                            }
+                        },
+                        on: (event: string, cb: () => Promise<void>) => {
+                            if (event !== 'error') cb();
                         },
                     }),
                 },

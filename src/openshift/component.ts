@@ -34,7 +34,7 @@ import treeKill = require('tree-kill');
 import fs = require('fs-extra');
 import { NewComponentCommandProps } from '../telemetry';
 
-const waitPort = require('wait-port');
+import waitPort = require('wait-port');
 
 export class SourceTypeChoice {
     public static readonly GIT: QuickPickItem = {
@@ -963,18 +963,30 @@ export class Component extends OpenShiftItem {
 
     static async startOdoAndConnectDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration): Promise<string> {
         await Component.odo.execute(Command.pushComponent(true, true), component.contextPath.fsPath);
-        const debugCmd = `'${toolLocation}' debug port-forward`;
+        const debugCmd = `${toolLocation}' debug port-forward`;
         const cp = exec(debugCmd, {cwd: component.contextPath.fsPath});
-        return new Promise<string>((resolve) => {
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            cp.stdout.on('data', async (data: string) => {
+        return new Promise<string>((resolve,reject) => {
+            cp.stdout.on('data', (data: string) => {
                 const parsedPort = data.trim().match(/- (?<localPort>\d+):\d+$/);
                 if (parsedPort?.groups?.localPort) {
-                    await waitPort({
+                    void waitPort({
                          host: 'localhost',
                          port: parseInt(parsedPort.groups.localPort, 10)
-                    });
-                    resolve(parsedPort.groups.localPort);
+                    })
+                    .then((success) => {
+                        success ? resolve(parsedPort.groups.localPort) : reject(new VsCommandError('Connection attempt timed out.'));
+                    })
+                    .catch(reject);
+                }
+            });
+            let stderrText = '';
+            cp.stderr.on('data', (data: string) => {
+                stderrText = stderrText.concat(data);
+            });
+            cp.on('error', reject);
+            cp.on('exit', (code) => {
+                if (code > 0) {
+                    reject(new VsCommandError(`Port forwarding request failed. CODE: ${code}', STDERR: ${stderrText}.`));
                 }
             });
         }).then((result) => {
@@ -986,9 +998,12 @@ export class Component extends OpenShiftItem {
             }
             config.odoPid = cp.pid;
             return debug.startDebugging(workspace.getWorkspaceFolder(component.contextPath), config);
-        }).then((result: boolean) =>
-            result ? 'Debugger session has successfully started.' : Promise.reject(new VsCommandError('Debugger session failed to start.'))
-        );
+        }).then((result: boolean) => {
+            if (!result) {
+                return Promise.reject(new VsCommandError('Debugger session failed to start.'));
+            }
+            return 'Debugger session has successfully started.';
+        });
     }
 
     @vsCommand('openshift.component.test', true)
