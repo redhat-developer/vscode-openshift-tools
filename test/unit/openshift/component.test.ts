@@ -1525,7 +1525,7 @@ suite('OpenShift/Component', () => {
             await Component.debug(devfileComponentItem2);
 
             expect(warningStub).calledThrice;
-            expect(warningStub).calledWith('Debug command supports only local Java, Node.Js and Python components.');
+            expect(warningStub).calledWith('Debug command currently supports local components with Java, Node.Js and Python component types.');
         });
 
         test('starts java debugger for devfile component with java in builder image', async () => {
