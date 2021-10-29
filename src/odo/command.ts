@@ -426,7 +426,7 @@ export class Command {
         if (registryName) {
             cTxt.addOption(new CommandOption('--registry', registryName));
         }
-        cTxt.addOption(new CommandOption('--context', folder))
+        cTxt.addOption(new CommandOption('--context', `"${folder}"`))
             .addOption(new CommandOption('--app', app))
             .addOption(new CommandOption('--project', project));
         if (starter) {
@@ -475,7 +475,7 @@ export class Command {
         cTxt.addOption(new CommandOption('--binary', binary))
             .addOption(new CommandOption('--app', app))
             .addOption(new CommandOption('--project', project))
-            .addOption(new CommandOption('--context',context));
+            .addOption(new CommandOption('--context', `"${context}"`));
         return cTxt;
     }
 
