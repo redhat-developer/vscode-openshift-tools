@@ -1,5 +1,15 @@
 # Change Log
 
+## 0.2.11 (November 1, 2021)
+
+* [#2269](https://github.com/redhat-developer/vscode-openshift-tools/issues/2269) Fix oc version name
+* [#2267](https://github.com/redhat-developer/vscode-openshift-tools/issues/2267) Fix Readme for correct download links and names
+* [#2261](https://github.com/redhat-developer/vscode-openshift-tools/issues/2261) Add debug configuration for django apps
+* [#2256](https://github.com/redhat-developer/vscode-openshift-tools/issues/2256) Update oc binary to 4.9 release
+* [#2255](https://github.com/redhat-developer/vscode-openshift-tools/issues/2255) Windows file paths that contain a space are not properly escaped
+* [#2229](https://github.com/redhat-developer/vscode-openshift-tools/issues/2229) Component `Debug` command on Windows never results in starting debug session
+* [#2120](https://github.com/redhat-developer/vscode-openshift-tools/issues/2120) Support CodeReady Containers 1.34.0 release
+
 ## 0.2.10 (October 18, 2021)
 
 * [#2249](https://github.com/redhat-developer/vscode-openshift-tools/issues/2249) Update oc to latest release v4.8.15
