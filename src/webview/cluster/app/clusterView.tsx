@@ -47,8 +47,8 @@ const crcDefaults = {
 	DefaultMemory: 9216,
 	DefaultWebConsoleURL: 'https://console-openshift-console.apps-crc.testing',
 	DefaultAPIURL: 'https://api.crc.testing:6443',
-	CrcLandingPageURL: 'https://cloud.redhat.com/openshift/install/crc/installer-provisioned',
-	DefaultCrcUrlBase: 'http://mirror.openshift.com/pub/openshift-v4/clients/crc'
+	CrcLandingPageURL: 'https://console.redhat.com/openshift/create/local',
+	DefaultCrcUrlBase: 'https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/crc'
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -597,7 +597,7 @@ export default function addClusterView(props) {
         case 4:
           return (
             <Typography>
-              Start the cluster. This will create a minimal OpenShift {crcOpenShift} cluster on your laptop or desktop computer.
+              Start the cluster. This will create a minimal OpenShift {crcOpenShift} cluster to your local computer.
             </Typography>)
         default:
           return 'Unknown step';

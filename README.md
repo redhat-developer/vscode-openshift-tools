@@ -10,7 +10,7 @@
 ## Overview
 
 OpenShift Connector extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:
- - Developers can easily create, deploy and live debug applications running on OpenShift.
+ - Developers can easily create, deploy and live debug container applications running on OpenShift.
  - Run local instance of OpenShift 4.7 using [Red Hat CodeReady Containers](https://code-ready.github.io/crc/).
 
 ### Demo: https://www.youtube.com/watch?v=HEsYgDqD1rM
@@ -21,30 +21,25 @@ OpenShift Connector extension provides an end-to-end developer experience for Re
 
 #### Developer Sandbox
 
-The extension allows users free access to the [Developer Sandbox for Red Hat OpenShift](http://workspaces.openshift.com/). From `Add Cluster View`, users will be redirected to the dev sandbox instance. The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools.
+The extension allows users free access to the [Developer Sandbox for Red Hat OpenShift](https://developers.redhat.com/developer-sandbox/get-started). From `Add Cluster View`, users will be redirected to the dev sandbox instance. The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools.
 
 #### Local instance of OpenShift
 
 This extension can work with local or remote OpenShift clusters.
 
 To provision local instance of OpenShift cluster, developers can use the following options:
-* [Red Hat CodeReady Containers](https://code-ready.github.io/crc/) - run single node local OpenShift 4.x cluster
+* [Red Hat CodeReady Containers](https://crc.dev/crc/) - run single node local OpenShift 4.x cluster
 * [minishift](http://bit.ly/3rSvzOx) / [CDK](http://red.ht/3opF1XC) - run single node local OpenShift 3.x cluster
 
 For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](http://bit.ly/3be4jUv).
 
 #### Public cloud providers
 
-If developers can't run OpenShift cluster locally, the extension can work with remote one provisioned with one of Red Hat products:
+To install OpenShift Container Platform 4 in the public cloud, in your datacenter or on your laptop please visit [Red Hat Hybrid Cloud console](https://console.redhat.com/openshift/create). Here are different scenarios to try OpenShift:
 
-* [Red Hat OpenShift Container Platform](http://red.ht/3rUUzoe) - build, deploy and manage your applications across cloud- and on-premise infrastructure
-* [Red Hat OpenShift Dedicated](http://red.ht/3bdr7E8) - single-tenant, high-availability Kubernetes clusters in the public cloud
-* [Microsoft Azure Red Hat OpenShift](http://red.ht/3oeVPjM) - fully managed Red Hat OpenShift service on Microsoft Azure
-* [Red Hat OpenShift Online](http://red.ht/3bbSVso) - the fastest way for developers to build, host and scale applications in the public cloud
-
-To install OpenShift Container Platform 4 in the public cloud, in your datacenter or on your laptop please visit [Red Hat OpenShift Cluster Manager](http://red.ht/3rSwjTP).
-
-**NOTE:** When working with [Red Hat OpenShift Online](http://red.ht/3bbSVso) remote cluster only one component can be created for Starter plan and Pro plan with default 2GiB storage. If you want to create multi component application you could opt in for Pro plan with bigger persistence storage (up to 150GiB).
+* [Red Hat OpenShift Cluster Manager](https://console.redhat.com/openshift/create/datacenter) - This 60-day, self-supported trial lets you install and run Red Hat OpenShift Container Platform on infrastructure you manage.
+* [Red Hat OpenShift Dedicated](https://console.redhat.com/openshift/create/osdtrial) - Red Hat OpenShift Dedicated is a fully managed service of Red Hat OpenShift on Amazon Web Services (AWS) and Google Cloud.
+* [Microsoft Azure Red Hat OpenShift](http://red.ht/3oeVPjM) - Azure Red Hat OpenShift is a fully-managed service of Red Hat OpenShift on Azure, jointly engineered, managed and supported by Microsoft and Red Hat.
 
 ## Core Concepts
 
@@ -168,11 +163,11 @@ The view guides you through the steps required to create and start OpenShift 4 s
 using Red Hat CodeReady Containers:
 
    * Download & Configure Red Hat CodeReady Containers
-   * Set Virtual Machine parameters: number of CPUs and memory amount
+   * Set Virtual Machine parameters: number of CPUs and memory limit
    * Setup Red Hat CodeReady Containers
-   * Run Red Hat CodeReady Containers commands to control the cluster
+   * Run Red Hat CodeReady Containers commands to setup/start the cluster
 
-The view provides UI to control cluster's state:
+The view provides following options to control cluster's state:
 
    * Start cluster
    * Stop cluster
@@ -183,18 +178,18 @@ The view provides UI to control cluster's state:
 
 ### Debug Support
 
-   * Supports Local Node.js and Java Components
+`OpenShift: Debug` command simplifies the way to start debugging for OpenShift Components pushed to a cluster.
+   * Supports following devfile components: Node.js, Java and Python(including Django)
+   * Supports only Local Components
    * Does not support git and binary based components
 
-`OpenShift: Debug` command simplifies the way to start debugging for OpenShift Components pushed to a cluster. It is an experimental feature, because it is using experimental odo `debug` command under the hood and supports only local Java and Node.js components. The command is available from command palette and context menu for Component nodes in OpenShift Application Explorer view.
-
-#### Debug Node.js Component
+### Debug Node.js Component
 
 Default Visual Studio Code installation includes JavaScript/TypeScript Language Support and Debugger Extensions required to debug a Node.js Component. That means new `OpenShift: Debug` command can be used without installing any additional extensions.
 
 ![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/master/images/gif/debug-node.gif)
 
-#### Debug Java Component
+### Debug Java Component
 
 To debug a Java Component, [Java Language Support](https://marketplace.visualstudio.com/items?itemName=redhat.java) and [Java Debugger](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug) Extensions are required. OpenShift Connector extension will prompt the user to install missing extension(s) before it starts Debugger for a Java Component.
 
@@ -244,24 +239,22 @@ OpenShift Connector extension provides ```Use Project``` command to switch betwe
 
 When installing the extension directly from the VSCode marketplace all the dependencies are installed automatically. For disconnected environments before installing the extension download and install dependencies in the order listed below:
 
-* [RedHat Commons](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-commons) ([download vsix](https://marketplace.visualstudio.com/_apis/public/gallery/publishers/redhat/vsextensions/vscode-commons/0.0.6/vspackage))
-* [YAML Extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) ([download vsix](https://marketplace.visualstudio.com/_apis/public/gallery/publishers/redhat/vsextensions/vscode-yaml/0.18.0/vspackage))
-* [Kubernetes Extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) ([download vsix](https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ms-kubernetes-tools/vsextensions/vscode-kubernetes-tools/1.3.0/vspackage))
+* [Red Hat Commons](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-commons) ([download vsix](https://marketplace.visualstudio.com/_apis/public/gallery/publishers/redhat/vsextensions/vscode-commons/0.0.6/vspackage))
+* [YAML Extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) ([download vsix](https://marketplace.visualstudio.com/_apis/public/gallery/publishers/redhat/vsextensions/vscode-yaml/1.1.0/vspackage))
+* [Kubernetes Extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) ([download vsix](https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ms-kubernetes-tools/vsextensions/vscode-kubernetes-tools/1.3.3/vspackage))
 
 ### CLI Tools
 
 This extension uses two CLI tools to interact with OpenShift cluster:
-* OKD CLI client tool - [oc](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.9.5/)
+* OKD CLI client tool - [oc](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.9.0/)
 * odo - [odo](https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/v2.3.1/)
 
 > `oc` and `odo` tools for Windows, Linux and macOS are included into extension package. Once the extension is installed it is ready to use.
 
 Follow the links below for additional information:
 
-* [Understanding odo](https://bit.ly/3ovRTuY)
-* [Devfile file reference](http://bit.ly/3hNrhTP)
-* [Deploying your first application using odo](http://bit.ly/2MurLCG)
-
+* [Understanding odo](https://odo.dev/docs/getting-started/features)
+* [Devfile file reference](https://devfile.io/docs/devfile/2.1.0/user-guide/index.html)
 ## Breaking Changes Between Previous Releases
 
 ### Updating from release `0.0.23` or earlier
