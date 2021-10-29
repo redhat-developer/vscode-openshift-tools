@@ -251,8 +251,8 @@ When installing the extension directly from the VSCode marketplace all the depen
 ### CLI Tools
 
 This extension uses two CLI tools to interact with OpenShift cluster:
-* OKD CLI client tool - [oc](http://red.ht/3s0jSW7)
-* odo - [odo](https://red.ht/3p7usI3)
+* OKD CLI client tool - [oc](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.9.5/)
+* odo - [odo](https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/v2.3.1/)
 
 > `oc` and `odo` tools for Windows, Linux and macOS are included into extension package. Once the extension is installed it is ready to use.
 
