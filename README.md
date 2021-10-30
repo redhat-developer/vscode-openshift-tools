@@ -11,7 +11,7 @@
 
 OpenShift Connector extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:
  - Developers can easily create, deploy and live debug container applications running on OpenShift.
- - Run local instance of OpenShift 4.7 using [Red Hat CodeReady Containers](https://code-ready.github.io/crc/).
+ - Run local instance of OpenShift 4.9.0 using [Red Hat CodeReady Containers](https://crc.dev/crc/).
 
 ### Demo: https://www.youtube.com/watch?v=HEsYgDqD1rM
 
@@ -29,9 +29,6 @@ This extension can work with local or remote OpenShift clusters.
 
 To provision local instance of OpenShift cluster, developers can use the following options:
 * [Red Hat CodeReady Containers](https://crc.dev/crc/) - run single node local OpenShift 4.x cluster
-* [minishift](http://bit.ly/3rSvzOx) / [CDK](http://red.ht/3opF1XC) - run single node local OpenShift 3.x cluster
-
-For detail analysis of how to setup and run local OpenShift Cluster using minishift, please follow this [wiki](http://bit.ly/3be4jUv).
 
 #### Public cloud providers
 
@@ -47,8 +44,7 @@ To install OpenShift Container Platform 4 in the public cloud, in your datacente
 * `Application`: An application is a program designed for end users. An application consists of multiple microservices or components that work individually to build the entire application. Examples of applications: e-Shop, Hotel Reservation System, Online Booking
 * `Component`: A component is a set of Kubernetes resources which host code or data. Each component can be run and deployed separately. Examples of components: Warehouse API Backend, Inventory API, Web Frontend, Payment Backend
 * `Service`: A service is software that your component links to or depends on. Examples of services: MariaDB, MySQL
-* `Devfile`: A portable file responsible for your entire reproducable development environment
-
+* `Devfile`: A devfile is a portable YAML file containing the definition of a component and its related URLs, storages and services.
 ##  Commands and Features
 
 The extension supports a number of commands to interact with OpenShift clusters and resources. The commands are accessible via the command palette (`Cmd+Shift+P` <kbd>⌘⇧P</kbd> on macOS or `Ctrl+Shift+P` <kbd>⌃⇧P</kbd> on Windows and Linux), Visual Studio Code View title buttons and tree context menus.
@@ -114,7 +110,7 @@ Components in different states have different set of commands available.
    * `Push` - Push the source code to a Component.
    * `Watch` - Watch for changes, update Component on change. This is not supported for git based components.
    * `Undeploy` - Undeploys a Component from the cluster. The component still resides in the local config.
-   * `Debug` - Debug local Java or Node.js Component.
+   * `Debug` - Debug local Java, Node.js and Python Component.
    * `Test` - Run test for the Component in cluster.
    * `Reveal in Explorer` - Show Component's context folder in Explorer view
    * `Delete` - Delete existing Component from the cluster and removes the local config also.
@@ -231,7 +227,7 @@ OpenShift Connector extension provides ```Use Project``` command to switch betwe
 
 **NOTE:** This extension is in Preview mode. The extension support for OpenShift is strictly experimental - assumptions may break, commands and behavior may change!
 
-**NOTE:** CRC (Red Hat CodeReady Containers) version supported by the extension is `1.23.1` (OpenShift Version: `4.7.0`)
+**NOTE:** CRC (Red Hat CodeReady Containers) version supported by the extension is `1.34.0` (OpenShift Version: `4.9.0`)
 
 ## Dependencies
 
