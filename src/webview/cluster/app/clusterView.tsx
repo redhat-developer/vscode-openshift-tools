@@ -269,8 +269,8 @@ export default function addClusterView(props) {
   const fetchDownloadBinary = () => {
     const platform = (window as any).platform;
     let crcBundle = '';
-    if (platform === 'darwin') crcBundle = 'crc-macos-amd64.tar.xz';
-    if (platform === 'win32') crcBundle = 'crc-windows-amd64.zip';
+    if (platform === 'darwin') crcBundle = 'crc-macos-amd64.pkg';
+    if (platform === 'win32') crcBundle = '	crc-windows-installer.zip';
     if (platform === 'linux') crcBundle = 'crc-linux-amd64.tar.xz';
     return `${crcDefaults.DefaultCrcUrlBase}/${crcLatest}/${crcBundle}`;
   }
