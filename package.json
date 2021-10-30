@@ -38,17 +38,20 @@
     }
   ],
   "categories": [
-    "Other"
+    "Other",
+    "Debuggers"
   ],
   "keywords": [
-    "openshift",
-    "kubernetes",
-    "redhat",
-    "clusters",
+    "OpenShift",
+    "Kubernetes",
+    "Red Hat",
+    "Clusters",
     "k8s",
-    "redhat",
-    "crc",
-    "codereadycontainers"
+    "CRC",
+    "CodeReady Containers",
+    "devsandbox",
+    "debuggers",
+    "Cloud"
   ],
   "icon": "images/openshift_extension.png",
   "main": "./out/src/extension",
@@ -1564,7 +1567,7 @@
           "Title": "CRC Pull Secret Path",
           "type": "string",
           "default": null,
-          "description": "Provide the path where the pull secret file is present."
+          "description": "Path of image pull secret."
         },
         "openshiftConnector.crcCpuCores": {
           "Title": "CRC Cpu Cores",
