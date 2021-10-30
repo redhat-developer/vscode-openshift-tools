@@ -2,6 +2,7 @@
 
 ## 0.2.11 (November 1, 2021)
 
+* [#1321](https://github.com/redhat-developer/vscode-openshift-tools/issues/1321) Add support for .NET Core binaries 5.0 and 3.1
 * [#2269](https://github.com/redhat-developer/vscode-openshift-tools/issues/2269) Fix oc version name
 * [#2267](https://github.com/redhat-developer/vscode-openshift-tools/issues/2267) Fix Readme for correct download links and names
 * [#2261](https://github.com/redhat-developer/vscode-openshift-tools/issues/2261) Add debug configuration for django apps
@@ -9,6 +10,7 @@
 * [#2255](https://github.com/redhat-developer/vscode-openshift-tools/issues/2255) Windows file paths that contain a space are not properly escaped
 * [#2229](https://github.com/redhat-developer/vscode-openshift-tools/issues/2229) Component `Debug` command on Windows never results in starting debug session
 * [#2120](https://github.com/redhat-developer/vscode-openshift-tools/issues/2120) Support CodeReady Containers 1.34.0 release
+* [#2278](https://github.com/redhat-developer/vscode-openshift-tools/issues/2278) Update correct CRC binary path location
 
 ## 0.2.10 (October 18, 2021)
 
