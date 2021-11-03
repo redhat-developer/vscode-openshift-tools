@@ -67,15 +67,18 @@ async function downloadFileAndCreateSha256(
 async function bundleTools(): Promise<void> {
     const outFolder = path.resolve('.', 'out');
     const toolsCacheFolder = path.join(outFolder, 'tools-cache');
-    const currentPlatform = process.argv.find((arg) => arg === '--platform')
+    let currentPlatform = process.env.TARGET;
+    if (!currentPlatform) {
+        currentPlatform = process.argv.find((arg) => arg === '--platform')
         ? process.platform
         : 'all';
+    }
     console.log(currentPlatform);
     console.info(`Download tools to '${toolsCacheFolder}'`);
     for (const key in configData) {
         const tool = configData[key];
         for (const OS in tool.platform) {
-            if (currentPlatform === 'all' || OS === process.platform) {
+            if (currentPlatform === 'all' || OS === currentPlatform) {
                 console.log(`Bundle '${tool.description}' for ${OS}`);
                 const osSpecificLocation = path.join(outFolder, 'tools', OS);
                 // eslint-disable-next-line no-await-in-loop
