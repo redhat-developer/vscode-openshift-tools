@@ -13,7 +13,7 @@ export function checkOpenshiftView() {
 
         before(async () => {
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
-            await new Promise(res => setTimeout(res, 1000));
+            await new Promise(res => setTimeout(res, 5000));
         });
 
         it('Displays all view sections', async () => {
