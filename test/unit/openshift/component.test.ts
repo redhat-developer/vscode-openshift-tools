@@ -1528,10 +1528,8 @@ suite('OpenShift/Component', () => {
             expect(warningStub).calledWith('Debug command currently supports local components with Java, Node.Js and Python component types.');
         });
 
-        test('starts java debugger for devfile component with java in builder image', async () => {
-            const startDebugging = sandbox.stub().resolves(true);
-            const waitPort = sandbox.stub().resolves(true);
-            Component = pq('../../../src/openshift/component', {
+        function mockComponent(startDebugging: sinon.SinonStub<any[], any>, waitPort: sinon.SinonStub<any[], any>) {
+            return Component = pq('../../../src/openshift/component', {
                 vscode: {
                     debug: {
                         startDebugging
@@ -1550,12 +1548,19 @@ suite('OpenShift/Component', () => {
                             }
                         },
                         on: (event: string, cb: () => Promise<void>) => {
-                            if (event !== 'error') cb();
+                            if (event !== 'error') {
+                                cb();
+                            }
                         },
                     }),
                 },
                 'wait-port': waitPort,
             }).Component;
+        }
+        test('starts java debugger for devfile component with java in builder image', async () => {
+            const startDebugging = sandbox.stub().resolves(true);
+            const waitPort = sandbox.stub().resolves(true);
+            Component = mockComponent(startDebugging, waitPort);
 
             const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
             sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
@@ -1573,31 +1578,7 @@ suite('OpenShift/Component', () => {
         test('starts python debugger for devfile component with python in builder image', async () => {
             const startDebugging = sandbox.stub().resolves(true);
             const waitPort = sandbox.stub().resolves(true)
-            Component = pq('../../../src/openshift/component', {
-                vscode: {
-                    debug: {
-                        startDebugging
-                    }
-                },
-                'child_process': {
-                    exec: () => ({
-                        stdout: {
-                            on: async (event: string, cb: (data: string) => Promise<void>) => {
-                                await cb('- 8888:7777');
-                            }
-                        },
-                        stderr: {
-                            on: async (event: string, cb: (data: string) => Promise<void>) => {
-                                await cb('Error stream output');
-                            }
-                        },
-                        on: (event: string, cb: () => Promise<void>) => {
-                            if (event !== 'error') cb();
-                        },
-                    }),
-                },
-                'wait-port': waitPort,
-            }).Component;
+            Component = mockComponent(startDebugging, waitPort);
 
             const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
             sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
@@ -1610,6 +1591,29 @@ suite('OpenShift/Component', () => {
             const result = await resultPromise;
             expect(startDebugging).calledOnce;
             expect(result).equals('Debugger session has successfully started.');
+        });
+
+        test('throws error if debug.startDebugging fails to start debug session and returns \'false\'', async () => {
+            const startDebugging = sandbox.stub().resolves(false);
+            const waitPort = sandbox.stub().resolves(true)
+            Component = mockComponent(startDebugging, waitPort);
+
+            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
+            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
+            devfileComponentItem2.builderImage = {
+                name: 'python',
+                tag: undefined
+            };
+            sandbox.stub(vscode.extensions, 'getExtension').returns({} as vscode.Extension<any>);
+            const resultPromise = Component.debug(devfileComponentItem2);
+            let caughtError;
+            try {
+                await resultPromise;
+            } catch (err) {
+                caughtError = err;
+            }
+            expect(startDebugging).calledOnce;
+            expect(caughtError).not.undefined;
         });
     });
 });
