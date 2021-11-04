@@ -544,7 +544,6 @@ export class OdoImpl implements Odo {
     public async _getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listApplications(project.getName()));
         let apps: string[] = this.loadItems<Application>(result).map((value) => value.metadata.name);
-        apps.push('app');
         apps = [...new Set(apps)]; // remove duplicates form array
         // extract apps from local not yet deployed components
         OdoImpl.data.getSettings().forEach((component) => {
