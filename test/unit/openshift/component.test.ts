@@ -1528,7 +1528,7 @@ suite('OpenShift/Component', () => {
             expect(warningStub).calledWith('Debug command currently supports local components with Java, Node.Js and Python component types.');
         });
 
-        function mockComponent(startDebugging: sinon.SinonStub<any[], any>, waitPort: sinon.SinonStub<any[], any>) {
+        function mockComponent(startDebugging: sinon.SinonStub<any[], any>, waitPort: sinon.SinonStub<any[], any>, exitCode = 0) {
             return Component = pq('../../../src/openshift/component', {
                 vscode: {
                     debug: {
@@ -1547,8 +1547,10 @@ suite('OpenShift/Component', () => {
                                 await cb('Error stream output');
                             }
                         },
-                        on: (event: string, cb: () => Promise<void>) => {
-                            if (event !== 'error') {
+                        on: (event: string, cb: (data?: any) => Promise<void>) => {
+                            if (event === 'exit') {
+                                cb(exitCode);
+                            } else if (event !== 'error') {
                                 cb();
                             }
                         },
@@ -1613,6 +1615,29 @@ suite('OpenShift/Component', () => {
                 caughtError = err;
             }
             expect(startDebugging).calledOnce;
+            expect(caughtError).not.undefined;
+        });
+
+        test('throws error if odo port-forwarding command fails', async () => {
+            const startDebugging = sandbox.stub().resolves(false);
+            const waitPort = sandbox.stub().resolves(true)
+            Component = mockComponent(startDebugging, waitPort, 1);
+
+            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
+            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
+            devfileComponentItem2.builderImage = {
+                name: 'python',
+                tag: undefined
+            };
+            sandbox.stub(vscode.extensions, 'getExtension').returns({} as vscode.Extension<any>);
+            const resultPromise = Component.debug(devfileComponentItem2);
+            let caughtError;
+            try {
+                await resultPromise;
+            } catch (err) {
+                caughtError = err;
+            }
+            expect(startDebugging).not.called;
             expect(caughtError).not.undefined;
         });
     });
