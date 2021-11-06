@@ -15,14 +15,12 @@ import { OdoImpl, ContextType } from '../../../src/odo';
 import { Command } from '../../../src/odo/command';
 import { Progress } from '../../../src/util/progress';
 import * as Util from '../../../src/util/async';
-import { Refs } from '../../../src/util/refs';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
 import { SourceType } from '../../../src/odo/config';
 import { ComponentKind, ComponentTypeAdapter } from '../../../src/odo/componentType';
 import { AddWorkspaceFolder } from '../../../src/util/workspace';
 import pq = require('proxyquire');
 
-import globby = require('globby');
 import fs = require('fs-extra');
 import { Platform } from '../../../src/util/platform';
 
@@ -49,14 +47,12 @@ suite('OpenShift/Component', () => {
     const errorMessage = 'FATAL ERROR';
     let getApps: sinon.SinonStub;
     let Component: any;
-    let fetchTag: sinon.SinonStub;
     let commandStub: sinon.SinonStub;
     let spawnStub: sinon.SinonStub;
 
     setup(() => {
         sandbox = sinon.createSandbox();
         sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
-        fetchTag = sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>([['HEAD', 'shanumb']]));
         Component = pq('../../../src/openshift/component', { }).Component;
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '' });
@@ -104,7 +100,6 @@ suite('OpenShift/Component', () => {
     suite('create', () => {
         const componentType = new ComponentTypeAdapter(ComponentKind.S2I, 'nodejs', 'latest', 'builder,nodejs');
         const version = 'latest';
-        const ref = 'master';
         const folder = { uri: { fsPath: 'folder' } };
         let inputStub: sinon.SinonStub;
         let progressFunctionStub: sinon.SinonStub;
@@ -212,198 +207,6 @@ suite('OpenShift/Component', () => {
                 const result = await Component.create(appItem);
 
                 expect(result.toString()).equals('');
-            });
-        });
-
-        suite('from git repository', () => {
-            const uri = 'git uri';
-            setup(() => {
-                sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves(['nodejs']);
-                quickPickStub.onFirstCall().resolves(AddWorkspaceFolder);
-                inputStub.onFirstCall().resolves(uri);
-                quickPickStub.onSecondCall().resolves('master');
-                quickPickStub.onThirdCall().resolves(componentType);
-                quickPickStub.onCall(3).resolves(version);
-                inputStub.onSecondCall().resolves(componentItem.getName());
-                sandbox.stub(vscode.window, 'showInformationMessage').resolves();
-                sandbox.stub(vscode.window, 'showOpenDialog').resolves([vscode.Uri.parse('file:///c%3A/Temp')]);
-            });
-
-            test('returns null when no option is selected from quick pick', async () => {
-                quickPickStub.onFirstCall().resolves(undefined);
-                const result = await Component.createFromGit(null);
-                expect(result).null;
-            });
-
-            test('returns null when no folder selected', async () => {
-                quickPickStub.onFirstCall().resolves(undefined);
-                const result = await Component.createFromGit(appItem);
-                expect(result).null;
-            });
-
-            test('happy path works', async () => {
-                const result =  await Component.createFromGit(appItem);
-
-                expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
-                expect(execStub).calledWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType.name, version, componentItem.getName(), uri, ref));
-            });
-
-            test('returns null when no git repo selected', async () => {
-                inputStub.onFirstCall().resolves();
-                const result = await Component.createFromGit(appItem);
-
-                expect(result).null;
-            });
-
-            test('returns null when no component name selected', async () => {
-                inputStub.onFirstCall().resolves();
-                const result = await Component.createFromGit(appItem);
-
-                expect(result).null;
-            });
-
-            test('returns null when no git reference selected', async () => {
-                quickPickStub.onSecondCall().resolves();
-                const result = await Component.createFromGit(appItem);
-
-                expect(result).null;
-            });
-
-            test('returns null when no component type selected', async () => {
-                quickPickStub.onCall(2).resolves();
-                const result = await Component.createFromGit(appItem);
-
-                expect(result).null;
-            });
-
-            test('allows to continue with valid git repository url', async () => {
-                let result: string | Thenable<string>;
-                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
-                    result = await options.validateInput('https://github.com/redhat-developer/vscode-openshift-tools');
-                    return Promise.resolve('https://github.com/redhat-developer/vscode-openshift-tools');
-                });
-
-                await Component.createFromGit(appItem);
-                expect(result).to.be.undefined;
-            });
-
-            test('shows error message when repo does not exist', async () => {
-                fetchTag.resolves (new Map<string, string>());
-                let result: string | Thenable<string>;
-                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
-                    result = await options.validateInput('https://github.com');
-                    return Promise.resolve('https://github.com');
-                });
-
-                await Component.createFromGit(appItem);
-                expect(result).equals('There is no git repository at provided URL.');
-            });
-
-            test('shows error message when invalid URL provided', async () => {
-                let result: string | Thenable<string>;
-                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
-                    result = await options.validateInput('github');
-                    return Promise.resolve('github');
-                });
-
-                await Component.createFromGit(appItem);
-                expect(result).equals('Invalid URL provided');
-            });
-
-            test('shows error message for empty git repository url', async () => {
-                let result: string | Thenable<string>;
-                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
-                    result =  await (async () => options.validateInput(''))();
-                    return Promise.resolve('');
-                });
-
-                await Component.createFromGit(appItem);
-                expect(result).equals('Empty Git repository URL');
-            });
-        });
-
-        suite('from binary file', () => {
-            let fsPath: string; let paths: string;
-            let globbyStub: sinon.SinonStub;
-
-            if (process.platform === 'win32') {
-                fsPath = 'c:\\Users\\Downloads';
-                paths = 'c:\\Users\\Downloads\\sb.jar';
-            } else {
-                fsPath = '/Users/Downloads';
-                paths = '/Users/Downloads';
-            }
-
-            const files = [{
-                _formatted: undefined,
-                _fsPath: undefined,
-                authority: '',
-                fragment: '',
-                fsPath,
-                path: paths,
-                query: '',
-                scheme: 'file'
-            }];
-
-            setup(() => {
-                quickPickStub.onFirstCall().resolves(AddWorkspaceFolder);
-                quickPickStub.onSecondCall().resolves({
-                    description: paths,
-                    label: '$(file-zip) sb.jar'
-                });
-                quickPickStub.onThirdCall().resolves(componentType);
-                quickPickStub.onCall(3).resolves(version);
-                sandbox.stub(vscode.window, 'showOpenDialog').resolves(files);
-                globbyStub = sandbox.stub(globby, 'sync').returns([paths]);
-                inputStub.resolves(componentItem.getName());
-            });
-
-            test('happy path works', async () => {
-                const result = await Component.createFromBinary(appItem);
-
-                expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
-                expect(execStub).calledWith(Command.createBinaryComponent(projectItem.getName(), appItem.getName(), componentType.name, version, componentItem.getName(), paths, files[0].fsPath));
-            });
-
-            test('returns null when no option is selected from quick pick', async () => {
-                quickPickStub.onSecondCall().resolves(undefined);
-                const result = await Component.createFromBinary(null);
-                expect(result).null;
-            });
-
-            test('returns information message if no binary file present in the context', async () => {
-                quickPickStub.onFirstCall().resolves(AddWorkspaceFolder);
-                globbyStub.onFirstCall().returns([]);
-                const result = await Component.createFromBinary(appItem);
-                expect(result).equals('No binary file present in the context folder selected. We currently only support .jar and .war files. If you need support for any other file, please raise an issue.');
-            });
-
-            test('returns null when no work space folder selected', async () => {
-                quickPickStub.onFirstCall().resolves(undefined);
-                const result = await Component.createFromBinary(appItem);
-
-                expect(result).null;
-            });
-
-            test('returns empty string and step name in cancelled_step property when no binary file selectedd', async () => {
-                quickPickStub.onSecondCall().resolves(undefined);
-                const result = await Component.create(appItem);
-
-                expect(result.toString()).equals('');
-            });
-
-            test('returns empty string and step name in cancelled_step property when no component name selected', async () => {
-                inputStub.resolves();
-                const result = await Component.create(appItem);
-
-                expect(result.toString()).equals('');
-            });
-
-            test('returns null when no component type selected', async () => {
-                quickPickStub.onThirdCall().resolves();
-                const result = await Component.createFromBinary(appItem);
-
-                expect(result).null;
             });
         });
     });
