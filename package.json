@@ -221,8 +221,6 @@
     "onCommand:openshift.app.delete",
     "onCommand:openshift.component.create",
     "onCommand:openshift.component.createFromLocal",
-    "onCommand:openshift.component.createFromGit",
-    "onCommand:openshift.component.createFromBinary",
     "onCommand:openshift.component.createFromRootWorkspaceFolder",
     "onCommand:openshift.component.describe",
     "onCommand:openshift.component.describe.palette",
@@ -451,16 +449,6 @@
       {
         "command": "openshift.component.deployRootWorkspaceFolder",
         "title": "Deploy and push folder to OpenShift"
-      },
-      {
-        "command": "openshift.component.createFromGit",
-        "title": "New Component from Git repository",
-        "category": "OpenShift"
-      },
-      {
-        "command": "openshift.component.createFromBinary",
-        "title": "New Component from binary",
-        "category": "OpenShift"
       },
       {
         "command": "openshift.component.delete.palette",

@@ -7,7 +7,6 @@
 
 import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
 import { ChildProcess , exec } from 'child_process';
-import { isURL } from 'validator';
 import { EventEmitter } from 'events';
 import * as YAML from 'yaml'
 import OpenShiftItem, { clusterRequired, selectTargetApplication, selectTargetComponent } from './openshiftItem';
@@ -15,8 +14,6 @@ import { OpenShiftObject, ContextType, OpenShiftObjectImpl, OpenShiftComponent, 
 import { Command, CommandOption, CommandText } from '../odo/command';
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
-import { Refs, Type } from '../util/refs';
-import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import { selectWorkspaceFolder } from '../util/workspace';
 import { ToolsConfig } from '../tools';
@@ -756,86 +753,6 @@ export class Component extends OpenShiftItem {
             }
             throw err;
         }
-    }
-
-    @vsCommand('openshift.component.createFromGit')
-    @clusterRequired()
-    @selectTargetApplication(
-        'In which Application you want to create a Component'
-    )
-    static async createFromGit(application: OpenShiftObject): Promise<string | null> {
-        if (!application) return null;
-        const workspacePath = await selectWorkspaceFolder();
-        if (!workspacePath) return null;
-        const delayer = new Delayer<string>(500);
-
-        const repoURI = await window.showInputBox({
-            prompt: 'Git repository URI',
-            ignoreFocusOut: true,
-            validateInput: (value: string) => {
-                return delayer.trigger(async () => {
-                    if (!value.trim()) return 'Empty Git repository URL';
-                    if (!isURL(value)) return 'Invalid URL provided';
-                    const references = await Refs.fetchTag(value);
-                    if (!references.get('HEAD')) return 'There is no git repository at provided URL.';
-                });
-            }
-        });
-
-        if (!repoURI) return null;
-
-        const references = await Refs.fetchTag(repoURI);
-        const gitRef = await window.showQuickPick([...references.values()].map(value => ({label: value.name, description: value.type === Type.TAG? `Tag at ${value.hash}` : value.hash })) , {placeHolder: 'Select git reference (branch/tag)', ignoreFocusOut: true});
-
-        if (!gitRef) return null;
-
-        const componentList = Component.odo.getComponents(application);
-        const componentName = await Component.getName('Component name', componentList, application.getName());
-
-        if (!componentName) return null;
-        const componentTypesPromise = Component.odo.getComponentTypes();
-        const s2iComponentTypes = componentTypesPromise.then((items) => items.filter((item) => item.kind === ComponentKind.S2I));
-        const componentType = await window.showQuickPick(s2iComponentTypes, {placeHolder: 'Component type', ignoreFocusOut: true});
-
-        if (!componentType) return null;
-
-        await Component.odo.createComponentFromGit(application, componentType.name, componentType.version, componentName, repoURI, workspacePath, gitRef.label);
-        return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
-    }
-
-    @vsCommand('openshift.component.createFromBinary')
-    @clusterRequired()
-    @selectTargetApplication(
-        'In which Application you want to create a Component'
-    )
-    static async createFromBinary(application: OpenShiftObject): Promise<string | null> {
-        if (!application) return null;
-
-        const workspacePath = await selectWorkspaceFolder();
-
-        if (!workspacePath) return null;
-
-        const globPath = process.platform === 'win32' ? workspacePath.fsPath.replace(/\\/g, '/') : workspacePath.path;
-        const paths = globby.sync(`${globPath}`, { expandDirectories: { files: ['*'], extensions: ['jar', 'war']}, deep: 20 });
-
-        if (paths.length === 0) return 'No binary file present in the context folder selected. We currently only support .jar and .war files. If you need support for any other file, please raise an issue.';
-
-        const binaryFileObj: QuickPickItem[] = paths.map((file) => ({ label: `$(file-zip) ${path.basename(file)}`, description: `${file}`}));
-
-        const binaryFile: QuickPickItem = await window.showQuickPick(binaryFileObj, {placeHolder: 'Select binary file', ignoreFocusOut: true});
-
-        if (!binaryFile) return null;
-
-        const componentList = Component.odo.getComponents(application);
-        const componentName = await Component.getName('Component name', componentList, application.getName());
-
-        if (!componentName) return null;
-        const componentType = await window.showQuickPick((await Component.odo.getComponentTypes()).filter((item) => item.kind === ComponentKind.S2I), {placeHolder: 'Component type', ignoreFocusOut: true});
-
-        if (!componentType) return null;
-
-        await Component.odo.createComponentFromBinary(application, componentType.name, componentType.version, componentName, Uri.file(binaryFile.description), workspacePath);
-        return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
     }
 
     @vsCommand('openshift.component.debug', true)
