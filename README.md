@@ -68,10 +68,7 @@ The extension supports a number of commands to interact with OpenShift clusters 
 
 #### Commands for a Project
 
-   * `New Component` - Create a new Component from the Project.
-        * git - Use a git repository as a source for the Component.
-        * binary - Use binary file as a source for the Component
-        * local - Use local directory as a source for the Component.
+   * `New Component` - Create a new Component in the Project.
    * `New Service` - Perform Service Catalog operations when it is enabled.
    * `Delete` - Delete an existing Project.
    * `Set Active Project` - Change active Project displayed in OpenShift Application View.
@@ -79,9 +76,6 @@ The extension supports a number of commands to interact with OpenShift clusters 
 #### Commands for an Application
 
    * `New Component` - Create a new Component inside the selected Application.
-        * git - Use a git repository as a source for the Component.
-        * binary - Use binary file as a source for the Component.
-        * local - Use local directory as a source for the Component.
    * `New Service` - Perform Service Catalog operations when it is enabled.
    * `Describe` - Describe the given Application in terminal window.
    * `Delete` - Delete an existing Application.
@@ -108,7 +102,7 @@ Components in different states have different set of commands available.
    * `Unlink` - Unlink Component from Component/Service.
    * `Open in Browser` - Open the exposed URL in default browser.
    * `Push` - Push the source code to a Component.
-   * `Watch` - Watch for changes, update Component on change. This is not supported for git based components.
+   * `Watch` - Watch for changes, update Component on change.
    * `Undeploy` - Undeploys a Component from the cluster. The component still resides in the local config.
    * `Debug` - Debug local Java, Node.js and Python Component.
    * `Test` - Run test for the Component in cluster.
@@ -174,10 +168,7 @@ The view provides following options to control cluster's state:
 
 ### Debug Support
 
-`OpenShift: Debug` command simplifies the way to start debugging for OpenShift Components pushed to a cluster.
-   * Supports following devfile components: Node.js, Java and Python(including Django)
-   * Supports only Local Components
-   * Does not support git and binary based components
+`OpenShift: Debug` command simplifies the way to start debugging for OpenShift Components pushed to a cluster. It supports following devfile components: Node.js, Java and Python (including Django)
 
 ### Debug Node.js Component
 
