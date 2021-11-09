@@ -21,7 +21,7 @@ import LogViewLoader from '../webview/log/LogViewLoader';
 import DescribeViewLoader from '../webview/describe/describeViewLoader';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { SourceType } from '../odo/config';
-import { ascDevfileFirst, ComponentKind, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, ImageStreamTag, isDevfileComponent, isImageStreamTag } from '../odo/componentType';
+import { ascDevfileFirst, ComponentKind, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, isDevfileComponent } from '../odo/componentType';
 import { Url } from '../odo/url';
 import { StarterProjectDescription } from '../odo/catalog';
 import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
@@ -541,7 +541,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.componentType.newComponent')
-    public static async createComponentFromCatalogEntry(context: DevfileComponentType | StarterProject | ImageStreamTag): Promise<string> {
+    public static async createComponentFromCatalogEntry(context: DevfileComponentType | StarterProject): Promise<string> {
         const application = await Component.getOpenShiftCmdData(undefined,
             'Select an Application where you want to create a Component'
         );
@@ -553,9 +553,6 @@ export class Component extends OpenShiftItem {
             starterProjectName:string;
         if (isDevfileComponent(context)) {
             componentTypeName = context.Name;
-        } else if (isImageStreamTag(context)) {
-            componentTypeName = context.typeName;
-            version = context.name;
         } else if (isStarterProject(context)){
             componentTypeName = context.typeName;
             starterProjectName = context.name;
