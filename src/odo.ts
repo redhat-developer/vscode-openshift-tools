@@ -643,29 +643,12 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson(), undefined, true, this.getKubeconfigEnv());
         const compTypesJson: ComponentTypesJson = this.loadJSON(result.stdout);
         const devfileItems: ComponentTypeAdapter[] = [];
-        const s2iItems: ComponentTypeAdapter[] = [];
 
-        if (compTypesJson?.devfileItems) {
-            compTypesJson.devfileItems.map((item) => devfileItems.push(new ComponentTypeAdapter(ComponentKind.DEVFILE, item.Name, undefined, item.Description, undefined, item.Registry.Name)));
+        if (compTypesJson?.items) {
+            compTypesJson.items.map((item) => devfileItems.push(new ComponentTypeAdapter(ComponentKind.DEVFILE, item.Name, undefined, item.Description, undefined, item.Registry.Name)));
         }
 
-        if (compTypesJson?.s2iItems) {
-            compTypesJson.s2iItems.forEach(element => {
-                if (element?.spec?.nonHiddenTags) {
-                    element.spec.nonHiddenTags.forEach(tag => {
-                        const foundTag = element.spec.imageStreamTags.find(imageTag => imageTag.name === tag);
-                        if (foundTag) {
-                            s2iItems.push(new ComponentTypeAdapter(ComponentKind.S2I, element.metadata.name, tag, foundTag?.annotations?.description, foundTag?.annotations.tags));
-                        }
-                    });
-                }
-            });
-        }
-
-        return [
-            ...devfileItems,
-            ...s2iItems
-        ];
+        return devfileItems;
     }
 
     public async getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]> {
