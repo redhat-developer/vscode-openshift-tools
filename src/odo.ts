@@ -351,9 +351,7 @@ export interface Odo {
     deleteProject(project: OpenShiftObject): Promise<OpenShiftObject>;
     createApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
     deleteApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
-    createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, repoUri: string, context: Uri, ref: string): Promise<OpenShiftObject>;
     createComponentFromFolder(application: OpenShiftObject, type: string, version: string, registryName: string, name: string, path: Uri, starterName?: string, useExistingDevfile?: boolean, notification?: boolean): Promise<OpenShiftObject>;
-    createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, path: Uri, context: Uri): Promise<OpenShiftObject>;
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     undeployComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     deleteNotPushedComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
@@ -910,35 +908,6 @@ export class OdoImpl implements Odo {
         if (!workspace.workspaceFolders || !wsFolder) {
             workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: location });
         }
-        return null;
-    }
-
-    public async createComponentFromGit(application: OpenShiftObject, type: string, version: string, name: string, location: string, context: Uri, ref = 'master'): Promise<OpenShiftObject> {
-        await this.execute(Command.createGitComponent(application.getParent().getName(), application.getName(), type, version, name, location, ref || 'master'), context.fsPath);
-        // This check is here to skip any model updates when there are not workspace folders yet,
-        // because when first folder added to workspace extesion is going to be reloaded anyway and
-        // model loaded when extension is reactivated
-        if (workspace.workspaceFolders) {
-            const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
-            if (!targetApplication) {
-                await this.insertAndReveal(application);
-            }
-            await this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, context, odo.SourceType.GIT, version ? ComponentKind.S2I : ComponentKind.DEVFILE, version ? {name: type, tag: version} : undefined));
-        }
-        workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: context });
-        return null;
-    }
-
-    public async createComponentFromBinary(application: OpenShiftObject, type: string, version: string, name: string, location: Uri, context: Uri): Promise<OpenShiftObject> {
-        await this.execute(Command.createBinaryComponent(application.getParent().getName(), application.getName(), type, version, name, location.fsPath, context.fsPath));
-        if (workspace.workspaceFolders) {
-            const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
-            if (!targetApplication) {
-                await this.insertAndReveal(application);
-            }
-            this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, context, odo.SourceType.BINARY, version ? ComponentKind.S2I : ComponentKind.DEVFILE, {name: type, tag: version}));
-        }
-        workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: context });
         return null;
     }
 
