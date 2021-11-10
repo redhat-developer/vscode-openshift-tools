@@ -449,47 +449,6 @@ export class Command {
         return cTxt;
     }
 
-    @verbose
-    static createGitComponent(
-        project: string,
-        app: string,
-        type: string,
-        version: string,
-        name: string,
-        git: string,
-        ref: string,
-    ): CommandText {
-        const cTxt = new CommandText('odo create', `${type}${version?':':''}${version?version:''} ${name}`);
-        if (version) {
-            cTxt.addOption(new CommandOption('--s2i'));
-        }
-        return cTxt.addOption(new CommandOption('--git', git))
-            .addOption(new CommandOption('--ref', ref))
-            .addOption(new CommandOption('--app', app))
-            .addOption(new CommandOption('--project', project));
-    }
-
-    @verbose
-    static createBinaryComponent(
-        project: string,
-        app: string,
-        type: string,
-        version: string,
-        name: string,
-        binary: string,
-        context: string,
-    ): CommandText {
-        const cTxt = new CommandText('odo create', `${type}:${version} ${name}`);
-        if (version) {
-            cTxt.addOption(new CommandOption('--s2i'));
-        }
-        cTxt.addOption(new CommandOption('--binary', binary))
-            .addOption(new CommandOption('--app', app))
-            .addOption(new CommandOption('--project', project))
-            .addOption(new CommandOption('--context', `"${context}"`));
-        return cTxt;
-    }
-
     static testComponent(): CommandText {
         return new CommandText('odo test --show-log');
     };
