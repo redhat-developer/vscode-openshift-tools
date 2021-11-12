@@ -126,7 +126,7 @@ export class ClusterServiceVersion extends OpenShiftItem {
         generateDefaults(openAPIV3SchemaAll, example);
         const openAPIV3Schema = _.defaultsDeep({}, DEFAULT_K8S_SCHEMA, _.omit(openAPIV3SchemaAll, 'properties.status'));
         openAPIV3Schema.properties.metadata.properties.name.default =
-            example?.metadata.name ? `${example.metadata.name}-${randomString()}` : `${crdDescription.kind}-${randomString()}`;
+            example?.metadata?.name ? `${example.metadata.name}-${randomString()}` : `${crdDescription.kind}-${randomString()}`;
 
         const uiSchema = getUISchema(
             openAPIV3Schema,
