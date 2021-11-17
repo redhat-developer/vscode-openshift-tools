@@ -33,7 +33,7 @@ export class Service extends OpenShiftItem {
 
         const csv: ClusterServiceVersionKind = await Service.odo.getClusterServiceVersion(operator.name);
         const selectedCrd = await window.showQuickPick(csv.spec.customresourcedefinitions.owned.map(crd=> {
-            return {label: `${crd.displayName} ${crd.version}`, target: crd};
+            return {label: `${crd.displayName? crd.displayName : crd.name} ${crd.version}`, target: crd};
         }), {
             placeHolder: 'Service Name',
             ignoreFocusOut: true
