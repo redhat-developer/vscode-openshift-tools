@@ -137,7 +137,11 @@ function generateTitlesForSchema(uiSchema, schema): void {
             if (!uiSchema[name]) {
                 uiSchema[name] = {};
             }
-            generateTitlesForSchema(uiSchema[name], schemaProperty);
+            if (schemaProperty.properties) {
+                generateTitlesForSchema(uiSchema[name], schemaProperty);
+            } else {
+                uiSchema[name]['ui:widget'] = 'hidden';
+            }
         } else {
             if (!uiSchema[name]) {
                 uiSchema[name] = {};
@@ -152,23 +156,38 @@ function generateTitlesForSchema(uiSchema, schema): void {
     });
 }
 
-export function generateDefaults(jsonSchema, jsonData) {
-    if (!jsonSchema.properties) {
-        jsonSchema.properties = {};
-    }
-    Object.keys(jsonData).forEach(key => {
-        const nextValue = jsonData[key];
-        if(typeof nextValue === 'object' && nextValue !== null && !Array.isArray(nextValue)) {
-            if (!jsonSchema.properties[key]) {
-                jsonSchema.properties[key] = {};
-            }
-            generateDefaults(jsonSchema.properties[key], jsonData[key]);
-        } else {
-            if (nextValue !== undefined && jsonSchema.properties[key]) {
-                jsonSchema.properties[key].default = nextValue;
+function hideEmptyNodesForSchema(uiSchema, schema): void {
+    Object.keys(schema.properties ? schema.properties : {}).forEach((name) => {
+        const schemaProperty = schema.properties[name];
+        if (schemaProperty.type === 'object') {
+            if (schemaProperty.properties) {
+                if (!uiSchema[name]) {
+                    uiSchema[name] = {};
+                }
+                hideEmptyNodesForSchema(uiSchema[name], schemaProperty);
+            } else {
+                uiSchema['ui:widget'] = 'hidden';
             }
         }
     });
+}
+
+export function generateDefaults(jsonSchema, jsonData) {
+    if (jsonSchema.properties) {
+        Object.keys(jsonData).forEach(key => {
+            const nextValue = jsonData[key];
+            if(typeof nextValue === 'object' && nextValue !== null && !Array.isArray(nextValue)) {
+                if (!jsonSchema.properties[key]) {
+                    jsonSchema.properties[key] = {};
+                }
+                generateDefaults(jsonSchema.properties[key], jsonData[key]);
+            } else {
+                if (nextValue !== undefined && jsonSchema.properties[key]) {
+                    jsonSchema.properties[key].default = nextValue;
+                }
+            }
+        });
+    }
 }
 
 export function randomString(): string {
@@ -181,6 +200,7 @@ export const getUISchema = (jsonSchema, providedAPI) => {
   const specUiSchema = descriptorsToUISchema(providedAPI?.specDescriptors, jsonSchema?.properties?.spec)
   // Extend ui-schema by adding ui:title for properties without descriptor.
   generateTitlesForSchema(specUiSchema, jsonSchema?.properties?.spec);
+  hideEmptyNodesForSchema(specUiSchema, jsonSchema);
   return {
     apiVersion: {
         'ui:widget': 'hidden'

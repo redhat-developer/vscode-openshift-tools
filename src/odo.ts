@@ -727,8 +727,6 @@ export class OdoImpl implements Odo {
     public async getClusterServiceVersion(operatorName: string): Promise<ClusterServiceVersionKind> {
         const result: cliInstance.CliExitData = await this.execute(Command.getClusterServiceVersionJson(operatorName), Platform.getUserHomePath());
         return JSON.parse(result.stdout)
-
-
     }
 
     async getServices(application: OpenShiftObject): Promise<OpenShiftObject[]> {
