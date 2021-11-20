@@ -99,7 +99,6 @@ export class ClusterServiceVersion extends OpenShiftItem {
                     window.showErrorMessage(err);
                     panel.webview.postMessage({action: 'error'});
                 }
-
             }
         }
     }
