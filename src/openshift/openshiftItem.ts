@@ -84,13 +84,12 @@ export default class OpenShiftItem {
     }
 
     static clusterURL(value: string): string | null {
-        const urlRegex = value.match('(https?://[^ ]*)');
-        return urlRegex ? urlRegex[0] : null;
+        const urlRegex = value.match(/--server=(https?:\/\/[^ ]*)/);
+        return urlRegex ? urlRegex[1] : null;
     }
 
     static ocLoginCommandMatches(value: string): string | null {
-        const ocLoginRegex = /oc login (http|https):(.*?) --token=(.*)/;
-        return ocLoginRegex.test(value) ? value : null;
+        return OpenShiftItem.clusterURL(value) !== null && OpenShiftItem.getToken(value) !== null ? value : null;
     }
 
     static getToken(value: string): string | null {

@@ -209,6 +209,7 @@
     "onCommand:openshift.explorer.login",
     "onCommand:openshift.explorer.login.credentialsLogin",
     "onCommand:openshift.explorer.login.tokenLogin",
+    "onCommand:openshift.explorer.login.clipboard",
     "onCommand:openshift.explorer.logout",
     "onCommand:openshift.explorer.refresh",
     "onCommand:openshift.componentTypesView.refresh",
@@ -345,6 +346,11 @@
       {
         "command": "openshift.explorer.login.credentialsLogin",
         "title": "Login into Cluster with credentials",
+        "category": "OpenShift"
+      },
+      {
+        "command": "openshift.explorer.login.clipboard",
+        "title": "Login into Cluster using URL and token from clipboard",
         "category": "OpenShift"
       },
       {

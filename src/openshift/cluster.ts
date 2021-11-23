@@ -306,7 +306,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     @vsCommand('openshift.explorer.login.tokenLogin')
-    static async tokenLogin(userClusterUrl: string, skipConfirmation = false): Promise<string | null> {
+    static async tokenLogin(userClusterUrl: string, skipConfirmation = false, userToken?: string): Promise<string | null> {
         let token: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
 
@@ -328,19 +328,34 @@ export class Cluster extends OpenShiftItem {
             clusterURL = await Cluster.getUrl();
         }
 
-        const ocToken = await window.showInputBox({
-            value: token,
-            prompt: 'Provide Bearer token for authentication to the API server',
-            ignoreFocusOut: true,
-            password: true
-        });
-        if (!ocToken) return null;
-
+        let ocToken: string;
+        if (!userToken) {
+            ocToken = await window.showInputBox({
+                value: token,
+                prompt: 'Provide Bearer token for authentication to the API server',
+                ignoreFocusOut: true,
+                password: true
+            });
+            if (!ocToken) return null;
+        } else {
+            ocToken = userToken;
+        }
         return Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`,
             () => Cluster.odo.execute(Command.odoLoginWithToken(clusterURL, ocToken.trim()))
             .then((result) => Cluster.loginMessage(clusterURL, result))
             .catch((error) => Promise.reject(new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(error.message)}'!`, 'Failed to login to cluster')))
         );
+    }
+
+    @vsCommand('openshift.explorer.login.clipboard')
+    static async loginUsingClipboardInfo(): Promise<string | null> {
+        const clipboard = await Cluster.readFromClipboard();
+        if(!Cluster.ocLoginCommandMatches(clipboard)) {
+            throw new VsCommandError('Cannot parse login command in clipboard.')
+        }
+        const url = Cluster.clusterURL(clipboard);
+        const token = Cluster.getToken(clipboard);
+        return Cluster.tokenLogin(url, true, token);
     }
 
     static async loginMessage(clusterURL: string, result: CliExitData): Promise<string | undefined> {
