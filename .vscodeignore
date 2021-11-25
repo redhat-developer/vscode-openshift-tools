@@ -6,6 +6,7 @@ out/build/**
 out/test-resources/**
 out/tools-cache/**
 out/**/*.map
+out/src-orig/**
 src/**
 doc/**
 .gitignore
