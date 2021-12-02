@@ -802,7 +802,7 @@ export class Component extends OpenShiftItem {
                 const jlsIsActive = extensions.getExtension(JAVA_EXT);
                 const jdIsActive = extensions.getExtension(JAVA_DEBUG_EXT);
                 if (!jlsIsActive || !jdIsActive) {
-                    let warningMsg;
+                    let warningMsg: string;
                     if (jlsIsActive && !jdIsActive) {
                         warningMsg = 'Debugger for Java (Publisher: Microsoft) extension is required to debug component';
                     } else if (!jlsIsActive && jdIsActive) {

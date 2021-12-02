@@ -295,7 +295,7 @@ export class Command {
         );
     }
 
-    static deleteComponent(project: string, app: string, component: string, context: boolean, s2i = false): CommandText {
+    static deleteComponent(project: string, app: string, component: string, context: boolean): CommandText {
         const ct = new CommandText('odo delete',
             context ? undefined : component, [ // if there is not context name is required
                 new CommandOption('-f'),
@@ -306,9 +306,6 @@ export class Command {
                 .addOption(new CommandOption('--project',project))
         } else {
             ct.addOption(new CommandOption('--all'));
-        }
-        if (s2i) {
-            ct.addOption(new CommandOption('--s2i'));
         }
         return ct;
     }
