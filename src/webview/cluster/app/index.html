@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <base href="%BASE_URL%" />
+        <% if (production) { %>
+            <base href="%BASE_URL%" />
+        <% } %>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Config View</title>
         <!-- meta http-equiv="Content-Security-Policy" -->
+
+        <% if (!production) { %>
+        <script src="./devstub.js"></script>
+        <% } %>
         <script>
-            if (typeof acquireVsCodeApi !== 'undefined') {
-                window.vscodeApi = acquireVsCodeApi();
-            }
+            window.vscodeApi = acquireVsCodeApi();
         </script>
         <style>
             html,
