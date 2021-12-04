@@ -74,6 +74,14 @@
             "env": {
                 "VSCODE_REDHAT_TELEMETRY_DEBUG":"true"
             }
-        }
+        },
+        {
+            "type": "pwa-chrome",
+            "request": "launch",
+            "name": "Launch Edge against localhost",
+            "file": "${workspaceFolder}/out/clusterViewer/index.html",
+            "webRoot": "${workspaceFolder}",
+            "trace": true
+          }
     ]
 }
