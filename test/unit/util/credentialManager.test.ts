@@ -44,7 +44,7 @@ suite('TokenStore', () => {
 
     suite('setUserName', () => {
         test('should set user\'s name', async () => {
-            const updateStub = sandbox.stub(TokenStore.extensionContext.globalState, 'update').resolves('developer');
+            const updateStub = sandbox.stub<any, any>(TokenStore.extensionContext.globalState, 'update').resolves('developer');
             const result = await TokenStore.setUserName('username');
             expect(result).equal('developer');
             expect(updateStub).calledOnce;

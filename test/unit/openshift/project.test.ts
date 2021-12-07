@@ -141,7 +141,7 @@ suite('OpenShift/Project', () => {
         let warnStub: sinon.SinonStub;
 
         setup(() => {
-            warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+            warnStub = sandbox.stub<any, any>(vscode.window, 'showWarningMessage').resolves('Yes');
         });
 
         test('works with context', async () => {

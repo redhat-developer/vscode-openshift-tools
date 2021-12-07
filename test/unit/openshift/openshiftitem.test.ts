@@ -128,7 +128,7 @@ suite('OpenShiftItem', () => {
     suite('getStorageNames', ()=> {
 
         test('returns an array of storage names for the component if there is at least one component', async ()=> {
-            sandbox.stub(OdoImpl.prototype, 'getStorageNames').resolves([storageItem]);
+            sandbox.stub<any, any>(OdoImpl.prototype, 'getStorageNames').resolves([storageItem]);
             const storageNames = await OpenShiftItem.getStorageNames(componentItem);
             expect(storageNames[0].getName()).equals('storage');
 

@@ -21,22 +21,16 @@ export class Archive {
         return new Promise((resolve, reject) => {
             if (zipFile.endsWith('.tar.gz')) {
                 if (zipFile.includes('windows')) {
-                    Archive.unzip(zipFile, extractTo, cmdFileName)
-                        .then(resolve)
-                        .catch(reject);
+                    Archive.unzip(zipFile, extractTo, cmdFileName).then(resolve).catch(reject);
                 } else {
                     Archive.untar(zipFile, extractTo, cmdFileName, prefix)
                         .then(resolve)
                         .catch(reject);
                 }
             } else if (zipFile.endsWith('.gz')) {
-                Archive.gunzip(zipFile, extractTo)
-                    .then(resolve)
-                    .catch(reject);
+                Archive.gunzip(zipFile, extractTo).then(resolve).catch(reject);
             } else if (zipFile.endsWith('.zip')) {
-                Archive.unzip(zipFile, extractTo, cmdFileName)
-                    .then(resolve)
-                    .catch(reject);
+                Archive.unzip(zipFile, extractTo, cmdFileName).then(resolve).catch(reject);
             } else {
                 reject(Error(`Unsupported extension for '${zipFile}'`));
             }
@@ -60,6 +54,7 @@ export class Archive {
         fileName: string,
         prefix: string,
     ): Promise<void> {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return pify(targz.decompress)({
             src: zipFile,
             dest: extractTo,

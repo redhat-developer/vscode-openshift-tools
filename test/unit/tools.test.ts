@@ -103,7 +103,7 @@ suite('tools configuration', () => {
                 sb.stub(fs, 'existsSync').returns(true);
                 sb.stub(fsex, 'ensureDirSync').returns();
                 sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-                sb.stub(vscode.window, 'showInformationMessage').resolves(`Download and install v${ToolsConfig.tools.odo.version}`);
+                sb.stub<any, any>(vscode.window, 'showInformationMessage').resolves(`Download and install v${ToolsConfig.tools.odo.version}`);
                 const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools.odo.sha256sum);
                 stub.onSecondCall().returns(ToolsConfig.tools.oc.sha256sum);
                 await ToolsConfig.detect('odo');

@@ -58,10 +58,10 @@ async function getComponentsInWorkspace(): Promise<WorkspaceFolderComponent[]> {
             let compData: EnvInfo;
             if (result.error) {
                 // detect S2I component manually
-                const pathToS2iConfig = path.join(result.cwd, '.odo', 'config.yaml');
+                const pathToS2iConfig = path.join(result.cwd.toString(), '.odo', 'config.yaml');
                 if (pathExistsSync(pathToS2iConfig)) {
                     // reconstruct env view form yaml file data
-                    const s2iConf = jsYaml.load(readFileSync(pathToS2iConfig, 'utf8'));
+                    const s2iConf = jsYaml.load(readFileSync(pathToS2iConfig, 'utf8')) as any;
                     compData = {
                         spec: {
                             appName: s2iConf.ComponentSettings.Application,
@@ -111,7 +111,7 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
     }
 
     private refresh(): void {
-        this.onDidChangeTreeDataEmitter.fire();
+        this.onDidChangeTreeDataEmitter.fire(undefined);
     }
 
     @vsCommand('openshift.componentsView.refresh')

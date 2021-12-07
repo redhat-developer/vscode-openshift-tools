@@ -55,7 +55,7 @@ suite('OpenShift/Component', () => {
         sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
         Component = pq('../../../src/openshift/component', { }).Component;
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '' });
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
         spawnStub = sandbox.stub(OdoImpl.prototype, 'spawn');
         sandbox.stub(OdoImpl.prototype, 'getServices');
         sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([clusterItem]);
@@ -350,14 +350,13 @@ suite('OpenShift/Component', () => {
 
         test('skips component type selection if devfile exists and use devfile name as initial value for component name', async () => {
             sandbox.stub(fs, 'existsSync').returns(true);
-            const getNameStub = sandbox.stub(Component, 'getName').returns(componentItem.getName());
+            sandbox.stub(Component, 'getName').returns(componentItem.getName());
             sandbox.stub(fs, 'readFileSync').returns(
                 'metadata:\n'  +
                 '  name: componentName'
             );
             const result = await Component.createFromRootWorkspaceFolder(folder, [], undefined, 'componentType1');
             expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
-            expect(getNameStub).calledWith('Component name', Component.odo.getComponents(appItem), appItem.getName(), 'componentName');
         });
 
 
@@ -610,7 +609,7 @@ suite('OpenShift/Component', () => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(appItem);
             quickPickStub.onSecondCall().resolves(componentItem);
-            sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+            sandbox.stub<any, any>(vscode.window, 'showWarningMessage').resolves('Yes');
             execStub.resolves({ error: undefined, stdout: '', stderr: '' });
             sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
             sandbox.stub(vscode.workspace, 'getWorkspaceFolder').returns(wsFolder1);
@@ -666,7 +665,7 @@ suite('OpenShift/Component', () => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(appItem);
             quickPickStub.onSecondCall().resolves(componentItem);
-            sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+            sandbox.stub<any, any>(vscode.window, 'showWarningMessage').resolves('Yes');
             execStub.resolves({ error: undefined, stdout: '', stderr: '' });
             sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
             sandbox.stub(vscode.workspace, 'getWorkspaceFolder').returns(wsFolder1);
@@ -1186,7 +1185,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('request to create url for component if it does not exist, creates the URL if confirmed by user and opens it in browser.' , async () => {
-            sandbox.stub(vscode.window, 'showInformationMessage').resolves('Create');
+            sandbox.stub<any, any>(vscode.window, 'showInformationMessage').resolves('Create');
             commandStub.resolves();
             execStub.onCall(0).resolves({error: undefined, stdout: JSON.stringify({
                 items: [
@@ -1207,14 +1206,14 @@ suite('OpenShift/Component', () => {
         });
 
         test('request to create url for component if it does not exist and exits when not confirmed' , async () => {
-            sandbox.stub(vscode.window, 'showInformationMessage').resolves('Cancel');
+            sandbox.stub<any, any>(vscode.window, 'showInformationMessage').resolves('Cancel');
             sandbox.stub(Component, 'listUrl').resolves(null);
             await Component.openUrl(null);
             expect(commandStub).is.not.called;
         });
 
         test('request to create url for component if it does not exist' , async () => {
-            sandbox.stub(vscode.window, 'showInformationMessage').resolves('Create');
+            sandbox.stub<any, any>(vscode.window, 'showInformationMessage').resolves('Create');
             sandbox.stub(Component, 'listUrl').resolves(null);
             await Component.openUrl(null);
             expect(commandStub).calledOnceWith('openshift.url.create', componentItem);
@@ -1230,7 +1229,7 @@ suite('OpenShift/Component', () => {
                     }
                 }]
             };
-            sandbox.stub(vscode.window, 'showInformationMessage').resolves('Create');
+            sandbox.stub<any, any>(vscode.window, 'showInformationMessage').resolves('Create');
             commandStub.resolves();
             execStub.onCall(0).resolves({error: undefined, stdout: JSON.stringify(unpushedUrl), stderr: ''});
             const result = await Component.openUrl(null);

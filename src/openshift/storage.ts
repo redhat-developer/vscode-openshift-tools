@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { window } from 'vscode';
-import { isEmpty } from 'validator';
+import validator from 'validator';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { OpenShiftObject, ContextType } from '../odo';
 import { Progress } from '../util/progress';
@@ -32,7 +32,7 @@ export class Storage extends OpenShiftItem {
             if (storages.find(storage => storage.mountPath === value)) {
                 return 'Mount path is already taken';
             }
-            if (isEmpty(value.trim())) {
+            if (validator.isEmpty(value.trim())) {
                 return 'Invalid mount path';
             }
         }});

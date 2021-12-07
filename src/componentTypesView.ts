@@ -16,11 +16,7 @@ import {
 } from 'vscode';
 import * as path from 'path';
 import { CliExitData } from './cli';
-import {
-    getInstance,
-    Odo,
-    OdoImpl
-} from './odo';
+import { getInstance, Odo, OdoImpl } from './odo';
 import { Command } from './odo/command';
 import {
     ComponentTypeDescription,
@@ -30,13 +26,10 @@ import {
     isRegistry,
     Registry,
 } from './odo/componentType';
-import {
-    isStarterProject,
-    StarterProject
-} from './odo/componentTypeDescription';
+import { isStarterProject, StarterProject } from './odo/componentTypeDescription';
 import { vsCommand, VsCommandError } from './vscommand';
 import { Platform } from './util/platform';
-import * as validator from 'validator';
+import validator from 'validator';
 
 type ComponentType = DevfileComponentType | StarterProject | Registry;
 
@@ -47,16 +40,16 @@ export enum ContextType {
 }
 
 export class ComponentTypesView implements TreeDataProvider<ComponentType> {
-
     private static viewInstance: ComponentTypesView;
 
     private treeView: TreeView<ComponentType>;
 
-    private onDidChangeTreeDataEmitter: EventEmitter<ComponentType> =
-        new EventEmitter<ComponentType | undefined>();
+    private onDidChangeTreeDataEmitter: EventEmitter<ComponentType> = new EventEmitter<
+        ComponentType | undefined
+    >();
 
-    readonly onDidChangeTreeData: Event<ComponentType | undefined> = this
-        .onDidChangeTreeDataEmitter.event;
+    readonly onDidChangeTreeData: Event<ComponentType | undefined> =
+        this.onDidChangeTreeDataEmitter.event;
 
     readonly odo: Odo = getInstance();
     private registries: Registry[];
@@ -85,34 +78,74 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 contextValue: ContextType.DEVFILE_REGISTRY,
                 tooltip: `Devfile Registry\nName: ${element.Name}\nURL: ${element.URL}`,
                 collapsibleState: TreeItemCollapsibleState.Collapsed,
-            }
+            };
         }
-        if(isStarterProject(element)) {
+        if (isStarterProject(element)) {
             return {
                 label: element.name,
                 contextValue: ContextType.DEVFILE_STARTER_PROJECT,
-                tooltip: `Starter Project\nName: ${element.name}\nDescription: ${element.description?element.description:'n/a'}`,
+                tooltip: `Starter Project\nName: ${element.name}\nDescription: ${
+                    element.description ? element.description : 'n/a'
+                }`,
                 description: element.description,
                 iconPath: {
-                    dark: Uri.file(path.join(__dirname, '..','..','images', 'component', 'start-project-dark.png')),
-                    light: Uri.file(path.join(__dirname, '..','..','images', 'component', 'start-project-light.png'))
+                    dark: Uri.file(
+                        path.join(
+                            __dirname,
+                            '..',
+                            '..',
+                            'images',
+                            'component',
+                            'start-project-dark.png',
+                        ),
+                    ),
+                    light: Uri.file(
+                        path.join(
+                            __dirname,
+                            '..',
+                            '..',
+                            'images',
+                            'component',
+                            'start-project-light.png',
+                        ),
+                    ),
                 },
-            }
+            };
         }
         return {
             label: `${element.DisplayName}`,
             contextValue: ContextType.DEVFILE_COMPONENT_TYPE,
             iconPath: {
-                dark: Uri.file(path.join(__dirname, '..','..','images', 'component', 'component-type-dark.png')),
-                light: Uri.file(path.join(__dirname, '..','..','images', 'component', 'component-type-light.png'))
+                dark: Uri.file(
+                    path.join(
+                        __dirname,
+                        '..',
+                        '..',
+                        'images',
+                        'component',
+                        'component-type-dark.png',
+                    ),
+                ),
+                light: Uri.file(
+                    path.join(
+                        __dirname,
+                        '..',
+                        '..',
+                        'images',
+                        'component',
+                        'component-type-light.png',
+                    ),
+                ),
             },
-            tooltip: `Component Type\nName: ${element.Name}\nKind: devfile\nDescription: ${element.Description ? element.Description : 'n/a'}`,
+            tooltip: `Component Type\nName: ${element.Name}\nKind: devfile\nDescription: ${
+                element.Description ? element.Description : 'n/a'
+            }`,
             description: element.Description,
             collapsibleState: TreeItemCollapsibleState.Collapsed,
         };
     }
 
-    public loadItems<I,O>(result: CliExitData, fetch: (data:I) => O[] ): O[] {
+    public loadItems<I, O>(result: CliExitData, fetch: (data: I) => O[]): O[] {
         let data: O[] = [];
         try {
             const items = fetch(JSON.parse(result.stdout));
@@ -127,20 +160,19 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         this.registries.push(newRegistry);
         this.refresh(false);
         this.reveal(newRegistry);
-
     }
 
     removeRegistry(targetRegistry: Registry): void {
         this.registries.splice(
             this.registries.findIndex((registry) => registry.Name === targetRegistry.Name),
-            1
+            1,
         );
         this.refresh(false);
     }
 
     private async getRegistries(): Promise<Registry[]> {
-        if(!this.registries) {
-            this.registries  = await this.odo.getRegistries();
+        if (!this.registries) {
+            this.registries = await this.odo.getRegistries();
         }
         return this.registries;
     }
@@ -152,15 +184,37 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         if (!parent) {
             this.registries = await this.getRegistries();
             children = this.registries;
-        } else if (isRegistry(parent) ) {
-            const result = await this.odo.execute(Command.listCatalogComponentsJson(),Platform.getUserHomePath(), true, addEnv);
-            children = this.loadItems<ComponentTypesJson, DevfileComponentType>(result, (data) => data.items);
-            children = children.filter((element:DevfileComponentType) => element.Registry.Name === parent.Name);
-        } else if (isDevfileComponent(parent)){
-            const result: CliExitData = await this.odo.execute(Command.describeCatalogComponent(parent.Name), Platform.getUserHomePath(), true, addEnv);
-            const descriptions = this.loadItems<ComponentTypeDescription[], ComponentTypeDescription>(result, (data) => data);
-            const description = descriptions.find((element)=> element.RegistryName === parent.Registry.Name && element.Devfile.metadata.name === parent.Name);
-            children = description?.Devfile?.starterProjects.map((starter:StarterProject) => {
+        } else if (isRegistry(parent)) {
+            const result = await this.odo.execute(
+                Command.listCatalogComponentsJson(),
+                Platform.getUserHomePath(),
+                true,
+                addEnv,
+            );
+            children = this.loadItems<ComponentTypesJson, DevfileComponentType>(
+                result,
+                (data) => data.items,
+            );
+            children = children.filter(
+                (element: DevfileComponentType) => element.Registry.Name === parent.Name,
+            );
+        } else if (isDevfileComponent(parent)) {
+            const result: CliExitData = await this.odo.execute(
+                Command.describeCatalogComponent(parent.Name),
+                Platform.getUserHomePath(),
+                true,
+                addEnv,
+            );
+            const descriptions = this.loadItems<
+                ComponentTypeDescription[],
+                ComponentTypeDescription
+            >(result, (data) => data);
+            const description = descriptions.find(
+                (element) =>
+                    element.RegistryName === parent.Registry.Name &&
+                    element.Devfile.metadata.name === parent.Name,
+            );
+            children = description?.Devfile?.starterProjects.map((starter: StarterProject) => {
                 starter.typeName = parent.Name;
                 return starter;
             });
@@ -181,7 +235,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         if (cleanCache) {
             this.registries = undefined;
         }
-        this.onDidChangeTreeDataEmitter.fire();
+        this.onDidChangeTreeDataEmitter.fire(undefined);
     }
 
     @vsCommand('openshift.componentTypesView.refresh')
@@ -190,7 +244,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     }
 
     public static getSampleRepositoryUrl(element: StarterProject): string {
-        const url =  Object.values(element.git.remotes).find((prop) => typeof prop === 'string');
+        const url = Object.values(element.git.remotes).find((prop) => typeof prop === 'string');
         return url;
     }
 
@@ -202,7 +256,10 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 await commands.executeCommand('vscode.open', Uri.parse(url, true));
             } catch (err) {
                 // TODO: report actual url only for default odo repository
-                throw new VsCommandError(err.toString(), 'Unable to open s`ample project repository');
+                throw new VsCommandError(
+                    err.toString(),
+                    'Unable to open s`ample project repository',
+                );
             }
         } else {
             return 'Cannot find sample project repository url';
@@ -218,7 +275,10 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 await commands.executeCommand('git.clone', url);
             } catch (err) {
                 // TODO: report actual url only for default odo repository
-                throw new VsCommandError(err.toString(), 'Unable to clone sample project repository');
+                throw new VsCommandError(
+                    err.toString(),
+                    'Unable to clone sample project repository',
+                );
             }
         } else {
             return 'Cannot find sample project repository url';
@@ -232,48 +292,49 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             prompt: 'Provide registry name to display in the view',
             placeHolder: 'Registry Name',
             validateInput: async (value) => {
-                const trimmedValue =  value.trim();
+                const trimmedValue = value.trim();
                 if (trimmedValue.length === 0) {
-                    return 'Registry name cannot be empty'
+                    return 'Registry name cannot be empty';
                 }
                 if (!validator.matches(trimmedValue, '^[a-zA-Z0-9]+$')) {
                     return 'Registry name can have only alphabet characters and numbers';
                 }
-                const registries  = await ComponentTypesView.instance.getRegistries();
-                if(registries.find((registry) => registry.Name === value)) {
+                const registries = await ComponentTypesView.instance.getRegistries();
+                if (registries.find((registry) => registry.Name === value)) {
                     return `Registry name '${value}' is already used`;
                 }
-            }
+            },
         });
 
         if (!regName) return null;
 
-        const regURL = await window.showInputBox({ignoreFocusOut: true,
+        const regURL = await window.showInputBox({
+            ignoreFocusOut: true,
             prompt: 'Provide registry URL to display in the view',
             placeHolder: 'Registry URL',
             validateInput: async (value) => {
                 const trimmedValue = value.trim();
                 if (!validator.isURL(trimmedValue)) {
-                    return 'Entered URL is invalid'
+                    return 'Entered URL is invalid';
                 }
-                const registries  = await ComponentTypesView.instance.getRegistries();
-                if(registries.find((registry) => registry.URL === value)) {
+                const registries = await ComponentTypesView.instance.getRegistries();
+                if (registries.find((registry) => registry.URL === value)) {
                     return `Registry with entered URL '${value}' already exists`;
                 }
-            }
+            },
         });
 
         if (!regURL) return null;
 
         const secure = await window.showQuickPick(['Yes', 'No'], {
-            placeHolder: 'Is it a secure registry?'
+            placeHolder: 'Is it a secure registry?',
         });
 
         if (!secure) return null;
 
         let token: string;
         if (secure === 'Yes') {
-            token = await window.showInputBox({placeHolder: 'Token to access the registry'});
+            token = await window.showInputBox({ placeHolder: 'Token to access the registry' });
             if (!token) return null;
         }
 
@@ -283,7 +344,11 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     @vsCommand('openshift.componentTypesView.registry.remove')
     public static async removeRegistry(registry: Registry): Promise<void> {
-        const yesNo = await window.showInformationMessage(`Remove registry '${registry.Name}'?`, 'Yes', 'No');
+        const yesNo = await window.showInformationMessage(
+            `Remove registry '${registry.Name}'?`,
+            'Yes',
+            'No',
+        );
         if (yesNo === 'Yes') {
             await OdoImpl.Instance.removeRegistry(registry.Name);
             ComponentTypesView.instance.removeRegistry(registry);

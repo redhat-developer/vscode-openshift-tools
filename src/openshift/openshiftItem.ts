@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 import { window, QuickPickItem, commands, workspace } from 'vscode';
-import * as validator from 'validator';
+import validator from 'validator';
 import { Odo, getInstance, OpenShiftObject, ContextType, OpenShiftApplication, OpenShiftProject } from '../odo';
 import { OpenShiftExplorer } from '../explorer';
 import { VsCommandError } from '../vscommand';
@@ -72,7 +72,7 @@ export default class OpenShiftItem {
     }
 
     static lengthName(message: string, value: string, offset: number): string | null {
-        return validator.isLength(value, 2, 63 - offset) ? null : message;
+        return validator.isLength(value, {min: 2, max: 63 - offset}) ? null : message;
     }
 
     static validateUrl(message: string, value: string): string | null {

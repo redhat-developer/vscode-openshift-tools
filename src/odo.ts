@@ -40,6 +40,20 @@ import { ClusterServiceVersionKind } from './k8s/olm/types';
 const tempfile = require('tmp');
 const {Collapsed} = TreeItemCollapsibleState;
 
+export enum ContextType {
+    CLUSTER = 'cluster',
+    PROJECT = 'project',
+    APPLICATION = 'application',
+    COMPONENT = 'componentNotPushed',
+    COMPONENT_PUSHED = 'component',
+    COMPONENT_NO_CONTEXT = 'componentNoContext',
+    SERVICE = 'service',
+    STORAGE = 'storage',
+    CLUSTER_DOWN = 'clusterDown',
+    LOGIN_REQUIRED = 'loginRequired',
+    COMPONENT_ROUTE = 'componentRoute'
+}
+
 export interface OpenShiftObject extends QuickPickItem {
     getChildren(): ProviderResult<OpenShiftObject[]>;
     removeChild(item: OpenShiftObject): Promise<void>;
@@ -53,20 +67,6 @@ export interface OpenShiftObject extends QuickPickItem {
     builderImage?: BuilderImage;
     iconPath?: Uri;
     kind?: ComponentKind;
-}
-
-export enum ContextType {
-    CLUSTER = 'cluster',
-    PROJECT = 'project',
-    APPLICATION = 'application',
-    COMPONENT = 'componentNotPushed',
-    COMPONENT_PUSHED = 'component',
-    COMPONENT_NO_CONTEXT = 'componentNoContext',
-    SERVICE = 'service',
-    STORAGE = 'storage',
-    CLUSTER_DOWN = 'clusterDown',
-    LOGIN_REQUIRED = 'loginRequired',
-    COMPONENT_ROUTE = 'componentRoute'
 }
 
 function compareNodes(a: OpenShiftObject, b: OpenShiftObject): number {
@@ -282,7 +282,7 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
     }
 
     getChildren(): Promise<OpenShiftObject[]> {
-        return this.contextValue === ContextType.COMPONENT_NO_CONTEXT ? Promise.resolve([]) : this.odo.getComponentChildren(this);
+        return this.contextValue === ContextType.COMPONENT_NO_CONTEXT ? Promise.resolve(<OpenShiftObject[]>[]) : this.odo.getComponentChildren(this);
     }
 
     get tooltip(): string {
@@ -330,7 +330,6 @@ export interface Odo {
     getClusters(): Promise<OpenShiftObject[]>;
     getProjects(): Promise<OpenShiftObject[]>;
     loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): Promise<void>;
-    addWorkspaceComponent(WorkspaceFolder: WorkspaceFolder, component: OpenShiftObject): void;
     getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]>;
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponents(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]>;
@@ -526,7 +525,7 @@ export class OdoImpl implements Odo {
         return this.execute(Command.listProjects()).then((result) => {
             return this.loadItems<Project>(result).map((item) => new OpenShiftProject(cluster, item.metadata.name, item.status.active) );
         }).catch((error) => {
-            window.showErrorMessage(`Cannot retrieve projects for current cluster. Error: ${error}`);
+            void window.showErrorMessage(`Cannot retrieve projects for current cluster. Error: ${error}`);
             return [];
         });
     }
@@ -616,7 +615,7 @@ export class OdoImpl implements Odo {
         return deployedComponents;
     }
 
-    public getKubeconfigEnv(): any {
+    public getKubeconfigEnv(): {KUBECONFIG?: string} {
         const addEnv: {KUBECONFIG?: string} = {};
         let kc: KubeConfig;
         // TODO: Remove when odo works without kubeconfig present
@@ -747,7 +746,7 @@ export class OdoImpl implements Odo {
         } catch (ignore) {
             // ignore error in case service catalog is not configured
         }
-        commands.executeCommand('setContext', 'servicePresent', services2.length > 0);
+        await commands.executeCommand('setContext', 'servicePresent', services2.length > 0);
         return services2;
     }
 
@@ -899,7 +898,7 @@ export class OdoImpl implements Odo {
             // could be new or existing folder
             wsFolder = workspace.getWorkspaceFolder(location);
             if (wsFolder) { // existing workspace folder
-                OdoImpl.data.addContexts([wsFolder]);
+                await OdoImpl.data.addContexts([wsFolder]);
             }
         }
         if (!workspace.workspaceFolders || !wsFolder) {
@@ -922,7 +921,7 @@ export class OdoImpl implements Odo {
         await this.deleteAndRefresh(component);
         const children = await app.getChildren();
         if (children.length === 0) {
-            this.deleteApplication(app);
+            await this.deleteApplication(app);
         }
         return component;
     }
@@ -961,7 +960,7 @@ export class OdoImpl implements Odo {
         const tempJsonFile = tempfile.fileSync({postfix: '.json'});
         fs.writeFileSync(tempJsonFile.name, jsonString);
         // call oc create -f path/to/file until odo does support creating services without component
-        this.execute(Command.createServiceCommand(tempJsonFile.name));
+        await this.execute(Command.createServiceCommand(tempJsonFile.name));
         return this.insertAndReveal(new OpenShiftService(application, `${formData.kind}/${formData.metadata.name}`));
     }
 
@@ -971,7 +970,7 @@ export class OdoImpl implements Odo {
         await this.deleteAndRefresh(service);
         const children = await app.getChildren();
         if (children.length === 0) {
-            this.deleteApplication(app);
+            await this.deleteApplication(app);
         }
         return service;
     }
@@ -1001,11 +1000,6 @@ export class OdoImpl implements Odo {
 
     clearCache(): void {
         OdoImpl.data.clearTreeData();
-    }
-
-    addWorkspaceComponent(folder: WorkspaceFolder): void {
-        OdoImpl.data.addContexts([folder]);
-        this.subject.next(new OdoEventImpl('changed', null));
     }
 
     getOpenShiftObjectByContext(context: string): OpenShiftObject {
