@@ -64,5 +64,9 @@ export default (theme: Theme) =>
       background: 'var(--vscode-list-inactiveSelectionBackground)',
       border: '1px solid var(--vscode-list-inactiveSelectionBackground)',
       color: 'var(--vscode-foreground)'
+    },
+    image: {
+       maxHeight: '100%',
+       maxWidth: '100%'
     }
   })
