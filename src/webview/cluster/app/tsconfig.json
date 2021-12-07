@@ -19,6 +19,7 @@
             "../../@types"
         ],
         "baseUrl": ".",
+        "resolveJsonModule": true,
     },
     "exclude": [
         "node_modules"
