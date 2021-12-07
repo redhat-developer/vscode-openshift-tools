@@ -34,7 +34,7 @@ suite('K8s/console', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '' });
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined});
         commandStub = sandbox.stub(vscode.commands, 'executeCommand');
     });
 

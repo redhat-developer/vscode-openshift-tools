@@ -14,7 +14,14 @@ const downloadAndUnzipVSCode = require('vscode-test').downloadAndUnzipVSCode;
 downloadAndUnzipVSCode().then((executable: string) => {
     let vsCodeExecutable;
     if (platform() === 'darwin') {
-        vsCodeExecutable = `'${path.join(executable.substring(0, executable.indexOf('.app')+4), 'Contents', 'Resources', 'app', 'bin', 'code')}'`;
+        vsCodeExecutable = `'${path.join(
+            executable.substring(0, executable.indexOf('.app') + 4),
+            'Contents',
+            'Resources',
+            'app',
+            'bin',
+            'code',
+        )}'`;
     } else {
         vsCodeExecutable = path.join(path.dirname(executable), 'bin', 'code');
     }

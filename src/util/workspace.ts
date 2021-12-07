@@ -65,7 +65,7 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
             window.showInformationMessage(
                 'The folder selected already contains a component. Please select a different folder.',
             );
-            return this.selectWorkspaceFolder();
+            return selectWorkspaceFolder();
         }
         [workspacePath] = folders;
     } else if (choice) {

@@ -18,8 +18,8 @@ import configData = require('../src/tools.json');
 
 interface PlatformData {
     url: string;
-    sha256sum:string;
-    dlFileName:string;
+    sha256sum: string;
+    dlFileName: string;
     cmdFileName: string;
     filePrefix: string;
 }
@@ -70,8 +70,8 @@ async function bundleTools(): Promise<void> {
     let currentPlatform = process.env.TARGET;
     if (!currentPlatform) {
         currentPlatform = process.argv.find((arg) => arg === '--platform')
-        ? process.platform
-        : 'all';
+            ? process.platform
+            : 'all';
     }
     console.log(currentPlatform);
     console.info(`Download tools to '${toolsCacheFolder}'`);

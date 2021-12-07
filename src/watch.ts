@@ -69,6 +69,6 @@ export class WatchSessionsView implements TreeDataProvider<string> {
     }
 
     refresh(): void {
-        this.onDidChangeTreeDataEmitter.fire();
+        this.onDidChangeTreeDataEmitter.fire(undefined);
     }
 }

@@ -10,8 +10,7 @@
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "prettier",
-    "prettier/@typescript-eslint"
+    "prettier"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -94,6 +93,7 @@
     "@typescript-eslint/no-unsafe-call": 1,
     "@typescript-eslint/no-unsafe-assignment": 1,
     "@typescript-eslint/no-var-requires": 1,
+    "@typescript-eslint/no-unsafe-argument": 1,
     "no-var": 2,
     "object-shorthand": ["error", "properties"],
     "prefer-const": ["error", { "destructuring": "all" }],

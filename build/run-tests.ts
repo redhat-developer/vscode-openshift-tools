@@ -22,16 +22,31 @@ async function main(): Promise<void> {
         await runTests({
             extensionDevelopmentPath,
             extensionTestsPath,
-            launchArgs: tests === 'integration' ? [
-                // this is required to create multi root workspace to run tests on
-                path.resolve(extensionRootPath,'test', 'fixtures', 'components', 'components.code-workspace'),
-                '--disable-workspace-trust'
-            ] : [
-                path.resolve(extensionRootPath,'test', 'fixtures', 'components', 'empty.code-workspace'),
-                '--disable-workspace-trust'
-            ]
+            launchArgs:
+                tests === 'integration'
+                    ? [
+                          // this is required to create multi root workspace to run tests on
+                          path.resolve(
+                              extensionRootPath,
+                              'test',
+                              'fixtures',
+                              'components',
+                              'components.code-workspace',
+                          ),
+                          '--disable-workspace-trust',
+                      ]
+                    : [
+                          path.resolve(
+                              extensionRootPath,
+                              'test',
+                              'fixtures',
+                              'components',
+                              'empty.code-workspace',
+                          ),
+                          '--disable-workspace-trust',
+                      ],
         });
-    } catch(error) {
+    } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Failed to run tests');
         process.exit(1);

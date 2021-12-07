@@ -6,7 +6,7 @@
 import * as sinon from 'sinon';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
-import { window, Terminal, workspace } from 'vscode';
+import { window, workspace } from 'vscode';
 import { ExecException } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -111,7 +111,7 @@ suite('odo', () => {
         });
 
         test('executeInTerminal send command to terminal and shows it', async () => {
-            const termFake: Terminal = {
+            const termFake: any = {
                 name:  'name',
                 processId: Promise.resolve(1),
                 sendText: sinon.stub(),
@@ -136,7 +136,7 @@ suite('odo', () => {
 
         setup(() => {
             execStub = sandbox.stub(odoCli, 'execute');
-            yamlStub = sandbox.stub(jsYaml, 'safeLoad');
+            yamlStub = sandbox.stub<any, any>(jsYaml, 'safeLoad');
             sandbox.stub(fs, 'readFileSync');
         });
 

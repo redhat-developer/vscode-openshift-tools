@@ -24,7 +24,7 @@ suite('Debug Sessions View', () => {
     const projectItem = new TestItem(clusterItem, 'project', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'application', ContextType.APPLICATION);
     const componentItem = new TestItem(appItem, 'component', ContextType.COMPONENT);
-    const debugSession = {
+    const debugSession: any = {
         id: 'unique',
         name: 'name',
         type: 'unique',

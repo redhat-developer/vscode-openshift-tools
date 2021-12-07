@@ -92,7 +92,7 @@ export class CliChannel implements Cli {
                 // do not reject it here, because caller in some cases need the error and the streams
                 // to make a decision
                 // Filter update message text which starts with `---`
-                resolve({ error, stdout: stdout.trim(), stderr: stderr.trim(), cwd: opts.cwd });
+                resolve({ error, stdout: stdout.trim(), stderr: stderr.trim(), cwd: opts?.cwd?.toString() });
             });
         });
     }
