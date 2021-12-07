@@ -148,7 +148,7 @@ export default function addClusterView(props) {
   }
 
   const handleUploadPullSecret = (event) => {
-    setSecret(event.target.files[0].path);
+    setSecret(event.target.files[0].path || event.target.files[0].name);
   }
 
   const handleCpuSize = (event) => {
@@ -214,6 +214,7 @@ export default function addClusterView(props) {
   const handleDisabled = () => {
     if (activeStep === 1 && fileName === '') return true;
     if (activeStep === 2 && pullSecretPath === '') return true;
+    return false;
   };
 
   const handleStopProcess = () => {
@@ -522,7 +523,7 @@ export default function addClusterView(props) {
                 />
                 <label htmlFor="contained-button-file">
                   <Tooltip title="This is a required field" placement="left">
-                    <Button className={classes.button} component="span">
+                    <Button variant="contained" className={classes.button} component="span">
                       Select Pull Secret file
                     </Button>
                   </Tooltip>

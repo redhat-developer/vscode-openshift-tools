@@ -97,7 +97,7 @@ export default function Header() {
           <CardContent style= {{ height: 240 }}>
             <Typography style={{ padding: '10px', height: '50px' }}>
               {list.imageUrl.map((url: string, index: string | number) => (
-                <img src={url} key={index} style={{ marginLeft: '.625rem', marginRight: '.625rem' }}></img>
+                <img src={url} key={index} className={classes.image} style={{ marginLeft: '.625rem', marginRight: '.625rem' }}></img>
               ))}
             </Typography>
             <List>
@@ -132,7 +132,7 @@ export default function Header() {
   return (
     <div className={classes.App}>
       <div className={classes.iconContainer}>
-        <img src='assets/logo.png' alt="redhat-openshift"></img>
+        <img className={classes.image} src='assets/logo.png' alt="redhat-openshift"></img>
       </div>
       {showWizard && (<div className={classes.rowBody}>
         <Card className={classes.cardContent}>
