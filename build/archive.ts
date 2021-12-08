@@ -54,7 +54,6 @@ export class Archive {
         fileName: string,
         prefix: string,
     ): Promise<void> {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return pify(targz.decompress)({
             src: zipFile,
             dest: extractTo,
