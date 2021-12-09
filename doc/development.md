@@ -119,3 +119,21 @@ use
 }
 ```
 # Run debugger from command pallet
+
+## How to update dependencies
+
+Use `npm run update-deps` or `npm-check-updates` package
+
+# Release steps
+
+Follow this steps to release:
+1. Update version in package.json to next one
+2. Add record for new release into CHANGELOG.md
+3. Commit changes [1] and [2]
+4. Kick the build on jenkins with 'publishToMarketplace' set
+5. Wait until build gets to the point where approval is needed to push to marketplace
+6. Download just built .vsix file form nightly releases here https://download.jboss.org/jbosstools/adapters/snapshots/vscode-tekton/?C=M;O=D
+7. Install it and do smoke test
+8. Approve release on jenkins if everything is fine
+9. Create release on github and put in description record form [2]
+10. (optional) Blog about it (edited) 
