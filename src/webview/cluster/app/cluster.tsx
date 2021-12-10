@@ -16,8 +16,8 @@ import {
   Tooltip,
   Typography} from '@material-ui/core';
 
-import AddClusterView from './crc';
-import clusterStyle from './types.style';
+import AddClusterView from './clusterView';
+import clusterStyle from './cluster.style';
 import './images/logo.png';
 
 const useStyles = makeStyles(clusterStyle);
@@ -58,7 +58,7 @@ const clusterTypes = [
 const vscodeApi = window.vscodeApi;
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export default function Editor() {
+export default function Header() {
   const classes = useStyles();
   const [showWizard, setShowWizard] = React.useState(false);
 
