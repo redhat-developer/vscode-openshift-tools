@@ -5,6 +5,6 @@
 
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
-import Editor from './editorNew';
+import Header from './cluster';
 
-ReactDOM.render(<Editor />, document.getElementById('root'));
+ReactDOM.render(<Header />, document.getElementById('root'));
