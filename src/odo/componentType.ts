@@ -34,8 +34,8 @@ export interface ImageStreamTag {
 }
 
 export function ascDevfileFirst(c1: ComponentType, c2: ComponentType): number {
-    if(c1.kind !== c2.kind) {
-        return c1.kind === ComponentKind.DEVFILE? -1: 1;
+    if(c1.type !== c2.type) {
+        return c1.type === ComponentKind.DEVFILE? -1: 1;
     }
     return c1.label.localeCompare(c2.label)
 }
@@ -76,7 +76,7 @@ export interface ComponentType {
     label: string;
     description: string;
     name: string;
-    kind: ComponentKind;
+    type: ComponentKind;
     version: string;
 }
 
@@ -87,7 +87,7 @@ export interface ComponentTypeDescription {
 
 export class ComponentTypeAdapter implements ComponentType {
     constructor(
-        public readonly kind: ComponentKind,
+        public readonly type: ComponentKind,
         public readonly name: string,
         public readonly version: string,
         public readonly description: string,
