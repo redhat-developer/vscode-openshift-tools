@@ -668,7 +668,7 @@ export class Component extends OpenShiftItem {
             progressIndicator.show();
             const componentTypes = await Component.odo.getComponentTypes();
             if (componentTypeName) {
-                componentTypeCandidates = componentTypes.filter(type => type.name === componentTypeName && type.kind === componentKind && (!version || type.version === version));
+                componentTypeCandidates = componentTypes.filter(type => type.name === componentTypeName && type.type === componentKind && (!version || type.version === version));
                 if (componentTypeCandidates?.length === 0) {
                     componentType = await window.showQuickPick(componentTypes.sort(ascDevfileFirst), { placeHolder: `Cannot find Component type '${componentTypeName}', select one below to use instead`, ignoreFocusOut: true });
                 } else if (componentTypeCandidates?.length > 1) {
@@ -683,7 +683,7 @@ export class Component extends OpenShiftItem {
 
             if (!componentType) return createCancelledResult('componentType');
 
-            if (componentType.kind === ComponentKind.DEVFILE) {
+            if (componentType.type === ComponentKind.DEVFILE) {
                 progressIndicator.placeholder = 'Checking if provided context folder is empty'
                 progressIndicator.show();
                 const globbyPath = `${folder.fsPath.replace('\\', '/')}/`;
@@ -873,13 +873,13 @@ export class Component extends OpenShiftItem {
             return result;
         }
         const components = await Component.odo.getComponentTypes();
-        const componentBuilder: ComponentTypeAdapter = components.find((comonentType) => comonentType.kind === component.kind? comonentType.name === component.builderImage.name : false);
+        const componentBuilder: ComponentTypeAdapter = components.find((comonentType) => comonentType.type === component.kind? comonentType.name === component.builderImage.name : false);
         let isJava: boolean;
         let isNode: boolean;
         let isPython: boolean;
 
         // TODO: https://github.com/redhat-developer/vscode-openshift-tools/issues/38
-        if (componentBuilder && componentBuilder.tags && componentBuilder.kind === ComponentKind.S2I) { // s2i component has been selected for debug
+        if (componentBuilder && componentBuilder.tags && componentBuilder.type === ComponentKind.S2I) { // s2i component has been selected for debug
             isJava = componentBuilder.tags.includes('java');
             isNode = componentBuilder.tags.includes('nodejs');
             isPython = componentBuilder.tags.includes('python');

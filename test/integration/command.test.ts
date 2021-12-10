@@ -154,7 +154,7 @@ suite('odo commands integration', () => {
 
     test('describeCatalogComponent()', async function () {
         const types = await ODO.getComponentTypes();
-        const devfileCompType = types.find((compType) => compType.kind === ComponentKind.DEVFILE);
+        const devfileCompType = types.find((compType) => compType.type === ComponentKind.DEVFILE);
         if (!devfileCompType) {
             this.skip();
         } else {
