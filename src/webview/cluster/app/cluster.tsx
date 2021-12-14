@@ -17,6 +17,7 @@ import {
   Typography} from '@material-ui/core';
 
 import AddClusterView from './clusterView';
+import AddSandboxView from './sandboxView';
 import clusterStyle from './cluster.style';
 import './images/logo.png';
 
@@ -39,7 +40,7 @@ const clusterTypes = [
     smallInfo: 'The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools.',
     imageUrl: ['https://assets.openshift.com/hubfs/images/logos/osh/Logo-Red_Hat-OpenShift-A-Standard-RGB.svg'],
     urlAlt: 'dev sandbox',
-    redirectLink: 'https://developers.redhat.com/developer-sandbox',
+    redirectLink: '',
     buttonText: 'Start your OpenShift experience',
     tooltip: 'Launch your Developer Sandbox for Red Hat OpenShift'
   },
@@ -60,15 +61,16 @@ const vscodeApi = window.vscodeApi;
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function Header() {
   const classes = useStyles();
-  const [showWizard, setShowWizard] = React.useState(false);
+  const [showWizard, setShowWizard] = React.useState('');
 
   const handleView = (index) => {
     if (index === 0) {
-      setShowWizard(!showWizard);
+      setShowWizard('crc');
       vscodeApi.postMessage({
         action: 'openCrcAddClusterPage',
       });
     } else if (index === 1) {
+      setShowWizard('sandbox');
       vscodeApi.postMessage({
         action: 'openLaunchSandboxPage',
         params: {
@@ -134,12 +136,20 @@ export default function Header() {
       <div className={classes.iconContainer}>
         <img className={classes.image} src='assets/logo.png' alt="redhat-openshift"></img>
       </div>
-      {showWizard && (<div className={classes.rowBody}>
+      {showWizard === 'crc' && (<div className={classes.rowBody}>
         <Card className={classes.cardContent}>
           <Typography variant="body2" component="p" style={{ padding: 20 }}>
             Red Hat CodeReady Containers brings a minimal OpenShift 4 cluster to your local computer.<br></br>You can use this wizard to create OpenShift cluster locally. Cluster take approximately 15 minutes to provision.
           </Typography>
           <AddClusterView vscode={vscodeApi}/>
+        </Card>
+      </div>)}
+      {showWizard === 'sandbox' && (<div className={classes.rowBody}>
+        <Card className={classes.cardContent}>
+          <Typography variant="body2" component="p" style={{ padding: 20 }}>
+            Red Hat CodeReady Containers brings a minimal OpenShift 4 cluster to your local computer.<br></br>You can use this wizard to create OpenShift cluster locally. Cluster take approximately 15 minutes to provision.
+          </Typography>
+          <AddSandboxView vscode={vscodeApi}/>
         </Card>
       </div>)}
       {!showWizard && (
