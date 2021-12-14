@@ -137,6 +137,6 @@ export class ComponentTypeAdapter implements ComponentType {
 
     get label(): string {
         const versionSuffix = this.version? `/${this.version}` : `/${this.registryName}` ;
-        return `${this.name}${versionSuffix} (${this.kind})`;
+        return `${this.name}${versionSuffix} (${this.type})`;
     }
 }
