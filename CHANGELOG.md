@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.12 (December 14, 2021)
+
+* [#2316](https://github.com/redhat-developer/vscode-openshift-tools/issues/2316) ComponentAdapter kind field conflicts with VSCode 1.63.0 proposed API
+
 ## 0.2.11 (November 1, 2021)
 
 * [#1321](https://github.com/redhat-developer/vscode-openshift-tools/issues/1321) Add support for .NET Core binaries 5.0 and 3.1
