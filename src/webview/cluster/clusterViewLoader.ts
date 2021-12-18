@@ -15,27 +15,6 @@ let panel: vscode.WebviewPanel;
 
 const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
 
-/*
-interface ViewEvent {
-    action: string;
-}
-
-
-interface OpenPageEvent extends ViewEvent {
-    params: {
-        url: string;
-    }
-}
-
-interface CrcStartEvent extends ViewEvent {
-    data: string;
-    pullSecret: string;
-    crcLoc: string;
-    cpuSize: number;
-    memory: number;
-    isSetting: boolean;
-}
-*/
 async function clusterEditorMessageListener (event: any ): Promise<any> {
     switch (event.action) {
         case 'openLaunchSandboxPage':
@@ -72,6 +51,21 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 event.data.password
             );
             break;
+        case 'sandboxPageCheckAuthSession':
+            // init sandbox page
+            const sessionCheck: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: false });
+            if (!sessionCheck) {
+                panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
+            }
+            break;
+        case 'sandboxPageLoginRequest':
+            const session: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: true });
+            if (!session) {
+                vscode.window.showErrorMessage('Login failed, please try again.');
+                panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
+            } else {
+                panel.webview.postMessage({action: 'sandboxPageCheckStatus'});
+            }
     }
 }
 

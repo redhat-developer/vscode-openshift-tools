@@ -78,7 +78,7 @@
         {
             "type": "pwa-chrome",
             "request": "launch",
-            "name": "Launch Edge against localhost",
+            "name": "Launch 'Cluster Editor' in Chrome",
             "file": "${workspaceFolder}/out/clusterViewer/index.html",
             "webRoot": "${workspaceFolder}",
             "trace": true
