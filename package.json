@@ -111,9 +111,14 @@
     "yaml": "^1.10.2"
   },
   "devDependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
     "@material-ui/core": "^4.12.3",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.60",
+    "@mui/core": "^5.0.0-alpha.54",
+    "@mui/lab": "^5.0.0-alpha.61",
+    "@mui/material": "^5.2.5",
     "@rjsf/material-ui": "^3.2.1",
     "@types/byline": "^4.2.33",
     "@types/chai": "^4.3.0",

@@ -15,7 +15,9 @@ function acquireVsCodeApi() {
                 },3000);
             }
             if (message.action === 'sandboxRequestVerificationCode') {
-                window.postMessage({ action: 'sandboxEnterVerificationCode'}, '*');
+                setTimeout(function() {
+                    window.postMessage({ action: 'sandboxEnterVerificationCode'}, '*');
+                }, 3000);
             }
             if (message.action === 'sandboxCheckVerificationCode') {
                 window.postMessage({ action: 'sandboxWaitingForApproval'});

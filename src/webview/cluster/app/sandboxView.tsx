@@ -4,6 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { Button, CircularProgress, TextField } from '@material-ui/core';
+import LoadingButton from '@mui/lab/LoadingButton';
 import * as React from 'react';
 // import * as request from 'request';
 
@@ -88,7 +89,10 @@ export default function addSandboxView(props): JSX.Element {
             setPhoneNumber(event.target.value);
         }
 
+        const [inProgress, setInProgress] = React.useState(false)
+
         const handleRequestVerificationCode = () => {
+            setInProgress(true);
             postMessage('sandboxRequestVerificationCode', { phoneNumber })
         }
 
@@ -97,7 +101,7 @@ export default function addSandboxView(props): JSX.Element {
                 {( currentState === 'sandboxRequestVerificationCode' ) && (
                     <div>
                          <TextField id='phone' onChange={handlePhoneNumber} label='Phone number' variant='outlined' />
-                         <Button variant='contained' onClick={handleRequestVerificationCode}>Send Verification Code</Button>
+                         <LoadingButton disabled={inProgress} loadingPosition='start' loading={inProgress} variant='contained' onClick={handleRequestVerificationCode}>Send Verification Code</LoadingButton>
                     </div>
                 )}
             </>
