@@ -20,13 +20,15 @@ function acquireVsCodeApi() {
                 }, 3000);
             }
             if (message.action === 'sandboxCheckVerificationCode') {
-                window.postMessage({ action: 'sandboxWaitingForApproval'});
                 setTimeout(function() {
-                    window.postMessage({ action: 'sandboxWaitingForProvision'}, '*')
+                    window.postMessage({ action: 'sandboxWaitingForApproval'});
                     setTimeout(function() {
-                        window.postMessage({ action: 'sandboxProvisioned'}, '*')
+                        window.postMessage({ action: 'sandboxWaitingForProvision'}, '*')
+                        setTimeout(function() {
+                            window.postMessage({ action: 'sandboxProvisioned'}, '*')
+                        },3000);
                     },3000);
-                },3000);
+                }, 3000);
             }
         }
     }

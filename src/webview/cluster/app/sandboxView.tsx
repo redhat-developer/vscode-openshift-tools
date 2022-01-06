@@ -6,6 +6,8 @@
 import { Button, CircularProgress, TextField } from '@material-ui/core';
 import LoadingButton from '@mui/lab/LoadingButton';
 import * as React from 'react';
+import SendIcon from '@mui/icons-material/Send';
+
 // import * as request from 'request';
 
 export default function addSandboxView(props): JSX.Element {
@@ -101,7 +103,7 @@ export default function addSandboxView(props): JSX.Element {
                 {( currentState === 'sandboxRequestVerificationCode' ) && (
                     <div>
                          <TextField id='phone' onChange={handlePhoneNumber} label='Phone number' variant='outlined' />
-                         <LoadingButton disabled={inProgress} loadingPosition='start' loading={inProgress} variant='contained' onClick={handleRequestVerificationCode}>Send Verification Code</LoadingButton>
+                         <LoadingButton disabled={inProgress} loadingPosition='start' startIcon={<SendIcon/>} loading={inProgress} variant='contained' onClick={handleRequestVerificationCode}>Send Verification Code</LoadingButton>
                     </div>
                 )}
             </>
@@ -111,11 +113,14 @@ export default function addSandboxView(props): JSX.Element {
     const EnterVerificationCode = () => {
         const [verificationCode, setVerificationCode] = React.useState('');
 
+        const [inProgress, setInProgress] = React.useState(false)
+
         const handleVerifyCode = (event) => {
             setVerificationCode(event.target.value);
         }
 
         const handleCheckVerificationCode = () => {
+            setInProgress(true);
             postMessage('sandboxCheckVerificationCode', {verificationCode});
         }
 
@@ -123,7 +128,7 @@ export default function addSandboxView(props): JSX.Element {
             <>
                 {( currentState === 'sandboxEnterVerificationCode' ) && (
                     <div>
-                        <TextField id='code' onChange={handleVerifyCode} label='Verification Code' variant='outlined' /> <Button variant='contained' onClick={handleCheckVerificationCode}>Verify</Button>
+                        <TextField id='code' onChange={handleVerifyCode} label='Verification Code' variant='outlined' /> <LoadingButton disabled={inProgress} loadingPosition='start' startIcon={<SendIcon/>} loading={inProgress} variant='contained' onClick={handleCheckVerificationCode}>Verify</LoadingButton>
                     </div>
                 )}
             </>

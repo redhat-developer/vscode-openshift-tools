@@ -119,6 +119,7 @@
     "@mui/core": "^5.0.0-alpha.54",
     "@mui/lab": "^5.0.0-alpha.61",
     "@mui/material": "^5.2.5",
+    "@mui/icons-material": "^5.2.5",
     "@rjsf/material-ui": "^3.2.1",
     "@types/byline": "^4.2.33",
     "@types/chai": "^4.3.0",
