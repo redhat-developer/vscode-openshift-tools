@@ -114,7 +114,7 @@ export default class ClusterViewLoader {
             const memoryFromSetting = vscode.workspace.getConfiguration('openshiftConnector').get('crcMemoryAllocated');
             const nameserver = vscode.workspace.getConfiguration('openshiftConnector').get<string>('crcNameserver');
             const nameserverOption = nameserver ? ['-n', nameserver] : [];
-            const crcOptions = ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`, ...nameserverOption,  '-ojson'];
+            const crcOptions = ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`, ...nameserverOption,  '-o json'];
 
             startProcess = spawn(`${binaryFromSetting}`, crcOptions);
             channel.append(`\n\n"${binaryFromSetting}" ${crcOptions.join(' ')}\n`);
@@ -211,11 +211,11 @@ export default class ClusterViewLoader {
 
     public static async checkCrcStatus(filePath: string, postCommand: string, p: vscode.WebviewPanel | undefined = undefined) {
         const crcCredArray = [];
-        const crcVerInfo = await CliChannel.getInstance().execute(`"${filePath}" version -ojson`);
-        channel.append(`\n\n"${filePath}" version -ojson\n`);
+        const crcVerInfo = await CliChannel.getInstance().execute(`"${filePath}" version -o json`);
+        channel.append(`\n\n"${filePath}" version -o json\n`);
         channel.append(crcVerInfo.stdout);
-        const result =  await CliChannel.getInstance().execute(`"${filePath}" status -ojson`);
-        channel.append(`\n\n"${filePath}" status -ojson\n`);
+        const result =  await CliChannel.getInstance().execute(`"${filePath}" status -o json`);
+        channel.append(`\n\n"${filePath}" status -o json\n`);
         channel.append(result.stdout);
         if (result.error || crcVerInfo.error) {
             p.webview.postMessage({action: postCommand, errorStatus: true});
@@ -228,7 +228,7 @@ export default class ClusterViewLoader {
                 creds: crcCredArray
             });
         }
-        const crcCreds = await CliChannel.getInstance().execute(`${filePath} console --credentials -ojson`);
+        const crcCreds = await CliChannel.getInstance().execute(`"${filePath}" console --credentials -o json`);
         if (!crcCreds.error) {
             try {
                 crcCredArray.push(JSON.parse(crcCreds.stdout).clusterConfig);
