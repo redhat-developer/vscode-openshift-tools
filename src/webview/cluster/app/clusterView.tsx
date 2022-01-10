@@ -78,7 +78,9 @@ export default function addClusterView(props) {
   const [statusError, setStatusError] = React.useState(false);
 
   React.useEffect(() => {
-    props.vscode.postMessage({action: 'checksetting'});
+    props.vscode.postMessage({
+      action: 'checksetting'
+    });
   }, []);
 
   const steps = getSteps();
@@ -168,14 +170,18 @@ export default function addClusterView(props) {
     setProgress(true);
     setCrcStartError(false);
     if (settingPresent) {
-      props.vscode.postMessage({action: 'crcStart', isSetting: true });
+      props.vscode.postMessage({
+        action: 'crcStart', isSetting: true
+      });
     } else {
-      const crcStartCommand = (crcNameserver === '') ? `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory} -ojson`:
-          `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory} -n ${crcNameserver} -ojson`;
+      const nameServerOpt = crcNameserver ? `-n ${crcNameserver}` : '';
 
       props.vscode.postMessage({
         action: 'crcStart',
-        data: crcStartCommand,
+        data: {
+          tool: fileName,
+          options: `start -p "${pullSecretPath}" -c ${cpuSize} -m ${memory} ${nameServerOpt} -o json`
+        },
         pullSecret: pullSecretPath,
         crcLoc: fileName,
         cpuSize,
@@ -219,23 +225,44 @@ export default function addClusterView(props) {
   const handleStopProcess = () => {
     setStopProgress(true);
     setCrcStopError(false);
-    props.vscode.postMessage({action: 'crcStop', data: `${fileName}`});
+    props.vscode.postMessage({
+        action: 'crcStop', 
+        data: {
+            tool: fileName
+        }
+    });
   }
 
   const handleCrcSetup = () => {
-    props.vscode.postMessage({action: 'crcSetup', data: `${fileName}` })
+    props.vscode.postMessage({
+      action: 'crcSetup',
+      data: {
+        tool: fileName
+      }
+    })
   }
 
   const handleCrcLogin = (loginDetails, clusterUrl) => {
-    props.vscode.postMessage({action: 'crcLogin', data: loginDetails, url: clusterUrl })
+    props.vscode.postMessage({
+      action: 'crcLogin',
+      data: loginDetails,
+      url: clusterUrl
+    })
   }
 
   const handleRefresh = () => {
     setStatusSkeleton(true);
     if (settingPresent) {
-      props.vscode.postMessage({action: 'checksetting'});
+      props.vscode.postMessage({
+        action: 'checksetting'
+      });
     } else {
-      props.vscode.postMessage({action: 'checkcrcstatus', data: `${fileName}`});
+      props.vscode.postMessage({
+        action: 'checkcrcstatus',
+        data: {
+          tool: fileName
+        }
+      });
     }
   }
 

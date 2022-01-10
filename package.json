@@ -1580,6 +1580,12 @@
           "type": "number",
           "default": 9216,
           "description": "MiB of memory to allocate to the OpenShift cluster as selected during the first run"
+        },
+        "openshiftConnector.crcNameserver": {
+          "Title": "CRC Domain Name Server",
+          "type": "string",
+          "default": "",
+          "description": "IP address/name of DNS to use with CRC"
         }
       }
     }

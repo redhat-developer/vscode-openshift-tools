@@ -99,7 +99,7 @@ export default class ClusterViewLoader {
     @vsCommand('openshift.explorer.addCluster.crcSetup')
     static async crcSetup(event: any) {
         const terminal: vscode.Terminal = WindowUtil.createTerminal('OpenShift: CRC Setup', undefined);
-        terminal.sendText(`${event.data} setup`);
+        terminal.sendText(`"${event.data.tool}" setup`);
         terminal.show();
     }
     
@@ -112,13 +112,15 @@ export default class ClusterViewLoader {
             const pullSecretFromSetting = vscode.workspace.getConfiguration('openshiftConnector').get('crcPullSecretPath');
             const cpuFromSetting = vscode.workspace.getConfiguration('openshiftConnector').get('crcCpuCores');
             const memoryFromSetting = vscode.workspace.getConfiguration('openshiftConnector').get('crcMemoryAllocated');
-            const crcOptions = ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`, '-ojson'];
+            const nameserver = vscode.workspace.getConfiguration('openshiftConnector').get<string>('crcNameserver');
+            const nameserverOption = nameserver ? ['-n', nameserver] : [];
+            const crcOptions = ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`, ...nameserverOption,  '-o json'];
+
             startProcess = spawn(`${binaryFromSetting}`, crcOptions);
-            channel.append(`\n\n${binaryFromSetting} ${crcOptions.join(' ')}\n`);
+            channel.append(`\n\n"${binaryFromSetting}" ${crcOptions.join(' ')}\n`);
         } else {
-            const [tool, ...params] = event.data.split(' ');
-            startProcess = spawn(tool, params);
-            channel.append(`\n\n${tool} ${params.join(' ')}\n`);
+            startProcess = spawn(`${event.data.tool}`, event.data.options.split(' '));
+            channel.append(`\n\n"${event.data.tool}" ${event.data.options}\n`);
         }
         startProcess.stdout.setEncoding('utf8');
         startProcess.stderr.setEncoding('utf8');
@@ -137,32 +139,42 @@ export default class ClusterViewLoader {
             const binaryLoc = event.isSetting ? vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation'): event.crcLoc;
             ClusterViewLoader.checkCrcStatus(binaryLoc, 'crcstartstatus', panel);
         });
+        startProcess.on('error', (err) => {
+          console.log(err);
+        });
     }
 
     @vsCommand('openshift.explorer.addCluster.crcStop')
     static async crcStop(event) {
         let filePath: string;
         channel.show();
-        if (event.data === '') {
+        if (event.data.tool === '') {
             filePath = vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
         } else {
-            filePath = event.data;
+            filePath = event.data.tool;
         }
-        const stopProcess = spawn(`${filePath}`, ['stop']);
-        channel.append(`\n\n$${filePath} stop\n`);
-        stopProcess.stdout.setEncoding('utf8');
-        stopProcess.stderr.setEncoding('utf8');
-        stopProcess.stdout.on('data', (chunk) => {
-            channel.append(chunk);
-        });
-        stopProcess.stderr.on('data', (chunk) => {
-            channel.append(chunk);
-        });
-        stopProcess.on('close', (code) => {
-            // eslint-disable-next-line no-console
-            console.log(`crc stop exited with code ${code}`);
-            ClusterViewLoader.checkCrcStatus(filePath, 'crcstopstatus', panel);
-        });
+        try {
+          const stopProcess = spawn(`${filePath}`, ['stop']);
+          channel.append(`\n\n"${filePath}" stop\n`);
+          stopProcess.stdout.setEncoding('utf8');
+          stopProcess.stderr.setEncoding('utf8');
+          stopProcess.stdout.on('data', (chunk) => {
+              channel.append(chunk);
+          });
+          stopProcess.stderr.on('data', (chunk) => {
+              channel.append(chunk);
+          });
+          stopProcess.on('close', (code) => {
+              // eslint-disable-next-line no-console
+              console.log(`crc stop exited with code ${code}`);
+              ClusterViewLoader.checkCrcStatus(filePath, 'crcstopstatus', panel);
+          });
+          stopProcess.on('error', (err) => {
+            console.log(err);
+          });
+        } catch(err) {
+          console.log(err);
+        }
     }
 
     static async crcSaveSettings(event) {
@@ -199,11 +211,11 @@ export default class ClusterViewLoader {
 
     public static async checkCrcStatus(filePath: string, postCommand: string, p: vscode.WebviewPanel | undefined = undefined) {
         const crcCredArray = [];
-        const crcVerInfo = await CliChannel.getInstance().execute(`${filePath} version -ojson`);
-        channel.append(`\n\n${filePath} version -ojson\n`);
+        const crcVerInfo = await CliChannel.getInstance().execute(`"${filePath}" version -o json`);
+        channel.append(`\n\n"${filePath}" version -o json\n`);
         channel.append(crcVerInfo.stdout);
-        const result =  await CliChannel.getInstance().execute(`${filePath} status -ojson`);
-        channel.append(`\n\n${filePath} status -ojson\n`);
+        const result =  await CliChannel.getInstance().execute(`"${filePath}" status -o json`);
+        channel.append(`\n\n"${filePath}" status -o json\n`);
         channel.append(result.stdout);
         if (result.error || crcVerInfo.error) {
             p.webview.postMessage({action: postCommand, errorStatus: true});
@@ -216,7 +228,7 @@ export default class ClusterViewLoader {
                 creds: crcCredArray
             });
         }
-        const crcCreds = await CliChannel.getInstance().execute(`${filePath} console --credentials -ojson`);
+        const crcCreds = await CliChannel.getInstance().execute(`"${filePath}" console --credentials -o json`);
         if (!crcCreds.error) {
             try {
                 crcCredArray.push(JSON.parse(crcCreds.stdout).clusterConfig);
