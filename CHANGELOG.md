@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.12 (January 11, 2022)
+
+* [#2319](https://github.com/redhat-developer/vscode-openshift-tools/issues/2319) VSCode-Opeshift-tools Folder Issue
+
 ## 0.2.11 (November 1, 2021)
 
 * [#2269](https://github.com/redhat-developer/vscode-openshift-tools/issues/2269) Fix oc version name
