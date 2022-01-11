@@ -2,7 +2,11 @@
 
 ## 0.2.13 (January 11, 2022)
 
-* [#2319](https://github.com/redhat-developer/vscode-openshift-tools/issues/2319) VSCode-Opeshift-tools Folder Issue
+* [#2319](https://github.com/redhat-developer/vscode-openshift-tools/issues/2319) Fix full path with spaces when running CRC
+
+## 0.2.12 (December 14, 2021)
+
+* [#2316](https://github.com/redhat-developer/vscode-openshift-tools/issues/2316) ComponentAdapter kind field conflicts with VSCode 1.63.0 proposed API
 
 ## 0.2.12 (December 14, 2021)
 
