@@ -114,7 +114,7 @@ export default class ClusterViewLoader {
             const memoryFromSetting = vscode.workspace.getConfiguration('openshiftConnector').get('crcMemoryAllocated');
             const nameserver = vscode.workspace.getConfiguration('openshiftConnector').get<string>('crcNameserver');
             const nameserverOption = nameserver ? ['-n', nameserver] : [];
-            const crcOptions = ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`, ...nameserverOption,  '-o json'];
+            const crcOptions = ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`, ...nameserverOption,  '-o', 'json'];
 
             startProcess = spawn(`${binaryFromSetting}`, crcOptions);
             channel.append(`\n\n"${binaryFromSetting}" ${crcOptions.join(' ')}\n`);
@@ -131,16 +131,18 @@ export default class ClusterViewLoader {
             channel.append(chunk);
         });
         startProcess.on('close', (code) => {
-            // eslint-disable-next-line no-console
-            console.log(`crc start exited with code ${code}`);
+            const message = `'crc start' exited with code ${code}`;
+            channel.append(message);
             if (code !== 0) {
-                panel.webview.postMessage({action: 'sendcrcstarterror'})
+                vscode.window.showErrorMessage(message);
             }
             const binaryLoc = event.isSetting ? vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation'): event.crcLoc;
             ClusterViewLoader.checkCrcStatus(binaryLoc, 'crcstartstatus', panel);
         });
         startProcess.on('error', (err) => {
-          console.log(err);
+            const message = `'crc start' execution failed with error: '${err.message}'`;
+            channel.append(message);
+            vscode.window.showErrorMessage(message);
         });
     }
 
@@ -153,28 +155,29 @@ export default class ClusterViewLoader {
         } else {
             filePath = event.data.tool;
         }
-        try {
-          const stopProcess = spawn(`${filePath}`, ['stop']);
-          channel.append(`\n\n"${filePath}" stop\n`);
-          stopProcess.stdout.setEncoding('utf8');
-          stopProcess.stderr.setEncoding('utf8');
-          stopProcess.stdout.on('data', (chunk) => {
-              channel.append(chunk);
-          });
-          stopProcess.stderr.on('data', (chunk) => {
-              channel.append(chunk);
-          });
-          stopProcess.on('close', (code) => {
-              // eslint-disable-next-line no-console
-              console.log(`crc stop exited with code ${code}`);
-              ClusterViewLoader.checkCrcStatus(filePath, 'crcstopstatus', panel);
-          });
-          stopProcess.on('error', (err) => {
-            console.log(err);
-          });
-        } catch(err) {
-          console.log(err);
-        }
+        const stopProcess = spawn(`${filePath}`, ['stop']);
+        channel.append(`\n\n"${filePath}" stop\n`);
+        stopProcess.stdout.setEncoding('utf8');
+        stopProcess.stderr.setEncoding('utf8');
+        stopProcess.stdout.on('data', (chunk) => {
+            channel.append(chunk);
+        });
+        stopProcess.stderr.on('data', (chunk) => {
+            channel.append(chunk);
+        });
+        stopProcess.on('close', (code) => {
+            const message = `'crc stop' exited with code ${code}`;
+            channel.append(message);
+            if (code !== 0) {
+                vscode.window.showErrorMessage(message);
+            }
+            ClusterViewLoader.checkCrcStatus(filePath, 'crcstopstatus', panel);
+        });
+        stopProcess.on('error', (err) => {
+            const message = `'crc stop' execution filed with error: '${err.message}'`;
+            channel.append(message);
+            vscode.window.showErrorMessage(message);
+        });
     }
 
     static async crcSaveSettings(event) {
