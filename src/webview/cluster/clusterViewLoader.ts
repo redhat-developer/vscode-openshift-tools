@@ -10,6 +10,8 @@ import { ExtenisonID } from '../../util/constants';
 import { WindowUtil } from '../../util/windowUtils';
 import { CliChannel } from '../../cli';
 import { vsCommand } from '../../vscommand';
+import fetch = require('make-fetch-happen');
+import { SBSignupResponse } from '../../openshift/sandbox';
 
 let panel: vscode.WebviewPanel;
 
@@ -56,16 +58,67 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             const sessionCheck: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: false });
             if (!sessionCheck) {
                 panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
+            } else {
+                panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+            }
+            break;
+        case 'sandboxPageSignupRequest':
+            const signupResponse = await fetch('https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com/api/v1/signup', {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${(sessionCheck as any).idToken}`
+                },
+                timeout: 10000
+            });
+            if (signupResponse.status === 202) {
+                // signup sucessful
+            } else {
+                // something went wrong
             }
             break;
         case 'sandboxPageLoginRequest':
+            // add timeout to avoid waiting forever
             const session: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: true });
-            if (!session) {
-                vscode.window.showErrorMessage('Login failed, please try again.');
-                panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
-            } else {
-                panel.webview.postMessage({action: 'sandboxPageCheckStatus'});
+            if (session) {
+                panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
             }
+        case 'sandboxPageDetectStatus':
+            try {
+                const signupResponse = await fetch('https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com/api/v1/signup', {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${(sessionCheck as any).idToken}`
+                    },
+                    timeout: 10000
+                });
+                if (signupResponse.status === 404) {
+                    // User does not signed up for sandbox, show sign up for sandbox page
+                    panel.webview.postMessage({action: 'sandboxPageSignUp'});
+                } else if (signupResponse.status === 200){
+                    const resJson: SBSignupResponse = await signupResponse.json();
+                    if (resJson.status.ready) {
+                        // cluster is ready to use
+                    } else {
+                        // cluster is not ready and the reason is 
+                        if (resJson.status.verificationRequired) {
+                            // user phone number verification required
+                        } else {
+                            // user phone number verified 
+                            if (resJson.status.reason === 'PendingApproval') {
+                                // pull staus again
+
+                            } else if (resJson.status.reason === 'Provisioned') {
+                                // being provisioned
+                            }
+                        }
+                    }
+                    console.log(resJson);
+                }
+            } catch(err) {
+                console.log(err);
+            }
+            break;
+
     }
 }
 

@@ -3,9 +3,11 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { workspace } from 'vscode';
+
  export interface SBStatus {
      ready: boolean;
-     reason: 'Provisioned' | '';
+     reason: 'Provisioned' | 'PendingApproval';
      verificationRequired: boolean;
  }
 
@@ -21,3 +23,16 @@
     status: SBStatus;
     username: string;
  }
+
+export function getSandboxAPIUrl(): string {
+    return workspace.getConfiguration('openshiftConnector').get('sandboxAPIHostUrl');
+}
+
+
+
+export interface SandboxAPI {
+    signup(): SBSignupResponse;
+    requestVerificationCode(areaCode: string, phoneNumber: string);
+    validateVerificationCode(code: string);
+}
+
