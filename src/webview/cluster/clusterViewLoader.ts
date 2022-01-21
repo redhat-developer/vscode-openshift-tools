@@ -18,9 +18,9 @@ const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Log
 const sandboxAPI = createSandboxAPI();
 
 async function clusterEditorMessageListener (event: any ): Promise<any> {
-    
+
     const sessionCheck: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: false });
-    
+
     switch (event.action) {
         case 'openLaunchSandboxPage':
         case 'openCreateClusterPage':
@@ -54,7 +54,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 event.url,
                 event.data.username,
                 event.data.password
-            ); 
+            );
             break;
         case 'sandboxPageCheckAuthSession':
             // init sandbox page
@@ -65,7 +65,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             }
             break;
         case 'sandboxRequestSignup':
-            const signupResponse = sandboxAPI.signUp((sessionCheck as any).idToken);
+            const signupResponse = await sandboxAPI.signUp((sessionCheck as any).idToken);
             if (signupResponse) {
                 panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
             } else {
@@ -88,12 +88,12 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 if (signupStatus.status.ready) {
                     panel.webview.postMessage({action: 'sandboxPageProvisioned'});
                 } else {
-                    // cluster is not ready and the reason is 
+                    // cluster is not ready and the reason is
                     if (signupStatus.status.verificationRequired) {
                         panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
                     } else {
-                        // user phone number verified 
-                        // 
+                        // user phone number verified
+                        //
                         if (signupStatus.status.reason === 'PendingApproval') {
                             panel.webview.postMessage({action: 'sandboxPageWaitingForApproval'});
                         } else if (signupStatus.status.reason === 'Provisioned') {
@@ -152,7 +152,7 @@ export default class ClusterViewLoader {
         terminal.sendText(`"${event.data.tool}" setup`);
         terminal.show();
     }
-    
+
     @vsCommand('openshift.explorer.addCluster.crcStart')
     static async crcStart(event: any) {
         let startProcess: ChildProcess;

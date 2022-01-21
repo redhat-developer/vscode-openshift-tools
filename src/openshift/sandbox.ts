@@ -55,7 +55,7 @@ export async function getSignUpStatus(token: string): Promise<SBSignupResponse |
 
 export async function signUp(token: string): Promise<boolean> {
     const signupResponse = await fetch(`${getSandboxAPIUrl()}${SBAPIEndpoint.SIGNUP}`, {
-            method: 'PUT',
+            method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`
             },
@@ -70,7 +70,7 @@ export async function requestVerificationCode(token: string, countryCode: string
         headers: {
             Authorization: `Bearer ${token}`
         },
-        timeout: 10000,
+        timeout: 100000,
         body: JSON.stringify({
             'country_code': countryCode,
             'phone_number': phoneNumber
@@ -86,7 +86,7 @@ export async function validateVerificationCode(token: string, code: string): Pro
         headers: {
             Authorization: `Bearer ${token}`
         },
-        timeout: 10000
+        timeout: 100000
     });
 
     return validationRequestResponse.ok;
