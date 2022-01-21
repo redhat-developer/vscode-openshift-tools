@@ -16,11 +16,14 @@ let signupStatus;
 app.route('/api/v1/signup')
     .get((req, res) => {
         if (signupStatus) {
+            console.log('Check signup status');
             res.json(signupStatus);
+        } else {
+            res.sendStatus(404);
         }
-        res.sendStatus(404);
     })
     .put(function(req, res) {
+        console.log('Signing up for sandbox');
         // TODO: Fill up the URLs
         signupStatus = {
             apiEndpoint: '',
@@ -44,17 +47,21 @@ app.route('/api/v1/signup')
     app.route('/api/v1/signup/verification').put(function(req, res) {
         res.sendStatus(200);
     });
-    app.route('/api/v1/signup/verification/*').put(function(req, res) {
+    app.route('/api/v1/signup/verification/*').get(function(req, res) {
+        console.log('Verified return code');
         signupStatus.status.verificationRequired = false;
         setTimeout(function() {
             // switch account from PendingApproval to status provisioning
             signupStatus.status.reason = '';
+            console.log('Chsnge to provisioning state');
+            setTimeout(function() {
+                // switch account to status provisioned
+                console.log('Change to provisioned state');
+                signupStatus.status.reason = 'Provisioned';
+                signupStatus.status.ready = true;
+            },10000);
         },10000);
-        setTimeout(function() {
-            // switch account to status provisioned
-            signupStatus.status.reason = 'Provisioned';
-            signupStatus.status.ready = true;
-        },10000);
+        res.sendStatus(200);
     });
 
 // Use a wildcard for a route

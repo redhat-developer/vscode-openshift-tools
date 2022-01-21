@@ -9,8 +9,6 @@ import * as React from 'react';
 import SendIcon from '@mui/icons-material/Send';
 // import * as ClusterViewStyles from './clusterView.style';
 
-// import * as request from 'request';
-
 export default function addSandboxView(props): JSX.Element {
 
     const [currentState, setCurrentState] = React.useState(
@@ -24,9 +22,9 @@ export default function addSandboxView(props): JSX.Element {
             //     case 'sandboxPageRequestSignup':
             //     case 'sandboxPageRequestVerificationCode':
             //     case 'sandboxPageEnterVerificationCode':
-            //     case 'sandboxWaitingForApproval':
-            //     case 'sandboxWaitingForProvision':
-            //     case 'sandboxProvisioned':
+            //     case 'sandboxPageWaitingForApproval':
+            //     case 'sandboxPageWaitingForProvision':
+            //     case 'sandboxPageProvisioned':
                     setCurrentState(event.data);
             //         break;
             // }
@@ -92,7 +90,7 @@ export default function addSandboxView(props): JSX.Element {
         
         React.useEffect(() => {
             if (currentState.action === 'sandboxPageDetectStatus') {
-                postMessage('sandboxPageDetectStatus');
+                postMessage('sandboxDetectStatus');
             }
         }, []);
         
@@ -136,24 +134,30 @@ export default function addSandboxView(props): JSX.Element {
     const RequestVerificationCode = () => {
     
         const [phoneNumber, setPhoneNumber] = React.useState('');
+        const [countryCode, setCountryCode] = React.useState('');
 
         const handlePhoneNumber = (event) => {
             setPhoneNumber(event.target.value);
+        }
+
+        const handleCountryCode = (event) => {
+            setCountryCode(event.target.value);
         }
 
         const [inProgress, setInProgress] = React.useState(false)
 
         const handleRequestVerificationCode = () => {
             setInProgress(true);
-            postMessage('sandboxRequestVerificationCode', { phoneNumber });
+            postMessage('sandboxRequestVerificationCode', { phoneNumber, countryCode });
         }
 
         return (
             <>
                 {( currentState.action === 'sandboxPageRequestVerificationCode' ) && (
                     <div>
-                         <TextField id='phone' disabled={inProgress} onChange={handlePhoneNumber} label='Phone number' variant='outlined' />
-                         <LoadingButton disabled={inProgress} loadingPosition='start' startIcon={<SendIcon/>} loading={inProgress} variant='contained' onClick={handleRequestVerificationCode}>Send Verification Code</LoadingButton>
+                            <TextField id='countryCode' disabled={inProgress} onChange={handleCountryCode} label='Country code' variant='outlined' />
+                            <TextField id='phoneNumber' disabled={inProgress} onChange={handlePhoneNumber} label='Phone number' variant='outlined' />
+                            <LoadingButton disabled={inProgress} loadingPosition='start' startIcon={<SendIcon/>} loading={inProgress} variant='contained' onClick={handleRequestVerificationCode}>Send Verification Code</LoadingButton>
                     </div>
                 )}
             </>
@@ -171,11 +175,14 @@ export default function addSandboxView(props): JSX.Element {
 
         const handleCheckVerificationCode = () => {
             setInProgress(true);
-            postMessage('sandboxCheckVerificationCode', {verificationCode});
+            postMessage('sandboxValidateVerificationCode', {verificationCode});
         }
 
-        const handleNewCodeRequest = () => {
-            postMessage('sandboxPageRequestVerificationCode');
+        const handlRequesteNewCodeRequest = () => {
+            setCurrentState({
+                action: 'sandboxPageRequestVerificationCode',
+                errorCode: undefined
+            });
         }
 
         return (
@@ -197,7 +204,7 @@ export default function addSandboxView(props): JSX.Element {
                             onClick={handleCheckVerificationCode}>
                                 Verify
                             </LoadingButton>
-                            <LoadingButton variant='contained' onClick={ handleNewCodeRequest }>Request New Code</LoadingButton>
+                            <LoadingButton variant='contained' onClick={ handlRequesteNewCodeRequest }>Request New Code</LoadingButton>
                     </div>
                 )}
             </>
@@ -205,9 +212,14 @@ export default function addSandboxView(props): JSX.Element {
     }
 
     const WaitingForApproval = () => {
+        React.useEffect(() => {
+            if (currentState.action === 'sandboxPageWaitingForApproval') {
+                setTimeout(()=>postMessage('sandboxDetectStatus'), 1000);
+            }
+        }, []);        
         return (
             <>
-                {( currentState.action === 'sandboxWaitingForApproval' ) && (
+                {( currentState.action === 'sandboxPageWaitingForApproval' ) && (
                     <div>
                         <CircularProgress color="secondary" /> Waiting for Sandbox instance approval
                     </div>
@@ -217,11 +229,16 @@ export default function addSandboxView(props): JSX.Element {
     }
 
     const WaitingForProvision = () => {
+        React.useEffect(() => {
+            if (currentState.action === 'sandboxPageWaitingForProvision') {
+                setTimeout(()=>postMessage('sandboxDetectStatus'), 1000);
+            }
+        }, []); 
         return (
             <>
-                {( currentState.action === 'sandboxWaitingForProvision' ) && (
+                {( currentState.action === 'sandboxPageWaitingForProvision' ) && (
                     <div>
-                        <CircularProgress color="secondary" /> Sandbox instance has been approved, waiting for provision
+                        <CircularProgress color="secondary" /> Sandbox instance has been approved, waiting for provision to finish
                     </div>
                 )}
             </>
@@ -231,7 +248,7 @@ export default function addSandboxView(props): JSX.Element {
     const Provisioned = () => {
         return (
             <>
-                {( currentState.action === 'sandboxProvisioned' ) && (
+                {( currentState.action === 'sandboxPageProvisioned' ) && (
                     <div>
                         <p>Sandbox instance has been provisioned.</p>
                         <Button variant='contained'>Open Developer Console</Button><Button variant='contained'>Login with token from clipboard</Button>

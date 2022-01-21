@@ -1591,10 +1591,10 @@
           "default": "",
           "description": "IP address/name of DNS to use with CRC"
         },
-        "openshiftConnector.sandboxAPIHostUrl" : {
-            "title": "OpenShift Sandbox API Host URL",
-            "type": "string",
-            "default": "https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com/"
+        "openshiftConnector.sandboxAPIHostUrl": {
+          "title": "OpenShift Sandbox API Host URL",
+          "type": "string",
+          "default": "https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com"
         }
       }
     }

@@ -10,14 +10,17 @@ import { ExtenisonID } from '../../util/constants';
 import { WindowUtil } from '../../util/windowUtils';
 import { CliChannel } from '../../cli';
 import { vsCommand } from '../../vscommand';
-import fetch = require('make-fetch-happen');
-import { SBSignupResponse } from '../../openshift/sandbox';
+import { createSandboxAPI } from '../../openshift/sandbox';
 
 let panel: vscode.WebviewPanel;
 
 const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
+const sandboxAPI = createSandboxAPI();
 
 async function clusterEditorMessageListener (event: any ): Promise<any> {
+    
+    const sessionCheck: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: false });
+    
     switch (event.action) {
         case 'openLaunchSandboxPage':
         case 'openCreateClusterPage':
@@ -51,27 +54,20 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 event.url,
                 event.data.username,
                 event.data.password
-            );
+            ); 
             break;
         case 'sandboxPageCheckAuthSession':
             // init sandbox page
-            const sessionCheck: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: false });
-            if (!sessionCheck) {
+            if (!sessionCheck ) {
                 panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
             } else {
                 panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
             }
             break;
-        case 'sandboxPageSignupRequest':
-            const signupResponse = await fetch('https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com/api/v1/signup', {
-                method: 'PUT',
-                headers: {
-                    Authorization: `Bearer ${(sessionCheck as any).idToken}`
-                },
-                timeout: 10000
-            });
-            if (signupResponse.status === 202) {
-                // signup sucessful
+        case 'sandboxRequestSignup':
+            const signupResponse = sandboxAPI.signUp((sessionCheck as any).idToken);
+            if (signupResponse) {
+                panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
             } else {
                 // something went wrong
             }
@@ -82,43 +78,50 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             if (session) {
                 panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
             }
-        case 'sandboxPageDetectStatus':
-            try {
-                const signupResponse = await fetch('https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com/api/v1/signup', {
-                    method: 'GET',
-                    headers: {
-                        Authorization: `Bearer ${(sessionCheck as any).idToken}`
-                    },
-                    timeout: 10000
-                });
-                if (signupResponse.status === 404) {
-                    // User does not signed up for sandbox, show sign up for sandbox page
-                    panel.webview.postMessage({action: 'sandboxPageSignUp'});
-                } else if (signupResponse.status === 200){
-                    const resJson: SBSignupResponse = await signupResponse.json();
-                    if (resJson.status.ready) {
-                        // cluster is ready to use
+        case 'sandboxDetectStatus':
+            // how to handle errors and timeouts
+            const signupStatus = await sandboxAPI.getSignUpStatus((sessionCheck as any).idToken);
+            if (!signupStatus) {
+                // User does not signed up for sandbox, show sign up for sandbox page
+                panel.webview.postMessage({action: 'sandboxPageRequestSignup'});
+            } else {
+                if (signupStatus.status.ready) {
+                    panel.webview.postMessage({action: 'sandboxPageProvisioned'});
+                } else {
+                    // cluster is not ready and the reason is 
+                    if (signupStatus.status.verificationRequired) {
+                        panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
                     } else {
-                        // cluster is not ready and the reason is 
-                        if (resJson.status.verificationRequired) {
-                            // user phone number verification required
+                        // user phone number verified 
+                        // 
+                        if (signupStatus.status.reason === 'PendingApproval') {
+                            panel.webview.postMessage({action: 'sandboxPageWaitingForApproval'});
+                        } else if (signupStatus.status.reason === 'Provisioned') {
+                            panel.webview.postMessage({action: 'sandboxPageProvisioned'});
                         } else {
-                            // user phone number verified 
-                            if (resJson.status.reason === 'PendingApproval') {
-                                // pull staus again
-
-                            } else if (resJson.status.reason === 'Provisioned') {
-                                // being provisioned
-                            }
+                            panel.webview.postMessage({action: 'sandboxPageWaitingForProvision'})
                         }
                     }
-                    console.log(resJson);
                 }
-            } catch(err) {
-                console.log(err);
+                console.log(signupStatus);
             }
             break;
-
+        case 'sandboxRequestVerificationCode': {
+            const requestStatus = await sandboxAPI.requestVerificationCode((sessionCheck as any).idToken, event.payload.countryCode, event.payload.phoneNumber);
+            if (requestStatus) {
+                panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode'});
+            }
+            break;
+        }
+        case 'sandboxValidateVerificationCode': {
+            const requestStatus = await sandboxAPI.validateVerificationCode((sessionCheck as any).idToken, event.payload.verificationCode);
+            if (requestStatus) {
+                panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+            } else {
+                panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+            }
+            break;
+        }
     }
 }
 

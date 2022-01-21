@@ -35,10 +35,10 @@ export function getSandboxAPIUrl(): string {
 }
 
 export interface SandboxAPI {
-    getSignUpStatus(): SBSignupResponse;
-    signUp(): Promise<boolean>;
-    requestVerificationCode(areaCode: string, phoneNumber: string);
-    validateVerificationCode(code: string);
+    getSignUpStatus(token: string): Promise<SBSignupResponse | undefined>;
+    signUp(token: string): Promise<boolean>;
+    requestVerificationCode(token: string, areaCode: string, phoneNumber: string): Promise<boolean>;
+    validateVerificationCode(token: string, code: string): Promise<boolean>;
 }
 
 export async function getSignUpStatus(token: string): Promise<SBSignupResponse | undefined> {
@@ -47,6 +47,7 @@ export async function getSignUpStatus(token: string): Promise<SBSignupResponse |
             headers: {
                 Authorization: `Bearer ${token}`
             },
+            cache: 'no-cache',
             timeout: 10000
         });
     return signupResponse.ok ? signupResponse.json() as Promise<SBSignupResponse> : undefined;
@@ -91,6 +92,11 @@ export async function validateVerificationCode(token: string, code: string): Pro
     return validationRequestResponse.ok;
 }
 
-// export function createSandboxAPI(): SandboxAPI {
-//     return
-// }
+export function createSandboxAPI(): SandboxAPI {
+    return {
+        getSignUpStatus,
+        signUp,
+        requestVerificationCode,
+        validateVerificationCode
+    };
+}
