@@ -6,6 +6,7 @@
 import { workspace } from 'vscode';
 import fetch = require('make-fetch-happen');
 
+// eslint-disable-next-line no-shadow
 export enum SBAPIEndpoint {
     SIGNUP = '/api/v1/signup',
     VERIFICATION = '/api/v1/signup/verification'

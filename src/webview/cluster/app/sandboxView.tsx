@@ -4,9 +4,12 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { Button, CircularProgress, TextField } from '@material-ui/core';
+import { styled } from '@mui/material/styles';
 import LoadingButton from '@mui/lab/LoadingButton';
 import * as React from 'react';
 import SendIcon from '@mui/icons-material/Send';
+import { red } from '@mui/material/colors';
+import Tooltip from '@mui/material/Tooltip';
 // import * as ClusterViewStyles from './clusterView.style';
 
 export default function addSandboxView(props): JSX.Element {
@@ -40,7 +43,15 @@ export default function addSandboxView(props): JSX.Element {
     React.useEffect(() => {
         postMessage('sandboxPageCheckAuthSession');
     }, []);
-    
+
+    const ColorButton = styled(Button)(({ theme }) => ({
+        color: theme.palette.getContrastText(red[500]),
+        backgroundColor: red[500],
+        '&:hover': {
+          backgroundColor: red[700],
+        },
+      }));
+
     const DetectAuthSession = () => {
         return (
             <>
@@ -61,25 +72,28 @@ export default function addSandboxView(props): JSX.Element {
             setInProgress(true);
             postMessage('sandboxPageLoginRequest');
         }
-    
+
         return (
             <>
                 {( currentState.action === 'sandboxPageLoginRequired' ) && (
                     <div>
-                        <div>You need RedHat Developers account to use Sandbox. Sign up for account if you don't have one or login to developers.redhat.com to continue.</div>
+                        <div>You need Red Hat Developers account to use Sandbox. Sign up for account if you don't have one or login to developers.redhat.com to continue.</div>
                         {(currentState.errorCode === 'loginTimedOut') && (
                             <div>Login command timed out. Please try again.</div>
                         )}
-                        <Button href='https://www.redhat.com/en/program-developers'>Sign up</Button> 
-                        <LoadingButton 
-                            disabled={inProgress}
-                            loadingPosition='start'
-                            startIcon={<SendIcon/>}
-                            loading={inProgress}
-                            variant='contained' 
-                            onClick={ handleLoginButton }>
-                            Login
-                        </LoadingButton>
+                        <div style= {{ margin: '20px' }}>
+                            <Tooltip title="Register a new Red Hat account" placement="bottom">
+                                <ColorButton style= {{ marginRight: '15px' }} variant='outlined' href='https://www.redhat.com/en/program-developers'>Sign up</ColorButton>
+                            </Tooltip>
+                            <Tooltip title="Login to Red Hat account" placement="bottom">
+                                <LoadingButton
+                                    disabled={inProgress}
+                                    variant='outlined'
+                                    onClick={ handleLoginButton }>
+                                    Login { inProgress && <CircularProgress style= {{ marginLeft: 0, marginRight: '10px' }} size={20}/>}
+                                </LoadingButton>
+                            </Tooltip>
+                        </div>
                     </div>
                 )}
             </>
@@ -87,18 +101,18 @@ export default function addSandboxView(props): JSX.Element {
     };
 
     const DetectStatus = () => {
-        
+
         React.useEffect(() => {
             if (currentState.action === 'sandboxPageDetectStatus') {
                 postMessage('sandboxDetectStatus');
             }
         }, []);
-        
+
         return (
             <>
                 {( currentState.action === 'sandboxPageDetectStatus' ) && (
                     <div>
-                        <CircularProgress color="secondary" /> Detecting Sandbox instance status
+                        <CircularProgress color="secondary" /> Detecting Developer Sandbox instance status
                     </div>
                 )}
             </>
@@ -108,7 +122,7 @@ export default function addSandboxView(props): JSX.Element {
     const Signup = () => {
 
         const [inProgress, setInProgress] = React.useState(false)
-        
+
         const handleSignupButton = (event) => {
             setInProgress(true);
             postMessage('sandboxRequestSignup');
@@ -117,14 +131,14 @@ export default function addSandboxView(props): JSX.Element {
             <>
                 {( currentState.action === 'sandboxPageRequestSignup' ) && (
                     <div>
-                        You have not signed up for OpenShif Sandbox. Press 'Sign Up' button below to requtst OpenShitf Sandbox instance.<br/>
-                        <LoadingButton 
+                        You have not signed up for Developer Sandbox for Red Hat OpenShift. Provision your free Red Hat OpenShift development cluster and get started.<br/>
+                        <LoadingButton
+                            style= {{ margin: '20px' }}
                             disabled={inProgress}
                             loadingPosition='start'
-                            startIcon={<SendIcon/>}
                             loading={inProgress}
-                            variant='contained' 
-                            onClick={handleSignupButton}>Sign Up for OpenShift Sandbox</LoadingButton>
+                            variant='outlined'
+                            onClick={handleSignupButton}>Get started in the Sandbox</LoadingButton>
                     </div>
                 )}
             </>
@@ -132,7 +146,6 @@ export default function addSandboxView(props): JSX.Element {
     };
 
     const RequestVerificationCode = () => {
-    
         const [phoneNumber, setPhoneNumber] = React.useState('');
         const [countryCode, setCountryCode] = React.useState('');
 
@@ -155,9 +168,9 @@ export default function addSandboxView(props): JSX.Element {
             <>
                 {( currentState.action === 'sandboxPageRequestVerificationCode' ) && (
                     <div>
-                            <TextField id='countryCode' disabled={inProgress} onChange={handleCountryCode} label='Country code' variant='outlined' />
+                            <TextField id='countryCode' disabled={inProgress} onChange={handleCountryCode} label='Country code trial' variant='outlined' />
                             <TextField id='phoneNumber' disabled={inProgress} onChange={handlePhoneNumber} label='Phone number' variant='outlined' />
-                            <LoadingButton disabled={inProgress} loadingPosition='start' startIcon={<SendIcon/>} loading={inProgress} variant='contained' onClick={handleRequestVerificationCode}>Send Verification Code</LoadingButton>
+                            <LoadingButton disabled={inProgress} loadingPosition='start' loading={inProgress} variant='contained' onClick={handleRequestVerificationCode}>Send Verification Code</LoadingButton>
                     </div>
                 )}
             </>
@@ -195,7 +208,7 @@ export default function addSandboxView(props): JSX.Element {
                             label='Verification Code'
                             variant='outlined'
                         />
-                        <LoadingButton 
+                        <LoadingButton
                             disabled={inProgress}
                             loadingPosition='start'
                             startIcon={<SendIcon/>}
@@ -216,7 +229,7 @@ export default function addSandboxView(props): JSX.Element {
             if (currentState.action === 'sandboxPageWaitingForApproval') {
                 setTimeout(()=>postMessage('sandboxDetectStatus'), 1000);
             }
-        }, []);        
+        }, []);
         return (
             <>
                 {( currentState.action === 'sandboxPageWaitingForApproval' ) && (
@@ -233,7 +246,7 @@ export default function addSandboxView(props): JSX.Element {
             if (currentState.action === 'sandboxPageWaitingForProvision') {
                 setTimeout(()=>postMessage('sandboxDetectStatus'), 1000);
             }
-        }, []); 
+        }, []);
         return (
             <>
                 {( currentState.action === 'sandboxPageWaitingForProvision' ) && (
@@ -250,7 +263,7 @@ export default function addSandboxView(props): JSX.Element {
             <>
                 {( currentState.action === 'sandboxPageProvisioned' ) && (
                     <div>
-                        <p>Sandbox instance has been provisioned.</p>
+                        <p>Your sandbox account has been provisioned and is ready to use.</p>
                         <Button variant='contained'>Open Developer Console</Button><Button variant='contained'>Login with token from clipboard</Button>
                     </div>
                 )}
