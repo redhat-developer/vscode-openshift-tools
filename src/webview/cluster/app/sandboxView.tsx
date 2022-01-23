@@ -84,14 +84,22 @@ export default function addSandboxView(props): JSX.Element {
         return (
             <>
                 {( currentState.action === 'sandboxPageLoginRequired' ) && (
-                    <div>
-                        <div>You need Red Hat Developers account to use Sandbox. Sign up for account if you don't have one or login to developers.redhat.com to continue.</div>
-                        {(currentState.errorCode === 'loginTimedOut') && (
-                            <div>Login command timed out. Please try again.</div>
-                        )}
-                        <div style= {{ margin: '20px' }}>
+                    <Box sx={{ flexGrow: 1 }}>
+                    <AppBar position="static" style={{ background: 'var(--vscode-list-inactiveSelectionBackground)' }}>
+                        <Toolbar>
+                            <Typography variant="body2" component="p" sx={{ flexGrow: 1 }}>
+                                Sign up a new Red Hat developer account or Login to existing account to start using Developer Sandbox on Red Hat OpenShift.
+                            </Typography>
+                            {(currentState.errorCode === 'loginTimedOut') && (
+                                <div>Login command timed out. Please try again.</div>
+                            )}
                             <Tooltip title="Register a new Red Hat account" placement="bottom">
-                                <ColorButton style= {{ marginRight: '15px' }} variant='outlined' href='https://www.redhat.com/en/program-developers'>Sign up</ColorButton>
+                                <ColorButton
+                                    href='https://www.redhat.com/en/program-developers'
+                                    variant="contained"
+                                    style= {{ marginRight: '10px' }}>
+                                        Sign Up
+                                </ColorButton>
                             </Tooltip>
                             <Tooltip title="Login to Red Hat account" placement="bottom">
                                 <LoadingButton
@@ -101,8 +109,9 @@ export default function addSandboxView(props): JSX.Element {
                                     Login { inProgress && <CircularProgress style= {{ marginLeft: '10px' }} size={20}/>}
                                 </LoadingButton>
                             </Tooltip>
-                        </div>
-                    </div>
+                        </Toolbar>
+                    </AppBar>
+                    </Box>
                 )}
             </>
         )

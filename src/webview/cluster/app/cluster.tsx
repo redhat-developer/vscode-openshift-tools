@@ -157,6 +157,9 @@ export default function Header() {
                         <Typography variant="body2" component="p" style={{ padding: 20 }}>
                         The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools. <br></br>Discover the rich capabilities of the full developer experience on OpenShift with the sandbox.
                         </Typography>
+                        <Button variant="outlined" href='https://developers.redhat.com/developer-sandbox' style={{ margin: 15, textTransform: 'none' }}>Learn More</Button>
+                        <Button variant="outlined" href='mailto:devsandbox@redhat.com' style={{ margin: 15, textTransform: 'none' }}>Contact Us</Button>
+                        <Button variant="outlined" href='https://dn.dev/DevNationSlack'style={{ margin: 15, textTransform: 'none' }}>Connect on Slack</Button>
                         <AddSandboxView vscode={vscodeApi} />
                     </Card>
                 </div>
