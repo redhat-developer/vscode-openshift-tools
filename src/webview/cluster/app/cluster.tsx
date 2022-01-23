@@ -31,7 +31,7 @@ const clusterTypes = [
     urlAlt: 'crc',
     redirectLink: '',
     buttonText: 'Create/Refresh cluster',
-    tooltip: 'You can create OpenShift 4 cluster using this wizard.'
+    tooltip: 'You can create/run local OpenShift 4 cluster using this wizard.'
   },
   {
     heading: 'Launch Developer Sandbox',
@@ -45,7 +45,7 @@ const clusterTypes = [
   },
   {
     heading: 'Deploy it in your public cloud',
-    description: 'Create an OpenShift cluster using managed services OR Run OpenShift clusters on your own by installing from another cloud provider.',
+    description: 'Run OpenShift clusters on your own by installing from another cloud provider.',
     smallInfo: 'This includes Azure Red Hat Openshift, Red Hat OpenShift on IBM Cloud, Red Hat OpenShift Service on AWS, Google Cloud, AWS (x86_64), Azure.',
     imageUrl: ['https://www.openshift.com/hubfs/images/logos/logo_aws.svg', 'https://www.openshift.com/hubfs/images/logos/logo-try-cloud.svg', 'https://www.openshift.com/hubfs/images/logos/logo_google_cloud.svg'],
     urlAlt: 'public cloud',
