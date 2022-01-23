@@ -8,6 +8,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -22,7 +24,7 @@ const useStyles = makeStyles(ClusterViewStyles.useStyles);
 export default function addSandboxView(props): JSX.Element {
     const classes = useStyles();
     const [currentState, setCurrentState] = React.useState(
-        {action: 'detectAuthSession', errorCode: undefined});
+        {action: 'detectAuthSession', statusInfo: '', consoleDashboard: '', errorCode: undefined});
 
     const messageListener = (event) => {
         if (event?.data?.action) {
@@ -222,6 +224,8 @@ export default function addSandboxView(props): JSX.Element {
         const handlRequesteNewCodeRequest = () => {
             setCurrentState({
                 action: 'sandboxPageRequestVerificationCode',
+                statusInfo: '',
+                consoleDashboard: '',
                 errorCode: undefined
             });
         }
@@ -297,11 +301,24 @@ export default function addSandboxView(props): JSX.Element {
                     <Box sx={{ flexGrow: 1 }}>
                         <AppBar position="static" style={{ background: 'var(--vscode-list-inactiveSelectionBackground)' }}>
                             <Toolbar>
-                                <Typography variant="body1" component="p" sx={{ flexGrow: 1 }}>
+                                <Typography variant="body1" component="p" sx={{ flexGrow: 1, marginLeft: 10 }}>
+                                    <Tooltip title={currentState.statusInfo}>
+                                            <IconButton
+                                                size="large"
+                                                aria-label="account of current user"
+                                                aria-controls="menu-appbar"
+                                                aria-haspopup="true"
+                                                color="inherit"
+                                            >
+                                                <AccountCircle />
+                                            </IconButton>
+                                        </Tooltip>
                                     Your sandbox account has been provisioned and is ready to use.
                                 </Typography>
-                                <Tooltip title="Launch your Sandbox console in Browser" placement="bottom">
-                                    <Button variant="contained" className={classes.button} style={{ marginBottom: '8px'}}>Open Dashboard</Button>
+                                <Tooltip title="Launch your Sandbox console in browser" placement="bottom">
+                                    <a href={currentState.consoleDashboard} style={{ textDecoration: 'none'}}>
+                                        <Button variant="contained" className={classes.button} style={{ marginBottom: '8px'}}>Open Dashboard</Button>
+                                    </a>
                                 </Tooltip>
                                 <Tooltip title="Connect in OpenShift Application View" placement="bottom">
                                     <ColorButton>Login</ColorButton>

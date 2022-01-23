@@ -24,7 +24,7 @@ export interface SBStatus {
     clusterName: string;
     company: string;
     compliantUsername: string;
-    consoleUrl: string;
+    consoleURL: string;
     familyName: string;
     givenName: string;
     status: SBStatus;

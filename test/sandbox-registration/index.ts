@@ -37,7 +37,7 @@ app.route('/api/v1/signup')
             clusterName: '',
             company: '',
             compliantUsername: '',
-            consoleUrl: '',
+            consoleURL: '',
             familyName: '',
             givenName: '',
             status: {
