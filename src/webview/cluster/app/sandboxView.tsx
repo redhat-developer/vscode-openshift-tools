@@ -7,9 +7,10 @@ import { Button, CircularProgress, TextField } from '@material-ui/core';
 import { styled } from '@mui/material/styles';
 import LoadingButton from '@mui/lab/LoadingButton';
 import * as React from 'react';
-import SendIcon from '@mui/icons-material/Send';
 import { red } from '@mui/material/colors';
 import Tooltip from '@mui/material/Tooltip';
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/style.css'
 // import * as ClusterViewStyles from './clusterView.style';
 
 export default function addSandboxView(props): JSX.Element {
@@ -146,31 +147,39 @@ export default function addSandboxView(props): JSX.Element {
     };
 
     const RequestVerificationCode = () => {
+
         const [phoneNumber, setPhoneNumber] = React.useState('');
         const [countryCode, setCountryCode] = React.useState('');
 
-        const handlePhoneNumber = (event) => {
-            setPhoneNumber(event.target.value);
-        }
-
-        const handleCountryCode = (event) => {
-            setCountryCode(event.target.value);
+        const handlePhoneNumber = (value, country) => {
+            setPhoneNumber(value);
+            setCountryCode(country.dialCode);
         }
 
         const [inProgress, setInProgress] = React.useState(false)
 
         const handleRequestVerificationCode = () => {
+            const rawPhoneNumber = phoneNumber.slice(countryCode.length);
+            const fullCountryCode = '+' + countryCode;
             setInProgress(true);
-            postMessage('sandboxRequestVerificationCode', { phoneNumber, countryCode });
+            postMessage('sandboxRequestVerificationCode', { rawPhoneNumber, fullCountryCode });
         }
 
         return (
             <>
                 {( currentState.action === 'sandboxPageRequestVerificationCode' ) && (
-                    <div>
-                            <TextField id='countryCode' disabled={inProgress} onChange={handleCountryCode} label='Country code trial' variant='outlined' />
-                            <TextField id='phoneNumber' disabled={inProgress} onChange={handlePhoneNumber} label='Phone number' variant='outlined' />
-                            <LoadingButton disabled={inProgress} loadingPosition='start' loading={inProgress} variant='contained' onClick={handleRequestVerificationCode}>Send Verification Code</LoadingButton>
+                    <div style = {{ margin: '20px', textAlign: 'left', left: '40%', position: 'relative' }}>
+                        <PhoneInput
+                        country={"us"}
+                        value={phoneNumber}
+                        onChange={handlePhoneNumber}
+                        />
+                        <LoadingButton
+                            style = {{ margin: '20px' }}
+                            size="medium"
+                            disabled={inProgress}
+                            variant='contained'
+                            onClick={handleRequestVerificationCode}>Send Verification Code { inProgress && <CircularProgress style= {{  marginLeft: '10px' }} size={20}/>}</LoadingButton>
                     </div>
                 )}
             </>
@@ -201,23 +210,25 @@ export default function addSandboxView(props): JSX.Element {
         return (
             <>
                 {( currentState.action === 'sandboxPageEnterVerificationCode' ) && (
-                    <div>
+                    <div style={{ margin: '20px' }}>
                         <TextField id='code'
+                            style = {{ marginRight: '10px' }}
                             disabled={inProgress}
                             onChange={handleVerifyCode}
                             label='Verification Code'
                             variant='outlined'
+                            size="small"
                         />
                         <LoadingButton
+                            style = {{ marginRight: '10px' }}
                             disabled={inProgress}
                             loadingPosition='start'
-                            startIcon={<SendIcon/>}
                             loading={inProgress}
                             variant='contained'
                             onClick={handleCheckVerificationCode}>
                                 Verify
                             </LoadingButton>
-                            <LoadingButton variant='contained' onClick={ handlRequesteNewCodeRequest }>Request New Code</LoadingButton>
+                            <LoadingButton variant='outlined' onClick={ handlRequesteNewCodeRequest }>Request New Code</LoadingButton>
                     </div>
                 )}
             </>
@@ -264,7 +275,8 @@ export default function addSandboxView(props): JSX.Element {
                 {( currentState.action === 'sandboxPageProvisioned' ) && (
                     <div>
                         <p>Your sandbox account has been provisioned and is ready to use.</p>
-                        <Button variant='contained'>Open Developer Console</Button><Button variant='contained'>Login with token from clipboard</Button>
+                        <Button style = {{ margin: '20px' }} variant='contained'>Launch your Sandbox console in Browser</Button>
+                        <ColorButton variant='contained'>Login to Developer Sandbox in OpenShift Application View</ColorButton>
                     </div>
                 )}
             </>
