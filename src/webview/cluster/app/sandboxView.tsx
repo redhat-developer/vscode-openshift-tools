@@ -2,19 +2,25 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-
+import * as React from 'react';
 import { Button, CircularProgress, TextField } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import LoadingButton from '@mui/lab/LoadingButton';
-import * as React from 'react';
 import { red } from '@mui/material/colors';
 import Tooltip from '@mui/material/Tooltip';
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css'
-// import * as ClusterViewStyles from './clusterView.style';
+import * as ClusterViewStyles from './clusterView.style';
+
+const useStyles = makeStyles(ClusterViewStyles.useStyles);
 
 export default function addSandboxView(props): JSX.Element {
-
+    const classes = useStyles();
     const [currentState, setCurrentState] = React.useState(
         {action: 'detectAuthSession', errorCode: undefined});
 
@@ -58,7 +64,8 @@ export default function addSandboxView(props): JSX.Element {
             <>
                 {(currentState.action === 'detectAuthSession') && (
                     <div>
-                        <CircularProgress color="secondary" /> Detecting Authentication Session
+                        <CircularProgress color="secondary" size={20} style={{ marginRight: '20px' }}/>
+                        <Typography component="p">Detecting Authentication Session</Typography>
                     </div>
                 )}
             </>
@@ -91,7 +98,7 @@ export default function addSandboxView(props): JSX.Element {
                                     disabled={inProgress}
                                     variant='outlined'
                                     onClick={ handleLoginButton }>
-                                    Login { inProgress && <CircularProgress style= {{ marginLeft: 0, marginRight: '10px' }} size={20}/>}
+                                    Login { inProgress && <CircularProgress style= {{ marginLeft: '10px' }} size={20}/>}
                                 </LoadingButton>
                             </Tooltip>
                         </div>
@@ -113,7 +120,10 @@ export default function addSandboxView(props): JSX.Element {
             <>
                 {( currentState.action === 'sandboxPageDetectStatus' ) && (
                     <div>
-                        <CircularProgress color="secondary" /> Detecting Developer Sandbox instance status
+                        <CircularProgress color="secondary" size={20} style={{ marginRight: '20px' }}/>
+                        <Typography component="p">
+                            Detecting Developer Sandbox instance status
+                        </Typography>
                     </div>
                 )}
             </>
@@ -245,7 +255,8 @@ export default function addSandboxView(props): JSX.Element {
             <>
                 {( currentState.action === 'sandboxPageWaitingForApproval' ) && (
                     <div>
-                        <CircularProgress color="secondary" /> Waiting for Sandbox instance approval
+                        <CircularProgress color="secondary" size={20} style={{ marginRight: '20px' }}/>
+                        <Typography component="p">Waiting for Sandbox instance approval</Typography>
                     </div>
                 )}
             </>
@@ -262,7 +273,8 @@ export default function addSandboxView(props): JSX.Element {
             <>
                 {( currentState.action === 'sandboxPageWaitingForProvision' ) && (
                     <div>
-                        <CircularProgress color="secondary" /> Sandbox instance has been approved, waiting for provision to finish
+                        <CircularProgress color="secondary" size={20} style={{ marginRight: '20px' }}/>
+                        <Typography component="p">Sandbox instance has been approved, waiting for provision to finish</Typography>
                     </div>
                 )}
             </>
@@ -273,11 +285,21 @@ export default function addSandboxView(props): JSX.Element {
         return (
             <>
                 {( currentState.action === 'sandboxPageProvisioned' ) && (
-                    <div>
-                        <p>Your sandbox account has been provisioned and is ready to use.</p>
-                        <Button style = {{ margin: '20px' }} variant='contained'>Launch your Sandbox console in Browser</Button>
-                        <ColorButton variant='contained'>Login to Developer Sandbox in OpenShift Application View</ColorButton>
-                    </div>
+                    <Box sx={{ flexGrow: 1 }}>
+                        <AppBar position="static" style={{ background: 'var(--vscode-list-inactiveSelectionBackground)' }}>
+                            <Toolbar>
+                                <Typography variant="body1" component="p" sx={{ flexGrow: 1 }}>
+                                    Your sandbox account has been provisioned and is ready to use.
+                                </Typography>
+                                <Tooltip title="Launch your Sandbox console in Browser" placement="bottom">
+                                    <Button variant="contained" className={classes.button} style={{ marginBottom: '8px'}}>Open Dashboard</Button>
+                                </Tooltip>
+                                <Tooltip title="Connect in OpenShift Application View" placement="bottom">
+                                    <ColorButton>Login</ColorButton>
+                                </Tooltip>
+                            </Toolbar>
+                        </AppBar>
+                    </Box>
                 )}
             </>
         )

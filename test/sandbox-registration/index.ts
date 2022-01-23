@@ -2,6 +2,10 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------------------------------
+ *  Copyright (c) Red Hat, Inc. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE file in the project root for license information.
+ *-----------------------------------------------------------------------------------------------*/
 
 import express = require('express');
 
@@ -16,6 +20,7 @@ let signupStatus;
 app.route('/api/v1/signup')
     .get((req, res) => {
         if (signupStatus) {
+            // eslint-disable-next-line no-console
             console.log('Check signup status');
             res.json(signupStatus);
         } else {
@@ -23,6 +28,7 @@ app.route('/api/v1/signup')
         }
     })
     .put(function(req, res) {
+        // eslint-disable-next-line no-console
         console.log('Signing up for sandbox');
         // TODO: Fill up the URLs
         signupStatus = {
@@ -48,16 +54,23 @@ app.route('/api/v1/signup')
         res.sendStatus(200);
     });
     app.route('/api/v1/signup/verification/*').get(function(req, res) {
+        // eslint-disable-next-line no-console
         console.log('Verified return code');
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         signupStatus.status.verificationRequired = false;
         setTimeout(function() {
             // switch account from PendingApproval to status provisioning
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             signupStatus.status.reason = '';
+            // eslint-disable-next-line no-console
             console.log('Chsnge to provisioning state');
             setTimeout(function() {
                 // switch account to status provisioned
+                // eslint-disable-next-line no-console
                 console.log('Change to provisioned state');
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 signupStatus.status.reason = 'Provisioned';
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 signupStatus.status.ready = true;
             },10000);
         },10000);
@@ -69,6 +82,7 @@ app.route('/api/v1/signup')
 // Use regular expressions in routes
 // app.get(/bat/, function(req, res) {
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use(function(req, res, next) {
     res.status(404).send('Sorry, that route doesn\'t exist.');
 });
