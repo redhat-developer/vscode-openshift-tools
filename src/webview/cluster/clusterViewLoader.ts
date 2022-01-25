@@ -113,7 +113,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             }
             break;
         case 'sandboxRequestVerificationCode': {
-            const requestStatus = await sandboxAPI.requestVerificationCode((sessionCheck as any).idToken, event.payload.countryCode, event.payload.phoneNumber);
+            const requestStatus = await sandboxAPI.requestVerificationCode((sessionCheck as any).idToken, event.payload.fullCountryCode, event.payload.rawPhoneNumber);
             if (requestStatus) {
                 panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode'});
             }
