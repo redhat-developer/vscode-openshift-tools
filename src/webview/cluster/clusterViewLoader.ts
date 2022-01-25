@@ -56,12 +56,12 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 event.data.password
             );
             break;
-        case 'sandboxPageCheckAuthSession':
+        case 'sandboxCheckAuthSession':
             // init sandbox page
-            if (!sessionCheck ) {
-                panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
-            } else {
+            if (sessionCheck) {
                 panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+            } else {
+                panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
             }
             break;
         case 'sandboxRequestSignup':
@@ -72,11 +72,17 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 // something went wrong
             }
             break;
-        case 'sandboxPageLoginRequest':
+        case 'sandboxLoginRequest':
             // add timeout to avoid waiting forever
-            const session: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: true });
-            if (session) {
-                panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+            try {
+                const session: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: true });
+                if (session) {
+                    panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+                } else {
+                    panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
+                }
+            } catch (ex) {
+                panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
             }
         case 'sandboxDetectStatus':
             // how to handle errors and timeouts

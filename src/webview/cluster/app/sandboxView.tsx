@@ -24,7 +24,7 @@ const useStyles = makeStyles(ClusterViewStyles.useStyles);
 export default function addSandboxView(props): JSX.Element {
     const classes = useStyles();
     const [currentState, setCurrentState] = React.useState(
-        {action: 'detectAuthSession', statusInfo: '', consoleDashboard: '', errorCode: undefined});
+        {action: 'sandboxPageDetectAuthSession', statusInfo: '', consoleDashboard: '', errorCode: undefined});
 
     const messageListener = (event) => {
         if (event?.data?.action) {
@@ -37,7 +37,7 @@ export default function addSandboxView(props): JSX.Element {
             //     case 'sandboxPageWaitingForApproval':
             //     case 'sandboxPageWaitingForProvision':
             //     case 'sandboxPageProvisioned':
-                    setCurrentState(event.data);
+            setCurrentState(event.data);
             //         break;
             // }
         }
@@ -50,7 +50,7 @@ export default function addSandboxView(props): JSX.Element {
     }
 
     React.useEffect(() => {
-        postMessage('sandboxPageCheckAuthSession');
+        postMessage('sandboxCheckAuthSession');
     }, []);
 
     const ColorButton = styled(Button)(({ theme }) => ({
@@ -64,7 +64,7 @@ export default function addSandboxView(props): JSX.Element {
     const DetectAuthSession = () => {
         return (
             <>
-                {(currentState.action === 'detectAuthSession') && (
+                {(currentState.action === 'sandboxPageDetectAuthSession') && (
                     <div>
                         <CircularProgress color="secondary" size={20} style={{ marginRight: '20px' }}/>
                         <Typography component="p">Detecting Authentication Session</Typography>
@@ -80,7 +80,7 @@ export default function addSandboxView(props): JSX.Element {
 
         const handleLoginButton = () => {
             setInProgress(true);
-            postMessage('sandboxPageLoginRequest');
+            postMessage('sandboxLoginRequest');
         }
 
         return (
