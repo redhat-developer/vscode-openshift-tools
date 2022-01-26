@@ -20,6 +20,10 @@ const sandboxAPI = createSandboxAPI();
 async function clusterEditorMessageListener (event: any ): Promise<any> {
 
     const sessionCheck: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: false });
+    if(!sessionCheck && event.action !== 'sandboxLoginRequest') {
+        panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
+        return;
+    }
 
     switch (event.action) {
         case 'openLaunchSandboxPage':
@@ -57,23 +61,20 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             );
             break;
         case 'sandboxCheckAuthSession':
-            // init sandbox page
-            if (sessionCheck) {
-                panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
-            } else {
-                panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
-            }
+            panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
             break;
         case 'sandboxRequestSignup':
-            const signupResponse = await sandboxAPI.signUp((sessionCheck as any).idToken);
-            if (signupResponse) {
+            try {
+                const signupResponse = await sandboxAPI.signUp((sessionCheck as any).idToken);
                 panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
-            } else {
-                // something went wrong
+                if (!signupResponse) {
+                    vscode.window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
+                }
+            } catch(ex) {
+                vscode.window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
             }
             break;
         case 'sandboxLoginRequest':
-            // add timeout to avoid waiting forever
             try {
                 const session: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: true });
                 if (session) {
@@ -84,50 +85,72 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             } catch (ex) {
                 panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
             }
+            break;
         case 'sandboxDetectStatus':
             // how to handle errors and timeouts
-            const signupStatus = await sandboxAPI.getSignUpStatus((sessionCheck as any).idToken);
-            if (!signupStatus) {
-                // User does not signed up for sandbox, show sign up for sandbox page
-                panel.webview.postMessage({action: 'sandboxPageRequestSignup'});
-            } else {
-                if (signupStatus.status.ready) {
-                    panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL });
+            try {
+                const signupStatus = await sandboxAPI.getSignUpStatus((sessionCheck as any).idToken);
+                if (!signupStatus) {
+                    // User does not signed up for sandbox, show sign up for sandbox page
+                    panel.webview.postMessage({action: 'sandboxPageRequestSignup'});
                 } else {
-                    // cluster is not ready and the reason is
-                    if (signupStatus.status.verificationRequired) {
-                        panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                    if (signupStatus.status.ready) {
+                        panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL });
                     } else {
-                        // user phone number verified
-                        //
-                        if (signupStatus.status.reason === 'PendingApproval') {
-                            panel.webview.postMessage({action: 'sandboxPageWaitingForApproval'});
-                        } else if (signupStatus.status.reason === 'Provisioned') {
-                            panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL});
+                        // cluster is not ready and the reason is
+                        if (signupStatus.status.verificationRequired) {
+                            panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
                         } else {
-                            panel.webview.postMessage({action: 'sandboxPageWaitingForProvision'})
+                            // user phone number verified
+                            //
+                            if (signupStatus.status.reason === 'PendingApproval') {
+                                panel.webview.postMessage({action: 'sandboxPageWaitingForApproval'});
+                            } else if (signupStatus.status.reason === 'Provisioned') {
+                                panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL});
+                            } else {
+                                panel.webview.postMessage({action: 'sandboxPageWaitingForProvision'})
+                            }
                         }
                     }
                 }
-                console.log(signupStatus);
+            } catch(ex) {
+                vscode.window.showErrorMessage('OpenShift Sandbox status request failed, please try again.')
+                panel.webview.postMessage({action: 'sandboxPageDetectStatus', errorCode: 'statusDetectionError'});
             }
             break;
         case 'sandboxRequestVerificationCode': {
-            const requestStatus = await sandboxAPI.requestVerificationCode((sessionCheck as any).idToken, event.payload.fullCountryCode, event.payload.rawPhoneNumber);
-            if (requestStatus) {
-                panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode'});
-            }
-            break;
-        }
-        case 'sandboxValidateVerificationCode': {
-            const requestStatus = await sandboxAPI.validateVerificationCode((sessionCheck as any).idToken, event.payload.verificationCode);
-            if (requestStatus) {
-                panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
-            } else {
+            try {
+                const requestStatus = await sandboxAPI.requestVerificationCode((sessionCheck as any).idToken, event.payload.fullCountryCode, event.payload.rawPhoneNumber);
+                if (requestStatus) {
+                    panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode'});
+                } else {
+                    vscode.window.showErrorMessage('Request for verification code failed, please try again.');
+                    panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                }
+            } catch (ex) {
+                vscode.window.showErrorMessage('Request for verification code failed, please try again.');
                 panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
             }
             break;
         }
+        case 'sandboxValidateVerificationCode': {
+            try {
+                const requestStatus = await sandboxAPI.validateVerificationCode((sessionCheck as any).idToken, event.payload.verificationCode);
+                if (requestStatus) {
+                    panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+                } else {
+                    vscode.window.showErrorMessage('Verification code does not match, please try again.');
+                    panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                }
+            } catch(ex) {
+                vscode.window.showErrorMessage('Verification code validation request failed, please try again.');
+                panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+            }
+            break;
+        }
+        case 'sandboxLoginUsingDataInClipboard':
+            vscode.commands.executeCommand('openshift.explorer.login.clipboard');
+            break;
     }
 }
 

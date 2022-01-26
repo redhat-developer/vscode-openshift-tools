@@ -23,8 +23,12 @@ const useStyles = makeStyles(ClusterViewStyles.useStyles);
 
 export default function addSandboxView(props): JSX.Element {
     const classes = useStyles();
-    const [currentState, setCurrentState] = React.useState(
-        {action: 'sandboxPageDetectAuthSession', statusInfo: '', consoleDashboard: '', errorCode: undefined});
+    const [currentState, setCurrentState] = React.useState({
+        action: 'sandboxPageDetectAuthSession',
+        statusInfo: '',
+        consoleDashboard: '',
+        errorCode: undefined
+    });
 
     const messageListener = (event) => {
         if (event?.data?.action) {
@@ -122,19 +126,41 @@ export default function addSandboxView(props): JSX.Element {
     const DetectStatus = () => {
 
         React.useEffect(() => {
-            if (currentState.action === 'sandboxPageDetectStatus') {
+            if (currentState.action === 'sandboxPageDetectStatus' && currentState.errorCode === undefined) {
                 postMessage('sandboxDetectStatus');
             }
         }, []);
+
+        const handleTryAgainButton = () => {
+            setCurrentState({
+                action: currentState.action,
+                consoleDashboard: currentState.consoleDashboard,
+                statusInfo: currentState.statusInfo,
+                errorCode: undefined
+            });
+            postMessage('sandboxDetectStatus');
+        }
 
         return (
             <>
                 {( currentState.action === 'sandboxPageDetectStatus' ) && (
                     <div>
-                        <CircularProgress color="secondary" size={20} style={{ marginRight: '20px' }}/>
-                        <Typography component="p">
-                            Detecting Developer Sandbox instance status
-                        </Typography>
+                        {(currentState.errorCode === undefined) && (
+                            <>
+                                <CircularProgress color="secondary" size={20} style={{ marginRight: '20px' }}/>
+                                <Typography component="p">
+                                    Detecting Developer Sandbox instance status
+                                </Typography>
+                            </>
+                        )}
+                        {(currentState.errorCode) && (
+                            <>
+                                <Typography component="p">
+                                    Could not detect Developer Sandbox instance status 
+                                </Typography>
+                                <Button style= {{ margin: '20px' }} className={classes.button} variant='outlined' onClick={handleTryAgainButton}>Try Again</Button>
+                            </>
+                        )}
                     </div>
                 )}
             </>
@@ -154,13 +180,12 @@ export default function addSandboxView(props): JSX.Element {
                 {( currentState.action === 'sandboxPageRequestSignup' ) && (
                     <div>
                         You have not signed up for Developer Sandbox for Red Hat OpenShift. Provision your free Red Hat OpenShift development cluster and get started.<br/>
-                        <LoadingButton
+                        <Button
                             style= {{ margin: '20px' }}
+                            className={classes.button}
                             disabled={inProgress}
-                            loadingPosition='start'
-                            loading={inProgress}
                             variant='outlined'
-                            onClick={handleSignupButton}>Get started in the Sandbox</LoadingButton>
+                            onClick={handleSignupButton}>Get started in the Sandbox{ inProgress && <CircularProgress style= {{  marginLeft: '10px' }} size={20}/>}</Button>
                     </div>
                 )}
             </>
@@ -195,12 +220,13 @@ export default function addSandboxView(props): JSX.Element {
                         value={phoneNumber}
                         onChange={handlePhoneNumber}
                         />
-                        <LoadingButton
+                        <Button
                             style = {{ margin: '20px' }}
+                            className={classes.button}
                             size="medium"
                             disabled={inProgress}
                             variant='contained'
-                            onClick={handleRequestVerificationCode}>Send Verification Code { inProgress && <CircularProgress style= {{  marginLeft: '10px' }} size={20}/>}</LoadingButton>
+                            onClick={handleRequestVerificationCode}>Send Verification Code { inProgress && <CircularProgress style= {{  marginLeft: '10px' }} size={20}/>}</Button>
                     </div>
                 )}
             </>
@@ -242,16 +268,16 @@ export default function addSandboxView(props): JSX.Element {
                             variant='outlined'
                             size="small"
                         />
-                        <LoadingButton
+                        <Button
                             style = {{ marginRight: '10px' }}
+                            className={classes.button}
+                            size="medium"
                             disabled={inProgress}
-                            loadingPosition='start'
-                            loading={inProgress}
                             variant='contained'
                             onClick={handleCheckVerificationCode}>
-                                Verify
-                            </LoadingButton>
-                            <LoadingButton variant='outlined' onClick={ handlRequesteNewCodeRequest }>Request New Code</LoadingButton>
+                                Verify { inProgress && <CircularProgress style= {{  marginLeft: '10px' }} size={20}/>}
+                        </Button>
+                        <Button className={classes.button} size="medium" variant='outlined' onClick={ handlRequesteNewCodeRequest }>Request New Code</Button>
                     </div>
                 )}
             </>
@@ -295,6 +321,10 @@ export default function addSandboxView(props): JSX.Element {
     }
 
     const Provisioned = () => {
+
+        const handleLoginButton = () => {
+            postMessage('sandboxLoginUsingDataInClipboard');
+        };
         return (
             <>
                 {( currentState.action === 'sandboxPageProvisioned' ) && (
@@ -321,7 +351,7 @@ export default function addSandboxView(props): JSX.Element {
                                     </a>
                                 </Tooltip>
                                 <Tooltip title="Connect in OpenShift Application View" placement="bottom">
-                                    <ColorButton>Login</ColorButton>
+                                    <ColorButton onClick={handleLoginButton}>Login</ColorButton>
                                 </Tooltip>
                             </Toolbar>
                         </AppBar>

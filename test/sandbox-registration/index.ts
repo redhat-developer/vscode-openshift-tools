@@ -16,18 +16,26 @@ app.get('/', function (req, res) {
 });
 
 let signupStatus;
+let signupStatusTimeoutError = false;
+let verificationCodeRequestTimeoutError = false;
+let validateVerificationCodeRequestTimeoutError = false;
 
 app.route('/api/v1/signup')
     .get((req, res) => {
         if (signupStatus) {
             // eslint-disable-next-line no-console
             console.log('Check signup status');
-            res.json(signupStatus);
+            if (signupStatusTimeoutError) {
+                setTimeout(() => res.send(signupStatus), 5000)
+            } else {
+                signupStatusTimeoutError = true;
+                setTimeout(() => res.send(signupStatus), 20000)
+            }
         } else {
             res.sendStatus(404);
         }
     })
-    .put(function(req, res) {
+    .post(function(req, res) {
         // eslint-disable-next-line no-console
         console.log('Signing up for sandbox');
         // TODO: Fill up the URLs
@@ -51,9 +59,21 @@ app.route('/api/v1/signup')
         res.sendStatus(200);
     });
     app.route('/api/v1/signup/verification').put(function(req, res) {
-        res.sendStatus(200);
+        if (verificationCodeRequestTimeoutError) {
+            setTimeout(()=>res.sendStatus(200), 5000);
+        } else {
+            verificationCodeRequestTimeoutError = true;
+            setTimeout(()=>res.sendStatus(200),120000);
+        }
     });
     app.route('/api/v1/signup/verification/*').get(function(req, res) {
+        // eslint-disable-next-line no-console
+        if(!validateVerificationCodeRequestTimeoutError) {
+            validateVerificationCodeRequestTimeoutError = true;
+            // will fail because of timeout
+            setTimeout(()=>res.sendStatus(200),120000);
+            return;
+        }
         // eslint-disable-next-line no-console
         console.log('Verified return code');
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
