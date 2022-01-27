@@ -448,7 +448,7 @@ export class Command {
 
     static testComponent(): CommandText {
         return new CommandText('odo test --show-log');
-    };
+    }
 
     @verbose
     static createService(

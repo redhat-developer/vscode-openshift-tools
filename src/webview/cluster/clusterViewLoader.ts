@@ -10,33 +10,21 @@ import { ExtenisonID } from '../../util/constants';
 import { WindowUtil } from '../../util/windowUtils';
 import { CliChannel } from '../../cli';
 import { vsCommand } from '../../vscommand';
+import { createSandboxAPI } from '../../openshift/sandbox';
 
 let panel: vscode.WebviewPanel;
 
 const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
+const sandboxAPI = createSandboxAPI();
 
-/*
-interface ViewEvent {
-    action: string;
-}
-
-
-interface OpenPageEvent extends ViewEvent {
-    params: {
-        url: string;
-    }
-}
-
-interface CrcStartEvent extends ViewEvent {
-    data: string;
-    pullSecret: string;
-    crcLoc: string;
-    cpuSize: number;
-    memory: number;
-    isSetting: boolean;
-}
-*/
 async function clusterEditorMessageListener (event: any ): Promise<any> {
+
+    const sessionCheck: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: false });
+    if(!sessionCheck && event.action !== 'sandboxLoginRequest') {
+        panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
+        return;
+    }
+
     switch (event.action) {
         case 'openLaunchSandboxPage':
         case 'openCreateClusterPage':
@@ -72,6 +60,97 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 event.data.password
             );
             break;
+        case 'sandboxCheckAuthSession':
+            panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+            break;
+        case 'sandboxRequestSignup':
+            try {
+                const signupResponse = await sandboxAPI.signUp((sessionCheck as any).idToken);
+                panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+                if (!signupResponse) {
+                    vscode.window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
+                }
+            } catch(ex) {
+                vscode.window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
+            }
+            break;
+        case 'sandboxLoginRequest':
+            try {
+                const session: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: true });
+                if (session) {
+                    panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+                } else {
+                    panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
+                }
+            } catch (ex) {
+                panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
+            }
+            break;
+        case 'sandboxDetectStatus':
+            // how to handle errors and timeouts
+            try {
+                const signupStatus = await sandboxAPI.getSignUpStatus((sessionCheck as any).idToken);
+                if (!signupStatus) {
+                    // User does not signed up for sandbox, show sign up for sandbox page
+                    panel.webview.postMessage({action: 'sandboxPageRequestSignup'});
+                } else {
+                    if (signupStatus.status.ready) {
+                        panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL });
+                    } else {
+                        // cluster is not ready and the reason is
+                        if (signupStatus.status.verificationRequired) {
+                            panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                        } else {
+                            // user phone number verified
+                            //
+                            if (signupStatus.status.reason === 'PendingApproval') {
+                                panel.webview.postMessage({action: 'sandboxPageWaitingForApproval'});
+                            } else if (signupStatus.status.reason === 'Provisioned') {
+                                panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL});
+                            } else {
+                                panel.webview.postMessage({action: 'sandboxPageWaitingForProvision'})
+                            }
+                        }
+                    }
+                }
+            } catch(ex) {
+                vscode.window.showErrorMessage('OpenShift Sandbox status request failed, please try again.')
+                panel.webview.postMessage({action: 'sandboxPageDetectStatus', errorCode: 'statusDetectionError'});
+            }
+            break;
+        case 'sandboxRequestVerificationCode': {
+            try {
+                const requestStatus = await sandboxAPI.requestVerificationCode((sessionCheck as any).idToken, event.payload.fullCountryCode, event.payload.rawPhoneNumber);
+                if (requestStatus) {
+                    panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode'});
+                } else {
+                    vscode.window.showErrorMessage('Request for verification code failed, please try again.');
+                    panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                }
+            } catch (ex) {
+                vscode.window.showErrorMessage('Request for verification code failed, please try again.');
+                panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+            }
+            break;
+        }
+        case 'sandboxValidateVerificationCode': {
+            try {
+                const requestStatus = await sandboxAPI.validateVerificationCode((sessionCheck as any).idToken, event.payload.verificationCode);
+                if (requestStatus) {
+                    panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+                } else {
+                    vscode.window.showErrorMessage('Verification code does not match, please try again.');
+                    panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                }
+            } catch(ex) {
+                vscode.window.showErrorMessage('Verification code validation request failed, please try again.');
+                panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+            }
+            break;
+        }
+        case 'sandboxLoginUsingDataInClipboard':
+            vscode.commands.executeCommand('openshift.explorer.login.clipboard');
+            break;
     }
 }
 
@@ -102,7 +181,7 @@ export default class ClusterViewLoader {
         terminal.sendText(`"${event.data.tool}" setup`);
         terminal.show();
     }
-    
+
     @vsCommand('openshift.explorer.addCluster.crcStart')
     static async crcStart(event: any) {
         let startProcess: ChildProcess;
