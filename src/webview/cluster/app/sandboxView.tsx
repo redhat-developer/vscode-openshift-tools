@@ -331,7 +331,7 @@ export default function addSandboxView(props): JSX.Element {
                     <Box sx={{ flexGrow: 1 }}>
                         <AppBar position="static" style={{ background: 'var(--vscode-list-inactiveSelectionBackground)' }}>
                             <Toolbar>
-                                <Typography variant="body1" component="p" sx={{ flexGrow: 1, marginLeft: 10, marginTop: 10, color: 'var(--vscode-foreground)' }}>
+                                <Typography variant="body1" component="p" style={{ flexGrow: 1, color: 'var(--vscode-foreground)', padding: 20, margin: 0 }}>
                                     <Tooltip title={currentState.statusInfo}>
                                             <IconButton
                                                 size="large"
