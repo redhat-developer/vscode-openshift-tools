@@ -295,7 +295,7 @@ export class Command {
         );
     }
 
-    static deleteComponent(project: string, app: string, component: string, context: boolean, s2i = false): CommandText {
+    static deleteComponent(project: string, app: string, component: string, context: boolean): CommandText {
         const ct = new CommandText('odo delete',
             context ? undefined : component, [ // if there is not context name is required
                 new CommandOption('-f'),
@@ -306,9 +306,6 @@ export class Command {
                 .addOption(new CommandOption('--project',project))
         } else {
             ct.addOption(new CommandOption('--all'));
-        }
-        if (s2i) {
-            ct.addOption(new CommandOption('--s2i'));
         }
         return ct;
     }
@@ -437,7 +434,7 @@ export class Command {
         if (registryName) {
             cTxt.addOption(new CommandOption('--registry', registryName));
         }
-        cTxt.addOption(new CommandOption('--context', folder))
+        cTxt.addOption(new CommandOption('--context', `"${folder}"`))
             .addOption(new CommandOption('--app', app))
             .addOption(new CommandOption('--project', project));
         if (starter) {
@@ -449,50 +446,9 @@ export class Command {
         return cTxt;
     }
 
-    @verbose
-    static createGitComponent(
-        project: string,
-        app: string,
-        type: string,
-        version: string,
-        name: string,
-        git: string,
-        ref: string,
-    ): CommandText {
-        const cTxt = new CommandText('odo create', `${type}${version?':':''}${version?version:''} ${name}`);
-        if (version) {
-            cTxt.addOption(new CommandOption('--s2i'));
-        }
-        return cTxt.addOption(new CommandOption('--git', git))
-            .addOption(new CommandOption('--ref', ref))
-            .addOption(new CommandOption('--app', app))
-            .addOption(new CommandOption('--project', project));
-    }
-
-    @verbose
-    static createBinaryComponent(
-        project: string,
-        app: string,
-        type: string,
-        version: string,
-        name: string,
-        binary: string,
-        context: string,
-    ): CommandText {
-        const cTxt = new CommandText('odo create', `${type}:${version} ${name}`);
-        if (version) {
-            cTxt.addOption(new CommandOption('--s2i'));
-        }
-        cTxt.addOption(new CommandOption('--binary', binary))
-            .addOption(new CommandOption('--app', app))
-            .addOption(new CommandOption('--project', project))
-            .addOption(new CommandOption('--context',context));
-        return cTxt;
-    }
-
     static testComponent(): CommandText {
         return new CommandText('odo test --show-log');
-    };
+    }
 
     @verbose
     static createService(

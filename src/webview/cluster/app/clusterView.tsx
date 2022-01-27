@@ -47,8 +47,8 @@ const crcDefaults = {
 	DefaultMemory: 9216,
 	DefaultWebConsoleURL: 'https://console-openshift-console.apps-crc.testing',
 	DefaultAPIURL: 'https://api.crc.testing:6443',
-	CrcLandingPageURL: 'https://cloud.redhat.com/openshift/install/crc/installer-provisioned',
-	DefaultCrcUrlBase: 'http://mirror.openshift.com/pub/openshift-v4/clients/crc'
+	CrcLandingPageURL: 'https://console.redhat.com/openshift/create/local',
+	DefaultCrcUrlBase: 'https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/crc'
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -59,8 +59,8 @@ function getSteps() {
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function addClusterView(props) {
   const classes = useStyles();
-  const crcLatest = '1.23.1';
-  const crcOpenShift = '4.7.0';
+  const crcLatest = '1.34.0';
+  const crcOpenShift = '4.9.0';
   const [fileName, setBinaryPath] = React.useState('');
   const [pullSecretPath, setSecret] = React.useState('');
   const [cpuSize, setCpuSize] = React.useState(crcDefaults.DefaultCPUs);
@@ -78,7 +78,9 @@ export default function addClusterView(props) {
   const [statusError, setStatusError] = React.useState(false);
 
   React.useEffect(() => {
-    props.vscode.postMessage({action: 'checksetting'});
+    props.vscode.postMessage({
+      action: 'checksetting'
+    });
   }, []);
 
   const steps = getSteps();
@@ -148,7 +150,7 @@ export default function addClusterView(props) {
   }
 
   const handleUploadPullSecret = (event) => {
-    setSecret(event.target.files[0].path);
+    setSecret(event.target.files[0].path || event.target.files[0].name);
   }
 
   const handleCpuSize = (event) => {
@@ -168,14 +170,18 @@ export default function addClusterView(props) {
     setProgress(true);
     setCrcStartError(false);
     if (settingPresent) {
-      props.vscode.postMessage({action: 'crcStart', isSetting: true });
+      props.vscode.postMessage({
+        action: 'crcStart', isSetting: true
+      });
     } else {
-      const crcStartCommand = (crcNameserver === '') ? `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory} -ojson`:
-          `${fileName} start -p ${pullSecretPath} -c ${cpuSize} -m ${memory} -n ${crcNameserver} -ojson`;
+      const nameServerOpt = crcNameserver ? `-n ${crcNameserver}` : '';
 
       props.vscode.postMessage({
         action: 'crcStart',
-        data: crcStartCommand,
+        data: {
+          tool: fileName,
+          options: `start -p "${pullSecretPath}" -c ${cpuSize} -m ${memory} ${nameServerOpt} -o json`
+        },
         pullSecret: pullSecretPath,
         crcLoc: fileName,
         cpuSize,
@@ -212,30 +218,51 @@ export default function addClusterView(props) {
   };
 
   const handleDisabled = () => {
-    if (activeStep === 1 && fileName === '') return true;
-    if (activeStep === 2 && pullSecretPath === '') return true;
+    return (activeStep === 1 && fileName === '') 
+        || (activeStep === 2 && pullSecretPath === '');
   };
 
   const handleStopProcess = () => {
     setStopProgress(true);
     setCrcStopError(false);
-    props.vscode.postMessage({action: 'crcStop', data: `${fileName}`});
+    props.vscode.postMessage({
+        action: 'crcStop', 
+        data: {
+            tool: fileName
+        }
+    });
   }
 
   const handleCrcSetup = () => {
-    props.vscode.postMessage({action: 'crcSetup', data: `${fileName}` })
+    props.vscode.postMessage({
+      action: 'crcSetup',
+      data: {
+        tool: fileName
+      }
+    })
   }
 
   const handleCrcLogin = (loginDetails, clusterUrl) => {
-    props.vscode.postMessage({action: 'crcLogin', data: loginDetails, url: clusterUrl })
+    props.vscode.postMessage({
+      action: 'crcLogin',
+      data: loginDetails,
+      url: clusterUrl
+    })
   }
 
   const handleRefresh = () => {
     setStatusSkeleton(true);
     if (settingPresent) {
-      props.vscode.postMessage({action: 'checksetting'});
+      props.vscode.postMessage({
+        action: 'checksetting'
+      });
     } else {
-      props.vscode.postMessage({action: 'checkcrcstatus', data: `${fileName}`});
+      props.vscode.postMessage({
+        action: 'checkcrcstatus',
+        data: {
+          tool: fileName
+        }
+      });
     }
   }
 
@@ -269,8 +296,8 @@ export default function addClusterView(props) {
   const fetchDownloadBinary = () => {
     const platform = (window as any).platform;
     let crcBundle = '';
-    if (platform === 'darwin') crcBundle = 'crc-macos-amd64.tar.xz';
-    if (platform === 'win32') crcBundle = 'crc-windows-amd64.zip';
+    if (platform === 'darwin') crcBundle = 'crc-macos-amd64.pkg';
+    if (platform === 'win32') crcBundle = 'crc-windows-installer.zip';
     if (platform === 'linux') crcBundle = 'crc-linux-amd64.tar.xz';
     return `${crcDefaults.DefaultCrcUrlBase}/${crcLatest}/${crcBundle}`;
   }
@@ -522,7 +549,7 @@ export default function addClusterView(props) {
                 />
                 <label htmlFor="contained-button-file">
                   <Tooltip title="This is a required field" placement="left">
-                    <Button className={classes.button} component="span">
+                    <Button variant="contained" className={classes.button} component="span">
                       Select Pull Secret file
                     </Button>
                   </Tooltip>
@@ -597,7 +624,7 @@ export default function addClusterView(props) {
         case 4:
           return (
             <Typography>
-              Start the cluster. This will create a minimal OpenShift {crcOpenShift} cluster on your laptop or desktop computer.
+              Start the cluster. This will create a minimal OpenShift {crcOpenShift} cluster to your local computer.
             </Typography>)
         default:
           return 'Unknown step';

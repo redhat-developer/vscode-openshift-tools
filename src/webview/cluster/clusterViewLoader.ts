@@ -10,33 +10,21 @@ import { ExtenisonID } from '../../util/constants';
 import { WindowUtil } from '../../util/windowUtils';
 import { CliChannel } from '../../cli';
 import { vsCommand } from '../../vscommand';
+import { createSandboxAPI } from '../../openshift/sandbox';
 
 let panel: vscode.WebviewPanel;
 
 const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
+const sandboxAPI = createSandboxAPI();
 
-/*
-interface ViewEvent {
-    action: string;
-}
-
-
-interface OpenPageEvent extends ViewEvent {
-    params: {
-        url: string;
-    }
-}
-
-interface CrcStartEvent extends ViewEvent {
-    data: string;
-    pullSecret: string;
-    crcLoc: string;
-    cpuSize: number;
-    memory: number;
-    isSetting: boolean;
-}
-*/
 async function clusterEditorMessageListener (event: any ): Promise<any> {
+
+    const sessionCheck: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: false });
+    if(!sessionCheck && event.action !== 'sandboxLoginRequest') {
+        panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
+        return;
+    }
+
     switch (event.action) {
         case 'openLaunchSandboxPage':
         case 'openCreateClusterPage':
@@ -72,6 +60,97 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 event.data.password
             );
             break;
+        case 'sandboxCheckAuthSession':
+            panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+            break;
+        case 'sandboxRequestSignup':
+            try {
+                const signupResponse = await sandboxAPI.signUp((sessionCheck as any).idToken);
+                panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+                if (!signupResponse) {
+                    vscode.window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
+                }
+            } catch(ex) {
+                vscode.window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
+            }
+            break;
+        case 'sandboxLoginRequest':
+            try {
+                const session: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: true });
+                if (session) {
+                    panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+                } else {
+                    panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
+                }
+            } catch (ex) {
+                panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
+            }
+            break;
+        case 'sandboxDetectStatus':
+            // how to handle errors and timeouts
+            try {
+                const signupStatus = await sandboxAPI.getSignUpStatus((sessionCheck as any).idToken);
+                if (!signupStatus) {
+                    // User does not signed up for sandbox, show sign up for sandbox page
+                    panel.webview.postMessage({action: 'sandboxPageRequestSignup'});
+                } else {
+                    if (signupStatus.status.ready) {
+                        panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL });
+                    } else {
+                        // cluster is not ready and the reason is
+                        if (signupStatus.status.verificationRequired) {
+                            panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                        } else {
+                            // user phone number verified
+                            //
+                            if (signupStatus.status.reason === 'PendingApproval') {
+                                panel.webview.postMessage({action: 'sandboxPageWaitingForApproval'});
+                            } else if (signupStatus.status.reason === 'Provisioned') {
+                                panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL});
+                            } else {
+                                panel.webview.postMessage({action: 'sandboxPageWaitingForProvision'})
+                            }
+                        }
+                    }
+                }
+            } catch(ex) {
+                vscode.window.showErrorMessage('OpenShift Sandbox status request failed, please try again.')
+                panel.webview.postMessage({action: 'sandboxPageDetectStatus', errorCode: 'statusDetectionError'});
+            }
+            break;
+        case 'sandboxRequestVerificationCode': {
+            try {
+                const requestStatus = await sandboxAPI.requestVerificationCode((sessionCheck as any).idToken, event.payload.fullCountryCode, event.payload.rawPhoneNumber);
+                if (requestStatus) {
+                    panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode'});
+                } else {
+                    vscode.window.showErrorMessage('Request for verification code failed, please try again.');
+                    panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                }
+            } catch (ex) {
+                vscode.window.showErrorMessage('Request for verification code failed, please try again.');
+                panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+            }
+            break;
+        }
+        case 'sandboxValidateVerificationCode': {
+            try {
+                const requestStatus = await sandboxAPI.validateVerificationCode((sessionCheck as any).idToken, event.payload.verificationCode);
+                if (requestStatus) {
+                    panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+                } else {
+                    vscode.window.showErrorMessage('Verification code does not match, please try again.');
+                    panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                }
+            } catch(ex) {
+                vscode.window.showErrorMessage('Verification code validation request failed, please try again.');
+                panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+            }
+            break;
+        }
+        case 'sandboxLoginUsingDataInClipboard':
+            vscode.commands.executeCommand('openshift.explorer.login.clipboard');
+            break;
     }
 }
 
@@ -99,10 +178,10 @@ export default class ClusterViewLoader {
     @vsCommand('openshift.explorer.addCluster.crcSetup')
     static async crcSetup(event: any) {
         const terminal: vscode.Terminal = WindowUtil.createTerminal('OpenShift: CRC Setup', undefined);
-        terminal.sendText(`${event.data} setup`);
+        terminal.sendText(`"${event.data.tool}" setup`);
         terminal.show();
     }
-    
+
     @vsCommand('openshift.explorer.addCluster.crcStart')
     static async crcStart(event: any) {
         let startProcess: ChildProcess;
@@ -112,13 +191,15 @@ export default class ClusterViewLoader {
             const pullSecretFromSetting = vscode.workspace.getConfiguration('openshiftConnector').get('crcPullSecretPath');
             const cpuFromSetting = vscode.workspace.getConfiguration('openshiftConnector').get('crcCpuCores');
             const memoryFromSetting = vscode.workspace.getConfiguration('openshiftConnector').get('crcMemoryAllocated');
-            const crcOptions = ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`, '-ojson'];
+            const nameserver = vscode.workspace.getConfiguration('openshiftConnector').get<string>('crcNameserver');
+            const nameserverOption = nameserver ? ['-n', nameserver] : [];
+            const crcOptions = ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`, ...nameserverOption,  '-o', 'json'];
+
             startProcess = spawn(`${binaryFromSetting}`, crcOptions);
-            channel.append(`\n\n${binaryFromSetting} ${crcOptions.join(' ')}\n`);
+            channel.append(`\n\n"${binaryFromSetting}" ${crcOptions.join(' ')}\n`);
         } else {
-            const [tool, ...params] = event.data.split(' ');
-            startProcess = spawn(tool, params);
-            channel.append(`\n\n${tool} ${params.join(' ')}\n`);
+            startProcess = spawn(`${event.data.tool}`, event.data.options.split(' '));
+            channel.append(`\n\n"${event.data.tool}" ${event.data.options}\n`);
         }
         startProcess.stdout.setEncoding('utf8');
         startProcess.stderr.setEncoding('utf8');
@@ -129,13 +210,18 @@ export default class ClusterViewLoader {
             channel.append(chunk);
         });
         startProcess.on('close', (code) => {
-            // eslint-disable-next-line no-console
-            console.log(`crc start exited with code ${code}`);
+            const message = `'crc start' exited with code ${code}`;
+            channel.append(message);
             if (code !== 0) {
-                panel.webview.postMessage({action: 'sendcrcstarterror'})
+                vscode.window.showErrorMessage(message);
             }
             const binaryLoc = event.isSetting ? vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation'): event.crcLoc;
             ClusterViewLoader.checkCrcStatus(binaryLoc, 'crcstartstatus', panel);
+        });
+        startProcess.on('error', (err) => {
+            const message = `'crc start' execution failed with error: '${err.message}'`;
+            channel.append(message);
+            vscode.window.showErrorMessage(message);
         });
     }
 
@@ -143,13 +229,13 @@ export default class ClusterViewLoader {
     static async crcStop(event) {
         let filePath: string;
         channel.show();
-        if (event.data === '') {
+        if (event.data.tool === '') {
             filePath = vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
         } else {
-            filePath = event.data;
+            filePath = event.data.tool;
         }
         const stopProcess = spawn(`${filePath}`, ['stop']);
-        channel.append(`\n\n$${filePath} stop\n`);
+        channel.append(`\n\n"${filePath}" stop\n`);
         stopProcess.stdout.setEncoding('utf8');
         stopProcess.stderr.setEncoding('utf8');
         stopProcess.stdout.on('data', (chunk) => {
@@ -159,9 +245,17 @@ export default class ClusterViewLoader {
             channel.append(chunk);
         });
         stopProcess.on('close', (code) => {
-            // eslint-disable-next-line no-console
-            console.log(`crc stop exited with code ${code}`);
+            const message = `'crc stop' exited with code ${code}`;
+            channel.append(message);
+            if (code !== 0) {
+                vscode.window.showErrorMessage(message);
+            }
             ClusterViewLoader.checkCrcStatus(filePath, 'crcstopstatus', panel);
+        });
+        stopProcess.on('error', (err) => {
+            const message = `'crc stop' execution filed with error: '${err.message}'`;
+            channel.append(message);
+            vscode.window.showErrorMessage(message);
         });
     }
 
@@ -199,11 +293,11 @@ export default class ClusterViewLoader {
 
     public static async checkCrcStatus(filePath: string, postCommand: string, p: vscode.WebviewPanel | undefined = undefined) {
         const crcCredArray = [];
-        const crcVerInfo = await CliChannel.getInstance().execute(`${filePath} version -ojson`);
-        channel.append(`\n\n${filePath} version -ojson\n`);
+        const crcVerInfo = await CliChannel.getInstance().execute(`"${filePath}" version -o json`);
+        channel.append(`\n\n"${filePath}" version -o json\n`);
         channel.append(crcVerInfo.stdout);
-        const result =  await CliChannel.getInstance().execute(`${filePath} status -ojson`);
-        channel.append(`\n\n${filePath} status -ojson\n`);
+        const result =  await CliChannel.getInstance().execute(`"${filePath}" status -o json`);
+        channel.append(`\n\n"${filePath}" status -o json\n`);
         channel.append(result.stdout);
         if (result.error || crcVerInfo.error) {
             p.webview.postMessage({action: postCommand, errorStatus: true});
@@ -216,7 +310,7 @@ export default class ClusterViewLoader {
                 creds: crcCredArray
             });
         }
-        const crcCreds = await CliChannel.getInstance().execute(`${filePath} console --credentials -ojson`);
+        const crcCreds = await CliChannel.getInstance().execute(`"${filePath}" console --credentials -o json`);
         if (!crcCreds.error) {
             try {
                 crcCredArray.push(JSON.parse(crcCreds.stdout).clusterConfig);

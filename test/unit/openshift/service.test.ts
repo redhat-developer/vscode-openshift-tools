@@ -28,7 +28,7 @@ suite('OpenShift/Service', () => {
     let execStub: sinon.SinonStub;
     const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
     const projectItem = new TestItem(clusterItem, 'project', ContextType.PROJECT);
-    const appItem = new TestItem(projectItem, 'application', ContextType.APPLICATION);
+    const appItem = new TestItem(projectItem, 'application', ContextType.APPLICATION, ['component']);
     const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
     const serviceOperator = <ServiceOperatorShortInfo>{
         name: 'service-operator',
@@ -60,7 +60,7 @@ suite('OpenShift/Service', () => {
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '' });
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
     });
 
     teardown(() => {
@@ -114,10 +114,9 @@ suite('OpenShift/Service', () => {
             getServicesStub.resolves([]);
             quickPickStub.onFirstCall().resolves(appItem);
             quickPickStub.onSecondCall().resolves(serviceItem);
-            warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+            warnStub = sandbox.stub<any, any>(vscode.window, 'showWarningMessage').resolves('Yes');
             sandbox.stub(Progress, 'execFunctionWithProgress').yields();
             execStub.reset();
-
         });
 
         test('works with context item', async () => {

@@ -9,12 +9,14 @@ import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import * as common from './common';
 import { ClusterServiceVersionKind, CRDDescription, CustomResourceDefinitionKind } from './olm/types';
 import { TreeItem, WebviewPanel, window } from 'vscode';
-import { vsCommand } from '../vscommand';
+import { vsCommand, VsCommandError } from '../vscommand';
 import CreateServiceViewLoader from '../webview/create-service/createServiceViewLoader';
 import { DEFAULT_K8S_SCHEMA, getUISchema, randomString, generateDefaults } from './utils';
 import { loadYaml } from '@kubernetes/client-node';
 import { JSONSchema7 } from 'json-schema';
 import { getInstance, OpenShiftObject } from '../odo';
+import { CommandText } from '../odo/command';
+import { getOpenAPISchemaFor } from '../util/swagger';
 
 class CsvNode implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorerExtensionNode {
 
@@ -48,15 +50,11 @@ interface K8sCrdNode {
 
 export class ClusterServiceVersion extends OpenShiftItem {
     public static command = {
-        getCsv(csvName: string): string {
-            return `get csv ${csvName}`;
-        },
-        getCrd(crdName: string): string {
-            return `get crd ${crdName}`;
-        },
-        getCreateCommand(file: string): string {
-            return `create -f ${file}`;
-        }
+        getCsv: (csvName: string): string => `get csv ${csvName}`,
+        getCrd: (crdName: string): string => `get crd ${crdName}`,
+        getCreateCommand: (file: string): string => `create -f ${file}`,
+        getCurrentUserName: (): CommandText => new CommandText('oc whoami'),
+        getCurrentUserToken: (): CommandText => new CommandText('oc whoami -t'),
     };
 
     public static getNodeContributor(): ClusterExplorerV1.NodeContributor {
@@ -101,7 +99,6 @@ export class ClusterServiceVersion extends OpenShiftItem {
                     window.showErrorMessage(err);
                     panel.webview.postMessage({action: 'error'});
                 }
-
             }
         }
     }
@@ -116,17 +113,50 @@ export class ClusterServiceVersion extends OpenShiftItem {
         return ClusterServiceVersion.createNewServiceFromDescriptor(crdOwnedNode.impl.crdDescription, crdOwnedNode.impl.csv, app);
     }
 
+    static async getAuthToken(): Promise<string> {
+        const gcuCmd = this.command.getCurrentUserName();
+        const gcuExecRes = await this.odo.execute(gcuCmd, undefined, false);
+        if (gcuExecRes.error) {
+            throw new VsCommandError(gcuExecRes.stderr, `Cannot get current user name. '${gcuCmd}' returned non zero error code.`);
+        }
+        const gcutCmd = this.command.getCurrentUserToken();
+        const gcutExecRes = await this.odo.execute(gcutCmd, undefined, false);
+        if (gcutExecRes.error) {
+            throw new VsCommandError(gcuExecRes.stderr, `Cannot get current user name. '${gcutCmd}' returned non zero error code.`);
+        }
+        return gcutExecRes.stdout.trim();
+    }
+
     static async createNewServiceFromDescriptor(crdDescription: CRDDescription, csv: ClusterServiceVersionKind, application: OpenShiftObject): Promise<void> {
         const getCrdCmd = ClusterServiceVersion.command.getCrd(crdDescription.name);
-        const crdResouce: CustomResourceDefinitionKind = await common.asJson(getCrdCmd);
-        const openAPIV3SchemaAll: JSONSchema7 = crdResouce.spec.versions.find((version) => version.name === crdDescription.version).schema.openAPIV3Schema;
+        let crdResource: CustomResourceDefinitionKind;
+        let apiVersion: string;
+        try {
+            crdResource = await common.asJson(getCrdCmd);
+        } catch (err) {
+            // if crd cannot be accessed, try to use swagger
+        }
+
+        let openAPIV3SchemaAll: JSONSchema7;
+        if (crdResource) {
+            openAPIV3SchemaAll = crdResource.spec.versions.find((version) => version.name === crdDescription.version).schema.openAPIV3Schema;
+            apiVersion = `${crdResource.spec.group}/${crdDescription.version}`;
+        } else {
+            const clusters = await this.odo.getClusters();
+            const token = await this.getAuthToken();
+            openAPIV3SchemaAll = await getOpenAPISchemaFor(clusters[0].getName(), token, crdDescription.kind, crdDescription.version);
+            const gvk = _.find(openAPIV3SchemaAll['x-kubernetes-group-version-kind'], ({ group, version, kind }) =>
+                crdDescription.version === version && crdDescription.kind === kind && group);
+                apiVersion = `${gvk.group}/${gvk.version}`;
+        }
+
         const examplesYaml: string = csv.metadata?.annotations?.['alm-examples'];
         const examples: any[] = examplesYaml ? loadYaml(examplesYaml) : undefined;
-        const example = examples ? examples.find(item => item.apiVersion === `${crdResouce.spec.group}/${crdDescription.version}` && item.kind === crdResouce.spec.names.kind) : {};
+        const example = examples ? examples.find(item => item.apiVersion === apiVersion && item.kind === crdDescription.kind) : {};
         generateDefaults(openAPIV3SchemaAll, example);
         const openAPIV3Schema = _.defaultsDeep({}, DEFAULT_K8S_SCHEMA, _.omit(openAPIV3SchemaAll, 'properties.status'));
         openAPIV3Schema.properties.metadata.properties.name.default =
-            example?.metadata.name ? `${example.metadata.name}-${randomString()}` : `${crdDescription.kind}-${randomString()}`;
+            example?.metadata?.name ? `${example.metadata.name}-${randomString()}` : `${crdDescription.kind}-${randomString()}`;
 
         const uiSchema = getUISchema(
             openAPIV3Schema,

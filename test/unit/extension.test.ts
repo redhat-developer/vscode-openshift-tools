@@ -145,7 +145,7 @@ suite('openshift connector Extension', () => {
     });
 
     test('async command wrapper shows message returned from command', async () => {
-        sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+        sandbox.stub<any, any>(vscode.window, 'showWarningMessage').resolves('Yes');
         const simStub = sandbox.stub(vscode.window, 'showInformationMessage');
         sandbox.stub(Progress, 'execFunctionWithProgress').resolves();
         await vscode.commands.executeCommand('openshift.app.delete', appItem);
@@ -153,7 +153,7 @@ suite('openshift connector Extension', () => {
     });
 
     test('async command wrapper shows error message from rejected command', async () => {
-        sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+        sandbox.stub<any, any>(vscode.window, 'showWarningMessage').resolves('Yes');
         sandbox.stub(vscode.window, 'showInformationMessage');
         const semStub = sandbox.stub(vscode.window, 'showErrorMessage');
         const error = new Error('message');

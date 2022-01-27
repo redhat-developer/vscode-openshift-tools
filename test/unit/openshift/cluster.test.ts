@@ -60,7 +60,7 @@ suite('Openshift/Cluster', () => {
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves(testData);
         inputStub = sandbox.stub(vscode.window, 'showInputBox');
         commandStub = sandbox.stub(vscode.commands, 'executeCommand').resolves();
-        infoStub = sandbox.stub(vscode.window, 'showInformationMessage').resolves('Yes');
+        infoStub = sandbox.stub<any, any>(vscode.window, 'showInformationMessage').resolves('Yes');
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick').resolves({label: 'Credentials', description: 'Log in to the given server using credentials'});
         loginStub = sandbox.stub(OdoImpl.prototype, 'requireLogin').resolves(true);
         sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);

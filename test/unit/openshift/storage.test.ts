@@ -35,8 +35,8 @@ suite('OpenShift/Storage', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([clusterItem]);
-        getStorageNamesStub = sandbox.stub(OdoImpl.prototype, 'getStorageNames').resolves([storageItem]);
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: '', stdout: '', stderr: ''});
+        getStorageNamesStub = sandbox.stub<any, any>(OdoImpl.prototype, 'getStorageNames').resolves([storageItem]);
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
     });
 
@@ -294,7 +294,7 @@ suite('OpenShift/Storage', () => {
             quickPickStub.onFirstCall().resolves(appItem);
             quickPickStub.onSecondCall().resolves(componentItem);
             quickPickStub.onThirdCall().resolves(storageItem);
-            warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+            warnStub = sandbox.stub<any, any>(vscode.window, 'showWarningMessage').resolves('Yes');
         });
 
         test('works with set tree item', async () => {

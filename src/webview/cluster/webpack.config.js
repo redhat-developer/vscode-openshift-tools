@@ -7,7 +7,10 @@
 const path = require("path");
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const HtmlWebPackPlugin = require( 'html-webpack-plugin' );
+const HtmlWebPackPlugin = require('html-webpack-plugin' );
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+const isProduction = process.argv[process.argv.indexOf('--mode') + 1] === 'production';
 
 module.exports = {
   entry: {
@@ -54,6 +57,14 @@ module.exports = {
     new HtmlWebPackPlugin({
        template: path.resolve( __dirname, 'app', 'index.html' ),
        filename: 'index.html',
+       templateParameters: {
+           production: isProduction
+       }
+    }),
+    new CopyWebpackPlugin({
+        patterns: [{
+            from: path.resolve(__dirname, 'app', 'devstub.js')
+        }]
     })
   ],
 };

@@ -12,14 +12,14 @@ export const VIEWS = {
     compTypes: 'Component Types',
     watchSessions: 'Watch Sessions',
     debugSessions: 'Debug Sessions',
-    devFileRegistry: 'DefaultDevfileRegistry'
+    devFileRegistry: 'DefaultDevfileRegistry',
 };
 
 export const BUTTONS = {
     login: 'Login',
     kubeContext: 'Select Kubernetes Context',
     addCluster: 'Add OpenShift Cluster',
-    newComponent: 'New Component'
+    newComponent: 'New Component',
 };
 
 export const INPUTS = {
@@ -28,24 +28,25 @@ export const INPUTS = {
     newUserQuickPick: 'Add new user...',
     newFolderQuickPick: 'Add new context folder to workspace',
     yes: 'Yes',
-    no: 'No'
+    no: 'No',
 };
 
 export const MENUS = {
     newProject: 'New Project',
     delete: 'Delete',
-    push: 'Push'
+    push: 'Push',
 };
 
 export const COMPONENTS = {
     nodejsDevfile: 'nodejs (devfile)',
     devfileComponent: (name: string) => `${name} (devfile)`,
-    pushSuccess: 'Changes successfully pushed'
+    pushSuccess: 'Changes successfully pushed',
 };
 
 export const NOTIFICATIONS = {
-    deleteProjectWarning: (projectName: string) => `Do you want to delete Project '${projectName}'?`,
+    deleteProjectWarning: (projectName: string) =>
+        `Do you want to delete Project '${projectName}'?`,
     projectDeleteSuccess: (projectName: string) => `Project '${projectName}' successfully deleted`,
     savePasswordPrompt: 'Do you want to save username and password?',
-    loginSuccess: (cluster: string) => `Successfully logged in to '${cluster}'`
+    loginSuccess: (cluster: string) => `Successfully logged in to '${cluster}'`,
 };

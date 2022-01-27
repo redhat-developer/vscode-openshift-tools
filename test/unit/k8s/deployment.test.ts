@@ -89,7 +89,7 @@ suite('K8s/deployment', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         termStub =  sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '' });
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined});
         sandbox.stub(Progress, 'execFunctionWithProgress').yields();
     });
 
@@ -269,7 +269,7 @@ suite('K8s/deployment', () => {
 
         setup(() => {
             execStub.resolves({ error: null, stdout: deploymentData, stderr: '' });
-            sandbox.stub(DeploymentConfig, 'getDeploymentConfigNames').resolves('comp1-app-2');
+            sandbox.stub<any, any>(DeploymentConfig, 'getDeploymentConfigNames').resolves('comp1-app-2');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
         });
 

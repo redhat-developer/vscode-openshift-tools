@@ -167,7 +167,7 @@ suite('odo integration', () => {
         name: string,
         template: string,
     ): Promise<odo.OpenShiftObject> {
-        sb.stub(window, 'showQuickPick')
+        sb.stub<any, any>(window, 'showQuickPick')
             .onFirstCall()
             .resolves(template)
             .onSecondCall()
@@ -239,7 +239,7 @@ suite('odo integration', () => {
 
         test('url for not pushed component', async () => {
             sb.stub(window, 'showInputBox').resolves(`${urlName}1`);
-            const sqpStub = sb.stub(window, 'showQuickPick');
+            const sqpStub = sb.stub<any, any>(window, 'showQuickPick');
             sqpStub.onFirstCall().resolves('Yes');
             await commands.executeCommand('openshift.url.create', component);
             const urls = await oi.getRoutes(component);
@@ -250,7 +250,7 @@ suite('odo integration', () => {
             const sibStub = sb.stub(window, 'showInputBox');
             sibStub.onFirstCall().resolves(storageName);
             sibStub.onSecondCall().resolves(storageMountPath);
-            sb.stub(window, 'showQuickPick').resolves(storageSize);
+            sb.stub<any, any>(window, 'showQuickPick').resolves(storageSize);
             await commands.executeCommand('openshift.storage.create', component);
             const storages = await oi.getStorageNames(component);
             [storage] = storages;
@@ -259,7 +259,7 @@ suite('odo integration', () => {
         test('create url for pushed component', async () => {
             await pushComponent(component);
             sb.stub(window, 'showInputBox').resolves(`${urlName}2`);
-            const sqpStub = sb.stub(window, 'showQuickPick');
+            const sqpStub = sb.stub<any, any>(window, 'showQuickPick');
             sqpStub.onFirstCall().resolves('Yes');
             await commands.executeCommand('openshift.url.create', component);
             const urls = await oi.getRoutes(component);
@@ -307,14 +307,14 @@ suite('odo integration', () => {
         });
 
         test('delete storage', async () => {
-            sb.stub(window, 'showWarningMessage').resolves('Yes');
+            sb.stub<any, any>(window, 'showWarningMessage').resolves('Yes');
             const errMessStub = sb.stub(window, 'showErrorMessage');
             await commands.executeCommand('openshift.storage.delete', storage);
             expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
         });
 
         test('delete url', async () => {
-            sb.stub(window, 'showWarningMessage').resolves('Yes');
+            sb.stub<any, any>(window, 'showWarningMessage').resolves('Yes');
             const errMessStub = sb.stub(window, 'showErrorMessage');
             await commands.executeCommand('openshift.url.delete', url1);
             await commands.executeCommand('openshift.url.delete', url2);
@@ -322,7 +322,7 @@ suite('odo integration', () => {
         });
 
         test('delete component', async () => {
-            sb.stub(window, 'showWarningMessage').resolves('Yes');
+            sb.stub<any, any>(window, 'showWarningMessage').resolves('Yes');
             const errMessStub = sb.stub(window, 'showErrorMessage');
             if (component) {
                 await commands.executeCommand('openshift.component.delete', component);
@@ -338,7 +338,7 @@ suite('odo integration', () => {
 
         test('delete service', async function() {
             if (openshiftVersion >= '4.5.0') this.skip();
-            sb.stub(window, 'showWarningMessage').resolves('Yes');
+            sb.stub<any, any>(window, 'showWarningMessage').resolves('Yes');
             const errMessStub = sb.stub(window, 'showErrorMessage');
             await commands.executeCommand('openshift.service.delete', service);
             expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
@@ -388,7 +388,7 @@ suite('odo integration', () => {
 
         test('unlink components', async () => {
             const errMessStub = sb.stub(window, 'showErrorMessage');
-            sb.stub(window, 'showQuickPick')
+            sb.stub<any, any>(window, 'showQuickPick')
                 .onFirstCall()
                 .resolves(linkedComp2.getName())
                 .onSecondCall()
@@ -403,7 +403,7 @@ suite('odo integration', () => {
         test('unlink component and service', async function() {
             if (openshiftVersion >= '4.5.0') this.skip();
             const errMessStub = sb.stub(window, 'showErrorMessage');
-            sb.stub(window, 'showQuickPick')
+            sb.stub<any, any>(window, 'showQuickPick')
                 .onFirstCall()
                 .resolves(service.getName());
             await commands.executeCommand('openshift.component.unlinkService.palette', linkedComp2);
@@ -411,7 +411,7 @@ suite('odo integration', () => {
         });
 
         test('delete application', async () => {
-            sb.stub(window, 'showWarningMessage').resolves('Yes');
+            sb.stub<any, any>(window, 'showWarningMessage').resolves('Yes');
             await commands.executeCommand('openshift.app.delete', existingApp);
             const applications = await oi.getApplications(project);
             expect(applications).is.empty;

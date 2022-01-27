@@ -7,7 +7,6 @@
 
 import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
 import { ChildProcess , exec } from 'child_process';
-import { isURL } from 'validator';
 import { EventEmitter } from 'events';
 import * as YAML from 'yaml'
 import OpenShiftItem, { clusterRequired, selectTargetApplication, selectTargetComponent } from './openshiftItem';
@@ -15,8 +14,6 @@ import { OpenShiftObject, ContextType, OpenShiftObjectImpl, OpenShiftComponent, 
 import { Command, CommandOption, CommandText } from '../odo/command';
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
-import { Refs, Type } from '../util/refs';
-import { Delayer } from '../util/async';
 import { Platform } from '../util/platform';
 import { selectWorkspaceFolder } from '../util/workspace';
 import { ToolsConfig } from '../tools';
@@ -24,7 +21,7 @@ import LogViewLoader from '../webview/log/LogViewLoader';
 import DescribeViewLoader from '../webview/describe/describeViewLoader';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { SourceType } from '../odo/config';
-import { ascDevfileFirst, ComponentKind, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, ImageStreamTag, isDevfileComponent, isImageStreamTag } from '../odo/componentType';
+import { ascDevfileFirst, ComponentKind, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, isDevfileComponent } from '../odo/componentType';
 import { Url } from '../odo/url';
 import { StarterProjectDescription } from '../odo/catalog';
 import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
@@ -34,7 +31,7 @@ import treeKill = require('tree-kill');
 import fs = require('fs-extra');
 import { NewComponentCommandProps } from '../telemetry';
 
-const waitPort = require('wait-port');
+import waitPort = require('wait-port');
 
 export class SourceTypeChoice {
     public static readonly GIT: QuickPickItem = {
@@ -544,7 +541,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.componentType.newComponent')
-    public static async createComponentFromCatalogEntry(context: DevfileComponentType | StarterProject | ImageStreamTag): Promise<string> {
+    public static async createComponentFromCatalogEntry(context: DevfileComponentType | StarterProject): Promise<string> {
         const application = await Component.getOpenShiftCmdData(undefined,
             'Select an Application where you want to create a Component'
         );
@@ -556,9 +553,6 @@ export class Component extends OpenShiftItem {
             starterProjectName:string;
         if (isDevfileComponent(context)) {
             componentTypeName = context.Name;
-        } else if (isImageStreamTag(context)) {
-            componentTypeName = context.typeName;
-            version = context.name;
         } else if (isStarterProject(context)){
             componentTypeName = context.typeName;
             starterProjectName = context.name;
@@ -659,7 +653,7 @@ export class Component extends OpenShiftItem {
             progressIndicator.show();
             const componentTypes = await Component.odo.getComponentTypes();
             if (componentTypeName) {
-                componentTypeCandidates = componentTypes.filter(type => type.name === componentTypeName && type.kind === componentKind && (!version || type.version === version));
+                componentTypeCandidates = componentTypes.filter(type => type.name === componentTypeName && type.type === componentKind && (!version || type.version === version));
                 if (componentTypeCandidates?.length === 0) {
                     componentType = await window.showQuickPick(componentTypes.sort(ascDevfileFirst), { placeHolder: `Cannot find Component type '${componentTypeName}', select one below to use instead`, ignoreFocusOut: true });
                 } else if (componentTypeCandidates?.length > 1) {
@@ -674,7 +668,7 @@ export class Component extends OpenShiftItem {
 
             if (!componentType) return createCancelledResult('componentType');
 
-            if (componentType.kind === ComponentKind.DEVFILE) {
+            if (componentType.type === ComponentKind.DEVFILE) {
                 progressIndicator.placeholder = 'Checking if provided context folder is empty'
                 progressIndicator.show();
                 const globbyPath = `${folder.fsPath.replace('\\', '/')}/`;
@@ -758,86 +752,6 @@ export class Component extends OpenShiftItem {
         }
     }
 
-    @vsCommand('openshift.component.createFromGit')
-    @clusterRequired()
-    @selectTargetApplication(
-        'In which Application you want to create a Component'
-    )
-    static async createFromGit(application: OpenShiftObject): Promise<string | null> {
-        if (!application) return null;
-        const workspacePath = await selectWorkspaceFolder();
-        if (!workspacePath) return null;
-        const delayer = new Delayer<string>(500);
-
-        const repoURI = await window.showInputBox({
-            prompt: 'Git repository URI',
-            ignoreFocusOut: true,
-            validateInput: (value: string) => {
-                return delayer.trigger(async () => {
-                    if (!value.trim()) return 'Empty Git repository URL';
-                    if (!isURL(value)) return 'Invalid URL provided';
-                    const references = await Refs.fetchTag(value);
-                    if (!references.get('HEAD')) return 'There is no git repository at provided URL.';
-                });
-            }
-        });
-
-        if (!repoURI) return null;
-
-        const references = await Refs.fetchTag(repoURI);
-        const gitRef = await window.showQuickPick([...references.values()].map(value => ({label: value.name, description: value.type === Type.TAG? `Tag at ${value.hash}` : value.hash })) , {placeHolder: 'Select git reference (branch/tag)', ignoreFocusOut: true});
-
-        if (!gitRef) return null;
-
-        const componentList = Component.odo.getComponents(application);
-        const componentName = await Component.getName('Component name', componentList, application.getName());
-
-        if (!componentName) return null;
-        const componentTypesPromise = Component.odo.getComponentTypes();
-        const s2iComponentTypes = componentTypesPromise.then((items) => items.filter((item) => item.kind === ComponentKind.S2I));
-        const componentType = await window.showQuickPick(s2iComponentTypes, {placeHolder: 'Component type', ignoreFocusOut: true});
-
-        if (!componentType) return null;
-
-        await Component.odo.createComponentFromGit(application, componentType.name, componentType.version, componentName, repoURI, workspacePath, gitRef.label);
-        return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
-    }
-
-    @vsCommand('openshift.component.createFromBinary')
-    @clusterRequired()
-    @selectTargetApplication(
-        'In which Application you want to create a Component'
-    )
-    static async createFromBinary(application: OpenShiftObject): Promise<string | null> {
-        if (!application) return null;
-
-        const workspacePath = await selectWorkspaceFolder();
-
-        if (!workspacePath) return null;
-
-        const globPath = process.platform === 'win32' ? workspacePath.fsPath.replace(/\\/g, '/') : workspacePath.path;
-        const paths = globby.sync(`${globPath}`, { expandDirectories: { files: ['*'], extensions: ['jar', 'war']}, deep: 20 });
-
-        if (paths.length === 0) return 'No binary file present in the context folder selected. We currently only support .jar and .war files. If you need support for any other file, please raise an issue.';
-
-        const binaryFileObj: QuickPickItem[] = paths.map((file) => ({ label: `$(file-zip) ${path.basename(file)}`, description: `${file}`}));
-
-        const binaryFile: QuickPickItem = await window.showQuickPick(binaryFileObj, {placeHolder: 'Select binary file', ignoreFocusOut: true});
-
-        if (!binaryFile) return null;
-
-        const componentList = Component.odo.getComponents(application);
-        const componentName = await Component.getName('Component name', componentList, application.getName());
-
-        if (!componentName) return null;
-        const componentType = await window.showQuickPick((await Component.odo.getComponentTypes()).filter((item) => item.kind === ComponentKind.S2I), {placeHolder: 'Component type', ignoreFocusOut: true});
-
-        if (!componentType) return null;
-
-        await Component.odo.createComponentFromBinary(application, componentType.name, componentType.version, componentName, Uri.file(binaryFile.description), workspacePath);
-        return `Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`;
-    }
-
     @vsCommand('openshift.component.debug', true)
     @clusterRequired()
     @selectTargetComponent(
@@ -864,20 +778,20 @@ export class Component extends OpenShiftItem {
             return result;
         }
         const components = await Component.odo.getComponentTypes();
-        const componentBuilder: ComponentTypeAdapter = components.find((comonentType) => comonentType.kind === component.kind? comonentType.name === component.builderImage.name : false);
+        const componentBuilder: ComponentTypeAdapter = components.find((comonentType) => comonentType.type === component.kind? comonentType.name === component.builderImage.name : false);
         let isJava: boolean;
         let isNode: boolean;
         let isPython: boolean;
 
         // TODO: https://github.com/redhat-developer/vscode-openshift-tools/issues/38
-        if (componentBuilder && componentBuilder.tags && componentBuilder.kind === ComponentKind.S2I) { // s2i component has been selected for debug
+        if (componentBuilder && componentBuilder.tags && componentBuilder.type === ComponentKind.S2I) { // s2i component has been selected for debug
             isJava = componentBuilder.tags.includes('java');
             isNode = componentBuilder.tags.includes('nodejs');
             isPython = componentBuilder.tags.includes('python');
         } else {
             isJava = component.builderImage.name.includes('java');
             isNode = component.builderImage.name.includes('nodejs');
-            isPython = component.builderImage.name.includes('python');
+            isPython = component.builderImage.name.includes('python') || component.builderImage.name.includes('django');
         }
 
         if (isJava || isNode || isPython) {
@@ -888,13 +802,13 @@ export class Component extends OpenShiftItem {
                 const jlsIsActive = extensions.getExtension(JAVA_EXT);
                 const jdIsActive = extensions.getExtension(JAVA_DEBUG_EXT);
                 if (!jlsIsActive || !jdIsActive) {
-                    let warningMsg;
+                    let warningMsg: string;
                     if (jlsIsActive && !jdIsActive) {
-                        warningMsg = 'Debugger for Java is required to debug component';
+                        warningMsg = 'Debugger for Java (Publisher: Microsoft) extension is required to debug component';
                     } else if (!jlsIsActive && jdIsActive) {
-                        warningMsg = 'Language Support for Java is required to debug component';
+                        warningMsg = 'Language support for Java ™ (Publisher: Red Hat) extension is required to support debugging.';
                     } else {
-                        warningMsg = 'Language Support and Debugger for Java are required to debug component';
+                        warningMsg = 'Language support for Java ™ and Debugger for Java extensions are required to debug component';
                     }
                     const response = await window.showWarningMessage(warningMsg, 'Install');
                     if (response === 'Install') {
@@ -920,7 +834,7 @@ export class Component extends OpenShiftItem {
                 const PYTHON_EXT = 'ms-python.python';
                 const pythonExtIsInstalled = extensions.getExtension('ms-python.python');
                 if (!pythonExtIsInstalled) {
-                    const response = await window.showWarningMessage('Python extension is required to debug component', 'Install');
+                    const response = await window.showWarningMessage('Python extension (Publisher: Microsoft) is required to support debugging.', 'Install');
                     if (response === 'Install') {
                         await window.withProgress({ location: ProgressLocation.Notification }, async (progress) => {
                             progress.report({ message: 'Installing extensions required to debug Python Component ...'});
@@ -956,39 +870,55 @@ export class Component extends OpenShiftItem {
                 });
             }
         } else {
-            window.showWarningMessage('Debug command supports only local Java, Node.Js and Python components.');
+            void window.showWarningMessage('Debug command currently supports local components with Java, Node.Js and Python component types.');
         }
         return result;
     }
 
     static async startOdoAndConnectDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration): Promise<string> {
         await Component.odo.execute(Command.pushComponent(true, true), component.contextPath.fsPath);
-        const debugCmd = `'${toolLocation}' debug port-forward`;
+        const debugCmd = `"${toolLocation}" debug port-forward`;
         const cp = exec(debugCmd, {cwd: component.contextPath.fsPath});
-        return new Promise<string>((resolve) => {
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            cp.stdout.on('data', async (data: string) => {
+        return new Promise<string>((resolve,reject) => {
+            cp.stdout.on('data', (data: string) => {
                 const parsedPort = data.trim().match(/- (?<localPort>\d+):\d+$/);
                 if (parsedPort?.groups?.localPort) {
-                    await waitPort({
+                    void waitPort({
                          host: 'localhost',
                          port: parseInt(parsedPort.groups.localPort, 10)
-                    });
-                    resolve(parsedPort.groups.localPort);
+                    })
+                    .then((success) => {
+                        success ? resolve(parsedPort.groups.localPort) : reject(new VsCommandError('Connection attempt timed out.'));
+                    })
+                    .catch(reject);
+                }
+            });
+            let stderrText = '';
+            cp.stderr.on('data', (data: string) => {
+                stderrText = stderrText.concat(data);
+            });
+            cp.on('error', reject);
+            cp.on('exit', (code) => {
+                if (code > 0) {
+                    reject(new VsCommandError(`Port forwarding request failed. CODE: ${code}', STDERR: ${stderrText}.`));
                 }
             });
         }).then((result) => {
             config.contextPath = component.contextPath;
             if (config.type === 'python') {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 config.connect.port = result;
             } else {
                 config.port = result;
             }
             config.odoPid = cp.pid;
             return debug.startDebugging(workspace.getWorkspaceFolder(component.contextPath), config);
-        }).then((result: boolean) =>
-            result ? 'Debugger session has successfully started.' : Promise.reject(new VsCommandError('Debugger session failed to start.'))
-        );
+        }).then((result: boolean) => {
+            if (!result) {
+                return Promise.reject(new VsCommandError('Debugger session failed to start.'));
+            }
+            return 'Debugger session has successfully started.';
+        });
     }
 
     @vsCommand('openshift.component.test', true)

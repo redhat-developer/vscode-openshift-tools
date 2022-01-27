@@ -3,10 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Cluster } from '@kubernetes/client-node/dist/config_types';
 import { Url } from 'url';
 import { Data } from './componentTypeDescription';
-import { ComponentMetadata } from './config';
 
 export enum ComponentKind {
     S2I = 's2i',
@@ -36,15 +34,10 @@ export interface ImageStreamTag {
 }
 
 export function ascDevfileFirst(c1: ComponentType, c2: ComponentType): number {
-    if(c1.kind !== c2.kind) {
-        return c1.kind === ComponentKind.DEVFILE? -1: 1;
+    if(c1.type !== c2.type) {
+        return c1.type === ComponentKind.DEVFILE? -1: 1;
     }
     return c1.label.localeCompare(c2.label)
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isS2iComponent(comp: any): comp is S2iComponentType {
-    return comp.kind && (typeof comp.kind) === 'string';
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -53,39 +46,8 @@ export function isDevfileComponent(comp: any): comp is DevfileComponentType {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isImageStreamTag(tag: any): tag is ImageStreamTag {
-    return tag.name && tag.annotations;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isSampleProject(repo: any): repo is SampleProject {
-    return repo?.sampleRepo;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isCluster(cluster: any): cluster is Cluster {
-    return cluster.name && cluster.server;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isRegistry(registry: any): registry is Registry {
     return registry.Name && registry.URL && registry.Secure !== undefined;
-}
-
-export interface S2iComponentType {
-    kind: 'ComponentType';
-    apiVersion: string;
-    metadata: ComponentMetadata;
-    spec: {
-        allTags: string[];
-        nonHiddenTags: string[];
-        supportedTags: string[];
-        imageStreamTags: ImageStreamTag[];
-    },
-}
-
-export interface SampleProject {
-    sampleRepo: string;
 }
 
 export interface RegistryRef {
@@ -107,15 +69,14 @@ export interface ComponentTypesJson {
 	metadata: {
 		creationTimestamp: string;
     },
-    s2iItems: S2iComponentType[];
-    devfileItems: DevfileComponentType[];
+    items: DevfileComponentType[];
 }
 
 export interface ComponentType {
     label: string;
     description: string;
     name: string;
-    kind: ComponentKind;
+    type: ComponentKind;
     version: string;
 }
 
@@ -126,7 +87,7 @@ export interface ComponentTypeDescription {
 
 export class ComponentTypeAdapter implements ComponentType {
     constructor(
-        public readonly kind: ComponentKind,
+        public readonly type: ComponentKind,
         public readonly name: string,
         public readonly version: string,
         public readonly description: string,
@@ -137,6 +98,6 @@ export class ComponentTypeAdapter implements ComponentType {
 
     get label(): string {
         const versionSuffix = this.version? `/${this.version}` : `/${this.registryName}` ;
-        return `${this.name}${versionSuffix} (${this.kind})`;
+        return `${this.name}${versionSuffix}`;
     }
 }

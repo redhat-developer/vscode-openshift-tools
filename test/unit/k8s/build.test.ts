@@ -63,7 +63,7 @@ suite('K8s/build', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '' });
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
         sandbox.stub(Progress, 'execFunctionWithProgress').yields();
     });
 
@@ -235,7 +235,7 @@ suite('K8s/build', () => {
     suite('rebuild', () => {
 
         setup(() => {
-            sandbox.stub(Build, 'getBuildNames').resolves('nodejs-copm-nodejs-comp');
+            sandbox.stub<any, any>(Build, 'getBuildNames').resolves('nodejs-copm-nodejs-comp');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.resolves({label: 'nodejs-copm-nodejs-comp-8'});
 
@@ -267,7 +267,7 @@ suite('K8s/build', () => {
 
         setup(() => {
             execStub.resolves({ error: null, stdout: buildData, stderr: '' });
-            sandbox.stub(Build, 'getBuildNames').resolves('nodejs-copm-nodejs-comp');
+            sandbox.stub<any, any>(Build, 'getBuildNames').resolves('nodejs-copm-nodejs-comp');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.resolves({label: 'nodejs-copm-nodejs-comp-8'});
         });
@@ -292,7 +292,7 @@ suite('K8s/build', () => {
     suite('Delete', ()=> {
         setup(() => {
             execStub.resolves({ error: null, stdout: buildData, stderr: '' });
-            sandbox.stub(Build, 'getBuildNames').resolves('nodejs-copm-nodejs-comp');
+            sandbox.stub<any, any>(Build, 'getBuildNames').resolves('nodejs-copm-nodejs-comp');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.resolves({label: 'nodejs-copm-nodejs-comp-8'});
         });

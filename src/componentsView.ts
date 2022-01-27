@@ -20,7 +20,7 @@ export interface WorkspaceEntry {
 }
 
 class Labeled {
-    constructor(public label: string) {}
+    constructor(public label: string) { }
 }
 
 class Project extends Labeled {
@@ -31,20 +31,16 @@ class Application extends Labeled {
 
 type Entry = Project | Application | WorkspaceEntry | WorkspaceFolderComponent;
 
-export interface WorkspaceFolderComponent extends vsc.TreeItem{
+export interface WorkspaceFolderComponent extends vsc.TreeItem {
     project: string;
     application: string;
     contextUri: vsc.Uri;
 }
 
-function isWorkspaceFolderComponent(entry): entry is WorkspaceFolderComponent {
-    return entry.contextUri;
-}
-
 async function getComponentsInWorkspace(): Promise<WorkspaceFolderComponent[]> {
     const execs: Promise<CliExitData>[] = [];
     if (vsc.workspace.workspaceFolders) {
-        vsc.workspace.workspaceFolders.forEach((folder)=> {
+        vsc.workspace.workspaceFolders.forEach((folder) => {
             try {
                 execs.push(getInstance().execute(Command.viewEnv(), folder.uri.fsPath, false));
             } catch (ignore) {
@@ -58,10 +54,10 @@ async function getComponentsInWorkspace(): Promise<WorkspaceFolderComponent[]> {
             let compData: EnvInfo;
             if (result.error) {
                 // detect S2I component manually
-                const pathToS2iConfig = path.join(result.cwd, '.odo', 'config.yaml');
+                const pathToS2iConfig = path.join(result.cwd.toString(), '.odo', 'config.yaml');
                 if (pathExistsSync(pathToS2iConfig)) {
                     // reconstruct env view form yaml file data
-                    const s2iConf = jsYaml.load(readFileSync(pathToS2iConfig, 'utf8'));
+                    const s2iConf: any = jsYaml.load(readFileSync(pathToS2iConfig, 'utf8'));
                     compData = {
                         spec: {
                             appName: s2iConf.ComponentSettings.Application,
@@ -81,7 +77,7 @@ async function getComponentsInWorkspace(): Promise<WorkspaceFolderComponent[]> {
                 `Project: ${project}`,
                 `Application: ${application}`,
                 `Context: ${contextUri.fsPath}`,
-                ].join('\n');
+            ].join('\n');
             const description = `${project}/${application}`;
             return {
                 project,
@@ -111,7 +107,7 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
     }
 
     private refresh(): void {
-        this.onDidChangeTreeDataEmitter.fire();
+        this.onDidChangeTreeDataEmitter.fire(undefined);
     }
 
     @vsCommand('openshift.componentsView.refresh')
@@ -120,9 +116,9 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
     }
 
     @vsCommand('openshift.component.revealInExplorer')
-    public static async revealInExplorer(context: Entry): Promise<void> {
-        if (isWorkspaceFolderComponent(context)) {
-            await vsc.commands.executeCommand('workbench.view.explorer', );
+    public static async revealInExplorer(context: WorkspaceFolderComponent): Promise<void> {
+        if (context.contextUri) {
+            await vsc.commands.executeCommand('workbench.view.explorer',);
             await vsc.commands.executeCommand('revealInExplorer', context.contextUri);
         }
     }
@@ -143,10 +139,8 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
         return ComponentsTreeDataProvider.dataProviderInstance;
     }
 
-    getTreeItem(element: Entry): vsc.TreeItem {
-        if (isWorkspaceFolderComponent(element)) {
-            return element;
-        }
+    getTreeItem(element: WorkspaceFolderComponent): vsc.TreeItem {
+        return element;
     }
 
     getChildren(element?: Entry): vsc.ProviderResult<Entry[]> {

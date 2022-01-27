@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 import { window, QuickPickItem, commands, workspace } from 'vscode';
-import * as validator from 'validator';
+import validator from 'validator';
 import { Odo, getInstance, OpenShiftObject, ContextType, OpenShiftApplication, OpenShiftProject } from '../odo';
 import { OpenShiftExplorer } from '../explorer';
 import { VsCommandError } from '../vscommand';
@@ -72,7 +72,7 @@ export default class OpenShiftItem {
     }
 
     static lengthName(message: string, value: string, offset: number): string | null {
-        return validator.isLength(value, 2, 63 - offset) ? null : message;
+        return validator.isLength(value, {min: 2, max: 63 - offset}) ? null : message;
     }
 
     static validateUrl(message: string, value: string): string | null {
@@ -84,13 +84,12 @@ export default class OpenShiftItem {
     }
 
     static clusterURL(value: string): string | null {
-        const urlRegex = value.match('(https?://[^ ]*)');
-        return urlRegex ? urlRegex[0] : null;
+        const urlRegex = value.match(/--server=(https?:\/\/[^ ]*)/);
+        return urlRegex ? urlRegex[1] : null;
     }
 
     static ocLoginCommandMatches(value: string): string | null {
-        const ocLoginRegex = /oc login (http|https):(.*?) --token=(.*)/;
-        return ocLoginRegex.test(value) ? value : null;
+        return OpenShiftItem.clusterURL(value) !== null && OpenShiftItem.getToken(value) !== null ? value : null;
     }
 
     static getToken(value: string): string | null {

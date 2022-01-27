@@ -15,14 +15,12 @@ import { OdoImpl, ContextType } from '../../../src/odo';
 import { Command } from '../../../src/odo/command';
 import { Progress } from '../../../src/util/progress';
 import * as Util from '../../../src/util/async';
-import { Refs } from '../../../src/util/refs';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
 import { SourceType } from '../../../src/odo/config';
 import { ComponentKind, ComponentTypeAdapter } from '../../../src/odo/componentType';
 import { AddWorkspaceFolder } from '../../../src/util/workspace';
 import pq = require('proxyquire');
 
-import globby = require('globby');
 import fs = require('fs-extra');
 import { Platform } from '../../../src/util/platform';
 
@@ -49,17 +47,15 @@ suite('OpenShift/Component', () => {
     const errorMessage = 'FATAL ERROR';
     let getApps: sinon.SinonStub;
     let Component: any;
-    let fetchTag: sinon.SinonStub;
     let commandStub: sinon.SinonStub;
     let spawnStub: sinon.SinonStub;
 
     setup(() => {
         sandbox = sinon.createSandbox();
         sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
-        fetchTag = sandbox.stub(Refs, 'fetchTag').resolves (new Map<string, string>([['HEAD', 'shanumb']]));
         Component = pq('../../../src/openshift/component', { }).Component;
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '' });
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
         spawnStub = sandbox.stub(OdoImpl.prototype, 'spawn');
         sandbox.stub(OdoImpl.prototype, 'getServices');
         sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([clusterItem]);
@@ -104,7 +100,6 @@ suite('OpenShift/Component', () => {
     suite('create', () => {
         const componentType = new ComponentTypeAdapter(ComponentKind.S2I, 'nodejs', 'latest', 'builder,nodejs');
         const version = 'latest';
-        const ref = 'master';
         const folder = { uri: { fsPath: 'folder' } };
         let inputStub: sinon.SinonStub;
         let progressFunctionStub: sinon.SinonStub;
@@ -212,198 +207,6 @@ suite('OpenShift/Component', () => {
                 const result = await Component.create(appItem);
 
                 expect(result.toString()).equals('');
-            });
-        });
-
-        suite('from git repository', () => {
-            const uri = 'git uri';
-            setup(() => {
-                sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves(['nodejs']);
-                quickPickStub.onFirstCall().resolves(AddWorkspaceFolder);
-                inputStub.onFirstCall().resolves(uri);
-                quickPickStub.onSecondCall().resolves('master');
-                quickPickStub.onThirdCall().resolves(componentType);
-                quickPickStub.onCall(3).resolves(version);
-                inputStub.onSecondCall().resolves(componentItem.getName());
-                sandbox.stub(vscode.window, 'showInformationMessage').resolves();
-                sandbox.stub(vscode.window, 'showOpenDialog').resolves([vscode.Uri.parse('file:///c%3A/Temp')]);
-            });
-
-            test('returns null when no option is selected from quick pick', async () => {
-                quickPickStub.onFirstCall().resolves(undefined);
-                const result = await Component.createFromGit(null);
-                expect(result).null;
-            });
-
-            test('returns null when no folder selected', async () => {
-                quickPickStub.onFirstCall().resolves(undefined);
-                const result = await Component.createFromGit(appItem);
-                expect(result).null;
-            });
-
-            test('happy path works', async () => {
-                const result =  await Component.createFromGit(appItem);
-
-                expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
-                expect(execStub).calledWith(Command.createGitComponent(projectItem.getName(), appItem.getName(), componentType.name, version, componentItem.getName(), uri, ref));
-            });
-
-            test('returns null when no git repo selected', async () => {
-                inputStub.onFirstCall().resolves();
-                const result = await Component.createFromGit(appItem);
-
-                expect(result).null;
-            });
-
-            test('returns null when no component name selected', async () => {
-                inputStub.onFirstCall().resolves();
-                const result = await Component.createFromGit(appItem);
-
-                expect(result).null;
-            });
-
-            test('returns null when no git reference selected', async () => {
-                quickPickStub.onSecondCall().resolves();
-                const result = await Component.createFromGit(appItem);
-
-                expect(result).null;
-            });
-
-            test('returns null when no component type selected', async () => {
-                quickPickStub.onCall(2).resolves();
-                const result = await Component.createFromGit(appItem);
-
-                expect(result).null;
-            });
-
-            test('allows to continue with valid git repository url', async () => {
-                let result: string | Thenable<string>;
-                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
-                    result = await options.validateInput('https://github.com/redhat-developer/vscode-openshift-tools');
-                    return Promise.resolve('https://github.com/redhat-developer/vscode-openshift-tools');
-                });
-
-                await Component.createFromGit(appItem);
-                expect(result).to.be.undefined;
-            });
-
-            test('shows error message when repo does not exist', async () => {
-                fetchTag.resolves (new Map<string, string>());
-                let result: string | Thenable<string>;
-                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
-                    result = await options.validateInput('https://github.com');
-                    return Promise.resolve('https://github.com');
-                });
-
-                await Component.createFromGit(appItem);
-                expect(result).equals('There is no git repository at provided URL.');
-            });
-
-            test('shows error message when invalid URL provided', async () => {
-                let result: string | Thenable<string>;
-                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
-                    result = await options.validateInput('github');
-                    return Promise.resolve('github');
-                });
-
-                await Component.createFromGit(appItem);
-                expect(result).equals('Invalid URL provided');
-            });
-
-            test('shows error message for empty git repository url', async () => {
-                let result: string | Thenable<string>;
-                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
-                    result =  await (async () => options.validateInput(''))();
-                    return Promise.resolve('');
-                });
-
-                await Component.createFromGit(appItem);
-                expect(result).equals('Empty Git repository URL');
-            });
-        });
-
-        suite('from binary file', () => {
-            let fsPath: string; let paths: string;
-            let globbyStub: sinon.SinonStub;
-
-            if (process.platform === 'win32') {
-                fsPath = 'c:\\Users\\Downloads';
-                paths = 'c:\\Users\\Downloads\\sb.jar';
-            } else {
-                fsPath = '/Users/Downloads';
-                paths = '/Users/Downloads';
-            }
-
-            const files = [{
-                _formatted: undefined,
-                _fsPath: undefined,
-                authority: '',
-                fragment: '',
-                fsPath,
-                path: paths,
-                query: '',
-                scheme: 'file'
-            }];
-
-            setup(() => {
-                quickPickStub.onFirstCall().resolves(AddWorkspaceFolder);
-                quickPickStub.onSecondCall().resolves({
-                    description: paths,
-                    label: '$(file-zip) sb.jar'
-                });
-                quickPickStub.onThirdCall().resolves(componentType);
-                quickPickStub.onCall(3).resolves(version);
-                sandbox.stub(vscode.window, 'showOpenDialog').resolves(files);
-                globbyStub = sandbox.stub(globby, 'sync').returns([paths]);
-                inputStub.resolves(componentItem.getName());
-            });
-
-            test('happy path works', async () => {
-                const result = await Component.createFromBinary(appItem);
-
-                expect(result).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
-                expect(execStub).calledWith(Command.createBinaryComponent(projectItem.getName(), appItem.getName(), componentType.name, version, componentItem.getName(), paths, files[0].fsPath));
-            });
-
-            test('returns null when no option is selected from quick pick', async () => {
-                quickPickStub.onSecondCall().resolves(undefined);
-                const result = await Component.createFromBinary(null);
-                expect(result).null;
-            });
-
-            test('returns information message if no binary file present in the context', async () => {
-                quickPickStub.onFirstCall().resolves(AddWorkspaceFolder);
-                globbyStub.onFirstCall().returns([]);
-                const result = await Component.createFromBinary(appItem);
-                expect(result).equals('No binary file present in the context folder selected. We currently only support .jar and .war files. If you need support for any other file, please raise an issue.');
-            });
-
-            test('returns null when no work space folder selected', async () => {
-                quickPickStub.onFirstCall().resolves(undefined);
-                const result = await Component.createFromBinary(appItem);
-
-                expect(result).null;
-            });
-
-            test('returns empty string and step name in cancelled_step property when no binary file selectedd', async () => {
-                quickPickStub.onSecondCall().resolves(undefined);
-                const result = await Component.create(appItem);
-
-                expect(result.toString()).equals('');
-            });
-
-            test('returns empty string and step name in cancelled_step property when no component name selected', async () => {
-                inputStub.resolves();
-                const result = await Component.create(appItem);
-
-                expect(result.toString()).equals('');
-            });
-
-            test('returns null when no component type selected', async () => {
-                quickPickStub.onThirdCall().resolves();
-                const result = await Component.createFromBinary(appItem);
-
-                expect(result).null;
             });
         });
     });
@@ -547,14 +350,13 @@ suite('OpenShift/Component', () => {
 
         test('skips component type selection if devfile exists and use devfile name as initial value for component name', async () => {
             sandbox.stub(fs, 'existsSync').returns(true);
-            const getNameStub = sandbox.stub(Component, 'getName').returns(componentItem.getName());
+            sandbox.stub(Component, 'getName').returns(componentItem.getName());
             sandbox.stub(fs, 'readFileSync').returns(
                 'metadata:\n'  +
                 '  name: componentName'
             );
             const result = await Component.createFromRootWorkspaceFolder(folder, [], undefined, 'componentType1');
             expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
-            expect(getNameStub).calledWith('Component name', Component.odo.getComponents(appItem), appItem.getName(), 'componentName');
         });
 
 
@@ -807,7 +609,7 @@ suite('OpenShift/Component', () => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(appItem);
             quickPickStub.onSecondCall().resolves(componentItem);
-            sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+            sandbox.stub<any, any>(vscode.window, 'showWarningMessage').resolves('Yes');
             execStub.resolves({ error: undefined, stdout: '', stderr: '' });
             sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
             sandbox.stub(vscode.workspace, 'getWorkspaceFolder').returns(wsFolder1);
@@ -819,7 +621,7 @@ suite('OpenShift/Component', () => {
             const result = await Component.del(componentItem);
 
             expect(result).equals(`Component '${componentItem.getName()}' successfully deleted`);
-            expect(execStub).calledWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), true, true));
+            expect(execStub).calledWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), true));
         });
 
         test('works with no context', async () => {
@@ -829,7 +631,7 @@ suite('OpenShift/Component', () => {
             const result = await Component.del(null);
 
             expect(result).equals(`Component '${componentItem.getName()}' successfully deleted`);
-            expect(execStub).calledWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), false, true));
+            expect(execStub).calledWith(Command.deleteComponent(projectItem.getName(), appItem.getName(), componentItem.getName(), false));
         });
 
         test('wraps errors in additional info', async () => {
@@ -863,7 +665,7 @@ suite('OpenShift/Component', () => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(appItem);
             quickPickStub.onSecondCall().resolves(componentItem);
-            sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+            sandbox.stub<any, any>(vscode.window, 'showWarningMessage').resolves('Yes');
             execStub.resolves({ error: undefined, stdout: '', stderr: '' });
             sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
             sandbox.stub(vscode.workspace, 'getWorkspaceFolder').returns(wsFolder1);
@@ -1383,7 +1185,7 @@ suite('OpenShift/Component', () => {
         });
 
         test('request to create url for component if it does not exist, creates the URL if confirmed by user and opens it in browser.' , async () => {
-            sandbox.stub(vscode.window, 'showInformationMessage').resolves('Create');
+            sandbox.stub<any, any>(vscode.window, 'showInformationMessage').resolves('Create');
             commandStub.resolves();
             execStub.onCall(0).resolves({error: undefined, stdout: JSON.stringify({
                 items: [
@@ -1404,14 +1206,14 @@ suite('OpenShift/Component', () => {
         });
 
         test('request to create url for component if it does not exist and exits when not confirmed' , async () => {
-            sandbox.stub(vscode.window, 'showInformationMessage').resolves('Cancel');
+            sandbox.stub<any, any>(vscode.window, 'showInformationMessage').resolves('Cancel');
             sandbox.stub(Component, 'listUrl').resolves(null);
             await Component.openUrl(null);
             expect(commandStub).is.not.called;
         });
 
         test('request to create url for component if it does not exist' , async () => {
-            sandbox.stub(vscode.window, 'showInformationMessage').resolves('Create');
+            sandbox.stub<any, any>(vscode.window, 'showInformationMessage').resolves('Create');
             sandbox.stub(Component, 'listUrl').resolves(null);
             await Component.openUrl(null);
             expect(commandStub).calledOnceWith('openshift.url.create', componentItem);
@@ -1427,7 +1229,7 @@ suite('OpenShift/Component', () => {
                     }
                 }]
             };
-            sandbox.stub(vscode.window, 'showInformationMessage').resolves('Create');
+            sandbox.stub<any, any>(vscode.window, 'showInformationMessage').resolves('Create');
             commandStub.resolves();
             execStub.onCall(0).resolves({error: undefined, stdout: JSON.stringify(unpushedUrl), stderr: ''});
             const result = await Component.openUrl(null);
@@ -1525,13 +1327,11 @@ suite('OpenShift/Component', () => {
             await Component.debug(devfileComponentItem2);
 
             expect(warningStub).calledThrice;
-            expect(warningStub).calledWith('Debug command supports only local Java, Node.Js and Python components.');
+            expect(warningStub).calledWith('Debug command currently supports local components with Java, Node.Js and Python component types.');
         });
 
-        test('starts java debugger for devfile component with java in builder image', async () => {
-            const startDebugging = sandbox.stub().resolves(true);
-            const waitPort = sandbox.stub().resolves()
-            Component = pq('../../../src/openshift/component', {
+        function mockComponent(startDebugging: sinon.SinonStub<any[], any>, waitPort: sinon.SinonStub<any[], any>, exitCode = 0) {
+            return Component = pq('../../../src/openshift/component', {
                 vscode: {
                     debug: {
                         startDebugging
@@ -1544,10 +1344,27 @@ suite('OpenShift/Component', () => {
                                 await cb('- 8888:7777');
                             }
                         },
+                        stderr: {
+                            on: async (event: string, cb: (data: string) => Promise<void>) => {
+                                await cb('Error stream output');
+                            }
+                        },
+                        on: (event: string, cb: (data?: any) => Promise<void>) => {
+                            if (event === 'exit') {
+                                cb(exitCode);
+                            } else if (event !== 'error') {
+                                cb();
+                            }
+                        },
                     }),
                 },
                 'wait-port': waitPort,
             }).Component;
+        }
+        test('starts java debugger for devfile component with java in builder image', async () => {
+            const startDebugging = sandbox.stub().resolves(true);
+            const waitPort = sandbox.stub().resolves(true);
+            Component = mockComponent(startDebugging, waitPort);
 
             const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
             sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
@@ -1564,24 +1381,8 @@ suite('OpenShift/Component', () => {
 
         test('starts python debugger for devfile component with python in builder image', async () => {
             const startDebugging = sandbox.stub().resolves(true);
-            const waitPort = sandbox.stub().resolves()
-            Component = pq('../../../src/openshift/component', {
-                vscode: {
-                    debug: {
-                        startDebugging
-                    }
-                },
-                'child_process': {
-                    exec: () => ({
-                        stdout: {
-                            on: async (event: string, cb: (data: string) => Promise<void>) => {
-                                await cb('- 8888:7777');
-                            }
-                        },
-                    }),
-                },
-                'wait-port': waitPort,
-            }).Component;
+            const waitPort = sandbox.stub().resolves(true)
+            Component = mockComponent(startDebugging, waitPort);
 
             const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
             sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
@@ -1594,6 +1395,52 @@ suite('OpenShift/Component', () => {
             const result = await resultPromise;
             expect(startDebugging).calledOnce;
             expect(result).equals('Debugger session has successfully started.');
+        });
+
+        test('throws error if debug.startDebugging fails to start debug session and returns \'false\'', async () => {
+            const startDebugging = sandbox.stub().resolves(false);
+            const waitPort = sandbox.stub().resolves(true)
+            Component = mockComponent(startDebugging, waitPort);
+
+            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
+            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
+            devfileComponentItem2.builderImage = {
+                name: 'python',
+                tag: undefined
+            };
+            sandbox.stub(vscode.extensions, 'getExtension').returns({} as vscode.Extension<any>);
+            const resultPromise = Component.debug(devfileComponentItem2);
+            let caughtError;
+            try {
+                await resultPromise;
+            } catch (err) {
+                caughtError = err;
+            }
+            expect(startDebugging).calledOnce;
+            expect(caughtError).not.undefined;
+        });
+
+        test('throws error if odo port-forwarding command fails', async () => {
+            const startDebugging = sandbox.stub().resolves(false);
+            const waitPort = sandbox.stub().resolves(true)
+            Component = mockComponent(startDebugging, waitPort, 1);
+
+            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
+            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
+            devfileComponentItem2.builderImage = {
+                name: 'python',
+                tag: undefined
+            };
+            sandbox.stub(vscode.extensions, 'getExtension').returns({} as vscode.Extension<any>);
+            const resultPromise = Component.debug(devfileComponentItem2);
+            let caughtError;
+            try {
+                await resultPromise;
+            } catch (err) {
+                caughtError = err;
+            }
+            expect(startDebugging).not.called;
+            expect(caughtError).not.undefined;
         });
     });
 });

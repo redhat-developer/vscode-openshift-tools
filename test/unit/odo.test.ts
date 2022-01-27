@@ -6,7 +6,7 @@
 import * as sinon from 'sinon';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
-import { window, Terminal, workspace } from 'vscode';
+import { window, workspace } from 'vscode';
 import { ExecException } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -111,7 +111,7 @@ suite('odo', () => {
         });
 
         test('executeInTerminal send command to terminal and shows it', async () => {
-            const termFake: Terminal = {
+            const termFake: any = {
                 name:  'name',
                 processId: Promise.resolve(1),
                 sendText: sinon.stub(),
@@ -136,7 +136,7 @@ suite('odo', () => {
 
         setup(() => {
             execStub = sandbox.stub(odoCli, 'execute');
-            yamlStub = sandbox.stub(jsYaml, 'safeLoad');
+            yamlStub = sandbox.stub<any, any>(jsYaml, 'safeLoad');
             sandbox.stub(fs, 'readFileSync');
         });
 
@@ -218,8 +218,8 @@ suite('odo', () => {
             });
             const result = await odoCli.getApplications(project);
 
-            expect(result.length).equals(2);
-            expect(result[1].getName()).equals('app1');
+            expect(result.length).equals(1);
+            expect(result[0].getName()).equals('app1');
         });
 
         test('getApplications returns empty list if no odo apps are present', async () => {
@@ -235,7 +235,7 @@ suite('odo', () => {
             });
             const result = await odoCli.getApplications(project);
 
-            expect(result).length(1);
+            expect(result).length(0);
         });
 
         test('getComponents returns components list for an application', async () => {
@@ -258,8 +258,8 @@ suite('odo', () => {
             });
             const result = await odoCli.getApplications(project);
 
-            expect(result).length(2);
-            expect(result[1].getName()).equals('component1');
+            expect(result).length(1);
+            expect(result[0].getName()).equals('component1');
         });
 
         test('getServices returns services for an application', async () => {

@@ -185,7 +185,7 @@ suite('OpenShift/URL', () => {
         getApplicationNamesStub = sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         getComponentsNameStub = sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
         sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: '', stdout: '', stderr: ''});
+        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
     });
 
     teardown(() => {
@@ -337,7 +337,7 @@ suite('OpenShift/URL', () => {
             quickPickStub.onFirstCall().resolves(appItem);
             quickPickStub.onSecondCall().resolves(componentItem);
             quickPickStub.onThirdCall().resolves(routeItem);
-            warnStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves('Yes');
+            warnStub = sandbox.stub<any, any>(vscode.window, 'showWarningMessage').resolves('Yes');
         });
 
         test('works with set tree item', async () => {

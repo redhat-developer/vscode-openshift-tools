@@ -86,14 +86,13 @@ export class CliChannel implements Cli {
             }
             cp.exec(cmd, opts, (error: cp.ExecException, stdout: string, stderr: string) => {
                 // filter out info about update
-                const stdoutFiltered = stdout.replace(/---[\s\S]*$/g, '').trim();
                 this.odoChannel.print(cmd);
-                this.odoChannel.print(stdoutFiltered);
+                this.odoChannel.print(stdout);
                 this.odoChannel.print(stderr);
                 // do not reject it here, because caller in some cases need the error and the streams
                 // to make a decision
                 // Filter update message text which starts with `---`
-                resolve({ error, stdout: stdoutFiltered, stderr, cwd: opts.cwd });
+                resolve({ error, stdout: stdout.trim(), stderr: stderr.trim(), cwd: opts?.cwd?.toString() });
             });
         });
     }

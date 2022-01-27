@@ -22,7 +22,7 @@ suite('Oc', () => {
     let detectOrDownloadStub: sinon.SinonStub<[string], Promise<string>>;
     let warnStub: sinon.SinonStub<[string, import('vscode').MessageOptions, ...import('vscode').MessageItem[]], Thenable<import('vscode').MessageItem>>;
     let execStub: sinon.SinonStub;
-    let quickPickStub: sinon.SinonStub<[import('vscode').QuickPickItem[] | Thenable<import('vscode').QuickPickItem[]>, import('vscode').QuickPickOptions?, import('vscode').CancellationToken?], Thenable<import('vscode').QuickPickItem>>;
+    let quickPickStub: sinon.SinonStub;
     const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
     const projectItem = new TestItem(clusterItem, 'myproject', ContextType.PROJECT);
 
@@ -90,7 +90,7 @@ suite('Oc', () => {
             stderr: '',
             stdout: 'imagestream.image.openshift.io/spring-petclinic created\ndeploymentconfig.apps.openshift.io/spring-petclinic created'
         });
-        sandbox.stub(window, 'showInformationMessage').resolves('Save');
+        sandbox.stub<any, any>(window, 'showInformationMessage').resolves('Save');
         quickPickStub.onFirstCall().resolves(projectItem);
         sandbox.stub(window, 'activeTextEditor').value({
             document: {
