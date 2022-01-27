@@ -112,7 +112,7 @@ export default function addSandboxView(props): JSX.Element {
                                     disabled={inProgress}
                                     variant='outlined'
                                     onClick={ handleLoginButton }>
-                                    Login { inProgress && <CircularProgress style= {{ marginLeft: '10px' }} size={20}/>}
+                                    Login to Red Hat{ inProgress && <CircularProgress style= {{ marginLeft: '10px' }} size={20}/>}
                                 </LoadingButton>
                             </Tooltip>
                         </Toolbar>
@@ -156,7 +156,7 @@ export default function addSandboxView(props): JSX.Element {
                         {(currentState.errorCode) && (
                             <>
                                 <Typography component="p">
-                                    Could not detect Developer Sandbox instance status 
+                                    Could not detect Developer Sandbox instance status
                                 </Typography>
                                 <Button style= {{ margin: '20px' }} className={classes.button} variant='outlined' onClick={handleTryAgainButton}>Try Again</Button>
                             </>
@@ -331,7 +331,7 @@ export default function addSandboxView(props): JSX.Element {
                     <Box sx={{ flexGrow: 1 }}>
                         <AppBar position="static" style={{ background: 'var(--vscode-list-inactiveSelectionBackground)' }}>
                             <Toolbar>
-                                <Typography variant="body1" component="p" sx={{ flexGrow: 1, marginLeft: 10 }}>
+                                <Typography variant="body1" component="p" sx={{ flexGrow: 1, marginLeft: 10, marginTop: 10, color: 'var(--vscode-foreground)' }}>
                                     <Tooltip title={currentState.statusInfo}>
                                             <IconButton
                                                 size="large"
@@ -351,9 +351,16 @@ export default function addSandboxView(props): JSX.Element {
                                     </a>
                                 </Tooltip>
                                 <Tooltip title="Connect in OpenShift Application View" placement="bottom">
-                                    <ColorButton onClick={handleLoginButton}>Login</ColorButton>
+                                    <ColorButton onClick={handleLoginButton}>Login to Sandbox</ColorButton>
                                 </Tooltip>
                             </Toolbar>
+                            <Typography variant="caption" display="block" style={{ textAlign:'left', margin: '20px 70px', color: 'var(--vscode-foreground)' }}>
+                                Next steps to connect with Developer Sandbox:<br></br>
+                                1. Click on <strong>Open Dashboard button</strong>. In the browser, login using <strong>DevSandbox</strong> and once loggedin, click on username dropdown.<br></br>
+                                2. Select <strong>Copy Login command</strong>. Once the new tab is opened, copy the entire <strong>Log in with this token</strong> command.<br></br>
+                                3. Come back to IDE and press <strong>'Login To Sandbox'</strong> Button. This will login your DevSandbox in OpenShift Application View.<br></br>
+                                4. Once successfully logged in, start creating applications and deploy on cluster.
+                            </Typography>
                         </AppBar>
                     </Box>
                 )}
