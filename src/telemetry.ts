@@ -47,4 +47,25 @@ export interface NewComponentCommandProps {
     'use_existing_devfile': boolean;
 }
 
-export type AllProps = Partial<CommonCommandProps & NewComponentCommandProps>;
+export type TelemetryProps = Partial<CommonCommandProps & NewComponentCommandProps>;
+
+export class ExtCommandTelemetryEvent {
+    private startTime: number;
+    constructor(public readonly commandId: string) {
+        this.startTime = Date.now();
+    }
+
+    send(properties: TelemetryProps = {}) {
+        const eventProps = {
+            ...properties,
+            identifier: this.commandId,
+            duration: Date.now() - this.startTime,
+        };
+        sendTelemetry('command', eventProps);
+    }
+
+    sendError(error: string) {
+        this.send({error})
+    }
+
+}

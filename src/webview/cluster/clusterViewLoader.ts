@@ -11,6 +11,8 @@ import { WindowUtil } from '../../util/windowUtils';
 import { CliChannel } from '../../cli';
 import { vsCommand } from '../../vscommand';
 import { createSandboxAPI } from '../../openshift/sandbox';
+import { ExtCommandTelemetryEvent } from '../../telemetry';
+import { Cluster } from '../../openshift/cluster';
 
 let panel: vscode.WebviewPanel;
 
@@ -64,17 +66,23 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
             break;
         case 'sandboxRequestSignup':
+            const telemetryEventSignup = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxRequestSignup');
             try {
                 const signupResponse = await sandboxAPI.signUp((sessionCheck as any).idToken);
                 panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
                 if (!signupResponse) {
                     vscode.window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
+                    telemetryEventSignup.sendError('Sign up request for OpenShift Sandbox failed.');
+                } else {
+                    telemetryEventSignup.send();
                 }
             } catch(ex) {
                 vscode.window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
+                telemetryEventSignup.sendError('Sign up request for OpenShift Sandbox timed out.');
             }
             break;
         case 'sandboxLoginRequest':
+            const telemetryEventLogin = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxLoginRequest');
             try {
                 const session: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: true });
                 if (session) {
@@ -82,12 +90,14 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 } else {
                     panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
                 }
+                telemetryEventLogin.send();
             } catch (ex) {
                 panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
+                telemetryEventLogin.sendError('Request for authentication session failed.');
             }
             break;
         case 'sandboxDetectStatus':
-            // how to handle errors and timeouts
+            const telemetryEventDetect = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxDetectStatus');
             try {
                 const signupStatus = await sandboxAPI.getSignUpStatus((sessionCheck as any).idToken);
                 if (!signupStatus) {
@@ -113,43 +123,61 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                         }
                     }
                 }
+                telemetryEventDetect.send();
             } catch(ex) {
-                vscode.window.showErrorMessage('OpenShift Sandbox status request failed, please try again.')
+                vscode.window.showErrorMessage('OpenShift Sandbox status request timed out, please try again.')
                 panel.webview.postMessage({action: 'sandboxPageDetectStatus', errorCode: 'statusDetectionError'});
+                telemetryEventDetect.sendError('OpenShift Sandbox status request timed out.');
             }
             break;
         case 'sandboxRequestVerificationCode': {
+            const telemetryEventRequestCode = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxRequestVerificationCode');
             try {
                 const requestStatus = await sandboxAPI.requestVerificationCode((sessionCheck as any).idToken, event.payload.fullCountryCode, event.payload.rawPhoneNumber);
                 if (requestStatus) {
                     panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode'});
+                    telemetryEventRequestCode.send();
                 } else {
                     vscode.window.showErrorMessage('Request for verification code failed, please try again.');
                     panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                    telemetryEventRequestCode.sendError('Request for verification code failed.');
                 }
             } catch (ex) {
-                vscode.window.showErrorMessage('Request for verification code failed, please try again.');
+                vscode.window.showErrorMessage('Request for verification code timed out, please try again.');
                 panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                telemetryEventRequestCode.sendError('Request for verification code timed out.');
             }
             break;
         }
         case 'sandboxValidateVerificationCode': {
+            const telemetryEventValidateCode = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxValidateVerificationCode');
             try {
                 const requestStatus = await sandboxAPI.validateVerificationCode((sessionCheck as any).idToken, event.payload.verificationCode);
                 if (requestStatus) {
                     panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+                    telemetryEventValidateCode.send();
                 } else {
                     vscode.window.showErrorMessage('Verification code does not match, please try again.');
                     panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                    telemetryEventValidateCode.sendError('Verification code does not match');
                 }
             } catch(ex) {
-                vscode.window.showErrorMessage('Verification code validation request failed, please try again.');
+                vscode.window.showErrorMessage('Verification code validation request timed out, please try again.');
                 panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                telemetryEventValidateCode.sendError('Verification code validation request failed');
             }
             break;
         }
         case 'sandboxLoginUsingDataInClipboard':
-            vscode.commands.executeCommand('openshift.explorer.login.clipboard');
+            const telemetryEventLoginToSandbox = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxLoginUsingDataInClipboard');
+            try {
+                const result = await Cluster.loginUsingClipboardInfo();
+                if (result) vscode.window.showInformationMessage(`${result}`);
+                telemetryEventLoginToSandbox.send();
+            } catch (err) {
+                vscode.window.showErrorMessage(err.message);
+                telemetryEventLoginToSandbox.sendError('Login into Sandbox Cluster failed.')
+            }
             break;
     }
 }

@@ -8,7 +8,7 @@
 
 import { commands, Disposable, window } from 'vscode';
 import * as stackTraceParser from 'stacktrace-parser';
-import sendTelemetry, { AllProps, CommonCommandProps } from './telemetry';
+import sendTelemetry, { TelemetryProps, CommonCommandProps } from './telemetry';
 import { ExtenisonID } from './util/constants';
 
 type VsCommandFunction = (...args: any[]) => Promise<any> | any;
@@ -21,11 +21,11 @@ interface VsCommand {
 
 export interface Result<ReturnType> {
     value: ReturnType;
-    properties: AllProps;
+    properties: TelemetryProps;
 }
 
 export class VsCommandError extends Error {
-    constructor(message: string, public readonly telemetryMessage = message, public readonly parent?, public readonly telemetryProps: AllProps = {}) {
+    constructor(message: string, public readonly telemetryMessage = message, public readonly parent?, public readonly telemetryProps: TelemetryProps = {}) {
         super(message);
         Object.setPrototypeOf(this, new.target.prototype);
     }
