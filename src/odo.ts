@@ -695,7 +695,8 @@ export class OdoImpl implements Odo {
 
     public async _getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
-        return this.loadItems<Storage>(result).map<OpenShiftObject>((value) => new OpenShiftStorage(component, value.metadata.name, value.spec.path));
+        const storageList = this.loadItems<Storage>(result).map<OpenShiftObject>((value) => new OpenShiftStorage(component, value.metadata.name, value.spec.path));
+        return [...new Map(storageList.map(storage=>[storage.label, storage])).values()];
     }
 
     public async getServiceOperators(): Promise<ServiceOperatorShortInfo[]> {
