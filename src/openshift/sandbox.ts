@@ -32,7 +32,11 @@ export interface SBStatus {
  }
 
 export function getSandboxAPIUrl(): string {
-    return workspace.getConfiguration('openshiftConnector').get('sandboxAPIHostUrl');
+    return workspace.getConfiguration('openshiftConnector').get('sandboxApiHostUrl');
+}
+
+export function getSandboxAPITimeout(): number {
+    return workspace.getConfiguration('openshiftConnector').get('sandboxApiTimeout');
 }
 
 export interface SandboxAPI {
@@ -49,7 +53,7 @@ export async function getSignUpStatus(token: string): Promise<SBSignupResponse |
                 Authorization: `Bearer ${token}`
             },
             cache: 'no-cache',
-            timeout: 10000
+            timeout: getSandboxAPITimeout()
         });
     return signupResponse.ok ? signupResponse.json() as Promise<SBSignupResponse> : undefined;
 }
@@ -60,7 +64,7 @@ export async function signUp(token: string): Promise<boolean> {
             headers: {
                 Authorization: `Bearer ${token}`
             },
-            timeout: 10000
+            timeout: getSandboxAPITimeout()
         });
     return signupResponse.ok;
 }
@@ -71,7 +75,7 @@ export async function requestVerificationCode(token: string, countryCode: string
         headers: {
             Authorization: `Bearer ${token}`
         },
-        timeout: 100000,
+        timeout: getSandboxAPITimeout(),
         body: JSON.stringify({
             'country_code': countryCode,
             'phone_number': phoneNumber
@@ -87,7 +91,7 @@ export async function validateVerificationCode(token: string, code: string): Pro
         headers: {
             Authorization: `Bearer ${token}`
         },
-        timeout: 100000
+        timeout: getSandboxAPITimeout()
     });
 
     return validationRequestResponse.ok;

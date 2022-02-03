@@ -701,7 +701,6 @@ export class OdoImpl implements Odo {
 
     public async getServiceOperators(): Promise<ServiceOperatorShortInfo[]> {
         // TODO: error reporting does not look right
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let items: ServiceOperatorShortInfo[];
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogOperatorBackedServices(), Platform.getUserHomePath(), false);
         try {

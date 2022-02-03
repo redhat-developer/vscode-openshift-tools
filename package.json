@@ -1528,77 +1528,86 @@
         }
       ]
     },
-    "configuration": {
+    "configuration": [{
       "type": "object",
+      "order": 1,
       "title": "OpenShift Connector",
       "properties": {
         "openshiftConnector.showWelcomePage": {
-          "title": "Show Welcome Page",
           "type": "boolean",
           "default": true,
           "description": "Show Welcome Page when using OpenShift Connector Extension"
         },
         "openshiftConnector.showChannelOnOutput": {
-          "title": "Show channel on output",
           "type": "boolean",
           "default": false,
           "description": "Show OpenShift Connector output channel when new text added to output stream."
         },
         "openshiftConnector.outputVerbosityLevel": {
-          "title": "Output Verbosity Level",
           "type": "number",
           "default": 0,
           "description": "Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and integrated terminal."
         },
         "openshiftConnector.searchForToolsInPath": {
-          "Title": "Search CLI tools in PATH locations before using included binaries",
           "type": "boolean",
           "default": false,
           "description": "Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries."
         },
         "openshiftConnector.useWebviewInsteadOfTerminalView": {
-          "Title": "Use Webview based editors to show 'Show Log', 'Follow Log', 'Watch Log' and 'Describe' commands output",
           "type": "boolean",
           "default": false,
           "description": "By default the Terminal View is used to execute OpenShift 'Show Log', 'Follow Log', 'Watch Log' and 'Describe' commands. Select this option if you want to use Webview based editors for it."
-        },
+        }
+      }
+    },
+    {
+      "type": "object",
+      "order": 2,
+      "title": "Red Hat CodeReady Containers",
+      "properties": {
         "openshiftConnector.crcBinaryLocation": {
-          "Title": "CRC Executable Location",
           "type": "string",
           "default": null,
           "description": "Provide the path where the crc executable is present."
         },
         "openshiftConnector.crcPullSecretPath": {
-          "Title": "CRC Pull Secret Path",
           "type": "string",
           "default": null,
           "description": "Path of image pull secret."
         },
         "openshiftConnector.crcCpuCores": {
-          "Title": "CRC Cpu Cores",
           "type": "number",
           "default": 4,
           "description": "Number of CPU cores to allocate to the OpenShift cluster as selected during the first run"
         },
         "openshiftConnector.crcMemoryAllocated": {
-          "Title": "CRC Memory Allocation",
           "type": "number",
           "default": 9216,
           "description": "MiB of memory to allocate to the OpenShift cluster as selected during the first run"
         },
         "openshiftConnector.crcNameserver": {
-          "Title": "CRC Domain Name Server",
           "type": "string",
           "default": "",
           "description": "IP address/name of DNS to use with CRC"
-        },
-        "openshiftConnector.sandboxAPIHostUrl": {
-          "title": "OpenShift Sandbox API Host URL",
-          "type": "string",
-          "default": "https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com"
         }
       }
-    }
+    },
+    {
+      "type": "object",
+      "order": 3,
+      "title": "Developer Sandbox for Red Hat OpenShift",
+      "properties": {
+        "openshiftConnector.sandboxApiHostUrl": {
+          "type": "string",
+          "default": "https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com"
+        },
+        "openshiftConnector.sandboxApiTimeout": {
+          "description": "Controls timeout for requests to OpenShift Sandbox Registration Service. Increase timeout value in case of unexpected errors in OpenShift Sandbox Provisioning workflow.",
+          "type": "number",
+          "default": 100000
+        }
+      }
+    }]
   },
   "extensionDependencies": [
     "redhat.vscode-redhat-account"
