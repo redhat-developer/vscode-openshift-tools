@@ -21,10 +21,13 @@ const sandboxAPI = createSandboxAPI();
 
 async function clusterEditorMessageListener (event: any ): Promise<any> {
 
-    const sessionCheck: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: false });
-    if(!sessionCheck && event.action !== 'sandboxLoginRequest') {
-        panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
-        return;
+    let sessionCheck: vscode.AuthenticationSession;
+    if (event.action?.startsWith('sandbox')) {
+        sessionCheck = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: false });
+        if(!sessionCheck && event.action !== 'sandboxLoginRequest') {
+            panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
+            return;
+        }
     }
 
     switch (event.action) {
