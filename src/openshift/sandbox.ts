@@ -32,11 +32,11 @@ export interface SBStatus {
  }
 
 export function getSandboxAPIUrl(): string {
-    return workspace.getConfiguration('openshiftConnector').get('sandboxAPIHostUrl');
+    return workspace.getConfiguration('openshiftConnector').get('sandboxApiHostUrl');
 }
 
 export function getSandboxAPITimeout(): number {
-    return workspace.getConfiguration('openshiftConnector').get('sandboxAPITimeout');
+    return workspace.getConfiguration('openshiftConnector').get('sandboxApiTimeout');
 }
 
 export interface SandboxAPI {
