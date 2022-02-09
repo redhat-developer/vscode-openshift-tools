@@ -207,9 +207,15 @@ export default function addSandboxView(props): JSX.Element {
         const handleRequestVerificationCode = () => {
             const rawPhoneNumber = phoneNumber.slice(countryCode.length);
             const fullCountryCode = '+' + countryCode;
+            
             setInProgress(true);
             postMessage('sandboxRequestVerificationCode', { rawPhoneNumber, fullCountryCode });
         }
+
+        const isValid = (value, country) => {
+            const validNumberCount = (country.format.match(/\./g) || []).length;
+            return value.length === validNumberCount;
+        };
 
         return (
             <>
@@ -219,6 +225,8 @@ export default function addSandboxView(props): JSX.Element {
                         country={"us"}
                         value={phoneNumber}
                         onChange={handlePhoneNumber}
+                        isValid={isValid}
+                        disabled={inProgress}
                         />
                         <Button
                             style = {{ margin: '20px' }}
