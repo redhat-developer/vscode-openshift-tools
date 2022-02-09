@@ -7,24 +7,6 @@
 import { workspace } from 'vscode';
 import { Platform } from '../util/platform';
 
-function verbose(_target: any, key: string, descriptor: any): void {
-    let fnKey: string | undefined;
-    let fn: Function | undefined;
-
-    if (typeof descriptor.value === 'function') {
-        fnKey = 'value';
-        fn = descriptor.value;
-    } else {
-        throw new Error('not supported');
-    }
-
-    descriptor[fnKey] = function(...args: any[]): any {
-        const v = workspace.getConfiguration('openshiftConnector').get('outputVerbosityLevel');
-        const command = fn.apply(this, args);
-        return v > 0 ? command.addOption('-v', v): command;
-    };
-}
-
 const QUOTE = Platform.OS === 'win32' ? '"' : '\'';
 
 export class CommandOption {
@@ -71,6 +53,24 @@ export class CommandText {
        this.options.push(option);
        return this;
     }
+}
+
+function verbose(_: unknown, key: string, descriptor: TypedPropertyDescriptor<Function>): void {
+    let fnKey: string | undefined;
+    let fn: Function | undefined;
+
+    if (typeof descriptor.value === 'function') {
+        fnKey = 'value';
+        fn = descriptor.value;
+    } else {
+        throw new Error('not supported');
+    }
+
+    descriptor[fnKey] = function(...args: unknown[]): unknown {
+        const v = workspace.getConfiguration('openshiftConnector').get<number>('outputVerbosityLevel');
+        const command = fn.apply(this, args) as CommandText;
+        return v > 0 ? command.addOption(new CommandOption('-v', `${v}`)): command;
+    };
 }
 
 export class Command {
@@ -167,7 +167,7 @@ export class Command {
     }
 
     static listCatalogComponentsJson(): CommandText {
-        return new CommandText(`${Command.listCatalogComponents()} -o json`);
+        return new CommandText(`${Command.listCatalogComponents().toString()} -o json`);
     }
 
     static listCatalogServices(): CommandText {
@@ -179,7 +179,7 @@ export class Command {
     }
 
     static listCatalogServicesJson(): CommandText {
-        return new CommandText(`${Command.listCatalogServices()} -o json`);
+        return new CommandText(`${Command.listCatalogServices().toString()} -o json`);
     }
 
     static listStorageNames(): CommandText {
@@ -352,7 +352,6 @@ export class Command {
     static showLogAndFollow(): CommandText {
         return Command.showLog().addOption(new CommandOption('-f'));
     }
-
 
     static listComponentPorts(project: string, app: string, component: string): CommandText {
         return new CommandText('oc get service',
