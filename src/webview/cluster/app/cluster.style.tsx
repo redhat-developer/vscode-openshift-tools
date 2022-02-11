@@ -53,9 +53,10 @@ export default (theme: Theme) =>
       marginBottom: theme.spacing(2)
     },
     button: {
-      color: 'white',
+      color: 'var(--vscode-button-foreground)',
       backgroundColor: '#EE0000',
       '&:hover': {
+        color: 'var(--vscode-button-foreground)',
         backgroundColor: '#BE0000',
       },
       textTransform: "none"

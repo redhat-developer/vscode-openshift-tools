@@ -11,9 +11,6 @@ import Toolbar from '@mui/material/Toolbar';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';
-import LoadingButton from '@mui/lab/LoadingButton';
-import { red } from '@mui/material/colors';
 import Tooltip from '@mui/material/Tooltip';
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css'
@@ -32,18 +29,7 @@ export default function addSandboxView(props): JSX.Element {
 
     const messageListener = (event) => {
         if (event?.data?.action) {
-            // switch (event.data.action) {
-            //     case 'sandboxPageLoginRequired':
-            //     case 'sandboxPageDetectStatus':
-            //     case 'sandboxPageRequestSignup':
-            //     case 'sandboxPageRequestVerificationCode':
-            //     case 'sandboxPageEnterVerificationCode':
-            //     case 'sandboxPageWaitingForApproval':
-            //     case 'sandboxPageWaitingForProvision':
-            //     case 'sandboxPageProvisioned':
             setCurrentState(event.data);
-            //         break;
-            // }
         }
     }
 
@@ -56,14 +42,6 @@ export default function addSandboxView(props): JSX.Element {
     React.useEffect(() => {
         postMessage('sandboxCheckAuthSession');
     }, []);
-
-    const ColorButton = styled(Button)(({ theme }) => ({
-        color: theme.palette.getContrastText(red[500]),
-        backgroundColor: red[500],
-        '&:hover': {
-          backgroundColor: red[700],
-        },
-      }));
 
     const DetectAuthSession = () => {
         return (
@@ -94,26 +72,28 @@ export default function addSandboxView(props): JSX.Element {
                     <AppBar position="static" style={{ background: 'var(--vscode-list-inactiveSelectionBackground)' }}>
                         <Toolbar>
                             <Typography variant="body2" component="p" sx={{ flexGrow: 1 }}>
-                                Sign up a new Red Hat developer account or Login to existing account to start using Developer Sandbox on Red Hat OpenShift.
+                                Sign up a new Red Hat developer account or Login to existing account<br/>to start using Developer Sandbox on Red Hat OpenShift.
                             </Typography>
                             {(currentState.errorCode === 'loginTimedOut') && (
                                 <div>Login command timed out. Please try again.</div>
                             )}
                             <Tooltip title="Register a new Red Hat account" placement="bottom">
-                                <ColorButton
+                                <Button
                                     href='https://www.redhat.com/en/program-developers'
                                     variant="contained"
+                                    className={classes.buttonSecondary}
                                     style= {{ marginRight: '10px' }}>
                                         Sign Up
-                                </ColorButton>
+                                </Button>
                             </Tooltip>
                             <Tooltip title="Login to Red Hat account" placement="bottom">
-                                <LoadingButton
+                                <Button
+                                    className={classes.button}
                                     disabled={inProgress}
-                                    variant='outlined'
+                                    variant='contained'
                                     onClick={ handleLoginButton }>
                                     Login to Red Hat{ inProgress && <CircularProgress style= {{ marginLeft: '10px' }} size={20}/>}
-                                </LoadingButton>
+                                </Button>
                             </Tooltip>
                         </Toolbar>
                     </AppBar>
@@ -158,7 +138,7 @@ export default function addSandboxView(props): JSX.Element {
                                 <Typography component="p">
                                     Could not detect Developer Sandbox instance status
                                 </Typography>
-                                <Button style= {{ margin: '20px' }} className={classes.button} variant='outlined' onClick={handleTryAgainButton}>Try Again</Button>
+                                <Button style= {{ margin: '20px' }} className={classes.button} variant='contained' onClick={handleTryAgainButton}>Try Again</Button>
                             </>
                         )}
                     </div>
@@ -179,12 +159,13 @@ export default function addSandboxView(props): JSX.Element {
             <>
                 {( currentState.action === 'sandboxPageRequestSignup' ) && (
                     <div>
-                        You have not signed up for Developer Sandbox for Red Hat OpenShift. Provision your free Red Hat OpenShift development cluster and get started.<br/>
+                        You have not signed up for Developer Sandbox for Red Hat OpenShift.<br/>
+                        Provision your free Red Hat OpenShift development cluster and get started.
                         <Button
                             style= {{ margin: '20px' }}
                             className={classes.button}
                             disabled={inProgress}
-                            variant='outlined'
+                            variant='contained'
                             onClick={handleSignupButton}>Get started in the Sandbox{ inProgress && <CircularProgress style= {{  marginLeft: '10px' }} size={20}/>}</Button>
                     </div>
                 )}
@@ -220,16 +201,19 @@ export default function addSandboxView(props): JSX.Element {
         return (
             <>
                 {( currentState.action === 'sandboxPageRequestVerificationCode' ) && (
-                    <div style = {{ margin: '20px', textAlign: 'left', left: '40%', position: 'relative' }}>
+                    <div style = {{ margin: '20px', position: 'relative', display: 'inline-block', width: '100%' }}>
                         <PhoneInput
                         country={"us"}
                         value={phoneNumber}
                         onChange={handlePhoneNumber}
                         isValid={isValid}
                         disabled={inProgress}
+                        containerStyle={{display: 'inline-flex', width: 'unset'}}
+                        dropdownStyle={{position: 'fixed', margin: '0px 0 10px -1px'}}
+                        inputStyle={{width: 'unset'}}
                         />
                         <Button
-                            style = {{ margin: '20px' }}
+                            style = {{ margin: '20px 20px 22px 20px' }}
                             className={classes.button}
                             size="medium"
                             disabled={inProgress}
@@ -269,23 +253,23 @@ export default function addSandboxView(props): JSX.Element {
                 {( currentState.action === 'sandboxPageEnterVerificationCode' ) && (
                     <div style={{ margin: '20px' }}>
                         <TextField id='code'
-                            style = {{ marginRight: '10px' }}
+                            style={{ marginRight: '10px', marginTop: '8px', color: 'var(--vscode-input-foreground)' }}
                             disabled={inProgress}
                             onChange={handleVerifyCode}
                             label='Verification Code'
                             variant='outlined'
-                            size="small"
+                            size='small'
                         />
                         <Button
                             style = {{ marginRight: '10px' }}
                             className={classes.button}
                             size="medium"
                             disabled={inProgress}
-                            variant='contained'
+                            variant='outlined'
                             onClick={handleCheckVerificationCode}>
                                 Verify { inProgress && <CircularProgress style= {{  marginLeft: '10px' }} size={20}/>}
                         </Button>
-                        <Button className={classes.button} size="medium" variant='outlined' onClick={ handlRequesteNewCodeRequest }>Request New Code</Button>
+                        <Button className={classes.buttonSecondary} size="medium" variant='outlined' onClick={ handlRequesteNewCodeRequest }>Request New Code</Button>
                     </div>
                 )}
             </>
@@ -354,12 +338,10 @@ export default function addSandboxView(props): JSX.Element {
                                     Your sandbox account has been provisioned and is ready to use.
                                 </Typography>
                                 <Tooltip title="Launch your Sandbox console in browser" placement="bottom">
-                                    <a href={currentState.consoleDashboard} style={{ textDecoration: 'none'}}>
-                                        <Button variant="contained" className={classes.button} style={{ marginBottom: '8px'}}>Open Dashboard</Button>
-                                    </a>
+                                    <Button variant="contained" className={classes.button} href={currentState.consoleDashboard}>Open Dashboard</Button>
                                 </Tooltip>
                                 <Tooltip title="Connect in OpenShift Application View" placement="bottom">
-                                    <ColorButton onClick={handleLoginButton}>Login to Sandbox</ColorButton>
+                                    <Button variant="contained" className={classes.buttonSecondary} onClick={handleLoginButton}>Login to Sandbox</Button>
                                 </Tooltip>
                             </Toolbar>
                             <Typography variant="caption" display="block" style={{ textAlign:'left', margin: '20px 70px', color: 'var(--vscode-foreground)' }}>
