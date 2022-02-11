@@ -66,11 +66,14 @@ createStyles({
     }
   },
   button: {
+    whiteSpace: 'nowrap',
+    display: 'inline-block',
     marginTop: theme.spacing(1),
     marginRight: theme.spacing(1),
     backgroundColor: 'var(--vscode-button-background)',
     color: 'var(--vscode-button-foreground)',
     '&:hover' :{
+      color: 'var(--vscode-button-foreground)',
       backgroundColor: 'var(--vscode-button-hoverBackground)',
       cursor: 'pointer'
     },
@@ -83,6 +86,8 @@ createStyles({
     }
   },
   buttonSecondary: {
+    whiteSpace: 'nowrap',
+    display: 'inline-block',
     marginTop: theme.spacing(1),
     marginRight: theme.spacing(1),
     backgroundColor: 'var(--vscode-button-secondaryBackground)',
@@ -116,7 +121,9 @@ createStyles({
   },
   textContainer: {
     color: 'var(--vscode-input-foreground)',
-    fontFamily: 'var(--vscode-editor-font-family)'
+    background: 'var(--vscode-input-background)',
+    fontFamily: 'var(--vscode-editor-font-family)',
+
   },
   icon: {
     verticalAlign: "bottom",
