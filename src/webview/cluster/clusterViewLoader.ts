@@ -161,12 +161,12 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                     telemetryEventValidateCode.send();
                 } else {
                     vscode.window.showErrorMessage('Verification code does not match, please try again.');
-                    panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                    panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode', errorCode: 'verificationFailed'});
                     telemetryEventValidateCode.sendError('Verification code does not match');
                 }
             } catch(ex) {
                 vscode.window.showErrorMessage('Verification code validation request timed out, please try again.');
-                panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode', errorCode: 'verificationFailed'});
                 telemetryEventValidateCode.sendError('Verification code validation request failed');
             }
             break;

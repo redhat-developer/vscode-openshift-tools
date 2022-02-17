@@ -62,9 +62,9 @@ export default (theme: Theme) =>
       textTransform: "none"
     },
     cardContent: {
-      background: 'var(--vscode-list-inactiveSelectionBackground)',
-      border: '1px solid var(--vscode-list-inactiveSelectionBackground)',
-      color: 'var(--vscode-foreground)'
+      background: 'var(--vscode-settings-focusedRowBackground)',
+      border: '1px solid var(--vscode-settings-focusedRowBorder)',
+      color: 'var(--vscode-foreground)',
     },
     image: {
        maxHeight: '100%',
