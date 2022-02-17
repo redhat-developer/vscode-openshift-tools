@@ -51,8 +51,9 @@ createStyles({
     '& .MuiTypography-colorTextSecondary': {
       color: 'var(--vscode-foreground)'
     },
-    '& .MuiButton-root.Mui-disabled': {
-      color: 'var(--vscode-button-secondaryForeground)'
+    '& .MuiButton-contained.Mui-disabled': {
+      opacity: '0.4',
+      backgroundColor: 'var(--vscode-button-background)',
     },
     '& .MuiBadge-anchorOriginTopLeftCircle' : {
       top: '46%',

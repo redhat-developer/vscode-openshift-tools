@@ -160,7 +160,7 @@ export default function Header() {
                         <Button variant="outlined" href='https://developers.redhat.com/developer-sandbox' className={classes.button} style={{ margin: 15, textTransform: 'none' }}>Learn More</Button>
                         <Button variant="outlined" href='mailto:devsandbox@redhat.com' className={classes.button} style={{ margin: 15, textTransform: 'none' }}>Contact Us</Button>
                         <Button variant="outlined" href='https://dn.dev/DevNationSlack'className={classes.button} style={{ margin: 15, textTransform: 'none' }}>Connect on Slack</Button>
-                        <AddSandboxView vscode={vscodeApi} />
+                        <AddSandboxView/>
                     </Card>
                 </div>
             )}
