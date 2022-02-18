@@ -711,9 +711,10 @@ export class OdoImpl implements Odo {
                     name: props[0],
                     displayName: props[2],
                     version: props[1],
-                    description: props[3]
+                    description: props[3],
+                    ownsCrds: !!props[4]
                 };
-            })
+            }).filter((csv)=>csv.ownsCrds);
         } catch (err) {
             throw new VsCommandError(JSON.parse(result.stderr).message, 'Error when parsing command\'s stdout output');
         }
