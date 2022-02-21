@@ -91,6 +91,7 @@
     "byline": "^5.0.0",
     "fs-extra": "^10.0.0",
     "globby": "^10.0.1",
+    "immutable": "^4.0.0",
     "install": "^0.13.0",
     "js-yaml": "^4.1.0",
     "json-schema": "^0.4.0",
@@ -171,7 +172,6 @@
     "handlebars": "^4.7.7",
     "hasha": "5.2.2",
     "html-webpack-plugin": "^5.5.0",
-    "immutable": "^4.0.0",
     "istanbul": "^0.4.5",
     "leasot": "^12.0.0",
     "mocha": "^9.1.3",
@@ -1528,86 +1528,88 @@
         }
       ]
     },
-    "configuration": [{
-      "type": "object",
-      "order": 1,
-      "title": "OpenShift Connector",
-      "properties": {
-        "openshiftConnector.showWelcomePage": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show Welcome Page when using OpenShift Connector Extension"
-        },
-        "openshiftConnector.showChannelOnOutput": {
-          "type": "boolean",
-          "default": false,
-          "description": "Show OpenShift Connector output channel when new text added to output stream."
-        },
-        "openshiftConnector.outputVerbosityLevel": {
-          "type": "number",
-          "default": 0,
-          "description": "Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and integrated terminal."
-        },
-        "openshiftConnector.searchForToolsInPath": {
-          "type": "boolean",
-          "default": false,
-          "description": "Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries."
-        },
-        "openshiftConnector.useWebviewInsteadOfTerminalView": {
-          "type": "boolean",
-          "default": false,
-          "description": "By default the Terminal View is used to execute OpenShift 'Show Log', 'Follow Log', 'Watch Log' and 'Describe' commands. Select this option if you want to use Webview based editors for it."
+    "configuration": [
+      {
+        "type": "object",
+        "order": 1,
+        "title": "OpenShift Connector",
+        "properties": {
+          "openshiftConnector.showWelcomePage": {
+            "type": "boolean",
+            "default": true,
+            "description": "Show Welcome Page when using OpenShift Connector Extension"
+          },
+          "openshiftConnector.showChannelOnOutput": {
+            "type": "boolean",
+            "default": false,
+            "description": "Show OpenShift Connector output channel when new text added to output stream."
+          },
+          "openshiftConnector.outputVerbosityLevel": {
+            "type": "number",
+            "default": 0,
+            "description": "Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and integrated terminal."
+          },
+          "openshiftConnector.searchForToolsInPath": {
+            "type": "boolean",
+            "default": false,
+            "description": "Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries."
+          },
+          "openshiftConnector.useWebviewInsteadOfTerminalView": {
+            "type": "boolean",
+            "default": false,
+            "description": "By default the Terminal View is used to execute OpenShift 'Show Log', 'Follow Log', 'Watch Log' and 'Describe' commands. Select this option if you want to use Webview based editors for it."
+          }
+        }
+      },
+      {
+        "type": "object",
+        "order": 2,
+        "title": "Red Hat CodeReady Containers",
+        "properties": {
+          "openshiftConnector.crcBinaryLocation": {
+            "type": "string",
+            "default": null,
+            "description": "Provide the path where the crc executable is present."
+          },
+          "openshiftConnector.crcPullSecretPath": {
+            "type": "string",
+            "default": null,
+            "description": "Path of image pull secret."
+          },
+          "openshiftConnector.crcCpuCores": {
+            "type": "number",
+            "default": 4,
+            "description": "Number of CPU cores to allocate to the OpenShift cluster as selected during the first run"
+          },
+          "openshiftConnector.crcMemoryAllocated": {
+            "type": "number",
+            "default": 9216,
+            "description": "MiB of memory to allocate to the OpenShift cluster as selected during the first run"
+          },
+          "openshiftConnector.crcNameserver": {
+            "type": "string",
+            "default": "",
+            "description": "IP address/name of DNS to use with CRC"
+          }
+        }
+      },
+      {
+        "type": "object",
+        "order": 3,
+        "title": "Developer Sandbox for Red Hat OpenShift",
+        "properties": {
+          "openshiftConnector.sandboxApiHostUrl": {
+            "type": "string",
+            "default": "https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com"
+          },
+          "openshiftConnector.sandboxApiTimeout": {
+            "description": "Controls timeout for requests to OpenShift Sandbox Registration Service. Increase timeout value in case of unexpected errors in OpenShift Sandbox Provisioning workflow.",
+            "type": "number",
+            "default": 100000
+          }
         }
       }
-    },
-    {
-      "type": "object",
-      "order": 2,
-      "title": "Red Hat CodeReady Containers",
-      "properties": {
-        "openshiftConnector.crcBinaryLocation": {
-          "type": "string",
-          "default": null,
-          "description": "Provide the path where the crc executable is present."
-        },
-        "openshiftConnector.crcPullSecretPath": {
-          "type": "string",
-          "default": null,
-          "description": "Path of image pull secret."
-        },
-        "openshiftConnector.crcCpuCores": {
-          "type": "number",
-          "default": 4,
-          "description": "Number of CPU cores to allocate to the OpenShift cluster as selected during the first run"
-        },
-        "openshiftConnector.crcMemoryAllocated": {
-          "type": "number",
-          "default": 9216,
-          "description": "MiB of memory to allocate to the OpenShift cluster as selected during the first run"
-        },
-        "openshiftConnector.crcNameserver": {
-          "type": "string",
-          "default": "",
-          "description": "IP address/name of DNS to use with CRC"
-        }
-      }
-    },
-    {
-      "type": "object",
-      "order": 3,
-      "title": "Developer Sandbox for Red Hat OpenShift",
-      "properties": {
-        "openshiftConnector.sandboxApiHostUrl": {
-          "type": "string",
-          "default": "https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com"
-        },
-        "openshiftConnector.sandboxApiTimeout": {
-          "description": "Controls timeout for requests to OpenShift Sandbox Registration Service. Increase timeout value in case of unexpected errors in OpenShift Sandbox Provisioning workflow.",
-          "type": "number",
-          "default": 100000
-        }
-      }
-    }]
+    ]
   },
   "extensionDependencies": [
     "redhat.vscode-redhat-account"
