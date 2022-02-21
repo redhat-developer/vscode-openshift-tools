@@ -311,14 +311,14 @@ export default class ClusterViewLoader {
                 localResourceRoots: [localResourceRoot],
                 retainContextWhenHidden: true
             });
+            panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'images/context/cluster-node.png'));
+            panel.webview.html = ClusterViewLoader.getWebviewContent(ClusterViewLoader.extensionPath, panel);
+            panel.webview.postMessage({action: 'cluster', data: ''});
+            panel.onDidDispose(()=> {
+                panel = undefined;
+            });
+            panel.webview.onDidReceiveMessage(clusterEditorMessageListener);
         }
-        panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'images/context/cluster-node.png'));
-        panel.webview.html = ClusterViewLoader.getWebviewContent(ClusterViewLoader.extensionPath, panel);
-        panel.webview.postMessage({action: 'cluster', data: ''});
-        panel.onDidDispose(()=> {
-            panel = undefined;
-        });
-        panel.webview.onDidReceiveMessage(clusterEditorMessageListener);
         return panel;
     }
 
