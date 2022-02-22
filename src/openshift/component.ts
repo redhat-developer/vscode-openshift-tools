@@ -132,7 +132,7 @@ export class Component extends OpenShiftItem {
 
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Deleting the Component '${component.getName()} '`, async () => {
-                if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT || component.contextValue === ContextType.COMPONENT_PUSHED || component.kind === ComponentKind.S2I) {
+                if (component.contextValue === ContextType.COMPONENT_PUSHED || component.kind === ComponentKind.S2I) {
                     await Component.unlinkAllComponents(component);
                 }
                 Component.stopDebugSession(component);

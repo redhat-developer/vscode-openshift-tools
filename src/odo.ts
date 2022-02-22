@@ -910,15 +910,26 @@ export class OdoImpl implements Odo {
 
     public async deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
         const app = component.getParent();
-        await this.execute(
-            Command.deleteComponent(
-                app.getParent().getName(),
-                app.getName(), component.getName(),
-                !!component.contextPath
-            ),
-            component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()
-        );
-
+        if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
+            await this.execute(
+                Command.deleteComponentNoContext(
+                    app.getParent().getName(),
+                    app.getName(),
+                    component.getName()
+                ),
+                component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()
+            );
+        } else {
+            await this.execute(
+                Command.deleteComponent(
+                    app.getParent().getName(),
+                    app.getName(),
+                    component.getName(),
+                    !!component.contextPath
+                ),
+                component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()
+            );
+        }
         await this.deleteAndRefresh(component);
         const children = await app.getChildren();
         if (children.length === 0) {
