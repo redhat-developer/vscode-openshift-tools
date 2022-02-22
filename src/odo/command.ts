@@ -310,6 +310,16 @@ export class Command {
         return ct;
     }
 
+    static deleteComponentNoContext(project: string, app: string, component: string): CommandText {
+        return new CommandText('oc delete',
+            'deployment', [
+                new CommandOption('-n', project),
+                new CommandOption('-l', `component=${component},app=${app}`),
+                new CommandOption('--wait=true'),
+            ]
+        );
+    }
+
     static describeComponentNoContext(project: string, app: string, component: string): CommandText {
         return new CommandText('odo describe',
             component, [
