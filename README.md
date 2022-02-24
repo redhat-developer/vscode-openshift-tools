@@ -46,6 +46,7 @@ To install OpenShift Container Platform 4 in the public cloud, in your datacente
 * `Component`: A component is a set of Kubernetes resources which host code or data. Each component can be run and deployed separately. Examples of components: Warehouse API Backend, Inventory API, Web Frontend, Payment Backend
 * `Service`: A service is software that your component links to or depends on. Examples of services: MariaDB, MySQL
 * `Devfile`: A devfile is a portable YAML file containing the definition of a component and its related URLs, storages and services.
+
 ##  Commands and Features
 
 The extension supports a number of commands to interact with OpenShift clusters and resources. The commands are accessible via the command palette (`Cmd+Shift+P` <kbd>⌘⇧P</kbd> on macOS or `Ctrl+Shift+P` <kbd>⌃⇧P</kbd> on Windows and Linux), Visual Studio Code View title buttons and tree context menus.
@@ -121,7 +122,6 @@ Components in different states have different set of commands available.
 ##### Commands for a `no context` Component
 
    * `Describe` - Describe the given Component in terminal window or inside a webview editor.
-   * `Import` - If the component was created using old version of the extension (`<=0.0.23`), users can use the `Import` action to migrate to latest version and import the metadata changes.
    * `Delete` - Delete existing Component from the cluster.
 
 ##### Commands for a URL in a Component
