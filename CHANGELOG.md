@@ -1,5 +1,30 @@
 # Change Log
 
+## 0.3.0 (February 23, 2022)
+
+* [#2350](https://github.com/redhat-developer/vscode-openshift-tools/issues/2350) Sandbox view is broken after second click on `Add Cluster` Button
+* [#2344](https://github.com/redhat-developer/vscode-openshift-tools/issues/2344) Error message appears for odo verbosity level values > 0
+* [#2340](https://github.com/redhat-developer/vscode-openshift-tools/issues/2340) Can't create service on Red Hat Developer Sandbox
+* [#2339](https://github.com/redhat-developer/vscode-openshift-tools/issues/2339) Implement 'Delete' command for component without context using `oc delete`
+* [#2335](https://github.com/redhat-developer/vscode-openshift-tools/issues/2335) Add Timeout setting for Sandbox integration
+* [#2331](https://github.com/redhat-developer/vscode-openshift-tools/issues/2331) Report telemetry for sandbox integration
+* [#2329](https://github.com/redhat-developer/vscode-openshift-tools/issues/2329) 'odo storage list' item with the same name should be shown as one
+* [#2325](https://github.com/redhat-developer/vscode-openshift-tools/issues/2325) Update odo to v2.5.0
+* [#2304](https://github.com/redhat-developer/vscode-openshift-tools/issues/2304) Update odo to v2.4.2 release
+* [#2297](https://github.com/redhat-developer/vscode-openshift-tools/issues/2297) Provide cache for https requests of swagger definition
+* [#2293](https://github.com/redhat-developer/vscode-openshift-tools/issues/2293) Create Service command fails for CSV w/o olm-examples
+* [#2287](https://github.com/redhat-developer/vscode-openshift-tools/issues/2287) Remove s2i components form Component Types View
+* [#2285](https://github.com/redhat-developer/vscode-openshift-tools/issues/2285) Migrate to odo v2.4.1
+* [#2254](https://github.com/redhat-developer/vscode-openshift-tools/issues/2254) Add Create Service Form support for user without access to service CRDs
+* [#2246](https://github.com/redhat-developer/vscode-openshift-tools/issues/2246) Provide warning/info about kubeadmin user for service workflow
+* [#2238](https://github.com/redhat-developer/vscode-openshift-tools/issues/2238) Remove info about Git Repository and Binary File component creation in readme
+* [#2228](https://github.com/redhat-developer/vscode-openshift-tools/issues/2228) Are Git Repository and Binary File options removed when creating a component from Openshift Connector extension? 
+* [#2208](https://github.com/redhat-developer/vscode-openshift-tools/issues/2208) Remove service catalog support related commands
+* [#2007](https://github.com/redhat-developer/vscode-openshift-tools/issues/2007) 'Open in Readme.md in Browser' for S2I Component Type
+* [#1967](https://github.com/redhat-developer/vscode-openshift-tools/issues/1967) Add quickpick item 'Login using cluster URL and token from clipboard' to login command
+* [#1788](https://github.com/redhat-developer/vscode-openshift-tools/issues/1788) Linking components & services for devfile
+* [#1787](https://github.com/redhat-developer/vscode-openshift-tools/issues/1787) Support to create operator backed services
+
 ## 0.2.13 (January 11, 2022)
 
 * [#2319](https://github.com/redhat-developer/vscode-openshift-tools/issues/2319) Fix full path with spaces when running CRC
