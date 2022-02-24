@@ -12,7 +12,7 @@ node('rhel8'){
   def packageJson = readJSON file: 'package.json'
 
   stage('Install requirements') {
-    def nodeHome = tool 'nodejs-15.14.0'
+    def nodeHome = tool 'nodejs-16.13.2'
     env.PATH="${env.PATH}:${nodeHome}/bin"
     sh "npm install"
     sh "npm install -g vsce"
