@@ -10,6 +10,7 @@ out/src-orig/**
 src/**
 doc/**
 .gitignore
+.github
 tsconfig.json
 vsc-extension-quickstart.md
 tslint.json
@@ -29,3 +30,5 @@ test-resources/**
 header.js
 .mocharc.js
 .eslintignore
+*.tgz
+*.sha256
