@@ -21,9 +21,6 @@ node('rhel8'){
   withEnv(['JUNIT_REPORT_PATH=report.xml']) {
     stage('Test') {
       wrap([$class: 'Xvnc']) {
-        vscodeVersion = packageJson.engines.vscode
-        packageJson.engines.vscode = "^1.40.0"
-        writeJSON file: 'package.json', json: packageJson, pretty: 4
         sh "npm run test:coverage"
         junit 'report.xml'
       }
@@ -32,7 +29,6 @@ node('rhel8'){
 
   stage('Package sources and ovsx package') {
     packageJson.extensionDependencies = ["ms-kubernetes-tools.vscode-kubernetes-tools"]
-    packageJson.engines.vscode = vscodeVersion
     writeJSON file: 'package.json', json: packageJson, pretty: 4
     sh 'node ./out/build/update-readme.js'
     sh "vsce package -o openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix"
