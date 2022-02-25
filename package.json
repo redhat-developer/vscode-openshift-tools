@@ -56,7 +56,7 @@
   "main": "./out/src/extension",
   "scripts": {
     "verify": "node ./out/build/verify-tools.js",
-    "vscode:prepublish": "npm run build && npm prune --production",
+    "vscode:prepublish": "npm run build",
     "compile": "npm-run-all compile:*",
     "compile:ext": "tsc -p ./",
     "compile:views": "webpack --mode production --config src/webview/webpack.config.js",
