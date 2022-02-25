@@ -117,6 +117,10 @@ export class Command {
         );
     }
 
+    static setActiveProject(name: string): CommandText {
+        return new CommandText('odo project set', name);
+    }
+
     static deleteProject(name: string): CommandText {
         return new CommandText(
             'odo project delete',

@@ -174,7 +174,13 @@ export class OpenShiftCluster extends OpenShiftObjectImpl {
     }
 
     async getChildren(): Promise<OpenShiftObject[]> {
-        const activeProject = (await this.odo.getProjects()).find((prj:OpenShiftProject)=>prj.active)
+        const prjs = await this.odo.getProjects();
+        let activeProject = prjs.find((prj:OpenShiftProject)=>prj.active);
+        if (prjs.length > 0 && !activeProject) {
+            // no active project after login
+            await OdoImpl.Instance.execute(Command.setActiveProject(prjs[0].getName()));
+            activeProject = prjs[0];
+        }
         return activeProject ? [activeProject] : [];
     }
 
