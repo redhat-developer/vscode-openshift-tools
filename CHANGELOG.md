@@ -1,7 +1,9 @@
 # Change Log
 
-## 0.3.0 (February 23, 2022)
+## 0.3.0 (February 24, 2022)
 
+* [#2361](https://github.com/redhat-developer/vscode-openshift-tools/issues/2361) SandBox code verification page shows all button on the same line for wide screens 
+* [#2359](https://github.com/redhat-developer/vscode-openshift-tools/issues/2359) OpenShift Sandbox Cluster has no active project after login
 * [#2350](https://github.com/redhat-developer/vscode-openshift-tools/issues/2350) Sandbox view is broken after second click on `Add Cluster` Button
 * [#2344](https://github.com/redhat-developer/vscode-openshift-tools/issues/2344) Error message appears for odo verbosity level values > 0
 * [#2340](https://github.com/redhat-developer/vscode-openshift-tools/issues/2340) Can't create service on Red Hat Developer Sandbox
