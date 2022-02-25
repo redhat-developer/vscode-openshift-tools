@@ -288,7 +288,7 @@ export default function addSandboxView(props): JSX.Element {
         return (
             <>
                 {( currentState.action === 'sandboxPageEnterVerificationCode' ) && (
-                    <div style={{ margin: '20px', position: 'relative', display: 'inline-block' }}>
+                    <div style={{ margin: '20px', position: 'relative' }}>
                         <CodeTextField id='code'
                             disabled={inProgress}
                             onChange={handleVerifyCode}
