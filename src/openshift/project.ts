@@ -8,14 +8,14 @@ import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { OpenShiftObject, OpenShiftProject, getInstance as getOdoInstance } from '../odo';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
-import { CommandText } from '../odo/command';
+import { Command, CommandText } from '../odo/command';
 
 export class Project extends OpenShiftItem {
 
     @vsCommand('openshift.project.set', true)
     @clusterRequired()
     static async set(): Promise<string | null> {
-        let message = null;
+        let message: string = null;
         const createNewProject = {
             label: 'Create new Project',
             description: 'Create new Project and make it active'
@@ -31,7 +31,7 @@ export class Project extends OpenShiftItem {
             await commands.executeCommand('openshift.project.create');
         } else {
             const project = selectedItem as OpenShiftObject;
-            await Project.odo.execute(new CommandText('odo project set', project.getName()));
+            await Project.odo.execute(Command.setActiveProject(project.getName()));
             Project.explorer.refresh();
             message = `Project '${project.getName()}' set as active.`;
         }
