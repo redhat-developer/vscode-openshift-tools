@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.3.0 (February 24, 2022)
+## 0.3.0 (February 28, 2022)
 
 * [#2361](https://github.com/redhat-developer/vscode-openshift-tools/issues/2361) SandBox code verification page shows all button on the same line for wide screens 
 * [#2359](https://github.com/redhat-developer/vscode-openshift-tools/issues/2359) OpenShift Sandbox Cluster has no active project after login
