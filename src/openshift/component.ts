@@ -33,24 +33,6 @@ import { NewComponentCommandProps } from '../telemetry';
 
 import waitPort = require('wait-port');
 
-export class SourceTypeChoice {
-    public static readonly GIT: QuickPickItem = {
-            label: 'Git Repository',
-            description: 'Use an existing git repository as a source for the Component'
-        };
-    public static readonly BINARY: QuickPickItem = {
-            label: 'Binary File',
-            description: 'Use binary file as a source for the Component'
-        };
-    public static readonly LOCAL: QuickPickItem = {
-            label: 'Workspace Directory',
-            description: 'Use workspace directory as a source for the Component'
-        };
-    public static asArray() : QuickPickItem[] {
-        return [SourceTypeChoice.GIT, SourceTypeChoice.BINARY, SourceTypeChoice.LOCAL];
-    }
-};
-
 function createCancelledResult(stepName: string): any {
     const cancelledResult:any = new String('');
     cancelledResult.properties = {
