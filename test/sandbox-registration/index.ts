@@ -20,16 +20,21 @@ let signupStatusTimeoutError = false;
 let verificationCodeRequestTimeoutError = false;
 let validateVerificationCodeRequestTimeoutError = false;
 
+// set SandBox Registration server to http://localhost:300 and timeout to 5000 in settings
+// before using this stub server for testing
+const LongTimeout = 6000;
+const ShortTimeout = 4000;
+
 app.route('/api/v1/signup')
     .get((req, res) => {
         if (signupStatus) {
             // eslint-disable-next-line no-console
             console.log('Check signup status');
             if (signupStatusTimeoutError) {
-                setTimeout(() => res.send(signupStatus), 5000)
+                setTimeout(() => res.send(signupStatus), ShortTimeout)
             } else {
                 signupStatusTimeoutError = true;
-                setTimeout(() => res.send(signupStatus), 20000)
+                setTimeout(() => res.send(signupStatus), LongTimeout)
             }
         } else {
             res.sendStatus(404);
@@ -60,10 +65,10 @@ app.route('/api/v1/signup')
     });
     app.route('/api/v1/signup/verification').put(function(req, res) {
         if (verificationCodeRequestTimeoutError) {
-            setTimeout(()=>res.sendStatus(200), 5000);
+            setTimeout(()=>res.sendStatus(200), ShortTimeout);
         } else {
             verificationCodeRequestTimeoutError = true;
-            setTimeout(()=>res.sendStatus(200),120000);
+            setTimeout(()=>res.sendStatus(200),LongTimeout);
         }
     });
     app.route('/api/v1/signup/verification/*').get(function(req, res) {
@@ -71,7 +76,7 @@ app.route('/api/v1/signup')
         if(!validateVerificationCodeRequestTimeoutError) {
             validateVerificationCodeRequestTimeoutError = true;
             // will fail because of timeout
-            setTimeout(()=>res.sendStatus(200),120000);
+            setTimeout(()=>res.sendStatus(200),LongTimeout);
             return;
         }
         // eslint-disable-next-line no-console
@@ -92,8 +97,8 @@ app.route('/api/v1/signup')
                 signupStatus.status.reason = 'Provisioned';
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 signupStatus.status.ready = true;
-            },10000);
-        },10000);
+            },ShortTimeout);
+        },ShortTimeout);
         res.sendStatus(200);
     });
 
