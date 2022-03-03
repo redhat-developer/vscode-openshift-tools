@@ -1,0 +1,138 @@
+{
+    "kind": "List",
+    "apiVersion": "odo.dev/v1alpha1",
+    "metadata": {},
+    "devfileComponents": [
+            {
+                    "kind": "Component",
+                    "apiVersion": "odo.dev/v1alpha1",
+                    "metadata": {
+                            "name": "comp14",
+                            "namespace": "storage-test",
+                            "creationTimestamp": null,
+                            "labels": {
+                                    "app": "sample-app",
+                                    "app.kubernetes.io/instance": "comp14",
+                                    "app.kubernetes.io/managed-by": "odo",
+                                    "app.kubernetes.io/managed-by-version": "v2.5.0",
+                                    "app.kubernetes.io/name": "",
+                                    "app.kubernetes.io/part-of": "sample-app",
+                                    "component": "comp14"
+                            },
+                            "annotations": {
+                                    "deployment.kubernetes.io/revision": "1",
+                                    "odo.dev/project-type": "nodejs"
+                            }
+                    },
+                    "spec": {
+                            "app": "sample-app",
+                            "type": "nodejs",
+                            "env": [
+                                    {
+                                            "name": "PROJECTS_ROOT",
+                                            "value": "/project"
+                                    },
+                                    {
+                                            "name": "PROJECT_SOURCE",
+                                            "value": "/project"
+                                    },
+                                    {
+                                            "name": "DEBUG_PORT",
+                                            "value": "5858"
+                                    }
+                            ]
+                    },
+                    "status": {
+                            "state": "Pushed"
+                    }
+            }
+    ],
+    "otherComponents": [
+            {
+                    "kind": "Component",
+                    "apiVersion": "odo.dev/v1alpha1",
+                    "metadata": {
+                            "name": "nodejs-basic",
+                            "namespace": "storage-test",
+                            "creationTimestamp": null,
+                            "labels": {
+                                    "app": "nodejs-basic",
+                                    "app.kubernetes.io/component": "nodejs-basic",
+                                    "app.kubernetes.io/instance": "nodejs-basic",
+                                    "app.kubernetes.io/name": "nodejs-basic",
+                                    "app.kubernetes.io/part-of": "sample-app",
+                                    "app.openshift.io/runtime": "nodejs-basic"
+                            },
+                            "annotations": {
+                                    "alpha.image.policy.openshift.io/resolve-names": "*",
+                                    "app.openshift.io/vcs-ref": "",
+                                    "app.openshift.io/vcs-uri": "https://github.com/redhat-developer/devfile-sample.git",
+                                    "deployment.kubernetes.io/revision": "2",
+                                    "image.openshift.io/triggers": "[{\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"nodejs-basic:latest\",\"namespace\":\"storage-test\"},\"fieldPath\":\"spec.template.spec.containers[?(@.name==\\\"nodejs-basic\\\")].image\",\"pause\":\"false\"}]",
+                                    "isFromDevfile": "true",
+                                    "openshift.io/generated-by": "OpenShiftWebConsole"
+                            }
+                    },
+                    "spec": {
+                            "app": "sample-app",
+                            "type": "Not available",
+                            "env": [
+                                    {
+                                            "name": "PROJECTS_ROOT",
+                                            "value": "/projects"
+                                    },
+                                    {
+                                            "name": "PROJECT_SOURCE",
+                                            "value": "/projects"
+                                    }
+                            ]
+                    },
+                    "status": {
+                            "state": "Pushed"
+                    }
+            },
+            {
+                    "kind": "Component",
+                    "apiVersion": "odo.dev/v1alpha1",
+                    "metadata": {
+                            "name": "nodejs-basic1",
+                            "namespace": "storage-test",
+                            "creationTimestamp": null,
+                            "labels": {
+                                    "app": "nodejs-basic1",
+                                    "app.kubernetes.io/component": "nodejs-basic1",
+                                    "app.kubernetes.io/instance": "nodejs-basic1",
+                                    "app.kubernetes.io/name": "nodejs-basic1",
+                                    "app.kubernetes.io/part-of": "sample-app",
+                                    "app.openshift.io/runtime": "nodejs-basic1"
+                            },
+                            "annotations": {
+                                    "alpha.image.policy.openshift.io/resolve-names": "*",
+                                    "app.openshift.io/vcs-ref": "",
+                                    "app.openshift.io/vcs-uri": "https://github.com/redhat-developer/devfile-sample.git",
+                                    "deployment.kubernetes.io/revision": "2",
+                                    "image.openshift.io/triggers": "[{\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"nodejs-basic1:latest\",\"namespace\":\"storage-test\"},\"fieldPath\":\"spec.template.spec.containers[?(@.name==\\\"nodejs-basic1\\\")].image\",\"pause\":\"false\"}]",
+                                    "isFromDevfile": "true",
+                                    "openshift.io/generated-by": "OpenShiftWebConsole"
+                            }
+                    },
+                    "spec": {
+                            "app": "sample-app",
+                            "type": "Not available",
+                            "env": [
+                                    {
+                                            "name": "PROJECTS_ROOT",
+                                            "value": "/projects"
+                                    },
+                                    {
+                                            "name": "PROJECT_SOURCE",
+                                            "value": "/projects"
+                                    }
+                            ]
+                    },
+                    "status": {
+                            "state": "Pushed"
+                    }
+            }
+    ]
+}

@@ -1,0 +1,153 @@
+{
+	"kind": "List",
+	"apiVersion": "odo.dev/v1alpha1",
+	"metadata": {
+		"creationTimestamp": null
+	},
+	"s2iItems": [
+		{
+			"kind": "ComponentType",
+			"apiVersion": "odo.dev/v1alpha1",
+			"metadata": {
+				"name": "dotnet",
+				"namespace": "openshift",
+				"creationTimestamp": null
+			},
+			"spec": {
+				"allTags": [
+					"2.1",
+					"3.1",
+					"latest"
+				],
+				"nonHiddenTags": [
+					"2.1",
+					"3.1",
+					"latest"
+				],
+				"supportedTags": [],
+				"imageStreamTags": [
+					{
+						"name": "2.1",
+						"annotations": {
+							"description": "Build and run .NET Core 2.1 applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/2.1/build/README.md.",
+							"iconClass": "icon-dotnet",
+							"openshift.io/display-name": ".NET Core 2.1",
+							"sampleContextDir": "app",
+							"sampleRef": "dotnetcore-2.1",
+							"sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore-ex.git",
+							"supports": "dotnet:2.1,dotnet",
+							"tags": "builder,.net,dotnet,dotnetcore,rh-dotnet21",
+							"version": "2.1"
+						},
+						"from": {
+							"kind": "DockerImage",
+							"name": "registry.redhat.io/dotnet/dotnet-21-rhel7:2.1"
+						},
+						"generation": 2,
+						"importPolicy": {},
+						"referencePolicy": {
+							"type": "Local"
+						}
+					},
+					{
+						"name": "3.1",
+						"annotations": {
+							"description": "Build and run .NET Core 3.1 applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/3.1/build/README.md.",
+							"iconClass": "icon-dotnet",
+							"openshift.io/display-name": ".NET Core 3.1",
+							"sampleContextDir": "app",
+							"sampleRef": "dotnetcore-3.1",
+							"sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore-ex.git",
+							"supports": "dotnet:3.1,dotnet",
+							"tags": "builder,.net,dotnet,dotnetcore,rh-dotnet31",
+							"version": "3.1"
+						},
+						"from": {
+							"kind": "DockerImage",
+							"name": "registry.redhat.io/dotnet/dotnet-31-rhel7:3.1"
+						},
+						"generation": 2,
+						"importPolicy": {},
+						"referencePolicy": {
+							"type": "Local"
+						}
+					},
+					{
+						"name": "latest",
+						"annotations": {
+							"description": "Build and run .NET Core applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/3.1/build/README.md.\n\nWARNING: By selecting this tag, your application will automatically update to use the latest version of .NET Core available on OpenShift, including major versions updates.",
+							"iconClass": "icon-dotnet",
+							"openshift.io/display-name": ".NET Core (Latest)",
+							"sampleContextDir": "app",
+							"sampleRef": "dotnetcore-3.1",
+							"sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore-ex.git",
+							"supports": "dotnet",
+							"tags": "builder,.net,dotnet,dotnetcore"
+						},
+						"from": {
+							"kind": "ImageStreamTag",
+							"name": "3.1"
+						},
+						"generation": 1,
+						"importPolicy": {},
+						"referencePolicy": {
+							"type": "Local"
+						}
+					}
+				]
+			}
+		}
+	],
+	"devfileItems": [
+		{
+			"Name": "java-maven",
+			"DisplayName": "Maven Java",
+			"Description": "Upstream Maven and OpenJDK 11",
+			"Link": "/devfiles/java-maven/devfile.yaml",
+			"Registry": {
+				"Name": "DefaultDevfileRegistry",
+				"URL": "https://raw.githubusercontent.com/odo-devfiles/registry/master"
+			}
+		},
+		{
+			"Name": "java-openliberty",
+			"DisplayName": "Open Liberty",
+			"Description": "Open Liberty microservice in Java",
+			"Link": "/devfiles/java-openliberty/devfile.yaml",
+			"Registry": {
+				"Name": "DefaultDevfileRegistry",
+				"URL": "https://raw.githubusercontent.com/odo-devfiles/registry/master"
+			}
+		},
+		{
+			"Name": "java-quarkus",
+			"DisplayName": "Quarkus Java",
+			"Description": "Upstream Quarkus with Java+GraalVM",
+			"Link": "/devfiles/java-quarkus/devfile.yaml",
+			"Registry": {
+				"Name": "DefaultDevfileRegistry",
+				"URL": "https://raw.githubusercontent.com/odo-devfiles/registry/master"
+			}
+		},
+		{
+			"Name": "java-springboot",
+			"DisplayName": "Spring Boot®",
+			"Description": "Spring Boot® using Java",
+			"Link": "/devfiles/java-springboot/devfile.yaml",
+			"Registry": {
+				"Name": "DefaultDevfileRegistry",
+				"URL": "https://raw.githubusercontent.com/odo-devfiles/registry/master"
+			}
+		},
+		{
+			"Name": "nodejs",
+			"DisplayName": "NodeJS Runtime",
+			"Description": "Stack with NodeJS 12",
+			"Link": "/devfiles/nodejs/devfile.yaml",
+			"Registry": {
+				"Name": "DefaultDevfileRegistry",
+				"URL": "https://raw.githubusercontent.com/odo-devfiles/registry/master"
+			}
+		}
+	]
+}
