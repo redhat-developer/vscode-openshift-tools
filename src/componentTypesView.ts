@@ -354,4 +354,9 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             ComponentTypesView.instance.removeRegistry(registry);
         }
     }
+
+    @vsCommand('openshift.componentTypesView.registry.openInBrowser')
+    public static async openRegistryWebSite(registry: Registry): Promise<void> {
+        await commands.executeCommand('vscode.open', Uri.parse(registry.URL));
+    }
 }
