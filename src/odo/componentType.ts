@@ -8,6 +8,7 @@ import { Data } from './componentTypeDescription';
 
 export enum ComponentKind {
     S2I = 's2i',
+    OTHER = 'other',
     DEVFILE = 'devfile'
 }
 

@@ -128,7 +128,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 }
                 telemetryEventDetect.send();
             } catch(ex) {
-                vscode.window.showErrorMessage('OpenShift Sandbox status request timed out, please try again.')
+                vscode.window.showErrorMessage('OpenShift Sandbox status request timed out, please try again.');
                 panel.webview.postMessage({action: 'sandboxPageDetectStatus', errorCode: 'statusDetectionError'});
                 telemetryEventDetect.sendError('OpenShift Sandbox status request timed out.');
             }
@@ -179,7 +179,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 telemetryEventLoginToSandbox.send();
             } catch (err) {
                 vscode.window.showErrorMessage(err.message);
-                telemetryEventLoginToSandbox.sendError('Login into Sandbox Cluster failed.')
+                telemetryEventLoginToSandbox.sendError('Login into Sandbox Cluster failed.');
             }
             break;
     }

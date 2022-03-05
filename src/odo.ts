@@ -22,11 +22,10 @@ import { GlyphChars } from './util/constants';
 import { Application } from './odo/application';
 import { ComponentType, ComponentTypesJson, ComponentKind, ComponentTypeAdapter, Registry, RegistryList } from './odo/componentType';
 import { Project } from './odo/project';
-import { ComponentsJson, DevfileComponentAdapter, S2iComponentAdapter } from './odo/component';
+import { ComponentsJson, NotAvailable } from './odo/component';
 import { Url } from './odo/url';
 import { Service, ServiceOperatorShortInfo } from './odo/service';
 import { Command, CommandText } from './odo/command';
-import { BuilderImage } from './odo/builderImage';
 import { VsCommandError } from './vscommand';
 import { Storage } from './odo/storage';
 import bs = require('binary-search');
@@ -45,6 +44,7 @@ export enum ContextType {
     PROJECT = 'project',
     APPLICATION = 'application',
     COMPONENT = 'componentNotPushed',
+    COMPONENT_OTHER = 'componentOther',
     COMPONENT_PUSHED = 'component',
     COMPONENT_NO_CONTEXT = 'componentNoContext',
     SERVICE = 'service',
@@ -64,7 +64,6 @@ export interface OpenShiftObject extends QuickPickItem {
     compType?: string;
     contextPath?: Uri;
     path?: string;
-    builderImage?: BuilderImage;
     iconPath?: Uri;
     kind?: ComponentKind;
 }
@@ -91,8 +90,7 @@ export abstract class OpenShiftObjectImpl implements OpenShiftObject {
         // eslint-disable-next-line no-shadow
         public readonly collapsibleState: TreeItemCollapsibleState = Collapsed,
         private contextPathValue: Uri = undefined,
-        public readonly compType: string = undefined,
-        public readonly builderImage: BuilderImage = undefined) {
+        public readonly compType: string = undefined) {
         OdoImpl.data.setPathToObject(this);
         OdoImpl.data.setContextToObject(this);
     }
@@ -269,22 +267,11 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
         contextValue: ContextType,
         contextPath: Uri = undefined,
         compType: string = undefined,
-        public readonly kind: ComponentKind,
-        builderImage: BuilderImage = undefined) {
-        super(parent, name, contextValue, '', Collapsed, contextPath, compType, builderImage);
+        public readonly kind: ComponentKind) {
+        super(parent, name, contextValue, '', Collapsed, contextPath, compType);
     }
     get iconPath(): Uri {
-        if (this.contextValue === ContextType.COMPONENT_PUSHED || this.contextValue === ContextType.COMPONENT || this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
-            let iconPath: Uri;
-            if (this.compType === odo.SourceType.GIT) {
-                iconPath = Uri.file(path.join(__dirname, '../../images/component', 'git.png'));
-            } else if (this.compType === odo.SourceType.BINARY) {
-                iconPath = Uri.file(path.join(__dirname, '../../images/component', 'binary.png'));
-            } else {
-                iconPath = Uri.file(path.join(__dirname, '../../images/component', 'workspace.png'));
-            }
-            return iconPath;
-        }
+        return Uri.file(path.join(__dirname, '../../images/component', 'workspace.png'));
     }
 
     getChildren(): Promise<OpenShiftObject[]> {
@@ -303,6 +290,8 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
             suffix = `${GlyphChars.Space}${GlyphChars.Push} pushed`;
         } else if (this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
             suffix = `${GlyphChars.Space}${GlyphChars.NoContext} no context`;
+        } else {
+            suffix = `${GlyphChars.Space}${GlyphChars.Push} deployment`
         }
         return `${suffix}`;
     }
@@ -576,13 +565,10 @@ export class OdoImpl implements Odo {
     public async _getComponents(application: OpenShiftObject): Promise<OpenShiftComponent[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listComponents(application.getParent().getName(), application.getName()), Platform.getUserHomePath());
         const componentsJson = this.loadJSON<ComponentsJson>(result.stdout);
-        const components = [
-            ...componentsJson?.s2iComponents ? componentsJson.s2iComponents.filter(item => !!item?.spec?.sourceType).map((item) => new S2iComponentAdapter(item)) : [],
-            ...componentsJson?.devfileComponents ? componentsJson.devfileComponents.map((item) => new DevfileComponentAdapter(item)) : []
-        ];
+        const components = [...componentsJson.otherComponents, ...componentsJson.devfileComponents];
 
         const deployedComponents = components.map<OpenShiftComponent>((value) => {
-            return new OpenShiftComponent(application, value.name, ContextType.COMPONENT_NO_CONTEXT, undefined, value.sourceType, value.kind);
+            return new OpenShiftComponent(application, value.metadata.name, value.spec.componentType === NotAvailable ? ContextType.COMPONENT_OTHER : ContextType.COMPONENT_NO_CONTEXT, value.kind);
         });
         const targetAppName = application.getName();
         const targetPrjName = application.getParent().getName();
@@ -604,15 +590,15 @@ export class OdoImpl implements Odo {
             if (item && item.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
                 item.contextPath = Uri.file(comp.status.context);
                 item.contextValue = ContextType.COMPONENT_PUSHED;
-                item.builderImage = builderImage;
             } else {
                 deployedComponents.push(
                     new OpenShiftComponent(
                         application,
-                        comp.metadata.name, item ? item.contextValue : ContextType.COMPONENT,
+                        comp.metadata.name,
+                        item ? item.contextValue : ContextType.COMPONENT,
                         Uri.file(comp.status.context),
-                        comp.spec.sourceType ? comp.spec.sourceType : odo.SourceType.LOCAL,
-                        comp.spec.sourceType ? ComponentKind.S2I : ComponentKind.DEVFILE, builderImage
+                        comp.spec.type === 'Not available' ? odo.SourceType.UNKNOWN : odo.SourceType.LOCAL,
+                        comp.spec.type === 'Not available' ? ComponentKind.OTHER : ComponentKind.DEVFILE
                     )
                 );
             }
@@ -895,7 +881,7 @@ export class OdoImpl implements Odo {
             if (!targetApplication) {
                 await this.insertAndReveal(application);
             }
-            await this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, location, 'local', ComponentKind.DEVFILE, {name: type? type : name , tag: version}), notification);
+            await this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, location, 'local', ComponentKind.DEVFILE), notification);
         } else {
             OdoImpl.data.delete(application);
             OdoImpl.data.delete(application.getParent());
@@ -1047,7 +1033,7 @@ export class OdoImpl implements Odo {
                                 comp.contextValue = ContextType.COMPONENT_PUSHED;
                                 this.subject.next(new OdoEventImpl('changed', comp));
                             } else if (!comp) {
-                                const newComponent = new OpenShiftComponent(app, added.metadata.name, ContextType.COMPONENT, Uri.file(added.status.context), added.spec.sourceType, added.spec.sourceType ? ComponentKind.S2I : ComponentKind.DEVFILE,  { name: added.spec.type.split(':')[0], tag: added.spec.type.split(':')[1]});
+                                const newComponent = new OpenShiftComponent(app, added.metadata.name, ContextType.COMPONENT, Uri.file(added.status.context), added.spec.sourceType, added.spec.sourceType ? ComponentKind.S2I : ComponentKind.DEVFILE);
                                 this.insertAndRefresh(newComponent);
                             }
                         } else if (!app) {

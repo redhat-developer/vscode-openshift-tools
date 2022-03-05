@@ -20,6 +20,7 @@ export const enum SourceType {
     GIT = 'git',
     LOCAL = 'local',
     BINARY = 'binary',
+    UNKNOWN = 'unknown'
 }
 
 export interface ComponentMetadata {
