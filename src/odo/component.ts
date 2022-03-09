@@ -3,25 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { Component } from './config';
+
 
 export const NotAvailable = 'Not available';
-
-export interface DevfileComponent {
-    kind: 'DevfileComponent';
-    apiVersion: string;
-    metadata: {
-        name: string;
-        creationTimestamp: string;
-    },
-    spec: {
-        namespace: string;
-        application: string;
-        componentType: string;
-    },
-    status: {
-        state: string;
-    }
-}
 
 export interface ComponentsJson {
     kind: string;
@@ -30,7 +15,7 @@ export interface ComponentsJson {
 		creationTimestamp: string;
     },
     // eslint-disable-next-line camelcase
-    otherComponents: DevfileComponent[];
+    otherComponents: Component[];
     // eslint-disable-next-line camelcase
-    devfileComponents: DevfileComponent[];
+    devfileComponents: Component[];
 }

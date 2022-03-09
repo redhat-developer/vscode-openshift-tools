@@ -16,12 +16,7 @@ export interface Port {
     protocol: string;
 }
 
-export const enum SourceType {
-    GIT = 'git',
-    LOCAL = 'local',
-    BINARY = 'binary',
-    UNKNOWN = 'unknown'
-}
+export const NOT_AVAILABLE = 'NOT_AVAILABLE';
 
 export interface ComponentMetadata {
     name: string;
@@ -32,7 +27,6 @@ export interface ComponentMetadata {
 export interface ComponentSpec {
     app: string;
     type: string;
-    sourceType: SourceType,
     ports: string[];
 }
 

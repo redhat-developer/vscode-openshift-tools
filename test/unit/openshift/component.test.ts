@@ -16,8 +16,7 @@ import { Command } from '../../../src/odo/command';
 import { Progress } from '../../../src/util/progress';
 import * as Util from '../../../src/util/async';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
-import { SourceType } from '../../../src/odo/config';
-import { ComponentKind, ComponentTypeAdapter } from '../../../src/odo/componentType';
+import { ComponentTypeAdapter } from '../../../src/odo/componentType';
 import { AddWorkspaceFolder } from '../../../src/util/workspace';
 import pq = require('proxyquire');
 
@@ -40,9 +39,8 @@ suite('OpenShift/Component', () => {
     const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
     const projectItem = new TestItem(clusterItem, 'myproject', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app1', ContextType.APPLICATION);
-    const componentItem = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1');
-    const devfileComponentItem = new TestItem(appItem, 'compDev', ContextType.COMPONENT_PUSHED,[], comp2Uri, '/path',  SourceType.GIT)
-    const s2iComponentItem = new TestItem(appItem, 'compDev', ContextType.COMPONENT_PUSHED,[], comp2Uri, '/path',  SourceType.LOCAL)
+    const componentItem = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', 'nodejs');
+    const devfileComponentItem = new TestItem(appItem, 'compDev', ContextType.COMPONENT_PUSHED,[], comp2Uri, '/path')
     const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
     const errorMessage = 'FATAL ERROR';
     let getApps: sinon.SinonStub;
@@ -98,7 +96,7 @@ suite('OpenShift/Component', () => {
     });
 
     suite('create', () => {
-        const componentType = new ComponentTypeAdapter(ComponentKind.S2I, 'nodejs', 'latest', 'builder,nodejs');
+        const componentType = new ComponentTypeAdapter('nodejs', 'latest', 'builder,nodejs');
         const version = 'latest';
         const folder = { uri: { fsPath: 'folder' } };
         let inputStub: sinon.SinonStub;
@@ -250,7 +248,7 @@ suite('OpenShift/Component', () => {
         let inputStub: sinon.SinonStub;
         const pathOne: string = path.join('some', 'path');
         const folder: vscode.Uri = vscode.Uri.file(pathOne);
-        const componentType = new ComponentTypeAdapter(ComponentKind.S2I, 'nodejs', 'latest', 'builder,nodejs');
+        const componentType = new ComponentTypeAdapter('nodejs', 'latest', 'builder,nodejs');
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -288,7 +286,6 @@ suite('OpenShift/Component', () => {
             inputStub.resolves(componentItem.getName());
             sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
                 new ComponentTypeAdapter(
-                    ComponentKind.DEVFILE,
                     'componentType1',
                     undefined,
                     'description',
@@ -304,7 +301,6 @@ suite('OpenShift/Component', () => {
         test('when componentTypeName provided and there are more than one type found in registries, asks to pick component type from list of found types', async () => {
             inputStub.resolves(componentItem.getName());
             const componentType1 = new ComponentTypeAdapter(
-                ComponentKind.DEVFILE,
                 'componentType1',
                 undefined,
                 'description',
@@ -312,7 +308,6 @@ suite('OpenShift/Component', () => {
                 'reg1'
             );
             const componentType2 = new ComponentTypeAdapter(
-                ComponentKind.DEVFILE,
                 'componentType1',
                 undefined,
                 'description',
@@ -332,7 +327,6 @@ suite('OpenShift/Component', () => {
         test('when componentTypeName provided and there is no type found in registries, asks to select from all available component types', async () => {
             inputStub.resolves(componentItem.getName());
             const componentType1 = new ComponentTypeAdapter(
-                ComponentKind.DEVFILE,
                 'componentType2',
                 undefined,
                 'description',
@@ -610,7 +604,13 @@ suite('OpenShift/Component', () => {
             quickPickStub.onFirstCall().resolves(appItem);
             quickPickStub.onSecondCall().resolves(componentItem);
             sandbox.stub<any, any>(vscode.window, 'showWarningMessage').resolves('Yes');
-            execStub.resolves({ error: undefined, stdout: '', stderr: '' });
+            execStub.resolves({ error: undefined, stdout: `{
+                "kind": "List",
+                "apiVersion": "odo.openshift.io/v1alpha1",
+                "metadata": {},
+                "otherComponents": [],
+                "devfileComponents": []
+              }`, stderr: '' });
             sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
             sandbox.stub(vscode.workspace, 'getWorkspaceFolder').returns(wsFolder1);
             OdoImpl.data.addContexts(vscode.workspace.workspaceFolders);
@@ -1049,13 +1049,6 @@ suite('OpenShift/Component', () => {
             expect(result).null;
         });
 
-        test('shows warning message if called for git component', async () => {
-            const gitComponent = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', SourceType.GIT);
-            const simStub = sandbox.stub(vscode.window, 'showInformationMessage');
-            await Component.watch(gitComponent);
-            expect(simStub).calledOnceWith('Watch is supported only for Components with local or binary source type.');
-        });
-
         test('calls the correct odo command w/ context', async () => {
             const cpStub = {on: sinon.stub()} as any as ChildProcess;
             spawnStub.resolves(cpStub);
@@ -1246,13 +1239,6 @@ suite('OpenShift/Component', () => {
             expect(execStub).not.called;
         });
 
-        test('called for git and binary components shows warning that only local components supported', async () => {
-            const warningStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves();
-            const result = await Component.debug(devfileComponentItem);
-            expect(result).is.null;
-            expect(warningStub).calledOnce;
-        });
-
         test('add/remove debug session to collection when debug started/stopped', () => {
             let didStart: (session) => void;
             let didTerminate: (session) => void;
@@ -1285,48 +1271,18 @@ suite('OpenShift/Component', () => {
         });
 
         test('shows warning if supported language is not detected for component', async () => {
-            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
+            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', 'node-js');
             sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
                 new ComponentTypeAdapter(
-                    ComponentKind.S2I,
-                    'componentType1',
-                    undefined,
-                    'description',
-                    'lang1,lang2,lang3'
-                ),
-                new ComponentTypeAdapter(
-                    ComponentKind.S2I,
-                    'componentType2',
-                    undefined,
-                    'description'
-                ),
-                new ComponentTypeAdapter(
-                    ComponentKind.DEVFILE,
                     'componentType3',
                     undefined,
                     'description'
                 )
             ]);
-            s2iComponentItem.builderImage = {
-                name: 'componentType1',
-                tag: 'tag'
-            };
             const warningStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves();
-            await Component.debug(s2iComponentItem);
 
-            s2iComponentItem.builderImage = {
-                name: 'componentType2',
-                tag: 'tag'
-            };
-            await Component.debug(s2iComponentItem);
-
-            devfileComponentItem2.builderImage = {
-                name: 'componentType3',
-                tag: undefined
-            };
             await Component.debug(devfileComponentItem2);
 
-            expect(warningStub).calledThrice;
             expect(warningStub).calledWith('Debug command currently supports local components with Java, Node.Js and Python component types.');
         });
 
@@ -1366,7 +1322,7 @@ suite('OpenShift/Component', () => {
             const waitPort = sandbox.stub().resolves(true);
             Component = mockComponent(startDebugging, waitPort);
 
-            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
+            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', 'java');
             sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
             devfileComponentItem2.builderImage = {
                 name: 'java',
@@ -1384,7 +1340,7 @@ suite('OpenShift/Component', () => {
             const waitPort = sandbox.stub().resolves(true)
             Component = mockComponent(startDebugging, waitPort);
 
-            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
+            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', 'python');
             sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
             devfileComponentItem2.builderImage = {
                 name: 'python',
@@ -1402,7 +1358,7 @@ suite('OpenShift/Component', () => {
             const waitPort = sandbox.stub().resolves(true)
             Component = mockComponent(startDebugging, waitPort);
 
-            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
+            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', 'nodejs');
             sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
             devfileComponentItem2.builderImage = {
                 name: 'python',
@@ -1425,7 +1381,7 @@ suite('OpenShift/Component', () => {
             const waitPort = sandbox.stub().resolves(true)
             Component = mockComponent(startDebugging, waitPort, 1);
 
-            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', undefined, ComponentKind.DEVFILE);
+            const devfileComponentItem2 = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1');
             sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
             devfileComponentItem2.builderImage = {
                 name: 'python',

@@ -301,7 +301,7 @@ suite('odo', () => {
                                 "kind": "List",
                                 "apiVersion": "odo.openshift.io/v1alpha1",
                                 "metadata": {},
-                                "s2iComponents": [],
+                                "otherComponents": [],
                                 "devfileComponents": []
                             }`,
                         stderr: '',
@@ -314,7 +314,7 @@ suite('odo', () => {
                         "kind": "List",
                         "apiVersion": "odo.openshift.io/v1alpha1",
                         "metadata": {},
-                        "s2iComponents": [],
+                        "otherComponents": [],
                         "devfileComponents": []
                       }`, stderr: '', cwd}
                 }
@@ -330,7 +330,14 @@ suite('odo', () => {
         });
 
         test('getServices returns an empty list if an error occurs', async () => {
-            execStub.onFirstCall().resolves({error: undefined, stdout: '', stderr: ''});
+            execStub.onFirstCall().resolves({error: undefined, stdout: `
+              {
+                "kind": "List",
+                "apiVersion": "odo.openshift.io/v1alpha1",
+                "metadata": {},
+                "otherComponents": [],
+                "devfileComponents": []
+              }`, stderr: ''});
             execStub.onSecondCall().rejects(errorMessage);
             const result = await odoCli.getServices(app);
 
@@ -339,7 +346,8 @@ suite('odo', () => {
 
         test('getApplicationChildren returns both components and services for an application', async () => {
             execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({
-                s2iComponents: [
+                otherComponents: [],
+                devfileComponents: [
                     {
                         metadata: {
                             name: 'component1',

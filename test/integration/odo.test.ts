@@ -14,7 +14,7 @@ import { Cluster } from '../../src/openshift/cluster';
 import { Command, CommandText } from '../../src/odo/command';
 import { Component } from '../../src/openshift/component';
 import { AddWorkspaceFolder } from '../../src/util/workspace';
-import { ComponentKind, ComponentTypeAdapter } from '../../src/odo/componentType';
+import { ComponentTypeAdapter } from '../../src/odo/componentType';
 import cp = require('child_process');
 
 import fs = require('fs-extra');
@@ -86,7 +86,7 @@ suite('odo integration', () => {
         sb.stub(window, 'showInputBox').resolves(componentNameParam);
         sqpStub
             .onSecondCall()
-            .resolves(new ComponentTypeAdapter(ComponentKind.S2I, 'nodejs', 'latest', '', 'nodejs'));
+            .resolves(new ComponentTypeAdapter('nodejs', 'latest', '', 'nodejs'));
 
         await commands.executeCommand('openshift.component.create', existingApp);
         const components = await oi.getComponents(existingApp);
@@ -111,7 +111,7 @@ suite('odo integration', () => {
             .onSecondCall()
             .resolves({ label: 'master' })
             .onThirdCall()
-            .resolves(new ComponentTypeAdapter(ComponentKind.S2I, 'nodejs', 'latest', '', 'nodejs'));
+            .resolves(new ComponentTypeAdapter('nodejs', 'latest', '', 'nodejs'));
         sb.stub(window, 'showOpenDialog').resolves([Uri.file(dirNameParam)]);
         sb.stub(window, 'showInputBox')
             .onFirstCall()
@@ -147,7 +147,7 @@ suite('odo integration', () => {
             .resolves({ label: 'sample.war', description: binaryFileInContextFolder })
             .onThirdCall()
             .resolves(
-                new ComponentTypeAdapter(ComponentKind.S2I, templateName, 'latest', '', 'java'),
+                new ComponentTypeAdapter(templateName, 'latest', '', 'java'),
             );
         sb.stub(window, 'showOpenDialog').resolves([Uri.file(dirNameParam)]);
         sb.stub(window, 'showInputBox').resolves(componentNameParam);
