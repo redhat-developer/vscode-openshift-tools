@@ -32,11 +32,6 @@ suite('OpenShift/URL', () => {
     const routeItem = new TestItem(componentItem, 'route', ContextType.COMPONENT_ROUTE);
     const errorMessage = 'ERROR';
 
-    const ports = [
-        {number: 8080, protocol: 'TCP'},
-        {number: 8081, protocol: 'TCP'}
-    ];
-
     const noPortsOutput = `{
         "apiVersion": "v1",
         "kind": "Service",
@@ -62,43 +57,6 @@ suite('OpenShift/URL', () => {
         "spec": {
             "clusterIP": "172.30.156.161",
             "ports": [ ],
-            "selector": {
-                "deploymentconfig": "node-app1"
-            },
-            "sessionAffinity": "None",
-            "type": "ClusterIP"
-        },
-        "status": {
-            "loadBalancer": {}
-        }
-    }`;
-    const portOutput = `{
-        "apiVersion": "v1",
-        "kind": "Service",
-        "metadata": {
-            "annotations": {
-                "app.kubernetes.io/component-source-type": "git",
-                "app.kubernetes.io/url": "https://github.com/dgolovin/nodejs-ex"
-            },
-            "creationTimestamp": "2019-01-04T01:03:34Z",
-            "labels": {
-                "app": "app1",
-                "app.kubernetes.io/component-name": "node",
-                "app.kubernetes.io/component-type": "nodejs",
-                "app.kubernetes.io/component-version": "latest",
-                "app.kubernetes.io/name": "app1"
-            },
-            "name": "node-app1",
-            "namespace": "proj1",
-            "resourceVersion": "1580667",
-            "selfLink": "/api/v1/namespaces/proj1/services/node-app1",
-            "uid": "8f80c48b-0fbc-11e9-b2e1-00155d93400f"
-        },
-        "spec": {
-            "clusterIP": "172.30.156.161",
-            "ports": [
-                "8080/TCP"
-            ],
             "selector": {
                 "deploymentconfig": "node-app1"
             },

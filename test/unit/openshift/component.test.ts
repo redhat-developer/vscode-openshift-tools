@@ -40,7 +40,6 @@ suite('OpenShift/Component', () => {
     const projectItem = new TestItem(clusterItem, 'myproject', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app1', ContextType.APPLICATION);
     const componentItem = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', 'nodejs');
-    const devfileComponentItem = new TestItem(appItem, 'compDev', ContextType.COMPONENT_PUSHED,[], comp2Uri, '/path')
     const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
     const errorMessage = 'FATAL ERROR';
     let getApps: sinon.SinonStub;
