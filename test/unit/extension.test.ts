@@ -81,7 +81,7 @@ suite('openshift connector Extension', () => {
                     "kind": "List",
                     "apiVersion": "odo.openshift.io/v1alpha1",
                     "metadata": {},
-                    "s2iComponents": [],
+                    "otherComponents": [],
                     "devfileComponents": []
                   }`, stderr: ''}
             }

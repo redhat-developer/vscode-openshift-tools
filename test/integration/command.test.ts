@@ -6,7 +6,6 @@
 import { Command, CommandText } from '../../src/odo/command';
 import { getInstance } from '../../src/odo';
 import { KubeConfig } from '@kubernetes/client-node';
-import { ComponentKind } from '../../src/odo/componentType';
 import * as tmp from 'tmp';
 import { extensions } from 'vscode';
 import cp = require('child_process');
@@ -154,7 +153,7 @@ suite('odo commands integration', () => {
 
     test('describeCatalogComponent()', async function () {
         const types = await ODO.getComponentTypes();
-        const devfileCompType = types.find((compType) => compType.type === ComponentKind.DEVFILE);
+        const devfileCompType = types[0];
         if (!devfileCompType) {
             this.skip();
         } else {

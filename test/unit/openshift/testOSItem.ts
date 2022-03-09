@@ -5,9 +5,7 @@
 
 import { Uri } from 'vscode';
 import { OpenShiftObject, ContextType } from '../../../src/odo';
-import { SourceType } from '../../../src/odo/config';
 import { BuilderImage } from '../../../src/odo/builderImage';
-import { ComponentKind } from '../../../src/odo/componentType';
 
 export class TestItem implements OpenShiftObject {
     public treeItem = null;
@@ -20,8 +18,7 @@ export class TestItem implements OpenShiftObject {
         private children = [],
         public contextPath = Uri.parse('file:///c%3A/Temp'),
         public path?: string,
-        public compType: string = SourceType.LOCAL,
-        public kind: ComponentKind = ComponentKind.S2I) {
+        public compType?: string) {
     }
 
     public builderImage?: BuilderImage;
@@ -57,5 +54,9 @@ export class TestItem implements OpenShiftObject {
 
     get label(): string {
         return this.name;
+    }
+
+    isOdoManaged(): boolean {
+        return this.compType !== undefined;
     }
 }

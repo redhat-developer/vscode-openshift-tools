@@ -12,7 +12,6 @@ import { OdoImpl, ContextType } from '../../../src/odo';
 import { Command } from '../../../src/odo/command';
 import { Url } from '../../../src/openshift/url';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
-import { ComponentKind } from '../../../src/odo/componentType';
 import * as Cli from '../../../src/cli';
 
 const {expect} = chai;
@@ -244,20 +243,10 @@ suite('OpenShift/URL', () => {
 
     suite('create', () => {
 
-        test('asks to select port if more that one exposed and returns message', async () => {
-            inputStub.onFirstCall().resolves('urlName');
-            execStub.onFirstCall().resolves({error: null, stdout: portsOutput, stderr: ''});
-            execStub.onSecondCall().resolves({error: null, stdout: '', stderr: ''});
-            sandbox.stub(OdoImpl.prototype, 'getComponentPorts').resolves(ports);
-            quickPickStub.resolves(ports[0]);
-            const result = await Url.create(componentItem);
-            expect(result).equals(`URL 'urlName' for component '${componentItem.getName()}' successfully created`);
-        });
-
         test('rejects when fails to create Url', async () => {
-            execStub.onFirstCall().resolves({error: null, stdout: portOutput, stderr: ''});
-            execStub.onSecondCall().rejects(Error('Error'));
+            execStub.onFirstCall().rejects(Error('Error'));
             inputStub.onFirstCall().resolves('urlName');
+            inputStub.onSecondCall().resolves('8080');
             quickPickStub.resolves('No');
             try {
                 await Url.create(componentItem);
@@ -266,18 +255,6 @@ suite('OpenShift/URL', () => {
                 return;
             }
 
-            expect.fail(false, true, 'No exception thrown');
-        });
-
-        test('rejects when component has no ports declared', async () => {
-            execStub.onFirstCall().resolves({error: null, stdout: noPortsOutput, stderr: ''});
-            inputStub.onFirstCall().resolves('urlName');
-            try {
-                await Url.create(componentItem);
-            } catch (error) {
-                expect(error.message).equals(`Component '${componentItem.getName()}' has no ports declared.`);
-                return;
-            }
             expect.fail(false, true, 'No exception thrown');
         });
 
@@ -300,7 +277,7 @@ suite('OpenShift/URL', () => {
             inputStub.onFirstCall().resolves(urlName);
             inputStub.onSecondCall().resolves(urlPort);
             execStub.onFirstCall().resolves({error: null, stdout: noPortsOutput, stderr: ''});
-            const devComp = new TestItem(appItem, 'component', ContextType.COMPONENT_PUSHED, [], undefined, undefined, 'nodejs:latest', ComponentKind.DEVFILE);
+            const devComp = new TestItem(appItem, 'component', ContextType.COMPONENT_PUSHED, [], undefined, undefined, 'nodejs:latest');
             quickPickStub.resolves('No');
             await Url.create(devComp);
             execStub.calledWith(Command.createComponentCustomUrl(urlName, urlPort));
@@ -321,7 +298,7 @@ suite('OpenShift/URL', () => {
                 expect(result).undefined;
                 return null;
             });
-            const devComp = new TestItem(appItem, 'component', ContextType.COMPONENT_PUSHED, [], undefined, undefined, 'nodejs:latest', ComponentKind.DEVFILE);
+            const devComp = new TestItem(appItem, 'component', ContextType.COMPONENT_PUSHED, [], undefined, undefined, 'nodejs:latest');
             await Url.create(devComp);
         });
     });
