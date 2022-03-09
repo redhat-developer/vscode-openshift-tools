@@ -1,0 +1,57 @@
+{
+          "apiVersion": "org.eclipse.che/v1",
+          "kind": "CheCluster",
+          "metadata": {
+            "name": "eclipse-che"
+          },
+          "spec": {
+            "auth": {
+              "externalIdentityProvider": false,
+              "identityProviderAdminUserName": "",
+              "identityProviderClientId": "",
+              "identityProviderPassword": "",
+              "identityProviderRealm": "",
+              "identityProviderURL": "",
+              "initialOpenShiftOAuthUser": true,
+              "oAuthClientName": "",
+              "oAuthSecret": ""
+            },
+            "database": {
+              "chePostgresDb": "",
+              "chePostgresHostName": "",
+              "chePostgresPassword": "",
+              "chePostgresPort": "",
+              "chePostgresUser": "",
+              "externalDb": false
+            },
+            "devWorkspace": {
+              "enable": false
+            },
+            "metrics": {
+              "enable": true
+            },
+            "server": {
+              "allowUserDefinedWorkspaceNamespaces": false,
+              "cheClusterRoles": "",
+              "cheFlavor": "",
+              "cheWorkspaceClusterRole": "",
+              "gitSelfSignedCert": false,
+              "nonProxyHosts": "",
+              "proxyPassword": "",
+              "proxyPort": "",
+              "proxyURL": "",
+              "proxyUser": "",
+              "serverExposureStrategy": "",
+              "serverTrustStoreConfigMapName": "",
+              "tlsSupport": true,
+              "workspaceNamespaceDefault": "<username>-che"
+            },
+            "storage": {
+              "postgresPVCStorageClassName": "",
+              "preCreateSubPaths": true,
+              "pvcClaimSize": "10Gi",
+              "pvcStrategy": "common",
+              "workspacePVCStorageClassName": ""
+            }
+          }
+        }
