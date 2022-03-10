@@ -10,7 +10,7 @@ import * as sinon from 'sinon';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { OdoImpl } from '../../../src/odo';
 import { Progress } from '../../../src/util/progress';
-import { DeploymentConfig } from '../../../src/k8s/deployment';
+import { DeploymentConfig } from '../../../src/k8s/deploymentConfig';
 
 const {expect} = chai;
 chai.use(sinonChai);

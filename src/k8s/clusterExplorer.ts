@@ -6,7 +6,7 @@
 import * as vscode from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { Build } from './build';
-import { DeploymentConfig } from './deployment';
+import { DeploymentConfig } from './deploymentConfig';
 import path = require('path');
 import { ClusterServiceVersion } from './csv';
 
