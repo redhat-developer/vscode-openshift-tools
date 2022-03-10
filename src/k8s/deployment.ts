@@ -9,7 +9,7 @@ import { Progress } from '../util/progress';
 import * as common from './common';
 import { OdoImpl, Odo } from '../odo';
 import { vsCommand, VsCommandError } from '../vscommand';
-import { CommandOption, CommandText } from '../odo/command';
+import { CommandOption, CommandText } from '../base/command';
 
 export class DeploymentConfig {
 

@@ -7,7 +7,7 @@ import { QuickPickItem, window } from 'vscode';
 
 import * as k8s from 'vscode-kubernetes-tools-api';
 import * as Odo from '../odo';
-import { CommandText } from '../odo/command';
+import { CommandText } from '../base/command';
 import { VsCommandError } from '../vscommand';
 import { Node } from './node';
 

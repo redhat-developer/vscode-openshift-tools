@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import { ExtenisonID } from '../../util/constants';
 import { OpenShiftObject } from '../../odo';
 import * as odo from '../../odo';
-import { CommandText } from '../../odo/command';
+import { CommandText } from '../../base/command';
 
 export default class DescribeViewLoader {
 

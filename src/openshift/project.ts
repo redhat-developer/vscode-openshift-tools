@@ -8,7 +8,8 @@ import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { OpenShiftObject, OpenShiftProject, getInstance as getOdoInstance } from '../odo';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
-import { Command, CommandText } from '../odo/command';
+import { CommandText } from '../base/command';
+import { Command } from '../odo/command';
 
 export class Project extends OpenShiftItem {
 

@@ -17,7 +17,7 @@ import { CliExitData, CliChannel } from '../../src/cli';
 import * as odo from '../../src/odo';
 import * as verbose from '../../src/odo/command';
 import jsYaml = require('js-yaml');
-import { CommandText } from '../../src/odo/command';
+import { CommandText } from '../../src/base/command';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -58,7 +58,7 @@ suite('odo', () => {
 
     suite('command execution', () => {
         let execStub: sinon.SinonStub; let toolsStub: sinon.SinonStub;
-        const command = new verbose.CommandText('odo do whatever you do');
+        const command = new CommandText('odo do whatever you do');
 
         setup(() => {
             execStub = sandbox.stub(CliChannel.prototype, 'execute');
