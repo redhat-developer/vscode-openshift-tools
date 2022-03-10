@@ -5,55 +5,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 import { workspace } from 'vscode';
-import { Platform } from '../util/platform';
-
-const QUOTE = Platform.OS === 'win32' ? '"' : '\'';
-
-export class CommandOption {
-    protected privacy = false;
-    constructor(public readonly name: string, public readonly value?: string, public readonly redacted = true, public readonly quoted = false) {
-    }
-
-    toString(): string {
-        if (this.privacy) {
-            return this.toPrivateString();
-        }
-        return `${this.name}${this.value ? `=${this.quote}${this.value}${this.quote}` : '' }`;
-    }
-
-    toPrivateString(): string {
-        return `${this.name}${this.value && this.redacted? ' REDACTED' : '' }`
-    }
-
-    privacyMode(set: boolean): void {
-        this.privacy = set;
-    }
-
-    get quote(): string {
-        return this.quoted? QUOTE : '';
-    }
-}
-
-export class CommandText {
-    private privacy = false;
-    constructor(public readonly command: string, public readonly parameter?: string, public readonly options: CommandOption[] = []) {
-    }
-
-    toString(): string {
-        return `${this.command}${this.parameter? ` ${this.privacy? 'REDACTED' : this.parameter}`: ''}${this.options && this.options.length > 0? ` ${this.options.join(' ')}`: ''}`;
-    }
-
-    privacyMode(set: boolean): CommandText {
-        this.privacy = set;
-        this.options.forEach(element => element.privacyMode(true));
-        return this;
-    }
-
-    addOption(option: CommandOption): CommandText {
-       this.options.push(option);
-       return this;
-    }
-}
+import { CommandOption, CommandText } from '../base/command';
 
 function verbose(_: unknown, key: string, descriptor: TypedPropertyDescriptor<Function>): void {
     let fnKey: string | undefined;
@@ -319,6 +271,15 @@ export class Command {
             'deployment', [
                 new CommandOption('-n', project),
                 new CommandOption('-l', `component=${component},app=${app}`),
+                new CommandOption('--wait=true'),
+            ]
+        );
+    }
+
+    static deleteDeploymentByName(project: string, name: string): CommandText {
+        return new CommandText('oc delete deployment',
+            name, [
+                new CommandOption('-n', project),
                 new CommandOption('--wait=true'),
             ]
         );
