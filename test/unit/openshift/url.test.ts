@@ -68,45 +68,6 @@ suite('OpenShift/URL', () => {
         }
     }`;
 
-    const portsOutput = `{
-        "apiVersion": "v1",
-        "kind": "Service",
-        "metadata": {
-            "annotations": {
-                "app.kubernetes.io/component-source-type": "git",
-                "app.kubernetes.io/url": "https://github.com/dgolovin/nodejs-ex"
-            },
-            "creationTimestamp": "2019-01-04T01:03:34Z",
-            "labels": {
-                "app": "app1",
-                "app.kubernetes.io/component-name": "node",
-                "app.kubernetes.io/component-type": "nodejs",
-                "app.kubernetes.io/component-version": "latest",
-                "app.kubernetes.io/name": "app1"
-            },
-            "name": "node-app1",
-            "namespace": "proj1",
-            "resourceVersion": "1580667",
-            "selfLink": "/api/v1/namespaces/proj1/services/node-app1",
-            "uid": "8f80c48b-0fbc-11e9-b2e1-00155d93400f"
-        },
-        "spec": {
-            "clusterIP": "172.30.156.161",
-            "ports": [
-                "8080/TCP",
-                "8081/TCP"
-            ],
-            "selector": {
-                "deploymentconfig": "node-app1"
-            },
-            "sessionAffinity": "None",
-            "type": "ClusterIP"
-        },
-        "status": {
-            "loadBalancer": {}
-        }
-    }`;
-
     function genUlrListExecResult(state: string): Cli.CliExitData {
         return {error: undefined, stdout: JSON.stringify({
             kind: 'List',
@@ -186,7 +147,7 @@ suite('OpenShift/URL', () => {
         test('rejects when fails to create Url', () => {
             inputStub.onFirstCall().resolves();
             execStub.onFirstCall().resolves({error: null, stdout: '', stderr: ''});
-            execStub.onSecondCall().resolves({error: 'Error', stdout: portsOutput, stderr: ''});
+            execStub.onSecondCall().resolves({error: 'Error', stdout: '', stderr: ''});
             return Url.create(null).catch((err) => {
                 expect(err).equals(`Failed to create URL for component '${componentItem.getName()}'`);
             });
