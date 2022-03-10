@@ -15,7 +15,7 @@ import { DEFAULT_K8S_SCHEMA, getUISchema, randomString, generateDefaults } from 
 import { loadYaml } from '@kubernetes/client-node';
 import { JSONSchema7 } from 'json-schema';
 import { getInstance, OpenShiftObject } from '../odo';
-import { CommandText } from '../odo/command';
+import { CommandText } from '../base/command';
 import { getOpenAPISchemaFor } from '../util/swagger';
 
 class CsvNode implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorerExtensionNode {

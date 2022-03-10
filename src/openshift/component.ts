@@ -11,7 +11,8 @@ import { EventEmitter } from 'events';
 import * as YAML from 'yaml'
 import OpenShiftItem, { clusterRequired, selectTargetApplication, selectTargetComponent } from './openshiftItem';
 import { OpenShiftObject, ContextType, OpenShiftObjectImpl, OpenShiftComponent, OpenShiftApplication } from '../odo';
-import { Command, CommandOption, CommandText } from '../odo/command';
+import { CommandOption, CommandText } from '../base/command';
+import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
 import { Platform } from '../util/platform';

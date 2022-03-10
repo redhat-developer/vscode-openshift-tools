@@ -18,7 +18,7 @@ import { Progress } from '../../src/util/progress';
 import path = require('path');
 
 import packagejson = require('../../package.json');
-import { CommandText } from '../../src/odo/command';
+import { CommandText } from '../../src/base/command';
 
 const {expect} = chai;
 chai.use(sinonChai);

@@ -10,7 +10,7 @@ import { OpenShiftObject } from '../../odo';
 import * as odo from '../../odo';
 import treeKill = require('tree-kill');
 import { ChildProcess } from 'child_process';
-import { CommandText } from '../../odo/command';
+import { CommandText } from '../../base/command';
 
 export default class LogViewLoader {
 

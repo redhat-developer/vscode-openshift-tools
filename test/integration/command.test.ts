@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Command, CommandText } from '../../src/odo/command';
+import { CommandText } from '../../src/base/command';
+import { Command } from '../../src/odo/command';
 import { getInstance } from '../../src/odo';
 import { KubeConfig } from '@kubernetes/client-node';
 import * as tmp from 'tmp';
