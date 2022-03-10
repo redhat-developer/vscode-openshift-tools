@@ -267,11 +267,11 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
         contextValue: ContextType,
         contextPath: Uri = undefined,
         compType: string = undefined) {
-        super(parent, name, contextValue, '', Collapsed, contextPath, compType);
+        super(parent, name, contextValue, '', compType === NotAvailable? TreeItemCollapsibleState.None : Collapsed, contextPath, compType);
     }
 
     isOdoManaged(): boolean {
-        return this.compType === NotAvailable;
+        return this.compType !== NotAvailable;
     }
 
     get iconPath(): Uri {
@@ -279,7 +279,7 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
     }
 
     getChildren(): Promise<OpenShiftObject[]> {
-        return this.contextValue === ContextType.COMPONENT_NO_CONTEXT ? Promise.resolve(<OpenShiftObject[]>[]) : this.odo.getComponentChildren(this);
+        return this.contextValue === ContextType.COMPONENT_NO_CONTEXT || !this.isOdoManaged() ? Promise.resolve(<OpenShiftObject[]>[]) : this.odo.getComponentChildren(this);
     }
 
     get tooltip(): string {
@@ -949,9 +949,6 @@ export class OdoImpl implements Odo {
     }
 
     public async createService(application: OpenShiftObject, formData: any): Promise<OpenShiftObject> {
-        // await this.execute(Command.createService(application.getParent().getName(), application.getName(), templateName, planName, name.trim()), Platform.getUserHomePath());
-        // await this.createApplication(application);
-        // return this.insertAndReveal(new OpenShiftService(application, name));
         formData.metadata.labels = {
             app: application.getName(),
             'app.kubernetes.io/part-of': application.getName()
