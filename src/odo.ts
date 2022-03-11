@@ -36,6 +36,7 @@ import { KubeConfig } from '@kubernetes/client-node';
 import { pathExistsSync } from 'fs-extra';
 import * as fs from 'fs';
 import { ClusterServiceVersionKind } from './k8s/olm/types';
+import { Deployment } from './k8s/deployment';
 
 const tempfile = require('tmp');
 const {Collapsed} = TreeItemCollapsibleState;
@@ -905,6 +906,13 @@ export class OdoImpl implements Odo {
                     app.getParent().getName(),
                     app.getName(),
                     component.getName()
+                ),
+                component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()
+            );
+        } else if (component.contextValue === ContextType.COMPONENT_OTHER) {
+            await this.execute(
+                Deployment.command.delete(
+                    component.getName(),
                 ),
                 component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()
             );
