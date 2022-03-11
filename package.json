@@ -1425,17 +1425,7 @@
         },
         {
           "command": "openshift.component.delete",
-          "when": "view == openshiftProjectExplorer && viewItem == componentNoContext || ",
-          "group": "c6@1"
-        },
-        {
-          "command": "openshift.component.delete",
-          "when": "view == openshiftProjectExplorer && viewItem == component",
-          "group": "c6@1"
-        },
-        {
-          "command": "openshift.component.delete",
-          "when": "view == openshiftProjectExplorer && viewItem == componentNotPushed",
+          "when": "view == openshiftProjectExplorer && viewItem == componentNoContext || viewItem == component || viewItem == componentNotPushed || viewItem == componentOther",
           "group": "c6@1"
         },
         {

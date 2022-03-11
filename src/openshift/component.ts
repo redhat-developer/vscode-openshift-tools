@@ -95,10 +95,25 @@ export class Component extends OpenShiftItem {
     @selectTargetApplication(
         'In which Application you want to create a Component'
     )
+
     static async create(application: OpenShiftApplication): Promise<string> {
         if (!application) return null;
 
         return Component.createFromLocal(application);
+    }
+
+    static async delete(component: OpenShiftComponent) {
+        if (component.contextValue === ContextType.COMPONENT_PUSHED) {
+            await Component.unlinkAllComponents(component);
+        }
+        Component.stopDebugSession(component);
+        Component.stopWatchSession(component);
+        await Component.odo.deleteComponent(component);
+        commands.executeCommand('openshift.componentsView.refresh');
+    }
+
+    static async deleteOther(component: OpenShiftComponent) {
+        await Component.odo.deleteComponent(component);
     }
 
     @vsCommand('openshift.component.delete', true)
@@ -114,15 +129,14 @@ export class Component extends OpenShiftItem {
 
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Deleting the Component '${component.getName()} '`, async () => {
-                if (component.contextValue === ContextType.COMPONENT_PUSHED) {
-                    await Component.unlinkAllComponents(component);
-                }
-                Component.stopDebugSession(component);
-                Component.stopWatchSession(component);
-                await Component.odo.deleteComponent(component);
-                commands.executeCommand('openshift.componentsView.refresh');
-            }).then(() => `Component '${name}' successfully deleted`)
-                .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Component with error '${err}'`, 'Failed to delete Component with error')));
+              if (component.isOdoManaged()) {
+                await Component.delete(component);
+              } else {
+                await Component.deleteOther(component);
+              }
+            })
+            .then(() => `Component '${name}' successfully deleted`)
+            .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Component with error '${err}'`, 'Failed to delete Component with error')));
         }
     }
 
