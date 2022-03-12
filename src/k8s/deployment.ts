@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { CommandText, CommandOption } from '../base/command';
-import { vsCommand } from '../vscommand';
 
 export class Deployment {
     public static command = {
