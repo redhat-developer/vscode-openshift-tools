@@ -20,16 +20,4 @@ export class Deployment {
             );
         }
     }
-
-    @vsCommand('clusters.openshift.deployment.delete', true)
-    static async delete(context: { impl: any }): Promise<string> {
-        let result: string | Promise<string> | PromiseLike<string>;
-        // const replica = await DeploymentConfig.selectReplica(context, 'Select a Replica to delete');
-        // if (replica) {
-        //     result = Progress.execFunctionWithProgress('Deleting replica', () => DeploymentConfig.odo.execute(DeploymentConfig.command.delete(replica)))
-        //         .then(() => `Replica '${replica}' successfully deleted`)
-        //         .catch((err) => Promise.reject(new VsCommandError(`Failed to delete replica with error '${err}'`, 'Failed to delete replica')));
-        // }
-        return result;
-    }
 }

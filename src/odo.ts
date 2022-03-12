@@ -285,6 +285,9 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
     }
 
     get tooltip(): string {
+        if (this.contextValue === ContextType.COMPONENT_OTHER) {
+            return `Deployment: ${this.name}`;
+        }
         return `Component: ${this.name}\nContext: ${this.contextPath ? this.contextPath.fsPath : 'not set'}`;
     }
 
@@ -297,7 +300,7 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
         } else if (this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
             suffix = `${GlyphChars.Space}${GlyphChars.NoContext} no context`;
         } else {
-            suffix = `${GlyphChars.Space}${GlyphChars.Push} deployment`
+            suffix = `${GlyphChars.Space}${GlyphChars.Push}`;
         }
         return `${suffix}`;
     }
