@@ -300,7 +300,7 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
         } else if (this.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
             suffix = `${GlyphChars.Space}${GlyphChars.NoContext} no context`;
         } else {
-            suffix = `${GlyphChars.Space}${GlyphChars.Push}`;
+            suffix = `${GlyphChars.Space}${GlyphChars.NoContext} no context`;
         }
         return `${suffix}`;
     }
