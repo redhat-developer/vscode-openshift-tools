@@ -1034,11 +1034,12 @@ suite('OpenShift/Component', () => {
     });
 
     suite('watch', () => {
-
+        let errorMessageStub;
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onFirstCall().resolves(appItem);
             quickPickStub.onSecondCall().resolves(componentItem);
+            errorMessageStub = sandbox.stub(vscode.window,'showErrorMessage');
         });
 
         test('returns null when cancelled', async () => {
@@ -1083,6 +1084,25 @@ suite('OpenShift/Component', () => {
             children = watchView.getChildren();
             expect((children as string[]).length).equals(0);
         });
+
+        test('shows error message if process fails to start', async () => {
+            const cpStub = new EventEmitter() as ChildProcess;
+            spawnStub.resolves(cpStub);
+            await Component.watch(null);
+            const error = new Error('Failed to start');
+            cpStub.emit('error', error);
+            expect(errorMessageStub).calledOnceWith(`Watch process failed to start with error: '${error}'`);
+        });
+
+        test('shows error message if process exits with error code', async () => {
+            const cpStub = new EventEmitter() as ChildProcess;
+            spawnStub.resolves(cpStub);
+            await Component.watch(null);
+            const error = new Error('Failed to start');
+            cpStub.emit('exit', 1);
+            expect(errorMessageStub).calledOnceWith('Watch process failed to start.');
+        });
+
     });
 
     suite('openUrl', () => {
