@@ -1098,7 +1098,6 @@ suite('OpenShift/Component', () => {
             const cpStub = new EventEmitter() as ChildProcess;
             spawnStub.resolves(cpStub);
             await Component.watch(null);
-            const error = new Error('Failed to start');
             cpStub.emit('exit', 1);
             expect(errorMessageStub).calledOnceWith('Watch process failed to start.');
         });
