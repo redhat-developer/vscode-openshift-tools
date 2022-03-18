@@ -464,8 +464,15 @@ export class Component extends OpenShiftItem {
             }
         } else {
             const process: ChildProcess = await Component.odo.spawn(Command.watchComponent().toString(), component.contextPath.fsPath);
+            process.on('error', (err) => {
+                void window.showErrorMessage(`Watch process failed to start with error: '${err}'`);
+                Component.removeWatchSession(component);
+            });
             Component.addWatchSession(component, process);
-            process.on('exit', () => {
+            process.on('exit', (code: number) => {
+                if (code!== 0) {
+                    void window.showErrorMessage('Watch process failed to start.');
+                }
                 Component.removeWatchSession(component);
             });
         }
