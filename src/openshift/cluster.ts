@@ -351,7 +351,7 @@ export class Cluster extends OpenShiftItem {
     static async loginUsingClipboardInfo(): Promise<string | null> {
         const clipboard = await Cluster.readFromClipboard();
         if(!Cluster.ocLoginCommandMatches(clipboard)) {
-            throw new VsCommandError('Cannot parse login command in clipboard.')
+            throw new VsCommandError('Cannot parse login command in clipboard. Please open Developer Console and use menu item to copy login command to clipboard.')
         }
         const url = Cluster.clusterURL(clipboard);
         const token = Cluster.getToken(clipboard);

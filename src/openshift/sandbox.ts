@@ -8,28 +8,40 @@ import fetch = require('make-fetch-happen');
 
 // eslint-disable-next-line no-shadow
 export enum SBAPIEndpoint {
-    SIGNUP = '/api/v1/signup',
-    VERIFICATION = '/api/v1/signup/verification'
+  SIGNUP = '/api/v1/signup',
+  VERIFICATION = '/api/v1/signup/verification'
 }
 
 export interface SBStatus {
-     ready: boolean;
-     reason: 'Provisioned' | 'PendingApproval';
-     verificationRequired: boolean;
- }
+  ready: boolean;
+  reason: 'Provisioned' | 'PendingApproval';
+  verificationRequired: boolean;
+}
 
- export interface SBSignupResponse {
-    apiEndpoint: string;
-    cheDashboardURL: string;
-    clusterName: string;
-    company: string;
-    compliantUsername: string;
-    consoleURL: string;
-    familyName: string;
-    givenName: string;
-    status: SBStatus;
-    username: string;
- }
+export interface SBSignupResponse {
+  apiEndpoint: string;
+  cheDashboardURL: string;
+  clusterName: string;
+  company: string;
+  compliantUsername: string;
+  consoleURL: string;
+  familyName: string;
+  givenName: string;
+  status: SBStatus;
+  username: string;
+}
+
+export interface SBResponseData {
+  status: string;
+  code: number;
+  message: string;
+  details: string;
+}
+
+export interface VerificationCodeResponse{
+  ok: boolean;
+  json: SBResponseData;
+}
 
 export function getSandboxAPIUrl(): string {
     return workspace.getConfiguration('openshiftConnector').get('sandboxApiHostUrl');
@@ -42,7 +54,7 @@ export function getSandboxAPITimeout(): number {
 export interface SandboxAPI {
     getSignUpStatus(token: string): Promise<SBSignupResponse | undefined>;
     signUp(token: string): Promise<boolean>;
-    requestVerificationCode(token: string, areaCode: string, phoneNumber: string): Promise<boolean>;
+    requestVerificationCode(token: string, areaCode: string, phoneNumber: string): Promise<VerificationCodeResponse>;
     validateVerificationCode(token: string, code: string): Promise<boolean>;
 }
 
@@ -69,7 +81,7 @@ export async function signUp(token: string): Promise<boolean> {
     return signupResponse.ok;
 }
 
-export async function requestVerificationCode(token: string, countryCode: string, phoneNumber: string): Promise<boolean> {
+export async function requestVerificationCode(token: string, countryCode: string, phoneNumber: string) : Promise<VerificationCodeResponse> {
     const verificationCodeRequestResponse = await fetch(`${getSandboxAPIUrl()}${SBAPIEndpoint.VERIFICATION}`, {
         method: 'PUT',
         headers: {
@@ -82,7 +94,10 @@ export async function requestVerificationCode(token: string, countryCode: string
         })
     });
 
-    return verificationCodeRequestResponse.ok;
+    return {
+        ok: verificationCodeRequestResponse.ok,
+        json: await verificationCodeRequestResponse.json() as SBResponseData
+    }
 }
 
 export async function validateVerificationCode(token: string, code: string): Promise<boolean> {
