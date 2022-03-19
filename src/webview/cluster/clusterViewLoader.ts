@@ -137,11 +137,11 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             const telemetryEventRequestCode = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxRequestVerificationCode');
             try {
                 const requestStatus = await sandboxAPI.requestVerificationCode((sessionCheck as any).idToken, event.payload.fullCountryCode, event.payload.rawPhoneNumber);
-                if (requestStatus) {
+                if (requestStatus.ok) {
                     panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode'});
                     telemetryEventRequestCode.send();
                 } else {
-                    vscode.window.showErrorMessage('Request for verification code failed, please try again.');
+                    vscode.window.showErrorMessage(`Request for verification code failed: ${requestStatus.json.details}`);
                     panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
                     telemetryEventRequestCode.sendError('Request for verification code failed.');
                 }
