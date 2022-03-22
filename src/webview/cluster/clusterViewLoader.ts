@@ -174,7 +174,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
         case 'sandboxLoginUsingDataInClipboard':
             const telemetryEventLoginToSandbox = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxLoginUsingDataInClipboard');
             try {
-                const result = await Cluster.loginUsingClipboardInfo();
+                const result = await Cluster.loginUsingClipboardInfo(event.payload.url);
                 if (result) vscode.window.showInformationMessage(`${result}`);
                 telemetryEventLoginToSandbox.send();
             } catch (err) {

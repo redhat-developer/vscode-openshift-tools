@@ -358,8 +358,9 @@ export default function addSandboxView(props): JSX.Element {
     const Provisioned = () => {
 
         const handleLoginButton = () => {
-            postMessage('sandboxLoginUsingDataInClipboard');
+            postMessage('sandboxLoginUsingDataInClipboard', {url: currentState.consoleDashboard});
         };
+        
         return (
             <>
                 {( currentState.action === 'sandboxPageProvisioned' ) && (

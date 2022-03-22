@@ -348,10 +348,15 @@ export class Cluster extends OpenShiftItem {
     }
 
     @vsCommand('openshift.explorer.login.clipboard')
-    static async loginUsingClipboardInfo(): Promise<string | null> {
+    static async loginUsingClipboardInfo(dashboardUrl: string): Promise<string | null> {
         const clipboard = await Cluster.readFromClipboard();
         if(!Cluster.ocLoginCommandMatches(clipboard)) {
-            throw new VsCommandError('Cannot parse login command in clipboard.')
+            const choice = await window.showErrorMessage('Cannot parse login command in clipboard. Please open cluster dashboard and select `Copy login command` from user name dropdown in the upper right corner. Copy full login command to clipboard. Switch back to VSCode window and press `Login to Sandbox` button again.',
+                'Open Dashboard');
+            if (choice === 'Open Dashboard') {
+                await commands.executeCommand('vscode.open', Uri.parse(dashboardUrl));
+            }
+            return;
         }
         const url = Cluster.clusterURL(clipboard);
         const token = Cluster.getToken(clipboard);
