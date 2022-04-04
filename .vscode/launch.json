@@ -82,6 +82,14 @@
             "file": "${workspaceFolder}/out/clusterViewer/index.html",
             "webRoot": "${workspaceFolder}",
             "trace": true
-          }
+        },
+        {
+              "type": "pwa-chrome",
+              "request": "launch",
+              "name": "Launch 'Devfile Registry viewer' in Chrome",
+              "file": "${workspaceFolder}/out/devFileRegistryViewer/index.html",
+              "webRoot": "${workspaceFolder}",
+              "trace": true
+        }
     ]
 }
