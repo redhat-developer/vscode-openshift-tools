@@ -371,6 +371,7 @@ export interface Odo {
     readonly subject: Subject<OdoEvent>;
     addRegistry(name: string, url: string, token: string): Promise<Registry>;
     removeRegistry(name: string): Promise<void>;
+    getWorkspaceComponents(): odo.Component[];
 }
 
 class OdoModel {
@@ -1116,6 +1117,10 @@ export class OdoImpl implements Odo {
 
     public async removeRegistry(name: string): Promise<void> {
         await this.execute(Command.removeRegistry(name));
+    }
+
+    public getWorkspaceComponents(): odo.Component[] {
+      return OdoImpl.data.getSettings();
     }
 }
 
