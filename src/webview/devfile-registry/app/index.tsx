@@ -4,15 +4,16 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import * as React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Home } from './home';
+import { DetailsPage } from './detailsPage';
 
 ReactDOM.render(
     <Router>
         <Routes>
-            <Route path="*" element={<Home />} />
-            <Route path="/devfiles/" element={<Home />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/devfiles/*" element={<DetailsPage />} />
         </Routes>
     </Router>,
     document.getElementById('root'),
