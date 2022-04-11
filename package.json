@@ -237,6 +237,7 @@
         "onCommand:openshift.app.create",
         "onCommand:openshift.app.delete",
         "onCommand:openshift.component.create",
+        "onCommand:openshift.component.web.create",
         "onCommand:openshift.component.createFromLocal",
         "onCommand:openshift.component.createFromRootWorkspaceFolder",
         "onCommand:openshift.component.describe",
@@ -448,6 +449,15 @@
             {
                 "command": "openshift.component.create",
                 "title": "New Component",
+                "category": "OpenShift",
+                "icon": {
+                    "light": "images/title/light/workspace-new.svg",
+                    "dark": "images/title/dark/workspace-new.svg"
+                }
+            },
+            {
+                "command": "openshift.component.web.create",
+                "title": "Web new Component",
                 "category": "OpenShift",
                 "icon": {
                     "light": "images/title/light/workspace-new.svg",
@@ -958,6 +968,10 @@
                     "when": "view == openshiftProjectExplorer"
                 },
                 {
+                    "command": "openshift.component.web.create",
+                    "when": "view == openshiftProjectExplorer"
+                },
+                {
                     "command": "openshift.component.test",
                     "when": "false"
                 },
@@ -1314,7 +1328,17 @@
                     "group": "p1@0"
                 },
                 {
+                    "command": "openshift.component.web.create",
+                    "when": "view == openshiftProjectExplorer && viewItem == project ",
+                    "group": "p1@0"
+                },
+                {
                     "command": "openshift.component.create",
+                    "when": "view == openshiftProjectExplorer && viewItem == application ",
+                    "group": "a1"
+                },
+                {
+                    "command": "openshift.component.web.create",
                     "when": "view == openshiftProjectExplorer && viewItem == application ",
                     "group": "a1"
                 },
@@ -1503,7 +1527,17 @@
                     "group": "inline"
                 },
                 {
+                    "command": "openshift.component.web.create",
+                    "when": "view == openshiftProjectExplorer && viewItem == project",
+                    "group": "inline"
+                },
+                {
                     "command": "openshift.component.create",
+                    "when": "view == openshiftProjectExplorer && viewItem == application",
+                    "group": "inline"
+                },
+                {
+                    "command": "openshift.component.web.create",
                     "when": "view == openshiftProjectExplorer && viewItem == application",
                     "group": "inline"
                 },

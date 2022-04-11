@@ -23,8 +23,8 @@ export interface Devfile {
             [key: string]: string;
         };
     };
-
-    // Properties specific to the registry viewer
-    registry: string;
+    architectures?: string[];
+    // Properties specific to
+    registry?: string;
     registryLink?: string;
 }

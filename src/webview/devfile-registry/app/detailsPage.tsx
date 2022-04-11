@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import React from "react";
-import { useLocation } from "react-router-dom";
-import { Devfile } from "../commands";
+import React from 'react';
+import { useLocation } from 'react-router-dom';
+import { Devfile } from '../commands';
 
 export function DetailsPage() {
     const devFile = useLocation().state as Devfile;

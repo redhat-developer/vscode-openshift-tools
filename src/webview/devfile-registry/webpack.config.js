@@ -61,10 +61,10 @@ module.exports = {
                 production: isProduction
             }
         }),
-        /*new CopyWebpackPlugin({
+        new CopyWebpackPlugin({
             patterns: [{
                 from: path.resolve(__dirname, 'app', 'devstub.js')
             }]
-        })*/
+        })
     ],
 };

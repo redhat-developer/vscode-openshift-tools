@@ -3,20 +3,27 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import React from "react";
-import { Brand, Card, CardBody, CardHeader, CardTitle, TextContent, TextVariants, Text } from "@patternfly/react-core";
-import { DevFileProps } from "./wrapperCardItem";
+import React from 'react';
+import { Brand, Card, CardBody, CardHeader, CardTitle, TextContent, TextVariants, Text } from '@patternfly/react-core';
+import { DevFileProps } from './wrapperCardItem';
+
+const vscodeApi = window.vscodeApi;
 
 export const CardItem: React.FC<DevFileProps> = ({
     devFile,
-    style,
+    style
 }: DevFileProps) => {
+
+    const onTileClick = (): void => {
+        vscodeApi.postMessage('getDevFile::' + devFile.name);
+    };
 
     return (
         <>
             <Card
                 className={style.card}
                 isHoverable
+                onClick={onTileClick}
                 data-testid={`card-${devFile.name.replace(/\.| /g, '')}`}
             >
                 <CardHeader className={style.cardHeader}>

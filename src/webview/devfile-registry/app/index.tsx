@@ -12,7 +12,7 @@ import { DetailsPage } from './detailsPage';
 ReactDOM.render(
     <Router>
         <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/index.html" element={<Home />} />
             <Route path="/devfiles/*" element={<DetailsPage />} />
         </Routes>
     </Router>,
