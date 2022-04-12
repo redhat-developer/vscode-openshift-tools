@@ -47,7 +47,12 @@ export function Home() {
     const homeStyle = useStyles();
     const [devfiles, setDevFiles] = useState([]);
     useEffect(() => {
-        return VSCodeMessage.onMessage((message) => setDevFiles(message.data));
+        return VSCodeMessage.onMessage((message) => {
+            if (message.data.action === 'getAllComponents') {
+                setDevFiles(message.data.devFiles)
+            }
+        }
+        );
     });
 
     return (

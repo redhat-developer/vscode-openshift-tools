@@ -10,7 +10,7 @@ import { Home } from './home';
 import { DetailsPage } from './detailsPage';
 import { VSCodeMessage } from '../vsCodeMessage';
 
-VSCodeMessage.postMessage('getAllComponents');
+VSCodeMessage.postMessage({action:'getAllComponents'});
 ReactDOM.render(
     <Router>
         <Routes>

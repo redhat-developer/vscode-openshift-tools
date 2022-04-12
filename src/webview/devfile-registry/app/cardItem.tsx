@@ -14,7 +14,7 @@ export const CardItem: React.FC<DevFileProps> = ({
 }: DevFileProps) => {
 
     const onTileClick = (): void => {
-        VSCodeMessage.postMessage('getDevFile::' + devFile.metadata.name);
+        VSCodeMessage.postMessage({'action':'getYAML','data': devFile});
     };
 
     return (
