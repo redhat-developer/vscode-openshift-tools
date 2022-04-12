@@ -8,7 +8,9 @@ import * as React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Home } from './home';
 import { DetailsPage } from './detailsPage';
+import { VSCodeMessage } from '../vsCodeMessage';
 
+VSCodeMessage.postMessage('getAllComponents');
 ReactDOM.render(
     <Router>
         <Routes>

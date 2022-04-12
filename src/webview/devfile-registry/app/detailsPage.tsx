@@ -5,14 +5,14 @@
 
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { Devfile } from '../commands';
+import { Data } from '../../../odo/componentTypeDescription';
 
 export function DetailsPage() {
-    const devFile = useLocation().state as Devfile;
+    const devFile = useLocation().state as Data;
     return (
         <>
-            <div>{devFile.name}</div>
-            <div>{devFile.description}</div>
+            <div>{devFile.metadata.name}</div>
+            <div>{devFile.metadata.description}</div>
         </>
     )
 }

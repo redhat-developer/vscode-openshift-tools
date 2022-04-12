@@ -6,8 +6,7 @@
 import React from 'react';
 import { Brand, Card, CardBody, CardHeader, CardTitle, TextContent, TextVariants, Text } from '@patternfly/react-core';
 import { DevFileProps } from './wrapperCardItem';
-
-const vscodeApi = window.vscodeApi;
+import { VSCodeMessage } from '../vsCodeMessage';
 
 export const CardItem: React.FC<DevFileProps> = ({
     devFile,
@@ -15,7 +14,7 @@ export const CardItem: React.FC<DevFileProps> = ({
 }: DevFileProps) => {
 
     const onTileClick = (): void => {
-        vscodeApi.postMessage('getDevFile::' + devFile.name);
+        VSCodeMessage.postMessage('getDevFile::' + devFile.metadata.name);
     };
 
     return (
@@ -24,38 +23,38 @@ export const CardItem: React.FC<DevFileProps> = ({
                 className={style.card}
                 isHoverable
                 onClick={onTileClick}
-                data-testid={`card-${devFile.name.replace(/\.| /g, '')}`}
+                data-testid={`card-${devFile.metadata.name.replace(/\.| /g, '')}`}
             >
                 <CardHeader className={style.cardHeader}>
                     <div className={style.cardHeaderDisplay}>
                         <Brand
-                            src={devFile.icon}
-                            alt={`${devFile.name} icon`}
+                            src={devFile.metadata.icon}
+                            alt={`${devFile.metadata.name} icon`}
                             className={style.cardImage}
                         />
-                        <TextContent>
+                        {/* TODO: needs to check <TextContent>
                             <Text className={style.text}>
-                                {capitalizeFirstLetter(devFile.type)}
+                                {capitalizeFirstLetter(devFile.metadata.projectType)}
                             </Text>
-                        </TextContent>
+                        </TextContent>*/}
                     </div>
                 </CardHeader>
                 <CardTitle style={{ margin: '0.5rem' }}>
                     <TextContent>
-                        <Text component={TextVariants.h3}>{devFile.displayName}</Text>
+                        <Text component={TextVariants.h3}>{devFile.metadata.displayName}</Text>
                     </TextContent>
                 </CardTitle>
                 <CardBody className={style.cardBody}>
-                    {devFile.version && (
+                    {devFile.metadata.version && (
                         <TextContent>
                             <Text component={TextVariants.small}>
-                                Version: {devFile.version}
+                                Version: {devFile.metadata.version}
                             </Text>
                         </TextContent>
                     )}
                     <TextContent>
                         <Text component={TextVariants.small}>
-                            Language: {capitalizeFirstLetter(devFile.language)}
+                            Language: {capitalizeFirstLetter(devFile.metadata.language)}
                         </Text>
                     </TextContent>
                     <TextContent>
@@ -63,7 +62,7 @@ export const CardItem: React.FC<DevFileProps> = ({
                             component={TextVariants.p}
                             className={style.longDescription}
                         >
-                            {devFile.description}
+                            {devFile.metadata.description}
                         </Text>
                     </TextContent>
                 </CardBody>

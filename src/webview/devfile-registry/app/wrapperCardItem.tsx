@@ -5,10 +5,10 @@
 
 import { CardItem } from "./cardItem";
 import React, { forwardRef } from "react";
-import { Devfile } from "../commands";
+import { Data } from '../../../odo/componentTypeDescription';
 
 export interface DevFileProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-    devFile: Devfile;
+    devFile: Data;
     style: any;
 }
 

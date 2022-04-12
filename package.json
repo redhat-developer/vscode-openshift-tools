@@ -88,8 +88,6 @@
     },
     "dependencies": {
         "@kubernetes/client-node": "^0.16.1",
-        "@patternfly/react-core": "^4.198.19",
-        "@patternfly/react-icons": "^4.49.19",
         "@redhat-developer/vscode-redhat-telemetry": "^0.4.2",
         "binary-search": "^1.3.6",
         "byline": "^5.0.0",
@@ -126,6 +124,8 @@
         "@mui/icons-material": "^5.2.5",
         "@mui/lab": "^5.0.0-alpha.61",
         "@mui/material": "^5.4.1",
+        "@patternfly/react-core": "^4.198.19",
+        "@patternfly/react-icons": "^4.49.19",
         "@rjsf/material-ui": "^3.2.1",
         "@types/byline": "^4.2.33",
         "@types/chai": "^4.3.0",

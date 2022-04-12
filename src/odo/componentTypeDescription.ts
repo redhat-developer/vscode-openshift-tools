@@ -20,6 +20,11 @@ export interface Data {
 export interface Metadata {
     name: string;
     version: string;
+    icon?: string;
+    projectType?: string;
+    displayName?: string;
+    language?: string;
+    description?: string;
 }
 
 export interface Parent {
