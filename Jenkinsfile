@@ -68,8 +68,13 @@ node('rhel8'){
 
   if(params.UPLOAD_LOCATION) {
     stage('Snapshot') {
-      def filesToPush = findFiles(glob: '**.vsix')
-      sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.vsix* ${UPLOAD_LOCATION}/snapshots/vscode-openshift-tools/"
+      script {
+        def filesToPush = findFiles(glob: '**.vsix*')
+        for (int i = 0; i < filesToPush.size(); i++) {
+          echo "Uploading ${filesToPush[i].path}"
+          sh "sftp -C ${UPLOAD_LOCATION}/snapshots/vscode-openshift-tools/ / <<< \$'put -p \"${filesToPush[i].path}\"'"
+        }
+      
     }
   }
 
