@@ -74,7 +74,7 @@ node('rhel8'){
           echo "Uploading ${filesToPush[i].path}"
           sh "sftp -C ${UPLOAD_LOCATION}/snapshots/vscode-openshift-tools/ / <<< \$'put -p \"${filesToPush[i].path}\"'"
         }
-      
+      }
     }
   }
 
