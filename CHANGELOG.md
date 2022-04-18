@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.4.0 (April 14, 2022)
+## 0.4.0 (April 18, 2022)
 
 * [#2397](https://github.com/redhat-developer/vscode-openshift-tools/issues/2397) Fix jenkinsFile rsync issues for release
 * [#2388](https://github.com/redhat-developer/vscode-openshift-tools/issues/2388) Not handled promise rejection reported in log when there is no active cluster
