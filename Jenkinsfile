@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-node('rhel8'){
+node('win10'){
 
   def vscodeVersion = ""
   stage('Checkout repo') {
