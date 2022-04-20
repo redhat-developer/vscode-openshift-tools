@@ -91,7 +91,7 @@ export class Component extends OpenShiftItem {
         return !!ws;
     }
 
-    @vsCommand('openshift.component.web.create')
+    @vsCommand('openshift.component.open.devfileRegistry')
     static add(): void {
         void RegistryViewLoader.loadView('Devfile Registry');
     }

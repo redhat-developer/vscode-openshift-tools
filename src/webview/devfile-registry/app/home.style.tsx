@@ -9,13 +9,17 @@ export default (theme: Theme) =>
     createStyles({
         devfileGalleryGrid: {
             paddingTop: '1rem',
+            color: 'var(--vscode-foreground)',
+            backgroundColor: 'var(--vscode-editor-background)',
+            fontSize: 'var(--vscode-font-size)',
+            fontFamily: 'var(--vscode-font-family)',
         },
         card: {
             height: 'auto',
             margin: '0.5rem',
             cursor: 'pointer',
-            borderRadius: '2rem',
-            border: '1px solid rgb(175,175,175)',
+            borderRadius: '1rem',
+            border: '1px solid var(--vscode-focusBorder)',
             transition: 'all ease 200ms',
             transform: 'scale(0.95)',
             '&:hover': {
@@ -25,7 +29,7 @@ export default (theme: Theme) =>
         },
         cardHeader: {
             display: 'block',
-            height: '5rem',
+            height: '3rem',
             margin: '0.5rem',
         },
         cardHeaderDisplay: {
@@ -35,21 +39,20 @@ export default (theme: Theme) =>
         cardImage: {
             width: 'auto',
             height: 'auto',
-            margin: '0.5rem',
+            margin: '1rem',
             maxWidth: '6rem',
             maxHeight: '3rem',
         },
         cardBody: {
-            height: '6rem',
+            height: '7rem',
             overflow: 'hidden',
-            margin: '0.5rem',
+            margin: '1.5rem'
         },
         cardFooterTag: {
             margin: '0.125rem',
         },
         text: {
-            textAlign: 'right',
-            color: 'var(--pf-global--Color--200)',
+            textAlign: 'right'
         },
         longDescription: {
             overflow: 'hidden',
@@ -57,12 +60,57 @@ export default (theme: Theme) =>
             WebkitLineClamp: 3,
             WebkitBoxOrient: 'vertical',
         },
-        textLink: {
-            color: 'inherit',
-            textDecoration: 'inherit',
+        cardButton: {
+            display: 'block',
+            marginBottom: theme.spacing(2),
+            color: 'var(--vscode-button-foreground)',
+            backgroundColor: 'var(--vscode-button-background)',
+            float:'right'
+        },
+        yamlCard: {
+            color: 'var(--vscode-foreground)',
+            backgroundColor: 'var(--vscode-editor-background)',
+            fontSize: 'var(--vscode-font-size)',
+            fontFamily: 'var(--vscode-font-family)',
+            height: '40rem',
+            margin: 'auto',
+            overflowX: 'scroll'
+        },
+        yamlCardHeader: {
+            padding: '1.5rem!important',
+            borderBottom: '1px solid rgb(175, 175, 175)',
+            display: 'flex',
+            justifyContent: 'space-between'
+        },
+        yamlCardBody: {
+            padding: '1.5rem!important',
+            width: 'auto'
+        },
+        button: {
+            width: '8rem',
+            height: '1.5rem',
+            border: '1px solid var(--vscode-focusBorder)',
+            padding: 'var(--input-padding-vertical) var(--input-padding-horizontal)',
+            textAlign: 'center',
+            outline: '0.0625rem solid transparent',
+            outlineOffset: '0.125rem!important',
+            textTransform: 'none',
             '&:hover': {
-                color: 'inherit',
-                textDecoration: 'none'
+                cursor: 'pointer',
+                background: 'var(--vscode-button-hoverBackground)'
+            },
+            '&:foucs': {
+                outlineColor: 'var(--vscode-focusBorder)'
             }
+        },
+        backBtnCardBody: {
+            height: 'auto',
+            overflow: 'hidden',
+            margin: '0.5rem',
+        },
+        error: {
+            display: 'flex',
+            color: 'Red',
+            justifyContent: 'center'
         }
     });

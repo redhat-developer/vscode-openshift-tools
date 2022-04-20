@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { makeStyles } from '@material-ui/core';
-import { Link } from 'react-router-dom';
 import {
     Gallery,
 } from '@patternfly/react-core';
@@ -29,14 +28,8 @@ const HomeItem: React.FC<HomePageProps> = ({
     return (
         <>
             <Gallery className={homeStyleClass.devfileGalleryGrid}>
-                {devFiles.map((devFile) => (
-                    <Link
-                        key={serializeURL(devFile.metadata.name)}
-                        to={`/devfiles/${serializeURL(devFile.metadata.name)}`}
-                        state={devFile}
-                        className={homeStyleClass.textLink}>
-                        <CardItem devFile={devFile} style={homeStyleClass} />
-                    </Link>
+                {devFiles.map((devFile, key) => (
+                    <CardItem key={key} devFile={devFile} style={homeStyleClass} />
                 ))}
             </Gallery>
         </>
@@ -57,11 +50,7 @@ export function Home() {
 
     return (
         <div>
-            {devfiles?.length > 0 ? <HomeItem devFiles={devfiles} homeStyleClass={homeStyle} /> :
+            {devfiles.length > 0 ? <HomeItem devFiles={devfiles} homeStyleClass={homeStyle} /> :
                 <LoadScreen />}
         </div>);
-}
-
-function serializeURL(name: string): string {
-    return `Community+${name.replace(/\+/g, '')}`;
 }

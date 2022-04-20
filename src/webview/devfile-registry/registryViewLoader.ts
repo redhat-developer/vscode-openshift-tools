@@ -26,6 +26,7 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
                             const out = JSON.parse(componentDesc.stdout)[0];
                             devFiles.push(out['Devfile']);
                             if (components.length === devFiles.length) {
+                                devFiles.sort(ascName);
                                 panel.webview.postMessage({ action: event.action, devFiles: devFiles });
                             }
                         });
@@ -35,11 +36,14 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             break;
         case 'getYAML':
             const yaml = stringify(event.data, { indent: 4 });
-            console.log(yaml);
-            panel.webview.postMessage({ action: event.action, devYAML: yaml });
+            panel.webview.postMessage({ action: event.action, devYAML: yaml});
+            break;
+        case 'callCreateComponent':
+            console.log('Create component called');
             break;
         default:
             panel.webview.postMessage({ error: 'Invalid command' });
+            break;
     }
 }
 
@@ -92,5 +96,9 @@ export default class RegistryViewLoader {
             .replace('%BASE_URL%', `${reactAppUri}`)
             .replace('<!-- meta http-equiv="Content-Security-Policy" -->', meta);
     }
+}
+
+function ascName(d1: Data, d2: Data): number {
+    return d1.metadata.name.localeCompare(d2.metadata.name);
 }
 

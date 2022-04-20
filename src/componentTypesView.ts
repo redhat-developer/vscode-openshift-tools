@@ -4,52 +4,38 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import {
-    TreeDataProvider,
     TreeItem,
-    Event,
-    EventEmitter,
     TreeView,
     window,
     Uri,
-    TreeItemCollapsibleState,
     commands,
+    workspace,
+    ProviderResult,
 } from 'vscode';
-import * as path from 'path';
-import { CliExitData } from './cli';
 import { getInstance, Odo, OdoImpl } from './odo';
-import { Command } from './odo/command';
 import {
-    ComponentTypeDescription,
-    ComponentTypesJson,
-    DevfileComponentType,
-    isDevfileComponent,
-    isRegistry,
     Registry,
 } from './odo/componentType';
-import { isStarterProject, StarterProject } from './odo/componentTypeDescription';
+import { StarterProject } from './odo/componentTypeDescription';
 import { vsCommand, VsCommandError } from './vscommand';
-import { Platform } from './util/platform';
 import validator from 'validator';
+import { BaseTreeDataProvider } from './base/baseTreeDataProvider';
+import { WorkspaceEntry, WorkspaceFolderComponent } from './componentsView';
+import { Application } from 'express';
+import { Project } from './odo/project';
 
-type ComponentType = DevfileComponentType | StarterProject | Registry;
+type ComponentType = Project | Application | WorkspaceEntry | WorkspaceFolderComponent;
 
-export enum ContextType {
-    DEVFILE_COMPONENT_TYPE = 'devfileComponentType',
-    DEVFILE_STARTER_PROJECT = 'devfileStarterProject',
-    DEVFILE_REGISTRY = 'devfileRegistry',
-}
+export class ComponentTypesView extends BaseTreeDataProvider<ComponentType> {
 
-export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     private static viewInstance: ComponentTypesView;
 
-    private treeView: TreeView<ComponentType>;
-
-    private onDidChangeTreeDataEmitter: EventEmitter<ComponentType> = new EventEmitter<
-        ComponentType | undefined
-    >();
-
-    readonly onDidChangeTreeData: Event<ComponentType | undefined> =
-        this.onDidChangeTreeDataEmitter.event;
+    private constructor() {
+        super();
+        workspace.onDidChangeWorkspaceFolders(() => {
+            this.refresh(false);
+        });
+    }
 
     readonly odo: Odo = getInstance();
     private registries: Registry[];
@@ -70,96 +56,21 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return ComponentTypesView.viewInstance;
     }
 
-    // eslint-disable-next-line class-methods-use-this
-    getTreeItem(element: ComponentType): TreeItem | Thenable<TreeItem> {
-        if (isRegistry(element)) {
-            return {
-                label: element.Name,
-                contextValue: ContextType.DEVFILE_REGISTRY,
-                tooltip: `Devfile Registry\nName: ${element.Name}\nURL: ${element.URL}`,
-                collapsibleState: TreeItemCollapsibleState.Collapsed,
-            };
-        }
-        if (isStarterProject(element)) {
-            return {
-                label: element.name,
-                contextValue: ContextType.DEVFILE_STARTER_PROJECT,
-                tooltip: `Starter Project\nName: ${element.name}\nDescription: ${
-                    element.description ? element.description : 'n/a'
-                }`,
-                description: element.description,
-                iconPath: {
-                    dark: Uri.file(
-                        path.join(
-                            __dirname,
-                            '..',
-                            '..',
-                            'images',
-                            'component',
-                            'start-project-dark.png',
-                        ),
-                    ),
-                    light: Uri.file(
-                        path.join(
-                            __dirname,
-                            '..',
-                            '..',
-                            'images',
-                            'component',
-                            'start-project-light.png',
-                        ),
-                    ),
-                },
-            };
-        }
-        return {
-            label: `${element.DisplayName}`,
-            contextValue: ContextType.DEVFILE_COMPONENT_TYPE,
-            iconPath: {
-                dark: Uri.file(
-                    path.join(
-                        __dirname,
-                        '..',
-                        '..',
-                        'images',
-                        'component',
-                        'component-type-dark.png',
-                    ),
-                ),
-                light: Uri.file(
-                    path.join(
-                        __dirname,
-                        '..',
-                        '..',
-                        'images',
-                        'component',
-                        'component-type-light.png',
-                    ),
-                ),
-            },
-            tooltip: `Component Type\nName: ${element.Name}\nKind: devfile\nDescription: ${
-                element.Description ? element.Description : 'n/a'
-            }`,
-            description: element.Description,
-            collapsibleState: TreeItemCollapsibleState.Collapsed,
-        };
+    getTreeItem(element: WorkspaceFolderComponent): TreeItem {
+        return element;
     }
 
-    public loadItems<I, O>(result: CliExitData, fetch: (data: I) => O[]): O[] {
-        let data: O[] = [];
-        try {
-            const items = fetch(JSON.parse(result.stdout));
-            if (items) data = items;
-        } catch (ignore) {
-            // ignore parse errors and return empty array
-        }
-        return data;
+    getChildren(element?: ComponentType): ProviderResult<ComponentType[]> {
+        const result = element ? [] : [];
+        return Promise.resolve(result).then(async result1 => {
+            await commands.executeCommand('setContext', 'openshift.component.explorer.init', result1.length === 0);
+            return result;
+        })
     }
 
     addRegistry(newRegistry: Registry): void {
         this.registries.push(newRegistry);
         this.refresh(false);
-        this.reveal(newRegistry);
     }
 
     removeRegistry(targetRegistry: Registry): void {
@@ -178,57 +89,8 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    async getChildren(parent: ComponentType): Promise<ComponentType[]> {
-        let children: ComponentType[];
-        const addEnv = this.odo.getKubeconfigEnv();
-        if (!parent) {
-            this.registries = await this.getRegistries();
-            children = this.registries;
-        } else if (isRegistry(parent)) {
-            const result = await this.odo.execute(
-                Command.listCatalogComponentsJson(),
-                Platform.getUserHomePath(),
-                true,
-                addEnv,
-            );
-            children = this.loadItems<ComponentTypesJson, DevfileComponentType>(
-                result,
-                (data) => data.items,
-            );
-            children = children.filter(
-                (element: DevfileComponentType) => element.Registry.Name === parent.Name,
-            );
-        } else if (isDevfileComponent(parent)) {
-            const result: CliExitData = await this.odo.execute(
-                Command.describeCatalogComponent(parent.Name),
-                Platform.getUserHomePath(),
-                true,
-                addEnv,
-            );
-            const descriptions = this.loadItems<
-                ComponentTypeDescription[],
-                ComponentTypeDescription
-            >(result, (data) => data);
-            const description = descriptions.find(
-                (element) =>
-                    element.RegistryName === parent.Registry.Name &&
-                    element.Devfile.metadata.name === parent.Name,
-            );
-            children = description?.Devfile?.starterProjects.map((starter: StarterProject) => {
-                starter.typeName = parent.Name;
-                return starter;
-            });
-        }
-        return children;
-    }
-
-    // eslint-disable-next-line class-methods-use-this
     getParent?(): ComponentType {
         return undefined;
-    }
-
-    reveal(item: Registry): void {
-        this.treeView.reveal(item);
     }
 
     refresh(cleanCache = true): void {
