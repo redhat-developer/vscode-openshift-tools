@@ -10,6 +10,7 @@ import { LoadScreen } from './loading';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { Data } from '../../../odo/componentTypeDescription';
 import { DevfileComponentType } from '../../../odo/componentType';
+import { SearchBar } from './searchBar';
 import homeStyle from './home.style';
 import cardItemStyle from './cardItem.style';
 
@@ -42,26 +43,56 @@ const HomeItem: React.FC<HomePageProps> = ({
 
 export function Home() {
 
-    const [{ devfiles, components }, setData] = React.useState({
+    const [{ devfiles, filteredDevFiles, components }, setData] = React.useState({
         devfiles: [],
+        filteredDevFiles: [],
         components: []
     });
 
     React.useEffect(() => {
         return VSCodeMessage.onMessage((message) => {
             if (message.data.action === 'getAllComponents') {
-                setData({
-                    devfiles: message.data.devFiles,
-                    components: message.data.components
-                })
+                setData(
+                    {
+                        devfiles: message.data.devFiles,
+                        filteredDevFiles: [],
+                        components: message.data.components
+                    }
+                )
             }
         });
     });
 
     return (
-        <div>
-            {devfiles.length > 0 ? <HomeItem devFiles={devfiles} components={components} /> :
-                <LoadScreen />}
-        </div>
+        <>
+            {
+                devfiles.length > 0 ?
+                    <>
+                        <SearchBar onSearchBarChange={function (value: string): void {
+                            if (value?.trim() !== '') {
+                                let filteredDevFiles = devfiles.filter(function (devFile: Data) {
+                                    return devFile.metadata.displayName?.toLowerCase().indexOf(value.toLowerCase()) !== -1 ||
+                                     devFile.metadata.description?.toLowerCase().indexOf(value.toLowerCase()) !== -1;
+                                });
+                                setData(
+                                    {
+                                        devfiles: devfiles,
+                                        filteredDevFiles: filteredDevFiles,
+                                        components: components
+                                    });
+                            } else {
+                                setData(
+                                    {
+                                        devfiles: devfiles,
+                                        filteredDevFiles: [],
+                                        components: components
+                                    });
+                            }
+                        }} searchBarValue={''} />
+                        <HomeItem devFiles={filteredDevFiles.length > 0 ? filteredDevFiles : devfiles} components={components} />
+                    </> :
+                    <LoadScreen />
+            }
+        </>
     );
 }

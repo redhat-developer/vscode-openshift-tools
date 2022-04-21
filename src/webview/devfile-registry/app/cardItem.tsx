@@ -16,7 +16,8 @@ import {
     Modal,
     ModalVariant,
     Button,
-    CardActions
+    CardActions,
+    Backdrop
 } from '@patternfly/react-core';
 import { DevFileProps } from './wrapperCardItem';
 import { VSCodeMessage } from '../vsCodeMessage';
@@ -124,45 +125,90 @@ export class CardItem extends React.Component<DevFileProps, { numOfCall: number,
                 </Card>
                 {
                     devFileYAML.length > 0 && isExpanded &&
-                    <Modal
-                        isOpen={isExpanded}
-                        title='devfile.yaml'
-                        variant={ModalVariant.small}
-                        onClose={this.onCloseClick}
-                        style={{ border: '1px solid var(--vscode-focusBorder)', width: '100%' }}
-                    >
-                        <Card data-testid='dev-page-yaml' className={this.props.cardItemStyle.yamlCard}>
-                            <CardHeader className={this.props.cardItemStyle.yamlCardHeader}>
-                                <CardActions className={this.props.cardItemStyle.cardButton}>
-                                    <Button
-                                        color="default"
-                                        component="span"
-                                        className={this.props.cardItemStyle.button}
-                                        onClick={this.createComponent}
-                                    >
-                                        New Component
-                                    </Button>
-                                </CardActions>
-                            </CardHeader>
-                            <CardBody className={this.props.cardItemStyle.yamlCardBody}>
-                                <SyntaxHighlighter language='yaml' style={this.props.cardItemStyle} useInlineStyles={false}
-                                    codeTagProps={{
-                                        style: {
-                                            fontFamily: 'inherit', color: 'inherit',
-                                            fontStyle: 'inherit', fontWeight: 'inherit'
-                                        }
-                                    }}>
-                                    {devFileYAML}
-                                </SyntaxHighlighter>
-                            </CardBody>
-                        </Card>
-                    </Modal>
+                    <>
+                        <Backdrop className={this.props.cardItemStyle.backDrop}>
+                            <Modal
+                                isOpen={isExpanded}
+                                className={this.props.cardItemStyle.modal}
+                                variant={ModalVariant.small}
+                                title='devfile.yaml'
+                                onClose={this.onCloseClick}
+                                style={{
+                                    width: '100%', height: '100%'
+                                }}>
+                                <Card data-testid='dev-page-yaml' className={this.props.cardItemStyle.yamlCard}>
+                                    <CardHeader className={this.props.cardItemStyle.yamlCardHeader}>
+                                        <Card data-testid='dev-page-header' className={this.props.cardItemStyle.devPageCard}>
+                                            <CardHeader className={this.props.cardItemStyle.devPageCardHeader}>
+                                                <Brand
+                                                    data-testid="icon"
+                                                    src={this.props.devFile.metadata.icon}
+                                                    alt={this.props.devFile.metadata.icon + ' logo'}/>
+                                                <TextContent>
+                                                    <Text component={TextVariants.h6}>
+                                                        {capitalizeFirstLetter(this.props.devFile.metadata.displayName)}
+                                                    </Text>
+                                                </TextContent>
+                                                <CardActions className={this.props.cardItemStyle.cardButton}>
+                                                    <Button
+                                                        color="default"
+                                                        component="span"
+                                                        className={this.props.cardItemStyle.button}
+                                                        onClick={this.createComponent}>
+                                                        <TextContent>
+                                                            <Text component={TextVariants.h1}>
+                                                                New Component
+                                                            </Text>
+                                                        </TextContent>
+                                                    </Button>
+                                                    <Button
+                                                        color="default"
+                                                        component="span"
+                                                        className={this.props.cardItemStyle.button}
+                                                        onClick={this.createComponent}>
+                                                        <TextContent>
+                                                            <Text component={TextVariants.h1}>
+                                                                Clone Repository
+                                                            </Text>
+                                                        </TextContent>
+                                                    </Button>
+                                                    <Button
+                                                        color="default"
+                                                        component="span"
+                                                        className={this.props.cardItemStyle.button}
+                                                        onClick={this.createComponent}>
+                                                        <TextContent>
+                                                            <Text component={TextVariants.h1}>
+                                                                Open in Browser
+                                                            </Text>
+                                                        </TextContent>
+                                                    </Button>
+                                                </CardActions>
+                                            </CardHeader>
+                                        </Card>
+                                    </CardHeader>
+                                    <CardBody className={this.props.cardItemStyle.yamlCardBody}>
+                                        <SyntaxHighlighter language='yaml' style={this.props.cardItemStyle} useInlineStyles={false}
+                                            wrapLines={true}
+                                            codeTagProps={{
+                                                style: {
+                                                    fontFamily: 'inherit', color: 'inherit',
+                                                    fontStyle: 'inherit', fontWeight: 'inherit'
+                                                }
+                                            }}>
+                                            {devFileYAML}
+                                        </SyntaxHighlighter>
+                                    </CardBody>
+                                </Card>
+                            </Modal>
+                        </Backdrop>
+                    </>
                 }
             </>
         );
     }
 }
 
-function capitalizeFirstLetter(value: string): string {
+function capitalizeFirstLetter(value?: string): string {
     return value[0].toUpperCase() + value.substring(1);
 }

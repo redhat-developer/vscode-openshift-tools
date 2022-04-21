@@ -8,10 +8,13 @@ import { Theme, createStyles } from '@material-ui/core/styles';
 export default (_theme: Theme) =>
     createStyles({
         searchBar: {
-            display: 'flex'
+            display: 'flex',
+            paddingTop: '1rem',
+            paddingRight: '1rem'
         },
         searchBarText: {
-            paddingRight: '1rem'
+            paddingRight: '1rem',
+            paddingLeft: '1.5rem'
         },
         searchBarInput: {
             flex: '1 1 0%'

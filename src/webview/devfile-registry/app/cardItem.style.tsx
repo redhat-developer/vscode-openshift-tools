@@ -18,7 +18,8 @@ export default (theme: Theme) =>
             '&:hover': {
                 transform: 'scale(1)',
                 boxShadow: '0 13px 27px -5px hsla(240, 30.1%, 28%, 0.25), 0 8px 16px -8px hsla(0, 0%, 0%, 0.3), 0 -6px 16px -6px hsla(0, 0%, 0%, 0.03)'
-            }
+            },
+            zIndex: 1
         },
         cardHeader: {
             display: 'block',
@@ -53,13 +54,6 @@ export default (theme: Theme) =>
             WebkitLineClamp: 3,
             WebkitBoxOrient: 'vertical',
         },
-        cardButton: {
-            display: 'block',
-            marginBottom: theme.spacing(2),
-            color: 'var(--vscode-button-foreground)',
-            backgroundColor: 'var(--vscode-button-background)',
-            float: 'right'
-        },
         yamlCard: {
             color: 'var(--vscode-foreground)',
             backgroundColor: 'var(--vscode-editor-background)',
@@ -71,23 +65,34 @@ export default (theme: Theme) =>
         },
         yamlCardHeader: {
             padding: '1.5rem!important',
+            paddingTop: '1.5rem!important',
             borderBottom: '1px solid rgb(175, 175, 175)',
             display: 'flex',
-            justifyContent: 'space-between'
+            justifyContent: 'space-between',
+            height: '6rem'
         },
         yamlCardBody: {
-            padding: '1.5rem!important',
-            width: 'auto'
+            paddingLeft: '1.5rem!important',
+            width: '100%'
+        },
+        cardButton: {
+            display: 'flex',
+            marginBottom: theme.spacing(2),
+            color: 'var(--vscode-button-foreground)',
+            backgroundColor: 'var(--vscode-button-background)',
+            float: 'right',
+            marginTop:'0.625rem'
         },
         button: {
             width: '8rem',
             height: '1.5rem',
             border: '1px solid var(--vscode-focusBorder)',
-            padding: 'var(--input-padding-vertical) var(--input-padding-horizontal)',
+            paddingTop: '0.125rem',
             textAlign: 'center',
             outline: '0.0625rem solid transparent',
             outlineOffset: '0.125rem!important',
             textTransform: 'none',
+            justifyContent: 'space-between',
             '&:hover': {
                 cursor: 'pointer',
                 background: 'var(--vscode-button-hoverBackground)'
@@ -105,5 +110,24 @@ export default (theme: Theme) =>
             display: 'flex',
             color: 'Red',
             justifyContent: 'center'
-        }
+        },
+        backDrop: {
+            position: 'fixed',
+            backdropFilter: 'blur(2px)',
+            zIndex: 2
+        },
+        modal: {
+            border: '1px solid var(--vscode-focusBorder)',
+            zIndex: 3
+        },
+        devPageCard: {
+            paddingTop:'0rem',
+            height: '7rem',
+            zIndex: 1
+        },
+        devPageCardHeader: {
+            display: 'block',
+            height: '3rem',
+            margin: '0.5rem',
+        },
     });

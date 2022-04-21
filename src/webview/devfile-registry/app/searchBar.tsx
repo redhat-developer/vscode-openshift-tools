@@ -11,7 +11,6 @@ import searchBarStyle from './searchBar.style';
 const useSearchBarStyle = makeStyles(searchBarStyle);
 
 interface SearchBarProps extends DefaultProps {
-    devfileCount: number;
     onSearchBarChange: (value: string) => void;
     searchBarValue: string;
 }
@@ -21,7 +20,6 @@ interface DefaultProps {
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
-    devfileCount,
     onSearchBarChange,
     searchBarValue
 }: SearchBarProps) => {
@@ -34,11 +32,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             <SearchInput
                 data-testid="search-bar-devfile"
                 className={searchBarStyle.searchBarInput}
-                placeholder="Search by name, tag, provider or description"
+                placeholder="Search by name or description"
                 value={searchBarValue}
                 onChange={onSearchBarChange}
                 onClear={(): void => onSearchBarChange('')}
-                resultsCount={devfileCount}
             />
         </div>
     );

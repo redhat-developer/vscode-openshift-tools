@@ -13,5 +13,6 @@ export default (_theme: Theme) =>
             backgroundColor: 'var(--vscode-editor-background)',
             fontSize: 'var(--vscode-font-size)',
             fontFamily: 'var(--vscode-font-family)',
+            zIndex: 0
         },
     });
