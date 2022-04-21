@@ -10,24 +10,40 @@ import { getInstance } from '../../odo';
 import { Command } from '../../odo/command';
 import { Data } from '../../odo/componentTypeDescription';
 import { stringify } from 'yaml';
+import { ComponentTypeAdapter, DevfileComponentType } from '../../odo/componentType';
 
 let panel: vscode.WebviewPanel;
 let devFiles: Data[] = [];
+let devFileComponents: DevfileComponentType[] = [];
 
 async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
     switch (event?.action) {
         case 'getAllComponents':
             if (devFiles.length > 0) {
-                panel.webview.postMessage({ action: event.action, devFiles: devFiles });
+                panel.webview.postMessage(
+                    {
+                        action: event.action,
+                        devFiles: devFiles,
+                        components: devFileComponents
+                    }
+                );
             } else {
-                getInstance().getComponentTypes().then((components) => {
+                getInstance().getCompTypesJson().then((devFileComponentTypes) => {
+                    devFileComponents = devFileComponentTypes.sort(ascDevfile);
+                    const components: ComponentTypeAdapter[] = getInstance().getComponentTypesOfJSON(devFileComponentTypes);
                     components.map(async (componentType) => {
                         getInstance().execute(Command.describeCatalogComponent(componentType.name)).then((componentDesc) => {
                             const out = JSON.parse(componentDesc.stdout)[0];
                             devFiles.push(out['Devfile']);
                             if (components.length === devFiles.length) {
                                 devFiles.sort(ascName);
-                                panel.webview.postMessage({ action: event.action, devFiles: devFiles });
+                                panel.webview.postMessage(
+                                    {
+                                        action: event.action,
+                                        devFiles: devFiles,
+                                        components: devFileComponents
+                                    }
+                                );
                             }
                         });
                     });
@@ -36,13 +52,27 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             break;
         case 'getYAML':
             const yaml = stringify(event.data, { indent: 4 });
-            panel.webview.postMessage({ action: event.action, devYAML: yaml});
+            panel.webview.postMessage(
+                {
+                    action: event.action,
+                    devYAML: yaml
+                }
+            );
             break;
         case 'callCreateComponent':
-            console.log('Create component called');
+            const devFileComponent = event.data;
+            vscode.commands.executeCommand('openshift.componentType.newComponent', devFileComponent).then((value) => {
+                if (value) {
+                    panel.dispose();
+                }
+            });
             break;
         default:
-            panel.webview.postMessage({ error: 'Invalid command' });
+            panel.webview.postMessage(
+                {
+                    error: 'Invalid command'
+                }
+            );
             break;
     }
 }
@@ -65,7 +95,7 @@ export default class RegistryViewLoader {
                 localResourceRoots: [localResourceRoot],
                 retainContextWhenHidden: true
             });
-            panel.iconPath = vscode.Uri.file(path.join(RegistryViewLoader.extensionPath, 'images/context/cluster-node.png'));
+            panel.iconPath = vscode.Uri.file(path.join(RegistryViewLoader.extensionPath, 'images/context/devfile.png'));
             panel.webview.html = RegistryViewLoader.getWebviewContent(RegistryViewLoader.extensionPath, panel);
             panel.onDidDispose(() => {
                 panel = undefined;
@@ -100,5 +130,9 @@ export default class RegistryViewLoader {
 
 function ascName(d1: Data, d2: Data): number {
     return d1.metadata.name.localeCompare(d2.metadata.name);
+}
+
+function ascDevfile(d1: DevfileComponentType, d2: DevfileComponentType): number {
+    return d1.Name.localeCompare(d2.Name);
 }
 

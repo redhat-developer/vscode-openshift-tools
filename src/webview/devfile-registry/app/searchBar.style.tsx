@@ -7,11 +7,13 @@ import { Theme, createStyles } from '@material-ui/core/styles';
 
 export default (_theme: Theme) =>
     createStyles({
-        devfileGalleryGrid: {
-            paddingTop: '1rem',
-            color: 'var(--vscode-foreground)',
-            backgroundColor: 'var(--vscode-editor-background)',
-            fontSize: 'var(--vscode-font-size)',
-            fontFamily: 'var(--vscode-font-family)',
+        searchBar: {
+            display: 'flex'
         },
+        searchBarText: {
+            paddingRight: '1rem'
+        },
+        searchBarInput: {
+            flex: '1 1 0%'
+        }
     });

@@ -9,10 +9,10 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core';
 import loaderStyle from './loading.style';
 
-const loadingCSS = makeStyles(loaderStyle);
+const useLoadingStyle = makeStyles(loaderStyle);
 
 export function LoadScreen() {
-    const loadingStyle = loadingCSS();
+    const loadingStyle = useLoadingStyle();
     return (
         <Box className={loadingStyle.loading}>
             <CircularProgress color='inherit' />

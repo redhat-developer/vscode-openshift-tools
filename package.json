@@ -128,6 +128,7 @@
     "@patternfly/react-core": "^4.198.19",
     "@patternfly/react-icons": "^4.49.19",
     "@rjsf/material-ui": "^3.2.1",
+    "@segment/analytics-next": "^1.17.4",
     "@types/byline": "^4.2.33",
     "@types/chai": "^4.3.0",
     "@types/collections": "^5.1.2",
