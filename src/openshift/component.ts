@@ -32,7 +32,6 @@ import fs = require('fs-extra');
 import { NewComponentCommandProps } from '../telemetry';
 
 import waitPort = require('wait-port');
-import RegistryViewLoader from '../webview/devfile-registry/registryViewLoader';
 
 function createCancelledResult(stepName: string): any {
     const cancelledResult: any = new String('');
@@ -89,11 +88,6 @@ export class Component extends OpenShiftItem {
             treeKill(ws.pid);
         }
         return !!ws;
-    }
-
-    @vsCommand('openshift.component.open.devfileRegistry')
-    static add(): void {
-        void RegistryViewLoader.loadView('Devfile Registry');
     }
 
     @vsCommand('openshift.component.create')
