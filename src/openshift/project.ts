@@ -43,7 +43,7 @@ export class Project extends OpenShiftItem {
     @clusterRequired()
     static async create(): Promise<string> {
         const projectList = OpenShiftItem.odo.getProjects();
-        let projectName = await Project.getName('Project name', projectList);
+        let projectName = await Project.getProjectName('Project name', projectList);
         if (!projectName) return null;
         projectName = projectName.trim();
         return Project.odo.createProject(projectName)
