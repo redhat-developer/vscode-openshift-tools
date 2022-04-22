@@ -4,19 +4,16 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { makeStyles } from '@material-ui/core';
-import { Text, TextContent, TextVariants, SearchInput } from '@patternfly/react-core';
+import { DefaultProps } from './home';
 import React from 'react';
 import searchBarStyle from './searchBar.style';
+import { SearchInput } from '@patternfly/react-core/dist/esm/components/SearchInput';
 
 const useSearchBarStyle = makeStyles(searchBarStyle);
 
 interface SearchBarProps extends DefaultProps {
     onSearchBarChange: (value: string) => void;
     searchBarValue: string;
-}
-
-interface DefaultProps {
-    analytics?: import('@segment/analytics-next').Analytics;
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
@@ -26,15 +23,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     const searchBarStyle = useSearchBarStyle();
     return (
         <div className={searchBarStyle.searchBar}>
-            <TextContent className={searchBarStyle.searchBarText}>
-                <Text component={TextVariants.h2}>Search</Text>
-            </TextContent>
             <SearchInput
-                data-testid="search-bar-devfile"
+                data-testid='search-bar-devfile'
                 className={searchBarStyle.searchBarInput}
-                placeholder="Search by name or description"
+                placeholder='Search by name or description'
                 value={searchBarValue}
                 onChange={onSearchBarChange}
+                onClick={(): void => onSearchBarChange('')}
                 onClear={(): void => onSearchBarChange('')}
             />
         </div>

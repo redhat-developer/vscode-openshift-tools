@@ -15,21 +15,23 @@ import {
     Text,
     Modal,
     ModalVariant,
-    Button,
-    CardActions,
-    Backdrop
+    Backdrop,
+    Button
 } from '@patternfly/react-core';
 import { DevFileProps } from './wrapperCardItem';
 import { VSCodeMessage } from '../vsCodeMessage';
+import { StarterProject } from '../../../odo/componentTypeDescription';
+import { StarterProjectDisplay } from './starterProjectDisplay';
 
-export class CardItem extends React.Component<DevFileProps, { numOfCall: number, isExpanded: boolean, devFileYAML: string }> {
+export class CardItem extends React.Component<DevFileProps, { numOfCall: number, isExpanded: boolean, devFileYAML: string, selectedProject: StarterProject }> {
 
     constructor(props: DevFileProps) {
         super(props);
         this.state = {
             numOfCall: 0,
             isExpanded: false,
-            devFileYAML: ''
+            devFileYAML: '',
+            selectedProject: props.devFile.starterProjects[0]
         };
     }
 
@@ -67,12 +69,165 @@ export class CardItem extends React.Component<DevFileProps, { numOfCall: number,
     };
 
     createComponent = (): void => {
-        VSCodeMessage.postMessage({ 'action': 'callCreateComponent', 'data': this.props.component });
+        VSCodeMessage.postMessage(
+            {
+                'action': 'createComponent',
+                'data': this.props.component
+            });
         return;
     }
 
+    cloneToWorkSpace = (): void => {
+        VSCodeMessage.postMessage(
+            {
+                'action': 'cloneToWorkSpace',
+                'data': this.state.selectedProject
+            });
+        return;
+    }
+
+    openInBrowser = (): void => {
+        VSCodeMessage.postMessage(
+            {
+                'action': 'openInBrowser',
+                'data': this.state.selectedProject
+            });
+        return;
+    }
+
+    setSelectedProject = (project: StarterProject): void => {
+        console.log('Selected Project: ', project.name);
+        this.setState({
+            selectedProject: project
+        });
+    };
+
+    setCurrentlyHoveredProject = (project: StarterProject): void => {
+        console.log('Hovered Project: ', project?.name);
+        this.setState({
+            selectedProject: project
+        });
+    };
+
     render(): React.ReactNode {
-        const { isExpanded, devFileYAML } = this.state;
+        const { isExpanded, devFileYAML, selectedProject } = this.state;
+        const starterProjectCard = <Card data-testid='dev-page-starterProject' className={this.props.cardItemStyle.starterProjectCard}>
+            <CardHeader className={this.props.cardItemStyle.starterProjectCardHeader}>
+                <TextContent>
+                    <Text component={TextVariants.h6}>
+                        Starter Projects
+                    </Text>
+                </TextContent>
+            </CardHeader>
+            <CardBody>
+                <div className={this.props.cardItemStyle.starterProjectCardBody}>
+                    <div
+                        data-testid="projects-selector"
+                        className={this.props.cardItemStyle.starterProjectSelect}
+                    >
+                        {this.props.devFile.starterProjects.map((project) => (
+                            <div
+                                key={project.name}
+                                data-testid={`projects-selector-item-${project.name}`}
+                                onMouseDown={(): void => this.setSelectedProject(project)}
+                                onMouseEnter={(): void => this.setCurrentlyHoveredProject(project)}
+                                className={
+                                    selectedProject.name === project.name ? this.props.cardItemStyle.starterProjectSelected : this.props.cardItemStyle.project
+                                }
+                            >
+                                {project.name}
+                            </div>
+                        ))}
+                    </div>
+                    <div className={this.props.cardItemStyle.display}>
+                        <StarterProjectDisplay project={selectedProject} projectDisplayStyle={this.props.projectDisplayStyle} />
+                        <Button
+                            color="default"
+                            component="span"
+                            className={this.props.cardItemStyle.button}
+                            onClick={this.createComponent}>
+                            <TextContent>
+                                <Text component={TextVariants.h1}>
+                                    New Component
+                                </Text>
+                            </TextContent>
+                        </Button>
+                        <Button
+                            color="default"
+                            component="span"
+                            className={this.props.cardItemStyle.button}
+                            onClick={this.cloneToWorkSpace}>
+                            <TextContent>
+                                <Text component={TextVariants.h1}>
+                                    Clone to Workspace
+                                </Text>
+                            </TextContent>
+                        </Button>
+                        <Button
+                            color="default"
+                            component="span"
+                            className={this.props.cardItemStyle.button}
+                            onClick={this.openInBrowser}>
+                            <TextContent>
+                                <Text component={TextVariants.h1}>
+                                    Open in Browser
+                                </Text>
+                            </TextContent>
+                        </Button>
+                    </div>
+                </div>
+            </CardBody>
+        </Card>;
+
+        const modalViewCard = <Modal
+            isOpen={isExpanded}
+            className={this.props.cardItemStyle.modal}
+            variant={ModalVariant.small}
+            aria-labelledby={`modal-${this.props.devFile.metadata.name}`}
+            showClose
+            disableFocusTrap
+            onClose={this.onCloseClick}
+            style={{
+                width: '100%', height: '100%'
+            }}>
+            <Card data-testid='dev-page-yaml' className={this.props.cardItemStyle.yamlCard}>
+                <CardHeader className={this.props.cardItemStyle.yamlCardHeader}>
+                    <Card data-testid='dev-page-header' className={this.props.cardItemStyle.devPageCard}>
+                        <CardHeader className={this.props.cardItemStyle.devPageCardHeader}>
+                            <div className={this.props.cardItemStyle.devPageTitle}>
+                                <Brand
+                                    data-testid="icon"
+                                    src={this.props.devFile.metadata.icon}
+                                    alt={this.props.devFile.metadata.icon + ' logo'}
+                                    className={this.props.cardItemStyle.cardImage}
+                                    style={{ margin: '0rem' }} />
+                                <TextContent style={{ padding: '1rem', margin: '0rem' }}>
+                                    <Text component={TextVariants.h6}>
+                                        {capitalizeFirstLetter(this.props.devFile.metadata.displayName)}
+                                    </Text>
+                                </TextContent>
+                            </div>
+                        </CardHeader>
+                        <CardBody className={this.props.cardItemStyle.devPageCardBody}>
+                            {starterProjectCard}
+                        </CardBody>
+                    </Card>
+                </CardHeader>
+                <CardBody className={this.props.cardItemStyle.yamlCardBody}>
+                    <SyntaxHighlighter language='yaml' style={this.props.cardItemStyle} useInlineStyles={false}
+                        wrapLines={true}
+                        codeTagProps={{
+                            style: {
+                                fontFamily: 'inherit', color: 'inherit',
+                                fontStyle: 'inherit', fontWeight: 'inherit'
+                            }
+                        }}>
+                        {devFileYAML}
+                    </SyntaxHighlighter>
+                </CardBody>
+            </Card>
+        </Modal>;
+
         return (
             <>
                 <Card
@@ -127,80 +282,7 @@ export class CardItem extends React.Component<DevFileProps, { numOfCall: number,
                     devFileYAML.length > 0 && isExpanded &&
                     <>
                         <Backdrop className={this.props.cardItemStyle.backDrop}>
-                            <Modal
-                                isOpen={isExpanded}
-                                className={this.props.cardItemStyle.modal}
-                                variant={ModalVariant.small}
-                                title='devfile.yaml'
-                                onClose={this.onCloseClick}
-                                style={{
-                                    width: '100%', height: '100%'
-                                }}>
-                                <Card data-testid='dev-page-yaml' className={this.props.cardItemStyle.yamlCard}>
-                                    <CardHeader className={this.props.cardItemStyle.yamlCardHeader}>
-                                        <Card data-testid='dev-page-header' className={this.props.cardItemStyle.devPageCard}>
-                                            <CardHeader className={this.props.cardItemStyle.devPageCardHeader}>
-                                                <Brand
-                                                    data-testid="icon"
-                                                    src={this.props.devFile.metadata.icon}
-                                                    alt={this.props.devFile.metadata.icon + ' logo'}/>
-                                                <TextContent>
-                                                    <Text component={TextVariants.h6}>
-                                                        {capitalizeFirstLetter(this.props.devFile.metadata.displayName)}
-                                                    </Text>
-                                                </TextContent>
-                                                <CardActions className={this.props.cardItemStyle.cardButton}>
-                                                    <Button
-                                                        color="default"
-                                                        component="span"
-                                                        className={this.props.cardItemStyle.button}
-                                                        onClick={this.createComponent}>
-                                                        <TextContent>
-                                                            <Text component={TextVariants.h1}>
-                                                                New Component
-                                                            </Text>
-                                                        </TextContent>
-                                                    </Button>
-                                                    <Button
-                                                        color="default"
-                                                        component="span"
-                                                        className={this.props.cardItemStyle.button}
-                                                        onClick={this.createComponent}>
-                                                        <TextContent>
-                                                            <Text component={TextVariants.h1}>
-                                                                Clone Repository
-                                                            </Text>
-                                                        </TextContent>
-                                                    </Button>
-                                                    <Button
-                                                        color="default"
-                                                        component="span"
-                                                        className={this.props.cardItemStyle.button}
-                                                        onClick={this.createComponent}>
-                                                        <TextContent>
-                                                            <Text component={TextVariants.h1}>
-                                                                Open in Browser
-                                                            </Text>
-                                                        </TextContent>
-                                                    </Button>
-                                                </CardActions>
-                                            </CardHeader>
-                                        </Card>
-                                    </CardHeader>
-                                    <CardBody className={this.props.cardItemStyle.yamlCardBody}>
-                                        <SyntaxHighlighter language='yaml' style={this.props.cardItemStyle} useInlineStyles={false}
-                                            wrapLines={true}
-                                            codeTagProps={{
-                                                style: {
-                                                    fontFamily: 'inherit', color: 'inherit',
-                                                    fontStyle: 'inherit', fontWeight: 'inherit'
-                                                }
-                                            }}>
-                                            {devFileYAML}
-                                        </SyntaxHighlighter>
-                                    </CardBody>
-                                </Card>
-                            </Modal>
+                            {modalViewCard}
                         </Backdrop>
                     </>
                 }

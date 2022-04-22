@@ -66,33 +66,24 @@ export default (theme: Theme) =>
         yamlCardHeader: {
             padding: '1.5rem!important',
             paddingTop: '1.5rem!important',
-            borderBottom: '1px solid rgb(175, 175, 175)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            height: '6rem'
+            borderBottom: '1px solid var(--vscode-focusBorder)',
+            height: 'auto'
         },
         yamlCardBody: {
             paddingLeft: '1.5rem!important',
             width: '100%'
         },
-        cardButton: {
-            display: 'flex',
-            marginBottom: theme.spacing(2),
-            color: 'var(--vscode-button-foreground)',
-            backgroundColor: 'var(--vscode-button-background)',
-            float: 'right',
-            marginTop:'0.625rem'
-        },
         button: {
             width: '8rem',
             height: '1.5rem',
             border: '1px solid var(--vscode-focusBorder)',
-            paddingTop: '0.125rem',
             textAlign: 'center',
             outline: '0.0625rem solid transparent',
             outlineOffset: '0.125rem!important',
             textTransform: 'none',
             justifyContent: 'space-between',
+            marginTop: '0.125rem',
+            backgroundColor: 'var(--vscode-button-background)',
             '&:hover': {
                 cursor: 'pointer',
                 background: 'var(--vscode-button-hoverBackground)'
@@ -113,21 +104,96 @@ export default (theme: Theme) =>
         },
         backDrop: {
             position: 'fixed',
-            backdropFilter: 'blur(2px)',
+            backdropFilter: 'blur(5px)',
             zIndex: 2
         },
         modal: {
             border: '1px solid var(--vscode-focusBorder)',
             zIndex: 3
         },
+        devPageTitle: {
+            display: 'flex',
+            height: '3rem'
+        },
         devPageCard: {
-            paddingTop:'0rem',
-            height: '7rem',
+            height: 'auto',
+            width: '100%',
             zIndex: 1
         },
         devPageCardHeader: {
             display: 'block',
             height: '3rem',
-            margin: '0.5rem',
+            margin: '0.5rem'
         },
+        devPageCardBody: {
+            paddingLeft: '0.5rem!important',
+            width: '100%'
+        },
+        starterProjectCard: {
+            color: 'var(--vscode-foreground)',
+            backgroundColor: 'var(--vscode-editor-background)',
+            fontSize: 'var(--vscode-font-size)',
+            fontFamily: 'var(--vscode-font-family)',
+            height: 'auto',
+            margin: 'auto',
+            overflow: 'hidden',
+            border: '1px solid var(--vscode-focusBorder)'
+        },
+        starterProjectCardHeader: {
+            display: 'block',
+            height: '1rem',
+            margin: '0.5rem'
+        },
+        starterProjectCardBody: {
+            display: 'flex',
+            borderTop: '1px solid var(--vscode-focusBorder)',
+            paddingTop: '1rem'
+        },
+        starterProjectSelect: {
+            width: '40%',
+            alignItems: 'center',
+            height: '10rem',
+            marginLeft:'0.5rem',
+            overflowX: 'hidden',
+            overflowY: 'scroll',
+            order: 0,
+            '&:webKitScrollbar': {
+                width: '0.5rem'
+            },
+            '&:webKitScrollbarThumb': {
+                backgroundColor: 'darkgrey',
+                borderRadius: '0.25rem'
+            }
+        },
+        starterProjectSelected: {
+            width: '95%',
+            backgroundColor: 'var(--vscode-button-background)',
+            color: '#ffffff',
+            borderRadius: '0.375rem',
+            paddingLeft: '0.5rem',
+            paddingTop: '0.2rem',
+            paddingBottom: '0.2rem',
+            cursor: 'default',
+            '&:hover': {
+                background: 'var(--vscode-button-hoverBackground)'
+            }
+        },
+        project: {
+            width: '95%',
+            borderRadius: '0.375rem',
+            paddingLeft: '0.5rem',
+            paddingTop: '0.2rem',
+            paddingBottom: '0.2rem',
+            cursor: 'default',
+            '&:hover': {
+                backgroundColor: '#adabae',
+                color: '#ffffff'
+            }
+        },
+        display: {
+            width: '40%',
+            alignItems: 'center',
+            marginLeft: 'auto',
+            marginRight: 'auto'
+        }
     });

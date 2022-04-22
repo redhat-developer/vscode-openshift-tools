@@ -5,16 +5,15 @@
 
 import { Theme, createStyles } from '@material-ui/core/styles';
 
-export default (_theme: Theme) =>
+export default (theme: Theme) =>
     createStyles({
-        searchBar: {
-            display: 'flex',
-            paddingTop: '1rem',
-            paddingRight: '1rem'
+        displayedName: {
+            margin: '0rem',
+            marginBottom: '0rem!important'
         },
-
-        searchBarInput: {
-            flex: '1 1 0%',
-            marginLeft:'1.5rem!important'
+        displayedDescription: {
+            margin: '0rem',
+            marginBottom: '0rem',
+            color: '#adabae'
         }
     });

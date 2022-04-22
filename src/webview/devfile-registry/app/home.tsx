@@ -13,13 +13,19 @@ import { DevfileComponentType } from '../../../odo/componentType';
 import { SearchBar } from './searchBar';
 import homeStyle from './home.style';
 import cardItemStyle from './cardItem.style';
+import starterProjectDisplayStyle from './starterProjectDisplay.style';
 
 const useHomeStyles = makeStyles(homeStyle);
+const starterProjectDisplayStyles = makeStyles(starterProjectDisplayStyle);
 const useCardItemStyles = makeStyles(cardItemStyle);
 
 interface HomePageProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
     devFiles: Data[];
     components: DevfileComponentType[];
+}
+
+export interface DefaultProps {
+    analytics?: import('@segment/analytics-next').Analytics;
 }
 
 const HomeItem: React.FC<HomePageProps> = ({
@@ -28,12 +34,13 @@ const HomeItem: React.FC<HomePageProps> = ({
 }: HomePageProps) => {
     const homeStyleClass = useHomeStyles();
     const cardItemStyle = useCardItemStyles();
+    const projectDisplayStyle = starterProjectDisplayStyles();
     return (
         <>
             <Gallery className={homeStyleClass.devfileGalleryGrid}>
                 {
                     devFiles.map((devFile, key) => (
-                        <CardItem key={key} devFile={devFile} component={components[key]} cardItemStyle={cardItemStyle} />
+                        <CardItem key={key} devFile={devFile} component={components[key]} cardItemStyle={cardItemStyle} projectDisplayStyle={projectDisplayStyle} />
                     ))
                 }
             </Gallery>

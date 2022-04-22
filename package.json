@@ -867,7 +867,7 @@
         "title": "Open in Browser",
         "category": "OpenSift"
       },
-	  {
+      {
         "command": "openshift.componentTypesView.registry.openInView",
         "title": "Open in View",
         "category": "OpenSift"
@@ -943,6 +943,11 @@
         "view": "openshiftComponentsView",
         "contents": "You have no OpenShift Components in your workspace yet.\n[New Component](command:openshift.component.createFromLocal)",
         "enablement": "openshift.component.explorer.init"
+      },
+      {
+        "view": "openshiftComponentTypesView",
+        "contents": "Add new Devfile Registry to start creating Components.\n[Add Devfile Registry](command:openshift.componentTypesView.registry.add)",
+        "enablement": "openshift.componentTypesView.init"
       }
     ],
     "menus": {
@@ -1157,10 +1162,10 @@
           "command": "openshift.componentTypesView.registry.openInBrowser",
           "when": "false"
         },
-		{
-		  "command": "openshift.componentTypesView.registry.openInView",
-		  "when": "false"
-		}
+        {
+          "command": "openshift.componentTypesView.registry.openInView",
+          "when": "false"
+        }
       ],
       "view/title": [
         {
@@ -1544,7 +1549,7 @@
           "when": "view == openshiftComponentTypesView && viewItem == devfileRegistry",
           "group": "0@0"
         },
-		{
+        {
           "command": "openshift.componentTypesView.registry.openInView",
           "when": "view == openshiftComponentTypesView && viewItem == devfileRegistry",
           "group": "0@0"

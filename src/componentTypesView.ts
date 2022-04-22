@@ -245,6 +245,9 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     }
 
     public static getSampleRepositoryUrl(element: StarterProject): string {
+        if (!element.git) {
+            return undefined;
+        }
         const url = Object.values(element.git.remotes).find((prop) => typeof prop === 'string');
         return url;
     }

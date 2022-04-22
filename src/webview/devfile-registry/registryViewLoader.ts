@@ -59,13 +59,17 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
                 }
             );
             break;
-        case 'callCreateComponent':
+        case 'createComponent':
             const devFileComponent = event.data;
-            vscode.commands.executeCommand('openshift.componentType.newComponent', devFileComponent).then((value) => {
-                if (value) {
-                    panel.dispose();
-                }
-            });
+            vscode.commands.executeCommand('openshift.componentType.newComponent', devFileComponent);
+            break;
+        case 'cloneToWorkSpace':
+            let starterProject = event.data.starterProjects[0];
+            vscode.commands.executeCommand('openshift.componentType.cloneStarterProjectRepository', starterProject);
+            break;
+        case 'openInBrowser':
+            starterProject = event.data.starterProjects[0];
+            vscode.commands.executeCommand('openshift.componentType.openStarterProjectRepository', starterProject);
             break;
         default:
             panel.webview.postMessage(
