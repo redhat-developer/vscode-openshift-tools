@@ -73,17 +73,26 @@ export default (theme: Theme) =>
             paddingLeft: '1.5rem!important',
             width: '100%'
         },
-        button: {
+        copyButton: {
+            display: 'block',
+            float: 'right',
+            marginRight: '1.75rem',
+            marginTop: '0.5rem'
+        },
+        cardButton: {
+            display: 'block',
+            color: 'var(--vscode-button-foreground)',
+            backgroundColor: 'var(--vscode-button-background)',
             width: '8rem',
+            marginTop: '0.5rem',
+        },
+        button: {
+            width: '7.85rem',
             height: '1.5rem',
-            border: '1px solid var(--vscode-focusBorder)',
             textAlign: 'center',
             outline: '0.0625rem solid transparent',
             outlineOffset: '0.125rem!important',
-            textTransform: 'none',
             justifyContent: 'space-between',
-            marginTop: '0.125rem',
-            backgroundColor: 'var(--vscode-button-background)',
             '&:hover': {
                 cursor: 'pointer',
                 background: 'var(--vscode-button-hoverBackground)'
@@ -153,7 +162,7 @@ export default (theme: Theme) =>
             width: '40%',
             alignItems: 'center',
             height: '10rem',
-            marginLeft:'0.5rem',
+            marginLeft: '0.5rem',
             overflowX: 'hidden',
             overflowY: 'scroll',
             order: 0,
@@ -186,7 +195,7 @@ export default (theme: Theme) =>
             paddingBottom: '0.2rem',
             cursor: 'default',
             '&:hover': {
-                backgroundColor: '#adabae',
+                backgroundColor: 'var(--vscode-editor-selectionHighlightBackground)',
                 color: '#ffffff'
             }
         },

@@ -8,8 +8,8 @@ import { Gallery } from '@patternfly/react-core';
 import { WrapperCardItem as CardItem } from './wrapperCardItem';
 import { LoadScreen } from './loading';
 import { VSCodeMessage } from '../vsCodeMessage';
-import { Data } from '../../../odo/componentTypeDescription';
-import { DevfileComponentType } from '../../../odo/componentType';
+import { Data, StarterProject } from '../../../odo/componentTypeDescription';
+import { ComponentTypeAdapter } from '../../../odo/componentType';
 import { SearchBar } from './searchBar';
 import homeStyle from './home.style';
 import cardItemStyle from './cardItem.style';
@@ -21,7 +21,7 @@ const useCardItemStyles = makeStyles(cardItemStyle);
 
 interface HomePageProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
     devFiles: Data[];
-    components: DevfileComponentType[];
+    components: ComponentTypeAdapter[];
 }
 
 export interface DefaultProps {
@@ -39,8 +39,9 @@ const HomeItem: React.FC<HomePageProps> = ({
         <>
             <Gallery className={homeStyleClass.devfileGalleryGrid}>
                 {
-                    devFiles.map((devFile, key) => (
-                        <CardItem key={key} devFile={devFile} component={components[key]} cardItemStyle={cardItemStyle} projectDisplayStyle={projectDisplayStyle} />
+                    devFiles.map((devFile: Data, key: number) => (
+                        <CardItem key={key} devFile={devFile} component={components[key]}
+                            cardItemStyle={cardItemStyle} projectDisplayStyle={projectDisplayStyle} hasGitLink={hasGitLink(devFile)} />
                     ))
                 }
             </Gallery>
@@ -55,6 +56,8 @@ export function Home() {
         filteredDevFiles: [],
         components: []
     });
+
+    const [searchValue, setSearchValue] = React.useState('')
 
     React.useEffect(() => {
         return VSCodeMessage.onMessage((message) => {
@@ -76,10 +79,11 @@ export function Home() {
                 devfiles.length > 0 ?
                     <>
                         <SearchBar onSearchBarChange={function (value: string): void {
-                            if (value?.trim() !== '') {
+                            setSearchValue(value);
+                            if (value !== '') {
                                 let filteredDevFiles = devfiles.filter(function (devFile: Data) {
                                     return devFile.metadata.displayName?.toLowerCase().indexOf(value.toLowerCase()) !== -1 ||
-                                     devFile.metadata.description?.toLowerCase().indexOf(value.toLowerCase()) !== -1;
+                                        devFile.metadata.description?.toLowerCase().indexOf(value.toLowerCase()) !== -1;
                                 });
                                 setData(
                                     {
@@ -95,11 +99,20 @@ export function Home() {
                                         components: components
                                     });
                             }
-                        }} searchBarValue={''} />
-                        <HomeItem devFiles={filteredDevFiles.length > 0 ? filteredDevFiles : devfiles} components={components} />
+                        }} searchBarValue={searchValue} />
+                        <HomeItem devFiles={searchValue.length > 0 ? filteredDevFiles : devfiles} components={components} />
                     </> :
                     <LoadScreen />
             }
         </>
     );
 }
+
+function hasGitLink(devFile: Data): boolean {
+    let hasGit = true;
+    devFile.starterProjects.map((starterPro: StarterProject) => {
+        hasGit = starterPro.git ? hasGit : false;
+    });
+    return hasGit;
+}
+

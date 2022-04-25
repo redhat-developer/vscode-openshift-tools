@@ -129,14 +129,14 @@ export class Component extends OpenShiftItem {
 
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Deleting the Component '${component.getName()} '`, async () => {
-              if (component.isOdoManaged()) {
-                await Component.delete(component);
-              } else {
-                await Component.deleteOther(component);
-              }
+                if (component.isOdoManaged()) {
+                    await Component.delete(component);
+                } else {
+                    await Component.deleteOther(component);
+                }
             })
-            .then(() => `Component '${name}' successfully deleted`)
-            .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Component with error '${err}'`, 'Failed to delete Component with error')));
+                .then(() => `Component '${name}' successfully deleted`)
+                .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Component with error '${err}'`, 'Failed to delete Component with error')));
         }
     }
 
@@ -470,7 +470,7 @@ export class Component extends OpenShiftItem {
             });
             Component.addWatchSession(component, process);
             process.on('exit', (code: number) => {
-                if (code!== 0) {
+                if (code !== 0) {
                     void window.showErrorMessage('Watch process failed to start.');
                 }
                 Component.removeWatchSession(component);
@@ -536,7 +536,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.componentType.newComponent')
-    public static async createComponentFromCatalogEntry(context: DevfileComponentType | StarterProject): Promise<string> {
+    public static async createComponentFromCatalogEntry(context: DevfileComponentType | StarterProject, component?: ComponentTypeAdapter): Promise<string> {
         const application = await Component.getOpenShiftCmdData(undefined,
             'Select an Application where you want to create a Component'
         );
@@ -550,6 +550,10 @@ export class Component extends OpenShiftItem {
         } else if (isStarterProject(context)) {
             componentTypeName = context.typeName;
             starterProjectName = context.name;
+        }
+
+        if (component) {
+            componentTypeName = component.name;
         }
 
         return Component.createFromLocal(application, [], componentTypeName, starterProjectName);

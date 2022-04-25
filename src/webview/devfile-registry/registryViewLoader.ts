@@ -10,13 +10,14 @@ import { getInstance } from '../../odo';
 import { Command } from '../../odo/command';
 import { Data } from '../../odo/componentTypeDescription';
 import { stringify } from 'yaml';
-import { ComponentTypeAdapter, DevfileComponentType } from '../../odo/componentType';
+import { ascDevfileFirst, ComponentTypeAdapter } from '../../odo/componentType';
 
 let panel: vscode.WebviewPanel;
 let devFiles: Data[] = [];
-let devFileComponents: DevfileComponentType[] = [];
+let devFileComponents: ComponentTypeAdapter[] = [];
 
 async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
+    let starterProject = event.selectedProject;
     switch (event?.action) {
         case 'getAllComponents':
             if (devFiles.length > 0) {
@@ -29,8 +30,8 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
                 );
             } else {
                 getInstance().getCompTypesJson().then((devFileComponentTypes) => {
-                    devFileComponents = devFileComponentTypes.sort(ascDevfile);
                     const components: ComponentTypeAdapter[] = getInstance().getComponentTypesOfJSON(devFileComponentTypes);
+                    devFileComponents = components.sort(ascDevfileFirst);
                     components.map(async (componentType) => {
                         getInstance().execute(Command.describeCatalogComponent(componentType.name)).then((componentDesc) => {
                             const out = JSON.parse(componentDesc.stdout)[0];
@@ -60,15 +61,14 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             );
             break;
         case 'createComponent':
-            const devFileComponent = event.data;
-            vscode.commands.executeCommand('openshift.componentType.newComponent', devFileComponent);
+            const component = event.component;
+            starterProject = starterProject;
+            vscode.commands.executeCommand('openshift.componentType.newComponent', starterProject, component);
             break;
         case 'cloneToWorkSpace':
-            let starterProject = event.data.starterProjects[0];
             vscode.commands.executeCommand('openshift.componentType.cloneStarterProjectRepository', starterProject);
             break;
         case 'openInBrowser':
-            starterProject = event.data.starterProjects[0];
             vscode.commands.executeCommand('openshift.componentType.openStarterProjectRepository', starterProject);
             break;
         default:
@@ -134,9 +134,5 @@ export default class RegistryViewLoader {
 
 function ascName(d1: Data, d2: Data): number {
     return d1.metadata.name.localeCompare(d2.metadata.name);
-}
-
-function ascDevfile(d1: DevfileComponentType, d2: DevfileComponentType): number {
-    return d1.Name.localeCompare(d2.Name);
 }
 

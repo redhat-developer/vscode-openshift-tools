@@ -16,14 +16,25 @@ import {
     Modal,
     ModalVariant,
     Backdrop,
-    Button
+    Button,
+    CardActions,
+    Tooltip
 } from '@patternfly/react-core';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { DevFileProps } from './wrapperCardItem';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { StarterProject } from '../../../odo/componentTypeDescription';
 import { StarterProjectDisplay } from './starterProjectDisplay';
+import CopyIcon from '@patternfly/react-icons/dist/esm/icons/copy-icon';
 
-export class CardItem extends React.Component<DevFileProps, { numOfCall: number, isExpanded: boolean, devFileYAML: string, selectedProject: StarterProject }> {
+export class CardItem extends React.Component<DevFileProps, {
+    numOfCall: number,
+    isExpanded: boolean,
+    devFileYAML: string,
+    selectedProject: StarterProject,
+    copyClicked: boolean
+    hoverProject: null | StarterProject,
+}> {
 
     constructor(props: DevFileProps) {
         super(props);
@@ -31,7 +42,9 @@ export class CardItem extends React.Component<DevFileProps, { numOfCall: number,
             numOfCall: 0,
             isExpanded: false,
             devFileYAML: '',
-            selectedProject: props.devFile.starterProjects[0]
+            selectedProject: props.devFile.starterProjects[0],
+            copyClicked: false,
+            hoverProject: null
         };
     }
 
@@ -72,7 +85,9 @@ export class CardItem extends React.Component<DevFileProps, { numOfCall: number,
         VSCodeMessage.postMessage(
             {
                 'action': 'createComponent',
-                'data': this.props.component
+                'devFile': this.props.devFile,
+                'component': this.props.component,
+                'selectedProject': this.state.selectedProject
             });
         return;
     }
@@ -81,7 +96,7 @@ export class CardItem extends React.Component<DevFileProps, { numOfCall: number,
         VSCodeMessage.postMessage(
             {
                 'action': 'cloneToWorkSpace',
-                'data': this.state.selectedProject
+                'selectedProject': this.state.selectedProject
             });
         return;
     }
@@ -90,27 +105,32 @@ export class CardItem extends React.Component<DevFileProps, { numOfCall: number,
         VSCodeMessage.postMessage(
             {
                 'action': 'openInBrowser',
-                'data': this.state.selectedProject
+                'selectedProject': this.state.selectedProject
             });
         return;
     }
 
     setSelectedProject = (project: StarterProject): void => {
-        console.log('Selected Project: ', project.name);
         this.setState({
             selectedProject: project
         });
     };
 
     setCurrentlyHoveredProject = (project: StarterProject): void => {
-        console.log('Hovered Project: ', project?.name);
         this.setState({
-            selectedProject: project
+            hoverProject: project
         });
     };
 
+    copyClicked = (isClicked: boolean): void => {
+        this.setState({
+            copyClicked: isClicked
+        });
+    }
+
     render(): React.ReactNode {
-        const { isExpanded, devFileYAML, selectedProject } = this.state;
+        const { isExpanded, devFileYAML, selectedProject, hoverProject, copyClicked } = this.state;
+
         const starterProjectCard = <Card data-testid='dev-page-starterProject' className={this.props.cardItemStyle.starterProjectCard}>
             <CardHeader className={this.props.cardItemStyle.starterProjectCardHeader}>
                 <TextContent>
@@ -122,10 +142,11 @@ export class CardItem extends React.Component<DevFileProps, { numOfCall: number,
             <CardBody>
                 <div className={this.props.cardItemStyle.starterProjectCardBody}>
                     <div
-                        data-testid="projects-selector"
+                        data-testid='projects-selector'
                         className={this.props.cardItemStyle.starterProjectSelect}
+                        onMouseLeave={(): void => this.setCurrentlyHoveredProject(null)}
                     >
-                        {this.props.devFile.starterProjects.map((project) => (
+                        {this.props.devFile.starterProjects.map((project: StarterProject) => (
                             <div
                                 key={project.name}
                                 data-testid={`projects-selector-item-${project.name}`}
@@ -140,40 +161,45 @@ export class CardItem extends React.Component<DevFileProps, { numOfCall: number,
                         ))}
                     </div>
                     <div className={this.props.cardItemStyle.display}>
-                        <StarterProjectDisplay project={selectedProject} projectDisplayStyle={this.props.projectDisplayStyle} />
-                        <Button
-                            color="default"
-                            component="span"
-                            className={this.props.cardItemStyle.button}
-                            onClick={this.createComponent}>
-                            <TextContent>
-                                <Text component={TextVariants.h1}>
-                                    New Component
-                                </Text>
-                            </TextContent>
-                        </Button>
-                        <Button
-                            color="default"
-                            component="span"
-                            className={this.props.cardItemStyle.button}
-                            onClick={this.cloneToWorkSpace}>
-                            <TextContent>
-                                <Text component={TextVariants.h1}>
-                                    Clone to Workspace
-                                </Text>
-                            </TextContent>
-                        </Button>
-                        <Button
-                            color="default"
-                            component="span"
-                            className={this.props.cardItemStyle.button}
-                            onClick={this.openInBrowser}>
-                            <TextContent>
-                                <Text component={TextVariants.h1}>
-                                    Open in Browser
-                                </Text>
-                            </TextContent>
-                        </Button>
+                        <StarterProjectDisplay project={selectedProject || hoverProject} projectDisplayStyle={this.props.projectDisplayStyle} />
+                        <CardActions className={this.props.cardItemStyle.cardButton}>
+                            <Button
+                                color='default'
+                                component='span'
+                                className={this.props.cardItemStyle.button}
+                                onClick={this.createComponent}>
+                                <TextContent>
+                                    <Text component={TextVariants.h6}>
+                                        New Component
+                                    </Text>
+                                </TextContent>
+                            </Button>
+                        </CardActions>
+                        {this.props.hasGitLink && <><CardActions className={this.props.cardItemStyle.cardButton}>
+                            <Button
+                                color='default'
+                                component='span'
+                                className={this.props.cardItemStyle.button}
+                                onClick={this.cloneToWorkSpace}>
+                                <TextContent>
+                                    <Text component={TextVariants.h6}>
+                                        Clone to Workspace
+                                    </Text>
+                                </TextContent>
+                            </Button>
+                        </CardActions><CardActions className={this.props.cardItemStyle.cardButton}>
+                                <Button
+                                    color='default'
+                                    component='span'
+                                    className={this.props.cardItemStyle.button}
+                                    onClick={this.openInBrowser}>
+                                    <TextContent>
+                                        <Text component={TextVariants.h1}>
+                                            Open in Browser
+                                        </Text>
+                                    </TextContent>
+                                </Button>
+                            </CardActions></>}
                     </div>
                 </div>
             </CardBody>
@@ -196,7 +222,7 @@ export class CardItem extends React.Component<DevFileProps, { numOfCall: number,
                         <CardHeader className={this.props.cardItemStyle.devPageCardHeader}>
                             <div className={this.props.cardItemStyle.devPageTitle}>
                                 <Brand
-                                    data-testid="icon"
+                                    data-testid='icon'
                                     src={this.props.devFile.metadata.icon}
                                     alt={this.props.devFile.metadata.icon + ' logo'}
                                     className={this.props.cardItemStyle.cardImage}
@@ -214,6 +240,27 @@ export class CardItem extends React.Component<DevFileProps, { numOfCall: number,
                     </Card>
                 </CardHeader>
                 <CardBody className={this.props.cardItemStyle.yamlCardBody}>
+                    <CopyToClipboard text={devFileYAML}>
+                        <CardActions className={this.props.cardItemStyle.copyButton}
+                            onMouseLeave={(): void => this.copyClicked(false)}>
+                            <Button
+                                id='tooltip-selector'
+                                component='span'
+                                icon={<CopyIcon />}
+                                style={{ cursor: 'pointer' }}
+                                onClick={(): void => this.copyClicked(true)}
+                            >
+                            </Button>
+                            <Tooltip
+                                content={
+                                    copyClicked ? 'Copied' : 'Copy'
+                                }
+                                position = 'bottom'
+                                trigger='mouseenter click'
+                                reference={() => document.getElementById('tooltip-selector')}
+                            />
+                        </CardActions>
+                    </CopyToClipboard>
                     <SyntaxHighlighter language='yaml' style={this.props.cardItemStyle} useInlineStyles={false}
                         wrapLines={true}
                         codeTagProps={{
@@ -242,6 +289,7 @@ export class CardItem extends React.Component<DevFileProps, { numOfCall: number,
                                 src={this.props.devFile.metadata.icon}
                                 alt={`${this.props.devFile.metadata.name} icon`}
                                 className={this.props.cardItemStyle.cardImage} />
+
                         </div>
                     </CardHeader>
                     <CardTitle style={{ margin: '1.5rem' }}>

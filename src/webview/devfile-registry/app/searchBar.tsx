@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { makeStyles } from '@material-ui/core';
+import { InputAdornment, makeStyles, TextField } from '@material-ui/core';
+import { SearchRounded } from '@material-ui/icons';
 import { DefaultProps } from './home';
 import React from 'react';
 import searchBarStyle from './searchBar.style';
-import { SearchInput } from '@patternfly/react-core/dist/esm/components/SearchInput';
 
 const useSearchBarStyle = makeStyles(searchBarStyle);
 
@@ -23,14 +23,22 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     const searchBarStyle = useSearchBarStyle();
     return (
         <div className={searchBarStyle.searchBar}>
-            <SearchInput
-                data-testid='search-bar-devfile'
+            <TextField
                 className={searchBarStyle.searchBarInput}
-                placeholder='Search by name or description'
+                placeholder='Search registry by name or description'
                 value={searchBarValue}
-                onChange={onSearchBarChange}
+                onChange={(e) => {
+                    onSearchBarChange(e.target.value);
+                }}
                 onClick={(): void => onSearchBarChange('')}
-                onClear={(): void => onSearchBarChange('')}
+                InputProps={{
+                    startAdornment: (
+                        <InputAdornment position='start' style={{ marginBottom: '0.0625rem', paddingLeft: '0.0625rem' }}>
+                            <SearchRounded />
+                        </InputAdornment >
+                    ),
+                    disableUnderline: true
+                }}
             />
         </div>
     );
