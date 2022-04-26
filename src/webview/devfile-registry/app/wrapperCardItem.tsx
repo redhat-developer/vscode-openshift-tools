@@ -6,11 +6,9 @@
 import { CardItem } from "./cardItem";
 import React, { forwardRef } from "react";
 import { Data } from '../../../odo/componentTypeDescription';
-import { ComponentTypeAdapter } from "../../../odo/componentType";
 
 export interface DevFileProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
     devFile: Data;
-    component: ComponentTypeAdapter;
     hasGitLink: boolean;
     cardItemStyle: any;
     projectDisplayStyle: any

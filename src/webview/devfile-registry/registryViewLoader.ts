@@ -8,13 +8,12 @@ import * as fs from 'fs';
 import { ExtenisonID } from '../../util/constants';
 import { getInstance } from '../../odo';
 import { Command } from '../../odo/command';
-import { Data } from '../../odo/componentTypeDescription';
+import { Data, StarterProject } from '../../odo/componentTypeDescription';
 import { stringify } from 'yaml';
-import { ascDevfileFirst, ComponentTypeAdapter } from '../../odo/componentType';
+import { ComponentTypeAdapter, DevfileComponentType, isDevfileComponent } from '../../odo/componentType';
 
 let panel: vscode.WebviewPanel;
 let devFiles: Data[] = [];
-let devFileComponents: ComponentTypeAdapter[] = [];
 
 async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
     let starterProject = event.selectedProject;
@@ -24,25 +23,27 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
                 panel.webview.postMessage(
                     {
                         action: event.action,
-                        devFiles: devFiles,
-                        components: devFileComponents
+                        devFiles: devFiles
                     }
                 );
             } else {
-                getInstance().getCompTypesJson().then((devFileComponentTypes) => {
+                getInstance().getCompTypesJson().then((devFileComponentTypes: DevfileComponentType[]) => {
                     const components: ComponentTypeAdapter[] = getInstance().getComponentTypesOfJSON(devFileComponentTypes);
-                    devFileComponents = components.sort(ascDevfileFirst);
-                    components.map(async (componentType) => {
+                    components.map(async (componentType: ComponentTypeAdapter, index) => {
                         getInstance().execute(Command.describeCatalogComponent(componentType.name)).then((componentDesc) => {
                             const out = JSON.parse(componentDesc.stdout)[0];
+                            if (isDevfileComponent(devFileComponentTypes[index])) {
+                                out.Devfile?.starterProjects.map((starter: StarterProject) => {
+                                    starter.typeName = devFileComponentTypes[index].Name;
+                                });
+                            }
                             devFiles.push(out['Devfile']);
                             if (components.length === devFiles.length) {
                                 devFiles.sort(ascName);
                                 panel.webview.postMessage(
                                     {
                                         action: event.action,
-                                        devFiles: devFiles,
-                                        components: devFileComponents
+                                        devFiles: devFiles
                                     }
                                 );
                             }
@@ -61,9 +62,8 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             );
             break;
         case 'createComponent':
-            const component = event.component;
             starterProject = starterProject;
-            vscode.commands.executeCommand('openshift.componentType.newComponent', starterProject, component);
+            vscode.commands.executeCommand('openshift.componentType.newComponent', starterProject);
             break;
         case 'cloneToWorkSpace':
             vscode.commands.executeCommand('openshift.componentType.cloneStarterProjectRepository', starterProject);

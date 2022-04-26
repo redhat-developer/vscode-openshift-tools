@@ -536,7 +536,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.componentType.newComponent')
-    public static async createComponentFromCatalogEntry(context: DevfileComponentType | StarterProject, component?: ComponentTypeAdapter): Promise<string> {
+    public static async createComponentFromCatalogEntry(context: DevfileComponentType | StarterProject): Promise<string> {
         const application = await Component.getOpenShiftCmdData(undefined,
             'Select an Application where you want to create a Component'
         );
@@ -550,10 +550,6 @@ export class Component extends OpenShiftItem {
         } else if (isStarterProject(context)) {
             componentTypeName = context.typeName;
             starterProjectName = context.name;
-        }
-
-        if (component) {
-            componentTypeName = component.name;
         }
 
         return Component.createFromLocal(application, [], componentTypeName, starterProjectName);

@@ -42,7 +42,7 @@ export class CardItem extends React.Component<DevFileProps, {
             numOfCall: 0,
             isExpanded: false,
             devFileYAML: '',
-            selectedProject: props.devFile.starterProjects[0],
+            selectedProject: this.props.devFile.starterProjects[0],
             copyClicked: false,
             hoverProject: null
         };
@@ -60,7 +60,8 @@ export class CardItem extends React.Component<DevFileProps, {
                     this.setState({
                         numOfCall,
                         isExpanded,
-                        devFileYAML
+                        devFileYAML,
+                        selectedProject: this.props.devFile.starterProjects[0]
                     });
                 }
             });
@@ -86,7 +87,6 @@ export class CardItem extends React.Component<DevFileProps, {
             {
                 'action': 'createComponent',
                 'devFile': this.props.devFile,
-                'component': this.props.component,
                 'selectedProject': this.state.selectedProject
             });
         return;
@@ -130,7 +130,6 @@ export class CardItem extends React.Component<DevFileProps, {
 
     render(): React.ReactNode {
         const { isExpanded, devFileYAML, selectedProject, hoverProject, copyClicked } = this.state;
-
         const starterProjectCard = <Card data-testid='dev-page-starterProject' className={this.props.cardItemStyle.starterProjectCard}>
             <CardHeader className={this.props.cardItemStyle.starterProjectCardHeader}>
                 <TextContent>
@@ -255,7 +254,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                 content={
                                     copyClicked ? 'Copied' : 'Copy'
                                 }
-                                position = 'bottom'
+                                position='bottom'
                                 trigger='mouseenter click'
                                 reference={() => document.getElementById('tooltip-selector')}
                             />

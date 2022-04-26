@@ -9,7 +9,6 @@ import { WrapperCardItem as CardItem } from './wrapperCardItem';
 import { LoadScreen } from './loading';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { Data, StarterProject } from '../../../odo/componentTypeDescription';
-import { ComponentTypeAdapter } from '../../../odo/componentType';
 import { SearchBar } from './searchBar';
 import homeStyle from './home.style';
 import cardItemStyle from './cardItem.style';
@@ -21,7 +20,6 @@ const useCardItemStyles = makeStyles(cardItemStyle);
 
 interface HomePageProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
     devFiles: Data[];
-    components: ComponentTypeAdapter[];
 }
 
 export interface DefaultProps {
@@ -29,8 +27,7 @@ export interface DefaultProps {
 }
 
 const HomeItem: React.FC<HomePageProps> = ({
-    devFiles,
-    components
+    devFiles
 }: HomePageProps) => {
     const homeStyleClass = useHomeStyles();
     const cardItemStyle = useCardItemStyles();
@@ -40,7 +37,7 @@ const HomeItem: React.FC<HomePageProps> = ({
             <Gallery className={homeStyleClass.devfileGalleryGrid}>
                 {
                     devFiles.map((devFile: Data, key: number) => (
-                        <CardItem key={key} devFile={devFile} component={components[key]}
+                        <CardItem key={key} devFile={devFile}
                             cardItemStyle={cardItemStyle} projectDisplayStyle={projectDisplayStyle} hasGitLink={hasGitLink(devFile)} />
                     ))
                 }
@@ -51,11 +48,9 @@ const HomeItem: React.FC<HomePageProps> = ({
 
 export function Home() {
 
-    const [{ devfiles, filteredDevFiles, components, filteredComponents }, setData] = React.useState({
+    const [{ devfiles, filteredDevFiles }, setData] = React.useState({
         devfiles: [],
-        filteredDevFiles: [],
-        components: [],
-        filteredComponents: []
+        filteredDevFiles: []
     });
 
     const [searchValue, setSearchValue] = React.useState('')
@@ -66,9 +61,7 @@ export function Home() {
                 setData(
                     {
                         devfiles: message.data.devFiles,
-                        filteredDevFiles: [],
-                        components: message.data.components,
-                        filteredComponents: []
+                        filteredDevFiles: []
                     }
                 )
             }
@@ -87,29 +80,20 @@ export function Home() {
                                     return devFile.metadata.displayName?.toLowerCase().indexOf(value.toLowerCase()) !== -1 ||
                                         devFile.metadata.description?.toLowerCase().indexOf(value.toLowerCase()) !== -1;
                                 });
-                                let filteredComponents = components.filter(function (component: ComponentTypeAdapter) {
-                                    return component.name.toLowerCase().indexOf(value.toLowerCase()) !== -1 ||
-                                        component.description.toLowerCase().indexOf(value.toLowerCase()) !== -1;
-                                });
                                 setData(
                                     {
                                         devfiles: devfiles,
-                                        filteredDevFiles: filteredDevFiles,
-                                        components: components,
-                                        filteredComponents: filteredComponents
+                                        filteredDevFiles: filteredDevFiles
                                     });
                             } else {
                                 setData(
                                     {
                                         devfiles: devfiles,
-                                        filteredDevFiles: [],
-                                        components: components,
-                                        filteredComponents: []
+                                        filteredDevFiles: []
                                     });
                             }
                         }} searchBarValue={searchValue} />
-                        <HomeItem devFiles={searchValue.length > 0 ? filteredDevFiles : devfiles}
-                            components={searchValue.length > 0 ? filteredComponents : components} />
+                        <HomeItem devFiles={searchValue.length > 0 ? filteredDevFiles : devfiles}/>
                     </> :
                     <LoadScreen />
             }
