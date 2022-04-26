@@ -51,10 +51,11 @@ const HomeItem: React.FC<HomePageProps> = ({
 
 export function Home() {
 
-    const [{ devfiles, filteredDevFiles, components }, setData] = React.useState({
+    const [{ devfiles, filteredDevFiles, components, filteredComponents }, setData] = React.useState({
         devfiles: [],
         filteredDevFiles: [],
-        components: []
+        components: [],
+        filteredComponents: []
     });
 
     const [searchValue, setSearchValue] = React.useState('')
@@ -66,7 +67,8 @@ export function Home() {
                     {
                         devfiles: message.data.devFiles,
                         filteredDevFiles: [],
-                        components: message.data.components
+                        components: message.data.components,
+                        filteredComponents: []
                     }
                 )
             }
@@ -85,22 +87,29 @@ export function Home() {
                                     return devFile.metadata.displayName?.toLowerCase().indexOf(value.toLowerCase()) !== -1 ||
                                         devFile.metadata.description?.toLowerCase().indexOf(value.toLowerCase()) !== -1;
                                 });
+                                let filteredComponents = components.filter(function (component: ComponentTypeAdapter) {
+                                    return component.name.toLowerCase().indexOf(value.toLowerCase()) !== -1 ||
+                                        component.description.toLowerCase().indexOf(value.toLowerCase()) !== -1;
+                                });
                                 setData(
                                     {
                                         devfiles: devfiles,
                                         filteredDevFiles: filteredDevFiles,
-                                        components: components
+                                        components: components,
+                                        filteredComponents: filteredComponents
                                     });
                             } else {
                                 setData(
                                     {
                                         devfiles: devfiles,
                                         filteredDevFiles: [],
-                                        components: components
+                                        components: components,
+                                        filteredComponents: []
                                     });
                             }
                         }} searchBarValue={searchValue} />
-                        <HomeItem devFiles={searchValue.length > 0 ? filteredDevFiles : devfiles} components={components} />
+                        <HomeItem devFiles={searchValue.length > 0 ? filteredDevFiles : devfiles}
+                            components={searchValue.length > 0 ? filteredComponents : components} />
                     </> :
                     <LoadScreen />
             }
