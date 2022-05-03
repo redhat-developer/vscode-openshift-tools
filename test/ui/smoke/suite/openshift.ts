@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { expect } from 'chai';
-import { ActivityBar, CustomTreeSection, SideBarView, ViewSection, WelcomeContentSection } from 'vscode-extension-tester';
+import { ActivityBar, CustomTreeSection, SideBarView, ViewSection, WebView, WelcomeContentSection } from 'vscode-extension-tester';
 import { BUTTONS, VIEWS } from '../common/constants';
 
 export function checkOpenshiftView() {
@@ -96,6 +96,18 @@ export function checkOpenshiftView() {
                 const registry = await types.findItem(VIEWS.devFileRegistry);
                 expect(registry).not.undefined;
             });
+
+            it('opens viewer for default devfile registry', async () =>{
+              const registry = await types.findItem(VIEWS.devFileRegistry);
+              const contextMenu = registry.openContextMenu();
+              const item = await (await contextMenu).getItem('Open in Viewer');
+              item.click();
+              await new Promise((res) => { setTimeout(res, 500); });
+              const regView = new WebView();
+              await regView.switchToFrame();
+
+              await new Promise((res) => { setTimeout(res, 5000); });
+          });
         });
     });
 }
