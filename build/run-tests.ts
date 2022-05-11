@@ -43,7 +43,7 @@ async function main(): Promise<void> {
                               'components',
                               'empty.code-workspace',
                           ),
-                          '--disable-workspace-trust',
+                          '--disable-workspace-trust'
                       ],
         });
     } catch (error) {

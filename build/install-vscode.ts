@@ -2,6 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+/* eslint-disable no-console */
 
 import { platform } from 'os';
 
@@ -25,8 +26,9 @@ downloadAndUnzipVSCode().then((executable: string) => {
     } else {
         vsCodeExecutable = path.join(path.dirname(executable), 'bin', 'code');
     }
-    const extensionRootPath = path.resolve(__dirname, '..', '..');
     const [, , vsixName] = process.argv;
-    const vsixPath = path.join(extensionRootPath, vsixName);
+    const extensionRootPath = path.resolve(__dirname, '..', '..');
+    const vsixPath = vsixName.includes('.vsix') ? path.join(extensionRootPath, vsixName) : vsixName;
+    console.log('Installin extension: ', vsixPath );
     cp.execSync(`${vsCodeExecutable} --install-extension ${vsixPath}`);
 });
