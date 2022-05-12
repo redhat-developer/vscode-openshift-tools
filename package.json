@@ -923,12 +923,12 @@
 		"viewsWelcome": [
 			{
 				"view": "openshiftProjectExplorer",
-				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context ](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)",
+				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context ](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[Create Component](command:openshift.component.createFromLocal)",
 				"enablement": "openshift.app.explorer.init"
 			},
 			{
 				"view": "openshiftComponentsView",
-				"contents": "You have no OpenShift Components in your workspace yet.\n[New Component](command:openshift.component.createFromLocal)",
+				"contents": "You have no OpenShift Components in your workspace yet.\n[Create Component](command:openshift.component.createFromLocal)",
 				"enablement": "openshift.component.explorer.init"
 			}
 		],
