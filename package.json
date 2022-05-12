@@ -80,11 +80,11 @@
 		"test": "npm run vscode:prepublish && node ./out/build/run-tests.js unit",
 		"test-integration": "npm run vscode:prepublish && node ./out/build/run-tests.js integration",
 		"test:instrument": "shx rm -rf out/src-orig && shx mv out/src out/src-orig && istanbul instrument --complete-copy --embed-source --output out/src out/src-orig",
-		"test:coverage": "npm run build && npm run test:instrument && node ./out/build/run-tests.js unit",
+		"test:coverage": "npm run build && npm run test:instrument && node ./out/build/install-vscode.js redhat.vscode-redhat-account && node ./out/build/run-tests.js unit",
 		"update-deps": "ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
 		"coverage:upload": "codecov -f coverage/coverage-final.json",
 		"build": "npm run clean && npm run lint && npm run compile && npm run bundle-tools",
-		"smoke-test": "npm run compile:ext && extest setup-and-run out/test/ui/smoke-test.js -o test/ui/settings.json -m test/ui/.mocharc.js"
+		"smoke-test": "npm run compile:ext && extest setup-and-run out/test/ui/smoke/smoke-test.js -o test/ui/smoke/settings.json -m test/ui/smoke/.mocharc.js"
 	},
 	"dependencies": {
 		"@kubernetes/client-node": "^0.16.1",

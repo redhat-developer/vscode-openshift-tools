@@ -8,6 +8,7 @@ import { CliChannel } from './cli';
 import { ToolsConfig } from './tools';
 import OpenShiftItem, { clusterRequired } from './openshift/openshiftItem';
 import { vsCommand } from './vscommand';
+import { OpenShiftProject } from './odo';
 
 export class Oc {
 
@@ -49,9 +50,9 @@ export class Oc {
         }
 
         if (message) {
-            window.showWarningMessage(message);
+            void window.showWarningMessage(message);
         } else {
-            const project = await OpenShiftItem.getOpenShiftCmdData(undefined);
+            const project = await OpenShiftItem.getOpenShiftCmdData<OpenShiftProject>(undefined);
             if (!project) return null;
             const result = await CliChannel.getInstance().execute(
                 `${toolLocation} create -f ${document.fileName} --namespace ${project.getName()}`,
