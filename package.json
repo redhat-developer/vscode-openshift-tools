@@ -908,7 +908,7 @@
 				},
 				{
 					"id": "openshiftComponentTypesView",
-					"name": "Component Types"
+					"name": "Registries"
 				},
 				{
 					"id": "openshiftWatchView",
