@@ -18,14 +18,17 @@ import {
     Backdrop,
     Button,
     CardActions,
-    Tooltip
+    Tooltip,
+    CardFooter
 } from '@patternfly/react-core';
+import clsx from 'clsx';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { DevFileProps } from './wrapperCardItem';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { StarterProject } from '../../../odo/componentTypeDescription';
 import { StarterProjectDisplay } from './starterProjectDisplay';
 import CopyIcon from '@patternfly/react-icons/dist/esm/icons/copy-icon';
+import { Badge } from '@material-ui/core';
 
 export class CardItem extends React.Component<DevFileProps, {
     numOfCall: number,
@@ -42,7 +45,7 @@ export class CardItem extends React.Component<DevFileProps, {
             numOfCall: 0,
             isExpanded: false,
             devFileYAML: '',
-            selectedProject: this.props.devFile.starterProjects[0],
+            selectedProject: this.props.compDescription.Devfile.starterProjects[0],
             copyClicked: false,
             hoverProject: null
         };
@@ -52,7 +55,7 @@ export class CardItem extends React.Component<DevFileProps, {
         const isExpanded = !this.state.isExpanded;
         let numOfCall = this.state.numOfCall;
         if (isExpanded) {
-            VSCodeMessage.postMessage({ 'action': 'getYAML', 'data': this.props.devFile });
+            VSCodeMessage.postMessage({ 'action': 'getYAML', 'data': this.props.compDescription.Devfile });
             VSCodeMessage.onMessage((message) => {
                 if (message.data.action === 'getYAML' && numOfCall === 0) {
                     numOfCall++;
@@ -61,7 +64,7 @@ export class CardItem extends React.Component<DevFileProps, {
                         numOfCall,
                         isExpanded,
                         devFileYAML,
-                        selectedProject: this.props.devFile.starterProjects[0]
+                        selectedProject: this.props.compDescription.Devfile.starterProjects[0]
                     });
                 }
             });
@@ -86,8 +89,10 @@ export class CardItem extends React.Component<DevFileProps, {
         VSCodeMessage.postMessage(
             {
                 'action': 'createComponent',
-                'devFile': this.props.devFile,
-                'selectedProject': this.state.selectedProject
+                'devFile': this.props.compDescription.Devfile,
+                'selectedProject': this.state.selectedProject,
+                'appName': 'app-' + this.state.selectedProject.name,
+                'registryName': this.props.compDescription.RegistryName
             });
         return;
     }
@@ -137,6 +142,13 @@ export class CardItem extends React.Component<DevFileProps, {
                         Starter Projects
                     </Text>
                 </TextContent>
+                <Badge key={this.props.compDescription.Devfile.metadata.name + '-badge'}
+                    className={clsx(this.props.cardItemStyle.badge, this.props.cardItemStyle.headerBadge)}
+                    overlap='rectangle'
+                    variant='standard'
+                    showZero={false}>
+                    {this.props.compDescription.Devfile.starterProjects.length}
+                </Badge>
             </CardHeader>
             <CardBody>
                 <div className={this.props.cardItemStyle.starterProjectCardBody}>
@@ -145,7 +157,7 @@ export class CardItem extends React.Component<DevFileProps, {
                         className={this.props.cardItemStyle.starterProjectSelect}
                         onMouseLeave={(): void => this.setCurrentlyHoveredProject(null)}
                     >
-                        {this.props.devFile.starterProjects.map((project: StarterProject) => (
+                        {this.props.compDescription.Devfile.starterProjects.map((project: StarterProject) => (
                             <div
                                 key={project.name}
                                 data-testid={`projects-selector-item-${project.name}`}
@@ -208,7 +220,7 @@ export class CardItem extends React.Component<DevFileProps, {
             isOpen={isExpanded}
             className={this.props.cardItemStyle.modal}
             variant={ModalVariant.small}
-            aria-labelledby={`modal-${this.props.devFile.metadata.name}`}
+            aria-labelledby={`modal-${this.props.compDescription.Devfile.metadata.name}`}
             showClose
             disableFocusTrap
             onClose={this.onCloseClick}
@@ -222,13 +234,13 @@ export class CardItem extends React.Component<DevFileProps, {
                             <div className={this.props.cardItemStyle.devPageTitle}>
                                 <Brand
                                     data-testid='icon'
-                                    src={this.props.devFile.metadata.icon}
-                                    alt={this.props.devFile.metadata.icon + ' logo'}
+                                    src={this.props.compDescription.Devfile.metadata.icon}
+                                    alt={this.props.compDescription.Devfile.metadata.icon + ' logo'}
                                     className={this.props.cardItemStyle.cardImage}
                                     style={{ margin: '0rem' }} />
                                 <TextContent style={{ padding: '1rem', margin: '0rem' }}>
                                     <Text component={TextVariants.h6}>
-                                        {capitalizeFirstLetter(this.props.devFile.metadata.displayName)}
+                                        {capitalizeFirstLetter(this.props.compDescription.Devfile.metadata.displayName)}
                                     </Text>
                                 </TextContent>
                             </div>
@@ -260,8 +272,11 @@ export class CardItem extends React.Component<DevFileProps, {
                             />
                         </CardActions>
                     </CopyToClipboard>
-                    <SyntaxHighlighter language='yaml' style={this.props.cardItemStyle} useInlineStyles={false}
-                        wrapLines={true}
+                    <SyntaxHighlighter language='yaml' useInlineStyles={false}
+                        wrapLines
+                        showLineNumbers
+                        lineNumberStyle={{marginLeft: '0.5rem'}}
+                        customStyle={{ marginLeft: '-1.5rem' }}
                         codeTagProps={{
                             style: {
                                 fontFamily: 'inherit', color: 'inherit',
@@ -280,50 +295,70 @@ export class CardItem extends React.Component<DevFileProps, {
                     className={this.props.cardItemStyle.card}
                     onClick={this.onCardClick}
                     isHoverable
-                    data-testid={`card-${this.props.devFile.metadata.name.replace(/\.| /g, '')}`}
+                    data-testid={`card-${this.props.compDescription.Devfile.metadata.name.replace(/\.| /g, '')}`}
                 >
                     <CardHeader className={this.props.cardItemStyle.cardHeader}>
                         <div className={this.props.cardItemStyle.cardHeaderDisplay}>
                             <Brand
-                                src={this.props.devFile.metadata.icon}
-                                alt={`${this.props.devFile.metadata.name} icon`}
+                                src={this.props.compDescription.Devfile.metadata.icon}
+                                alt={`${this.props.compDescription.Devfile.metadata.name} icon`}
                                 className={this.props.cardItemStyle.cardImage} />
 
                         </div>
                     </CardHeader>
-                    <CardTitle style={{ margin: '1.5rem' }}>
+                    <CardTitle style={{ margin: '1rem 1.5rem' }}>
                         <TextContent>
-                            <Text component={TextVariants.h1}>{this.props.devFile.metadata.displayName}</Text>
+                            <Text component={TextVariants.h1}>{this.props.compDescription.Devfile.metadata.displayName}</Text>
                         </TextContent>
+                        {this.props.compDescription.RegistryName.toLowerCase() !== 'defaultdevfileregistry' &&
+                            <TextContent className={this.props.cardItemStyle.cardRegistryTitle}>
+                                <Text component={TextVariants.p}>{this.props.compDescription.RegistryName}</Text>
+                            </TextContent>}
                     </CardTitle>
                     <CardBody className={this.props.cardItemStyle.cardBody}>
                         {
-                            this.props.devFile.metadata.version && (
+                            this.props.compDescription.Devfile.metadata.version && (
                                 <TextContent>
                                     <Text component={TextVariants.small}>
-                                        Version: {this.props.devFile.metadata.version}
+                                        Version: {this.props.compDescription.Devfile.metadata.version}
                                     </Text>
                                 </TextContent>
                             )
                         }
                         <TextContent>
                             <Text component={TextVariants.small}>
-                                Project Type: {capitalizeFirstLetter(this.props.devFile.metadata.projectType)}
+                                Project Type: {capitalizeFirstLetter(this.props.compDescription.Devfile.metadata.projectType)}
                             </Text>
                         </TextContent>
                         <TextContent>
                             <Text component={TextVariants.small}>
-                                Language: {capitalizeFirstLetter(this.props.devFile.metadata.language)}
+                                Language: {capitalizeFirstLetter(this.props.compDescription.Devfile.metadata.language)}
                             </Text>
                         </TextContent>
                         <TextContent>
                             <Text
                                 component={TextVariants.p}
                                 className={this.props.cardItemStyle.longDescription}>
-                                {this.props.devFile.metadata.description}
+                                {this.props.compDescription.Devfile.metadata.description}
                             </Text>
                         </TextContent>
                     </CardBody>
+                    <CardFooter className={this.props.cardItemStyle.cardFooterTag}>
+                        {
+                            this.props.compDescription.Devfile.metadata.tags?.map((tag: string, index: number) =>
+                                index <= 2 &&
+                                <Badge key={index}
+                                    className={index === 0 ?
+                                        clsx(this.props.cardItemStyle.badge, this.props.cardItemStyle.firstBadge)
+                                        : this.props.cardItemStyle.badge}
+                                    overlap='rectangle'
+                                    variant='standard'
+                                >
+                                    {tag}
+                                </Badge>
+                            )
+                        }
+                    </CardFooter>
                 </Card>
                 {
                     devFileYAML.length > 0 && isExpanded &&

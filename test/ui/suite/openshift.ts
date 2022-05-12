@@ -17,7 +17,7 @@ export function checkOpenshiftView() {
         });
 
         it('Displays all view sections', async () => {
-            const expected = [VIEWS.appExplorer, VIEWS.components, VIEWS.compTypes, VIEWS.watchSessions, VIEWS.debugSessions];
+            const expected = [VIEWS.appExplorer, VIEWS.components, VIEWS.compRegistries, VIEWS.watchSessions, VIEWS.debugSessions];
             const sections = await view.getContent().getSections();
             const titles = await Promise.all(sections.map(async item => item.getTitle()));
 
@@ -34,7 +34,7 @@ export function checkOpenshiftView() {
                 explorer = await view.getContent().getSection(VIEWS.appExplorer);
                 welcome = await explorer.findWelcomeContent();
 
-                for (const item of [VIEWS.components, VIEWS.compTypes, VIEWS.watchSessions, VIEWS.debugSessions]) {
+                for (const item of [VIEWS.components, VIEWS.compRegistries, VIEWS.watchSessions, VIEWS.debugSessions]) {
                     await (await view.getContent().getSection(item)).collapse();
                 }
             });
@@ -84,11 +84,11 @@ export function checkOpenshiftView() {
             });
         });
 
-        describe('Component Types', () => {
+        describe('Component Registries', () => {
             let types: CustomTreeSection;
 
             before(async () => {
-                types = await view.getContent().getSection(VIEWS.compTypes) as CustomTreeSection;
+                types = await view.getContent().getSection(VIEWS.compRegistries) as CustomTreeSection;
                 await types.expand();
             });
 

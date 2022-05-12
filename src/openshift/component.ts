@@ -536,9 +536,10 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.componentType.newComponent')
-    public static async createComponentFromCatalogEntry(context: DevfileComponentType | StarterProject): Promise<string> {
+    public static async createComponentFromCatalogEntry(context: DevfileComponentType | StarterProject, appName?: string, registryName?: string): Promise<string> {
         const application = await Component.getOpenShiftCmdData(undefined,
-            'Select an Application where you want to create a Component'
+            'Select an Application where you want to create a Component', undefined, undefined,
+            appName
         );
 
         if (!application) return null;
@@ -552,19 +553,19 @@ export class Component extends OpenShiftItem {
             starterProjectName = context.name;
         }
 
-        return Component.createFromLocal(application, [], componentTypeName, starterProjectName);
+        return Component.createFromLocal(application, [], componentTypeName, starterProjectName, registryName);
     }
 
     @vsCommand('openshift.component.createFromLocal')
     @selectTargetApplication(
         'Select an Application where you want to create a Component'
     )
-    static async createFromLocal(application: OpenShiftApplication, selection?: OpenShiftObject[], componentTypeName?: string, starterProjectName?: string): Promise<string | null> {
+    static async createFromLocal(application: OpenShiftApplication, selection?: OpenShiftObject[], componentTypeName?: string, starterProjectName?: string, registryName?: string): Promise<string | null> {
         if (!application) return createCancelledResult('applicationName');
         const workspacePath = await selectWorkspaceFolder();
         if (!workspacePath) return createCancelledResult('contextFolder');
 
-        return Component.createFromRootWorkspaceFolder(workspacePath, [], application, componentTypeName, starterProjectName);
+        return Component.createFromRootWorkspaceFolder(workspacePath, [], application, componentTypeName, starterProjectName, registryName);
     }
 
     /**
@@ -581,7 +582,7 @@ export class Component extends OpenShiftItem {
         let result: any;
         let component = Component.odo.getOpenShiftObjectByContext(folder.fsPath);
         if (!component) {
-            result = await Component.createFromRootWorkspaceFolder(folder, undefined, undefined, componentTypeName, undefined, false);
+            result = await Component.createFromRootWorkspaceFolder(folder, undefined, undefined, componentTypeName, undefined, undefined, false);
             component = Component.odo.getOpenShiftObjectByContext(folder.fsPath);
         }
         if (component) {
@@ -603,7 +604,7 @@ export class Component extends OpenShiftItem {
      */
 
     @vsCommand('openshift.component.createFromRootWorkspaceFolder')
-    static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], context: OpenShiftApplication, componentTypeName?: string, starterProjectName?: string, notification = true): Promise<string | null> {
+    static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], context: OpenShiftApplication, componentTypeName?: string, starterProjectName?: string, registryName?: string, notification = true): Promise<string | null> {
         const application = await Component.getOpenShiftCmdData(context,
             'Select an Application where you want to create a Component'
         );
@@ -622,11 +623,11 @@ export class Component extends OpenShiftItem {
                 initialNameValue = devfileYaml.metadata.name;
             }
         } else {
-            initialNameValue = path.basename(folder.fsPath);
+            initialNameValue = starterProjectName || path.basename(folder.fsPath);
         }
 
         const componentName = await Component.getName(
-            'Component name',
+            'Name',
             application.getParent().getParent() ? Component.odo.getComponents(application) : Promise.resolve([]),
             application.getName(),
             initialNameValue
@@ -645,7 +646,7 @@ export class Component extends OpenShiftItem {
             progressIndicator.show();
             const componentTypes = await Component.odo.getComponentTypes();
             if (componentTypeName) {
-                componentTypeCandidates = componentTypes.filter(type => type.name === componentTypeName);
+                componentTypeCandidates = registryName && registryName.length > 0 ? componentTypes.filter(type => type.name === componentTypeName && type.registryName === registryName) : componentTypes.filter(type => type.name === componentTypeName);
                 if (componentTypeCandidates?.length === 0) {
                     componentType = await window.showQuickPick(componentTypes.sort(ascDevfileFirst), { placeHolder: `Cannot find Component type '${componentTypeName}', select one below to use instead`, ignoreFocusOut: true });
                 } else if (componentTypeCandidates?.length > 1) {

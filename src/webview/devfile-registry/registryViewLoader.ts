@@ -8,49 +8,53 @@ import * as fs from 'fs';
 import { ExtenisonID } from '../../util/constants';
 import { getInstance } from '../../odo';
 import { Command } from '../../odo/command';
-import { Data, StarterProject } from '../../odo/componentTypeDescription';
 import { stringify } from 'yaml';
-import { ComponentTypeAdapter, DevfileComponentType, isDevfileComponent } from '../../odo/componentType';
+import { ComponentTypesView } from '../../componentTypesView';
+import { StarterProject } from '../../odo/componentTypeDescription';
+import { DevfileComponentType } from '../../odo/componentType';
 
 let panel: vscode.WebviewPanel;
-let devFiles: Data[] = [];
+let compDescriptions = new Set<any>();
 
 async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
     let starterProject = event.selectedProject;
     switch (event?.action) {
         case 'getAllComponents':
-            if (devFiles.length > 0) {
-                panel.webview.postMessage(
-                    {
-                        action: event.action,
-                        devFiles: devFiles
-                    }
-                );
-            } else {
-                getInstance().getCompTypesJson().then((devFileComponentTypes: DevfileComponentType[]) => {
-                    const components: ComponentTypeAdapter[] = getInstance().getComponentTypesOfJSON(devFileComponentTypes);
-                    components.map(async (componentType: ComponentTypeAdapter, index) => {
-                        getInstance().execute(Command.describeCatalogComponent(componentType.name)).then((componentDesc) => {
-                            const out = JSON.parse(componentDesc.stdout)[0];
-                            if (isDevfileComponent(devFileComponentTypes[index])) {
-                                out.Devfile?.starterProjects.map((starter: StarterProject) => {
-                                    starter.typeName = devFileComponentTypes[index].Name;
-                                });
-                            }
-                            devFiles.push(out['Devfile']);
-                            if (components.length === devFiles.length) {
-                                devFiles.sort(ascName);
-                                panel.webview.postMessage(
-                                    {
-                                        action: event.action,
-                                        devFiles: devFiles
-                                    }
-                                );
-                            }
+            compDescriptions.clear();
+            getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
+                const components = new Set<string>();
+                getInstance().getComponentTypesOfJSON(devFileComponentTypes).map((comp) => {
+                    components.add(comp.name);
+                });
+                const registries = await ComponentTypesView.instance.getRegistries();
+                Array.from(components).map(async (compName: string) => {
+                    getInstance().execute(Command.describeCatalogComponent(compName)).then((componentDesc) => {
+                        const out = JSON.parse(componentDesc.stdout);
+                        out.forEach((component) => {
+                            component.Devfile?.starterProjects?.map((starter: StarterProject) => {
+                                starter.typeName = compName;
+                            });
+                            compDescriptions.add(component);
                         });
+                        if (devFileComponentTypes.length === compDescriptions.size) {
+                            panel.webview.postMessage(
+                                {
+                                    action: event.action,
+                                    compDescriptions: Array.from(compDescriptions),
+                                    registries: registries
+                                }
+                            );
+                        }
+                    }).catch((reason) => {
+                        panel.webview.postMessage(
+                            {
+                                action: event.action,
+                                error: '500: Internal Server Error, Please try later'
+                            }
+                        );
                     });
                 });
-            }
+            });
             break;
         case 'getYAML':
             const yaml = stringify(event.data, { indent: 4 });
@@ -62,8 +66,9 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             );
             break;
         case 'createComponent':
-            starterProject = starterProject;
-            vscode.commands.executeCommand('openshift.componentType.newComponent', starterProject);
+            const appName = event.appName;
+            const registryName = event.registryName;
+            vscode.commands.executeCommand('openshift.componentType.newComponent', starterProject, appName, registryName);
             break;
         case 'cloneToWorkSpace':
             vscode.commands.executeCommand('openshift.componentType.cloneStarterProjectRepository', starterProject);
@@ -131,8 +136,3 @@ export default class RegistryViewLoader {
             .replace('<!-- meta http-equiv="Content-Security-Policy" -->', meta);
     }
 }
-
-function ascName(d1: Data, d2: Data): number {
-    return d1.metadata.name.localeCompare(d2.metadata.name);
-}
-

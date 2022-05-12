@@ -9,7 +9,7 @@ export const VIEWS = {
     openshift: 'OpenShift',
     appExplorer: 'Application Explorer',
     components: 'Components',
-    compTypes: 'Component Types',
+    compRegistries: 'Registries',
     watchSessions: 'Watch Sessions',
     debugSessions: 'Debug Sessions',
     devFileRegistry: 'DefaultDevfileRegistry',
@@ -26,7 +26,7 @@ export const INPUTS = {
     newUrlQuickPick: 'Provide new URL...',
     credentialsQuickPick: 'Credentials',
     newUserQuickPick: 'Add new user...',
-    newFolderQuickPick: 'Add new context folder to workspace',
+    newFolderQuickPick: 'Select workspace for component',
     yes: 'Yes',
     no: 'No',
 };

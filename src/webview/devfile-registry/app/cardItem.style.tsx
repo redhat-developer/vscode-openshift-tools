@@ -9,7 +9,7 @@ export default (theme: Theme) =>
     createStyles({
         card: {
             height: 'auto',
-            margin: '0.5rem',
+            margin: '0.2rem',
             cursor: 'pointer',
             borderRadius: '1rem',
             border: '1px solid var(--vscode-focusBorder)',
@@ -24,26 +24,62 @@ export default (theme: Theme) =>
         cardHeader: {
             display: 'block',
             height: '3rem',
-            margin: '0.5rem',
+            margin: '0.5rem'
         },
         cardHeaderDisplay: {
             display: 'flex',
-            justifyContent: 'space-between',
+            justifyContent: 'space-between'
         },
         cardImage: {
             width: 'auto',
             height: 'auto',
             margin: '1rem',
             maxWidth: '6rem',
-            maxHeight: '3rem',
+            maxHeight: '3rem'
         },
         cardBody: {
-            height: '7rem',
+            height: 'auto',
             overflow: 'hidden',
-            margin: '1.5rem'
+            marginLeft: '1.5rem',
+            marginRight: '1.5rem'
+        },
+        cardRegistryTitle: {
+            color: 'var(--vscode-textPreformat-foreground)',
+            width: '15rem',
+            height: '2rem',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            display: 'block',
+            textAlign: 'left',
+            textDecoration: 'none',
+            textOverflow: 'ellipsis',
+            wordBreak: 'break-all',
+            paddingTop: '0rem'
+        },
+        badge: {
+            minWidth: '0.5rem',
+            maxWidth: '5rem',
+            padding: '0.5rem',
+            minHeight: '2px',
+            maxHeight: '1rem',
+            borderRadius: '0.5rem!important',
+            marginLeft: '0.5rem',
+            alignItems: 'center',
+            color: 'var(--vscode-badge-foreground)',
+            backgroundColor: 'var(--vscode-badge-background)',
+            outline: '0.0625rem solid var(--vscode-focusBorder)'
+        },
+        headerBadge: {
+            height: '1px',
+            outline: 'none'
+        },
+        firstBadge: {
+            marginLeft: '0rem'
         },
         cardFooterTag: {
-            margin: '0.125rem',
+            marginTop: '0.125rem',
+            marginLeft: '1.5rem',
+            marginBottom: '1rem'
         },
         text: {
             textAlign: 'right'
@@ -52,7 +88,7 @@ export default (theme: Theme) =>
             overflow: 'hidden',
             display: '-webkit-box',
             WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
+            WebkitBoxOrient: 'vertical'
         },
         yamlCard: {
             color: 'var(--vscode-foreground)',
@@ -61,7 +97,7 @@ export default (theme: Theme) =>
             fontFamily: 'var(--vscode-font-family)',
             height: '40rem',
             margin: 'auto',
-            overflowX: 'scroll'
+            overflow: 'none'
         },
         yamlCardHeader: {
             padding: '1.5rem!important',
@@ -70,8 +106,8 @@ export default (theme: Theme) =>
             height: 'auto'
         },
         yamlCardBody: {
-            paddingLeft: '1.5rem!important',
-            width: '100%'
+            width: '100%',
+            overflow: 'scroll'
         },
         copyButton: {
             display: 'block',
@@ -84,7 +120,7 @@ export default (theme: Theme) =>
             color: 'var(--vscode-button-foreground)',
             backgroundColor: 'var(--vscode-button-background)',
             width: '8rem',
-            marginTop: '0.5rem',
+            marginTop: '0.5rem'
         },
         button: {
             width: '7.85rem',
@@ -104,7 +140,7 @@ export default (theme: Theme) =>
         backBtnCardBody: {
             height: 'auto',
             overflow: 'hidden',
-            margin: '0.5rem',
+            margin: '0.5rem'
         },
         error: {
             display: 'flex',
@@ -149,7 +185,7 @@ export default (theme: Theme) =>
             border: '1px solid var(--vscode-focusBorder)'
         },
         starterProjectCardHeader: {
-            display: 'block',
+            display: 'flex',
             height: '1rem',
             margin: '0.5rem'
         },

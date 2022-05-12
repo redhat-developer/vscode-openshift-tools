@@ -25,6 +25,7 @@ export interface Metadata {
     displayName?: string;
     language?: string;
     description?: string;
+    tags?: string[];
 }
 
 export interface Parent {

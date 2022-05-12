@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { CardItem } from "./cardItem";
-import React, { forwardRef } from "react";
-import { Data } from '../../../odo/componentTypeDescription';
+import { CardItem } from './cardItem';
+import React, { forwardRef } from 'react';
+import { ComponentTypeDescription } from '../../../odo/componentType';
 
 export interface DevFileProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-    devFile: Data;
+    compDescription: ComponentTypeDescription;
     hasGitLink: boolean;
     cardItemStyle: any;
     projectDisplayStyle: any

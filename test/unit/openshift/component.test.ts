@@ -323,7 +323,7 @@ suite('OpenShift/Component', () => {
             expect(quickPickStub).calledWith([componentType1,componentType2]);
         });
 
-        test('when componentTypeName provided and there is no type found in registries, asks to select from all available component types', async () => {
+        test('when componentTypeName provided and there is no type found in registries, asks to select from all available registries', async () => {
             inputStub.resolves(componentItem.getName());
             const componentType1 = new ComponentTypeAdapter(
                 'componentType2',
@@ -1301,7 +1301,7 @@ suite('OpenShift/Component', () => {
 
             await Component.debug(devfileComponentItem2);
 
-            expect(warningStub).calledWith('Debug command currently supports local components with Java, Node.Js and Python component types.');
+            expect(warningStub).calledWith('Debug command currently supports local components with Java, Node.Js and Python component registries.');
         });
 
         function mockComponent(startDebugging: sinon.SinonStub<any[], any>, waitPort: sinon.SinonStub<any[], any>, exitCode = 0) {

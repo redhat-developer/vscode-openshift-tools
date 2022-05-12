@@ -14,25 +14,16 @@ import {
     TreeItemCollapsibleState,
     commands,
 } from 'vscode';
-import * as path from 'path';
-import { CliExitData } from './cli';
 import { getInstance, Odo, OdoImpl } from './odo';
-import { Command } from './odo/command';
 import {
-    ComponentTypeDescription,
-    ComponentTypesJson,
-    DevfileComponentType,
-    isDevfileComponent,
-    isRegistry,
     Registry,
 } from './odo/componentType';
-import { isStarterProject, StarterProject } from './odo/componentTypeDescription';
+import { StarterProject } from './odo/componentTypeDescription';
 import { vsCommand, VsCommandError } from './vscommand';
-import { Platform } from './util/platform';
 import validator from 'validator';
 import RegistryViewLoader from './webview/devfile-registry/registryViewLoader';
 
-type ComponentType = DevfileComponentType | StarterProject | Registry;
+type ComponentType = Registry;
 
 export enum ContextType {
     DEVFILE_COMPONENT_TYPE = 'devfileComponentType',
@@ -73,88 +64,12 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     // eslint-disable-next-line class-methods-use-this
     getTreeItem(element: ComponentType): TreeItem | Thenable<TreeItem> {
-        if (isRegistry(element)) {
-            return {
-                label: element.Name,
-                contextValue: ContextType.DEVFILE_REGISTRY,
-                tooltip: `Devfile Registry\nName: ${element.Name}\nURL: ${element.URL}`,
-                collapsibleState: TreeItemCollapsibleState.Collapsed,
-            };
-        }
-        if (isStarterProject(element)) {
-            return {
-                label: element.name,
-                contextValue: ContextType.DEVFILE_STARTER_PROJECT,
-                tooltip: `Starter Project\nName: ${element.name}\nDescription: ${
-                    element.description ? element.description : 'n/a'
-                }`,
-                description: element.description,
-                iconPath: {
-                    dark: Uri.file(
-                        path.join(
-                            __dirname,
-                            '..',
-                            '..',
-                            'images',
-                            'component',
-                            'start-project-dark.png',
-                        ),
-                    ),
-                    light: Uri.file(
-                        path.join(
-                            __dirname,
-                            '..',
-                            '..',
-                            'images',
-                            'component',
-                            'start-project-light.png',
-                        ),
-                    ),
-                },
-            };
-        }
         return {
-            label: `${element.DisplayName}`,
-            contextValue: ContextType.DEVFILE_COMPONENT_TYPE,
-            iconPath: {
-                dark: Uri.file(
-                    path.join(
-                        __dirname,
-                        '..',
-                        '..',
-                        'images',
-                        'component',
-                        'component-type-dark.png',
-                    ),
-                ),
-                light: Uri.file(
-                    path.join(
-                        __dirname,
-                        '..',
-                        '..',
-                        'images',
-                        'component',
-                        'component-type-light.png',
-                    ),
-                ),
-            },
-            tooltip: `Component Type\nName: ${element.Name}\nKind: devfile\nDescription: ${
-                element.Description ? element.Description : 'n/a'
-            }`,
-            description: element.Description,
-            collapsibleState: TreeItemCollapsibleState.Collapsed,
+            label: element.Name,
+            contextValue: ContextType.DEVFILE_REGISTRY,
+            tooltip: `Devfile Registry\nName: ${element.Name}\nURL: ${element.URL}`,
+            collapsibleState: TreeItemCollapsibleState.None,
         };
-    }
-
-    public loadItems<I, O>(result: CliExitData, fetch: (data: I) => O[]): O[] {
-        let data: O[] = [];
-        try {
-            const items = fetch(JSON.parse(result.stdout));
-            if (items) data = items;
-        } catch (ignore) {
-            // ignore parse errors and return empty array
-        }
-        return data;
     }
 
     addRegistry(newRegistry: Registry): void {
@@ -171,7 +86,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         this.refresh(false);
     }
 
-    private async getRegistries(): Promise<Registry[]> {
+    public async getRegistries(): Promise<Registry[]> {
         if (!this.registries) {
             this.registries = await this.odo.getRegistries();
         }
@@ -180,45 +95,13 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     // eslint-disable-next-line class-methods-use-this
     async getChildren(parent: ComponentType): Promise<ComponentType[]> {
-        let children: ComponentType[];
-        const addEnv = this.odo.getKubeconfigEnv();
+        let children: ComponentType[] = [];
         if (!parent) {
             this.registries = await this.getRegistries();
+            /**
+             * no need to show the default devfile registry on tree view
+             */
             children = this.registries;
-        } else if (isRegistry(parent)) {
-            const result = await this.odo.execute(
-                Command.listCatalogComponentsJson(),
-                Platform.getUserHomePath(),
-                true,
-                addEnv,
-            );
-            children = this.loadItems<ComponentTypesJson, DevfileComponentType>(
-                result,
-                (data) => data.items,
-            );
-            children = children.filter(
-                (element: DevfileComponentType) => element.Registry.Name === parent.Name,
-            );
-        } else if (isDevfileComponent(parent)) {
-            const result: CliExitData = await this.odo.execute(
-                Command.describeCatalogComponent(parent.Name),
-                Platform.getUserHomePath(),
-                true,
-                addEnv,
-            );
-            const descriptions = this.loadItems<
-                ComponentTypeDescription[],
-                ComponentTypeDescription
-            >(result, (data) => data);
-            const description = descriptions.find(
-                (element) =>
-                    element.RegistryName === parent.Registry.Name &&
-                    element.Devfile.metadata.name === parent.Name,
-            );
-            children = description?.Devfile?.starterProjects.map((starter: StarterProject) => {
-                starter.typeName = parent.Name;
-                return starter;
-            });
         }
         return children;
     }
