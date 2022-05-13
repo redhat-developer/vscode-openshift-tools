@@ -174,12 +174,12 @@ suite('odo', () => {
         test('getProjects returns empty list if no projects present', async () => {
             execStub.onFirstCall().resolves({
                 error: undefined,
-                stdout: 'Server https://172.17.185.52:8443',
+                stdout: 'Server: https://172.17.185.52:8443',
                 stderr: ''
             });
             execStub.onSecondCall().resolves({
                 error: undefined,
-                stdout: 'Server https://172.17.185.52:8443',
+                stdout: 'Server: https://172.17.185.52:8443',
                 stderr: ''
             });
             execStub.onThirdCall().resolves({ stdout: '', stderr: '', error: null });
@@ -576,12 +576,12 @@ suite('odo', () => {
             const stub = sandbox.stub(odoCli, 'execute').resolves({ error: null, stdout: 'logged in', stderr: ''});
             const result = await odoCli.requireLogin();
 
-            expect(stub).calledOnceWith(new CommandText('oc whoami'));
+            expect(stub).calledWith(new CommandText('oc whoami'));
             expect(result).false;
         });
 
         test('requireLogin returns true if odo is not logged in to the cluster', async () => {
-            sandbox.stub(odoCli, 'execute').resolves({ error: new Error('Not logged in!'), stdout: '', stderr: ''});
+            sandbox.stub(odoCli, 'execute').returns(Promise.reject('Not logged in!'));
             const result = await odoCli.requireLogin();
 
             expect(result).true;
