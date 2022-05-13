@@ -12,6 +12,7 @@ import { stringify } from 'yaml';
 import { ComponentTypesView } from '../../componentTypesView';
 import { StarterProject } from '../../odo/componentTypeDescription';
 import { DevfileComponentType } from '../../odo/componentType';
+import { vsCommand } from '../../vscommand';
 
 let panel: vscode.WebviewPanel;
 let compDescriptions = new Set<any>();
@@ -85,7 +86,6 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             break;
     }
 }
-
 export default class RegistryViewLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     static get extensionPath() {
@@ -134,5 +134,10 @@ export default class RegistryViewLoader {
             .replace('devFileRegistryViewer.js', `${reactAppUri}`)
             .replace('%BASE_URL%', `${reactAppUri}`)
             .replace('<!-- meta http-equiv="Content-Security-Policy" -->', meta);
+    }
+
+    @vsCommand('openshift.componentTypesView.registry.closeView')
+    static async closeRegistryInWebview(): Promise<void> {
+        panel?.dispose();
     }
 }

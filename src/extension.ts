@@ -77,7 +77,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             './k8s/console',
             './oc',
             './componentTypesView',
-            './componentsView'
+            './componentsView',
+            './webview/devfile-registry/registryViewLoader'
         )),
         commands.registerCommand('clusters.openshift.useProject', (context) =>
             commands.executeCommand('extension.vsKubernetesUseNamespace', context),
