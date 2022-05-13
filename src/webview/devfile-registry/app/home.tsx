@@ -140,7 +140,7 @@ function getFilteredCompDesc(registries: Registry[], compDescriptions: CompTypeD
                 compDescription.priority = 3;
             } else if (compDescription.Devfile.metadata.name === 'nodejs') {
                 compDescription.priority = 2;
-            } else if (compDescription.Devfile.metadata.name === 'python') {
+            } else if (compDescription.Devfile.metadata.name.indexOf('python') !== -1) {
                 compDescription.priority = 1;
             } else {
                 compDescription.priority = -1;

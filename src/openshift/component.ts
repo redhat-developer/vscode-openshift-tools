@@ -641,10 +641,12 @@ export class Component extends OpenShiftItem {
         let componentType: ComponentTypeAdapter;
         let componentTypeCandidates: ComponentTypeAdapter[];
         if (!useExistingDevfile) {
-            progressIndicator.busy = true;
-            progressIndicator.placeholder = componentTypeName ? `Checking if '${componentTypeName}' Component type is available` : 'Loading available Component types';
-            progressIndicator.show();
             const componentTypes = await Component.odo.getComponentTypes();
+            if (!componentTypeName && !starterProjectName) {
+                progressIndicator.busy = true;
+                progressIndicator.placeholder = componentTypeName ? `Checking if '${componentTypeName}' Component type is available` : 'Loading available Component types';
+                progressIndicator.show();
+            }
             if (componentTypeName) {
                 componentTypeCandidates = registryName && registryName.length > 0 ? componentTypes.filter(type => type.name === componentTypeName && type.registryName === registryName) : componentTypes.filter(type => type.name === componentTypeName);
                 if (componentTypeCandidates?.length === 0) {
