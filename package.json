@@ -263,6 +263,7 @@
 		"onCommand:openshift.component.watch.terminate",
 		"onCommand:openshift.component.watch.showLog",
 		"onCommand:openshift.component.deployRootWorkspaceFolder",
+		"onCommand:openshift.componentTypesView.registry.closeView",
 		"onCommand:openshift.catalog.listComponents",
 		"onCommand:openshift.catalog.listServices",
 		"onCommand:openshift.url.create",
@@ -874,6 +875,11 @@
 				"category": "OpenSift"
 			},
 			{
+				"command": "openshift.componentTypesView.registry.edit",
+				"title": "Edit",
+				"category": "OpenSift"
+			},
+			{
 				"command": "openshift.componentTypesView.registry.openInBrowser",
 				"title": "Open in Browser",
 				"category": "OpenSift"
@@ -1157,6 +1163,10 @@
 				},
 				{
 					"command": "openshift.componentTypesView.registry.remove",
+					"when": "false"
+				},
+				{
+					"command": "openshift.componentTypesView.registry.edit",
 					"when": "false"
 				},
 				{
@@ -1548,6 +1558,11 @@
 				{
 					"command": "openshift.component.revealInExplorer",
 					"when": "view == openshiftComponentsView && viewItem == openshift.component"
+				},
+				{
+					"command": "openshift.componentTypesView.registry.edit",
+					"when": "view == openshiftComponentTypesView && viewItem == devfileRegistry && viewItem != DefaultdevfileRegistry",
+					"group": "1@0"
 				},
 				{
 					"command": "openshift.componentTypesView.registry.remove",

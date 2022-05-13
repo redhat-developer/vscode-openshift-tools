@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-
+import * as vscode from 'vscode';
 import {
     TreeDataProvider,
     TreeItem,
@@ -173,10 +173,11 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     }
 
     @vsCommand('openshift.componentTypesView.registry.add')
-    public static async addRegistryCmd(): Promise<void> {
+    public static async addRegistryCmd(registry: Registry): Promise<void> {
         // ask for registry
         const regName = await window.showInputBox({
-            prompt: 'Provide registry name to display in the view',
+            value: registry?.Name,
+            prompt: registry ? 'Edit registry name' : 'Provide registry name to display in the view',
             placeHolder: 'Registry Name',
             validateInput: async (value) => {
                 const trimmedValue = value.trim();
@@ -197,7 +198,8 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
         const regURL = await window.showInputBox({
             ignoreFocusOut: true,
-            prompt: 'Provide registry URL to display in the view',
+            value: registry?.URL,
+            prompt: registry ? 'Edit registry URL' : 'Provide registry URL to display in the view',
             placeHolder: 'Registry URL',
             validateInput: async (value) => {
                 const trimmedValue = value.trim();
@@ -230,8 +232,8 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     }
 
     @vsCommand('openshift.componentTypesView.registry.remove')
-    public static async removeRegistry(registry: Registry): Promise<void> {
-        const yesNo = await window.showInformationMessage(
+    public static async removeRegistry(registry: Registry, isEdit: boolean): Promise<void> {
+        const yesNo = isEdit ? 'Yes' : await window.showInformationMessage(
             `Remove registry '${registry.Name}'?`,
             'Yes',
             'No',
@@ -240,6 +242,14 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             await OdoImpl.Instance.removeRegistry(registry.Name);
             ComponentTypesView.instance.removeRegistry(registry);
         }
+    }
+
+    @vsCommand('openshift.componentTypesView.registry.edit')
+    public static editRegistry(registry: Registry): void {
+        vscode.commands.executeCommand('openshift.componentTypesView.registry.closeView');
+        vscode.commands.executeCommand('openshift.componentTypesView.registry.remove', registry, true).then((_value) =>
+            vscode.commands.executeCommand('openshift.componentTypesView.registry.add', registry)).then((_value) =>
+            ComponentTypesView.openRegistryInWebview());
     }
 
     @vsCommand('openshift.componentTypesView.registry.openInBrowser')
