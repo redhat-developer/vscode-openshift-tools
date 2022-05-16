@@ -14,7 +14,7 @@ node('rhel8'){
   stage('Install requirements') {
     def nodeHome = tool 'nodejs-lts'
     env.PATH="${env.PATH}:${nodeHome}/bin"
-    sh "npm install"
+    sh "npm ci"
     sh "npm install -g vsce"
   }
 
