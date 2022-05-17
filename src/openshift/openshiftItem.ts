@@ -180,7 +180,7 @@ export default class OpenShiftItem {
         return urlList;
     }
 
-    static async getOpenShiftCmdData<T extends OpenShiftObject>(treeItem: T, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean): Promise<T | null>  {
+    static async getOpenShiftCmdData<T extends OpenShiftObject>(treeItem: T, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean, appName?: string): Promise<T | null>  {
         let context: OpenShiftObject | QuickPickCommand = treeItem;
         let project: OpenShiftObject;
         if (!context) {
@@ -231,7 +231,7 @@ export default class OpenShiftItem {
                 context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(applicationList, {placeHolder: appPlaceholder, ignoreFocusOut: true});
             }
             if (context && isCommand(context)) {
-                const newAppName = await context.command();
+                const newAppName = appName || await context.command();
                 if (newAppName) {
                     context = new OpenShiftApplication(project, newAppName);
                 } else {

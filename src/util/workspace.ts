@@ -14,7 +14,7 @@ interface WorkspaceFolderItem extends QuickPickItem {
 }
 
 export const AddWorkspaceFolder: QuickPickItem = {
-    label: '$(plus) Add new context folder to workspace',
+    label: '$(plus) Select workspace for component',
     description: 'Folder which does not have an OpenShift context',
 };
 

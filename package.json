@@ -64,9 +64,11 @@
 		"dev:compile:describe-view": "webpack --mode development --config src/webview/describe/webpack.config.js",
 		"dev:compile:cluster-view": "webpack --mode development --config src/webview/cluster/webpack.config.js",
 		"dev:compile:create-service-view": "webpack --mode development --config src/webview/create-service/webpack.config.js",
+		"dev:compile:devfile-registry-view": "webpack --mode development --config src/webview/devfile-registry/webpack.config.js",
 		"dev:run:log-view": "webpack-dev-server --mode development --config src/webview/log/webpack.config.js",
 		"dev:run:describe-view": "webpack-dev-server --mode development --config src/webview/describe/webpack.config.js",
 		"dev:run:cluster-view": "webpack-dev-server --port 9222 --mode development --config src/webview/cluster/webpack.config.js",
+		"dev:run:devfile-registry-view": "webpack-dev-server --port 9222 --mode development --config src/webview/devfile-registry/webpack.config.js",
 		"dev:run:create-service-view": "webpack-dev-server --mode development --config src/webview/create-service/webpack.config.js",
 		"watch": "tsc -watch -p ./",
 		"clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/logViewer",
@@ -89,6 +91,7 @@
 		"@redhat-developer/vscode-redhat-telemetry": "^0.4.2",
 		"binary-search": "^1.3.6",
 		"byline": "^5.0.0",
+		"clsx": "^1.1.1",
 		"fs-extra": "^10.0.0",
 		"globby": "^10.0.1",
 		"immutable": "^4.0.0",
@@ -99,6 +102,9 @@
 		"make-fetch-happen": "^9.1.0",
 		"minimatch": "^3.0.4",
 		"mkdirp": "^1.0.4",
+		"react-copy-to-clipboard": "^5.1.0",
+		"react-router-dom": "^6.3.0",
+		"react-syntax-highlighter": "^15.5.0",
 		"rxjs": "^7.4.0",
 		"semver": "^7.3.5",
 		"stacktrace-parser": "^0.1.10",
@@ -115,13 +121,16 @@
 		"@emotion/react": "^11.7.1",
 		"@emotion/styled": "^11.6.0",
 		"@material-ui/core": "^4.12.3",
-		"@material-ui/icons": "^4.11.2",
+		"@material-ui/icons": "^4.11.3",
 		"@material-ui/lab": "^4.0.0-alpha.60",
 		"@mui/core": "^5.0.0-alpha.54",
 		"@mui/icons-material": "^5.2.5",
 		"@mui/lab": "^5.0.0-alpha.61",
 		"@mui/material": "^5.4.1",
+		"@patternfly/react-core": "^4.198.19",
+		"@patternfly/react-icons": "^4.49.19",
 		"@rjsf/material-ui": "^3.2.1",
+		"@segment/analytics-next": "^1.17.4",
 		"@types/byline": "^4.2.33",
 		"@types/chai": "^4.3.0",
 		"@types/collections": "^5.1.2",
@@ -137,6 +146,7 @@
 		"@types/react": "^17.0.37",
 		"@types/react-dom": "^17.0.11",
 		"@types/react-lazylog": "^4.5.1",
+		"@types/react-syntax-highlighter": "^13.5.2",
 		"@types/shelljs": "^0.8.9",
 		"@types/sinon": "^10.0.6",
 		"@types/sinon-chai": "^3.2.6",
@@ -841,6 +851,15 @@
 				}
 			},
 			{
+				"command": "openshift.componentTypesView.registry.openInView",
+				"title": "Show View",
+				"category": "OpenShift",
+				"icon": {
+					"dark": "images/title/dark/open-preview.svg",
+					"light": "images/title/light/open-preview.svg"
+				}
+			},
+			{
 				"command": "openshift.componentTypesView.registry.add",
 				"title": "Add Registry",
 				"category": "OpenShift",
@@ -908,7 +927,7 @@
 				},
 				{
 					"id": "openshiftComponentTypesView",
-					"name": "Component Types"
+					"name": "Registries"
 				},
 				{
 					"id": "openshiftWatchView",
@@ -1141,11 +1160,20 @@
 					"when": "false"
 				},
 				{
+					"command": "openshift.componentTypesView.registry.openInView",
+					"when": "false"
+				},
+				{
 					"command": "openshift.componentTypesView.registry.openInBrowser",
 					"when": "false"
 				}
 			],
 			"view/title": [
+				{
+					"command": "openshift.componentTypesView.registry.openInView",
+					"when": "view == openshiftComponentTypesView",
+					"group": "navigation"
+				},
 				{
 					"command": "openshift.componentTypesView.registry.add",
 					"when": "view == openshiftComponentTypesView",
@@ -1518,18 +1546,18 @@
 					"group": "0@0"
 				},
 				{
+					"command": "openshift.component.revealInExplorer",
+					"when": "view == openshiftComponentsView && viewItem == openshift.component"
+				},
+				{
 					"command": "openshift.componentTypesView.registry.remove",
-					"when": "view == openshiftComponentTypesView && viewItem == devfileRegistry",
+					"when": "view == openshiftComponentTypesView && viewItem == devfileRegistry && viewItem != DefaultdevfileRegistry",
 					"group": "1@0"
 				},
 				{
 					"command": "openshift.componentTypesView.registry.openInBrowser",
 					"when": "view == openshiftComponentTypesView && viewItem == devfileRegistry",
 					"group": "0@0"
-				},
-				{
-					"command": "openshift.component.revealInExplorer",
-					"when": "view == openshiftComponentsView && viewItem == openshift.component"
 				}
 			]
 		},
