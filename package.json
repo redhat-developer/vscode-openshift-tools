@@ -927,7 +927,7 @@
 				},
 				{
 					"id": "openshiftComponentTypesView",
-					"name": "Registries"
+					"name": "Devfile Registries"
 				},
 				{
 					"id": "openshiftWatchView",
