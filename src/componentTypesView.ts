@@ -149,7 +149,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 // TODO: report actual url only for default odo repository
                 throw new VsCommandError(
                     err.toString(),
-                    'Unable to open s`ample project repository',
+                    'Unable to open sample project repository',
                 );
             }
         } else {
@@ -192,13 +192,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 if (!validator.matches(trimmedValue, '^[a-zA-Z0-9]+$')) {
                     return 'Registry name can have only alphabet characters and numbers';
                 }
-                if (registries.find((registry) => {
-                    if (registryContext) {
-                        registry.Name === registryContext.Name && registry.URL === registryContext.URL
-                    } else {
-                        registry.Name === value
-                    }
-                })) {
+                if (registries.find((registry) => registry.Name !== registryContext?.Name && registry.Name === value)) {
                     return `Registry name '${value}' is already used`;
                 }
             },
@@ -216,13 +210,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 if (!validator.isURL(trimmedValue)) {
                     return 'Entered URL is invalid';
                 }
-                if (registries.find((registry) => {
-                    if (registryContext) {
-                        registry.Name === registryContext.Name && registry.URL === registryContext.URL
-                    } else {
-                        registry.URL === value
-                    }
-                })) {
+                if (registries.find((registry) => registry.Name !== registryContext?.Name && registry.URL === value)) {
                     return `Registry with entered URL '${value}' already exists`;
                 }
             },
@@ -245,16 +233,13 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         /**
          * For edit, remove the existing registry
          */
+
         if (registryContext) {
-            if (registries.find((registry) => registry.Name === regName && registry.URL === regURL)) {
-                return null;
-            }
-            const registryExist = registries.filter((registry) => registry.Name !== registryContext.Name && registry.URL !== registryContext.URL).find((registry) => registry.Name === regName || registry.URL === regURL);
-            if (!registryExist) {
-                await vscode.commands.executeCommand('openshift.componentTypesView.registry.remove', registryContext, true);
-            } else {
-                return null;
-            }
+          const notChangedRegisty = registries.find((registry) => registry.Name === regName && registry.URL === regURL && registry.Secure === (secure === 'Yes'));
+          if (notChangedRegisty) {
+              return null;
+          }
+          await vscode.commands.executeCommand('openshift.componentTypesView.registry.remove', registryContext, true);
         }
 
         const newRegistry = await OdoImpl.Instance.addRegistry(regName, regURL, token);
