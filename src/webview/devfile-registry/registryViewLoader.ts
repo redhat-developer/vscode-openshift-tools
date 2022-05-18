@@ -21,41 +21,7 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
     let starterProject = event.selectedProject;
     switch (event?.action) {
         case 'getAllComponents':
-            compDescriptions.clear();
-            getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
-                const components = new Set<string>();
-                getInstance().getComponentTypesOfJSON(devFileComponentTypes).map((comp) => {
-                    components.add(comp.name);
-                });
-                const registries = await ComponentTypesView.instance.getRegistries();
-                Array.from(components).map(async (compName: string) => {
-                    getInstance().execute(Command.describeCatalogComponent(compName)).then((componentDesc) => {
-                        const out = JSON.parse(componentDesc.stdout);
-                        out.forEach((component) => {
-                            component.Devfile?.starterProjects?.map((starter: StarterProject) => {
-                                starter.typeName = compName;
-                            });
-                            compDescriptions.add(component);
-                        });
-                        if (devFileComponentTypes.length === compDescriptions.size) {
-                            panel.webview.postMessage(
-                                {
-                                    action: event.action,
-                                    compDescriptions: Array.from(compDescriptions),
-                                    registries: registries
-                                }
-                            );
-                        }
-                    }).catch((reason) => {
-                        panel.webview.postMessage(
-                            {
-                                action: event.action,
-                                error: '500: Internal Server Error, Please try later'
-                            }
-                        );
-                    });
-                });
-            });
+            getAllComponents(event.action);
             break;
         case 'getYAML':
             const yaml = stringify(event.data, { indent: 4 });
@@ -98,6 +64,7 @@ export default class RegistryViewLoader {
         if (panel) {
             // If we already have a panel, show it in the target column
             panel.reveal(vscode.ViewColumn.One);
+            getAllComponents('getAllComponents');
         } else {
             panel = vscode.window.createWebviewPanel('devFileRegistryView', title, vscode.ViewColumn.One, {
                 enableScripts: true,
@@ -140,4 +107,42 @@ export default class RegistryViewLoader {
     static async closeRegistryInWebview(): Promise<void> {
         panel?.dispose();
     }
+}
+
+function getAllComponents(eventActionName: string) {
+    compDescriptions.clear();
+    getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
+        const components = new Set<string>();
+        getInstance().getComponentTypesOfJSON(devFileComponentTypes).map((comp) => {
+            components.add(comp.name);
+        });
+        const registries = await ComponentTypesView.instance.getRegistries();
+        Array.from(components).map(async (compName: string) => {
+            getInstance().execute(Command.describeCatalogComponent(compName)).then((componentDesc) => {
+                const out = JSON.parse(componentDesc.stdout);
+                out.forEach((component) => {
+                    component.Devfile?.starterProjects?.map((starter: StarterProject) => {
+                        starter.typeName = compName;
+                    });
+                    compDescriptions.add(component);
+                });
+                if (devFileComponentTypes.length === compDescriptions.size) {
+                    panel.webview.postMessage(
+                        {
+                            action: eventActionName,
+                            compDescriptions: Array.from(compDescriptions),
+                            registries: registries
+                        }
+                    );
+                }
+            }).catch((reason) => {
+                panel.webview.postMessage(
+                    {
+                        action: eventActionName,
+                        error: '500: Internal Server Error, Please try later'
+                    }
+                );
+            });
+        });
+    });
 }
