@@ -87,8 +87,12 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     }
 
     public async getRegistries(): Promise<Registry[]> {
-        if (!this.registries) {
-            this.registries = await this.odo.getRegistries();
+        try {
+            if (!this.registries) {
+                this.registries = await this.odo.getRegistries();
+            }
+        } catch (err) {
+            this.registries = [];
         }
         return this.registries;
     }
@@ -175,11 +179,12 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     @vsCommand('openshift.componentTypesView.registry.add')
     public static async addRegistryCmd(registryContext: Registry): Promise<void> {
         // ask for registry
+        const registries = await ComponentTypesView.instance.getRegistries();
         const regName = await window.showInputBox({
             value: registryContext?.Name,
             prompt: registryContext ? 'Edit registry name' : 'Provide registry name to display in the view',
             placeHolder: 'Registry Name',
-            validateInput: async (value) => {
+            validateInput: (value) => {
                 const trimmedValue = value.trim();
                 if (trimmedValue.length === 0) {
                     return 'Registry name cannot be empty';
@@ -187,8 +192,13 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 if (!validator.matches(trimmedValue, '^[a-zA-Z0-9]+$')) {
                     return 'Registry name can have only alphabet characters and numbers';
                 }
-                const registries = await ComponentTypesView.instance.getRegistries();
-                if (registries.find((registry) => registry.Name === value)) {
+                if (registries.find((registry) => {
+                    if (registryContext) {
+                        registry.Name === registryContext.Name && registry.URL === registryContext.URL
+                    } else {
+                        registry.Name === value
+                    }
+                })) {
                     return `Registry name '${value}' is already used`;
                 }
             },
@@ -201,13 +211,18 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             value: registryContext?.URL,
             prompt: registryContext ? 'Edit registry URL' : 'Provide registry URL to display in the view',
             placeHolder: 'Registry URL',
-            validateInput: async (value) => {
+            validateInput: (value) => {
                 const trimmedValue = value.trim();
                 if (!validator.isURL(trimmedValue)) {
                     return 'Entered URL is invalid';
                 }
-                const registries = await ComponentTypesView.instance.getRegistries();
-                if (!registryContext && registries.find((registry) => registry.URL === value)) {
+                if (registries.find((registry) => {
+                    if (registryContext) {
+                        registry.Name === registryContext.Name && registry.URL === registryContext.URL
+                    } else {
+                        registry.URL === value
+                    }
+                })) {
                     return `Registry with entered URL '${value}' already exists`;
                 }
             },
@@ -227,8 +242,27 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             if (!token) return null;
         }
 
+        /**
+         * For edit, remove the existing registry
+         */
+        if (registryContext) {
+            if (registries.find((registry) => registry.Name === regName && registry.URL === regURL)) {
+                return null;
+            }
+            const registryExist = registries.filter((registry) => registry.Name !== registryContext.Name && registry.URL !== registryContext.URL).find((registry) => registry.Name === regName || registry.URL === regURL);
+            if (!registryExist) {
+                await vscode.commands.executeCommand('openshift.componentTypesView.registry.remove', registryContext, true);
+            } else {
+                return null;
+            }
+        }
+
         const newRegistry = await OdoImpl.Instance.addRegistry(regName, regURL, token);
         ComponentTypesView.instance.addRegistry(newRegistry);
+
+        if (registryContext) {
+            void ComponentTypesView.openRegistryInWebview();
+        }
     }
 
     @vsCommand('openshift.componentTypesView.registry.remove')
@@ -246,12 +280,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     @vsCommand('openshift.componentTypesView.registry.edit')
     public static async editRegistry(registry: Registry): Promise<void> {
-        await vscode.commands.executeCommand('openshift.componentTypesView.registry.closeView');
-        const addRegistryFlag = await vscode.commands.executeCommand('openshift.componentTypesView.registry.add', registry);
-        if (null !== addRegistryFlag) {
-            await vscode.commands.executeCommand('openshift.componentTypesView.registry.remove', registry, true);
-            vscode.commands.executeCommand('openshift.componentTypesView.registry.openInView');
-        }
+        await vscode.commands.executeCommand('openshift.componentTypesView.registry.add', registry);
     }
 
     @vsCommand('openshift.componentTypesView.registry.openInBrowser')
