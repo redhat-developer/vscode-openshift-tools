@@ -245,11 +245,13 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     }
 
     @vsCommand('openshift.componentTypesView.registry.edit')
-    public static editRegistry(registry: Registry): void {
-        vscode.commands.executeCommand('openshift.componentTypesView.registry.closeView');
-        vscode.commands.executeCommand('openshift.componentTypesView.registry.add', registry).then((_value) =>
-            vscode.commands.executeCommand('openshift.componentTypesView.registry.remove', registry, true)).then((_value) =>
-                ComponentTypesView.openRegistryInWebview());
+    public static async editRegistry(registry: Registry): Promise<void> {
+        await vscode.commands.executeCommand('openshift.componentTypesView.registry.closeView');
+        const addRegistryFlag = await vscode.commands.executeCommand('openshift.componentTypesView.registry.add', registry);
+        if (null !== addRegistryFlag) {
+            await vscode.commands.executeCommand('openshift.componentTypesView.registry.remove', registry, true);
+            vscode.commands.executeCommand('openshift.componentTypesView.registry.openInView');
+        }
     }
 
     @vsCommand('openshift.componentTypesView.registry.openInBrowser')
