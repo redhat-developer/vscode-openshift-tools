@@ -1576,6 +1576,39 @@
 				}
 			]
 		},
+        "walkthroughs": [
+            {
+                "id": "openshiftWalkthrough",
+                "title": "Getting Started with OpenShift",
+                "description": "A sample walkthrough",
+                "steps": [
+                    {
+                        "id": "createComponent",
+                        "title": "Create Component",
+                        "description": "This step will run a command and check off once it has been run.\n[Create Component](command:openshift.componentType.newComponent)",
+                        "media": {
+                            "image": "images/gif/crc-webview.gif",
+                            "altText": "Empty image"
+                        },
+                        "completionEvents": [
+                            "onCommand:openshift.componentType.newComponent"
+                        ]
+                    },
+                    {
+                        "id": "addRegistry",
+                        "title": "Add Registry",
+                        "description": "This step will show adding registry.\n[Add Registry](command:openshift.componentTypesView.registry.add)",
+                        "media": {
+                            "image": "images/gif/crc-webview.gif",
+                            "altText": "Empty image"
+                        },
+                        "completionEvents": [
+                            "onCommand:openshift.componentTypesView.registry.add"
+                        ]
+                    }
+                ]
+            }
+        ],
 		"configuration": [
 			{
 				"type": "object",
