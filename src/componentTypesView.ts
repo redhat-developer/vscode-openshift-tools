@@ -245,9 +245,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         const newRegistry = await OdoImpl.Instance.addRegistry(regName, regURL, token);
         ComponentTypesView.instance.addRegistry(newRegistry);
 
-        if (registryContext) {
-            void ComponentTypesView.openRegistryInWebview();
-        }
+        RegistryViewLoader.refresh();
     }
 
     @vsCommand('openshift.componentTypesView.registry.remove')
@@ -260,6 +258,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         if (yesNo === 'Yes') {
             await OdoImpl.Instance.removeRegistry(registry.Name);
             ComponentTypesView.instance.removeRegistry(registry);
+            RegistryViewLoader.refresh();
         }
     }
 

@@ -107,6 +107,13 @@ export default class RegistryViewLoader {
     static async closeRegistryInWebview(): Promise<void> {
         panel?.dispose();
     }
+
+    static refresh(): void {
+      if(panel) {
+        panel.webview.postMessage({action: 'loadingComponents' });
+        getAllComponents('getAllComponents');
+      }
+    }
 }
 
 function getAllComponents(eventActionName: string) {
