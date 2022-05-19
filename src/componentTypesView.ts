@@ -226,7 +226,10 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
         let token: string;
         if (secure === 'Yes') {
-            token = await window.showInputBox({ placeHolder: 'Token to access the registry' });
+            token = await window.showInputBox({
+              placeHolder: 'Token to access the registry',
+              validateInput: (value) => value?.trim().length > 0 ? undefined : 'Token cannot be empty'
+            });
             if (!token) return null;
         }
 
