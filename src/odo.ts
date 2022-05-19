@@ -1139,7 +1139,7 @@ export class OdoImpl implements Odo {
         await this.execute(Command.addRegistry(name, url, token));
         return {
             Name: name,
-            Secure: true,
+            Secure: !!token,
             URL: url
         };
     }
