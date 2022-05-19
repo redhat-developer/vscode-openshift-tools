@@ -73,8 +73,12 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                     setCompDescriptions(message.data.compDescriptions);
                     setRegistries(message.data.registries);
                     setFilteredcompDescriptions(getFilteredCompDesc(message.data.registries, message.data.compDescriptions, searchValue));
-
                 }
+            } else if (message.data.action === 'loadingComponents') {
+              setError('');
+              setFilteredcompDescriptions([]);
+              setCompDescriptions([]);
+              setSearchValue('');
             }
         });
     });
