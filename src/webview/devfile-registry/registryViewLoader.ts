@@ -33,9 +33,8 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             );
             break;
         case 'createComponent':
-            const appName = event.appName;
             const registryName = event.registryName;
-            vscode.commands.executeCommand('openshift.componentType.newComponent', starterProject, appName, registryName);
+            vscode.commands.executeCommand('openshift.componentType.newComponent', starterProject, registryName);
             break;
         case 'cloneToWorkSpace':
             vscode.commands.executeCommand('openshift.componentType.cloneStarterProjectRepository', starterProject);

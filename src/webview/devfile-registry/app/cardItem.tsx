@@ -91,7 +91,6 @@ export class CardItem extends React.Component<DevFileProps, {
                 'action': 'createComponent',
                 'devFile': this.props.compDescription.Devfile,
                 'selectedProject': this.state.selectedProject,
-                'appName': 'app-' + this.state.selectedProject.name,
                 'registryName': this.props.compDescription.RegistryName
             });
         return;
