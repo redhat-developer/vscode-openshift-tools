@@ -26,7 +26,7 @@ import { ToolsConfig } from './tools';
 import { extendClusterExplorer } from './k8s/clusterExplorer';
 import { WatchSessionsView } from './watch';
 import { DebugSessionsView } from './debug';
-import { ComponentTypesView } from './componentTypesView';
+import { ComponentTypesView } from './registriesView';
 import { WelcomePage } from './welcomePage';
 import { ComponentsTreeDataProvider } from './componentsView';
 
@@ -76,7 +76,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             './openshift/service',
             './k8s/console',
             './oc',
-            './componentTypesView',
+            './registriesView',
             './componentsView',
             './webview/devfile-registry/registryViewLoader'
         )),
