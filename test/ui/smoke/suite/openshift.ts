@@ -98,10 +98,8 @@ export function checkOpenshiftView() {
             });
 
             it('opens viewer for default devfile registry', async () =>{
-              const registry = await types.findItem(VIEWS.devFileRegistry);
-              const contextMenu = registry.openContextMenu();
-              const item = await (await contextMenu).getItem('Open in Viewer');
-              item.click();
+              const registry = await types.getAction('Show View');
+              await registry.click();
               await new Promise((res) => { setTimeout(res, 500); });
               const regView = new WebView();
               await regView.switchToFrame();
