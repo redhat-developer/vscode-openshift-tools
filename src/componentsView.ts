@@ -51,46 +51,31 @@ async function getComponentsInWorkspace(): Promise<WorkspaceFolderComponent[]> {
     const results = await Promise.all(execs);
     return results.map((result) => {
         try {
-            let compData: EnvInfo;
-            if (result.error) {
-                // detect S2I component manually
-                const pathToS2iConfig = path.join(result.cwd.toString(), '.odo', 'config.yaml');
-                if (pathExistsSync(pathToS2iConfig)) {
-                    // reconstruct env view form yaml file data
-                    const s2iConf: any = jsYaml.load(readFileSync(pathToS2iConfig, 'utf8'));
-                    compData = {
-                        spec: {
-                            appName: s2iConf.ComponentSettings.Application,
-                            project: s2iConf.ComponentSettings.Project,
-                            name: s2iConf.ComponentSettings.Name,
-                        }
-                    }
-                }
-            } else {
-                compData = JSON.parse(result.stdout) as EnvInfo;
-            }
-            const contextUri = vsc.Uri.parse(result.cwd);
-            const project = compData.spec.project ? compData.spec.project : 'N/A';
-            const application = compData.spec.appName ? compData.spec.appName : 'N/A';
-            const tooltip = ['Component',
-                `Name: ${compData.spec.name}`,
-                `Project: ${project}`,
-                `Application: ${application}`,
-                `Context: ${contextUri.fsPath}`,
-            ].join('\n');
-            const description = `${project}/${application}`;
-            return {
-                project,
-                application,
-                label: compData.spec.name,
-                contextUri,
-                description,
-                tooltip,
-                contextValue: 'openshift.component',
-                iconPath: vsc.Uri.file(path.join(__dirname, '../../images/component', 'workspace.png'))
+            if (!result.error) {
+                const compData = JSON.parse(result.stdout) as EnvInfo;
+                const contextUri = vsc.Uri.parse(result.cwd);
+                const project = compData.spec.project ? compData.spec.project : 'N/A';
+                const application = compData.spec.appName ? compData.spec.appName : 'N/A';
+                const tooltip = ['Component',
+                    `Name: ${compData.spec.name}`,
+                    `Project: ${project}`,
+                    `Application: ${application}`,
+                    `Context: ${contextUri.fsPath}`,
+                ].join('\n');
+                const description = `${project}/${application}`;
+                return {
+                    project,
+                    application,
+                    label: compData.spec.name,
+                    contextUri,
+                    description,
+                    tooltip,
+                    contextValue: 'openshift.component',
+                    iconPath: vsc.Uri.file(path.join(__dirname, '../../images/component', 'workspace.png'))
+                };
             }
         } catch (err) {
-            // ignore unexpected parsing errors
+            // ignore unexpected parsing and loading errors
         }
     });
 }
