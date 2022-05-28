@@ -1301,7 +1301,7 @@ suite('OpenShift/Component', () => {
 
             await Component.debug(devfileComponentItem2);
 
-            expect(warningStub).calledWith('Debug command currently supports local components with Java, Node.Js and Python component registries.');
+            expect(warningStub).calledWith('Debug command currently supports local components with Java, Node.Js and Python component types.');
         });
 
         function mockComponent(startDebugging: sinon.SinonStub<any[], any>, waitPort: sinon.SinonStub<any[], any>, exitCode = 0) {
