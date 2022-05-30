@@ -127,6 +127,15 @@ export class CardItem extends React.Component<DevFileProps, {
     };
 
     copyClicked = (isClicked: boolean): void => {
+        if (isClicked) {
+            VSCodeMessage.postMessage(
+                {
+                    'action': 'telemeteryCopyEvent',
+                    'devFile': this.props.compDescription.Devfile.metadata.name,
+                    'copyClicked': isClicked
+                }
+            )
+        }
         this.setState({
             copyClicked: isClicked
         });
@@ -143,7 +152,7 @@ export class CardItem extends React.Component<DevFileProps, {
                 </TextContent>
                 <Badge key={this.props.compDescription.Devfile.metadata.name + '-badge'}
                     className={clsx(this.props.cardItemStyle.badge, this.props.cardItemStyle.headerBadge)}
-                    overlap='rectangle'
+                    overlap='rectangular'
                     variant='standard'
                     showZero={false}>
                     {this.props.compDescription.Devfile.starterProjects.length}
@@ -350,7 +359,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                     className={index === 0 ?
                                         clsx(this.props.cardItemStyle.badge, this.props.cardItemStyle.firstBadge)
                                         : this.props.cardItemStyle.badge}
-                                    overlap='rectangle'
+                                    overlap='rectangular'
                                     variant='standard'
                                 >
                                     {tag}
