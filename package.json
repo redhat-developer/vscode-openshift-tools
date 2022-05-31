@@ -1583,28 +1583,40 @@
                 "description": "A sample walkthrough",
                 "steps": [
                     {
+                        "id": "login",
+                        "title": "Login",
+                        "description": "This step will helps with login to the cluster.\n[Login to Cluster](command:openshift.explorer.login)\n[Setup CRC](command:openshift.explorer.addCluster.crcSetup)",
+                        "media": {
+                            "image": "images/walkthrough/loginCluster.gif",
+                            "altText": "login to cluster"
+                        },
+                        "completionEvents": [
+                            "onCommand:openshift.explorer.login",
+                            "onCommand:openshift.explorer.addCluster.crcSetup",
+                            "onCommand:openshift.explorer.login.credentialsLogin",
+                            "onCommand:openshift.explorer.login.tokenLogin"
+                        ]
+                    },
+                    {
                         "id": "createComponent",
                         "title": "Create Component",
                         "description": "This step will run a command and check off once it has been run.\n[Create Component](command:openshift.componentType.newComponent)",
                         "media": {
-                            "image": "images/gif/crc-webview.gif",
-                            "altText": "Empty image"
+                            "image": "images/walkthrough/createComponent.gif",
+                            "altText": "create component"
                         },
                         "completionEvents": [
                             "onCommand:openshift.componentType.newComponent"
                         ]
                     },
                     {
-                        "id": "addRegistry",
-                        "title": "Add Registry",
-                        "description": "This step will show adding registry.\n[Add Registry](command:openshift.componentTypesView.registry.add)",
+                        "id": "pushComponent",
+                        "title": "Push Component",
+                        "description": "This step will push the component into the cluster.",
                         "media": {
-                            "image": "images/gif/crc-webview.gif",
-                            "altText": "Empty image"
-                        },
-                        "completionEvents": [
-                            "onCommand:openshift.componentTypesView.registry.add"
-                        ]
+                            "image": "images/walkthrough/push.gif",
+                            "altText": "push"
+                        }
                     }
                 ]
             }
