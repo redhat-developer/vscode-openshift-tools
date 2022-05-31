@@ -3,10 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { pathExistsSync, readFileSync } from 'fs-extra';
 import * as path from 'path';
 import * as vsc from 'vscode';
-import * as jsYaml from 'js-yaml';
 import { BaseTreeDataProvider } from './base/baseTreeDataProvider';
 import { CliExitData } from './cli';
 import { getInstance } from './odo';
