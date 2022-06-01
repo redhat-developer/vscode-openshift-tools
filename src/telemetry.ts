@@ -47,12 +47,7 @@ export interface NewComponentCommandProps {
     'use_existing_devfile': boolean;
 }
 
-export interface copyDevFileProps {
-    'devFileName': string;
-    'devFileCopied': boolean;
-}
-
-export type TelemetryProps = Partial<CommonCommandProps & NewComponentCommandProps & copyDevFileProps>;
+export type TelemetryProps = Partial<CommonCommandProps & NewComponentCommandProps>;
 
 export class ExtCommandTelemetryEvent {
     private startTime: number;

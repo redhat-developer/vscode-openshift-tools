@@ -131,8 +131,7 @@ export class CardItem extends React.Component<DevFileProps, {
             VSCodeMessage.postMessage(
                 {
                     'action': 'telemeteryCopyEvent',
-                    'devFile': this.props.compDescription.Devfile.metadata.name,
-                    'copyClicked': isClicked
+                    'devFileName': this.props.compDescription.Devfile.metadata.name
                 }
             )
         }
