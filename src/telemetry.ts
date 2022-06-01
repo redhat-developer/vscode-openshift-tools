@@ -67,5 +67,4 @@ export class ExtCommandTelemetryEvent {
     sendError(error: string) {
         this.send({error})
     }
-
 }
