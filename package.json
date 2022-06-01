@@ -1541,21 +1541,6 @@
 					"group": "inline"
 				},
 				{
-					"command": "openshift.componentType.openStarterProjectRepository",
-					"when": "view == openshiftComponentTypesView && viewItem == s2iSampleProject || viewItem == devfileStarterProject",
-					"group": "1@0"
-				},
-				{
-					"command": "openshift.componentType.cloneStarterProjectRepository",
-					"when": "view == openshiftComponentTypesView && viewItem == s2iSampleProject || viewItem == devfileStarterProject",
-					"group": "1@1"
-				},
-				{
-					"command": "openshift.componentType.newComponent",
-					"when": "view == openshiftComponentTypesView && viewItem == s2iImageStreamTag || viewItem == devfileStarterProject || viewItem == devfileComponentType",
-					"group": "0@0"
-				},
-				{
 					"command": "openshift.component.revealInExplorer",
 					"when": "view == openshiftComponentsView && viewItem == openshift.component"
 				},
