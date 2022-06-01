@@ -44,12 +44,10 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             vscode.commands.executeCommand('openshift.componentType.openStarterProjectRepository', starterProject);
             break;
         case 'telemeteryCopyEvent':
-            const devFileName = event.devFile;
-            const copyClicked = event.copyClicked;
+            const devFileName = event.devFileName;
             const telemetryEventCopyDevFile = new ExtCommandTelemetryEvent('openshift.registryView.starterProjects.copyDevFile');
             telemetryEventCopyDevFile.send({
-                devFileName: devFileName,
-                devFileCopied: copyClicked
+                component_type: devFileName
             })
             break;
         default:
