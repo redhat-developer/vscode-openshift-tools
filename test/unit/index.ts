@@ -40,13 +40,21 @@ export function run(): Promise<void> {
                 reject(error);
             } else {
                 files.forEach((f): Mocha => mocha.addFile(paths.join(testsRoot, f)));
+                let failed = 0;
                 mocha.run(failures => {
                     if (failures > 0) {
-                        reject(new Error(`${failures} tests failed.`));
+                        failed = failures;
                     }
                 }).on('end', () => {
                     coverageRunner && coverageRunner.reportCoverage();
-                    resolve();
+                    if (failed > 0) {
+                        reject (`Test failures: ${failed}`);
+                    } else {
+                        resolve();
+                    }
+		            resolve();
+                }).on('fail', () => {
+                    failed++;
                 });
             }
         });
