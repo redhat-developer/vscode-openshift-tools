@@ -1569,8 +1569,8 @@
                 "steps": [
                     {
                         "id": "login",
-                        "title": "Login",
-                        "description": "This step will helps with login to the cluster.\n[Login to Cluster](command:openshift.explorer.login)\n[Setup CRC](command:openshift.explorer.addCluster.crcSetup)",
+                        "title": "Login to Openshift",
+                        "description": "This step will helps with login to Openshift.\n[Login using Remote OpenShift Cluster](command:openshift.explorer.login)\n[Login using OpenShift Local](command:openshift.explorer.addCluster.crcSetup)\n[Login using Developer Sandbox](command:openshift.explorer.addCluster.openLaunchSandboxPage)",
                         "media": {
                             "image": "images/walkthrough/loginCluster.gif",
                             "altText": "login to cluster"
@@ -1579,12 +1579,13 @@
                             "onCommand:openshift.explorer.login",
                             "onCommand:openshift.explorer.addCluster.crcSetup",
                             "onCommand:openshift.explorer.login.credentialsLogin",
-                            "onCommand:openshift.explorer.login.tokenLogin"
+                            "onCommand:openshift.explorer.login.tokenLogin",
+                            "onCommand:openshift.explorer.addCluster.openLaunchSandboxPage"
                         ]
                     },
                     {
                         "id": "createComponent",
-                        "title": "Create Component",
+                        "title": "Create a Component using Registry Viewer",
                         "description": "This step will run a command and check off once it has been run.\n[Create Component](command:openshift.componentType.newComponent)",
                         "media": {
                             "image": "images/walkthrough/createComponent.gif",
@@ -1596,8 +1597,26 @@
                     },
                     {
                         "id": "pushComponent",
-                        "title": "Push Component",
+                        "title": "Push a Component to the connected cluster",
                         "description": "This step will push the component into the cluster.",
+                        "media": {
+                            "image": "images/walkthrough/push.gif",
+                            "altText": "push"
+                        }
+                    },
+                    {
+                        "id": "debug",
+                        "title": "Debug the Component locally",
+                        "description": "This step helps to understand, debugging a component locally.",
+                        "media": {
+                            "image": "images/walkthrough/push.gif",
+                            "altText": "push"
+                        }
+                    },
+                    {
+                        "id": "openInBrowser",
+                        "title": "Open the Component in Browser",
+                        "description": "This step helps to understand, opening the component in browser.",
                         "media": {
                             "image": "images/walkthrough/push.gif",
                             "altText": "push"
