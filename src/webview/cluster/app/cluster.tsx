@@ -5,6 +5,7 @@
 
 import * as React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import { vscodeApi } from '../vsCodeMessage';
 import {
     Button,
     Card,
@@ -25,44 +26,50 @@ import './images/logo.png';
 const useStyles = makeStyles(clusterStyle);
 
 const clusterTypes = [
-  {
-    heading: 'Deploy it locally on your laptop',
-    description: 'Install on Laptop: Red Hat CodeReady Containers.',
-    smallInfo: 'Create a minimal OpenShift 4 cluster on your desktop/laptop for local development and testing.',
-    imageUrl: ['https://www.openshift.com/hubfs/images/icons/Icon-Red_Hat-Hardware-Laptop-A-Black-RGB.svg'],
-    urlAlt: 'crc',
-    redirectLink: '',
-    buttonText: 'Create/Refresh cluster',
-    tooltip: 'You can create/run local OpenShift 4 cluster using this wizard.'
-  },
-  {
-    heading: 'Launch Developer Sandbox',
-    description: 'Free access to the Developer Sandbox for Red Hat OpenShift',
-    smallInfo: 'The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools.',
-    imageUrl: ['https://assets.openshift.com/hubfs/images/logos/osh/Logo-Red_Hat-OpenShift-A-Standard-RGB.svg'],
-    urlAlt: 'dev sandbox',
-    redirectLink: '',
-    buttonText: 'Start your OpenShift experience',
-    tooltip: 'Launch your Developer Sandbox for Red Hat OpenShift'
-  },
-  {
-    heading: 'Deploy it in your public cloud',
-    description: 'Run OpenShift clusters on your own by installing from another cloud provider.',
-    smallInfo: 'This includes Azure Red Hat Openshift, Red Hat OpenShift on IBM Cloud, Red Hat OpenShift Service on AWS, Google Cloud, AWS (x86_64), Azure.',
-    imageUrl: ['https://www.openshift.com/hubfs/images/logos/logo_aws.svg', 'https://www.openshift.com/hubfs/images/logos/logo-try-cloud.svg', 'https://www.openshift.com/hubfs/images/logos/logo_google_cloud.svg'],
-    urlAlt: 'public cloud',
-    redirectLink: 'https://console.redhat.com/openshift/create',
-    buttonText: 'Try it in your cloud',
-    tooltip: 'For complete installation, follow the official documentation.'
-  }
+    {
+        heading: 'Deploy it locally on your laptop',
+        description: 'Install on Laptop: Red Hat CodeReady Containers.',
+        smallInfo: 'Create a minimal OpenShift 4 cluster on your desktop/laptop for local development and testing.',
+        imageUrl: ['https://www.openshift.com/hubfs/images/icons/Icon-Red_Hat-Hardware-Laptop-A-Black-RGB.svg'],
+        urlAlt: 'crc',
+        redirectLink: '',
+        buttonText: 'Create/Refresh cluster',
+        tooltip: 'You can create/run local OpenShift 4 cluster using this wizard.'
+    },
+    {
+        heading: 'Launch Developer Sandbox',
+        description: 'Free access to the Developer Sandbox for Red Hat OpenShift',
+        smallInfo: 'The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools.',
+        imageUrl: ['https://assets.openshift.com/hubfs/images/logos/osh/Logo-Red_Hat-OpenShift-A-Standard-RGB.svg'],
+        urlAlt: 'dev sandbox',
+        redirectLink: '',
+        buttonText: 'Start your OpenShift experience',
+        tooltip: 'Launch your Developer Sandbox for Red Hat OpenShift'
+    },
+    {
+        heading: 'Deploy it in your public cloud',
+        description: 'Run OpenShift clusters on your own by installing from another cloud provider.',
+        smallInfo: 'This includes Azure Red Hat Openshift, Red Hat OpenShift on IBM Cloud, Red Hat OpenShift Service on AWS, Google Cloud, AWS (x86_64), Azure.',
+        imageUrl: ['https://www.openshift.com/hubfs/images/logos/logo_aws.svg', 'https://www.openshift.com/hubfs/images/logos/logo-try-cloud.svg', 'https://www.openshift.com/hubfs/images/logos/logo_google_cloud.svg'],
+        urlAlt: 'public cloud',
+        redirectLink: 'https://console.redhat.com/openshift/create',
+        buttonText: 'Try it in your cloud',
+        tooltip: 'For complete installation, follow the official documentation.'
+    }
 ];
-
-const vscodeApi = window.vscodeApi;
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function Header() {
     const classes = useStyles();
     const [showWizard, setShowWizard] = React.useState('');
+
+    React.useEffect(() => {
+        return vscodeApi.onMessage((message) => {
+            if (['crc', 'sandbox'].includes(message.data.param)) {
+                setShowWizard(message.data.param);
+            }
+        });
+    })
 
     const handleView = (index: number) => {
         switch (index) {
@@ -141,7 +148,7 @@ export default function Header() {
             <div className={classes.iconContainer}>
                 <img className={classes.image} src='assets/logo.png' alt="redhat-openshift"></img>
             </div>
-            { showWizard === 'crc' && (
+            {showWizard === 'crc' && (
                 <div className={classes.rowBody}>
                     <Card className={classes.cardContent}>
                         <Typography variant="body2" component="p" style={{ padding: 20 }}>
@@ -151,20 +158,20 @@ export default function Header() {
                     </Card>
                 </div>
             )}
-            { showWizard === 'sandbox' && (
+            {showWizard === 'sandbox' && (
                 <div className={classes.rowBody}>
                     <Card className={classes.cardContent}>
                         <Typography variant="body2" component="p" style={{ padding: 20 }}>
-                        The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools. <br></br>Discover the rich capabilities of the full developer experience on OpenShift with the sandbox.
+                            The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools. <br></br>Discover the rich capabilities of the full developer experience on OpenShift with the sandbox.
                         </Typography>
                         <Button variant="outlined" href='https://developers.redhat.com/developer-sandbox' className={classes.button} style={{ margin: 15, textTransform: 'none' }}>Learn More</Button>
                         <Button variant="outlined" href='mailto:devsandbox@redhat.com' className={classes.button} style={{ margin: 15, textTransform: 'none' }}>Contact Us</Button>
-                        <Button variant="outlined" href='https://dn.dev/DevNationSlack'className={classes.button} style={{ margin: 15, textTransform: 'none' }}>Connect on Slack</Button>
-                        <AddSandboxView/>
+                        <Button variant="outlined" href='https://dn.dev/DevNationSlack' className={classes.button} style={{ margin: 15, textTransform: 'none' }}>Connect on Slack</Button>
+                        <AddSandboxView vscode={vscodeApi} />
                     </Card>
                 </div>
             )}
-            { !showWizard && (
+            {!showWizard && (
                 <div className={classes.cardContainer}>
                     <InfrastructureLayout clusterTypes={clusterTypes}></InfrastructureLayout>
                 </div>

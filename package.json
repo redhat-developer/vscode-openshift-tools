@@ -897,11 +897,6 @@
 		],
 		"keybindings": [
 			{
-				"command": "openshift.explorer.login",
-				"key": "alt+shift+l",
-				"mac": "ctrl+shift+l"
-			},
-			{
 				"command": "openshift.explorer.refresh",
 				"key": "alt+shift+r",
 				"mac": "ctrl+shift+r"
@@ -1570,17 +1565,16 @@
                     {
                         "id": "login",
                         "title": "Login to Openshift",
-                        "description": "This step will helps with login to Openshift.\n[Login using Remote OpenShift Cluster](command:openshift.explorer.login)\n[Login using OpenShift Local](command:openshift.explorer.addCluster.crcSetup)\n[Login using Developer Sandbox](command:openshift.explorer.addCluster.openLaunchSandboxPage)",
+                        "description": "This step will helps with login to Openshift.\n[Connect using remote OpenShift Cluster](command:openshift.explorer.login)\n[Connect using OpenShift Local](command:openshift.explorer.addCluster?[\"crc\"])\n[Connect using Developer Sandbox](command:openshift.explorer.addCluster?[\"sandbox\"])",
                         "media": {
                             "image": "images/walkthrough/loginCluster.gif",
                             "altText": "login to cluster"
                         },
                         "completionEvents": [
                             "onCommand:openshift.explorer.login",
-                            "onCommand:openshift.explorer.addCluster.crcSetup",
+                            "onCommand:openshift.explorer.addCluster",
                             "onCommand:openshift.explorer.login.credentialsLogin",
-                            "onCommand:openshift.explorer.login.tokenLogin",
-                            "onCommand:openshift.explorer.addCluster.openLaunchSandboxPage"
+                            "onCommand:openshift.explorer.login.tokenLogin"
                         ]
                     },
                     {

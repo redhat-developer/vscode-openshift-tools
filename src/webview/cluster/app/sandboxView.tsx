@@ -71,7 +71,7 @@ export default function addSandboxView(props): JSX.Element {
     window.addEventListener('message', messageListener);
 
     function postMessage(action: string, payload?: any): void {
-        window.vscodeApi.postMessage({ action, payload });
+        props.vscode.postMessage({ action, payload });
     }
 
     React.useEffect(() => {
@@ -225,7 +225,7 @@ export default function addSandboxView(props): JSX.Element {
         const handleRequestVerificationCode = () => {
             const rawPhoneNumber = phoneNumber.slice(countryCode.length);
             const fullCountryCode = '+' + countryCode;
-            
+
             setInProgress(true);
             postMessage('sandboxRequestVerificationCode', { rawPhoneNumber, fullCountryCode });
         }
@@ -360,7 +360,7 @@ export default function addSandboxView(props): JSX.Element {
         const handleLoginButton = () => {
             postMessage('sandboxLoginUsingDataInClipboard', {url: currentState.consoleDashboard});
         };
-        
+
         return (
             <>
                 {( currentState.action === 'sandboxPageProvisioned' ) && (

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace } from 'vscode';
+import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace, WebviewPanel } from 'vscode';
 import { Command } from '../odo/command';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { CliExitData, CliChannel } from '../cli';
@@ -108,8 +108,11 @@ export class Cluster extends OpenShiftItem {
     }
 
     @vsCommand('openshift.explorer.addCluster')
-    static add(): void {
-        ClusterViewLoader.loadView('Add OpenShift Cluster');
+    static async add(value: string): Promise<void> {
+        const webViewPanel: WebviewPanel = await ClusterViewLoader.loadView('Add OpenShift Cluster');
+        if(value?.length > 0){
+            await webViewPanel.webview.postMessage({action: 'cluster', param: value});
+        }
     }
 
     @vsCommand('openshift.explorer.stopCluster')
