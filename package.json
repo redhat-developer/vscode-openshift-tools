@@ -1622,7 +1622,7 @@
                     {
                         "id": "openInBrowser",
                         "title": "Open the Component in Browser",
-                        "description": "This step helps to understand, opening the component in browser.",
+                        "description": "Users can access the deployed component in web browser",
                         "media": {
                             "image": "images/walkthrough/openInBrowser.gif",
                             "altText": "open in browser"
