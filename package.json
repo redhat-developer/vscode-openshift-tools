@@ -1560,11 +1560,11 @@
             {
                 "id": "openshiftWalkthrough",
                 "title": "Getting Started with OpenShift",
-                "description": "A sample walkthrough",
+                "description": "Start your application deployment on OpenShift or Kubernetes",
                 "steps": [
                     {
                         "id": "login",
-                        "title": "Login to Openshift",
+                        "title": "Login to OpenShift instance",
                         "description": "This step will helps with login to Openshift.\n[Connect using remote OpenShift Cluster](command:openshift.explorer.login)\n[Connect using OpenShift Local](command:openshift.explorer.addCluster?[\"crc\"])\n[Connect using Developer Sandbox](command:openshift.explorer.addCluster?[\"sandbox\"])",
                         "media": {
                             "image": "images/walkthrough/loginCluster.gif",
@@ -1575,6 +1575,18 @@
                             "onCommand:openshift.explorer.addCluster",
                             "onCommand:openshift.explorer.login.credentialsLogin",
                             "onCommand:openshift.explorer.login.tokenLogin"
+                        ]
+                    },
+                    {
+                        "id": "showRegistries",
+                        "title": "Show all the registries",
+                        "description": "This step will helps to understand the registries and list of registries already configured.\n[Open registry view](command:openshift.componentTypesView.registry.openInView)",
+                        "media": {
+                            "image": "images/walkthrough/showRegistries.gif",
+                            "altText": "show registry"
+                        },
+                        "completionEvents": [
+                            "onCommand:openshift.componentTypesView.registry.openInView"
                         ]
                     },
                     {
@@ -1603,8 +1615,8 @@
                         "title": "Debug the Component locally",
                         "description": "This step helps to understand, debugging a component locally.",
                         "media": {
-                            "image": "images/walkthrough/push.gif",
-                            "altText": "push"
+                            "image": "images/walkthrough/debug.gif",
+                            "altText": "debug"
                         }
                     },
                     {
@@ -1612,8 +1624,8 @@
                         "title": "Open the Component in Browser",
                         "description": "This step helps to understand, opening the component in browser.",
                         "media": {
-                            "image": "images/walkthrough/push.gif",
-                            "altText": "push"
+                            "image": "images/walkthrough/openInBrowser.gif",
+                            "altText": "open in browser"
                         }
                     }
                 ]
