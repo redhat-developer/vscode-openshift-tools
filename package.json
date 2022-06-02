@@ -1601,7 +1601,7 @@
                     {
                         "id": "debug",
                         "title": "Debug the Component locally",
-                        "description": "This step helps to understand, debugging a component locally.",
+                        "description": "Debug and test remote applications deployed from your IDE to OpenShift/Kubernetes. No more having to exit your IDE to push your application.",
                         "media": {
                             "image": "images/walkthrough/push.gif",
                             "altText": "push"
