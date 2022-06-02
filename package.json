@@ -1604,7 +1604,7 @@
                     {
                         "id": "pushComponent",
                         "title": "Push a Component to the connected cluster",
-                        "description": "This step will push the component into the cluster.",
+                        "description": "The component created above is available locally. To deploy the component on the connect OpenShift/Kubernetes cluster, we need to `Push` the Component",
                         "media": {
                             "image": "images/walkthrough/push.gif",
                             "altText": "push"
