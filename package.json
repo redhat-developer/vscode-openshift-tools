@@ -1561,7 +1561,7 @@
             {
                 "id": "openshiftWalkthrough",
                 "title": "Getting Started with OpenShift",
-                "description": "Start your application deployment on OpenShift or Kubernetes",
+                "description": "Start your application development on OpenShift or Kubernetes",
                 "steps": [
                     {
                         "id": "login",
