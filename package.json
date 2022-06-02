@@ -1565,7 +1565,7 @@
                     {
                         "id": "login",
                         "title": "Login to OpenShift instance",
-                        "description": "This step will helps with login to Openshift.\n[Connect using remote OpenShift Cluster](command:openshift.explorer.login)\n[Connect using OpenShift Local](command:openshift.explorer.addCluster?[\"crc\"])\n[Connect using Developer Sandbox](command:openshift.explorer.addCluster?[\"sandbox\"])",
+                        "description": "Please select a way to login to an Openshift instance.\n[Connect using remote OpenShift Cluster](command:openshift.explorer.login)\n[Connect using OpenShift Local](command:openshift.explorer.addCluster?[\"crc\"])\n[Connect using Developer Sandbox](command:openshift.explorer.addCluster?[\"sandbox\"])",
                         "media": {
                             "image": "images/walkthrough/loginCluster.gif",
                             "altText": "login to cluster"
@@ -1613,7 +1613,7 @@
                     {
                         "id": "debug",
                         "title": "Debug the Component locally",
-                        "description": "This step helps to understand, debugging a component locally.",
+                        "description": "Debug and test remote applications deployed from your IDE to OpenShift/Kubernetes. No more having to exit your IDE to push your application.",
                         "media": {
                             "image": "images/walkthrough/debug.gif",
                             "altText": "debug"
