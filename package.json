@@ -1592,7 +1592,7 @@
                     {
                         "id": "createComponent",
                         "title": "Create a Component using Registry Viewer",
-                        "description": "This step will run a command and check off once it has been run.\n[Create Component](command:openshift.componentType.newComponent)",
+                        "description": Create a component in the current working directory with the file `devfile.yaml` from the devfile registry and the starter project selected. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.componentType.newComponent)",
                         "media": {
                             "image": "images/walkthrough/createComponent.gif",
                             "altText": "create component"
