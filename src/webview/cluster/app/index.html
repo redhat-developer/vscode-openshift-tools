@@ -12,6 +12,9 @@
         <% if (!production) { %>
         <script src="./devstub.js"></script>
         <% } %>
+        <script>
+            window.vscodeApi = acquireVsCodeApi();
+        </script>
         <style>
             html,
             body {

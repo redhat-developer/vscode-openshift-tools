@@ -71,7 +71,7 @@ export default function addSandboxView(props): JSX.Element {
     window.addEventListener('message', messageListener);
 
     function postMessage(action: string, payload?: any): void {
-        props.vscode.postMessage({ action, payload });
+        window.vscodeApi.postMessage({ action, payload });
     }
 
     React.useEffect(() => {
