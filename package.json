@@ -1592,7 +1592,7 @@
                     {
                         "id": "createComponent",
                         "title": "Create a Component using Registry Viewer",
-                        "description": Create a component in the current working directory with the file `devfile.yaml` from the devfile registry and the starter project selected. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.componentType.newComponent)",
+                        "description": "Create a component in the current working directory with the file `devfile.yaml` from the devfile registry and the starter project selected. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.componentType.newComponent)",
                         "media": {
                             "image": "images/walkthrough/createComponent.gif",
                             "altText": "create component"
@@ -1606,8 +1606,8 @@
                         "title": "Push a Component to the connected cluster",
                         "description": "The component created above is available locally. To deploy the component on the connect OpenShift/Kubernetes cluster, we need to `Push` the Component",
                         "media": {
-                            "image": "images/walkthrough/push.gif",
-                            "altText": "push"
+                            "image": "images/walkthrough/pushComponent.gif",
+                            "altText": "push component"
                         }
                     },
                     {
