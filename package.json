@@ -1580,7 +1580,7 @@
                     },
                     {
                         "id": "showRegistries",
-                        "title": "Show all the registries",
+                        "title": "View the default and custom devfile registries.",
                         "description": "You can connect to publicly available devfile registries to get started with devfiles for different languages and frameworks.\n[Open registry view](command:openshift.componentTypesView.registry.openInView)",
                         "media": {
                             "image": "images/walkthrough/showRegistries.gif",
