@@ -298,7 +298,8 @@
 		"onCommand:clusters.openshift.deploy.rcShowLog",
 		"onCommand:clusters.openshift.deploy.rcShowLog.palette",
 		"onCommand:clusters.openshift.deployment.openConsole",
-		"onCommand:clusters.openshift.imagestream.openConsole"
+		"onCommand:clusters.openshift.imagestream.openConsole",
+        "onCommand:openshift.componentTypesView.registry.openInView"
 	],
 	"contributes": {
 		"commands": [
