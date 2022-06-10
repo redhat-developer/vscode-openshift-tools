@@ -1565,8 +1565,8 @@
                 "steps": [
                     {
                         "id": "login",
-                        "title": "Login to OpenShift instance",
-                        "description": "Please select a way to login to an OpenShift instance.\n[Connect using remote OpenShift Cluster](command:openshift.explorer.login)\n[Connect using OpenShift Local](command:openshift.explorer.addCluster?[\"crc\"])\n[Connect using Red Hat Developer Sandbox](command:openshift.explorer.addCluster?[\"sandbox\"])",
+                        "title": "Login/Provision OpenShift cluster",
+                        "description": "Users can Login to an existing OpenShift cluster using the login button.\nTo provision a new OpenShift cluster, **Add OpenShift Cluster** button opens a guided experience workflow to connect to a local or sandbox cluster.\n[Login to the existing OpenShift cluster](command:openshift.explorer.login)\n[Connect using OpenShift Local](command:openshift.explorer.addCluster?[\"crc\"])\n[Connect using Red Hat Developer Sandbox](command:openshift.explorer.addCluster?[\"sandbox\"])",
                         "media": {
                             "image": "images/walkthrough/loginCluster.gif",
                             "altText": "login to cluster"
