@@ -299,7 +299,8 @@
 		"onCommand:clusters.openshift.deploy.rcShowLog.palette",
 		"onCommand:clusters.openshift.deployment.openConsole",
 		"onCommand:clusters.openshift.imagestream.openConsole",
-        "onCommand:openshift.componentTypesView.registry.openInView"
+    "onCommand:openshift.componentTypesView.registry.openInView",
+    "onWalkthrough:openshiftWalkthrough"
 	],
 	"contributes": {
 		"commands": [
@@ -1566,7 +1567,7 @@
                     {
                         "id": "login",
                         "title": "Login/Provision OpenShift cluster",
-                        "description": "Users can Login to an existing OpenShift cluster using the login button.\nTo provision a new OpenShift cluster, **Add OpenShift Cluster** button opens a guided experience workflow to connect to a local or sandbox cluster.\n[Login to the existing OpenShift cluster](command:openshift.explorer.login)\n[Connect using OpenShift Local](command:openshift.explorer.addCluster?[\"crc\"])\n[Connect using Red Hat Developer Sandbox](command:openshift.explorer.addCluster?[\"sandbox\"])",
+                        "description": "Users can Login to an existing OpenShift cluster using the login button.\nTo provision a new OpenShift cluster, **Add OpenShift Cluster** button opens a guided experience workflow to connect to a local or sandbox cluster.\n[Login to the existing OpenShift cluster](command:openshift.explorer.login)\n[Provision OpenShift cluster](command:openshift.explorer.addCluster)",
                         "media": {
                             "image": "images/walkthrough/loginCluster.gif",
                             "altText": "login to cluster"
