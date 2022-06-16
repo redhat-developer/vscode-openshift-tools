@@ -27,18 +27,18 @@ const useStyles = makeStyles(clusterStyle);
 const clusterTypes = [
   {
     heading: 'Deploy it locally on your laptop',
-    description: 'Install on Laptop: Red Hat CodeReady Containers.',
+    description: 'Install on Laptop: Red Hat OpenShift Local(formerly Red Hat CodeReady Containers)',
     smallInfo: 'Create a minimal OpenShift 4 cluster on your desktop/laptop for local development and testing.',
     imageUrl: ['https://www.openshift.com/hubfs/images/icons/Icon-Red_Hat-Hardware-Laptop-A-Black-RGB.svg'],
     urlAlt: 'crc',
     redirectLink: '',
     buttonText: 'Create/Refresh cluster',
-    tooltip: 'You can create/run local OpenShift 4 cluster using this wizard.'
+    tooltip: 'Create/Run local OpenShift 4 cluster using the guided workflow'
   },
   {
     heading: 'Launch Developer Sandbox',
     description: 'Free access to the Developer Sandbox for Red Hat OpenShift',
-    smallInfo: 'The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools.',
+    smallInfo: 'If you are exploring how to run your code as containers in OpenShift, our free Developer Sandbox instantly gives you a way to try it out.',
     imageUrl: ['https://assets.openshift.com/hubfs/images/logos/osh/Logo-Red_Hat-OpenShift-A-Standard-RGB.svg'],
     urlAlt: 'dev sandbox',
     redirectLink: '',
@@ -151,7 +151,7 @@ export default function Header() {
                 <div className={classes.rowBody}>
                     <Card className={classes.cardContent}>
                         <Typography variant="body2" component="p" style={{ padding: 20 }}>
-                            Red Hat CodeReady Containers brings a minimal OpenShift 4 cluster to your local computer.<br></br>You can use this wizard to create OpenShift cluster locally. Cluster take approximately 15 minutes to provision.
+                            Red Hat OpenShift Local brings a minimal OpenShift 4 cluster to your local computer.<br></br>You can use this guided workflow to create OpenShift cluster locally. Cluster take approximately 15 minutes to provision.
                         </Typography>
                         <AddClusterView vscode={vscodeApi} />
                     </Card>

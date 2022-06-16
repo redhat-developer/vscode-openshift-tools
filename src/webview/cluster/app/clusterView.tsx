@@ -53,14 +53,14 @@ const crcDefaults = {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function getSteps() {
-  return ['CodeReady Containers archive', 'File path of image pull secret', 'Select optional configurations', 'Setup CRC', 'Start the cluster'];
+  return ['Download OpenShift Local', 'File path of image pull secret', 'Select optional configurations', 'Setup OpenShift Local', 'Start the cluster'];
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function addClusterView(props) {
   const classes = useStyles();
-  const crcLatest = '1.40.0';
-  const crcOpenShift = '4.9.18';
+  const crcLatest = '2.4.1';
+  const crcOpenShift = '4.10.14';
   const [fileName, setBinaryPath] = React.useState('');
   const [pullSecretPath, setSecret] = React.useState('');
   const [cpuSize, setCpuSize] = React.useState(crcDefaults.DefaultCPUs);
@@ -218,7 +218,7 @@ export default function addClusterView(props) {
   };
 
   const handleDisabled = () => {
-    return (activeStep === 1 && fileName === '') 
+    return (activeStep === 1 && fileName === '')
         || (activeStep === 2 && pullSecretPath === '');
   };
 
@@ -226,7 +226,7 @@ export default function addClusterView(props) {
     setStopProgress(true);
     setCrcStopError(false);
     props.vscode.postMessage({
-        action: 'crcStop', 
+        action: 'crcStop',
         data: {
             tool: fileName
         }
@@ -339,7 +339,7 @@ export default function addClusterView(props) {
         <div className={classes.column}>
           <List dense>
             <ListItem>
-              <ListItemText primary={<span>CodeReady Containers Status: {status.crcStatus}</span>}/>
+              <ListItemText primary={<span>OpenShift Local Status: {status.crcStatus}</span>}/>
             </ListItem>
             <ListItem>
               <ListItemText primary={<span>OpenShift Status: {status.openshiftStatus}</span>}/>
@@ -396,7 +396,7 @@ export default function addClusterView(props) {
     )}
     {(statusSkeleton && !statusError) && (
       <div>
-        <Typography paragraph>Refreshing the crc status</Typography>
+        <Typography paragraph>Refreshing the OpenShift Local status</Typography>
         <LinearProgress />
       </div>
     )}
@@ -461,7 +461,7 @@ export default function addClusterView(props) {
         case 0:
           return (
             <div>
-              <Typography>Download and extract the CodeReady Containers archive for your operating system and place the executable in your $PATH</Typography>
+              <Typography>Download and open the OpenShift Local file. Opening the file will automatically start a step-by-step installation guide.</Typography>
               <List className={classes.uploadLabel}>
                 <ListItem>
                   <ListItemAvatar>
@@ -471,15 +471,14 @@ export default function addClusterView(props) {
                   </ListItemAvatar>
                   <ListItemText
                     primary="Download"
-                    secondary={<span>This will download the CodeReady Containers {crcLatest} archive</span>}/>
+                    secondary={<span>This will download OpenShift local {crcLatest}</span>}/>
                     <a href={fetchDownloadBinary()} style={{ textDecoration: 'none'}}>
                       <Button
                         color="default"
                         component="span"
                         className={classes.button}
-                        startIcon={<GetApp />}
                       >
-                        Download
+                        Download OpenShift Local
                       </Button>
                     </a>
                 </ListItem>
@@ -492,7 +491,7 @@ export default function addClusterView(props) {
                   </ListItemAvatar>
                   <ListItemText
                     primary={<span>Executable Location<sup style={{color: '#BE0000'}}>*</sup></span>}
-                    secondary={<span>Provide the CodeReady Containers {crcLatest} executable location</span>} />
+                    secondary={<span>Provide the OpenShift Local {crcLatest} executable location</span>} />
                   <div>
                     <input
                     style={{ display: 'none' }}
@@ -612,7 +611,7 @@ export default function addClusterView(props) {
             <List>
               <ListItem>
               <ListItemText
-                primary={<span>Set up your host operating system for the CodeReady Containers virtual machine</span>}
+                primary={<span>Set up your host operating system for the OpenShift Local virtual machine</span>}
                 secondary={<span>Once the setup process is successful, then proceed to start the cluster in Next step.</span>} />
                 <Button
                   onClick={handleCrcSetup}
@@ -624,7 +623,7 @@ export default function addClusterView(props) {
         case 4:
           return (
             <Typography>
-              Start the cluster. This will create a minimal OpenShift {crcOpenShift} cluster to your local computer.
+              Start the cluster. This will create a minimal OpenShift {crcOpenShift} cluster on your computer.
             </Typography>)
         default:
           return 'Unknown step';
@@ -635,7 +634,7 @@ export default function addClusterView(props) {
     <Paper elevation={3}>
       <blockquote className={classes.blockquoteText}>
         <Typography variant="body2" component="p" style={{textAlign: 'center'}}>
-          Install OpenShift {crcOpenShift} on your system using CodeReady Containers {crcLatest}.
+          Install OpenShift {crcOpenShift} on your system using OpenShift Local {crcLatest}.
         </Typography>
       </blockquote>
       <Stepper activeStep={activeStep} orientation="vertical">
@@ -697,7 +696,7 @@ export default function addClusterView(props) {
           <Paper square elevation={3} className={classes.resetContainer}>
             <blockquote className={classes.blockquoteText}>
               <Typography variant='body2'>
-                CRC configuration is detected in workspace settings. If you need to setup a new CRC instance, click on Reset and proceed with wizard workflow.
+                OpenShift Local configuration is detected in workspace settings. If you need to setup a new OpenShift Local instance, click on Reset and proceed with guided workflow.
               </Typography>
             </blockquote>
             <StartStopLoader />
