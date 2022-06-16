@@ -64,6 +64,12 @@ export default function Header() {
     const classes = useStyles();
     const [showWizard, setShowWizard] = React.useState('');
 
+    window.onmessage = (event: any) => {
+        if (['crc', 'sandbox'].includes(event.data.param)) {
+            setShowWizard(event.data.param);
+        }
+    }
+
     const handleView = (index: number) => {
         switch (index) {
             case 0:
