@@ -20,7 +20,7 @@ import { Platform } from './util/platform';
 import * as odo from './odo/config';
 import { GlyphChars } from './util/constants';
 import { Application } from './odo/application';
-import { ComponentType, ComponentTypesJson, ComponentTypeAdapter, Registry, RegistryList } from './odo/componentType';
+import { ComponentType, ComponentTypesJson, ComponentTypeAdapter, Registry, RegistryList, DevfileComponentType } from './odo/componentType';
 import { Project } from './odo/project';
 import { ComponentsJson, NotAvailable } from './odo/component';
 import { Url } from './odo/url';
@@ -337,6 +337,8 @@ export interface Odo {
     getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]>;
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponents(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]>;
+    getCompTypesJson():Promise<DevfileComponentType[]>;
+    getComponentTypesOfJSON(devFileComponents: DevfileComponentType[]):ComponentTypeAdapter[];
     getComponentTypes(): Promise<ComponentTypeAdapter[]>;
     getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]>;
@@ -507,13 +509,22 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(
             Command.printOdoVersion(), process.cwd(), false
         );
-        commands.executeCommand('setContext', 'isLoggedIn', false);
+        void commands.executeCommand('setContext', 'isLoggedIn', false);
         clusters = result.stdout.trim().split('\n')
             .filter((value) => value.includes('Server:'))
             .map((value) => {
-                commands.executeCommand('setContext', 'isLoggedIn', true);
-                return new OpenShiftCluster(value.substr(value.indexOf(':')+1).trim())
+                void commands.executeCommand('setContext', 'isLoggedIn', true);
+                return new OpenShiftCluster(value.substr(value.indexOf(':')+1).trim());
             });
+        if (clusters.length === 0) {
+          const projects = await this.execute(
+            Command.listProjects(), process.cwd(), false
+          );
+          if (!projects.error) {
+            clusters.push(new OpenShiftCluster(new KubeConfigUtils().getCurrentCluster().server));
+            void commands.executeCommand('setContext', 'isLoggedIn', true);
+          }
+        }
         return clusters;
     }
 
@@ -626,6 +637,22 @@ export class OdoImpl implements Odo {
             addEnv.KUBECONFIG = path.resolve(__dirname, '..', '..', 'config', 'kubeconfig');
         }
         return addEnv;
+    }
+
+    public async getCompTypesJson(): Promise<DevfileComponentType[]> {
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson(), undefined, true, this.getKubeconfigEnv());
+        const compTypesJson: ComponentTypesJson = this.loadJSON(result.stdout);
+        return compTypesJson?.items;
+    }
+
+    public getComponentTypesOfJSON(devFileComponents: DevfileComponentType[]): ComponentType[] {
+        const devfileItems: ComponentTypeAdapter[] = [];
+
+        if (devFileComponents) {
+            devFileComponents.map((item) => devfileItems.push(new ComponentTypeAdapter(item.Name, undefined, item.Description, undefined, item.Registry.Name)));
+        }
+
+        return devfileItems;
     }
 
     public async getComponentTypes(): Promise<ComponentType[]> {
@@ -786,8 +813,10 @@ export class OdoImpl implements Odo {
     }
 
     public async requireLogin(): Promise<boolean> {
-        const result: cliInstance.CliExitData = await this.execute(new CommandText('oc whoami'), process.cwd(), false);
-        return !!result.error;
+      return await Promise.any([
+        this.execute(new CommandText('oc whoami')),
+        this.execute(Command.listProjects())
+      ]).then(() => false).catch(() => true);
     }
 
     private async insertAndReveal(item: OpenShiftObject, notification = true): Promise<OpenShiftObject> {
@@ -1110,7 +1139,7 @@ export class OdoImpl implements Odo {
         await this.execute(Command.addRegistry(name, url, token));
         return {
             Name: name,
-            Secure: true,
+            Secure: !!token,
             URL: url
         };
     }

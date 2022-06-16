@@ -67,6 +67,28 @@ export default class OpenShiftItem {
         });
     }
 
+    static async getProjectName(message: string, data: Promise<Array<OpenShiftObject>>, offset?: string, defaultValue = ''): Promise<string> {
+      return window.showInputBox({
+          value: defaultValue,
+          prompt: `Provide ${message}`,
+          ignoreFocusOut: true,
+          validateInput: async (value: string) => {
+              let validationMessage = OpenShiftItem.emptyName(`Empty ${message}`, value.trim());
+              if (!validationMessage) validationMessage = OpenShiftItem.validateRFC1123DNSLabel(`Not a valid ${message}. Please enter name that starts with an alphanumeric character, use lower case alphanumeric characters or '-' and end with an alphanumeric character`, value);
+              if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${message} should be between 2-63 characters`, value, offset ? offset.length : 0);
+              if (!validationMessage) {
+                  try {
+                      const existingResources = await data;
+                      validationMessage = OpenShiftItem.validateUniqueName(existingResources, value);
+                  } catch (err) {
+                      //ignore to keep other validation to work
+                  }
+              }
+              return validationMessage;
+          }
+      });
+  }
+
     static emptyName(message: string, value: string): string | null {
         return validator.isEmpty(value) ? message : null;
     }
@@ -81,6 +103,10 @@ export default class OpenShiftItem {
 
     static validateMatches(message: string, value: string): string | null {
         return validator.matches(value, '^[a-z]([-a-z0-9]*[a-z0-9])*$') ? null : message;
+    }
+
+    static validateRFC1123DNSLabel(message: string, value: string): string | null {
+      return validator.matches(value, '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$') ? null : message;
     }
 
     static clusterURL(value: string): string | null {
@@ -154,7 +180,7 @@ export default class OpenShiftItem {
         return urlList;
     }
 
-    static async getOpenShiftCmdData<T extends OpenShiftObject>(treeItem: T, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean): Promise<T | null>  {
+    static async getOpenShiftCmdData<T extends OpenShiftObject>(treeItem: T, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean): Promise<T | null> {
         let context: OpenShiftObject | QuickPickCommand = treeItem;
         let project: OpenShiftObject;
         if (!context) {
@@ -205,7 +231,7 @@ export default class OpenShiftItem {
                 context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(applicationList, {placeHolder: appPlaceholder, ignoreFocusOut: true});
             }
             if (context && isCommand(context)) {
-                const newAppName = await context.command();
+                const newAppName = 'app';
                 if (newAppName) {
                     context = new OpenShiftApplication(project, newAppName);
                 } else {

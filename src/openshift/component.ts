@@ -129,14 +129,14 @@ export class Component extends OpenShiftItem {
 
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Deleting the Component '${component.getName()} '`, async () => {
-              if (component.isOdoManaged()) {
-                await Component.delete(component);
-              } else {
-                await Component.deleteOther(component);
-              }
+                if (component.isOdoManaged()) {
+                    await Component.delete(component);
+                } else {
+                    await Component.deleteOther(component);
+                }
             })
-            .then(() => `Component '${name}' successfully deleted`)
-            .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Component with error '${err}'`, 'Failed to delete Component with error')));
+                .then(() => `Component '${name}' successfully deleted`)
+                .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Component with error '${err}'`, 'Failed to delete Component with error')));
         }
     }
 
@@ -470,7 +470,7 @@ export class Component extends OpenShiftItem {
             });
             Component.addWatchSession(component, process);
             process.on('exit', (code: number) => {
-                if (code!== 0) {
+                if (code !== 0) {
                     void window.showErrorMessage('Watch process failed to start.');
                 }
                 Component.removeWatchSession(component);
@@ -536,9 +536,9 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.componentType.newComponent')
-    public static async createComponentFromCatalogEntry(context: DevfileComponentType | StarterProject): Promise<string> {
+    public static async createComponentFromCatalogEntry(context: DevfileComponentType | StarterProject, registryName?: string): Promise<string> {
         const application = await Component.getOpenShiftCmdData(undefined,
-            'Select an Application where you want to create a Component'
+            'Select an Application where you want to create a Component', undefined, undefined
         );
 
         if (!application) return null;
@@ -552,19 +552,19 @@ export class Component extends OpenShiftItem {
             starterProjectName = context.name;
         }
 
-        return Component.createFromLocal(application, [], componentTypeName, starterProjectName);
+        return Component.createFromLocal(application, [], componentTypeName, starterProjectName, registryName);
     }
 
     @vsCommand('openshift.component.createFromLocal')
     @selectTargetApplication(
         'Select an Application where you want to create a Component'
     )
-    static async createFromLocal(application: OpenShiftApplication, selection?: OpenShiftObject[], componentTypeName?: string, starterProjectName?: string): Promise<string | null> {
+    static async createFromLocal(application: OpenShiftApplication, selection?: OpenShiftObject[], componentTypeName?: string, starterProjectName?: string, registryName?: string): Promise<string | null> {
         if (!application) return createCancelledResult('applicationName');
         const workspacePath = await selectWorkspaceFolder();
         if (!workspacePath) return createCancelledResult('contextFolder');
 
-        return Component.createFromRootWorkspaceFolder(workspacePath, [], application, componentTypeName, starterProjectName);
+        return Component.createFromRootWorkspaceFolder(workspacePath, [], application, componentTypeName, starterProjectName, registryName);
     }
 
     /**
@@ -581,7 +581,7 @@ export class Component extends OpenShiftItem {
         let result: any;
         let component = Component.odo.getOpenShiftObjectByContext(folder.fsPath);
         if (!component) {
-            result = await Component.createFromRootWorkspaceFolder(folder, undefined, undefined, componentTypeName, undefined, false);
+            result = await Component.createFromRootWorkspaceFolder(folder, undefined, undefined, componentTypeName, undefined, undefined, false);
             component = Component.odo.getOpenShiftObjectByContext(folder.fsPath);
         }
         if (component) {
@@ -603,8 +603,8 @@ export class Component extends OpenShiftItem {
      */
 
     @vsCommand('openshift.component.createFromRootWorkspaceFolder')
-    static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], context: OpenShiftApplication, componentTypeName?: string, starterProjectName?: string, notification = true): Promise<string | null> {
-        const application = await Component.getOpenShiftCmdData(context,
+    static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], context: OpenShiftApplication, componentTypeName?: string, starterProjectName?: string, registryName?: string, notification = true): Promise<string | null> {
+        let application = await Component.getOpenShiftCmdData(context,
             'Select an Application where you want to create a Component'
         );
 
@@ -621,18 +621,7 @@ export class Component extends OpenShiftItem {
             if (devfileYaml && devfileYaml.metadata && devfileYaml.metadata.name) {
                 initialNameValue = devfileYaml.metadata.name;
             }
-        } else {
-            initialNameValue = path.basename(folder.fsPath);
         }
-
-        const componentName = await Component.getName(
-            'Component name',
-            application.getParent().getParent() ? Component.odo.getComponents(application) : Promise.resolve([]),
-            application.getName(),
-            initialNameValue
-        );
-
-        if (!componentName) return createCancelledResult('componentName');
 
         const progressIndicator = window.createQuickPick();
 
@@ -640,12 +629,14 @@ export class Component extends OpenShiftItem {
         let componentType: ComponentTypeAdapter;
         let componentTypeCandidates: ComponentTypeAdapter[];
         if (!useExistingDevfile) {
-            progressIndicator.busy = true;
-            progressIndicator.placeholder = componentTypeName ? `Checking if '${componentTypeName}' Component type is available` : 'Loading available Component types';
-            progressIndicator.show();
             const componentTypes = await Component.odo.getComponentTypes();
+            if (!componentTypeName && !starterProjectName) {
+                progressIndicator.busy = true;
+                progressIndicator.placeholder = componentTypeName ? `Checking if '${componentTypeName}' Component type is available` : 'Loading available Component types';
+                progressIndicator.show();
+            }
             if (componentTypeName) {
-                componentTypeCandidates = componentTypes.filter(type => type.name === componentTypeName);
+                componentTypeCandidates = registryName && registryName.length > 0 ? componentTypes.filter(type => type.name === componentTypeName && type.registryName === registryName) : componentTypes.filter(type => type.name === componentTypeName);
                 if (componentTypeCandidates?.length === 0) {
                     componentType = await window.showQuickPick(componentTypes.sort(ascDevfileFirst), { placeHolder: `Cannot find Component type '${componentTypeName}', select one below to use instead`, ignoreFocusOut: true });
                 } else if (componentTypeCandidates?.length > 1) {
@@ -696,9 +687,19 @@ export class Component extends OpenShiftItem {
                         }
                     }
                 }
+                application = application.getName() === 'app' ?
+                    new OpenShiftApplication(application.getParent(), `app-${createStarter}`) : application;
             }
         }
 
+        const componentName = await Component.getName(
+            'Name',
+            application.getParent().getParent() ? Component.odo.getComponents(application) : Promise.resolve([]),
+            application.getName(),
+            initialNameValue?.trim().length > 0 ? initialNameValue : createStarter
+        );
+
+        if (!componentName) return createCancelledResult('componentName');
         const refreshComponentsView = workspace.getWorkspaceFolder(folder);
         const creatComponentProperties: NewComponentCommandProps = {
             'component_kind': 'devfile',

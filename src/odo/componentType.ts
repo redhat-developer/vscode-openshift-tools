@@ -14,6 +14,7 @@ export interface Registry {
     readonly Name: string;
     readonly URL: string;
     readonly Secure: boolean;
+    state?: boolean;
 }
 
 export interface ImageStreamTag {

@@ -12,9 +12,9 @@ node('rhel8'){
   def packageJson = readJSON file: 'package.json'
 
   stage('Install requirements') {
-    def nodeHome = tool 'nodejs-16.13.2'
+    def nodeHome = tool 'nodejs-lts'
     env.PATH="${env.PATH}:${nodeHome}/bin"
-    sh "npm install"
+    sh "npm ci"
     sh "npm install -g vsce"
   }
 
@@ -68,8 +68,13 @@ node('rhel8'){
 
   if(params.UPLOAD_LOCATION) {
     stage('Snapshot') {
-      def filesToPush = findFiles(glob: '**.vsix')
-      sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.vsix* ${UPLOAD_LOCATION}/snapshots/vscode-openshift-tools/"
+      script {
+        def filesToPush = findFiles(glob: '**.vsix*')
+        for (int i = 0; i < filesToPush.size(); i++) {
+          echo "Uploading ${filesToPush[i].path}"
+          sh "sftp -C ${UPLOAD_LOCATION}/snapshots/vscode-openshift-tools/ <<< \$'put -p \"${filesToPush[i].path}\"'"
+        }
+      }
     }
   }
 
@@ -87,8 +92,14 @@ node('rhel8'){
         }
 
         stage "Promote the build to stable"
-        sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.vsix* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
-        sh "rsync -Pzrlt --rsh=ssh --protocol=28 *.tgz* ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/"
+        script {
+          def filesToPush = findFiles(glob: '**.vsix*')
+          for (int i = 0; i < filesToPush.size(); i++) {
+            echo "Uploading ${filesToPush[i].path}"
+            sh "sftp -C ${UPLOAD_LOCATION}/stable/vscode-openshift-tools/ <<< \$'put -p \"${filesToPush[i].path}\"'"
+          }
+        }
+
         archive includes:"**.vsix*,**.tgz*"
       }
     }

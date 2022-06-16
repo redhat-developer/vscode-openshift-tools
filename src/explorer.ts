@@ -26,9 +26,14 @@ import { Odo, OpenShiftObject, OdoImpl } from './odo';
 import { WatchUtil, FileContentChangeNotifier } from './util/watch';
 import { KubeConfigUtils } from './util/kubeUtils';
 import { vsCommand } from './vscommand';
-import { ComponentTypesView } from './componentTypesView';
+import { ComponentTypesView } from './registriesView';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
+
+type PackageJSON = {
+  version: string;
+  bugs: string;
+};
 
 export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Disposable {
     private static instance: OpenShiftExplorer;
@@ -56,7 +61,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         try {
             this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
         } catch (err) {
-            window.showWarningMessage('Couldn\'t install watcher for Kubernetes configuration file. OpenShift Application Explorer view won\'t be updated automatically.');
+            void window.showWarningMessage('Couldn\'t install watcher for Kubernetes configuration file. OpenShift Application Explorer view won\'t be updated automatically.');
         }
         this.fsw?.emitter?.on('file-changed', () => {
             const ku2 = new KubeConfigUtils();
@@ -74,7 +79,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         });
         OpenShiftExplorer.odoctl.subject.subscribe((event) => {
             if (event.reveal) {
-                this.reveal(event.data);
+                void this.reveal(event.data);
             } else {
                 this.refresh(event.data);
             }
@@ -126,7 +131,7 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         // double call of reveal is workaround for possible upstream issue
         // https://github.com/redhat-developer/vscode-openshift-tools/issues/762
         await this.treeView.reveal(item);
-        this.treeView.reveal(item);
+        void this.treeView.reveal(item);
     }
 
     @vsCommand('openshift.explorer.reportIssue')
@@ -135,8 +140,8 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     }
 
     static issueUrl(): string {
-        const packageJSON = extensions.getExtension('redhat.vscode-openshift-connector')
-            .packageJSON;
+        const packageJSON: PackageJSON = extensions.getExtension('redhat.vscode-openshift-connector')
+            .packageJSON as PackageJSON;
         const body = [
             `VS Code version: ${version}`,
             `OS: ${Platform.OS}`,

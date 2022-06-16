@@ -1,5 +1,32 @@
 # Change Log
 
+## 0.5.0 (June 2, 2022)
+
+* [#2414](https://github.com/redhat-developer/vscode-openshift-tools/issues/2414) Add Get Started page for OpenShift Walkthrough
+* [#2392](https://github.com/redhat-developer/vscode-openshift-tools/issues/2392) Webview Based Registry Browser
+* [#2432](https://github.com/redhat-developer/vscode-openshift-tools/issues/2432) Add telemetry event to capture Registry View UI
+* [#2417](https://github.com/redhat-developer/vscode-openshift-tools/issues/2417) Implement UI changes in the Registry Webview
+* [#2416](https://github.com/redhat-developer/vscode-openshift-tools/issues/2416) Add button for `Create Component from Workspace` in Application Explorer
+* [#2415](https://github.com/redhat-developer/vscode-openshift-tools/issues/2415) Allow users to edit registries added
+* [#2398](https://github.com/redhat-developer/vscode-openshift-tools/issues/2398) Update odo to v2.5.1
+* [#2393](https://github.com/redhat-developer/vscode-openshift-tools/issues/2393) Using kubernetes context with user with valid certificate data does not show content of cluster in Application Explorer
+* [#2437](https://github.com/redhat-developer/vscode-openshift-tools/issues/2437) Do not recognize not supported s2i components in workspace
+
+## 0.4.0 (April 18, 2022)
+
+* [#2397](https://github.com/redhat-developer/vscode-openshift-tools/issues/2397) Fix jenkinsFile rsync issues for release
+* [#2388](https://github.com/redhat-developer/vscode-openshift-tools/issues/2388) Not handled promise rejection reported in log when there is no active cluster
+* [#2386](https://github.com/redhat-developer/vscode-openshift-tools/issues/2386) Sandbox error messages are not presented to the user when requesting verification code
+* [#2372](https://github.com/redhat-developer/vscode-openshift-tools/issues/2372) Update crc version to support 1.40.0
+* [#2369](https://github.com/redhat-developer/vscode-openshift-tools/issues/2369) `Open in Browser` command for Registry node in `Component Types View`
+* [#2367](https://github.com/redhat-developer/vscode-openshift-tools/issues/2367) Login to sandbox error can be improved
+* [#2324](https://github.com/redhat-developer/vscode-openshift-tools/issues/2324) Non odo components are not visible
+* [#2307](https://github.com/redhat-developer/vscode-openshift-tools/issues/2307) Update ComponentKind concept to support Deployment Configs and Deployment resources reported as otherComponents by odo
+* [#2299](https://github.com/redhat-developer/vscode-openshift-tools/issues/2299) Switch to main branch and make it as default
+* [#2157](https://github.com/redhat-developer/vscode-openshift-tools/issues/2157) Show error message when 'odo watch' execution fails and give access to command's output
+* [#1979](https://github.com/redhat-developer/vscode-openshift-tools/issues/1979) Show 'Create project' node item under cluster without projects
+* [#1174](https://github.com/redhat-developer/vscode-openshift-tools/issues/1174) Add contextValue to every URL node in the tree view
+
 ## 0.3.0 (February 28, 2022)
 
 * [#2361](https://github.com/redhat-developer/vscode-openshift-tools/issues/2361) SandBox code verification page shows all button on the same line for wide screens 

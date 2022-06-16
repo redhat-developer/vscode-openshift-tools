@@ -323,7 +323,7 @@ suite('OpenShift/Component', () => {
             expect(quickPickStub).calledWith([componentType1,componentType2]);
         });
 
-        test('when componentTypeName provided and there is no type found in registries, asks to select from all available component types', async () => {
+        test('when componentTypeName provided and there is no type found in registries, asks to select from all available registries', async () => {
             inputStub.resolves(componentItem.getName());
             const componentType1 = new ComponentTypeAdapter(
                 'componentType2',
