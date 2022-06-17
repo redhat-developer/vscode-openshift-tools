@@ -27,7 +27,7 @@ const useStyles = makeStyles(clusterStyle);
 const clusterTypes = [
   {
     heading: 'Deploy it locally on your laptop',
-    description: 'Install on Laptop: Red Hat OpenShift Local(formerly Red Hat CodeReady Containers)',
+    description: 'Install on Laptop: Red Hat OpenShift Local (formerly Red Hat CodeReady Containers)',
     smallInfo: 'Create a minimal OpenShift 4 cluster on your desktop/laptop for local development and testing.',
     imageUrl: ['https://www.openshift.com/hubfs/images/icons/Icon-Red_Hat-Hardware-Laptop-A-Black-RGB.svg'],
     urlAlt: 'crc',
