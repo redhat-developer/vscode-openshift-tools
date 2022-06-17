@@ -471,7 +471,7 @@ export default function addClusterView(props) {
                   </ListItemAvatar>
                   <ListItemText
                     primary="Download"
-                    secondary={<span>This will download OpenShift local {crcLatest}</span>}/>
+                    secondary={<span>This will download OpenShift Local {crcLatest}</span>}/>
                     <a href={fetchDownloadBinary()} style={{ textDecoration: 'none'}}>
                       <Button
                         color="default"
