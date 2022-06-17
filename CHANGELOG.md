@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.5.0 (June 2, 2022)
+## 0.5.0 (June 20, 2022)
 
 * [#2414](https://github.com/redhat-developer/vscode-openshift-tools/issues/2414) Add Get Started page for OpenShift Walkthrough
 * [#2392](https://github.com/redhat-developer/vscode-openshift-tools/issues/2392) Webview Based Registry Browser
