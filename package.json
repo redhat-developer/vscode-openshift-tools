@@ -46,7 +46,7 @@
 		"Red Hat",
 		"Clusters",
 		"k8s",
-		"CRC",
+		"OpenShift Local",
 		"CodeReady Containers",
 		"devsandbox",
 		"debuggers",
@@ -350,7 +350,7 @@
 			},
 			{
 				"command": "openshift.explorer.stopCluster",
-				"title": "Stop CRC",
+				"title": "Stop OpenShift Local",
 				"category": "OpenShift"
 			},
 			{
@@ -807,22 +807,22 @@
 			},
 			{
 				"command": "openshift.explorer.addCluster.openCrcAddClusterPage",
-				"title": "Open Add CRC Cluster Wizard",
+				"title": "Open Add OpenShift Local Setup Workflow",
 				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.explorer.addCluster.crcSetup",
-				"title": "Run CRC Setup Command",
+				"title": "Run OpenShift Local Setup Command",
 				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.explorer.addCluster.crcStart",
-				"title": "Run CRC Setup Command",
+				"title": "Run OpenShift Local Start Command",
 				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.explorer.addCluster.crcStop",
-				"title": "Run CRC Setup Command",
+				"title": "Run OpenShift Local Stop Command",
 				"category": "OpenShift"
 			},
 			{
@@ -1669,12 +1669,12 @@
 			{
 				"type": "object",
 				"order": 2,
-				"title": "Red Hat CodeReady Containers",
+				"title": "Red Hat OpenShift Local",
 				"properties": {
 					"openshiftConnector.crcBinaryLocation": {
 						"type": "string",
 						"default": null,
-						"description": "Provide the path where the crc executable is present."
+						"description": "Provide the path where the OpenShift Local executable is present."
 					},
 					"openshiftConnector.crcPullSecretPath": {
 						"type": "string",
@@ -1694,7 +1694,7 @@
 					"openshiftConnector.crcNameserver": {
 						"type": "string",
 						"default": "",
-						"description": "IP address/name of DNS to use with CRC"
+						"description": "IP address/name of DNS to use with OpenShift Local"
 					}
 				}
 			},

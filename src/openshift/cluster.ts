@@ -122,8 +122,8 @@ export class Cluster extends OpenShiftItem {
         let crcBinary;
         const crcPath = workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
         if(crcPath) {
-            newPathPrompt = { label: '$(plus) Provide different crc binary path'};
-            pathSelectionDialog = await window.showQuickPick([{label:`${crcPath}`, description: 'Fetched from settings'}, newPathPrompt], {placeHolder: 'Select CRC binary path', ignoreFocusOut: true});
+            newPathPrompt = { label: '$(plus) Provide different OpenShift Local file path'};
+            pathSelectionDialog = await window.showQuickPick([{label:`${crcPath}`, description: 'Fetched from settings'}, newPathPrompt], {placeHolder: 'Select OpenShift Local file path', ignoreFocusOut: true});
         }
         if(!pathSelectionDialog) return;
         if (pathSelectionDialog.label === newPathPrompt.label) {
@@ -132,14 +132,14 @@ export class Cluster extends OpenShiftItem {
                 canSelectFolders: false,
                 canSelectMany: false,
                 defaultUri: Uri.file(Platform.getUserHomePath()),
-                openLabel: 'Add crc binary path.',
+                openLabel: 'Add OpenShift Local file path.',
             });
             if (!crcBinaryLocation) return null;
             crcBinary = crcBinaryLocation[0].fsPath;
         } else {
             crcBinary = crcPath;
         }
-        const terminal: Terminal = WindowUtil.createTerminal('OpenShift: Stop CRC', undefined);
+        const terminal: Terminal = WindowUtil.createTerminal('OpenShift: Stop OpenShift Local', undefined);
             terminal.sendText(`${crcBinary} stop`);
             terminal.show();
         return;
