@@ -537,7 +537,7 @@ export default function addClusterView(props) {
                 </ListItemAvatar>
               <ListItemText
                 primary={<span>Provide the pull secret.<sup style={{color: '#BE0000'}}>*</sup></span>}
-                secondary={<span>Download pull secret file from <a href={crcDefaults.CrcLandingPageURL}>here</a> and upload it.</span>} />
+                secondary={<span>To pull container images from the registry, a pull secret is necessary. You can download the pull secret from the <a href={crcDefaults.CrcLandingPageURL}>Red Hat OpenShift Local download page</a> and upload it.</span>} />
               <div className={classes.uploadLabel}>
                 <input
                   style={{ display: 'none' }}
