@@ -842,7 +842,7 @@ export class Component extends OpenShiftItem {
                     request: 'attach',
                     address: 'localhost',
                     localRoot: component.contextPath.fsPath,
-                    remoteRoot: '/project'
+                    remoteRoot: '/projects'
                 });
             }
         } else {
