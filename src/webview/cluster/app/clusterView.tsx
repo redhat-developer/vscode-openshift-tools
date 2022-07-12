@@ -59,8 +59,8 @@ function getSteps() {
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function addClusterView(props) {
   const classes = useStyles();
-  const crcLatest = '2.4.1';
-  const crcOpenShift = '4.10.14';
+  const crcLatest = '2.5.1';
+  const crcOpenShift = '4.10.18';
   const [fileName, setBinaryPath] = React.useState('');
   const [pullSecretPath, setSecret] = React.useState('');
   const [cpuSize, setCpuSize] = React.useState(crcDefaults.DefaultCPUs);
