@@ -1,0 +1,34 @@
+.gridwrapper {
+    display: grid;
+    margin: 1rem 6rem;
+    grid-template-columns: repeat(2, 2fr);
+    grid-auto-rows: 200px;
+    grid-template-rows: 100px 200px;
+    grid-gap: 10px;
+}
+
+nav {
+    background: yellow;
+}
+
+.gridwrapper div {
+    padding: 1em;
+    background: red;
+    color: white;
+    box-sizing: border-box;
+}
+
+.gridwrapper div:nth-child(odd) {
+    background: blue;
+}
+
+nav {
+    grid-column: 1 / -1;
+}
+
+/*MAKE DIVS 1FR ON MOBILE*/
+@media only screen and (max-width : 736px) {
+    .gridwrapper {
+        grid-template-columns: 1fr;
+    }
+}
