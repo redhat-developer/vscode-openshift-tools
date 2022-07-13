@@ -11,6 +11,8 @@
 * [#2398](https://github.com/redhat-developer/vscode-openshift-tools/issues/2398) Update odo to v2.5.1
 * [#2393](https://github.com/redhat-developer/vscode-openshift-tools/issues/2393) Using kubernetes context with user with valid certificate data does not show content of cluster in Application Explorer
 * [#2437](https://github.com/redhat-developer/vscode-openshift-tools/issues/2437) Do not recognize not supported s2i components in workspace
+* [#2470](https://github.com/redhat-developer/vscode-openshift-tools/issues/2470) Update CRC to v2.5.1
+* [#2446](https://github.com/redhat-developer/vscode-openshift-tools/issues/2446) Create Component workflow select context folder step should not filter out workspace folders with s2i components
 
 ## 0.4.0 (April 18, 2022)
 
