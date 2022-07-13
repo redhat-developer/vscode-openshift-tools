@@ -4,17 +4,15 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { workspace } from 'vscode';
-import { ExtenisonID } from './util/constants';
-import { WelcomeWebview } from 'vscode-welcome-view';
-import path = require('path');
 import { vsCommand } from './vscommand';
+import WelcomeViewLoader from './webview/welcome/welcomeViewLoader';
 
 export class WelcomePage {
 
     @vsCommand('openshift.welcome')
-    static createOrShow(): void {
+    static async createOrShow(): Promise<void> {
         if(workspace.getConfiguration('openshiftConnector').get('showWelcomePage')) {
-            WelcomeWebview.createOrShow(ExtenisonID, path.resolve(__dirname, '..', '..'), path.join('welcome', 'app', 'assets'), 'openshiftConnector.showWelcomePage');
+            await WelcomeViewLoader.loadView('Welcome');
         }
     }
 }
