@@ -13,3 +13,4 @@ src/webview/webpack.config.js
 out
 src/webview/create-service
 src/webview/devfile-registry
+src/webview/welcome
