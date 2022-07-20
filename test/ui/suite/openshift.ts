@@ -2,27 +2,28 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-
 import { expect } from 'chai';
-import { ActivityBar, CustomTreeSection, SideBarView, ViewSection, WelcomeContentSection } from 'vscode-extension-tester';
+import { ActivityBar, CustomTreeSection, SideBarView, ViewSection, WelcomeContentSection, Workbench } from 'vscode-extension-tester';
 import { BUTTONS, VIEWS } from '../common/constants';
 
 export function checkOpenshiftView() {
     describe('OpenShift View', () => {
         let view: SideBarView;
 
-        before(async () => {
+        before(async function context() {
+            this.timeout(10000);
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             await new Promise(res => setTimeout(res, 5000));
+            await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
         });
 
         it('Displays all view sections', async () => {
             const expected = [VIEWS.appExplorer, VIEWS.components, VIEWS.compRegistries, VIEWS.watchSessions, VIEWS.debugSessions];
-            const sections = await view.getContent().getSections();
-            const titles = await Promise.all(sections.map(async item => item.getTitle()));
-
-            for (const item of expected) {
-                expect(titles).contains(item);
+            const content = view.getContent();
+            for (const sectionTitle of expected) {
+                const section = await content.getSection(sectionTitle);
+                expect(await section.getTitle()).to.eq(sectionTitle);
+                await section.collapse();
             }
         });
 
@@ -32,6 +33,7 @@ export function checkOpenshiftView() {
 
             before(async () => {
                 explorer = await view.getContent().getSection(VIEWS.appExplorer);
+                await explorer.expand();
                 welcome = await explorer.findWelcomeContent();
 
                 for (const item of [VIEWS.components, VIEWS.compRegistries, VIEWS.watchSessions, VIEWS.debugSessions]) {
