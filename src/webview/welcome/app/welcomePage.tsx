@@ -23,7 +23,7 @@ export const Welcome: React.FC<DefaultProps> = ({ }) => {
                 </header>
 
                 <div className='content__area'>
-                <section id='current-line' className='section--settings'>
+                    <section id='current-line' className='section--settings'>
                         <div className='section__content'>
                             <div className='section__header'>
                                 <div className='setting__input setting__input--big'>
@@ -100,37 +100,7 @@ export const Welcome: React.FC<DefaultProps> = ({ }) => {
                             </div>
                         </div>
                         <div className='section__preview'>
-                            <img
-                                className='image__preview'
-                                src='#{webroot}/media/current-line-blame.webp'
-                                loading='lazy'
-                                width='600'
-                                height='206'
-                            />
-                            <img
-                                className='image__preview--overlay hidden'
-                                src='#{webroot}/media/current-line-blame-on.webp'
-                                data-visibility='currentLine.enabled'
-                                loading='lazy'
-                                width='600'
-                                height='206'
-                            />
-                            <img
-                                className='image__preview--overlay hidden'
-                                src='#{webroot}/media/current-line-blame-on+pr.webp'
-                                data-visibility='currentLine.enabled &amp; currentLine.pullRequests.enabled'
-                                loading='lazy'
-                                width='600'
-                                height='206'
-                            />
-                            <img
-                                className='image__preview--overlay hidden'
-                                src='#{webroot}/media/current-line-blame-on-scrollable.webp'
-                                data-visibility='currentLine.enabled &amp; currentLine.scrollable'
-                                loading='lazy'
-                                width='600'
-                                height='206'
-                            />
+                            <img className='image__preview' src={require('../../../../images/welcome/cloud.svg').default} />
                         </div>
                     </section>
 
@@ -153,85 +123,7 @@ export const Welcome: React.FC<DefaultProps> = ({ }) => {
                             </div>
                         </div>
                         <div className='section__preview'>
-                            <img
-                                className='image__preview'
-                                src='#{webroot}/media/code-lens.webp'
-                                loading='lazy'
-                                width='600'
-                                height='206'
-                            />
-                            <img
-                                className='image__preview--overlay hidden'
-                                src='#{webroot}/media/code-lens-file-recent+authors.webp'
-                                data-visibility='codeLens.enabled &amp; codeLens.recentChange.enabled &amp; codeLens.authors.enabled &amp; codeLens.scopes +document'
-                                loading='lazy'
-                                width='600'
-                                height='206'
-                            />
-                            <img
-                                className='image__preview--overlay hidden'
-                                src='#{webroot}/media/code-lens-file-recent.webp'
-                                data-visibility='codeLens.enabled &amp; codeLens.recentChange.enabled &amp; codeLens.authors.enabled =false &amp; codeLens.scopes +document'
-                                loading='lazy'
-                                width='600'
-                                height='206'
-                            />
-                            <img
-                                className='image__preview--overlay hidden'
-                                src='#{webroot}/media/code-lens-file-authors.webp'
-                                data-visibility='codeLens.enabled &amp; codeLens.recentChange.enabled =false &amp; codeLens.authors.enabled &amp; codeLens.scopes +document'
-                                loading='lazy'
-                                width='600'
-                                height='206'
-                            />
-
-                            <img
-                                className='image__preview--overlay hidden'
-                                src='#{webroot}/media/code-lens-containers-recent+authors.webp'
-                                data-visibility='codeLens.enabled &amp; codeLens.recentChange.enabled &amp; codeLens.authors.enabled &amp; codeLens.scopes +containers'
-                                loading='lazy'
-                                width='600'
-                                height='206'
-                            />
-                            <img
-                                className='image__preview--overlay hidden'
-                                src='#{webroot}/media/code-lens-containers-recent.webp'
-                                data-visibility='codeLens.enabled &amp; codeLens.recentChange.enabled &amp; codeLens.authors.enabled =false &amp; codeLens.scopes +containers'
-                                loading='lazy'
-                                width='600'
-                                height='206'
-                            />
-                            <img
-                                className='image__preview--overlay hidden'
-                                src='#{webroot}/media/code-lens-containers-authors.webp'
-                                data-visibility='codeLens.enabled &amp; codeLens.recentChange.enabled =false &amp; codeLens.authors.enabled &amp; codeLens.scopes +containers'
-                                loading='lazy'
-                                width='600'
-                                height='206'
-                            />
-
-                            <img
-                                className='image__preview--overlay hidden'
-                                src='#{webroot}/media/code-lens-blocks-recent+authors.webp'
-                                data-visibility='codeLens.enabled &amp; codeLens.recentChange.enabled &amp; codeLens.authors.enabled &amp; codeLens.scopes +blocks'
-                                loading='lazy'
-                                width='600'
-                                height='206'
-                            />
-                            <img
-                                className='image__preview--overlay hidden'
-                                src='#{webroot}/media/code-lens-blocks-recent.webp'
-                                data-visibility='codeLens.enabled &amp; codeLens.recentChange.enabled &amp; codeLens.authors.enabled =false &amp; codeLens.scopes +blocks'
-                                loading='lazy'
-                            />
-                            <img
-                                className='image__preview--overlay hidden'
-                                src='#{webroot}/media/code-lens-blocks-authors.webp'
-                                data-visibility='codeLens.enabled &amp; codeLens.recentChange.enabled =false &amp; codeLens.authors.enabled &amp; codeLens.scopes +blocks'
-                                loading='lazy'
-                                width='600'
-                                height='206'
-                            />
+                            <img className='image__preview' src={require('../../../../images/welcome/devfile.svg').default} />
                         </div>
                     </section>
 
@@ -254,29 +146,7 @@ export const Welcome: React.FC<DefaultProps> = ({ }) => {
                             </div>
                         </div>
                         <div className='section__preview'>
-                            <img
-                                className='image__preview'
-                                src='#{webroot}/media/status-bar.webp'
-                                loading='lazy'
-                                width='600'
-                                height='206'
-                            />
-                            <img
-                                className='image__preview--overlay hidden'
-                                src='#{webroot}/media/status-bar-left.webp'
-                                data-visibility='statusBar.enabled &amp; statusBar.alignment =left'
-                                loading='lazy'
-                                width='600'
-                                height='206'
-                            />
-                            <img
-                                className='image__preview--overlay hidden'
-                                src='#{webroot}/media/status-bar-right.webp'
-                                data-visibility='statusBar.enabled &amp; statusBar.alignment =right'
-                                loading='lazy'
-                                width='600'
-                                height='206'
-                            />
+                            <img className='image__preview' src={require('../../../../images/welcome/component.svg').default} />
                         </div>
                     </section>
                 </div>
