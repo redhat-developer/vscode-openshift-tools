@@ -44,7 +44,7 @@ export const Welcome: React.FC<DefaultProps> = ({ }) => {
                         <div className='section__preview'>
                             <img
                                 className='image__preview'
-                                src={require('../../../../images/welcome/OpenShift-Branding-box1.png').default}
+                                src={require('../../../../images/welcome/OpenShift-Branding-box.png').default}
                                 loading='lazy'
                                 width={500}
                             />
