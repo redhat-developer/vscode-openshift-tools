@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
+import { VSCodeMessage } from './vsCodeMessage';
 import './welcome.scss';
 
 export interface DefaultProps {
@@ -10,6 +11,20 @@ export interface DefaultProps {
 }
 
 export const Welcome: React.FC<DefaultProps> = ({ }) => {
+
+    const openGetStarted = (): void => {
+        VSCodeMessage.postMessage({
+            'action': 'callGetStartedPage'
+        });
+        return;
+    }
+
+    const openReleaseNotes = (): void => {
+        VSCodeMessage.postMessage({
+            'action': 'openReleaseNotes'
+        });
+        return;
+    }
     return (
         <>
             <div className='container'>
@@ -43,7 +58,7 @@ export const Welcome: React.FC<DefaultProps> = ({ }) => {
                         </div>
                         <div className='section__preview'>
                             <img
-                                className='image__preview'
+                                className='brand'
                                 src={require('../../../../images/welcome/OpenShift-Branding-box.png').default}
                                 loading='lazy'
                                 width={500}
@@ -58,25 +73,17 @@ export const Welcome: React.FC<DefaultProps> = ({ }) => {
                             <a
                                 title='Watch the OpenShift Getting Started video'
                                 href='#'
-                            >
-                                <img
-                                    src='#{webroot}/media/gitlens-tutorial-banner.webp'
-                                    alt='Watch the OpenShift Connector Getting Started video'
-                                />
-                            </a>
+                            />
                             <a
                                 className='button button--flat'
                                 title='See Whats New'
-                                href='#'
+                                onClick={openReleaseNotes}
                             >See What's New in OpenShift Connector</a
-                            >
-                            <span className='button__subaction'
-                            >or read the <a href='#'>release notes</a></span
                             >
                             <a
                                 className='button button--flat'
-                                title='Open the Get Started with GitLens walkthrough'
-                                href='command:gitlens.getStarted'
+                                title='Open the Get Started with OpenShift Connector walkthrough'
+                                onClick={openGetStarted}
                             >Get Started Walkthrough</a
                             >
                         </div>
