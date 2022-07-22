@@ -225,6 +225,7 @@
 		"onView:extension.vsKubernetesExplorer",
 		"onView:openshiftComponentTypesView",
 		"onCommand:openshift.welcome",
+        "onCommand:openshift.getStarted",
 		"onCommand:openshift.about",
 		"onCommand:openshift.oc.about",
 		"onCommand:openshift.output",
@@ -304,7 +305,6 @@
 		"onCommand:clusters.openshift.deployment.openConsole",
 		"onCommand:clusters.openshift.imagestream.openConsole",
 		"onCommand:openshift.componentTypesView.registry.openInView",
-        "onCommand:openshift.getStarted",
 		"onWalkthrough:openshiftWalkthrough"
 	],
 	"contributes": {
@@ -894,6 +894,11 @@
 			{
 				"command": "openshift.welcome",
 				"title": "Welcome",
+				"category": "OpenShift"
+			},
+            {
+				"command": "openshift.getStarted",
+				"title": "Get Started",
 				"category": "OpenShift"
 			},
 			{
@@ -1564,80 +1569,80 @@
 			]
 		},
 		"walkthroughs": [
-			{
-				"id": "openshiftWalkthrough",
-				"title": "Getting Started with OpenShift",
-				"description": "Start your application development on OpenShift or Kubernetes",
-				"steps": [
-					{
-						"id": "login",
-						"title": "Login/Provision OpenShift cluster",
-						"description": "Users can Login to an existing OpenShift cluster using the login button.\nTo provision a new OpenShift cluster, **Add OpenShift Cluster** button opens a guided experience workflow to connect to a local or sandbox cluster.\n[Login to the existing OpenShift cluster](command:openshift.explorer.login)\n[Provision local OpenShift cluster](command:openshift.explorer.addCluster?[\"crc\"])\n[Provision Red Hat Developer Sandbox cluster](command:openshift.explorer.addCluster?[\"sandbox\"])",
-						"media": {
-							"image": "images/walkthrough/loginCluster.gif",
-							"altText": "login to cluster"
-						},
-						"completionEvents": [
-							"onCommand:openshift.explorer.login",
-							"onCommand:openshift.explorer.addCluster",
-							"onCommand:openshift.explorer.login.credentialsLogin",
-							"onCommand:openshift.explorer.login.tokenLogin"
-						]
-					},
-					{
-						"id": "showRegistries",
-						"title": "View the default and custom devfile registries.",
-						"description": "You can connect to publicly available devfile registries to get started with devfiles for different languages and frameworks.\n[Open registry view](command:openshift.componentTypesView.registry.openInView)",
-						"media": {
-							"image": "images/walkthrough/showRegistries.gif",
-							"altText": "show registry"
-						},
-						"completionEvents": [
-							"onCommand:openshift.componentTypesView.registry.openInView"
-						]
-					},
-					{
-						"id": "createComponent",
-						"title": "Create a Component using Registry Viewer",
-						"description": "Create a component in the current working directory with the file `devfile.yaml` from the devfile registry and the starter project selected. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.componentType.newComponent)",
-						"media": {
-							"image": "images/walkthrough/createComponent.gif",
-							"altText": "create component"
-						},
-						"completionEvents": [
-							"onCommand:openshift.componentType.newComponent"
-						]
-					},
-					{
-						"id": "pushComponent",
-						"title": "Push a Component to the connected cluster",
-						"description": "The component created above is available locally. To deploy the component on the connect OpenShift/Kubernetes cluster, we need to `Push` the Component",
-						"media": {
-							"image": "images/walkthrough/pushComponent.gif",
-							"altText": "push component"
-						}
-					},
-					{
-						"id": "debug",
-						"title": "Debug the Component locally",
-						"description": "Debug and test remote applications deployed from your IDE to OpenShift/Kubernetes. No more having to exit your IDE to push your application.",
-						"media": {
-							"image": "images/walkthrough/debug.gif",
-							"altText": "debug"
-						}
-					},
-					{
-						"id": "openInBrowser",
-						"title": "Open the Component in Browser",
-						"description": "Users can access the deployed component in web browser",
-						"media": {
-							"image": "images/walkthrough/openInBrowser.gif",
-							"altText": "open in browser"
-						}
-					}
-				]
-			}
-		],
+            {
+                "id": "openshiftWalkthrough",
+                "title": "Getting Started with OpenShift",
+                "description": "Start your application development on OpenShift or Kubernetes",
+                "steps": [
+                    {
+                        "id": "login",
+                        "title": "Login/Provision OpenShift cluster",
+                        "description": "Users can Login to an existing OpenShift cluster using the login button.\nTo provision a new OpenShift cluster, **Add OpenShift Cluster** button opens a guided experience workflow to connect to a local or sandbox cluster.\n[Login to the existing OpenShift cluster](command:openshift.explorer.login)\n[Provision local OpenShift cluster](command:openshift.explorer.addCluster?[\"crc\"])\n[Provision Red Hat Developer Sandbox cluster](command:openshift.explorer.addCluster?[\"sandbox\"])",
+                        "media": {
+                            "image": "images/walkthrough/loginCluster.gif",
+                            "altText": "login to cluster"
+                        },
+                        "completionEvents": [
+                            "onCommand:openshift.explorer.login",
+                            "onCommand:openshift.explorer.addCluster",
+                            "onCommand:openshift.explorer.login.credentialsLogin",
+                            "onCommand:openshift.explorer.login.tokenLogin"
+                        ]
+                    },
+                    {
+                        "id": "showRegistries",
+                        "title": "View the default and custom devfile registries.",
+                        "description": "You can connect to publicly available devfile registries to get started with devfiles for different languages and frameworks.\n[Open registry view](command:openshift.componentTypesView.registry.openInView)",
+                        "media": {
+                            "image": "images/walkthrough/showRegistries.gif",
+                            "altText": "show registry"
+                        },
+                        "completionEvents": [
+                            "onCommand:openshift.componentTypesView.registry.openInView"
+                        ]
+                    },
+                    {
+                        "id": "createComponent",
+                        "title": "Create a Component using Registry Viewer",
+                        "description": "Create a component in the current working directory with the file `devfile.yaml` from the devfile registry and the starter project selected. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.componentType.newComponent)",
+                        "media": {
+                            "image": "images/walkthrough/createComponent.gif",
+                            "altText": "create component"
+                        },
+                        "completionEvents": [
+                            "onCommand:openshift.componentType.newComponent"
+                        ]
+                    },
+                    {
+                        "id": "pushComponent",
+                        "title": "Push a Component to the connected cluster",
+                        "description": "The component created above is available locally. To deploy the component on the connect OpenShift/Kubernetes cluster, we need to `Push` the Component",
+                        "media": {
+                            "image": "images/walkthrough/pushComponent.gif",
+                            "altText": "push component"
+                        }
+                    },
+                    {
+                        "id": "debug",
+                        "title": "Debug the Component locally",
+                        "description": "Debug and test remote applications deployed from your IDE to OpenShift/Kubernetes. No more having to exit your IDE to push your application.",
+                        "media": {
+                            "image": "images/walkthrough/debug.gif",
+                            "altText": "debug"
+                        }
+                    },
+                    {
+                        "id": "openInBrowser",
+                        "title": "Open the Component in Browser",
+                        "description": "Users can access the deployed component in web browser",
+                        "media": {
+                            "image": "images/walkthrough/openInBrowser.gif",
+                            "altText": "open in browser"
+                        }
+                    }
+                ]
+            }
+        ],
 		"configuration": [
 			{
 				"type": "object",

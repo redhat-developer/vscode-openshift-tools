@@ -9,6 +9,23 @@ import { ExtenisonID } from '../../util/constants';
 
 let panel: vscode.WebviewPanel;
 
+async function welcomeViewerMessageListener(event: any): Promise<any> {
+    switch (event?.action) {
+        case 'callGetStartedPage':
+            vscode.commands.executeCommand('openshift.getStarted');
+            break;
+        case 'openReleaseNotes':
+            await vscode.commands.executeCommand('vscode.open', 'https://github.com/redhat-developer/vscode-openshift-tools/releases');
+            break;
+        default:
+            panel.webview.postMessage(
+                {
+                    error: 'Invalid command'
+                }
+            );
+            break;
+    }
+}
 export default class WelcomeViewLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     static get extensionPath() {
@@ -33,7 +50,7 @@ export default class WelcomeViewLoader {
             panel.onDidDispose(() => {
                 panel = undefined;
             });
-            //panel.webview.onDidReceiveMessage(welcomeViewerMessageListener);
+            panel.webview.onDidReceiveMessage(welcomeViewerMessageListener);
         }
         return panel;
     }
