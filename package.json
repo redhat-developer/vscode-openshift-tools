@@ -84,7 +84,8 @@
 		"update-deps": "ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
 		"coverage:upload": "codecov -f coverage/coverage-final.json",
 		"build": "npm run clean && npm run lint && npm run compile && npm run bundle-tools",
-		"smoke-test": "npm run compile:ext && extest setup-and-run out/test/ui/smoke/smoke-test.js -o test/ui/smoke/settings.json -m test/ui/smoke/.mocharc.js"
+		"smoke-test": "npm run compile:ext && extest setup-and-run out/test/ui/smoke/smoke-test.js -o test/ui/smoke/settings.json -m test/ui/smoke/.mocharc.js",
+        "public-ui-test": "npm run compile:ext && extest setup-and-run out/test/ui/public-ui-test.js -o test/ui/smoke/settings.json -m test/ui/smoke/.mocharc.js"
 	},
 	"dependencies": {
 		"@kubernetes/client-node": "^0.16.1",
@@ -210,7 +211,7 @@
 		"typescript": "^4.5.2",
 		"unzip-stream": "^0.3.1",
 		"utf-8-validate": "^5.0.7",
-		"vscode-extension-tester": "^4.2.3",
+		"vscode-extension-tester": "^4.3.0",
 		"vscode-test": "^1.6.1",
 		"webpack": "^5.65.0",
 		"webpack-cli": "^4.9.1",
