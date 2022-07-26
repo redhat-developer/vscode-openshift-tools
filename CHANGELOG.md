@@ -14,6 +14,7 @@
 * [#2470](https://github.com/redhat-developer/vscode-openshift-tools/issues/2470) Update OpenShift Local(CRC) to v2.5.1
 * [#2459](https://github.com/redhat-developer/vscode-openshift-tools/issues/2459) Update gifs with latest workflow
 * [#2446](https://github.com/redhat-developer/vscode-openshift-tools/issues/2446) `Create Component` workflow for `select context folder` step should not filter out workspace folders with s2i components
+
 ## 0.4.0 (April 18, 2022)
 
 * [#2397](https://github.com/redhat-developer/vscode-openshift-tools/issues/2397) Fix jenkinsFile rsync issues for release
