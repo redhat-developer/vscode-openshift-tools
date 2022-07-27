@@ -66,7 +66,7 @@ To resolve the problem delete 'crc' domain using
 
 `virsh destroy crc`
 
-### Error when `vrish destroy crc` domain 
+### Error when `vrish destroy crc` domain
 
 ```virsh # destroy crc
 error: Failed to destroy domain crc
@@ -79,12 +79,15 @@ use
 
 # Running local OpenShift Cluster
 
-## CodeReady Containers
+## OpenShift Local (formerly Red Hat CodeReady Containers)
 
-1. Download form https://mirror.openshift.com/pub/openshift-v4/clients/crc/
-2. Unpack
-3. 'crc setup'
-4. 'crc start -p /path/to/pull-secret.txt
+1. Downloads are available at: https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/crc/
+2. To use these binaries follow the instructions at https://console.redhat.com/openshift/install/crc/installer-provisioned to obtain the needed pull-secret.
+3. Install OpenShift Local using the installer
+3. `crc setup`
+4. `crc start -p /path/to/pull-secret.txt`
+
+Note: MacOS users upgrading from an earlier release should perform a crc delete if you get an error saying vfkit-amd64 or vfkit-arm64 not found. See: [#3218 (comment)](https://github.com/code-ready/crc/pull/3218#issuecomment-1161496884)
 
 ## minishift
 
@@ -136,4 +139,4 @@ Follow this steps to release:
 7. Install it and do smoke test
 8. Approve release on jenkins if everything is fine
 9. Create release on github and put in description record form [2]
-10. (optional) Blog about it (edited) 
+10. (optional) Blog about it (edited)

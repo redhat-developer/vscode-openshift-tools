@@ -9,7 +9,7 @@ export const VIEWS = {
     openshift: 'OpenShift',
     appExplorer: 'Application Explorer',
     components: 'Components',
-    compTypes: 'Component Types',
+    compTypes: 'Devfile Registries',
     watchSessions: 'Watch Sessions',
     debugSessions: 'Debug Sessions',
     devFileRegistry: 'DefaultDevfileRegistry',
@@ -19,7 +19,7 @@ export const BUTTONS = {
     login: 'Login',
     kubeContext: 'Select Kubernetes Context',
     addCluster: 'Add OpenShift Cluster',
-    newComponent: 'New Component',
+    newComponent: 'Create Component',
 };
 
 export const INPUTS = {

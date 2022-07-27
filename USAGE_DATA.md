@@ -40,13 +40,13 @@ In addition to generic command's usage data (see above) `Login` command also rep
 ### Add Cluster Editor
 
 The editor reports selection made on first page:
-* CRC cluster (identifier: `openshift.explorer.addCluster.openCrcAddClusterPage`)
+* OpenShift Local cluster (identifier: `openshift.explorer.addCluster.openCrcAddClusterPage`)
 * OpenShift Sandbox Cluster (identifier: `openshift.explorer.addCluster.openLaunchSandboxPage`)
 * OpenShift cluster deployed in a public cloud (identifier: `openshift.explorer.addCluster.openCreateClusterPage`)
 
 #### Code Ready Containers Cluster Page
 
-As a user goes through a setting up process or using CRC, the editor reports calls of CRC CLI commands
+As a user goes through a setting up process or using OpenShift Local, the editor reports calls of OpenShift Local CLI commands
 and sends generic command telemetry data described above.
 
 * Setup (identifier: `openshift.explorer.addCluster.crcSetup`)
