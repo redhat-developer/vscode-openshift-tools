@@ -6,18 +6,12 @@ import React from 'react';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import {
     Brand,
-    Card,
     CardBody,
     CardHeader,
     CardTitle,
     TextContent,
     TextVariants,
     Text,
-    Modal,
-    ModalVariant,
-    Backdrop,
-    Button,
-    CardActions,
     Tooltip,
     CardFooter
 } from '@patternfly/react-core';
@@ -28,7 +22,7 @@ import { VSCodeMessage } from '../vsCodeMessage';
 import { StarterProject } from '../../../odo/componentTypeDescription';
 import { StarterProjectDisplay } from './starterProjectDisplay';
 import CopyIcon from '@patternfly/react-icons/dist/esm/icons/copy-icon';
-import { Badge } from '@material-ui/core';
+import { Badge, Backdrop, Button, Card, CardActions, Modal } from '@material-ui/core';
 
 export class CardItem extends React.Component<DevFileProps, {
     numOfCall: number,
@@ -216,13 +210,18 @@ export class CardItem extends React.Component<DevFileProps, {
         </Card>;
 
         const modalViewCard = <Modal
-            isOpen={isExpanded}
+            open={isExpanded}
             className={this.props.cardItemStyle.modal}
-            variant={ModalVariant.small}
             aria-labelledby={`modal-${this.props.compDescription.Devfile.metadata.name}`}
-            showClose
-            disableFocusTrap
             onClose={this.onCloseClick}
+            onEscapeKeyDown={this.onCloseClick}
+            closeAfterTransition
+            BackdropComponent={Backdrop}
+            disableBackdropClick
+            disableAutoFocus
+            BackdropProps={{
+                timeout: 500,
+            }}
             style={{
                 width: '100%', height: '100%'
             }}>
@@ -256,10 +255,10 @@ export class CardItem extends React.Component<DevFileProps, {
                             <Button
                                 id='tooltip-selector'
                                 component='span'
-                                icon={<CopyIcon />}
                                 style={{ cursor: 'pointer' }}
                                 onClick={(): void => this.copyClicked(true)}
                             >
+                                <CopyIcon color='white' />
                             </Button>
                             <Tooltip
                                 content={
@@ -274,7 +273,7 @@ export class CardItem extends React.Component<DevFileProps, {
                     <SyntaxHighlighter language='yaml' useInlineStyles={false}
                         wrapLines
                         showLineNumbers
-                        lineNumberStyle={{marginLeft: '0.5rem'}}
+                        lineNumberStyle={{ marginLeft: '0.5rem' }}
                         customStyle={{ marginLeft: '-1.5rem' }}
                         codeTagProps={{
                             style: {
@@ -293,7 +292,6 @@ export class CardItem extends React.Component<DevFileProps, {
                 <Card
                     className={this.props.cardItemStyle.card}
                     onClick={this.onCardClick}
-                    isHoverable
                     data-testid={`card-${this.props.compDescription.Devfile.metadata.name.replace(/\.| /g, '')}`}
                 >
                     <CardHeader className={this.props.cardItemStyle.cardHeader}>
@@ -302,17 +300,16 @@ export class CardItem extends React.Component<DevFileProps, {
                                 src={this.props.compDescription.Devfile.metadata.icon}
                                 alt={`${this.props.compDescription.Devfile.metadata.name} icon`}
                                 className={this.props.cardItemStyle.cardImage} />
-
+                            {this.props.compDescription.RegistryName.toLowerCase() !== 'defaultdevfileregistry' &&
+                                <TextContent className={this.props.cardItemStyle.cardRegistryTitle}>
+                                    <Text component={TextVariants.p}>{this.props.compDescription.RegistryName}</Text>
+                                </TextContent>}
                         </div>
                     </CardHeader>
                     <CardTitle style={{ margin: '1rem 1.5rem' }}>
                         <TextContent>
                             <Text component={TextVariants.h1}>{this.props.compDescription.Devfile.metadata.displayName}</Text>
                         </TextContent>
-                        {this.props.compDescription.RegistryName.toLowerCase() !== 'defaultdevfileregistry' &&
-                            <TextContent className={this.props.cardItemStyle.cardRegistryTitle}>
-                                <Text component={TextVariants.p}>{this.props.compDescription.RegistryName}</Text>
-                            </TextContent>}
                     </CardTitle>
                     <CardBody className={this.props.cardItemStyle.cardBody}>
                         {
@@ -362,9 +359,7 @@ export class CardItem extends React.Component<DevFileProps, {
                 {
                     devFileYAML.length > 0 && isExpanded &&
                     <>
-                        <Backdrop className={this.props.cardItemStyle.backDrop}>
-                            {modalViewCard}
-                        </Backdrop>
+                        {modalViewCard}
                     </>
                 }
             </>

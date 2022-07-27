@@ -12,7 +12,9 @@ export default (theme: Theme) =>
             margin: '0.2rem',
             cursor: 'pointer',
             borderRadius: '1rem',
-            border: '1px solid var(--vscode-focusBorder)',
+            border: '2px solid var(--vscode-focusBorder)',
+            backgroundColor: 'var(--vscode-editor-background)',
+            color: 'var(--vscode-editor-foreground)',
             transition: 'all ease 200ms',
             transform: 'scale(0.95)',
             '&:hover': {
@@ -44,8 +46,8 @@ export default (theme: Theme) =>
             marginRight: '1.5rem'
         },
         cardRegistryTitle: {
-            color: 'var(--vscode-textPreformat-foreground)',
-            width: '15rem',
+            color: 'var(--vscode-textLink-activeForeground)',
+            minWidth: '5rem',
             height: '2rem',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
@@ -54,7 +56,9 @@ export default (theme: Theme) =>
             textDecoration: 'none',
             textOverflow: 'ellipsis',
             wordBreak: 'break-all',
-            paddingTop: '0rem'
+            float: 'right',
+            paddingTop: '0.5rem',
+            margin: '1rem'
         },
         badge: {
             minWidth: '0.5rem',
@@ -95,9 +99,11 @@ export default (theme: Theme) =>
             backgroundColor: 'var(--vscode-editor-background)',
             fontSize: 'var(--vscode-font-size)',
             fontFamily: 'var(--vscode-font-family)',
-            height: '40rem',
+            border: '1px solid var(--vscode-focusBorder)',
+            maxHeight: '40rem',
+            maxWidth: '50rem',
             margin: 'auto',
-            overflow: 'none'
+            overflowY: 'auto'
         },
         yamlCardHeader: {
             padding: '1.5rem!important',
@@ -106,8 +112,10 @@ export default (theme: Theme) =>
             height: 'auto'
         },
         yamlCardBody: {
+            position: 'relative',
             width: '100%',
-            overflow: 'scroll'
+            height: '50rem',
+            overflow: 'auto'
         },
         copyButton: {
             display: 'block',
@@ -161,8 +169,10 @@ export default (theme: Theme) =>
             height: '3rem'
         },
         devPageCard: {
+            color: 'var(--vscode-foreground)',
+            backgroundColor: 'var(--vscode-editor-background)',
             height: 'auto',
-            width: '100%',
+            width: '40rem',
             zIndex: 1
         },
         devPageCardHeader: {
@@ -179,7 +189,8 @@ export default (theme: Theme) =>
             backgroundColor: 'var(--vscode-editor-background)',
             fontSize: 'var(--vscode-font-size)',
             fontFamily: 'var(--vscode-font-family)',
-            height: 'auto',
+            maxWidth: '25rem',
+            maxHeight: '15rem',
             margin: 'auto',
             overflow: 'hidden',
             border: '1px solid var(--vscode-focusBorder)'
