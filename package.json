@@ -2,7 +2,7 @@
 	"name": "vscode-openshift-connector",
 	"displayName": "OpenShift Connector",
 	"description": "Simplified app dev for Kubernetes or Red Hat OpenShift",
-	"version": "0.5.0",
+	"version": "0.6.0",
 	"license": "MIT",
 	"publisher": "redhat",
 	"author": "Red Hat",
@@ -46,7 +46,7 @@
 		"Red Hat",
 		"Clusters",
 		"k8s",
-		"CRC",
+		"OpenShift Local",
 		"CodeReady Containers",
 		"devsandbox",
 		"debuggers",
@@ -84,7 +84,8 @@
 		"update-deps": "ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
 		"coverage:upload": "codecov -f coverage/coverage-final.json",
 		"build": "npm run clean && npm run lint && npm run compile && npm run bundle-tools",
-		"smoke-test": "npm run compile:ext && extest setup-and-run out/test/ui/smoke/smoke-test.js -o test/ui/smoke/settings.json -m test/ui/smoke/.mocharc.js"
+		"smoke-test": "npm run compile:ext && extest setup-and-run out/test/ui/smoke/smoke-test.js -o test/ui/smoke/settings.json -m test/ui/smoke/.mocharc.js",
+        "public-ui-test": "npm run compile:ext && extest setup-and-run out/test/ui/public-ui-test.js -o test/ui/smoke/settings.json -m test/ui/smoke/.mocharc.js"
 	},
 	"dependencies": {
 		"@kubernetes/client-node": "^0.16.1",
@@ -102,9 +103,6 @@
 		"make-fetch-happen": "^9.1.0",
 		"minimatch": "^3.0.4",
 		"mkdirp": "^1.0.4",
-		"react-copy-to-clipboard": "^5.1.0",
-		"react-router-dom": "^6.3.0",
-		"react-syntax-highlighter": "^15.5.0",
 		"rxjs": "^7.4.0",
 		"semver": "^7.3.5",
 		"stacktrace-parser": "^0.1.10",
@@ -177,7 +175,7 @@
 		"express": "^4.17.2",
 		"file-loader": "^6.2.0",
 		"glob": "^7.2.0",
-		"got": "^11.8.3",
+		"got": "^11.8.5",
 		"handlebars": "^4.7.7",
 		"hasha": "5.2.2",
 		"html-webpack-plugin": "^5.5.0",
@@ -196,6 +194,9 @@
 		"react-lazylog": "^4.5.3",
 		"react-loader-spinner": "^4.0.0",
 		"react-phone-input-2": "^2.14.0",
+		"react-copy-to-clipboard": "^5.1.0",
+		"react-router-dom": "^6.3.0",
+		"react-syntax-highlighter": "^15.5.0",
 		"remap-istanbul": "^0.13.0",
 		"request": "^2.88.2",
 		"shelljs": "^0.8.5",
@@ -210,7 +211,7 @@
 		"typescript": "^4.5.2",
 		"unzip-stream": "^0.3.1",
 		"utf-8-validate": "^5.0.7",
-		"vscode-extension-tester": "^4.2.3",
+		"vscode-extension-tester": "^4.3.0",
 		"vscode-test": "^1.6.1",
 		"webpack": "^5.65.0",
 		"webpack-cli": "^4.9.1",
@@ -298,7 +299,9 @@
 		"onCommand:clusters.openshift.deploy.rcShowLog",
 		"onCommand:clusters.openshift.deploy.rcShowLog.palette",
 		"onCommand:clusters.openshift.deployment.openConsole",
-		"onCommand:clusters.openshift.imagestream.openConsole"
+		"onCommand:clusters.openshift.imagestream.openConsole",
+    "onCommand:openshift.componentTypesView.registry.openInView",
+    "onWalkthrough:openshiftWalkthrough"
 	],
 	"contributes": {
 		"commands": [
@@ -348,7 +351,7 @@
 			},
 			{
 				"command": "openshift.explorer.stopCluster",
-				"title": "Stop CRC",
+				"title": "Stop OpenShift Local",
 				"category": "OpenShift"
 			},
 			{
@@ -805,22 +808,22 @@
 			},
 			{
 				"command": "openshift.explorer.addCluster.openCrcAddClusterPage",
-				"title": "Open Add CRC Cluster Wizard",
+				"title": "Open Add OpenShift Local Setup Workflow",
 				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.explorer.addCluster.crcSetup",
-				"title": "Run CRC Setup Command",
+				"title": "Run OpenShift Local Setup Command",
 				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.explorer.addCluster.crcStart",
-				"title": "Run CRC Setup Command",
+				"title": "Run OpenShift Local Start Command",
 				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.explorer.addCluster.crcStop",
-				"title": "Run CRC Setup Command",
+				"title": "Run OpenShift Local Stop Command",
 				"category": "OpenShift"
 			},
 			{
@@ -896,11 +899,6 @@
 			}
 		],
 		"keybindings": [
-			{
-				"command": "openshift.explorer.login",
-				"key": "alt+shift+l",
-				"mac": "ctrl+shift+l"
-			},
 			{
 				"command": "openshift.explorer.refresh",
 				"key": "alt+shift+r",
@@ -1541,21 +1539,6 @@
 					"group": "inline"
 				},
 				{
-					"command": "openshift.componentType.openStarterProjectRepository",
-					"when": "view == openshiftComponentTypesView && viewItem == s2iSampleProject || viewItem == devfileStarterProject",
-					"group": "1@0"
-				},
-				{
-					"command": "openshift.componentType.cloneStarterProjectRepository",
-					"when": "view == openshiftComponentTypesView && viewItem == s2iSampleProject || viewItem == devfileStarterProject",
-					"group": "1@1"
-				},
-				{
-					"command": "openshift.componentType.newComponent",
-					"when": "view == openshiftComponentTypesView && viewItem == s2iImageStreamTag || viewItem == devfileStarterProject || viewItem == devfileComponentType",
-					"group": "0@0"
-				},
-				{
 					"command": "openshift.component.revealInExplorer",
 					"when": "view == openshiftComponentsView && viewItem == openshift.component"
 				},
@@ -1576,6 +1559,81 @@
 				}
 			]
 		},
+        "walkthroughs": [
+            {
+                "id": "openshiftWalkthrough",
+                "title": "Getting Started with OpenShift",
+                "description": "Start your application development on OpenShift or Kubernetes",
+                "steps": [
+                    {
+                        "id": "login",
+                        "title": "Login/Provision OpenShift cluster",
+                        "description": "Users can Login to an existing OpenShift cluster using the login button.\nTo provision a new OpenShift cluster, **Add OpenShift Cluster** button opens a guided experience workflow to connect to a local or sandbox cluster.\n[Login to the existing OpenShift cluster](command:openshift.explorer.login)\n[Provision local OpenShift cluster](command:openshift.explorer.addCluster?[\"crc\"])\n[Provision Red Hat Developer Sandbox cluster](command:openshift.explorer.addCluster?[\"sandbox\"])",
+                        "media": {
+                            "image": "images/walkthrough/loginCluster.gif",
+                            "altText": "login to cluster"
+                        },
+                        "completionEvents": [
+                            "onCommand:openshift.explorer.login",
+                            "onCommand:openshift.explorer.addCluster",
+                            "onCommand:openshift.explorer.login.credentialsLogin",
+                            "onCommand:openshift.explorer.login.tokenLogin"
+                        ]
+                    },
+                    {
+                        "id": "showRegistries",
+                        "title": "View the default and custom devfile registries.",
+                        "description": "You can connect to publicly available devfile registries to get started with devfiles for different languages and frameworks.\n[Open registry view](command:openshift.componentTypesView.registry.openInView)",
+                        "media": {
+                            "image": "images/walkthrough/showRegistries.gif",
+                            "altText": "show registry"
+                        },
+                        "completionEvents": [
+                            "onCommand:openshift.componentTypesView.registry.openInView"
+                        ]
+                    },
+                    {
+                        "id": "createComponent",
+                        "title": "Create a Component using Registry Viewer",
+                        "description": "Create a component in the current working directory with the file `devfile.yaml` from the devfile registry and the starter project selected. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.componentType.newComponent)",
+                        "media": {
+                            "image": "images/walkthrough/createComponent.gif",
+                            "altText": "create component"
+                        },
+                        "completionEvents": [
+                            "onCommand:openshift.componentType.newComponent"
+                        ]
+                    },
+                    {
+                        "id": "pushComponent",
+                        "title": "Push a Component to the connected cluster",
+                        "description": "The component created above is available locally. To deploy the component on the connect OpenShift/Kubernetes cluster, we need to `Push` the Component",
+                        "media": {
+                            "image": "images/walkthrough/pushComponent.gif",
+                            "altText": "push component"
+                        }
+                    },
+                    {
+                        "id": "debug",
+                        "title": "Debug the Component locally",
+                        "description": "Debug and test remote applications deployed from your IDE to OpenShift/Kubernetes. No more having to exit your IDE to push your application.",
+                        "media": {
+                            "image": "images/walkthrough/debug.gif",
+                            "altText": "debug"
+                        }
+                    },
+                    {
+                        "id": "openInBrowser",
+                        "title": "Open the Component in Browser",
+                        "description": "Users can access the deployed component in web browser",
+                        "media": {
+                            "image": "images/walkthrough/openInBrowser.gif",
+                            "altText": "open in browser"
+                        }
+                    }
+                ]
+            }
+        ],
 		"configuration": [
 			{
 				"type": "object",
@@ -1612,12 +1670,12 @@
 			{
 				"type": "object",
 				"order": 2,
-				"title": "Red Hat CodeReady Containers",
+				"title": "Red Hat OpenShift Local",
 				"properties": {
 					"openshiftConnector.crcBinaryLocation": {
 						"type": "string",
 						"default": null,
-						"description": "Provide the path where the crc executable is present."
+						"description": "Provide the path where the OpenShift Local executable is present."
 					},
 					"openshiftConnector.crcPullSecretPath": {
 						"type": "string",
@@ -1637,7 +1695,7 @@
 					"openshiftConnector.crcNameserver": {
 						"type": "string",
 						"default": "",
-						"description": "IP address/name of DNS to use with CRC"
+						"description": "IP address/name of DNS to use with OpenShift Local"
 					}
 				}
 			},

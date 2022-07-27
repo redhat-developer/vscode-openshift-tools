@@ -26,7 +26,7 @@ import { Odo, OpenShiftObject, OdoImpl } from './odo';
 import { WatchUtil, FileContentChangeNotifier } from './util/watch';
 import { KubeConfigUtils } from './util/kubeUtils';
 import { vsCommand } from './vscommand';
-import { ComponentTypesView } from './componentTypesView';
+import { ComponentTypesView } from './registriesView';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 

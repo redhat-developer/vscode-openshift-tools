@@ -9,10 +9,11 @@ import { ExtenisonID } from '../../util/constants';
 import { getInstance } from '../../odo';
 import { Command } from '../../odo/command';
 import { stringify } from 'yaml';
-import { ComponentTypesView } from '../../componentTypesView';
+import { ComponentTypesView } from '../../registriesView';
 import { StarterProject } from '../../odo/componentTypeDescription';
 import { DevfileComponentType } from '../../odo/componentType';
 import { vsCommand } from '../../vscommand';
+import { ExtCommandTelemetryEvent } from '../../telemetry';
 
 let panel: vscode.WebviewPanel;
 let compDescriptions = new Set<any>();
@@ -41,6 +42,13 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             break;
         case 'openInBrowser':
             vscode.commands.executeCommand('openshift.componentType.openStarterProjectRepository', starterProject);
+            break;
+        case 'telemeteryCopyEvent':
+            const devFileName = event.devFileName;
+            const telemetryEventCopyDevFile = new ExtCommandTelemetryEvent('openshift.registryView.starterProjects.copyDevFile');
+            telemetryEventCopyDevFile.send({
+                component_type: devFileName
+            })
             break;
         default:
             panel.webview.postMessage(

@@ -1,5 +1,20 @@
 # Change Log
 
+## 0.5.0 (July 13, 2022)
+
+* [#2414](https://github.com/redhat-developer/vscode-openshift-tools/issues/2414) Add Get Started page for OpenShift Walkthrough
+* [#2392](https://github.com/redhat-developer/vscode-openshift-tools/issues/2392) Webview Based Registry Browser
+* [#2432](https://github.com/redhat-developer/vscode-openshift-tools/issues/2432) Add telemetry event to capture Registry View UI
+* [#2417](https://github.com/redhat-developer/vscode-openshift-tools/issues/2417) Implement UI changes in the Registry Webview
+* [#2416](https://github.com/redhat-developer/vscode-openshift-tools/issues/2416) Add button for `Create Component from Workspace` in Application Explorer
+* [#2415](https://github.com/redhat-developer/vscode-openshift-tools/issues/2415) Allow users to edit registries added
+* [#2398](https://github.com/redhat-developer/vscode-openshift-tools/issues/2398) Update odo to v2.5.1
+* [#2393](https://github.com/redhat-developer/vscode-openshift-tools/issues/2393) Using kubernetes context with user with valid certificate data does not show content of cluster in Application Explorer
+* [#2437](https://github.com/redhat-developer/vscode-openshift-tools/issues/2437) Do not recognize not supported s2i components in workspace
+* [#2470](https://github.com/redhat-developer/vscode-openshift-tools/issues/2470) Update OpenShift Local(CRC) to v2.5.1
+* [#2459](https://github.com/redhat-developer/vscode-openshift-tools/issues/2459) Update gifs with latest workflow
+* [#2446](https://github.com/redhat-developer/vscode-openshift-tools/issues/2446) `Create Component` workflow for `select context folder` step should not filter out workspace folders with s2i components
+
 ## 0.4.0 (April 18, 2022)
 
 * [#2397](https://github.com/redhat-developer/vscode-openshift-tools/issues/2397) Fix jenkinsFile rsync issues for release

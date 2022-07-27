@@ -16,7 +16,7 @@ import { Cluster } from '../../openshift/cluster';
 
 let panel: vscode.WebviewPanel;
 
-const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
+const channel: vscode.OutputChannel = vscode.window.createOutputChannel('OpenShift Local Logs');
 const sandboxAPI = createSandboxAPI();
 
 async function clusterEditorMessageListener (event: any ): Promise<any> {

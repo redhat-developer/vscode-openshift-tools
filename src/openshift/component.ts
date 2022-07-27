@@ -766,7 +766,7 @@ export class Component extends OpenShiftItem {
             return result;
         }
         // const components = await Component.odo.getComponentTypes();
-        const isJava = component.compType.includes('java');
+        const isJava = component.compType.includes('java') || component.compType.includes('spring');
         const isNode = component.compType.includes('nodejs');
         const isPython = component.compType.includes('python') || component.compType.includes('django');
 
@@ -842,7 +842,7 @@ export class Component extends OpenShiftItem {
                     request: 'attach',
                     address: 'localhost',
                     localRoot: component.contextPath.fsPath,
-                    remoteRoot: '/project'
+                    remoteRoot: '/projects'
                 });
             }
         } else {
