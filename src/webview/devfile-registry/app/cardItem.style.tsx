@@ -125,25 +125,25 @@ export default (theme: Theme) =>
         },
         cardButton: {
             display: 'block',
-            color: 'var(--vscode-button-foreground)',
-            backgroundColor: 'var(--vscode-button-background)',
-            width: '8rem',
-            marginTop: '0.5rem'
+            marginTop: '0.3rem',
+            marginBottom: '0.5rem'
         },
         button: {
-            width: '7.85rem',
-            height: '1.5rem',
+            width: 'auto',
+            maxHeight: '2rem',
             textAlign: 'center',
             outline: '0.0625rem solid transparent',
             outlineOffset: '0.125rem!important',
+            fontSize: 'var(--vscode-font-size)',
+            fontFamily: 'var(--vscode-font-family)',
             justifyContent: 'space-between',
+            color: 'var(--vscode-button-foreground)',
+            backgroundColor: 'var(--vscode-button-background)',
             '&:hover': {
                 cursor: 'pointer',
-                background: 'var(--vscode-button-hoverBackground)'
+                backgroundColor: 'var(--vscode-button-hoverBackground)',
             },
-            '&:foucs': {
-                outlineColor: 'var(--vscode-focusBorder)'
-            }
+            textTransform: 'none'
         },
         backBtnCardBody: {
             height: 'auto',
@@ -190,7 +190,7 @@ export default (theme: Theme) =>
             fontSize: 'var(--vscode-font-size)',
             fontFamily: 'var(--vscode-font-family)',
             maxWidth: '25rem',
-            maxHeight: '15rem',
+            maxHeight: '18rem',
             margin: 'auto',
             overflow: 'hidden',
             border: '1px solid var(--vscode-focusBorder)'
@@ -250,6 +250,7 @@ export default (theme: Theme) =>
             width: '40%',
             alignItems: 'center',
             marginLeft: 'auto',
-            marginRight: 'auto'
+            marginRight: 'auto',
+            marginBottom: '0.5rem'
         }
     });
