@@ -71,12 +71,14 @@ export class CardItem extends React.Component<DevFileProps, {
         }
     };
 
-    onCloseClick = (): void => {
-        this.setState({
-            numOfCall: 0,
-            isExpanded: false,
-            devFileYAML: ''
-        });
+    onCloseClick = (event, reason): void => {
+        if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+            this.setState({
+                numOfCall: 0,
+                isExpanded: false,
+                devFileYAML: ''
+            });
+        }
     };
 
     createComponent = (): void => {
@@ -223,10 +225,8 @@ export class CardItem extends React.Component<DevFileProps, {
             className={this.props.cardItemStyle.modal}
             aria-labelledby={`modal-${this.props.compDescription.Devfile.metadata.name}`}
             onClose={this.onCloseClick}
-            onEscapeKeyDown={this.onCloseClick}
             closeAfterTransition
             BackdropComponent={Backdrop}
-            disableBackdropClick
             disableAutoFocus
             BackdropProps={{
                 timeout: 500,
