@@ -330,6 +330,8 @@ class OdoEventImpl implements OdoEvent {
 }
 
 export interface Odo {
+    getDevfileComponents(): DevfileComponentType[];
+    getComponentTypeAdapters(): ComponentTypeAdapter[];
     getKubeconfigEnv(): any;
     getClusters(): Promise<OpenShiftObject[]>;
     getProjects(): Promise<OpenShiftObject[]>;
@@ -489,11 +491,22 @@ export class OdoImpl implements Odo {
 
     public readonly subject: Subject<OdoEvent> = new Subject<OdoEvent>();
 
+    private static compTypeAdapters: ComponentTypeAdapter[] = [];
+    private static devfileComponents: DevfileComponentType[] = [];
+
     public static get Instance(): Odo {
         if (!OdoImpl.instance) {
             OdoImpl.instance = new OdoImpl();
         }
         return OdoImpl.instance;
+    }
+
+    public getComponentTypeAdapters(): ComponentTypeAdapter[] {
+        return OdoImpl.compTypeAdapters;
+    }
+
+    public getDevfileComponents(): DevfileComponentType[] {
+        return OdoImpl.devfileComponents;
     }
 
     async getClusters(): Promise<OpenShiftObject[]> {
@@ -642,6 +655,7 @@ export class OdoImpl implements Odo {
     public async getCompTypesJson(): Promise<DevfileComponentType[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson(), undefined, true, this.getKubeconfigEnv());
         const compTypesJson: ComponentTypesJson = this.loadJSON(result.stdout);
+        OdoImpl.devfileComponents = compTypesJson?.items;
         return compTypesJson?.items;
     }
 
@@ -651,7 +665,7 @@ export class OdoImpl implements Odo {
         if (devFileComponents) {
             devFileComponents.map((item) => devfileItems.push(new ComponentTypeAdapter(item.Name, undefined, item.Description, undefined, item.Registry.Name)));
         }
-
+        OdoImpl.compTypeAdapters = devfileItems;
         return devfileItems;
     }
 

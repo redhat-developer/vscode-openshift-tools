@@ -11,7 +11,6 @@ import { Command } from '../../odo/command';
 import { stringify } from 'yaml';
 import { ComponentTypesView } from '../../registriesView';
 import { StarterProject } from '../../odo/componentTypeDescription';
-import { DevfileComponentType } from '../../odo/componentType';
 import { vsCommand } from '../../vscommand';
 import { ExtCommandTelemetryEvent } from '../../telemetry';
 
@@ -123,11 +122,12 @@ export default class RegistryViewLoader {
     }
 }
 
-function getAllComponents(eventActionName: string) {
+async function getAllComponents(eventActionName: string) {
     compDescriptions.clear();
-    getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
         const components = new Set<string>();
-        getInstance().getComponentTypesOfJSON(devFileComponentTypes).map((comp) => {
+        const devfileComponents = getInstance().getDevfileComponents();
+        const componentTypeAdapters = getInstance().getComponentTypeAdapters();
+        componentTypeAdapters.map((comp) => {
             components.add(comp.name);
         });
         const registries = await ComponentTypesView.instance.getRegistries();
@@ -140,7 +140,7 @@ function getAllComponents(eventActionName: string) {
                     });
                     compDescriptions.add(component);
                 });
-                if (devFileComponentTypes.length === compDescriptions.size) {
+                if (devfileComponents.length === compDescriptions.size) {
                     panel.webview.postMessage(
                         {
                             action: eventActionName,
@@ -158,5 +158,4 @@ function getAllComponents(eventActionName: string) {
                 );
             });
         });
-    });
 }

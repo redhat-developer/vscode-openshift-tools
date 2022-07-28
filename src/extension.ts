@@ -31,6 +31,7 @@ import { WelcomePage } from './welcomePage';
 import { ComponentsTreeDataProvider } from './componentsView';
 
 import fsx = require('fs-extra');
+import { DevfileComponentType } from './odo/componentType';
 
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -145,6 +146,10 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     OdoImpl.Instance.loadWorkspaceComponents(null);
 
     startTelemetry(extensionContext);
+
+    void OdoImpl.Instance.getCompTypesJson().then((values:DevfileComponentType[]) => {
+        OdoImpl.Instance.getComponentTypesOfJSON(values);
+    });
 
     return {
         verifyBundledBinaries,
