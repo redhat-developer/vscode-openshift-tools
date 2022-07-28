@@ -232,7 +232,7 @@ export class CardItem extends React.Component<DevFileProps, {
                 timeout: 500,
             }}
             style={{
-                width: '100%', height: '100%'
+                width: '100%', height: '100%', marginTop: '5rem'
             }}>
             <Card data-testid='dev-page-yaml' className={this.props.cardItemStyle.yamlCard}>
                 <CardHeader className={this.props.cardItemStyle.yamlCardHeader}>
