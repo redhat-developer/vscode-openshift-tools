@@ -115,47 +115,21 @@ export default class RegistryViewLoader {
     }
 
     static refresh(): void {
-      if(panel) {
-        panel.webview.postMessage({action: 'loadingComponents' });
-        getAllComponents('getAllComponents');
-      }
+        if (panel) {
+            panel.webview.postMessage({ action: 'loadingComponents' });
+            getAllComponents('getAllComponents');
+        }
     }
 }
 
-async function getAllComponents(eventActionName: string) {
-    compDescriptions.clear();
-        const components = new Set<string>();
-        const devfileComponents = getInstance().getDevfileComponents();
-        const componentTypeAdapters = getInstance().getComponentTypeAdapters();
-        componentTypeAdapters.map((comp) => {
-            components.add(comp.name);
-        });
-        const registries = await ComponentTypesView.instance.getRegistries();
-        Array.from(components).map(async (compName: string) => {
-            getInstance().execute(Command.describeCatalogComponent(compName)).then((componentDesc) => {
-                const out = JSON.parse(componentDesc.stdout);
-                out.forEach((component) => {
-                    component.Devfile?.starterProjects?.map((starter: StarterProject) => {
-                        starter.typeName = compName;
-                    });
-                    compDescriptions.add(component);
-                });
-                if (devfileComponents.length === compDescriptions.size) {
-                    panel.webview.postMessage(
-                        {
-                            action: eventActionName,
-                            compDescriptions: Array.from(compDescriptions),
-                            registries: registries
-                        }
-                    );
-                }
-            }).catch((reason) => {
-                panel.webview.postMessage(
-                    {
-                        action: eventActionName,
-                        error: '500: Internal Server Error, Please try later'
-                    }
-                );
-            });
-        });
+function getAllComponents(eventActionName: string) {
+    const registries = ComponentTypesView.instance.getListOfRegistries();
+    const componentDescriptions = ComponentTypesView.instance.getCompDescriptions();
+    panel.webview.postMessage(
+        {
+            action: eventActionName,
+            compDescriptions: Array.from(componentDescriptions),
+            registries: registries
+        }
+    );
 }

@@ -50,7 +50,7 @@ function migrateFromOdo018(): void {
     }
 }
 
-async function verifyBundledBinaries(): Promise<{odoPath: string, ocPath: string}> {
+async function verifyBundledBinaries(): Promise<{ odoPath: string, ocPath: string }> {
     return {
         odoPath: await ToolsConfig.detect('odo'),
         ocPath: await ToolsConfig.detect('oc'),
@@ -64,8 +64,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     migrateFromOdo018();
     Cluster.extensionContext = extensionContext;
     TokenStore.extensionContext = extensionContext;
-	const crcStatusItem = window.createStatusBarItem(StatusBarAlignment.Left);
-	crcStatusItem.command = 'openshift.explorer.stopCluster';
+    const crcStatusItem = window.createStatusBarItem(StatusBarAlignment.Left);
+    crcStatusItem.command = 'openshift.explorer.stopCluster';
     const disposable = [
         ...(await registerCommands(
             './k8s/route',
@@ -128,10 +128,10 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     });
 
     function updateStatusBarItem(statusBarItem: StatusBarItem, text: string): void {
-		if (!workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation')) {
-			statusBarItem.hide();
-			return;
-		}
+        if (!workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation')) {
+            statusBarItem.hide();
+            return;
+        }
         statusBarItem.text = `$(debug-stop) ${text}`;
         statusBarItem.show();
     }
@@ -143,12 +143,10 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         OdoImpl.Instance.loadWorkspaceComponents(event);
     });
 
-    OdoImpl.Instance.loadWorkspaceComponents(null);
+    await ComponentTypesView.instance.getAllComponents().then(() => {
+        OdoImpl.Instance.loadWorkspaceComponents(null);
 
-    startTelemetry(extensionContext);
-
-    void OdoImpl.Instance.getCompTypesJson().then((values:DevfileComponentType[]) => {
-        OdoImpl.Instance.getComponentTypesOfJSON(values);
+        startTelemetry(extensionContext);
     });
 
     return {

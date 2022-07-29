@@ -16,6 +16,7 @@ import {
 } from 'vscode';
 import { getInstance, Odo, OdoImpl } from './odo';
 import {
+    ComponentTypeDescription,
     DevfileComponentType,
     Registry,
 } from './odo/componentType';
@@ -23,6 +24,9 @@ import { StarterProject } from './odo/componentTypeDescription';
 import { vsCommand, VsCommandError } from './vscommand';
 import validator from 'validator';
 import RegistryViewLoader from './webview/devfile-registry/registryViewLoader';
+import { Command } from './odo/command';
+import { CommandText } from './base/command';
+import { CliExitData } from './cli';
 
 type ComponentType = Registry;
 
@@ -46,6 +50,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     readonly odo: Odo = getInstance();
     private registries: Registry[];
+    private compDescriptions: Set<ComponentTypeDescription> = new Set<ComponentTypeDescription>();
 
     createTreeView(id: string): TreeView<ComponentType> {
         if (!this.treeView) {
@@ -96,6 +101,48 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             this.registries = [];
         }
         return this.registries;
+    }
+
+    public getCompDescriptions(): Set<ComponentTypeDescription> {
+        return this.compDescriptions;
+    }
+
+    public getListOfRegistries(): Registry[] {
+        return this.registries;
+    }
+
+    public async getAllComponents(): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            const compDescs: Set<ComponentTypeDescription> = new Set<ComponentTypeDescription>();
+            void getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
+                const components = new Set<string>();
+                getInstance().getComponentTypesOfJSON(devFileComponentTypes).map((comp) => {
+                    components.add(comp.name);
+                });
+                await this.getRegistries();
+                Array.from(components).map((compName: string) => {
+                    getInstance().execute(Command.describeCatalogComponent(compName)).then((componentDesc: CliExitData) => {
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                        const out: ComponentTypeDescription[] = JSON.parse(componentDesc.stdout);
+                        out.forEach((component) => {
+                            // eslint-disable-next-line max-nested-callbacks
+                            component.Devfile?.starterProjects?.map((starter: StarterProject) => {
+                                starter.typeName = compName;
+                            });
+                            compDescs.add(component);
+                        });
+                        if (devFileComponentTypes.length === compDescs.size) {
+                            this.compDescriptions.clear();
+                            this.compDescriptions = compDescs;
+                            resolve(true);
+                        }
+                    }).catch(() => {
+                        this.compDescriptions.clear();
+                        resolve(true);
+                    });
+                });
+            });
+        });
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -228,8 +275,8 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         let token: string;
         if (secure === 'Yes') {
             token = await window.showInputBox({
-              placeHolder: 'Token to access the registry',
-              validateInput: (value) => value?.trim().length > 0 ? undefined : 'Token cannot be empty'
+                placeHolder: 'Token to access the registry',
+                validateInput: (value) => value?.trim().length > 0 ? undefined : 'Token cannot be empty'
             });
             if (!token) return null;
         }
@@ -239,21 +286,19 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
          */
 
         if (registryContext) {
-          const notChangedRegisty = registries.find((registry) => registry.Name === regName && registry.URL === regURL && registry.Secure === (secure === 'Yes'));
-          if (notChangedRegisty) {
-              return null;
-          }
-          await vscode.commands.executeCommand('openshift.componentTypesView.registry.remove', registryContext, true);
+            const notChangedRegisty = registries.find((registry) => registry.Name === regName && registry.URL === regURL && registry.Secure === (secure === 'Yes'));
+            if (notChangedRegisty) {
+                return null;
+            }
+            await vscode.commands.executeCommand('openshift.componentTypesView.registry.remove', registryContext, true);
         }
 
         const newRegistry = await OdoImpl.Instance.addRegistry(regName, regURL, token);
         ComponentTypesView.instance.addRegistry(newRegistry);
 
-        void OdoImpl.Instance.getCompTypesJson().then((values:DevfileComponentType[]) => {
-            OdoImpl.Instance.getComponentTypesOfJSON(values);
-        });
-
-        RegistryViewLoader.refresh();
+        await ComponentTypesView.instance.getAllComponents().then(() =>
+            RegistryViewLoader.refresh()
+        );
     }
 
     @vsCommand('openshift.componentTypesView.registry.remove')
@@ -266,10 +311,9 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         if (yesNo === 'Yes') {
             await OdoImpl.Instance.removeRegistry(registry.Name);
             ComponentTypesView.instance.removeRegistry(registry);
-            void OdoImpl.Instance.getCompTypesJson().then((values:DevfileComponentType[]) => {
-                OdoImpl.Instance.getComponentTypesOfJSON(values);
-            });
-            RegistryViewLoader.refresh();
+            await ComponentTypesView.instance.getAllComponents().then(() =>
+                RegistryViewLoader.refresh()
+            );
         }
     }
 
