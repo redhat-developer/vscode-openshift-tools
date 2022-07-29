@@ -855,11 +855,11 @@
 			},
 			{
 				"command": "openshift.componentTypesView.registry.openInView",
-				"title": "Show View",
+				"title": "Open Registry View",
 				"category": "OpenShift",
 				"icon": {
-					"dark": "images/title/dark/open-preview.svg",
-					"light": "images/title/light/open-preview.svg"
+					"dark": "images/title/dark/book.svg",
+					"light": "images/title/light/book.svg"
 				}
 			},
 			{
