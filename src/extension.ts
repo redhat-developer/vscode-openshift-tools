@@ -31,7 +31,6 @@ import { WelcomePage } from './welcomePage';
 import { ComponentsTreeDataProvider } from './componentsView';
 
 import fsx = require('fs-extra');
-import { DevfileComponentType } from './odo/componentType';
 
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function

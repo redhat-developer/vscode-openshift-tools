@@ -6,16 +6,12 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ExtenisonID } from '../../util/constants';
-import { getInstance } from '../../odo';
-import { Command } from '../../odo/command';
 import { stringify } from 'yaml';
-import { ComponentTypesView } from '../../registriesView';
-import { StarterProject } from '../../odo/componentTypeDescription';
+import { ComponentTypesView } from '../../registriesView'
 import { vsCommand } from '../../vscommand';
 import { ExtCommandTelemetryEvent } from '../../telemetry';
 
 let panel: vscode.WebviewPanel;
-let compDescriptions = new Set<any>();
 
 async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
     let starterProject = event.selectedProject;

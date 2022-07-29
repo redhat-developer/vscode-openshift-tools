@@ -25,7 +25,6 @@ import { vsCommand, VsCommandError } from './vscommand';
 import validator from 'validator';
 import RegistryViewLoader from './webview/devfile-registry/registryViewLoader';
 import { Command } from './odo/command';
-import { CommandText } from './base/command';
 import { CliExitData } from './cli';
 
 type ComponentType = Registry;
