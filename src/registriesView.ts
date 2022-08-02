@@ -110,16 +110,13 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return this.registries;
     }
 
-    public async getAllComponents(): Promise<boolean> {
-        return new Promise<boolean>((resolve) => {
+    public async getAllComponents(): Promise<void> {
+        return new Promise<void>((resolve) => {
             const compDescs: Set<ComponentTypeDescription> = new Set<ComponentTypeDescription>();
             void getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
-                const components = new Set<string>();
-                getInstance().getComponentTypesOfJSON(devFileComponentTypes).map((comp) => {
-                    components.add(comp.name);
-                });
+                const components = new Set<string>(devFileComponentTypes.map((devFileComponentType: DevfileComponentType) => devFileComponentType.Name));
                 await this.getRegistries();
-                Array.from(components).map((compName: string) => {
+                components.forEach((compName: string) => {
                     getInstance().execute(Command.describeCatalogComponent(compName)).then((componentDesc: CliExitData) => {
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                         const out: ComponentTypeDescription[] = JSON.parse(componentDesc.stdout);
@@ -133,11 +130,11 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                         if (devFileComponentTypes.length === compDescs.size) {
                             this.compDescriptions.clear();
                             this.compDescriptions = compDescs;
-                            resolve(true);
+                            resolve();
                         }
                     }).catch(() => {
                         this.compDescriptions.clear();
-                        resolve(true);
+                        resolve();
                     });
                 });
             });

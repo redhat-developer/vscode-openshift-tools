@@ -142,11 +142,11 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         OdoImpl.Instance.loadWorkspaceComponents(event);
     });
 
-    await ComponentTypesView.instance.getAllComponents().then(() => {
-        OdoImpl.Instance.loadWorkspaceComponents(null);
+    await ComponentTypesView.instance.getAllComponents();
 
-        startTelemetry(extensionContext);
-    });
+    OdoImpl.Instance.loadWorkspaceComponents(null);
+
+    startTelemetry(extensionContext);
 
     return {
         verifyBundledBinaries,
