@@ -142,7 +142,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         OdoImpl.Instance.loadWorkspaceComponents(event);
     });
 
-    await ComponentTypesView.instance.getAllComponents();
+    void ComponentTypesView.instance.getAllComponents();
 
     OdoImpl.Instance.loadWorkspaceComponents(null);
 

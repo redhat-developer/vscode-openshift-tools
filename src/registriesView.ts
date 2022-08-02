@@ -26,6 +26,7 @@ import validator from 'validator';
 import RegistryViewLoader from './webview/devfile-registry/registryViewLoader';
 import { Command } from './odo/command';
 import { CliExitData } from './cli';
+import { Subject } from 'rxjs';
 
 type ComponentType = Registry;
 
@@ -49,7 +50,8 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     readonly odo: Odo = getInstance();
     private registries: Registry[];
-    private compDescriptions: Set<ComponentTypeDescription> = new Set<ComponentTypeDescription>();
+    private readonly compDescriptions: Set<ComponentTypeDescription> = new Set<ComponentTypeDescription>();
+    public readonly subject: Subject<ComponentTypeDescription | string> = new Subject<ComponentTypeDescription | string>();
 
     createTreeView(id: string): TreeView<ComponentType> {
         if (!this.treeView) {
@@ -106,36 +108,40 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return this.compDescriptions;
     }
 
+    public setComponentTypeDesc(value: ComponentTypeDescription): void {
+        this.compDescriptions.add(value);
+    }
+
     public getListOfRegistries(): Registry[] {
         return this.registries;
     }
 
-    public async getAllComponents(): Promise<void> {
-        return new Promise<void>((resolve) => {
-            const compDescs: Set<ComponentTypeDescription> = new Set<ComponentTypeDescription>();
-            void getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
-                const components = new Set<string>(devFileComponentTypes.map((devFileComponentType: DevfileComponentType) => devFileComponentType.Name));
-                await this.getRegistries();
-                components.forEach((compName: string) => {
-                    getInstance().execute(Command.describeCatalogComponent(compName)).then((componentDesc: CliExitData) => {
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                        const out: ComponentTypeDescription[] = JSON.parse(componentDesc.stdout);
-                        out.forEach((component) => {
-                            // eslint-disable-next-line max-nested-callbacks
-                            component.Devfile?.starterProjects?.map((starter: StarterProject) => {
-                                starter.typeName = compName;
-                            });
-                            compDescs.add(component);
+    public getAllComponents(): void {
+        ComponentTypesView.instance.subject.subscribe((compDesc: ComponentTypeDescription) => {
+            ComponentTypesView.instance.setComponentTypeDesc(compDesc);
+        });
+        const compDescs: Set<ComponentTypeDescription> = new Set<ComponentTypeDescription>();
+        void getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
+            const components = new Set<string>(devFileComponentTypes.map((devFileComponentType: DevfileComponentType) => devFileComponentType.Name));
+            await this.getRegistries();
+            components.forEach((compName: string) => {
+                getInstance().execute(Command.describeCatalogComponent(compName)).then((componentDesc: CliExitData) => {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                    const out: ComponentTypeDescription[] = JSON.parse(componentDesc.stdout);
+                    out.forEach((component) => {
+                        // eslint-disable-next-line max-nested-callbacks
+                        component.Devfile?.starterProjects?.map((starter: StarterProject) => {
+                            starter.typeName = compName;
                         });
-                        if (devFileComponentTypes.length === compDescs.size) {
-                            this.compDescriptions.clear();
-                            this.compDescriptions = compDescs;
-                            resolve();
-                        }
-                    }).catch(() => {
-                        this.compDescriptions.clear();
-                        resolve();
+                        compDescs.add(component);
+                        this.subject.next(component);
                     });
+                    if (devFileComponentTypes.length === compDescs.size) {
+                        this.subject.next('Done');
+                    }
+                }).catch(() => {
+                    this.subject.complete();
+                    this.subject.unsubscribe();
                 });
             });
         });
@@ -292,9 +298,9 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         const newRegistry = await OdoImpl.Instance.addRegistry(regName, regURL, token);
         ComponentTypesView.instance.addRegistry(newRegistry);
 
-        await ComponentTypesView.instance.getAllComponents().then(() =>
-            RegistryViewLoader.refresh()
-        );
+        ComponentTypesView.instance.compDescriptions.clear();
+        ComponentTypesView.instance.getAllComponents();
+        RegistryViewLoader.refresh()
     }
 
     @vsCommand('openshift.componentTypesView.registry.remove')
@@ -307,9 +313,9 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         if (yesNo === 'Yes') {
             await OdoImpl.Instance.removeRegistry(registry.Name);
             ComponentTypesView.instance.removeRegistry(registry);
-            await ComponentTypesView.instance.getAllComponents().then(() =>
-                RegistryViewLoader.refresh()
-            );
+            ComponentTypesView.instance.compDescriptions.clear();
+            ComponentTypesView.instance.getAllComponents();
+            RegistryViewLoader.refresh();
         }
     }
 
