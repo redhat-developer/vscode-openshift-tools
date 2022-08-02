@@ -313,9 +313,11 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         if (yesNo === 'Yes') {
             await OdoImpl.Instance.removeRegistry(registry.Name);
             ComponentTypesView.instance.removeRegistry(registry);
-            ComponentTypesView.instance.compDescriptions.clear();
-            ComponentTypesView.instance.getAllComponents();
-            RegistryViewLoader.refresh();
+            if (!isEdit) {
+                ComponentTypesView.instance.compDescriptions.clear();
+                ComponentTypesView.instance.getAllComponents();
+                RegistryViewLoader.refresh();
+            }
         }
     }
 

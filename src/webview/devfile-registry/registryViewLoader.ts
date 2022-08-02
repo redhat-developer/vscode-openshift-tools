@@ -126,7 +126,7 @@ function getAllComponents(eventActionName: string) {
     if (componentDescriptions.size === 0) {
         const components: ComponentTypeDescription[] = [];
         ComponentTypesView.instance.subject.subscribe((componentDescription: ComponentTypeDescription | string) => {
-            if(!isString(componentDescription)) {
+            if (!isString(componentDescription)) {
                 components.push(componentDescription);
             } else {
                 panel.webview.postMessage(
