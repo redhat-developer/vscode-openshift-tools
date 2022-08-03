@@ -16,7 +16,6 @@ import {
 } from 'vscode';
 import { getInstance, Odo, OdoImpl } from './odo';
 import {
-    DevfileComponentType,
     Registry,
 } from './odo/componentType';
 import { StarterProject } from './odo/componentTypeDescription';
@@ -249,10 +248,6 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         const newRegistry = await OdoImpl.Instance.addRegistry(regName, regURL, token);
         ComponentTypesView.instance.addRegistry(newRegistry);
 
-        void OdoImpl.Instance.getCompTypesJson().then((values:DevfileComponentType[]) => {
-            OdoImpl.Instance.getComponentTypesOfJSON(values);
-        });
-
         RegistryViewLoader.refresh();
     }
 
@@ -266,9 +261,6 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         if (yesNo === 'Yes') {
             await OdoImpl.Instance.removeRegistry(registry.Name);
             ComponentTypesView.instance.removeRegistry(registry);
-            void OdoImpl.Instance.getCompTypesJson().then((values:DevfileComponentType[]) => {
-                OdoImpl.Instance.getComponentTypesOfJSON(values);
-            });
             RegistryViewLoader.refresh();
         }
     }
