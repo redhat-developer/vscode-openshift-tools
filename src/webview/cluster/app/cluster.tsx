@@ -16,7 +16,7 @@ import {
     Tooltip,
     Typography
 } from '@material-ui/core';
-
+import { CardBody, CardFooter } from '@patternfly/react-core';
 import AddClusterView from './clusterView';
 import AddSandboxView from './sandboxView';
 import clusterStyle from './cluster.style';
@@ -108,35 +108,39 @@ export default function Header() {
                         </Typography>
                     </div>
                     <CardContent style={{ height: 240 }}>
-                        <Typography style={{ padding: '10px', height: '50px' }}>
+                        <Typography style={{ padding: '10px', height: '50px', maxWidth:'20em' }}>
                             {list.imageUrl.map((url: string, index: string | number) => (
                                 <img src={url} key={index} className={classes.image} style={{ marginLeft: '.625rem', marginRight: '.625rem' }}></img>
                             ))}
                         </Typography>
-                        <List>
-                            <ListItem>
-                                <ListItemText
-                                    primary={list.description}
-                                    secondary={list.smallInfo} />
-                            </ListItem>
-                        </List>
+                        <CardBody className={classes.cardBody}>
+                            <List>
+                                <ListItem>
+                                    <ListItemText
+                                        primary={list.description}
+                                        secondary={list.smallInfo} />
+                                </ListItem>
+                            </List>
+                        </CardBody>
                     </CardContent>
-                    <CardActions className={classes.cardButton}>
-                        <Tooltip title={list.tooltip} placement="top">
-                            <div>
-                                <a onClick={() => handleView(index)} style={{ textDecoration: 'none' }} href={clusterTypes[index].redirectLink || '#'}>
-                                    <Button
-                                        variant="contained"
-                                        color="default"
-                                        component="span"
-                                        className={classes.button}
-                                    >
-                                        {list.buttonText}
-                                    </Button>
-                                </a>
-                            </div>
-                        </Tooltip>
-                    </CardActions>
+                    <CardFooter>
+                        <CardActions className={classes.cardButton}>
+                            <Tooltip title={list.tooltip} placement="top">
+                                <div>
+                                    <a onClick={() => handleView(index)} style={{ textDecoration: 'none' }} href={clusterTypes[index].redirectLink || '#'}>
+                                        <Button
+                                            variant="contained"
+                                            color="default"
+                                            component="span"
+                                            className={classes.button}
+                                        >
+                                            {list.buttonText}
+                                        </Button>
+                                    </a>
+                                </div>
+                            </Tooltip>
+                        </CardActions>
+                    </CardFooter>
                 </Card>
             ))}
         </>
