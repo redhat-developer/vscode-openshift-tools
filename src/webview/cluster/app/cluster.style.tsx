@@ -35,8 +35,8 @@ export default (theme: Theme) =>
     },
     cardTransform: {
       width: '27em',
+      height: 'auto',
       marginRight: theme.spacing(4),
-      position: 'relative',
       transform: 'scale(0.95)',
       '&:hover': {
         transform: 'scale(1)',
@@ -48,15 +48,30 @@ export default (theme: Theme) =>
       padding: theme.spacing(2),
       borderBottom: '0 solid transparent'
     },
+    cardBody: {
+        maxHeight: '14em',
+        overflowX: 'hidden',
+        overflowY:'scroll',
+        '&::-webkit-scrollbar':{
+            width:0,
+        }
+    },
     cardButton: {
       display: 'block',
-      marginBottom: theme.spacing(2)
+      margin: theme.spacing(2)
     },
     button: {
+      minWidth: '5rem',
+      maxWidth: '18rem',
+      maxHeight: '3rem',
+      height: '2rem',
+      textAlign: 'center',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
       color: 'var(--vscode-button-foreground)',
       backgroundColor: '#EE0000',
       '&:hover': {
-        color: 'var(--vscode-button-foreground)',
         backgroundColor: '#BE0000',
       },
       textTransform: "none"
