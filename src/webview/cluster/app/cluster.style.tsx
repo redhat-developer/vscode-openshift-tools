@@ -48,6 +48,20 @@ export default (theme: Theme) =>
       padding: theme.spacing(2),
       borderBottom: '0 solid transparent'
     },
+    cardImageContainer: {
+        display: 'inherit',
+        padding: '10px',
+        height: '50px',
+        maxHeight: '10rem',
+        maxWidth: '15rem'
+    },
+    cardImageTableContainer: {
+        display: 'table',
+        marginLeft: '3rem',
+        height: '50px',
+        maxHeight: '10rem',
+        maxWidth: '15rem'
+    },
     cardBody: {
         maxHeight: '14em',
         overflowX: 'hidden',
@@ -61,12 +75,12 @@ export default (theme: Theme) =>
       margin: theme.spacing(2)
     },
     button: {
-      minWidth: '5rem',
-      maxWidth: '18rem',
-      maxHeight: '3rem',
+      display: 'table-cell',
+      minWidth: '8rem',
+      maxWidth: '20rem',
+      maxHeight: '5rem',
       height: '2rem',
       textAlign: 'center',
-      whiteSpace: 'nowrap',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       color: 'var(--vscode-button-foreground)',
@@ -74,7 +88,7 @@ export default (theme: Theme) =>
       '&:hover': {
         backgroundColor: '#BE0000',
       },
-      textTransform: "none"
+      textTransform: 'none'
     },
     cardContent: {
       background: 'var(--vscode-settings-focusedRowBackground)',
