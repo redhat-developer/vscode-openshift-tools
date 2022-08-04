@@ -94,9 +94,9 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                         }} searchBarValue={searchValue} />
                         {
                             registries.length > 1 &&
-                            <FilterElements id='registry' label='Registries:'
+                            <FilterElements id='registry'
                                 registries={registries}
-                                onCheckBoxChange={function (event: ChangeEvent<HTMLInputElement>, checked: boolean): void {
+                                onCheckBoxChange={function (event: ChangeEvent<HTMLInputElement>, _checked: boolean): void {
                                     const target: EventTarget = event.target;
                                     const state: boolean = (target as HTMLInputElement).checked;
                                     const value: string = (target as HTMLInputElement).name;
