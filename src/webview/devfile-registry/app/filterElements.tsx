@@ -16,7 +16,6 @@ import { Tooltip } from '@mui/material';
 
 interface FilterProps extends DefaultProps {
     id: string,
-    label: string,
     registries: Registry[],
     onCheckBoxChange: (event: ChangeEvent<HTMLInputElement>, checked: boolean) => void;
 }
@@ -25,7 +24,6 @@ const filterStyle = makeStyles(filterElementsStyle);
 
 export const FilterElements: React.FC<FilterProps> = ({
     id,
-    label,
     registries,
     onCheckBoxChange
 }: FilterProps) => {
@@ -36,15 +34,15 @@ export const FilterElements: React.FC<FilterProps> = ({
                 <Text style={{ fontSize: 'var(--vscode-editor-font-size)' }}>Registries:</Text>
             </TextContent>
             {
-                registries.map((registry) => (
-                    <FormControlLabel className={filterStyleCSS.checkBoxItem}
+                registries.map((registry, index) => (
+                    <FormControlLabel className={filterStyleCSS.checkBoxItem} key={registry.Name + '-' + index}
                         control={
                             <Checkbox id={`${id}-${registry.Name}`}
                                 className={filterStyleCSS.checkbox}
                                 onChange={onCheckBoxChange}
                                 name={registry.Name}
                                 checked={registry.state}
-                                key={registry.Name}
+                                key={registry.Name + '-' + index}
                                 color='primary'
                                 size='medium' />
                         }
