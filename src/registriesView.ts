@@ -51,7 +51,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     readonly odo: Odo = getInstance();
     private registries: Registry[];
     private readonly compDescriptions: Set<ComponentTypeDescription> = new Set<ComponentTypeDescription>();
-    public readonly subject: Subject<ComponentTypeDescription | string> = new Subject<ComponentTypeDescription | string>();
+    public  subject: Subject<string> = new Subject<string>();
 
     createTreeView(id: string): TreeView<ComponentType> {
         if (!this.treeView) {
@@ -108,19 +108,12 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return this.compDescriptions;
     }
 
-    public setComponentTypeDesc(value: ComponentTypeDescription): void {
-        this.compDescriptions.add(value);
-    }
-
     public getListOfRegistries(): Registry[] {
         return this.registries;
     }
 
     public getAllComponents(): void {
-        ComponentTypesView.instance.subject.subscribe((compDesc: ComponentTypeDescription) => {
-            ComponentTypesView.instance.setComponentTypeDesc(compDesc);
-        });
-        const compDescs: Set<ComponentTypeDescription> = new Set<ComponentTypeDescription>();
+        this.compDescriptions.clear();
         void getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
             const components = new Set<string>(devFileComponentTypes.map((devFileComponentType: DevfileComponentType) => devFileComponentType.Name));
             await this.getRegistries();
@@ -133,15 +126,16 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                         component.Devfile?.starterProjects?.map((starter: StarterProject) => {
                             starter.typeName = compName;
                         });
-                        compDescs.add(component);
-                        this.subject.next(component);
+                        this.compDescriptions.add(component);
                     });
-                    if (devFileComponentTypes.length === compDescs.size) {
-                        this.subject.next('Done');
+                    if (devFileComponentTypes.length === this.compDescriptions.size) {
+                        this.subject.next('refresh');
                     }
                 }).catch(() => {
-                    this.subject.complete();
-                    this.subject.unsubscribe();
+                    if (this.subject.closed) {
+                        this.subject = new Subject<string>();
+                        this.getAllComponents();
+                    }
                 });
             });
         });
@@ -298,7 +292,6 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         const newRegistry = await OdoImpl.Instance.addRegistry(regName, regURL, token);
         ComponentTypesView.instance.addRegistry(newRegistry);
 
-        ComponentTypesView.instance.compDescriptions.clear();
         ComponentTypesView.instance.getAllComponents();
         RegistryViewLoader.refresh()
     }
@@ -314,7 +307,6 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             await OdoImpl.Instance.removeRegistry(registry.Name);
             ComponentTypesView.instance.removeRegistry(registry);
             if (!isEdit) {
-                ComponentTypesView.instance.compDescriptions.clear();
                 ComponentTypesView.instance.getAllComponents();
                 RegistryViewLoader.refresh();
             }

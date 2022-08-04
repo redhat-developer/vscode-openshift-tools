@@ -10,8 +10,6 @@ import { stringify } from 'yaml';
 import { ComponentTypesView } from '../../registriesView'
 import { vsCommand } from '../../vscommand';
 import { ExtCommandTelemetryEvent } from '../../telemetry';
-import { ComponentTypeDescription } from '../../odo/componentType';
-import { isString } from 'lodash';
 
 let panel: vscode.WebviewPanel;
 
@@ -115,36 +113,18 @@ export default class RegistryViewLoader {
     static refresh(): void {
         if (panel) {
             panel.webview.postMessage({ action: 'loadingComponents' });
-            getAllComponents('getAllComponents');
         }
     }
 }
 
-function getAllComponents(eventActionName: string) {
+export function getAllComponents(eventActionName: string) {
     const registries = ComponentTypesView.instance.getListOfRegistries();
     const componentDescriptions = ComponentTypesView.instance.getCompDescriptions();
-    if (componentDescriptions.size === 0) {
-        const components: ComponentTypeDescription[] = [];
-        ComponentTypesView.instance.subject.subscribe((componentDescription: ComponentTypeDescription | string) => {
-            if (!isString(componentDescription)) {
-                components.push(componentDescription);
-            } else {
-                panel.webview.postMessage(
-                    {
-                        action: eventActionName,
-                        compDescriptions: components,
-                        registries: registries
-                    }
-                );
-            }
-        })
-    } else {
-        panel.webview.postMessage(
-            {
-                action: eventActionName,
-                compDescriptions: Array.from(componentDescriptions),
-                registries: registries
-            }
-        );
-    }
+    panel.webview.postMessage(
+        {
+            action: eventActionName,
+            compDescriptions: Array.from(componentDescriptions),
+            registries: registries
+        }
+    );
 }

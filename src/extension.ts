@@ -31,6 +31,7 @@ import { WelcomePage } from './welcomePage';
 import { ComponentsTreeDataProvider } from './componentsView';
 
 import fsx = require('fs-extra');
+import { getAllComponents } from './webview/devfile-registry/registryViewLoader';
 
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -143,6 +144,12 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     });
 
     void ComponentTypesView.instance.getAllComponents();
+
+    ComponentTypesView.instance.subject.subscribe((value: string) => {
+        if (value === 'refresh') {
+            getAllComponents('getAllComponents');
+        }
+    });
 
     OdoImpl.Instance.loadWorkspaceComponents(null);
 
