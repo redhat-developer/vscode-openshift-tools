@@ -56,19 +56,22 @@ export default (theme: Theme) =>
         maxWidth: '15rem'
     },
     cardImageTableContainer: {
-        display: 'table',
-        marginLeft: '3rem',
-        height: '50px',
-        maxHeight: '10rem',
-        maxWidth: '15rem'
+        display: 'inline-block',
+        verticalAlign: 'top',
+        height: '15%',
+        width: 'auto',
+        marginTop: '1rem'
     },
     cardBody: {
-        maxHeight: '14em',
-        overflowX: 'hidden',
+        maxHeight: '15em',
+        overflow: 'hidden',
         overflowY:'scroll',
         '&::-webkit-scrollbar':{
             width:0,
         }
+    },
+    cardBodyMargin: {
+        marginTop: theme.spacing(3)
     },
     cardButton: {
       display: 'block',
