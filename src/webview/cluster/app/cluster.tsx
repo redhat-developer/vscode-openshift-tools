@@ -17,7 +17,6 @@ import {
     Typography
 } from '@material-ui/core';
 import clsx from 'clsx';
-import { CardBody, CardFooter } from '@patternfly/react-core';
 import AddClusterView from './clusterView';
 import AddSandboxView from './sandboxView';
 import clusterStyle from './cluster.style';
@@ -114,7 +113,7 @@ export default function Header() {
                                 <img src={url} key={index} className={classes.image} style={{ marginLeft: '.625rem', marginRight: '.625rem', position: 'relative' }}></img>
                             ))}
                         </Typography>
-                        <CardBody className={index === 2 ? clsx(classes.cardBody, classes.cardBodyMargin) : classes.cardBody}>
+                        <div className={index === 2 ? clsx(classes.cardBody, classes.cardBodyMargin) : classes.cardBody}>
                             <List>
                                 <ListItem>
                                     <ListItemText
@@ -122,9 +121,9 @@ export default function Header() {
                                         secondary={list.smallInfo} />
                                 </ListItem>
                             </List>
-                        </CardBody>
+                        </div>
                     </CardContent>
-                    <CardFooter>
+                    <div>
                         <CardActions className={classes.cardButton}>
                             <Tooltip title={list.tooltip} placement="top">
                                 <div>
@@ -141,7 +140,7 @@ export default function Header() {
                                 </div>
                             </Tooltip>
                         </CardActions>
-                    </CardFooter>
+                    </div>
                 </Card>
             ))}
         </>
