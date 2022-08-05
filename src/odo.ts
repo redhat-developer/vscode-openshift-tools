@@ -620,8 +620,8 @@ export class OdoImpl implements Odo {
         return deployedComponents;
     }
 
-    public getKubeconfigEnv(): {KUBECONFIG?: string} {
-        const addEnv: {KUBECONFIG?: string} = {};
+    public getKubeconfigEnv(): {KUBECONFIG?: string, HTTP_PROXY?: string, HTTPS_PROXY?: string, [key: string] : any} {
+        const addEnv: {KUBECONFIG?: string, HTTP_PROXY?: string, HTTPS_PROXY?: string, [key: string] : any} = {};
         let kc: KubeConfig;
         // TODO: Remove when odo works without kubeconfig present
         try {
@@ -636,11 +636,28 @@ export class OdoImpl implements Odo {
             // use fake config to let odo get component types from registry
             addEnv.KUBECONFIG = path.resolve(__dirname, '..', '..', 'config', 'kubeconfig');
         }
+
+        if (kc && pathExistsSync(configPath)) {
+            // add HTTP(S)_PROXY env var in case cluster from current context has proxy-url property
+            const cc = kc.getContextObject(kc.currentContext);
+            const ccc = cc ? kc.getCluster(cc.cluster) : undefined;
+            const cccp:string = ccc?.['proxy-url']; // proxy url
+            if (cccp) {
+                const cccpu = Uri.parse(cccp);
+                // no scheme means http proxy
+                if (!cccpu.scheme || cccpu.scheme === 'http') {
+                    addEnv.HTTP_PROXY = cccp;
+                } else {
+                    // everything else is https proxy
+                    addEnv.HTTPS_PROXY = cccp;
+                }
+            }
+        }
         return addEnv;
     }
 
     public async getCompTypesJson(): Promise<DevfileComponentType[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson(), undefined, true, this.getKubeconfigEnv());
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson(), undefined, true);
         const compTypesJson: ComponentTypesJson = this.loadJSON(result.stdout);
         return compTypesJson?.items;
     }
@@ -658,7 +675,7 @@ export class OdoImpl implements Odo {
     public async getComponentTypes(): Promise<ComponentType[]> {
         // if kc is produced, KUBECONFIG env var is empty or pointing
 
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson(), undefined, true, this.getKubeconfigEnv());
+        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson(), undefined, true);
         const compTypesJson: ComponentTypesJson = this.loadJSON(result.stdout);
         const devfileItems: ComponentTypeAdapter[] = [];
 
@@ -786,7 +803,7 @@ export class OdoImpl implements Odo {
         terminal.show();
     }
 
-    public async execute(command: CommandText, cwd?: string, fail = true, addEnv = {}): Promise<cliInstance.CliExitData> {
+    public async execute(command: CommandText, cwd?: string, fail = true, addEnv = this.getKubeconfigEnv()): Promise<cliInstance.CliExitData> {
         const env = this.createEnv();
         const commandActual = `${command}`;
         const commandPrivacy = `${command.privacyMode(true)}`;
