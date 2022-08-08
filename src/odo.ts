@@ -790,7 +790,7 @@ export class OdoImpl implements Odo {
     }
 
     public createEnv(): any {
-        const env = {...process.env };
+        const env = {...process.env, ...this.getKubeconfigEnv() };
         env.ODO_DISABLE_TELEMETRY = 'true';
         return env;
     }
@@ -803,7 +803,7 @@ export class OdoImpl implements Odo {
         terminal.show();
     }
 
-    public async execute(command: CommandText, cwd?: string, fail = true, addEnv = this.getKubeconfigEnv()): Promise<cliInstance.CliExitData> {
+    public async execute(command: CommandText, cwd?: string, fail = true, addEnv = {}): Promise<cliInstance.CliExitData> {
         const env = this.createEnv();
         const commandActual = `${command}`;
         const commandPrivacy = `${command.privacyMode(true)}`;
