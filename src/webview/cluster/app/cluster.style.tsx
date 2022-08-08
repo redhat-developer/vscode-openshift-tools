@@ -15,9 +15,25 @@ export default (theme: Theme) =>
       fontSize: '1.25em'
     },
     iconContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      textAlign: 'center',
       height: 60,
       marginBottom: '3em',
       marginTop: '2em'
+    },
+    backButton: {
+      marginBottom: '3em',
+      marginTop: '2em',
+      width: '1.2em',
+      color: 'var(--vscode-button-foreground)',
+      backgroundColor: '#EE0000',
+      '&:hover': {
+        backgroundColor: '#BE0000',
+        cursor: 'pointer'
+      },
+      textTransform: 'none'
     },
     textWhite: {
       marginBottom: '20px!important',
@@ -93,6 +109,15 @@ export default (theme: Theme) =>
       },
       textTransform: 'none'
     },
+    sandboxButton: {
+        color: 'var(--vscode-button-foreground)',
+        backgroundColor: '#EE0000',
+        '&:hover': {
+          color: 'var(--vscode-button-foreground)',
+          backgroundColor: '#BE0000',
+        },
+        textTransform: 'none'
+      },
     cardContent: {
       background: 'var(--vscode-settings-focusedRowBackground)',
       border: '1px solid var(--vscode-settings-focusedRowBorder)',
