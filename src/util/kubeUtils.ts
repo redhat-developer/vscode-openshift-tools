@@ -31,7 +31,7 @@ export class KubeConfigUtils extends KubeConfig {
         return findHomeDir();
     }
 
-    getProxy(contextName: string): string | undefined {
+    getProxy(contextName: string = this.currentContext): string | undefined {
         if (process.env.KUBECONFIG?.[1]) {
             const cFiles = process.env.KUBECONFIG.split(path.delimiter).filter(file => file);
             //const yaml =

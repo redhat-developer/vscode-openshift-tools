@@ -622,7 +622,7 @@ export class OdoImpl implements Odo {
 
     public getKubeconfigEnv(): {KUBECONFIG?: string, HTTP_PROXY?: string, HTTPS_PROXY?: string, [key: string] : any} {
         const addEnv: {KUBECONFIG?: string, HTTP_PROXY?: string, HTTPS_PROXY?: string, [key: string] : any} = {};
-        let kc: KubeConfig;
+        let kc: KubeConfigUtils;
         // TODO: Remove when odo works without kubeconfig present
         try {
             kc = new KubeConfigUtils();
@@ -631,27 +631,27 @@ export class OdoImpl implements Odo {
         }
 
         const configPath = path.join(Platform.getUserHomePath(), '.kube', 'config');
-
-        if (kc && !pathExistsSync(configPath)) { // config is loaded, yay! But there is still use case for missing config file
-            // use fake config to let odo get component types from registry
-            addEnv.KUBECONFIG = path.resolve(__dirname, '..', '..', 'config', 'kubeconfig');
-        }
-
-        if (kc && pathExistsSync(configPath)) {
+        // kc loaded ether from files listed in env variable or default config location
+        if (kc && process.env.KUBECONFIG || pathExistsSync(configPath)) {
             // add HTTP(S)_PROXY env var in case cluster from current context has proxy-url property
-            const cc = kc.getContextObject(kc.currentContext);
-            const ccc = cc ? kc.getCluster(cc.cluster) : undefined;
-            const cccp:string = ccc?.['proxy-url']; // proxy url
+            const cccp:string = kc.getProxy();
             if (cccp) {
                 const cccpu = Uri.parse(cccp);
                 // no scheme means http proxy
                 if (!cccpu.scheme || cccpu.scheme === 'http') {
                     addEnv.HTTP_PROXY = cccp;
                 } else {
-                    // everything else is https proxy
+                    // everything else is https proxy for now
                     addEnv.HTTPS_PROXY = cccp;
                 }
             }
+        }
+
+        // config is loaded, but in case of no KUBECONFIG var or config file
+        // dummy config is created
+        if (kc && !addEnv.KUBECONFIG && !pathExistsSync(configPath)) {
+            // use fake config to let odo get component types from registry
+            addEnv.KUBECONFIG = path.resolve(__dirname, '..', '..', 'config', 'kubeconfig');
         }
         return addEnv;
     }
