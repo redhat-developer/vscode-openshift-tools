@@ -23,7 +23,6 @@ import {
 import { StarterProject } from './odo/componentTypeDescription';
 import { vsCommand, VsCommandError } from './vscommand';
 import validator from 'validator';
-import RegistryViewLoader from './webview/devfile-registry/registryViewLoader';
 import { Command } from './odo/command';
 import { CliExitData } from './cli';
 import { Subject } from 'rxjs';
@@ -135,13 +134,8 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 }).catch(() => {
                     isError = true;
                 }).finally(() => {
-                    if (isError) {
-                        if (this.subject.closed) {
-                            this.subject = new Subject<string>();
-                            this.getAllComponents();
-                        } else {
-                            this.subject.next('refresh');
-                        }
+                    if (isError && !this.subject.closed) {
+                        this.subject.next('refresh');
                     }
                 });
             });
@@ -300,7 +294,6 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         ComponentTypesView.instance.addRegistry(newRegistry);
 
         ComponentTypesView.instance.getAllComponents();
-        RegistryViewLoader.refresh()
     }
 
     @vsCommand('openshift.componentTypesView.registry.remove')
@@ -315,7 +308,6 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             ComponentTypesView.instance.removeRegistry(registry);
             if (!isEdit) {
                 ComponentTypesView.instance.getAllComponents();
-                RegistryViewLoader.refresh();
             }
         }
     }
@@ -328,10 +320,5 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     @vsCommand('openshift.componentTypesView.registry.openInBrowser')
     public static async openRegistryWebSite(registry: Registry): Promise<void> {
         await commands.executeCommand('vscode.open', Uri.parse(registry.URL));
-    }
-
-    @vsCommand('openshift.componentTypesView.registry.openInView')
-    public static async openRegistryInWebview(): Promise<void> {
-        await RegistryViewLoader.loadView('Devfile Registry');
     }
 }

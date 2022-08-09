@@ -105,6 +105,11 @@ export default class RegistryViewLoader {
             .replace('<!-- meta http-equiv="Content-Security-Policy" -->', meta);
     }
 
+    @vsCommand('openshift.componentTypesView.registry.openInView')
+    public static async openRegistryInWebview(): Promise<void> {
+        await RegistryViewLoader.loadView('Devfile Registry');
+    }
+
     @vsCommand('openshift.componentTypesView.registry.closeView')
     static async closeRegistryInWebview(): Promise<void> {
         panel?.dispose();
@@ -117,10 +122,10 @@ export default class RegistryViewLoader {
     }
 }
 
-export function getAllComponents(eventActionName: string) {
+function getAllComponents(eventActionName: string) {
     const registries = ComponentTypesView.instance.getListOfRegistries();
     const componentDescriptions = ComponentTypesView.instance.getCompDescriptions();
-    panel.webview.postMessage(
+    panel?.webview.postMessage(
         {
             action: eventActionName,
             compDescriptions: Array.from(componentDescriptions),
@@ -128,3 +133,10 @@ export function getAllComponents(eventActionName: string) {
         }
     );
 }
+
+ComponentTypesView.instance.subject.subscribe((value: string) => {
+    if (value === 'refresh') {
+        RegistryViewLoader.refresh();
+        getAllComponents('getAllComponents');
+    }
+});
