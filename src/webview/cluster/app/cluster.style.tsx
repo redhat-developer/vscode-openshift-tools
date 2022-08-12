@@ -78,7 +78,6 @@ export default (theme: Theme) =>
       margin: theme.spacing(2)
     },
     button: {
-      display: 'table-cell',
       minWidth: '8rem',
       maxWidth: '20rem',
       maxHeight: '5rem',
