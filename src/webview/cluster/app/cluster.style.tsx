@@ -53,7 +53,6 @@ export default (theme: Theme) =>
         padding: '10px',
         height: '50px',
         maxHeight: '10rem',
-        maxWidth: '15rem'
     },
     cardImageTableContainer: {
         display: 'inline-block',
