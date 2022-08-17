@@ -56,15 +56,15 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
     const [filteredcompDescriptions, setFilteredcompDescriptions] = React.useState([]);
     const [registries, setRegistries] = React.useState([]);
     const [searchValue, setSearchValue] = React.useState('');
-    const [error, setError] = React.useState(false);
+    const [error, setError] = React.useState('');
 
     React.useEffect(() => {
         return VSCodeMessage.onMessage((message) => {
             if (message.data.action === 'getAllComponents') {
-                if (message.data.error) {
-                    setError(message.data.error);
+                if (message.data.errorMessage && message.data.errorMessage.length > 0) {
+                    setError(message.data.errorMessage);
                 } else {
-                    setError(false);
+                    setError('');
                     message.data.registries.map((registry: Registry) => {
                         if (registry.URL.toLowerCase().indexOf('https://registry.devfile.io') !== -1) {
                             registry.state = true;
@@ -75,7 +75,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                     setFilteredcompDescriptions(getFilteredCompDesc(message.data.registries, message.data.compDescriptions, searchValue));
                 }
             } else if (message.data.action === 'loadingComponents') {
-                setError(false);
+                setError('');
                 setFilteredcompDescriptions([]);
                 setCompDescriptions([]);
                 setSearchValue('');
@@ -120,10 +120,10 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                             />
                         }
                         <HomeItem compDescriptions={filteredcompDescriptions} />
-                        {error ? <ErrorPage message='Devfiles not downloaded properly' /> : null}
+                        {error?.length > 0 ? <ErrorPage message='Devfiles not downloaded properly' /> : null}
                     </>
                     :
-                    error ? <ErrorPage message='500: Internal Sever Error' /> : <LoadScreen />
+                    error?.length > 0 ? <ErrorPage message={error} /> : <LoadScreen />
             }
         </>
     );

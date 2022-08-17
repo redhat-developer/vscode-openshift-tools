@@ -139,6 +139,8 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                     }
                 });
             });
+        }).catch(() => {
+            this.subject.next('error');
         });
     }
 

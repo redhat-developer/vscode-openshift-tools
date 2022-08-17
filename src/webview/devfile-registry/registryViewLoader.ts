@@ -122,14 +122,15 @@ export default class RegistryViewLoader {
     }
 }
 
-function getAllComponents(eventActionName: string) {
+function getAllComponents(eventActionName: string, error?: string) {
     const registries = ComponentTypesView.instance.getListOfRegistries();
     const componentDescriptions = ComponentTypesView.instance.getCompDescriptions();
     panel?.webview.postMessage(
         {
             action: eventActionName,
             compDescriptions: Array.from(componentDescriptions),
-            registries: registries
+            registries: registries,
+            errorMessage: error
         }
     );
 }
@@ -138,5 +139,7 @@ ComponentTypesView.instance.subject.subscribe((value: string) => {
     if (value === 'refresh') {
         RegistryViewLoader.refresh();
         getAllComponents('getAllComponents');
+    } else if (value === 'error') {
+        getAllComponents('getAllComponents', 'Devfile Registry is not accessible');
     }
 });
