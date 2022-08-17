@@ -21,8 +21,8 @@ import { DevFileProps } from './wrapperCardItem';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { StarterProject } from '../../../odo/componentTypeDescription';
 import { StarterProjectDisplay } from './starterProjectDisplay';
-import CopyIcon from '@patternfly/react-icons/dist/esm/icons/copy-icon';
 import { Badge, Backdrop, Button, Card, CardActions, Modal } from '@material-ui/core';
+import { FileCopy } from '@material-ui/icons';
 
 export class CardItem extends React.Component<DevFileProps, {
     numOfCall: number,
@@ -71,12 +71,14 @@ export class CardItem extends React.Component<DevFileProps, {
         }
     };
 
-    onCloseClick = (): void => {
-        this.setState({
-            numOfCall: 0,
-            isExpanded: false,
-            devFileYAML: ''
-        });
+    onCloseClick = (event, reason): void => {
+        if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+            this.setState({
+                numOfCall: 0,
+                isExpanded: false,
+                devFileYAML: ''
+            });
+        }
     };
 
     createComponent = (): void => {
@@ -177,6 +179,7 @@ export class CardItem extends React.Component<DevFileProps, {
                         <CardActions className={this.props.cardItemStyle.cardButton}>
                             <Button
                                 color='default'
+                                variant='contained'
                                 component='span'
                                 className={this.props.cardItemStyle.button}
                                 onClick={this.createComponent}>
@@ -222,16 +225,14 @@ export class CardItem extends React.Component<DevFileProps, {
             className={this.props.cardItemStyle.modal}
             aria-labelledby={`modal-${this.props.compDescription.Devfile.metadata.name}`}
             onClose={this.onCloseClick}
-            onEscapeKeyDown={this.onCloseClick}
             closeAfterTransition
             BackdropComponent={Backdrop}
-            disableBackdropClick
             disableAutoFocus
             BackdropProps={{
                 timeout: 500,
             }}
             style={{
-                width: '100%', height: '100%'
+                width: '100%', height: '100%', marginTop: '5rem'
             }}>
             <Card data-testid='dev-page-yaml' className={this.props.cardItemStyle.yamlCard}>
                 <CardHeader className={this.props.cardItemStyle.yamlCardHeader}>
@@ -266,10 +267,11 @@ export class CardItem extends React.Component<DevFileProps, {
                                 style={{ cursor: 'pointer' }}
                                 onClick={(): void => this.copyClicked(true)}
                             >
-                                <CopyIcon color='white' />
+                                <FileCopy style={{ color: 'white' }} fontSize='small' />
                             </Button>
                             <Tooltip
                                 content={
+
                                     copyClicked ? 'Copied' : 'Copy'
                                 }
                                 position='bottom'

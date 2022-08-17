@@ -338,7 +338,6 @@ export interface Odo {
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponents(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]>;
     getCompTypesJson():Promise<DevfileComponentType[]>;
-    getComponentTypesOfJSON(devFileComponents: DevfileComponentType[]):ComponentTypeAdapter[];
     getComponentTypes(): Promise<ComponentTypeAdapter[]>;
     getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]>;
@@ -643,16 +642,6 @@ export class OdoImpl implements Odo {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson(), undefined, true, this.getKubeconfigEnv());
         const compTypesJson: ComponentTypesJson = this.loadJSON(result.stdout);
         return compTypesJson?.items;
-    }
-
-    public getComponentTypesOfJSON(devFileComponents: DevfileComponentType[]): ComponentType[] {
-        const devfileItems: ComponentTypeAdapter[] = [];
-
-        if (devFileComponents) {
-            devFileComponents.map((item) => devfileItems.push(new ComponentTypeAdapter(item.Name, undefined, item.Description, undefined, item.Registry.Name)));
-        }
-
-        return devfileItems;
     }
 
     public async getComponentTypes(): Promise<ComponentType[]> {

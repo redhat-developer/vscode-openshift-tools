@@ -35,8 +35,8 @@ export default (theme: Theme) =>
     },
     cardTransform: {
       width: '27em',
+      height: 'auto',
       marginRight: theme.spacing(4),
-      position: 'relative',
       transform: 'scale(0.95)',
       '&:hover': {
         transform: 'scale(1)',
@@ -48,18 +48,48 @@ export default (theme: Theme) =>
       padding: theme.spacing(2),
       borderBottom: '0 solid transparent'
     },
+    cardImageContainer: {
+        display: 'inherit',
+        padding: '10px',
+        height: '50px',
+        maxHeight: '10rem',
+    },
+    cardImageTableContainer: {
+        display: 'inline-block',
+        verticalAlign: 'top',
+        height: '15%',
+        width: 'auto',
+        marginTop: '1rem'
+    },
+    cardBody: {
+        maxHeight: '15em',
+        overflow: 'hidden',
+        overflowY:'scroll',
+        '&::-webkit-scrollbar':{
+            width:0,
+        }
+    },
+    cardBodyMargin: {
+        marginTop: theme.spacing(3)
+    },
     cardButton: {
       display: 'block',
-      marginBottom: theme.spacing(2)
+      margin: theme.spacing(2)
     },
     button: {
+      minWidth: '8rem',
+      maxWidth: '20rem',
+      maxHeight: '5rem',
+      height: '2rem',
+      textAlign: 'center',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
       color: 'var(--vscode-button-foreground)',
       backgroundColor: '#EE0000',
       '&:hover': {
-        color: 'var(--vscode-button-foreground)',
         backgroundColor: '#BE0000',
       },
-      textTransform: "none"
+      textTransform: 'none'
     },
     cardContent: {
       background: 'var(--vscode-settings-focusedRowBackground)',

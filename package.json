@@ -128,7 +128,6 @@
 		"@mui/lab": "^5.0.0-alpha.61",
 		"@mui/material": "^5.4.1",
 		"@patternfly/react-core": "^4.198.19",
-		"@patternfly/react-icons": "^4.49.19",
 		"@rjsf/material-ui": "^3.2.1",
 		"@segment/analytics-next": "^1.17.4",
 		"@types/byline": "^4.2.33",
@@ -861,11 +860,11 @@
 			},
 			{
 				"command": "openshift.componentTypesView.registry.openInView",
-				"title": "Show View",
+				"title": "Open Registry View",
 				"category": "OpenShift",
 				"icon": {
-					"dark": "images/title/dark/open-preview.svg",
-					"light": "images/title/light/open-preview.svg"
+					"dark": "images/title/dark/book.svg",
+					"light": "images/title/light/book.svg"
 				}
 			},
 			{

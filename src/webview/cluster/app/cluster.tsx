@@ -16,7 +16,7 @@ import {
     Tooltip,
     Typography
 } from '@material-ui/core';
-
+import clsx from 'clsx';
 import AddClusterView from './clusterView';
 import AddSandboxView from './sandboxView';
 import clusterStyle from './cluster.style';
@@ -108,35 +108,39 @@ export default function Header() {
                         </Typography>
                     </div>
                     <CardContent style={{ height: 240 }}>
-                        <Typography style={{ padding: '10px', height: '50px' }}>
+                        <Typography  className={index === 2 ? classes.cardImageTableContainer : classes.cardImageContainer}>
                             {list.imageUrl.map((url: string, index: string | number) => (
-                                <img src={url} key={index} className={classes.image} style={{ marginLeft: '.625rem', marginRight: '.625rem' }}></img>
+                                <img src={url} key={index} className={classes.image} style={{ marginLeft: '.625rem', marginRight: '.625rem', position: 'relative' }}></img>
                             ))}
                         </Typography>
-                        <List>
-                            <ListItem>
-                                <ListItemText
-                                    primary={list.description}
-                                    secondary={list.smallInfo} />
-                            </ListItem>
-                        </List>
+                        <div className={index === 2 ? clsx(classes.cardBody, classes.cardBodyMargin) : classes.cardBody}>
+                            <List>
+                                <ListItem>
+                                    <ListItemText
+                                        primary={list.description}
+                                        secondary={list.smallInfo} />
+                                </ListItem>
+                            </List>
+                        </div>
                     </CardContent>
-                    <CardActions className={classes.cardButton}>
-                        <Tooltip title={list.tooltip} placement="top">
-                            <div>
-                                <a onClick={() => handleView(index)} style={{ textDecoration: 'none' }} href={clusterTypes[index].redirectLink || '#'}>
-                                    <Button
-                                        variant="contained"
-                                        color="default"
-                                        component="span"
-                                        className={classes.button}
-                                    >
-                                        {list.buttonText}
-                                    </Button>
-                                </a>
-                            </div>
-                        </Tooltip>
-                    </CardActions>
+                    <div>
+                        <CardActions className={classes.cardButton}>
+                            <Tooltip title={list.tooltip} placement="top">
+                                <div>
+                                    <a onClick={() => handleView(index)} style={{ textDecoration: 'none' }} href={clusterTypes[index].redirectLink || '#'}>
+                                        <Button
+                                            variant="contained"
+                                            color="default"
+                                            component="span"
+                                            className={classes.button}
+                                        >
+                                            {list.buttonText}
+                                        </Button>
+                                    </a>
+                                </div>
+                            </Tooltip>
+                        </CardActions>
+                    </div>
                 </Card>
             ))}
         </>

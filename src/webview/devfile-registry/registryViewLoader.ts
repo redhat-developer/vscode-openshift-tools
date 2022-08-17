@@ -6,17 +6,12 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ExtenisonID } from '../../util/constants';
-import { getInstance } from '../../odo';
-import { Command } from '../../odo/command';
 import { stringify } from 'yaml';
-import { ComponentTypesView } from '../../registriesView';
-import { StarterProject } from '../../odo/componentTypeDescription';
-import { DevfileComponentType } from '../../odo/componentType';
+import { ComponentTypesView } from '../../registriesView'
 import { vsCommand } from '../../vscommand';
 import { ExtCommandTelemetryEvent } from '../../telemetry';
 
 let panel: vscode.WebviewPanel;
-let compDescriptions = new Set<any>();
 
 async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
     let starterProject = event.selectedProject;
@@ -110,53 +105,41 @@ export default class RegistryViewLoader {
             .replace('<!-- meta http-equiv="Content-Security-Policy" -->', meta);
     }
 
+    @vsCommand('openshift.componentTypesView.registry.openInView')
+    public static async openRegistryInWebview(): Promise<void> {
+        await RegistryViewLoader.loadView('Devfile Registry');
+    }
+
     @vsCommand('openshift.componentTypesView.registry.closeView')
     static async closeRegistryInWebview(): Promise<void> {
         panel?.dispose();
     }
 
     static refresh(): void {
-      if(panel) {
-        panel.webview.postMessage({action: 'loadingComponents' });
-        getAllComponents('getAllComponents');
-      }
+        if (panel) {
+            panel.webview.postMessage({ action: 'loadingComponents' });
+        }
     }
 }
 
-function getAllComponents(eventActionName: string) {
-    compDescriptions.clear();
-    getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
-        const components = new Set<string>();
-        getInstance().getComponentTypesOfJSON(devFileComponentTypes).map((comp) => {
-            components.add(comp.name);
-        });
-        const registries = await ComponentTypesView.instance.getRegistries();
-        Array.from(components).map(async (compName: string) => {
-            getInstance().execute(Command.describeCatalogComponent(compName)).then((componentDesc) => {
-                const out = JSON.parse(componentDesc.stdout);
-                out.forEach((component) => {
-                    component.Devfile?.starterProjects?.map((starter: StarterProject) => {
-                        starter.typeName = compName;
-                    });
-                    compDescriptions.add(component);
-                });
-                if (devFileComponentTypes.length === compDescriptions.size) {
-                    panel.webview.postMessage(
-                        {
-                            action: eventActionName,
-                            compDescriptions: Array.from(compDescriptions),
-                            registries: registries
-                        }
-                    );
-                }
-            }).catch((reason) => {
-                panel.webview.postMessage(
-                    {
-                        action: eventActionName,
-                        error: '500: Internal Server Error, Please try later'
-                    }
-                );
-            });
-        });
-    });
+function getAllComponents(eventActionName: string, error?: string) {
+    const registries = ComponentTypesView.instance.getListOfRegistries();
+    const componentDescriptions = ComponentTypesView.instance.getCompDescriptions();
+    panel?.webview.postMessage(
+        {
+            action: eventActionName,
+            compDescriptions: Array.from(componentDescriptions),
+            registries: registries,
+            errorMessage: error
+        }
+    );
 }
+
+ComponentTypesView.instance.subject.subscribe((value: string) => {
+    if (value === 'refresh') {
+        RegistryViewLoader.refresh();
+        getAllComponents('getAllComponents');
+    } else if (value === 'error') {
+        getAllComponents('getAllComponents', 'Devfile Registry is not accessible');
+    }
+});

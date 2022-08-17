@@ -7,6 +7,9 @@ import { Theme, createStyles } from '@material-ui/core/styles';
 
 export default (theme: Theme) =>
     createStyles({
+        loadProgress: {
+            color: '#EE0000'
+        },
         loading: {
             display: 'flex',
             justifyContent: 'center',

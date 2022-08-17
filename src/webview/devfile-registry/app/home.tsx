@@ -61,8 +61,8 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
     React.useEffect(() => {
         return VSCodeMessage.onMessage((message) => {
             if (message.data.action === 'getAllComponents') {
-                if (message.data.error) {
-                    setError(message.data.error);
+                if (message.data.errorMessage && message.data.errorMessage.length > 0) {
+                    setError(message.data.errorMessage);
                 } else {
                     setError('');
                     message.data.registries.map((registry: Registry) => {
@@ -75,10 +75,10 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                     setFilteredcompDescriptions(getFilteredCompDesc(message.data.registries, message.data.compDescriptions, searchValue));
                 }
             } else if (message.data.action === 'loadingComponents') {
-              setError('');
-              setFilteredcompDescriptions([]);
-              setCompDescriptions([]);
-              setSearchValue('');
+                setError('');
+                setFilteredcompDescriptions([]);
+                setCompDescriptions([]);
+                setSearchValue('');
             }
         });
     });
@@ -94,9 +94,9 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                         }} searchBarValue={searchValue} />
                         {
                             registries.length > 1 &&
-                            <FilterElements id='registry' label='Registries:'
+                            <FilterElements id='registry'
                                 registries={registries}
-                                onCheckBoxChange={function (event: ChangeEvent<HTMLInputElement>, checked: boolean): void {
+                                onCheckBoxChange={function (event: ChangeEvent<HTMLInputElement>, _checked: boolean): void {
                                     const target: EventTarget = event.target;
                                     const state: boolean = (target as HTMLInputElement).checked;
                                     const value: string = (target as HTMLInputElement).name;
@@ -120,9 +120,10 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                             />
                         }
                         <HomeItem compDescriptions={filteredcompDescriptions} />
+                        {error?.length > 0 ? <ErrorPage message='Devfiles not downloaded properly' /> : null}
                     </>
                     :
-                    error.length > 0 ? <ErrorPage message={error} /> : <LoadScreen />
+                    error?.length > 0 ? <ErrorPage message={error} /> : <LoadScreen />
             }
         </>
     );
