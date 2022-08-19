@@ -65,10 +65,12 @@
 		"dev:compile:cluster-view": "webpack --mode development --config src/webview/cluster/webpack.config.js",
 		"dev:compile:create-service-view": "webpack --mode development --config src/webview/create-service/webpack.config.js",
 		"dev:compile:devfile-registry-view": "webpack --mode development --config src/webview/devfile-registry/webpack.config.js",
+        "dev:compile:welcome-view": "webpack --mode development --config src/webview/welcome/webpack.config.js",
 		"dev:run:log-view": "webpack-dev-server --mode development --config src/webview/log/webpack.config.js",
 		"dev:run:describe-view": "webpack-dev-server --mode development --config src/webview/describe/webpack.config.js",
 		"dev:run:cluster-view": "webpack-dev-server --port 9222 --mode development --config src/webview/cluster/webpack.config.js",
 		"dev:run:devfile-registry-view": "webpack-dev-server --port 9222 --mode development --config src/webview/devfile-registry/webpack.config.js",
+        "dev:run:welcome-view": "webpack-dev-server --port 9222 --mode development --config src/webview/welcome/webpack.config.js",
 		"dev:run:create-service-view": "webpack-dev-server --mode development --config src/webview/create-service/webpack.config.js",
 		"watch": "tsc -watch -p ./",
 		"clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/logViewer",
@@ -182,6 +184,7 @@
 		"leasot": "^12.0.0",
 		"mocha": "^9.1.3",
 		"mocha-jenkins-reporter": "^0.4.7",
+        "node-sass": "^7.0.1",
 		"npm-check-updates": "^12.0.3",
 		"npm-run-all": "^4.1.5",
 		"pify": "^5.0.0",
@@ -198,6 +201,7 @@
 		"react-syntax-highlighter": "^15.5.0",
 		"remap-istanbul": "^0.13.0",
 		"request": "^2.88.2",
+        "sass-loader": "^13.0.2",
 		"shelljs": "^0.8.5",
 		"shx": "^0.3.3",
 		"sinon": "^12.0.1",
@@ -221,6 +225,7 @@
 		"onView:extension.vsKubernetesExplorer",
 		"onView:openshiftComponentTypesView",
 		"onCommand:openshift.welcome",
+        "onCommand:openshift.getStarted",
 		"onCommand:openshift.about",
 		"onCommand:openshift.oc.about",
 		"onCommand:openshift.output",
@@ -299,8 +304,8 @@
 		"onCommand:clusters.openshift.deploy.rcShowLog.palette",
 		"onCommand:clusters.openshift.deployment.openConsole",
 		"onCommand:clusters.openshift.imagestream.openConsole",
-    "onCommand:openshift.componentTypesView.registry.openInView",
-    "onWalkthrough:openshiftWalkthrough"
+        "onCommand:openshift.componentTypesView.registry.openInView",
+        "onWalkthrough:openshiftWalkthrough"
 	],
 	"contributes": {
 		"commands": [
@@ -889,6 +894,11 @@
 			{
 				"command": "openshift.welcome",
 				"title": "Welcome",
+				"category": "OpenShift"
+			},
+            {
+				"command": "openshift.getStarted",
+				"title": "Get Started",
 				"category": "OpenShift"
 			},
 			{
