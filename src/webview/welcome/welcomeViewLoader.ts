@@ -40,7 +40,6 @@ async function welcomeViewerMessageListener(event: any): Promise<any> {
             break;
     }
 }
-
 export default class WelcomeViewLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     static get extensionPath() {
