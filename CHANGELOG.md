@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.6.0 (August 22, 2022)
+
+* [#2474](https://github.com/redhat-developer/vscode-openshift-tools/issues/2474) Launching Developer Sandbox feature does not work
+
 ## 0.5.0 (July 13, 2022)
 
 * [#2414](https://github.com/redhat-developer/vscode-openshift-tools/issues/2414) Add Get Started page for OpenShift Walkthrough
