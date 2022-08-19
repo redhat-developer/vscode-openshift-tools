@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <% if (production) { %>
+        <base href="%BASE_URL%" />
+        <% } %>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Welcome</title>
+        <!-- meta http-equiv="Content-Security-Policy" -->
+        <style>
+            html,
+            body {
+                padding: 0;
+                overflow: visible;
+            }
+
+            body.vscode-light {
+                color: black;
+            }
+
+            body.vscode-dark {
+                color: white;
+            }
+
+            body.vscode-high-contrast {
+                color: red;
+            }
+
+            .box {
+                display: flex;
+                flex-flow: column;
+                position: absolute;
+                top: 0px;
+                bottom: 1px;
+                left: 0px;
+                right: 0px;
+            }
+
+            .box .row.header {
+                flex: 0 1 auto;
+            }
+
+            .box .row.content {
+                flex: 1 1 auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="box" id="root"></div>
+    </body>
+</html>
