@@ -11,10 +11,14 @@ import { vsCommand } from './vscommand';
 
 export class WelcomePage {
 
-    @vsCommand('openshift.welcome')
     static createOrShow(): void {
         if(workspace.getConfiguration('openshiftConnector').get('showWelcomePage')) {
-            WelcomeWebview.createOrShow(ExtenisonID, path.resolve(__dirname, '..', '..'), path.join('welcome', 'app', 'assets'), 'openshiftConnector.showWelcomePage');
+            WelcomePage.createOrShowCmd();
         }
+    }
+
+    @vsCommand('openshift.welcome')
+    static createOrShowCmd(): void {
+        WelcomeWebview.createOrShow(ExtenisonID, path.resolve(__dirname, '..', '..'), path.join('welcome', 'app', 'assets'), 'openshiftConnector.showWelcomePage');
     }
 }
