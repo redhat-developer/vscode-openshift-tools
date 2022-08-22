@@ -18,10 +18,13 @@ async function welcomeViewerMessageListener(event: any): Promise<any> {
             await vscode.commands.executeCommand('vscode.open', 'https://github.com/redhat-developer/vscode-openshift-tools/releases');
             break;
         case 'openCluster':
-            await vscode.commands.executeCommand('openshift.explorer.addCluster',event.param);
+            await vscode.commands.executeCommand('openshift.explorer.addCluster', event.param);
             break;
         case 'openDevfileRegistry':
             await vscode.commands.executeCommand('openshift.componentTypesView.registry.openInView');
+            break;
+        case 'updateShowWelcomePage':
+            await vscode.workspace.getConfiguration('openshiftConnector').update('showWelcomePage', event.param, vscode.ConfigurationTarget.Global);
             break;
         default:
             panel.webview.postMessage(

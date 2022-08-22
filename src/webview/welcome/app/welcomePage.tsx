@@ -10,9 +10,6 @@ import ChatIcon from '@mui/icons-material/Chat';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import NewReleasesIcon from '@mui/icons-material/NewReleases';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import YouTubeIcon from '@mui/icons-material/YouTube';
 import './welcome.scss';
 
 export interface DefaultProps {
@@ -20,7 +17,8 @@ export interface DefaultProps {
 }
 
 export class Welcome extends React.Component<DefaultProps, {
-    imageVal: number
+    imageVal: number,
+    checked: boolean
 }> {
     textContentRef: React.RefObject<HTMLDivElement>;
     sandboxRef: React.RefObject<HTMLDivElement>;
@@ -34,13 +32,21 @@ export class Welcome extends React.Component<DefaultProps, {
         this.componentRef = React.createRef();
         this.remoteRef = React.createRef();
         this.state = {
-            imageVal: 1
+            imageVal: 1,
+            checked: true
         }
+    }
+
+    onCheckboxChange = (isChecked: boolean) => {
+        this.setState({ checked: isChecked });
+        VSCodeMessage.postMessage({
+            'action': 'updateShowWelcomePage',
+            'param': isChecked
+        })
     }
 
     handleScroll = () => {
         const { scrollTop } = this.textContentRef.current;
-        console.log('scrollTop:::', scrollTop);
         if (scrollTop < 100) {
             this.setState({
                 imageVal: 1
@@ -100,14 +106,12 @@ export class Welcome extends React.Component<DefaultProps, {
         return;
     }
 
-    footer = <footer id='footer'>
+    footer = (checked: boolean) => <footer id='footer'>
         <div className='foot-col-1'>
-            <h4>Channels</h4>
-            <ul>
-                <li><a href='#'><TwitterIcon /></a></li>
-                <li><a href='#'><FacebookIcon /></a></li>
-                <li><a href='#'><YouTubeIcon /></a></li>
-            </ul>
+            <input type='checkbox' id='showWhenUsingExtension' defaultChecked={checked} onChange={(e) => {
+                this.onCheckboxChange(e.target.checked);
+            }} />
+            <label htmlFor='showWhenUsingExtension'>Show welcome page when OpenShift Connector Extension is activated</label>
         </div>
 
         <div className='foot-col-2'>
@@ -174,7 +178,7 @@ export class Welcome extends React.Component<DefaultProps, {
     </footer>
 
     render(): React.ReactNode {
-        const { imageVal } = this.state;
+        const { imageVal, checked } = this.state;
         return <>
             <header>
                 <div className='header__logo'>
@@ -293,7 +297,7 @@ export class Welcome extends React.Component<DefaultProps, {
                     </section>
                 </div>
             </div>
-            {this.footer}
+            {this.footer(checked)}
         </>;
     }
 }
