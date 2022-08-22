@@ -21,7 +21,6 @@ import AddClusterView from './clusterView';
 import AddSandboxView from './sandboxView';
 import clusterStyle from './cluster.style';
 import './images/logo.png';
-import { ArrowBack } from '@material-ui/icons';
 
 const useStyles = makeStyles(clusterStyle);
 
@@ -113,7 +112,7 @@ export default function Header() {
                         </Typography>
                     </div>
                     <CardContent style={{ height: 240 }}>
-                        <Typography  className={index === 2 ? classes.cardImageTableContainer : classes.cardImageContainer}>
+                        <Typography className={index === 2 ? classes.cardImageTableContainer : classes.cardImageContainer}>
                             {list.imageUrl.map((url: string, index: string | number) => (
                                 <img src={url} key={index} className={classes.image} style={{ marginLeft: '.625rem', marginRight: '.625rem', position: 'relative' }}></img>
                             ))}
@@ -153,12 +152,13 @@ export default function Header() {
 
     return (
         <div className={classes.App}>
-            <div style={{ display: 'grid',gridTemplateColumns: 'repeat(3,1fr)',margin:'0 auto' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', margin: '0 auto' }}>
                 <div>
-                    { showWizard?.length > 0 &&
-                    (<Tooltip title='Back' placement='top'>
-                        <ArrowBack className={classes.backButton} onClick={() => moveBack()}/>
-                    </Tooltip>)}
+                    {showWizard?.length > 0 &&
+                        <a onClick={() => moveBack()} className={classes.cardButton} style={{ textDecoration: 'none', cursor: 'pointer'}}>
+                            &#60; Back
+                        </a>
+                    }
                 </div>
                 <div className={classes.iconContainer}>
                     <img className={classes.image} src='assets/logo.png' alt='redhat-openshift'></img>
