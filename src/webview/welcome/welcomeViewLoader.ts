@@ -31,6 +31,9 @@ async function welcomeViewerMessageListener(event: any): Promise<any> {
         case 'openDevfileRegistry':
             await vscode.commands.executeCommand('openshift.componentTypesView.registry.openInView');
             break;
+        case 'updateShowWelcomePage':
+            await vscode.workspace.getConfiguration('openshiftConnector').update('showWelcomePage', event.param, vscode.ConfigurationTarget.Global);
+            break;
         default:
             panel.webview.postMessage(
                 {
