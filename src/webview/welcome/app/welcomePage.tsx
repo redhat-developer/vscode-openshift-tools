@@ -84,9 +84,10 @@ export class Welcome extends React.Component<DefaultProps, {
         return;
     }
 
-    openReleaseNotes = (): void => {
+    openExternalPage = (url: string): void => {
         VSCodeMessage.postMessage({
-            'action': 'openReleaseNotes'
+            'action': 'open',
+            'param': url
         });
         return;
     }
@@ -118,14 +119,14 @@ export class Welcome extends React.Component<DefaultProps, {
             <h4>Help</h4>
             <ul>
                 <li>
-                    <a href='#'>
+                    <a href='#' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector&ssr=false#qna')}>
                         <Typography variant='subtitle1' className='footerIcons'>
                             <HelpIcon /> Questions
                         </Typography>
                     </a>
                 </li>
                 <li>
-                    <a href='#'>
+                    <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/issues')}>
                         <Typography variant='subtitle1' className='footerIcons'>
                             <BugReportIcon /> Issues
                         </Typography>
@@ -145,28 +146,28 @@ export class Welcome extends React.Component<DefaultProps, {
             <h4>Resources</h4>
             <ul>
                 <li>
-                    <a href='#'>
+                    <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/releases')}>
                         <Typography variant='subtitle1' className='footerIcons'>
                             <NewReleasesIcon /> What's New
                         </Typography>
                     </a>
                 </li>
                 <li>
-                    <a href='#'>
+                    <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools')}>
                         <Typography variant='subtitle1' className='footerIcons'>
                             <GitHubIcon /> GitHub
                         </Typography>
                     </a>
                 </li>
                 <li>
-                    <a href='#'>
+                    <a href='#' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector')}>
                         <Typography variant='subtitle1' className='footerIcons'>
                             Marketplace
                         </Typography>
                     </a>
                 </li>
                 <li>
-                    <a href='#'>
+                    <a href='#' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items/redhat.vscode-openshift-connector/license')}>
                         <Typography variant='subtitle1' className='footerIcons'>
                             License
                         </Typography>
@@ -227,7 +228,7 @@ export class Welcome extends React.Component<DefaultProps, {
                             <a
                                 className='button button--flat'
                                 title='See Whats New'
-                                onClick={this.openReleaseNotes}
+                                onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/releases')}
                             >See What's New in OpenShift Connector</a>
                             <a
                                 className='button button--flat'

@@ -14,8 +14,8 @@ async function welcomeViewerMessageListener(event: any): Promise<any> {
         case 'callGetStartedPage':
             vscode.commands.executeCommand('openshift.getStarted');
             break;
-        case 'openReleaseNotes':
-            await vscode.commands.executeCommand('vscode.open', 'https://github.com/redhat-developer/vscode-openshift-tools/releases');
+        case 'open':
+            await vscode.commands.executeCommand('vscode.open', event.param);
             break;
         case 'openCluster':
             await vscode.commands.executeCommand('openshift.explorer.addCluster', event.param);
