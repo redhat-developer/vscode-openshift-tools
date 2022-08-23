@@ -93,10 +93,10 @@ export async function requestVerificationCode(token: string, countryCode: string
             'phone_number': phoneNumber
         })
     });
-
+    const responseText = await verificationCodeRequestResponse.text();
     return {
         ok: verificationCodeRequestResponse.ok,
-        json: await verificationCodeRequestResponse.json() as SBResponseData
+        json: (responseText ? JSON.parse(responseText) : {}) as SBResponseData
     }
 }
 
