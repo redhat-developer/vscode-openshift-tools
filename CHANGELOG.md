@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.6.0 (August 22, 2022)
+## 0.6.0 (August 25, 2022)
 
 * [#2514](https://github.com/redhat-developer/vscode-openshift-tools/issues/2514) Sandbox: Verification code request form times out
 * [#2510](https://github.com/redhat-developer/vscode-openshift-tools/issues/2510) Welcome View: `OpenShift: Welcome` command does not open Welcome View if 'Show Welcome Page' preference is not set
