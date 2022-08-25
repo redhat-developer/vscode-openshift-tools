@@ -2,6 +2,7 @@
 
 ## 0.6.0 (August 25, 2022)
 
+* [#2464](https://github.com/redhat-developer/vscode-openshift-tools/issues/2464) Debug command fails for python components due to issue with debug command in devfile
 * [#2514](https://github.com/redhat-developer/vscode-openshift-tools/issues/2514) Sandbox: Verification code request form times out
 * [#2510](https://github.com/redhat-developer/vscode-openshift-tools/issues/2510) Welcome View: `OpenShift: Welcome` command does not open Welcome View if 'Show Welcome Page' preference is not set
 * [#2507](https://github.com/redhat-developer/vscode-openshift-tools/issues/2507) Cluster Editor: Buttons in Sandbox Workflow page are not centered
