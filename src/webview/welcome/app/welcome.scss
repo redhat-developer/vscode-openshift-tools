@@ -181,15 +181,6 @@ section {
     padding: 1em;
 }
 
-.footer {
-    width: 99%;
-    position: relative;
-}
-
-.footerContent {
-    margin-left: 1.5rem;
-}
-
 .conent--section--settings {
     flex: 0 1 auto;
     display: flex;
@@ -288,10 +279,11 @@ section {
 #footer {
     width: 99%;
     display: inline-block;
-    margin: 0 auto;
+    margin: 1.5rem auto;
     background: var('--vscode-editor-background');
-    color: #dbdbdb;
-    border-top: 1px solid #EE0000;
+    color: #f2f2f2;
+    font-size: 'inherit';
+    font-family: 'inherit';
 }
 
 #footer ul li a {
