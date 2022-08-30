@@ -6,11 +6,19 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ExtenisonID } from '../../util/constants';
+const pkjson = require('../../../package.json');
 
 let panel: vscode.WebviewPanel;
 
 async function welcomeViewerMessageListener(event: any): Promise<any> {
     switch (event?.action) {
+        case 'getOpenShiftVersion':
+            const preVersion = 'v'+Number((parseFloat(pkjson['version']) - 0.1).toFixed(1)) + '.0';
+            panel?.webview.postMessage({
+                'action': 'getOpenShiftVersion',
+                'param': preVersion
+            });
+            break;
         case 'callGetStartedPage':
             vscode.commands.executeCommand('openshift.getStarted');
             break;
@@ -23,9 +31,6 @@ async function welcomeViewerMessageListener(event: any): Promise<any> {
         case 'openDevfileRegistry':
             await vscode.commands.executeCommand('openshift.componentTypesView.registry.openInView');
             break;
-        case 'updateShowWelcomePage':
-            await vscode.workspace.getConfiguration('openshiftConnector').update('showWelcomePage', event.param, vscode.ConfigurationTarget.Global);
-            break;
         default:
             panel.webview.postMessage(
                 {
@@ -35,6 +40,7 @@ async function welcomeViewerMessageListener(event: any): Promise<any> {
             break;
     }
 }
+
 export default class WelcomeViewLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     static get extensionPath() {

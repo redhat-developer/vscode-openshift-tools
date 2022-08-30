@@ -5,7 +5,11 @@
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
 import { Welcome } from './welcomePage';
+import { VSCodeMessage } from './vsCodeMessage';
 
+VSCodeMessage.postMessage({
+    'action': 'getOpenShiftVersion'
+})
 ReactDOM.render(
     <Welcome />,
     document.getElementById('root'),

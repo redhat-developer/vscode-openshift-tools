@@ -18,7 +18,7 @@ export interface DefaultProps {
 
 export class Welcome extends React.Component<DefaultProps, {
     imageVal: number,
-    checked: boolean
+    lastRelease: string
 }> {
     textContentRef: React.RefObject<HTMLDivElement>;
     sandboxRef: React.RefObject<HTMLDivElement>;
@@ -33,16 +33,16 @@ export class Welcome extends React.Component<DefaultProps, {
         this.remoteRef = React.createRef();
         this.state = {
             imageVal: 1,
-            checked: true
+            lastRelease: ''
         }
     }
 
-    onCheckboxChange = (isChecked: boolean) => {
-        this.setState({ checked: isChecked });
-        VSCodeMessage.postMessage({
-            'action': 'updateShowWelcomePage',
-            'param': isChecked
-        })
+    componentDidMount(): void {
+        VSCodeMessage.onMessage((message) => {
+            if (message.data.action === 'getOpenShiftVersion') {
+                this.setState({ lastRelease: message.data.param })
+            }
+        });
     }
 
     handleScroll = () => {
@@ -107,14 +107,7 @@ export class Welcome extends React.Component<DefaultProps, {
         return;
     }
 
-    footer = (checked: boolean) => <footer id='footer'>
-        <div className='foot-col-1'>
-            <input type='checkbox' id='showWhenUsingExtension' defaultChecked={checked} onChange={(e) => {
-                this.onCheckboxChange(e.target.checked);
-            }} />
-            <label htmlFor='showWhenUsingExtension'>Show welcome page when OpenShift Connector Extension is activated</label>
-        </div>
-
+    footer = <footer id='footer'>
         <div className='foot-col-2'>
             <h4>Help</h4>
             <ul>
@@ -133,9 +126,9 @@ export class Welcome extends React.Component<DefaultProps, {
                     </a>
                 </li>
                 <li>
-                    <a href='#'>
+                    <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/discussions')}>
                         <Typography variant='subtitle1' className='footerIcons'>
-                            <ChatIcon />  Slack
+                            <ChatIcon />  Discussions
                         </Typography>
                     </a>
                 </li>
@@ -148,7 +141,7 @@ export class Welcome extends React.Component<DefaultProps, {
                 <li>
                     <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/releases')}>
                         <Typography variant='subtitle1' className='footerIcons'>
-                            <NewReleasesIcon /> What's New
+                            <NewReleasesIcon /> Releases
                         </Typography>
                     </a>
                 </li>
@@ -167,7 +160,7 @@ export class Welcome extends React.Component<DefaultProps, {
                     </a>
                 </li>
                 <li>
-                    <a href='#' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items/redhat.vscode-openshift-connector/license')}>
+                    <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/blob/main/LICENSE')}>
                         <Typography variant='subtitle1' className='footerIcons'>
                             License
                         </Typography>
@@ -179,7 +172,7 @@ export class Welcome extends React.Component<DefaultProps, {
     </footer>
 
     render(): React.ReactNode {
-        const { imageVal, checked } = this.state;
+        const { imageVal, lastRelease } = this.state;
         return <>
             <header>
                 <div className='header__logo'>
@@ -228,7 +221,7 @@ export class Welcome extends React.Component<DefaultProps, {
                             <a
                                 className='button button--flat'
                                 title='See Whats New'
-                                onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/releases')}
+                                onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/releases/' + `${lastRelease}`)}
                             >See What's New in OpenShift Connector</a>
                             <a
                                 className='button button--flat'
@@ -298,7 +291,7 @@ export class Welcome extends React.Component<DefaultProps, {
                     </section>
                 </div>
             </div>
-            {this.footer(checked)}
+            {this.footer}
         </>;
     }
 }
