@@ -90,7 +90,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             'merge.currentHeaderBackground', 'button.foreground', 'input.background'];
         const random = Math.floor(Math.random() * listColors.length);
         return element.URL?.toLowerCase().indexOf('https://registry.devfile.io') !== -1 ?
-            new vscode.ThemeColor('editorError.foreground') : new vscode.ThemeColor(listColors[random]);;
+            new vscode.ThemeColor('editorError.foreground') : new vscode.ThemeColor(listColors[random]);
     }
 
     addRegistry(newRegistry: Registry): void {
