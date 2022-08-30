@@ -106,7 +106,7 @@ export default (theme: Theme) =>
             maxHeight: '40rem',
             maxWidth: '50rem',
             margin: 'auto',
-            overflowY: 'auto'
+            overflow: 'auto'
         },
         yamlCardHeader: {
             padding: '1.5rem!important',
@@ -118,8 +118,7 @@ export default (theme: Theme) =>
         yamlCardBody: {
             position: 'relative',
             width: '100%',
-            height: '50rem',
-            overflow: 'auto'
+            height: '50rem'
         },
         copyButton: {
             display: 'block',
