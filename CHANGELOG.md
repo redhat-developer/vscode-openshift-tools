@@ -1,8 +1,24 @@
 # Change Log
 
-## 0.6.0 (August 22, 2022)
+## 0.6.0 (August 25, 2022)
 
+* [#2464](https://github.com/redhat-developer/vscode-openshift-tools/issues/2464) Debug command fails for python components due to issue with debug command in devfile
+* [#2514](https://github.com/redhat-developer/vscode-openshift-tools/issues/2514) Sandbox: Verification code request form times out
+* [#2510](https://github.com/redhat-developer/vscode-openshift-tools/issues/2510) Welcome View: `OpenShift: Welcome` command does not open Welcome View if 'Show Welcome Page' preference is not set
+* [#2507](https://github.com/redhat-developer/vscode-openshift-tools/issues/2507) Cluster Editor: Buttons in Sandbox Workflow page are not centered
+* [#2506](https://github.com/redhat-developer/vscode-openshift-tools/issues/2506) Cluster Editor: Images on infrastructure cards are not centered
+* [#2497](https://github.com/redhat-developer/vscode-openshift-tools/issues/2497) update Registry View icon and change the text
+* [#2496](https://github.com/redhat-developer/vscode-openshift-tools/issues/2496) Improve loading time for registry viewer
+* [#2490](https://github.com/redhat-developer/vscode-openshift-tools/issues/2490) Devfile view registry is broken on vscode macOS
+* [#2488](https://github.com/redhat-developer/vscode-openshift-tools/issues/2488) Add Back button when specific card is opened in Add Cluster view
+* [#2487](https://github.com/redhat-developer/vscode-openshift-tools/issues/2487) CRC 2.5.1 does not support M1 based machines for OpenShift workflow
+* [#2486](https://github.com/redhat-developer/vscode-openshift-tools/issues/2486) Fix UI responsiveness for Add Cluster screen
+* [#2480](https://github.com/redhat-developer/vscode-openshift-tools/issues/2480) Activate basic UI tests in GitHub Actions workflow
 * [#2474](https://github.com/redhat-developer/vscode-openshift-tools/issues/2474) Launching Developer Sandbox feature does not work
+* [#2450](https://github.com/redhat-developer/vscode-openshift-tools/issues/2450) Migrate to latest CRC 2.4.1 release 
+* [#2421](https://github.com/redhat-developer/vscode-openshift-tools/issues/2421) Review telemetry events to eliminate not used ones
+* [#2404](https://github.com/redhat-developer/vscode-openshift-tools/issues/2404) Change New Component workflow
+* [#1477](https://github.com/redhat-developer/vscode-openshift-tools/issues/1477) 'OpenShift: Delete Storage' command should not delete storage from tree until it is pushed
 
 ## 0.5.0 (July 13, 2022)
 

@@ -91,6 +91,15 @@ export default (theme: Theme) =>
       },
       textTransform: 'none'
     },
+    sandboxButton: {
+        color: 'var(--vscode-button-foreground)',
+        backgroundColor: '#EE0000',
+        '&:hover': {
+          color: 'var(--vscode-button-foreground)',
+          backgroundColor: '#BE0000',
+        },
+        textTransform: 'none'
+      },
     cardContent: {
       background: 'var(--vscode-settings-focusedRowBackground)',
       border: '1px solid var(--vscode-settings-focusedRowBorder)',
