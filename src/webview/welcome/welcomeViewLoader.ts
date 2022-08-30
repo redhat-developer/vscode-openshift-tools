@@ -31,9 +31,6 @@ async function welcomeViewerMessageListener(event: any): Promise<any> {
         case 'openDevfileRegistry':
             await vscode.commands.executeCommand('openshift.componentTypesView.registry.openInView');
             break;
-        case 'updateShowWelcomePage':
-            await vscode.workspace.getConfiguration('openshiftConnector').update('showWelcomePage', event.param, vscode.ConfigurationTarget.Global);
-            break;
         default:
             panel.webview.postMessage(
                 {
@@ -43,6 +40,7 @@ async function welcomeViewerMessageListener(event: any): Promise<any> {
             break;
     }
 }
+
 export default class WelcomeViewLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     static get extensionPath() {
