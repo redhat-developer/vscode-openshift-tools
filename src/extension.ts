@@ -72,7 +72,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             './openshift/project',
             './openshift/application',
             './openshift/storage',
-            './openshift/url',
             './openshift/service',
             './k8s/console',
             './oc',

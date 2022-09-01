@@ -272,11 +272,6 @@
 		"onCommand:openshift.componentTypesView.registry.closeView",
 		"onCommand:openshift.catalog.listComponents",
 		"onCommand:openshift.catalog.listServices",
-		"onCommand:openshift.url.create",
-		"onCommand:openshift.url.delete",
-		"onCommand:openshift.url.delete.palette",
-		"onCommand:openshift.component.openUrl",
-		"onCommand:openshift.component.openUrl.palette",
 		"onCommand:openshift.component.debug",
 		"onCommand:openshift.component.debug.palette",
 		"onCommand:openshift.storage.create",
@@ -614,37 +609,6 @@
 			{
 				"command": "openshift.catalog.listServices",
 				"title": "List Catalog Services",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.url.create",
-				"title": "New URL",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.url.delete",
-				"title": "Delete",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.url.delete.palette",
-				"title": "Delete URL",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.url.open",
-				"title": "Open URL",
-				"category": "OpenShift",
-				"icon": "images/context/url-node-open.png"
-			},
-			{
-				"command": "openshift.component.openUrl",
-				"title": "Open in Browser",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.openUrl.palette",
-				"title": "Open Component in Browser",
 				"category": "OpenShift"
 			},
 			{
@@ -994,10 +958,6 @@
 					"when": "false"
 				},
 				{
-					"command": "openshift.url.open",
-					"when": "false"
-				},
-				{
 					"command": "openshift.componentType.openStarterProjectRepository",
 					"when": "false"
 				},
@@ -1058,10 +1018,6 @@
 					"when": "view == openshiftProjectExplorer"
 				},
 				{
-					"command": "openshift.component.openUrl",
-					"when": "view == openshiftProjectExplorer"
-				},
-				{
 					"command": "openshift.component.debug",
 					"when": "view == openshiftProjectExplorer"
 				},
@@ -1091,10 +1047,6 @@
 				},
 				{
 					"command": "openshift.storage.delete",
-					"when": "view == openshiftProjectExplorer"
-				},
-				{
-					"command": "openshift.url.delete",
 					"when": "view == openshiftProjectExplorer"
 				},
 				{
@@ -1370,16 +1322,6 @@
 					"group": "a3"
 				},
 				{
-					"command": "openshift.url.create",
-					"when": "view == openshiftProjectExplorer && viewItem == component",
-					"group": "c1@1"
-				},
-				{
-					"command": "openshift.url.create",
-					"when": "view == openshiftProjectExplorer && viewItem == componentNotPushed",
-					"group": "c1@1"
-				},
-				{
 					"command": "openshift.storage.create",
 					"when": "view == openshiftProjectExplorer && viewItem == component",
 					"group": "c1@2"
@@ -1428,11 +1370,6 @@
 					"command": "openshift.component.unlink",
 					"when": "view == openshiftProjectExplorer && viewItem == component",
 					"group": "c3@3"
-				},
-				{
-					"command": "openshift.component.openUrl",
-					"when": "view == openshiftProjectExplorer && viewItem == component",
-					"group": "c4@1"
 				},
 				{
 					"command": "openshift.component.push",
@@ -1488,16 +1425,6 @@
 					"command": "openshift.storage.delete",
 					"when": "view == openshiftProjectExplorer && viewItem == storage",
 					"group": "s3"
-				},
-				{
-					"command": "openshift.url.delete",
-					"when": "view == openshiftProjectExplorer && viewItem == componentRoute",
-					"group": "s3"
-				},
-				{
-					"command": "openshift.url.open",
-					"when": "view == openshiftProjectExplorer && viewItem == componentRoute",
-					"group": "inline@0"
 				},
 				{
 					"command": "clusters.openshift.useProject",
