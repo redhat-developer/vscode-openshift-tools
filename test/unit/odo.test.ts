@@ -374,37 +374,6 @@ suite('odo', () => {
             expect(result[0].getName()).deep.equals('component1');
             expect(result[1].getName()).deep.equals('service1');
         });
-
-        test('getStorageNames returns storage items for a component', async () => {
-            const component = new TestItem(app, 'comp', odo.ContextType.COMPONENT);
-            execStub.returns({
-                error: undefined,
-                stdout: JSON.stringify({
-                        items: [
-                            {
-                                metadata: {
-                                    name: 'storage1'
-                                },
-                                spec: {
-                                    path: '/mnt/path1'
-                                }
-                            },
-                            {
-                                metadata: {
-                                    name: 'storage2'
-                                },
-                                spec: {
-                                    path: '/mnt/path1'
-                                }
-                            }
-                        ]
-                    }
-                ),
-                stderr: ''
-            });
-            const result = await odoCli.getStorageNames(component);
-            expect(result.length).equals(2);
-        });
     });
 
     suite('catalog integration', () => {

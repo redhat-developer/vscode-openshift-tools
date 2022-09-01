@@ -138,10 +138,6 @@ export class Command {
         return new CommandText(`${Command.listCatalogServices().toString()} -o json`);
     }
 
-    static listStorageNames(): CommandText {
-        return new CommandText('odo storage list -o json');
-    }
-
     static printOcVersion(): CommandText {
         return new CommandText('oc version');
     }
@@ -210,33 +206,6 @@ export class Command {
             clusterURL, [
                 new CommandOption('--token',ocToken),
                 new CommandOption('--insecure-skip-tls-verify')
-            ]
-        );
-    }
-
-    @verbose
-    static createStorage(storageName: string, mountPath: string, storageSize: string): CommandText {
-        return new CommandText('odo storage create',
-            storageName, [
-                new CommandOption('--path', mountPath),
-                new CommandOption('--size', storageSize)
-            ]
-        );
-    }
-
-    static deleteStorage(storage: string): CommandText {
-        return new CommandText('odo storage delete',
-            storage, [
-                new CommandOption('-f')
-            ]
-        );
-    }
-
-    static waitForStorageToBeGone(project: string, app: string, storage: string): CommandText {
-        return new CommandText('oc wait',
-            `pvc/${storage}-${app}-pvc`, [
-                new CommandOption('--for=delete'),
-                new CommandOption('--namespace', project)
             ]
         );
     }

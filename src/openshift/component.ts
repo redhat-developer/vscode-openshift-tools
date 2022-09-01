@@ -5,7 +5,7 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { window, commands, QuickPickItem, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
+import { window, commands, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
 import { ChildProcess, exec } from 'child_process';
 import { EventEmitter } from 'events';
 import * as YAML from 'yaml'
@@ -22,7 +22,6 @@ import LogViewLoader from '../webview/log/LogViewLoader';
 import DescribeViewLoader from '../webview/describe/describeViewLoader';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { ascDevfileFirst, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, isDevfileComponent } from '../odo/componentType';
-import { Url } from '../odo/url';
 import { StarterProjectDescription } from '../odo/catalog';
 import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
 import path = require('path');
@@ -487,52 +486,6 @@ export class Component extends OpenShiftItem {
     @clusterRequired()
     static showWatchSessionLog(context: string): void {
         LogViewLoader.loadView(`${context} Watch Log`, () => new CommandText('odo watch').addOption(new CommandOption('--context', context)), Component.odo.getOpenShiftObjectByContext(context), Component.watchSessions.get(context));
-    }
-
-    @vsCommand('openshift.component.openUrl', true)
-    @clusterRequired()
-    @selectTargetComponent(
-        'Select an Application',
-        'Select a Component to open in browser',
-        (target) => target.contextValue === ContextType.COMPONENT_PUSHED
-    )
-    static async openUrl(component: OpenShiftObject): Promise<ChildProcess | string> {
-        if (!component) return null;
-        const app = component.getParent();
-        const urlItems = await Component.listUrl(component);
-        if (urlItems) {
-            let selectRoute: QuickPickItem;
-            const pushedUrl = urlItems.filter((value: Url) => value.status.state === 'Pushed');
-            if (pushedUrl.length > 0) {
-                const hostName: QuickPickItem[] = pushedUrl.map((value: Url) => ({ label: `${value.spec.protocol}://${value.spec.host}`, description: `Target Port is ${value.spec.port}` }));
-                let targetUrl: string;
-                if (hostName.length > 1) {
-                    selectRoute = await window.showQuickPick(hostName, { placeHolder: 'This Component has multiple URLs. Select the desired URL to open in browser.', ignoreFocusOut: true });
-                    if (selectRoute) {
-                        targetUrl = selectRoute.label;
-                    } else {
-                        return null; // url selection was canceled
-                    };
-                } else {
-                    targetUrl = hostName[0].label;
-                }
-                return commands.executeCommand('vscode.open', Uri.parse(targetUrl));
-            }
-            const unpushedUrl = urlItems.filter((value: Url) => value.status.state === 'Not Pushed');
-            if (unpushedUrl.length > 0) {
-                return `${unpushedUrl.length} unpushed URL in the local config. Use 'Push' command before opening URL in browser.`;
-            }
-        } else {
-            const value = await window.showInformationMessage(`No URL for Component '${component.getName()}' in Application '${app.getName()}'. Do you want to create a URL and open it?`, 'Create', 'Cancel');
-            if (value === 'Create') {
-                await commands.executeCommand('openshift.url.create', component);
-            }
-        }
-    }
-
-    static async listUrl(component: OpenShiftObject): Promise<Url[]> {
-        const UrlDetails = await Component.odo.execute(Command.getComponentUrl(), component.contextPath.fsPath);
-        return JSON.parse(UrlDetails.stdout).items;
     }
 
     @vsCommand('openshift.componentType.newComponent')

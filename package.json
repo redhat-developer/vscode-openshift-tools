@@ -274,8 +274,6 @@
 		"onCommand:openshift.catalog.listServices",
 		"onCommand:openshift.component.debug",
 		"onCommand:openshift.component.debug.palette",
-		"onCommand:openshift.storage.create",
-		"onCommand:openshift.storage.delete",
 		"onCommand:openshift.service.create",
 		"onCommand:openshift.service.delete",
 		"onCommand:openshift.component.folder.create",
@@ -619,21 +617,6 @@
 			{
 				"command": "openshift.component.debug.palette",
 				"title": "Debug Component",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.storage.create",
-				"title": "New Storage",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.storage.delete.palette",
-				"title": "Delete Storage",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.storage.delete",
-				"title": "Delete",
 				"category": "OpenShift"
 			},
 			{
@@ -1046,10 +1029,6 @@
 					"when": "false"
 				},
 				{
-					"command": "openshift.storage.delete",
-					"when": "view == openshiftProjectExplorer"
-				},
-				{
 					"command": "openshift.service.delete",
 					"when": "view == openshiftProjectExplorer"
 				},
@@ -1322,16 +1301,6 @@
 					"group": "a3"
 				},
 				{
-					"command": "openshift.storage.create",
-					"when": "view == openshiftProjectExplorer && viewItem == component",
-					"group": "c1@2"
-				},
-				{
-					"command": "openshift.storage.create",
-					"when": "view == openshiftProjectExplorer && viewItem == componentNotPushed",
-					"group": "c1@2"
-				},
-				{
 					"command": "openshift.component.describe",
 					"when": "view == openshiftProjectExplorer && viewItem == component",
 					"group": "c2@1"
@@ -1420,11 +1389,6 @@
 					"command": "openshift.service.delete",
 					"when": "view == openshiftProjectExplorer && viewItem == service",
 					"group": "s2"
-				},
-				{
-					"command": "openshift.storage.delete",
-					"when": "view == openshiftProjectExplorer && viewItem == storage",
-					"group": "s3"
 				},
 				{
 					"command": "clusters.openshift.useProject",

@@ -34,7 +34,6 @@ suite('odo integration', () => {
     const projectName = `project${Math.round(Math.random() * 1000)}`;
     const componentName = 'component1';
     const appName = 'app1';
-    const urlName = 'url1';
     const nodeJsExGitUrl = 'https://github.com/sclorg/nodejs-ex.git';
     let project: odo.OpenShiftObject;
     let existingApp: odo.OpenShiftObject;
@@ -47,9 +46,6 @@ suite('odo integration', () => {
     let url1: odo.OpenShiftObject;
     let url2: odo.OpenShiftObject;
     let storage: odo.OpenShiftObject;
-    const storageName = 's1';
-    const storageMountPath = '/mnt/s1';
-    const storageSize = '1.5Gi';
 
     async function clone(repositoryURL: string, location: string): Promise<void> {
         const gitExtension = extensions.getExtension('vscode.git').exports;
@@ -236,35 +232,6 @@ suite('odo integration', () => {
                 ),
             );
             expect(componentFromBinary).not.undefined;
-        });
-
-        test('url for not pushed component', async () => {
-            sb.stub(window, 'showInputBox').resolves(`${urlName}1`);
-            const sqpStub = sb.stub<any, any>(window, 'showQuickPick');
-            sqpStub.onFirstCall().resolves('Yes');
-            await commands.executeCommand('openshift.url.create', component);
-            const urls = await oi.getRoutes(component);
-            url1 = urls.find((value) => value.getName() === `${urlName}1`);
-        });
-
-        test('storage for not pushed component', async () => {
-            const sibStub = sb.stub(window, 'showInputBox');
-            sibStub.onFirstCall().resolves(storageName);
-            sibStub.onSecondCall().resolves(storageMountPath);
-            sb.stub<any, any>(window, 'showQuickPick').resolves(storageSize);
-            await commands.executeCommand('openshift.storage.create', component);
-            const storages = await oi.getStorageNames(component);
-            [storage] = storages;
-        });
-
-        test('create url for pushed component', async () => {
-            await pushComponent(component);
-            sb.stub(window, 'showInputBox').resolves(`${urlName}2`);
-            const sqpStub = sb.stub<any, any>(window, 'showQuickPick');
-            sqpStub.onFirstCall().resolves('Yes');
-            await commands.executeCommand('openshift.url.create', component);
-            const urls = await oi.getRoutes(component);
-            url2 = urls.find((value) => value.getName() === `${urlName}2`);
         });
 
         test('create service', async function() {
