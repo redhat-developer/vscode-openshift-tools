@@ -232,7 +232,6 @@ export default (theme: Theme) =>
             width: '95%',
             backgroundColor: 'var(--vscode-list-activeSelectionBackground)',
             color: 'var(--vscode-list-activeSelectionForeground)',
-            borderRadius: '0.375rem',
             paddingLeft: '0.5rem',
             paddingTop: '0.2rem',
             paddingBottom: '0.2rem',
@@ -242,7 +241,6 @@ export default (theme: Theme) =>
         },
         project: {
             width: '95%',
-            borderRadius: '0.375rem',
             paddingLeft: '0.5rem',
             paddingTop: '0.2rem',
             paddingBottom: '0.2rem',
