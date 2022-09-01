@@ -70,27 +70,13 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     // eslint-disable-next-line class-methods-use-this
     getTreeItem(element: ComponentType): TreeItem | Thenable<TreeItem> {
-        const iconColor: vscode.ThemeColor = this.getColor(element);
         return {
             label: element.Name,
             contextValue: ContextType.DEVFILE_REGISTRY,
             tooltip: `Devfile Registry\nName: ${element.Name}\nURL: ${element.URL}`,
             collapsibleState: TreeItemCollapsibleState.None,
-            iconPath: new vscode.ThemeIcon('circle-filled', iconColor)
+            iconPath: new vscode.ThemeIcon('note')
         };
-    }
-
-    /**
-     * by default devfile returns red color for others it will randomly picks
-     * @param element element
-     * @returns color code
-     */
-    private getColor(element: Registry): vscode.ThemeColor {
-        const listColors = ['textLink.foreground', 'searchEditor.findMatchBackground',
-            'merge.currentHeaderBackground', 'button.foreground', 'input.background'];
-        const random = Math.floor(Math.random() * listColors.length);
-        return element.URL?.toLowerCase().indexOf('https://registry.devfile.io') !== -1 ?
-            new vscode.ThemeColor('editorError.foreground') : new vscode.ThemeColor(listColors[random]);
     }
 
     addRegistry(newRegistry: Registry): void {
