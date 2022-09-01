@@ -23,7 +23,6 @@ import { Application } from './odo/application';
 import { ComponentType, ComponentTypesJson, ComponentTypeAdapter, Registry, RegistryList, DevfileComponentType } from './odo/componentType';
 import { Project } from './odo/project';
 import { ComponentsJson, NotAvailable } from './odo/component';
-import { Url } from './odo/url';
 import { Service, ServiceOperatorShortInfo } from './odo/service';
 import { CommandText } from './base/command';
 import { Command } from './odo/command';
@@ -232,17 +231,6 @@ export class OpenShiftStorage extends OpenShiftObjectImpl {
     }
 }
 
-export class OpenShiftUrl extends OpenShiftObjectImpl {
-    constructor(parent: OpenShiftObject, name: string) {
-        super(parent, name, ContextType.COMPONENT_ROUTE, 'url-node.png', TreeItemCollapsibleState.None);
-    }
-
-    get tooltip(): string {
-        return `URL: ${this.name}`;
-    }
-
-}
-
 export class OpenShiftClusterDown extends OpenShiftObjectImpl {
     constructor() {
         super(undefined, 'Cannot connect to the OpenShift cluster', ContextType.CLUSTER_DOWN, 'cluster-down.png', TreeItemCollapsibleState.None);
@@ -363,8 +351,6 @@ export interface Odo {
     deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject>;
     createService(application: OpenShiftObject, formData: any): Promise<OpenShiftObject>;
     deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
-    deleteURL(url: OpenShiftObject): Promise<OpenShiftObject>;
-    createComponentCustomUrl(component: OpenShiftObject, name: string, port: string, secure?: boolean): Promise<OpenShiftObject>;
     getOpenShiftObjectByContext(context: string): OpenShiftObject;
     getSettingsByContext(context: string): odo.Component;
     loadItems<I>(result: cliInstance.CliExitData, fetch: (data) => I[]): I[];
@@ -667,7 +653,7 @@ export class OdoImpl implements Odo {
     }
 
     async _getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        return [... await this._getStorageNames(component), ... await this._getRoutes(component)].sort(compareNodes);
+        return (await this._getStorageNames(component)).sort(compareNodes);
     }
 
     async getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
@@ -690,13 +676,6 @@ export class OdoImpl implements Odo {
             const data = port.split('/');
             return {number: Number.parseInt(data[0], 10), protocol: data[1]};
         });
-    }
-
-    public async _getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.getComponentUrl(), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath(), false);
-        return this.loadItems<Url>(result)
-            .filter((value)=> !!value.metadata.name)
-            .map((value) => new OpenShiftUrl(component, value.metadata.name));
     }
 
     async getStorageNames(component: OpenShiftObject): Promise<OpenShiftStorage[]> {
@@ -1014,16 +993,6 @@ export class OdoImpl implements Odo {
         await this.execute(Command.pushComponent(true), component.contextPath.fsPath);
         await this.execute(Command.waitForStorageToBeGone(storage.getParent().getParent().getParent().getName(), storage.getParent().getParent().getName(), storage.getName()), process.cwd(), false);
         return this.deleteAndRefresh(storage);
-    }
-
-    public async createComponentCustomUrl(component: OpenShiftObject, name: string, port: string, secure = false): Promise<OpenShiftObject> {
-        await this.execute(Command.createComponentCustomUrl(name, port, secure), component.contextPath.fsPath);
-        return this.insertAndReveal(new OpenShiftUrl(component, name));
-    }
-
-    public async deleteURL(route: OpenShiftObject): Promise<OpenShiftObject> {
-        await this.execute(Command.deleteComponentUrl(route.getName()), route.getParent().contextPath.fsPath);
-        return this.deleteAndRefresh(route);
     }
 
     clearCache(): void {
