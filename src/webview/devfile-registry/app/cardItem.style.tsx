@@ -145,7 +145,7 @@ export default (theme: Theme) =>
             backgroundColor: 'var(--vscode-button-background)',
             '&:hover': {
                 cursor: 'pointer',
-                backgroundColor: 'var(--vscode-button-hoverBackground)',
+                backgroundColor: 'var(--vscode-button-hoverBackground)'
             },
             textTransform: 'none'
         },
@@ -230,16 +230,15 @@ export default (theme: Theme) =>
         },
         starterProjectSelected: {
             width: '95%',
-            backgroundColor: 'var(--vscode-button-background)',
-            color: '#ffffff',
+            backgroundColor: 'var(--vscode-list-activeSelectionBackground)',
+            color: 'var(--vscode-list-activeSelectionForeground)',
             borderRadius: '0.375rem',
             paddingLeft: '0.5rem',
             paddingTop: '0.2rem',
             paddingBottom: '0.2rem',
             cursor: 'default',
-            '&:hover': {
-                background: 'var(--vscode-button-hoverBackground)'
-            }
+            border: '0.5px solid',
+            borderColor: 'var(--vscode-focusBorder)'
         },
         project: {
             width: '95%',
@@ -248,9 +247,11 @@ export default (theme: Theme) =>
             paddingTop: '0.2rem',
             paddingBottom: '0.2rem',
             cursor: 'default',
+            backgroundColor: 'var(--vscode-list-focusBackground)',
+            color: 'var(--vscode-list-focusForeground)',
             '&:hover': {
-                backgroundColor: 'var(--vscode-editor-selectionHighlightBackground)',
-                color: '#ffffff'
+                background: 'var(--vscode-list-hoverBackground)',
+                color: 'var(--vscode-list-hoverForeground)'
             }
         },
         display: {
