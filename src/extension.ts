@@ -71,7 +71,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             './openshift/catalog',
             './openshift/project',
             './openshift/application',
-            './openshift/storage',
             './openshift/service',
             './k8s/console',
             './oc',
@@ -104,23 +103,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             if (choice === 'Push') {
                 await commands.executeCommand('openshift.component.push', event.data);
                 OpenShiftExplorer.getInstance().refresh(event.data);
-            }
-        } else if (
-            event.type === 'inserted' &&
-            (event.data.contextValue === ContextType.COMPONENT_ROUTE ||
-                event.data.contextValue === ContextType.STORAGE)
-        ) {
-            const choice = await window.showInformationMessage(
-                `Do you want to push changes for '${event.data.getParent().getName()}' Component?`,
-                'Push',
-            );
-            if (choice === 'Push') {
-                await commands.executeCommand(
-                    'openshift.component.push',
-                    event.data.getParent(),
-                    true,
-                );
-                OpenShiftExplorer.getInstance().refresh(event.data.getParent());
             }
         }
     });

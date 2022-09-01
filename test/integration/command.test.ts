@@ -172,7 +172,6 @@ suite('odo commands integration', () => {
         const componentLocation = tmp.dirSync().name;
         const newUrlName = 'new-url-name';
         const newUrlNameSecure = 'new-url-name-secure';
-        const newStorageName = 'new-sorage-name';
         const nodeJsExGitUrl = 'https://github.com/sclorg/nodejs-ex.git';
 
         test('createLocalComponent()', async () => {
@@ -201,15 +200,6 @@ suite('odo commands integration', () => {
         test('createComponentCustomUrl(secure)', async () => {
             await ODO.execute(Command.createComponentCustomUrl(newUrlNameSecure, '8080', true), componentLocation);
         });
-        test('createStorage(1)', async () => {
-            await ODO.execute(Command.createStorage(`${newStorageName}1`, '/mnt/storage1', '1Gi'), componentLocation);
-        });
-        test('createStorage(2)', async () => {
-            await ODO.execute(Command.createStorage(`${newStorageName}2`, '/mnt/storage2', '1Gi'), componentLocation);
-        });
-        test('listStorageNames()', async () => {
-            await ODO.execute(Command.listStorageNames(), componentLocation);
-        });
         test('describeComponentJson()', async () => {
             await ODO.execute(Command.describeComponentJson(),componentLocation);
         });
@@ -233,10 +223,6 @@ suite('odo commands integration', () => {
         });
         test('undeployComponent', async () => {
             await ODO.execute(Command.undeployComponent(project, newAppName, newNodeJsComponent), componentLocation);
-        });
-        test('deleteStorage()', async () => {
-            await ODO.execute(Command.deleteStorage(`${newStorageName}1`), componentLocation);
-            await ODO.execute(Command.waitForStorageToBeGone(project, newAppName, `${newStorageName}1`), componentLocation)
         });
         test('deleteComponent', async () => {
             await ODO.execute(Command.deleteComponent(project, newAppName, newNodeJsComponent, true), componentLocation);

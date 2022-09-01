@@ -27,7 +27,6 @@ import { Service, ServiceOperatorShortInfo } from './odo/service';
 import { CommandText } from './base/command';
 import { Command } from './odo/command';
 import { VsCommandError } from './vscommand';
-import { Storage } from './odo/storage';
 import bs = require('binary-search');
 import { CliExitData } from './cli';
 import { KubeConfigUtils } from './util/kubeUtils';
@@ -49,10 +48,8 @@ export enum ContextType {
     COMPONENT_PUSHED = 'component',
     COMPONENT_NO_CONTEXT = 'componentNoContext',
     SERVICE = 'service',
-    STORAGE = 'storage',
     CLUSTER_DOWN = 'clusterDown',
     LOGIN_REQUIRED = 'loginRequired',
-    COMPONENT_ROUTE = 'componentRoute'
 }
 
 export interface OpenShiftObject extends QuickPickItem {
@@ -221,16 +218,6 @@ export class OpenShiftApplication extends OpenShiftObjectImpl {
     }
 }
 
-export class OpenShiftStorage extends OpenShiftObjectImpl {
-    constructor(parent: OpenShiftObject, name: string, public readonly mountPath: string) {
-        super(parent, name, ContextType.STORAGE, 'storage-node.png', TreeItemCollapsibleState.None);
-    }
-
-    get tooltip(): string {
-        return `Storage: ${this.name}`;
-    }
-}
-
 export class OpenShiftClusterDown extends OpenShiftObjectImpl {
     constructor() {
         super(undefined, 'Cannot connect to the OpenShift cluster', ContextType.CLUSTER_DOWN, 'cluster-down.png', TreeItemCollapsibleState.None);
@@ -266,10 +253,6 @@ export class OpenShiftComponent extends OpenShiftObjectImpl {
 
     get iconPath(): Uri {
         return Uri.file(path.join(__dirname, '../../images/component', 'workspace.png'));
-    }
-
-    getChildren(): Promise<OpenShiftObject[]> {
-        return this.contextValue === ContextType.COMPONENT_NO_CONTEXT || !this.isOdoManaged() ? Promise.resolve(<OpenShiftObject[]>[]) : this.odo.getComponentChildren(this);
     }
 
     get tooltip(): string {
@@ -327,10 +310,7 @@ export interface Odo {
     getComponents(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]>;
     getCompTypesJson():Promise<DevfileComponentType[]>;
     getComponentTypes(): Promise<ComponentTypeAdapter[]>;
-    getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]>;
-    getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponentPorts(component: OpenShiftObject): Promise<odo.Port[]>;
-    getStorageNames(component: OpenShiftObject): Promise<OpenShiftStorage[]>;
     getServiceOperators(): Promise<ServiceOperatorShortInfo[]>;
     getClusterServiceVersion(svc: string): Promise<ClusterServiceVersionKind>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
@@ -347,8 +327,6 @@ export interface Odo {
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     undeployComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     deleteNotPushedComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
-    createStorage(component: OpenShiftObject, name: string, mountPath: string, size: string): Promise<OpenShiftObject>;
-    deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject>;
     createService(application: OpenShiftObject, formData: any): Promise<OpenShiftObject>;
     deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
     getOpenShiftObjectByContext(context: string): OpenShiftObject;
@@ -644,22 +622,6 @@ export class OdoImpl implements Odo {
         return devfileItems;
     }
 
-    public async getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        let children = OdoImpl.data.getChildrenByParent(component);
-        if (!children) {
-            children = OdoImpl.data.setParentToChildren(component, this._getComponentChildren(component));
-        }
-        return children;
-    }
-
-    async _getComponentChildren(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        return (await this._getStorageNames(component)).sort(compareNodes);
-    }
-
-    async getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        return (await this.getComponentChildren(component)).filter((value) => value.contextValue === ContextType.COMPONENT_ROUTE);
-    }
-
     async getComponentPorts(component: OpenShiftObject): Promise<odo.Port[]> {
         let ports: string[] = [];
         if (component.contextValue === ContextType.COMPONENT_PUSHED) {
@@ -676,16 +638,6 @@ export class OdoImpl implements Odo {
             const data = port.split('/');
             return {number: Number.parseInt(data[0], 10), protocol: data[1]};
         });
-    }
-
-    async getStorageNames(component: OpenShiftObject): Promise<OpenShiftStorage[]> {
-        return (await this.getComponentChildren(component)).filter((value) => value.contextValue === ContextType.STORAGE) as OpenShiftStorage[];
-    }
-
-    public async _getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listStorageNames(), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
-        const storageList = this.loadItems<Storage>(result).map<OpenShiftObject>((value) => new OpenShiftStorage(component, value.metadata.name, value.spec.path));
-        return [...new Map(storageList.map(storage=>[storage.label, storage])).values()];
     }
 
     public async getServiceOperators(): Promise<ServiceOperatorShortInfo[]> {
@@ -980,19 +932,6 @@ export class OdoImpl implements Odo {
             await this.deleteApplication(app);
         }
         return service;
-    }
-
-    public async createStorage(component: OpenShiftObject, name: string, mountPath: string, size: string): Promise<OpenShiftObject> {
-        await this.execute(Command.createStorage(name, mountPath, size), component.contextPath.fsPath);
-        return this.insertAndReveal(new OpenShiftStorage(component, name, mountPath));
-    }
-
-    public async deleteStorage(storage: OpenShiftObject): Promise<OpenShiftObject> {
-        const component = storage.getParent();
-        await this.execute(Command.deleteStorage(storage.getName()), component.contextPath.fsPath);
-        await this.execute(Command.pushComponent(true), component.contextPath.fsPath);
-        await this.execute(Command.waitForStorageToBeGone(storage.getParent().getParent().getParent().getName(), storage.getParent().getParent().getName(), storage.getName()), process.cwd(), false);
-        return this.deleteAndRefresh(storage);
     }
 
     clearCache(): void {

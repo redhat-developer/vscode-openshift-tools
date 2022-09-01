@@ -14,9 +14,7 @@ const errorMessage = {
     Project: 'You need at least one Project available. Please create new OpenShift Project and try again.',
     Application: 'You need at least one Application available. Please create new OpenShift Application and try again.',
     Component: 'You need at least one Component available. Please create new OpenShift Component and try again.',
-    Service: 'You need at least one Service available. Please create new OpenShift Service and try again.',
-    Storage: 'You need at least one Storage available. Please create new OpenShift Storage and try again.',
-    Route: 'You need to add one URL to the component. Please create a new URL and try again.'
+    Service: 'You need at least one Service available. Please create new OpenShift Service and try again.'
 };
 
 export class QuickPickCommand implements QuickPickItem {
@@ -162,22 +160,6 @@ export default class OpenShiftItem {
             throw new VsCommandError(errorMessage.Service);
         }
         return serviceList;
-    }
-
-    static async getStorageNames(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        const storageList: Array<OpenShiftObject> = await OpenShiftItem.odo.getStorageNames(component);
-        if (storageList.length === 0) {
-            throw new VsCommandError(errorMessage.Storage);
-        }
-        return storageList;
-    }
-
-    static async getRoutes(component: OpenShiftObject): Promise<OpenShiftObject[]> {
-        const urlList: Array<OpenShiftObject> = await OpenShiftItem.odo.getRoutes(component);
-        if (urlList.length === 0) {
-            throw new VsCommandError(errorMessage.Route);
-        }
-        return urlList;
     }
 
     static async getOpenShiftCmdData<T extends OpenShiftObject>(treeItem: T, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean): Promise<T | null> {
