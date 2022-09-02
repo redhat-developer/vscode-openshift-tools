@@ -715,28 +715,6 @@ suite('OpenShift/Component', () => {
             expect(treeKillStub).calledOnceWith(1);
         });
 
-        test('stops watch command if running', async () => {
-            const cpStub = new EventEmitter() as any as ChildProcess;
-            (cpStub as any).pid = 123;
-            spawnStub.resolves(cpStub);
-            const c = pq('../../../src/openshift/component', {
-                'tree-kill': () => {
-                    cpStub.emit('exit');
-                }
-            }).Component;
-            const WatchSessionsViewPQ = pq('../../../src/watch', {
-                './openshift/component': { Component: c}
-            }).WatchSessionsView;
-            const watchView = new WatchSessionsViewPQ();
-            await c.watch(componentItem);
-
-            let children = watchView.getChildren();
-            expect((children as string[]).length).equals(1);
-            await c.undeploy(componentItem);
-            children = watchView.getChildren();
-            expect((children as string[]).length).equals(0);
-        });
-
         test('wraps errors in additional info', async () => {
             execStub.rejects(errorMessage);
 
@@ -1031,77 +1009,6 @@ suite('OpenShift/Component', () => {
 
             expect(termStub).calledOnceWith(Command.pushComponent());
         });
-    });
-
-    suite('watch', () => {
-        let errorMessageStub;
-        setup(() => {
-            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves(appItem);
-            quickPickStub.onSecondCall().resolves(componentItem);
-            errorMessageStub = sandbox.stub(vscode.window,'showErrorMessage');
-        });
-
-        test('returns null when cancelled', async () => {
-            quickPickStub.onFirstCall().resolves();
-            const result = await Component.watch(null);
-
-            expect(result).null;
-        });
-
-        test('calls the correct odo command w/ context', async () => {
-            const cpStub = {on: sinon.stub()} as any as ChildProcess;
-            spawnStub.resolves(cpStub);
-            await Component.watch(componentItem);
-            expect(spawnStub).calledOnceWith(`${Command.watchComponent()}`);
-        });
-
-        test('calls the correct odo command w/o context', async () => {
-            const cpStub = {on: sinon.stub()} as any as ChildProcess;
-            spawnStub.resolves(cpStub);
-            await Component.watch(null);
-            expect(spawnStub).calledOnceWith(`${Command.watchComponent()}`);
-        });
-
-        test('adds process to Watch Sessions view and removes it when process exits', async () => {
-            const cpStub = new EventEmitter() as any as ChildProcess;
-            (cpStub as any).pid = 123;
-            spawnStub.resolves(cpStub);
-            const c = pq('../../../src/openshift/component', {
-                'tree-kill': () => {
-                    cpStub.emit('exit');
-                }
-            }).Component;
-            c.aaa = 'test';
-            const WatchSessionsViewPQ = pq('../../../src/watch', {
-                './openshift/component': { Component: c}
-            }).WatchSessionsView;
-            const watchView = new WatchSessionsViewPQ();
-            await c.watch(componentItem);
-            let children = watchView.getChildren();
-            expect((children as string[]).length).equals(1);
-            c.terminateWatchSession(componentItem.contextPath.fsPath);
-            children = watchView.getChildren();
-            expect((children as string[]).length).equals(0);
-        });
-
-        test('shows error message if process fails to start', async () => {
-            const cpStub = new EventEmitter() as ChildProcess;
-            spawnStub.resolves(cpStub);
-            await Component.watch(null);
-            const error = new Error('Failed to start');
-            cpStub.emit('error', error);
-            expect(errorMessageStub).calledOnceWith(`Watch process failed to start with error: '${error}'`);
-        });
-
-        test('shows error message if process exits with error code', async () => {
-            const cpStub = new EventEmitter() as ChildProcess;
-            spawnStub.resolves(cpStub);
-            await Component.watch(null);
-            cpStub.emit('exit', 1);
-            expect(errorMessageStub).calledOnceWith('Watch process failed to start.');
-        });
-
     });
 
     suite('debug', () => {

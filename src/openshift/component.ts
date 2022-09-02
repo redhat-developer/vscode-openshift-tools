@@ -6,12 +6,11 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import { window, commands, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
-import { ChildProcess, exec } from 'child_process';
-import { EventEmitter } from 'events';
+import { exec } from 'child_process';
 import * as YAML from 'yaml'
 import OpenShiftItem, { clusterRequired, selectTargetApplication, selectTargetComponent } from './openshiftItem';
-import { OpenShiftObject, ContextType, OpenShiftObjectImpl, OpenShiftComponent, OpenShiftApplication } from '../odo';
-import { CommandOption, CommandText } from '../base/command';
+import { OpenShiftObject, ContextType, OpenShiftComponent, OpenShiftApplication } from '../odo';
+import { CommandText } from '../base/command';
 import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
@@ -43,16 +42,6 @@ function createCancelledResult(stepName: string): any {
 export class Component extends OpenShiftItem {
     private static extensionContext: ExtensionContext;
     private static debugSessions = new Map<string, DebugSession>();
-    private static watchSessions = new Map<string, ChildProcess>();
-    private static readonly watchEmitter = new EventEmitter();
-
-    public static onDidWatchStarted(listener: (event: OpenShiftObjectImpl) => void): void {
-        Component.watchEmitter.on('watchStarted', listener);
-    }
-
-    public static onDidWatchStopped(listener: (event: OpenShiftObjectImpl) => void): void {
-        Component.watchEmitter.on('watchStopped', listener);
-    }
 
     public static init(context: ExtensionContext): Disposable[] {
         Component.extensionContext = context;
@@ -81,14 +70,6 @@ export class Component extends OpenShiftItem {
         return !!ds;
     }
 
-    static stopWatchSession(component: OpenShiftObject): boolean {
-        const ws = component.contextPath ? Component.watchSessions.get(component.contextPath.fsPath) : undefined;
-        if (ws) {
-            treeKill(ws.pid);
-        }
-        return !!ws;
-    }
-
     @vsCommand('openshift.component.create')
     @clusterRequired()
     @selectTargetApplication(
@@ -106,7 +87,6 @@ export class Component extends OpenShiftItem {
             await Component.unlinkAllComponents(component);
         }
         Component.stopDebugSession(component);
-        Component.stopWatchSession(component);
         await Component.odo.deleteComponent(component);
         commands.executeCommand('openshift.componentsView.refresh');
     }
@@ -153,7 +133,6 @@ export class Component extends OpenShiftItem {
         if (value === 'Yes') {
             return Progress.execFunctionWithProgress(`Undeploying the Component '${component.getName()} '`, async () => {
                 Component.stopDebugSession(component);
-                Component.stopWatchSession(component);
                 await Component.odo.undeployComponent(component);
             }).then(() => `Component '${name}' successfully undeployed`)
                 .catch((err) => Promise.reject(new VsCommandError(`Failed to undeploy Component with error '${err}'`, 'Failed to undeploy Component with error')));
@@ -435,57 +414,6 @@ export class Component extends OpenShiftItem {
         } else {
             return 'Execute regular Push command for a Component before you can repeat it';
         }
-    }
-
-    static addWatchSession(component: OpenShiftObject, process: ChildProcess): void {
-        Component.watchSessions.set(component.contextPath.fsPath, process);
-        Component.watchEmitter.emit('watchStarted', component);
-    }
-
-    static removeWatchSession(component: OpenShiftObject): void {
-        Component.watchSessions.delete(component.contextPath.fsPath);
-        Component.watchEmitter.emit('watchStopped', component);
-    }
-
-    @vsCommand('openshift.component.watch', true)
-    @clusterRequired()
-    @selectTargetComponent(
-        'Select an Application',
-        'Select a Component you want to watch',
-        (target) => target.contextValue === ContextType.COMPONENT_PUSHED
-    )
-    static async watch(component: OpenShiftObject): Promise<void> {
-        if (!component) return null;
-        if (Component.watchSessions.get(component.contextPath.fsPath)) {
-            const sel = await window.showInformationMessage(`Watch process is already running for '${component.getName()}'`, 'Show Log');
-            if (sel === 'Show Log') {
-                commands.executeCommand('openshift.component.watch.showLog', component.contextPath.fsPath);
-            }
-        } else {
-            const process: ChildProcess = await Component.odo.spawn(Command.watchComponent().toString(), component.contextPath.fsPath);
-            process.on('error', (err) => {
-                void window.showErrorMessage(`Watch process failed to start with error: '${err}'`);
-                Component.removeWatchSession(component);
-            });
-            Component.addWatchSession(component, process);
-            process.on('exit', (code: number) => {
-                if (code !== 0) {
-                    void window.showErrorMessage('Watch process failed to start.');
-                }
-                Component.removeWatchSession(component);
-            });
-        }
-    }
-
-    @vsCommand('openshift.component.watch.terminate')
-    static terminateWatchSession(context: string): void {
-        treeKill(Component.watchSessions.get(context).pid, 'SIGKILL');
-    }
-
-    @vsCommand('openshift.component.watch.showLog')
-    @clusterRequired()
-    static showWatchSessionLog(context: string): void {
-        LogViewLoader.loadView(`${context} Watch Log`, () => new CommandText('odo watch').addOption(new CommandOption('--context', context)), Component.odo.getOpenShiftObjectByContext(context), Component.watchSessions.get(context));
     }
 
     @vsCommand('openshift.componentType.newComponent')

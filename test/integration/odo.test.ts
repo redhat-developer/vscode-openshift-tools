@@ -267,13 +267,6 @@ suite('odo integration', () => {
             expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
         });
 
-        test('start/stop watch', async () => {
-            const errMessStub = sb.stub(window, 'showErrorMessage');
-            await commands.executeCommand('openshift.component.watch', component);
-            expect(Component.stopWatchSession(component)).to.be.true;
-            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
-        });
-
         test('delete storage', async () => {
             sb.stub<any, any>(window, 'showWarningMessage').resolves('Yes');
             const errMessStub = sb.stub(window, 'showErrorMessage');

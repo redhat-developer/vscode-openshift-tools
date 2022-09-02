@@ -354,11 +354,6 @@ export class Command {
     }
 
     @verbose
-    static watchComponent(): CommandText {
-        return new CommandText('odo watch');
-    }
-
-    @verbose
     static createLocalComponent(
         project: string,
         app: string,
