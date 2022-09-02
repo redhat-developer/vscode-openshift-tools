@@ -119,7 +119,7 @@ export class Command {
     }
 
     static listCatalogComponents(): CommandText {
-        return new CommandText('odo catalog list components');
+        return new CommandText('odo registry');
     }
 
     static listCatalogComponentsJson(): CommandText {
@@ -281,9 +281,12 @@ export class Command {
 
     }
 
-    static describeCatalogComponent(component: string): CommandText {
-        return new CommandText('odo catalog describe component',
-            component, [
+    static describeCatalogComponent(component: string, registry: string): CommandText {
+        return new CommandText('odo',
+            'registry', [
+                new CommandOption('--details'),
+                new CommandOption('--devfile', component),
+                new CommandOption('--devfile-registry', registry),
                 new CommandOption('-o', 'json', false)
             ]
         );

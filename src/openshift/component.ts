@@ -427,7 +427,7 @@ export class Component extends OpenShiftItem {
         let componentTypeName: string,
             starterProjectName: string;
         if (isDevfileComponent(context)) {
-            componentTypeName = context.Name;
+            componentTypeName = context.name;
         } else if (isStarterProject(context)) {
             componentTypeName = context.typeName;
             starterProjectName = context.name;
@@ -544,10 +544,10 @@ export class Component extends OpenShiftItem {
                 } else {
                     progressIndicator.placeholder = 'Loading Starter Projects for selected Component Type'
                     progressIndicator.show();
-                    const descr = await Component.odo.execute(Command.describeCatalogComponent(componentType.name));
+                    const descr = await Component.odo.execute(Command.describeCatalogComponent(componentType.name, componentType.registryName));
                     const starterProjects: StarterProjectDescription[] = Component.odo.loadItems<StarterProjectDescription>(descr, (data: ComponentTypeDescription[]) => {
-                        const dfCompType = data.find((comp) => comp.RegistryName === componentType.registryName);
-                        return dfCompType.Devfile.starterProjects
+                        const dfCompType = data.find((comp) => comp.registry.name === componentType.registryName);
+                        return dfCompType.devfileData.devfile.starterProjects
                     });
                     progressIndicator.hide();
                     if (starterProjects?.length && starterProjects.length > 0) {

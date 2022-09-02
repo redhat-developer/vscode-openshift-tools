@@ -158,7 +158,7 @@ suite('odo commands integration', () => {
         if (!devfileCompType) {
             this.skip();
         } else {
-            await ODO.execute(Command.describeCatalogComponent(devfileCompType.name));
+            await ODO.execute(Command.describeCatalogComponent(devfileCompType.name, devfileCompType.registryName));
         }
     });
 
