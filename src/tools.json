@@ -10,20 +10,20 @@
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/v3.0.0~beta2/odo-windows-amd64.exe.zip",
-                "sha256sum": "e1f36d481469c76a9f8e00c4d322a783132ca8ec10fca9269cbc443c0895d700",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/v3.0.0~rc1/odo-windows-amd64.exe.zip",
+                "sha256sum": "40033172b2804156878f05c9987dd406638a475cb151d0b6402a2612fa89729f",
                 "dlFileName": "odo-windows-amd64.exe.zip",
                 "cmdFileName": "odo-windows-amd64.exe"
             },
             "darwin": {
-                "url": "https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/odo/v3.0.0~beta2/odo-darwin-amd64.tar.gz",
-                "sha256sum": "ff51138652432c13fe363293696ccf30400374a629ceee88b698a7834019add5",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/v3.0.0~rc1//odo-darwin-amd64.tar.gz",
+                "sha256sum": "d035ada5f0ff9efc5668d699065df55515d88962a4eb6f7822ed7933c242357c",
                 "dlFileName": "odo-darwin-amd64.tar.gz",
                 "cmdFileName": "odo-darwin-amd64"
             },
             "linux": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/v3.0.0~beta2/odo-linux-amd64.tar.gz",
-                "sha256sum": "74ed7cd9c27cd22a1f9801d17bc34c2709a34e4d331d1bdc2cb10e5d6bfcc836",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/v3.0.0~rc1/odo-linux-amd64.tar.gz",
+                "sha256sum": "f0f363009b84edddc046e7d3dcc3baa1c0bdbbdbc6a54b7427361c8c8d5cc0fd",
                 "dlFileName": "odo-linux-amd64.tar.gz",
                 "cmdFileName": "odo"
             }
