@@ -264,10 +264,6 @@
 		"onCommand:openshift.component.push",
 		"onCommand:openshift.component.lastPush",
 		"onCommand:openshift.component.push.palette",
-		"onCommand:openshift.component.watch",
-		"onCommand:openshift.component.watch.palette",
-		"onCommand:openshift.component.watch.terminate",
-		"onCommand:openshift.component.watch.showLog",
 		"onCommand:openshift.component.deployRootWorkspaceFolder",
 		"onCommand:openshift.componentTypesView.registry.closeView",
 		"onCommand:openshift.catalog.listComponents",
@@ -540,16 +536,6 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.component.watch.terminate",
-				"title": "Stop",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.watch.showLog",
-				"title": "Show Watch Command Log",
-				"category": "OpenShift"
-			},
-			{
 				"command": "openshift.openshiftConsole",
 				"title": "Open Console Dashboard",
 				"category": "OpenShift"
@@ -587,16 +573,6 @@
 			{
 				"command": "openshift.component.lastPush",
 				"title": "Repeat last push command",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.watch",
-				"title": "Watch",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.watch.palette",
-				"title": "Watch Component",
 				"category": "OpenShift"
 			},
 			{
@@ -891,10 +867,6 @@
 					"name": "Devfile Registries"
 				},
 				{
-					"id": "openshiftWatchView",
-					"name": "Watch Sessions"
-				},
-				{
 					"id": "openshiftDebugView",
 					"name": "Debug Sessions"
 				}
@@ -934,10 +906,6 @@
 				},
 				{
 					"command": "openshift.component.test",
-					"when": "false"
-				},
-				{
-					"command": "openshift.component.watch.terminate",
 					"when": "false"
 				},
 				{
@@ -1017,10 +985,6 @@
 					"when": "view == openshiftProjectExplorer"
 				},
 				{
-					"command": "openshift.component.watch",
-					"when": "view == openshiftProjectExplorer"
-				},
-				{
 					"command": "openshift.component.push",
 					"when": "view == openshiftProjectExplorer"
 				},
@@ -1086,10 +1050,6 @@
 				},
 				{
 					"command": "openshift.componentType.newComponent",
-					"when": "false"
-				},
-				{
-					"command": "openshift.component.watch.showLog",
 					"when": "false"
 				},
 				{
@@ -1351,11 +1311,6 @@
 					"group": "c4@2"
 				},
 				{
-					"command": "openshift.component.watch",
-					"when": "view == openshiftProjectExplorer && viewItem == component",
-					"group": "c4@3"
-				},
-				{
 					"command": "openshift.component.undeploy",
 					"when": "view == openshiftProjectExplorer && viewItem == component",
 					"group": "c4@4"
@@ -1410,14 +1365,6 @@
 				{
 					"command": "openshift.explorer.login.credentialsLogin",
 					"when": "view == openshiftProjectExplorer && viewItem == loginRequired"
-				},
-				{
-					"command": "openshift.component.watch.terminate",
-					"when": "view == openshiftWatchView && viewItem == openshift.watch.process"
-				},
-				{
-					"command": "openshift.component.watch.showLog",
-					"when": "view == openshiftWatchView && viewItem == openshift.watch.process"
 				},
 				{
 					"command": "openshift.project.set",
@@ -1554,7 +1501,7 @@
 					"openshiftConnector.outputVerbosityLevel": {
 						"type": "number",
 						"default": 0,
-						"description": "Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and integrated terminal."
+						"description": "Output verbosity level (value between 0 and 9) for OpenShift Create, and Dev commands in output channel and integrated terminal."
 					},
 					"openshiftConnector.searchForToolsInPath": {
 						"type": "boolean",
@@ -1564,7 +1511,7 @@
 					"openshiftConnector.useWebviewInsteadOfTerminalView": {
 						"type": "boolean",
 						"default": false,
-						"description": "By default the Terminal View is used to execute OpenShift 'Show Log', 'Follow Log', 'Watch Log' and 'Describe' commands. Select this option if you want to use Webview based editors for it."
+						"description": "By default the Terminal View is used to execute OpenShift 'Show Log', 'Follow Log' and 'Describe' commands. Select this option if you want to use Webview based editors for it."
 					}
 				}
 			},

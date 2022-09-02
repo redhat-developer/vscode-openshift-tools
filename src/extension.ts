@@ -24,7 +24,6 @@ import { TokenStore } from './util/credentialManager';
 import { registerCommands } from './vscommand';
 import { ToolsConfig } from './tools';
 import { extendClusterExplorer } from './k8s/clusterExplorer';
-import { WatchSessionsView } from './watch';
 import { DebugSessionsView } from './debug';
 import { ComponentTypesView } from './registriesView';
 import { WelcomePage } from './welcomePage';
@@ -84,7 +83,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         commands.registerCommand('openshift.component.deployRootWorkspaceFolder', Component.deployRootWorkspaceFolder),
         crcStatusItem,
         OpenShiftExplorer.getInstance(),
-        new WatchSessionsView().createTreeView('openshiftWatchView'),
         new DebugSessionsView().createTreeView('openshiftDebugView'),
         ...Component.init(extensionContext),
         ComponentTypesView.instance.createTreeView('openshiftComponentTypesView'),
@@ -92,7 +90,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
 
-    // TODO: Implement the case when 'odo watch' is running for component and push would be done automatically
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     OdoImpl.Instance.subject.subscribe(async (event: OdoEvent) => {
         if (event.type === 'inserted' && event.data.contextValue === ContextType.COMPONENT) {
