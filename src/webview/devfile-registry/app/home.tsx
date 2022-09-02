@@ -133,19 +133,19 @@ function getFilteredCompDesc(registries: Registry[], compDescriptions: CompTypeD
     const filteredCompDesciptions: CompTypeDesc[] = [];
     registries.map((registry: Registry) => {
         const compDescrs = compDescriptions.filter(function (compDescription: CompTypeDesc) {
-            if (compDescription.RegistryName === registry.Name && registry.state) {
+            if (compDescription.registry.name === registry.Name && registry.state) {
                 if (searchValue !== '') {
-                    return compDescription.Devfile.metadata.displayName?.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1 ||
-                        compDescription.Devfile.metadata.description?.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1;
+                    return compDescription.devfileData.devfile.metadata.displayName?.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1 ||
+                        compDescription.devfileData.devfile.metadata.description?.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1;
                 }
                 return compDescription;
             }
         }).map((compDescription: CompTypeDesc) => {
-            if (compDescription.Devfile.metadata.name === 'java-quarkus') {
+            if (compDescription.devfileData.devfile.metadata.name === 'java-quarkus') {
                 compDescription.priority = 3;
-            } else if (compDescription.Devfile.metadata.name === 'nodejs') {
+            } else if (compDescription.devfileData.devfile.metadata.name === 'nodejs') {
                 compDescription.priority = 2;
-            } else if (compDescription.Devfile.metadata.name.indexOf('python') !== -1) {
+            } else if (compDescription.devfileData.devfile.metadata.name.indexOf('python') !== -1) {
                 compDescription.priority = 1;
             } else {
                 compDescription.priority = -1;
@@ -159,7 +159,7 @@ function getFilteredCompDesc(registries: Registry[], compDescriptions: CompTypeD
 
 function hasGitLink(compDescription: CompTypeDesc): boolean {
     let hasGit = true;
-    compDescription.Devfile.starterProjects?.map((starterPro: StarterProject) => {
+    compDescription.devfileData.devfile.starterProjects?.map((starterPro: StarterProject) => {
         hasGit = starterPro.git ? hasGit : false;
     });
     return hasGit;
@@ -167,7 +167,7 @@ function hasGitLink(compDescription: CompTypeDesc): boolean {
 
 function ascName(oldCompDesc: CompTypeDesc, newCompDesc: CompTypeDesc): number {
     if (oldCompDesc.priority < 0 && newCompDesc.priority < 0) {
-        return oldCompDesc.Devfile.metadata.name.localeCompare(newCompDesc.Devfile.metadata.name);
+        return oldCompDesc.devfileData.devfile.metadata.name.localeCompare(newCompDesc.devfileData.devfile.metadata.name);
     }
     return newCompDesc.priority - oldCompDesc.priority;
 }

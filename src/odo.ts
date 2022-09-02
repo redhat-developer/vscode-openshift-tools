@@ -30,8 +30,8 @@ import { VsCommandError } from './vscommand';
 import bs = require('binary-search');
 import { CliExitData } from './cli';
 import { KubeConfigUtils } from './util/kubeUtils';
-import { KubeConfig } from '@kubernetes/client-node';
-import { pathExistsSync } from 'fs-extra';
+import { KubeConfig, loadYaml } from '@kubernetes/client-node';
+import { pathExistsSync, readFileSync } from 'fs-extra';
 import * as fs from 'fs';
 import { ClusterServiceVersionKind } from './k8s/olm/types';
 import { Deployment } from './k8s/deployment';
@@ -604,8 +604,8 @@ export class OdoImpl implements Odo {
 
     public async getCompTypesJson(): Promise<DevfileComponentType[]> {
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson(), undefined, true, this.getKubeconfigEnv());
-        const compTypesJson: ComponentTypesJson = this.loadJSON(result.stdout);
-        return compTypesJson?.items;
+        const componentTypes: DevfileComponentType[] = this.loadJSON(result.stdout);
+        return componentTypes;
     }
 
     public async getComponentTypes(): Promise<ComponentType[]> {
@@ -616,7 +616,7 @@ export class OdoImpl implements Odo {
         const devfileItems: ComponentTypeAdapter[] = [];
 
         if (compTypesJson?.items) {
-            compTypesJson.items.map((item) => devfileItems.push(new ComponentTypeAdapter(item.Name, undefined, item.Description, undefined, item.Registry.Name)));
+            compTypesJson.items.map((item) => devfileItems.push(new ComponentTypeAdapter(item.name, undefined, item.description, undefined, item.registry.name)));
         }
 
         return devfileItems;
@@ -1027,16 +1027,25 @@ export class OdoImpl implements Odo {
         return data;
     }
 
-    public async getRegistries(): Promise<Registry[]> {
-        const result = await this.execute(Command.listRegistries());
-        return this.loadItemsFrom<RegistryList, Registry>(result, (data) => data.registries);
+    private loadRegistryFromPreferences() {
+        const prefYaml = path.resolve(Platform.getUserHomePath(), '.odo', 'preference.yaml');
+        const yamlData: any = loadYaml(readFileSync(prefYaml, {encoding: 'utf8'}));
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        return yamlData.OdoSettings.RegistryList;
+    }
+
+    public getRegistries(): Promise<Registry[]> {
+        // wait for fix of https://github.com/redhat-developer/odo/issues/5993#issuecomment-1235550247
+        // const result = await this.execute(Command.listRegistries());
+        // return this.loadItemsFrom<RegistryList, Registry>(result, (data) => data.registries);
+        return Promise.resolve(this.loadRegistryFromPreferences() as Registry[]);
     }
 
     public async addRegistry(name: string, url: string, token: string): Promise<Registry> {
         await this.execute(Command.addRegistry(name, url, token));
         return {
             Name: name,
-            Secure: !!token,
+            secure: !!token,
             URL: url
         };
     }
