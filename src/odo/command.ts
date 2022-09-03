@@ -35,15 +35,6 @@ export class Command {
         )
     }
 
-    static viewEnv(): CommandText {
-        return new CommandText(
-            'odo env view',
-            undefined, [
-                new CommandOption('-o', 'json', false)
-            ]
-        );
-    }
-
     static printCatalogComponentImageStreamRefJson(name: string, namespace: string): CommandText {
         return new CommandText(
             'oc get imagestream',
