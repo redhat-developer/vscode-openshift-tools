@@ -9,6 +9,7 @@ import { BaseTreeDataProvider } from './base/baseTreeDataProvider';
 import { CliExitData } from './cli';
 import { getInstance } from './odo';
 import { Command } from './odo/command';
+import { ComponentDescription } from './odo/componentTypeDescription';
 import { EnvInfo } from './odo/env';
 import { vsCommand } from './vscommand';
 
@@ -30,8 +31,6 @@ class Application extends Labeled {
 type Entry = Project | Application | WorkspaceEntry | WorkspaceFolderComponent;
 
 export interface WorkspaceFolderComponent extends vsc.TreeItem {
-    project: string;
-    application: string;
     contextUri: vsc.Uri;
 }
 
@@ -40,7 +39,7 @@ async function getComponentsInWorkspace(): Promise<WorkspaceFolderComponent[]> {
     if (vsc.workspace.workspaceFolders) {
         vsc.workspace.workspaceFolders.forEach((folder) => {
             try {
-                execs.push(getInstance().execute(Command.viewEnv(), folder.uri.fsPath, false));
+                execs.push(getInstance().execute(Command.describeComponentJson(), folder.uri.fsPath, false));
             } catch (ignore) {
                 // ignore execution errors
             }
@@ -50,23 +49,15 @@ async function getComponentsInWorkspace(): Promise<WorkspaceFolderComponent[]> {
     return results.map((result) => {
         try {
             if (!result.error) {
-                const compData = JSON.parse(result.stdout) as EnvInfo;
+                const compData = JSON.parse(result.stdout) as ComponentDescription;
                 const contextUri = vsc.Uri.parse(result.cwd);
-                const project = compData.spec.project ? compData.spec.project : 'N/A';
-                const application = compData.spec.appName ? compData.spec.appName : 'N/A';
                 const tooltip = ['Component',
-                    `Name: ${compData.spec.name}`,
-                    `Project: ${project}`,
-                    `Application: ${application}`,
+                    `Name: ${compData.devfileData.devfile.metadata.name}`,
                     `Context: ${contextUri.fsPath}`,
                 ].join('\n');
-                const description = `${project}/${application}`;
                 return {
-                    project,
-                    application,
-                    label: compData.spec.name,
+                    label: compData.devfileData.devfile.metadata.name,
                     contextUri,
-                    description,
                     tooltip,
                     contextValue: 'openshift.component',
                     iconPath: vsc.Uri.file(path.join(__dirname, '../../images/component', 'workspace.png'))

@@ -7,6 +7,20 @@ export interface Ctx {
     Fs: any;
 }
 
+export interface ComponentDescription {
+    devfilePath: string;
+    devfileData: {
+        devfile: Data;
+        supportedOdoFeatures: {
+            debug: boolean;
+            deploy: boolean;
+            dev: boolean;
+        }
+    }
+    runningIn: string[];
+    managedBy: string;
+}
+
 export interface Data {
     schemaVersion: string;
     metadata: Metadata;
