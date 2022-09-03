@@ -21,7 +21,6 @@ import LogViewLoader from '../webview/log/LogViewLoader';
 import DescribeViewLoader from '../webview/describe/describeViewLoader';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { ascDevfileFirst, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, isDevfileComponent } from '../odo/componentType';
-import { StarterProjectDescription } from '../odo/catalog';
 import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
 import path = require('path');
 import globby = require('globby');
@@ -545,7 +544,7 @@ export class Component extends OpenShiftItem {
                     progressIndicator.placeholder = 'Loading Starter Projects for selected Component Type'
                     progressIndicator.show();
                     const descr = await Component.odo.execute(Command.describeCatalogComponent(componentType.name, componentType.registryName));
-                    const starterProjects: StarterProjectDescription[] = Component.odo.loadItems<StarterProjectDescription>(descr, (data: ComponentTypeDescription[]) => {
+                    const starterProjects: StarterProject[] = Component.odo.loadItems<StarterProject>(descr, (data: ComponentTypeDescription[]) => {
                         const dfCompType = data.find((comp) => comp.registry.name === componentType.registryName);
                         return dfCompType.devfileData.devfile.starterProjects
                     });
