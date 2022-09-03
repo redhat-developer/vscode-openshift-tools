@@ -777,18 +777,6 @@ export class Component extends OpenShiftItem {
         });
     }
 
-    @vsCommand('openshift.component.test', true)
-    @clusterRequired()
-    @selectTargetComponent(
-        'Select an Application',
-        'Select a Component you want to debug (showing only Components pushed to the cluster)',
-        (value: OpenShiftComponent) => value.contextValue === ContextType.COMPONENT_PUSHED
-    )
-    static async test(component: OpenShiftComponent): Promise<string | void> {
-        if (!component) return null;
-        await Component.odo.executeInTerminal(Command.testComponent(), component.contextPath.fsPath, `OpenShift: Test '${component.getName()}' Component`);
-    }
-
     @vsCommand('openshift.component.revealContextInExplorer')
     public static async revealContextInExplorer(context: OpenShiftComponent): Promise<void> {
         await commands.executeCommand('workbench.view.explorer');
