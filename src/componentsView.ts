@@ -10,7 +10,6 @@ import { CliExitData } from './cli';
 import { getInstance } from './odo';
 import { Command } from './odo/command';
 import { ComponentDescription } from './odo/componentTypeDescription';
-import { EnvInfo } from './odo/env';
 import { vsCommand } from './vscommand';
 
 export interface WorkspaceEntry {
