@@ -759,16 +759,6 @@
 				"title": "Reveal in Explorer"
 			},
 			{
-				"command": "openshift.component.test",
-				"title": "Test",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.test.palette",
-				"title": "Test Component",
-				"category": "OpenShift"
-			},
-			{
 				"command": "openshift.component.revealInExplorer",
 				"title": "Reveal in Explorer",
 				"category": "OpenShift"
@@ -903,10 +893,6 @@
 				{
 					"command": "openshift.component.create",
 					"when": "view == openshiftProjectExplorer"
-				},
-				{
-					"command": "openshift.component.test",
-					"when": "false"
 				},
 				{
 					"command": "openshift.componentType.openStarterProjectRepository",
@@ -1319,11 +1305,6 @@
 					"command": "openshift.component.debug",
 					"when": "view == openshiftProjectExplorer && viewItem == component",
 					"group": "c4@5"
-				},
-				{
-					"command": "openshift.component.test",
-					"when": "view == openshiftProjectExplorer && viewItem == component",
-					"group": "c4@6"
 				},
 				{
 					"command": "openshift.component.revealContextInExplorer",
