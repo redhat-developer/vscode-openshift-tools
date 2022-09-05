@@ -208,7 +208,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                     className={this.props.cardItemStyle.button}
                                     onClick={this.openInBrowser}>
                                         <TextContent>
-                                            <Text component={TextVariants.h1}>
+                                            <Text component={TextVariants.h6}>
                                                 Open in Browser
                                             </Text>
                                         </TextContent>

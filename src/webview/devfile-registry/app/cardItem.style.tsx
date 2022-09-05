@@ -104,7 +104,7 @@ export default (theme: Theme) =>
             border: '1px solid',
             borderColor: 'inherit',
             maxHeight: '40rem',
-            maxWidth: '50rem',
+            width: '65rem',
             margin: 'auto',
             overflow: 'auto'
         },
@@ -127,13 +127,11 @@ export default (theme: Theme) =>
             marginTop: '0.5rem'
         },
         cardButton: {
-            display: 'inline-block',
-            marginTop: '0.3rem',
-            marginBottom: '0.5rem'
+            display: 'inline-block'
         },
         button: {
-            width: '5rem',
-            height: '2.5rem',
+            width: 'auto',
+            height: '2rem',
             textAlign: 'center',
             outline: '0.0625rem solid transparent',
             outlineOffset: '0.125rem!important',
@@ -176,8 +174,7 @@ export default (theme: Theme) =>
             color: 'var(--vscode-foreground)',
             backgroundColor: 'var(--vscode-editor-background)',
             height: 'auto',
-            width: '40rem',
-            zIndex: 1
+            width: '65rem'
         },
         devPageCardHeader: {
             display: 'block',
@@ -189,9 +186,9 @@ export default (theme: Theme) =>
             backgroundColor: 'var(--vscode-editor-background)',
             fontSize: 'var(--vscode-font-size)',
             fontFamily: 'var(--vscode-font-family)',
-            width: '39rem',
+            width: '60rem',
             maxHeight: '18rem',
-            overflow: 'hidden',
+            overflow: 'auto',
             border: '1px solid',
             borderColor: 'inherit'
         },
@@ -201,7 +198,7 @@ export default (theme: Theme) =>
             margin: '0.5rem'
         },
         starterProjectCardBody: {
-            width: '100%',
+            width: 'auto',
             display: 'flex',
             borderTop: '1px solid',
             borderTopColor: 'inherit',
