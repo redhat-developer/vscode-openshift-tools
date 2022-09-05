@@ -189,32 +189,31 @@ export class CardItem extends React.Component<DevFileProps, {
                                     </Text>
                                 </TextContent>
                             </Button>
-                        </CardActions>
-                        {this.props.hasGitLink && <><CardActions className={this.props.cardItemStyle.cardButton}>
-                            <Button
-                                color='default'
-                                component='span'
-                                className={this.props.cardItemStyle.button}
-                                onClick={this.cloneToWorkSpace}>
-                                <TextContent>
-                                    <Text component={TextVariants.h6}>
-                                        Clone to Workspace
-                                    </Text>
-                                </TextContent>
-                            </Button>
-                        </CardActions><CardActions className={this.props.cardItemStyle.cardButton}>
-                                <Button
+                            {this.props.hasGitLink &&
+                                <><Button
                                     color='default'
+                                    variant='contained'
+                                    component='span'
+                                    className={this.props.cardItemStyle.button}
+                                    onClick={this.cloneToWorkSpace}>
+                                    <TextContent>
+                                        <Text component={TextVariants.h6}>
+                                            Clone to Workspace
+                                        </Text>
+                                    </TextContent>
+                                </Button><Button
+                                    color='default'
+                                    variant='contained'
                                     component='span'
                                     className={this.props.cardItemStyle.button}
                                     onClick={this.openInBrowser}>
-                                    <TextContent>
-                                        <Text component={TextVariants.h1}>
-                                            Open in Browser
-                                        </Text>
-                                    </TextContent>
-                                </Button>
-                            </CardActions></>}
+                                        <TextContent>
+                                            <Text component={TextVariants.h1}>
+                                                Open in Browser
+                                            </Text>
+                                        </TextContent>
+                                    </Button></>}
+                        </CardActions>
                     </div>
                 </div>
             </CardBody>
@@ -252,9 +251,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                 </TextContent>
                             </div>
                         </CardHeader>
-                        <CardBody className={this.props.cardItemStyle.devPageCardBody}>
-                            {starterProjectCard}
-                        </CardBody>
+                        {starterProjectCard}
                     </Card>
                 </CardHeader>
                 <CardBody className={this.props.cardItemStyle.yamlCardBody}>
