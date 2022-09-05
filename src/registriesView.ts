@@ -75,6 +75,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             contextValue: ContextType.DEVFILE_REGISTRY,
             tooltip: `Devfile Registry\nName: ${element.Name}\nURL: ${element.URL}`,
             collapsibleState: TreeItemCollapsibleState.None,
+            iconPath: new vscode.ThemeIcon('note')
         };
     }
 
