@@ -135,7 +135,7 @@ export default (theme: Theme) =>
             textAlign: 'center',
             outline: '0.0625rem solid transparent',
             outlineOffset: '0.125rem!important',
-            fontSize: '10px',
+            fontSize: 'var(--vscode-font-size)',
             fontFamily: 'var(--vscode-font-family)',
             justifyContent: 'space-between',
             color: 'var(--vscode-button-foreground)',
