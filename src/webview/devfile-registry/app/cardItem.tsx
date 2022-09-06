@@ -23,6 +23,7 @@ import { StarterProject } from '../../../odo/componentTypeDescription';
 import { StarterProjectDisplay } from './starterProjectDisplay';
 import { Badge, Backdrop, Button, Card, CardActions, Modal } from '@material-ui/core';
 import { FileCopy } from '@material-ui/icons';
+import { monokai } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 export class CardItem extends React.Component<DevFileProps, {
     numOfCall: number,
@@ -280,11 +281,12 @@ export class CardItem extends React.Component<DevFileProps, {
                             />
                         </CardActions>
                     </CopyToClipboard>
-                    <SyntaxHighlighter language='yaml' useInlineStyles={false}
+                    <SyntaxHighlighter language='yaml' useInlineStyles
+                        style={monokai}
                         wrapLines
                         showLineNumbers
-                        lineNumberStyle={{ marginLeft: '0.5rem' }}
-                        customStyle={{ marginLeft: '-1.5rem' }}
+                        lineNumberStyle={{ marginLeft: '-1.5rem' }}
+                        customStyle={{ marginLeft: '-1.5rem', backgroundColor: 'inherit' }}
                         codeTagProps={{
                             style: {
                                 fontFamily: 'inherit', color: 'inherit',
@@ -316,7 +318,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                 </TextContent>}
                         </div>
                     </CardHeader>
-                    <CardTitle style={{ margin: '1rem 1.5rem' }}>
+                    <CardTitle style={{ margin: '1.5rem' }}>
                         <TextContent>
                             <Text component={TextVariants.h1}>{this.props.compDescription.Devfile.metadata.displayName}</Text>
                         </TextContent>
