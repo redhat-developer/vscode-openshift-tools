@@ -17,7 +17,6 @@ export interface DefaultProps {
 }
 
 export class Welcome extends React.Component<DefaultProps, {
-    imageVal: number,
     lastRelease: string
 }> {
     cloudRef: React.RefObject<HTMLDivElement>;
@@ -30,7 +29,6 @@ export class Welcome extends React.Component<DefaultProps, {
         this.componentRef = React.createRef();
         this.devfileRef = React.createRef();
         this.state = {
-            imageVal: 1,
             lastRelease: ''
         }
     }
@@ -46,7 +44,6 @@ export class Welcome extends React.Component<DefaultProps, {
 
     handleScroll = () => {
         const { pageYOffset } = window;
-        console.log('Window Scroll: ', window.pageYOffset)
         if (pageYOffset < 550) {
             this.cloudRef.current.style.visibility = 'visible';
             this.cloudRef.current.style.marginTop = '50px';
@@ -160,7 +157,7 @@ export class Welcome extends React.Component<DefaultProps, {
     </footer>
 
     render(): React.ReactNode {
-        const { /*imageVal,*/ lastRelease } = this.state;
+        const { lastRelease } = this.state;
         return <>
             <header className='header__logo'>
                 <img className='image__logo' src={require('../../../../images/title/logo.svg').default} />
