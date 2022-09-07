@@ -104,7 +104,7 @@ export default (theme: Theme) =>
             border: '1px solid',
             borderColor: 'inherit',
             maxHeight: '40rem',
-            maxWidth: '50rem',
+            width: '65rem',
             margin: 'auto',
             overflow: 'auto'
         },
@@ -127,13 +127,11 @@ export default (theme: Theme) =>
             marginTop: '0.5rem'
         },
         cardButton: {
-            display: 'block',
-            marginTop: '0.3rem',
-            marginBottom: '0.5rem'
+            display: 'inline-block'
         },
         button: {
             width: 'auto',
-            maxHeight: '2rem',
+            height: '2rem',
             textAlign: 'center',
             outline: '0.0625rem solid transparent',
             outlineOffset: '0.125rem!important',
@@ -176,27 +174,21 @@ export default (theme: Theme) =>
             color: 'var(--vscode-foreground)',
             backgroundColor: 'var(--vscode-editor-background)',
             height: 'auto',
-            width: '40rem',
-            zIndex: 1
+            width: '65rem'
         },
         devPageCardHeader: {
             display: 'block',
             height: '3rem',
             margin: '0.5rem'
         },
-        devPageCardBody: {
-            paddingLeft: '0.5rem!important',
-            width: '100%'
-        },
         starterProjectCard: {
             color: 'var(--vscode-foreground)',
             backgroundColor: 'var(--vscode-editor-background)',
             fontSize: 'var(--vscode-font-size)',
             fontFamily: 'var(--vscode-font-family)',
-            maxWidth: '25rem',
+            width: '60rem',
             maxHeight: '18rem',
-            margin: 'auto',
-            overflow: 'hidden',
+            overflow: 'auto',
             border: '1px solid',
             borderColor: 'inherit'
         },
@@ -206,6 +198,7 @@ export default (theme: Theme) =>
             margin: '0.5rem'
         },
         starterProjectCardBody: {
+            width: 'auto',
             display: 'flex',
             borderTop: '1px solid',
             borderTopColor: 'inherit',
@@ -233,7 +226,7 @@ export default (theme: Theme) =>
             color: 'var(--vscode-list-activeSelectionForeground)',
             paddingLeft: '0.5rem',
             paddingTop: '0.2rem',
-            paddingBottom: '0.2rem',
+            paddingBottom: '0.5rem',
             cursor: 'default',
             border: '0.5px solid',
             borderColor: 'var(--vscode-focusBorder)'
@@ -242,7 +235,7 @@ export default (theme: Theme) =>
             width: '95%',
             paddingLeft: '0.5rem',
             paddingTop: '0.2rem',
-            paddingBottom: '0.2rem',
+            paddingBottom: '0.5rem',
             cursor: 'default',
             backgroundColor: 'var(--vscode-list-focusBackground)',
             color: 'var(--vscode-list-focusForeground)',
@@ -252,7 +245,7 @@ export default (theme: Theme) =>
             }
         },
         display: {
-            width: '40%',
+            width: '50%',
             alignItems: 'center',
             marginLeft: 'auto',
             marginRight: 'auto',
