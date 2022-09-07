@@ -20,17 +20,15 @@ export class Welcome extends React.Component<DefaultProps, {
     imageVal: number,
     lastRelease: string
 }> {
-    textContentRef: React.RefObject<HTMLDivElement>;
-    sandboxRef: React.RefObject<HTMLDivElement>;
+    cloudRef: React.RefObject<HTMLDivElement>;
     componentRef: React.RefObject<HTMLDivElement>;
-    remoteRef: React.RefObject<HTMLDivElement>;
+    devfileRef: React.RefObject<HTMLDivElement>;
 
     constructor(props) {
         super(props);
-        this.textContentRef = React.createRef();
-        this.sandboxRef = React.createRef();
+        this.cloudRef = React.createRef();
         this.componentRef = React.createRef();
-        this.remoteRef = React.createRef();
+        this.devfileRef = React.createRef();
         this.state = {
             imageVal: 1,
             lastRelease: ''
@@ -43,37 +41,27 @@ export class Welcome extends React.Component<DefaultProps, {
                 this.setState({ lastRelease: message.data.param })
             }
         });
+        window.addEventListener('scroll', this.handleScroll);
     }
 
     handleScroll = () => {
-        const { scrollTop } = this.textContentRef.current;
-        if (scrollTop < 100) {
-            this.setState({
-                imageVal: 1
-            });
-            this.sandboxRef.current.style.marginTop = '0px';
-            this.componentRef.current.style.marginTop = '170px';
-            this.remoteRef.current.style.marginTop = '340px';
-            this.sandboxRef.current.style.visibility = 'visible';
-            this.componentRef.current.style.visibility = 'visible';
-            this.remoteRef.current.style.visibility = 'visible';
-        } else if (scrollTop >= 100 && scrollTop < 140) {
-            this.setState({
-                imageVal: 2
-            });
-            this.componentRef.current.style.marginTop = '-170px';
-            this.remoteRef.current.style.marginTop = '170px';
-            this.sandboxRef.current.style.visibility = 'hidden';
-            this.componentRef.current.style.visibility = 'visible';
-            this.remoteRef.current.style.visibility = 'hidden';
-        } else if (scrollTop >= 140) {
-            this.setState({
-                imageVal: 3
-            });
-            this.remoteRef.current.style.marginTop = '-400px';
-            this.sandboxRef.current.style.visibility = 'hidden';
+        const { pageYOffset } = window;
+        console.log('Window Scroll: ', window.pageYOffset)
+        if (pageYOffset < 550) {
+            this.cloudRef.current.style.visibility = 'visible';
+            this.cloudRef.current.style.marginTop = '50px';
             this.componentRef.current.style.visibility = 'hidden';
-            this.remoteRef.current.style.visibility = 'visible';
+            this.devfileRef.current.style.visibility = 'hidden';
+        } else if (pageYOffset >= 550 && pageYOffset < 700) {
+            this.cloudRef.current.style.visibility = 'hidden';
+            this.componentRef.current.style.visibility = 'visible';
+            this.componentRef.current.style.marginTop = '-400px';
+            this.devfileRef.current.style.visibility = 'hidden';
+        } else if (pageYOffset >= 700) {
+            this.cloudRef.current.style.visibility = 'hidden';
+            this.componentRef.current.style.visibility = 'hidden';
+            this.devfileRef.current.style.visibility = 'visible';
+            this.componentRef.current.style.marginTop = '-900px';
         }
     };
 
@@ -172,14 +160,12 @@ export class Welcome extends React.Component<DefaultProps, {
     </footer>
 
     render(): React.ReactNode {
-        const { imageVal, lastRelease } = this.state;
+        const { /*imageVal,*/ lastRelease } = this.state;
         return <>
-            <header>
-                <div className='header__logo'>
-                    <img className='image__logo' src={require('../../../../images/title/logo.svg').default} />
-                    <div>
-                        <h1 className='header__title'>OpenShift Connector</h1>
-                    </div>
+            <header className='header__logo'>
+                <img className='image__logo' src={require('../../../../images/title/logo.svg').default} />
+                <div className='header__title'>
+                    <h1>OpenShift Connector</h1>
                 </div>
             </header>
             <div className='container' id='con'>
@@ -187,54 +173,42 @@ export class Welcome extends React.Component<DefaultProps, {
                     <section className='section--settings'>
                         <div className='section__content'>
                             <div className='section__header'>
-                                <div className='setting__input setting__input--big'>
-                                    <label>Component 1</label>
-                                    <a
-                                        className='link__configure'
-                                        title='Jump to more Current Line Blame settings'
-                                        href='command:gitlens.showSettingsPage?%22current-line%22'
-                                    >
-                                        <i className='icon icon__gear'></i>
-                                    </a>
-                                </div>
                                 <p className='section__header-hint'>
-                                    description of component 1
+                                    OpenShift Connector for VS Code brings the power and convenience of Kubernetes and Red Hat OpenShift to developers. The extension allows developers to create, test, debug and deploy cloud-native applications on OpenShift in simple steps.
+                                    With the extension, users can provision a new OpenShift cluster, either using <a>OpenShift Local</a> or using a free(30 days) <a>Red Hat Developer Sandbox</a> instance.
                                 </p>
+                                <h2 className='section__title section__title--primary'>
+                                    Welcome to <span className='highlight' style={{ paddingLeft: '1rem' }}>OpenShift Connector</span>
+                                </h2>
+                                <div className='section__whatsnew'>
+                                    <a
+                                        title='Watch the OpenShift Getting Started video'
+                                        href='#' />
+                                    <a
+                                        className='button button--flat'
+                                        title='See Whats New'
+                                        onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/releases/' + `${lastRelease}`)}
+                                    >See What's New in OpenShift Connector</a>
+                                    <a
+                                        className='button button--flat'
+                                        title='Open the Get Started with OpenShift Connector walkthrough'
+                                        onClick={this.openGetStarted}
+                                    >Get Started Walkthrough</a>
+                                </div>
                             </div>
                         </div>
                         <div className='section__preview'>
                             <img
                                 className='brand'
                                 src={require('../../../../images/welcome/OpenShift-Branding-box.png').default}
-                                loading='lazy'
-                                width={500} />
+                                loading='lazy' />
                         </div>
                     </section>
-                    <section id='welcome' className='section--full'>
-                        <h2 className='section__title section__title--primary'>
-                            Welcome to <span className='highlight'>OpenShift Connector</span>
-                        </h2>
-                        <div className='section__whatsnew'>
-                            <a
-                                title='Watch the OpenShift Getting Started video'
-                                href='#' />
-                            <a
-                                className='button button--flat'
-                                title='See Whats New'
-                                onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/releases/' + `${lastRelease}`)}
-                            >See What's New in OpenShift Connector</a>
-                            <a
-                                className='button button--flat'
-                                title='Open the Get Started with OpenShift Connector walkthrough'
-                                onClick={this.openGetStarted}
-                            >Get Started Walkthrough</a>
-                        </div>
-                    </section>
-                    <section id='current-line' className='conent--section--settings'>
-                        <div className='scroll__content' ref={this.textContentRef} onScroll={() => this.handleScroll()}>
-                            <div className='section__header' ref={this.sandboxRef}>
+                    <div className="container">
+                        <div className="sticky-section" ref={this.cloudRef}>
+                            <div className='section__header'>
                                 <div className='setting__input setting__input--big'>
-                                    <label>Hybrid Cloud Flexibility</label>
+                                    <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Hybrid Cloud</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}> Flexibility</Typography></label>
                                 </div>
                                 <p className='section__header-hint'>
                                     Open hybrid cloud is Red Hat's recommended strategy for architecting, developing, and operating a hybrid mix of applications. This extension allows the developers to connect to any OpenShift cluster, be it running locally or on any hybrid cloud. Using the extension, developers can use the streamlined experience for the easy creation of clusters hosted on OpenShift
@@ -258,9 +232,14 @@ export class Welcome extends React.Component<DefaultProps, {
                                     </li>
                                 </ul>
                             </div>
-                            <div className='section__header' ref={this.componentRef}>
+                            <div className='section__preview'>
+                                <img className='content__image__preview' src={require('../../../../images/welcome/cloud.svg').default} />
+                            </div>
+                        </div>
+                        <div className="sticky-section" ref={this.componentRef}>
+                            <div className='section__header'>
                                 <div className='setting__input setting__input--big'>
-                                    <label>Component Creation Simplicity</label>
+                                    <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Component</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}>Creation Simplicity</Typography></label>
                                 </div>
                                 <p className='section__header-hint'>
                                     Developers can quickly get started with application development using devfile based sample code. This allows them to built from the ground up with application development on Kubernetes in mind. Users can create, develop, debug and deploy applications on OpenShift within few clicks.
@@ -274,21 +253,37 @@ export class Welcome extends React.Component<DefaultProps, {
                                     >Component Registry View</a>
                                 </label>
                             </div>
-                            <div className='section__header' ref={this.remoteRef}>
+                            <div className='section__preview'>
+                                <img className='content__image__preview fixMargin' src={require('../../../../images/welcome/component.png').default} />
+                            </div>
+                        </div>
+                        <div className="sticky-section-last" ref={this.devfileRef}>
+                            <div className='section__header'>
                                 <div className='setting__input setting__input--big'>
-                                    <label>Push code fast and debug on remote</label>
+                                    <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Push</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}>code fast and debug on remote</Typography></label>
                                 </div>
                                 <p className='section__header-hint'>
                                     Developers can quickly check out the code, make changes and do fast deployment on the remote cluster. Once deployed, they can Debug the changes directly in the remote environment. There is a separate view for applications running in Debug Mode.
                                 </p>
                             </div>
+                            <div className='section__preview'>
+                                <img className='content__image__preview lastone' src={require('../../../../images/welcome/devfile.png').default} />
+                            </div>
                         </div>
-                        <div className='section__preview'>
-                            {imageVal === 1 ? <img className='content__image__preview' src={require('../../../../images/welcome/cloud.svg').default} />
-                                : imageVal === 2 ? <img className='content__image__preview' src={require('../../../../images/welcome/component.svg').default} />
-                                    : <img className='content__image__preview' src={require('../../../../images/welcome/devfile.svg').default} />}
+                    </div>
+                    <div className='extensionContainer'>
+                        <div className='extensionContainerLeft'>
+                            <div className='extensionContainerTitle'>This extension does</div>
                         </div>
-                    </section>
+                        <div className='extensionContainerRight'>
+                            <p className='extensionContainerDesc'>a consistent platform running diverse workloads on every infrastructure.</p>
+                            <p className='extensionContainerDesc'>integrated management and automation capabilities.</p>
+                            <p className='extensionContainerDesc'>cloud-native application services and tools for developers.</p>
+                            <p className='extensionContainerDesc'>changing or adding public cloud providers doesn’t always lead to costly refactoring or retraining.</p>
+                            <p className='extensionContainerDesc'>any proprietary software you use is ultimately connected to flexible open standards across your organization.</p>
+                            <p className='extensionContainerDesc'>your vendor doesn’t control your IT future. You&nbsp;do.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
             {this.footer}

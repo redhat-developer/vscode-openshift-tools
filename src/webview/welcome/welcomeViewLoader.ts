@@ -60,7 +60,7 @@ export default class WelcomeViewLoader {
                 localResourceRoots: [images, localResourceRoot],
                 retainContextWhenHidden: true
             });
-            panel.iconPath = vscode.Uri.file(path.join(WelcomeViewLoader.extensionPath, 'images/context/devfile.png'));
+            panel.iconPath = vscode.Uri.file(path.join(WelcomeViewLoader.extensionPath, 'images/openshift_extension.png'));
             panel.webview.html = WelcomeViewLoader.getWebviewContent(WelcomeViewLoader.extensionPath, panel);
             panel.onDidDispose(() => {
                 panel = undefined;

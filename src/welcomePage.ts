@@ -11,7 +11,7 @@ export class WelcomePage {
     @vsCommand('openshift.welcome')
     static async createOrShow(): Promise<void> {
         if (vscode.workspace.getConfiguration('openshiftConnector').get('showWelcomePage')) {
-            await WelcomeViewLoader.loadView('Welcome');
+            await WelcomeViewLoader.loadView('Welcome - Openshift Connector');
         }
     }
 
