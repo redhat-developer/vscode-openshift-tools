@@ -58,11 +58,11 @@ header {
     display: flex;
     flex-direction: row;
     justify-content: center;
+    margin-top: 2rem;
 }
 
 .header__title {
     font-family: var(--vscode-font-family);
-    color: #EE0000;
     margin-left: -25px;
 }
 

@@ -8,8 +8,8 @@ import { Icon, Stack, Typography } from '@mui/material';
 import HelpIcon from '@mui/icons-material/Help';
 import ChatIcon from '@mui/icons-material/Chat';
 import BugReportIcon from '@mui/icons-material/BugReport';
-import NewReleasesIcon from '@mui/icons-material/NewReleases';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import ScrollToTop from 'react-scroll-to-top';
 import './welcome.scss';
 
@@ -123,7 +123,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <HelpIcon style={{ fontSize: 25 }} />
-                                        <Typography variant='button'>Questions</Typography>
+                                        <Typography variant='body1'>Questions</Typography>
                                     </Stack>
                                 </div>
                             </a>
@@ -133,7 +133,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <BugReportIcon style={{ fontSize: 25 }} />
-                                        <Typography variant='button'>Issues</Typography>
+                                        <Typography variant='body1'>Issues</Typography>
                                     </Stack>
                                 </div>
                             </a>
@@ -147,7 +147,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <ChatIcon style={{ fontSize: 25 }} />
-                                        <Typography variant='button'>Discussions</Typography>
+                                        <Typography variant='body1'>Discussions</Typography>
                                     </Stack>
                                 </div>
 
@@ -157,8 +157,8 @@ export class Welcome extends React.Component<DefaultProps, {
                             <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/releases')}>
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
-                                        <NewReleasesIcon style={{ fontSize: 25 }} />
-                                        <Typography variant='button'>Releases</Typography>
+                                        <RocketLaunchIcon style={{ fontSize: 25 }} />
+                                        <Typography variant='body1'>Releases</Typography>
                                     </Stack>
                                 </div>
                             </a>
@@ -172,7 +172,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <GitHubIcon style={{ fontSize: 25 }} />
-                                        <Typography variant='button'>GitHub</Typography>
+                                        <Typography variant='body1'>Repository</Typography>
                                     </Stack>
                                 </div>
                             </a>
@@ -181,23 +181,10 @@ export class Welcome extends React.Component<DefaultProps, {
                             <a href='#' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector')}>
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
-                                        <Icon>
-                                            <img src={require('../../../../images/welcome/vscode.svg').default} height={100} width={100} />
+                                        <Icon fontSize='large'>
+                                            <img src={require('../../../../images/welcome/microsoft.svg').default} />
                                         </Icon>
-                                        <Typography variant='button'>Marketplace</Typography>
-                                    </Stack>
-                                </div>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                <div className='documentation'>
-                    <ul>
-                        <li>
-                            <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/blob/main/LICENSE')}>
-                                <div className='section__header-hint section__footer'>
-                                    <Stack direction='row' alignItems='center' gap={1}>
-                                        <Typography variant='button'>License</Typography>
+                                        <Typography variant='body1'>Marketplace</Typography>
                                     </Stack>
                                 </div>
                             </a>
@@ -215,7 +202,9 @@ export class Welcome extends React.Component<DefaultProps, {
             <header className='header__logo'>
                 <img className='image__logo' src={require('../../../../images/title/logo.svg').default} />
                 <div className='header__title'>
-                    <h1>OpenShift Connector</h1>
+                    <div className='setting__input setting__input--big' style={{ paddingBottom: '0px', borderBottom: '0px', marginBottom: '0px' }}>
+                        <label style={{ display: 'flex', flexDirection: 'row', textAlign: 'center' }}><Typography variant='h1' className='highlight'>OpenShift</Typography><Typography variant='h1' style={{ paddingLeft: '1rem' }}>Connector</Typography></label>
+                    </div>
                 </div>
             </header>
             <div className='container' id='con'>
@@ -227,9 +216,13 @@ export class Welcome extends React.Component<DefaultProps, {
                                     OpenShift Connector for VS Code brings the power and convenience of Kubernetes and Red Hat OpenShift to developers. The extension allows developers to create, test, debug and deploy cloud-native applications on OpenShift in simple steps.
                                     With the extension, users can provision a new OpenShift cluster, either using <a>OpenShift Local</a> or using a free(30 days) <a>Red Hat Developer Sandbox</a> instance.
                                 </p>
-                                <h2 className='section__title section__title--primary'>
-                                    Welcome to <span className='highlight' style={{ paddingLeft: '1rem' }}>OpenShift Connector</span>
-                                </h2>
+                                <div className='setting__input setting__input--big' style={{ paddingBottom: '0px', borderBottom: '0px', marginBottom: '0px' }}>
+                                    <label style={{ display: 'flex', flexDirection: 'row' }}>
+                                        <Typography variant='h2'>Welcome to</Typography>
+                                        <Typography variant='h2' style={{ paddingLeft: '1rem' }} className='highlight'>OpenShift</Typography>
+                                        <Typography variant='h2' style={{ paddingLeft: '1rem' }} >Connector</Typography>
+                                    </label>
+                                </div>
                                 <div className='section__whatsnew'>
                                     <a
                                         title='Watch the OpenShift Getting Started video'
