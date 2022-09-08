@@ -4,12 +4,13 @@
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
 import { VSCodeMessage } from './vsCodeMessage';
-import { Typography } from '@mui/material';
+import { Icon, Stack, Typography } from '@mui/material';
 import HelpIcon from '@mui/icons-material/Help';
 import ChatIcon from '@mui/icons-material/Chat';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import NewReleasesIcon from '@mui/icons-material/NewReleases';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import ScrollToTop from 'react-scroll-to-top';
 import './welcome.scss';
 
 export interface DefaultProps {
@@ -22,12 +23,16 @@ export class Welcome extends React.Component<DefaultProps, {
     cloudRef: React.RefObject<HTMLDivElement>;
     componentRef: React.RefObject<HTMLDivElement>;
     devfileRef: React.RefObject<HTMLDivElement>;
+    extenContainerRef: React.RefObject<HTMLDivElement>;
+    firstDivRef: React.RefObject<HTMLDivElement>;
 
     constructor(props) {
         super(props);
         this.cloudRef = React.createRef();
         this.componentRef = React.createRef();
         this.devfileRef = React.createRef();
+        this.extenContainerRef = React.createRef();
+        this.firstDivRef = React.createRef();
         this.state = {
             lastRelease: ''
         }
@@ -44,6 +49,14 @@ export class Welcome extends React.Component<DefaultProps, {
 
     handleScroll = () => {
         const { pageYOffset } = window;
+        console.log('pageYOffset:::', pageYOffset);
+        if (pageYOffset > 1000) {
+            this.extenContainerRef.current.style.position = 'fixed';
+            this.extenContainerRef.current.style.top = 700 / 3 + 'px';
+        } else {
+            this.extenContainerRef.current.style.position = 'absolute';
+            this.extenContainerRef.current.style.top = '0px';
+        }
         if (pageYOffset < 550) {
             this.cloudRef.current.style.visibility = 'visible';
             this.cloudRef.current.style.marginTop = '50px';
@@ -93,65 +106,105 @@ export class Welcome extends React.Component<DefaultProps, {
     }
 
     footer = <footer id='footer'>
-        <div className='foot-col-2'>
-            <h4>Help</h4>
-            <ul>
-                <li>
-                    <a href='#' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector&ssr=false#qna')}>
-                        <Typography variant='subtitle1' className='footerIcons'>
-                            <HelpIcon /> Questions
-                        </Typography>
-                    </a>
-                </li>
-                <li>
-                    <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/issues')}>
-                        <Typography variant='subtitle1' className='footerIcons'>
-                            <BugReportIcon /> Issues
-                        </Typography>
-                    </a>
-                </li>
-                <li>
-                    <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/discussions')}>
-                        <Typography variant='subtitle1' className='footerIcons'>
-                            <ChatIcon />  Discussions
-                        </Typography>
-                    </a>
-                </li>
-            </ul>
-        </div>
+        <div className='foot-col-1'>
+            <div className='setting__input setting__input--big footer__input' style={{ width: '30%' }}>
+                <label style={{
+                    display: 'flex', flexDirection: 'row'
+                }}>
+                    <Typography variant='h2' className='highlight'>Help</Typography>
+                    <Typography variant='h2' style={{ paddingLeft: '1rem' }}>&#38; Documentation</Typography>
+                </label>
+            </div>
+            <div className='foot-col-2'>
+                <div className='help'>
+                    <ul>
+                        <li>
+                            <a href='#' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector&ssr=false#qna')}>
+                                <div className='section__header-hint section__footer'>
+                                    <Stack direction='row' alignItems='center' gap={1}>
+                                        <HelpIcon style={{ fontSize: 25 }} />
+                                        <Typography variant='button'>Questions</Typography>
+                                    </Stack>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/issues')}>
+                                <div className='section__header-hint section__footer'>
+                                    <Stack direction='row' alignItems='center' gap={1}>
+                                        <BugReportIcon style={{ fontSize: 25 }} />
+                                        <Typography variant='button'>Issues</Typography>
+                                    </Stack>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div className='help'>
+                    <ul>
+                        <li>
+                            <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/discussions')}>
+                                <div className='section__header-hint section__footer'>
+                                    <Stack direction='row' alignItems='center' gap={1}>
+                                        <ChatIcon style={{ fontSize: 25 }} />
+                                        <Typography variant='button'>Discussions</Typography>
+                                    </Stack>
+                                </div>
 
-        <div className='foot-col-3'>
-            <h4>Resources</h4>
-            <ul>
-                <li>
-                    <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/releases')}>
-                        <Typography variant='subtitle1' className='footerIcons'>
-                            <NewReleasesIcon /> Releases
-                        </Typography>
-                    </a>
-                </li>
-                <li>
-                    <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools')}>
-                        <Typography variant='subtitle1' className='footerIcons'>
-                            <GitHubIcon /> GitHub
-                        </Typography>
-                    </a>
-                </li>
-                <li>
-                    <a href='#' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector')}>
-                        <Typography variant='subtitle1' className='footerIcons'>
-                            Marketplace
-                        </Typography>
-                    </a>
-                </li>
-                <li>
-                    <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/blob/main/LICENSE')}>
-                        <Typography variant='subtitle1' className='footerIcons'>
-                            License
-                        </Typography>
-                    </a>
-                </li>
-            </ul>
+                            </a>
+                        </li>
+                        <li>
+                            <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/releases')}>
+                                <div className='section__header-hint section__footer'>
+                                    <Stack direction='row' alignItems='center' gap={1}>
+                                        <NewReleasesIcon style={{ fontSize: 25 }} />
+                                        <Typography variant='button'>Releases</Typography>
+                                    </Stack>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div className='documentation'>
+                    <ul>
+                        <li>
+                            <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools')}>
+                                <div className='section__header-hint section__footer'>
+                                    <Stack direction='row' alignItems='center' gap={1}>
+                                        <GitHubIcon style={{ fontSize: 25 }} />
+                                        <Typography variant='button'>GitHub</Typography>
+                                    </Stack>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href='#' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector')}>
+                                <div className='section__header-hint section__footer'>
+                                    <Stack direction='row' alignItems='center' gap={1}>
+                                        <Icon>
+                                            <img src={require('../../../../images/welcome/vscode.svg').default} height={100} width={100} />
+                                        </Icon>
+                                        <Typography variant='button'>Marketplace</Typography>
+                                    </Stack>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div className='documentation'>
+                    <ul>
+                        <li>
+                            <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/blob/main/LICENSE')}>
+                                <div className='section__header-hint section__footer'>
+                                    <Stack direction='row' alignItems='center' gap={1}>
+                                        <Typography variant='button'>License</Typography>
+                                    </Stack>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
     </footer>
@@ -201,8 +254,8 @@ export class Welcome extends React.Component<DefaultProps, {
                                 loading='lazy' />
                         </div>
                     </section>
-                    <div className="container">
-                        <div className="sticky-section" ref={this.cloudRef}>
+                    <div className='container'>
+                        <div className='sticky-section' ref={this.cloudRef}>
                             <div className='section__header'>
                                 <div className='setting__input setting__input--big'>
                                     <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Hybrid Cloud</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}> Flexibility</Typography></label>
@@ -233,7 +286,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <img className='content__image__preview' src={require('../../../../images/welcome/cloud.svg').default} />
                             </div>
                         </div>
-                        <div className="sticky-section" ref={this.componentRef}>
+                        <div className='sticky-section' ref={this.componentRef}>
                             <div className='section__header'>
                                 <div className='setting__input setting__input--big'>
                                     <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Component</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}>Creation Simplicity</Typography></label>
@@ -254,7 +307,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <img className='content__image__preview fixMargin' src={require('../../../../images/welcome/component.png').default} />
                             </div>
                         </div>
-                        <div className="sticky-section-last" ref={this.devfileRef}>
+                        <div className='sticky-section-last' ref={this.devfileRef}>
                             <div className='section__header'>
                                 <div className='setting__input setting__input--big'>
                                     <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Push</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}>code fast and debug on remote</Typography></label>
@@ -270,20 +323,35 @@ export class Welcome extends React.Component<DefaultProps, {
                     </div>
                     <div className='extensionContainer'>
                         <div className='extensionContainerLeft'>
-                            <div className='extensionContainerTitle'>This extension does</div>
+                            <div className='setting__input setting__input--big extensionContainerTitle' ref={this.extenContainerRef}>
+                                <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>This extension</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}>does</Typography></label>
+                            </div>
                         </div>
-                        <div className='extensionContainerRight'>
-                            <p className='extensionContainerDesc'>a consistent platform running diverse workloads on every infrastructure.</p>
-                            <p className='extensionContainerDesc'>integrated management and automation capabilities.</p>
-                            <p className='extensionContainerDesc'>cloud-native application services and tools for developers.</p>
-                            <p className='extensionContainerDesc'>changing or adding public cloud providers doesn’t always lead to costly refactoring or retraining.</p>
-                            <p className='extensionContainerDesc'>any proprietary software you use is ultimately connected to flexible open standards across your organization.</p>
-                            <p className='extensionContainerDesc'>your vendor doesn’t control your IT future. You&nbsp;do.</p>
+                        <div className='extencontainer'>
+                            <div className='sticky-section-exten' ref={this.firstDivRef}>
+                                <p className='section__header-hint'>a consistent platform running diverse workloads on every infrastructure.</p>
+                            </div>
+                            <div className='sticky-section-exten'>
+                                <p className='section__header-hint'>integrated management and automation capabilities.</p>
+                            </div>
+                            <div className='sticky-section-exten'>
+                                <p className='section__header-hint'>cloud-native application services and tools for developers.</p>
+                            </div>
+                            <div className='sticky-section-exten'>
+                                <p className='section__header-hint'>changing or adding public cloud providers doesn’t always lead to costly refactoring or retraining.</p>
+                            </div>
+                            <div className='sticky-section-exten'>
+                                <p className='section__header-hint'>any proprietary software you use is ultimately connected to flexible open standards across your organization.</p>
+                            </div>
+                            <div className='sticky-section-exten'>
+                                <p className='section__header-hint'>your vendor doesn’t control your IT future. You&nbsp;do.</p>
+                            </div>
                         </div>
                     </div>
+                    {this.footer}
                 </div>
             </div>
-            {this.footer}
+            <ScrollToTop smooth style={{ background: '#EE0000' }} color='#FFFFFF' />
         </>;
     }
 }
