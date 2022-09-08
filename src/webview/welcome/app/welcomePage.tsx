@@ -275,7 +275,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                     </li>
                                 </ul>
                             </div>
-                            <div className='section__preview'>
+                            <div className='section__preview sticky-img'>
                                 <img className='content__image__preview' src={require('../../../../images/welcome/cloud.svg').default} />
                             </div>
                         </div>
@@ -296,7 +296,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                     >Component Registry View</a>
                                 </label>
                             </div>
-                            <div className='section__preview'>
+                            <div className='section__preview sticky-img'>
                                 <img className='content__image__preview fixMargin' src={require('../../../../images/welcome/component.png').default} />
                             </div>
                         </div>
@@ -309,7 +309,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                     Developers can quickly check out the code, make changes and do fast deployment on the remote cluster. Once deployed, they can Debug the changes directly in the remote environment. There is a separate view for applications running in Debug Mode.
                                 </p>
                             </div>
-                            <div className='section__preview'>
+                            <div className='section__preview sticky-img'>
                                 <img className='content__image__preview lastone' src={require('../../../../images/welcome/devfile.png').default} />
                             </div>
                         </div>

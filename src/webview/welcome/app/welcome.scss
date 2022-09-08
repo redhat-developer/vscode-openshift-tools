@@ -79,7 +79,7 @@ header {
 }
 
 .content__image__preview {
-    width: 100%;
+    width: 90%;
     height: 100%;
 }
 
@@ -123,6 +123,7 @@ section {
     top: 10%;
     width: 100%;
     height: 70vh;
+    padding-left: 3rem;
     background: var(--vscode-editor-background);
 }
 
@@ -133,6 +134,7 @@ section {
     top: 10%;
     width: 100%;
     height: 50vh;
+    padding-left: 3rem;
     background: var(--vscode-editor-background);
 }
 
@@ -161,6 +163,7 @@ section {
     width: 100%;
     margin: 0;
     position: relative;
+    padding-left: 3rem;
 }
 
 .extensionContainerLeft .extensionContainerTitle {
@@ -212,7 +215,7 @@ section {
     margin-bottom: 1em;
     margin-right: 1em;
     position: relative;
-    width: 60%;
+    width: 50%;
 
     h2 {
         margin-bottom: 0;
@@ -280,9 +283,11 @@ section {
     flex: 0 1 auto;
     position: relative;
     margin-left: 0rem;
-    margin-right: auto;
 }
 
+.sticky-img {
+    margin-left: 10rem;
+}
 .section__title {
     flex: 1 0 auto;
     margin: 0;
@@ -362,6 +367,7 @@ section {
     color: #f2f2f2;
     font-size: 'inherit';
     font-family: 'inherit';
+    padding-left: 3rem;
 }
 
 #footer ul li a {
