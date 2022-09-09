@@ -245,10 +245,6 @@ suite('odo integration', () => {
             await oi.execute(Command.describeComponent(), component.contextPath.fsPath);
         });
 
-        test('describe app', async () => {
-            await oi.execute(Command.describeApplication(projectName, appName));
-        });
-
         test('describe service', async function() {
             if (openshiftVersion >= '4.5.0') this.skip();
             await commands.executeCommand('openshift.service.describe', service);

@@ -243,10 +243,6 @@
 		"onCommand:openshift.project.create",
 		"onCommand:openshift.project.delete",
 		"onCommand:openshift.project.delete.palette",
-		"onCommand:openshift.app.delete.palette",
-		"onCommand:openshift.app.describe",
-		"onCommand:openshift.app.create",
-		"onCommand:openshift.app.delete",
 		"onCommand:openshift.component.create",
 		"onCommand:openshift.component.createFromLocal",
 		"onCommand:openshift.component.createFromRootWorkspaceFolder",
@@ -416,26 +412,6 @@
 			{
 				"command": "openshift.project.set.palette",
 				"title": "Set Active Project",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.app.delete.palette",
-				"title": "Delete Application",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.app.describe",
-				"title": "Describe",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.app.describe.palette",
-				"title": "Describe Application",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.app.delete",
-				"title": "Delete",
 				"category": "OpenShift"
 			},
 			{
@@ -845,10 +821,6 @@
 					"when": "view == openshiftProjectExplorer"
 				},
 				{
-					"command": "openshift.app.describe",
-					"when": "view == openshiftProjectExplorer"
-				},
-				{
 					"command": "openshift.explorer.addCluster",
 					"when": "view == openshiftProjectExplorer && isVSCode == 1"
 				},
@@ -858,10 +830,6 @@
 				},
 				{
 					"command": "clusters.openshift.deploy.rcShowLog",
-					"when": "view == openshiftProjectExplorer"
-				},
-				{
-					"command": "openshift.app.delete",
 					"when": "view == openshiftProjectExplorer"
 				},
 				{
@@ -1135,16 +1103,6 @@
 					"command": "openshift.component.create",
 					"when": "view == openshiftProjectExplorer && viewItem == application ",
 					"group": "a1"
-				},
-				{
-					"command": "openshift.app.describe",
-					"when": "view == openshiftProjectExplorer && viewItem == application",
-					"group": "a2"
-				},
-				{
-					"command": "openshift.app.delete",
-					"when": "view == openshiftProjectExplorer && viewItem == application",
-					"group": "a3"
 				},
 				{
 					"command": "openshift.component.describe",

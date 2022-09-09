@@ -322,7 +322,6 @@ export interface Odo {
     createProject(name: string): Promise<OpenShiftObject>;
     deleteProject(project: OpenShiftObject): Promise<OpenShiftObject>;
     createApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
-    deleteApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentFromFolder(application: OpenShiftObject, type: string, version: string, registryName: string, name: string, path: Uri, starterName?: string, useExistingDevfile?: boolean, notification?: boolean): Promise<OpenShiftObject>;
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     deleteNotPushedComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
@@ -794,28 +793,6 @@ export class OdoImpl implements Odo {
         await result;
     }
 
-    public async deleteApplication(app: OpenShiftObject): Promise<OpenShiftObject> {
-        const allComps = await OdoImpl.instance.getApplicationChildren(app);
-
-        // find out if there is at least one deployed component/service and `odo app delete` should be called
-        const callAppDelete = !!allComps.find(
-            (item) => [ContextType.COMPONENT_PUSHED, ContextType.COMPONENT_NO_CONTEXT, ContextType.SERVICE].includes(item.contextValue)
-        );
-
-        try { // first delete all application related resources in cluster
-            if (callAppDelete) {
-                await this.execute(Command.deleteApplication(app.getParent().getName(), app.getName()));
-            }
-            await this.deleteComponentsWithoutRefresh(allComps);
-            return this.deleteAndRefresh(app);
-        } catch (error) {
-            // if error occurs during application deletion, app object has to be refreshed to new state
-            this.subject.next(new OdoEventImpl('changed', app));
-            throw error;
-        }
-
-    }
-
     public async createApplication(application: OpenShiftObject): Promise<OpenShiftObject> {
         const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
         if (!targetApplication) {
@@ -832,9 +809,6 @@ export class OdoImpl implements Odo {
                 await this.insertAndReveal(application);
             }
             await this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, location, type), notification);
-        } else {
-            OdoImpl.data.delete(application);
-            OdoImpl.data.delete(application.getParent());
         }
         let wsFolder: WorkspaceFolder;
         if (workspace.workspaceFolders) {
@@ -880,10 +854,6 @@ export class OdoImpl implements Odo {
             );
         }
         await this.deleteAndRefresh(component);
-        const children = await app.getChildren();
-        if (children.length === 0) {
-            await this.deleteApplication(app);
-        }
         return component;
     }
 
@@ -914,13 +884,8 @@ export class OdoImpl implements Odo {
     }
 
     public async deleteService(service: OpenShiftObject): Promise<OpenShiftObject> {
-        const app = service.getParent();
         await this.execute(Command.deleteService(service.getName()), Platform.getUserHomePath());
         await this.deleteAndRefresh(service);
-        const children = await app.getChildren();
-        if (children.length === 0) {
-            await this.deleteApplication(app);
-        }
         return service;
     }
 
