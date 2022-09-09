@@ -147,23 +147,6 @@ export class Command {
         );
     }
 
-    static describeApplication(project: string, app: string): CommandText {
-        return new CommandText('odo app describe',
-            app, [
-                new CommandOption('--project', project)
-            ]
-        );
-    }
-
-    static deleteApplication(project: string, app: string): CommandText {
-        return new CommandText ('odo app delete',
-            app, [
-                new CommandOption('--project', project),
-                new CommandOption('-f')
-            ]
-        );
-    }
-
     static printOdoVersion(): CommandText {
         return new CommandText('odo version');
     }

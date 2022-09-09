@@ -188,9 +188,6 @@ suite('odo commands integration', () => {
                 )
             );
         });
-        test('describeApplication', async () => {
-            await ODO.execute(Command.describeApplication(project, newAppName));
-        });
         test('listComponents()', async () => {
             await ODO.execute(Command.listComponents(project, newAppName));
         });
