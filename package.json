@@ -258,8 +258,6 @@
 		"onCommand:openshift.component.followLog.palette",
 		"onCommand:openshift.component.delete",
 		"onCommand:openshift.componentTypesView.registry.closeView",
-		"onCommand:openshift.catalog.listComponents",
-		"onCommand:openshift.catalog.listServices",
 		"onCommand:openshift.component.debug",
 		"onCommand:openshift.component.debug.palette",
 		"onCommand:openshift.service.create",
@@ -511,16 +509,6 @@
 			{
 				"command": "openshift.component.delete",
 				"title": "Delete",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.catalog.listComponents",
-				"title": "List Catalog Components ",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.catalog.listServices",
-				"title": "List Catalog Services",
 				"category": "OpenShift"
 			},
 			{
@@ -1112,16 +1100,6 @@
 					"command": "openshift.project.create",
 					"when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
 					"group": "c1"
-				},
-				{
-					"command": "openshift.catalog.listComponents",
-					"when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
-					"group": "c2@1"
-				},
-				{
-					"command": "openshift.catalog.listServices",
-					"when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
-					"group": "c2@2"
 				},
 				{
 					"command": "openshift.explorer.logout",
