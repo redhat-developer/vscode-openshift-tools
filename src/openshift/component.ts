@@ -12,8 +12,6 @@ import OpenShiftItem, { clusterRequired, selectTargetApplication, selectTargetCo
 import { OpenShiftObject, ContextType, OpenShiftComponent, OpenShiftApplication } from '../odo';
 import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
-import { CliExitData } from '../cli';
-import { Platform } from '../util/platform';
 import { selectWorkspaceFolder } from '../util/workspace';
 import { ToolsConfig } from '../tools';
 import LogViewLoader from '../webview/log/LogViewLoader';
@@ -79,9 +77,6 @@ export class Component extends OpenShiftItem {
     }
 
     static async delete(component: OpenShiftComponent) {
-        if (component.contextValue === ContextType.COMPONENT_PUSHED) {
-            await Component.unlinkAllComponents(component);
-        }
         Component.stopDebugSession(component);
         await Component.odo.deleteComponent(component);
         commands.executeCommand('openshift.componentsView.refresh');
@@ -112,51 +107,6 @@ export class Component extends OpenShiftItem {
             })
                 .then(() => `Component '${name}' successfully deleted`)
                 .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Component with error '${err}'`, 'Failed to delete Component with error')));
-        }
-    }
-
-    @vsCommand('openshift.component.undeploy', true)
-    @clusterRequired()
-    @selectTargetComponent(
-        'From which Application you want to undeploy Component',
-        'Select Component to undeploy',
-        (target) => target.contextValue === ContextType.COMPONENT_PUSHED
-    )
-    static async undeploy(component: OpenShiftObject): Promise<string> {
-        if (!component) return null;
-        const name: string = component.getName();
-        const value = await window.showWarningMessage(`Do you want to undeploy Component '${name}'?`, 'Yes', 'Cancel');
-        if (value === 'Yes') {
-            return Progress.execFunctionWithProgress(`Undeploying the Component '${component.getName()} '`, async () => {
-                Component.stopDebugSession(component);
-                await Component.odo.undeployComponent(component);
-            }).then(() => `Component '${name}' successfully undeployed`)
-                .catch((err) => Promise.reject(new VsCommandError(`Failed to undeploy Component with error '${err}'`, 'Failed to undeploy Component with error')));
-        }
-    }
-
-    static async getLinkPort(component: OpenShiftObject, compName: string): Promise<any> {
-        const compData = await Component.odo.execute(Command.describeComponentNoContextJson(component.getParent().getParent().getName(), component.getParent().getName(), compName), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
-        return JSON.parse(compData.stdout);
-    }
-
-    static async unlinkAllComponents(component: OpenShiftObject): Promise<void> {
-        const linkComponent = await Component.getLinkData(component);
-        const getLinkComponent = linkComponent.status.linkedComponents;
-        if (getLinkComponent) {
-            // eslint-disable-next-line no-restricted-syntax
-            for (const key of Object.keys(getLinkComponent)) {
-                // eslint-disable-next-line no-await-in-loop
-                const getLinkPort = await Component.getLinkPort(component, key);
-                const ports = getLinkPort.status.linkedComponents[component.getName()];
-                if (ports) {
-                    // eslint-disable-next-line no-restricted-syntax
-                    for (const port of ports) {
-                        // eslint-disable-next-line no-await-in-loop
-                        await Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), key, component.getName(), port), component.contextPath.fsPath);
-                    }
-                }
-            }
         }
     }
 
@@ -223,156 +173,6 @@ export class Component extends OpenShiftItem {
                 component.contextPath.fsPath,
                 `OpenShift: Follow '${component.getName()}' Component Log`);
         }
-    }
-
-    static async getLinkData(component: OpenShiftObject): Promise<any> {
-        const compData = await Component.odo.execute(Command.describeComponentNoContextJson(component.getParent().getParent().getName(), component.getParent().getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
-        return JSON.parse(compData.stdout);
-    }
-
-    @vsCommand('openshift.component.unlink')
-    @clusterRequired()
-    static async unlink(context: OpenShiftComponent): Promise<string | null> {
-        if (!context) return null;
-        const unlinkActions = [
-            {
-                label: 'Component',
-                description: 'Unlink Component'
-            },
-            {
-                label: 'Service',
-                description: 'Unlink Service'
-            }
-        ];
-        const unlinkActionSelected = await window.showQuickPick(unlinkActions, { placeHolder: 'Select an option', ignoreFocusOut: true });
-
-        if (!unlinkActionSelected) return null;
-
-        let result = null;
-        if (unlinkActionSelected.label === 'Component') {
-            result = Component.unlinkComponent(context);
-        } else {
-            result = Component.unlinkService(context);
-        }
-        return result;
-    }
-
-    @vsCommand('openshift.component.unlinkComponent.palette')
-    @clusterRequired()
-    @selectTargetComponent(
-        'Select an Application',
-        'Select a Component',
-        (value: OpenShiftComponent) => value.contextValue === ContextType.COMPONENT_PUSHED
-    )
-    static async unlinkComponent(component: OpenShiftComponent): Promise<string | null> {
-        if (!component) return null;
-
-        const linkComponent = await Component.getLinkData(component);
-        const getLinkComponent = linkComponent.status.linkedComponents;
-
-        if (!getLinkComponent) throw new VsCommandError('No linked Components found');
-
-        const linkCompName: Array<string> = Object.keys(getLinkComponent);
-        const compName = await window.showQuickPick(linkCompName, { placeHolder: 'Select a Component to unlink', ignoreFocusOut: true });
-
-        if (!compName) return null;
-
-        const getLinkPort = linkComponent.status.linkedComponents[compName];
-        const port = await window.showQuickPick(getLinkPort, { placeHolder: 'Select a Port' });
-
-        if (!port) return null;
-
-        return Progress.execFunctionWithProgress('Unlinking Component',
-            () => Component.odo.execute(Command.unlinkComponents(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), compName, port), component.contextPath.fsPath)
-                .then(() => `Component '${compName}' has been successfully unlinked from the Component '${component.getName()}'`)
-                .catch((err) => Promise.reject(new VsCommandError(`Failed to unlink Component with error '${err}'`, 'Failed to unlink Component with error')))
-        );
-    }
-
-    @vsCommand('openshift.component.unlinkService.palette')
-    @clusterRequired()
-    @selectTargetComponent(
-        'Select an Application',
-        'Select a Component',
-        (value: OpenShiftComponent) => value.contextValue === ContextType.COMPONENT_PUSHED
-    )
-    static async unlinkService(component: OpenShiftComponent): Promise<string | null> {
-        if (!component) return null;
-        const linkService = await Component.getLinkData(component);
-        const getLinkService = linkService?.status?.linkedServices?.map(serviceLink => serviceLink.ServiceName);
-
-        if (!getLinkService) throw new VsCommandError('No linked Services found');
-
-        const serviceName = await window.showQuickPick(getLinkService, { placeHolder: 'Select a Service to unlink', ignoreFocusOut: true });
-
-        if (!serviceName) return null;
-
-        return Progress.execFunctionWithProgress('Unlinking Service',
-            () => Component.odo.execute(Command.unlinkService(component.getParent().getParent().getName(), serviceName), component.contextPath.fsPath)
-                .then(() => `Service '${serviceName}' has been successfully unlinked from the Component '${component.getName()}'`)
-                .catch((err) => Promise.reject(new VsCommandError(`Failed to unlink Service with error '${err}'`, 'Failed to unlink Service with error')))
-        );
-    }
-
-    @vsCommand('openshift.component.linkComponent')
-    @clusterRequired()
-    @selectTargetComponent(
-        'Select an Application',
-        'Select a Component',
-        (value: OpenShiftComponent) => value.contextValue === ContextType.COMPONENT_PUSHED
-    )
-    static async linkComponent(component: OpenShiftComponent): Promise<string | null> {
-        if (!component) return null;
-
-        const componentPresent = (await Component.odo.getComponents(component.getParent())).filter((target: OpenShiftComponent) => target.contextValue !== ContextType.COMPONENT && target.isOdoManaged());
-
-        if (componentPresent.length === 1) throw new VsCommandError('You have no S2I Components available to link, please create new OpenShift Component and try again.');
-
-        const componentToLink = await window.showQuickPick(componentPresent.filter((comp) => comp.getName() !== component.getName()), { placeHolder: 'Select a Component to link', ignoreFocusOut: true });
-
-        if (!componentToLink) return null;
-
-        const ports: string[] = await Component.getPorts(component, componentToLink);
-        let port: string;
-        if (ports.length === 1) {
-            [port] = ports;
-        } else if (ports.length > 1) {
-            port = await window.showQuickPick(ports, { placeHolder: 'Select Port to link', ignoreFocusOut: true });
-        } else {
-            return Promise.reject(new VsCommandError(`Component '${component.getName()}' has no Ports declared.`, 'Component has no Ports declared'));
-        }
-
-        return Progress.execFunctionWithProgress(`Link Component '${componentToLink.getName()}' with Component '${component.getName()}'`,
-            () => Component.odo.execute(Command.linkComponentTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), componentToLink.getName(), port), component.contextPath.fsPath)
-                .then(() => `Component '${componentToLink.getName()}' successfully linked with Component '${component.getName()}'`)
-                .catch((err) => Promise.reject(new VsCommandError(`Failed to link component with error '${err}'`, 'Failed to link component')))
-        );
-    }
-
-    static async getPorts(component: OpenShiftObject, componentToLink: OpenShiftObject): Promise<string[]> {
-        const portsResult: CliExitData = await Component.odo.execute(Command.listComponentPorts(component.getParent().getParent().getName(), component.getParent().getName(), componentToLink.getName()));
-        let ports: string[] = portsResult.stdout.trim().split(',');
-        ports = ports.slice(0, ports.length - 1);
-        return ports;
-    }
-
-    @vsCommand('openshift.component.linkService')
-    @clusterRequired()
-    @selectTargetComponent(
-        'Select an Application',
-        'Select a Component',
-        (value: OpenShiftComponent) => value.contextValue === ContextType.COMPONENT_PUSHED
-    )
-    static async linkService(component: OpenShiftComponent): Promise<string | null> {
-        if (!component) return null;
-        const serviceToLink: OpenShiftObject = await window.showQuickPick(Component.getServiceNames(component.getParent()), { placeHolder: 'Select a service to link', ignoreFocusOut: true });
-        if (!serviceToLink) return null;
-
-        return Progress.execFunctionWithProgress(`Link Service '${serviceToLink.getName()}' with Component '${component.getName()}'`,
-            () => Component.odo.execute(Command.linkServiceTo(component.getParent().getParent().getName(), component.getParent().getName(), component.getName(), serviceToLink.getName()), component.contextPath.fsPath)
-                .then(() => `Service '${serviceToLink.getName()}' successfully linked with Component '${component.getName()}'`)
-                .catch((err) => Promise.reject(new VsCommandError(`Failed to link Service with error '${err}'`, 'Failed to link Service')))
-        );
     }
 
     @vsCommand('openshift.componentType.newComponent')

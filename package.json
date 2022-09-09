@@ -253,10 +253,6 @@
 		"onCommand:openshift.component.describe",
 		"onCommand:openshift.component.describe.palette",
 		"onCommand:openshift.component.log",
-		"onCommand:openshift.component.unlink",
-		"onCommand:openshift.component.unlink.palette",
-		"onCommand:openshift.component.unlinkComponent.palette",
-		"onCommand:openshift.component.unlinkService.palette",
 		"onCommand:openshift.component.log.palette",
 		"onCommand:openshift.component.followLog",
 		"onCommand:openshift.component.followLog.palette",
@@ -503,31 +499,6 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.component.linkComponent",
-				"title": "Link Component",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.unlink",
-				"title": "Unlink",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.unlinkComponent.palette",
-				"title": "Unlink Component",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.unlinkService.palette",
-				"title": "Unlink Service",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.linkService",
-				"title": "Link Service",
-				"category": "OpenShift"
-			},
-			{
 				"command": "openshift.openshiftConsole",
 				"title": "Open Console Dashboard",
 				"category": "OpenShift"
@@ -540,16 +511,6 @@
 			{
 				"command": "openshift.component.delete",
 				"title": "Delete",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.undeploy",
-				"title": "Undeploy",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.undeploy.palette",
-				"title": "Undeploy Component",
 				"category": "OpenShift"
 			},
 			{
@@ -936,15 +897,7 @@
 					"when": "view == openshiftProjectExplorer"
 				},
 				{
-					"command": "openshift.component.unlink",
-					"when": "view == openshiftProjectExplorer"
-				},
-				{
 					"command": "openshift.component.delete",
-					"when": "view == openshiftProjectExplorer"
-				},
-				{
-					"command": "openshift.component.undeploy",
 					"when": "view == openshiftProjectExplorer"
 				},
 				{
@@ -1239,26 +1192,6 @@
 					"command": "openshift.component.followLog",
 					"when": "view == openshiftProjectExplorer && viewItem == component",
 					"group": "c2@3"
-				},
-				{
-					"command": "openshift.component.linkComponent",
-					"when": "view == openshiftProjectExplorer && viewItem == component",
-					"group": "c3@1"
-				},
-				{
-					"command": "openshift.component.linkService",
-					"when": "view == openshiftProjectExplorer && viewItem == component",
-					"group": "c3@2"
-				},
-				{
-					"command": "openshift.component.unlink",
-					"when": "view == openshiftProjectExplorer && viewItem == component",
-					"group": "c3@3"
-				},
-				{
-					"command": "openshift.component.undeploy",
-					"when": "view == openshiftProjectExplorer && viewItem == component",
-					"group": "c4@4"
 				},
 				{
 					"command": "openshift.component.debug",

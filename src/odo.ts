@@ -325,7 +325,6 @@ export interface Odo {
     deleteApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentFromFolder(application: OpenShiftObject, type: string, version: string, registryName: string, name: string, path: Uri, starterName?: string, useExistingDevfile?: boolean, notification?: boolean): Promise<OpenShiftObject>;
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
-    undeployComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     deleteNotPushedComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     createService(application: OpenShiftObject, formData: any): Promise<OpenShiftObject>;
     deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
@@ -885,15 +884,6 @@ export class OdoImpl implements Odo {
         if (children.length === 0) {
             await this.deleteApplication(app);
         }
-        return component;
-    }
-
-    public async undeployComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
-        const app = component.getParent();
-        await this.execute(Command.undeployComponent(app.getParent().getName(), app.getName(), component.getName()), component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath());
-        component.contextValue = ContextType.COMPONENT;
-        //  OpenShiftExplorer.getInstance().refresh(component);
-        this.subject.next(new OdoEventImpl('changed', component));
         return component;
     }
 
