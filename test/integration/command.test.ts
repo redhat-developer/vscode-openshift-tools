@@ -206,17 +206,11 @@ suite('odo commands integration', () => {
         test('describeComponentNoContextJson()', async () => {
             await ODO.execute(Command.describeComponentNoContextJson(project, newAppName, newNodeJsComponent),tmp.dirSync().name);
         });
-        test('pushComponent()', async () => {
-            await ODO.execute(Command.pushComponent(), componentLocation);
-        });
         test('showLog()', async () => {
             await ODO.execute(Command.showLog(), componentLocation);
         });
         test('createComponentCustomUrl(secure)', async () => {
             await ODO.execute(Command.createComponentCustomUrl(`${newUrlNameSecure}2`, '8080', true), componentLocation);
-        });
-        test('pushComponent(config, debug)', async () => {
-            await ODO.execute(Command.pushComponent(true, true), componentLocation);
         });
         test('deleteComponentUrl', async () => {
             await ODO.execute(Command.deleteComponentUrl(newUrlName),componentLocation);

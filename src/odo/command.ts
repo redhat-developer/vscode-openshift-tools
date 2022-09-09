@@ -334,20 +334,6 @@ export class Command {
     }
 
     @verbose
-    static pushComponent(configOnly = false, debug = false): CommandText {
-        const cTxt = new CommandText('odo push');
-        if (debug) {
-            cTxt.addOption(new CommandOption('--debug'));
-        }
-        if (configOnly) {
-            cTxt.addOption(new CommandOption('--config'));
-        } else {
-            cTxt.addOption(new CommandOption('--show-log'));
-        }
-        return cTxt;
-    }
-
-    @verbose
     static createLocalComponent(
         project: string,
         app: string,

@@ -20,7 +20,7 @@ import { Platform } from './util/platform';
 import * as odo from './odo/config';
 import { GlyphChars } from './util/constants';
 import { Application } from './odo/application';
-import { ComponentType, ComponentTypesJson, ComponentTypeAdapter, Registry, RegistryList, DevfileComponentType } from './odo/componentType';
+import { ComponentType, ComponentTypesJson, ComponentTypeAdapter, Registry, DevfileComponentType } from './odo/componentType';
 import { Project } from './odo/project';
 import { ComponentsJson, NotAvailable } from './odo/component';
 import { Service, ServiceOperatorShortInfo } from './odo/service';

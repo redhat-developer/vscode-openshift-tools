@@ -116,7 +116,6 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         let isError = false;
         this.compDescriptions.clear();
         void getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
-            const components = new Set<string>(devFileComponentTypes.map((devFileComponentType: DevfileComponentType) => devFileComponentType.name));
             await this.getRegistries();
             devFileComponentTypes.forEach((component: DevfileComponentType) => {
                 getInstance().execute(Command.describeCatalogComponent(component.name, component.registry.name)).then((componentDesc: CliExitData) => {
