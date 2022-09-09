@@ -201,16 +201,6 @@ export class Command {
         );
     }
 
-    static undeployComponent(project: string, app: string, component: string): CommandText {
-        return new CommandText('odo delete',
-            component, [
-                new CommandOption('-f'),
-                new CommandOption('--app', app),
-                new CommandOption('--project', project)
-            ]
-        );
-    }
-
     static deleteComponent(project: string, app: string, component: string, context: boolean): CommandText {
         const ct = new CommandText('odo delete',
             context ? undefined : component, [ // if there is not context name is required
@@ -297,38 +287,6 @@ export class Command {
                 new CommandOption('--namespace', project),
                 // see https://kubernetes.io/docs/reference/kubectl/jsonpath/ for examples
                 new CommandOption('-o', 'jsonpath="{range .spec.ports[*]}{.port}{\',\'}{end}"', false)
-            ]
-        );
-    }
-
-    static linkComponentTo(
-        project: string,
-        app: string,
-        component: string,
-        componentToLink: string,
-        port?: string,
-    ): CommandText {
-        const cTxt = new CommandText('odo link', componentToLink);
-        cTxt.addOption(new CommandOption('--project',project))
-            .addOption(new CommandOption('--app',app))
-            .addOption(new CommandOption('--component', component))
-            .addOption(new CommandOption('--wait'));
-        if (port) {
-            cTxt.addOption(new CommandOption('--port', port));
-        }
-        return cTxt;
-    }
-
-    static linkServiceTo(
-        project: string,
-        app: string,
-        component: string,
-        serviceToLink: string,
-    ): CommandText {
-        return new CommandText('odo link',
-            serviceToLink, [
-                new CommandOption('--wait'),
-                new CommandOption('--wait-for-target')
             ]
         );
     }
@@ -436,27 +394,6 @@ export class Command {
 
     static getComponentJson(): CommandText {
         return new CommandText('odo describe -o json');
-    }
-
-    static unlinkComponents(
-        project: string,
-        app: string,
-        comp1: string,
-        comp2: string,
-        port: string,
-    ): CommandText {
-        return new CommandText('odo unlink',
-            comp2, [
-                new CommandOption('--project', project),
-                new CommandOption('--app', app),
-                new CommandOption('--port', port),
-                new CommandOption('--component', comp1)
-            ]
-        );
-    }
-
-    static unlinkService(project: string, service: string): CommandText {
-        return new CommandText('odo unlink', service);
     }
 
     static getclusterVersion(): CommandText {

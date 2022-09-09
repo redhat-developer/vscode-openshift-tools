@@ -215,9 +215,6 @@ suite('odo commands integration', () => {
         test('deleteComponentUrl', async () => {
             await ODO.execute(Command.deleteComponentUrl(newUrlName),componentLocation);
         });
-        test('undeployComponent', async () => {
-            await ODO.execute(Command.undeployComponent(project, newAppName, newNodeJsComponent), componentLocation);
-        });
         test('deleteComponent', async () => {
             await ODO.execute(Command.deleteComponent(project, newAppName, newNodeJsComponent, true), componentLocation);
         });
