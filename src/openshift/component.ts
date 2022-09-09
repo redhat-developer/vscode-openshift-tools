@@ -10,7 +10,6 @@ import { exec } from 'child_process';
 import * as YAML from 'yaml'
 import OpenShiftItem, { clusterRequired, selectTargetApplication, selectTargetComponent } from './openshiftItem';
 import { OpenShiftObject, ContextType, OpenShiftComponent, OpenShiftApplication } from '../odo';
-import { CommandText } from '../base/command';
 import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
 import { CliExitData } from '../cli';
@@ -39,11 +38,9 @@ function createCancelledResult(stepName: string): any {
 }
 
 export class Component extends OpenShiftItem {
-    private static extensionContext: ExtensionContext;
     private static debugSessions = new Map<string, DebugSession>();
 
     public static init(context: ExtensionContext): Disposable[] {
-        Component.extensionContext = context;
         return [
             debug.onDidStartDebugSession((session) => {
                 if (session.configuration.contextPath) {
@@ -378,43 +375,6 @@ export class Component extends OpenShiftItem {
         );
     }
 
-    static getPushCmd(): Thenable<{ pushCmd: CommandText; contextPath: string; name: string }> {
-        return this.extensionContext.globalState.get('PUSH');
-    }
-
-    static setPushCmd(fsPath: string, name: string): Thenable<void> {
-        return this.extensionContext.globalState.update('PUSH', {
-            pushCmd: Command.pushComponent(),
-            contextPath: fsPath, name
-        });
-    }
-
-    @vsCommand('openshift.component.push', true)
-    @clusterRequired()
-    @selectTargetComponent(
-        'In which Application you want to push the changes',
-        'For which Component you want to push the changes',
-        (target) => target.contextValue === ContextType.COMPONENT_PUSHED || target.contextValue === ContextType.COMPONENT
-    )
-    static async push(component: OpenShiftObject, configOnly = false): Promise<string | null> {
-        if (!component) return null;
-        Component.setPushCmd(component.contextPath.fsPath, component.getName());
-        await Component.odo.executeInTerminal(Command.pushComponent(configOnly), component.contextPath.fsPath, `OpenShift: Push '${component.getName()}' Component`);
-        component.contextValue = ContextType.COMPONENT_PUSHED;
-        Component.explorer.refresh(component);
-    }
-
-    @vsCommand('openshift.component.lastPush')
-    @clusterRequired()
-    static async lastPush(): Promise<string> {
-        const getPushCmd = await Component.getPushCmd();
-        if (getPushCmd?.pushCmd && getPushCmd.contextPath) {
-            Component.odo.executeInTerminal(getPushCmd.pushCmd, getPushCmd.contextPath, `OpenShift: Push '${getPushCmd.name}' Component`);
-        } else {
-            return 'Execute regular Push command for a Component before you can repeat it';
-        }
-    }
-
     @vsCommand('openshift.componentType.newComponent')
     public static async createComponentFromCatalogEntry(context: DevfileComponentType | StarterProject, registryName?: string): Promise<string> {
         const application = await Component.getOpenShiftCmdData(undefined,
@@ -445,29 +405,6 @@ export class Component extends OpenShiftItem {
         if (!workspacePath) return createCancelledResult('contextFolder');
 
         return Component.createFromRootWorkspaceFolder(workspacePath, [], application, componentTypeName, starterProjectName, registryName);
-    }
-
-    /**
-     * Command ID: openshift.component.deployRootWorkspaceFolder
-     * Create and push or just push existing component to the cluster
-     *
-     * @param folder where component source code is
-     * @param component type name in registry
-     *
-     */
-
-    @clusterRequired() // request to login to cluster and then execute command
-    static async deployRootWorkspaceFolder(folder: Uri, componentTypeName: string): Promise<string> {
-        let result: any;
-        let component = Component.odo.getOpenShiftObjectByContext(folder.fsPath);
-        if (!component) {
-            result = await Component.createFromRootWorkspaceFolder(folder, undefined, undefined, componentTypeName, undefined, undefined, false);
-            component = Component.odo.getOpenShiftObjectByContext(folder.fsPath);
-        }
-        if (component) {
-            await Component.push(component);
-        }
-        return result;
     }
 
     /**
@@ -732,7 +669,6 @@ export class Component extends OpenShiftItem {
     }
 
     static async startOdoAndConnectDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration): Promise<string> {
-        await Component.odo.execute(Command.pushComponent(true, true), component.contextPath.fsPath);
         const debugCmd = `"${toolLocation}" debug port-forward`;
         const cp = exec(debugCmd, { cwd: component.contextPath.fsPath });
         return new Promise<string>((resolve, reject) => {

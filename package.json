@@ -261,10 +261,6 @@
 		"onCommand:openshift.component.followLog",
 		"onCommand:openshift.component.followLog.palette",
 		"onCommand:openshift.component.delete",
-		"onCommand:openshift.component.push",
-		"onCommand:openshift.component.lastPush",
-		"onCommand:openshift.component.push.palette",
-		"onCommand:openshift.component.deployRootWorkspaceFolder",
 		"onCommand:openshift.componentTypesView.registry.closeView",
 		"onCommand:openshift.catalog.listComponents",
 		"onCommand:openshift.catalog.listServices",
@@ -472,10 +468,6 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.component.deployRootWorkspaceFolder",
-				"title": "Deploy and push folder to OpenShift"
-			},
-			{
 				"command": "openshift.component.delete.palette",
 				"title": "Delete Component",
 				"category": "OpenShift"
@@ -558,21 +550,6 @@
 			{
 				"command": "openshift.component.undeploy.palette",
 				"title": "Undeploy Component",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.push",
-				"title": "Push",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.push.palette",
-				"title": "Push Component",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.lastPush",
-				"title": "Repeat last push command",
 				"category": "OpenShift"
 			},
 			{
@@ -971,14 +948,6 @@
 					"when": "view == openshiftProjectExplorer"
 				},
 				{
-					"command": "openshift.component.push",
-					"when": "view == openshiftProjectExplorer"
-				},
-				{
-					"command": "openshift.component.deployRootWorkspaceFolder",
-					"when": "false"
-				},
-				{
 					"command": "openshift.service.delete",
 					"when": "view == openshiftProjectExplorer"
 				},
@@ -1285,16 +1254,6 @@
 					"command": "openshift.component.unlink",
 					"when": "view == openshiftProjectExplorer && viewItem == component",
 					"group": "c3@3"
-				},
-				{
-					"command": "openshift.component.push",
-					"when": "view == openshiftProjectExplorer && viewItem == component",
-					"group": "c4@2"
-				},
-				{
-					"command": "openshift.component.push",
-					"when": "view == openshiftProjectExplorer && viewItem == componentNotPushed",
-					"group": "c4@2"
 				},
 				{
 					"command": "openshift.component.undeploy",

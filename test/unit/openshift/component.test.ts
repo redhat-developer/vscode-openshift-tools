@@ -8,8 +8,6 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { ChildProcess } from 'child_process';
-import { EventEmitter } from 'events';
 import { TestItem } from './testOSItem';
 import { OdoImpl, ContextType } from '../../../src/odo';
 import { Command } from '../../../src/odo/command';
@@ -45,7 +43,6 @@ suite('OpenShift/Component', () => {
     let getApps: sinon.SinonStub;
     let Component: any;
     let commandStub: sinon.SinonStub;
-    let spawnStub: sinon.SinonStub;
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -53,7 +50,6 @@ suite('OpenShift/Component', () => {
         Component = pq('../../../src/openshift/component', { }).Component;
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
-        spawnStub = sandbox.stub(OdoImpl.prototype, 'spawn');
         sandbox.stub(OdoImpl.prototype, 'getServices');
         sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([clusterItem]);
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
@@ -969,45 +965,6 @@ suite('OpenShift/Component', () => {
         test('works with no context', async () => {
             await Component.followLog(null);
             expect(termStub).calledOnceWith(Command.showLogAndFollow());
-        });
-    });
-
-    suite('push', () => {
-        let getpushStub: sinon.SinonStub<any[], any>;
-
-        setup(() => {
-            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves(appItem);
-            quickPickStub.onSecondCall().resolves(componentItem);
-            sandbox.stub(vscode.window, 'showWarningMessage');
-            getpushStub = sandbox.stub(Component, 'getPushCmd').resolves(undefined);
-            sandbox.stub(Component, 'setPushCmd');
-        });
-
-        test('returns null when cancelled', async () => {
-            quickPickStub.onFirstCall().resolves();
-            const result = await Component.push(null);
-
-            expect(result).null;
-        });
-
-        test('push calls the correct odo command with progress', async () => {
-            await Component.push(componentItem);
-
-            expect(termStub).calledOnceWith(Command.pushComponent());
-        });
-
-        test('works with no context', async () => {
-            await Component.push(null);
-
-            expect(termStub).calledOnceWith(Command.pushComponent());
-        });
-
-        test('works from keybinding', async () => {
-            getpushStub.resolves(`odo push ${componentItem.getName()} --app ${appItem.getName()} --project ${projectItem.getName()}`);
-            await Component.push(null);
-
-            expect(termStub).calledOnceWith(Command.pushComponent());
         });
     });
 

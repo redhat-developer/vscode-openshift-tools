@@ -154,11 +154,6 @@ suite('odo integration', () => {
         return components.find((item) => item.getName() === componentNameParam);
     }
 
-    async function pushComponent(componentParam: odo.OpenShiftObject): Promise<void> {
-        await oi.execute(Command.pushComponent(), componentParam.contextPath.fsPath);
-        componentParam.contextValue = odo.ContextType.COMPONENT_PUSHED;
-    }
-
     async function createService(
         appParam: odo.OpenShiftObject,
         name: string,
@@ -314,7 +309,6 @@ suite('odo integration', () => {
                 `${componentName}1`,
                 nodeJsExGitUrl,
             );
-            await pushComponent(linkedComp1);
         });
 
         test('create comp2', async () => {
@@ -324,7 +318,6 @@ suite('odo integration', () => {
                 `${componentName}2`,
                 nodeJsExGitUrl,
             );
-            await pushComponent(linkedComp2);
         });
 
         test('create service1 from mongodb-persistent', async function() {
