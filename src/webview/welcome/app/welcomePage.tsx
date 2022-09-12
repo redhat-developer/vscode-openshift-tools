@@ -133,7 +133,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <BugReportIcon style={{ fontSize: 25 }} />
-                                        <Typography variant='body1'>Issues</Typography>
+                                        <Typography variant='body1'>File issues  /  Request a feature</Typography>
                                     </Stack>
                                 </div>
                             </a>
