@@ -158,7 +158,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <RocketLaunchIcon style={{ fontSize: 25 }} />
-                                        <Typography variant='body1'>Releases</Typography>
+                                        <Typography variant='body1'>Look out for the Releases</Typography>
                                     </Stack>
                                 </div>
                             </a>
