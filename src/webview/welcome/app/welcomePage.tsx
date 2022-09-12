@@ -337,7 +337,8 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <p className='section__header-hint'>Allows to connect & provision free OpenShift cluster  from IDE, using a guided workflow. This workflow allows you to either Run OpenShift locally or provision a free 30 days Developer Sandbox.</p>
                             </div>
                             <div className='sticky-section-exten'>
-                                <p className='section__header-hint'>your vendor doesn’t control your IT future. You&nbsp;do.</p>
+                                <p className='section__header-hint'>Allows Monitoring through view and stream logs from your deployments, pods and containers for Kubernetes resources, with One Click from IDE.
+</p>
                             </div>
                         </div>
                     </div>
