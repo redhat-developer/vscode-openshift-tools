@@ -119,7 +119,7 @@ export class Welcome extends React.Component<DefaultProps, {
                 <div className='help'>
                     <ul>
                         <li>
-                            <a href='#' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector&ssr=false#qna')}>
+                            <a href='#!' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector&ssr=false#qna')}>
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <HelpIcon style={{ fontSize: 25 }} />
@@ -129,7 +129,7 @@ export class Welcome extends React.Component<DefaultProps, {
                             </a>
                         </li>
                         <li>
-                            <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/issues')}>
+                            <a href='#!' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/issues')}>
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <BugReportIcon style={{ fontSize: 25 }} />
@@ -143,7 +143,7 @@ export class Welcome extends React.Component<DefaultProps, {
                 <div className='help'>
                     <ul>
                         <li>
-                            <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/discussions')}>
+                            <a href='#!' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/discussions')}>
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <ChatIcon style={{ fontSize: 25 }} />
@@ -154,7 +154,7 @@ export class Welcome extends React.Component<DefaultProps, {
                             </a>
                         </li>
                         <li>
-                            <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/releases')}>
+                            <a href='#!' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/releases')}>
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <RocketLaunchIcon style={{ fontSize: 25 }} />
@@ -168,7 +168,7 @@ export class Welcome extends React.Component<DefaultProps, {
                 <div className='documentation'>
                     <ul>
                         <li>
-                            <a href='#' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools')}>
+                            <a href='#!' onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools')}>
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <GitHubIcon style={{ fontSize: 25 }} />
@@ -178,7 +178,7 @@ export class Welcome extends React.Component<DefaultProps, {
                             </a>
                         </li>
                         <li>
-                            <a href='#' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector')}>
+                            <a href='#!' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector')}>
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <Icon fontSize='large'>
@@ -193,7 +193,6 @@ export class Welcome extends React.Component<DefaultProps, {
                 </div>
             </div>
         </div>
-
     </footer>
 
     render(): React.ReactNode {
