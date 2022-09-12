@@ -334,7 +334,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <p className='section__header-hint'>Allows to Run your tests directly on the cluster. Debug and test remote applications deployed directly from your IDE to OpenShift. No more having to exit your IDE to push your application.</p>
                             </div>
                             <div className='sticky-section-exten'>
-                                <p className='section__header-hint'>any proprietary software you use is ultimately connected to flexible open standards across your organization.</p>
+                                <p className='section__header-hint'>Allows to connect & provision free OpenShift cluster  from IDE, using a guided workflow. This workflow allows you to either Run OpenShift locally or provision a free 30 days Developer Sandbox.</p>
                             </div>
                             <div className='sticky-section-exten'>
                                 <p className='section__header-hint'>your vendor doesn’t control your IT future. You&nbsp;do.</p>
