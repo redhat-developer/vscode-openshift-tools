@@ -184,7 +184,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                         <Icon fontSize='large'>
                                             <img src={require('../../../../images/welcome/microsoft.svg').default} />
                                         </Icon>
-                                        <Typography variant='body1'>Marketplace</Typography>
+                                        <Typography variant='body1'>View in Marketplace</Typography>
                                     </Stack>
                                 </div>
                             </a>
