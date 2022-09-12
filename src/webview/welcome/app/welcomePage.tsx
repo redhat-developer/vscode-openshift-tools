@@ -317,7 +317,7 @@ export class Welcome extends React.Component<DefaultProps, {
                     <div className='extensionContainer'>
                         <div className='extensionContainerLeft'>
                             <div className='setting__input setting__input--big extensionContainerTitle' ref={this.extenContainerRef}>
-                                <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>This extension</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}>does</Typography></label>
+                                <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>This extension</Typography></label>
                             </div>
                         </div>
                         <div className='extencontainer'>
