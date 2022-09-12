@@ -325,7 +325,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <p className='section__header-hint'>a consistent platform running diverse workloads on every infrastructure.</p>
                             </div>
                             <div className='sticky-section-exten'>
-                                <p className='section__header-hint'>integrated management and automation capabilities.</p>
+                                <p className='section__header-hint'>Allows developers to Push code fast and often. Spend less time maintaining your deployment infrastructure and more time coding. Immediately have your application running each time you compile.</p>
                             </div>
                             <div className='sticky-section-exten'>
                                 <p className='section__header-hint'>cloud-native application services and tools for developers.</p>
