@@ -322,7 +322,7 @@ export class Welcome extends React.Component<DefaultProps, {
                         </div>
                         <div className='extencontainer'>
                             <div className='sticky-section-exten' ref={this.firstDivRef}>
-                                <p className='section__header-hint'>a consistent platform running diverse workloads on every infrastructure.</p>
+                                <p className='section__header-hint'>Allows developers to easily create, deploy and live debug container applications running on OpenShift & Kubernetes. Thus enhancing the development inner loop workflow through One-click actions right from IDE.></p>
                             </div>
                             <div className='sticky-section-exten'>
                                 <p className='section__header-hint'>Allows developers to Push code fast and often. Spend less time maintaining your deployment infrastructure and more time coding. Immediately have your application running each time you compile.</p>
