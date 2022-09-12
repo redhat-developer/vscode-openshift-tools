@@ -328,7 +328,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <p className='section__header-hint'>Allows developers to Push code fast and often. Spend less time maintaining your deployment infrastructure and more time coding. Immediately have your application running each time you compile.</p>
                             </div>
                             <div className='sticky-section-exten'>
-                                <p className='section__header-hint'>cloud-native application services and tools for developers.</p>
+                                <p className='section__header-hint'>Allows support for importing devfile templates to set up specific applications quickly. This helps to deploy them all, big and small. Deploy a simple Node.JS application or even a complex Operator-backed service.</p>
                             </div>
                             <div className='sticky-section-exten'>
                                 <p className='section__header-hint'>changing or adding public cloud providers doesn’t always lead to costly refactoring or retraining.</p>
