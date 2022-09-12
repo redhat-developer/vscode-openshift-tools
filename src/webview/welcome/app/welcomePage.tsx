@@ -147,7 +147,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <ChatIcon style={{ fontSize: 25 }} />
-                                        <Typography variant='body1'>Discussions</Typography>
+                                        <Typography variant='body1'>Start a Discussion</Typography>
                                     </Stack>
                                 </div>
 
