@@ -331,7 +331,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <p className='section__header-hint'>Allows support for importing devfile templates to set up specific applications quickly. This helps to deploy them all, big and small. Deploy a simple Node.JS application or even a complex Operator-backed service.</p>
                             </div>
                             <div className='sticky-section-exten'>
-                                <p className='section__header-hint'>changing or adding public cloud providers doesn’t always lead to costly refactoring or retraining.</p>
+                                <p className='section__header-hint'>Allows to Run your tests directly on the cluster. Debug and test remote applications deployed directly from your IDE to OpenShift. No more having to exit your IDE to push your application.</p>
                             </div>
                             <div className='sticky-section-exten'>
                                 <p className='section__header-hint'>any proprietary software you use is ultimately connected to flexible open standards across your organization.</p>
