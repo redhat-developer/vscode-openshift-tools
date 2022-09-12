@@ -8,11 +8,11 @@ import { Theme, createStyles } from '@material-ui/core/styles';
 export default (theme: Theme) =>
     createStyles({
         displayedName: {
-            margin: '0rem',
+            margin: '0rem 0.5rem',
             marginBottom: '0rem!important'
         },
         displayedDescription: {
-            margin: '0rem',
+            margin: '0rem 0.5rem',
             marginBottom: '0rem',
             color: '#adabae'
         }
