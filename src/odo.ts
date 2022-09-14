@@ -324,7 +324,6 @@ export interface Odo {
     createApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentFromFolder(application: OpenShiftObject, type: string, version: string, registryName: string, name: string, path: Uri, starterName?: string, useExistingDevfile?: boolean, notification?: boolean): Promise<OpenShiftObject>;
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
-    deleteNotPushedComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     createService(application: OpenShiftObject, formData: any): Promise<OpenShiftObject>;
     deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
     getOpenShiftObjectByContext(context: string): OpenShiftObject;
@@ -855,10 +854,6 @@ export class OdoImpl implements Odo {
         }
         await this.deleteAndRefresh(component);
         return component;
-    }
-
-    public async deleteNotPushedComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
-        return this.deleteAndRefresh(component);
     }
 
     public async getActiveProject(): Promise<OpenShiftObject> {
