@@ -60,3 +60,14 @@ export async function execKubectl(command: string) {
     }
     throw new Error('Cannot find kubectl command.');
 }
+
+export function loadItems<I>(json: string, fetch: (data) => I[] = (data): I[] => data.items): I[] {
+    let data: I[] = [];
+    try {
+        const items = fetch(JSON.parse(json));
+        if (items) data = items;
+    } catch (ignore) {
+        // ignore parse errors and return empty array
+    }
+    return data;
+}
