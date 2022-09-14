@@ -310,7 +310,6 @@ export interface Odo {
     getComponents(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]>;
     getCompTypesJson():Promise<DevfileComponentType[]>;
     getComponentTypes(): Promise<ComponentTypeAdapter[]>;
-    getComponentPorts(component: OpenShiftObject): Promise<odo.Port[]>;
     getServiceOperators(): Promise<ServiceOperatorShortInfo[]>;
     getClusterServiceVersion(svc: string): Promise<ClusterServiceVersionKind>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
@@ -617,24 +616,6 @@ export class OdoImpl implements Odo {
         }
 
         return devfileItems;
-    }
-
-    async getComponentPorts(component: OpenShiftObject): Promise<odo.Port[]> {
-        let ports: string[] = [];
-        if (component.contextValue === ContextType.COMPONENT_PUSHED) {
-            const portsResult: cliInstance.CliExitData = await this.execute(Command.getComponentJson(), component.contextPath.fsPath);
-            const serviceOpj = JSON.parse(portsResult.stdout);
-            ports = serviceOpj.spec.ports;
-        } else {
-            const settings: odo.Component = OdoImpl.data.getSettingsByContext(component.contextPath.fsPath);
-            if (settings) {
-                ports = settings.spec.ports;
-            }
-        }
-        return ports.map<odo.Port>((port: string) => {
-            const data = port.split('/');
-            return {number: Number.parseInt(data[0], 10), protocol: data[1]};
-        });
     }
 
     public async getServiceOperators(): Promise<ServiceOperatorShortInfo[]> {
