@@ -34,7 +34,7 @@ import { KubeConfig, loadYaml } from '@kubernetes/client-node';
 import { pathExistsSync, readFileSync } from 'fs-extra';
 import * as fs from 'fs';
 import { ClusterServiceVersionKind } from './k8s/olm/types';
-import { Deployment } from './k8s/deployment';
+import { Command as DeploymentCommand } from './k8s/deployment';
 
 const tempfile = require('tmp');
 const {Collapsed} = TreeItemCollapsibleState;
@@ -458,9 +458,9 @@ export class OdoImpl implements Odo {
     }
 
     async getClusters(): Promise<OpenShiftObject[]> {
-        let children = OdoImpl.data.getChildrenByParent(OdoImpl.ROOT);
+        let children = await OdoImpl.data.getChildrenByParent(OdoImpl.ROOT);
         if (!children) {
-            children = OdoImpl.data.setParentToChildren(OdoImpl.ROOT, this._getClusters());
+            children = await OdoImpl.data.setParentToChildren(OdoImpl.ROOT, this._getClusters());
         }
         return children;
     }
@@ -837,7 +837,7 @@ export class OdoImpl implements Odo {
             );
         } else if (component.contextValue === ContextType.COMPONENT_OTHER) {
             await this.execute(
-                Deployment.command.delete(
+                DeploymentCommand.delete(
                     component.getName(),
                 ),
                 component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()

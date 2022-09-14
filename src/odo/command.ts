@@ -46,7 +46,11 @@ export class Command {
     }
 
     static listProjects(): CommandText {
-        return new CommandText('odo project list -o json');
+        return new CommandText('oc',
+            'get project', [
+                new CommandOption('-o', 'json', false)
+            ]
+        );
     }
 
     @verbose
@@ -61,7 +65,7 @@ export class Command {
     }
 
     static setActiveProject(name: string): CommandText {
-        return new CommandText('odo project set', name);
+        return new CommandText('odo set project', name);
     }
 
     static deleteProject(name: string): CommandText {
