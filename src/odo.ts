@@ -320,8 +320,7 @@ export interface Odo {
     clearCache?(): void;
     createProject(name: string): Promise<OpenShiftObject>;
     deleteProject(project: OpenShiftObject): Promise<OpenShiftObject>;
-    createApplication(application: OpenShiftObject): Promise<OpenShiftObject>;
-    createComponentFromFolder(application: OpenShiftObject, type: string, version: string, registryName: string, name: string, path: Uri, starterName?: string, useExistingDevfile?: boolean, notification?: boolean): Promise<OpenShiftObject>;
+    createComponentFromFolder(type: string, registryName: string, name: string, path: Uri, starterName?: string, useExistingDevfile?: boolean, notification?: boolean): Promise<OpenShiftObject>;
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     createService(application: OpenShiftObject, formData: any): Promise<OpenShiftObject>;
     deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
@@ -608,12 +607,10 @@ export class OdoImpl implements Odo {
         // if kc is produced, KUBECONFIG env var is empty or pointing
 
         const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson(), undefined, true, this.getKubeconfigEnv());
-        const compTypesJson: ComponentTypesJson = this.loadJSON(result.stdout);
+        const componentTypes: DevfileComponentType[] = this.loadJSON(result.stdout);
         const devfileItems: ComponentTypeAdapter[] = [];
 
-        if (compTypesJson?.items) {
-            compTypesJson.items.map((item) => devfileItems.push(new ComponentTypeAdapter(item.name, undefined, item.description, undefined, item.registry.name)));
-        }
+        componentTypes.map((item) => devfileItems.push(new ComponentTypeAdapter(item.name, undefined, item.description, undefined, item.registry.name)));
 
         return devfileItems;
     }
@@ -773,23 +770,8 @@ export class OdoImpl implements Odo {
         await result;
     }
 
-    public async createApplication(application: OpenShiftObject): Promise<OpenShiftObject> {
-        const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
-        if (!targetApplication) {
-            await this.insertAndReveal(application);
-        }
-        return application;
-    }
-
-    public async createComponentFromFolder(application: OpenShiftObject, type: string, version: string, registryName: string, name: string, location: Uri, starter: string = undefined, useExistingDevfile = false, notification = true): Promise<OpenShiftObject> {
-        await this.execute(Command.createLocalComponent(application.getParent().getName(), application.getName(), type, version, registryName, name, location.fsPath, starter, useExistingDevfile), location.fsPath);
-        if (workspace.workspaceFolders && application.getParent().getParent()) { // if there are workspace folders and cluster is accessible
-            const targetApplication = (await this.getApplications(application.getParent())).find((value) => value === application);
-            if (!targetApplication) {
-                await this.insertAndReveal(application);
-            }
-            await this.insertAndReveal(new OpenShiftComponent(application, name, ContextType.COMPONENT, location, type), notification);
-        }
+    public async createComponentFromFolder(type: string, registryName: string, name: string, location: Uri, starter: string = undefined, useExistingDevfile = false, notification = true): Promise<OpenShiftObject> {
+        await this.execute(Command.createLocalComponent(type, registryName, name, starter, useExistingDevfile), location.fsPath);
         let wsFolder: WorkspaceFolder;
         if (workspace.workspaceFolders) {
             // could be new or existing folder
