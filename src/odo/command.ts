@@ -280,31 +280,25 @@ export class Command {
 
     @verbose
     static createLocalComponent(
-        project: string,
-        app: string,
         type = '', // will use empty string in case of undefined type passed in
-        version: string,
         registryName: string,
         name: string,
-        folder: string,
         starter: string = undefined,
         useExistingDevfile = false
     ): CommandText {
-        const cTxt = new CommandText('odo create', `${type}${version?':':''}${version?version:''} ${name}`);
-        if (version) {
-            cTxt.addOption(new CommandOption('--s2i'));
-        }
+        const cTxt = new CommandText('odo', 'init', [
+            new CommandOption('--name', name),
+            new CommandOption('--devfile', type)
+        ]
+        );
         if (registryName) {
-            cTxt.addOption(new CommandOption('--registry', registryName));
+            cTxt.addOption(new CommandOption('--devfile-registry', registryName));
         }
-        cTxt.addOption(new CommandOption('--context', `"${folder}"`))
-            .addOption(new CommandOption('--app', app))
-            .addOption(new CommandOption('--project', project));
         if (starter) {
             cTxt.addOption(new CommandOption('--starter', starter, false));
         }
         if (useExistingDevfile) {
-            cTxt.addOption(new CommandOption('--devfile', 'devfile.yaml', false));
+            cTxt.addOption(new CommandOption('--devfile-path', 'devfile.yaml', false));
         }
         return cTxt;
     }

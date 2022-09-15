@@ -243,7 +243,6 @@
 		"onCommand:openshift.project.create",
 		"onCommand:openshift.project.delete",
 		"onCommand:openshift.project.delete.palette",
-		"onCommand:openshift.component.create",
 		"onCommand:openshift.component.createFromLocal",
 		"onCommand:openshift.component.createFromRootWorkspaceFolder",
 		"onCommand:openshift.component.describe",
@@ -415,17 +414,8 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.component.create",
-				"title": "New Component",
-				"category": "OpenShift",
-				"icon": {
-					"light": "images/title/light/workspace-new.svg",
-					"dark": "images/title/dark/workspace-new.svg"
-				}
-			},
-			{
 				"command": "openshift.component.createFromLocal",
-				"title": "New Component from local folder",
+				"title": "New Component",
 				"category": "OpenShift",
 				"icon": {
 					"light": "images/title/light/workspace-new.svg",
@@ -793,10 +783,6 @@
 					"when": "view == openshiftProjectExplorer"
 				},
 				{
-					"command": "openshift.component.create",
-					"when": "view == openshiftProjectExplorer"
-				},
-				{
 					"command": "openshift.componentType.openStarterProjectRepository",
 					"when": "false"
 				},
@@ -1090,21 +1076,6 @@
 					"group": "p3"
 				},
 				{
-					"command": "openshift.service.create",
-					"when": "view == openshiftProjectExplorer && viewItem == project",
-					"group": "p1@1"
-				},
-				{
-					"command": "openshift.component.create",
-					"when": "view == openshiftProjectExplorer && viewItem == project ",
-					"group": "p1@0"
-				},
-				{
-					"command": "openshift.component.create",
-					"when": "view == openshiftProjectExplorer && viewItem == application ",
-					"group": "a1"
-				},
-				{
 					"command": "openshift.component.describe",
 					"when": "view == openshiftProjectExplorer && viewItem == component",
 					"group": "c2@1"
@@ -1145,11 +1116,6 @@
 					"group": "c6@1"
 				},
 				{
-					"command": "openshift.service.create",
-					"when": "view == openshiftProjectExplorer && viewItem == application",
-					"group": "a1"
-				},
-				{
 					"command": "openshift.service.delete",
 					"when": "view == openshiftProjectExplorer && viewItem == service",
 					"group": "s2"
@@ -1183,16 +1149,6 @@
 				{
 					"command": "openshift.project.set",
 					"when": "view == openshiftProjectExplorer && viewItem == project",
-					"group": "inline"
-				},
-				{
-					"command": "openshift.component.create",
-					"when": "view == openshiftProjectExplorer && viewItem == project",
-					"group": "inline"
-				},
-				{
-					"command": "openshift.component.create",
-					"when": "view == openshiftProjectExplorer && viewItem == application",
 					"group": "inline"
 				},
 				{
