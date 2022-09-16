@@ -432,6 +432,11 @@
 				"title": "Delete Component",
 				"category": "OpenShift"
 			},
+            {
+                "command": "openshift.component.dev",
+                "title": "Start Dev Mode",
+                "category": "OpenShift"
+            },
 			{
 				"command": "openshift.component.describe",
 				"title": "Describe",
@@ -1115,6 +1120,10 @@
 					"when": "view == openshiftProjectExplorer && viewItem == componentNoContext || viewItem == component || viewItem == componentNotPushed || viewItem == componentOther",
 					"group": "c6@1"
 				},
+                {
+                    "command": "openshift.component.dev",
+                    "when": "view == openshiftComponentsView && viewItem == openshift.component"
+                },
 				{
 					"command": "openshift.service.delete",
 					"when": "view == openshiftProjectExplorer && viewItem == service",
