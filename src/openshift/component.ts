@@ -5,8 +5,8 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { window, commands, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable } from 'vscode';
-import { exec } from 'child_process';
+import { window, commands, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable, EventEmitter } from 'vscode';
+import { ChildProcess, exec } from 'child_process';
 import * as YAML from 'yaml'
 import OpenShiftItem, { clusterRequired, selectTargetApplication, selectTargetComponent } from './openshiftItem';
 import { OpenShiftObject, ContextType, OpenShiftComponent, OpenShiftApplication } from '../odo';
@@ -26,6 +26,7 @@ import fs = require('fs-extra');
 import { NewComponentCommandProps } from '../telemetry';
 
 import waitPort = require('wait-port');
+import { WorkspaceFolderComponent } from '../componentsView';
 
 function createCancelledResult(stepName: string): any {
     const cancelledResult: any = new String('');
@@ -62,6 +63,43 @@ export class Component extends OpenShiftItem {
             treeKill(ds.configuration.odoPid);
         }
         return !!ds;
+    }
+
+    @vsCommand('openshift.component.dev')
+    // @clusterRequired()
+    static async dev(component: WorkspaceFolderComponent) {
+            // eslint-disable-next-line prefer-const
+            let devProcess: ChildProcess;
+            const outputEmitter = new EventEmitter<string>();
+            const terminal = window.createTerminal({
+                name: component.contextUri.fsPath,
+                pty: {
+                    onDidWrite: outputEmitter.event,
+                    open: () => {},
+                    close: () => {
+                        return;
+                    }, handleInput: (data => {
+                        if (data.charCodeAt(0) === 3) { //ctrl+C
+                            treeKill(devProcess.pid, 'SIGINT');
+                        }
+                    })
+                },
+            });
+            try {
+                devProcess = await Component.odo.spawn(`${Command.dev(component.contextUri.fsPath)}`, component.contextUri.fsPath);
+            } catch (err) {
+                void window.showErrorMessage(err.toString());
+                terminal.dispose();
+            }
+            devProcess.on('error', (err)=> {
+                void window.showErrorMessage(err.toString());
+            })
+            devProcess.stdout.on('data', (chunk) => {
+                outputEmitter.fire(`${chunk}`.replaceAll('\n', '\r\n'));
+            });
+            devProcess.on('exit', () => {
+                terminal.dispose();
+            })
     }
 
     static async delete(component: OpenShiftComponent) {
