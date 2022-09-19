@@ -18,22 +18,24 @@ export interface DefaultProps {
 }
 
 export class Welcome extends React.Component<DefaultProps, {
+    imageVal: number
     lastRelease: string
 }> {
+    contentContainerRef: React.RefObject<HTMLDivElement>;
     cloudRef: React.RefObject<HTMLDivElement>;
     componentRef: React.RefObject<HTMLDivElement>;
     devfileRef: React.RefObject<HTMLDivElement>;
     extenContainerRef: React.RefObject<HTMLDivElement>;
-    firstDivRef: React.RefObject<HTMLDivElement>;
 
     constructor(props) {
         super(props);
+        this.contentContainerRef = React.createRef();
+        this.extenContainerRef = React.createRef();
         this.cloudRef = React.createRef();
         this.componentRef = React.createRef();
         this.devfileRef = React.createRef();
-        this.extenContainerRef = React.createRef();
-        this.firstDivRef = React.createRef();
         this.state = {
+            imageVal: 1,
             lastRelease: ''
         }
     }
@@ -48,30 +50,22 @@ export class Welcome extends React.Component<DefaultProps, {
     }
 
     handleScroll = () => {
-        const { pageYOffset } = window;
-        console.log('pageYOffset:::', pageYOffset);
-        if (pageYOffset > 1000) {
-            this.extenContainerRef.current.style.position = 'fixed';
-            this.extenContainerRef.current.style.top = 700 / 3 + 'px';
-        } else {
-            this.extenContainerRef.current.style.position = 'absolute';
-            this.extenContainerRef.current.style.top = '0px';
-        }
-        if (pageYOffset < 550) {
-            this.cloudRef.current.style.visibility = 'visible';
-            this.cloudRef.current.style.marginTop = '50px';
-            this.componentRef.current.style.visibility = 'hidden';
-            this.devfileRef.current.style.visibility = 'hidden';
-        } else if (pageYOffset >= 550 && pageYOffset < 700) {
-            this.cloudRef.current.style.visibility = 'hidden';
-            this.componentRef.current.style.visibility = 'visible';
-            this.componentRef.current.style.marginTop = '-400px';
-            this.devfileRef.current.style.visibility = 'hidden';
-        } else if (pageYOffset >= 700) {
-            this.cloudRef.current.style.visibility = 'hidden';
-            this.componentRef.current.style.visibility = 'hidden';
-            this.devfileRef.current.style.visibility = 'visible';
-            this.componentRef.current.style.marginTop = '-900px';
+        const winScroll =
+            document.body.scrollTop || document.documentElement.scrollTop;
+
+        console.log('winScroll', winScroll);
+
+        if (winScroll < this.cloudRef.current.offsetTop) {
+            this.contentContainerRef.current.style.position = 'relative';
+            this.setState({ imageVal: 1 });
+        } else if (winScroll >= this.cloudRef.current.offsetTop) {
+            this.contentContainerRef.current.style.position = 'sticky';
+            this.setState({ imageVal: 1 });
+            if (winScroll >= this.componentRef.current.offsetTop - 235 && winScroll < this.devfileRef.current.offsetTop - 235) {
+                this.setState({ imageVal: 2 });
+            } else if (winScroll >= this.devfileRef.current.offsetTop - 235) {
+                this.setState({ imageVal: 3 });
+            }
         }
     };
 
@@ -123,7 +117,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <HelpIcon style={{ fontSize: 25 }} />
-                                        <Typography variant='body1'>Ask a Question</Typography>
+                                        <Typography variant='h6'>Ask a Question</Typography>
                                     </Stack>
                                 </div>
                             </a>
@@ -133,7 +127,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <BugReportIcon style={{ fontSize: 25 }} />
-                                        <Typography variant='body1'>File issues  /  Request a feature</Typography>
+                                        <Typography variant='h6'>File issues  /  Request a feature</Typography>
                                     </Stack>
                                 </div>
                             </a>
@@ -147,7 +141,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <ChatIcon style={{ fontSize: 25 }} />
-                                        <Typography variant='body1'>Start a Discussion</Typography>
+                                        <Typography variant='h6'>Start a Discussion</Typography>
                                     </Stack>
                                 </div>
 
@@ -158,7 +152,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <RocketLaunchIcon style={{ fontSize: 25 }} />
-                                        <Typography variant='body1'>Look out for the Releases</Typography>
+                                        <Typography variant='h6'>Look out for the Releases</Typography>
                                     </Stack>
                                 </div>
                             </a>
@@ -172,7 +166,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <GitHubIcon style={{ fontSize: 25 }} />
-                                        <Typography variant='body1'>Star the Repository</Typography>
+                                        <Typography variant='h6'>Star the Repository</Typography>
                                     </Stack>
                                 </div>
                             </a>
@@ -184,7 +178,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                         <Icon fontSize='large'>
                                             <img src={require('../../../../images/welcome/microsoft.svg').default} />
                                         </Icon>
-                                        <Typography variant='body1'>View in Marketplace</Typography>
+                                        <Typography variant='h6'>View in Marketplace</Typography>
                                     </Stack>
                                 </div>
                             </a>
@@ -196,7 +190,7 @@ export class Welcome extends React.Component<DefaultProps, {
     </footer>
 
     render(): React.ReactNode {
-        const { lastRelease } = this.state;
+        const { imageVal, lastRelease } = this.state;
         return <>
             <header className='header__logo'>
                 <img className='image__logo' src={require('../../../../images/title/logo.svg').default} />
@@ -239,90 +233,91 @@ export class Welcome extends React.Component<DefaultProps, {
                                 </div>
                             </div>
                         </div>
-                        <div className='section__preview'>
+                        <div className='section__brand__preview'>
                             <img
                                 className='brand'
                                 src={require('../../../../images/welcome/OpenShift-Branding-box.png').default}
                                 loading='lazy' />
                         </div>
                     </section>
-                    <div className='container'>
-                        <div className='sticky-section' ref={this.cloudRef}>
-                            <div className='section__header'>
-                                <div className='setting__input setting__input--big'>
-                                    <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Hybrid Cloud</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}> Flexibility</Typography></label>
+                    <div className='extensionContainer content-area'>
+                        <div className='extensioncontainer'>
+                            <div className='sticky-section-exten'>
+                                <div className='section__header sticky-content-section' ref={this.cloudRef}>
+                                    <div className='setting__input setting__input--big'>
+                                        <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Hybrid Cloud</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}> Flexibility</Typography></label>
+                                    </div>
+                                    <p className='section__header-hint'>
+                                        Open hybrid cloud is Red Hat's recommended strategy for architecting, developing, and operating a hybrid mix of applications. This extension allows the developers to connect to any OpenShift cluster, be it running locally or on any hybrid cloud. Using the extension, developers can use the streamlined experience for the easy creation of clusters hosted on OpenShift
+                                    </p>
+                                    <ul>
+                                        <li style={{ marginTop: '3rem' }}>
+                                            <label>Local OpenShift running on the laptop</label>
+                                            <a
+                                                className='button button--flat list--button'
+                                                title='Open CRC'
+                                                onClick={(): void => this.openCluster('crc')}
+                                            >OpenShift Local</a>
+                                        </li>
+                                        <li style={{ marginTop: '3rem' }}>
+                                            <label>Provision a free tier version of OpenShift Developer Sandbox</label>
+                                            <a
+                                                className='button button--flat list--button'
+                                                title='Open Developer Sandnox'
+                                                onClick={(): void => this.openCluster('sandbox')}
+                                            >Developer Sandbox</a>
+                                        </li>
+                                    </ul>
                                 </div>
-                                <p className='section__header-hint'>
-                                    Open hybrid cloud is Red Hat's recommended strategy for architecting, developing, and operating a hybrid mix of applications. This extension allows the developers to connect to any OpenShift cluster, be it running locally or on any hybrid cloud. Using the extension, developers can use the streamlined experience for the easy creation of clusters hosted on OpenShift
-                                </p>
-                                <ul>
-                                    <li>
-                                        <label>Local OpenShift running on the laptop</label>
+
+                                <div className='section__header sticky-content-section' ref={this.componentRef}>
+                                    <div className='setting__input setting__input--big'>
+                                        <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Component</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}>Creation Simplicity</Typography></label>
+                                    </div>
+                                    <p className='section__header-hint'>
+                                        Developers can quickly get started with application development using devfile based sample code. This allows them to built from the ground up with application development on Kubernetes in mind. Users can create, develop, debug and deploy applications on OpenShift within few clicks.
+                                    </p>
+                                    <label style={{marginTop: '3rem'}}>
+                                        The extension supports Java, NodeJS, Python, .NET, Go, Quarkus, etc.
                                         <a
                                             className='button button--flat'
-                                            title='Open CRC'
-                                            onClick={(): void => this.openCluster('crc')}
-                                        >OpenShift Local</a>
-                                    </li>
-                                    <li>
-                                        <label>Provision a free tier version of OpenShift Developer Sandbox</label>
-                                        <a
-                                            className='button button--flat'
-                                            title='Open Developer Sandnox'
-                                            onClick={(): void => this.openCluster('sandbox')}
-                                        >Developer Sandbox</a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div className='section__preview sticky-img'>
-                                <img className='content__image__preview' src={require('../../../../images/welcome/cloud.svg').default} />
-                            </div>
-                        </div>
-                        <div className='sticky-section' ref={this.componentRef}>
-                            <div className='section__header'>
-                                <div className='setting__input setting__input--big'>
-                                    <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Component</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}>Creation Simplicity</Typography></label>
+                                            title='Component Registry View'
+                                            onClick={this.openDevfileRegistry}
+                                        >Component Registry View</a>
+                                    </label>
                                 </div>
-                                <p className='section__header-hint'>
-                                    Developers can quickly get started with application development using devfile based sample code. This allows them to built from the ground up with application development on Kubernetes in mind. Users can create, develop, debug and deploy applications on OpenShift within few clicks.
-                                </p>
-                                <label>
-                                    The extension supports Java, NodeJS, Python, .NET, Go, Quarkus, etc.
-                                    <a
-                                        className='button button--flat'
-                                        title='Component Registry View'
-                                        onClick={this.openDevfileRegistry}
-                                    >Component Registry View</a>
-                                </label>
-                            </div>
-                            <div className='section__preview sticky-img'>
-                                <img className='content__image__preview fixMargin' src={require('../../../../images/welcome/component.png').default} />
-                            </div>
-                        </div>
-                        <div className='sticky-section-last' ref={this.devfileRef}>
-                            <div className='section__header'>
-                                <div className='setting__input setting__input--big'>
-                                    <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Push</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}>code fast and debug on remote</Typography></label>
+
+
+                                <div className='section__header sticky-content-section' ref={this.devfileRef}>
+                                    <div className='setting__input setting__input--big'>
+                                        <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Push</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}>code fast and debug on remote</Typography></label>
+                                    </div>
+                                    <p className='section__header-hint'>
+                                        Developers can quickly check out the code, make changes and do fast deployment on the remote cluster. Once deployed, they can Debug the changes directly in the remote environment. There is a separate view for applications running in Debug Mode.
+                                    </p>
                                 </div>
-                                <p className='section__header-hint'>
-                                    Developers can quickly check out the code, make changes and do fast deployment on the remote cluster. Once deployed, they can Debug the changes directly in the remote environment. There is a separate view for applications running in Debug Mode.
-                                </p>
                             </div>
-                            <div className='section__preview sticky-img'>
-                                <img className='content__image__preview lastone' src={require('../../../../images/welcome/devfile.png').default} />
-                            </div>
+
+                        </div>
+                        <div className='section__brand__preview sticky-section' ref={this.contentContainerRef}>
+
+                            {imageVal === 1 ? <img className='content__image__preview' src={require('../../../../images/welcome/cloud.svg').default} />
+                                : imageVal === 2 ? <img className='content__image__preview' src={require('../../../../images/welcome/component.png').default} />
+                                    : imageVal === 3 ? <img className='content__image__preview' src={require('../../../../images/welcome/devfile.png').default} />
+                                        : undefined}
+
                         </div>
                     </div>
                     <div className='extensionContainer'>
-                        <div className='extensionContainerLeft'>
-                            <div className='setting__input setting__input--big extensionContainerTitle' ref={this.extenContainerRef}>
+                        <div className='sticky-section' ref={this.extenContainerRef}>
+                            <div className='setting__input setting__input--big' style={{borderBottom: '0px'}}>
                                 <label style={{ display: 'flex', flexDirection: 'row' }}>
                                     <Typography variant='h2' className='highlight'>This extension</Typography>
                                 </label>
                             </div>
                         </div>
                         <div className='extencontainer'>
-                            <div className='sticky-section-exten' ref={this.firstDivRef}>
+                            <div className='sticky-section-exten'>
                                 <p className='section__header-hint'>Allows developers to easily create, deploy and live debug container applications running on OpenShift &#38; Kubernetes. Thus enhancing the development inner loop workflow through One-click actions right from IDE.&gt;</p>
                             </div>
                             <div className='sticky-section-exten'>
