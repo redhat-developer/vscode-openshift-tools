@@ -46,7 +46,8 @@ async function getComponentsInWorkspace(): Promise<WorkspaceFolderComponent[]> {
         });
     }
     const results = await Promise.all(execs);
-    return results.map((result) => {
+    const components: WorkspaceFolderComponent[] = [];
+    results.forEach((result) => {
         try {
             if (!result.error) {
                 const compData = JSON.parse(result.stdout) as ComponentDescription;
@@ -56,18 +57,19 @@ async function getComponentsInWorkspace(): Promise<WorkspaceFolderComponent[]> {
                     `Name: ${compData.devfileData.devfile.metadata.name}`,
                     `Context: ${contextUri.fsPath}`,
                 ].join('\n');
-                return {
+                components.push({
                     label: `${compData.devfileData.devfile.metadata.name}${isDevMode ? ' (dev mode)' : ''}`,
                     contextUri,
                     tooltip,
                     contextValue: `openshift.component${isDevMode ? '.devmode' : ''}`,
                     iconPath: vsc.Uri.file(path.join(__dirname, '../../images/component', 'workspace.png'))
-                };
+                });
             }
         } catch (err) {
             // ignore unexpected parsing and loading errors
         }
     });
+    return components;
 }
 
 export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
