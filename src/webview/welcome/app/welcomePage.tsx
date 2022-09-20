@@ -53,19 +53,16 @@ export class Welcome extends React.Component<DefaultProps, {
         const winScroll =
             document.body.scrollTop || document.documentElement.scrollTop;
 
-        console.log('winScroll', winScroll);
-
-        if (winScroll < this.cloudRef.current.offsetTop) {
-            this.contentContainerRef.current.style.position = 'relative';
-            this.setState({ imageVal: 1 });
-        } else if (winScroll >= this.cloudRef.current.offsetTop) {
+        if (winScroll >= this.cloudRef.current.offsetTop) {
             this.contentContainerRef.current.style.position = 'sticky';
             this.setState({ imageVal: 1 });
-            if (winScroll >= this.componentRef.current.offsetTop - 235 && winScroll < this.devfileRef.current.offsetTop - 235) {
+            if (winScroll >= this.componentRef.current.offsetTop - 200 && winScroll < this.devfileRef.current.offsetTop - 300) {
                 this.setState({ imageVal: 2 });
-            } else if (winScroll >= this.devfileRef.current.offsetTop - 235) {
+            } else if (winScroll >= this.devfileRef.current.offsetTop - 300) {
                 this.setState({ imageVal: 3 });
             }
+        } else {
+            this.setState({ imageVal: 1 });
         }
     };
 
@@ -277,14 +274,19 @@ export class Welcome extends React.Component<DefaultProps, {
                                     <p className='section__header-hint'>
                                         Developers can quickly get started with application development using devfile based sample code. This allows them to built from the ground up with application development on Kubernetes in mind. Users can create, develop, debug and deploy applications on OpenShift within few clicks.
                                     </p>
-                                    <label style={{marginTop: '3rem'}}>
-                                        The extension supports Java, NodeJS, Python, .NET, Go, Quarkus, etc.
-                                        <a
-                                            className='button button--flat'
-                                            title='Component Registry View'
-                                            onClick={this.openDevfileRegistry}
-                                        >Component Registry View</a>
-                                    </label>
+                                    <ul>
+                                        <li style={{ marginTop: '3rem' }}>
+                                            <label>
+                                                The extension supports Java, NodeJS, Python, .NET, Go, Quarkus, etc.
+                                                <a
+                                                    className='button button--flat list--button'
+                                                    title='Component Registry View'
+                                                    onClick={this.openDevfileRegistry}
+                                                    style={{ marginLeft: '1rem' }}
+                                                >Registry View</a>
+                                            </label>
+                                        </li>
+                                    </ul>
                                 </div>
 
 
@@ -299,18 +301,19 @@ export class Welcome extends React.Component<DefaultProps, {
                             </div>
 
                         </div>
-                        <div className='section__brand__preview sticky-section' ref={this.contentContainerRef}>
+                        <div className='section__brand__preview sticky-section' ref={this.contentContainerRef}
+                            style={{margin: '0rem'}}>
 
                             {imageVal === 1 ? <img className='content__image__preview' src={require('../../../../images/welcome/cloud.svg').default} />
                                 : imageVal === 2 ? <img className='content__image__preview' src={require('../../../../images/welcome/component.png').default} />
-                                    : imageVal === 3 ? <img className='content__image__preview' src={require('../../../../images/welcome/devfile.png').default} />
+                                    : imageVal === 3 ? <img className='content__image__preview last__image' src={require('../../../../images/welcome/devfile.png').default} />
                                         : undefined}
 
                         </div>
                     </div>
                     <div className='extensionContainer'>
                         <div className='sticky-section' ref={this.extenContainerRef}>
-                            <div className='setting__input setting__input--big' style={{borderBottom: '0px'}}>
+                            <div className='setting__input setting__input--big' style={{ borderBottom: '0px' }}>
                                 <label style={{ display: 'flex', flexDirection: 'row' }}>
                                     <Typography variant='h2' className='highlight'>This extension</Typography>
                                 </label>
@@ -318,7 +321,7 @@ export class Welcome extends React.Component<DefaultProps, {
                         </div>
                         <div className='extencontainer'>
                             <div className='sticky-section-exten'>
-                                <p className='section__header-hint'>Allows developers to easily create, deploy and live debug container applications running on OpenShift &#38; Kubernetes. Thus enhancing the development inner loop workflow through One-click actions right from IDE.&gt;</p>
+                                <p className='section__header-hint'>Allows developers to easily create, deploy and live debug container applications running on OpenShift &#38; Kubernetes. Thus enhancing the development inner loop workflow through One-click actions right from IDE.</p>
                             </div>
                             <div className='sticky-section-exten'>
                                 <p className='section__header-hint'>Allows developers to Push code fast and often. Spend less time maintaining your deployment infrastructure and more time coding. Immediately have your application running each time you compile.</p>

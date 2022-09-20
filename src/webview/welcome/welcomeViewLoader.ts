@@ -6,18 +6,29 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ExtenisonID } from '../../util/constants';
-const pkjson = require('../../../package.json');
+const request = require('request');
 
 let panel: vscode.WebviewPanel;
 
 async function welcomeViewerMessageListener(event: any): Promise<any> {
     switch (event?.action) {
         case 'getOpenShiftVersion':
-            const preVersion = 'v'+Number((parseFloat(pkjson['version']) - 0.1).toFixed(1)) + '.0';
-            panel?.webview.postMessage({
-                'action': 'getOpenShiftVersion',
-                'param': preVersion
-            });
+            request('https://api.github.com/repos/redhat-developer/vscode-openshift-tools/releases/latest',
+                {
+                    json: true,
+                    hostname: 'api.github.com',
+                    path: '/repos/redhat-developer/vscode-openshift-tools/releases/latest',
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36'
+                    }
+                }, (err: any, _res: any, body: { name: any; }) => {
+                    if (!err) {
+                        panel?.webview.postMessage({
+                            'action': 'getOpenShiftVersion',
+                            'param': body?.name
+                        });
+                    }
+                });
             break;
         case 'callGetStartedPage':
             vscode.commands.executeCommand('openshift.getStarted');
