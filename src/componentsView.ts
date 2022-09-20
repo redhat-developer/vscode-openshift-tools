@@ -10,6 +10,7 @@ import { CliExitData } from './cli';
 import { getInstance } from './odo';
 import { Command } from './odo/command';
 import { ComponentDescription } from './odo/componentTypeDescription';
+import { Component } from './openshift/component';
 import { vsCommand } from './vscommand';
 
 export interface WorkspaceEntry {
@@ -49,16 +50,17 @@ async function getComponentsInWorkspace(): Promise<WorkspaceFolderComponent[]> {
         try {
             if (!result.error) {
                 const compData = JSON.parse(result.stdout) as ComponentDescription;
+                const isDevMode = compData.runningIn?.includes('Dev') && Component.getComponentDevState(result.cwd);
                 const contextUri = vsc.Uri.parse(result.cwd);
                 const tooltip = ['Component',
                     `Name: ${compData.devfileData.devfile.metadata.name}`,
                     `Context: ${contextUri.fsPath}`,
                 ].join('\n');
                 return {
-                    label: compData.devfileData.devfile.metadata.name,
+                    label: `${compData.devfileData.devfile.metadata.name}${isDevMode ? ' (dev mode)' : ''}`,
                     contextUri,
                     tooltip,
-                    contextValue: 'openshift.component',
+                    contextValue: `openshift.component${isDevMode ? '.devmode' : ''}`,
                     iconPath: vsc.Uri.file(path.join(__dirname, '../../images/component', 'workspace.png'))
                 };
             }
@@ -77,6 +79,8 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
         vsc.workspace.onDidChangeWorkspaceFolders(() => {
             this.refresh();
         });
+        Component.onDidDevStarted(() => this.refresh());
+        Component.onDidDevEnded(() => this.refresh());
     }
 
     private refresh(): void {
