@@ -437,6 +437,16 @@
                 "title": "Start Dev Mode",
                 "category": "OpenShift"
             },
+            {
+                "command": "openshift.component.exitDevMode",
+                "title": "Exit Dev Mode",
+                "category": "OpenShift"
+            },
+            {
+                "command": "openshift.component.showDevTerminal",
+                "title": "Show Dev Terminal",
+                "category": "OpenShift"
+            },
 			{
 				"command": "openshift.component.describe",
 				"title": "Describe",
@@ -825,7 +835,7 @@
 				},
 				{
 					"command": "openshift.component.describe",
-					"when": "view == openshiftProjectExplorer"
+					"when": "view == openshiftComponentsView"
 				},
 				{
 					"command": "openshift.component.log",
@@ -1082,27 +1092,17 @@
 				},
 				{
 					"command": "openshift.component.describe",
-					"when": "view == openshiftProjectExplorer && viewItem == component",
-					"group": "c2@1"
-				},
-				{
-					"command": "openshift.component.describe",
-					"when": "view == openshiftProjectExplorer && viewItem == componentNotPushed",
-					"group": "c2@1"
-				},
-				{
-					"command": "openshift.component.describe",
-					"when": "view == openshiftProjectExplorer && viewItem == componentNoContext",
-					"group": "c2@1"
+					"when": "view == openshiftComponentsView && viewItem == openshift.component || viewItem == openshift.component.devmode",
+                    "group": "c1@2"
 				},
 				{
 					"command": "openshift.component.log",
-					"when": "view == openshiftProjectExplorer && viewItem == component",
-					"group": "c2@2"
+					"when": "view == openshiftComponentsView && viewItem == openshift.component.devmode",
+					"group": "c2@3"
 				},
 				{
 					"command": "openshift.component.followLog",
-					"when": "view == openshiftProjectExplorer && viewItem == component",
+					"when": "view == openshiftComponentsView && viewItem == openshift.component.devmode",
 					"group": "c2@3"
 				},
 				{
@@ -1122,7 +1122,18 @@
 				},
                 {
                     "command": "openshift.component.dev",
-                    "when": "view == openshiftComponentsView && viewItem == openshift.component"
+                    "when": "view == openshiftComponentsView && viewItem == openshift.component",
+                    "group": "c2@1"
+                },
+                {
+                    "command": "openshift.component.exitDevMode",
+                    "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode",
+                    "group": "c2@4"
+                },
+                {
+                    "command": "openshift.component.showDevTerminal",
+                    "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode",
+                    "group": "c2@1"
                 },
 				{
 					"command": "openshift.service.delete",
@@ -1162,7 +1173,7 @@
 				},
 				{
 					"command": "openshift.component.revealInExplorer",
-					"when": "view == openshiftComponentsView && viewItem == openshift.component"
+					"when": "view == openshiftComponentsView && viewItem == openshift.component || viewItem == openshift.component.devmode"
 				},
 				{
 					"command": "openshift.componentTypesView.registry.edit",

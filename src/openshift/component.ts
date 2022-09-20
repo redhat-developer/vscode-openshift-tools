@@ -5,10 +5,10 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { window, commands, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable, EventEmitter } from 'vscode';
+import { window, commands, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable, EventEmitter, Terminal } from 'vscode';
 import { ChildProcess, exec } from 'child_process';
 import * as YAML from 'yaml'
-import OpenShiftItem, { clusterRequired, selectTargetApplication, selectTargetComponent } from './openshiftItem';
+import OpenShiftItem, { clusterRequired, selectTargetComponent } from './openshiftItem';
 import { OpenShiftObject, ContextType, OpenShiftComponent, OpenShiftApplication } from '../odo';
 import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
@@ -36,8 +36,23 @@ function createCancelledResult(stepName: string): any {
     return cancelledResult;
 }
 
+interface ComponentDevState {
+    devTerminal: Terminal;
+    devProcess: ChildProcess;
+}
+
 export class Component extends OpenShiftItem {
     private static debugSessions = new Map<string, DebugSession>();
+    private static developmentStarted = new EventEmitter<string>();
+    private static developmentEnded = new EventEmitter<string>();
+
+    public static onDidDevStarted(listener: (context: string) => any) {
+        Component.developmentStarted.event(listener);
+    }
+
+    public static onDidDevEnded(listener: (context: string) => any) {
+        Component.developmentEnded.event(listener);
+    }
 
     public static init(context: ExtensionContext): Disposable[] {
         return [
@@ -65,41 +80,74 @@ export class Component extends OpenShiftItem {
         return !!ds;
     }
 
+    private static readonly componentsInDevMode = new Map<string, ComponentDevState>();
+
+    static getComponentDevState(contextPath: string): ComponentDevState {
+        return Component.componentsInDevMode.get(contextPath);
+    }
+
+    @vsCommand('openshift.component.showDevTerminal')
+    static showDevTerminal(component: WorkspaceFolderComponent) {
+        Component.componentsInDevMode.get(component.contextUri.fsPath)?.devTerminal.show();
+    }
+
     @vsCommand('openshift.component.dev')
     // @clusterRequired()
     static async dev(component: WorkspaceFolderComponent) {
-            // eslint-disable-next-line prefer-const
-            let devProcess: ChildProcess;
-            const outputEmitter = new EventEmitter<string>();
-            const terminal = window.createTerminal({
-                name: component.contextUri.fsPath,
-                pty: {
-                    onDidWrite: outputEmitter.event,
-                    open: () => {},
-                    close: () => {
-                        return;
-                    }, handleInput: (data => {
-                        if (data.charCodeAt(0) === 3) { //ctrl+C
-                            treeKill(devProcess.pid, 'SIGINT');
-                        }
-                    })
+        // eslint-disable-next-line prefer-const
+        let devProcess: ChildProcess;
+        const outputEmitter = new EventEmitter<string>();
+        const devTerminal = window.createTerminal({
+            name: component.contextUri.fsPath,
+            pty: {
+                onDidWrite: outputEmitter.event,
+                open: () => {
+                    return;
                 },
+                close: () => {
+                    return;
+                }, handleInput: (data => {
+                    if (data.charCodeAt(0) === 3) { //ctrl+C
+                        treeKill(devProcess.pid, 'SIGINT');
+                    }
+                })
+            },
+        });
+        devTerminal.show();
+        try {
+            devProcess = await Component.odo.spawn(`${Command.dev(component.contextUri.fsPath)}`, component.contextUri.fsPath);
+            Component.componentsInDevMode.set(component.contextUri.fsPath, {
+                devTerminal,
+                devProcess
             });
-            try {
-                devProcess = await Component.odo.spawn(`${Command.dev(component.contextUri.fsPath)}`, component.contextUri.fsPath);
-            } catch (err) {
-                void window.showErrorMessage(err.toString());
-                terminal.dispose();
-            }
             devProcess.on('error', (err)=> {
                 void window.showErrorMessage(err.toString());
             })
             devProcess.stdout.on('data', (chunk) => {
                 outputEmitter.fire(`${chunk}`.replaceAll('\n', '\r\n'));
             });
+            devProcess.stderr.on('data', (chunk) => {
+                outputEmitter.fire(`\x1b[31m${chunk}\x1b[0m`.replaceAll('\n', '\r\n'));
+            });
             devProcess.on('exit', () => {
-                terminal.dispose();
-            })
+                devTerminal.dispose();
+                Component.developmentEnded.fire(component.contextUri.fsPath);
+            });
+            Component.developmentStarted.fire(component.contextUri.fsPath);
+        } catch (err) {
+            void window.showErrorMessage(err.toString());
+            devTerminal?.dispose();
+        }
+    }
+
+    @vsCommand('openshift.component.exitDevMode')
+    @clusterRequired()
+    static async exitDevMode(component: WorkspaceFolderComponent): Promise<void> {
+        const componentState = Component.componentsInDevMode.get(component.contextUri.fsPath)
+        if (componentState) {
+            componentState.devTerminal.show();
+        }
+        await commands.executeCommand('workbench.action.terminal.sendSequence', {text: '\u0003'});
     }
 
     static async delete(component: OpenShiftComponent) {
@@ -143,62 +191,32 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.describe', true)
-    @clusterRequired()
-    @selectTargetComponent(
-        'From which Application you want to describe Component',
-        'Select Component you want to describe'
-    )
-    static describe(component: OpenShiftObject): Promise<string> {
-        if (!component) return null;
-        const command = (component.contextValue === ContextType.COMPONENT_NO_CONTEXT) ? Command.describeComponentNoContext : Command.describeComponent;
-        if (Component.isUsingWebviewEditor()) {
-            DescribeViewLoader.loadView(`${component.path} Describe`, command, component);
-        } else {
-            Component.odo.executeInTerminal(
-                command(component.getParent().getParent().getName(),
-                    component.getParent().getName(),
-                    component.getName()),
-                component.contextPath ? component.contextPath.fsPath : undefined,
-                `OpenShift: Describe '${component.getName()}' Component`);
-        }
+    static async describe(component: WorkspaceFolderComponent): Promise<string> {
+        const command = Command.describeComponent;
+        await Component.odo.executeInTerminal(
+            command(),
+            component.contextUri.fsPath,
+            `OpenShift: Describe '${component.label}' Component`);
+        return;
     }
 
     @vsCommand('openshift.component.log', true)
-    @clusterRequired()
-    @selectTargetComponent(
-        'In which Application you want to see Log',
-        'For which Component you want to see Log',
-        (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
-    )
-    static log(component: OpenShiftObject): Promise<string> {
-        if (!component) return null;
-        if (Component.isUsingWebviewEditor()) {
-            LogViewLoader.loadView(`${component.path} Log`, Command.showLog, component);
-        } else {
-            Component.odo.executeInTerminal(
-                Command.showLog(),
-                component.contextPath.fsPath,
-                `OpenShift: Show '${component.getName()}' Component Log`);
-        }
+    static log(component: WorkspaceFolderComponent): Promise<string> {
+        Component.odo.executeInTerminal(
+            Command.showLog(),
+            component.contextUri.fsPath,
+            `OpenShift: Show '${component.label}' Component Log`);
+        return;
     }
 
     @vsCommand('openshift.component.followLog', true)
     @clusterRequired()
-    @selectTargetComponent(
-        'In which Application you want to follow Log',
-        'For which Component you want to follow Log',
-        (value: OpenShiftObject) => value.contextValue === ContextType.COMPONENT_PUSHED
-    )
-    static followLog(component: OpenShiftObject): Promise<string> {
-        if (!component) return null;
-        if (Component.isUsingWebviewEditor()) {
-            LogViewLoader.loadView(`${component.path} Follow Log`, Command.showLogAndFollow, component);
-        } else {
-            Component.odo.executeInTerminal(
-                Command.showLogAndFollow(),
-                component.contextPath.fsPath,
-                `OpenShift: Follow '${component.getName()}' Component Log`);
-        }
+    static followLog(component: WorkspaceFolderComponent): Promise<string> {
+        Component.odo.executeInTerminal(
+            Command.showLogAndFollow(),
+            component.contextUri.fsPath,
+            `OpenShift: Follow '${component.label}' Component Log`);
+        return;
     }
 
     @vsCommand('openshift.componentType.newComponent')

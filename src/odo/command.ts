@@ -26,6 +26,11 @@ function verbose(_: unknown, key: string, descriptor: TypedPropertyDescriptor<Fu
 }
 
 export class Command {
+
+    static dev(contextPath: string): CommandText {
+        return new CommandText('odo', 'dev', []);
+    }
+
     static createServiceCommand(fileName: string): CommandText {
         return new CommandText(
             'oc create',
@@ -261,11 +266,11 @@ export class Command {
     }
 
     static showLog(): CommandText {
-        return new CommandText('odo log');
+        return new CommandText('odo','logs', [new CommandOption('--dev')]);
     }
 
     static showLogAndFollow(): CommandText {
-        return Command.showLog().addOption(new CommandOption('-f'));
+        return Command.showLog().addOption(new CommandOption('--follow'));
     }
 
     static listComponentPorts(project: string, app: string, component: string): CommandText {
