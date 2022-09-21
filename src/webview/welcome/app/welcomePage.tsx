@@ -10,6 +10,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import LaptopMacIcon from '@mui/icons-material/LaptopMac';
 import ScrollToTop from 'react-scroll-to-top';
 import './welcome.scss';
 
@@ -36,24 +37,7 @@ export class Welcome extends React.Component<DefaultProps, {
                 this.setState({ lastRelease: message.data.param })
             }
         });
-        window.addEventListener('scroll', this.handleScroll);
     }
-
-    handleScroll = () => {
-        const winScroll =
-            document.body.scrollTop || document.documentElement.scrollTop;
-
-        console.log('winscroll:::',winScroll);
-        console.log('extenContainerRef.current.offsetTop:::',this.extenContainerRef.current.offsetTop);
-
-        if(winScroll >= this.extenContainerRef.current.offsetTop - 200) {
-            this.extenContainerRef.current.style.position = 'sticky';
-            this.extenContainerRef.current.style.top = '25%';
-        } else {
-            this.extenContainerRef.current.style.position = 'relative';
-        }
-
-    };
 
     openGetStarted = (): void => {
         VSCodeMessage.postMessage({
@@ -86,7 +70,65 @@ export class Welcome extends React.Component<DefaultProps, {
     }
 
     footer = <footer id='footer'>
-        <div className='foot-col-1'>
+        <div className='foot-col-1' >
+            <div className='setting__input setting__input--big footer__input' style={{ width: '30%' }}>
+                <label style={{
+                    display: 'flex', flexDirection: 'row'
+                }}>
+                    <Typography variant='h2' className='highlight'>Additional</Typography>
+                    <Typography variant='h2' style={{ paddingLeft: '1rem' }}>Resources</Typography>
+                </label>
+            </div>
+            <div className='foot-col-2'>
+                <div className='help'>
+                    <ul>
+                        <li>
+                            <a href='#!' onClick={() => this.openExternalPage('https://developers.redhat.com/products/openshift-local/overview')}>
+                                <div className='section__header-hint section__footer'>
+                                    <Stack direction='row' alignItems='center' gap={1}>
+                                        <LaptopMacIcon style={{ fontSize: 25 }} />
+                                        <Typography variant='h6' className='footerText'>OpenShift Local</Typography>
+                                    </Stack>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div className='help'>
+                    <ul>
+                        <li>
+                            <a href='#!' onClick={() => this.openExternalPage('https://developers.redhat.com/developer-sandbox')}>
+                                <div className='section__header-hint section__footer'>
+                                    <Stack direction='row' alignItems='center' gap={1}>
+                                        <Icon fontSize='large'>
+                                            <img src={require('../../../../images/openshift_extension.png').default} />
+                                        </Icon>
+                                        <Typography variant='h6' className='footerText'>Red Hat Developer Sandbox</Typography>
+                                    </Stack>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div className='documentation'>
+                    <ul>
+                        <li>
+                            <a href='#!' onClick={() => this.openExternalPage('https://odo.dev')}>
+                                <div className='section__header-hint section__footer'>
+                                    <Stack direction='row' alignItems='center' gap={1}>
+                                        <Icon fontSize='large'>
+                                            <img src={require('../../../../images/welcome/odo.png').default} />
+                                        </Icon>
+                                        <Typography variant='h6' className='footerText'>odo</Typography>
+                                    </Stack>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div className='foot-col-1' style={{ marginTop: '2rem' }}>
             <div className='setting__input setting__input--big footer__input' style={{ width: '30%' }}>
                 <label style={{
                     display: 'flex', flexDirection: 'row'
@@ -232,7 +274,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <div className='setting__input setting__input--big'>
                                     <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Hybrid Cloud</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}> Flexibility</Typography></label>
                                 </div>
-                                <p className='section__header-hint'>
+                                <p className='section__header-hint subtitle-hint'>
                                     Open hybrid cloud is Red Hat's recommended strategy for architecting, developing, and operating a hybrid mix of applications. This extension allows the developers to connect to any OpenShift cluster, be it running locally or on any hybrid cloud. Using the extension, developers can use the streamlined experience for the easy creation of clusters hosted on OpenShift
                                 </p>
                                 <ul>
@@ -262,13 +304,13 @@ export class Welcome extends React.Component<DefaultProps, {
                             </div>
                         </div>
                     </div>
-                    <div className='extensionContainer'>
+                    <div className='extensionContainer' style={{ margin: '5rem 0' }}>
                         <div className='extensionContainerLeft'>
                             <div className='section__header sticky-content-section'>
                                 <div className='setting__input setting__input--big'>
                                     <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Component</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}>Creation Simplicity</Typography></label>
                                 </div>
-                                <p className='section__header-hint'>
+                                <p className='section__header-hint subtitle-hint'>
                                     Developers can quickly get started with application development using devfile based sample code. This allows them to built from the ground up with application development on Kubernetes in mind. Users can create, develop, debug and deploy applications on OpenShift within few clicks.
                                 </p>
                                 <ul>
@@ -293,13 +335,13 @@ export class Welcome extends React.Component<DefaultProps, {
                             </div>
                         </div>
                     </div>
-                    <div className='extensionContainer lastContainer'>
+                    <div className='extensionContainer' style={{ height: '35rem' }}>
                         <div className='extensionContainerLeft'>
                             <div className='section__header sticky-content-section'>
                                 <div className='setting__input setting__input--big'>
                                     <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Push</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}>code fast and debug on remote</Typography></label>
                                 </div>
-                                <p className='section__header-hint'>
+                                <p className='section__header-hint subtitle-hint'>
                                     Developers can quickly check out the code, make changes and do fast deployment on the remote cluster. Once deployed, they can Debug the changes directly in the remote environment. There is a separate view for applications running in Debug Mode.
                                 </p>
                             </div>
@@ -311,32 +353,32 @@ export class Welcome extends React.Component<DefaultProps, {
                             </div>
                         </div>
                     </div>
-                    <div className='extensionContainer'>
+                    <div className='extensionContainer' style={{ height: '65rem' }}>
                         <div className='sticky-section' ref={this.extenContainerRef}>
                             <div className='setting__input setting__input--big' style={{ borderBottom: '0px' }}>
                                 <label style={{ display: 'flex', flexDirection: 'row' }}>
-                                    <Typography variant='h2' className='highlight'>This extension</Typography>
+                                    <Typography variant='h2' className='highlight'>OpenShift extension</Typography>
                                 </label>
                             </div>
                         </div>
                         <div className='extencontainer'>
                             <div className='sticky-section-exten'>
-                                <p className='section__header-hint'>Allows developers to easily create, deploy and live debug container applications running on OpenShift &#38; Kubernetes. Thus enhancing the development inner loop workflow through One-click actions right from IDE.</p>
+                                <p className='section__header-hint sticky-section-hint'>Allows developers to easily create, deploy and live debug container applications running on OpenShift &#38; Kubernetes. Thus enhancing the development inner loop workflow through One-click actions right from IDE.</p>
                             </div>
                             <div className='sticky-section-exten'>
-                                <p className='section__header-hint'>Allows developers to Push code fast and often. Spend less time maintaining your deployment infrastructure and more time coding. Immediately have your application running each time you compile.</p>
+                                <p className='section__header-hint sticky-section-hint'>Allows developers to Push code fast and often. Spend less time maintaining your deployment infrastructure and more time coding. Immediately have your application running each time you compile.</p>
                             </div>
                             <div className='sticky-section-exten'>
-                                <p className='section__header-hint'>Allows support for importing devfile templates to set up specific applications quickly. This helps to deploy them all, big and small. Deploy a simple Node.JS application or even a complex Operator-backed service.</p>
+                                <p className='section__header-hint sticky-section-hint'>Allows support for importing devfile templates to set up specific applications quickly. This helps to deploy them all, big and small. Deploy a simple Node.JS application or even a complex Operator-backed service.</p>
                             </div>
                             <div className='sticky-section-exten'>
-                                <p className='section__header-hint'>Allows to Run your tests directly on the cluster. Debug and test remote applications deployed directly from your IDE to OpenShift. No more having to exit your IDE to push your application.</p>
+                                <p className='section__header-hint sticky-section-hint'>Allows to Run your tests directly on the cluster. Debug and test remote applications deployed directly from your IDE to OpenShift. No more having to exit your IDE to push your application.</p>
                             </div>
                             <div className='sticky-section-exten'>
-                                <p className='section__header-hint'>Allows to connect &#38; provision free OpenShift cluster  from IDE, using a guided workflow. This workflow allows you to either Run OpenShift locally or provision a free 30 days Developer Sandbox.</p>
+                                <p className='section__header-hint sticky-section-hint'>Allows to connect &#38; provision free OpenShift cluster  from IDE, using a guided workflow. This workflow allows you to either Run OpenShift locally or provision a free 30 days Developer Sandbox.</p>
                             </div>
                             <div className='sticky-section-exten'>
-                                <p className='section__header-hint'>Allows Monitoring through view and stream logs from your deployments, pods and containers for Kubernetes resources, with One Click from IDE.
+                                <p className='section__header-hint sticky-section-hint'>Allows Monitoring through view and stream logs from your deployments, pods and containers for Kubernetes resources, with One Click from IDE.
                                 </p>
                             </div>
                         </div>

@@ -120,10 +120,7 @@ section {
     display: flex;
     flex-direction: row;
     width: 100%;
-}
-
-.lastContainer {
-    height: 30rem;
+    height: 40rem;
 }
 
 .content-area {
@@ -152,7 +149,7 @@ section {
     flex-direction: row;
     top: 0;
     width: 100%;
-    height: 22vh;
+    height: 16vh;
 }
 
 .sticky-content-section {
@@ -171,6 +168,7 @@ section {
     border-radius: 6px;
     margin: 1em;
     padding: 1em;
+    height: 57rem;
 
     .vscode-dark & {
         background: var(--color-background--lighten-075);
@@ -219,14 +217,23 @@ section {
     color: var(--color-foreground--75);
     font-weight: 200;
     margin: 0.25em 0;
-    width: 500px;
+    width: 550px;
     justify-content: center;
     word-spacing: 5px;
     text-align: justify;
 }
 
+.subtitle-hint {
+    width: 600px;
+}
+
+.sticky-section-hint {
+    width: 53.125rem;
+}
+
 .section__footer {
     margin: 2rem;
+    width: fit-content;
     word-spacing: 0px;
 }
 
@@ -281,6 +288,16 @@ section {
     margin-left: 10rem;
     background: inherit;
 }
+
+.sticky-section label
+{
+  margin: 0px;
+  position: sticky;
+  top: 50%;
+  transform: translate(0,-50%);
+  text-align: center;
+}
+
 
 .section__title {
     flex: 1 0 auto;
