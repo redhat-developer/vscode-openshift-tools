@@ -122,25 +122,29 @@ section {
     width: 100%;
 }
 
+.lastContainer {
+    height: 30rem;
+}
+
 .content-area {
     margin-top: 10rem;
 }
 
 .extensionContainerLeft {
-    width: 50%;
+    width: 60%;
     margin: 0;
     position: relative;
-    padding-left: 3rem;
 }
 
 .extensionContainerRight {
+    width: 40%;
     margin: 0;
     position: relative;
 }
 
 .extencontainer {
     position: relative;
-    width: 100%;
+    margin-left: 15rem;
 }
 
 .extencontainer .sticky-section-exten {
@@ -224,9 +228,12 @@ section {
 .section__footer {
     margin: 2rem;
     word-spacing: 0px;
+}
+
+.footerText {
 
     &:hover {
-        text-decoration: underline;
+        border-bottom: 3px solid #EE0000;
     }
 }
 
@@ -268,11 +275,8 @@ section {
 }
 
 .sticky-section {
-    position: sticky;
     display: flex;
     flex-direction: row;
-    top: 0;
-    width: 100%;
     height: 70vh;
     margin-left: 10rem;
     background: inherit;
