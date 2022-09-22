@@ -65,10 +65,12 @@
 		"dev:compile:cluster-view": "webpack --mode development --config src/webview/cluster/webpack.config.js",
 		"dev:compile:create-service-view": "webpack --mode development --config src/webview/create-service/webpack.config.js",
 		"dev:compile:devfile-registry-view": "webpack --mode development --config src/webview/devfile-registry/webpack.config.js",
+		"dev:compile:welcome-view": "webpack --mode development --config src/webview/welcome/webpack.config.js",
 		"dev:run:log-view": "webpack-dev-server --mode development --config src/webview/log/webpack.config.js",
 		"dev:run:describe-view": "webpack-dev-server --mode development --config src/webview/describe/webpack.config.js",
 		"dev:run:cluster-view": "webpack-dev-server --port 9222 --mode development --config src/webview/cluster/webpack.config.js",
 		"dev:run:devfile-registry-view": "webpack-dev-server --port 9222 --mode development --config src/webview/devfile-registry/webpack.config.js",
+		"dev:run:welcome-view": "webpack-dev-server --port 9222 --mode development --config src/webview/welcome/webpack.config.js",
 		"dev:run:create-service-view": "webpack-dev-server --mode development --config src/webview/create-service/webpack.config.js",
 		"watch": "tsc -watch -p ./",
 		"clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/logViewer",
@@ -85,7 +87,7 @@
 		"coverage:upload": "codecov -f coverage/coverage-final.json",
 		"build": "npm run clean && npm run lint && npm run compile && npm run bundle-tools",
 		"smoke-test": "npm run compile:ext && extest setup-and-run out/test/ui/smoke/smoke-test.js -o test/ui/smoke/settings.json -m test/ui/smoke/.mocharc.js",
-        "public-ui-test": "npm run compile:ext && extest setup-and-run out/test/ui/public-ui-test.js -o test/ui/smoke/settings.json -m test/ui/smoke/.mocharc.js"
+		"public-ui-test": "npm run compile:ext && extest setup-and-run out/test/ui/public-ui-test.js -o test/ui/smoke/settings.json -m test/ui/smoke/.mocharc.js"
 	},
 	"dependencies": {
 		"@kubernetes/client-node": "^0.16.1",
@@ -182,6 +184,7 @@
 		"leasot": "^12.0.0",
 		"mocha": "^9.1.3",
 		"mocha-jenkins-reporter": "^0.4.7",
+		"node-sass": "^7.0.1",
 		"npm-check-updates": "^12.0.3",
 		"npm-run-all": "^4.1.5",
 		"pify": "^5.0.0",
@@ -189,15 +192,17 @@
 		"pretty-bytes": "^5.6.0",
 		"proxyquire": "^2.1.3",
 		"react": "^17.0.2",
+		"react-copy-to-clipboard": "^5.1.0",
 		"react-dom": "^17.0.2",
 		"react-lazylog": "^4.5.3",
 		"react-loader-spinner": "^4.0.0",
 		"react-phone-input-2": "^2.14.0",
-		"react-copy-to-clipboard": "^5.1.0",
 		"react-router-dom": "^6.3.0",
+		"react-scroll-to-top": "^3.0.0",
 		"react-syntax-highlighter": "^15.5.0",
 		"remap-istanbul": "^0.13.0",
 		"request": "^2.88.2",
+		"sass-loader": "^13.0.2",
 		"shelljs": "^0.8.5",
 		"shx": "^0.3.3",
 		"sinon": "^12.0.1",
@@ -221,6 +226,7 @@
 		"onView:extension.vsKubernetesExplorer",
 		"onView:openshiftComponentTypesView",
 		"onCommand:openshift.welcome",
+		"onCommand:openshift.getStarted",
 		"onCommand:openshift.about",
 		"onCommand:openshift.oc.about",
 		"onCommand:openshift.output",
@@ -299,8 +305,8 @@
 		"onCommand:clusters.openshift.deploy.rcShowLog.palette",
 		"onCommand:clusters.openshift.deployment.openConsole",
 		"onCommand:clusters.openshift.imagestream.openConsole",
-    "onCommand:openshift.componentTypesView.registry.openInView",
-    "onWalkthrough:openshiftWalkthrough"
+		"onCommand:openshift.componentTypesView.registry.openInView",
+		"onWalkthrough:openshiftWalkthrough"
 	],
 	"contributes": {
 		"commands": [
@@ -889,6 +895,11 @@
 			{
 				"command": "openshift.welcome",
 				"title": "Welcome",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.getStarted",
+				"title": "Get Started",
 				"category": "OpenShift"
 			},
 			{
@@ -1558,81 +1569,81 @@
 				}
 			]
 		},
-        "walkthroughs": [
-            {
-                "id": "openshiftWalkthrough",
-                "title": "Getting Started with OpenShift",
-                "description": "Start your application development on OpenShift or Kubernetes",
-                "steps": [
-                    {
-                        "id": "login",
-                        "title": "Login/Provision OpenShift cluster",
-                        "description": "Users can Login to an existing OpenShift cluster using the login button.\nTo provision a new OpenShift cluster, **Add OpenShift Cluster** button opens a guided experience workflow to connect to a local or sandbox cluster.\n[Login to the existing OpenShift cluster](command:openshift.explorer.login)\n[Provision local OpenShift cluster](command:openshift.explorer.addCluster?[\"crc\"])\n[Provision Red Hat Developer Sandbox cluster](command:openshift.explorer.addCluster?[\"sandbox\"])",
-                        "media": {
-                            "image": "images/walkthrough/loginCluster.gif",
-                            "altText": "login to cluster"
-                        },
-                        "completionEvents": [
-                            "onCommand:openshift.explorer.login",
-                            "onCommand:openshift.explorer.addCluster",
-                            "onCommand:openshift.explorer.login.credentialsLogin",
-                            "onCommand:openshift.explorer.login.tokenLogin"
-                        ]
-                    },
-                    {
-                        "id": "showRegistries",
-                        "title": "View the default and custom devfile registries.",
-                        "description": "You can connect to publicly available devfile registries to get started with devfiles for different languages and frameworks.\n[Open registry view](command:openshift.componentTypesView.registry.openInView)",
-                        "media": {
-                            "image": "images/walkthrough/showRegistries.gif",
-                            "altText": "show registry"
-                        },
-                        "completionEvents": [
-                            "onCommand:openshift.componentTypesView.registry.openInView"
-                        ]
-                    },
-                    {
-                        "id": "createComponent",
-                        "title": "Create a Component using Registry Viewer",
-                        "description": "Create a component in the current working directory with the file `devfile.yaml` from the devfile registry and the starter project selected. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.componentType.newComponent)",
-                        "media": {
-                            "image": "images/walkthrough/createComponent.gif",
-                            "altText": "create component"
-                        },
-                        "completionEvents": [
-                            "onCommand:openshift.componentType.newComponent"
-                        ]
-                    },
-                    {
-                        "id": "pushComponent",
-                        "title": "Push a Component to the connected cluster",
-                        "description": "The component created above is available locally. To deploy the component on the connect OpenShift/Kubernetes cluster, we need to `Push` the Component",
-                        "media": {
-                            "image": "images/walkthrough/pushComponent.gif",
-                            "altText": "push component"
-                        }
-                    },
-                    {
-                        "id": "debug",
-                        "title": "Debug the Component locally",
-                        "description": "Debug and test remote applications deployed from your IDE to OpenShift/Kubernetes. No more having to exit your IDE to push your application.",
-                        "media": {
-                            "image": "images/walkthrough/debug.gif",
-                            "altText": "debug"
-                        }
-                    },
-                    {
-                        "id": "openInBrowser",
-                        "title": "Open the Component in Browser",
-                        "description": "Users can access the deployed component in web browser",
-                        "media": {
-                            "image": "images/walkthrough/openInBrowser.gif",
-                            "altText": "open in browser"
-                        }
-                    }
-                ]
-            }
-        ],
+		"walkthroughs": [
+			{
+				"id": "openshiftWalkthrough",
+				"title": "Getting Started with OpenShift",
+				"description": "Start your application development on OpenShift or Kubernetes",
+				"steps": [
+					{
+						"id": "login",
+						"title": "Login/Provision OpenShift cluster",
+						"description": "Users can Login to an existing OpenShift cluster using the login button.\nTo provision a new OpenShift cluster, **Add OpenShift Cluster** button opens a guided experience workflow to connect to a local or sandbox cluster.\n[Login to the existing OpenShift cluster](command:openshift.explorer.login)\n[Provision local OpenShift cluster](command:openshift.explorer.addCluster?[\"crc\"])\n[Provision Red Hat Developer Sandbox cluster](command:openshift.explorer.addCluster?[\"sandbox\"])",
+						"media": {
+							"image": "images/walkthrough/loginCluster.gif",
+							"altText": "login to cluster"
+						},
+						"completionEvents": [
+							"onCommand:openshift.explorer.login",
+							"onCommand:openshift.explorer.addCluster",
+							"onCommand:openshift.explorer.login.credentialsLogin",
+							"onCommand:openshift.explorer.login.tokenLogin"
+						]
+					},
+					{
+						"id": "showRegistries",
+						"title": "View the default and custom devfile registries.",
+						"description": "You can connect to publicly available devfile registries to get started with devfiles for different languages and frameworks.\n[Open registry view](command:openshift.componentTypesView.registry.openInView)",
+						"media": {
+							"image": "images/walkthrough/showRegistries.gif",
+							"altText": "show registry"
+						},
+						"completionEvents": [
+							"onCommand:openshift.componentTypesView.registry.openInView"
+						]
+					},
+					{
+						"id": "createComponent",
+						"title": "Create a Component using Registry Viewer",
+						"description": "Create a component in the current working directory with the file `devfile.yaml` from the devfile registry and the starter project selected. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.componentType.newComponent)",
+						"media": {
+							"image": "images/walkthrough/createComponent.gif",
+							"altText": "create component"
+						},
+						"completionEvents": [
+							"onCommand:openshift.componentType.newComponent"
+						]
+					},
+					{
+						"id": "pushComponent",
+						"title": "Push a Component to the connected cluster",
+						"description": "The component created above is available locally. To deploy the component on the connect OpenShift/Kubernetes cluster, we need to `Push` the Component",
+						"media": {
+							"image": "images/walkthrough/pushComponent.gif",
+							"altText": "push component"
+						}
+					},
+					{
+						"id": "debug",
+						"title": "Debug the Component locally",
+						"description": "Debug and test remote applications deployed from your IDE to OpenShift/Kubernetes. No more having to exit your IDE to push your application.",
+						"media": {
+							"image": "images/walkthrough/debug.gif",
+							"altText": "debug"
+						}
+					},
+					{
+						"id": "openInBrowser",
+						"title": "Open the Component in Browser",
+						"description": "Users can access the deployed component in web browser",
+						"media": {
+							"image": "images/walkthrough/openInBrowser.gif",
+							"altText": "open in browser"
+						}
+					}
+				]
+			}
+		],
 		"configuration": [
 			{
 				"type": "object",
