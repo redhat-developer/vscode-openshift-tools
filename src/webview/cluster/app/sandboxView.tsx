@@ -12,6 +12,7 @@ import Tooltip from '@mui/material/Tooltip';
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css'
 import * as ClusterViewStyles from './clusterView.style';
+import './clusterView.scss';
 
 const useStyles = makeStyles(ClusterViewStyles.useStyles);
 
@@ -246,8 +247,25 @@ export default function addSandboxView(props): JSX.Element {
                         isValid={isValid}
                         disabled={inProgress}
                         containerStyle={{display: 'inline-flex', margin: '20px 10px 20px 10px', width: 'unset'}}
-                        dropdownStyle={{position: 'fixed', margin: '0px 0 10px -1px', textAlign: 'initial'}}
-                        inputStyle={{width: 'unset'}}
+                        dropdownStyle = {{
+                            position: 'fixed',
+                            margin: '0px 0 10px -1px',
+                            textAlign: 'initial',
+                            background: 'var(--vscode-settings-textInputBackground)',
+                            border: '0.5px solid',
+                            borderColor: 'var(--vscode-focusBorder)'
+                        }}
+                        buttonStyle = {{
+                            border: '0.5px solid',
+                            borderColor: 'var(--vscode-focusBorder)'
+                        }}
+                        inputStyle = {{
+                        width: '10rem !important',
+                        background: 'var(--vscode-settings-textInputBackground)',
+                        border: '0.5px solid',
+                        borderColor: 'var(--vscode-focusBorder)',
+                        color: 'var(--vscode-settings-textInputForeground)'
+                        }}
                         />
                         <Button
                             style = {{ margin: '20px 10px 20px 10px' }}
