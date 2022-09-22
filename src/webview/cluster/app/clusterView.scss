@@ -1,0 +1,21 @@
+.react-tel-input .flag-dropdown {
+    background-color: var(--vscode-settings-textInputBackground) !important;
+}
+
+.react-tel-input .selected-flag {
+    background: var(--vscode-settings-textInputBackground) !important;
+}
+
+.react-tel-input .country-list .country.highlight {
+    background-color: var(--vscode-list-activeSelectionBackground) !important;
+    color: var(--vscode-list-activeSelectionForeground) !important;
+    border: 0.3px solid;
+    border-color: var(--vscode-focusBorder) !important;
+}
+
+.react-tel-input .country-list .country:hover {
+    background-color: var(--vscode-list-hoverBackground) !important;
+    color: var(--vscode-list-hoverForeground) !important;
+    border: 0.3px solid;
+    border-color: var(--vscode-focusBorder) !important;
+}
