@@ -103,7 +103,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                         <Icon fontSize='large'>
                                             <img src={require('../../../../images/openshift_extension.png').default} />
                                         </Icon>
-                                        <Typography variant='h6' className='footerText'>Red Hat Developer Sandbox</Typography>
+                                        <Typography variant='h6' className='footerText'>Developer Sandbox for Red Hat OpenShift</Typography>
                                     </Stack>
                                 </div>
                             </a>
@@ -304,7 +304,7 @@ export class Welcome extends React.Component<DefaultProps, {
                             </div>
                         </div>
                     </div>
-                    <div className='extensionContainer' style={{ margin: '5rem 0' }}>
+                    <div className='extensionContainer'>
                         <div className='extensionContainerLeft'>
                             <div className='section__header sticky-content-section'>
                                 <div className='setting__input setting__input--big'>
@@ -335,7 +335,7 @@ export class Welcome extends React.Component<DefaultProps, {
                             </div>
                         </div>
                     </div>
-                    <div className='extensionContainer' style={{ height: '35rem' }}>
+                    <div className='extensionContainer' style={{ height: '40rem' }}>
                         <div className='extensionContainerLeft'>
                             <div className='section__header sticky-content-section'>
                                 <div className='setting__input setting__input--big'>
@@ -353,7 +353,7 @@ export class Welcome extends React.Component<DefaultProps, {
                             </div>
                         </div>
                     </div>
-                    <div className='extensionContainer' style={{ height: '65rem' }}>
+                    <div className='extensionContainer' style={{ height: '100vh'}}>
                         <div className='sticky-section' ref={this.extenContainerRef}>
                             <div className='setting__input setting__input--big' style={{ borderBottom: '0px' }}>
                                 <label style={{ display: 'flex', flexDirection: 'row' }}>
