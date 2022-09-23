@@ -178,10 +178,7 @@ suite('odo commands integration', () => {
             await clone(nodeJsExGitUrl, componentLocation);
             await ODO.execute(
                 Command.createLocalComponent(
-                    project,
-                    newAppName,
                     'nodejs',
-                    'latest',
                     undefined,
                     newNodeJsComponent,
                     componentLocation

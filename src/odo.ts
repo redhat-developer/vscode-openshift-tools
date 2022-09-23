@@ -20,7 +20,7 @@ import { Platform } from './util/platform';
 import * as odo from './odo/config';
 import { GlyphChars } from './util/constants';
 import { Application } from './odo/application';
-import { ComponentType, ComponentTypesJson, ComponentTypeAdapter, Registry, DevfileComponentType } from './odo/componentType';
+import { ComponentType, ComponentTypeAdapter, Registry, DevfileComponentType } from './odo/componentType';
 import { Project } from './odo/project';
 import { ComponentsJson, NotAvailable } from './odo/component';
 import { Service, ServiceOperatorShortInfo } from './odo/service';
@@ -35,6 +35,7 @@ import { pathExistsSync, readFileSync } from 'fs-extra';
 import * as fs from 'fs';
 import { ClusterServiceVersionKind } from './k8s/olm/types';
 import { Command as DeploymentCommand } from './k8s/deployment';
+import { ComponentDescription } from './odo/componentTypeDescription';
 
 const tempfile = require('tmp');
 const {Collapsed} = TreeItemCollapsibleState;
@@ -332,6 +333,7 @@ export interface Odo {
     addRegistry(name: string, url: string, token: string): Promise<Registry>;
     removeRegistry(name: string): Promise<void>;
     getWorkspaceComponents(): odo.Component[];
+    describeComponent(contextPath: string): Promise<ComponentDescription>;
 }
 
 class OdoModel {
@@ -665,6 +667,17 @@ export class OdoImpl implements Odo {
         }
         await commands.executeCommand('setContext', 'servicePresent', services2.length > 0);
         return services2;
+    }
+
+    public async describeComponent(contextPath: string): Promise<ComponentDescription | undefined> {
+        try {
+            const describeCmdResult: cliInstance.CliExitData = await this.execute(
+                Command.describeComponentJson(), contextPath, false
+            );
+            return JSON.parse(describeCmdResult.stdout) as ComponentDescription;
+        } catch(error) {
+            // ignore and return undefined
+        }
     }
 
     public createEnv(): any {

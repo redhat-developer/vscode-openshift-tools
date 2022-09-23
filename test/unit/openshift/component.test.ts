@@ -90,7 +90,6 @@ suite('OpenShift/Component', () => {
 
     suite('create', () => {
         const componentType = new ComponentTypeAdapter('nodejs', 'latest', 'builder,nodejs');
-        const version = 'latest';
         const folder = { uri: { fsPath: 'folder' } };
         let inputStub: sinon.SinonStub;
         let progressFunctionStub: sinon.SinonStub;
@@ -136,7 +135,7 @@ suite('OpenShift/Component', () => {
                 expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
                 expect(progressFunctionStub).calledOnceWith(
                     `Creating new Component '${componentItem.getName()}'`);
-                expect(execStub).calledWith(Command.createLocalComponent(appItem.getParent().getName(), appItem.getName(), componentType.name, version, undefined, componentItem.getName(), folder.uri.fsPath));
+                expect(execStub).calledWith(Command.createLocalComponent(componentType.name, undefined, componentItem.getName(), folder.uri.fsPath));
             });
 
             test('returns empty string and step name in cancelled_step property when no option is selected from quick pick', async () => {

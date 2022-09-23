@@ -43,7 +43,6 @@ type PackageJSON = {
 export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Disposable {
     private static instance: OpenShiftExplorer;
 
-
     private treeView: TreeView<ExplorerItem>;
 
     private fsw: FileContentChangeNotifier;
@@ -110,12 +109,11 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     // eslint-disable-next-line class-methods-use-this
     async getChildren(element?: ExplorerItem): Promise<ExplorerItem[]> {
-        const result: Promise<ExplorerItem[]> = element ? Promise.resolve([... await this.getDeployments(), ... await this.getDeploymentConfigs()]) : Promise.resolve([this.kubeContext]);
-        return result // convert to promise, for the case of none thenable value
-            .then(async result1 => {
-                await commands.executeCommand('setContext', 'openshift.app.explorer.init', result1.length === 0);
-                return result1;
-            });
+        const result: ExplorerItem[] = element ? [... await this.getDeployments(), ... await this.getDeploymentConfigs()] : [this.kubeContext];
+        if (!element) {
+            await commands.executeCommand('setContext', 'openshift.app.explorer.init', result.length === 0);
+        }
+        return result;
     }
 
     refresh(target?: ExplorerItem): void {
