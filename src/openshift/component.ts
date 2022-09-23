@@ -9,13 +9,11 @@ import { window, commands, Uri, workspace, ExtensionContext, debug, DebugConfigu
 import { ChildProcess, exec } from 'child_process';
 import * as YAML from 'yaml'
 import OpenShiftItem, { clusterRequired, selectTargetComponent } from './openshiftItem';
-import { OpenShiftObject, ContextType, OpenShiftComponent, OpenShiftApplication } from '../odo';
+import { OpenShiftObject, ContextType, OpenShiftComponent } from '../odo';
 import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
 import { selectWorkspaceFolder } from '../util/workspace';
 import { ToolsConfig } from '../tools';
-import LogViewLoader from '../webview/log/LogViewLoader';
-import DescribeViewLoader from '../webview/describe/describeViewLoader';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { ascDevfileFirst, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, isDevfileComponent } from '../odo/componentType';
 import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
@@ -26,7 +24,7 @@ import fs = require('fs-extra');
 import { NewComponentCommandProps } from '../telemetry';
 
 import waitPort = require('wait-port');
-import { WorkspaceFolderComponent } from '../componentsView';
+import { ComponentWorkspaceFolder } from '../odo/workspace';
 
 function createCancelledResult(stepName: string): any {
     const cancelledResult: any = new String('');
@@ -87,18 +85,18 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.showDevTerminal')
-    static showDevTerminal(component: WorkspaceFolderComponent) {
-        Component.componentsInDevMode.get(component.contextUri.fsPath)?.devTerminal.show();
+    static showDevTerminal(context: ComponentWorkspaceFolder) {
+        Component.componentsInDevMode.get(context.contextPath)?.devTerminal.show();
     }
 
     @vsCommand('openshift.component.dev')
     // @clusterRequired()
-    static async dev(component: WorkspaceFolderComponent) {
+    static async dev(component: ComponentWorkspaceFolder) {
         // eslint-disable-next-line prefer-const
         let devProcess: ChildProcess;
         const outputEmitter = new EventEmitter<string>();
         const devTerminal = window.createTerminal({
-            name: component.contextUri.fsPath,
+            name: component.contextPath,
             pty: {
                 onDidWrite: outputEmitter.event,
                 open: () => {
@@ -115,8 +113,8 @@ export class Component extends OpenShiftItem {
         });
         devTerminal.show();
         try {
-            devProcess = await Component.odo.spawn(`${Command.dev(component.contextUri.fsPath)}`, component.contextUri.fsPath);
-            Component.componentsInDevMode.set(component.contextUri.fsPath, {
+            devProcess = await Component.odo.spawn(`${Command.dev(component.contextPath)}`, component.contextPath);
+            Component.componentsInDevMode.set(component.contextPath, {
                 devTerminal,
                 devProcess
             });
@@ -131,9 +129,9 @@ export class Component extends OpenShiftItem {
             });
             devProcess.on('exit', () => {
                 devTerminal.dispose();
-                Component.developmentEnded.fire(component.contextUri.fsPath);
+                Component.developmentEnded.fire(component.contextPath);
             });
-            Component.developmentStarted.fire(component.contextUri.fsPath);
+            Component.developmentStarted.fire(component.contextPath);
         } catch (err) {
             void window.showErrorMessage(err.toString());
             devTerminal?.dispose();
@@ -142,8 +140,8 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.exitDevMode')
     @clusterRequired()
-    static async exitDevMode(component: WorkspaceFolderComponent): Promise<void> {
-        const componentState = Component.componentsInDevMode.get(component.contextUri.fsPath)
+    static async exitDevMode(component: ComponentWorkspaceFolder): Promise<void> {
+        const componentState = Component.componentsInDevMode.get(component.contextPath)
         if (componentState) {
             componentState.devTerminal.show();
         }
@@ -191,31 +189,31 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.describe', true)
-    static async describe(component: WorkspaceFolderComponent): Promise<string> {
+    static async describe(componentFolder: ComponentWorkspaceFolder): Promise<string> {
         const command = Command.describeComponent;
         await Component.odo.executeInTerminal(
             command(),
-            component.contextUri.fsPath,
-            `OpenShift: Describe '${component.label}' Component`);
+            componentFolder.contextPath,
+            `OpenShift: Describe '${componentFolder.component.devfileData.devfile.metadata.name}' Component`);
         return;
     }
 
     @vsCommand('openshift.component.log', true)
-    static log(component: WorkspaceFolderComponent): Promise<string> {
+    static log(componentFolder: ComponentWorkspaceFolder): Promise<string> {
         Component.odo.executeInTerminal(
             Command.showLog(),
-            component.contextUri.fsPath,
-            `OpenShift: Show '${component.label}' Component Log`);
+            componentFolder.contextPath,
+            `OpenShift: Show '${componentFolder.component.devfileData.devfile.metadata.name}' Component Log`);
         return;
     }
 
     @vsCommand('openshift.component.followLog', true)
     @clusterRequired()
-    static followLog(component: WorkspaceFolderComponent): Promise<string> {
+    static followLog(omponentFolder: ComponentWorkspaceFolder): Promise<string> {
         Component.odo.executeInTerminal(
             Command.showLogAndFollow(),
-            component.contextUri.fsPath,
-            `OpenShift: Follow '${component.label}' Component Log`);
+            omponentFolder.contextPath,
+            `OpenShift: Follow '${omponentFolder.component.devfileData.devfile.metadata.name}' Component Log`);
         return;
     }
 
