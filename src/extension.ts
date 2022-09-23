@@ -114,13 +114,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     updateStatusBarItem(crcStatusItem, 'Stop CRC');
     extendClusterExplorer();
 
-    workspace.onDidChangeWorkspaceFolders((event: WorkspaceFoldersChangeEvent) => {
-        OdoImpl.Instance.loadWorkspaceComponents(event);
-    });
-
     void ComponentTypesView.instance.getAllComponents();
-
-    OdoImpl.Instance.loadWorkspaceComponents(null);
 
     startTelemetry(extensionContext);
 
