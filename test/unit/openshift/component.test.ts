@@ -85,7 +85,6 @@ suite('OpenShift/Component', () => {
             await Component.revealContextInExplorer(componentItem);
             expect(commandStub).calledWith('revealInExplorer', componentItem.contextPath);
         });
-
     });
 
     suite('create', () => {
