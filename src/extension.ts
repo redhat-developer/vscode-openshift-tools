@@ -8,7 +8,6 @@ import {
     commands,
     workspace,
     window,
-    WorkspaceFoldersChangeEvent,
     StatusBarAlignment,
     StatusBarItem,
     env
