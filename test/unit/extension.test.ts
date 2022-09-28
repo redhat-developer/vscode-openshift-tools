@@ -87,9 +87,7 @@ suite('openshift connector Extension', () => {
             }
             return { error: undefined, stdout: '', stderr: ''};
         });
-        if (activated) {
-            await OdoImpl.Instance.loadWorkspaceComponents(null);
-        } else {
+        if (!activated) {
             await vscode.commands.executeCommand('openshift.output');
             activated = true;
         }
@@ -111,29 +109,6 @@ suite('openshift connector Extension', () => {
     test('should load components from workspace folders', async () => {
         const components = await OdoImpl.Instance.getApplicationChildren(appItem);
         expect(components.length).is.equals(2);
-    });
-
-    test('should load components from added folders', async () => {
-        await OdoImpl.Instance.loadWorkspaceComponents({
-            added: [{
-                uri: vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp3')), index: 0, name: 'comp3'
-            }],
-            removed: undefined
-        });
-        const components = await OdoImpl.Instance.getApplicationChildren(appItem);
-        expect(components.length).is.equals(3);
-    });
-
-    test.skip('should remove components loaded from removed folders', async () => {
-        sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
-        OdoImpl.Instance.loadWorkspaceComponents({
-            removed: [{
-                uri: comp2Uri, index: 0, name: 'comp2'
-            }],
-            added: undefined
-        });
-        const components = await OdoImpl.Instance.getApplicationChildren(appItem);
-        expect(components.length).is.equals(1);
     });
 
     test('should register all extension commands declared commands in package descriptor', async () => {
