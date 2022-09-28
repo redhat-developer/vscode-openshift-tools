@@ -333,7 +333,7 @@ export interface Odo {
     addRegistry(name: string, url: string, token: string): Promise<Registry>;
     removeRegistry(name: string): Promise<void>;
     getWorkspaceComponents(): odo.Component[];
-    describeComponent(contextPath: string): Promise<ComponentDescription>;
+    describeComponent(contextPath: string): Promise<ComponentDescription | undefined>;
 }
 
 class OdoModel {

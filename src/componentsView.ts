@@ -21,7 +21,7 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<ComponentWo
 
     private constructor() {
         super();
-        vsc.workspace.onDidChangeWorkspaceFolders(() => {
+        this.odoWorkspace.onDidChangeComponents(() => {
             this.refresh();
         });
         Component.onDidDevStarted(() => this.refresh());
