@@ -9,7 +9,7 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
 
-import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Command as VSCommand } from 'vscode';
+import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFolder, Command as VSCommand } from 'vscode';
 import * as path from 'path';
 import { Subject } from 'rxjs';
 import { ChildProcess } from 'child_process';
@@ -305,7 +305,6 @@ export interface Odo {
     getKubeconfigEnv(): any;
     getClusters(): Promise<OpenShiftObject[]>;
     getProjects(): Promise<OpenShiftObject[]>;
-    loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): Promise<void>;
     getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]>;
     getApplicationChildren(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     getComponents(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]>;
@@ -332,7 +331,6 @@ export interface Odo {
     readonly subject: Subject<OdoEvent>;
     addRegistry(name: string, url: string, token: string): Promise<Registry>;
     removeRegistry(name: string): Promise<void>;
-    getWorkspaceComponents(): odo.Component[];
     describeComponent(contextPath: string): Promise<ComponentDescription | undefined>;
 }
 
@@ -735,11 +733,6 @@ export class OdoImpl implements Odo {
         return item;
     }
 
-    private async insertAndRefresh(item: OpenShiftObject): Promise<OpenShiftObject> {
-        this.subject.next(new OdoEventImpl('changed', (await item.getParent().addChild(item)).getParent()));
-        return item;
-    }
-
     private async deleteAndRefresh(item: OpenShiftObject): Promise<OpenShiftObject> {
         await item.getParent().removeChild(item);
         OdoImpl.data.delete(item);
@@ -872,55 +865,6 @@ export class OdoImpl implements Odo {
         return OdoImpl.data.getSettingsByContext(context);
     }
 
-    async loadWorkspaceComponents(event: WorkspaceFoldersChangeEvent): Promise<void> {
-        const clusters = await this.getClusters();
-        if(clusters.length === 0) return;
-        if (event === null && workspace.workspaceFolders || event && event.added && event.added.length > 0) {
-            const addedFolders = event === null? workspace.workspaceFolders : event.added;
-            await OdoImpl.data.addContexts(addedFolders);
-            addedFolders.forEach((folder: WorkspaceFolder) => {
-                const added: odo.Component = OdoImpl.data.getSettingsByContext(folder.uri.fsPath);
-                if (added) {
-                    const prj = OdoImpl.data.getObjectByPath([clusters[0].path, added.metadata.namespace].join('/'));
-                    if (prj && !!OdoImpl.data.getChildrenByParent(prj)) {
-                        const app = OdoImpl.data.getObjectByPath([prj.path, added.spec.app].join('/'));
-                        if (app && !!OdoImpl.data.getChildrenByParent(app)) {
-                            const comp =  OdoImpl.data.getObjectByPath([app.path, added.metadata.name].join('/'));
-                            if (comp && !comp.contextPath) {
-                                comp.contextPath = Uri.file(added.status.context);
-                                comp.contextValue = ContextType.COMPONENT_PUSHED;
-                                this.subject.next(new OdoEventImpl('changed', comp));
-                            } else if (!comp) {
-                                const newComponent = new OpenShiftComponent(app, added.metadata.name, ContextType.COMPONENT, Uri.file(added.status.context), added.spec.type);
-                                this.insertAndRefresh(newComponent);
-                            }
-                        } else if (!app) {
-                            const newApp = new OpenShiftApplication(prj, added.spec.app);
-                            this.insertAndRefresh(newApp);
-                        }
-                    }
-                }
-            });
-        }
-
-        if (event && event.removed && event.removed.length > 0) {
-            event.removed.forEach((wsFolder: WorkspaceFolder) => {
-                const settings = OdoImpl.data.getSettingsByContext(wsFolder.uri.fsPath);
-                if (settings) {
-                    const item = OdoImpl.data.getObjectByPath([clusters[0].path, settings.metadata.namespace, settings.spec.app, settings.metadata.name].join('/'));
-                    if (item && item.contextValue === ContextType.COMPONENT) {
-                        this.deleteAndRefresh(item);
-                    } else if (item) {
-                        item.contextValue = ContextType.COMPONENT_NO_CONTEXT;
-                        item.contextPath = undefined;
-                        this.subject.next(new OdoEventImpl('changed', item));
-                    }
-                    OdoImpl.data.deleteContext(wsFolder.uri.fsPath);
-                }
-            });
-        }
-    }
-
     public loadItems<I>(result: cliInstance.CliExitData, fetch: (data) => I[] = (data): I[] => data.items): I[] {
         let data: I[] = [];
         try {
@@ -978,10 +922,6 @@ export class OdoImpl implements Odo {
 
     public async removeRegistry(name: string): Promise<void> {
         await this.execute(Command.removeRegistry(name));
-    }
-
-    public getWorkspaceComponents(): odo.Component[] {
-      return OdoImpl.data.getSettings();
     }
 }
 
