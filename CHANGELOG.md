@@ -1,5 +1,19 @@
 # Change Log
 
+## 0.7.0 (September 28, 2022)
+
+* [#2546](https://github.com/redhat-developer/vscode-openshift-tools/issues/2546) Support crc 2.9.0 in the extension
+* [#2533](https://github.com/redhat-developer/vscode-openshift-tools/issues/2533) Card Modal should use more width and be bigger
+* [#2532](https://github.com/redhat-developer/vscode-openshift-tools/issues/2532) Improve UX for devfile registry View
+* [#2531](https://github.com/redhat-developer/vscode-openshift-tools/issues/2531) Fix starter project card layout
+* [#2523](https://github.com/redhat-developer/vscode-openshift-tools/issues/2523) Registry Viewer: Selected item in starter projects list easily confused with buttons
+* [#2522](https://github.com/redhat-developer/vscode-openshift-tools/issues/2522) Registry Viewer: Devfile details view has two scroll bars
+* [#2521](https://github.com/redhat-developer/vscode-openshift-tools/issues/2521) Registry Viewer: White frame apperas when devfile selected
+* [#2520](https://github.com/redhat-developer/vscode-openshift-tools/issues/2520) SandBox Workflow: Use theme colors in forms for PhoneInput and Button components
+* [#2516](https://github.com/redhat-developer/vscode-openshift-tools/issues/2516) Add color labels to registry views added by the user
+* [#2461](https://github.com/redhat-developer/vscode-openshift-tools/issues/2461) Java debug fails for any java based devfile
+* [#2402](https://github.com/redhat-developer/vscode-openshift-tools/issues/2402) Design a new Welcome Page with Instructions and Feature sets
+
 ## 0.6.0 (August 25, 2022)
 
 * [#2464](https://github.com/redhat-developer/vscode-openshift-tools/issues/2464) Debug command fails for python components due to issue with debug command in devfile
