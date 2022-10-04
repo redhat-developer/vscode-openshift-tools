@@ -197,15 +197,28 @@ export class Component extends OpenShiftItem {
         await commands.executeCommand('workbench.action.terminal.sendSequence', {text: '\u0003'});
     }
 
-    // @vsCommand('openshift.component.openInBrowser')
-    // @clusterRequired()
-    // static async openInBrowser(component: ComponentWorkspaceFolder): Promise<string> {
-    //     const componentDescription = await Component.odo.describeComponent(component.contextPath);
-    //     if (componentDescription.devfileData.forwardedPorts)
-    //         await commands.executeCommand('vscode.open', Uri.parse(`${urlObject[0].spec.protocol}://${urlObject[0].spec.host}`));
-    //         // return 'Selected URL is not created in cluster yet. Use \'Push\' command before opening URL in browser.';
-    //     return
-    // }
+    @vsCommand('openshift.component.openInBrowser')
+    @clusterRequired()
+    static async openInBrowser(component: ComponentWorkspaceFolder): Promise<string> {
+        const componentDescription = await Component.odo.describeComponent(component.contextPath);
+        if (componentDescription.devForwardedPorts?.length === 1) {
+            const fp = componentDescription.devForwardedPorts[0];
+            await commands.executeCommand('vscode.open', Uri.parse(`http://${fp.localAddress}:${fp.localPort}`));
+            return '';
+        } else if (componentDescription.devForwardedPorts?.length > 1) {
+            const ports = componentDescription.devForwardedPorts.map((fp) => ({
+                label: `${fp.localAddress}:${fp.localPort}`,
+                description: `Forwards to ${fp.containerName}:${fp.containerPort}`,
+            }));
+            const port = await window.showQuickPick(ports, {placeHolder: 'Select a Port to open in default browser'});
+            if(port) {
+                await commands.executeCommand('vscode.open', Uri.parse(`http://${port.label}`));
+                return '';
+            }
+            return null;
+        }
+        return 'No forwarded ports available for component yet. Pleas wait and try again.';
+    }
 
     static async delete(component: OpenShiftComponent) {
         Component.stopDebugSession(component);
