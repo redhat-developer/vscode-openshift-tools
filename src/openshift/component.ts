@@ -147,12 +147,14 @@ export class Component extends OpenShiftItem {
                         outputEmitter.fire(`Starting ${Command.dev(component.contextPath).toString()}\r\n`);
                     },
                     close: () => {
-                        if (devProcess.exitCode === null) { // if process is still running and user closed terminal
+                        if (devProcess?.exitCode === null) { // if process is still running and user closed terminal
                             Component.changeComponentStateTo(component.contextPath, ComponentContext.COMPONENT_DEVMODE_STOPPING);
                             treeKill(devProcess.pid, 'SIGINT');
                         }
-                    }, handleInput: (data => {
-                        if (data.charCodeAt(0) === 3) { // ctrl+C
+                    }, handleInput: ((data: string) => {
+                        if(devProcess?.exitCode) {
+                            devTerminal.dispose();
+                        } else if (data.charCodeAt(0) === 3) { // ctrl+C
                             outputEmitter.fire('^C\r\n');
                             Component.changeComponentStateTo(component.contextPath, ComponentContext.COMPONENT_DEVMODE_STOPPING);
                             treeKill(devProcess.pid, 'SIGINT');
@@ -176,10 +178,8 @@ export class Component extends OpenShiftItem {
                 outputEmitter.fire(`\x1b[31m${chunk}\x1b[0m`.replaceAll('\n', '\r\n'));
             });
             devProcess.on('exit', () => {
-                if (!devTerminal.exitStatus) { // check if terminal is already closed by user
-                    devTerminal.dispose(); // TODO: add option to close or keep dead terminal after process exit
-                }
-                Component.changeComponentStateTo(component.contextPath, ComponentContext.COMPONENT);
+                outputEmitter.fire('\r\nPress any key to close this terminal\r\n')
+                Component.changeComponentStateTo(component.contextPath, ComponentContext.COMPONENT, undefined, devTerminal);
             });
         } catch (err) {
             void window.showErrorMessage(err.toString());
@@ -199,21 +199,21 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.openInBrowser')
     @clusterRequired()
-    static async openInBrowser(component: ComponentWorkspaceFolder): Promise<string> {
+    static async openInBrowser(component: ComponentWorkspaceFolder): Promise<string | null | undefined> {
         const componentDescription = await Component.odo.describeComponent(component.contextPath);
         if (componentDescription.devForwardedPorts?.length === 1) {
             const fp = componentDescription.devForwardedPorts[0];
             await commands.executeCommand('vscode.open', Uri.parse(`http://${fp.localAddress}:${fp.localPort}`));
-            return '';
+            return;
         } else if (componentDescription.devForwardedPorts?.length > 1) {
             const ports = componentDescription.devForwardedPorts.map((fp) => ({
                 label: `${fp.localAddress}:${fp.localPort}`,
                 description: `Forwards to ${fp.containerName}:${fp.containerPort}`,
             }));
-            const port = await window.showQuickPick(ports, {placeHolder: 'Select a Port to open in default browser'});
+            const port = await window.showQuickPick(ports, {placeHolder: 'Select a URL to open in default browser'});
             if(port) {
                 await commands.executeCommand('vscode.open', Uri.parse(`http://${port.label}`));
-                return '';
+                return;
             }
             return null;
         }
