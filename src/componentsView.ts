@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import e = require('express');
 import * as path from 'path';
 import * as vsc from 'vscode';
 import { BaseTreeDataProvider } from './base/baseTreeDataProvider';
@@ -24,12 +25,17 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<ComponentWo
         this.odoWorkspace.onDidChangeComponents(() => {
             this.refresh();
         });
-        Component.onDidDevStarted(() => this.refresh());
-        Component.onDidDevEnded(() => this.refresh());
+        Component.onDidStateChanged(() => this.refresh());
     }
 
-    private refresh(): void {
-        this.onDidChangeTreeDataEmitter.fire(undefined);
+    private refresh(contextPath?: string): void {
+        if (contextPath) {
+            const folder = this.odoWorkspace.findComponent(vsc.workspace.getWorkspaceFolder(vsc.Uri.parse(contextPath)));
+            this.onDidChangeTreeDataEmitter.fire(folder)
+        } else {
+            this.odoWorkspace.reset();
+            this.onDidChangeTreeDataEmitter.fire(undefined);
+        }
     }
 
     @vsCommand('openshift.componentsView.refresh')
@@ -60,16 +66,15 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<ComponentWo
     }
 
     getTreeItem(element: ComponentWorkspaceFolder): ComponentWorkspaceFolderTreeItem {
-        const isDevMode = element.component.runningIn?.includes('Dev') && Component.getComponentDevState(element.contextPath);
         const tooltip = ['Component',
             `Name: ${element.component.devfileData.devfile.metadata.name}`,
             `Context: ${element.contextPath}`,
         ].join('\n');
         return {
-            label: `${element.component.devfileData.devfile.metadata.name}${isDevMode ? ' (dev mode)' : ''}`,
+            label: Component.renderLabel(element),
             workspaceFolder: element,
             tooltip,
-            contextValue: `openshift.component${isDevMode ? '.devmode' : ''}`,
+            contextValue: Component.generateContextValue(element),
             iconPath: vsc.Uri.file(path.join(__dirname, '../../images/component', 'workspace.png'))
         };
     }
