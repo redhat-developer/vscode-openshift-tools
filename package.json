@@ -246,6 +246,7 @@
 		"onCommand:openshift.component.createFromLocal",
 		"onCommand:openshift.component.createFromRootWorkspaceFolder",
 		"onCommand:openshift.component.describe",
+        "onCommand:openshift.component.openInBrowser",
 		"onCommand:openshift.component.describe.palette",
 		"onCommand:openshift.component.log",
 		"onCommand:openshift.component.log.palette",
@@ -475,6 +476,11 @@
 			{
 				"command": "openshift.component.followLog.palette",
 				"title": "Follow Component Log",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.component.openInBrowser",
+				"title": "Open in Browser",
 				"category": "OpenShift"
 			},
 			{
@@ -1134,6 +1140,11 @@
                     "command": "openshift.component.showDevTerminal",
                     "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
                     "group": "c2@1"
+                },
+                {
+                    "command": "openshift.component.openInBrowser",
+                    "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
+                    "group": "c2@5"
                 },
 				{
 					"command": "openshift.service.delete",

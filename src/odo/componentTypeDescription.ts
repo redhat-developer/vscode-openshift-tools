@@ -7,6 +7,13 @@ export interface Ctx {
     Fs: any;
 }
 
+export interface ForwardedPort {
+    containerName: string,
+    localAddress: string,
+    localPort: number,
+    containerPort: number,
+}
+
 export interface ComponentDescription {
     devfilePath: string;
     devfileData: {
@@ -17,6 +24,7 @@ export interface ComponentDescription {
             dev: boolean;
         }
     }
+    devForwardedPorts: ForwardedPort[],
     runningIn: string[];
     managedBy: string;
 }

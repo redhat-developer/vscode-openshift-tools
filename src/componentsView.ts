@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import e = require('express');
 import * as path from 'path';
 import * as vsc from 'vscode';
 import { BaseTreeDataProvider } from './base/baseTreeDataProvider';
