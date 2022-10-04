@@ -75,6 +75,10 @@ export class OdoWorkspace {
         })
     }
 
+    public reset() {
+        this.components = undefined;
+    }
+
     public async getComponents(): Promise<ComponentWorkspaceFolder[]> {
         if (this.components === undefined) {
             await this.loadComponents();
@@ -90,7 +94,7 @@ export class OdoWorkspace {
         }
     }
 
-    private findComponent(folder: WorkspaceFolder) {
+    public findComponent(folder: WorkspaceFolder) {
         return this.components.find((component) => component.contextPath === folder.uri.fsPath);
     }
 }

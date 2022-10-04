@@ -1092,17 +1092,17 @@
 				},
 				{
 					"command": "openshift.component.describe",
-					"when": "view == openshiftComponentsView && viewItem == openshift.component || viewItem == openshift.component.devmode",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*/",
                     "group": "c1@2"
 				},
 				{
 					"command": "openshift.component.log",
-					"when": "view == openshiftComponentsView && viewItem == openshift.component.devmode",
+					"when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
 					"group": "c2@3"
 				},
 				{
 					"command": "openshift.component.followLog",
-					"when": "view == openshiftComponentsView && viewItem == openshift.component.devmode",
+					"when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
 					"group": "c2@3"
 				},
 				{
@@ -1127,12 +1127,12 @@
                 },
                 {
                     "command": "openshift.component.exitDevMode",
-                    "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode",
+                    "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
                     "group": "c2@4"
                 },
                 {
                     "command": "openshift.component.showDevTerminal",
-                    "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode",
+                    "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
                     "group": "c2@1"
                 },
 				{
@@ -1173,7 +1173,8 @@
 				},
 				{
 					"command": "openshift.component.revealInExplorer",
-					"when": "view == openshiftComponentsView && viewItem == openshift.component || viewItem == openshift.component.devmode"
+					"when": "view == openshiftComponentsView && viewItem ~= /openshift\\.component.*",
+                    "group": "c10@1"
 				},
 				{
 					"command": "openshift.componentTypesView.registry.edit",
