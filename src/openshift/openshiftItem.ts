@@ -268,7 +268,7 @@ export function clusterRequired() {
         }
 
        descriptor[fnKey] = async function (...args: any[]): Promise<any> {
-            let clusters = await getInstance().getClusters()
+            let clusters = await getInstance().getProjects();
             if (clusters.length === 0) {
                 const lOrC = await window.showInformationMessage('Login in to a Cluster to run this command.', 'Login', 'Cancel');
                 if(lOrC === 'Login') {
