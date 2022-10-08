@@ -68,17 +68,21 @@ export class Cluster extends OpenShiftItem {
 
     @vsCommand('openshift.open.developerConsole', true)
     @clusterRequired()
-    static async openshiftConsole(): Promise<void> {
-
-        let consoleUrl: string;
-        try {
-            const getUrlObj = await Cluster.odo.execute(Command.showConsoleUrl());
-            consoleUrl = JSON.parse(getUrlObj.stdout).data.consoleURL;
-        } catch (ignore) {
-            const serverUrl = await Cluster.odo.execute(Command.showServerUrl());
-            consoleUrl = `${serverUrl.stdout}/console`;
-        }
-        return commands.executeCommand('vscode.open', Uri.parse(consoleUrl));
+    static async openOpenshiftConsole(): Promise<void> {
+        return Progress.execFunctionWithProgress('Opening Console Dashboard', async (progress) => {
+            let consoleUrl: string;
+            try {
+                progress.report({increment: 0, message: 'Detecting cluster type'});
+                const getUrlObj = await Cluster.odo.execute(Command.showConsoleUrl());
+                progress.report({increment: 30, message: 'Getting URL'});
+                consoleUrl = JSON.parse(getUrlObj.stdout).data.consoleURL;
+            } catch (ignore) {
+                const serverUrl = await Cluster.odo.execute(Command.showServerUrl());
+                consoleUrl = `${serverUrl.stdout}/console`;
+            }
+            progress.report({increment: 100, message: 'Starting default browser'});
+            return commands.executeCommand('vscode.open', Uri.parse(consoleUrl));
+        });
     }
 
     @vsCommand('openshift.explorer.switchContext')
