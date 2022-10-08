@@ -93,14 +93,14 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     getTreeItem(element: ExplorerItem): TreeItem | Thenable<TreeItem> {
         if ('name' in element) { // Context instance
             return  {
-                contextValue: 'context',
+                contextValue: 'openshift.k8sContext',
                 label: element.name,
                 collapsibleState: TreeItemCollapsibleState.Collapsed
             };
         }
         // KubernetesObject instance
         return {
-            contextValue: 'k8sobject',
+            contextValue: 'openshift.k8sObject',
             label: element.metadata.name,
             collapsibleState: TreeItemCollapsibleState.None,
             iconPath: element.kind === 'Deployment' ? path.resolve(__dirname, '../../images/context/dark/deployment.svg') : path.resolve(__dirname, '../../images/context/dark/deployment-config.svg')

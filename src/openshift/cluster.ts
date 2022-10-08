@@ -66,9 +66,10 @@ export class Cluster extends OpenShiftItem {
         CliChannel.getInstance().showOutput();
     }
 
-    @vsCommand('openshift.openshiftConsole', true)
+    @vsCommand('openshift.open.developerConsole', true)
     @clusterRequired()
     static async openshiftConsole(): Promise<void> {
+
         let consoleUrl: string;
         try {
             const getUrlObj = await Cluster.odo.execute(Command.showConsoleUrl());
