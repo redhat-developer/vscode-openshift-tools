@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 // import { spawn, ChildProcess } from 'child_process';
-import { ExtenisonID } from '../../util/constants';
+import { ExtensionID } from '../../util/constants';
 // import { WindowUtil } from '../../util/windowUtils';
 // import { CliChannel } from '../../cli';
 // import { vsCommand } from '../../vscommand';
@@ -16,7 +16,7 @@ import { ExtenisonID } from '../../util/constants';
 export default class CreateServiceViewLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     static get extensionPath() {
-        return vscode.extensions.getExtension(ExtenisonID).extensionPath
+        return vscode.extensions.getExtension(ExtensionID).extensionPath
     }
 
     // eslint-disable-next-line @typescript-eslint/require-await

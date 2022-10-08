@@ -9,7 +9,7 @@
 import { commands, Disposable, window } from 'vscode';
 import * as stackTraceParser from 'stacktrace-parser';
 import sendTelemetry, { TelemetryProps, CommonCommandProps } from './telemetry';
-import { ExtenisonID } from './util/constants';
+import { ExtensionID } from './util/constants';
 
 type VsCommandFunction = (...args: any[]) => Promise<any> | any;
 
@@ -59,7 +59,7 @@ export async function registerCommands(...modules: string[]): Promise<Disposable
                 if (err.stack) {
                     stack = stackTraceParser.parse(err.stack); // TODO: add recursive stacktrace parsing for parent errors
                     if (stack.length > 0) {
-                        const files = stack.map((value) => `${value.file.substring(value.file.lastIndexOf(ExtenisonID)-1)}:${value.lineNumber}:${value.column}`);
+                        const files = stack.map((value) => `${value.file.substring(value.file.lastIndexOf(ExtensionID)-1)}:${value.lineNumber}:${value.column}`);
                         telemetryProps.stack_trace  = files.join('\n')
                     }
                 }

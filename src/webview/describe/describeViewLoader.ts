@@ -5,7 +5,7 @@
 import { Uri, window, extensions, WebviewPanel, ViewColumn } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { ExtenisonID } from '../../util/constants';
+import { ExtensionID } from '../../util/constants';
 import { OpenShiftObject } from '../../odo';
 import * as odo from '../../odo';
 import { CommandText } from '../../base/command';
@@ -13,7 +13,7 @@ import { CommandText } from '../../base/command';
 export default class DescribeViewLoader {
 
     static get extensionPath() {
-        return extensions.getExtension(ExtenisonID).extensionPath
+        return extensions.getExtension(ExtensionID).extensionPath
     }
 
     static async loadView(title: string, cmdFunction: (prj, app, comp) => CommandText, target: OpenShiftObject): Promise<WebviewPanel> {

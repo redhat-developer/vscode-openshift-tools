@@ -5,7 +5,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { ExtenisonID } from '../../util/constants';
+import { ExtensionID } from '../../util/constants';
 const request = require('request');
 
 let panel: vscode.WebviewPanel;
@@ -55,7 +55,7 @@ async function welcomeViewerMessageListener(event: any): Promise<any> {
 export default class WelcomeViewLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     static get extensionPath() {
-        return vscode.extensions.getExtension(ExtenisonID).extensionPath
+        return vscode.extensions.getExtension(ExtensionID).extensionPath
     }
 
     // eslint-disable-next-line @typescript-eslint/require-await
