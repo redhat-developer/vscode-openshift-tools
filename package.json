@@ -231,7 +231,8 @@
 		"onCommand:openshift.oc.about",
 		"onCommand:openshift.output",
 		"onCommand:openshift.create",
-		"onCommand:openshift.openshiftConsole.palette",
+        "onCommand:openshift.open.developerConsole",
+		"onCommand:openshift.open.developerConsole.palette",
 		"onCommand:openshift.explorer.addCluster",
 		"onCommand:openshift.explorer.login",
 		"onCommand:openshift.explorer.login.credentialsLogin",
@@ -484,13 +485,13 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.openshiftConsole",
+				"command": "openshift.open.developerConsole",
 				"title": "Open Console Dashboard",
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.openshiftConsole.palette",
-				"title": "Open Console for Current Cluster",
+				"command": "openshift.open.developerConsole.palette",
+				"title": "Open Console Dashboard for Current Cluster",
 				"category": "OpenShift"
 			},
 			{
@@ -852,7 +853,7 @@
 					"when": "view == openshiftProjectExplorer"
 				},
 				{
-					"command": "openshift.openshiftConsole",
+					"command": "openshift.open.developerConsole",
 					"when": "view == openshiftProjectExplorer"
 				},
 				{
@@ -1067,28 +1068,28 @@
 					"when": "view == extension.vsKubernetesExplorer && viewItem =~ /openShift\\.resource\\.build.*/i"
 				},
 				{
-					"command": "openshift.openshiftConsole",
-					"when": "view == openshiftProjectExplorer && viewItem == cluster",
+					"command": "openshift.open.developerConsole",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext",
 					"group": "c0"
 				},
 				{
 					"command": "openshift.project.create",
-					"when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isLoggedIn",
 					"group": "c1"
 				},
 				{
 					"command": "openshift.explorer.logout",
-					"when": "view == openshiftProjectExplorer && viewItem == cluster && isLoggedIn",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isLoggedIn",
 					"group": "c3"
 				},
 				{
 					"command": "openshift.about",
-					"when": "view == openshiftProjectExplorer && viewItem == cluster",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext",
 					"group": "c4"
 				},
 				{
 					"command": "openshift.output",
-					"when": "view == openshiftProjectExplorer && viewItem == cluster",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext",
 					"group": "c5"
 				},
 				{
@@ -1174,7 +1175,7 @@
 				},
 				{
 					"command": "openshift.project.set",
-					"when": "view == openshiftProjectExplorer && viewItem == cluster",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext",
 					"group": "inline"
 				},
 				{
