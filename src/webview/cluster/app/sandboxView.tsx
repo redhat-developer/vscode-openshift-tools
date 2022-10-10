@@ -107,7 +107,7 @@ export default function addSandboxView(props): JSX.Element {
                     <div>
                         <div style={{ margin: '20px' }}>
                             <Typography variant="body2" component="p" sx={{ flexGrow: 1 }}>
-                                Sign up for a new Red Hat developer account or Login to existing account to start using Developer Sandbox on Red Hat OpenShift.
+                                Sign up for a new Red Hat developer account OR Login to an existing account to start using Developer Sandbox for Red Hat OpenShift.
                             </Typography>
                             {(currentState.errorCode === 'loginTimedOut') && (
                                 <div>
@@ -117,7 +117,7 @@ export default function addSandboxView(props): JSX.Element {
                         </div>
                         <div style={{ margin: '20px' }}>
                             <Button
-                                href='https://www.redhat.com/en/program-developers'
+                                href='https://red.ht/3MkQ54W'
                                 variant="contained"
                                 className={classes.buttonSecondary}
                                 style= {{ marginRight: '10px' }}>
