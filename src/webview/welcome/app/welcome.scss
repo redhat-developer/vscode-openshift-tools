@@ -214,13 +214,20 @@ section {
 }
 
 .section__header-hint {
-    color: var(--color-foreground--75);
-    font-weight: 200;
     margin: 0.25em 0;
     width: 550px;
     justify-content: center;
     word-spacing: 5px;
     text-align: justify;
+    color: var(--vscode-foreground);
+    font-weight: normal;
+    font-family: var(--vscode-font-family);
+    font-size: 14px;
+}
+
+.foreGroundColor {
+    color: var(--vscode-foreground);
+    font-weight: normal;
 }
 
 .subtitle-hint {
