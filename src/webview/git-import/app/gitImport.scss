@@ -1,0 +1,28 @@
+body {
+    &.vscode-light {
+        background-color: var(--color-background--darken-05);
+    }
+}
+
+.margin {
+    margin: 1.5rem;
+}
+
+.mainContainer,
+.formContainer,
+.form {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--pf-global--FontFamily--heading--sans-serif);
+}
+
+.title,
+.subTitle {
+    width: 100%;
+    margin-bottom: 3rem;
+}
+
+.input {
+    border: 1px solid;
+    border-color: aliceblue;
+}

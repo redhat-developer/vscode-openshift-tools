@@ -29,6 +29,7 @@
         "src/webview/cluster/app",
         "src/webview/create-service/app",
         "src/webview/devfile-registry/app",
-        "src/webview/welcome/app"
+        "src/webview/welcome/app",
+        "src/webview/git-import/app"
     ]
 }
