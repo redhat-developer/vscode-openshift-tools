@@ -32,6 +32,7 @@ import fs = require('fs-extra');
 import { NewComponentCommandProps } from '../telemetry';
 
 import waitPort = require('wait-port');
+import GitImportLoader from '../webview/git-import/gitImportLoader';
 
 function createCancelledResult(stepName: string): any {
     const cancelledResult: any = new String('');
@@ -565,6 +566,11 @@ export class Component extends OpenShiftItem {
         if (!workspacePath) return createCancelledResult('contextFolder');
 
         return Component.createFromRootWorkspaceFolder(workspacePath, [], application, componentTypeName, starterProjectName, registryName);
+    }
+
+    @vsCommand('openshift.component.importFromGit')
+    static async importFromGit(): Promise<void> {
+        await GitImportLoader.loadView('Git Import');
     }
 
     /**

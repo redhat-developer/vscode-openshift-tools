@@ -66,11 +66,13 @@
 		"dev:compile:create-service-view": "webpack --mode development --config src/webview/create-service/webpack.config.js",
 		"dev:compile:devfile-registry-view": "webpack --mode development --config src/webview/devfile-registry/webpack.config.js",
 		"dev:compile:welcome-view": "webpack --mode development --config src/webview/welcome/webpack.config.js",
+        "dev:compile:git-import-view": "webpack --mode development --config src/webview/git-import/webpack.config.js",
 		"dev:run:log-view": "webpack-dev-server --mode development --config src/webview/log/webpack.config.js",
 		"dev:run:describe-view": "webpack-dev-server --mode development --config src/webview/describe/webpack.config.js",
 		"dev:run:cluster-view": "webpack-dev-server --port 9222 --mode development --config src/webview/cluster/webpack.config.js",
 		"dev:run:devfile-registry-view": "webpack-dev-server --port 9222 --mode development --config src/webview/devfile-registry/webpack.config.js",
 		"dev:run:welcome-view": "webpack-dev-server --port 9222 --mode development --config src/webview/welcome/webpack.config.js",
+        "dev:run:git-import-view": "webpack-dev-server --port 9222 --mode development --config src/webview/git-import/webpack.config.js",
 		"dev:run:create-service-view": "webpack-dev-server --mode development --config src/webview/create-service/webpack.config.js",
 		"watch": "tsc -watch -p ./",
 		"clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/logViewer",
@@ -249,6 +251,7 @@
 		"onCommand:openshift.app.delete",
 		"onCommand:openshift.component.create",
 		"onCommand:openshift.component.createFromLocal",
+        "openshift.component.importFromGit",
 		"onCommand:openshift.component.createFromRootWorkspaceFolder",
 		"onCommand:openshift.component.describe",
 		"onCommand:openshift.component.describe.palette",
@@ -471,6 +474,15 @@
 			{
 				"command": "openshift.component.createFromLocal",
 				"title": "New Component from local folder",
+				"category": "OpenShift",
+				"icon": {
+					"light": "images/title/light/workspace-new.svg",
+					"dark": "images/title/dark/workspace-new.svg"
+				}
+			},
+            {
+				"command": "openshift.component.importFromGit",
+				"title": "Import from Git repository",
 				"category": "OpenShift",
 				"icon": {
 					"light": "images/title/light/workspace-new.svg",
@@ -1234,6 +1246,11 @@
 				},
 				{
 					"command": "openshift.component.createFromLocal",
+					"when": "view == openshiftComponentsView",
+					"group": "navigation"
+				},
+                {
+					"command": "openshift.component.importFromGit",
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
 				}
