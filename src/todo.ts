@@ -2,9 +2,14 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-// TODO: Migrate 'Open Dashboard' to context item in Openshift Application View
-// TODO: MIgrate 'Set Project' to context item
-// TODO: Create Project should (if possible) check permissinons to create project
+
 // TODO: Bring back show log in webview
 // TODO: Debug
+// TODO: Deploy (after next release)
 // TODO: Documentation update: README.md, Walkthrough and demo gif
+
+// OpenShift Application Explorer
+// TODO: Handle no ~/.kube/config use case and show item 'Login to a cluster'
+// TODO: Handle token/login session expiration in the middle of tree expanding
+// TODO: Watch for changes in specific resources
+// TODO: Reuse get command from k8s ext for D and DC resources in tree
