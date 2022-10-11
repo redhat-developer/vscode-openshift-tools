@@ -753,29 +753,6 @@ export class OdoImpl implements Odo {
         return this.insertAndReveal(new OpenShiftProject(clusters[0], projectName, true));
     }
 
-    public async deleteComponentsWithoutRefresh(components: OpenShiftObject[]): Promise<void> {
-        let result = Promise.resolve();
-        components
-            .forEach((component) => {
-                result = result.then(async ()=> {
-                    if (component.contextPath) { // call odo only for local components in workspace
-                        await this.execute(
-                            Command.deleteComponent(
-                                component.getParent().getParent().getName(),
-                                component.getParent().getName(), component.getName(),
-                                !!component.contextPath
-                            ),
-                            component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()
-                        );
-                    }
-                    await component.getParent().removeChild(component);
-                    OdoImpl.data.delete(component);
-                }
-            );
-        });
-        await result;
-    }
-
     public async createComponentFromFolder(type: string, registryName: string, name: string, location: Uri, starter: string = undefined, useExistingDevfile = false, notification = true): Promise<OpenShiftObject> {
         await this.execute(Command.createLocalComponent(type, registryName, name, starter, useExistingDevfile), location.fsPath);
         let wsFolder: WorkspaceFolder;
@@ -823,15 +800,6 @@ export class OdoImpl implements Odo {
         }
         await this.deleteAndRefresh(component);
         return component;
-    }
-
-    public async getActiveProject(): Promise<OpenShiftObject> {
-        const clusters = await this.getClusters();
-        if (!clusters.length) {
-            throw new VsCommandError('Please login into the cluster.');
-        }
-        const projects = await clusters[0].getChildren();
-        return projects[0];
     }
 
     public async createService(application: OpenShiftObject, formData: any): Promise<OpenShiftObject> {
