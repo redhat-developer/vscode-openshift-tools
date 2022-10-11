@@ -85,7 +85,7 @@ export class Command {
 
     @verbose
     static createProject(name: string): CommandText {
-        return new CommandText('odo project create',
+        return new CommandText('oc create namespace',
             name, [
                 new CommandOption('-w')
             ]
