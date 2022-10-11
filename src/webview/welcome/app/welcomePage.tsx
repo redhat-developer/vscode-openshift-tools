@@ -76,7 +76,7 @@ export class Welcome extends React.Component<DefaultProps, {
                     display: 'flex', flexDirection: 'row'
                 }}>
                     <Typography variant='h2' className='highlight'>Additional</Typography>
-                    <Typography variant='h2' style={{ paddingLeft: '1rem' }}>Resources</Typography>
+                    <Typography variant='h2' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Resources</Typography>
                 </label>
             </div>
             <div className='foot-col-2'>
@@ -134,7 +134,7 @@ export class Welcome extends React.Component<DefaultProps, {
                     display: 'flex', flexDirection: 'row'
                 }}>
                     <Typography variant='h2' className='highlight'>Help</Typography>
-                    <Typography variant='h2' style={{ paddingLeft: '1rem' }}>&#38; Documentation</Typography>
+                    <Typography variant='h2' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>&#38; Documentation</Typography>
                 </label>
             </div>
             <div className='foot-col-2'>
@@ -224,7 +224,7 @@ export class Welcome extends React.Component<DefaultProps, {
                 <img className='image__logo' src={require('../../../../images/title/logo.svg').default} />
                 <div className='header__title'>
                     <div className='setting__input setting__input--big' style={{ paddingBottom: '0px', borderBottom: '0px', marginBottom: '0px' }}>
-                        <label style={{ display: 'flex', flexDirection: 'row', textAlign: 'center' }}><Typography variant='h1' className='highlight'>OpenShift</Typography><Typography variant='h1' style={{ paddingLeft: '1rem' }}>Connector</Typography></label>
+                        <label style={{ display: 'flex', flexDirection: 'row', textAlign: 'center' }}><Typography variant='h1' className='highlight'>OpenShift</Typography><Typography variant='h1' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Connector</Typography></label>
                     </div>
                 </div>
             </header>
@@ -239,12 +239,12 @@ export class Welcome extends React.Component<DefaultProps, {
                                 </p>
                                 <div className='setting__input setting__input--big' style={{ paddingBottom: '0px', borderBottom: '0px', marginBottom: '0px' }}>
                                     <label style={{ display: 'flex', flexDirection: 'row' }}>
-                                        <Typography variant='h2'>Welcome to</Typography>
+                                        <Typography variant='h2' className='foreGroundColor'>Welcome to</Typography>
                                         <Typography variant='h2' style={{ paddingLeft: '1rem' }} className='highlight'>OpenShift</Typography>
-                                        <Typography variant='h2' style={{ paddingLeft: '1rem' }} >Connector</Typography>
+                                        <Typography variant='h2' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Connector</Typography>
                                     </label>
                                 </div>
-                                <div className='section__whatsnew'>
+                                <div className='section__whatsnew foreGroundColor'>
                                     <a
                                         title='Watch the OpenShift Getting Started video'
                                         href='#' />
@@ -272,12 +272,12 @@ export class Welcome extends React.Component<DefaultProps, {
                         <div className='extensionContainerLeft'>
                             <div className='section__header sticky-content-section'>
                                 <div className='setting__input setting__input--big'>
-                                    <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Hybrid Cloud</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}> Flexibility</Typography></label>
+                                    <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Hybrid Cloud</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }} className='foreGroundColor'> Flexibility</Typography></label>
                                 </div>
                                 <p className='section__header-hint subtitle-hint'>
                                     Open hybrid cloud is Red Hat's recommended strategy for architecting, developing, and operating a hybrid mix of applications. This extension allows the developers to connect to any OpenShift cluster, be it running locally or on any hybrid cloud. Using the extension, developers can use the streamlined experience for the easy creation of clusters hosted on OpenShift
                                 </p>
-                                <ul>
+                                <ul className='foreGroundColor'>
                                     <li style={{ marginTop: '3rem' }}>
                                         <label>Local OpenShift running on the laptop</label>
                                         <a
@@ -308,12 +308,12 @@ export class Welcome extends React.Component<DefaultProps, {
                         <div className='extensionContainerLeft'>
                             <div className='section__header sticky-content-section'>
                                 <div className='setting__input setting__input--big'>
-                                    <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Component</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}>Creation Simplicity</Typography></label>
+                                    <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Component</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Creation Simplicity</Typography></label>
                                 </div>
                                 <p className='section__header-hint subtitle-hint'>
                                     Developers can quickly get started with application development using devfile based sample code. This allows them to built from the ground up with application development on Kubernetes in mind. Users can create, develop, debug and deploy applications on OpenShift within few clicks.
                                 </p>
-                                <ul>
+                                <ul className='foreGroundColor'>
                                     <li style={{ marginTop: '3rem' }}>
                                         <label>
                                             The extension supports Java, NodeJS, Python, .NET, Go, Quarkus, etc.
@@ -339,7 +339,7 @@ export class Welcome extends React.Component<DefaultProps, {
                         <div className='extensionContainerLeft'>
                             <div className='section__header sticky-content-section'>
                                 <div className='setting__input setting__input--big'>
-                                    <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Push</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }}>code fast and debug on remote</Typography></label>
+                                    <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Push</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>code fast and debug on remote</Typography></label>
                                 </div>
                                 <p className='section__header-hint subtitle-hint'>
                                     Developers can quickly check out the code, make changes and do fast deployment on the remote cluster. Once deployed, they can Debug the changes directly in the remote environment. There is a separate view for applications running in Debug Mode.

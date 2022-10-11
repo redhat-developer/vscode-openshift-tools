@@ -63,7 +63,7 @@
 	&:not([disabled]):hover,
 	&:not([disabled]):focus {
 		.vscode-light & {
-			background-color: var(--color-button-background--darken-30);
+			background-color: var(--vscode-button-hoverBackground);
 			border-color: var(--color-button-background--darken-30);
 			color: white;
 		}
