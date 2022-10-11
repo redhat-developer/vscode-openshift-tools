@@ -8,8 +8,17 @@ import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { OpenShiftObject, OpenShiftProject, getInstance as getOdoInstance } from '../odo';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
-import { CommandText } from '../base/command';
-import { Command } from '../odo/command';
+import { CommandOption, CommandText } from '../base/command';
+
+export class Command {
+    static listProjects(): CommandText {
+        return new CommandText('oc', 'get projects', [new CommandOption('-o', 'jsonpath="{range .items[*]}{.metadata.name}{\'\\n\'}{end}')]);
+    }
+
+    static setActiveProject(name: string) {
+        return new CommandText('oc', `project ${name}`);
+    }
+}
 
 export class Project extends OpenShiftItem {
 
@@ -22,7 +31,7 @@ export class Project extends OpenShiftItem {
             description: 'Create new Project and make it active'
         };
         const projectsAndCommand = getOdoInstance().getProjects()
-            .then((projects) =>projects.filter((prj: OpenShiftProject) => !prj.active))
+            .then((projects) => projects.filter((prj: OpenShiftProject) => !prj.active))
             .then((projects: (QuickPickItem | OpenShiftObject)[]) => {
                 return [createNewProject, ...projects];
             });
