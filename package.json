@@ -436,12 +436,12 @@
 			},
             {
                 "command": "openshift.component.dev",
-                "title": "Start Dev Mode",
+                "title": "Start Dev",
                 "category": "OpenShift"
             },
             {
                 "command": "openshift.component.exitDevMode",
-                "title": "Exit Dev Mode",
+                "title": "Stop Dev",
                 "category": "OpenShift"
             },
             {
@@ -1100,17 +1100,17 @@
 				{
 					"command": "openshift.component.describe",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*/",
-                    "group": "c1@2"
+                    "group": "c3@1"
 				},
 				{
 					"command": "openshift.component.log",
 					"when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
-					"group": "c2@3"
+					"group": "c3@2"
 				},
 				{
 					"command": "openshift.component.followLog",
 					"when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
-					"group": "c2@3"
+					"group": "c3@3"
 				},
 				{
 					"command": "openshift.component.debug",
@@ -1130,22 +1130,22 @@
                 {
                     "command": "openshift.component.dev",
                     "when": "view == openshiftComponentsView && viewItem == openshift.component",
-                    "group": "c2@1"
+                    "group": "c1@1"
                 },
                 {
                     "command": "openshift.component.exitDevMode",
                     "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
-                    "group": "c2@4"
+                    "group": "c1@2"
                 },
                 {
                     "command": "openshift.component.showDevTerminal",
                     "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
-                    "group": "c2@1"
+                    "group": "c1@3"
                 },
                 {
                     "command": "openshift.component.openInBrowser",
                     "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
-                    "group": "c2@5"
+                    "group": "c3@4"
                 },
 				{
 					"command": "openshift.service.delete",
@@ -1185,8 +1185,8 @@
 				},
 				{
 					"command": "openshift.component.revealInExplorer",
-					"when": "view == openshiftComponentsView && viewItem ~= /openshift\\.component.*",
-                    "group": "c10@1"
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*/",
+                    "group": "c40@1"
 				},
 				{
 					"command": "openshift.componentTypesView.registry.edit",
