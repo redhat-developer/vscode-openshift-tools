@@ -25,6 +25,7 @@ import { NewComponentCommandProps } from '../telemetry';
 
 import waitPort = require('wait-port');
 import { ComponentWorkspaceFolder } from '../odo/workspace';
+import LogViewLoader from '../webview/log/LogViewLoader';
 
 
 function createCancelledResult(stepName: string): any {
@@ -325,20 +326,30 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.log', true)
     static log(componentFolder: ComponentWorkspaceFolder): Promise<string> {
-        void Component.odo.executeInTerminal(
-            Command.showLog(),
-            componentFolder.contextPath,
-            `OpenShift: Show '${componentFolder.component.devfileData.devfile.metadata.name}' Component Log`);
+        const componentName = componentFolder.component.devfileData.devfile.metadata.name;
+        if (Component.isUsingWebviewEditor()) {
+            LogViewLoader.loadView(`${componentName} Log`, Command.showLog, componentFolder);
+        } else {
+            void Component.odo.executeInTerminal(
+                Command.showLog(),
+                componentFolder.contextPath,
+                `OpenShift: Show '${componentName}' Component Log`);
+        }
         return;
     }
 
     @vsCommand('openshift.component.followLog', true)
     @clusterRequired()
-    static followLog(omponentFolder: ComponentWorkspaceFolder): Promise<string> {
-        void Component.odo.executeInTerminal(
-            Command.showLogAndFollow(),
-            omponentFolder.contextPath,
-            `OpenShift: Follow '${omponentFolder.component.devfileData.devfile.metadata.name}' Component Log`);
+    static followLog(componentFolder: ComponentWorkspaceFolder): Promise<string> {
+        const componentName = componentFolder.component.devfileData.devfile.metadata.name;
+        if (Component.isUsingWebviewEditor()) {
+            LogViewLoader.loadView(`${componentName} Follow Log`, Command.showLogAndFollow, componentFolder);
+        } else {
+            void Component.odo.executeInTerminal(
+                Command.showLogAndFollow(),
+                componentFolder.contextPath,
+                `OpenShift: Follow '${componentName}' Component Log`);
+        }
         return;
     }
 

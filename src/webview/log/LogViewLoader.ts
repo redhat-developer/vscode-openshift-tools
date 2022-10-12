@@ -6,11 +6,10 @@ import { Uri, window, extensions, WebviewPanel, ViewColumn } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ExtensionID } from '../../util/constants';
-import { OpenShiftObject } from '../../odo';
 import * as odo from '../../odo';
 import treeKill = require('tree-kill');
-import { ChildProcess } from 'child_process';
 import { CommandText } from '../../base/command';
+import { ComponentWorkspaceFolder } from '../../odo/workspace';
 
 export default class LogViewLoader {
 
@@ -18,7 +17,7 @@ export default class LogViewLoader {
         return extensions.getExtension(ExtensionID).extensionPath
     }
 
-    static async loadView(title: string, cmdFunction: (prj, app, comp) => CommandText, target: OpenShiftObject, existingProcess?: ChildProcess): Promise<WebviewPanel> {
+    static async loadView(title: string, cmdFunction: () => CommandText, target: ComponentWorkspaceFolder): Promise<WebviewPanel> {
         const localResourceRoot = Uri.file(path.join(LogViewLoader.extensionPath, 'out', 'logViewer'));
 
         const panel = window.createWebviewPanel('logView', title, ViewColumn.One, {
@@ -28,12 +27,12 @@ export default class LogViewLoader {
         });
         panel.iconPath = Uri.file(path.join(LogViewLoader.extensionPath, "images/context/cluster-node.png"));
 
-        const cmd = cmdFunction(target.getParent().getParent().getName(), target.getParent().getName(), target.getName());
+        const cmd = cmdFunction();
 
         // TODO: When webview is going to be ready?
         panel.webview.html = LogViewLoader.getWebviewContent(LogViewLoader.extensionPath, `${cmd}`.replace(/\\/g, '\\\\'));
 
-        const process = existingProcess? existingProcess : await odo.getInstance().spawn(`${cmd}`, target.contextPath.fsPath);
+        const process = await odo.getInstance().spawn(`${cmd}`, target.contextPath);
         process.stdout.on('data', (data) => {
             panel.webview.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
         }).on('close', ()=>{
@@ -47,9 +46,7 @@ export default class LogViewLoader {
         })
         panel.onDidDispose(()=> {
             process.stdout.removeAllListeners();
-            if(!existingProcess) {
-                treeKill(process.pid);
-            }
+            treeKill(process.pid);
         });
         return panel;
     }
