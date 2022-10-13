@@ -6,10 +6,40 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ExtenisonID } from '../../util/constants';
+import { GitProvider } from '../../git/types/git';
+import { getGitService } from '../../git/services';
+
+import jsYaml = require('js-yaml');
+import GitUrlParse = require('git-url-parse');
+import { ComponentData, componentList } from './componentData';
 
 let panel: vscode.WebviewPanel;
 
-async function gitImportMessageListener(_event: any): Promise<any> {
+async function gitImportMessageListener(event: any): Promise<any> {
+    switch (event?.action) {
+        case 'validateGitURL':
+            validateGitURL(event);
+            break;
+        case 'parseGitURL':
+            let yamlDoc;
+            const gitProvider = getGitProvider(event.parser.host);
+            if (gitProvider !== GitProvider.INVALID) {
+                const service = getGitService(event.param, gitProvider, '', '', undefined, 'devfile.yaml');
+                const isDevFileAvailable = await service.isDevfilePresent();
+                if (isDevFileAvailable) {
+                    const devFileContent = await service.getDevfileContent();
+                    yamlDoc = jsYaml.load(devFileContent);
+                    getIcon(yamlDoc);
+                }
+                panel.webview.postMessage({
+                    action: event?.action,
+                    appName: event.parser.name + '-app',
+                    name: event.parser.name,
+                    yamlDoc: yamlDoc
+                });
+            }
+            break;
+    }
 }
 
 export default class GitImportLoader {
@@ -67,3 +97,49 @@ export default class GitImportLoader {
         }
     }
 }
+
+function validateGitURL(event: any) {
+    if (event.param.trim().length === 0) {
+        panel.webview.postMessage({
+            action: event.action,
+            error: true,
+            helpText: 'Required',
+            gitURL: event.param
+        });
+    } else {
+        try {
+            const parse = GitUrlParse(event.param);
+            panel.webview.postMessage({
+                action: event.action,
+                error: false,
+                helpText: 'Validated',
+                parser: parse,
+                gitURL: event.param
+            });
+        } catch (e) {
+            panel.webview.postMessage({
+                action: event.action,
+                error: true,
+                helpText: 'Invalid Git URL.',
+                gitURL: event.param
+            });
+        }
+    }
+}
+
+function getGitProvider(host: string): GitProvider {
+    return host.indexOf(GitProvider.GITHUB) !== -1 ? GitProvider.GITHUB :
+        host.indexOf(GitProvider.BITBUCKET) !== -1 ? GitProvider.BITBUCKET :
+            host.indexOf(GitProvider.GITLAB) !== -1 ? GitProvider.GITLAB : GitProvider.INVALID;
+}
+
+function getIcon(doc: any) {
+    /*const descriptions = ComponentTypesView.instance.getCompDescriptions();
+    const filter = Array.from(descriptions).filter((desc) => desc.Devfile.metadata.name === doc.metadata.name);
+    return filter.pop();*/
+    const component: ComponentData = componentList.filter((comp) =>
+        comp.language === doc.metadata.language.toLowerCase()
+        && comp.projectType === doc.metadata.projectType.toLowerCase()).pop();
+    doc.metadata.icon = component.icon;
+}
+
