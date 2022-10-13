@@ -258,7 +258,7 @@
 		"onCommand:openshift.app.delete",
 		"onCommand:openshift.component.create",
 		"onCommand:openshift.component.createFromLocal",
-		"openshift.component.importFromGit",
+		"onCommand:openshift.component.importFromGit",
 		"onCommand:openshift.component.createFromRootWorkspaceFolder",
 		"onCommand:openshift.component.describe",
 		"onCommand:openshift.component.describe.palette",
@@ -492,8 +492,8 @@
 				"title": "Import from Git repository",
 				"category": "OpenShift",
 				"icon": {
-					"light": "images/title/light/workspace-new.svg",
-					"dark": "images/title/dark/workspace-new.svg"
+					"light": "images/title/light/git.svg",
+					"dark": "images/title/dark/git.svg"
 				}
 			},
 			{
@@ -975,7 +975,7 @@
 		"viewsWelcome": [
 			{
 				"view": "openshiftProjectExplorer",
-				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context ](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[Create Component](command:openshift.component.createFromLocal)",
+				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context ](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[Import from Git](command:openshift.component.importFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
 				"enablement": "openshift.app.explorer.init"
 			},
 			{

@@ -77,6 +77,7 @@ export class GitImport extends React.Component<DefaultProps, {
     }
 
     gitRepoChange = (value: string): void => {
+        this.setState({ applicationName: undefined, name: undefined });
         VSCodeMessage.postMessage({
             action: 'validateGitURL',
             param: value
