@@ -257,6 +257,7 @@
 		"onCommand:openshift.componentTypesView.registry.closeView",
 		"onCommand:openshift.component.debug",
 		"onCommand:openshift.component.debug.palette",
+        "onCommand:openshift.resource.load",
 		"onCommand:openshift.service.create",
 		"onCommand:openshift.service.delete",
 		"onCommand:openshift.component.folder.create",
@@ -733,7 +734,12 @@
 				"command": "clusters.openshift.csv.create",
 				"title": "Create Service ...",
 				"category": "OpenShift"
-			}
+			},
+            {
+                "command": "openshift.resource.load",
+                "title": "Load",
+                "category": "OpenShift"
+            }
 		],
 		"keybindings": [
 			{
@@ -947,7 +953,11 @@
 				{
 					"command": "openshift.componentTypesView.registry.openInBrowser",
 					"when": "false"
-				}
+				},
+                {   
+                    "command": "openshift.resource.load",
+                    "when": "false"
+                }
 			],
 			"view/title": [
 				{
@@ -1202,7 +1212,11 @@
 					"command": "openshift.componentTypesView.registry.openInBrowser",
 					"when": "view == openshiftComponentTypesView && viewItem == devfileRegistry",
 					"group": "0@0"
-				}
+				},
+                {
+                    "command": "openshift.resource.load",
+                    "when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
+                }
 			]
 		},
 		"walkthroughs": [
