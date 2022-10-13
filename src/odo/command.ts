@@ -534,4 +534,8 @@ export class Command {
             ]
         );
     }
+
+    static analyze(): CommandText {
+        return new CommandText('odo analyze -o json');
+    }
 }

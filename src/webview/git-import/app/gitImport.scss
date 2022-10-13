@@ -16,13 +16,46 @@ body {
     font-family: var(--pf-global--FontFamily--heading--sans-serif);
 }
 
-.title,
-.subTitle {
+.title {
     width: 100%;
     margin-bottom: 3rem;
 }
 
-.input {
-    border: 1px solid;
-    border-color: aliceblue;
+.sub {
+    margin: 1rem 0rem;
+}
+
+.buttonStyle {
+    min-width: 8rem;
+    max-width: 20rem;
+    max-height: 5rem;
+    height: 2rem;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--vscode-button-foreground) !important;
+    background: var(--vscode-button-background) !important;
+
+    &:hover {
+        background: var(--vscode-button-hoverBackground) !important;
+    }
+
+    text-transform: none;
+}
+
+.MuiFormHelperText-root {
+    color: var(--vscode-foreground) !important;
+    margin-left: 0px !important;
+}
+
+.Mui-error {
+    color: #EE0000 !important;
+}
+
+.MuiOutlinedInput-input {
+    padding: 5px 14px !important;
+}
+
+.MuiAccordionSummary-root {
+    padding: 0px !important;
 }
