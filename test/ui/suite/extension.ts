@@ -19,6 +19,7 @@ export function checkExtension() {
             await btn.openView();
             extView = await new SideBarView().getContent().getSection(VIEWS.installed) as ExtensionsViewSection;
             item = await extView.findItem(`@installed ${pjson.displayName}`);
+            await item.select();
         });
 
         it('Openshift toolkit is installed', () => {

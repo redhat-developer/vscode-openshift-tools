@@ -80,7 +80,7 @@ export function checkOpenshiftView() {
 
             it('shows a button to create a new component', async () => {
                 const btns = await welcome.getButtons();
-                const titles = await Promise.all(btns.map(async item => item.getTitle()));
+                const titles = await Promise.all(btns.map(async item => await item.getTitle()));
 
                 expect(titles).includes(BUTTONS.newComponent);
             });
