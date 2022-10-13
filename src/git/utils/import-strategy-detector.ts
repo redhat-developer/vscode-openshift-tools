@@ -1,3 +1,7 @@
+/*-----------------------------------------------------------------------------------------------
+ *  Copyright (c) Red Hat, Inc. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE file in the project root for license information.
+ *-----------------------------------------------------------------------------------------------*/
 import { BaseService } from '../services/base-service';
 import { RepoStatus } from '../types';
 import { ImportStrategy } from '../types/git';
@@ -53,7 +57,7 @@ export const detectImportStrategies = async (
   gitService: BaseService,
 ): Promise<DetectedServiceData> => {
   let detectedStrategies: DetectedStrategy[] = [];
-  let loaded: boolean = false;
+  let loaded = false;
   let loadError = null;
 
   const repositoryStatus = gitService ? await gitService.isRepoReachable() : RepoStatus.Unreachable;

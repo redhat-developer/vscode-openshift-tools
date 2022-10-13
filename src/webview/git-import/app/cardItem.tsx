@@ -3,11 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
-import {
-    CardBody,
-    CardHeader,
-    CardTitle
-} from '@patternfly/react-core';
 import { Card, makeStyles, Typography } from '@material-ui/core';
 import cardItemStyle from './cardItem.style';
 
@@ -29,18 +24,17 @@ export const CardItem: React.FC<CardProps> = ({
                 className={style.card}
                 data-testid={`card-${yamlDoc.metadata.name.replace(/\.| /g, '')}`}
             >
-                <CardHeader className={style.cardHeader}>
+                <div className={style.cardHeader}>
                     <div className={style.cardHeaderDisplay}>
                         <img
                             src={yamlDoc.metadata.icon}
-                            alt={`${yamlDoc.metadata.name} icon`}
                             className={style.cardImage} />
                     </div>
-                </CardHeader>
-                <CardTitle style={{ margin: '1.5rem' }}>
+                </div>
+                <div style={{ margin: '1.5rem' }}>
                     <Typography variant='body1'>{yamlDoc.metadata.name}</Typography>
-                </CardTitle>
-                <CardBody className={style.cardBody}>
+                </div>
+                <div className={style.cardBody}>
                     {
                         yamlDoc.metadata.version && (
                             <Typography variant='caption'>
@@ -54,7 +48,7 @@ export const CardItem: React.FC<CardProps> = ({
                     <Typography variant='caption'>
                         Language: {yamlDoc.metadata.language}<br />
                     </Typography>
-                </CardBody>
+                </div>
             </Card>
         </>
     );
