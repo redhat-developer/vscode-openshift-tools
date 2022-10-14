@@ -52,6 +52,7 @@ interface ComponentDevState {
 
 interface DevProcessStopRequest extends Disposable {
     isSigabrtSent: () => boolean;
+    sendSigabrt: () => void;
 }
 
 export class Component extends OpenShiftItem {
@@ -151,7 +152,11 @@ export class Component extends OpenShiftItem {
                 devCleaningTimeout = undefined;
             },
             // test devProcess.signalCode approach and switch back to Disposable
-            isSigabrtSent: () => sigAbortSent
+            isSigabrtSent: () => sigAbortSent,
+            sendSigabrt: () => {
+                sigAbortSent = true;
+                devProcess.kill('SIGABRT');
+            }
         }
     }
 
@@ -243,12 +248,12 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.forceExitDevMode')
     // @clusterRequired()
-    static async forceExitDevMode(component: ComponentWorkspaceFolder): Promise<void> {
+    static forceExitDevMode(component: ComponentWorkspaceFolder): Promise<void> {
         const componentState = Component.componentStates.get(component.contextPath)
-        if (componentState) {
-            componentState.devTerminal?.show();
+        if (componentState.devProcess && componentState.devProcess.exitCode === null) {
+            componentState.devProcessStopRequest.sendSigabrt();
         }
-        await commands.executeCommand('workbench.action.terminal.sendSequence', {text: '\u0003'});
+        return;
     }
 
     @vsCommand('openshift.component.openInBrowser')
