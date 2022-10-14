@@ -129,6 +129,12 @@ export class Component extends OpenShiftItem {
         Component.componentStates.get(context.contextPath)?.devTerminal.show();
     }
 
+    static devModeExitTimeout(): number {
+        return workspace
+            .getConfiguration('openshiftConnector')
+            .get<number>('stopDevModeTimeout');
+    }
+
     private static exitDevelopmentMode(devProcess: ChildProcess) : DevProcessStopRequest {
         let sigAbortSent = false;
         let devCleaningTimeout = setTimeout( () => {
@@ -145,7 +151,7 @@ export class Component extends OpenShiftItem {
                         }
                     }
                 });
-        }, 1000);
+        }, Component.devModeExitTimeout());
         return {
             dispose: () => {
                 clearTimeout(devCleaningTimeout);
