@@ -1350,6 +1350,11 @@
 						"type": "boolean",
 						"default": false,
 						"description": "By default the Terminal View is used to execute OpenShift 'Show Log', 'Follow Log' and 'Describe' commands. Select this option if you want to use Webview based editors for it."
+					},
+					"openshiftConnector.stopDevModeTimeout": {
+						"type": "number",
+						"default": 90000,
+						"description": "Controls stopping development mode timeout (in milliseconds)."
 					}
 				}
 			},
@@ -1395,7 +1400,7 @@
 						"default": "https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com"
 					},
 					"openshiftConnector.sandboxApiTimeout": {
-						"description": "Controls timeout for requests to OpenShift Sandbox Registration Service. Increase timeout value in case of unexpected errors in OpenShift Sandbox Provisioning workflow.",
+						"description": "Controls timeout (im milliseconds) for requests to OpenShift Sandbox Registration Service. Increase timeout value in case of unexpected errors in OpenShift Sandbox Provisioning workflow.",
 						"type": "number",
 						"default": 100000
 					}
