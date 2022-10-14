@@ -5,6 +5,7 @@
 
 import { workspace } from 'vscode';
 import fetch = require('make-fetch-happen');
+import { method } from 'lodash';
 
 // eslint-disable-next-line no-shadow
 export enum SBAPIEndpoint {
@@ -43,6 +44,18 @@ export interface VerificationCodeResponse{
   json: SBResponseData;
 }
 
+export const OAUTH_SERVER_INFO_PATH = '.well-known/oauth-authorization-server';
+
+export interface OauthServerInfo {
+    issuer: string;
+    authorization_endpoint: string;
+    token_endpoint: string;
+    scopes_supported: string[];
+    response_types_supported: string[];
+    grant_types_supported: string[];
+    code_challenge_methods_supported: string[];
+  }
+
 export function getSandboxAPIUrl(): string {
     return workspace.getConfiguration('openshiftConnector').get('sandboxApiHostUrl');
 }
@@ -56,6 +69,7 @@ export interface SandboxAPI {
     signUp(token: string): Promise<boolean>;
     requestVerificationCode(token: string, areaCode: string, phoneNumber: string): Promise<VerificationCodeResponse>;
     validateVerificationCode(token: string, code: string): Promise<boolean>;
+    getOauthServerInfo(apiEndpointUrl: string): Promise<OauthServerInfo>;
 }
 
 export async function getSignUpStatus(token: string): Promise<SBSignupResponse | undefined> {
@@ -112,11 +126,21 @@ export async function validateVerificationCode(token: string, code: string): Pro
     return validationRequestResponse.ok;
 }
 
+export async function getOauthServerInfo(apiEndpointUrl: string): Promise<OauthServerInfo> {
+    const oauthServerInfoResponse = await fetch(`${apiEndpointUrl}/${OAUTH_SERVER_INFO_PATH}`, {
+        method: 'GET',
+        timeout: getSandboxAPITimeout()
+    });
+    const oauthInfoText = await oauthServerInfoResponse.text();
+    return (oauthInfoText ? JSON.parse(oauthInfoText) : {}) as OauthServerInfo;
+}
+
 export function createSandboxAPI(): SandboxAPI {
     return {
         getSignUpStatus,
         signUp,
         requestVerificationCode,
-        validateVerificationCode
+        validateVerificationCode,
+        getOauthServerInfo
     };
 }
