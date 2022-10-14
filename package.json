@@ -488,15 +488,6 @@
 				}
 			},
 			{
-				"command": "openshift.component.importFromGit",
-				"title": "Import from Git repository",
-				"category": "OpenShift",
-				"icon": {
-					"light": "images/title/light/git.svg",
-					"dark": "images/title/dark/git.svg"
-				}
-			},
-			{
 				"command": "openshift.component.createFromRootWorkspaceFolder",
 				"title": "New OpenShift Component",
 				"category": "OpenShift"
@@ -975,7 +966,7 @@
 		"viewsWelcome": [
 			{
 				"view": "openshiftProjectExplorer",
-				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context ](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[Import from Git](command:openshift.component.importFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
+				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context ](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[$(git-branch) Import from Git](command:openshift.component.importFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
 				"enablement": "openshift.app.explorer.init"
 			},
 			{
@@ -1253,11 +1244,6 @@
 				},
 				{
 					"command": "openshift.component.createFromLocal",
-					"when": "view == openshiftComponentsView",
-					"group": "navigation"
-				},
-				{
-					"command": "openshift.component.importFromGit",
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
 				}
