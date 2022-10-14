@@ -5,7 +5,6 @@
 
 import { workspace } from 'vscode';
 import fetch = require('make-fetch-happen');
-import { method } from 'lodash';
 
 // eslint-disable-next-line no-shadow
 export enum SBAPIEndpoint {
