@@ -446,6 +446,11 @@
                 "category": "OpenShift"
             },
             {
+                "command": "openshift.component.forceExitDevMode",
+                "title": "Force Stop Dev",
+                "category": "OpenShift"
+            },
+            {
                 "command": "openshift.component.showDevTerminal",
                 "title": "Show Dev Terminal",
                 "category": "OpenShift"
@@ -965,7 +970,10 @@
                 {
                     "command": "openshift.resource.openInDeveloperConsole",
                     "when": "false"
-
+                },
+                {
+                    "command": "openshift.component.forceExitDevMode",
+                    "when": "false"
                 }
 			],
 			"view/title": [
@@ -1155,6 +1163,11 @@
                     "command": "openshift.component.exitDevMode",
                     "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
                     "group": "c1@2"
+                },
+                {
+                    "command": "openshift.component.forceExitDevMode",
+                    "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.stopping",
+                    "group": "c1@3"                                        
                 },
                 {
                     "command": "openshift.component.showDevTerminal",
