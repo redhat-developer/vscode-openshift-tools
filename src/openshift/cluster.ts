@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace, WebviewPanel } from 'vscode';
+import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace, WebviewPanel, Progress as VProgress } from 'vscode';
 import { Command } from '../odo/command';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { CliExitData, CliChannel } from '../cli';
@@ -15,6 +15,7 @@ import { Platform } from '../util/platform';
 import { WindowUtil } from '../util/windowUtils';
 import { vsCommand, VsCommandError } from '../vscommand';
 import ClusterViewLoader from '../webview/cluster/clusterViewLoader';
+import { KubernetesObject } from '@kubernetes/client-node';
 
 interface Versions {
     'openshift_version':  string;
@@ -66,22 +67,37 @@ export class Cluster extends OpenShiftItem {
         CliChannel.getInstance().showOutput();
     }
 
+    static async getConsoleUrl(progress: VProgress<{increment: number, message: string}>): Promise<string> {
+        let consoleUrl: string;
+        try {
+            progress.report({increment: 0, message: 'Detecting cluster type'});
+            const getUrlObj = await Cluster.odo.execute(Command.showConsoleUrl());
+            progress.report({increment: 30, message: 'Getting URL'});
+            consoleUrl = JSON.parse(getUrlObj.stdout).data.consoleURL;
+        } catch (ignore) {
+            const serverUrl = await Cluster.odo.execute(Command.showServerUrl());
+            consoleUrl = `${serverUrl.stdout}/console`;
+        }
+        return consoleUrl;
+    }
+
     @vsCommand('openshift.open.developerConsole', true)
     @clusterRequired()
     static async openOpenshiftConsole(): Promise<void> {
         return Progress.execFunctionWithProgress('Opening Console Dashboard', async (progress) => {
-            let consoleUrl: string;
-            try {
-                progress.report({increment: 0, message: 'Detecting cluster type'});
-                const getUrlObj = await Cluster.odo.execute(Command.showConsoleUrl());
-                progress.report({increment: 30, message: 'Getting URL'});
-                consoleUrl = JSON.parse(getUrlObj.stdout).data.consoleURL;
-            } catch (ignore) {
-                const serverUrl = await Cluster.odo.execute(Command.showServerUrl());
-                consoleUrl = `${serverUrl.stdout}/console`;
-            }
+            const consoleUrl = await Cluster.getConsoleUrl(progress);
             progress.report({increment: 100, message: 'Starting default browser'});
             return commands.executeCommand('vscode.open', Uri.parse(consoleUrl));
+        });
+    }
+
+    @vsCommand('openshift.resource.openInDeveloperConsole')
+    @clusterRequired()
+    static async openInDeveloperConsole(resource: KubernetesObject): Promise<void> {
+        return Progress.execFunctionWithProgress('Opening Console Dashboard', async (progress) => {
+            const consoleUrl = await Cluster.getConsoleUrl(progress);
+            progress.report({increment: 100, message: 'Starting default browser'});
+            return commands.executeCommand('vscode.open', Uri.parse(`${consoleUrl}/topology/ns/${resource.metadata.namespace}?selectId=${resource.metadata.uid}&view=graph`));
         });
     }
 

@@ -739,6 +739,10 @@
                 "command": "openshift.resource.load",
                 "title": "Load",
                 "category": "OpenShift"
+            },
+            {
+                "command": "openshift.resource.openInDeveloperConsole",
+                "title": "Open in Developer Console"
             }
 		],
 		"keybindings": [
@@ -957,6 +961,11 @@
                 {   
                     "command": "openshift.resource.load",
                     "when": "false"
+                },
+                {
+                    "command": "openshift.resource.openInDeveloperConsole",
+                    "when": "false"
+
                 }
 			],
 			"view/title": [
@@ -1215,6 +1224,10 @@
 				},
                 {
                     "command": "openshift.resource.load",
+                    "when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
+                },
+                {
+                    "command": "openshift.resource.openInDeveloperConsole",
                     "when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
                 }
 			]

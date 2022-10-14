@@ -142,6 +142,11 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         void commands.executeCommand('extension.vsKubernetesLoad', {namespace: component.metadata.namespace, kindName: `${component.kind}/${component.metadata.name}`});
     }
 
+    @vsCommand('openshift.resource.openInConsole')
+    public static openInConsole(component: KubernetesObject) {
+        void commands.executeCommand('extension.vsKubernetesLoad', {namespace: component.metadata.namespace, kindName: `${component.kind}/${component.metadata.name}`});
+    }
+
     @vsCommand('openshift.explorer.reportIssue')
     static async reportIssue(): Promise<unknown> {
         return commands.executeCommand('vscode.open', Uri.parse(OpenShiftExplorer.issueUrl()));
