@@ -12,6 +12,7 @@ import {
   RepoLanguageList,
   RepoFileList,
   RepoStatus,
+  Response
 } from '../types';
 import { BaseService } from './base-service';
 import GitUrlParse = require('git-url-parse');
@@ -148,14 +149,15 @@ export class GitlabService extends BaseService {
     }
   };
 
-  isFilePresent = async (path: string): Promise<boolean> => {
+  isFilePresent = async (path: string): Promise<Response> => {
     try {
       const projectID = await this.getProjectId();
       const ref = this.metadata.defaultBranch || (this.repo as any)?.default_branch;
       await this.client.RepositoryFiles.showRaw(projectID, path, ref);
-      return true;
+      return {status: true};
     } catch (e) {
-      return false;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      return {status: false, error: e};
     }
   };
 

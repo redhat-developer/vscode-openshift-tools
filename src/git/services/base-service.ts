@@ -10,6 +10,7 @@ import {
   RepoLanguageList,
   RepoMetadata,
   RepoStatus,
+  Response
 } from '../types';
 import { detectBuildTypes, isModernWebApp } from '../utils/build-tool-detector';
 
@@ -53,7 +54,7 @@ export abstract class BaseService {
   /**
    * Check if Dockerfile present in the repo.
    */
-  abstract isDockerfilePresent(): Promise<boolean>;
+  abstract isDockerfilePresent(): Promise<Response>;
 
   /**
    * Checks if dockerfile exist in the repo and returns dockerfile content
@@ -63,7 +64,7 @@ export abstract class BaseService {
   /**
    * Check if Devfile present in the repo.
    */
-  abstract isDevfilePresent(): Promise<boolean>;
+  abstract isDevfilePresent(): Promise<Response>;
 
   /**
    * Check if Devfile present in the repo.

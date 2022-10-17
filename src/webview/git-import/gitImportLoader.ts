@@ -10,8 +10,11 @@ import { GitProvider } from '../../git/types/git';
 import { getGitService } from '../../git/services';
 
 import jsYaml = require('js-yaml');
+import { DetectedServiceData, DetectedStrategy, detectImportStrategies } from '../../git/utils';
+import { ComponentTypesView } from '../../registriesView';
 import GitUrlParse = require('git-url-parse');
-import { ComponentData, componentList } from './componentData';
+import { ComponentTypeDescription } from '../../odo/componentType';
+import { Response } from '../../git/types';
 
 let panel: vscode.WebviewPanel;
 
@@ -21,22 +24,31 @@ async function gitImportMessageListener(event: any): Promise<any> {
             validateGitURL(event);
             break;
         case 'parseGitURL':
-            let yamlDoc;
+            let compDesc: ComponentTypeDescription;
             const gitProvider = getGitProvider(event.parser.host);
             if (gitProvider !== GitProvider.INVALID) {
                 const service = getGitService(event.param, gitProvider, '', '', undefined, 'devfile.yaml');
-                const isDevFileAvailable = await service.isDevfilePresent();
-                if (isDevFileAvailable) {
+                const importService: DetectedServiceData = await detectImportStrategies(event.param, service);
+                const response: Response = await service.isDevfilePresent();
+                if (importService.strategies.length === 1) {
+                    const stratergy: DetectedStrategy = importService.strategies[0];
+                    const detectedCustomData = stratergy.detectedCustomData[0];
+                    compDesc = getCompDescription(detectedCustomData.name.toLowerCase(), detectedCustomData.language.toLowerCase());
+                } else if (response.status) {
                     const devFileContent = await service.getDevfileContent();
-                    yamlDoc = jsYaml.load(devFileContent);
-                    getIcon(yamlDoc);
+                    const yamlDoc: any = jsYaml.load(devFileContent);
+                    compDesc = getCompDescription(yamlDoc.metadata.projectType.toLowerCase(), yamlDoc.metadata.language.toLowerCase())
                 }
                 panel.webview.postMessage({
                     action: event?.action,
-                    appName: event.parser.name + '-app',
-                    name: event.parser.name,
-                    yamlDoc: yamlDoc
+                    appName: !response.error ? event.parser.name + '-app' : undefined,
+                    name: !response.error ? event.parser.name : undefined,
+                    error: response.error ? true : false,
+                    helpText: response.status ? 'Validated' : response.error ?
+                        'Rate Limit exceeded' : 'Devfile not detected and the sample devfile from registry below:',
+                    compDesc: compDesc
                 });
+                break;
             }
             break;
     }
@@ -109,13 +121,23 @@ function validateGitURL(event: any) {
     } else {
         try {
             const parse = GitUrlParse(event.param);
-            panel.webview.postMessage({
-                action: event.action,
-                error: false,
-                helpText: 'Validated',
-                parser: parse,
-                gitURL: event.param
-            });
+            if (parse.organization !== '' && parse.name !== '') {
+                panel.webview.postMessage({
+                    action: event.action,
+                    error: false,
+                    helpText: 'Validated',
+                    parser: parse,
+                    gitURL: event.param
+                });
+            } else {
+                panel.webview.postMessage({
+                    action: event.action,
+                    error: false,
+                    helpText: 'URL is valid but cannot be reached',
+                    parser: parse,
+                    gitURL: event.param
+                });
+            }
         } catch (e) {
             panel.webview.postMessage({
                 action: event.action,
@@ -133,13 +155,10 @@ function getGitProvider(host: string): GitProvider {
             host.indexOf(GitProvider.GITLAB) !== -1 ? GitProvider.GITLAB : GitProvider.INVALID;
 }
 
-function getIcon(doc: any) {
-    /*const descriptions = ComponentTypesView.instance.getCompDescriptions();
-    const filter = Array.from(descriptions).filter((desc) => desc.Devfile.metadata.name === doc.metadata.name);
-    return filter.pop();*/
-    const component: ComponentData = componentList.filter((comp) =>
-        comp.language === doc.metadata.language.toLowerCase()
-        && comp.projectType === doc.metadata.projectType.toLowerCase()).pop();
-    doc.metadata.icon = component.icon;
+function getCompDescription(projectType: string, language: string) {
+    const compDescriptions = ComponentTypesView.instance.getCompDescriptions();
+    const filter = Array.from(compDescriptions).filter((desc) => desc.Devfile.metadata.projectType.toLowerCase() === projectType &&
+        (desc.Devfile.metadata.language.toLowerCase() === language || desc.Devfile.metadata.name.toLowerCase() === language));
+    return filter?.pop();
 }
 

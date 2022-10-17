@@ -15,7 +15,9 @@ import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import { ComponentTypeDescription } from '../../../odo/componentType';
 import './gitImport.scss';
+
 export interface DefaultProps {
     analytics?: import('@segment/analytics-next').Analytics;
 }
@@ -30,7 +32,7 @@ export class GitImport extends React.Component<DefaultProps, {
         parse?: any
     },
     accordionOpen: boolean,
-    yamlDoc: any
+    compDesc: ComponentTypeDescription
 }> {
 
     constructor(props: DefaultProps | Readonly<DefaultProps>) {
@@ -44,7 +46,7 @@ export class GitImport extends React.Component<DefaultProps, {
             accordionOpen: false,
             applicationName: undefined,
             name: undefined,
-            yamlDoc: undefined
+            compDesc: undefined
         }
     }
 
@@ -54,7 +56,11 @@ export class GitImport extends React.Component<DefaultProps, {
                 this.setState({
                     applicationName: message.data.appName,
                     name: message.data.name,
-                    yamlDoc: message.data.yamlDoc
+                    compDesc: message.data.compDesc,
+                    gitURLValid: {
+                        showError: message.data.error,
+                        helpText: message.data.helpText
+                    }
                 });
             } else if (message.data.action === 'validateGitURL') {
                 this.setState({
@@ -70,14 +76,14 @@ export class GitImport extends React.Component<DefaultProps, {
                         parser: this.state.gitURLValid.parse
                     });
                 } else {
-                    this.setState({ applicationName: undefined, name: undefined });
+                    this.setState({ applicationName: undefined, name: undefined, compDesc: undefined });
                 }
             }
         });
     }
 
     gitRepoChange = (value: string): void => {
-        this.setState({ applicationName: undefined, name: undefined });
+        this.setState({ applicationName: undefined, name: undefined, compDesc: undefined });
         VSCodeMessage.postMessage({
             action: 'validateGitURL',
             param: value
@@ -121,17 +127,21 @@ export class GitImport extends React.Component<DefaultProps, {
     }));
 
     render(): React.ReactNode {
-        const { gitURLValid, accordionOpen, applicationName, name, yamlDoc } = this.state;
+        const { gitURLValid, accordionOpen, applicationName, name, compDesc } = this.state;
         return (
             <div className='mainContainer margin' >
                 <div className='title'>
                     <Typography variant='h4' className='highlight'>Import from Git</Typography>
                 </div>
+                <div className='subTitle'>
+                    <Typography variant='caption'>Import code from your Git repository to be built and deployed on OpenShift.
+                        This workflow will suggest the Import strategy following the recommended devfile.yaml and create a component from it.</Typography>
+                </div>
                 <div className='formContainer'>
                     <div className='form'>
                         <InputLabel required htmlFor='bootstrap-input'
                             style={{
-                                color: 'var(--vscode-settings-textInputForeground)'
+                                color: '#fe5142'
                             }}>
                             Git Repo URL
                         </InputLabel>
@@ -147,11 +157,16 @@ export class GitImport extends React.Component<DefaultProps, {
                             style={{ width: '80%' }}
                             onChange={(e) => this.gitRepoChange(e.target.value)}
                             helperText={gitURLValid.helpText}
-                            InputProps={gitURLValid.helpText !== '' && {
+                            InputProps={{
                                 endAdornment: (
                                     <InputAdornment position='end'>
-                                        {gitURLValid.helpText === 'Validated' ?
-                                            <CheckCircleIcon color='success' /> : <ErrorIcon color='error' />}
+                                        {gitURLValid.helpText !== '' ?
+                                            gitURLValid.helpText === 'Validated' ?
+                                                <CheckCircleIcon color='success' /> :
+                                                gitURLValid.helpText.indexOf('but cannot be reached') !== -1 ?
+                                                    <ErrorIcon color='warning' />
+                                                    : gitURLValid.helpText.indexOf('Devfile not detected') !== -1 ? <CheckCircleIcon color='success' /> : <ErrorIcon color='error' />
+                                            : undefined}
                                     </InputAdornment>
                                 ),
                             }}
@@ -210,60 +225,55 @@ export class GitImport extends React.Component<DefaultProps, {
                                     />
                                 </this.AccordionDetails>
                             </this.Accordion>
-                            {yamlDoc &&
-                                <CardItem key='cardKey' yamlDoc={yamlDoc} />
+                            {compDesc &&
+                                <CardItem key='cardKey' compDesc={compDesc} />
                             }
-                            {applicationName && name &&
-                                <>
-                                    <div className='title sub'>
-                                        <Typography variant='h6' className='highlight'>General</Typography>
-                                    </div>
-                                    <div className='form'>
-                                        <InputLabel htmlFor='bootstrap-input'
-                                            style={{
-                                                color: 'var(--vscode-settings-textInputForeground)'
-                                            }}>
-                                            Application name
-                                        </InputLabel>
-                                        <TextField
-                                            defaultValue={applicationName}
-                                            id='bootstrap-input'
-                                            sx={{
-                                                input: {
-                                                    color: 'var(--vscode-settings-textInputForeground)',
-                                                    backgroundColor: 'var(--vscode-settings-textInputBackground)'
-                                                }
-                                            }}
-                                            style={{ width: '80%' }}
-                                            helperText='A unique name given to the application grouping to label your resources.' />
-                                        <InputLabel required htmlFor='bootstrap-input'
-                                            style={{
+                            {applicationName &&
+                                <div className='form sub'>
+                                    <InputLabel htmlFor='bootstrap-input'
+                                        style={{
+                                            color: 'var(--vscode-settings-textInputForeground)'
+                                        }}>
+                                        Application name
+                                    </InputLabel>
+                                    <TextField
+                                        defaultValue={applicationName}
+                                        id='bootstrap-input'
+                                        sx={{
+                                            input: {
                                                 color: 'var(--vscode-settings-textInputForeground)',
-                                                marginTop: '1rem'
-                                            }}>
-                                            Name
-                                        </InputLabel>
-                                        <TextField
-                                            defaultValue={name}
-                                            id='bootstrap-input'
-                                            sx={{
-                                                input: {
-                                                    color: 'var(--vscode-settings-textInputForeground)',
-                                                    backgroundColor: 'var(--vscode-settings-textInputBackground)'
-                                                }
-                                            }}
-                                            style={{ width: '80%' }}
-                                            helperText='A unique name given to the component that will be used to name associated resources.' />
-                                    </div>
-                                </>
+                                                backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                            }
+                                        }}
+                                        style={{ width: '80%' }}
+                                        helperText='A unique name given to the application grouping to label your resources.' />
+                                    <InputLabel required htmlFor='bootstrap-input'
+                                        style={{
+                                            color: '#fe5142',
+                                            marginTop: '1rem'
+                                        }}>
+                                        Name
+                                    </InputLabel>
+                                    <TextField
+                                        defaultValue={name}
+                                        id='bootstrap-input'
+                                        sx={{
+                                            input: {
+                                                color: 'var(--vscode-settings-textInputForeground)',
+                                                backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                            }
+                                        }}
+                                        style={{ width: '80%' }}
+                                        helperText='A unique name given to the component that will be used to name associated resources.' />
+                                </div>
                             }
-                            <div style={{ margin: '2rem 0rem', position: 'fixed' }}>
+                            <div className={compDesc ? 'buttonDivWithBottom' : 'buttonDiv'}>
                                 <Button variant='contained'
                                     disabled={gitURLValid.showError}
                                     component='span' className='buttonStyle'>
                                     Create
                                 </Button>
-                                <Button variant='contained' className='buttonStyle' style={{ marginLeft: '1rem' }}>
+                                <Button variant='outlined' className='buttonStyle' style={{ marginLeft: '1rem' }}>
                                     Cancel
                                 </Button>
                             </div>

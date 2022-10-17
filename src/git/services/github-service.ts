@@ -11,6 +11,7 @@ import {
   RepoLanguageList,
   RepoFileList,
   RepoStatus,
+  Response
 } from '../types';
 import { BaseService } from './base-service';
 import GitUrlParse = require('git-url-parse');
@@ -121,7 +122,7 @@ export class GithubService extends BaseService {
     }
   };
 
-  isFilePresent = async (path: string): Promise<boolean> => {
+  isFilePresent = async (path: string): Promise<Response> => {
     try {
       const resp = await this.client.repos.getContents({
         owner: this.metadata.owner,
@@ -129,9 +130,10 @@ export class GithubService extends BaseService {
         path,
         ...(this.metadata.defaultBranch ? { ref: this.metadata.defaultBranch } : {}),
       });
-      return resp.status === 200;
+      return {status: resp.status === 200};
     } catch (e) {
-      return false;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      return {status: false, error: e};
     }
   };
 

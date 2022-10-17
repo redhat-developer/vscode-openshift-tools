@@ -25,6 +25,12 @@ export interface RepoFileList {
   files: string[];
 }
 
+export interface Response {
+    status: boolean,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    error?: any
+}
+
 // eslint-disable-next-line no-shadow
 export enum RepoStatus {
   Reachable,

@@ -11,6 +11,7 @@ import {
     RepoLanguageList,
     RepoFileList,
     RepoStatus,
+    Response
 } from '../types';
 import { BaseService } from './base-service';
 import { Base64 } from 'js-base64';
@@ -125,16 +126,17 @@ export class BitbucketService extends BaseService {
         }
     };
 
-    isFilePresent = async (path: string): Promise<boolean> => {
+    isFilePresent = async (path: string): Promise<Response> => {
         const filePath = path.replace(/^\//, '');
         const url = this.isServer
             ? `${this.baseURL}/projects/${this.metadata.owner}/repos/${this.metadata.repoName}/raw/${filePath}?at=${this.metadata.defaultBranch}`
             : `${this.baseURL}/repositories/${this.metadata.owner}/${this.metadata.repoName}/src/${this.metadata.defaultBranch}/${filePath}`;
         try {
             await this.fetchJson(url);
-            return true;
+            return { status: true };
         } catch (e) {
-            return false;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            return { status: false, error: e };
         }
     };
 

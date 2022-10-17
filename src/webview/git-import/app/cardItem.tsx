@@ -4,16 +4,17 @@
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
 import { Card, makeStyles, Typography } from '@material-ui/core';
+import { ComponentTypeDescription } from '../../../odo/componentType';
 import cardItemStyle from './cardItem.style';
-
-interface CardProps extends React.AllHTMLAttributes<HTMLDivElement> {
-    yamlDoc: any;
-}
 
 const makeCardStyle = makeStyles(cardItemStyle);
 
+interface CardProps extends React.AllHTMLAttributes<HTMLDivElement> {
+    compDesc: ComponentTypeDescription;
+}
+
 export const CardItem: React.FC<CardProps> = ({
-    yamlDoc
+    compDesc
 }: CardProps) => {
 
     const style = makeCardStyle();
@@ -22,34 +23,38 @@ export const CardItem: React.FC<CardProps> = ({
         <>
             <Card
                 className={style.card}
-                data-testid={`card-${yamlDoc.metadata.name.replace(/\.| /g, '')}`}
+                data-testid={`card-${compDesc.Devfile.metadata.name.replace(/\.| /g, '')}`}
             >
                 <div className={style.cardHeader}>
                     <div className={style.cardHeaderDisplay}>
                         <img
-                            src={yamlDoc.metadata.icon}
+                            src={compDesc.Devfile.metadata.icon}
                             className={style.cardImage} />
                     </div>
                 </div>
                 <div style={{ margin: '1.5rem' }}>
-                    <Typography variant='body1'>{yamlDoc.metadata.name}</Typography>
+                    <Typography variant='body1'>{compDesc.Devfile.metadata.name}</Typography>
                 </div>
                 <div className={style.cardBody}>
                     {
-                        yamlDoc.metadata.version && (
+                        compDesc.Devfile.metadata.version && (
                             <Typography variant='caption'>
-                                Version: {yamlDoc.metadata.version}<br />
+                                Version: {compDesc.Devfile.metadata.version}<br />
                             </Typography>
                         )
                     }
                     <Typography variant='caption'>
-                        Project Type: {yamlDoc.metadata.projectType}<br />
+                        Project Type: {capitalizeFirstLetter(compDesc.Devfile.metadata.projectType)}<br />
                     </Typography>
                     <Typography variant='caption'>
-                        Language: {yamlDoc.metadata.language}<br />
+                        Language: {capitalizeFirstLetter(compDesc.Devfile.metadata.language)}<br />
                     </Typography>
                 </div>
             </Card>
         </>
     );
+}
+
+function capitalizeFirstLetter(value?: string): string {
+    return value[0].toUpperCase() + value.substring(1);
 }

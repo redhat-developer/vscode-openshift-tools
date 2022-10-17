@@ -45,7 +45,7 @@ export type DetectedStrategy = {
   detectedCustomData?: any;
 };
 
-type DetectedServiceData = {
+export type DetectedServiceData = {
   loaded: boolean;
   loadError?: any;
   repositoryStatus: RepoStatus;
