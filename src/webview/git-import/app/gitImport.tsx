@@ -180,16 +180,16 @@ export class GitImport extends React.Component<DefaultProps, {
                     <Typography variant='h5'>Import from Git</Typography>
                 </div>
                 <div className='subTitle'>
-                    <Typography variant='caption'>Import code from your Git repository to be built and deployed on OpenShift.
+                    <Typography>Import code from your Git repository to be built and deployed on OpenShift.
                         This workflow will suggest the Import strategy following the recommended devfile.yaml and create a component from it.</Typography>
                 </div>
                 <div className='formContainer'>
                     <div className='form'>
                         <InputLabel required htmlFor='bootstrap-input'
                             style={{
-                                color: '#fe5142'
+                                color: '#EE0000'
                             }}>
-                            Git Repo URL
+                            Provide your Git Repository URL
                         </InputLabel>
                         <TextField
                             error={gitURLValid.showError}
@@ -200,7 +200,7 @@ export class GitImport extends React.Component<DefaultProps, {
                                     backgroundColor: 'var(--vscode-settings-textInputBackground)'
                                 }
                             }}
-                            style={{ width: '80%' }}
+                            style={{ width: '80%', paddingTop: '10px' }}
                             onChange={(e) => this.gitRepoChange(e.target.value)}
                             helperText={gitURLValid.helpText}
                             InputProps={{
@@ -247,7 +247,7 @@ export class GitImport extends React.Component<DefaultProps, {
                                                 backgroundColor: 'var(--vscode-settings-textInputBackground)'
                                             }
                                         }}
-                                        style={{ width: '80%' }}
+                                        style={{ width: '80%', paddingTop: '10px' }}
                                         helperText='Optional branch, tag, or commit.'
                                     />
                                     <InputLabel htmlFor='bootstrap-input'
@@ -265,7 +265,7 @@ export class GitImport extends React.Component<DefaultProps, {
                                                 backgroundColor: 'var(--vscode-settings-textInputBackground)'
                                             }
                                         }}
-                                        style={{ width: '80%' }}
+                                        style={{ width: '80%', paddingTop: '10px' }}
                                         defaultValue='/'
                                         helperText='Optional subdirectory for the source code, used as a context directory for build.'
                                     />
@@ -276,18 +276,18 @@ export class GitImport extends React.Component<DefaultProps, {
                                     {isDevFile &&
                                         <div className='stratergyContainer stratergySuccess'>
                                             <CheckCircleIcon color='success' style={{ fontSize: 20 }} />
-                                            <Typography variant='body2' style={{ margin: '0 0.5rem' }}>Devfile detected</Typography>
+                                            <Typography variant='body2' style={{ margin: '0 5px' }}>A devfile is detected and recommended to create the component.</Typography>
                                         </div>
                                     }
                                     {!isDevFile &&
                                         <div className='stratergyContainer stratergyWarning'>
                                             <ErrorIcon color='warning' style={{ fontSize: 20 }} />
-                                            <Typography variant='body2' style={{ margin: '0 0.5rem' }}>Devfile not detected and the sample devfile from registry below</Typography>
+                                            <Typography variant='body2' style={{ margin: '0 5px' }}>There is no devfile.yaml detected in the repository. Please select a devfile from the default devfile registry.</Typography>
                                         </div>
                                     }
                                     <div className='cardContainer'>
                                         <CardItem key='cardKey' compDesc={compDesc} className='card' />
-                                        <div className='editStatergy'>
+                                        <div className='editStatergy' style={{ marginLeft: '20px'}}>
                                             <this.Accordion
                                                 style={{
                                                     backgroundColor: 'var(--vscode-editor-background)',
@@ -305,7 +305,7 @@ export class GitImport extends React.Component<DefaultProps, {
                                                 <this.AccordionDetails>
                                                     <InputLabel required htmlFor='bootstrap-input'
                                                         style={{
-                                                            color: '#fe5142'
+                                                            color: '#EE0000'
                                                         }}>
                                                         Devfile Path
                                                     </InputLabel>
@@ -317,8 +317,8 @@ export class GitImport extends React.Component<DefaultProps, {
                                                                 backgroundColor: 'var(--vscode-settings-textInputBackground)'
                                                             }
                                                         }}
-                                                        style={{ width: '80%' }}
-                                                        helperText='Allows the builds to use a different path to locate your Devfile, relative to the Context Dir field'
+                                                        style={{ width: '80%' , paddingTop: '10px'}}
+                                                        helperText='Please provide the full path of your local devfile.yaml to be used.'
                                                     />
                                                 </this.AccordionDetails>
                                             </this.Accordion>
@@ -332,7 +332,7 @@ export class GitImport extends React.Component<DefaultProps, {
                                         style={{
                                             color: 'var(--vscode-settings-textInputForeground)'
                                         }}>
-                                        Project name
+                                        Project Name
                                     </InputLabel>
                                     <TextField
                                         value={projectName}
@@ -344,13 +344,14 @@ export class GitImport extends React.Component<DefaultProps, {
                                                 backgroundColor: 'var(--vscode-settings-textInputBackground)'
                                             }
                                         }}
-                                        style={{ width: '80%' }} />
+                                        style={{ width: '80%', paddingTop: '10px' }}
+                                        helperText='A unique name given for the Project.' />
                                     <InputLabel htmlFor='bootstrap-input'
                                         style={{
                                             color: 'var(--vscode-settings-textInputForeground)',
                                             marginTop: '1rem'
                                         }}>
-                                        Application name
+                                        Application Name
                                     </InputLabel>
                                     <TextField
                                         defaultValue={applicationName}
@@ -361,14 +362,14 @@ export class GitImport extends React.Component<DefaultProps, {
                                                 backgroundColor: 'var(--vscode-settings-textInputBackground)'
                                             }
                                         }}
-                                        style={{ width: '80%' }}
+                                        style={{ width: '80%', paddingTop: '10px' }}
                                         helperText='A unique name given to the application grouping to label your resources.' />
                                     <InputLabel required htmlFor='bootstrap-input'
                                         style={{
-                                            color: '#fe5142',
+                                            color: '#EE0000',
                                             marginTop: '1rem'
                                         }}>
-                                        Name
+                                        Component Name
                                     </InputLabel>
                                     <TextField
                                         defaultValue={componentName}
@@ -379,18 +380,23 @@ export class GitImport extends React.Component<DefaultProps, {
                                                 backgroundColor: 'var(--vscode-settings-textInputBackground)'
                                             }
                                         }}
-                                        style={{ width: '80%' }}
+                                        style={{ width: '80%', paddingTop: '10px' }}
                                         helperText='A unique name given to the component that will be used to name associated resources.' />
                                 </div>
                             }
-                            <div className={compDesc ? 'buttonDivWithBottom' : 'buttonDiv'}>
+                            <div style={{ marginTop: '10px'}}>
                                 <Button variant='contained'
                                     disabled={gitURLValid.showError}
-                                    component='span' className='buttonStyle'
+                                    component='span'
+                                    className='buttonStyle'
+                                    style={{ backgroundColor: '#EE0000', textTransform: 'none'}}
                                     onClick={() => this.createComponent()}>
-                                    Create
+                                    Create Component
                                 </Button>
-                                <Button variant='outlined' className='buttonStyle' style={{ marginLeft: '1rem' }}>
+                                <Button
+                                    variant='outlined'
+                                    className='buttonStyle'
+                                    style={{ textTransform: 'none', marginLeft: '1rem' }}>
                                     Cancel
                                 </Button>
                             </div>

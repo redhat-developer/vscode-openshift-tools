@@ -5,7 +5,7 @@ body {
 }
 
 .margin {
-    margin: 1.5rem;
+    margin: 3rem;
 }
 
 .mainContainer,
@@ -14,7 +14,7 @@ body {
     display: flex;
     flex-direction: column;
     font-family: var(--vscode-font-family);
-    overflow-y: scroll;
+    // overflow-y: scroll;
 }
 
 .title {
@@ -46,12 +46,10 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--vscode-button-foreground) !important;
-    background: var(--vscode-button-background) !important;
-
+    background-color: '#EE0000' !important;
     &:hover {
-        background: var(--vscode-button-hoverBackground) !important;
+        background-color: '#BE0000' !important;
     }
-
     text-transform: none;
 }
 
@@ -63,7 +61,7 @@ body {
 .buttonDivWithBottom {
     display: inline-flex;
     border-top: 1px solid;
-    border-color: inherit;
+    // border-color: inherit;
     width: 100%;
     height: 3rem;
     background-color: var(--vscode-editor-background) !important;
