@@ -13,6 +13,8 @@ import { VSCodeMessage } from './vsCodeMessage';
 import { CardItem } from './cardItem';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
+import EditIcon from '@mui/icons-material/Edit';
+import UndoIcon from '@mui/icons-material/Undo';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import { ComponentTypeDescription } from '../../../odo/componentType';
@@ -24,14 +26,17 @@ export interface DefaultProps {
 
 export class GitImport extends React.Component<DefaultProps, {
     gitURL: string,
-    name: string,
+    projectName: string,
+    componentName: string,
     applicationName: string,
     gitURLValid: {
         showError: boolean,
         helpText: string,
         parse?: any
     },
-    accordionOpen: boolean,
+    isDevFile?: boolean,
+    parentAccordionOpen: boolean,
+    statergyAccordionOpen: boolean,
     compDesc: ComponentTypeDescription
 }> {
 
@@ -43,10 +48,13 @@ export class GitImport extends React.Component<DefaultProps, {
                 showError: false,
                 helpText: ''
             },
-            accordionOpen: false,
+            parentAccordionOpen: false,
+            statergyAccordionOpen: false,
+            projectName: undefined,
+            componentName: undefined,
             applicationName: undefined,
-            name: undefined,
-            compDesc: undefined
+            compDesc: undefined,
+            isDevFile: undefined
         }
     }
 
@@ -55,16 +63,21 @@ export class GitImport extends React.Component<DefaultProps, {
             if (message.data.action === 'parseGitURL') {
                 this.setState({
                     applicationName: message.data.appName,
-                    name: message.data.name,
+                    componentName: message.data.name,
                     compDesc: message.data.compDesc,
                     gitURLValid: {
                         showError: message.data.error,
                         helpText: message.data.helpText
-                    }
+                    },
+                    isDevFile: message.data.isDevFile
                 });
             } else if (message.data.action === 'validateGitURL') {
                 this.setState({
-                    gitURLValid: { showError: message.data.error, helpText: message.data.helpText, parse: message.data?.parser },
+                    gitURLValid: {
+                        showError: message.data.error,
+                        helpText: message.data.helpText,
+                        parse: message.data?.parser
+                    },
                     gitURL: message.data.gitURL
                 });
 
@@ -76,23 +89,43 @@ export class GitImport extends React.Component<DefaultProps, {
                         parser: this.state.gitURLValid.parse
                     });
                 } else {
-                    this.setState({ applicationName: undefined, name: undefined, compDesc: undefined });
+                    this.setState({
+                        applicationName: undefined,
+                        projectName: undefined,
+                        componentName: undefined,
+                        compDesc: undefined,
+                        isDevFile: undefined
+                    });
                 }
             }
         });
     }
 
     gitRepoChange = (value: string): void => {
-        this.setState({ applicationName: undefined, name: undefined, compDesc: undefined });
+        this.setState({
+            applicationName: undefined,
+            projectName: undefined,
+            componentName: undefined,
+            compDesc: undefined,
+            isDevFile: undefined
+        });
         VSCodeMessage.postMessage({
             action: 'validateGitURL',
             param: value
         });
     }
 
-    accordionClick = (event, value: boolean): void => {
+    projectNameChange = (value: string): void => {
+        this.setState({ projectName: value });
+    }
+
+    accordionClick = (event, value: boolean, place: string): void => {
         if (['p', 'svg', 'div'].includes(event.target.localName)) {
-            this.setState({ accordionOpen: value })
+            if (place === 'parent') {
+                this.setState({ parentAccordionOpen: value })
+            } else {
+                this.setState({ statergyAccordionOpen: value })
+            }
         }
     }
 
@@ -126,12 +159,25 @@ export class GitImport extends React.Component<DefaultProps, {
         borderTop: '1px solid rgba(0, 0, 0, .125)',
     }));
 
+    createComponent = (): void => {
+        //const url: Url = new URL('https://registry.devfile.io');
+        VSCodeMessage.postMessage({
+            action: 'createComponent',
+            gitURL: this.state.gitURL,
+            projectName: this.state.projectName,
+            componentName: this.state.componentName,
+            applicationName: this.state.applicationName,
+            compDesc: this.state.compDesc
+        });
+    }
+
     render(): React.ReactNode {
-        const { gitURLValid, accordionOpen, applicationName, name, compDesc } = this.state;
+        const { gitURLValid, parentAccordionOpen,
+            statergyAccordionOpen, applicationName, projectName, componentName, compDesc, isDevFile } = this.state;
         return (
             <div className='mainContainer margin' >
                 <div className='title'>
-                    <Typography variant='h4' className='highlight'>Import from Git</Typography>
+                    <Typography variant='h5'>Import from Git</Typography>
                 </div>
                 <div className='subTitle'>
                     <Typography variant='caption'>Import code from your Git repository to be built and deployed on OpenShift.
@@ -164,8 +210,8 @@ export class GitImport extends React.Component<DefaultProps, {
                                             gitURLValid.helpText === 'Validated' ?
                                                 <CheckCircleIcon color='success' /> :
                                                 gitURLValid.helpText.indexOf('but cannot be reached') !== -1 ?
-                                                    <ErrorIcon color='warning' />
-                                                    : gitURLValid.helpText.indexOf('Devfile not detected') !== -1 ? <CheckCircleIcon color='success' /> : <ErrorIcon color='error' />
+                                                    <ErrorIcon color='warning' /> :
+                                                    <ErrorIcon color='error' />
                                             : undefined}
                                     </InputAdornment>
                                 ),
@@ -178,13 +224,13 @@ export class GitImport extends React.Component<DefaultProps, {
                                     color: 'var(--vscode-dropdown-foreground)',
                                     marginTop: '1rem'
                                 }}
-                                onClick={(e) => this.accordionClick(e, !accordionOpen)}
+                                onClick={(e) => this.accordionClick(e, !parentAccordionOpen, 'parent')}
                             >
                                 <this.AccordionSummary aria-controls='panel1d-content' id='panel1d-header'
                                     expandIcon={
                                         <ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem', color: 'var(--vscode-dropdown-foreground)' }} />
                                     }>
-                                    <Typography>{accordionOpen ? 'Hide' : 'Show'} advanced Git Options</Typography>
+                                    <Typography>{parentAccordionOpen ? 'Hide' : 'Show'} advanced Git Options</Typography>
                                 </this.AccordionSummary>
                                 <this.AccordionDetails>
                                     <InputLabel htmlFor='bootstrap-input'
@@ -226,13 +272,83 @@ export class GitImport extends React.Component<DefaultProps, {
                                 </this.AccordionDetails>
                             </this.Accordion>
                             {compDesc &&
-                                <CardItem key='cardKey' compDesc={compDesc} />
+                                <>
+                                    {isDevFile &&
+                                        <div className='stratergyContainer stratergySuccess'>
+                                            <CheckCircleIcon color='success' style={{ fontSize: 20 }} />
+                                            <Typography variant='body2' style={{ margin: '0 0.5rem' }}>Devfile detected</Typography>
+                                        </div>
+                                    }
+                                    {!isDevFile &&
+                                        <div className='stratergyContainer stratergyWarning'>
+                                            <ErrorIcon color='warning' style={{ fontSize: 20 }} />
+                                            <Typography variant='body2' style={{ margin: '0 0.5rem' }}>Devfile not detected and the sample devfile from registry below</Typography>
+                                        </div>
+                                    }
+                                    <div className='cardContainer'>
+                                        <CardItem key='cardKey' compDesc={compDesc} className='card' />
+                                        <div className='editStatergy'>
+                                            <this.Accordion
+                                                style={{
+                                                    backgroundColor: 'var(--vscode-editor-background)',
+                                                    color: 'var(--vscode-dropdown-foreground)',
+                                                    marginTop: '1rem'
+                                                }}
+                                                onClick={(e) => this.accordionClick(e, !statergyAccordionOpen, 'statergy')}
+                                            >
+                                                <this.AccordionSummary aria-controls='panel1d-content' id='panel1d-header'
+                                                    expandIcon={statergyAccordionOpen ?
+                                                        <UndoIcon sx={{ fontSize: '0.9rem', color: 'var(--vscode-dropdown-foreground)' }} /> :
+                                                        <EditIcon sx={{ fontSize: '0.9rem', color: 'var(--vscode-dropdown-foreground)' }} />}>
+                                                    <Typography>{statergyAccordionOpen ? 'Revert to recommended' : 'Edit Import Strategy'}</Typography>
+                                                </this.AccordionSummary>
+                                                <this.AccordionDetails>
+                                                    <InputLabel required htmlFor='bootstrap-input'
+                                                        style={{
+                                                            color: '#fe5142'
+                                                        }}>
+                                                        Devfile Path
+                                                    </InputLabel>
+                                                    <TextField
+                                                        id='bootstrap-input'
+                                                        sx={{
+                                                            input: {
+                                                                color: 'var(--vscode-settings-textInputForeground)',
+                                                                backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                                            }
+                                                        }}
+                                                        style={{ width: '80%' }}
+                                                        helperText='Allows the builds to use a different path to locate your Devfile, relative to the Context Dir field'
+                                                    />
+                                                </this.AccordionDetails>
+                                            </this.Accordion>
+                                        </div>
+                                    </div>
+                                </>
                             }
                             {applicationName &&
                                 <div className='form sub'>
                                     <InputLabel htmlFor='bootstrap-input'
                                         style={{
                                             color: 'var(--vscode-settings-textInputForeground)'
+                                        }}>
+                                        Project name
+                                    </InputLabel>
+                                    <TextField
+                                        value={projectName}
+                                        onChange={(e) => this.projectNameChange(e.target.value)}
+                                        id='bootstrap-input'
+                                        sx={{
+                                            input: {
+                                                color: 'var(--vscode-settings-textInputForeground)',
+                                                backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                            }
+                                        }}
+                                        style={{ width: '80%' }} />
+                                    <InputLabel htmlFor='bootstrap-input'
+                                        style={{
+                                            color: 'var(--vscode-settings-textInputForeground)',
+                                            marginTop: '1rem'
                                         }}>
                                         Application name
                                     </InputLabel>
@@ -255,7 +371,7 @@ export class GitImport extends React.Component<DefaultProps, {
                                         Name
                                     </InputLabel>
                                     <TextField
-                                        defaultValue={name}
+                                        defaultValue={componentName}
                                         id='bootstrap-input'
                                         sx={{
                                             input: {
@@ -270,7 +386,8 @@ export class GitImport extends React.Component<DefaultProps, {
                             <div className={compDesc ? 'buttonDivWithBottom' : 'buttonDiv'}>
                                 <Button variant='contained'
                                     disabled={gitURLValid.showError}
-                                    component='span' className='buttonStyle'>
+                                    component='span' className='buttonStyle'
+                                    onClick={() => this.createComponent()}>
                                     Create
                                 </Button>
                                 <Button variant='outlined' className='buttonStyle' style={{ marginLeft: '1rem' }}>

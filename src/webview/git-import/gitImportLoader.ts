@@ -8,13 +8,16 @@ import * as fs from 'fs';
 import { ExtensionID } from '../../util/constants';
 import { GitProvider } from '../../git/types/git';
 import { getGitService } from '../../git/services';
-
 import jsYaml = require('js-yaml');
 import { DetectedServiceData, DetectedStrategy, detectImportStrategies } from '../../git/utils';
 import { ComponentTypesView } from '../../registriesView';
 import GitUrlParse = require('git-url-parse');
 import { ComponentTypeDescription } from '../../odo/componentType';
 import { Response } from '../../git/types';
+import { selectWorkspaceFolder } from '../../util/workspace';
+import cp = require('child_process');
+import { Uri, workspace } from 'vscode';
+import { Component } from '../../openshift/component';
 
 let panel: vscode.WebviewPanel;
 
@@ -25,32 +28,45 @@ async function gitImportMessageListener(event: any): Promise<any> {
             break;
         case 'parseGitURL':
             let compDesc: ComponentTypeDescription;
+            let isDevFile = false;
             const gitProvider = getGitProvider(event.parser.host);
             if (gitProvider !== GitProvider.INVALID) {
                 const service = getGitService(event.param, gitProvider, '', '', undefined, 'devfile.yaml');
                 const importService: DetectedServiceData = await detectImportStrategies(event.param, service);
                 const response: Response = await service.isDevfilePresent();
                 if (importService.strategies.length === 1) {
+                    response.status = true;
                     const stratergy: DetectedStrategy = importService.strategies[0];
                     const detectedCustomData = stratergy.detectedCustomData[0];
                     compDesc = getCompDescription(detectedCustomData.name.toLowerCase(), detectedCustomData.language.toLowerCase());
                 } else if (response.status) {
+                    isDevFile = true;
                     const devFileContent = await service.getDevfileContent();
                     const yamlDoc: any = jsYaml.load(devFileContent);
                     compDesc = getCompDescription(yamlDoc.metadata.projectType.toLowerCase(), yamlDoc.metadata.language.toLowerCase())
                 }
                 panel.webview.postMessage({
                     action: event?.action,
-                    appName: !response.error ? event.parser.name + '-app' : undefined,
-                    name: !response.error ? event.parser.name : undefined,
-                    error: response.error ? true : false,
-                    helpText: response.status ? 'Validated' : response.error ?
-                        'Rate Limit exceeded' : 'Devfile not detected and the sample devfile from registry below:',
+                    appName: response.status ? event.parser.name + '-app' : undefined,
+                    name: response.status ? event.parser.name : undefined,
+                    error: !response.status,
+                    isDevFile: isDevFile,
+                    helpText: response.status ? 'Validated' : 'Rate Limit exceeded',
                     compDesc: compDesc
                 });
                 break;
             }
             break;
+        case 'createComponent': {
+            const workspacePath = await selectWorkspaceFolder();
+            const appendedUri = Uri.joinPath(workspacePath, event.projectName);
+            workspace.updateWorkspaceFolders(workspace.workspaceFolders.length, 0, { uri: appendedUri });
+            await clone(event.gitURL, appendedUri.fsPath);
+            const result = await Component.createFromRootWorkspaceFolder(appendedUri, undefined, undefined,
+                {componentTypeName: event.compDesc.Devfile.metadata.name, projectName: event.projectName, applicationName: event.applicationName, compName: event.componentName});
+            console.log(result);
+            break;
+        }
     }
 }
 
@@ -157,8 +173,15 @@ function getGitProvider(host: string): GitProvider {
 
 function getCompDescription(projectType: string, language: string) {
     const compDescriptions = ComponentTypesView.instance.getCompDescriptions();
-    const filter = Array.from(compDescriptions).filter((desc) => desc.Devfile.metadata.projectType.toLowerCase() === projectType &&
-        (desc.Devfile.metadata.language.toLowerCase() === language || desc.Devfile.metadata.name.toLowerCase() === language));
+    const filter = Array.from(compDescriptions).filter((desc) => desc.Devfile.metadata.projectType.toLowerCase() === projectType ||
+        desc.Devfile.metadata.language.toLowerCase() === language || desc.Devfile.metadata.name.toLowerCase() === language);
     return filter?.pop();
+}
+
+function clone(repositoryURL: string, location: string): Promise<void> {
+    const gitExtension = vscode.extensions.getExtension('vscode.git').exports;
+    const git = gitExtension.getAPI(1).git.path;
+    // run 'git clone url location' as external process and return location
+    return new Promise((resolve, reject) => cp.exec(`${git} clone ${repositoryURL} ${location}`, (error: cp.ExecException) => error ? reject(error) : resolve()));
 }
 
