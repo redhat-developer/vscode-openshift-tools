@@ -8,16 +8,21 @@ import { Theme, createStyles } from '@material-ui/core/styles';
 export default (theme: Theme) =>
     createStyles({
         card: {
+            display: 'inline-table',
             height: 'auto',
-            width: '20%',
+            width: '30%',
             margin: '0',
             borderRadius: '1rem',
-            //border: '1px solid',
-            //borderColor: 'inherit',
             backgroundColor: 'var(--vscode-editor-background)',
             color: 'var(--vscode-editor-foreground)',
             transition: 'all ease 200ms',
             transform: 'scale(0.95)',
+            '&:hover': {
+                transform: 'scale(1)',
+                boxShadow: '0 13px 27px -5px hsla(240, 30.1%, 28%, 0.25), 0 8px 16px -8px hsla(0, 0%, 0%, 0.3), 0 -6px 16px -6px hsla(0, 0%, 0%, 0.03)',
+                border: '1px solid',
+                borderColor: 'inherit'
+            },
             zIndex: 1
         },
         cardHeader: {

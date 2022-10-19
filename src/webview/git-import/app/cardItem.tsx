@@ -4,17 +4,21 @@
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
 import { Card, makeStyles, Typography } from '@material-ui/core';
-import { ComponentTypeDescription } from '../../../odo/componentType';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 import cardItemStyle from './cardItem.style';
+import { CompTypeDesc } from './gitImport';
 
 const makeCardStyle = makeStyles(cardItemStyle);
 
 interface CardProps extends React.AllHTMLAttributes<HTMLDivElement> {
-    compDesc: ComponentTypeDescription;
+    compDesc: CompTypeDesc;
+    onCardClick: (selectedComp: CompTypeDesc) => void;
 }
 
 export const CardItem: React.FC<CardProps> = ({
-    compDesc
+    compDesc,
+    onCardClick
 }: CardProps) => {
 
     const style = makeCardStyle();
@@ -23,6 +27,7 @@ export const CardItem: React.FC<CardProps> = ({
         <>
             <Card
                 className={style.card}
+                onClick={() => onCardClick(compDesc)}
                 data-testid={`card-${compDesc.Devfile.metadata.name.replace(/\.| /g, '')}`}
             >
                 <div className={style.cardHeader}>
@@ -30,6 +35,9 @@ export const CardItem: React.FC<CardProps> = ({
                         <img
                             src={compDesc.Devfile.metadata.icon}
                             className={style.cardImage} />
+                        <div className={style.cardRegistryTitle}>
+                            {compDesc.selected ? <StarIcon style={{ fontSize: 20 }} /> : <StarBorderIcon style={{ fontSize: 20 }} />}
+                        </div>
                     </div>
                 </div>
                 <div style={{ margin: '1.5rem' }}>

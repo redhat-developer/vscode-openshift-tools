@@ -105,6 +105,11 @@ export default class OpenShiftItem {
         return validator.matches(value, '^[a-z]([-a-z0-9]*[a-z0-9])*$') ? null : message;
     }
 
+    static validateFilePath(message: string, value: string): string | null {
+        const regx = new RegExp(/^[a-z]:((\/|\\)[a-zA-Z0-9_ \\-]+)+\.(yaml|yml)$/,'gi');
+        return regx.test(value) ? null : message;
+    }
+
     static validateRFC1123DNSLabel(message: string, value: string): string | null {
       return validator.matches(value, '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$') ? null : message;
     }

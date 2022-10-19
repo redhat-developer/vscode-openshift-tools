@@ -18,6 +18,7 @@ import { selectWorkspaceFolder } from '../../util/workspace';
 import cp = require('child_process');
 import { Uri, workspace } from 'vscode';
 import { Component } from '../../openshift/component';
+import OpenShiftItem from '../../openshift/openshiftItem';
 
 let panel: vscode.WebviewPanel;
 
@@ -26,33 +27,41 @@ async function gitImportMessageListener(event: any): Promise<any> {
         case 'validateGitURL':
             validateGitURL(event);
             break;
+        case 'validateComponentName':
+            validateComponentName(event)
+            break;
+        case 'validateDevFilePath':
+            validateDevFilePath(event)
+            break;
         case 'parseGitURL':
-            let compDesc: ComponentTypeDescription;
+            let compDescs: ComponentTypeDescription[];
             let isDevFile = false;
             const gitProvider = getGitProvider(event.parser.host);
             if (gitProvider !== GitProvider.INVALID) {
-                const service = getGitService(event.param, gitProvider, '', '', undefined, 'devfile.yaml');
+                const service = getGitService(event.param.value, gitProvider, '', '', undefined, 'devfile.yaml');
                 const importService: DetectedServiceData = await detectImportStrategies(event.param, service);
                 const response: Response = await service.isDevfilePresent();
                 if (importService.strategies.length === 1) {
                     response.status = true;
                     const stratergy: DetectedStrategy = importService.strategies[0];
                     const detectedCustomData = stratergy.detectedCustomData[0];
-                    compDesc = getCompDescription(detectedCustomData.name.toLowerCase(), detectedCustomData.language.toLowerCase());
+                    compDescs = getCompDescription(detectedCustomData.name.toLowerCase(), detectedCustomData.language.toLowerCase());
                 } else if (response.status) {
                     isDevFile = true;
                     const devFileContent = await service.getDevfileContent();
                     const yamlDoc: any = jsYaml.load(devFileContent);
-                    compDesc = getCompDescription(yamlDoc.metadata.projectType.toLowerCase(), yamlDoc.metadata.language.toLowerCase())
+                    compDescs = getCompDescription(yamlDoc.metadata.projectType.toLowerCase(), yamlDoc.metadata.language.toLowerCase())
                 }
                 panel.webview.postMessage({
                     action: event?.action,
+                    gitURL: event.param.value,
                     appName: response.status ? event.parser.name + '-app' : undefined,
-                    name: response.status ? event.parser.name : undefined,
+                    name: response.status ? event.parser.name + '-comp' : undefined,
                     error: !response.status,
                     isDevFile: isDevFile,
                     helpText: response.status ? 'Validated' : 'Rate Limit exceeded',
-                    compDesc: compDesc
+                    compDescs: compDescs,
+                    parser: event.parser
                 });
                 break;
             }
@@ -60,11 +69,17 @@ async function gitImportMessageListener(event: any): Promise<any> {
         case 'createComponent': {
             const workspacePath = await selectWorkspaceFolder();
             const appendedUri = Uri.joinPath(workspacePath, event.projectName);
-            workspace.updateWorkspaceFolders(workspace.workspaceFolders.length, 0, { uri: appendedUri });
+            const wsFolderLength = workspace?.workspaceFolders?.length || 0;
+            workspace.updateWorkspaceFolders(wsFolderLength, 0, { uri: appendedUri });
             await clone(event.gitURL, appendedUri.fsPath);
-            const result = await Component.createFromRootWorkspaceFolder(appendedUri, undefined, undefined,
-                {componentTypeName: event.compDesc.Devfile.metadata.name, projectName: event.projectName, applicationName: event.applicationName, compName: event.componentName});
-            console.log(result);
+            await Component.createFromRootWorkspaceFolder(appendedUri, undefined, undefined,
+                {
+                    componentTypeName: event.compDesc.Devfile.metadata.name,
+                    projectName: event.projectName,
+                    applicationName: event.applicationName,
+                    compName: event.componentName,
+                    devFilePath: event.devFilePath === 'devfile.yaml' ? '' : event.devFilePath
+                }, true);
             break;
         }
     }
@@ -171,11 +186,10 @@ function getGitProvider(host: string): GitProvider {
             host.indexOf(GitProvider.GITLAB) !== -1 ? GitProvider.GITLAB : GitProvider.INVALID;
 }
 
-function getCompDescription(projectType: string, language: string) {
+function getCompDescription(projectType: string, language: string): ComponentTypeDescription[] {
     const compDescriptions = ComponentTypesView.instance.getCompDescriptions();
-    const filter = Array.from(compDescriptions).filter((desc) => desc.Devfile.metadata.projectType.toLowerCase() === projectType ||
+    return Array.from(compDescriptions).filter((desc) => desc.Devfile.metadata.projectType.toLowerCase() === projectType ||
         desc.Devfile.metadata.language.toLowerCase() === language || desc.Devfile.metadata.name.toLowerCase() === language);
-    return filter?.pop();
 }
 
 function clone(repositoryURL: string, location: string): Promise<void> {
@@ -183,5 +197,34 @@ function clone(repositoryURL: string, location: string): Promise<void> {
     const git = gitExtension.getAPI(1).git.path;
     // run 'git clone url location' as external process and return location
     return new Promise((resolve, reject) => cp.exec(`${git} clone ${repositoryURL} ${location}`, (error: cp.ExecException) => error ? reject(error) : resolve()));
+}
+
+function validateComponentName(event: any) {
+    let validationMessage = OpenShiftItem.emptyName(`Required ${event.param}`, event.param.trim());
+    if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${event.param}.
+        Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`, event.param);
+    if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${event.param} should be between 2-63 characters`, event.param, 0);
+    panel.webview.postMessage({
+        action: event.action,
+        error: !validationMessage ? false : true,
+        helpText: !validationMessage ? 'A unique name given to the component that will be used to name associated resources.' : validationMessage,
+        compName: event.param
+    });
+}
+
+function validateDevFilePath(event: any) {
+    let validationMessage = OpenShiftItem.emptyName(`Required ${event.param}`, event.param.trim());
+    if (!validationMessage) validationMessage = OpenShiftItem.validateFilePath(`Not matches ^[a-z]:((\/|\\\\)[a-zA-Z0-9_ \\-]+)+\\.yaml$`, event.param);
+    if (!validationMessage) {
+        const uri = Uri.parse(event.param);
+        const devFileLocation = path.join(uri.fsPath);
+        validationMessage = fs.existsSync(devFileLocation) ? null : 'devfile not available on the given path';
+    }
+    panel.webview.postMessage({
+        action: event.action,
+        error: !validationMessage ? false : true,
+        helpText: !validationMessage ? 'Validated' : validationMessage,
+        devFilePath: event.param
+    });
 }
 

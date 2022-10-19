@@ -609,10 +609,15 @@ export class Component extends OpenShiftItem {
      */
 
     @vsCommand('openshift.component.createFromRootWorkspaceFolder')
-    static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], context: OpenShiftApplication, opts: {
-        componentTypeName?: string, projectName?: string,
-        applicationName?: string, compName?: string, registryName?: string
-    }, notification = true): Promise<string | null> {
+    static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], context: OpenShiftApplication,
+        opts: {
+            componentTypeName?: string,
+            projectName?: string,
+            applicationName?: string,
+            compName?: string,
+            registryName?: string
+            devFilePath?: string
+        }, isGitImportCall = false, notification = true): Promise<string | null> {
         let application = await Component.getOpenShiftCmdData(context,
             'Select an Application where you want to create a Component', undefined, undefined, opts.projectName, opts.applicationName
         );
@@ -620,7 +625,7 @@ export class Component extends OpenShiftItem {
         if (!application) return createCancelledResult('application');
 
         let useExistingDevfile = false;
-        const devFileLocation = path.join(folder.fsPath, 'devfile.yaml');
+        const devFileLocation = opts.devFilePath?.length > 0 ? path.join(opts.devFilePath) : path.join(folder.fsPath, 'devfile.yaml');
         useExistingDevfile = fs.existsSync(devFileLocation);
 
         let initialNameValue: string;
@@ -666,7 +671,7 @@ export class Component extends OpenShiftItem {
             const globbyPath = `${folder.fsPath.replace('\\', '/')}/`;
             const paths = globby.sync(`${globbyPath}*`, { dot: true, onlyFiles: false });
             progressIndicator.hide();
-            if (paths.length === 0) {
+            if (paths.length === 0 && !isGitImportCall) {
                 if (opts.projectName) {
                     createStarter = opts.projectName;
                 } else {
