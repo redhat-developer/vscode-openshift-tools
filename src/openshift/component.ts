@@ -5,7 +5,7 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { window, commands, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable, EventEmitter, Terminal } from 'vscode';
+import { window, commands, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable, EventEmitter, Terminal, QuickPick, QuickPickItem } from 'vscode';
 import { ChildProcess, exec } from 'child_process';
 import * as YAML from 'yaml'
 import OpenShiftItem, { clusterRequired, selectTargetComponent } from './openshiftItem';
@@ -26,7 +26,6 @@ import { NewComponentCommandProps } from '../telemetry';
 import waitPort = require('wait-port');
 import { ComponentWorkspaceFolder } from '../odo/workspace';
 import LogViewLoader from '../webview/log/LogViewLoader';
-
 
 function createCancelledResult(stepName: string): any {
     const cancelledResult: any = new String('');
@@ -271,7 +270,7 @@ export class Component extends OpenShiftItem {
             await commands.executeCommand('vscode.open', Uri.parse(`http://${fp.localAddress}:${fp.localPort}`));
             return;
         } else if (componentDescription.devForwardedPorts?.length > 1) {
-            const ports = componentDescription.devForwardedPorts.map((fp) => ({
+            const ports: ReadonlyArray<QuickPickItem> = componentDescription.devForwardedPorts.map((fp) => ({
                 label: `${fp.localAddress}:${fp.localPort}`,
                 description: `Forwards to ${fp.containerName}:${fp.containerPort}`,
             }));
