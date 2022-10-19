@@ -18,7 +18,7 @@ export function checkOpenshiftView() {
         });
 
         it('Displays all view sections', async () => {
-            const expected = [VIEWS.appExplorer, VIEWS.components, VIEWS.compRegistries, VIEWS.watchSessions, VIEWS.debugSessions];
+            const expected = [VIEWS.appExplorer, VIEWS.components, VIEWS.compRegistries, VIEWS.debugSessions];
             const content = view.getContent();
             for (const sectionTitle of expected) {
                 const section = await content.getSection(sectionTitle);
