@@ -13,7 +13,7 @@ OpenShift Connector extension provides an end-to-end developer experience for Re
  - Developers can easily create, deploy and live debug container applications running on OpenShift.
  - Create [devfile](https://devfile.io/docs/2.1.0/what-is-a-devfile) based components directly from Devfile Registries View
  - Follow logs for the deployed applications on OpenShift
- - Run local instance of OpenShift 4.11.3 using [OpenShift Local](https://crc.dev/crc/) directly from IDE
+ - Run local instance of OpenShift 4.11.7 using [OpenShift Local](https://crc.dev/crc/) directly from IDE
  - Connect & Provision free [Developer Sandbox for Red Hat OpenShift](https://developers.redhat.com/developer-sandbox) instance from IDE
 
 ### Demo: https://www.youtube.com/watch?v=HEsYgDqD1rM

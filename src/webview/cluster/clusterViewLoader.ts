@@ -108,7 +108,8 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                     panel.webview.postMessage({action: 'sandboxPageRequestSignup'});
                 } else {
                     if (signupStatus.status.ready) {
-                        panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL });
+                        const oauthInfo = await sandboxAPI.getOauthServerInfo(signupStatus.apiEndpoint);
+                        panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL, apiEndpoint: signupStatus.apiEndpoint, oauthTokenEndpoint: oauthInfo.token_endpoint });
                     } else {
                         // cluster is not ready and the reason is
                         if (signupStatus.status.verificationRequired) {
@@ -118,8 +119,6 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                             //
                             if (signupStatus.status.reason === 'PendingApproval') {
                                 panel.webview.postMessage({action: 'sandboxPageWaitingForApproval'});
-                            } else if (signupStatus.status.reason === 'Provisioned') {
-                                panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL});
                             } else {
                                 panel.webview.postMessage({action: 'sandboxPageWaitingForProvision'})
                             }
@@ -174,7 +173,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
         case 'sandboxLoginUsingDataInClipboard':
             const telemetryEventLoginToSandbox = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxLoginUsingDataInClipboard');
             try {
-                const result = await Cluster.loginUsingClipboardInfo(event.payload.url);
+                const result = await Cluster.loginUsingClipboardToken(event.payload.apiEndpointUrl, event.payload.oauthRequestTokenUrl);
                 if (result) vscode.window.showInformationMessage(`${result}`);
                 telemetryEventLoginToSandbox.send();
             } catch (err) {

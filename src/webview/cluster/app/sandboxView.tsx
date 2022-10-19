@@ -60,6 +60,8 @@ export default function addSandboxView(props): JSX.Element {
         action: 'sandboxPageDetectAuthSession',
         statusInfo: '',
         consoleDashboard: '',
+        apiEndpoint: '',
+        oauthTokenEndpoint: '',
         errorCode: undefined
     });
 
@@ -150,6 +152,8 @@ export default function addSandboxView(props): JSX.Element {
                 action: currentState.action,
                 consoleDashboard: currentState.consoleDashboard,
                 statusInfo: currentState.statusInfo,
+                apiEndpoint: '',
+                oauthTokenEndpoint: '',
                 errorCode: undefined
             });
             postMessage('sandboxDetectStatus');
@@ -299,6 +303,8 @@ export default function addSandboxView(props): JSX.Element {
                 action: 'sandboxPageRequestVerificationCode',
                 statusInfo: '',
                 consoleDashboard: '',
+                apiEndpoint: '',
+                oauthTokenEndpoint: '',
                 errorCode: undefined
             });
         }
@@ -376,7 +382,7 @@ export default function addSandboxView(props): JSX.Element {
     const Provisioned = () => {
 
         const handleLoginButton = () => {
-            postMessage('sandboxLoginUsingDataInClipboard', {url: currentState.consoleDashboard});
+            postMessage('sandboxLoginUsingDataInClipboard', {apiEndpointUrl: currentState.apiEndpoint, oauthRequestTokenUrl: `${currentState.oauthTokenEndpoint}/request`});
         };
 
         return (
@@ -399,16 +405,19 @@ export default function addSandboxView(props): JSX.Element {
                         </Typography>
                         <Typography variant="caption" display="block" style={{ textAlign:'left', margin: '20px 70px' }}>
                             Next steps to connect with Developer Sandbox:<br></br>
-                            1. Click on <strong>Open Dashboard button</strong>. In the browser, login using <strong>DevSandbox</strong> and once loggedin, click on username dropdown.<br></br>
-                            2. Select <strong>Copy Login command</strong>. Once the new tab is opened, copy the entire <strong>Log in with this token</strong> command.<br></br>
-                            3. Come back to IDE and press <strong>'Login To Sandbox'</strong> Button. This will login your DevSandbox in OpenShift Application View.<br></br>
+                            1. Click on <strong>Get token</strong> button. In the browser, login using <strong>DevSandbox</strong> button.<br></br>
+                            2. Click on <strong>Display token</strong> link and copy token to clipboard.<br></br>
+                            3. Switch back to IDE and press <strong>'Login To DevSandbox'</strong> button. This will login you to DevSandbox with token from clipboard.<br></br>
                             4. Once successfully logged in, start creating applications and deploy on cluster.
                         </Typography>
-                        <Tooltip title="Launch your Sandbox console in browser" placement="bottom">
+                        <Tooltip title="Launch your DevSandbox console in browser" placement="bottom">
                             <Button variant="contained" className={classes.button} href={currentState.consoleDashboard}>Open Dashboard</Button>
                         </Tooltip>
-                        <Tooltip title="Connect in OpenShift Application View" placement="bottom">
-                            <Button variant="contained" className={classes.buttonSecondary} onClick={handleLoginButton}>Login to Sandbox</Button>
+                        <Tooltip title="Copy token from DevSandbox console page in browser" placement="bottom">
+                            <Button variant="contained" className={classes.button} href={`${currentState.oauthTokenEndpoint}/request`}>Get token</Button>
+                        </Tooltip>
+                        <Tooltip title="Login to DevSandbox OpenShift cluster with token from clipboard" placement="bottom">
+                            <Button variant="contained" className={classes.buttonSecondary} onClick={handleLoginButton}>Login to DevSandbox</Button>
                         </Tooltip>
                     </div>
                 )}
