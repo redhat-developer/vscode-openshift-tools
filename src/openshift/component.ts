@@ -680,7 +680,6 @@ export class Component extends OpenShiftItem {
         });
     }
 
-
     // TODO: remove "openshift.component.revealContextInExplorer" command
     @vsCommand('openshift.component.revealContextInExplorer')
     public static async revealContextInExplorer(context: OpenShiftComponent): Promise<void> {
