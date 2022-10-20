@@ -28,12 +28,12 @@ export const CardItem: React.FC<CardProps> = ({
             <Card
                 className={style.card}
                 onClick={() => onCardClick(compDesc)}
-                data-testid={`card-${compDesc.Devfile.metadata.name.replace(/\.| /g, '')}`}
+                data-testid={`card-${compDesc.devfileData.devfile.metadata.name.replace(/\.| /g, '')}`}
             >
                 <div className={style.cardHeader}>
                     <div className={style.cardHeaderDisplay}>
                         <img
-                            src={compDesc.Devfile.metadata.icon}
+                            src={compDesc.devfileData.devfile.metadata.icon}
                             className={style.cardImage} />
                         <div className={style.cardRegistryTitle}>
                             {compDesc.selected ? <StarIcon style={{ fontSize: 20 }} /> : <StarBorderIcon style={{ fontSize: 20 }} />}
@@ -41,21 +41,21 @@ export const CardItem: React.FC<CardProps> = ({
                     </div>
                 </div>
                 <div style={{ margin: '1.5rem' }}>
-                    <Typography variant='body1'>{compDesc.Devfile.metadata.name}</Typography>
+                    <Typography variant='body1'>{compDesc.devfileData.devfile.metadata.name}</Typography>
                 </div>
                 <div className={style.cardBody}>
                     {
-                        compDesc.Devfile.metadata.version && (
+                        compDesc.devfileData.devfile.metadata.version && (
                             <Typography variant='caption'>
-                                Version: {compDesc.Devfile.metadata.version}<br />
+                                Version: {compDesc.devfileData.devfile.metadata.version}<br />
                             </Typography>
                         )
                     }
                     <Typography variant='caption'>
-                        Project Type: {capitalizeFirstLetter(compDesc.Devfile.metadata.projectType)}<br />
+                        Project Type: {capitalizeFirstLetter(compDesc.devfileData.devfile.metadata.projectType)}<br />
                     </Typography>
                     <Typography variant='caption'>
-                        Language: {capitalizeFirstLetter(compDesc.Devfile.metadata.language)}<br />
+                        Language: {capitalizeFirstLetter(compDesc.devfileData.devfile.metadata.language)}<br />
                     </Typography>
                 </div>
             </Card>

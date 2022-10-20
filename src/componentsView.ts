@@ -6,91 +6,35 @@
 import * as path from 'path';
 import * as vsc from 'vscode';
 import { BaseTreeDataProvider } from './base/baseTreeDataProvider';
-import { CliExitData } from './cli';
-import { getInstance } from './odo';
-import { Command } from './odo/command';
-import { EnvInfo } from './odo/env';
+import { ComponentWorkspaceFolder, OdoWorkspace } from './odo/workspace';
+import { Component } from './openshift/component';
 import { vsCommand } from './vscommand';
 
-export interface WorkspaceEntry {
-    uri: vsc.Uri;
-    type: vsc.FileType;
+export interface ComponentWorkspaceFolderTreeItem extends vsc.TreeItem {
+    workspaceFolder: ComponentWorkspaceFolder;
 }
 
-class Labeled {
-    constructor(public label: string) { }
-}
-
-class Project extends Labeled {
-}
-
-class Application extends Labeled {
-}
-
-type Entry = Project | Application | WorkspaceEntry | WorkspaceFolderComponent;
-
-export interface WorkspaceFolderComponent extends vsc.TreeItem {
-    project: string;
-    application: string;
-    contextUri: vsc.Uri;
-}
-
-async function getComponentsInWorkspace(): Promise<WorkspaceFolderComponent[]> {
-    const execs: Promise<CliExitData>[] = [];
-    if (vsc.workspace.workspaceFolders) {
-        vsc.workspace.workspaceFolders.forEach((folder) => {
-            try {
-                execs.push(getInstance().execute(Command.viewEnv(), folder.uri.fsPath, false));
-            } catch (ignore) {
-                // ignore execution errors
-            }
-        });
-    }
-    const results = await Promise.all(execs);
-    return results.map((result) => {
-        try {
-            if (!result.error) {
-                const compData = JSON.parse(result.stdout) as EnvInfo;
-                const contextUri = vsc.Uri.parse(result.cwd);
-                const project = compData.spec.project ? compData.spec.project : 'N/A';
-                const application = compData.spec.appName ? compData.spec.appName : 'N/A';
-                const tooltip = ['Component',
-                    `Name: ${compData.spec.name}`,
-                    `Project: ${project}`,
-                    `Application: ${application}`,
-                    `Context: ${contextUri.fsPath}`,
-                ].join('\n');
-                const description = `${project}/${application}`;
-                return {
-                    project,
-                    application,
-                    label: compData.spec.name,
-                    contextUri,
-                    description,
-                    tooltip,
-                    contextValue: 'openshift.component',
-                    iconPath: vsc.Uri.file(path.join(__dirname, '../../images/component', 'workspace.png'))
-                };
-            }
-        } catch (err) {
-            // ignore unexpected parsing and loading errors
-        }
-    });
-}
-
-export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
+export class ComponentsTreeDataProvider extends BaseTreeDataProvider<ComponentWorkspaceFolder> {
 
     static dataProviderInstance: ComponentsTreeDataProvider;
+    private odoWorkspace = new OdoWorkspace();
 
     private constructor() {
         super();
-        vsc.workspace.onDidChangeWorkspaceFolders(() => {
+        this.odoWorkspace.onDidChangeComponents(() => {
             this.refresh();
         });
+        Component.onDidStateChanged(() => this.refresh());
     }
 
-    private refresh(): void {
-        this.onDidChangeTreeDataEmitter.fire(undefined);
+    private refresh(contextPath?: string): void {
+        if (contextPath) {
+            const folder = this.odoWorkspace.findComponent(vsc.workspace.getWorkspaceFolder(vsc.Uri.parse(contextPath)));
+            this.onDidChangeTreeDataEmitter.fire(folder)
+        } else {
+            this.odoWorkspace.reset();
+            this.onDidChangeTreeDataEmitter.fire(undefined);
+        }
     }
 
     @vsCommand('openshift.componentsView.refresh')
@@ -99,14 +43,12 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
     }
 
     @vsCommand('openshift.component.revealInExplorer')
-    public static async revealInExplorer(context: WorkspaceFolderComponent): Promise<void> {
-        if (context.contextUri) {
-            await vsc.commands.executeCommand('workbench.view.explorer',);
-            await vsc.commands.executeCommand('revealInExplorer', context.contextUri);
-        }
+    public static async revealInExplorer(context: ComponentWorkspaceFolder): Promise<void> {
+        await vsc.commands.executeCommand('workbench.view.explorer',);
+        await vsc.commands.executeCommand('revealInExplorer', vsc.Uri.parse(context.contextPath));
     }
 
-    createTreeView(id: string): vsc.TreeView<Entry> {
+    createTreeView(id: string): vsc.TreeView<ComponentWorkspaceFolder> {
         if (!this.treeView) {
             this.treeView = vsc.window.createTreeView(id, {
                 treeDataProvider: this,
@@ -122,14 +64,24 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<Entry> {
         return ComponentsTreeDataProvider.dataProviderInstance;
     }
 
-    getTreeItem(element: WorkspaceFolderComponent): vsc.TreeItem {
-        return element;
+    getTreeItem(element: ComponentWorkspaceFolder): ComponentWorkspaceFolderTreeItem {
+        const tooltip = ['Component',
+            `Name: ${element.component.devfileData.devfile.metadata.name}`,
+            `Context: ${element.contextPath}`,
+        ].join('\n');
+        return {
+            label: Component.renderLabel(element),
+            workspaceFolder: element,
+            tooltip,
+            contextValue: Component.generateContextValue(element),
+            iconPath: vsc.Uri.file(path.join(__dirname, '../../images/component', 'workspace.png'))
+        };
     }
 
-    getChildren(element?: Entry): vsc.ProviderResult<Entry[]> {
-        const result = element ? [] : getComponentsInWorkspace();
+    getChildren(element?: ComponentWorkspaceFolder): vsc.ProviderResult<ComponentWorkspaceFolder[]> {
+        const result = element ? [] : this.odoWorkspace.getComponents();
         return Promise.resolve(result).then(async result1 => {
-            await vsc.commands.executeCommand('setContext', 'openshift.component.explorer.init', result1.length === 0);
+            await vsc.commands.executeCommand('setContext', 'openshift.component.explorer.init', !result1?.length && result1.length === 0);
             return result;
         })
     }

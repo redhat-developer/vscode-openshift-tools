@@ -8,7 +8,6 @@ import {
     commands,
     workspace,
     window,
-    WorkspaceFoldersChangeEvent,
     StatusBarAlignment,
     StatusBarItem,
     env
@@ -24,7 +23,6 @@ import { TokenStore } from './util/credentialManager';
 import { registerCommands } from './vscommand';
 import { ToolsConfig } from './tools';
 import { extendClusterExplorer } from './k8s/clusterExplorer';
-import { WatchSessionsView } from './watch';
 import { DebugSessionsView } from './debug';
 import { ComponentTypesView } from './registriesView';
 import { WelcomePage } from './welcomePage';
@@ -68,11 +66,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     const disposable = [
         ...(await registerCommands(
             './k8s/route',
-            './openshift/catalog',
             './openshift/project',
-            './openshift/application',
-            './openshift/storage',
-            './openshift/url',
+            './openshift/cluster',
             './openshift/service',
             './k8s/console',
             './oc',
@@ -83,10 +78,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         commands.registerCommand('clusters.openshift.useProject', (context) =>
             commands.executeCommand('extension.vsKubernetesUseNamespace', context),
         ),
-        commands.registerCommand('openshift.component.deployRootWorkspaceFolder', Component.deployRootWorkspaceFolder),
         crcStatusItem,
         OpenShiftExplorer.getInstance(),
-        new WatchSessionsView().createTreeView('openshiftWatchView'),
         new DebugSessionsView().createTreeView('openshiftDebugView'),
         ...Component.init(extensionContext),
         ComponentTypesView.instance.createTreeView('openshiftComponentTypesView'),
@@ -94,7 +87,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
 
-    // TODO: Implement the case when 'odo watch' is running for component and push would be done automatically
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     OdoImpl.Instance.subject.subscribe(async (event: OdoEvent) => {
         if (event.type === 'inserted' && event.data.contextValue === ContextType.COMPONENT) {
@@ -104,24 +96,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             );
             if (choice === 'Push') {
                 await commands.executeCommand('openshift.component.push', event.data);
-                OpenShiftExplorer.getInstance().refresh(event.data);
-            }
-        } else if (
-            event.type === 'inserted' &&
-            (event.data.contextValue === ContextType.COMPONENT_ROUTE ||
-                event.data.contextValue === ContextType.STORAGE)
-        ) {
-            const choice = await window.showInformationMessage(
-                `Do you want to push changes for '${event.data.getParent().getName()}' Component?`,
-                'Push',
-            );
-            if (choice === 'Push') {
-                await commands.executeCommand(
-                    'openshift.component.push',
-                    event.data.getParent(),
-                    true,
-                );
-                OpenShiftExplorer.getInstance().refresh(event.data.getParent());
             }
         }
     });
@@ -138,13 +112,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     updateStatusBarItem(crcStatusItem, 'Stop CRC');
     extendClusterExplorer();
 
-    workspace.onDidChangeWorkspaceFolders((event: WorkspaceFoldersChangeEvent) => {
-        OdoImpl.Instance.loadWorkspaceComponents(event);
-    });
-
     void ComponentTypesView.instance.getAllComponents();
-
-    OdoImpl.Instance.loadWorkspaceComponents(null);
 
     startTelemetry(extensionContext);
 

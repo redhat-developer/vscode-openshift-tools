@@ -7,6 +7,28 @@ export interface Ctx {
     Fs: any;
 }
 
+export interface ForwardedPort {
+    containerName: string,
+    localAddress: string,
+    localPort: number,
+    containerPort: number,
+}
+
+export interface ComponentDescription {
+    devfilePath: string;
+    devfileData: {
+        devfile: Data;
+        supportedOdoFeatures: {
+            debug: boolean;
+            deploy: boolean;
+            dev: boolean;
+        }
+    }
+    devForwardedPorts: ForwardedPort[],
+    runningIn: string[];
+    managedBy: string;
+}
+
 export interface Data {
     schemaVersion: string;
     metadata: Metadata;

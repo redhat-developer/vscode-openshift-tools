@@ -78,7 +78,7 @@ async function gitImportMessageListener(event: any): Promise<any> {
             panel.webview.postMessage({
                 action: 'start_create_component'
             })
-            const status = await Component.createFromRootWorkspaceFolder(appendedUri, undefined, undefined,
+            const status = await Component.createFromRootWorkspaceFolder(appendedUri, undefined,
                 {
                     componentTypeName: event.compDesc.Devfile.metadata.name,
                     projectName: event.projectName,
@@ -202,8 +202,8 @@ function getGitProvider(host: string): GitProvider {
 
 function getCompDescription(projectType: string, language: string): ComponentTypeDescription[] {
     const compDescriptions = ComponentTypesView.instance.getCompDescriptions();
-    return Array.from(compDescriptions).filter((desc) => desc.Devfile.metadata.projectType.toLowerCase() === projectType ||
-        desc.Devfile.metadata.language.toLowerCase() === language || desc.Devfile.metadata.name.toLowerCase() === language);
+    return Array.from(compDescriptions).filter((desc) => desc.devfileData.devfile.metadata.projectType.toLowerCase() === projectType ||
+        desc.devfileData.devfile.metadata.language.toLowerCase() === language || desc.devfileData.devfile.metadata.name.toLowerCase() === language);
 }
 
 function clone(repositoryURL: string, location: string): Promise<void> {

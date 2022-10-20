@@ -23,8 +23,6 @@ suite('OpenShiftItem', () => {
     const appItem = new TestItem(projectItem, 'application', ContextType.APPLICATION);
     const componentItem = new TestItem(appItem, 'component', ContextType.COMPONENT);
     const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
-    const storageItem = new TestItem(componentItem, 'storage', ContextType.STORAGE);
-    const routeItem = new TestItem(componentItem, 'route', ContextType.COMPONENT_ROUTE);
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -119,48 +117,6 @@ suite('OpenShiftItem', () => {
                 await OpenShiftItem.getServiceNames(appItem);
             } catch (err) {
                 expect(err.message).equals('You need at least one Service available. Please create new OpenShift Service and try again.');
-                return;
-            }
-            fail('should throw error in case components array is empty');
-        });
-    });
-
-    suite('getStorageNames', ()=> {
-
-        test('returns an array of storage names for the component if there is at least one component', async ()=> {
-            sandbox.stub<any, any>(OdoImpl.prototype, 'getStorageNames').resolves([storageItem]);
-            const storageNames = await OpenShiftItem.getStorageNames(componentItem);
-            expect(storageNames[0].getName()).equals('storage');
-
-        });
-
-        test('throws error if there are no components available', async ()=> {
-            sandbox.stub(OdoImpl.prototype, 'getStorageNames').resolves([]);
-            try {
-                await OpenShiftItem.getStorageNames(componentItem);
-            } catch (err) {
-                expect(err.message).equals('You need at least one Storage available. Please create new OpenShift Storage and try again.');
-                return;
-            }
-            fail('should throw error in case components array is empty');
-        });
-    });
-
-    suite('getRoutes', ()=> {
-
-        test('returns list of URL names for the component if there is at least one component', async ()=> {
-            sandbox.stub(OdoImpl.prototype, 'getRoutes').resolves([routeItem]);
-            const routeNames = await OpenShiftItem.getRoutes(componentItem);
-            expect(routeNames[0].getName()).equals('route');
-
-        });
-
-        test('throws error if there are no components available', async ()=> {
-            sandbox.stub(OdoImpl.prototype, 'getRoutes').resolves([]);
-            try {
-                await OpenShiftItem.getRoutes(componentItem);
-            } catch (err) {
-                expect(err.message).equals('You need to add one URL to the component. Please create a new URL and try again.');
                 return;
             }
             fail('should throw error in case components array is empty');

@@ -14,4 +14,5 @@ interface VscodeAPI {
 interface Window {
     cmdText?: string;
     vscodeApi: VscodeAPI;
+    acquireVsCodeApi: () => VscodeAPI;
 }

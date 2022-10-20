@@ -266,7 +266,7 @@ export class GitImport extends React.Component<DefaultProps, {
 
     handleSelectedCard(compTypeDesc: CompTypeDesc): void {
         this.state.compDescs.forEach((compDesc) => {
-            if (compDesc.Devfile.metadata.name === compTypeDesc.Devfile.metadata.name) {
+            if (compDesc.devfileData.devfile.metadata.name === compTypeDesc.devfileData.devfile.metadata.name) {
                 compTypeDesc.selected = !compTypeDesc.selected;
                 compDesc.selected = compTypeDesc.selected;
             } else {

@@ -158,7 +158,7 @@ suite('odo commands integration', () => {
         if (!devfileCompType) {
             this.skip();
         } else {
-            await ODO.execute(Command.describeCatalogComponent(devfileCompType.name));
+            await ODO.execute(Command.describeCatalogComponent(devfileCompType.name, devfileCompType.registryName));
         }
     });
 
@@ -172,25 +172,18 @@ suite('odo commands integration', () => {
         const componentLocation = tmp.dirSync().name;
         const newUrlName = 'new-url-name';
         const newUrlNameSecure = 'new-url-name-secure';
-        const newStorageName = 'new-sorage-name';
         const nodeJsExGitUrl = 'https://github.com/sclorg/nodejs-ex.git';
 
         test('createLocalComponent()', async () => {
             await clone(nodeJsExGitUrl, componentLocation);
             await ODO.execute(
                 Command.createLocalComponent(
-                    project,
-                    newAppName,
                     'nodejs',
-                    'latest',
                     undefined,
                     newNodeJsComponent,
                     componentLocation
                 )
             );
-        });
-        test('describeApplication', async () => {
-            await ODO.execute(Command.describeApplication(project, newAppName));
         });
         test('listComponents()', async () => {
             await ODO.execute(Command.listComponents(project, newAppName));
@@ -201,23 +194,11 @@ suite('odo commands integration', () => {
         test('createComponentCustomUrl(secure)', async () => {
             await ODO.execute(Command.createComponentCustomUrl(newUrlNameSecure, '8080', true), componentLocation);
         });
-        test('createStorage(1)', async () => {
-            await ODO.execute(Command.createStorage(`${newStorageName}1`, '/mnt/storage1', '1Gi'), componentLocation);
-        });
-        test('createStorage(2)', async () => {
-            await ODO.execute(Command.createStorage(`${newStorageName}2`, '/mnt/storage2', '1Gi'), componentLocation);
-        });
-        test('listStorageNames()', async () => {
-            await ODO.execute(Command.listStorageNames(), componentLocation);
-        });
         test('describeComponentJson()', async () => {
             await ODO.execute(Command.describeComponentJson(),componentLocation);
         });
         test('describeComponentNoContextJson()', async () => {
             await ODO.execute(Command.describeComponentNoContextJson(project, newAppName, newNodeJsComponent),tmp.dirSync().name);
-        });
-        test('pushComponent()', async () => {
-            await ODO.execute(Command.pushComponent(), componentLocation);
         });
         test('showLog()', async () => {
             await ODO.execute(Command.showLog(), componentLocation);
@@ -225,18 +206,8 @@ suite('odo commands integration', () => {
         test('createComponentCustomUrl(secure)', async () => {
             await ODO.execute(Command.createComponentCustomUrl(`${newUrlNameSecure}2`, '8080', true), componentLocation);
         });
-        test('pushComponent(config, debug)', async () => {
-            await ODO.execute(Command.pushComponent(true, true), componentLocation);
-        });
         test('deleteComponentUrl', async () => {
             await ODO.execute(Command.deleteComponentUrl(newUrlName),componentLocation);
-        });
-        test('undeployComponent', async () => {
-            await ODO.execute(Command.undeployComponent(project, newAppName, newNodeJsComponent), componentLocation);
-        });
-        test('deleteStorage()', async () => {
-            await ODO.execute(Command.deleteStorage(`${newStorageName}1`), componentLocation);
-            await ODO.execute(Command.waitForStorageToBeGone(project, newAppName, `${newStorageName}1`), componentLocation)
         });
         test('deleteComponent', async () => {
             await ODO.execute(Command.deleteComponent(project, newAppName, newNodeJsComponent, true), componentLocation);

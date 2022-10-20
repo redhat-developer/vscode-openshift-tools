@@ -7,7 +7,6 @@ import {
     TreeDataProvider,
     TreeItem,
     Event,
-    ProviderResult,
     EventEmitter,
     Disposable,
     TreeView,
@@ -16,39 +15,43 @@ import {
     version,
     commands,
     Uri,
+    TreeItemCollapsibleState,
 } from 'vscode';
 
 import * as path from 'path';
-import { Context } from '@kubernetes/client-node/dist/config_types';
+import * as k8s from '@kubernetes/client-node';
 import { Platform } from './util/platform';
 
-import { Odo, OpenShiftObject, OdoImpl } from './odo';
 import { WatchUtil, FileContentChangeNotifier } from './util/watch';
 import { KubeConfigUtils } from './util/kubeUtils';
 import { vsCommand } from './vscommand';
-import { ComponentTypesView } from './registriesView';
+import { KubernetesObject } from '@kubernetes/client-node';
+import { CliChannel } from './cli';
+import { Command as DeploymentCommand } from './k8s/deployment';
+import { DeploymentConfig } from './k8s/deploymentConfig';
+import { loadItems } from './k8s/common';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
+
+type ExplorerItem = KubernetesObject | k8s.Context;
 
 type PackageJSON = {
   version: string;
   bugs: string;
 };
 
-export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Disposable {
+export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Disposable {
     private static instance: OpenShiftExplorer;
 
-    private static odoctl: Odo = OdoImpl.Instance;
-
-    private treeView: TreeView<OpenShiftObject>;
+    private treeView: TreeView<ExplorerItem>;
 
     private fsw: FileContentChangeNotifier;
-    private kubeContext: Context;
+    private kubeContext: k8s.Context;
 
-    private eventEmitter: EventEmitter<OpenShiftObject | undefined> =
-        new EventEmitter<OpenShiftObject | undefined>();
+    private eventEmitter: EventEmitter<ExplorerItem | undefined> =
+        new EventEmitter<ExplorerItem | undefined>();
 
-    readonly onDidChangeTreeData: Event<OpenShiftObject | undefined> = this
+    readonly onDidChangeTreeData: Event<ExplorerItem | undefined> = this
         .eventEmitter.event;
 
     private constructor() {
@@ -74,15 +77,8 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
             }
             this.kubeContext = newCtx;
         });
-        this.treeView = window.createTreeView('openshiftProjectExplorer', {
+        this.treeView = window.createTreeView<ExplorerItem>('openshiftProjectExplorer', {
             treeDataProvider: this,
-        });
-        OpenShiftExplorer.odoctl.subject.subscribe((event) => {
-            if (event.reveal) {
-                void this.reveal(event.data);
-            } else {
-                this.refresh(event.data);
-            }
         });
     }
 
@@ -94,31 +90,46 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
     }
 
     // eslint-disable-next-line class-methods-use-this
-    getTreeItem(element: OpenShiftObject): TreeItem | Thenable<TreeItem> {
-        return element;
-    }
-
-    // eslint-disable-next-line class-methods-use-this
-    getChildren(element?: OpenShiftObject): ProviderResult<OpenShiftObject[]> {
-        const result = element ? element.getChildren() : OpenShiftExplorer.odoctl.getClusters();
-        return Promise.resolve(result) // convert to promise, for the case of none thenable value
-            .then(async result1 => {
-                await commands.executeCommand('setContext', 'openshift.app.explorer.init', result1.length === 0);
-                return result1;
-            });
-    }
-
-    // eslint-disable-next-line class-methods-use-this
-    getParent?(element: OpenShiftObject): OpenShiftObject {
-        return element.getParent();
-    }
-
-    refresh(target?: OpenShiftObject): void {
-        if (!target) {
-            OpenShiftExplorer.odoctl.clearCache();
-            ComponentTypesView.refresh();
+    getTreeItem(element: ExplorerItem): TreeItem | Thenable<TreeItem> {
+        if ('name' in element) { // Context instance
+            return  {
+                contextValue: 'openshift.k8sContext',
+                label: element.name,
+                collapsibleState: TreeItemCollapsibleState.Collapsed
+            };
         }
+        // KubernetesObject instance
+        return {
+            contextValue: 'openshift.k8sObject',
+            label: element.metadata.name,
+            collapsibleState: TreeItemCollapsibleState.None,
+            iconPath: element.kind === 'Deployment' ? path.resolve(__dirname, '../../images/context/dark/deployment.svg') : path.resolve(__dirname, '../../images/context/dark/deployment-config.svg')
+        };
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    async getChildren(element?: ExplorerItem): Promise<ExplorerItem[]> {
+        const result: ExplorerItem[] = element ? [... await this.getDeployments(), ... await this.getDeploymentConfigs()] : [this.kubeContext];
+        if (!element) {
+            await commands.executeCommand('setContext', 'openshift.app.explorer.init', result.length === 0);
+        }
+        return result;
+    }
+
+    refresh(target?: ExplorerItem): void {
         this.eventEmitter.fire(target);
+    }
+
+    async getDeployments(): Promise<ExplorerItem[]> {
+        const deploymentsListData = await CliChannel.getInstance().execute(`${DeploymentCommand.get()}`);
+        const result = loadItems<k8s.KubernetesObject>(deploymentsListData.stdout);
+        return result;
+    }
+
+    async getDeploymentConfigs(): Promise<ExplorerItem[]> {
+        const deploymentsListData = await CliChannel.getInstance().execute(`${DeploymentConfig.command.getDeploymentConfigs()}`);
+        const result = loadItems<k8s.KubernetesObject>(deploymentsListData.stdout);
+        return result;
     }
 
     dispose(): void {
@@ -126,12 +137,14 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         this.treeView.dispose();
     }
 
-    async reveal(item: OpenShiftObject): Promise<void> {
-        this.refresh(item.getParent());
-        // double call of reveal is workaround for possible upstream issue
-        // https://github.com/redhat-developer/vscode-openshift-tools/issues/762
-        await this.treeView.reveal(item);
-        void this.treeView.reveal(item);
+    @vsCommand('openshift.resource.load')
+    public static loadResource(component: KubernetesObject) {
+        void commands.executeCommand('extension.vsKubernetesLoad', {namespace: component.metadata.namespace, kindName: `${component.kind}/${component.metadata.name}`});
+    }
+
+    @vsCommand('openshift.resource.openInConsole')
+    public static openInConsole(component: KubernetesObject) {
+        void commands.executeCommand('extension.vsKubernetesLoad', {namespace: component.metadata.namespace, kindName: `${component.kind}/${component.metadata.name}`});
     }
 
     @vsCommand('openshift.explorer.reportIssue')
@@ -149,4 +162,5 @@ export class OpenShiftExplorer implements TreeDataProvider<OpenShiftObject>, Dis
         ].join('\n');
         return `${packageJSON.bugs}/new?labels=kind/bug&title=&body=**Environment**\n${body}\n**Description**`;
     }
+
 }

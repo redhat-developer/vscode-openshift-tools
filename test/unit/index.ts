@@ -17,7 +17,7 @@ const config: Mocha.MochaOptions = {
     ui: 'tdd',
     timeout: 60000,
     color: true,
-    // grep: 'returns with no url set',
+    // grep: 'loads components in workspace',
 };
 
 const mocha = new Mocha(config);
@@ -35,7 +35,7 @@ export function run(): Promise<void> {
      return new Promise((resolve, reject) => {
         const testsRoot = paths.resolve(__dirname);
         const coverageRunner = loadCoverageRunner(testsRoot);
-        glob('**/**.test.js', { cwd: testsRoot }, (error, files): void => {
+        glob('**/workspace.test.js', { cwd: testsRoot }, (error, files): void => {
             if (error) {
                 reject(error);
             } else {

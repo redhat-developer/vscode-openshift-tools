@@ -65,7 +65,7 @@ const AutoScrollSwitch = withStyles({
     track: {},
   })(Switch);
 
-const vscode = window.vscodeApi;
+const vscode = window.acquireVsCodeApi();
 
 function stop() {
     vscode.postMessage({action: 'stop'});
