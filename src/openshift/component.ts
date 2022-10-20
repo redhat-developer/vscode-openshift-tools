@@ -5,7 +5,7 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { window, commands, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable, EventEmitter, Terminal, QuickPickItem } from 'vscode';
+import { window, commands, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable, EventEmitter, Terminal } from 'vscode';
 import { ChildProcess, exec } from 'child_process';
 import * as YAML from 'yaml'
 import OpenShiftItem, { clusterRequired, selectTargetComponent } from './openshiftItem';
@@ -27,6 +27,7 @@ import waitPort = require('wait-port');
 import { ComponentWorkspaceFolder } from '../odo/workspace';
 import LogViewLoader from '../webview/log/LogViewLoader';
 
+
 function createCancelledResult(stepName: string): any {
     const cancelledResult: any = new String('');
     cancelledResult.properties = {
@@ -35,18 +36,41 @@ function createCancelledResult(stepName: string): any {
     return cancelledResult;
 }
 
-export enum ComponentContext {
-    COMPONENT = 'openshift.component',
-    COMPONENT_DEVMODE_STARTING = 'openshift.component.devmode.starting',
-    COMPONENT_DEVMODE_RUNNING = 'openshift.component.devmode.running',
-    COMPONENT_DEVMODE_STOPPING = 'openshift.component.devmode.stopping'
+export enum ComponentContextState {
+    DEV = 'dev',
+    DEV_STARTING = 'dev-str',
+    DEV_RUNNING = 'dev-run',
+    DEV_STOPPING = 'dev-stp',
+    DEB = 'deb',
+    DEB_RUNNING = 'deb-run',
+    DEP = 'dep',
+    DEP_RUNNING = 'dep-run',
 }
 
+export class ComponentStateRegex {
+    public static readonly COMPONENT_DEV_STARTING = /openshift\.component\.dev-str.*/;
+    public static readonly COMPONENT_DEV_RUNNING = /openshift\.component\.dev-run.*/;
+    public static readonly COMPONENT_DEV_STOPPING = /openshift\.component\.dev-stp.*/;
+    public static readonly COMPONENT_DEB_STARTING = /openshift\.component.*\.deb-str.*/;
+    public static readonly COMPONENT_DEB_RUNNING = /openshift\.component.*\.deb-run.*/;
+    public static readonly COMPONENT_DEB_STOPPING = /openshift\.component.*\.deb-stp.*/;
+    public static readonly COMPONENT_DEP_STARTING = /openshift\.component.*\.dep-str.*/;
+    public static readonly COMPONENT_DEP_RUNNING = /openshift\.component.*\.dep-run.*/;
+    public static readonly COMPONENT_DEP_STOPPING = /openshift\.component.*\.dep-stp.*/;
+}
+
+
 interface ComponentDevState {
+    // dev state
     devTerminal?: Terminal;
     devProcess?: ChildProcess;
-    contextValue: ComponentContext;
+    devStatus?: string;
+    contextValue?: string;
     devProcessStopRequest?: DevProcessStopRequest;
+    // debug state
+    debugStatus?: string;
+    // deploy state
+    deployStatus?: string;
 }
 
 interface DevProcessStopRequest extends Disposable {
@@ -90,15 +114,32 @@ export class Component extends OpenShiftItem {
 
     private static readonly componentStates = new Map<string, ComponentDevState>();
 
-    static getComponentDevState(contextPath: string): ComponentDevState {
-        let state = Component.componentStates.get(contextPath);
+    static getComponentDevState(folder: ComponentWorkspaceFolder): ComponentDevState {
+        let state = Component.componentStates.get(folder.contextPath);
         if (!state) {
             state = {
-                contextValue: ComponentContext.COMPONENT
+                devStatus: folder.component?.devfileData?.supportedOdoFeatures?.dev ? 'dev-nrn' : undefined,
+                debugStatus: folder.component?.devfileData?.supportedOdoFeatures?.debug ? 'deb-nrn' : undefined,
+                deployStatus: folder.component?.devfileData?.supportedOdoFeatures?.deploy ? 'dep-nrn' : undefined,
             };
-            this.componentStates.set(contextPath, state);
+            this.componentStates.set(folder.contextPath, state);
         }
         return state;
+    }
+
+    public static generateContextValue(folder: ComponentWorkspaceFolder): string {
+        const state = Component.componentStates.get(folder.contextPath);
+        let contextSuffix = '';
+        if (state.devStatus) {
+            contextSuffix = contextSuffix.concat('.').concat(state.devStatus);
+        }
+        if (state.debugStatus) {
+            contextSuffix = contextSuffix.concat('.').concat(state.debugStatus);
+        }
+        if (state.deployStatus) {
+            contextSuffix = contextSuffix.concat('.').concat(state.deployStatus);
+        }
+        return `openshift.component${contextSuffix}`;
     }
 
     public static renderLabel(folder: ComponentWorkspaceFolder) {
@@ -106,21 +147,16 @@ export class Component extends OpenShiftItem {
     };
 
     public static renderStateLabel(folder: ComponentWorkspaceFolder) {
-        const state = Component.getComponentDevState(folder.contextPath);
-        switch (state.contextValue) {
-            case ComponentContext.COMPONENT_DEVMODE_STARTING:
-                return ' (starting)'
-            case ComponentContext.COMPONENT_DEVMODE_RUNNING:
-                return ' (running)';
-            case ComponentContext.COMPONENT_DEVMODE_STOPPING:
-                return ' (stopping)';
-            default:
-                return '';
+        let label = '';
+        const state = Component.getComponentDevState(folder);
+        if (state.devStatus === ComponentContextState.DEV_STARTING) {
+            label = ' (dev starting)';
+        } else if(state.devStatus === ComponentContextState.DEV_RUNNING) {
+            label = ' (dev running)';
+        } else if(state.devStatus === ComponentContextState.DEV_STOPPING) {
+            label = ' (dev stopping)';
         }
-    }
-
-    public static generateContextValue(folder: ComponentWorkspaceFolder) {
-        return Component.getComponentDevState(folder.contextPath).contextValue;
+        return label;
     }
 
     @vsCommand('openshift.component.showDevTerminal')
@@ -168,8 +204,8 @@ export class Component extends OpenShiftItem {
     @vsCommand('openshift.component.dev')
     //@clusterRequired() check for user is logged in should be implemented from scratch
     static async dev(component: ComponentWorkspaceFolder) {
-        const cs = Component.getComponentDevState(component.contextPath);
-        cs.contextValue = ComponentContext.COMPONENT_DEVMODE_STARTING;
+        const cs = Component.getComponentDevState(component);
+        cs.devStatus = ComponentContextState.DEV_STARTING;
         Component.stateChanged.fire(component.contextPath)
         const outputEmitter = new EventEmitter<string>();
         try {
@@ -182,7 +218,7 @@ export class Component extends OpenShiftItem {
                     },
                     close: () => {
                         if (cs.devProcess && cs.devProcess.exitCode === null && !cs.devProcessStopRequest) { // if process is still running and user closed terminal
-                            cs.contextValue = ComponentContext.COMPONENT_DEVMODE_STOPPING;
+                            cs.devStatus = ComponentContextState.DEV_STOPPING;
                             Component.stateChanged.fire(component.contextPath)
                             cs.devProcess.kill('SIGINT');
                             cs.devProcessStopRequest = Component.exitDevelopmentMode(cs.devProcess);
@@ -190,12 +226,12 @@ export class Component extends OpenShiftItem {
                         cs.devTerminal = undefined;
                     },
                     handleInput: ((data: string) => {
-                        if (cs.contextValue !== ComponentContext.COMPONENT_DEVMODE_STARTING) {
+                        if (cs.devStatus !== ComponentContextState.DEV_STARTING) {
                             if(!cs.devProcess) { // if any key pressed after odo process ends
                                 cs.devTerminal.dispose();
                             } else if (!cs.devProcessStopRequest && data.charCodeAt(0) === 3) { // ctrl+C processed only once when there is no cleaning process
                                 outputEmitter.fire('^C\r\n');
-                                cs.contextValue = ComponentContext.COMPONENT_DEVMODE_STOPPING;
+                                cs.devStatus = ComponentContextState.DEV_STOPPING;
                                 Component.stateChanged.fire(component.contextPath)
                                 cs.devProcess.kill('SIGINT');
                                 cs.devProcessStopRequest = Component.exitDevelopmentMode(cs.devProcess);
@@ -208,12 +244,12 @@ export class Component extends OpenShiftItem {
             devProcess.on('spawn', () => {
                 cs.devTerminal.show();
                 cs.devProcess = devProcess;
-                cs.contextValue = ComponentContext.COMPONENT_DEVMODE_RUNNING;
+                cs.devStatus = ComponentContextState.DEV_RUNNING;
                 Component.stateChanged.fire(component.contextPath)
             });
             devProcess.on('error', (err)=> {
                 void window.showErrorMessage(err.message);
-                cs.contextValue = ComponentContext.COMPONENT;
+                cs.devStatus = ComponentContextState.DEV;
                 Component.stateChanged.fire(component.contextPath)
             })
             devProcess.stdout.on('data', (chunk) => {
@@ -232,7 +268,7 @@ export class Component extends OpenShiftItem {
 
                 outputEmitter.fire('\r\nPress any key to close this terminal\r\n');
 
-                cs.contextValue = ComponentContext.COMPONENT;
+                cs.devStatus = ComponentContextState.DEV;
                 cs.devProcess = undefined;
                 Component.stateChanged.fire(component.contextPath)
             });
@@ -270,7 +306,7 @@ export class Component extends OpenShiftItem {
             await commands.executeCommand('vscode.open', Uri.parse(`http://${fp.localAddress}:${fp.localPort}`));
             return;
         } else if (componentDescription.devForwardedPorts?.length > 1) {
-            const ports: ReadonlyArray<QuickPickItem> = componentDescription.devForwardedPorts.map((fp) => ({
+            const ports = componentDescription.devForwardedPorts.map((fp) => ({
                 label: `${fp.localAddress}:${fp.localPort}`,
                 description: `Forwards to ${fp.containerName}:${fp.containerPort}`,
             }));
@@ -679,6 +715,7 @@ export class Component extends OpenShiftItem {
             return 'Debugger session has successfully started.';
         });
     }
+
 
     // TODO: remove "openshift.component.revealContextInExplorer" command
     @vsCommand('openshift.component.revealContextInExplorer')

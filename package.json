@@ -1131,22 +1131,22 @@
 				},
 				{
 					"command": "openshift.component.log",
-					"when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
 					"group": "c3@2"
 				},
 				{
 					"command": "openshift.component.followLog",
-					"when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
 					"group": "c3@3"
 				},
 				{
 					"command": "openshift.component.debug",
-					"when": "view == openshiftProjectExplorer && viewItem == component",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.deb-nrn.*/ && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
 					"group": "c4@5"
 				},
 				{
 					"command": "openshift.component.revealContextInExplorer",
-					"when": "view == openshiftProjectExplorer && viewItem == component || viewItem == componentNotPushed",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift\\.component.*/ || viewItem == componentNotPushed",
 					"group": "c5@1"
 				},
 				{
@@ -1156,27 +1156,27 @@
 				},
                 {
                     "command": "openshift.component.dev",
-                    "when": "view == openshiftComponentsView && viewItem == openshift.component",
+                    "when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
                     "group": "c1@1"
                 },
                 {
                     "command": "openshift.component.exitDevMode",
-                    "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
+                    "when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
                     "group": "c1@2"
                 },
                 {
                     "command": "openshift.component.forceExitDevMode",
-                    "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.stopping",
+                    "when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-stp.*/",
                     "group": "c1@3"                                        
                 },
                 {
                     "command": "openshift.component.showDevTerminal",
-                    "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
+                    "when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
                     "group": "c1@3"
                 },
                 {
                     "command": "openshift.component.openInBrowser",
-                    "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.running",
+                    "when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
                     "group": "c3@4"
                 },
 				{
