@@ -74,22 +74,39 @@ async function gitImportMessageListener(event: any): Promise<any> {
                 action: 'cloneStarted'
             })
             workspace.updateWorkspaceFolders(wsFolderLength, 0, { uri: appendedUri });
+            //workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: appendedUri });
             await clone(event.gitURL, appendedUri.fsPath);
-            panel.webview.postMessage({
-                action: 'start_create_component'
-            })
-            const status = await Component.createFromRootWorkspaceFolder(appendedUri, undefined,
-                {
-                    componentTypeName: event.compDesc.Devfile.metadata.name,
-                    projectName: event.projectName,
-                    applicationName: event.applicationName,
-                    compName: event.componentName,
-                    devFilePath: event.devFilePath === 'devfile.yaml' || 'devfile.yml' ? '' : event.devFilePath
-                }, true);
-            panel.webview.postMessage({
-                action: event.action,
-                status: status
-            });
+            if (!event.isDevFile) {
+                panel.webview.postMessage({
+                    action: 'start_create_component'
+                })
+                try {
+                    const status = await Component.createFromRootWorkspaceFolder(appendedUri, undefined,
+                        {
+                            componentTypeName: event.compDesc.devfileData.devfile.metadata.name,
+                            projectName: event.projectName,
+                            applicationName: event.applicationName,
+                            compName: event.componentName,
+                            devFilePath: !event.devFilePath || event.devFilePath === 'devfile.yaml' || 'devfile.yml' ?
+                                '' : event.devFilePath
+                        }, true);
+                    panel.webview.postMessage({
+                        action: event.action,
+                        status: status
+                    });
+                } catch (e) {
+                    console.error(e);
+                    vscode.window.showErrorMessage(`Componet ${event.componentName} creation failed`);
+                    panel.webview.postMessage({
+                        action: event.action
+                    });
+                }
+            } else {
+                panel.webview.postMessage({
+                    action: event.action,
+                    status: 'done'
+                });
+            }
             break;
         }
         case 'close': {

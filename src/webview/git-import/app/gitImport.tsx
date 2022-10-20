@@ -253,7 +253,8 @@ export class GitImport extends React.Component<DefaultProps, {
             componentName: this.state.componentName.value,
             applicationName: this.state.applicationName,
             devFilePath: this.state.devFilePath?.value,
-            compDesc: this.state.selectedDesc
+            compDesc: this.state.selectedDesc,
+            isDevFile: this.state.isDevFile
         });
     }
 
@@ -284,25 +285,70 @@ export class GitImport extends React.Component<DefaultProps, {
             applicationName, componentName, compDescs, isDevFile, devFilePath, selectedDesc } = this.state;
         return (
             <div className='mainContainer margin' >
-                {
-                    showLoadScreen ? <LoadScreen title={notification} /> :
-                        <>
-                            <div className='title'>
-                                <Typography variant='h5'>Import from Git</Typography>
-                            </div><div className='subTitle'>
-                                <Typography>Import code from your Git repository to be built and deployed on OpenShift.
-                                    This workflow will suggest the Import strategy following the recommended devfile.yaml and create a component from it.</Typography>
-                            </div><div className='formContainer'>
-                                <div className='form'>
-                                    <InputLabel required htmlFor='bootstrap-input'
+                <div className='title'>
+                    <Typography variant='h5'>Import from Git</Typography>
+                </div><div className='subTitle'>
+                    <Typography>Import code from your Git repository to be built and deployed on OpenShift.
+                        This workflow will suggest the Import strategy following the recommended devfile.yaml and create a component from it.</Typography>
+                </div><div className='formContainer'>
+                    <div className='form'>
+                        <InputLabel required htmlFor='bootstrap-input'
+                            style={{
+                                color: '#EE0000'
+                            }}>
+                            Provide your Git Repository URL
+                        </InputLabel>
+                        <TextField
+                            error={gitURL.showError}
+                            value={gitURL.value}
+                            id='bootstrap-input'
+                            sx={{
+                                input: {
+                                    color: 'var(--vscode-settings-textInputForeground)',
+                                    backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                }
+                            }}
+                            style={{ width: '80%', paddingTop: '10px' }}
+                            onChange={(e) => this.gitRepoChange(e.target.value)}
+                            helperText={gitURL.helpText}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position='end'>
+                                        {gitURL.helpText !== '' ?
+                                            gitURL.helpText === 'Validated' ?
+                                                <CheckCircleIcon color='success' /> :
+                                                gitURL.helpText.indexOf('but cannot be reached') !== -1 ?
+                                                    <ErrorIcon color='warning' /> :
+                                                    <ErrorIcon color='error' />
+                                            : undefined}
+                                    </InputAdornment>
+                                )
+                            }} >
+                        </TextField>
+                        <div style={{position: 'relative'}}>
+                            {showLoadScreen && <LoadScreen title={notification} />}
+                        </div>
+                        <div>
+                            <this.Accordion
+                                id='parent'
+                                style={{
+                                    backgroundColor: 'var(--vscode-editor-background)',
+                                    color: 'var(--vscode-dropdown-foreground)',
+                                    marginTop: '1rem'
+                                }}
+                                onClick={(e) => this.accordionClick(e, !parentAccordionOpen, 'parent')}>
+                                <this.AccordionSummary aria-controls='panel1d-content' id='panel1d-header'
+                                    expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem', color: 'var(--vscode-dropdown-foreground)' }} />}>
+                                    <Typography>{parentAccordionOpen ? 'Hide' : 'Show'} advanced Git Options</Typography>
+                                </this.AccordionSummary>
+                                <this.AccordionDetails>
+                                    <InputLabel htmlFor='bootstrap-input'
                                         style={{
-                                            color: '#EE0000'
+                                            color: 'var(--vscode-settings-textInputForeground)'
                                         }}>
-                                        Provide your Git Repository URL
+                                        Git reference
                                     </InputLabel>
                                     <TextField
-                                        error={gitURL.showError}
-                                        value={gitURL.value}
                                         id='bootstrap-input'
                                         sx={{
                                             input: {
@@ -311,200 +357,154 @@ export class GitImport extends React.Component<DefaultProps, {
                                             }
                                         }}
                                         style={{ width: '80%', paddingTop: '10px' }}
-                                        onChange={(e) => this.gitRepoChange(e.target.value)}
-                                        helperText={gitURL.helpText}
-                                        InputProps={{
-                                            endAdornment: (
-                                                <InputAdornment position='end'>
-                                                    {gitURL.helpText !== '' ?
-                                                        gitURL.helpText === 'Validated' ?
-                                                            <CheckCircleIcon color='success' /> :
-                                                            gitURL.helpText.indexOf('but cannot be reached') !== -1 ?
-                                                                <ErrorIcon color='warning' /> :
-                                                                <ErrorIcon color='error' />
-                                                        : undefined}
-                                                </InputAdornment>
-                                            ),
-                                        }} />
-                                    <div>
-                                        <this.Accordion
-                                            id='parent'
-                                            style={{
-                                                backgroundColor: 'var(--vscode-editor-background)',
-                                                color: 'var(--vscode-dropdown-foreground)',
-                                                marginTop: '1rem'
-                                            }}
-                                            onClick={(e) => this.accordionClick(e, !parentAccordionOpen, 'parent')}>
-                                            <this.AccordionSummary aria-controls='panel1d-content' id='panel1d-header'
-                                                expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem', color: 'var(--vscode-dropdown-foreground)' }} />}>
-                                                <Typography>{parentAccordionOpen ? 'Hide' : 'Show'} advanced Git Options</Typography>
-                                            </this.AccordionSummary>
-                                            <this.AccordionDetails>
-                                                <InputLabel htmlFor='bootstrap-input'
-                                                    style={{
-                                                        color: 'var(--vscode-settings-textInputForeground)'
-                                                    }}>
-                                                    Git reference
-                                                </InputLabel>
-                                                <TextField
-                                                    id='bootstrap-input'
-                                                    sx={{
-                                                        input: {
-                                                            color: 'var(--vscode-settings-textInputForeground)',
-                                                            backgroundColor: 'var(--vscode-settings-textInputBackground)'
-                                                        }
-                                                    }}
-                                                    style={{ width: '80%', paddingTop: '10px' }}
-                                                    helperText='Optional branch, tag, or commit.' />
-                                                <InputLabel htmlFor='bootstrap-input'
-                                                    style={{
-                                                        color: 'var(--vscode-settings-textInputForeground)',
-                                                        marginTop: '2rem'
-                                                    }}>
-                                                    Context dir
-                                                </InputLabel>
-                                                <TextField
-                                                    id='bootstrap-input'
-                                                    sx={{
-                                                        input: {
-                                                            color: 'var(--vscode-settings-textInputForeground)',
-                                                            backgroundColor: 'var(--vscode-settings-textInputBackground)'
-                                                        }
-                                                    }}
-                                                    style={{ width: '80%', paddingTop: '10px' }}
-                                                    defaultValue='/'
-                                                    helperText='Optional subdirectory for the source code, used as a context directory for build.' />
-                                            </this.AccordionDetails>
-                                        </this.Accordion>
-                                        {compDescs?.length > 0 &&
-                                            <>
-                                                {isDevFile &&
-                                                    <div className='stratergyContainer stratergySuccess'>
-                                                        <CheckCircleIcon color='success' style={{ fontSize: 20 }} />
-                                                        <Typography variant='body2' style={{ margin: '0 5px' }}>A devfile is detected and recommended to create the component.</Typography>
-                                                    </div>}
-                                                {!isDevFile &&
-                                                    <div className='stratergyContainer stratergyWarning'>
-                                                        <ErrorIcon color='warning' style={{ fontSize: 20 }} />
-                                                        <Typography variant='body2' style={{ margin: '0 5px' }}>There is no devfile.yaml detected in the repository. Please select a devfile from the default devfile registry.</Typography>
-                                                    </div>}
-                                                <div className='cardContainer'>
-                                                    <div className='devfileGalleryGrid'>
-                                                        {compDescs.map((compDescription, key: number) => (
-                                                            <CardItem key={key} compDesc={compDescription}
-                                                                onCardClick={(compDesc) => this.handleSelectedCard(compDesc)} />
-                                                        ))}
-                                                    </div>
-                                                    <div>
-                                                        <this.Accordion
-                                                            style={{
-                                                                backgroundColor: 'var(--vscode-editor-background)',
-                                                                color: 'var(--vscode-dropdown-foreground)',
-                                                                marginTop: '1rem'
-                                                            }}
-                                                            onClick={(e) => this.accordionClick(e, !statergyAccordionOpen, 'statergy')}
-                                                        >
-                                                            <this.AccordionSummary aria-controls='panel2d-content' id='panel2d-header'
-                                                                expandIcon={statergyAccordionOpen ?
-                                                                    <UndoIcon sx={{ fontSize: '0.9rem', color: 'var(--vscode-dropdown-foreground)' }} /> :
-                                                                    <EditIcon sx={{ fontSize: '0.9rem', color: 'var(--vscode-dropdown-foreground)' }} />}>
-                                                                <Typography>{statergyAccordionOpen ? 'Revert to recommended' : 'Edit Import Strategy'}</Typography>
-                                                            </this.AccordionSummary>
-                                                            <this.AccordionDetails>
-                                                                <InputLabel required htmlFor='bootstrap-input'
-                                                                    style={{
-                                                                        color: '#EE0000'
-                                                                    }}>
-                                                                    Devfile Path
-                                                                </InputLabel>
-                                                                <TextField
-                                                                    id='bootstrap-input'
-                                                                    value={devFilePath?.value}
-                                                                    error={devFilePath?.error}
-                                                                    defaultValue={devFilePath?.value || 'devfile.yaml'}
-                                                                    sx={{
-                                                                        input: {
-                                                                            color: 'var(--vscode-settings-textInputForeground)',
-                                                                            backgroundColor: 'var(--vscode-settings-textInputBackground)'
-                                                                        }
-                                                                    }}
-                                                                    style={{ width: '80%', paddingTop: '10px' }}
-                                                                    helperText={devFilePath?.helpText}
-                                                                    onChange={(e) => this.devFilePathChange(e.target.value)} />
-                                                            </this.AccordionDetails>
-                                                        </this.Accordion>
-                                                    </div>
-
-
-                                                </div>
-                                            </>}
-                                        {applicationName && componentName &&
-                                            <div className='form sub'>
-                                                <InputLabel htmlFor='bootstrap-input'
-                                                    style={{
-                                                        color: 'var(--vscode-settings-textInputForeground)',
-                                                        marginTop: '1rem'
-                                                    }}>
-                                                    Application Name
-                                                </InputLabel>
-                                                <TextField
-                                                    defaultValue={applicationName}
-                                                    value={applicationName}
-                                                    onChange={(e) => this.textFieldChange(e.target.value, 'app')}
-                                                    id='bootstrap-input'
-                                                    sx={{
-                                                        input: {
-                                                            color: 'var(--vscode-settings-textInputForeground)',
-                                                            backgroundColor: 'var(--vscode-settings-textInputBackground)'
-                                                        }
-                                                    }}
-                                                    style={{ width: '80%', paddingTop: '10px' }}
-                                                    helperText='A unique name given to the application grouping to label your resources.' />
-                                                <InputLabel required htmlFor='bootstrap-input'
-                                                    style={{
-                                                        color: '#EE0000',
-                                                        marginTop: '1rem'
-                                                    }}>
-                                                    Component Name
-                                                </InputLabel>
-                                                <TextField
-                                                    defaultValue={componentName.value}
-                                                    value={componentName.value}
-                                                    error={componentName.error}
-                                                    onChange={(e) => this.textFieldChange(e.target.value, 'comp')}
-                                                    id='bootstrap-input'
-                                                    sx={{
-                                                        input: {
-                                                            color: 'var(--vscode-settings-textInputForeground)',
-                                                            backgroundColor: 'var(--vscode-settings-textInputBackground)'
-                                                        }
-                                                    }}
-                                                    style={{ width: '80%', paddingTop: '10px' }}
-                                                    helperText={componentName.helpText} />
-                                            </div>}
-                                        <div style={{ marginTop: '10px' }}>
-                                            <Button variant='contained'
-                                                disabled={gitURL.value.length === 0 || gitURL.showError ||
-                                                    componentName?.error || devFilePath?.error || !selectedDesc?.selected}
-                                                component='span'
-                                                className='buttonStyle'
-                                                style={{ backgroundColor: '#EE0000', textTransform: 'none' }}
-                                                onClick={() => this.createComponent()}>
-                                                Create Component
-                                            </Button>
-                                            <Button
-                                                variant='outlined'
-                                                className='buttonStyle'
-                                                style={{ textTransform: 'none', marginLeft: '1rem' }}
-                                                onClick={() => this.initalize(true)}>
-                                                Cancel
-                                            </Button>
+                                        helperText='Optional branch, tag, or commit.' />
+                                    <InputLabel htmlFor='bootstrap-input'
+                                        style={{
+                                            color: 'var(--vscode-settings-textInputForeground)',
+                                            marginTop: '2rem'
+                                        }}>
+                                        Context dir
+                                    </InputLabel>
+                                    <TextField
+                                        id='bootstrap-input'
+                                        sx={{
+                                            input: {
+                                                color: 'var(--vscode-settings-textInputForeground)',
+                                                backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                            }
+                                        }}
+                                        style={{ width: '80%', paddingTop: '10px' }}
+                                        defaultValue='/'
+                                        helperText='Optional subdirectory for the source code, used as a context directory for build.' />
+                                </this.AccordionDetails>
+                            </this.Accordion>
+                            {compDescs?.length > 0 &&
+                                <>
+                                    {isDevFile &&
+                                        <div className='stratergyContainer stratergySuccess'>
+                                            <CheckCircleIcon color='success' style={{ fontSize: 20 }} />
+                                            <Typography variant='body2' style={{ margin: '0 5px' }}>A devfile is detected and recommended to create the component.</Typography>
+                                        </div>}
+                                    {!isDevFile &&
+                                        <div className='stratergyContainer stratergyWarning'>
+                                            <ErrorIcon color='warning' style={{ fontSize: 20 }} />
+                                            <Typography variant='body2' style={{ margin: '0 5px' }}>There is no devfile.yaml detected in the repository. Please select a devfile from the default devfile registry.</Typography>
+                                        </div>}
+                                    <div className='cardContainer'>
+                                        <div className='devfileGalleryGrid'>
+                                            {compDescs.map((compDescription, key: number) => (
+                                                <CardItem key={key} compDesc={compDescription}
+                                                    onCardClick={(compDesc) => this.handleSelectedCard(compDesc)} />
+                                            ))}
                                         </div>
+                                        <div>
+                                            <this.Accordion
+                                                style={{
+                                                    backgroundColor: 'var(--vscode-editor-background)',
+                                                    color: 'var(--vscode-dropdown-foreground)',
+                                                    marginTop: '1rem'
+                                                }}
+                                                onClick={(e) => this.accordionClick(e, !statergyAccordionOpen, 'statergy')}
+                                            >
+                                                <this.AccordionSummary aria-controls='panel2d-content' id='panel2d-header'
+                                                    expandIcon={statergyAccordionOpen ?
+                                                        <UndoIcon sx={{ fontSize: '0.9rem', color: 'var(--vscode-dropdown-foreground)' }} /> :
+                                                        <EditIcon sx={{ fontSize: '0.9rem', color: 'var(--vscode-dropdown-foreground)' }} />}>
+                                                    <Typography>{statergyAccordionOpen ? 'Revert to recommended' : 'Edit Import Strategy'}</Typography>
+                                                </this.AccordionSummary>
+                                                <this.AccordionDetails>
+                                                    <InputLabel required htmlFor='bootstrap-input'
+                                                        style={{
+                                                            color: '#EE0000'
+                                                        }}>
+                                                        Devfile Path
+                                                    </InputLabel>
+                                                    <TextField
+                                                        id='bootstrap-input'
+                                                        value={devFilePath?.value}
+                                                        error={devFilePath?.error}
+                                                        defaultValue={devFilePath?.value || 'devfile.yaml'}
+                                                        sx={{
+                                                            input: {
+                                                                color: 'var(--vscode-settings-textInputForeground)',
+                                                                backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                                            }
+                                                        }}
+                                                        style={{ width: '80%', paddingTop: '10px' }}
+                                                        helperText={devFilePath?.helpText}
+                                                        onChange={(e) => this.devFilePathChange(e.target.value)} />
+                                                </this.AccordionDetails>
+                                            </this.Accordion>
+                                        </div>
+
+
                                     </div>
-                                </div>
+                                </>}
+                            {applicationName && componentName &&
+                                <div className='form sub'>
+                                    <InputLabel htmlFor='bootstrap-input'
+                                        style={{
+                                            color: 'var(--vscode-settings-textInputForeground)',
+                                            marginTop: '1rem'
+                                        }}>
+                                        Application Name
+                                    </InputLabel>
+                                    <TextField
+                                        defaultValue={applicationName}
+                                        value={applicationName}
+                                        onChange={(e) => this.textFieldChange(e.target.value, 'app')}
+                                        id='bootstrap-input'
+                                        sx={{
+                                            input: {
+                                                color: 'var(--vscode-settings-textInputForeground)',
+                                                backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                            }
+                                        }}
+                                        style={{ width: '80%', paddingTop: '10px' }}
+                                        helperText='A unique name given to the application grouping to label your resources.' />
+                                    <InputLabel required htmlFor='bootstrap-input'
+                                        style={{
+                                            color: '#EE0000',
+                                            marginTop: '1rem'
+                                        }}>
+                                        Component Name
+                                    </InputLabel>
+                                    <TextField
+                                        defaultValue={componentName.value}
+                                        value={componentName.value}
+                                        error={componentName.error}
+                                        onChange={(e) => this.textFieldChange(e.target.value, 'comp')}
+                                        id='bootstrap-input'
+                                        sx={{
+                                            input: {
+                                                color: 'var(--vscode-settings-textInputForeground)',
+                                                backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                            }
+                                        }}
+                                        style={{ width: '80%', paddingTop: '10px' }}
+                                        helperText={componentName.helpText} />
+                                </div>}
+                            <div style={{ marginTop: '10px' }}>
+                                <Button variant='contained'
+                                    disabled={gitURL.value.length === 0 || gitURL.showError ||
+                                        componentName?.error || devFilePath?.error || !selectedDesc?.selected}
+                                    component='span'
+                                    className='buttonStyle'
+                                    style={{ backgroundColor: '#EE0000', textTransform: 'none' }}
+                                    onClick={() => this.createComponent()}>
+                                    Create Component
+                                </Button>
+                                <Button
+                                    variant='outlined'
+                                    className='buttonStyle'
+                                    style={{ textTransform: 'none', marginLeft: '1rem' }}
+                                    onClick={() => this.initalize(true)}>
+                                    Cancel
+                                </Button>
                             </div>
-                        </>
-                }
+                        </div>
+                    </div>
+                </div>
             </div>
         )
     }

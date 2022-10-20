@@ -427,6 +427,15 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.component.importFromGit",
+				"title": "Import from Git",
+				"category": "OpenShift",
+				"icon": {
+					"light": "images/title/light/workspace-new.svg",
+					"dark": "images/title/dark/workspace-new.svg"
+				}
+			},
+			{
 				"command": "openshift.component.createFromLocal",
 				"title": "New Component",
 				"category": "OpenShift",
@@ -809,7 +818,7 @@
 			},
 			{
 				"view": "openshiftComponentsView",
-				"contents": "You have no OpenShift Components in your workspace yet.\n[Create Component](command:openshift.component.createFromLocal)",
+				"contents": "You have no OpenShift Components in your workspace yet.\n[$(git-branch) Import from Git](command:openshift.component.importFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
 				"enablement": "openshift.component.explorer.init"
 			}
 		],
@@ -973,7 +982,7 @@
 					"command": "openshift.componentTypesView.registry.openInBrowser",
 					"when": "false"
 				},
-                {   
+                {
                     "command": "openshift.resource.load",
                     "when": "false"
                 },
@@ -1034,6 +1043,11 @@
 				},
 				{
 					"command": "openshift.component.createFromLocal",
+					"when": "view == openshiftComponentsView",
+					"group": "navigation"
+				},
+                {
+					"command": "openshift.component.importFromGit",
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
 				}
@@ -1177,7 +1191,7 @@
                 {
                     "command": "openshift.component.forceExitDevMode",
                     "when": "view == openshiftComponentsView && viewItem == openshift.component.devmode.stopping",
-                    "group": "c1@3"                                        
+                    "group": "c1@3"
                 },
                 {
                     "command": "openshift.component.showDevTerminal",
