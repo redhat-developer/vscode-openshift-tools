@@ -85,12 +85,8 @@ body {
 
 .cardContainer {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     margin-top: 1rem;
-}
-
-.editStatergy {
-    width: 50%;
 }
 
 .stratergySuccess {

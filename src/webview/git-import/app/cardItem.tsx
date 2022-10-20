@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
-import { Card, makeStyles, Typography } from '@material-ui/core';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
-import cardItemStyle from './cardItem.style';
+import { Card, makeStyles, Typography } from '@material-ui/core';
 import { CompTypeDesc } from './gitImport';
+import cardItemStyle from './cardItem.style';
 
 const makeCardStyle = makeStyles(cardItemStyle);
 

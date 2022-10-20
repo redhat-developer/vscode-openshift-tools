@@ -8,17 +8,17 @@ import * as fs from 'fs';
 import { ExtensionID } from '../../util/constants';
 import { GitProvider } from '../../git/types/git';
 import { getGitService } from '../../git/services';
-import jsYaml = require('js-yaml');
 import { DetectedServiceData, DetectedStrategy, detectImportStrategies } from '../../git/utils';
 import { ComponentTypesView } from '../../registriesView';
-import GitUrlParse = require('git-url-parse');
 import { ComponentTypeDescription } from '../../odo/componentType';
 import { Response } from '../../git/types';
-import { selectWorkspaceFolder } from '../../util/workspace';
-import cp = require('child_process');
 import { Uri, workspace } from 'vscode';
 import { Component } from '../../openshift/component';
 import OpenShiftItem from '../../openshift/openshiftItem';
+import { selectWorkspaceFolder } from '../../util/workspace';
+import jsYaml = require('js-yaml');
+import GitUrlParse = require('git-url-parse');
+import cp = require('child_process');
 
 let panel: vscode.WebviewPanel;
 
@@ -70,16 +70,30 @@ async function gitImportMessageListener(event: any): Promise<any> {
             const workspacePath = await selectWorkspaceFolder();
             const appendedUri = Uri.joinPath(workspacePath, event.projectName);
             const wsFolderLength = workspace?.workspaceFolders?.length || 0;
+            panel.webview.postMessage({
+                action: 'cloneStarted'
+            })
             workspace.updateWorkspaceFolders(wsFolderLength, 0, { uri: appendedUri });
             await clone(event.gitURL, appendedUri.fsPath);
-            await Component.createFromRootWorkspaceFolder(appendedUri, undefined, undefined,
+            panel.webview.postMessage({
+                action: 'start_create_component'
+            })
+            const status = await Component.createFromRootWorkspaceFolder(appendedUri, undefined, undefined,
                 {
                     componentTypeName: event.compDesc.Devfile.metadata.name,
                     projectName: event.projectName,
                     applicationName: event.applicationName,
                     compName: event.componentName,
-                    devFilePath: event.devFilePath === 'devfile.yaml' ? '' : event.devFilePath
+                    devFilePath: event.devFilePath === 'devfile.yaml' || 'devfile.yml' ? '' : event.devFilePath
                 }, true);
+            panel.webview.postMessage({
+                action: event.action,
+                status: status
+            });
+            break;
+        }
+        case 'close': {
+            panel.dispose();
             break;
         }
     }
@@ -215,7 +229,7 @@ function validateComponentName(event: any) {
 function validateDevFilePath(event: any) {
     let validationMessage = OpenShiftItem.emptyName(`Required ${event.param}`, event.param.trim());
     if (!validationMessage) validationMessage = OpenShiftItem.validateFilePath(`Not matches ^[a-z]:((\/|\\\\)[a-zA-Z0-9_ \\-]+)+\\.yaml$`, event.param);
-    if (!validationMessage) {
+    if (!validationMessage && event.param !== 'devfile.yaml' && event.param !== 'devfile.yml') {
         const uri = Uri.parse(event.param);
         const devFileLocation = path.join(uri.fsPath);
         validationMessage = fs.existsSync(devFileLocation) ? null : 'devfile not available on the given path';

@@ -106,7 +106,7 @@ export default class OpenShiftItem {
     }
 
     static validateFilePath(message: string, value: string): string | null {
-        const regx = new RegExp(/^[a-z]:((\/|\\)[a-zA-Z0-9_ \\-]+)+\.(yaml|yml)$/,'gi');
+        const regx = new RegExp(/(^[a-z]:((\/|\\)[a-zA-Z0-9_ \\-]+)+|(devfile))\.(yaml|yml)$/,'gi');
         return regx.test(value) ? null : message;
     }
 
