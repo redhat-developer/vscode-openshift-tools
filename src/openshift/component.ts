@@ -37,13 +37,13 @@ function createCancelledResult(stepName: string): any {
 }
 
 export enum ComponentContextState {
-    DEV = 'dev',
+    DEV = 'dev-nrn',
     DEV_STARTING = 'dev-str',
     DEV_RUNNING = 'dev-run',
     DEV_STOPPING = 'dev-stp',
-    DEB = 'deb',
+    DEB = 'deb-nrn',
     DEB_RUNNING = 'deb-run',
-    DEP = 'dep',
+    DEP = 'dep-nrn',
     DEP_RUNNING = 'dep-run',
 }
 
@@ -118,9 +118,9 @@ export class Component extends OpenShiftItem {
         let state = Component.componentStates.get(folder.contextPath);
         if (!state) {
             state = {
-                devStatus: folder.component?.devfileData?.supportedOdoFeatures?.dev ? 'dev-nrn' : undefined,
-                debugStatus: folder.component?.devfileData?.supportedOdoFeatures?.debug ? 'deb-nrn' : undefined,
-                deployStatus: folder.component?.devfileData?.supportedOdoFeatures?.deploy ? 'dep-nrn' : undefined,
+                devStatus: folder.component?.devfileData?.supportedOdoFeatures?.dev ? ComponentContextState.DEV : undefined,
+                debugStatus: folder.component?.devfileData?.supportedOdoFeatures?.debug ? ComponentContextState.DEB : undefined,
+                deployStatus: folder.component?.devfileData?.supportedOdoFeatures?.deploy ? ComponentContextState.DEP : undefined,
             };
             this.componentStates.set(folder.contextPath, state);
         }
