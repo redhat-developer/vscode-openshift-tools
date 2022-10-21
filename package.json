@@ -431,8 +431,8 @@
 				"title": "Import from Git",
 				"category": "OpenShift",
 				"icon": {
-					"light": "images/title/light/workspace-new.svg",
-					"dark": "images/title/dark/workspace-new.svg"
+					"light": "images/title/light/git-branch.svg",
+					"dark": "images/title/dark/git-branch.svg"
 				}
 			},
 			{
@@ -1191,7 +1191,7 @@
         {
             "command": "openshift.component.forceExitDevMode",
             "when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-stp.*/",
-            "group": "c1@3"                                        
+            "group": "c1@3"
         },
         {
             "command": "openshift.component.showDevTerminal",
