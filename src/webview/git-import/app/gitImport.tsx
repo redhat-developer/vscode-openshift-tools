@@ -112,7 +112,6 @@ export class GitImport extends React.Component<DefaultProps, {
                 this.setState({
                     applicationName: message.data.appName,
                     compDescs: message.data.compDescs,
-                    selectedDesc: message.data.compDescs,
                     gitURL: {
                         value: message.data.gitURL,
                         showError: message.data.error,
@@ -185,7 +184,7 @@ export class GitImport extends React.Component<DefaultProps, {
             compDescs: [],
             isDevFile: undefined,
             devFilePath: {
-                value: undefined,
+                value: 'devfile.yaml',
                 error: undefined,
                 helpText: 'Allows the builds to use a different path to locate your Devfile, relative to the Context Dir field'
             }
@@ -280,9 +279,24 @@ export class GitImport extends React.Component<DefaultProps, {
         }
     }
 
+    handleCreateBtnDisable(): boolean {
+        let disable = this.state.gitURL.value.length === 0 || this.state.gitURL.showError || this.state.componentName?.error;
+        if (!disable) {
+            if (this.state.selectedDesc && this.state.selectedDesc.selected) {
+                return false;
+            } else {
+                console.log('devfilepath:::', this.state.devFilePath);
+                disable =
+                    this.state.devFilePath.error || this.state.devFilePath.value.length === 0 ||
+                    this.state.devFilePath.value === 'devfile.yaml' || this.state.devFilePath.value === 'devfile.yml';
+            }
+        }
+        return disable;
+    }
+
     render(): React.ReactNode {
         const { gitURL, parentAccordionOpen, statergyAccordionOpen, showLoadScreen, notification,
-            applicationName, componentName, compDescs, isDevFile, devFilePath, selectedDesc } = this.state;
+            applicationName, componentName, compDescs, isDevFile, devFilePath } = this.state;
         return (
             <div className='mainContainer margin' >
                 <div className='title'>
@@ -325,7 +339,7 @@ export class GitImport extends React.Component<DefaultProps, {
                                 )
                             }} >
                         </TextField>
-                        <div style={{position: 'relative'}}>
+                        <div style={{ position: 'relative' }}>
                             {showLoadScreen && <LoadScreen title={notification} />}
                         </div>
                         <div>
@@ -486,8 +500,7 @@ export class GitImport extends React.Component<DefaultProps, {
                                 </div>}
                             <div style={{ marginTop: '10px' }}>
                                 <Button variant='contained'
-                                    disabled={gitURL.value.length === 0 || gitURL.showError ||
-                                        componentName?.error || devFilePath?.error || !selectedDesc?.selected}
+                                    disabled={this.handleCreateBtnDisable()}
                                     component='span'
                                     className='buttonStyle'
                                     style={{ backgroundColor: '#EE0000', textTransform: 'none' }}

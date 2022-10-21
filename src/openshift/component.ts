@@ -413,7 +413,7 @@ export class Component extends OpenShiftItem {
         devFilePath?: string
     }, isGitImportCall = false, notification = true): Promise<string | null> {
         let useExistingDevfile = false;
-        const devFileLocation = opts.devFilePath?.length > 0 ? path.join(opts.devFilePath) : path.join(folder.fsPath, 'devfile.yaml');
+        const devFileLocation = path.join(folder.fsPath, 'devfile.yaml');
         useExistingDevfile = fs.existsSync(devFileLocation);
 
         let initialNameValue: string;
@@ -430,7 +430,7 @@ export class Component extends OpenShiftItem {
         let createStarter: string;
         let componentType: ComponentTypeAdapter;
         let componentTypeCandidates: ComponentTypeAdapter[];
-        if (!useExistingDevfile) {
+        if (!useExistingDevfile && (!opts.devFilePath || opts.devFilePath.length === 0)) {
             const componentTypes = await Component.odo.getComponentTypes();
             if (!opts.componentTypeName && !opts.projectName) {
                 progressIndicator.busy = true;
@@ -517,6 +517,7 @@ export class Component extends OpenShiftItem {
                     folder,
                     createStarter,
                     useExistingDevfile,
+                    opts.devFilePath,
                     notification
                 )
             );

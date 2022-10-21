@@ -289,7 +289,8 @@ export class Command {
         registryName: string,
         name: string,
         starter: string = undefined,
-        useExistingDevfile = false
+        useExistingDevfile = false,
+        customDevfilePath = ''
     ): CommandText {
         const cTxt = new CommandText('odo', 'init', [
             new CommandOption('--name', name)
@@ -304,8 +305,11 @@ export class Command {
         if (starter) {
             cTxt.addOption(new CommandOption('--starter', starter, false));
         }
-        if (useExistingDevfile) {
+        if (useExistingDevfile && customDevfilePath.length === 0) {
             cTxt.addOption(new CommandOption('--devfile-path', 'devfile.yaml', false));
+        }
+        if(customDevfilePath.length > 0) {
+            cTxt.addOption(new CommandOption('--devfile-path', customDevfilePath, false));
         }
         return cTxt;
     }

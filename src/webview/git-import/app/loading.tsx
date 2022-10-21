@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
 import { Box, Typography } from '@material-ui/core';
-import { LinearProgress } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 
 interface LoadProps extends React.AllHTMLAttributes<HTMLDivElement> {
     title: string
@@ -15,15 +15,15 @@ export const LoadScreen: React.FC<LoadProps> = ({
 }: LoadProps) => {
     return (
         <div className=''>
-            <div style={{ width: '58rem', marginTop:'0.5rem' }}>
+            <div style={{ width: '58rem', marginTop:'0.5rem', display: 'flex', flexDirection: 'row' }}>
                 <Box sx={{ color: '#EE0000' }}>
-                    <LinearProgress color='inherit' />
+                    <CircularProgress color='inherit' size='1rem' />
                 </Box>
                 <Typography
                     variant='caption'
                     component='p'
                     color='inherit'
-                    style={{ marginTop: '0.5rem', fontSize: '12px' }}
+                    style={{ margin: '0 0.5rem 0', marginLeft: '0.5rem', marginTop: '0', fontSize: '12px' }}
                 >{title}</Typography>
             </div>
         </div>

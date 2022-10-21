@@ -69,43 +69,45 @@ async function gitImportMessageListener(event: any): Promise<any> {
         case 'createComponent': {
             const workspacePath = await selectWorkspaceFolder();
             const appendedUri = Uri.joinPath(workspacePath, event.projectName);
-            const wsFolderLength = workspace?.workspaceFolders?.length || 0;
+            //const wsFolderLength = workspace?.workspaceFolders?.length || 0;
             panel.webview.postMessage({
                 action: 'cloneStarted'
             })
-            workspace.updateWorkspaceFolders(wsFolderLength, 0, { uri: appendedUri });
-            //workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: appendedUri });
-            await clone(event.gitURL, appendedUri.fsPath);
+            //workspace.updateWorkspaceFolders(wsFolderLength, 0, { uri: appendedUri });
+            workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: appendedUri });
+            await clone(event, appendedUri.fsPath);
             if (!event.isDevFile) {
                 panel.webview.postMessage({
                     action: 'start_create_component'
                 })
                 try {
-                    const status = await Component.createFromRootWorkspaceFolder(appendedUri, undefined,
+                    await Component.createFromRootWorkspaceFolder(appendedUri, undefined,
                         {
-                            componentTypeName: event.compDesc.devfileData.devfile.metadata.name,
+                            componentTypeName: event.compDesc?.devfileData.devfile.metadata.name,
                             projectName: event.projectName,
                             applicationName: event.applicationName,
                             compName: event.componentName,
-                            devFilePath: !event.devFilePath || event.devFilePath === 'devfile.yaml' || 'devfile.yml' ?
+                            devFilePath: !event.devFilePath || event.devFilePath === 'devfile.yaml' || event.devFilePath === 'devfile.yml' ?
                                 '' : event.devFilePath
                         }, true);
                     panel.webview.postMessage({
                         action: event.action,
-                        status: status
+                        status: true
                     });
+                    vscode.window.showInformationMessage(`Componet ${event.componentName} created successfully`);
                 } catch (e) {
-                    console.error(e);
                     vscode.window.showErrorMessage(`Componet ${event.componentName} creation failed`);
                     panel.webview.postMessage({
-                        action: event.action
+                        action: event.action,
+                        staus: false
                     });
                 }
             } else {
                 panel.webview.postMessage({
                     action: event.action,
-                    status: 'done'
+                    status: true
                 });
+                vscode.window.showInformationMessage('Selected Componet added into Workspace');
             }
             break;
         }
@@ -223,11 +225,12 @@ function getCompDescription(projectType: string, language: string): ComponentTyp
         desc.devfileData.devfile.metadata.language.toLowerCase() === language || desc.devfileData.devfile.metadata.name.toLowerCase() === language);
 }
 
-function clone(repositoryURL: string, location: string): Promise<void> {
+function clone(event: any, location: string): Promise<any> {
     const gitExtension = vscode.extensions.getExtension('vscode.git').exports;
     const git = gitExtension.getAPI(1).git.path;
     // run 'git clone url location' as external process and return location
-    return new Promise((resolve, reject) => cp.exec(`${git} clone ${repositoryURL} ${location}`, (error: cp.ExecException) => error ? reject(error) : resolve()));
+    return new Promise((resolve, reject) => cp.exec(`${git} clone ${event.gitURL} ${location}`, (error: cp.ExecException) => error ?
+        showError(event, location, error.message) : resolve(true)));
 }
 
 function validateComponentName(event: any) {
@@ -257,5 +260,17 @@ function validateDevFilePath(event: any) {
         helpText: !validationMessage ? 'Validated' : validationMessage,
         devFilePath: event.param
     });
+}
+
+function showError(event: any, location: string, message: string): void {
+    panel.webview.postMessage({
+        action: event.action,
+        status: false
+    });
+    if (message.indexOf('already exists') !== -1) {
+        vscode.window.showErrorMessage(`Folder already exists on the selected ${location.substring(0, location.lastIndexOf('\\'))}`);
+    } else {
+        vscode.window.showErrorMessage('Error while clone the repository');
+    }
 }
 
