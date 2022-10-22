@@ -498,19 +498,18 @@ export class GitImport extends React.Component<DefaultProps, {
                                         style={{ width: '80%', paddingTop: '10px' }}
                                         helperText={componentName.helpText} />
                                 </div>}
-                            <div style={{ marginTop: '10px' }}>
+                            <div style={{ marginTop: '10px', marginBottom: '10px' }}>
                                 <Button variant='contained'
                                     disabled={this.handleCreateBtnDisable()}
-                                    component='span'
                                     className='buttonStyle'
-                                    style={{ backgroundColor: '#EE0000', textTransform: 'none' }}
+                                    style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white' }}
                                     onClick={() => this.createComponent()}>
                                     Create Component
                                 </Button>
                                 <Button
                                     variant='outlined'
                                     className='buttonStyle'
-                                    style={{ textTransform: 'none', marginLeft: '1rem' }}
+                                    style={{ textTransform: 'none', marginLeft: '1rem', color: '#EE0000 !important' }}
                                     onClick={() => this.initalize(true)}>
                                     Cancel
                                 </Button>

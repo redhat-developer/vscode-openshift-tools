@@ -135,7 +135,7 @@ export default class GitImportLoader {
                 localResourceRoots: [localResourceRoot],
                 retainContextWhenHidden: true
             });
-            panel.iconPath = vscode.Uri.file(path.join(GitImportLoader.extensionPath, 'images/gitImport/git.png'));
+            panel.iconPath = vscode.Uri.file(path.join(GitImportLoader.extensionPath, 'images/gitImport/git.svg'));
             panel.webview.html = GitImportLoader.getWebviewContent(GitImportLoader.extensionPath, panel);
             panel.onDidDispose(() => {
                 panel = undefined;

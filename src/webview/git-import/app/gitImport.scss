@@ -38,15 +38,10 @@ body {
 }
 
 .buttonStyle {
-    min-width: 8rem;
-    max-width: 20rem;
-    max-height: 5rem;
-    height: 2rem;
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--vscode-button-foreground) !important;
-    background-color: '#EE0000' !important;
+    color: var(--vscode-button-foreground);
     &:hover {
         background-color: '#BE0000' !important;
     }
