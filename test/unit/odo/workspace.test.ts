@@ -28,7 +28,7 @@ suite('Odo/Workspace', () => {
 
     function stubDescribeComponentCall() {
         return sandbox.stub(OdoImpl.prototype, 'describeComponent').callsFake((contextPath: string): Promise<ComponentDescription | undefined> => {
-            if (contextPath.includes('/comp', contextPath.lastIndexOf(path.sep))) {
+            if (contextPath.includes(`${path.sep}comp`, contextPath.lastIndexOf(path.sep))) {
                 return Promise.resolve({} as ComponentDescription);
             }
             return Promise.resolve<undefined>(undefined);
@@ -118,11 +118,11 @@ suite('Odo/Workspace', () => {
             });
             const added = [{
                 index: 0,
-                uri: vscode.Uri.parse(fixtures.comp1Folder),
+                uri: vscode.Uri.file(fixtures.comp1Folder),
                 name: 'comp1'
             }, {
                 index: 1,
-                uri: vscode.Uri.parse(fixtures.comp2Folder),
+                uri: vscode.Uri.file(fixtures.comp2Folder),
                 name: 'comp2'
             }, {
                 uri: vscode.Uri.file(fixtures.folder1), index: 3, name: 'noComp1'
@@ -148,11 +148,11 @@ suite('Odo/Workspace', () => {
             });
             const removed = [{
                 index: 0,
-                uri: vscode.Uri.parse(fixtures.comp1Folder),
+                uri: vscode.Uri.file(fixtures.comp1Folder),
                 name: 'comp1'
             }, {
                 index: 1,
-                uri: vscode.Uri.parse(fixtures.comp2Folder),
+                uri: vscode.Uri.file(fixtures.comp2Folder),
                 name: 'comp2'
             }, {
                 uri: vscode.Uri.file(fixtures.folder1), index: 3, name: 'noComp1'
