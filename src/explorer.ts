@@ -91,7 +91,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         // if line with Server: is printed out it means user is logged in
         void commands.executeCommand('setContext', 'isLoggedIn', !!clusterLine);
         // cut out server url after 'Server:' substring
-        return clusterLine ? clusterLine.substr(clusterLine.indexOf(':')+1).trim() : undefined;
+        return clusterLine ? clusterLine.substring(clusterLine.indexOf(':') as  number + 1).trim() : undefined;
     }
 
     static getInstance(): OpenShiftExplorer {
