@@ -31,7 +31,6 @@ import { Command as DeploymentCommand } from './k8s/deployment';
 import { DeploymentConfig } from './k8s/deploymentConfig';
 import { loadItems } from './k8s/common';
 import { Command } from './odo/command';
-import { ToolsConfig } from './tools';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
