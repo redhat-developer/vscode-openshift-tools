@@ -30,6 +30,8 @@ import { CliChannel } from './cli';
 import { Command as DeploymentCommand } from './k8s/deployment';
 import { DeploymentConfig } from './k8s/deploymentConfig';
 import { loadItems } from './k8s/common';
+import { Command } from './odo/command';
+import { ToolsConfig } from './tools';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
@@ -82,6 +84,17 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         });
     }
 
+    async getCurrentClusterUrl(): Promise<string | undefined> {
+        // print odo version and Server URL if user is logged in
+        const result = await CliChannel.getInstance().executeTool(Command.printOdoVersion());
+        // search for line with 'Server:' substring
+        const clusterLine = result.stdout.trim().split('\n').find((value) => value.includes('Server:'));
+        // if line with Server: is printed out it means user is logged in
+        void commands.executeCommand('setContext', 'isLoggedIn', !!clusterLine);
+        // cut out server url after 'Server:' substring
+        return clusterLine ? clusterLine.substr(clusterLine.indexOf(':')+1).trim() : undefined;
+    }
+
     static getInstance(): OpenShiftExplorer {
         if (!OpenShiftExplorer.instance) {
             OpenShiftExplorer.instance = new OpenShiftExplorer();
@@ -91,16 +104,28 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     // eslint-disable-next-line class-methods-use-this
     getTreeItem(element: ExplorerItem): TreeItem | Thenable<TreeItem> {
-        if ('name' in element) { // Context instance
+        // check if element is Context instance
+        if ('name' in element && 'cluster' in element && 'user' in element) { // Context instance could be without namespace
             return  {
                 contextValue: 'openshift.k8sContext',
                 label: element.name,
                 collapsibleState: TreeItemCollapsibleState.Collapsed
             };
         }
-        // KubernetesObject instance
+
+        // otherwise it is a KubernetesObject instance
+
+        if (element.kind === 'project') {
+            return {
+                contextValue: 'openshift.k8sNamespace',
+                label: element.metadata.name,
+                collapsibleState: TreeItemCollapsibleState.Collapsed,
+                iconPath: path.resolve(__dirname, '../../images/context/dark/project.svg')
+            }
+        }
+
         return {
-            contextValue: 'openshift.k8sObject',
+            contextValue: 'openshift.k8sObject.',
             label: element.metadata.name,
             collapsibleState: TreeItemCollapsibleState.None,
             iconPath: element.kind === 'Deployment' ? path.resolve(__dirname, '../../images/context/dark/deployment.svg') : path.resolve(__dirname, '../../images/context/dark/deployment-config.svg')
@@ -109,7 +134,35 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     // eslint-disable-next-line class-methods-use-this
     async getChildren(element?: ExplorerItem): Promise<ExplorerItem[]> {
-        const result: ExplorerItem[] = element ? [... await this.getDeployments(), ... await this.getDeploymentConfigs()] : [this.kubeContext];
+        let result: ExplorerItem[] = [];
+        if (!element) {
+            // get cluster url or empty array if not logged in
+            if (await this.getCurrentClusterUrl()){
+                result = [this.kubeContext];
+            }
+        } else if ('name' in element) { // we are dealing with context here
+            // user is logged into cluster from current context
+            // and project should be show as child node of current context
+            // there are several possible scenarios
+            // (1) there is no namespace set in context and default namespace/project exists
+            //   * example is kubernetes provisioned with docker-desktop
+            //   * could also be the case with CRC provisioned for the first time
+            // (2) there is no namespace set in context and default namespace/project does not exist
+            //   * example is sandbox context created when login to sandbox first time
+            // (3) there is namespace set in context and namespace exists in the cluster
+            // (4) there is namespace set in context and namespace does not exist in the cluster
+            if (this.kubeContext.namespace) {
+                result = [{
+                    kind: 'project',
+                    metadata: {
+                        name: this.kubeContext.namespace,
+                    },
+                } as KubernetesObject]
+            }
+        } else {
+            result = [...await this.getDeploymentConfigs(), ...await this.getDeployments()];
+        }
+
         if (!element) {
             await commands.executeCommand('setContext', 'openshift.app.explorer.init', result.length === 0);
         }
@@ -121,13 +174,13 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     }
 
     async getDeployments(): Promise<ExplorerItem[]> {
-        const deploymentsListData = await CliChannel.getInstance().execute(`${DeploymentCommand.get()}`);
+        const deploymentsListData = await CliChannel.getInstance().executeTool(DeploymentCommand.get());
         const result = loadItems<k8s.KubernetesObject>(deploymentsListData.stdout);
         return result;
     }
 
     async getDeploymentConfigs(): Promise<ExplorerItem[]> {
-        const deploymentsListData = await CliChannel.getInstance().execute(`${DeploymentConfig.command.getDeploymentConfigs()}`);
+        const deploymentsListData = await CliChannel.getInstance().executeTool(DeploymentConfig.command.getDeploymentConfigs());
         const result = loadItems<k8s.KubernetesObject>(deploymentsListData.stdout);
         return result;
     }
