@@ -91,7 +91,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         // if line with Server: is printed out it means user is logged in
         void commands.executeCommand('setContext', 'isLoggedIn', !!clusterLine);
         // cut out server url after 'Server:' substring
-        return clusterLine ? clusterLine.substring(clusterLine.indexOf(':') as  number + 1).trim() : undefined;
+        return clusterLine ? clusterLine.substring(clusterLine.indexOf(':') + 1).trim() : undefined;
     }
 
     static getInstance(): OpenShiftExplorer {
@@ -107,7 +107,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         if ('name' in element && 'cluster' in element && 'user' in element) { // Context instance could be without namespace
             return  {
                 contextValue: 'openshift.k8sContext',
-                label: element.name,
+                label: `https://${element.cluster}`,
                 collapsibleState: TreeItemCollapsibleState.Collapsed
             };
         }
