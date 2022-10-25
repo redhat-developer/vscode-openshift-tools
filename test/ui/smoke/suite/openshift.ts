@@ -34,7 +34,7 @@ export function checkOpenshiftView() {
                 explorer = await view.getContent().getSection(VIEWS.appExplorer);
                 welcome = await explorer.findWelcomeContent();
 
-                for (const item of [VIEWS.components, VIEWS.compTypes, VIEWS.watchSessions, VIEWS.debugSessions]) {
+                for (const item of [VIEWS.components, VIEWS.compTypes, VIEWS.debugSessions]) {
                     await (await view.getContent().getSection(item)).collapse();
                 }
             });
@@ -93,6 +93,8 @@ export function checkOpenshiftView() {
             });
 
             it('shows the default devfile registry', async () => {
+                // timeout should be long enough for windows
+                await new Promise((res) => { setTimeout(res, 20000); });
                 const registry = await types.findItem(VIEWS.devFileRegistry);
                 expect(registry).not.undefined;
             });
