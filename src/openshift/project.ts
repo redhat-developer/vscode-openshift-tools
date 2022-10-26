@@ -68,7 +68,8 @@ export class Project extends OpenShiftItem {
         if (value === 'Yes') {
             result = Progress.execFunctionWithProgress(`Deleting Project '${project.metadata.name}'`,
                 () => Promise.resolve().then(() => {
-                        return CliChannel.getInstance().executeTool(new CommandText('oc delete project', project.metadata.name))
+                        // TODO: Find file where to put command
+                        return CliChannel.getInstance().executeTool(new CommandText('oc delete project', project.metadata.name, [new CommandOption('--wait=true')]))
                     })
                     .then(() => `Project '${project.metadata.name}' successfully deleted`)
                     .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Project with error '${err}'`,'Failed to delete Project')))
