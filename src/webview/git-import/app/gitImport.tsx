@@ -285,7 +285,6 @@ export class GitImport extends React.Component<DefaultProps, {
             if (this.state.selectedDesc && this.state.selectedDesc.selected) {
                 return false;
             } else {
-                console.log('devfilepath:::', this.state.devFilePath);
                 disable =
                     this.state.devFilePath.error || this.state.devFilePath.value.length === 0 ||
                     this.state.devFilePath.value === 'devfile.yaml' || this.state.devFilePath.value === 'devfile.yml';
@@ -435,7 +434,6 @@ export class GitImport extends React.Component<DefaultProps, {
                                                     </InputLabel>
                                                     <TextField
                                                         id='bootstrap-input'
-                                                        value={devFilePath?.value}
                                                         error={devFilePath?.error}
                                                         defaultValue={devFilePath?.value || 'devfile.yaml'}
                                                         sx={{
@@ -465,7 +463,6 @@ export class GitImport extends React.Component<DefaultProps, {
                                     </InputLabel>
                                     <TextField
                                         defaultValue={applicationName}
-                                        value={applicationName}
                                         onChange={(e) => this.textFieldChange(e.target.value, 'app')}
                                         id='bootstrap-input'
                                         sx={{
@@ -485,7 +482,6 @@ export class GitImport extends React.Component<DefaultProps, {
                                     </InputLabel>
                                     <TextField
                                         defaultValue={componentName.value}
-                                        value={componentName.value}
                                         error={componentName.error}
                                         onChange={(e) => this.textFieldChange(e.target.value, 'comp')}
                                         id='bootstrap-input'
