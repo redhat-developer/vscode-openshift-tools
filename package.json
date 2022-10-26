@@ -1121,7 +1121,7 @@
 				},
 				{
 					"command": "openshift.project.delete",
-					"when": "view == openshiftProjectExplorer && viewItem == project",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.project",
 					"group": "p3"
 				},
 				{
@@ -1207,12 +1207,7 @@
 				},
 				{
 					"command": "openshift.project.set",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext",
-					"group": "inline"
-				},
-				{
-					"command": "openshift.project.set",
-					"when": "view == openshiftProjectExplorer && viewItem == project",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext || viewItem == openshift.project",
 					"group": "inline"
 				},
 				{

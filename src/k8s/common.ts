@@ -7,9 +7,15 @@ import { QuickPickItem, window } from 'vscode';
 
 import * as k8s from 'vscode-kubernetes-tools-api';
 import * as Odo from '../odo';
-import { CommandText } from '../base/command';
+import { CommandOption, CommandText } from '../base/command';
 import { VsCommandError } from '../vscommand';
 import { Node } from './node';
+
+export const Command = {
+    getResourceList(name: string) {
+        return new CommandText('oc get', name , [ new CommandOption('-o', 'json')]);
+    }
+}
 
 function convertItemToQuickPick(item: any): QuickPickItem {
     const qp = item;
