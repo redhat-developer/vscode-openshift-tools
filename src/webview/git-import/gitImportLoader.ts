@@ -185,6 +185,10 @@ function validateGitURL(event: any) {
     } else {
         try {
             const parse = GitUrlParse(event.param);
+            const isGitRepo = isGitURL(parse.host);
+            if(!isGitRepo) {
+               throw 'Invalid Git URL';
+            }
             if (parse.organization !== '' && parse.name !== '') {
                 panel.webview.postMessage({
                     action: event.action,
@@ -272,5 +276,9 @@ function showError(event: any, location: string, message: string): void {
     } else {
         vscode.window.showErrorMessage('Error while clone the repository');
     }
+}
+
+function isGitURL(host: string): boolean {
+    return ['github.com','bitbucket.org','gitlab.com'].includes(host);
 }
 

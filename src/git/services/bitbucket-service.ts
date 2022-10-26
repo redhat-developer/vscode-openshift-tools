@@ -15,7 +15,7 @@ import {
 } from '../types';
 import { BaseService } from './base-service';
 import { Base64 } from 'js-base64';
-import { ParseBitbucketUrl } from 'parse-bitbucket-url';
+import  ParseBitbucketUrl  = require('parse-bitbucket-url');
 
 export class BitbucketService extends BaseService {
     private readonly metadata: RepoMetadata;

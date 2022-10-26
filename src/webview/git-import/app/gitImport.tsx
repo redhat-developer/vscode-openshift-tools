@@ -135,7 +135,7 @@ export class GitImport extends React.Component<DefaultProps, {
                     }
                 });
                 //if valid url then send parse message
-                if (!this.state.gitURL.showError) {
+                if (!this.state.gitURL.showError && this.state.gitURL.helpText !== 'URL is valid but cannot be reached') {
                     this.setState({ showLoadScreen: true, notification: 'Scanning through git repo and recommending the import strategy...' });
                     VSCodeMessage.postMessage({
                         action: 'parseGitURL',
@@ -286,7 +286,7 @@ export class GitImport extends React.Component<DefaultProps, {
                 return false;
             } else {
                 disable =
-                    this.state.devFilePath.error || this.state.devFilePath.value.length === 0 ||
+                    !this.state.devFilePath || this.state.devFilePath.error || this.state.devFilePath.value.length === 0 ||
                     this.state.devFilePath.value === 'devfile.yaml' || this.state.devFilePath.value === 'devfile.yml';
             }
         }
