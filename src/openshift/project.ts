@@ -4,11 +4,13 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { commands, QuickPickItem, window } from 'vscode';
-import OpenShiftItem, { clusterRequired } from './openshiftItem';
+import OpenShiftItem from './openshiftItem';
 import { OpenShiftObject, OpenShiftProject, getInstance as getOdoInstance } from '../odo';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { CommandOption, CommandText } from '../base/command';
+import { CliChannel } from '../cli';
+import { KubernetesObject } from '@kubernetes/client-node';
 
 export class Command {
     static listProjects(): CommandText {
@@ -23,7 +25,6 @@ export class Command {
 export class Project extends OpenShiftItem {
 
     @vsCommand('openshift.project.set', true)
-    @clusterRequired()
     static async set(): Promise<string | null> {
         let message: string = null;
         const createNewProject = {
@@ -49,7 +50,6 @@ export class Project extends OpenShiftItem {
     }
 
     @vsCommand('openshift.project.create')
-    @clusterRequired()
     static async create(): Promise<string> {
         const projectList = OpenShiftItem.odo.getProjects();
         let projectName = await Project.getProjectName('Project name', projectList);
@@ -61,27 +61,19 @@ export class Project extends OpenShiftItem {
     }
 
     @vsCommand('openshift.project.delete', true)
-    @clusterRequired()
-    static async del(context: OpenShiftObject): Promise<string> {
+    static async del(project: KubernetesObject): Promise<string> {
         let result: Promise<string> = null;
-        const project = await Project.getOpenShiftCmdData(context);
-        if (project) {
-            const value = await window.showWarningMessage(`Do you want to delete Project '${project.getName()}'?`, 'Yes', 'Cancel');
-            if (value === 'Yes') {
-                result = Progress.execFunctionWithProgress(`Deleting Project '${project.getName()}'`,
-                    () => Project.odo.deleteProject(project)
-                        .then(async () => {
-                            const p = await Project.odo.getProjects();
-                            if (p.length>0) {
-                                // this changes kubeconfig and that triggers full tree refresh
-                                // there is no need to call explorer.refresh() manully
-                                await Project.odo.execute(new CommandText('odo project set', p[0].getName()));
-                            }
-                        })
-                        .then(() => `Project '${project.getName()}' successfully deleted`)
-                        .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Project with error '${err}'`,'Failed to delete Project')))
-                );
-            }
+
+        const value = await window.showWarningMessage(`Do you want to delete Project '${project.metadata.name}'?`, 'Yes', 'Cancel');
+        if (value === 'Yes') {
+            result = Progress.execFunctionWithProgress(`Deleting Project '${project.metadata.name}'`,
+                () => Promise.resolve().then(() => {
+                        // TODO: Find file where to put command
+                        return CliChannel.getInstance().executeTool(new CommandText('oc delete project', project.metadata.name, [new CommandOption('--wait=true')]))
+                    })
+                    .then(() => `Project '${project.metadata.name}' successfully deleted`)
+                    .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Project with error '${err}'`,'Failed to delete Project')))
+            );
         }
         return result;
     }
