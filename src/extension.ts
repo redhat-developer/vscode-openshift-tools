@@ -15,6 +15,8 @@ import {
     window,
     workspace
 } from 'vscode';
+import * as k8s from 'vscode-kubernetes-tools-api';
+import { REDHAT_CLOUD_PROVIDER } from './cloud-provider/redhat-cloud-provider';
 import { ComponentsTreeDataProvider } from './componentsView';
 import { DebugSessionsView } from './debug';
 import { OpenShiftExplorer } from './explorer';
@@ -56,7 +58,15 @@ async function verifyBundledBinaries(): Promise<{ odoPath: string, ocPath: strin
     };
 }
 
-export async function activate(extensionContext: ExtensionContext): Promise<any> {
+async function registerCloudProvider(): Promise<void> {
+    const cloudProvider = await k8s.extension.cloudExplorer.v1
+    if (cloudProvider.available) {
+        cloudProvider.api.registerCloudProvider(REDHAT_CLOUD_PROVIDER)
+    }
+
+}
+
+export async function activate(extensionContext: ExtensionContext): Promise<unknown> {
     WelcomePage.createOrShow();
     await commands.executeCommand('setContext', 'isVSCode', env.uiKind);
     // UIKind.Desktop ==1 & UIKind.Web ==2. These conditions are checked for browser based & electron based IDE.
@@ -102,7 +112,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
                         kind: QuickPickItemKind.Separator
                     },
                     {
-                        label:'Add OpenShift Cluster'
+                        label: 'Add OpenShift Cluster'
                     },
                     {
                         label: 'Login to Cluster'
@@ -133,7 +143,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
                     {
                         label: 'Getting Started Walkthrough'
                     }
-                    ]);
+                ]);
             switch (selection?.label) {
                 case 'Add OpenShift Cluster':
                     await commands.executeCommand('openshift.explorer.addCluster');
@@ -166,8 +176,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         });
     }
 
-    function createStatusBarItem(context: ExtensionContext)
-    {
+    function createStatusBarItem(context: ExtensionContext) {
         const item = window.createStatusBarItem(StatusBarAlignment.Left, 1);
         item.command = 'openshift.openStatusBar';
         context.subscriptions.push(item);
@@ -176,7 +185,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         item.show();
     }
 
-    createStatusBarItem(extensionContext) ;
+    createStatusBarItem(extensionContext);
 
     function updateStatusBarItem(statusBarItem: StatusBarItem, text: string): void {
         if (!workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation')) {
@@ -191,6 +200,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     extendClusterExplorer();
 
     await ComponentTypesView.instance.getAllComponents();
+
+    await registerCloudProvider();
 
     startTelemetry(extensionContext);
     await verifyBinariesInRemoteContainer();
