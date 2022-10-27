@@ -113,7 +113,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
                         label: 'Create Component from Workspace'
                     },
                     {
-                        label: 'Create Component from Registries'
+                        label: 'Create Component from devfile registry'
                     },
                     {
                         label: 'Import from Git',
