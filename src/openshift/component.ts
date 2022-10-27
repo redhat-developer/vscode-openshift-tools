@@ -104,14 +104,6 @@ export class Component extends OpenShiftItem {
         ];
     }
 
-    static stopDebugSession(component: OpenShiftObject): boolean {
-        const ds = component.contextPath ? Component.debugSessions.get(component.contextPath.fsPath) : undefined;
-        if (ds) {
-            treeKill(ds.configuration.odoPid);
-        }
-        return !!ds;
-    }
-
     private static readonly componentStates = new Map<string, ComponentDevState>();
 
     static getComponentDevState(folder: ComponentWorkspaceFolder): ComponentDevState {
@@ -321,7 +313,6 @@ export class Component extends OpenShiftItem {
     }
 
     static async delete(component: OpenShiftComponent) {
-        Component.stopDebugSession(component);
         await Component.odo.deleteComponent(component);
         commands.executeCommand('openshift.componentsView.refresh');
     }
@@ -565,33 +556,26 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.debug', true)
-    @clusterRequired()
-    @selectTargetComponent(
-        'Select an Application',
-        'Select a Component you want to debug (showing only Components pushed to the cluster)',
-        (value: OpenShiftComponent) => value.contextValue === ContextType.COMPONENT_PUSHED
-    )
-    static async debug(component: OpenShiftComponent): Promise<string | null> {
+    static async debug(component: ComponentWorkspaceFolder): Promise<string | null> {
         if (!component) return null;
-        return Progress.execFunctionWithProgress(`Starting debugger session for the component '${component.getName()}'.`, () => Component.startDebugger(component));
+        return Progress.execFunctionWithProgress(`Starting debugger session for the component '${component.component.devfileData.devfile.metadata.name}'.`, () => Component.startDebugger(component));
     }
 
-    static async startDebugger(component: OpenShiftObject): Promise<string | undefined> {
+    static async startDebugger(component: ComponentWorkspaceFolder): Promise<string | undefined> {
         let result: undefined | string | PromiseLike<string> = null;
-        if (Component.debugSessions.get(component.contextPath.fsPath)) {
-            const choice = await window.showWarningMessage(`Debugger session is already running for ${component.getName()}.`, 'Show \'Run and Debug\' view');
+        if (Component.debugSessions.get(component.contextPath)) {
+            const choice = await window.showWarningMessage(`Debugger session is already running for ${component.component.devfileData.devfile.metadata.name}.`, 'Show \'Run and Debug\' view');
             if (choice) {
                 commands.executeCommand('workbench.view.debug');
             }
             return result;
         }
         // const components = await Component.odo.getComponentTypes();
-        const isJava = component.compType.includes('java') || component.compType.includes('spring');
-        const isNode = component.compType.includes('nodejs');
-        const isPython = component.compType.includes('python') || component.compType.includes('django');
+        const isJava = component.component.devfileData.devfile.metadata.tags.includes('Java') ;
+        const isNode = component.component.devfileData.devfile.metadata.tags.includes('Node.js');
+        const isPython = component.component.devfileData.devfile.metadata.tags.includes('Python');
 
         if (isJava || isNode || isPython) {
-            const toolLocation = await ToolsConfig.detect('odo');
             if (isJava) {
                 const JAVA_EXT = 'redhat.java';
                 const JAVA_DEBUG_EXT = 'vscjava.vscode-java-debug';
@@ -618,12 +602,12 @@ export class Component extends OpenShiftItem {
                     }
                 }
                 if (jlsIsActive && jdIsActive) {
-                    result = Component.startOdoAndConnectDebugger(toolLocation, component, {
-                        name: `Attach to '${component.getName()}' component.`,
+                    result = Component.startOdoAndConnectDebugger(component, {
+                        name: `Attach to '${component.component.devfileData.devfile.metadata.name}' component.`,
                         type: 'java',
                         request: 'attach',
                         hostName: 'localhost',
-                        projectName: path.basename(component.contextPath.fsPath)
+                        projectName: path.basename(component.contextPath)
                     });
                 }
             } else if (isPython) {
@@ -641,27 +625,27 @@ export class Component extends OpenShiftItem {
                     }
                 }
                 if (pythonExtIsInstalled) {
-                    result = Component.startOdoAndConnectDebugger(toolLocation, component, {
-                        name: `Attach to '${component.getName()}' component.`,
+                    result = Component.startOdoAndConnectDebugger(component, {
+                        name: `Attach to '${component.component.devfileData.devfile.metadata.name}' component.`,
                         type: 'python',
                         request: 'attach',
                         connect: {
                             host: 'localhost'
                         },
                         pathMappings: [{
-                            localRoot: component.contextPath.fsPath,
+                            localRoot: component.contextPath,
                             remoteRoot: '/projects'
                         }],
-                        projectName: path.basename(component.contextPath.fsPath)
+                        projectName: path.basename(component.contextPath)
                     });
                 }
             } else {
-                result = Component.startOdoAndConnectDebugger(toolLocation, component, {
-                    name: `Attach to '${component.getName()}' component.`,
+                result = Component.startOdoAndConnectDebugger(component, {
+                    name: `Attach to '${component.component.devfileData.devfile.metadata.name}' component.`,
                     type: 'pwa-node',
                     request: 'attach',
                     address: 'localhost',
-                    localRoot: component.contextPath.fsPath,
+                    localRoot: component.contextPath,
                     remoteRoot: '/projects'
                 });
             }
@@ -671,49 +655,32 @@ export class Component extends OpenShiftItem {
         return result;
     }
 
-    static async startOdoAndConnectDebugger(toolLocation: string, component: OpenShiftObject, config: DebugConfiguration): Promise<string> {
-        const debugCmd = `"${toolLocation}" debug port-forward`;
-        const cp = exec(debugCmd, { cwd: component.contextPath.fsPath });
-        return new Promise<string>((resolve, reject) => {
-            cp.stdout.on('data', (data: string) => {
-                const parsedPort = data.trim().match(/- (?<localPort>\d+):\d+$/);
-                if (parsedPort?.groups?.localPort) {
-                    void waitPort({
-                        host: 'localhost',
-                        port: parseInt(parsedPort.groups.localPort, 10)
-                    })
-                        .then((success) => {
-                            success ? resolve(parsedPort.groups.localPort) : reject(new VsCommandError('Connection attempt timed out.'));
-                        })
-                        .catch(reject);
+    static async startOdoAndConnectDebugger(component: ComponentWorkspaceFolder, config: DebugConfiguration): Promise<string> {
+            const componentDescription = await Component.odo.describeComponent(component.contextPath);
+            if (componentDescription.devForwardedPorts?.length > 0) {
+                const ports = componentDescription.devForwardedPorts.map((fp) => ({
+                    label: `${fp.localAddress}:${fp.localPort}`,
+                    description: `Forwards to ${fp.containerName}:${fp.containerPort}`,
+                    fp
+                }));
+                const port = await window.showQuickPick(ports, {placeHolder: 'Select a URL to open in default browser'});
+
+                config.contextPath = component.contextPath;
+                if (config.type === 'python') {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                    config.connect.port = port.fp.localPort;
+                } else {
+                    config.port = port.fp.localPort;
                 }
-            });
-            let stderrText = '';
-            cp.stderr.on('data', (data: string) => {
-                stderrText = stderrText.concat(data);
-            });
-            cp.on('error', reject);
-            cp.on('exit', (code) => {
-                if (code > 0) {
-                    reject(new VsCommandError(`Port forwarding request failed. CODE: ${code}', STDERR: ${stderrText}.`));
+
+                const result = await debug.startDebugging(workspace.getWorkspaceFolder(Uri.file(component.contextPath)), config);
+
+                if (!result) {
+                    return Promise.reject(new VsCommandError('Debugger session failed to start.'));
                 }
-            });
-        }).then((result) => {
-            config.contextPath = component.contextPath;
-            if (config.type === 'python') {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                config.connect.port = result;
-            } else {
-                config.port = result;
+                return 'Debugger session has successfully started.';
             }
-            config.odoPid = cp.pid;
-            return debug.startDebugging(workspace.getWorkspaceFolder(component.contextPath), config);
-        }).then((result: boolean) => {
-            if (!result) {
-                return Promise.reject(new VsCommandError('Debugger session failed to start.'));
-            }
-            return 'Debugger session has successfully started.';
-        });
+            return 'Component has no ports forwarded.'
     }
 
 
