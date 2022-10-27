@@ -42,7 +42,8 @@
 		"CodeReady Containers",
 		"devsandbox",
 		"debuggers",
-		"Cloud"
+		"Cloud",
+        "kubernetes-extension-cloud-provider"
 	],
 	"icon": "images/openshift_extension.png",
 	"main": "./out/src/extension",
@@ -791,7 +792,17 @@
 				"command": "openshift.component.importFromGit",
 				"title": "Import Component from git repository",
 				"category": "OpenShift"
-			}
+			},
+            {
+                "command": "openshift.sandbox.open.dashboard",
+                "title": "Open Console",
+                "category": "OpenShift"
+            },
+            {
+                "command": "openshift.sandbox.signup",
+                "title": "Signup for Sandbox",
+                "category": "OpenShift"
+            }
 		],
 		"keybindings": [
 			{
@@ -1089,6 +1100,16 @@
 				}
 			],
 			"view/item/context": [
+                {
+                    "command": "openshift.sandbox.signup",
+                    "category": "1@1",
+                    "when": "viewItem == openshift.sandbox.status.none"
+                },
+                {
+                    "command": "openshift.sandbox.open.dashboard",
+                    "category": "1@1",
+                    "when": "viewItem == openshift.sandbox.status.ready"
+                },
 				{
 					"command": "clusters.openshift.csv.create",
 					"group": "1@1",

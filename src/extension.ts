@@ -14,6 +14,7 @@ import {
     QuickPickItemKind
 } from 'vscode';
 import path = require('path');
+import * as k8s from 'vscode-kubernetes-tools-api';
 import { startTelemetry } from './telemetry';
 import { OpenShiftExplorer } from './explorer';
 import { Cluster } from './openshift/cluster';
@@ -27,6 +28,7 @@ import { DebugSessionsView } from './debug';
 import { ComponentTypesView } from './registriesView';
 import { WelcomePage } from './welcomePage';
 import { ComponentsTreeDataProvider } from './componentsView';
+import { REDHAT_CLOUD_PROVIDER } from './cloud-provider/redhat-cloud-provider';
 
 import fsx = require('fs-extra');
 
@@ -54,7 +56,15 @@ async function verifyBundledBinaries(): Promise<{ odoPath: string, ocPath: strin
     };
 }
 
-export async function activate(extensionContext: ExtensionContext): Promise<any> {
+async function registerCloudProvider(): Promise<void> {
+    const cloudProvider = await k8s.extension.cloudExplorer.v1
+    if(cloudProvider.available){
+        cloudProvider.api.registerCloudProvider(REDHAT_CLOUD_PROVIDER)
+    }
+
+}
+
+export async function activate(extensionContext: ExtensionContext): Promise<unknown> {
     WelcomePage.createOrShow();
     await commands.executeCommand('setContext', 'isVSCode', env.uiKind);
     // UIKind.Desktop ==1 & UIKind.Web ==2. These conditions are checked for browser based & electron based IDE.
@@ -185,6 +195,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     extendClusterExplorer();
 
     void ComponentTypesView.instance.getAllComponents();
+
+    await registerCloudProvider();
 
     startTelemetry(extensionContext);
 
