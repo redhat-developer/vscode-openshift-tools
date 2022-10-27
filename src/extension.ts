@@ -142,7 +142,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
                 case 'Create Component from Workspace':
                     await commands.executeCommand('openshift.component.createFromLocal');
                     break;
-                case 'Create Component from Registries':
+                case 'Create Component from devfile registry':
                     await commands.executeCommand('openshift.componentTypesView.registry.openInView');
                     break;
                 case 'Import from Git':
