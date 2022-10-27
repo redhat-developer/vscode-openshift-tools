@@ -18,8 +18,6 @@ import {
 } from 'vscode';
 import { ComponentsTreeDataProvider } from './componentsView';
 
-import { Odo, OdoImpl } from './odo';
-
 class DebugSessionEntry {
     label: string;
     session: DebugSession;
@@ -27,8 +25,6 @@ class DebugSessionEntry {
 
 export class DebugSessionsView implements TreeDataProvider<string>, Disposable {
     private static sessions: Map<string, DebugSessionEntry> = new Map();
-
-    private static odoctl: Odo = OdoImpl.Instance;
 
     private odoWorkspace = ComponentsTreeDataProvider.instance.odoWorkspace;
 

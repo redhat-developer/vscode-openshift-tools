@@ -13,7 +13,6 @@ import * as odo from '../../src/odo';
 import { Cluster } from '../../src/openshift/cluster';
 import { CommandText } from '../../src/base/command';
 import { Command } from '../../src/odo/command';
-import { Component } from '../../src/openshift/component';
 import { AddWorkspaceFolder } from '../../src/util/workspace';
 import { ComponentTypeAdapter } from '../../src/odo/componentType';
 import cp = require('child_process');
