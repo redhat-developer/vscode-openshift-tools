@@ -5,25 +5,22 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { window, commands, Uri, workspace, ExtensionContext, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable, EventEmitter, Terminal } from 'vscode';
-import { ChildProcess, exec } from 'child_process';
+import { window, commands, Uri, workspace, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable, EventEmitter, Terminal } from 'vscode';
+import { ChildProcess } from 'child_process';
 import * as YAML from 'yaml'
 import OpenShiftItem, { clusterRequired, selectTargetComponent } from './openshiftItem';
-import { OpenShiftObject, ContextType, OpenShiftComponent } from '../odo';
+import { OpenShiftComponent } from '../odo';
 import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
 import { selectWorkspaceFolder } from '../util/workspace';
-import { ToolsConfig } from '../tools';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { ascDevfileFirst, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, isDevfileComponent } from '../odo/componentType';
 import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
 import path = require('path');
 import globby = require('globby');
-import treeKill = require('tree-kill');
 import fs = require('fs-extra');
 import { NewComponentCommandProps } from '../telemetry';
 
-import waitPort = require('wait-port');
 import { ComponentWorkspaceFolder } from '../odo/workspace';
 import LogViewLoader from '../webview/log/LogViewLoader';
 
@@ -86,7 +83,7 @@ export class Component extends OpenShiftItem {
         Component.stateChanged.event(listener);
     }
 
-    public static init(context: ExtensionContext): Disposable[] {
+    public static init(): Disposable[] {
         return [
             debug.onDidStartDebugSession((session) => {
                 if (session.configuration.contextPath) {
@@ -96,9 +93,6 @@ export class Component extends OpenShiftItem {
             debug.onDidTerminateDebugSession((session) => {
                 if (session.configuration.contextPath) {
                     Component.debugSessions.delete(session.configuration.contextPath.fsPath);
-                }
-                if (session.configuration.odoPid) {
-                    treeKill(session.configuration.odoPid);
                 }
             })
         ];
@@ -195,11 +189,12 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.dev')
     //@clusterRequired() check for user is logged in should be implemented from scratch
-    static async dev(component: ComponentWorkspaceFolder) {
+    static dev(component: ComponentWorkspaceFolder) {
         const cs = Component.getComponentDevState(component);
         cs.devStatus = ComponentContextState.DEV_STARTING;
         Component.stateChanged.fire(component.contextPath)
         const outputEmitter = new EventEmitter<string>();
+        let devProcess: ChildProcess;
         try {
             cs.devTerminal = window.createTerminal({
                 name: component.contextPath,
@@ -207,6 +202,40 @@ export class Component extends OpenShiftItem {
                     onDidWrite: outputEmitter.event,
                     open: () => {
                         outputEmitter.fire(`Starting ${Command.dev().toString()}\r\n`);
+                        void Component.odo.spawn(Command.dev().toString(), component.contextPath).then((cp) => {
+                            devProcess = cp;
+                            devProcess.on('spawn', () => {
+                                cs.devTerminal.show();
+                                cs.devProcess = devProcess;
+                                cs.devStatus = ComponentContextState.DEV_RUNNING;
+                                Component.stateChanged.fire(component.contextPath)
+                            });
+                            devProcess.on('error', (err)=> {
+                                void window.showErrorMessage(err.message);
+                                cs.devStatus = ComponentContextState.DEV;
+                                Component.stateChanged.fire(component.contextPath)
+                            })
+                            devProcess.stdout.on('data', (chunk) => {
+                                outputEmitter.fire(`${chunk}`.replaceAll('\n', '\r\n'));
+                            });
+                            devProcess.stderr.on('data', (chunk) => {
+                                if (!cs.devProcessStopRequest?.isSigabrtSent()) {
+                                    outputEmitter.fire(`\x1b[31m${chunk}\x1b[0m`.replaceAll('\n', '\r\n'));
+                                }
+                            });
+                            devProcess.on('exit', () => {
+                                if (cs.devProcessStopRequest) {
+                                    cs.devProcessStopRequest.dispose();
+                                    cs.devProcessStopRequest = undefined;
+                                }
+
+                                outputEmitter.fire('\r\nPress any key to close this terminal\r\n');
+
+                                cs.devStatus = ComponentContextState.DEV;
+                                cs.devProcess = undefined;
+                                Component.stateChanged.fire(component.contextPath)
+                            });
+                        });
                     },
                     close: () => {
                         if (cs.devProcess && cs.devProcess.exitCode === null && !cs.devProcessStopRequest) { // if process is still running and user closed terminal
@@ -231,38 +260,6 @@ export class Component extends OpenShiftItem {
                         }
                     })
                 },
-            });
-            const devProcess = await Component.odo.spawn(Command.dev().toString(), component.contextPath);
-            devProcess.on('spawn', () => {
-                cs.devTerminal.show();
-                cs.devProcess = devProcess;
-                cs.devStatus = ComponentContextState.DEV_RUNNING;
-                Component.stateChanged.fire(component.contextPath)
-            });
-            devProcess.on('error', (err)=> {
-                void window.showErrorMessage(err.message);
-                cs.devStatus = ComponentContextState.DEV;
-                Component.stateChanged.fire(component.contextPath)
-            })
-            devProcess.stdout.on('data', (chunk) => {
-                outputEmitter.fire(`${chunk}`.replaceAll('\n', '\r\n'));
-            });
-            devProcess.stderr.on('data', (chunk) => {
-                if (!cs.devProcessStopRequest?.isSigabrtSent()) {
-                    outputEmitter.fire(`\x1b[31m${chunk}\x1b[0m`.replaceAll('\n', '\r\n'));
-                }
-            });
-            devProcess.on('exit', () => {
-                 if (cs.devProcessStopRequest) {
-                    cs.devProcessStopRequest.dispose();
-                    cs.devProcessStopRequest = undefined;
-                }
-
-                outputEmitter.fire('\r\nPress any key to close this terminal\r\n');
-
-                cs.devStatus = ComponentContextState.DEV;
-                cs.devProcess = undefined;
-                Component.stateChanged.fire(component.contextPath)
             });
         } catch (err) {
             void window.showErrorMessage(err.toString());

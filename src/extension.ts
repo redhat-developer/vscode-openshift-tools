@@ -82,7 +82,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         crcStatusItem,
         OpenShiftExplorer.getInstance(),
         new DebugSessionsView().createTreeView('openshiftDebugView'),
-        ...Component.init(extensionContext),
+        ...Component.init(),
         ComponentTypesView.instance.createTreeView('openshiftComponentTypesView'),
         ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
     ];
