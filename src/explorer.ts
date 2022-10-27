@@ -140,7 +140,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 }
             }
             return {
-                contextValue: 'openshift.k8sObject.',
+                contextValue: 'openshift.k8sObject',
                 label: element.metadata.name,
                 collapsibleState: TreeItemCollapsibleState.None,
                 iconPath: element.kind === 'Deployment' ? path.resolve(__dirname, '../../images/context/dark/deployment.svg') : path.resolve(__dirname, '../../images/context/dark/deployment-config.svg')
