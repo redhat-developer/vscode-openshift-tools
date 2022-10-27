@@ -17,7 +17,7 @@ export interface ComponentWorkspaceFolderTreeItem extends vsc.TreeItem {
 export class ComponentsTreeDataProvider extends BaseTreeDataProvider<ComponentWorkspaceFolder> {
 
     static dataProviderInstance: ComponentsTreeDataProvider;
-    private odoWorkspace = new OdoWorkspace();
+    public odoWorkspace = new OdoWorkspace();
 
     private constructor() {
         super();

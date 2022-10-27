@@ -19,3 +19,4 @@
 // TODO: Watch for changes in specific resources
 // TODO: Reuse get command from k8s ext for D and DC resources in tree
 
+// TODO: Look at IoC https://rpeshkov.net/blog/vscode-extension-di/
