@@ -373,7 +373,6 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.followLog', true)
-    @clusterRequired()
     static followLog(componentFolder: ComponentWorkspaceFolder): Promise<string> {
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
         if (Component.isUsingWebviewEditor()) {
