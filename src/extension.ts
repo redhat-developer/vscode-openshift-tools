@@ -173,19 +173,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
 
     createStatusBarItem(extensionContext) ;
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    OdoImpl.Instance.subject.subscribe(async (event: OdoEvent) => {
-        if (event.type === 'inserted' && event.data.contextValue === ContextType.COMPONENT) {
-            const choice = await window.showInformationMessage(
-                `Do you want to push new '${event.data.getName()}' Component?`,
-                'Push',
-            );
-            if (choice === 'Push') {
-                await commands.executeCommand('openshift.component.push', event.data);
-            }
-        }
-    });
-
     function updateStatusBarItem(statusBarItem: StatusBarItem, text: string): void {
         if (!workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation')) {
             statusBarItem.hide();
