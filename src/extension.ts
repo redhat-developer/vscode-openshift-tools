@@ -19,7 +19,6 @@ import { OpenShiftExplorer } from './explorer';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
 import { Platform } from './util/platform';
-import { OdoImpl, ContextType, OdoEvent } from './odo';
 import { TokenStore } from './util/credentialManager';
 import { registerCommands } from './vscommand';
 import { ToolsConfig } from './tools';
