@@ -451,6 +451,11 @@
                 "category": "OpenShift"
             },
             {
+                "command": "openshift.component.deploy",
+                "title": "Deploy",
+                "category": "OpenShift"
+            },
+            {
                 "command": "openshift.component.showDevTerminal",
                 "title": "Show Dev Terminal",
                 "category": "OpenShift"
@@ -1173,6 +1178,11 @@
                     "command": "openshift.component.forceExitDevMode",
                     "when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-stp.*/",
                     "group": "c1@3"
+                },
+                {
+                    "command": "openshift.component.deploy",
+                    "when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dep-nrn.*/ || viewItem =~ /openshift\\.component.*\\.dep-run.*/",
+                    "group": "c2"
                 },
                 {
                     "command": "openshift.component.showDevTerminal",
