@@ -253,7 +253,7 @@ export class Component extends OpenShiftItem {
                             } else if (!cs.devProcessStopRequest && data.charCodeAt(0) === 3) { // ctrl+C processed only once when there is no cleaning process
                                 outputEmitter.fire('^C\r\n');
                                 cs.devStatus = ComponentContextState.DEV_STOPPING;
-                                Component.stateChanged.fire(component.contextPath)
+                                Component.stateChanged.fire(component.contextPath);
                                 cs.devProcess.kill('SIGINT');
                                 cs.devProcessStopRequest = Component.exitDevelopmentMode(cs.devProcess);
                             }
@@ -686,4 +686,20 @@ export class Component extends OpenShiftItem {
         await commands.executeCommand('workbench.view.explorer');
         await commands.executeCommand('revealInExplorer', context.contextPath);
     }
+
+    @vsCommand('openshift.component.deploy')
+    public static deploy(context: ComponentWorkspaceFolder) {
+        const cs = Component.getComponentDevState(context);
+        // TODO: Find out details for deployment workflow
+        // right now just let deploy and redeploy
+        // Undeploy is not provided
+        // --
+        // cs.deployStatus = ComponentContextState.DEP_RUNNING;
+        // Component.stateChanged.fire(context.contextPath);
+        void Component.odo.executeInTerminal(
+            Command.deploy(),
+            context.contextPath,
+            `OpenShift: Deploying '${context.component.devfileData.devfile.metadata.name}' Component`);
+    }
+
 }

@@ -27,6 +27,10 @@ function verbose(_: unknown, key: string, descriptor: TypedPropertyDescriptor<Fu
 
 export class Command {
 
+    static deploy(): CommandText {
+        return new CommandText('odo', 'deploy')
+    }
+
     static dev(): CommandText {
         return new CommandText('odo', 'dev', []);
     }
