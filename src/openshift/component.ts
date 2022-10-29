@@ -689,11 +689,11 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.deploy')
     public static deploy(context: ComponentWorkspaceFolder) {
-        const cs = Component.getComponentDevState(context);
         // TODO: Find out details for deployment workflow
         // right now just let deploy and redeploy
         // Undeploy is not provided
         // --
+        // const cs = Component.getComponentDevState(context);
         // cs.deployStatus = ComponentContextState.DEP_RUNNING;
         // Component.stateChanged.fire(context.contextPath);
         void Component.odo.executeInTerminal(
