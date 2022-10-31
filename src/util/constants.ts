@@ -13,4 +13,4 @@ export enum GlyphChars {
     LocallyDeleted = '\u2297',
 }
 
-export const ExtensionID = 'redhat.vscode-openshift-connector';
+export const ExtensionID = 'redhat.vscode-openshift-toolkit';

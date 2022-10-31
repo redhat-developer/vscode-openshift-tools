@@ -238,7 +238,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     }
 
     static issueUrl(): string {
-        const packageJSON: PackageJSON = extensions.getExtension('redhat.vscode-openshift-connector')
+        const packageJSON: PackageJSON = extensions.getExtension('redhat.vscode-openshift-toolkit')
             .packageJSON as PackageJSON;
         const body = [
             `VS Code version: ${version}`,

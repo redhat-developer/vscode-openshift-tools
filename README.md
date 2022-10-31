@@ -1,7 +1,7 @@
-# OpenShift Connector
+# OpenShift Toolkit
 
-[![Visual Studio Marketplace](https://img.shields.io/visual-studio-marketplace/v/redhat.vscode-openshift-connector?style=for-the-badge&label=VS%20Marketplace&logo=visual-studio-code&color=blue)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector)
-[![Downloads](https://img.shields.io/visual-studio-marketplace/d/redhat.vscode-openshift-connector?style=for-the-badge&color=purple)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector)
+[![Visual Studio Marketplace](https://img.shields.io/visual-studio-marketplace/v/redhat.vscode-openshift-toolkit?style=for-the-badge&label=VS%20Marketplace&logo=visual-studio-code&color=blue)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-toolkit)
+[![Downloads](https://img.shields.io/visual-studio-marketplace/d/redhat.vscode-openshift-toolkit?style=for-the-badge&color=purple)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-toolkit)
 [![Gitter](https://img.shields.io/gitter/room/redhat-developer/vscode-openshift-tools?style=for-the-badge&logo=gitter)](https://gitter.im/redhat-developer/openshift-connector)
 [![Build Status](https://img.shields.io/github/workflow/status/redhat-developer/vscode-openshift-tools/CI?style=for-the-badge&logo=github)](https://github.com/redhat-developer/vscode-openshift-tools/actions?query=workflow%3ACI)
 [![Unit Tests Code Coverage](https://img.shields.io/codecov/c/github/redhat-developer/vscode-openshift-tools?logo=codecov&style=for-the-badge)](https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/main/graph/badge.svg)
@@ -9,7 +9,7 @@
 
 ## Overview
 
-OpenShift Connector extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:
+OpenShift Toolkit extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:
  - Developers can easily create, deploy and live debug container applications running on OpenShift.
  - Create [devfile](https://devfile.io/docs/2.1.0/what-is-a-devfile) based components directly from Devfile Registries View
  - Follow logs for the deployed applications on OpenShift
@@ -181,7 +181,7 @@ Default Visual Studio Code installation includes JavaScript/TypeScript Language 
 
 ### Debug Java Component
 
-To debug a Java Component, [Java Language Support](https://marketplace.visualstudio.com/items?itemName=redhat.java) and [Java Debugger](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug) Extensions are required. OpenShift Connector extension will prompt the user to install missing extension(s) before it starts Debugger for a Java Component.
+To debug a Java Component, [Java Language Support](https://marketplace.visualstudio.com/items?itemName=redhat.java) and [Java Debugger](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug) Extensions are required. OpenShift Toolkit extension will prompt the user to install missing extension(s) before it starts Debugger for a Java Component.
 
 ![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/debug-java.gif)
 
@@ -202,20 +202,20 @@ To debug a Java Component, [Java Language Support](https://marketplace.visualstu
 <div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/context/url-node-open.png" width="15" height="15" /><span style="margin: 20px">Open URL</span></div>
 
 ## Extension Configuration Settings
-   * `OpenShift Connector: Show Channel On Output` - Show OpenShift Connector output channel when new text added to output stream
-   * `OpenShift Connector: Output verbosity level` - Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and terminal view
-   * `OpenShift Connector: Search CLI tools in PATH locations before using included binaries` - Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries
-   * `OpenShift Connector: Use Webview based editors to show 'Show Log', 'Follow Log' and 'Describe' commands output` - Use Webview based editors instead of Terminal view to show or follow logs
-   * `OpenShift Connector: CRC Executable Location` - Provide the path where OpenShift Local is installed.
-   * `OpenShift Connector: CRC Pull Secret Path` - Provide the path where the pull secret file is present.
-   * `OpenShift Connector: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
-   * `OpenShift Connector: CRC Memory Allocation` - MiB of memory to allocate to the OpenShift cluster as selected during the first run.
+   * `OpenShift Toolkit: Show Channel On Output` - Show OpenShift Toolkit output channel when new text added to output stream
+   * `OpenShift Toolkit: Output verbosity level` - Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and terminal view
+   * `OpenShift Toolkit: Search CLI tools in PATH locations before using included binaries` - Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries
+   * `OpenShift Toolkit: Use Webview based editors to show 'Show Log', 'Follow Log' and 'Describe' commands output` - Use Webview based editors instead of Terminal view to show or follow logs
+   * `OpenShift Toolkit: CRC Executable Location` - Provide the path where OpenShift Local is installed.
+   * `OpenShift Toolkit: CRC Pull Secret Path` - Provide the path where the pull secret file is present.
+   * `OpenShift Toolkit: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
+   * `OpenShift Toolkit: CRC Memory Allocation` - MiB of memory to allocate to the OpenShift cluster as selected during the first run.
 
 ## OpenShift Resources
 
 This Extension uses Kubernetes Extension API to show OpenShift specific resources like Projects, Routes, Deployment Configs, Image Streams, Templates and others in Kubernetes Clusters View.
 
-OpenShift Connector extension provides ```Use Project``` command to switch between OpenShift Projects. It is available for Project items in Kubernetes Clusters View.
+OpenShift Toolkit extension provides ```Use Project``` command to switch between OpenShift Projects. It is available for Project items in Kubernetes Clusters View.
 
 ![ useproject ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/use-project.png)
 
@@ -267,7 +267,7 @@ This is an open source project open to anyone. This project welcomes contributio
 
 For information on getting started, refer to the [CONTRIBUTING instructions](CONTRIBUTING.md).
 
-Download the most recent `openshift-connector-<version>.vsix` file from the [release](https://github.com/redhat-developer/vscode-openshift-tools/releases) and install it by following the instructions [here](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix). Stable releases are archived [here](https://download.jboss.org/jbosstools/adapters/stable/vscode-openshift-tools/).
+Download the most recent `openshift-toolkit-<version>.vsix` file from the [release](https://github.com/redhat-developer/vscode-openshift-tools/releases) and install it by following the instructions [here](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix). Stable releases are archived [here](https://download.jboss.org/jbosstools/adapters/stable/vscode-openshift-tools/).
 
 ## Feedback & Questions
 
@@ -281,4 +281,4 @@ MIT, See [LICENSE](LICENSE) for more information.
 
 ## Data and telemetry
 
-The Red Hat OpenShift Connector for Visual Studio Code collects anonymous [usage data](USAGE_DATA.md) and sends it to Red Hat servers to help improve our products and services. Read our [privacy statement](https://developers.redhat.com/article/tool-data-collection) to learn more. This extension respects the `redhat.telemetry.enabled` setting which you can learn more about at https://github.com/redhat-developer/vscode-commons#how-to-disable-telemetry-reporting
+The Red Hat OpenShift Toolkit for Visual Studio Code collects anonymous [usage data](USAGE_DATA.md) and sends it to Red Hat servers to help improve our products and services. Read our [privacy statement](https://developers.redhat.com/article/tool-data-collection) to learn more. This extension respects the `redhat.telemetry.enabled` setting which you can learn more about at https://github.com/redhat-developer/vscode-commons#how-to-disable-telemetry-reporting

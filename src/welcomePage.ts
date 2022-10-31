@@ -10,15 +10,15 @@ export class WelcomePage {
 
     @vsCommand('openshift.welcome')
     static async createOrShow(): Promise<void> {
-        if (vscode.workspace.getConfiguration('openshiftConnector').get('showWelcomePage')) {
-            await WelcomeViewLoader.loadView('Welcome - OpenShift Connector');
+        if (vscode.workspace.getConfiguration('openshiftToolkit').get('showWelcomePage')) {
+            await WelcomeViewLoader.loadView('Welcome - OpenShift Toolkit');
         }
     }
 
     @vsCommand('openshift.getStarted')
     static async showGetStarted(): Promise<void> {
         await vscode.commands.executeCommand('workbench.action.openWalkthrough', {
-            category: 'redhat.vscode-openshift-connector#openshiftWalkthrough'
+            category: 'redhat.vscode-openshift-toolkit#openshiftWalkthrough'
         }, false);
     }
 }

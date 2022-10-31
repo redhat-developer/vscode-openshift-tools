@@ -141,7 +141,7 @@ export class Welcome extends React.Component<DefaultProps, {
                 <div className='help'>
                     <ul>
                         <li>
-                            <a href='#!' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector&ssr=false#qna')}>
+                            <a href='#!' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-toolkit&ssr=false#qna')}>
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <HelpIcon style={{ fontSize: 25 }} />
@@ -200,7 +200,7 @@ export class Welcome extends React.Component<DefaultProps, {
                             </a>
                         </li>
                         <li>
-                            <a href='#!' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector')}>
+                            <a href='#!' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-toolkit')}>
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <Icon fontSize='large'>
@@ -224,7 +224,7 @@ export class Welcome extends React.Component<DefaultProps, {
                 <img className='image__logo' src={require('../../../../images/title/logo.svg').default} />
                 <div className='header__title'>
                     <div className='setting__input setting__input--big' style={{ paddingBottom: '0px', borderBottom: '0px', marginBottom: '0px' }}>
-                        <label style={{ display: 'flex', flexDirection: 'row', textAlign: 'center' }}><Typography variant='h1' className='highlight'>OpenShift</Typography><Typography variant='h1' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Connector</Typography></label>
+                        <label style={{ display: 'flex', flexDirection: 'row', textAlign: 'center' }}><Typography variant='h1' className='highlight'>OpenShift</Typography><Typography variant='h1' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Toolkit</Typography></label>
                     </div>
                 </div>
             </header>
@@ -234,14 +234,14 @@ export class Welcome extends React.Component<DefaultProps, {
                         <div className='section__content'>
                             <div className='section__header'>
                                 <p className='section__header-hint'>
-                                    OpenShift Connector for VS Code brings the power and convenience of Kubernetes and Red Hat OpenShift to developers. The extension allows developers to create, test, debug and deploy cloud-native applications on OpenShift in simple steps.
+                                    OpenShift Toolkit for VS Code brings the power and convenience of Kubernetes and Red Hat OpenShift to developers. The extension allows developers to create, test, debug and deploy cloud-native applications on OpenShift in simple steps.
                                     With the extension, users can provision a new OpenShift cluster, either using <a>OpenShift Local</a> or using a free(30 days) <a>Red Hat Developer Sandbox</a> instance.
                                 </p>
                                 <div className='setting__input setting__input--big' style={{ paddingBottom: '0px', borderBottom: '0px', marginBottom: '0px' }}>
                                     <label style={{ display: 'flex', flexDirection: 'row' }}>
                                         <Typography variant='h2' className='foreGroundColor'>Welcome to</Typography>
                                         <Typography variant='h2' style={{ paddingLeft: '1rem' }} className='highlight'>OpenShift</Typography>
-                                        <Typography variant='h2' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Connector</Typography>
+                                        <Typography variant='h2' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Toolkit</Typography>
                                     </label>
                                 </div>
                                 <div className='section__whatsnew foreGroundColor'>
@@ -252,10 +252,10 @@ export class Welcome extends React.Component<DefaultProps, {
                                         className='button button--flat'
                                         title='See Whats New'
                                         onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/releases/' + `${lastRelease}`)}
-                                    >See What's New in OpenShift Connector</a>
+                                    >See What's New in OpenShift Toolkit</a>
                                     <a
                                         className='button button--flat'
-                                        title='Open the Get Started with OpenShift Connector walkthrough'
+                                        title='Open the Get Started with OpenShift Toolkit walkthrough'
                                         onClick={this.openGetStarted}
                                     >Get Started Walkthrough</a>
                                 </div>

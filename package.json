@@ -1,8 +1,8 @@
 {
-	"name": "vscode-openshift-connector",
-	"displayName": "OpenShift Connector",
+	"name": "vscode-openshift-toolkit",
+	"displayName": "OpenShift Toolkit",
 	"description": "Simplified app dev for Kubernetes or Red Hat OpenShift",
-	"version": "0.7.0",
+	"version": "1.0.0",
 	"license": "MIT",
 	"publisher": "redhat",
 	"author": "Red Hat",
@@ -44,7 +44,7 @@
 		"OpenShift",
 		"Kubernetes",
 		"Red Hat",
-		"Clusters",
+		"kubernetes-extension-cloud-provider",
 		"k8s",
 		"OpenShift Local",
 		"CodeReady Containers",
@@ -1377,34 +1377,34 @@
 			{
 				"type": "object",
 				"order": 1,
-				"title": "OpenShift Connector",
+				"title": "OpenShift Toolkit",
 				"properties": {
-					"openshiftConnector.showWelcomePage": {
+					"openshiftToolkit.showWelcomePage": {
 						"type": "boolean",
 						"default": true,
-						"description": "Show Welcome Page when using OpenShift Connector Extension"
+						"description": "Show Welcome Page when using OpenShift Toolkit Extension"
 					},
-					"openshiftConnector.showChannelOnOutput": {
+					"openshiftToolkit.showChannelOnOutput": {
 						"type": "boolean",
 						"default": false,
-						"description": "Show OpenShift Connector output channel when new text added to output stream."
+						"description": "Show OpenShift Toolkit output channel when new text added to output stream."
 					},
-					"openshiftConnector.outputVerbosityLevel": {
+					"openshiftToolkit.outputVerbosityLevel": {
 						"type": "number",
 						"default": 0,
 						"description": "Output verbosity level (value between 0 and 9) for OpenShift Create, and Dev commands in output channel and integrated terminal."
 					},
-					"openshiftConnector.searchForToolsInPath": {
+					"openshiftToolkit.searchForToolsInPath": {
 						"type": "boolean",
 						"default": false,
 						"description": "Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries."
 					},
-					"openshiftConnector.useWebviewInsteadOfTerminalView": {
+					"openshiftToolkit.useWebviewInsteadOfTerminalView": {
 						"type": "boolean",
 						"default": false,
 						"description": "By default the Terminal View is used to execute OpenShift 'Show Log', 'Follow Log' and 'Describe' commands. Select this option if you want to use Webview based editors for it."
 					},
-					"openshiftConnector.stopDevModeTimeout": {
+					"openshiftToolkit.stopDevModeTimeout": {
 						"type": "number",
 						"default": 90000,
 						"description": "Controls stopping development mode timeout (in milliseconds)."
@@ -1416,27 +1416,27 @@
 				"order": 2,
 				"title": "Red Hat OpenShift Local",
 				"properties": {
-					"openshiftConnector.crcBinaryLocation": {
+					"openshiftToolkit.crcBinaryLocation": {
 						"type": "string",
 						"default": null,
 						"description": "Provide the path where the OpenShift Local executable is present."
 					},
-					"openshiftConnector.crcPullSecretPath": {
+					"openshiftToolkit.crcPullSecretPath": {
 						"type": "string",
 						"default": null,
 						"description": "Path of image pull secret."
 					},
-					"openshiftConnector.crcCpuCores": {
+					"openshiftToolkit.crcCpuCores": {
 						"type": "number",
 						"default": 4,
 						"description": "Number of CPU cores to allocate to the OpenShift cluster as selected during the first run"
 					},
-					"openshiftConnector.crcMemoryAllocated": {
+					"openshiftToolkit.crcMemoryAllocated": {
 						"type": "number",
 						"default": 9216,
 						"description": "MiB of memory to allocate to the OpenShift cluster as selected during the first run"
 					},
-					"openshiftConnector.crcNameserver": {
+					"openshiftToolkit.crcNameserver": {
 						"type": "string",
 						"default": "",
 						"description": "IP address/name of DNS to use with OpenShift Local"
@@ -1448,11 +1448,11 @@
 				"order": 3,
 				"title": "Developer Sandbox for Red Hat OpenShift",
 				"properties": {
-					"openshiftConnector.sandboxApiHostUrl": {
+					"openshiftToolkit.sandboxApiHostUrl": {
 						"type": "string",
 						"default": "https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com"
 					},
-					"openshiftConnector.sandboxApiTimeout": {
+					"openshiftToolkit.sandboxApiTimeout": {
 						"description": "Controls timeout (im milliseconds) for requests to OpenShift Sandbox Registration Service. Increase timeout value in case of unexpected errors in OpenShift Sandbox Provisioning workflow.",
 						"type": "number",
 						"default": 100000
