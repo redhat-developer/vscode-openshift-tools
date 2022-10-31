@@ -54,7 +54,7 @@ class OdoChannelImpl implements OdoChannel {
         }
         if (
             vscode.workspace
-                .getConfiguration('openshiftConnector')
+                .getConfiguration('openshiftToolkit')
                 .get<boolean>('showChannelOnOutput')
         ) {
             this.channel.show();

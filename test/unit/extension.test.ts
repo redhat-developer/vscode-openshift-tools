@@ -48,7 +48,7 @@ function genComponentJson(p: string, a: string, n: string, c: string ): string {
     }`;
 }
 
-suite('openshift connector Extension', () => {
+suite('openshift toolkit Extension', () => {
     let sandbox: sinon.SinonSandbox;
 
     const clusterItem = new OpenShiftCluster('cluster');
@@ -103,7 +103,7 @@ suite('openshift connector Extension', () => {
     });
 
     test('Extension should be present', () => {
-		assert.ok(vscode.extensions.getExtension('redhat.vscode-openshift-connector'));
+		assert.ok(vscode.extensions.getExtension('redhat.vscode-openshift-toolkit'));
 	});
 
     test('should load components from workspace folders', async () => {

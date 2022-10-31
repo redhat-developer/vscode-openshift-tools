@@ -153,7 +153,7 @@ export class Component extends OpenShiftItem {
 
     static devModeExitTimeout(): number {
         return workspace
-            .getConfiguration('openshiftConnector')
+            .getConfiguration('openshiftToolkit')
             .get<number>('stopDevModeTimeout');
     }
 
@@ -352,7 +352,7 @@ export class Component extends OpenShiftItem {
 
     static isUsingWebviewEditor(): boolean {
         return workspace
-            .getConfiguration('openshiftConnector')
+            .getConfiguration('openshiftToolkit')
             .get<boolean>('useWebviewInsteadOfTerminalView');
     }
 

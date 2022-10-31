@@ -32,37 +32,37 @@ node('rhel8'){
         packageJson.extensionDependencies << "ms-kubernetes-tools.vscode-kubernetes-tools"
         writeJSON file: 'package.json', json: packageJson, pretty: 4
         sh 'node ./out/build/update-readme.js'
-        sh "vsce package -o openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix"
-        sh "sha256sum *-ovsx.vsix > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix.sha256"
-        sh "npm pack && mv vscode-openshift-connector-${packageJson.version}.tgz openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.tgz"
-        sh "sha256sum *.tgz > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}.tgz.sha256"
+        sh "vsce package -o openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix"
+        sh "sha256sum *-ovsx.vsix > openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix.sha256"
+        sh "npm pack && mv vscode-openshift-toolkit-${packageJson.version}.tgz openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}.tgz"
+        sh "sha256sum *.tgz > openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}.tgz.sha256"
     }
   }
-  
+
   withEnv(['TARGET=win32']) {
     stage('Package win32-x64') {
-      sh "vsce package --target win32-x64 -o openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-win32-x64.vsix"
-      sh "sha256sum *-win32-x64.vsix > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-win32-x64.vsix.sha256"
+      sh "vsce package --target win32-x64 -o openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-win32-x64.vsix"
+      sh "sha256sum *-win32-x64.vsix > openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-win32-x64.vsix.sha256"
     }
   }
 
   withEnv(['TARGET=linux']) {
     stage('Package linux-x64') {
-        sh "vsce package --target linux-x64 -o openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-linux-x64.vsix"
-        sh "sha256sum *-linux-x64.vsix > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-linux-x64.vsix.sha256"
+        sh "vsce package --target linux-x64 -o openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-linux-x64.vsix"
+        sh "sha256sum *-linux-x64.vsix > openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-linux-x64.vsix.sha256"
     }
   }
 
   withEnv(['TARGET=darwin']) {
     stage('Package darwin-x64') {
-        sh "vsce package --target darwin-x64 -o openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-darwin-x64.vsix"
-        sh "sha256sum *-darwin-x64.vsix > openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-darwin-x64.vsix.sha256"
+        sh "vsce package --target darwin-x64 -o openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-darwin-x64.vsix"
+        sh "sha256sum *-darwin-x64.vsix > openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-darwin-x64.vsix.sha256"
     }
   }
 
   stage('vsix package smoke test') {
       wrap([$class: 'Xvnc']) {
-        sh "node ./out/build/install-vscode.js openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix && node ./out/build/run-tests.js vsix-test test/fake-extension/"
+        sh "node ./out/build/install-vscode.js openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix && node ./out/build/run-tests.js vsix-test test/fake-extension/"
       }
   }
 
@@ -86,9 +86,9 @@ node('rhel8'){
     if(publishToMarketPlace.equals('true')) {
       stage("Publish to Marketplace") {
         withCredentials([[$class: 'StringBinding', credentialsId: 'vscode_java_marketplace', variable: 'TOKEN']]) {
-          sh "vsce publish -p ${TOKEN} --packagePath openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-darwin-x64.vsix"
-          sh "vsce publish -p ${TOKEN} --packagePath openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-linux-x64.vsix"
-          sh "vsce publish -p ${TOKEN} --packagePath openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-win32-x64.vsix"
+          sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-darwin-x64.vsix"
+          sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-linux-x64.vsix"
+          sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-win32-x64.vsix"
         }
 
         stage "Promote the build to stable"
@@ -108,7 +108,7 @@ node('rhel8'){
       stage("Publish to OVSX") {
         sh "npm install -g ovsx"
         withCredentials([[$class: 'StringBinding', credentialsId: 'open-vsx-access-token', variable: 'OVSX_TOKEN']]) {
-          sh "ovsx publish -p ${OVSX_TOKEN} openshift-connector-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix"
+          sh "ovsx publish -p ${OVSX_TOKEN} openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix"
         }
       }
     }

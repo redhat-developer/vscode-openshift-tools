@@ -21,11 +21,11 @@ export function checkExtension() {
             item = await extView.findItem(`@installed ${pjson.displayName}`);
         });
 
-        it('Openshift connector is installed', () => {
+        it('Openshift toolkit is installed', () => {
             expect(item).not.undefined;
         });
 
-        it('Openshift connector has the correct attributes', async () => {
+        it('Openshift toolkit has the correct attributes', async () => {
             const version = await item.getVersion();
             const author = await item.getAuthor();
             const desc = await item.getDescription();

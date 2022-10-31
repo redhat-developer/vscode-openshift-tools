@@ -56,11 +56,11 @@ export interface OauthServerInfo {
   }
 
 export function getSandboxAPIUrl(): string {
-    return workspace.getConfiguration('openshiftConnector').get('sandboxApiHostUrl');
+    return workspace.getConfiguration('openshiftToolkit').get('sandboxApiHostUrl');
 }
 
 export function getSandboxAPITimeout(): number {
-    return workspace.getConfiguration('openshiftConnector').get('sandboxApiTimeout');
+    return workspace.getConfiguration('openshiftToolkit').get('sandboxApiTimeout');
 }
 
 export interface SandboxAPI {

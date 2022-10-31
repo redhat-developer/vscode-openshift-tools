@@ -18,8 +18,8 @@ function verbose(_: unknown, key: string, descriptor: TypedPropertyDescriptor<Fu
         throw new Error('not supported');
     }
 
-    descriptor[fnKey] = function (...args: unknown[]): unknown {
-        const v = workspace.getConfiguration('openshiftConnector').get<number>('outputVerbosityLevel');
+    descriptor[fnKey] = function(...args: unknown[]): unknown {
+        const v = workspace.getConfiguration('openshiftToolkit').get<number>('outputVerbosityLevel');
         const command = fn.apply(this, args) as CommandText;
         return v > 0 ? command.addOption(new CommandOption('-v', `${v}`)) : command;
     };
