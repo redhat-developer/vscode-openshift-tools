@@ -2,13 +2,13 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { GitSource, GitProvider, SecretType as GitSecretType } from '../types';
+import { GitSource, GitProvider, SecretType } from '../types';
 import { BaseService } from './base-service';
 import { BitbucketService } from './bitbucket-service';
 import { GithubService } from './github-service';
 import { GitlabService } from './gitlab-service';
 
-export enum SecretType {
+export enum ServiceSecretType {
     basicAuth = 'kubernetes.io/basic-auth',
     dockercfg = 'kubernetes.io/dockercfg',
     dockerconfigjson = 'kubernetes.io/dockerconfigjson',
@@ -27,19 +27,19 @@ export function getGitService(
     devfilePath?: string,
     dockerfilePath?: string,
 ): BaseService {
-    let secretType: GitSecretType;
+    let secretType: SecretType;
     let secretContent: any;
     switch (secret?.type) {
-        case SecretType.basicAuth:
-            secretType = GitSecretType.BASIC_AUTH;
+        case ServiceSecretType.basicAuth:
+            secretType = SecretType.BASIC_AUTH;
             secretContent = secret.data;
             break;
-        case SecretType.sshAuth:
-            secretType = GitSecretType.SSH;
+        case ServiceSecretType.sshAuth:
+            secretType = SecretType.SSH;
             secretContent = secret['ssh-privatekey'];
             break;
         default:
-            secretType = GitSecretType.NO_AUTH;
+            secretType = SecretType.NO_AUTH;
     }
     const gitSource: GitSource = {
         url: repository,
