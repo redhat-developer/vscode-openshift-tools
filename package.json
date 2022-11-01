@@ -407,8 +407,8 @@
 				"title": "Change Active Project",
 				"category": "OpenShift",
 				"icon": {
-					"dark": "images/title/dark/icon-select-project.svg",
-					"light": "images/title/light/icon-select-project.svg"
+					"dark": "images/title/dark/set-project.svg",
+					"light": "images/title/light/set-project.svg"
 				}
 			},
 			{
