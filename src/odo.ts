@@ -865,18 +865,16 @@ export class OdoImpl implements Odo {
         return data;
     }
 
-    private loadRegistryFromPreferences() {
+    private async loadRegistryFromPreferences() {
+        await this.execute(Command.listRegistries());
         const prefYaml = path.resolve(Platform.getUserHomePath(), '.odo', 'preference.yaml');
         const yamlData: any = loadYaml(readFileSync(prefYaml, {encoding: 'utf8'}));
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        return yamlData.OdoSettings.RegistryList;
+        return yamlData.OdoSettings.RegistryList as Registry[];
     }
 
     public getRegistries(): Promise<Registry[]> {
-        // wait for fix of https://github.com/redhat-developer/odo/issues/5993#issuecomment-1235550247
-        // const result = await this.execute(Command.listRegistries());
-        // return this.loadItemsFrom<RegistryList, Registry>(result, (data) => data.registries);
-        return Promise.resolve(this.loadRegistryFromPreferences() as Registry[]);
+        return this.loadRegistryFromPreferences();
     }
 
     public async addRegistry(name: string, url: string, token: string): Promise<Registry> {

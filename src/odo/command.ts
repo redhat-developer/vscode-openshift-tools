@@ -111,7 +111,7 @@ export class Command {
     }
 
     static addRegistry(name: string, url: string, token: string): CommandText {
-        const cTxt =  new CommandText('odo registry add', `${name} ${url}`);
+        const cTxt =  new CommandText('odo preference add registry', `${name} ${url}`);
         if (token) {
             cTxt.addOption(new CommandOption('--token', token));
         }
@@ -119,7 +119,7 @@ export class Command {
     }
 
     static removeRegistry(name: string): CommandText {
-        return new CommandText('odo registry delete', name, [new CommandOption('-f')]);
+        return new CommandText('odo preference remove registry', name, [new CommandOption('--force')]);
     }
 
     static listCatalogComponents(): CommandText {
