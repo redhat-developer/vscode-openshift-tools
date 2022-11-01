@@ -124,7 +124,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             return  {
                 contextValue: 'openshift.k8sContext',
                 label: this.kubeConfig.getCluster(element.cluster).server,
-                collapsibleState: TreeItemCollapsibleState.Collapsed
+                collapsibleState: TreeItemCollapsibleState.Collapsed,
+                iconPath: path.resolve(__dirname, '../../images/context/cluster-node.png')
             };
         }
 
@@ -136,14 +137,17 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     contextValue: 'openshift.project',
                     label: element.metadata.name,
                     collapsibleState: TreeItemCollapsibleState.Collapsed,
-                    iconPath: path.resolve(__dirname, '../../images/context/dark/project.svg')
+                    iconPath: path.resolve(__dirname, '../../images/context/project-node.png')
                 }
             }
             return {
                 contextValue: 'openshift.k8sObject',
                 label: element.metadata.name,
                 collapsibleState: TreeItemCollapsibleState.None,
-                iconPath: element.kind === 'Deployment' ? path.resolve(__dirname, '../../images/context/dark/deployment.svg') : path.resolve(__dirname, '../../images/context/dark/deployment-config.svg')
+                iconPath: {
+                    dark: path.resolve(__dirname, '../../images/context/component-node-dark.png'),
+                    light: path.resolve(__dirname, '../../images/context/component-node-light.png')
+                }
             };
         }
 
