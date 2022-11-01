@@ -216,6 +216,12 @@ export class Component extends OpenShiftItem {
                                 Component.stateChanged.fire(component.contextPath)
                             })
                             devProcess.stdout.on('data', (chunk) => {
+                                // TODO: test on macos (see https://github.com/redhat-developer/vscode-openshift-tools/issues/2607)
+                                // it seems 'spawn' event is not firing on macos
+                                if(cs.devStatus === ComponentContextState.DEV_STARTING) {
+                                    cs.devStatus = ComponentContextState.DEV_RUNNING;
+                                    Component.stateChanged.fire(component.contextPath)
+                                }
                                 outputEmitter.fire(`${chunk}`.replaceAll('\n', '\r\n'));
                             });
                             devProcess.stderr.on('data', (chunk) => {
