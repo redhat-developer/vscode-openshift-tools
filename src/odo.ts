@@ -866,7 +866,7 @@ export class OdoImpl implements Odo {
     }
 
     private async loadRegistryFromPreferences() {
-        await this.execute(Command.listRegistries());
+        await this.execute(Command.listRegistries()); // this call is required to init preferences
         const prefYaml = path.resolve(Platform.getUserHomePath(), '.odo', 'preference.yaml');
         const yamlData: any = loadYaml(readFileSync(prefYaml, {encoding: 'utf8'}));
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
