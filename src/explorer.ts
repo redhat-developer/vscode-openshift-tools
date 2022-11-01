@@ -160,9 +160,11 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     async getChildren(element?: ExplorerItem): Promise<ExplorerItem[]> {
         let result: ExplorerItem[] = [];
         if (!element) {
-            // get cluster url or empty array if not logged in
-            if (await this.getCurrentClusterUrl()){
+            try {
+                await this.getNamesapcesOrProjects()
                 result = [this.kubeContext];
+            } catch (err) {
+                // ignore because ether server is not accessible or user is logged out
             }
         } else if ('name' in element) { // we are dealing with context here
             // user is logged into cluster from current context
