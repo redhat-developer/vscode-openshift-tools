@@ -106,6 +106,13 @@ export class Cluster extends OpenShiftItem {
         const k8sConfig = new KubeConfigUtils();
         const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
         const contextName: QuickPickItem[] = contexts.map((ctx) => ({ label: `${ctx.name}`}));
+        if (contextName.length === 0) {
+            const command = await window.showInformationMessage('You have no Kubernetes contexts yet, please login to a cluster.', 'Login', 'Cancel');
+            if (command === 'Login') {
+                return Cluster.login(undefined, true);
+            }
+            return null;
+        }
         const choice = await window.showQuickPick(contextName, {placeHolder: 'Select a new OpenShift context'});
         if (!choice) return null;
         await Cluster.odo.execute(Command.setOpenshiftContext(choice.label));

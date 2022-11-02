@@ -13,7 +13,6 @@ import * as odo from '../../src/odo';
 import { Cluster } from '../../src/openshift/cluster';
 import { CommandText } from '../../src/base/command';
 import { Command } from '../../src/odo/command';
-import { Component } from '../../src/openshift/component';
 import { AddWorkspaceFolder } from '../../src/util/workspace';
 import { ComponentTypeAdapter } from '../../src/odo/componentType';
 import cp = require('child_process');
@@ -254,7 +253,6 @@ suite('odo integration', () => {
         test('start/stop debugger', async () => {
             const errMessStub = sb.stub(window, 'showErrorMessage');
             await commands.executeCommand('openshift.component.debug', component);
-            expect(Component.stopDebugSession(component)).to.be.true;
             expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
         });
 

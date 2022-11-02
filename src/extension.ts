@@ -19,7 +19,6 @@ import { OpenShiftExplorer } from './explorer';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
 import { Platform } from './util/platform';
-import { OdoImpl, ContextType, OdoEvent } from './odo';
 import { TokenStore } from './util/credentialManager';
 import { registerCommands } from './vscommand';
 import { ToolsConfig } from './tools';
@@ -82,7 +81,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         crcStatusItem,
         OpenShiftExplorer.getInstance(),
         new DebugSessionsView().createTreeView('openshiftDebugView'),
-        ...Component.init(extensionContext),
+        ...Component.init(),
         ComponentTypesView.instance.createTreeView('openshiftComponentTypesView'),
         ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
     ];
@@ -172,19 +171,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     }
 
     createStatusBarItem(extensionContext) ;
-
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    OdoImpl.Instance.subject.subscribe(async (event: OdoEvent) => {
-        if (event.type === 'inserted' && event.data.contextValue === ContextType.COMPONENT) {
-            const choice = await window.showInformationMessage(
-                `Do you want to push new '${event.data.getName()}' Component?`,
-                'Push',
-            );
-            if (choice === 'Push') {
-                await commands.executeCommand('openshift.component.push', event.data);
-            }
-        }
-    });
 
     function updateStatusBarItem(statusBarItem: StatusBarItem, text: string): void {
         if (!workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation')) {

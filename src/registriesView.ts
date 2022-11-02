@@ -227,8 +227,8 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         }
     }
 
-    @vsCommand('openshift.componentTypesView.registry.add')
-    public static async addRegistryCmd(registryContext: Registry): Promise<void> {
+    @vsCommand('openshift.componentTypesView.registry.edit')
+    public static async editRegistry(registryContext: Registry): Promise<void> {
         // ask for registry
         const registries = await ComponentTypesView.instance.getRegistries();
         const regName = await window.showInputBox({
@@ -318,9 +318,9 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         }
     }
 
-    @vsCommand('openshift.componentTypesView.registry.edit')
-    public static async editRegistry(registry: Registry): Promise<void> {
-        await vscode.commands.executeCommand('openshift.componentTypesView.registry.add', registry);
+    @vsCommand('openshift.componentTypesView.registry.add')
+    public static async addRegistry(): Promise<void> {
+        await vscode.commands.executeCommand('openshift.componentTypesView.registry.edit');
     }
 
     @vsCommand('openshift.componentTypesView.registry.openInBrowser')
