@@ -26,11 +26,7 @@ import { KubeConfigUtils } from './util/kubeUtils';
 import { vsCommand } from './vscommand';
 import { KubernetesObject, Context } from '@kubernetes/client-node';
 import { CliChannel } from './cli';
-import { Command as DeploymentCommand } from './k8s/deployment';
-import { DeploymentConfig } from './k8s/deploymentConfig';
-import { Command as CommonCommand, loadItems } from './k8s/common';
 import { Command } from './odo/command';
-import { CommandText } from './base/command';
 import { newInstance, Odo3 } from './odo3';
 import { getInstance } from './odo';
 
