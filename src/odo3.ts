@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { KubernetesObject, KubernetesListObject } from '@kubernetes/client-node';
+import { KubernetesObject } from '@kubernetes/client-node';
 import { CommandText } from './base/command';
 import { CliChannel } from './cli';
 import { Command as CommonCommand, loadItems } from './k8s/common';
