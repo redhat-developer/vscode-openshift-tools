@@ -32,8 +32,7 @@ export class Project extends OpenShiftItem {
             description: 'Create new Project and make it active'
         };
         const projectsAndCommand = getOdoInstance().getProjects()
-            .then((projects) => projects.filter((prj: OpenShiftProject) => !prj.active))
-            .then((projects: (QuickPickItem | OpenShiftObject)[]) => {
+            .then((projects: (OpenShiftObject)[]) => {
                 return [createNewProject, ...projects];
             });
         const selectedItem = await window.showQuickPick(projectsAndCommand, {placeHolder: 'Select Project to activate or create new one'});
