@@ -19,8 +19,58 @@ import { selectWorkspaceFolder } from '../../util/workspace';
 import jsYaml = require('js-yaml');
 import GitUrlParse = require('git-url-parse');
 import cp = require('child_process');
+import { vsCommand } from '../../vscommand';
 
 let panel: vscode.WebviewPanel;
+
+class Command {
+
+    @vsCommand('openshift.component.importFromGit')
+    static async createComponent(event: any) {
+        const workspacePath = await selectWorkspaceFolder();
+        const appendedUri = Uri.joinPath(workspacePath, event.projectName);
+        //const wsFolderLength = workspace?.workspaceFolders?.length || 0;
+        panel.webview.postMessage({
+            action: 'cloneStarted'
+        })
+        //workspace.updateWorkspaceFolders(wsFolderLength, 0, { uri: appendedUri });
+        workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: appendedUri });
+        await clone(event, appendedUri.fsPath);
+        if (!event.isDevFile) {
+            panel.webview.postMessage({
+                action: 'start_create_component'
+            })
+            try {
+                await Component.createFromRootWorkspaceFolder(appendedUri, undefined,
+                    {
+                        componentTypeName: event.compDesc?.devfileData.devfile.metadata.name,
+                        projectName: event.projectName,
+                        applicationName: event.applicationName,
+                        compName: event.componentName,
+                        devFilePath: !event.devFilePath || event.devFilePath === 'devfile.yaml' || event.devFilePath === 'devfile.yml' ?
+                            '' : event.devFilePath
+                    }, true);
+                panel.webview.postMessage({
+                    action: event.action,
+                    status: true
+                });
+                vscode.window.showInformationMessage(`Componet ${event.componentName} created successfully`);
+            } catch (e) {
+                vscode.window.showErrorMessage(`Componet ${event.componentName} creation failed`);
+                panel.webview.postMessage({
+                    action: event.action,
+                    staus: false
+                });
+            }
+        } else {
+            panel.webview.postMessage({
+                action: event.action,
+                status: true
+            });
+            vscode.window.showInformationMessage('Selected Componet added into Workspace');
+        }
+    }
+}
 
 async function gitImportMessageListener(event: any): Promise<any> {
     switch (event?.action) {
@@ -67,48 +117,7 @@ async function gitImportMessageListener(event: any): Promise<any> {
             }
             break;
         case 'createComponent': {
-            const workspacePath = await selectWorkspaceFolder();
-            const appendedUri = Uri.joinPath(workspacePath, event.projectName);
-            //const wsFolderLength = workspace?.workspaceFolders?.length || 0;
-            panel.webview.postMessage({
-                action: 'cloneStarted'
-            })
-            //workspace.updateWorkspaceFolders(wsFolderLength, 0, { uri: appendedUri });
-            workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: appendedUri });
-            await clone(event, appendedUri.fsPath);
-            if (!event.isDevFile) {
-                panel.webview.postMessage({
-                    action: 'start_create_component'
-                })
-                try {
-                    await Component.createFromRootWorkspaceFolder(appendedUri, undefined,
-                        {
-                            componentTypeName: event.compDesc?.devfileData.devfile.metadata.name,
-                            projectName: event.projectName,
-                            applicationName: event.applicationName,
-                            compName: event.componentName,
-                            devFilePath: !event.devFilePath || event.devFilePath === 'devfile.yaml' || event.devFilePath === 'devfile.yml' ?
-                                '' : event.devFilePath
-                        }, true);
-                    panel.webview.postMessage({
-                        action: event.action,
-                        status: true
-                    });
-                    vscode.window.showInformationMessage(`Componet ${event.componentName} created successfully`);
-                } catch (e) {
-                    vscode.window.showErrorMessage(`Componet ${event.componentName} creation failed`);
-                    panel.webview.postMessage({
-                        action: event.action,
-                        staus: false
-                    });
-                }
-            } else {
-                panel.webview.postMessage({
-                    action: event.action,
-                    status: true
-                });
-                vscode.window.showInformationMessage('Selected Componet added into Workspace');
-            }
+            vscode.commands.executeCommand('openshift.component.importFromGit', event);
             break;
         }
         case 'close': {

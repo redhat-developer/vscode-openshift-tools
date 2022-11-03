@@ -415,7 +415,7 @@ export class Component extends OpenShiftItem {
         return Component.createFromRootWorkspaceFolder(workspacePath, [], { componentTypeName: compTypeName, projectName: starterProjectName, registryName: regName });
     }
 
-    @vsCommand('openshift.component.importFromGit')
+    @vsCommand('openshift.component.openImportFromGit')
     static async importFromGit(): Promise<void> {
         await GitImportLoader.loadView('Git Import');
     }

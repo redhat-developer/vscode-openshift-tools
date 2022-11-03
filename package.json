@@ -254,7 +254,7 @@
 		"onCommand:openshift.project.delete",
 		"onCommand:openshift.project.delete.palette",
 		"onCommand:openshift.component.createFromLocal",
-		"onCommand:openshift.component.importFromGit",
+		"onCommand:openshift.component.openImportFromGit",
 		"onCommand:openshift.component.createFromRootWorkspaceFolder",
 		"onCommand:openshift.component.describe",
     "onCommand:openshift.component.openInBrowser",
@@ -427,7 +427,7 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.component.importFromGit",
+				"command": "openshift.component.openImportFromGit",
 				"title": "Import from Git",
 				"category": "OpenShift",
 				"icon": {
@@ -777,6 +777,11 @@
                 "command": "openshift.openStatusBar",
                 "title": "OpenShift",
                 "category": "OpenShift"
+            },
+            {
+                "command": "openshift.component.importFromGit",
+                "title": "Import Component from git repository",
+                "category": "OpenShift"
             }
 		],
 		"keybindings": [
@@ -823,12 +828,12 @@
 		"viewsWelcome": [
 			{
 				"view": "openshiftProjectExplorer",
-				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context ](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[$(git-branch) Import from Git](command:openshift.component.importFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
+				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context ](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[$(git-branch) Import from Git](command:openshift.component.openImportFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
 				"enablement": "openshift.app.explorer.init"
 			},
 			{
 				"view": "openshiftComponentsView",
-				"contents": "You have no OpenShift Components in your workspace yet.\n[$(git-branch) Import from Git](command:openshift.component.importFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
+				"contents": "You have no OpenShift Components in your workspace yet.\n[$(git-branch) Import from Git](command:openshift.component.openImportFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
 				"enablement": "openshift.component.explorer.init"
 			}
 		],
@@ -1003,6 +1008,10 @@
                 {
                     "command": "openshift.component.forceExitDevMode",
                     "when": "false"
+                },
+                {
+                    "command": "openshift.component.importFromGit",
+                    "when": "false"
                 }
 			],
 			"view/title": [
@@ -1057,7 +1066,7 @@
 					"group": "navigation"
 				},
                 {
-					"command": "openshift.component.importFromGit",
+					"command": "openshift.component.openImportFromGit",
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
 				}
