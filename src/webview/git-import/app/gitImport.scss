@@ -1,0 +1,112 @@
+body {
+    &.vscode-light {
+        background-color: var(--color-background--darken-05);
+    }
+}
+
+.margin {
+    margin: 3rem;
+}
+
+.mainContainer,
+.formContainer,
+.form {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--vscode-font-family);
+    // overflow-y: scroll;
+}
+
+.title {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.sub {
+    margin: 1rem 0rem;
+}
+
+.subTitle {
+    margin-bottom: 2rem;
+    width: 59rem;
+    justify-content: center;
+    word-spacing: 5px;
+    text-align: justify;
+    color: var(--vscode-foreground);
+    font-weight: normal;
+    font-size: 14px;
+}
+
+.buttonStyle {
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--vscode-button-foreground);
+    &:hover {
+        background-color: '#BE0000' !important;
+    }
+    text-transform: none;
+}
+
+.buttonDiv {
+    margin: 2rem 0rem;
+    position: fixed;
+}
+
+.buttonDivWithBottom {
+    display: inline-flex;
+    border-top: 1px solid;
+    // border-color: inherit;
+    width: 100%;
+    height: 3rem;
+    background-color: var(--vscode-editor-background) !important;
+    backdrop-filter: blur(15px);
+    padding-top: 1rem;
+    margin-top: 2rem;
+    position: fixed;
+    bottom: -3%;
+}
+
+.stratergyContainer {
+    display: flex;
+    flex-direction: row;
+    border-top: 3px solid;
+    width: 55rem;
+    margin-top: 2rem;
+    padding-top: 0.5rem;
+    padding-left: 1rem;
+    height: 2rem;
+}
+
+.cardContainer {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+}
+
+.stratergySuccess {
+    border-color: green;
+    background-color: darkseagreen !important;
+}
+
+.stratergyWarning {
+    border-color: orange;
+    background-color: burlywood !important;
+}
+
+.MuiFormHelperText-root {
+    color: var(--vscode-foreground) !important;
+    margin-left: 0px !important;
+}
+
+.Mui-error {
+    color: #EE0000 !important;
+}
+
+.MuiOutlinedInput-input {
+    padding: 5px 14px !important;
+}
+
+.MuiAccordionSummary-root {
+    padding: 0px !important;
+}

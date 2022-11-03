@@ -21,7 +21,7 @@ import pq = require('proxyquire');
 import fs = require('fs-extra');
 import { Platform } from '../../../src/util/platform';
 
-const {expect} = chai;
+const { expect } = chai;
 chai.use(sinonChai);
 
 suite('OpenShift/Component', () => {
@@ -46,7 +46,7 @@ suite('OpenShift/Component', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
-        Component = pq('../../../src/openshift/component', { }).Component;
+        Component = pq('../../../src/openshift/component', {}).Component;
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
         sandbox.stub(OdoImpl.prototype, 'getServices');
@@ -95,7 +95,7 @@ suite('OpenShift/Component', () => {
 
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onFirstCall().resolves({label: 'file:///c:/Temp', folder: vscode.Uri.parse('file:///c:/Temp')});
+            quickPickStub.onFirstCall().resolves({ label: 'file:///c:/Temp', folder: vscode.Uri.parse('file:///c:/Temp') });
             quickPickStub.onSecondCall().resolves(componentType);
             inputStub = sandbox.stub(vscode.window, 'showInputBox');
             progressFunctionStub = sandbox.stub(Progress, 'execFunctionWithProgress').yields();
@@ -125,7 +125,7 @@ suite('OpenShift/Component', () => {
 
             setup(() => {
                 inputStub.resolves(componentItem.getName());
-                quickPickStub.onFirstCall().resolves({label: folder.uri.fsPath, uri: folder.uri});
+                quickPickStub.onFirstCall().resolves({ label: folder.uri.fsPath, uri: folder.uri });
             });
 
             test('happy path works', async () => {
@@ -175,7 +175,7 @@ suite('OpenShift/Component', () => {
                 quickPickStub.onSecondCall().resolves(AddWorkspaceFolder)
                 const sod = sandbox.stub(vscode.window, 'showOpenDialog');
                 sod.onFirstCall().resolves([vscode.Uri.parse('file:///c%3A/Temp')]);
-                sandbox.stub(fs,'existsSync').returns(true);
+                sandbox.stub(fs, 'existsSync').returns(true);
                 const sim = sandbox.stub(vscode.window, 'showInformationMessage').resolves();
                 sod.onSecondCall().resolves(null);
                 const result = await Component.create(appItem);
@@ -224,7 +224,7 @@ suite('OpenShift/Component', () => {
             expect(push).calledWith(o);
         });
 
-        test('starts new component workflow if provided folder is not odo component and does not call push if workflow canceled', async() => {
+        test('starts new component workflow if provided folder is not odo component and does not call push if workflow canceled', async () => {
             const getOso = sandbox.stub(OdoImpl.prototype, 'getOpenShiftObjectByContext')
             getOso.onFirstCall().returns(undefined);
             getOso.onSecondCall().returns(null);
@@ -312,7 +312,7 @@ suite('OpenShift/Component', () => {
             const result = await Component.createFromRootWorkspaceFolder(folder, [], undefined, 'componentType1');
             expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
             expect(quickPickStub).calledTwice;
-            expect(quickPickStub).calledWith([componentType1,componentType2]);
+            expect(quickPickStub).calledWith([componentType1, componentType2]);
         });
 
         test('when componentTypeName provided and there is no type found in registries, asks to select from all available registries', async () => {
@@ -337,7 +337,7 @@ suite('OpenShift/Component', () => {
             sandbox.stub(fs, 'existsSync').returns(true);
             sandbox.stub(Component, 'getName').returns(componentItem.getName());
             sandbox.stub(fs, 'readFileSync').returns(
-                'metadata:\n'  +
+                'metadata:\n' +
                 '  name: componentName'
             );
             const result = await Component.createFromRootWorkspaceFolder(folder, [], undefined, 'componentType1');
@@ -538,7 +538,7 @@ suite('OpenShift/Component', () => {
                 },
                 status: {
                     linkedServices: [{
-                            'ServiceName' : 'service'
+                        'ServiceName': 'service'
                     }]
                 }
             });
@@ -583,7 +583,7 @@ suite('OpenShift/Component', () => {
     suite('del', () => {
 
         const onDidFake = (listener): vscode.Disposable => {
-            Promise.resolve().then(() => { listener(undefined); } );
+            Promise.resolve().then(() => { listener(undefined); });
             return {
                 dispose: sandbox.stub()
             };
@@ -595,13 +595,15 @@ suite('OpenShift/Component', () => {
             quickPickStub.onFirstCall().resolves(appItem);
             quickPickStub.onSecondCall().resolves(componentItem);
             sandbox.stub<any, any>(vscode.window, 'showWarningMessage').resolves('Yes');
-            execStub.resolves({ error: undefined, stdout: `{
+            execStub.resolves({
+                error: undefined, stdout: `{
                 "kind": "List",
                 "apiVersion": "odo.openshift.io/v1alpha1",
                 "metadata": {},
                 "otherComponents": [],
                 "devfileComponents": []
-              }`, stderr: '' });
+              }`, stderr: ''
+            });
             sandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
             sandbox.stub(vscode.workspace, 'getWorkspaceFolder').returns(wsFolder1);
             OdoImpl.data.addContexts(vscode.workspace.workspaceFolders);

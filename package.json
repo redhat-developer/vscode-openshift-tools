@@ -66,11 +66,13 @@
 		"dev:compile:create-service-view": "webpack --mode development --config src/webview/create-service/webpack.config.js",
 		"dev:compile:devfile-registry-view": "webpack --mode development --config src/webview/devfile-registry/webpack.config.js",
 		"dev:compile:welcome-view": "webpack --mode development --config src/webview/welcome/webpack.config.js",
+		"dev:compile:git-import-view": "webpack --mode development --config src/webview/git-import/webpack.config.js",
 		"dev:run:log-view": "webpack-dev-server --mode development --config src/webview/log/webpack.config.js",
 		"dev:run:describe-view": "webpack-dev-server --mode development --config src/webview/describe/webpack.config.js",
 		"dev:run:cluster-view": "webpack-dev-server --port 9222 --mode development --config src/webview/cluster/webpack.config.js",
 		"dev:run:devfile-registry-view": "webpack-dev-server --port 9222 --mode development --config src/webview/devfile-registry/webpack.config.js",
 		"dev:run:welcome-view": "webpack-dev-server --port 9222 --mode development --config src/webview/welcome/webpack.config.js",
+		"dev:run:git-import-view": "webpack-dev-server --port 9222 --mode development --config src/webview/git-import/webpack.config.js",
 		"dev:run:create-service-view": "webpack-dev-server --mode development --config src/webview/create-service/webpack.config.js",
 		"watch": "tsc -watch -p ./",
 		"clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/logViewer",
@@ -91,12 +93,17 @@
 	},
 	"dependencies": {
 		"@kubernetes/client-node": "^0.16.1",
+		"@octokit/rest": "^16.30.1",
 		"@redhat-developer/vscode-redhat-telemetry": "^0.4.2",
 		"binary-search": "^1.3.6",
 		"byline": "^5.0.0",
 		"clsx": "^1.1.1",
+		"docker-file-parser": "^1.0.4",
 		"fs-extra": "^10.0.0",
+		"git-url-parse": "^13.1.0",
+		"gitlab": "10.0.1",
 		"globby": "^10.0.1",
+		"i18next": "^21.8.11",
 		"immutable": "^4.0.0",
 		"install": "^0.13.0",
 		"js-yaml": "^4.1.0",
@@ -105,6 +112,7 @@
 		"make-fetch-happen": "^9.1.0",
 		"minimatch": "^3.0.4",
 		"mkdirp": "^1.0.4",
+		"parse-bitbucket-url": "^0.3.0",
 		"rxjs": "^7.4.0",
 		"semver": "^7.3.5",
 		"stacktrace-parser": "^0.1.10",
@@ -135,6 +143,7 @@
 		"@types/collections": "^5.1.2",
 		"@types/express": "^4.17.13",
 		"@types/fs-extra": "^9.0.13",
+		"@types/js-base64": "^3.3.1",
 		"@types/js-yaml": "^4.0.5",
 		"@types/lodash": "^4.14.177",
 		"@types/make-fetch-happen": "^9.0.1",
@@ -231,7 +240,7 @@
 		"onCommand:openshift.oc.about",
 		"onCommand:openshift.output",
 		"onCommand:openshift.create",
-        "onCommand:openshift.open.developerConsole",
+    "onCommand:openshift.open.developerConsole",
 		"onCommand:openshift.open.developerConsole.palette",
 		"onCommand:openshift.explorer.addCluster",
 		"onCommand:openshift.explorer.login",
@@ -245,9 +254,10 @@
 		"onCommand:openshift.project.delete",
 		"onCommand:openshift.project.delete.palette",
 		"onCommand:openshift.component.createFromLocal",
+		"onCommand:openshift.component.openImportFromGit",
 		"onCommand:openshift.component.createFromRootWorkspaceFolder",
 		"onCommand:openshift.component.describe",
-        "onCommand:openshift.component.openInBrowser",
+    "onCommand:openshift.component.openInBrowser",
 		"onCommand:openshift.component.describe.palette",
 		"onCommand:openshift.component.log",
 		"onCommand:openshift.component.log.palette",
@@ -257,7 +267,7 @@
 		"onCommand:openshift.componentTypesView.registry.closeView",
 		"onCommand:openshift.component.debug",
 		"onCommand:openshift.component.debug.palette",
-        "onCommand:openshift.resource.load",
+    "onCommand:openshift.resource.load",
 		"onCommand:openshift.service.create",
 		"onCommand:openshift.service.delete",
 		"onCommand:openshift.component.folder.create",
@@ -415,6 +425,15 @@
 				"command": "openshift.project.set.palette",
 				"title": "Set Active Project",
 				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.component.openImportFromGit",
+				"title": "Import from Git",
+				"category": "OpenShift",
+				"icon": {
+					"light": "images/title/light/git-branch.svg",
+					"dark": "images/title/dark/git-branch.svg"
+				}
 			},
 			{
 				"command": "openshift.component.createFromLocal",
@@ -758,6 +777,11 @@
                 "command": "openshift.openStatusBar",
                 "title": "OpenShift",
                 "category": "OpenShift"
+            },
+            {
+                "command": "openshift.component.importFromGit",
+                "title": "Import Component from git repository",
+                "category": "OpenShift"
             }
 		],
 		"keybindings": [
@@ -804,12 +828,12 @@
 		"viewsWelcome": [
 			{
 				"view": "openshiftProjectExplorer",
-				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context ](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[Create Component](command:openshift.component.createFromLocal)",
+				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context ](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[$(git-branch) Import from Git](command:openshift.component.openImportFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
 				"enablement": "openshift.app.explorer.init"
 			},
 			{
 				"view": "openshiftComponentsView",
-				"contents": "You have no OpenShift Components in your workspace yet.\n[Create Component](command:openshift.component.createFromLocal)",
+				"contents": "You have no OpenShift Components in your workspace yet.\n[$(git-branch) Import from Git](command:openshift.component.openImportFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
 				"enablement": "openshift.component.explorer.init"
 			}
 		],
@@ -984,6 +1008,10 @@
                 {
                     "command": "openshift.component.forceExitDevMode",
                     "when": "false"
+                },
+                {
+                    "command": "openshift.component.importFromGit",
+                    "when": "false"
                 }
 			],
 			"view/title": [
@@ -1034,6 +1062,11 @@
 				},
 				{
 					"command": "openshift.component.createFromLocal",
+					"when": "view == openshiftComponentsView",
+					"group": "navigation"
+				},
+                {
+					"command": "openshift.component.openImportFromGit",
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
 				}
@@ -1245,14 +1278,14 @@
 					"when": "view == openshiftComponentTypesView && viewItem == devfileRegistry",
 					"group": "0@0"
 				},
-                {
-                    "command": "openshift.resource.load",
-                    "when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
-                },
-                {
-                    "command": "openshift.resource.openInDeveloperConsole",
-                    "when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
-                }
+        {
+            "command": "openshift.resource.load",
+            "when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
+        },
+        {
+            "command": "openshift.resource.openInDeveloperConsole",
+            "when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
+        }
 			]
 		},
 		"walkthroughs": [
