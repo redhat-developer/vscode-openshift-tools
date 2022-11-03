@@ -23,8 +23,7 @@ import { vsCommand } from '../../vscommand';
 
 let panel: vscode.WebviewPanel;
 
-class Command {
-
+export class Command {
     @vsCommand('openshift.component.importFromGit')
     static async createComponent(event: any) {
         const workspacePath = await selectWorkspaceFolder();
