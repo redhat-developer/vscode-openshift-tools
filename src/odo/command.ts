@@ -31,8 +31,12 @@ export class Command {
         return new CommandText('odo', 'deploy');
     }
 
-    static undeploy(): CommandText {
-        return new CommandText('odo', 'delete');
+    static undeploy(name?: string): CommandText {
+        const command = new CommandText('odo delete', 'component');
+        if (name) {
+            command.addOption(new CommandOption('--name', name));
+        }
+        return command;
     }
 
     static dev(): CommandText {

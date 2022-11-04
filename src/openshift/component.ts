@@ -732,7 +732,7 @@ export class Component extends OpenShiftItem {
         // cs.deployStatus = ComponentContextState.DEP;
         // Component.stateChanged.fire(context.contextPath);
         void Component.odo.executeInTerminal(
-            Command.undeploy(),
+            Command.undeploy(context.component.devfileData.devfile.metadata.name),
             context.contextPath,
             `OpenShift: Undeploying '${context.component.devfileData.devfile.metadata.name}' Component`);
     }
