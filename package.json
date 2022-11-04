@@ -412,6 +412,12 @@
 				"title": "Delete Project",
 				"category": "OpenShift"
 			},
+            {
+				"command": "openshift.open.configFile",
+				"title": "Open File",
+				"category": "OpenShift",
+				"icon": "$(link-external)"
+			},
 			{
 				"command": "openshift.project.set",
 				"title": "Change Active Project",
@@ -853,6 +859,10 @@
 					"command": "openshift.project.set",
 					"when": "view == openshiftProjectExplorer"
 				},
+                {
+					"command": "openshift.open.configFile",
+					"when": "view == openshiftProjectExplorer"
+				},
 				{
 					"command": "openshift.componentType.openStarterProjectRepository",
 					"when": "false"
@@ -1252,6 +1262,11 @@
 				{
 					"command": "openshift.explorer.login.credentialsLogin",
 					"when": "view == openshiftProjectExplorer && viewItem == loginRequired"
+				},
+                {
+					"command": "openshift.open.configFile",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.openConfigFile",
+					"group": "inline"
 				},
 				{
 					"command": "openshift.project.set",
