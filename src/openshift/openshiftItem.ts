@@ -103,6 +103,11 @@ export default class OpenShiftItem {
         return validator.matches(value, '^[a-z]([-a-z0-9]*[a-z0-9])*$') ? null : message;
     }
 
+    static validateFilePath(message: string, value: string): string | null {
+        const regx = new RegExp(/(^[a-z]:((\/|\\)[a-zA-Z0-9_ \\-]+)+|(devfile))\.(yaml|yml)$/,'gi');
+        return regx.test(value) ? null : message;
+    }
+
     static validateRFC1123DNSLabel(message: string, value: string): string | null {
       return validator.matches(value, '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$') ? null : message;
     }
@@ -162,7 +167,8 @@ export default class OpenShiftItem {
         return serviceList;
     }
 
-    static async getOpenShiftCmdData<T extends OpenShiftObject>(treeItem: T, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean): Promise<T | null> {
+    static async getOpenShiftCmdData<T extends OpenShiftObject>(treeItem: T, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean,
+    proName?: string, appName?: string): Promise<T | null> {
         let context: OpenShiftObject | QuickPickCommand = treeItem;
         let project: OpenShiftObject;
         if (!context) {
@@ -196,7 +202,7 @@ export default class OpenShiftItem {
                     }
                 }
             } else { // cluster is not accessible or user not logged in
-                const projectName = await OpenShiftItem.getName('Project Name', Promise.resolve([]))
+                const projectName = proName || await OpenShiftItem.getName('Project Name', Promise.resolve([]))
                     if (projectName) {
                         context = new OpenShiftProject(undefined, projectName, true);
                     } else {
@@ -213,7 +219,7 @@ export default class OpenShiftItem {
                 context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(applicationList, {placeHolder: appPlaceholder, ignoreFocusOut: true});
             }
             if (context && isCommand(context)) {
-                const newAppName = 'app';
+                const newAppName = appName || 'app';
                 if (newAppName) {
                     context = new OpenShiftApplication(project, newAppName);
                 } else {

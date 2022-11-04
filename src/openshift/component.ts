@@ -23,6 +23,7 @@ import { NewComponentCommandProps } from '../telemetry';
 
 import { ComponentWorkspaceFolder } from '../odo/workspace';
 import LogViewLoader from '../webview/log/LogViewLoader';
+import GitImportLoader from '../webview/git-import/gitImportLoader';
 
 
 function createCancelledResult(stepName: string): any {
@@ -407,11 +408,16 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.createFromLocal')
-    static async createFromLocal(componentTypeName?: string, starterProjectName?: string, registryName?: string): Promise<string | null> {
+    static async createFromLocal(compTypeName?: string, starterProjectName?: string, regName?: string): Promise<string | null> {
         const workspacePath = await selectWorkspaceFolder();
         if (!workspacePath) return createCancelledResult('contextFolder');
 
-        return Component.createFromRootWorkspaceFolder(workspacePath, [], componentTypeName, starterProjectName, registryName);
+        return Component.createFromRootWorkspaceFolder(workspacePath, [], { componentTypeName: compTypeName, projectName: starterProjectName, registryName: regName });
+    }
+
+    @vsCommand('openshift.component.openImportFromGit')
+    static async importFromGit(): Promise<void> {
+        await GitImportLoader.loadView('Git Import');
     }
 
     /**
@@ -427,7 +433,14 @@ export class Component extends OpenShiftItem {
      */
 
     @vsCommand('openshift.component.createFromRootWorkspaceFolder')
-    static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], componentTypeName?: string, starterProjectName?: string, registryName?: string, notification = true): Promise<string | null> {
+    static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], opts: {
+        componentTypeName?: string,
+        projectName?: string,
+        applicationName?: string,
+        compName?: string,
+        registryName?: string
+        devFilePath?: string
+    }, isGitImportCall = false, notification = true): Promise<string | null> {
         let useExistingDevfile = false;
         const devFileLocation = path.join(folder.fsPath, 'devfile.yaml');
         useExistingDevfile = fs.existsSync(devFileLocation);
@@ -446,19 +459,19 @@ export class Component extends OpenShiftItem {
         let createStarter: string;
         let componentType: ComponentTypeAdapter;
         let componentTypeCandidates: ComponentTypeAdapter[];
-        if (!useExistingDevfile) {
+        if (!useExistingDevfile && (!opts.devFilePath || opts.devFilePath.length === 0)) {
             const componentTypes = await Component.odo.getComponentTypes();
-            if (!componentTypeName && !starterProjectName) {
+            if (!opts.componentTypeName && !opts.projectName) {
                 progressIndicator.busy = true;
-                progressIndicator.placeholder = componentTypeName ? `Checking if '${componentTypeName}' Component type is available` : 'Loading available Component types';
+                progressIndicator.placeholder = opts.componentTypeName ? `Checking if '${opts.componentTypeName}' Component type is available` : 'Loading available Component types';
                 progressIndicator.show();
             }
-            if (componentTypeName) {
-                componentTypeCandidates = registryName && registryName.length > 0 ? componentTypes.filter(type => type.name === componentTypeName && type.registryName === registryName) : componentTypes.filter(type => type.name === componentTypeName);
+            if (opts.componentTypeName) {
+                componentTypeCandidates = opts.registryName && opts.registryName.length > 0 ? componentTypes.filter(type => type.name === opts.componentTypeName && type.registryName === opts.registryName) : componentTypes.filter(type => type.name === opts.componentTypeName);
                 if (componentTypeCandidates?.length === 0) {
-                    componentType = await window.showQuickPick(componentTypes.sort(ascDevfileFirst), { placeHolder: `Cannot find Component type '${componentTypeName}', select one below to use instead`, ignoreFocusOut: true });
+                    componentType = await window.showQuickPick(componentTypes.sort(ascDevfileFirst), { placeHolder: `Cannot find Component type '${opts.componentTypeName}', select one below to use instead`, ignoreFocusOut: true });
                 } else if (componentTypeCandidates?.length > 1) {
-                    componentType = await window.showQuickPick(componentTypeCandidates.sort(ascDevfileFirst), { placeHolder: `Found more than one Component types '${componentTypeName}', select one below to use`, ignoreFocusOut: true });
+                    componentType = await window.showQuickPick(componentTypeCandidates.sort(ascDevfileFirst), { placeHolder: `Found more than one Component types '${opts.componentTypeName}', select one below to use`, ignoreFocusOut: true });
                 } else {
                     [componentType] = componentTypeCandidates;
                     progressIndicator.hide();
@@ -475,9 +488,9 @@ export class Component extends OpenShiftItem {
             const globbyPath = `${folder.fsPath.replace('\\', '/')}/`;
             const paths = globby.sync(`${globbyPath}*`, { dot: true, onlyFiles: false });
             progressIndicator.hide();
-            if (paths.length === 0) {
-                if (starterProjectName) {
-                    createStarter = starterProjectName;
+            if (paths.length === 0 && !isGitImportCall) {
+                if (opts.projectName) {
+                    createStarter = opts.projectName;
                 } else {
                     progressIndicator.placeholder = 'Loading Starter Projects for selected Component Type'
                     progressIndicator.show();
@@ -508,7 +521,7 @@ export class Component extends OpenShiftItem {
             }
         }
 
-        const componentName = await Component.getName(
+        const componentName = opts.compName || await Component.getName(
             'Name',
             Promise.resolve([]),
             initialNameValue?.trim().length > 0 ? initialNameValue : createStarter
@@ -533,6 +546,7 @@ export class Component extends OpenShiftItem {
                     folder,
                     createStarter,
                     useExistingDevfile,
+                    opts.devFilePath,
                     notification
                 )
             );

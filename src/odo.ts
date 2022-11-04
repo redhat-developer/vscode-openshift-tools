@@ -320,7 +320,7 @@ export interface Odo {
     clearCache?(): void;
     createProject(name: string): Promise<OpenShiftObject>;
     deleteProject(project: OpenShiftObject): Promise<OpenShiftObject>;
-    createComponentFromFolder(type: string, registryName: string, name: string, path: Uri, starterName?: string, useExistingDevfile?: boolean, notification?: boolean): Promise<OpenShiftObject>;
+    createComponentFromFolder(type: string, registryName: string, name: string, path: Uri, starterName?: string, useExistingDevfile?: boolean, customDevfilePath?: string, notification?: boolean): Promise<OpenShiftObject>;
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     createService(application: OpenShiftObject, formData: any): Promise<OpenShiftObject>;
     deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
@@ -329,6 +329,7 @@ export interface Odo {
     getSettingsByContext(context: string): odo.Component;
     loadItems<I>(result: cliInstance.CliExitData, fetch: (data) => I[]): I[];
     getRegistries(): Promise<Registry[]>;
+    getAnalyze();
     readonly subject: Subject<OdoEvent>;
     addRegistry(name: string, url: string, token: string): Promise<Registry>;
     removeRegistry(name: string): Promise<void>;
@@ -754,8 +755,8 @@ export class OdoImpl implements Odo {
         return this.insertAndReveal(new OpenShiftProject(clusters[0], projectName, true));
     }
 
-    public async createComponentFromFolder(type: string, registryName: string, name: string, location: Uri, starter: string = undefined, useExistingDevfile = false, notification = true): Promise<OpenShiftObject> {
-        await this.execute(Command.createLocalComponent(type, registryName, name, starter, useExistingDevfile), location.fsPath);
+    public async createComponentFromFolder(type: string, registryName: string, name: string, location: Uri, starter: string = undefined, useExistingDevfile = false, customDevfilePath = '', notification = true): Promise<OpenShiftObject> {
+        await this.execute(Command.createLocalComponent(type, registryName, name, starter, useExistingDevfile, customDevfilePath), location.fsPath);
         let wsFolder: WorkspaceFolder;
         if (workspace.workspaceFolders) {
             // could be new or existing folder
@@ -880,6 +881,14 @@ export class OdoImpl implements Odo {
 
     public getRegistries(): Promise<Registry[]> {
         return this.loadRegistryFromPreferences();
+    }
+
+    // eslint-disable-next-line @typescript-eslint/require-await
+    public async getAnalyze() {
+        void this.execute(Command.analyze()).then((values) => {
+            // eslint-disable-next-line no-console
+            console.log(values);
+        });
     }
 
     public async addRegistry(name: string, url: string, token: string): Promise<Registry> {

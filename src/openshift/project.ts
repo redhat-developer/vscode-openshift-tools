@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { commands, QuickPickItem, window } from 'vscode';
+import { commands, window } from 'vscode';
 import OpenShiftItem from './openshiftItem';
-import { OpenShiftObject, OpenShiftProject, getInstance as getOdoInstance } from '../odo';
+import { OpenShiftObject, getInstance as getOdoInstance } from '../odo';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { CommandOption, CommandText } from '../base/command';
@@ -32,8 +32,7 @@ export class Project extends OpenShiftItem {
             description: 'Create new Project and make it active'
         };
         const projectsAndCommand = getOdoInstance().getProjects()
-            .then((projects) => projects.filter((prj: OpenShiftProject) => !prj.active))
-            .then((projects: (QuickPickItem | OpenShiftObject)[]) => {
+            .then((projects: (OpenShiftObject)[]) => {
                 return [createNewProject, ...projects];
             });
         const selectedItem = await window.showQuickPick(projectsAndCommand, {placeHolder: 'Select Project to activate or create new one'});

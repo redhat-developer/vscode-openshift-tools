@@ -145,7 +145,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
                     await commands.executeCommand('openshift.componentTypesView.registry.openInView');
                     break;
                 case 'Import from Git':
-                    await commands.executeCommand('openshift.component.importFromGit');
+                    await commands.executeCommand('openshift.component.openImportFromGit');
                     break;
                 case 'Open Welcome Page':
                     await commands.executeCommand('openshift.welcome');
