@@ -28,7 +28,11 @@ function verbose(_: unknown, key: string, descriptor: TypedPropertyDescriptor<Fu
 export class Command {
 
     static deploy(): CommandText {
-        return new CommandText('odo', 'deploy')
+        return new CommandText('odo', 'deploy');
+    }
+
+    static undeploy(): CommandText {
+        return new CommandText('odo', 'delete');
     }
 
     static dev(): CommandText {
@@ -41,7 +45,7 @@ export class Command {
             undefined, [
             new CommandOption('-f', fileName)
         ]
-        )
+        );
     }
 
     static printCatalogComponentImageStreamRefJson(name: string, namespace: string): CommandText {
