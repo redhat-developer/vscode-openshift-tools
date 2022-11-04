@@ -262,7 +262,7 @@
 		"onCommand:openshift.service.delete",
 		"onCommand:openshift.component.folder.create",
 		"onCommand:openshift.explorer.reportIssue",
-		"onCommand:openshift.explorer.switchContext",
+		"onCommand:openshift.explorer.manageContext",
 		"onCommand:clusters.openshift.project.openConsole",
 		"onCommand:clusters.openshift.useProject",
 		"onCommand:clusters.openshift.deploy",
@@ -361,8 +361,8 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.explorer.switchContext",
-				"title": "Switch Contexts",
+				"command": "openshift.explorer.manageContext",
+				"title": "Manage Contexts",
 				"category": "OpenShift",
 				"icon": {
 					"dark": "images/title/dark/users.svg",
@@ -804,7 +804,7 @@
 		"viewsWelcome": [
 			{
 				"view": "openshiftProjectExplorer",
-				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context ](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[Create Component](command:openshift.component.createFromLocal)",
+				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Manage Kubernetes Context](command:openshift.explorer.manageContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[Create Component](command:openshift.component.createFromLocal)",
 				"enablement": "openshift.app.explorer.init"
 			},
 			{
@@ -1018,7 +1018,7 @@
 					"group": "navigation@1"
 				},
 				{
-					"command": "openshift.explorer.switchContext",
+					"command": "openshift.explorer.manageContext",
 					"when": "view == openshiftProjectExplorer",
 					"group": "navigation@2"
 				},

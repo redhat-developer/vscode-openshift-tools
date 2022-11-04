@@ -4,6 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 /* eslint-disable @typescript-eslint/ban-types */
 
+import { Context } from '@kubernetes/client-node';
 import { workspace } from 'vscode';
 import { CommandOption, CommandText } from '../base/command';
 
@@ -336,6 +337,10 @@ export class Command {
 
     static deleteService(name: string): CommandText {
         return new CommandText('oc delete', name);
+    }
+
+    static deleteContext(context: Context): CommandText {
+        return new CommandText('oc config delete-context',`${context.name}`);
     }
 
     static getServiceTemplate(project: string, service: string): CommandText {

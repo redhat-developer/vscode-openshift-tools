@@ -30,7 +30,7 @@ import { VsCommandError } from './vscommand';
 import bs = require('binary-search');
 import { CliExitData } from './cli';
 import { KubeConfigUtils } from './util/kubeUtils';
-import { KubeConfig, loadYaml } from '@kubernetes/client-node';
+import { Context, KubeConfig, loadYaml } from '@kubernetes/client-node';
 import { pathExistsSync, readFileSync } from 'fs-extra';
 import * as fs from 'fs';
 import { ClusterServiceVersionKind } from './k8s/olm/types';
@@ -324,6 +324,7 @@ export interface Odo {
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     createService(application: OpenShiftObject, formData: any): Promise<OpenShiftObject>;
     deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
+    deleteContext(context: Context): Promise<void>;
     getOpenShiftObjectByContext(context: string): OpenShiftObject;
     getSettingsByContext(context: string): odo.Component;
     loadItems<I>(result: cliInstance.CliExitData, fetch: (data) => I[]): I[];
@@ -819,6 +820,10 @@ export class OdoImpl implements Odo {
         await this.execute(Command.deleteService(service.getName()), Platform.getUserHomePath());
         await this.deleteAndRefresh(service);
         return service;
+    }
+
+    public async deleteContext(context: Context): Promise<void> {
+        await this.execute(Command.deleteContext(context));
     }
 
     clearCache(): void {

@@ -136,7 +136,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
                     await commands.executeCommand('openshift.explorer.login');
                     break;
                 case 'Switch Kubernetes Context':
-                    await commands.executeCommand('openshift.explorer.switchContext');
+                    await commands.executeCommand('openshift.explorer.manageContext');
                     break;
                 case 'Create Component from Workspace':
                     await commands.executeCommand('openshift.component.createFromLocal');

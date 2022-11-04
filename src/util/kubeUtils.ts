@@ -7,7 +7,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { QuickPickItem } from 'vscode';
 import { KubeConfig, findHomeDir, loadYaml } from '@kubernetes/client-node';
-import { User, Cluster } from '@kubernetes/client-node/dist/config_types';
+import { User, Cluster, Context } from '@kubernetes/client-node/dist/config_types';
+import { getInstance, Odo } from '../odo';
+import { VsCommandError } from '../vscommand';
 
 function fileExists(file: string): boolean {
     try {
@@ -19,12 +21,23 @@ function fileExists(file: string): boolean {
 }
 
 export class KubeConfigUtils extends KubeConfig {
+
+    protected static readonly odo: Odo = getInstance();
+
     constructor() {
         super();
         this.loadFromDefault();
         // k8s nodejs-client ignores all unknown properties,
         // so cluster object's proxy-url attribute is not present
         // after k8s config loaded
+    }
+
+    async deleteContext(context: Context) {
+        try{
+            await KubeConfigUtils.odo.deleteContext(context);
+        } catch(error) {
+            throw new VsCommandError(`Unable to delete the context '${context.name}'`, 'Failed to delete context');
+        }
     }
 
     findHomeDir() {
