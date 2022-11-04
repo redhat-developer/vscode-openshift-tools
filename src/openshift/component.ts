@@ -190,10 +190,11 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.dev')
     //@clusterRequired() check for user is logged in should be implemented from scratch
-    static dev(component: ComponentWorkspaceFolder) {
+    static async dev(component: ComponentWorkspaceFolder) {
         const cs = Component.getComponentDevState(component);
         cs.devStatus = ComponentContextState.DEV_STARTING;
         Component.stateChanged.fire(component.contextPath)
+        await Component.odo.execute(Command.deletePreviouslyPushedResouces(component.component.devfileData.devfile.metadata.name), undefined, false);
         const outputEmitter = new EventEmitter<string>();
         let devProcess: ChildProcess;
         try {
