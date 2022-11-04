@@ -27,6 +27,19 @@ function verbose(_: unknown, key: string, descriptor: TypedPropertyDescriptor<Fu
 
 export class Command {
 
+    static searchPreviousReleaseResources(name: string): CommandText {
+        return new CommandText('oc get', 'deployment', [
+            new CommandOption('-o', `jsonpath="{range .items[?(.metadata.labels.component=='${name}')]}{.metadata.labels.app\\.kubernetes\\.io\\/managed-by}{':'}{.metadata.labels.app\\.kubernetes\\.io\\/managed-by-version}{end}"`)
+        ]);
+    }
+
+    static deletePreviouslyPushedResouces(name: string): CommandText {
+        return new CommandText('oc delete', 'deployment', [
+            new CommandOption('-l', `component='${name}'`),
+            new CommandOption('--cascade')
+        ])
+    }
+
     static deploy(): CommandText {
         return new CommandText('odo', 'deploy');
     }
