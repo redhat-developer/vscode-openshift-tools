@@ -1,5 +1,5 @@
 {
-    "name": "vscode-openshift-toolkit-testing",
+    "name": "vscode-openshift-connector-testing",
     "displayName": "OpenShift Toolkit Fake",
     "description": "Fake extension",
     "version": "0.0.1",

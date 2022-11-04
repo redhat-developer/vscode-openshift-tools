@@ -103,7 +103,7 @@ suite('openshift toolkit Extension', () => {
     });
 
     test('Extension should be present', () => {
-		assert.ok(vscode.extensions.getExtension('redhat.vscode-openshift-toolkit'));
+		assert.ok(vscode.extensions.getExtension('redhat.vscode-openshift-connector'));
 	});
 
     test('should load components from workspace folders', async () => {
