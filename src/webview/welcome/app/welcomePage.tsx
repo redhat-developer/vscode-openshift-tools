@@ -141,7 +141,7 @@ export class Welcome extends React.Component<DefaultProps, {
                 <div className='help'>
                     <ul>
                         <li>
-                            <a href='#!' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-toolkit&ssr=false#qna')}>
+                            <a href='#!' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector&ssr=false#qna')}>
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <HelpIcon style={{ fontSize: 25 }} />
@@ -200,7 +200,7 @@ export class Welcome extends React.Component<DefaultProps, {
                             </a>
                         </li>
                         <li>
-                            <a href='#!' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-toolkit')}>
+                            <a href='#!' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector')}>
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <Icon fontSize='large'>

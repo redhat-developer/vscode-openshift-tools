@@ -12,7 +12,7 @@ suite('vsix install tests', () => {
     });
 
     test('verify tools', async () => {
-        const paths = await extensions.getExtension('redhat.vscode-openshift-toolkit').exports.verifyBundledBinaries();
+        const paths = await extensions.getExtension('redhat.vscode-openshift-connector').exports.verifyBundledBinaries();
         if (!paths.odoPath) throw Error('odo binary is missing');
         if (!paths.ocPath) throw Error('oc binary is missing');
     });

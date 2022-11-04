@@ -18,7 +18,7 @@ export class WelcomePage {
     @vsCommand('openshift.getStarted')
     static async showGetStarted(): Promise<void> {
         await vscode.commands.executeCommand('workbench.action.openWalkthrough', {
-            category: 'redhat.vscode-openshift-toolkit#openshiftWalkthrough'
+            category: 'redhat.vscode-openshift-connector#openshiftWalkthrough'
         }, false);
     }
 }
