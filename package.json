@@ -414,7 +414,7 @@
 			},
             {
 				"command": "openshift.open.configFile",
-				"title": "Open File",
+				"title": "Open in editor",
 				"category": "OpenShift",
 				"icon": "$(link-external)"
 			},
