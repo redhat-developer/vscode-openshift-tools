@@ -12,6 +12,7 @@ import { OdoWorkspace } from '../../../src/odo/workspace';
 import { OdoImpl } from '../../../src/odo';
 import path = require('path');
 import { ComponentDescription } from '../../../src/odo/componentTypeDescription';
+import { Odo3Impl } from '../../../src/odo3';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -27,7 +28,7 @@ suite('Odo/Workspace', () => {
     });
 
     function stubDescribeComponentCall() {
-        return sandbox.stub(OdoImpl.prototype, 'describeComponent').callsFake((contextPath: string): Promise<ComponentDescription | undefined> => {
+        return sandbox.stub(Odo3Impl.prototype, 'describeComponent').callsFake((contextPath: string): Promise<ComponentDescription | undefined> => {
             if (contextPath.includes(`${path.sep}comp`, contextPath.lastIndexOf(path.sep))) {
                 return Promise.resolve({} as ComponentDescription);
             }

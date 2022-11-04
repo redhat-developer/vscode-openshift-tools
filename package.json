@@ -1,12 +1,12 @@
 {
 	"name": "vscode-openshift-connector",
-	"displayName": "OpenShift Connector",
-	"description": "Simplified app dev for Kubernetes or Red Hat OpenShift",
-	"version": "0.7.0",
+	"displayName": "OpenShift Toolkit",
+	"description": "Fast iterative application development on Red Hat OpenShift and Kubernetes",
+	"version": "1.0.1",
 	"license": "MIT",
 	"publisher": "redhat",
 	"author": "Red Hat",
-	"preview": true,
+	"preview": false,
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/redhat-developer/vscode-openshift-tools.git"
@@ -17,34 +17,26 @@
 	},
 	"badges": [
 		{
-			"url": "https://badges.gitter.im/redhat-developer/openshift-connector.svg",
+			"url": "https://img.shields.io/gitter/room/redhat-developer/vscode-openshift-tools?style=for-the-badge&logo=gitter",
 			"href": "https://gitter.im/redhat-developer/openshift-connector",
 			"description": "Join us at #openshift-connector channel"
 		},
 		{
-			"url": "https://img.shields.io/github/workflow/status/redhat-developer/vscode-openshift-tools/CI",
-			"href": "https://github.com/redhat-developer/vscode-openshift-tools/actions?query=workflow%3ACI",
-			"description": "Build status"
-		},
-		{
-			"url": "https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg",
-			"href": "https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/",
-			"description": "Unit tests code coverage"
-		},
-		{
-			"url": "https://img.shields.io/badge/license-MIT-brightgreen.svg",
-			"href": "https://github.com/redhat-developer/vscode-openshift-tools/blob/master/LICENSE",
-			"description": "License"
+			"url": "https://img.shields.io/twitter/follow/rhdevelopers?style=social",
+			"href": "https://twitter.com/intent/follow?screen_name=rhdevelopers",
+			"description": "Tweet"
 		}
 	],
 	"categories": [
+		"Debuggers",
+		"Azure",
 		"Other"
 	],
 	"keywords": [
 		"OpenShift",
 		"Kubernetes",
 		"Red Hat",
-		"Clusters",
+		"kubernetes-extension-cloud-provider",
 		"k8s",
 		"OpenShift Local",
 		"CodeReady Containers",
@@ -60,17 +52,20 @@
 		"compile": "npm-run-all compile:*",
 		"compile:ext": "tsc -p ./",
 		"compile:views": "webpack --mode production --config src/webview/webpack.config.js",
+		"compile:git-import-view": "webpack --mode development --config src/webview/git-import/webpack.config.js",
 		"dev:compile:log-view": "webpack --mode development --config src/webview/log/webpack.config.js",
 		"dev:compile:describe-view": "webpack --mode development --config src/webview/describe/webpack.config.js",
 		"dev:compile:cluster-view": "webpack --mode development --config src/webview/cluster/webpack.config.js",
 		"dev:compile:create-service-view": "webpack --mode development --config src/webview/create-service/webpack.config.js",
 		"dev:compile:devfile-registry-view": "webpack --mode development --config src/webview/devfile-registry/webpack.config.js",
 		"dev:compile:welcome-view": "webpack --mode development --config src/webview/welcome/webpack.config.js",
+		"dev:compile:git-import-view": "webpack --mode development --config src/webview/git-import/webpack.config.js",
 		"dev:run:log-view": "webpack-dev-server --mode development --config src/webview/log/webpack.config.js",
 		"dev:run:describe-view": "webpack-dev-server --mode development --config src/webview/describe/webpack.config.js",
 		"dev:run:cluster-view": "webpack-dev-server --port 9222 --mode development --config src/webview/cluster/webpack.config.js",
 		"dev:run:devfile-registry-view": "webpack-dev-server --port 9222 --mode development --config src/webview/devfile-registry/webpack.config.js",
 		"dev:run:welcome-view": "webpack-dev-server --port 9222 --mode development --config src/webview/welcome/webpack.config.js",
+		"dev:run:git-import-view": "webpack-dev-server --port 9222 --mode development --config src/webview/git-import/webpack.config.js",
 		"dev:run:create-service-view": "webpack-dev-server --mode development --config src/webview/create-service/webpack.config.js",
 		"watch": "tsc -watch -p ./",
 		"clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/logViewer",
@@ -91,12 +86,17 @@
 	},
 	"dependencies": {
 		"@kubernetes/client-node": "^0.16.1",
+		"@octokit/rest": "^16.30.1",
 		"@redhat-developer/vscode-redhat-telemetry": "^0.4.2",
 		"binary-search": "^1.3.6",
 		"byline": "^5.0.0",
 		"clsx": "^1.1.1",
+		"docker-file-parser": "^1.0.4",
 		"fs-extra": "^10.0.0",
+		"git-url-parse": "^13.1.0",
+		"gitlab": "10.0.1",
 		"globby": "^10.0.1",
+		"i18next": "^21.8.11",
 		"immutable": "^4.0.0",
 		"install": "^0.13.0",
 		"js-yaml": "^4.1.0",
@@ -105,6 +105,7 @@
 		"make-fetch-happen": "^9.1.0",
 		"minimatch": "^3.0.4",
 		"mkdirp": "^1.0.4",
+		"parse-bitbucket-url": "^0.3.0",
 		"rxjs": "^7.4.0",
 		"semver": "^7.3.5",
 		"stacktrace-parser": "^0.1.10",
@@ -135,6 +136,7 @@
 		"@types/collections": "^5.1.2",
 		"@types/express": "^4.17.13",
 		"@types/fs-extra": "^9.0.13",
+		"@types/js-base64": "^3.3.1",
 		"@types/js-yaml": "^4.0.5",
 		"@types/lodash": "^4.14.177",
 		"@types/make-fetch-happen": "^9.0.1",
@@ -156,6 +158,7 @@
 		"@types/vscode": "1.64.0",
 		"@typescript-eslint/eslint-plugin": "^5.6.0",
 		"@typescript-eslint/parser": "^5.6.0",
+		"@vscode/test-electron": "^2.2.0",
 		"babel-loader": "^8.2.3",
 		"base64-inline-loader": "^2.0.1",
 		"bootstrap": "^5.1.3",
@@ -216,7 +219,6 @@
 		"unzip-stream": "^0.3.1",
 		"utf-8-validate": "^5.0.7",
 		"vscode-extension-tester": "^4.3.0",
-		"vscode-test": "^1.6.1",
 		"webpack": "^5.65.0",
 		"webpack-cli": "^4.9.1",
 		"webpack-dev-server": "^4.6.0"
@@ -231,7 +233,7 @@
 		"onCommand:openshift.oc.about",
 		"onCommand:openshift.output",
 		"onCommand:openshift.create",
-        "onCommand:openshift.open.developerConsole",
+		"onCommand:openshift.open.developerConsole",
 		"onCommand:openshift.open.developerConsole.palette",
 		"onCommand:openshift.explorer.addCluster",
 		"onCommand:openshift.explorer.login",
@@ -245,9 +247,10 @@
 		"onCommand:openshift.project.delete",
 		"onCommand:openshift.project.delete.palette",
 		"onCommand:openshift.component.createFromLocal",
+		"onCommand:openshift.component.openImportFromGit",
 		"onCommand:openshift.component.createFromRootWorkspaceFolder",
 		"onCommand:openshift.component.describe",
-        "onCommand:openshift.component.openInBrowser",
+		"onCommand:openshift.component.openInBrowser",
 		"onCommand:openshift.component.describe.palette",
 		"onCommand:openshift.component.log",
 		"onCommand:openshift.component.log.palette",
@@ -257,12 +260,12 @@
 		"onCommand:openshift.componentTypesView.registry.closeView",
 		"onCommand:openshift.component.debug",
 		"onCommand:openshift.component.debug.palette",
-        "onCommand:openshift.resource.load",
+		"onCommand:openshift.resource.load",
 		"onCommand:openshift.service.create",
 		"onCommand:openshift.service.delete",
 		"onCommand:openshift.component.folder.create",
 		"onCommand:openshift.explorer.reportIssue",
-		"onCommand:openshift.explorer.switchContext",
+		"onCommand:openshift.explorer.manageContext",
 		"onCommand:clusters.openshift.project.openConsole",
 		"onCommand:clusters.openshift.useProject",
 		"onCommand:clusters.openshift.deploy",
@@ -361,8 +364,8 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.explorer.switchContext",
-				"title": "Switch Contexts",
+				"command": "openshift.explorer.manageContext",
+				"title": "Manage Contexts",
 				"category": "OpenShift",
 				"icon": {
 					"dark": "images/title/dark/users.svg",
@@ -403,6 +406,12 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.open.configFile",
+				"title": "Open in editor",
+				"category": "OpenShift",
+				"icon": "$(link-external)"
+			},
+			{
 				"command": "openshift.project.set",
 				"title": "Change Active Project",
 				"category": "OpenShift",
@@ -415,6 +424,15 @@
 				"command": "openshift.project.set.palette",
 				"title": "Set Active Project",
 				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.component.openImportFromGit",
+				"title": "Import from Git",
+				"category": "OpenShift",
+				"icon": {
+					"light": "images/title/light/git-branch.svg",
+					"dark": "images/title/dark/git-branch.svg"
+				}
 			},
 			{
 				"command": "openshift.component.createFromLocal",
@@ -435,31 +453,36 @@
 				"title": "Delete Component",
 				"category": "OpenShift"
 			},
-            {
-                "command": "openshift.component.dev",
-                "title": "Start Dev",
-                "category": "OpenShift"
-            },
-            {
-                "command": "openshift.component.exitDevMode",
-                "title": "Stop Dev",
-                "category": "OpenShift"
-            },
-            {
-                "command": "openshift.component.forceExitDevMode",
-                "title": "Force Stop Dev",
-                "category": "OpenShift"
-            },
-            {
-                "command": "openshift.component.deploy",
-                "title": "Deploy",
-                "category": "OpenShift"
-            },
-            {
-                "command": "openshift.component.showDevTerminal",
-                "title": "Show Dev Terminal",
-                "category": "OpenShift"
-            },
+			{
+				"command": "openshift.component.dev",
+				"title": "Start Dev",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.component.exitDevMode",
+				"title": "Stop Dev",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.component.forceExitDevMode",
+				"title": "Force Stop Dev",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.component.deploy",
+				"title": "Deploy",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.component.undeploy",
+				"title": "Undeploy",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.component.showDevTerminal",
+				"title": "Show Dev Terminal",
+				"category": "OpenShift"
+			},
 			{
 				"command": "openshift.component.describe",
 				"title": "Describe",
@@ -718,17 +741,22 @@
 			{
 				"command": "openshift.componentTypesView.registry.remove",
 				"title": "Remove",
-				"category": "OpenSift"
+				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.componentTypesView.registry.edit",
 				"title": "Edit",
-				"category": "OpenSift"
+				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.componentTypesView.registry.openInBrowser",
 				"title": "Open in Browser",
-				"category": "OpenSift"
+				"category": "OpenShift"
+			},
+            {
+				"command": "openshift.componentTypesView.registry.openInEditor",
+				"title": "Open in Editor",
+				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.welcome",
@@ -745,20 +773,25 @@
 				"title": "Create Service ...",
 				"category": "OpenShift"
 			},
-            {
-                "command": "openshift.resource.load",
-                "title": "Load",
-                "category": "OpenShift"
-            },
-            {
-                "command": "openshift.resource.openInDeveloperConsole",
-                "title": "Open in Developer Console"
-            },
-            {
-                "command": "openshift.openStatusBar",
-                "title": "OpenShift",
-                "category": "OpenShift"
-            }
+			{
+				"command": "openshift.resource.load",
+				"title": "Load",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.resource.openInDeveloperConsole",
+				"title": "Open in Developer Console"
+			},
+			{
+				"command": "openshift.openStatusBar",
+				"title": "OpenShift",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.component.importFromGit",
+				"title": "Import Component from git repository",
+				"category": "OpenShift"
+			}
 		],
 		"keybindings": [
 			{
@@ -804,12 +837,12 @@
 		"viewsWelcome": [
 			{
 				"view": "openshiftProjectExplorer",
-				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context ](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[Create Component](command:openshift.component.createFromLocal)",
+				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context ](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[$(git-branch) Import from Git](command:openshift.component.openImportFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
 				"enablement": "openshift.app.explorer.init"
 			},
 			{
 				"view": "openshiftComponentsView",
-				"contents": "You have no OpenShift Components in your workspace yet.\n[Create Component](command:openshift.component.createFromLocal)",
+				"contents": "You have no OpenShift Components in your workspace yet.\n[$(git-branch) Import from Git](command:openshift.component.openImportFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
 				"enablement": "openshift.component.explorer.init"
 			}
 		],
@@ -827,6 +860,10 @@
 				},
 				{
 					"command": "openshift.project.set",
+					"when": "view == openshiftProjectExplorer"
+				},
+				{
+					"command": "openshift.open.configFile",
 					"when": "view == openshiftProjectExplorer"
 				},
 				{
@@ -974,17 +1011,25 @@
 					"when": "false"
 				},
                 {
-                    "command": "openshift.resource.load",
-                    "when": "false"
+                    "command": "openshift.componentTypesView.registry.openInEditor",
+					"when": "false"
                 },
-                {
-                    "command": "openshift.resource.openInDeveloperConsole",
-                    "when": "false"
-                },
-                {
-                    "command": "openshift.component.forceExitDevMode",
-                    "when": "false"
-                }
+				{
+					"command": "openshift.resource.load",
+					"when": "false"
+				},
+				{
+					"command": "openshift.resource.openInDeveloperConsole",
+					"when": "false"
+				},
+				{
+					"command": "openshift.component.forceExitDevMode",
+					"when": "false"
+				},
+				{
+					"command": "openshift.component.importFromGit",
+					"when": "false"
+				}
 			],
 			"view/title": [
 				{
@@ -1018,7 +1063,7 @@
 					"group": "navigation@1"
 				},
 				{
-					"command": "openshift.explorer.switchContext",
+					"command": "openshift.explorer.manageContext",
 					"when": "view == openshiftProjectExplorer",
 					"group": "navigation@2"
 				},
@@ -1034,6 +1079,11 @@
 				},
 				{
 					"command": "openshift.component.createFromLocal",
+					"when": "view == openshiftComponentsView",
+					"group": "navigation"
+				},
+				{
+					"command": "openshift.component.openImportFromGit",
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
 				}
@@ -1137,7 +1187,7 @@
 				{
 					"command": "openshift.component.describe",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*/",
-                    "group": "c3@1"
+					"group": "c3@1"
 				},
 				{
 					"command": "openshift.component.log",
@@ -1164,36 +1214,41 @@
 					"when": "view == openshiftProjectExplorer && viewItem == componentNoContext || viewItem == component || viewItem == componentNotPushed || viewItem == componentOther",
 					"group": "c6@1"
 				},
-                {
-                    "command": "openshift.component.dev",
-                    "when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
-                    "group": "c1@1"
-                },
-                {
-                    "command": "openshift.component.exitDevMode",
-                    "when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
-                    "group": "c1@2"
-                },
-                {
-                    "command": "openshift.component.forceExitDevMode",
-                    "when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-stp.*/",
-                    "group": "c1@3"
-                },
-                {
-                    "command": "openshift.component.deploy",
-                    "when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dep-nrn.*/ || viewItem =~ /openshift\\.component.*\\.dep-run.*/",
-                    "group": "c2"
-                },
-                {
-                    "command": "openshift.component.showDevTerminal",
-                    "when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
-                    "group": "c1@3"
-                },
-                {
-                    "command": "openshift.component.openInBrowser",
-                    "when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
-                    "group": "c3@4"
-                },
+				{
+					"command": "openshift.component.dev",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
+					"group": "c1@1"
+				},
+				{
+					"command": "openshift.component.exitDevMode",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
+					"group": "c1@2"
+				},
+				{
+					"command": "openshift.component.forceExitDevMode",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-stp.*/",
+					"group": "c1@3"
+				},
+				{
+					"command": "openshift.component.deploy",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dep-nrn.*/ || viewItem =~ /openshift\\.component.*\\.dep-run.*/",
+					"group": "c2@0"
+				},
+				{
+					"command": "openshift.component.undeploy",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dep-nrn.*/ || viewItem =~ /openshift\\.component.*\\.dep-run.*/",
+					"group": "c2@1"
+				},
+				{
+					"command": "openshift.component.showDevTerminal",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
+					"group": "c1@3"
+				},
+				{
+					"command": "openshift.component.openInBrowser",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
+					"group": "c3@4"
+				},
 				{
 					"command": "openshift.service.delete",
 					"when": "view == openshiftProjectExplorer && viewItem == service",
@@ -1221,6 +1276,11 @@
 					"when": "view == openshiftProjectExplorer && viewItem == loginRequired"
 				},
 				{
+					"command": "openshift.open.configFile",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.openConfigFile",
+					"group": "inline"
+				},
+				{
 					"command": "openshift.project.set",
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext || viewItem == openshift.project",
 					"group": "inline"
@@ -1228,7 +1288,7 @@
 				{
 					"command": "openshift.component.revealInExplorer",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*/",
-                    "group": "c40@1"
+					"group": "c40@1"
 				},
 				{
 					"command": "openshift.componentTypesView.registry.edit",
@@ -1246,25 +1306,30 @@
 					"group": "0@0"
 				},
                 {
-                    "command": "openshift.resource.load",
-                    "when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
-                },
-                {
-                    "command": "openshift.resource.openInDeveloperConsole",
-                    "when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
-                }
+					"command": "openshift.componentTypesView.registry.openInEditor",
+					"when": "view == openshiftComponentTypesView && viewItem == devfileRegistry",
+					"group": "0@0"
+				},
+				{
+					"command": "openshift.resource.load",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
+				},
+				{
+					"command": "openshift.resource.openInDeveloperConsole",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
+				}
 			]
 		},
 		"walkthroughs": [
 			{
 				"id": "openshiftWalkthrough",
-				"title": "Getting Started with OpenShift",
+				"title": "Getting Started with OpenShift Toolkit",
 				"description": "Start your application development on OpenShift or Kubernetes",
 				"steps": [
 					{
 						"id": "login",
 						"title": "Login/Provision OpenShift cluster",
-						"description": "Users can Login to an existing OpenShift cluster using the login button.\nTo provision a new OpenShift cluster, **Add OpenShift Cluster** button opens a guided experience workflow to connect to a local or sandbox cluster.\n[Login to the existing OpenShift cluster](command:openshift.explorer.login)\n[Provision local OpenShift cluster](command:openshift.explorer.addCluster?[\"crc\"])\n[Provision Red Hat Developer Sandbox cluster](command:openshift.explorer.addCluster?[\"sandbox\"])",
+						"description": "Users can Login to an existing OpenShift cluster using the login button.\nTo provision a new OpenShift cluster, **Add OpenShift Cluster** button opens a guided workflow to provision a local, sandbox or hyrid cloud cluster.\n[Login to the existing OpenShift cluster](command:openshift.explorer.login)\n[Provision local OpenShift cluster](command:openshift.explorer.addCluster?[\"crc\"])\n[Provision Red Hat Developer Sandbox cluster](command:openshift.explorer.addCluster?[\"sandbox\"])",
 						"media": {
 							"image": "images/walkthrough/loginCluster.gif",
 							"altText": "login to cluster"
@@ -1278,8 +1343,8 @@
 					},
 					{
 						"id": "showRegistries",
-						"title": "View the default and custom devfile registries.",
-						"description": "You can connect to publicly available devfile registries to get started with devfiles for different languages and frameworks.\n[Open registry view](command:openshift.componentTypesView.registry.openInView)",
+						"title": "Create Component from Devfile registries webview",
+						"description": "Select a specific devfile registry to create a component directly.\n[Browse Devfile Registries](command:openshift.componentTypesView.registry.openInView)",
 						"media": {
 							"image": "images/walkthrough/showRegistries.gif",
 							"altText": "show registry"
@@ -1290,8 +1355,8 @@
 					},
 					{
 						"id": "createComponent",
-						"title": "Create a Component using Registry Viewer",
-						"description": "Create a component in the current working directory with the file `devfile.yaml` from the devfile registry and the starter project selected. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.componentType.newComponent)",
+						"title": "Create a Component using local workspace",
+						"description": "Create a component in the local workspace using the selected starter project and associated `devfile.yaml` configuration. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.component.createFromLocal)",
 						"media": {
 							"image": "images/walkthrough/createComponent.gif",
 							"altText": "create component"
@@ -1301,30 +1366,42 @@
 						]
 					},
 					{
-						"id": "pushComponent",
-						"title": "Push a Component to the connected cluster",
-						"description": "The component created above is available locally. To deploy the component on the connect OpenShift/Kubernetes cluster, we need to `Push` the Component",
+						"id": "importFromGit",
+						"title": "Create a Component from git repository",
+						"description": "Create a component directly from git repository. The guided workflow will detect the repository and recommend the deployment `devfile` for it. Users can also provide their own custom devfile. \n[Import from Git](command:openshift.component.openImportFromGit)",
 						"media": {
-							"image": "images/walkthrough/pushComponent.gif",
-							"altText": "push component"
+							"image": "images/walkthrough/git-import-walkthrough.gif",
+							"altText": "create component from git"
+						},
+						"completionEvents": [
+							"onCommand:openshift.component.openImportFromGit"
+						]
+					},
+					{
+						"id": "startDevComponent",
+						"title": "Start a component in development mode",
+						"description": "This is inner loop development and allows you to code, build, run and test the application in a continuous workflow. It continuously watches the directory for any new changes and automatically syncs them with the application running on the cluster.\n\n This also forwards a port on the development system to the port on the container cluster allowing you remote access to your deployed application",
+						"media": {
+							"image": "images/walkthrough/startDev.gif",
+							"altText": "dev component"
 						}
 					},
 					{
-						"id": "debug",
-						"title": "Debug the Component locally",
-						"description": "Debug and test remote applications deployed from your IDE to OpenShift/Kubernetes. No more having to exit your IDE to push your application.",
+						"id": "debugComponent",
+						"title": "Debug the component",
+						"description": "Start the component in debug mode. The devfile.yaml should be specified with the debug port as an endpoint for the debug to work.",
 						"media": {
-							"image": "images/walkthrough/debug.gif",
-							"altText": "debug"
+							"image": "images/walkthrough/startDebug.png",
+							"altText": "debug component"
 						}
 					},
 					{
-						"id": "openInBrowser",
-						"title": "Open the Component in Browser",
-						"description": "Users can access the deployed component in web browser",
+						"id": "deployComponent",
+						"title": "Deploy component on the cluster",
+						"description": "Deploy components in a similar manner they would be deployed by a CI/CD system, by first building the images of the containers to deploy, then by deploying the OpenShift/Kubernetes resources necessary to deploy the components.",
 						"media": {
-							"image": "images/walkthrough/openInBrowser.gif",
-							"altText": "open in browser"
+							"image": "images/walkthrough/deploy-demo.gif",
+							"altText": "deploy component"
 						}
 					}
 				]
@@ -1334,34 +1411,34 @@
 			{
 				"type": "object",
 				"order": 1,
-				"title": "OpenShift Connector",
+				"title": "OpenShift Toolkit",
 				"properties": {
-					"openshiftConnector.showWelcomePage": {
+					"openshiftToolkit.showWelcomePage": {
 						"type": "boolean",
 						"default": true,
-						"description": "Show Welcome Page when using OpenShift Connector Extension"
+						"description": "Show Welcome Page when using OpenShift Toolkit Extension"
 					},
-					"openshiftConnector.showChannelOnOutput": {
+					"openshiftToolkit.showChannelOnOutput": {
 						"type": "boolean",
 						"default": false,
-						"description": "Show OpenShift Connector output channel when new text added to output stream."
+						"description": "Show OpenShift Toolkit output channel when new text added to output stream."
 					},
-					"openshiftConnector.outputVerbosityLevel": {
+					"openshiftToolkit.outputVerbosityLevel": {
 						"type": "number",
 						"default": 0,
 						"description": "Output verbosity level (value between 0 and 9) for OpenShift Create, and Dev commands in output channel and integrated terminal."
 					},
-					"openshiftConnector.searchForToolsInPath": {
+					"openshiftToolkit.searchForToolsInPath": {
 						"type": "boolean",
 						"default": false,
 						"description": "Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries."
 					},
-					"openshiftConnector.useWebviewInsteadOfTerminalView": {
+					"openshiftToolkit.useWebviewInsteadOfTerminalView": {
 						"type": "boolean",
 						"default": false,
 						"description": "By default the Terminal View is used to execute OpenShift 'Show Log', 'Follow Log' and 'Describe' commands. Select this option if you want to use Webview based editors for it."
 					},
-					"openshiftConnector.stopDevModeTimeout": {
+					"openshiftToolkit.stopDevModeTimeout": {
 						"type": "number",
 						"default": 90000,
 						"description": "Controls stopping development mode timeout (in milliseconds)."
@@ -1373,27 +1450,27 @@
 				"order": 2,
 				"title": "Red Hat OpenShift Local",
 				"properties": {
-					"openshiftConnector.crcBinaryLocation": {
+					"openshiftToolkit.crcBinaryLocation": {
 						"type": "string",
 						"default": null,
 						"description": "Provide the path where the OpenShift Local executable is present."
 					},
-					"openshiftConnector.crcPullSecretPath": {
+					"openshiftToolkit.crcPullSecretPath": {
 						"type": "string",
 						"default": null,
 						"description": "Path of image pull secret."
 					},
-					"openshiftConnector.crcCpuCores": {
+					"openshiftToolkit.crcCpuCores": {
 						"type": "number",
 						"default": 4,
 						"description": "Number of CPU cores to allocate to the OpenShift cluster as selected during the first run"
 					},
-					"openshiftConnector.crcMemoryAllocated": {
+					"openshiftToolkit.crcMemoryAllocated": {
 						"type": "number",
 						"default": 9216,
 						"description": "MiB of memory to allocate to the OpenShift cluster as selected during the first run"
 					},
-					"openshiftConnector.crcNameserver": {
+					"openshiftToolkit.crcNameserver": {
 						"type": "string",
 						"default": "",
 						"description": "IP address/name of DNS to use with OpenShift Local"
@@ -1405,11 +1482,11 @@
 				"order": 3,
 				"title": "Developer Sandbox for Red Hat OpenShift",
 				"properties": {
-					"openshiftConnector.sandboxApiHostUrl": {
+					"openshiftToolkit.sandboxApiHostUrl": {
 						"type": "string",
 						"default": "https://registration-service-toolchain-host-operator.apps.sandbox.x8i5.p1.openshiftapps.com"
 					},
-					"openshiftConnector.sandboxApiTimeout": {
+					"openshiftToolkit.sandboxApiTimeout": {
 						"description": "Controls timeout (im milliseconds) for requests to OpenShift Sandbox Registration Service. Increase timeout value in case of unexpected errors in OpenShift Sandbox Provisioning workflow.",
 						"type": "number",
 						"default": 100000

@@ -1,5 +1,38 @@
 # Change Log
 
+## 1.0.0 (November 8, 2022)
+
+* [#2651](https://github.com/redhat-developer/vscode-openshift-tools/issues/2651) Add analyze button in git import
+* [#2646](https://github.com/redhat-developer/vscode-openshift-tools/issues/2646) Component creation success message still shows Push information
+* [#2644](https://github.com/redhat-developer/vscode-openshift-tools/issues/2644) Deploy command is not shown even if deploy is true in odo describe
+* [#2640](https://github.com/redhat-developer/vscode-openshift-tools/issues/2640) Update readme gifs and information with latest workflow
+* [#2637](https://github.com/redhat-developer/vscode-openshift-tools/issues/2637) Components view refresh does not pickup changes from devfiles
+* [#2636](https://github.com/redhat-developer/vscode-openshift-tools/issues/2636) Context folder quick pick list should exclude folders with components
+* [#2632](https://github.com/redhat-developer/vscode-openshift-tools/issues/2632) Update Getting Started gifs with latest workflow
+* [#2621](https://github.com/redhat-developer/vscode-openshift-tools/issues/2621) Add Undeploy command for the components
+* [#2615](https://github.com/redhat-developer/vscode-openshift-tools/issues/2615) 'Add Registry' command always triggers 'Edit Registry' workflow after Registry item selected in view
+* [#2607](https://github.com/redhat-developer/vscode-openshift-tools/issues/2607) Start dev results in stucked "dev starting" state
+* [#2605](https://github.com/redhat-developer/vscode-openshift-tools/issues/2605) Cannot change active project under OS connection
+* [#2604](https://github.com/redhat-developer/vscode-openshift-tools/issues/2604) Logging out of the cluster (crc) throws an error notification: All promises were rejected
+* [#2603](https://github.com/redhat-developer/vscode-openshift-tools/issues/2603) Add parsing of kubeconfig file, empty kube config file throws an error: Cannot read properties of undefined (reading 'clusters')
+* [#2597](https://github.com/redhat-developer/vscode-openshift-tools/issues/2597) Add Default kubeconfig File at the top of the cluster connected to
+* [#2595](https://github.com/redhat-developer/vscode-openshift-tools/issues/2595) Change the icon of `change active project`
+* [#2594](https://github.com/redhat-developer/vscode-openshift-tools/issues/2594) OpenShift welcome page layout breaks when zoomed in
+* [#2593](https://github.com/redhat-developer/vscode-openshift-tools/issues/2593) Open .kubeconfig in editor
+* [#2591](https://github.com/redhat-developer/vscode-openshift-tools/issues/2591) Update Readme with 1.0 changes and odov3 support
+* [#2590](https://github.com/redhat-developer/vscode-openshift-tools/issues/2590) Follow logs commands fails with error
+* [#2588](https://github.com/redhat-developer/vscode-openshift-tools/issues/2588) Odo logo output is missing in terminal when starting dev on k8s cluster 
+* [#2582](https://github.com/redhat-developer/vscode-openshift-tools/issues/2582) Show the application explorer using the cluster and project structure
+* [#2580](https://github.com/redhat-developer/vscode-openshift-tools/issues/2580) Force stop dev fails with the following error
+* [#2578](https://github.com/redhat-developer/vscode-openshift-tools/issues/2578) Created component notification says is should be pushed into cluster, wrong description
+* [#2577](https://github.com/redhat-developer/vscode-openshift-tools/issues/2577) Registry view is empty by default when OpenShift extension is opened
+* [#2576](https://github.com/redhat-developer/vscode-openshift-tools/issues/2576) Application Explorer options (buttons) are missing and only "loaded-context" item is present when no kubeconfig is set
+* [#2574](https://github.com/redhat-developer/vscode-openshift-tools/issues/2574) Project creation does not do anything in Application Explorer
+* [#2573](https://github.com/redhat-developer/vscode-openshift-tools/issues/2573) Show current context only if it is active
+* [#2572](https://github.com/redhat-developer/vscode-openshift-tools/issues/2572) Change message for create component
+* [#2571](https://github.com/redhat-developer/vscode-openshift-tools/issues/2571) start dev fails for any component created
+* [#2568](https://github.com/redhat-developer/vscode-openshift-tools/pull/2568) Improve sandbox workflow and go directly to 'Copy Login Command' page
+
 ## 0.7.0 (September 28, 2022)
 
 * [#2546](https://github.com/redhat-developer/vscode-openshift-tools/issues/2546) Support crc 2.9.0 in the extension

@@ -1,4 +1,4 @@
-## [OpenShift Connector](https://github.com/redhat-developer/vscode-openshift-tools)
+## [OpenShift Toolkit](https://github.com/redhat-developer/vscode-openshift-tools)
 
 ### Usage Data Reported
 

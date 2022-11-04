@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace, WebviewPanel, Progress as VProgress } from 'vscode';
+import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace, WebviewPanel, Progress as VProgress, QuickPickItemButtonEvent, ThemeIcon, QuickInputButton } from 'vscode';
 import { Command } from '../odo/command';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { CliExitData, CliChannel } from '../cli';
@@ -20,6 +20,10 @@ import { KubernetesObject } from '@kubernetes/client-node';
 interface Versions {
     'openshift_version':  string;
     'kubernetes_version': string;
+}
+
+class quickBtn implements QuickInputButton {
+    constructor(public iconPath: ThemeIcon, public tooltip: string) { }
 }
 
 export class Cluster extends OpenShiftItem {
@@ -101,22 +105,42 @@ export class Cluster extends OpenShiftItem {
         });
     }
 
-    @vsCommand('openshift.explorer.switchContext')
-    static async switchContext(): Promise<string> {
+    @vsCommand('openshift.explorer.manageContext')
+    static manageContext(): string {
         const k8sConfig = new KubeConfigUtils();
         const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
-        const contextName: QuickPickItem[] = contexts.map((ctx) => ({ label: `${ctx.name}`}));
-        if (contextName.length === 0) {
-            const command = await window.showInformationMessage('You have no Kubernetes contexts yet, please login to a cluster.', 'Login', 'Cancel');
-            if (command === 'Login') {
-                return Cluster.login(undefined, true);
+        const switchBtn = new quickBtn(new ThemeIcon('arrow-swap'),'Switch Context');
+        const deleteBtn = new quickBtn(new ThemeIcon('trash'), 'Delete');
+        const quickPick = window.createQuickPick();
+        const contextNames: QuickPickItem[] = contexts.map((ctx) => ({ label: `${ctx.name}`, buttons: [switchBtn, deleteBtn] }));
+        quickPick.items = contextNames;
+        quickPick.onDidTriggerItemButton(async (event: QuickPickItemButtonEvent<QuickPickItem>) => {
+            if (event.button instanceof quickBtn) {
+                if (event.button.iconPath.id === 'arrow-swap') {
+                    await window.showInformationMessage('Are you sure to switch the context?', 'Yes', 'No')
+                        .then(async answer => {
+                            if (answer === 'Yes') {
+                                await Cluster.odo.execute(Command.setOpenshiftContext(event.item.label));
+                                return `Cluster context is changed to: ${event.item.label}`;
+                            }
+                        });
+                } else if (event.button.iconPath.id === 'trash') {
+                    await window.showInformationMessage('Are you sure you want to delete this cluster information from kubeconfig?', 'Yes', 'No')
+                        .then(async answer => {
+                            if (answer === 'Yes') {
+                                const context = k8sConfig.getContextObject(event.item.label);
+                                const index = contexts.indexOf(context);
+                                if(index > -1) {
+                                    await k8sConfig.deleteContext(context);
+                                    return `Context ${context.name} deleted`;
+                                }
+                            }
+                        });
+                }
             }
-            return null;
-        }
-        const choice = await window.showQuickPick(contextName, {placeHolder: 'Select a new OpenShift context'});
-        if (!choice) return null;
-        await Cluster.odo.execute(Command.setOpenshiftContext(choice.label));
-        return `Cluster context is changed to: ${choice.label}`;
+        });
+        quickPick.show();
+        return '';
     }
 
     static async getUrl(): Promise<string | null> {
@@ -148,7 +172,7 @@ export class Cluster extends OpenShiftItem {
         let pathSelectionDialog;
         let newPathPrompt;
         let crcBinary;
-        const crcPath = workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
+        const crcPath = workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
         if(crcPath) {
             newPathPrompt = { label: '$(plus) Provide different OpenShift Local file path'};
             pathSelectionDialog = await window.showQuickPick([{label:`${crcPath}`, description: 'Fetched from settings'}, newPathPrompt], {placeHolder: 'Select OpenShift Local file path', ignoreFocusOut: true});

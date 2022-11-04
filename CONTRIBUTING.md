@@ -28,7 +28,7 @@ There are only a few guidelines that we need contributors to follow.
     ```bash
     $ vsce package
     ```
-3. `openshift-connector-<version>.vsix` file is created. Install it by following the instructions [here](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix).
+3. `openshift-toolkit-<version>.vsix` file is created. Install it by following the instructions [here](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix).
 
 
 4. Once the extension is installed and reloaded, there will be an OpenShift Icon on the View Container, on the lines of snap mentioned below.

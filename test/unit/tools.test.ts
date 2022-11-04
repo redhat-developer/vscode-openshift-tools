@@ -82,7 +82,7 @@ suite('tools configuration', () => {
             sb.stub(fs, 'existsSync').returns(false);
             sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools.odo.version);
             const toolLocation = await ToolsConfig.detect('odo');
-            if (vscode.workspace.getConfiguration('openshiftConnector').get('searchForToolsInPath')) {
+            if (vscode.workspace.getConfiguration('openshiftToolkit').get('searchForToolsInPath')) {
                 assert.equal(toolLocation, 'odo');
             } else {
                 assert.equal(toolLocation, path.resolve(__dirname, '..', '..', '..', 'out', 'tools', Platform.OS, ToolsConfig.tools.odo.cmdFileName));

@@ -16,26 +16,23 @@ import {
     commands,
     Uri,
     TreeItemCollapsibleState,
+    ThemeIcon,
 } from 'vscode';
 
 import * as path from 'path';
-import * as k8s from '@kubernetes/client-node';
 import { Platform } from './util/platform';
 
 import { WatchUtil, FileContentChangeNotifier } from './util/watch';
 import { KubeConfigUtils } from './util/kubeUtils';
 import { vsCommand } from './vscommand';
-import { KubernetesObject } from '@kubernetes/client-node';
+import { KubernetesObject, Context } from '@kubernetes/client-node';
 import { CliChannel } from './cli';
-import { Command as DeploymentCommand } from './k8s/deployment';
-import { DeploymentConfig } from './k8s/deploymentConfig';
-import { Command as CommonCommand, loadItems } from './k8s/common';
 import { Command } from './odo/command';
-import { CommandText } from './base/command';
+import { newInstance, Odo3 } from './odo3';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
-type ExplorerItem = KubernetesObject | k8s.Context | TreeItem;
+type ExplorerItem = KubernetesObject | Context | TreeItem;
 
 type PackageJSON = {
   version: string;
@@ -56,7 +53,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     private treeView: TreeView<ExplorerItem>;
 
     private fsw: FileContentChangeNotifier;
-    private kubeContext: k8s.Context;
+    private kubeContext: Context;
     private kubeConfig: KubeConfigUtils;
 
     private eventEmitter: EventEmitter<ExplorerItem | undefined> =
@@ -64,6 +61,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     readonly onDidChangeTreeData: Event<ExplorerItem | undefined> = this
         .eventEmitter.event;
+
+    private odo3: Odo3 = newInstance();
 
     private constructor() {
         try {
@@ -119,6 +118,17 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             return element;
         }
 
+        if('label' in element) {
+            return  {
+                contextValue: 'openshift.openConfigFile',
+                label: element.label,
+                collapsibleState: TreeItemCollapsibleState.None,
+                tooltip: 'Default KubeConfig',
+                description: element.description,
+                iconPath: new ThemeIcon('file')
+            };
+        }
+
         // check if element is Context instance
         if ('name' in element && 'cluster' in element && 'user' in element) { // Context instance could be without namespace
             return  {
@@ -144,9 +154,11 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 contextValue: 'openshift.k8sObject',
                 label: element.metadata.name,
                 collapsibleState: TreeItemCollapsibleState.None,
-                iconPath: {
-                    dark: path.resolve(__dirname, '../../images/context/component-node-dark.png'),
-                    light: path.resolve(__dirname, '../../images/context/component-node-light.png')
+                iconPath: path.resolve(__dirname, '../../images/context/component-node.png'),
+                command: {
+                    title: 'Load',
+                    command: 'openshift.resource.load',
+                    arguments: [element]
                 }
             };
         }
@@ -161,8 +173,15 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         let result: ExplorerItem[] = [];
         if (!element) {
             try {
-                await this.getNamesapcesOrProjects()
+                await this.odo3.getNamespaces()
                 result = [this.kubeContext];
+                if (this.kubeContext) {
+                    const homeDir = this.kubeConfig.findHomeDir();
+                    if (homeDir){
+                        const config = path.join(homeDir, '.kube', 'config');
+                        result.unshift({label: 'Default KubeConfig', description: `${config}`})
+                    }
+                }
             } catch (err) {
                 // ignore because ether server is not accessible or user is logged out
             }
@@ -177,7 +196,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             //   * example is sandbox context created when login to sandbox first time
             // (3) there is namespace set in context and namespace exists in the cluster
             // (4) there is namespace set in context and namespace does not exist in the cluster
-            const pOrNs = await this.getNamesapcesOrProjects();
+            const pOrNs = await this.odo3.getNamespaces();
             if (this.kubeContext.namespace) {
                 if (pOrNs.find(item => item?.metadata.name === this.kubeContext.namespace)) {
                     result = [{
@@ -204,7 +223,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 }
             }
         } else {
-            result = [...await this.getDeploymentConfigs(), ...await this.getDeployments()];
+            result = [...await this.odo3.getDeploymentConfigs(), ...await this.odo3.getDeployments()];
         }
 
         if (!element) {
@@ -215,35 +234,6 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     refresh(target?: ExplorerItem): void {
         this.eventEmitter.fire(target);
-    }
-
-    private async getListItems<T>(command: CommandText, fail = false) {
-        const listCliExitData = await CliChannel.getInstance().executeTool(command, undefined, fail);
-        const result = loadItems<T>(listCliExitData.stdout);
-        return result;
-    }
-
-    async getDeployments(): Promise<ExplorerItem[]> {
-        return this.getListItems<k8s.KubernetesObject>(DeploymentCommand.get());
-    }
-
-    async getDeploymentConfigs(): Promise<ExplorerItem[]> {
-        return this.getListItems<k8s.KubernetesObject>(DeploymentConfig.command.getDeploymentConfigs());
-    }
-
-    async getProjects() {
-        return this.getListItems<k8s.KubernetesObject>(CommonCommand.getResourceList('project'), true);
-    }
-
-    async getNamespaces() {
-        return this.getListItems<k8s.KubernetesObject>(CommonCommand.getResourceList('namespace'), true);
-    }
-
-    async getNamesapcesOrProjects(): Promise<k8s.KubernetesObject[]> {
-        return Promise.any([
-            this.getProjects(),
-            this.getNamespaces()
-        ]);
     }
 
     dispose(): void {
@@ -266,6 +256,13 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         return commands.executeCommand('vscode.open', Uri.parse(OpenShiftExplorer.issueUrl()));
     }
 
+    @vsCommand('openshift.open.configFile')
+    async openConfigFile(context: TreeItem): Promise<void> {
+        if(context.description && typeof context.description === 'string'){
+            await commands.executeCommand('vscode.open', Uri.file(context.description));
+        }
+    }
+
     static issueUrl(): string {
         const packageJSON: PackageJSON = extensions.getExtension('redhat.vscode-openshift-connector')
             .packageJSON as PackageJSON;
@@ -276,5 +273,4 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         ].join('\n');
         return `${packageJSON.bugs}/new?labels=kind/bug&title=&body=**Environment**\n${body}\n**Description**`;
     }
-
 }

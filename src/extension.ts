@@ -136,7 +136,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
                     await commands.executeCommand('openshift.explorer.login');
                     break;
                 case 'Switch Kubernetes Context':
-                    await commands.executeCommand('openshift.explorer.switchContext');
+                    await commands.executeCommand('openshift.explorer.manageContext');
                     break;
                 case 'Create Component from Workspace':
                     await commands.executeCommand('openshift.component.createFromLocal');
@@ -145,7 +145,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
                     await commands.executeCommand('openshift.componentTypesView.registry.openInView');
                     break;
                 case 'Import from Git':
-                    await commands.executeCommand('openshift.component.importFromGit');
+                    await commands.executeCommand('openshift.component.openImportFromGit');
                     break;
                 case 'Open Welcome Page':
                     await commands.executeCommand('openshift.welcome');
@@ -173,7 +173,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     createStatusBarItem(extensionContext) ;
 
     function updateStatusBarItem(statusBarItem: StatusBarItem, text: string): void {
-        if (!workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation')) {
+        if (!workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation')) {
             statusBarItem.hide();
             return;
         }

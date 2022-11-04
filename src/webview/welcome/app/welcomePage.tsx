@@ -21,11 +21,9 @@ export interface DefaultProps {
 export class Welcome extends React.Component<DefaultProps, {
     lastRelease: string
 }> {
-    extenContainerRef: React.RefObject<HTMLDivElement>;
 
     constructor(props) {
         super(props);
-        this.extenContainerRef = React.createRef();
         this.state = {
             lastRelease: ''
         }
@@ -222,11 +220,7 @@ export class Welcome extends React.Component<DefaultProps, {
         return <>
             <header className='header__logo'>
                 <img className='image__logo' src={require('../../../../images/title/logo.svg').default} />
-                <div className='header__title'>
-                    <div className='setting__input setting__input--big' style={{ paddingBottom: '0px', borderBottom: '0px', marginBottom: '0px' }}>
-                        <label style={{ display: 'flex', flexDirection: 'row', textAlign: 'center' }}><Typography variant='h1' className='highlight'>OpenShift</Typography><Typography variant='h1' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Connector</Typography></label>
-                    </div>
-                </div>
+                <label style={{ display: 'flex', flexDirection: 'row', textAlign: 'center' }}><Typography variant='h1' className='highlight'>OpenShift</Typography><Typography variant='h1' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Toolkit</Typography></label>
             </header>
             <div className='container' id='con'>
                 <div className='content__area'>
@@ -234,14 +228,14 @@ export class Welcome extends React.Component<DefaultProps, {
                         <div className='section__content'>
                             <div className='section__header'>
                                 <p className='section__header-hint'>
-                                    OpenShift Connector for VS Code brings the power and convenience of Kubernetes and Red Hat OpenShift to developers. The extension allows developers to create, test, debug and deploy cloud-native applications on OpenShift in simple steps.
+                                    OpenShift Toolkit for VS Code brings the power and convenience of Kubernetes and Red Hat OpenShift to developers. The extension allows developers to create, test, debug and deploy cloud-native applications on OpenShift in simple steps.
                                     With the extension, users can provision a new OpenShift cluster, either using <a>OpenShift Local</a> or using a free(30 days) <a>Red Hat Developer Sandbox</a> instance.
                                 </p>
                                 <div className='setting__input setting__input--big' style={{ paddingBottom: '0px', borderBottom: '0px', marginBottom: '0px' }}>
                                     <label style={{ display: 'flex', flexDirection: 'row' }}>
                                         <Typography variant='h2' className='foreGroundColor'>Welcome to</Typography>
                                         <Typography variant='h2' style={{ paddingLeft: '1rem' }} className='highlight'>OpenShift</Typography>
-                                        <Typography variant='h2' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Connector</Typography>
+                                        <Typography variant='h2' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Toolkit</Typography>
                                     </label>
                                 </div>
                                 <div className='section__whatsnew foreGroundColor'>
@@ -252,10 +246,10 @@ export class Welcome extends React.Component<DefaultProps, {
                                         className='button button--flat'
                                         title='See Whats New'
                                         onClick={() => this.openExternalPage('https://github.com/redhat-developer/vscode-openshift-tools/releases/' + `${lastRelease}`)}
-                                    >See What's New in OpenShift Connector</a>
+                                    >See What's New in OpenShift Toolkit</a>
                                     <a
                                         className='button button--flat'
-                                        title='Open the Get Started with OpenShift Connector walkthrough'
+                                        title='Open the Get Started with OpenShift Toolkit walkthrough'
                                         onClick={this.openGetStarted}
                                     >Get Started Walkthrough</a>
                                 </div>
@@ -268,9 +262,9 @@ export class Welcome extends React.Component<DefaultProps, {
                                 loading='lazy' />
                         </div>
                     </section>
-                    <div className='extensionContainer'>
-                        <div className='extensionContainerLeft'>
-                            <div className='section__header sticky-content-section'>
+                    <section className='section--settings'>
+                        <div className='section__content'>
+                            <div className='section__header'>
                                 <div className='setting__input setting__input--big'>
                                     <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Hybrid Cloud</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }} className='foreGroundColor'> Flexibility</Typography></label>
                                 </div>
@@ -297,16 +291,14 @@ export class Welcome extends React.Component<DefaultProps, {
                                 </ul>
                             </div>
                         </div>
-                        <div className='extensionContainerRight'>
-                            <div className='section__brand__preview'
-                                style={{ margin: '0rem' }}>
-                                <img className='content__image__preview' src={require('../../../../images/welcome/cloud.svg').default} />
-                            </div>
+                        <div className='section__brand__preview'
+                            style={{ margin: '0rem' }}>
+                            <img className='content__image__preview' src={require('../../../../images/welcome/cloud.svg').default} />
                         </div>
-                    </div>
-                    <div className='extensionContainer'>
-                        <div className='extensionContainerLeft'>
-                            <div className='section__header sticky-content-section'>
+                    </section>
+                    <section className='section--settings'>
+                        <div className='section__content'>
+                            <div className='section__header'>
                                 <div className='setting__input setting__input--big'>
                                     <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Component</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Creation Simplicity</Typography></label>
                                 </div>
@@ -328,16 +320,14 @@ export class Welcome extends React.Component<DefaultProps, {
                                 </ul>
                             </div>
                         </div>
-                        <div className='extensionContainerRight'>
-                            <div className='section__brand__preview'
-                                style={{ margin: '0rem' }}>
-                                <img className='content__image__preview' src={require('../../../../images/welcome/component.png').default} />
-                            </div>
+                        <div className='section__brand__preview'
+                            style={{ margin: '0rem' }}>
+                            <img className='content__image__preview' src={require('../../../../images/welcome/component.png').default} />
                         </div>
-                    </div>
-                    <div className='extensionContainer' style={{ height: '40rem' }}>
-                        <div className='extensionContainerLeft'>
-                            <div className='section__header sticky-content-section'>
+                    </section>
+                    <section className='section--settings'>
+                        <div className='section__content'>
+                            <div className='section__header'>
                                 <div className='setting__input setting__input--big'>
                                     <label style={{ display: 'flex', flexDirection: 'row' }}><Typography variant='h2' className='highlight'>Push</Typography><Typography variant='h2' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>code fast and debug on remote</Typography></label>
                                 </div>
@@ -346,22 +336,20 @@ export class Welcome extends React.Component<DefaultProps, {
                                 </p>
                             </div>
                         </div>
-                        <div className='extensionContainerRight'>
-                            <div className='section__brand__preview'
-                                style={{ margin: '0rem' }}>
-                                <img className='content__image__preview' src={require('../../../../images/welcome/devfile.png').default} />
-                            </div>
+                        <div className='section__brand__preview'
+                            style={{ margin: '0rem' }}>
+                            <img className='content__image__preview' src={require('../../../../images/welcome/devfile.png').default} />
                         </div>
-                    </div>
-                    <div className='extensionContainer' style={{ height: '100vh'}}>
-                        <div className='sticky-section' ref={this.extenContainerRef}>
+                    </section>
+                    <section className='section--settings' style={{ gap: '3rem' }}>
+                        <div className='sticky-section'>
                             <div className='setting__input setting__input--big' style={{ borderBottom: '0px' }}>
                                 <label style={{ display: 'flex', flexDirection: 'row' }}>
                                     <Typography variant='h2' className='highlight'>OpenShift extension</Typography>
                                 </label>
                             </div>
                         </div>
-                        <div className='extencontainer'>
+                        <section className='sticky-section-content'>
                             <div className='sticky-section-exten'>
                                 <p className='section__header-hint sticky-section-hint'>Allows developers to easily create, deploy and live debug container applications running on OpenShift &#38; Kubernetes. Thus enhancing the development inner loop workflow through One-click actions right from IDE.</p>
                             </div>
@@ -381,8 +369,8 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <p className='section__header-hint sticky-section-hint'>Allows Monitoring through view and stream logs from your deployments, pods and containers for Kubernetes resources, with One Click from IDE.
                                 </p>
                             </div>
-                        </div>
-                    </div>
+                        </section>
+                    </section>
                     {this.footer}
                 </div>
             </div>

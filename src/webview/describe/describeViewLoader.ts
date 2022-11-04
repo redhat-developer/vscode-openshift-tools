@@ -7,8 +7,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { ExtensionID } from '../../util/constants';
 import { OpenShiftObject } from '../../odo';
-import * as odo from '../../odo';
 import { CommandText } from '../../base/command';
+import { CliChannel } from '../../cli';
 
 export default class DescribeViewLoader {
 
@@ -31,7 +31,7 @@ export default class DescribeViewLoader {
         // TODO: When webview is going to be ready?
         panel.webview.html = DescribeViewLoader.getWebviewContent(DescribeViewLoader.extensionPath, `${cmd}`);
 
-        const process = await odo.getInstance().spawn(`${cmd}`, target.contextPath.fsPath);
+        const process = await CliChannel.getInstance().spawnTool(cmd, {cwd: target.contextPath.fsPath});
         process.stdout.on('data', (data) => {
             panel.webview.postMessage({action: 'describe', data: `${data}`.trim().split('\n')});
         });
