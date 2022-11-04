@@ -722,4 +722,18 @@ export class Component extends OpenShiftItem {
             `OpenShift: Deploying '${context.component.devfileData.devfile.metadata.name}' Component`);
     }
 
+    @vsCommand('openshift.component.undeploy')
+    public static undeploy(context: ComponentWorkspaceFolder) {
+        // TODO: Find out details for deployment workflow
+        // right now just let deploy and redeploy
+        // Undeploy is not provided
+        // // --
+        // const cs = Component.getComponentDevState(context);
+        // cs.deployStatus = ComponentContextState.DEP;
+        // Component.stateChanged.fire(context.contextPath);
+        void Component.odo.executeInTerminal(
+            Command.undeploy(),
+            context.contextPath,
+            `OpenShift: Undeploying '${context.component.devfileData.devfile.metadata.name}' Component`);
+    }
 }

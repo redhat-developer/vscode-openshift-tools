@@ -475,6 +475,11 @@
                 "category": "OpenShift"
             },
             {
+                "command": "openshift.component.undeploy",
+                "title": "Undeploy",
+                "category": "OpenShift"
+            },
+            {
                 "command": "openshift.component.showDevTerminal",
                 "title": "Show Dev Terminal",
                 "category": "OpenShift"
@@ -1215,7 +1220,12 @@
                 {
                     "command": "openshift.component.deploy",
                     "when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dep-nrn.*/ || viewItem =~ /openshift\\.component.*\\.dep-run.*/",
-                    "group": "c2"
+                    "group": "c2@0"
+                },
+                {
+                    "command": "openshift.component.undeploy",
+                    "when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dep-nrn.*/ || viewItem =~ /openshift\\.component.*\\.dep-run.*/",
+                    "group": "c2@1"
                 },
                 {
                     "command": "openshift.component.showDevTerminal",
