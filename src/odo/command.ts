@@ -128,7 +128,7 @@ export class Command {
     }
 
     static listRegistries(): CommandText {
-        return new CommandText('odo registry list -o json');
+        return new CommandText('odo preference view -o json');
     }
 
     static addRegistry(name: string, url: string, token: string): CommandText {
