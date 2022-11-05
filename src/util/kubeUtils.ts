@@ -5,7 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { QuickPickItem } from 'vscode';
+import { commands, QuickPickItem, window } from 'vscode';
 import { KubeConfig, findHomeDir, loadYaml } from '@kubernetes/client-node';
 import { User, Cluster } from '@kubernetes/client-node/dist/config_types';
 
@@ -19,9 +19,14 @@ function fileExists(file: string): boolean {
 }
 
 export class KubeConfigUtils extends KubeConfig {
+    public readonly loadingError: any;
     constructor() {
         super();
-        this.loadFromDefault();
+        try {
+            this.loadFromDefault();
+        } catch (error) {
+            throw new Error('Kubernetes configuration file cannot be parsed. Please open it in editor and fix the errors to continue.');
+        }
         // k8s nodejs-client ignores all unknown properties,
         // so cluster object's proxy-url attribute is not present
         // after k8s config loaded
