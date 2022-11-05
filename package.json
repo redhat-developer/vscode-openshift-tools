@@ -1,7 +1,7 @@
 {
 	"name": "vscode-openshift-connector",
 	"displayName": "OpenShift Toolkit",
-	"description": "Simplified app dev for Kubernetes or Red Hat OpenShift",
+	"description": "Fast iterative application development on Red Hat OpenShift and Kubernetes",
 	"version": "1.0.0",
 	"license": "MIT",
 	"publisher": "redhat",
@@ -17,29 +17,21 @@
 	},
 	"badges": [
 		{
-			"url": "https://badges.gitter.im/redhat-developer/openshift-connector.svg",
+			"url": "https://img.shields.io/gitter/room/redhat-developer/vscode-openshift-tools?style=for-the-badge&logo=gitter",
 			"href": "https://gitter.im/redhat-developer/openshift-connector",
 			"description": "Join us at #openshift-connector channel"
 		},
 		{
-			"url": "https://img.shields.io/github/workflow/status/redhat-developer/vscode-openshift-tools/CI",
-			"href": "https://github.com/redhat-developer/vscode-openshift-tools/actions?query=workflow%3ACI",
-			"description": "Build status"
-		},
-		{
-			"url": "https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/graph/badge.svg",
-			"href": "https://codecov.io/gh/redhat-developer/vscode-openshift-tools/branch/master/",
-			"description": "Unit tests code coverage"
-		},
-		{
-			"url": "https://img.shields.io/badge/license-MIT-brightgreen.svg",
-			"href": "https://github.com/redhat-developer/vscode-openshift-tools/blob/master/LICENSE",
-			"description": "License"
+			"url": "https://img.shields.io/twitter/follow/rhdevelopers?style=social",
+			"href": "https://twitter.com/intent/follow?screen_name=rhdevelopers",
+			"description": "Tweet"
 		}
 	],
-	"categories": [
-		"Other"
-	],
+    "categories": [
+        "Debuggers",
+        "Azure",
+        "Other"
+    ],
 	"keywords": [
 		"OpenShift",
 		"Kubernetes",
