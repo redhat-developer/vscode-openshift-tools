@@ -682,6 +682,8 @@ export class Component extends OpenShiftItem {
                 }));
                 const port = await window.showQuickPick(ports, {placeHolder: 'Select a URL to open in default browser'});
 
+                if (!port) return null;
+
                 config.contextPath = component.contextPath;
                 if (config.type === 'python') {
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
