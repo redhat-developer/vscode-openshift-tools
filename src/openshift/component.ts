@@ -203,8 +203,8 @@ export class Component extends OpenShiftItem {
                 pty: {
                     onDidWrite: outputEmitter.event,
                     open: () => {
-                        outputEmitter.fire(`Starting ${Command.dev().toString()}\r\n`);
-                        void Component.odo.spawn(Command.dev().toString(), component.contextPath).then((cp) => {
+                        outputEmitter.fire(`Starting ${Command.dev(component.component.devfileData.supportedOdoFeatures.debug).toString()}\r\n`);
+                        void Component.odo.spawn(Command.dev(component.component.devfileData.supportedOdoFeatures.debug).toString(), component.contextPath).then((cp) => {
                             devProcess = cp;
                             devProcess.on('spawn', () => {
                                 cs.devTerminal.show();

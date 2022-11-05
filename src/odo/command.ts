@@ -52,8 +52,12 @@ export class Command {
         return command;
     }
 
-    static dev(): CommandText {
-        return new CommandText('odo', 'dev', []);
+    static dev(debug: boolean): CommandText {
+        const command = new CommandText('odo', 'dev');
+        if (debug) {
+            command.addOption(new CommandOption('--debug'));
+        }
+        return command;
     }
 
     static createServiceCommand(fileName: string): CommandText {
