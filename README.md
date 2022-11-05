@@ -10,45 +10,82 @@
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=for-the-badge)](https://github.com/redhat-developer/vscode-openshift-tools/blob/main/LICENSE)
 
 
+[Getting Started](#getting-started) •
+[Quick Start Guide](#quick-start---showcasing-component-creation) •
 [Commands and Features](#commands-and-features) •
-[Feedback & Questions](#feedback-and-questions)
+[Feedback](#feedback)
 </div>
 
 ## Overview
 
+The OpenShift Toolkit extends Visual Studio Code to provide all of the power and convenience of IDEs for developing cloud-native Kubernetes applications, without leaving the comfort of your IDE. For a developer to run the local code on an OpenShift instance, test & debug it and deploy it on production without worrying about the complexities around different K8s tools.
+
 OpenShift Toolkit extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:
  - Developers can easily create, deploy and live debug container applications running on OpenShift.
  - Create [devfile](https://devfile.io) based components directly from Devfile Registries View
- - Follow logs for the deployed applications on OpenShift
+ - Deploy git repositories directly on OpenShift through Import from Git guided workflow
+ - Developers can view and edit Resources YAML manifests, and view logs for pods, deployments, and deployment configs. The extension also allows users to view these resources in the cluster dashboard.
  - Run local instance of OpenShift 4.11.7 using [OpenShift Local](https://crc.dev/crc/) directly from IDE
  - Connect & Provision free [Developer Sandbox for Red Hat OpenShift](https://developers.redhat.com/developer-sandbox) instance from IDE
 
-### Demo: https://www.youtube.com/watch?v=HEsYgDqD1rM
-
 ![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/vscode-openshift-tools.gif)
 
-### Supported OpenShift Clusters
+## Getting Started
 
-#### Developer Sandbox
+### Install
+
+[Open this extension in the Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector)
+
+The OpenShift Toolkit extension provides multiple views to the user once it is launched.
+
+1. `Application Explorer View`: Showcases the cluster connected to and the resources present in the cluster. The cluster URL, Project, Deployment and Deployment Configs are shown in the tree view.
+
+2. `Components View`: Displays the components created and also the actions associated with the component based on the state in which it is( running or stopped). Allows user to create components from local workspace or directly from git repository.
+
+3. `Devfile Registries View`: Contains the [Default Devfile Registry](https://registry.devfile.io/viewer) to browse and create components from the devfile stacks provided. Users can their own custom registry to the view and create components.
+
+4. `Debug Sessions View`: Once the debug session is active, the associate component is displayed in this view.
+### Provision new OpenShift Cluster
+
+The extension provides users with multiple ways to provision an instance of OpenShift to get started. Click on `Add OpenShif Cluster` which opens webview to select the way to get connected with a new OpenShift instance.
+
+#### `Red Hat OpenShift Developer Sandbox`
 
 The extension allows users free access to the [Developer Sandbox for Red Hat OpenShift](https://developers.redhat.com/developer-sandbox/get-started). From `Add Cluster View`, users can provision and connect to dev sandbox instance using the guided workflow. The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools.
 
-#### Local instance of OpenShift
+#### `Local instance of OpenShift`
 
-This extension can work with local or remote OpenShift clusters.
+The extension allows the developers to provision a local instance of OpenShift cluster using the guided workfflow from the extension. It runs [OpenShift Local](https://crc.dev/crc/) which provides a single node local OpenShift 4.x cluster.
 
-To provision local instance of OpenShift cluster, developers can use the following options:
-* [OpenShift Local](https://crc.dev/crc/) - run single node local OpenShift 4.x cluster
-
-#### Public cloud providers
+Please follow this [guide](README.crc-workflow.md) to understand the guided workflow to provision OpenShift locally.
+`
+#### `Provision Hybrid Cloud`
 
 To install OpenShift Container Platform 4 in the public cloud, in your datacenter or on your laptop please visit [Red Hat Hybrid Cloud console](https://console.redhat.com/openshift/create). Here are different scenarios to try OpenShift:
 
 * [Red Hat OpenShift Cluster Manager](https://console.redhat.com/openshift/create/datacenter) - This 60-day, self-supported trial lets you install and run Red Hat OpenShift Container Platform on infrastructure you manage.
 * [Red Hat OpenShift Dedicated](https://console.redhat.com/openshift/create/osdtrial) - Red Hat OpenShift Dedicated is a fully managed service of Red Hat OpenShift on Amazon Web Services (AWS) and Google Cloud.
-* [Microsoft Azure Red Hat OpenShift](http://red.ht/3oeVPjM) - Azure Red Hat OpenShift is a fully-managed service of Red Hat OpenShift on Azure, jointly engineered, managed and supported by Microsoft and Red Hat.
+* [Azure Red Hat OpenShift](http://red.ht/3oeVPjM) - Azure Red Hat OpenShift is a fully-managed service of Red Hat OpenShift on Azure, jointly engineered, managed and supported by Microsoft and Red Hat.
+* [Red Hat OpenShift Service on AWS (ROSA)](https://console.redhat.com/openshift/create/rosa/wizard) - Build, deploy, and manage Kubernetes applications with Red Hat OpenShift running natively on AWS.
 
-## Core Concepts
+## Quick Start - Showcasing Component Creation
+
+Users can create components in a faster and intuitive way in few clicks using the following workflows:
+### `Import From Git`
+
+Users can directly deploy the git repo code on top of OpenShift/Kubernetes cluster. The guided workflow allows them to provide git repository and the extension detects the files in the repo and recoommends a deployment strategy to deploy on cluster. Users can also provide their own custom deployment strategy and create a component directly from the webview. This provides a One-click deployment from Git to OpenShift
+
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/git-import.gif)
+
+### `Create component from devfile registry`
+
+In the Devfile Registries view, there is an action to `Open Registry View` which opens a webview to browse devfile stacks consisting of supported registries. Users can create components directly from any selected stack and deploy on OpenShift
+
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/walkthrough/showRegistries.gif)
+##  Commands and Features
+
+The extension supports a number of commands to interact with OpenShift clusters and resources. The commands are accessible via the command palette (`Cmd+Shift+P` <kbd>⌘⇧P</kbd> on macOS or `Ctrl+Shift+P` <kbd>⌃⇧P</kbd> on Windows and Linux), Visual Studio Code View title buttons and tree context menus.
+### Core Concepts
 
 * `Project`: A project is your source code, tests, and libraries organized in a separate single unit
 * `Application`: An application is a program designed for end users. An application consists of multiple microservices or components that work individually to build the entire application. Examples of applications: e-Shop, Hotel Reservation System, Online Booking
@@ -56,13 +93,7 @@ To install OpenShift Container Platform 4 in the public cloud, in your datacente
 * `Service`: A service is software that your component links to or depends on. Examples of services: MariaDB, MySQL
 * `Devfile`: A devfile is a portable YAML file containing the definition of a component and its related URLs, storages and services.
 
-##  Commands and Features
-
-The extension supports a number of commands to interact with OpenShift clusters and resources. The commands are accessible via the command palette (`Cmd+Shift+P` <kbd>⌘⇧P</kbd> on macOS or `Ctrl+Shift+P` <kbd>⌃⇧P</kbd> on Windows and Linux), Visual Studio Code View title buttons and tree context menus.
-
-### Commands Available in OpenShift Application Explorer View
-
-#### Commands for a Cluster
+#### Commands in OpenShift Application Explorer View
 
 * `Log in to cluster` - Log in to your cluster and save login for subsequent use.
     * Credentials : Log in to the given cluster with the given credentials.
@@ -87,7 +118,7 @@ Actions available in Components View
    * `Import from Git` - Deploy a git repository directly on OpenShift using a guided workflow
    * `New Component` - Create a component from the available registries.
 
-Components in different states have different set of commands available.
+Commands available in context for the compenent
 
    * `Start Dev` - The application has been built and deployed to the cluster and the application is port-forwarded for local accessibility. The extension will watch for changes in the current directory and rebuild the application when changes are detected.
    * `Stop Dev` - Stop the dev command workflow and resources are cleaned, hence the application is not running on the cluster
@@ -103,57 +134,6 @@ Components in different states have different set of commands available.
 
 **NOTE:** Currently we support creation of one component per folder. Multiple components from a folder might be supported in
 future releases.
-
-### Running OpenShift Locally
-
-The extension provides a view to run local instance of OpenShift from IDE. To open the view use `Add OpenShift Cluster` button
-![ addclusterbutton ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/add-cluster-button.gif)
-from `OpenShift: Application Explorer` view title.
-
-![ addcluster ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/add-cluster.gif)
-
-The view provides a guided workflow to create and start OpenShift 4 single node cluster on your workstation
-using OpenShift Local (formerly Red Hat CodeReady Containers):
-
-   * Download & Install OpenShift Local
-   * Set Virtual Machine parameters: number of CPUs and memory limit
-   * Setup OpenShift Local
-   * Run OpenShift Local commands to setup/start the cluster
-
-The view provides following options to control cluster's state:
-
-   * Start cluster
-   * Stop cluster
-   * Open OpenShift Developer Console for cluster
-   * Refresh cluster's state
-
-![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/crc-webview.gif)
-
-### Debug Support
-
-`OpenShift: Debug` command simplifies the way to start debugging for OpenShift Components pushed to a cluster. It supports following devfile components: Node.js, Java and Python (including Django)
-
-### Debug Node.js Component
-
-Default Visual Studio Code installation includes JavaScript/TypeScript Language Support and Debugger Extensions required to debug a Node.js Component. That means new `OpenShift: Debug` command can be used without installing any additional extensions.
-
-![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/debug-node.gif)
-
-### Debug Java Component
-
-To debug a Java Component, [Java Language Support](https://marketplace.visualstudio.com/items?itemName=redhat.java) and [Java Debugger](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug) Extensions are required. OpenShift Toolkit extension will prompt the user to install missing extension(s) before it starts Debugger for a Java Component.
-
-![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/debug-java.gif)
-
-## Icons for OpenShift Application Explorer View Items
-
-<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/title/readme/add-cluster.png" width="15" height="15" /><span style="margin: 20px">Add OpenShift Cluster</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/title/readme/icon-login.png" width="15" height="15" /><span style="margin: 20px">Log in to Cluster</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/title/readme/icon-refresh.png" width="15" height="15" /><span style="margin: 20px">Refresh Cluster</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/context/cluster-node.png" width="15" height="15" /><span style="margin: 20px">Cluster Resource Node</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/context/project-node.png" width="15" height="15" /><span style="margin: 20px">Project Resource</span></div>
-<div><img src="https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/context/component-node.png" width="15" height="15" /><span style="margin: 20px">Deployment/Deployment Config Resource</span></div>
-
 ## Extension Configuration Settings
    * `OpenShift Toolkit: Show Channel On Output` - Show OpenShift Toolkit output channel when new text added to output stream
    * `OpenShift Toolkit: Output verbosity level` - Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and terminal view
@@ -164,13 +144,16 @@ To debug a Java Component, [Java Language Support](https://marketplace.visualstu
    * `OpenShift Toolkit: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
    * `OpenShift Toolkit: CRC Memory Allocation` - MiB of memory to allocate to the OpenShift cluster as selected during the first run.
 
-## OpenShift Resources
+## View OpenShift Resources
 
 This Extension uses Kubernetes Extension API to show OpenShift specific resources like Projects, Routes, Deployment Configs, Image Streams, Templates and others in Kubernetes Clusters View.
 
 OpenShift Toolkit extension provides ```Use Project``` command to switch between OpenShift Projects. It is available for Project items in Kubernetes Clusters View.
+<details>
+<summary>Open this screenshot</summary>
 
 ![ useproject ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/use-project.png)
+</details>
 
 ## Dependencies
 
@@ -195,8 +178,6 @@ Follow the links below for additional information:
 * [Understanding odo](https://odo.dev/)
 * [Devfile ecosystem](https://devfile.io/)
 
-In case of any queries, please use the [Feedback & Question](#Feedback-&-Questions) section.
-
 ## Release Notes
 
 See the [change log](CHANGELOG.md).
@@ -209,7 +190,7 @@ For information on getting started, refer to the [CONTRIBUTING instructions](CON
 
 Download the most recent `openshift-toolkit-<version>.vsix` file from the [release](https://github.com/redhat-developer/vscode-openshift-tools/releases) and install it by following the instructions [here](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix). Stable releases are archived [here](https://download.jboss.org/jbosstools/adapters/stable/vscode-openshift-tools/).
 
-## Feedback & Questions
+## Feedback
 
 If you discover an issue please file a bug and we will fix it as soon as possible.
 * File a bug in [GitHub Issues](https://github.com/redhat-developer/vscode-openshift-tools/issues).
