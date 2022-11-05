@@ -143,7 +143,12 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 contextValue: 'openshift.k8sObject',
                 label: element.metadata.name,
                 collapsibleState: TreeItemCollapsibleState.None,
-                iconPath: path.resolve(__dirname, '../../images/context/component-node.png')
+                iconPath: path.resolve(__dirname, '../../images/context/component-node.png'),
+                command: {
+                    title: 'Load',
+                    command: 'openshift.resource.load',
+                    arguments: [element]
+                }
             };
         }
 
