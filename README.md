@@ -22,9 +22,9 @@ The OpenShift Toolkit extends Visual Studio Code to provide all of the power and
 
 OpenShift Toolkit extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:
  - Developers can easily create, deploy and live debug container applications running on OpenShift.
- - Create [devfile](https://devfile.io) based components directly from Devfile Registries View
- - Deploy git repositories directly on OpenShift through Import from Git guided workflow
- - Developers can view and edit Resources YAML manifests, and view logs for pods, deployments, and deployment configs. The extension also allows users to view these resources in the cluster dashboard.
+ - Create [devfile](https://devfile.io) based components directly from _Devfile Registries View_
+ - Deploy git repositories directly on OpenShift through _Import from Git_ guided workflow
+ - Developers can view and edit Resources YAML manifests, and view logs for pods, deployments, and deployment configs.
  - Run local instance of OpenShift 4.11.7 using [OpenShift Local](https://crc.dev/crc/) directly from IDE
  - Connect & Provision free [Developer Sandbox for Red Hat OpenShift](https://developers.redhat.com/developer-sandbox) instance from IDE
 
@@ -38,28 +38,29 @@ OpenShift Toolkit extension provides an end-to-end developer experience for Red 
 
 The OpenShift Toolkit extension provides multiple views to the user once it is launched.
 
-1. `Application Explorer View`: Showcases the cluster connected to and the resources present in the cluster. The cluster URL, Project, Deployment and Deployment Configs are shown in the tree view.
+1. **Application Explorer View**: Showcases the cluster connected to and the resources present in the cluster. The cluster URL, Project, Deployment and Deployment Configs are shown in the tree view.
 
-2. `Components View`: Displays the components created and also the actions associated with the component based on the state in which it is( running or stopped). Allows user to create components from local workspace or directly from git repository.
+2. **Components View**: Displays the components created and also the actions associated with the component based on the state in which it is( running or stopped). Allows user to create components from local workspace or directly from git repository.
 
-3. `Devfile Registries View`: Contains the [Default Devfile Registry](https://registry.devfile.io/viewer) to browse and create components from the devfile stacks provided. Users can their own custom registry to the view and create components.
+3. **Devfile Registries View**: Contains the [Default Devfile Registry](https://registry.devfile.io/viewer) to browse and create components from the devfile stacks provided. Users can their own custom registry to the view and create components.
 
-4. `Debug Sessions View`: Once the debug session is active, the associate component is displayed in this view.
-### Provision new OpenShift Cluster
+4. **Debug Sessions View**: Once the debug session is active, the associate component is displayed in this view.
 
-The extension provides users with multiple ways to provision an instance of OpenShift to get started. Click on `Add OpenShif Cluster` which opens webview to select the way to get connected with a new OpenShift instance.
+## Provision new OpenShift Cluster
 
-#### `Red Hat OpenShift Developer Sandbox`
+The extension provides users with multiple ways to provision an instance of OpenShift to get started. Click on _Add OpenShift Cluster_ which opens webview to select the way to get connected with a new OpenShift instance.
+
+1. **Red Hat OpenShift Developer Sandbox**
 
 The extension allows users free access to the [Developer Sandbox for Red Hat OpenShift](https://developers.redhat.com/developer-sandbox/get-started). From `Add Cluster View`, users can provision and connect to dev sandbox instance using the guided workflow. The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools.
 
-#### `Local instance of OpenShift`
+2. **Local instance of OpenShift**
 
 The extension allows the developers to provision a local instance of OpenShift cluster using the guided workfflow from the extension. It runs [OpenShift Local](https://crc.dev/crc/) which provides a single node local OpenShift 4.x cluster.
 
-Please follow this [guide](README.crc-workflow.md) to understand the guided workflow to provision OpenShift locally.
-`
-#### `Provision Hybrid Cloud`
+- Please follow this [guide](README.crc-workflow.md) to understand the guided workflow to provision OpenShift locally.
+
+3. **Provision Hybrid Cloud**
 
 To install OpenShift Container Platform 4 in the public cloud, in your datacenter or on your laptop please visit [Red Hat Hybrid Cloud console](https://console.redhat.com/openshift/create). Here are different scenarios to try OpenShift:
 
@@ -71,13 +72,13 @@ To install OpenShift Container Platform 4 in the public cloud, in your datacente
 ## Quick Start - Showcasing Component Creation
 
 Users can create components in a faster and intuitive way in few clicks using the following workflows:
-### `Import From Git`
+### **Import From Git**
 
 Users can directly deploy the git repo code on top of OpenShift/Kubernetes cluster. The guided workflow allows them to provide git repository and the extension detects the files in the repo and recoommends a deployment strategy to deploy on cluster. Users can also provide their own custom deployment strategy and create a component directly from the webview. This provides a One-click deployment from Git to OpenShift
 
 ![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/git-import.gif)
 
-### `Create component from devfile registry`
+### **Create component from devfile registry**
 
 In the Devfile Registries view, there is an action to `Open Registry View` which opens a webview to browse devfile stacks consisting of supported registries. Users can create components directly from any selected stack and deploy on OpenShift
 
@@ -87,11 +88,11 @@ In the Devfile Registries view, there is an action to `Open Registry View` which
 The extension supports a number of commands to interact with OpenShift clusters and resources. The commands are accessible via the command palette (`Cmd+Shift+P` <kbd>⌘⇧P</kbd> on macOS or `Ctrl+Shift+P` <kbd>⌃⇧P</kbd> on Windows and Linux), Visual Studio Code View title buttons and tree context menus.
 ### Core Concepts
 
-* `Project`: A project is your source code, tests, and libraries organized in a separate single unit
-* `Application`: An application is a program designed for end users. An application consists of multiple microservices or components that work individually to build the entire application. Examples of applications: e-Shop, Hotel Reservation System, Online Booking
-* `Component`: A component is a set of Kubernetes resources which host code or data. Each component can be run and deployed separately. Examples of components: Warehouse API Backend, Inventory API, Web Frontend, Payment Backend
-* `Service`: A service is software that your component links to or depends on. Examples of services: MariaDB, MySQL
-* `Devfile`: A devfile is a portable YAML file containing the definition of a component and its related URLs, storages and services.
+* **Project**: A project is your source code, tests, and libraries organized in a separate single unit
+* **Application**: An application is a program designed for end users. An application consists of multiple microservices or components that work individually to build the entire application. Examples of applications: e-Shop, Hotel Reservation System, Online Booking
+* **Component**: A component is a set of Kubernetes resources which host code or data. Each component can be run and deployed separately. Examples of components: Warehouse API Backend, Inventory API, Web Frontend, Payment Backend
+* **Service**: A service is software that your component links to or depends on. Examples of services: MariaDB, MySQL
+* **Devfile**: A devfile is a portable YAML file containing the definition of a component and its related URLs, storages and services.
 
 #### Commands in OpenShift Application Explorer View
 
@@ -150,7 +151,7 @@ This Extension uses Kubernetes Extension API to show OpenShift specific resource
 
 OpenShift Toolkit extension provides ```Use Project``` command to switch between OpenShift Projects. It is available for Project items in Kubernetes Clusters View.
 <details>
-<summary>Open this screenshot</summary>
+<summary>Reference image</summary>
 
 ![ useproject ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/use-project.png)
 </details>
