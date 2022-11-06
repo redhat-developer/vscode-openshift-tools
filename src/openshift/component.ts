@@ -153,7 +153,7 @@ export class Component extends OpenShiftItem {
 
     static devModeExitTimeout(): number {
         return workspace
-            .getConfiguration('openshiftConnector')
+            .getConfiguration('openshiftToolkit')
             .get<number>('stopDevModeTimeout');
     }
 
@@ -190,10 +190,11 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.dev')
     //@clusterRequired() check for user is logged in should be implemented from scratch
-    static dev(component: ComponentWorkspaceFolder) {
+    static async dev(component: ComponentWorkspaceFolder) {
         const cs = Component.getComponentDevState(component);
         cs.devStatus = ComponentContextState.DEV_STARTING;
         Component.stateChanged.fire(component.contextPath)
+        await Component.odo.execute(Command.deletePreviouslyPushedResouces(component.component.devfileData.devfile.metadata.name), undefined, false);
         const outputEmitter = new EventEmitter<string>();
         let devProcess: ChildProcess;
         try {
@@ -351,7 +352,7 @@ export class Component extends OpenShiftItem {
 
     static isUsingWebviewEditor(): boolean {
         return workspace
-            .getConfiguration('openshiftConnector')
+            .getConfiguration('openshiftToolkit')
             .get<boolean>('useWebviewInsteadOfTerminalView');
     }
 
@@ -556,7 +557,7 @@ export class Component extends OpenShiftItem {
                 commands.executeCommand('openshift.componentsView.refresh');
             }
 
-            const result: any = new String(`Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+            const result: any = new String(`Component '${componentName}' successfully created. Perform actions on it from Components View.`);
             result.properties = creatComponentProperties;
             return result;
         } catch (err) {
@@ -681,6 +682,8 @@ export class Component extends OpenShiftItem {
                 }));
                 const port = await window.showQuickPick(ports, {placeHolder: 'Select a URL to open in default browser'});
 
+                if (!port) return null;
+
                 config.contextPath = component.contextPath;
                 if (config.type === 'python') {
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -722,4 +725,18 @@ export class Component extends OpenShiftItem {
             `OpenShift: Deploying '${context.component.devfileData.devfile.metadata.name}' Component`);
     }
 
+    @vsCommand('openshift.component.undeploy')
+    public static undeploy(context: ComponentWorkspaceFolder) {
+        // TODO: Find out details for deployment workflow
+        // right now just let deploy and redeploy
+        // Undeploy is not provided
+        // // --
+        // const cs = Component.getComponentDevState(context);
+        // cs.deployStatus = ComponentContextState.DEP;
+        // Component.stateChanged.fire(context.contextPath);
+        void Component.odo.executeInTerminal(
+            Command.undeploy(context.component.devfileData.devfile.metadata.name),
+            context.contextPath,
+            `OpenShift: Undeploying '${context.component.devfileData.devfile.metadata.name}' Component`);
+    }
 }

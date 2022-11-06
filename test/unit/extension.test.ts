@@ -48,7 +48,7 @@ function genComponentJson(p: string, a: string, n: string, c: string ): string {
     }`;
 }
 
-suite('openshift connector Extension', () => {
+suite('openshift toolkit Extension', () => {
     let sandbox: sinon.SinonSandbox;
 
     const clusterItem = new OpenShiftCluster('cluster');

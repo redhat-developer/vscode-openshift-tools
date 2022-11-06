@@ -19,8 +19,8 @@ function verbose(_: unknown, key: string, descriptor: TypedPropertyDescriptor<Fu
         throw new Error('not supported');
     }
 
-    descriptor[fnKey] = function (...args: unknown[]): unknown {
-        const v = workspace.getConfiguration('openshiftConnector').get<number>('outputVerbosityLevel');
+    descriptor[fnKey] = function(...args: unknown[]): unknown {
+        const v = workspace.getConfiguration('openshiftToolkit').get<number>('outputVerbosityLevel');
         const command = fn.apply(this, args) as CommandText;
         return v > 0 ? command.addOption(new CommandOption('-v', `${v}`)) : command;
     };
@@ -28,8 +28,29 @@ function verbose(_: unknown, key: string, descriptor: TypedPropertyDescriptor<Fu
 
 export class Command {
 
+    static searchPreviousReleaseResources(name: string): CommandText {
+        return new CommandText('oc get', 'deployment', [
+            new CommandOption('-o', `jsonpath="{range .items[?(.metadata.labels.component=='${name}')]}{.metadata.labels.app\\.kubernetes\\.io\\/managed-by}{':'}{.metadata.labels.app\\.kubernetes\\.io\\/managed-by-version}{end}"`)
+        ]);
+    }
+
+    static deletePreviouslyPushedResouces(name: string): CommandText {
+        return new CommandText('oc delete', 'deployment', [
+            new CommandOption('-l', `component='${name}'`),
+            new CommandOption('--cascade')
+        ])
+    }
+
     static deploy(): CommandText {
-        return new CommandText('odo', 'deploy')
+        return new CommandText('odo', 'deploy');
+    }
+
+    static undeploy(name?: string): CommandText {
+        const command = new CommandText('odo delete', 'component');
+        if (name) {
+            command.addOption(new CommandOption('--name', name));
+        }
+        return command;
     }
 
     static dev(): CommandText {
@@ -42,7 +63,7 @@ export class Command {
             undefined, [
             new CommandOption('-f', fileName)
         ]
-        )
+        );
     }
 
     static printCatalogComponentImageStreamRefJson(name: string, namespace: string): CommandText {
@@ -108,7 +129,7 @@ export class Command {
     }
 
     static listRegistries(): CommandText {
-        return new CommandText('odo registry list -o json');
+        return new CommandText('odo preference view -o json');
     }
 
     static addRegistry(name: string, url: string, token: string): CommandText {
