@@ -1314,7 +1314,7 @@
 					{
 						"id": "showRegistries",
 						"title": "Browse all the Devfile stacks from Devfile registries",
-						"description": "Select a specific devfile registry to create a component directly.\n[Open registry view](command:openshift.componentTypesView.registry.openInView)",
+						"description": "Select a specific devfile registry to create a component directly.\n[Browse Devfile Registries](command:openshift.componentTypesView.registry.openInView)",
 						"media": {
 							"image": "images/walkthrough/showRegistries.gif",
 							"altText": "show registry"
@@ -1338,7 +1338,7 @@
 					{
 						"id": "importFromGit",
 						"title": "Create a Component from git repository",
-						"description": "Create a component directly from git repository. The guided workflow will detect the repository and recommend the deployment `devfile` for it. Users can also provide their own custom devfile. \n[Create Component](command:openshift.component.openImportFromGit)",
+						"description": "Create a component directly from git repository. The guided workflow will detect the repository and recommend the deployment `devfile` for it. Users can also provide their own custom devfile. \n[Import from Git](command:openshift.component.openImportFromGit)",
 						"media": {
 							"image": "images/walkthrough/git-import-walkthrough.gif",
 							"altText": "create component from git"
@@ -1350,7 +1350,7 @@
 					{
 						"id": "startDevComponent",
 						"title": "Start a component in development mode",
-						"description": "This is inner loop development and allows you to code, build, run and test the application in a continuous workflow. It continuously watches the directory for any new changes (including the changes occurring in the Devfile) and automatically syncs them with the application running on the cluster.\n\n This also forwards a port on the development system to the port on the container cluster allowing you remote access to your deployed application",
+						"description": "This is inner loop development and allows you to code, build, run and test the application in a continuous workflow. It continuously watches the directory for any new changes and automatically syncs them with the application running on the cluster.\n\n This also forwards a port on the development system to the port on the container cluster allowing you remote access to your deployed application",
 						"media": {
 							"image": "images/walkthrough/startDev.gif",
 							"altText": "dev component"
@@ -1358,7 +1358,7 @@
 					},
 					{
 						"id": "debugComponent",
-						"title": "Run the component in debug mode",
+						"title": "Debug the component",
 						"description": "Start the component in debug mode. The devfile.yaml should be specified with the debug port as an endpoint for the debug to work.",
 						"media": {
 							"image": "images/walkthrough/startDebug.png",
@@ -1370,7 +1370,7 @@
 						"title": "Deploy component on the cluster",
 						"description": "Deploy components in a similar manner they would be deployed by a CI/CD system, by first building the images of the containers to deploy, then by deploying the OpenShift/Kubernetes resources necessary to deploy the components.",
 						"media": {
-							"image": "",
+							"image": "images/walkthrough/deployWalkthrough.png",
 							"altText": "deploy component"
 						}
 					}
