@@ -15,8 +15,7 @@ import {
     version,
     commands,
     Uri,
-    TreeItemCollapsibleState,
-    ThemeIcon,
+    TreeItemCollapsibleState
 } from 'vscode';
 
 import * as path from 'path';
