@@ -131,7 +131,7 @@ suite('OpenShift/Component', () => {
             test('happy path works', async () => {
                 const result = await Component.create(appItem);
 
-                expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+                expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. Perform actions on it from Components View.`);
                 expect(progressFunctionStub).calledOnceWith(
                     `Creating new Component '${componentItem.getName()}'`);
                 expect(execStub).calledWith(Command.createLocalComponent(componentType.name, undefined, componentItem.getName(), folder.uri.fsPath));
@@ -270,7 +270,7 @@ suite('OpenShift/Component', () => {
             inputStub.resolves(componentItem.getName());
             quickPickStub.onSecondCall().resolves(componentType);
             const result = await Component.createFromRootWorkspaceFolder(folder);
-            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. Perform actions on it from Components View.`);
         });
 
         test('skips component type selection if componentTypeName provided and only one type found in registries', async () => {
@@ -284,7 +284,7 @@ suite('OpenShift/Component', () => {
                 )
             ]);
             const result = await Component.createFromRootWorkspaceFolder(folder, [], undefined, 'componentType1');
-            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. Perform actions on it from Components View.`);
             expect(quickPickStub).calledOnce;
             expect(quickPickStub).have.not.calledWith({ placeHolder: 'Component type' })
         });
@@ -310,7 +310,7 @@ suite('OpenShift/Component', () => {
                 componentType1, componentType2
             ]);
             const result = await Component.createFromRootWorkspaceFolder(folder, [], undefined, 'componentType1');
-            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. Perform actions on it from Components View.`);
             expect(quickPickStub).calledTwice;
             expect(quickPickStub).calledWith([componentType1, componentType2]);
         });
@@ -328,7 +328,7 @@ suite('OpenShift/Component', () => {
                 componentType1
             ]);
             const result = await Component.createFromRootWorkspaceFolder(folder, [], undefined, 'componentType1');
-            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. Perform actions on it from Components View.`);
             expect(quickPickStub).calledTwice;
             expect(quickPickStub).calledWith([componentType1]);
         });
@@ -341,7 +341,7 @@ suite('OpenShift/Component', () => {
                 '  name: componentName'
             );
             const result = await Component.createFromRootWorkspaceFolder(folder, [], undefined, 'componentType1');
-            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. Perform actions on it from Components View.`);
         });
 
 

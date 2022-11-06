@@ -557,7 +557,7 @@ export class Component extends OpenShiftItem {
                 commands.executeCommand('openshift.componentsView.refresh');
             }
 
-            const result: any = new String(`Component '${componentName}' successfully created. To deploy it on cluster, perform 'Push' action.`);
+            const result: any = new String(`Component '${componentName}' successfully created. Perform actions on it from Components View.`);
             result.properties = creatComponentProperties;
             return result;
         } catch (err) {
