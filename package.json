@@ -1370,7 +1370,7 @@
 						"title": "Deploy component on the cluster",
 						"description": "Deploy components in a similar manner they would be deployed by a CI/CD system, by first building the images of the containers to deploy, then by deploying the OpenShift/Kubernetes resources necessary to deploy the components.",
 						"media": {
-							"image": "images/walkthrough/deployWalkthrough.png",
+							"image": "images/walkthrough/deploy-demo.gif",
 							"altText": "deploy component"
 						}
 					}
