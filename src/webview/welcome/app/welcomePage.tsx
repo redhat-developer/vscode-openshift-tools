@@ -222,11 +222,7 @@ export class Welcome extends React.Component<DefaultProps, {
         return <>
             <header className='header__logo'>
                 <img className='image__logo' src={require('../../../../images/title/logo.svg').default} />
-                <div className='header__title'>
-                    <div className='setting__input setting__input--big' style={{ paddingBottom: '0px', borderBottom: '0px', marginBottom: '0px' }}>
-                        <label style={{ display: 'flex', flexDirection: 'row', textAlign: 'center' }}><Typography variant='h1' className='highlight'>OpenShift</Typography><Typography variant='h1' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Toolkit</Typography></label>
-                    </div>
-                </div>
+                <label style={{ display: 'flex', flexDirection: 'row', textAlign: 'center' }}><Typography variant='h1' className='highlight'>OpenShift</Typography><Typography variant='h1' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Toolkit</Typography></label>
             </header>
             <div className='container' id='con'>
                 <div className='content__area'>
