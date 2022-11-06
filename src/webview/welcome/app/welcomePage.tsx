@@ -233,7 +233,7 @@ export class Welcome extends React.Component<DefaultProps, {
                     <section className='section--settings'>
                         <div className='section__content'>
                             <div className='section__header'>
-                                <p className='section__header-hint'>
+                                <p className='section__header-hint subtitle-hint'>
                                     OpenShift Toolkit for VS Code brings the power and convenience of Kubernetes and Red Hat OpenShift to developers. The extension allows developers to create, test, debug and deploy cloud-native applications on OpenShift in simple steps.
                                     With the extension, users can provision a new OpenShift cluster, either using <a>OpenShift Local</a> or using a free(30 days) <a>Red Hat Developer Sandbox</a> instance.
                                 </p>
