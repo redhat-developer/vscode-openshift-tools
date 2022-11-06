@@ -7,9 +7,15 @@ import { QuickPickItem, window } from 'vscode';
 
 import * as k8s from 'vscode-kubernetes-tools-api';
 import * as Odo from '../odo';
-import { CommandText } from '../base/command';
+import { CommandOption, CommandText } from '../base/command';
 import { VsCommandError } from '../vscommand';
 import { Node } from './node';
+
+export const Command = {
+    getResourceList(name: string) {
+        return new CommandText('oc get', name , [ new CommandOption('-o', 'json')]);
+    }
+}
 
 function convertItemToQuickPick(item: any): QuickPickItem {
     const qp = item;
@@ -59,4 +65,15 @@ export async function execKubectl(command: string) {
         return result;
     }
     throw new Error('Cannot find kubectl command.');
+}
+
+export function loadItems<I>(json: string, fetch: (data) => I[] = (data): I[] => data.items): I[] {
+    let data: I[] = [];
+    try {
+        const items = fetch(JSON.parse(json));
+        if (items) data = items;
+    } catch (ignore) {
+        // ignore parse errors and return empty array
+    }
+    return data;
 }

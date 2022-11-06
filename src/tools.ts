@@ -41,7 +41,7 @@ export class ToolsConfig {
         if (ToolsConfig.tools[cmd].location === undefined) {
             const toolCacheLocation = path.resolve(__dirname, '..', 'tools', Platform.OS, ToolsConfig.tools[cmd].cmdFileName);
             const toolLocations: string[] = [toolCacheLocation];
-            if (vscode.workspace.getConfiguration('openshiftConnector').get('searchForToolsInPath')) {
+            if (vscode.workspace.getConfiguration('openshiftToolkit').get('searchForToolsInPath')) {
                 const whichLocation = which(cmd);
                 toolLocations.unshift(whichLocation && whichLocation.stdout);
             }

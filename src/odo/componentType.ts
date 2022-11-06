@@ -13,7 +13,7 @@ export interface RegistryList {
 export interface Registry {
     readonly Name: string;
     readonly URL: string;
-    readonly Secure: boolean;
+    readonly secure: boolean;
     state?: boolean;
 }
 
@@ -44,16 +44,22 @@ export function isRegistry(registry: any): registry is Registry {
 }
 
 export interface RegistryRef {
-    Name: string;
-    URL: Url;
+    name: string;
+    url: Url;
+    secure: boolean;
 }
 
 export interface DevfileComponentType {
-    Name: string;
-    DisplayName: string;
-    Description: string;
-    Link: string;
-    Registry: RegistryRef;
+    name: string;
+    displayName: string;
+    description: string;
+    link: string;
+    registry: RegistryRef;
+    language: string;
+    tags: string[];
+    projectType: string;
+    version: string;
+    starterProjects: string[];
 }
 
 export interface ComponentTypesJson {
@@ -72,10 +78,13 @@ export interface ComponentType {
     version: string;
 }
 
-export interface ComponentTypeDescription {
-    RegistryName: string;
-    Devfile: Data;
+export interface DevfileData {
+    devfileData: {
+        devfile: Data;
+    }
 }
+
+export type ComponentTypeDescription = DevfileComponentType & DevfileData;
 
 export class ComponentTypeAdapter implements ComponentType {
     constructor(

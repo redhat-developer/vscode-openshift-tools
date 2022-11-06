@@ -13,7 +13,6 @@ import * as odo from '../../src/odo';
 import { Cluster } from '../../src/openshift/cluster';
 import { CommandText } from '../../src/base/command';
 import { Command } from '../../src/odo/command';
-import { Component } from '../../src/openshift/component';
 import { AddWorkspaceFolder } from '../../src/util/workspace';
 import { ComponentTypeAdapter } from '../../src/odo/componentType';
 import cp = require('child_process');
@@ -34,7 +33,6 @@ suite('odo integration', () => {
     const projectName = `project${Math.round(Math.random() * 1000)}`;
     const componentName = 'component1';
     const appName = 'app1';
-    const urlName = 'url1';
     const nodeJsExGitUrl = 'https://github.com/sclorg/nodejs-ex.git';
     let project: odo.OpenShiftObject;
     let existingApp: odo.OpenShiftObject;
@@ -47,9 +45,6 @@ suite('odo integration', () => {
     let url1: odo.OpenShiftObject;
     let url2: odo.OpenShiftObject;
     let storage: odo.OpenShiftObject;
-    const storageName = 's1';
-    const storageMountPath = '/mnt/s1';
-    const storageSize = '1.5Gi';
 
     async function clone(repositoryURL: string, location: string): Promise<void> {
         const gitExtension = extensions.getExtension('vscode.git').exports;
@@ -158,11 +153,6 @@ suite('odo integration', () => {
         return components.find((item) => item.getName() === componentNameParam);
     }
 
-    async function pushComponent(componentParam: odo.OpenShiftObject): Promise<void> {
-        await oi.execute(Command.pushComponent(), componentParam.contextPath.fsPath);
-        componentParam.contextValue = odo.ContextType.COMPONENT_PUSHED;
-    }
-
     async function createService(
         appParam: odo.OpenShiftObject,
         name: string,
@@ -238,35 +228,6 @@ suite('odo integration', () => {
             expect(componentFromBinary).not.undefined;
         });
 
-        test('url for not pushed component', async () => {
-            sb.stub(window, 'showInputBox').resolves(`${urlName}1`);
-            const sqpStub = sb.stub<any, any>(window, 'showQuickPick');
-            sqpStub.onFirstCall().resolves('Yes');
-            await commands.executeCommand('openshift.url.create', component);
-            const urls = await oi.getRoutes(component);
-            url1 = urls.find((value) => value.getName() === `${urlName}1`);
-        });
-
-        test('storage for not pushed component', async () => {
-            const sibStub = sb.stub(window, 'showInputBox');
-            sibStub.onFirstCall().resolves(storageName);
-            sibStub.onSecondCall().resolves(storageMountPath);
-            sb.stub<any, any>(window, 'showQuickPick').resolves(storageSize);
-            await commands.executeCommand('openshift.storage.create', component);
-            const storages = await oi.getStorageNames(component);
-            [storage] = storages;
-        });
-
-        test('create url for pushed component', async () => {
-            await pushComponent(component);
-            sb.stub(window, 'showInputBox').resolves(`${urlName}2`);
-            const sqpStub = sb.stub<any, any>(window, 'showQuickPick');
-            sqpStub.onFirstCall().resolves('Yes');
-            await commands.executeCommand('openshift.url.create', component);
-            const urls = await oi.getRoutes(component);
-            url2 = urls.find((value) => value.getName() === `${urlName}2`);
-        });
-
         test('create service', async function() {
             if (openshiftVersion >= '4.5.0') this.skip();
             const errMessStub = sb.stub(window, 'showErrorMessage');
@@ -283,10 +244,6 @@ suite('odo integration', () => {
             await oi.execute(Command.describeComponent(), component.contextPath.fsPath);
         });
 
-        test('describe app', async () => {
-            await oi.execute(Command.describeApplication(projectName, appName));
-        });
-
         test('describe service', async function() {
             if (openshiftVersion >= '4.5.0') this.skip();
             await commands.executeCommand('openshift.service.describe', service);
@@ -296,14 +253,6 @@ suite('odo integration', () => {
         test('start/stop debugger', async () => {
             const errMessStub = sb.stub(window, 'showErrorMessage');
             await commands.executeCommand('openshift.component.debug', component);
-            expect(Component.stopDebugSession(component)).to.be.true;
-            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
-        });
-
-        test('start/stop watch', async () => {
-            const errMessStub = sb.stub(window, 'showErrorMessage');
-            await commands.executeCommand('openshift.component.watch', component);
-            expect(Component.stopWatchSession(component)).to.be.true;
             expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
         });
 
@@ -354,7 +303,6 @@ suite('odo integration', () => {
                 `${componentName}1`,
                 nodeJsExGitUrl,
             );
-            await pushComponent(linkedComp1);
         });
 
         test('create comp2', async () => {
@@ -364,7 +312,6 @@ suite('odo integration', () => {
                 `${componentName}2`,
                 nodeJsExGitUrl,
             );
-            await pushComponent(linkedComp2);
         });
 
         test('create service1 from mongodb-persistent', async function() {

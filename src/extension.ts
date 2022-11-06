@@ -8,10 +8,10 @@ import {
     commands,
     workspace,
     window,
-    WorkspaceFoldersChangeEvent,
     StatusBarAlignment,
     StatusBarItem,
-    env
+    env,
+    QuickPickItemKind
 } from 'vscode';
 import path = require('path');
 import { startTelemetry } from './telemetry';
@@ -19,12 +19,10 @@ import { OpenShiftExplorer } from './explorer';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
 import { Platform } from './util/platform';
-import { OdoImpl, ContextType, OdoEvent } from './odo';
 import { TokenStore } from './util/credentialManager';
 import { registerCommands } from './vscommand';
 import { ToolsConfig } from './tools';
 import { extendClusterExplorer } from './k8s/clusterExplorer';
-import { WatchSessionsView } from './watch';
 import { DebugSessionsView } from './debug';
 import { ComponentTypesView } from './registriesView';
 import { WelcomePage } from './welcomePage';
@@ -68,11 +66,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     const disposable = [
         ...(await registerCommands(
             './k8s/route',
-            './openshift/catalog',
             './openshift/project',
-            './openshift/application',
-            './openshift/storage',
-            './openshift/url',
+            './openshift/cluster',
             './openshift/service',
             './k8s/console',
             './oc',
@@ -83,51 +78,102 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         commands.registerCommand('clusters.openshift.useProject', (context) =>
             commands.executeCommand('extension.vsKubernetesUseNamespace', context),
         ),
-        commands.registerCommand('openshift.component.deployRootWorkspaceFolder', Component.deployRootWorkspaceFolder),
         crcStatusItem,
         OpenShiftExplorer.getInstance(),
-        new WatchSessionsView().createTreeView('openshiftWatchView'),
         new DebugSessionsView().createTreeView('openshiftDebugView'),
-        ...Component.init(extensionContext),
+        ...Component.init(),
         ComponentTypesView.instance.createTreeView('openshiftComponentTypesView'),
         ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
 
-    // TODO: Implement the case when 'odo watch' is running for component and push would be done automatically
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    OdoImpl.Instance.subject.subscribe(async (event: OdoEvent) => {
-        if (event.type === 'inserted' && event.data.contextValue === ContextType.COMPONENT) {
-            const choice = await window.showInformationMessage(
-                `Do you want to push new '${event.data.getName()}' Component?`,
-                'Push',
-            );
-            if (choice === 'Push') {
-                await commands.executeCommand('openshift.component.push', event.data);
-                OpenShiftExplorer.getInstance().refresh(event.data);
+    function statusBarFunctions() {
+        return commands.registerCommand('openshift.openStatusBar', async () => {
+            const selection = await window.showQuickPick(
+                [
+                    {
+                        label: '',
+                        kind: QuickPickItemKind.Separator
+                    },
+                    {
+                        label:'Add OpenShift Cluster'
+                    },
+                    {
+                        label: 'Login to Cluster'
+                    },
+                    {
+                        label: 'Switch Kubernetes Context',
+                    },
+                    {
+                        label: '',
+                        kind: QuickPickItemKind.Separator
+                    },
+                    {
+                        label: 'Create Component from Workspace'
+                    },
+                    {
+                        label: 'Create Component from devfile registry'
+                    },
+                    {
+                        label: 'Import from Git',
+                    },
+                    {
+                        label: '',
+                        kind: QuickPickItemKind.Separator
+                    },
+                    {
+                        label: 'Open Welcome Page',
+                    },
+                    {
+                        label: 'Getting Started Walkthrough'
+                    }
+                    ]);
+            switch (selection?.label) {
+                case 'Add OpenShift Cluster':
+                    await commands.executeCommand('openshift.explorer.addCluster');
+                    break;
+                case 'Login to Cluster':
+                    await commands.executeCommand('openshift.explorer.login');
+                    break;
+                case 'Switch Kubernetes Context':
+                    await commands.executeCommand('openshift.explorer.switchContext');
+                    break;
+                case 'Create Component from Workspace':
+                    await commands.executeCommand('openshift.component.createFromLocal');
+                    break;
+                case 'Create Component from devfile registry':
+                    await commands.executeCommand('openshift.componentTypesView.registry.openInView');
+                    break;
+                case 'Import from Git':
+                    await commands.executeCommand('openshift.component.openImportFromGit');
+                    break;
+                case 'Open Welcome Page':
+                    await commands.executeCommand('openshift.welcome');
+                    break;
+                case 'Getting Started Walkthrough':
+                    await commands.executeCommand('openshift.getStarted');
+                    break;
+                default:
+                    break;
             }
-        } else if (
-            event.type === 'inserted' &&
-            (event.data.contextValue === ContextType.COMPONENT_ROUTE ||
-                event.data.contextValue === ContextType.STORAGE)
-        ) {
-            const choice = await window.showInformationMessage(
-                `Do you want to push changes for '${event.data.getParent().getName()}' Component?`,
-                'Push',
-            );
-            if (choice === 'Push') {
-                await commands.executeCommand(
-                    'openshift.component.push',
-                    event.data.getParent(),
-                    true,
-                );
-                OpenShiftExplorer.getInstance().refresh(event.data.getParent());
-            }
-        }
-    });
+
+        });
+    }
+
+    function createStatusBarItem(context: ExtensionContext)
+    {
+        const item = window.createStatusBarItem(StatusBarAlignment.Left, 1);
+        item.command = 'openshift.openStatusBar';
+        context.subscriptions.push(item);
+        context.subscriptions.push(statusBarFunctions());
+        item.text = '$(cloud) OpenShift';
+        item.show();
+    }
+
+    createStatusBarItem(extensionContext) ;
 
     function updateStatusBarItem(statusBarItem: StatusBarItem, text: string): void {
-        if (!workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation')) {
+        if (!workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation')) {
             statusBarItem.hide();
             return;
         }
@@ -138,13 +184,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     updateStatusBarItem(crcStatusItem, 'Stop CRC');
     extendClusterExplorer();
 
-    workspace.onDidChangeWorkspaceFolders((event: WorkspaceFoldersChangeEvent) => {
-        OdoImpl.Instance.loadWorkspaceComponents(event);
-    });
-
     void ComponentTypesView.instance.getAllComponents();
-
-    OdoImpl.Instance.loadWorkspaceComponents(null);
 
     startTelemetry(extensionContext);
 

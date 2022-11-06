@@ -40,7 +40,7 @@ export class CardItem extends React.Component<DevFileProps, {
             numOfCall: 0,
             isExpanded: false,
             devFileYAML: '',
-            selectedProject: this.props.compDescription.Devfile.starterProjects[0],
+            selectedProject: this.props.compDescription.devfileData.devfile.starterProjects[0],
             copyClicked: false,
             hoverProject: null
         };
@@ -50,7 +50,7 @@ export class CardItem extends React.Component<DevFileProps, {
         const isExpanded = !this.state.isExpanded;
         let numOfCall = this.state.numOfCall;
         if (isExpanded) {
-            VSCodeMessage.postMessage({ 'action': 'getYAML', 'data': this.props.compDescription.Devfile });
+            VSCodeMessage.postMessage({ 'action': 'getYAML', 'data': this.props.compDescription.devfileData.devfile });
             VSCodeMessage.onMessage((message) => {
                 if (message.data.action === 'getYAML' && numOfCall === 0) {
                     numOfCall++;
@@ -59,7 +59,7 @@ export class CardItem extends React.Component<DevFileProps, {
                         numOfCall,
                         isExpanded,
                         devFileYAML,
-                        selectedProject: this.props.compDescription.Devfile.starterProjects[0]
+                        selectedProject: this.props.compDescription.devfileData.devfile.starterProjects[0]
                     });
                 }
             });
@@ -86,9 +86,9 @@ export class CardItem extends React.Component<DevFileProps, {
         VSCodeMessage.postMessage(
             {
                 'action': 'createComponent',
-                'devFile': this.props.compDescription.Devfile,
+                'devFile': this.props.compDescription.devfileData.devfile,
                 'selectedProject': this.state.selectedProject,
-                'registryName': this.props.compDescription.RegistryName
+                'registryName': this.props.compDescription.registry.name
             });
         return;
     }
@@ -128,7 +128,7 @@ export class CardItem extends React.Component<DevFileProps, {
             VSCodeMessage.postMessage(
                 {
                     'action': 'telemeteryCopyEvent',
-                    'devFileName': this.props.compDescription.Devfile.metadata.name
+                    'devFileName': this.props.compDescription.devfileData.devfile.metadata.name
                 }
             )
         }
@@ -146,12 +146,12 @@ export class CardItem extends React.Component<DevFileProps, {
                         Starter Projects
                     </Text>
                 </TextContent>
-                <Badge key={this.props.compDescription.Devfile.metadata.name + '-badge'}
+                <Badge key={this.props.compDescription.devfileData.devfile.metadata.name + '-badge'}
                     className={clsx(this.props.cardItemStyle.badge, this.props.cardItemStyle.headerBadge)}
                     overlap='rectangular'
                     variant='standard'
                     showZero={false}>
-                    {this.props.compDescription.Devfile.starterProjects.length}
+                    {this.props.compDescription.devfileData.devfile.starterProjects.length}
                 </Badge>
             </CardHeader>
             <CardBody>
@@ -161,7 +161,7 @@ export class CardItem extends React.Component<DevFileProps, {
                         className={this.props.cardItemStyle.starterProjectSelect}
                         onMouseLeave={(): void => this.setCurrentlyHoveredProject(null)}
                     >
-                        {this.props.compDescription.Devfile.starterProjects.map((project: StarterProject) => (
+                        {this.props.compDescription.devfileData.devfile.starterProjects.map((project: StarterProject) => (
                             <div
                                 key={project.name}
                                 data-testid={`projects-selector-item-${project.name}`}
@@ -223,7 +223,7 @@ export class CardItem extends React.Component<DevFileProps, {
         const modalViewCard = <Modal
             open={isExpanded}
             className={this.props.cardItemStyle.modal}
-            aria-labelledby={`modal-${this.props.compDescription.Devfile.metadata.name}`}
+            aria-labelledby={`modal-${this.props.compDescription.devfileData.devfile.metadata.name}`}
             onClose={this.onCloseClick}
             closeAfterTransition
             BackdropComponent={Backdrop}
@@ -241,13 +241,13 @@ export class CardItem extends React.Component<DevFileProps, {
                             <div className={this.props.cardItemStyle.devPageTitle}>
                                 <Brand
                                     data-testid='icon'
-                                    src={this.props.compDescription.Devfile.metadata.icon}
-                                    alt={this.props.compDescription.Devfile.metadata.icon + ' logo'}
+                                    src={this.props.compDescription.devfileData.devfile.metadata.icon}
+                                    alt={this.props.compDescription.devfileData.devfile.metadata.icon + ' logo'}
                                     className={this.props.cardItemStyle.cardImage}
                                     style={{ margin: '0rem' }} />
                                 <TextContent style={{ padding: '1rem', margin: '0rem' }}>
                                     <Text component={TextVariants.h6}>
-                                        {capitalizeFirstLetter(this.props.compDescription.Devfile.metadata.displayName)}
+                                        {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.displayName)}
                                     </Text>
                                 </TextContent>
                             </div>
@@ -301,56 +301,56 @@ export class CardItem extends React.Component<DevFileProps, {
                 <Card
                     className={this.props.cardItemStyle.card}
                     onClick={this.onCardClick}
-                    data-testid={`card-${this.props.compDescription.Devfile.metadata.name.replace(/\.| /g, '')}`}
+                    data-testid={`card-${this.props.compDescription.devfileData.devfile.metadata.name.replace(/\.| /g, '')}`}
                 >
                     <CardHeader className={this.props.cardItemStyle.cardHeader}>
                         <div className={this.props.cardItemStyle.cardHeaderDisplay}>
                             <Brand
-                                src={this.props.compDescription.Devfile.metadata.icon}
-                                alt={`${this.props.compDescription.Devfile.metadata.name} icon`}
+                                src={this.props.compDescription.devfileData.devfile.metadata.icon}
+                                alt={`${this.props.compDescription.devfileData.devfile.metadata.name} icon`}
                                 className={this.props.cardItemStyle.cardImage} />
-                            {this.props.compDescription.RegistryName.toLowerCase() !== 'defaultdevfileregistry' &&
+                            {this.props.compDescription.registry.name.toLowerCase() !== 'defaultdevfileregistry' &&
                                 <TextContent className={this.props.cardItemStyle.cardRegistryTitle}>
-                                    <Text component={TextVariants.p}>{this.props.compDescription.RegistryName}</Text>
+                                    <Text component={TextVariants.p}>{this.props.compDescription.registry.name}</Text>
                                 </TextContent>}
                         </div>
                     </CardHeader>
                     <CardTitle style={{ margin: '1.5rem' }}>
                         <TextContent>
-                            <Text component={TextVariants.h1}>{this.props.compDescription.Devfile.metadata.displayName}</Text>
+                            <Text component={TextVariants.h1}>{this.props.compDescription.devfileData.devfile.metadata.displayName}</Text>
                         </TextContent>
                     </CardTitle>
                     <CardBody className={this.props.cardItemStyle.cardBody}>
                         {
-                            this.props.compDescription.Devfile.metadata.version && (
+                            this.props.compDescription.devfileData.devfile.metadata.version && (
                                 <TextContent>
                                     <Text component={TextVariants.small}>
-                                        Version: {this.props.compDescription.Devfile.metadata.version}
+                                        Version: {this.props.compDescription.devfileData.devfile.metadata.version}
                                     </Text>
                                 </TextContent>
                             )
                         }
                         <TextContent>
                             <Text component={TextVariants.small}>
-                                Project Type: {capitalizeFirstLetter(this.props.compDescription.Devfile.metadata.projectType)}
+                                Project Type: {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.projectType)}
                             </Text>
                         </TextContent>
                         <TextContent>
                             <Text component={TextVariants.small}>
-                                Language: {capitalizeFirstLetter(this.props.compDescription.Devfile.metadata.language)}
+                                Language: {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.language)}
                             </Text>
                         </TextContent>
                         <TextContent>
                             <Text
                                 component={TextVariants.p}
                                 className={this.props.cardItemStyle.longDescription}>
-                                {this.props.compDescription.Devfile.metadata.description}
+                                {this.props.compDescription.devfileData.devfile.metadata.description}
                             </Text>
                         </TextContent>
                     </CardBody>
                     <CardFooter className={this.props.cardItemStyle.cardFooterTag}>
                         {
-                            this.props.compDescription.Devfile.metadata.tags?.map((tag: string, index: number) =>
+                            this.props.compDescription.devfileData.devfile.metadata.tags?.map((tag: string, index: number) =>
                                 index <= 2 &&
                                 <Badge key={index}
                                     className={index === 0 ?

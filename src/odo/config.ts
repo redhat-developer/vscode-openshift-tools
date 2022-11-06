@@ -20,7 +20,7 @@ export const NOT_AVAILABLE = 'NOT_AVAILABLE';
 
 export interface ComponentMetadata {
     name: string;
-    namespace: string;
+    namespace?: string;
     creationTimestamp: string;
 }
 

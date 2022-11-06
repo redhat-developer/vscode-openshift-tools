@@ -1,6 +1,6 @@
 {
     "name": "vscode-openshift-connector-testing",
-    "displayName": "OpenShift Connector Fake",
+    "displayName": "OpenShift Toolkit Fake",
     "description": "Fake extension",
     "version": "0.0.1",
     "license": "MIT",

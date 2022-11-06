@@ -10,8 +10,8 @@ export class WelcomePage {
 
     @vsCommand('openshift.welcome')
     static async createOrShow(): Promise<void> {
-        if (vscode.workspace.getConfiguration('openshiftConnector').get('showWelcomePage')) {
-            await WelcomeViewLoader.loadView('Welcome - OpenShift Connector');
+        if (vscode.workspace.getConfiguration('openshiftToolkit').get('showWelcomePage')) {
+            await WelcomeViewLoader.loadView('Welcome - OpenShift Toolkit');
         }
     }
 

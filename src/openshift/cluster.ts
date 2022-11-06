@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace, WebviewPanel } from 'vscode';
+import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace, WebviewPanel, Progress as VProgress } from 'vscode';
 import { Command } from '../odo/command';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { CliExitData, CliChannel } from '../cli';
@@ -15,6 +15,7 @@ import { Platform } from '../util/platform';
 import { WindowUtil } from '../util/windowUtils';
 import { vsCommand, VsCommandError } from '../vscommand';
 import ClusterViewLoader from '../webview/cluster/clusterViewLoader';
+import { KubernetesObject } from '@kubernetes/client-node';
 
 interface Versions {
     'openshift_version':  string;
@@ -66,18 +67,38 @@ export class Cluster extends OpenShiftItem {
         CliChannel.getInstance().showOutput();
     }
 
-    @vsCommand('openshift.openshiftConsole', true)
-    @clusterRequired()
-    static async openshiftConsole(): Promise<void> {
+    static async getConsoleUrl(progress: VProgress<{increment: number, message: string}>): Promise<string> {
         let consoleUrl: string;
         try {
+            progress.report({increment: 0, message: 'Detecting cluster type'});
             const getUrlObj = await Cluster.odo.execute(Command.showConsoleUrl());
+            progress.report({increment: 30, message: 'Getting URL'});
             consoleUrl = JSON.parse(getUrlObj.stdout).data.consoleURL;
         } catch (ignore) {
             const serverUrl = await Cluster.odo.execute(Command.showServerUrl());
             consoleUrl = `${serverUrl.stdout}/console`;
         }
-        return commands.executeCommand('vscode.open', Uri.parse(consoleUrl));
+        return consoleUrl;
+    }
+
+    @vsCommand('openshift.open.developerConsole', true)
+    @clusterRequired()
+    static async openOpenshiftConsole(): Promise<void> {
+        return Progress.execFunctionWithProgress('Opening Console Dashboard', async (progress) => {
+            const consoleUrl = await Cluster.getConsoleUrl(progress);
+            progress.report({increment: 100, message: 'Starting default browser'});
+            return commands.executeCommand('vscode.open', Uri.parse(consoleUrl));
+        });
+    }
+
+    @vsCommand('openshift.resource.openInDeveloperConsole')
+    @clusterRequired()
+    static async openInDeveloperConsole(resource: KubernetesObject): Promise<void> {
+        return Progress.execFunctionWithProgress('Opening Console Dashboard', async (progress) => {
+            const consoleUrl = await Cluster.getConsoleUrl(progress);
+            progress.report({increment: 100, message: 'Starting default browser'});
+            return commands.executeCommand('vscode.open', Uri.parse(`${consoleUrl}/topology/ns/${resource.metadata.namespace}?selectId=${resource.metadata.uid}&view=graph`));
+        });
     }
 
     @vsCommand('openshift.explorer.switchContext')
@@ -85,6 +106,13 @@ export class Cluster extends OpenShiftItem {
         const k8sConfig = new KubeConfigUtils();
         const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
         const contextName: QuickPickItem[] = contexts.map((ctx) => ({ label: `${ctx.name}`}));
+        if (contextName.length === 0) {
+            const command = await window.showInformationMessage('You have no Kubernetes contexts yet, please login to a cluster.', 'Login', 'Cancel');
+            if (command === 'Login') {
+                return Cluster.login(undefined, true);
+            }
+            return null;
+        }
         const choice = await window.showQuickPick(contextName, {placeHolder: 'Select a new OpenShift context'});
         if (!choice) return null;
         await Cluster.odo.execute(Command.setOpenshiftContext(choice.label));
@@ -120,7 +148,7 @@ export class Cluster extends OpenShiftItem {
         let pathSelectionDialog;
         let newPathPrompt;
         let crcBinary;
-        const crcPath = workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
+        const crcPath = workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
         if(crcPath) {
             newPathPrompt = { label: '$(plus) Provide different OpenShift Local file path'};
             pathSelectionDialog = await window.showQuickPick([{label:`${crcPath}`, description: 'Fetched from settings'}, newPathPrompt], {placeHolder: 'Select OpenShift Local file path', ignoreFocusOut: true});
@@ -351,6 +379,19 @@ export class Cluster extends OpenShiftItem {
     }
 
     @vsCommand('openshift.explorer.login.clipboard')
+    static async loginUsingClipboardToken(apiEndpointUrl: string, oauthRequestTokenUrl: string): Promise<string | null> {
+        const clipboard = await Cluster.readFromClipboard();
+        if(!clipboard) {
+            const choice = await window.showErrorMessage('Cannot parse token in clipboard. Please click `Get token` button below, copy token into clipboard and press `Login to Sandbox` button again.',
+                'Get token');
+            if (choice === 'Get token') {
+                await commands.executeCommand('vscode.open', Uri.parse(oauthRequestTokenUrl));
+            }
+            return;
+        }
+        return Cluster.tokenLogin(apiEndpointUrl, true, clipboard);
+    }
+
     static async loginUsingClipboardInfo(dashboardUrl: string): Promise<string | null> {
         const clipboard = await Cluster.readFromClipboard();
         if(!Cluster.ocLoginCommandMatches(clipboard)) {

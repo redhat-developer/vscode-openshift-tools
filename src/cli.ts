@@ -5,7 +5,10 @@
 
 import * as cp from 'child_process';
 import * as vscode from 'vscode';
+import { CommandText } from './base/command';
+import { ToolsConfig } from './tools';
 import { Filters } from './util/filters';
+import { VsCommandError } from './vscommand';
 
 export interface CliExitData {
     readonly error: cp.ExecException;
@@ -16,6 +19,7 @@ export interface CliExitData {
 
 export interface Cli {
     execute(cmd: string, opts?: cp.ExecOptions): Promise<CliExitData>;
+    executeTool(command: CommandText, opts?: cp.ExecOptions): Promise<CliExitData>;
     spawn(cmd: string, params: string[], opts: cp.SpawnOptions): cp.ChildProcess;
 }
 
@@ -50,7 +54,7 @@ class OdoChannelImpl implements OdoChannel {
         }
         if (
             vscode.workspace
-                .getConfiguration('openshiftConnector')
+                .getConfiguration('openshiftToolkit')
                 .get<boolean>('showChannelOnOutput')
         ) {
             this.channel.show();
@@ -95,6 +99,18 @@ export class CliChannel implements Cli {
                 resolve({ error, stdout: stdout.trim(), stderr: stderr.trim(), cwd: opts?.cwd?.toString() });
             });
         });
+    }
+
+    async executeTool(command: CommandText, opts?: cp.ExecOptions, fail = false): Promise<CliExitData> {
+        const commandActual = `${command}`;
+        const commandPrivacy = `${command.privacyMode(true)}`;
+        const [cmd] = commandActual.split(' ');
+        const toolLocation = await ToolsConfig.detect(cmd);
+        const result: CliExitData = await this.execute(toolLocation ? commandActual.replace(cmd, `"${toolLocation}"`) : commandActual, opts);
+        if (result.error && fail) {
+            throw new VsCommandError(`${result.error.message}`, `Error when running command: ${commandPrivacy}`, result.error);
+        };
+        return result;
     }
 
     spawn(cmd: string, params: string[], opts: cp.SpawnOptions = {cwd: undefined, env: process.env}): cp.ChildProcess {

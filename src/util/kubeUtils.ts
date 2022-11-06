@@ -19,9 +19,14 @@ function fileExists(file: string): boolean {
 }
 
 export class KubeConfigUtils extends KubeConfig {
+    public readonly loadingError: any;
     constructor() {
         super();
-        this.loadFromDefault();
+        try {
+            this.loadFromDefault();
+        } catch (error) {
+            throw new Error('Kubernetes configuration cannot be loaded. Please check configuration files for errors and fix them to continue.');
+        }
         // k8s nodejs-client ignores all unknown properties,
         // so cluster object's proxy-url attribute is not present
         // after k8s config loaded

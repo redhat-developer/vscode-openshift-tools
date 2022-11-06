@@ -104,6 +104,10 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return this.registries;
     }
 
+    public async getAnalyze() {
+        await this.odo.getAnalyze();
+    }
+
     public getCompDescriptions(): Set<ComponentTypeDescription> {
         return this.compDescriptions;
     }
@@ -116,19 +120,18 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         let isError = false;
         this.compDescriptions.clear();
         void getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
-            const components = new Set<string>(devFileComponentTypes.map((devFileComponentType: DevfileComponentType) => devFileComponentType.Name));
             await this.getRegistries();
-            components.forEach((compName: string) => {
-                getInstance().execute(Command.describeCatalogComponent(compName)).then((componentDesc: CliExitData) => {
+            devFileComponentTypes.forEach((component: DevfileComponentType) => {
+                getInstance().execute(Command.describeCatalogComponent(component.name, component.registry.name)).then((componentDesc: CliExitData) => {
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    const out: ComponentTypeDescription[] = JSON.parse(componentDesc.stdout);
-                    out.forEach((component) => {
+                    const [ component ] = JSON.parse(componentDesc.stdout) as ComponentTypeDescription[];
+
                         // eslint-disable-next-line max-nested-callbacks
-                        component.Devfile?.starterProjects?.map((starter: StarterProject) => {
-                            starter.typeName = compName;
+                        component.devfileData.devfile?.starterProjects?.map((starter: StarterProject) => {
+                            starter.typeName = component.name;
                         });
                         this.compDescriptions.add(component);
-                    });
+
                     if (devFileComponentTypes.length === this.compDescriptions.size) {
                         this.subject.next('refresh');
                     }
@@ -224,8 +227,8 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         }
     }
 
-    @vsCommand('openshift.componentTypesView.registry.add')
-    public static async addRegistryCmd(registryContext: Registry): Promise<void> {
+    @vsCommand('openshift.componentTypesView.registry.edit')
+    public static async editRegistry(registryContext: Registry): Promise<void> {
         // ask for registry
         const registries = await ComponentTypesView.instance.getRegistries();
         const regName = await window.showInputBox({
@@ -286,7 +289,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
          */
 
         if (registryContext) {
-            const notChangedRegisty = registries.find((registry) => registry.Name === regName && registry.URL === regURL && registry.Secure === (secure === 'Yes'));
+            const notChangedRegisty = registries.find((registry) => registry.Name === regName && registry.URL === regURL && registry.secure === (secure === 'Yes'));
             if (notChangedRegisty) {
                 return null;
             }
@@ -315,9 +318,9 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         }
     }
 
-    @vsCommand('openshift.componentTypesView.registry.edit')
-    public static async editRegistry(registry: Registry): Promise<void> {
-        await vscode.commands.executeCommand('openshift.componentTypesView.registry.add', registry);
+    @vsCommand('openshift.componentTypesView.registry.add')
+    public static async addRegistry(): Promise<void> {
+        await vscode.commands.executeCommand('openshift.componentTypesView.registry.edit');
     }
 
     @vsCommand('openshift.componentTypesView.registry.openInBrowser')

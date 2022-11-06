@@ -45,7 +45,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             break;
 
         case 'checksetting':
-            const binaryFromSetting:string = vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
+            const binaryFromSetting:string = vscode.workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
             if (binaryFromSetting) {
                 panel.webview.postMessage({action: 'crcsetting'});
                 ClusterViewLoader.checkCrcStatus(binaryFromSetting, 'crcstatus', panel);
@@ -108,7 +108,8 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                     panel.webview.postMessage({action: 'sandboxPageRequestSignup'});
                 } else {
                     if (signupStatus.status.ready) {
-                        panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL });
+                        const oauthInfo = await sandboxAPI.getOauthServerInfo(signupStatus.apiEndpoint);
+                        panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL, apiEndpoint: signupStatus.apiEndpoint, oauthTokenEndpoint: oauthInfo.token_endpoint });
                     } else {
                         // cluster is not ready and the reason is
                         if (signupStatus.status.verificationRequired) {
@@ -118,8 +119,6 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                             //
                             if (signupStatus.status.reason === 'PendingApproval') {
                                 panel.webview.postMessage({action: 'sandboxPageWaitingForApproval'});
-                            } else if (signupStatus.status.reason === 'Provisioned') {
-                                panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL});
                             } else {
                                 panel.webview.postMessage({action: 'sandboxPageWaitingForProvision'})
                             }
@@ -174,7 +173,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
         case 'sandboxLoginUsingDataInClipboard':
             const telemetryEventLoginToSandbox = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxLoginUsingDataInClipboard');
             try {
-                const result = await Cluster.loginUsingClipboardInfo(event.payload.url);
+                const result = await Cluster.loginUsingClipboardToken(event.payload.apiEndpointUrl, event.payload.oauthRequestTokenUrl);
                 if (result) vscode.window.showInformationMessage(`${result}`);
                 telemetryEventLoginToSandbox.send();
             } catch (err) {
@@ -218,11 +217,11 @@ export default class ClusterViewLoader {
         let startProcess: ChildProcess;
         channel.show();
         if (event.isSetting) {
-            const binaryFromSetting = vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
-            const pullSecretFromSetting = vscode.workspace.getConfiguration('openshiftConnector').get('crcPullSecretPath');
-            const cpuFromSetting = vscode.workspace.getConfiguration('openshiftConnector').get('crcCpuCores');
-            const memoryFromSetting = vscode.workspace.getConfiguration('openshiftConnector').get('crcMemoryAllocated');
-            const nameserver = vscode.workspace.getConfiguration('openshiftConnector').get<string>('crcNameserver');
+            const binaryFromSetting = vscode.workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
+            const pullSecretFromSetting = vscode.workspace.getConfiguration('openshiftToolkit').get('crcPullSecretPath');
+            const cpuFromSetting = vscode.workspace.getConfiguration('openshiftToolkit').get('crcCpuCores');
+            const memoryFromSetting = vscode.workspace.getConfiguration('openshiftToolkit').get('crcMemoryAllocated');
+            const nameserver = vscode.workspace.getConfiguration('openshiftToolkit').get<string>('crcNameserver');
             const nameserverOption = nameserver ? ['-n', nameserver] : [];
             const crcOptions = ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`, ...nameserverOption,  '-o', 'json'];
 
@@ -246,7 +245,7 @@ export default class ClusterViewLoader {
             if (code !== 0) {
                 vscode.window.showErrorMessage(message);
             }
-            const binaryLoc = event.isSetting ? vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation'): event.crcLoc;
+            const binaryLoc = event.isSetting ? vscode.workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation'): event.crcLoc;
             ClusterViewLoader.checkCrcStatus(binaryLoc, 'crcstartstatus', panel);
         });
         startProcess.on('error', (err) => {
@@ -261,7 +260,7 @@ export default class ClusterViewLoader {
         let filePath: string;
         channel.show();
         if (event.data.tool === '') {
-            filePath = vscode.workspace.getConfiguration('openshiftConnector').get('crcBinaryLocation');
+            filePath = vscode.workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
         } else {
             filePath = event.data.tool;
         }
@@ -291,7 +290,7 @@ export default class ClusterViewLoader {
     }
 
     static async crcSaveSettings(event) {
-        const cfg = vscode.workspace.getConfiguration('openshiftConnector');
+        const cfg = vscode.workspace.getConfiguration('openshiftToolkit');
         await cfg.update('crcBinaryLocation', event.crcLoc, vscode.ConfigurationTarget.Global);
         await cfg.update('crcPullSecretPath', event.pullSecret, vscode.ConfigurationTarget.Global);
         await cfg.update('crcCpuCores', event.cpuSize, vscode.ConfigurationTarget.Global);
