@@ -9,8 +9,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import UndoIcon from '@mui/icons-material/Undo';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+//import SearchIcon from '@mui/icons-material/Search';
 import { styled } from '@mui/material/styles';
-import { Button, InputAdornment, InputLabel, TextField, Typography } from '@mui/material';
+import { Button, InputLabel, TextField, Typography } from '@mui/material';
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
 import MuiAccordionSummary, {
     AccordionSummaryProps,
@@ -179,6 +180,17 @@ export class GitImport extends React.Component<DefaultProps, {
 
     gitRepoChange = (value: string): void => {
         this.setState({
+            gitURL: {
+                value: value,
+                helpText: '',
+                showError: false,
+                parser: undefined
+            }
+        })
+    }
+
+    analyze = (): void => {
+        this.setState({
             applicationName: undefined,
             componentName: undefined,
             compDescs: [],
@@ -192,7 +204,7 @@ export class GitImport extends React.Component<DefaultProps, {
         this.setState({ showLoadScreen: true, notification: 'Validating the repo URL...' });
         VSCodeMessage.postMessage({
             action: 'validateGitURL',
-            param: value
+            param: this.state.gitURL.value
         });
     }
 
@@ -300,10 +312,12 @@ export class GitImport extends React.Component<DefaultProps, {
             <div className='mainContainer margin' >
                 <div className='title'>
                     <Typography variant='h5'>Import from Git</Typography>
-                </div><div className='subTitle'>
+                </div>
+                <div className='subTitle'>
                     <Typography>Import code from your Git repository to be built and deployed on OpenShift.
                         This workflow will suggest the Import strategy following the recommended devfile.yaml and create a component from it.</Typography>
-                </div><div className='formContainer'>
+                </div>
+                <div className='formContainer'>
                     <div className='form'>
                         <InputLabel required htmlFor='bootstrap-input'
                             style={{
@@ -311,33 +325,38 @@ export class GitImport extends React.Component<DefaultProps, {
                             }}>
                             Provide your Git Repository URL
                         </InputLabel>
-                        <TextField
-                            error={gitURL.showError}
-                            value={gitURL.value}
-                            id='bootstrap-input'
-                            sx={{
-                                input: {
-                                    color: 'var(--vscode-settings-textInputForeground)',
-                                    backgroundColor: 'var(--vscode-settings-textInputBackground)'
-                                }
-                            }}
-                            style={{ width: '80%', paddingTop: '10px' }}
-                            onChange={(e) => this.gitRepoChange(e.target.value)}
-                            helperText={gitURL.helpText}
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position='end'>
-                                        {gitURL.helpText !== '' ?
-                                            gitURL.helpText === 'Validated' ?
-                                                <CheckCircleIcon color='success' /> :
-                                                gitURL.helpText.indexOf('but cannot be reached') !== -1 ?
-                                                    <ErrorIcon color='warning' /> :
-                                                    <ErrorIcon color='error' />
-                                            : undefined}
-                                    </InputAdornment>
-                                )
-                            }} >
-                        </TextField>
+                        <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem' }}>
+                            <TextField
+                                error={gitURL.showError}
+                                value={gitURL.value}
+                                id='bootstrap-input'
+                                sx={{
+                                    input: {
+                                        color: 'var(--vscode-settings-textInputForeground)',
+                                        backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                    }
+                                }}
+                                style={{ width: '80%', paddingTop: '10px' }}
+                                onChange={(e) => this.gitRepoChange(e.target.value)}
+                                helperText={gitURL.helpText}>
+                            </TextField>
+                            {gitURL.helpText !== '' ?
+                                gitURL.helpText === 'Validated' ?
+                                    <CheckCircleIcon color='success' style={{ paddingTop: '1rem' }} /> :
+                                    gitURL.helpText.indexOf('but cannot be reached') !== -1 ?
+                                        <ErrorIcon color='warning' style={{ paddingTop: '1rem' }} /> :
+                                        <ErrorIcon color='error' style={{ paddingTop: '1rem' }} />
+                                : undefined}
+                            <Button variant='contained' size='small'
+                                style={{
+                                    backgroundColor: '#EE0000', textTransform: 'none',
+                                    color: 'white', height: '2rem',
+                                    marginTop: '0.6rem'
+                                }}
+                                onClick={() => this.analyze()}>
+                                Analyze
+                            </Button>
+                        </div>
                         <div style={{ position: 'relative' }}>
                             {showLoadScreen && <LoadScreen title={notification} />}
                         </div>
