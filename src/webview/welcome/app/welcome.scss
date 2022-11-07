@@ -7,7 +7,6 @@ body {
     &.vscode-light {
         background-color: var(--color-background--darken-05);
     }
-    overflow: scroll;
 }
 
 header {
@@ -70,12 +69,14 @@ header {
 
 .brand {
     max-width: 100%;
-    height: 430px;
-    width: 430px;
+    width: 500px;
+    height: 500px;
 }
 
 .content__image__preview {
-    width: 90%;
+    max-width: 100%;
+    width: 400px;
+    height: 400px;
 }
 
 .last__image {
@@ -111,38 +112,7 @@ section {
     }
 }
 
-.extensionContainer {
-    margin: auto;
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    height: 50rem;
-}
-
-.content-area {
-    margin-top: 10rem;
-}
-
-.extensionContainerLeft {
-    width: 60%;
-    margin: 0;
-    position: relative;
-}
-
-.extensionContainerRight {
-    width: 40%;
-    margin: 0;
-    position: relative;
-}
-
-.extencontainer {
-    position: relative;
-    margin-left: 15rem;
-}
-
-.extencontainer .sticky-section-exten {
-    display: flex;
-    flex-direction: row;
+.sticky-section-content .sticky-section-exten {
     top: 0;
     width: 100%;
     height: 16vh;
@@ -164,7 +134,7 @@ section {
     border-radius: 6px;
     margin: 1em;
     padding: 1em;
-    height: 50rem;
+    height: auto;
 
     .vscode-dark & {
         background: var(--color-background--lighten-075);
@@ -179,6 +149,14 @@ section {
     flex: 1 1 auto;
     display: flex;
     flex-flow: column wrap;
+}
+
+.extensionContainer {
+    margin: auto;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 50rem;
 }
 
 .section__header {
@@ -293,13 +271,18 @@ section {
     background: inherit;
 }
 
-.sticky-section label
-{
-  margin: 0px;
-  position: sticky;
-  top: 50%;
-  transform: translate(0,-50%);
-  text-align: center;
+.sticky-section-content {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+}
+
+.sticky-section label {
+    margin: 0px;
+    position: sticky;
+    top: 50%;
+    transform: translate(0, -50%);
+    text-align: center;
 }
 
 
@@ -442,17 +425,17 @@ li {
     position: relative;
 }
 
-.sticky-content-section ul {
+.section__header ul {
     padding: 0;
 }
 
-.sticky-content-section li {
+.section__header li {
     display: flex;
     flex-direction: row;
     grid-gap: 1em;
 }
 
-.sticky-content-section li:before {
+.section__header li:before {
     position: relative;
     content: ' ';
     display: flex;
