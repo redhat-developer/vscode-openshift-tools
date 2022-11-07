@@ -6,7 +6,7 @@
 	"license": "MIT",
 	"publisher": "redhat",
 	"author": "Red Hat",
-	"preview": true,
+	"preview": false,
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/redhat-developer/vscode-openshift-tools.git"
