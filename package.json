@@ -52,6 +52,7 @@
 		"compile": "npm-run-all compile:*",
 		"compile:ext": "tsc -p ./",
 		"compile:views": "webpack --mode production --config src/webview/webpack.config.js",
+        "compile:git-import-view": "webpack --mode development --config src/webview/git-import/webpack.config.js",
 		"dev:compile:log-view": "webpack --mode development --config src/webview/log/webpack.config.js",
 		"dev:compile:describe-view": "webpack --mode development --config src/webview/describe/webpack.config.js",
 		"dev:compile:cluster-view": "webpack --mode development --config src/webview/cluster/webpack.config.js",

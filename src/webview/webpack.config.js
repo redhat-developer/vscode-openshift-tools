@@ -13,7 +13,7 @@ const viewEntries = fs.readdirSync(__dirname);
 viewEntries.forEach((name) => {
   const dir = path.join(__dirname, name)
   const stat = fs.statSync(dir);
-  if (stat.isDirectory()) {
+  if (stat.isDirectory() && !dir.endsWith('git-import')) {
     const webpack = path.join(dir, 'webpack.config.js')
     const exists = fs.existsSync(webpack);
     if (exists) {
