@@ -15,7 +15,8 @@ import {
 } from '../types';
 import { BaseService } from './base-service';
 import GitUrlParse = require('git-url-parse');
-import Base64 = require('js-base64');
+import { getVscodeModule } from '../../util/credentialManager';
+const Base64:any = getVscodeModule('js-base64');
 
 export class GithubService extends BaseService {
   private readonly client: Octokit;
