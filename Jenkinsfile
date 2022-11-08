@@ -35,7 +35,7 @@ node('rhel8'){
         sh 'node ./out/build/update-readme.js'
         sh "vsce package -o openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix"
         sh "sha256sum *-ovsx.vsix > openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix.sha256"
-        sh "npm pack && mv vscode-openshift-toolkit-${packageJson.version}.tgz openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}.tgz"
+        sh "npm pack && mv vscode-openshift-connector-${packageJson.version}.tgz openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}.tgz"
         sh "sha256sum *.tgz > openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}.tgz.sha256"
     }
   }
