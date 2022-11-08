@@ -14,7 +14,7 @@ node('rhel8'){
   stage('Install requirements') {
     def nodeHome = tool 'nodejs-lts'
     env.PATH="${env.PATH}:${nodeHome}/bin"
-    env.NODE_OPTIONS: --max_old_space_size=16384
+    env.NODE_OPTIONS="--max_old_space_size=16384"
     sh "npm ci"
     sh "npm install -g vsce"
   }
