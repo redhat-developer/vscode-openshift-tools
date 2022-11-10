@@ -106,11 +106,6 @@ suite('openshift toolkit Extension', () => {
 		assert.ok(vscode.extensions.getExtension('redhat.vscode-openshift-connector'));
 	});
 
-    test('should load components from workspace folders', async () => {
-        const components = await OdoImpl.Instance.getApplicationChildren(appItem);
-        expect(components.length).is.equals(2);
-    });
-
     test('should register all extension commands declared commands in package descriptor', async () => {
         return vscode.commands.getCommands(true).then((commands) => {
             packagejson.contributes.commands.forEach((value)=> {
@@ -123,8 +118,9 @@ suite('openshift toolkit Extension', () => {
         sandbox.stub<any, any>(vscode.window, 'showWarningMessage').resolves('Yes');
         const simStub = sandbox.stub(vscode.window, 'showInformationMessage');
         sandbox.stub(Progress, 'execFunctionWithProgress').resolves();
-        await vscode.commands.executeCommand('openshift.app.delete', appItem);
-        expect(simStub).calledWith(`Application '${appItem.getName()}' successfully deleted`);
+        const p1 = {kind: 'project', metadata: { name: 'p1'}};
+        await vscode.commands.executeCommand('openshift.project.delete', p1);
+        expect(simStub).calledWith(`Project '${p1.metadata.name}' successfully deleted`);
     });
 
     test('async command wrapper shows error message from rejected command', async () => {
@@ -133,7 +129,8 @@ suite('openshift toolkit Extension', () => {
         const semStub = sandbox.stub(vscode.window, 'showErrorMessage');
         const error = new Error('message');
         sandbox.stub(Progress, 'execFunctionWithProgress').rejects(error);
-        await vscode.commands.executeCommand('openshift.app.delete', appItem);
-        expect(semStub).calledWith(`Failed to delete Application with error '${error.message}'`);
+        const p1 = {kind: 'project', metadata: { name: 'p1'}};
+        await vscode.commands.executeCommand('openshift.project.delete', p1);
+        expect(semStub).calledWith(`Failed to delete Project with error '${error}'`);
     });
 });
