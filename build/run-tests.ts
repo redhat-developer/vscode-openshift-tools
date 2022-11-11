@@ -34,7 +34,7 @@ async function main(): Promise<void> {
                               'components.code-workspace',
                           ),
                           '--disable-workspace-trust',
-                          '--trace-warnings',
+                          '--max-memory 16384',
                       ]
                     : [
                           path.resolve(
@@ -45,7 +45,7 @@ async function main(): Promise<void> {
                               'empty.code-workspace',
                           ),
                           '--disable-workspace-trust',
-                          '--trace-warnings',
+                          '--max-memory 16384',
                       ],
         });
     } catch (error) {
