@@ -26,9 +26,13 @@ etest.downloadAndUnzipVSCode().then((executable: string) => {
     } else {
         vsCodeExecutable = path.join(path.dirname(executable), 'bin', 'code');
     }
+    const vsCodeTest = path.resolve(path.join(path.dirname(executable), '..'));
+    const userDataDir = path.join(vsCodeTest, 'user-data');
+    const extDir = path.join(vsCodeTest, 'extensions');
     const [, , vsixName] = process.argv;
     const extensionRootPath = path.resolve(__dirname, '..', '..');
     const vsixPath = vsixName.includes('.vsix') ? path.join(extensionRootPath, vsixName) : vsixName;
     console.log('Installin extension: ', vsixPath );
-    cp.execSync(`${vsCodeExecutable} --install-extension ${vsixPath}`);
+    console.log(`${vsCodeExecutable} --install-extension ${vsixPath} --user-data-dir ${userDataDir} --extensions-dir ${extDir}`);
+    cp.execSync(`${vsCodeExecutable} --install-extension ${vsixPath} --user-data-dir ${userDataDir} --extensions-dir ${extDir}`);
 });
