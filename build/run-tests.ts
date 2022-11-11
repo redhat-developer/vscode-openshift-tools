@@ -6,7 +6,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import * as path from 'path';
-import { runTests } from 'vscode-test';
+
+import * as etest from '@vscode/test-electron';
 
 /**
  * Run mocha tests from project's tests folder.
@@ -19,7 +20,7 @@ async function main(): Promise<void> {
     const extensionDevelopmentPath = path.resolve(extensionRootPath, extension);
     const extensionTestsPath = path.resolve(extensionRootPath, 'out', 'test', tests);
     try {
-        await runTests({
+        await etest.runTests({
             extensionDevelopmentPath,
             extensionTestsPath,
             launchArgs:
