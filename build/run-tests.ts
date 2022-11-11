@@ -34,6 +34,7 @@ async function main(): Promise<void> {
                               'components.code-workspace',
                           ),
                           '--disable-workspace-trust',
+                          '--trace-warnings',
                       ]
                     : [
                           path.resolve(
@@ -43,7 +44,8 @@ async function main(): Promise<void> {
                               'components',
                               'empty.code-workspace',
                           ),
-                          '--disable-workspace-trust'
+                          '--disable-workspace-trust',
+                          '--trace-warnings',
                       ],
         });
     } catch (error) {
