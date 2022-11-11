@@ -10,9 +10,9 @@ import cp = require('child_process');
 import path = require('path');
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-const downloadAndUnzipVSCode = require('vscode-test').downloadAndUnzipVSCode;
+import * as etest from '@vscode/test-electron';
 
-downloadAndUnzipVSCode().then((executable: string) => {
+etest.downloadAndUnzipVSCode().then((executable: string) => {
     let vsCodeExecutable;
     if (platform() === 'darwin') {
         vsCodeExecutable = `'${path.join(
