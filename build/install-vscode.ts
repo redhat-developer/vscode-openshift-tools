@@ -14,6 +14,7 @@ import * as etest from '@vscode/test-electron';
 
 etest.downloadAndUnzipVSCode().then((executable: string) => {
     let vsCodeExecutable;
+    let vsCodeTest;
     if (platform() === 'darwin') {
         console.log(executable);
         vsCodeExecutable = `'${path.join(
@@ -24,10 +25,12 @@ etest.downloadAndUnzipVSCode().then((executable: string) => {
             'bin',
             'code',
         )}'`;
+        vsCodeTest = path.resolve(path.join(path.dirname(executable), '..', '..', '..'));
     } else {
         vsCodeExecutable = path.join(path.dirname(executable), 'bin', 'code');
+        vsCodeTest = path.resolve(path.join(path.dirname(executable), '..'));
     }
-    const vsCodeTest = path.resolve(path.join(path.dirname(executable), '..'));
+
     const userDataDir = path.join(vsCodeTest, 'user-data');
     const extDir = path.join(vsCodeTest, 'extensions');
     const [, , vsixName] = process.argv;
