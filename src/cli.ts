@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 import { CommandText } from './base/command';
 import { ToolsConfig } from './tools';
 import { Filters } from './util/filters';
+import { WindowUtil } from './util/windowUtils';
 import { VsCommandError } from './vscommand';
 
 export interface CliExitData {
@@ -21,6 +22,8 @@ export interface Cli {
     execute(cmd: string, opts?: cp.ExecOptions): Promise<CliExitData>;
     executeTool(command: CommandText, opts?: cp.ExecOptions): Promise<CliExitData>;
     spawn(cmd: string, params: string[], opts: cp.SpawnOptions): cp.ChildProcess;
+    spawnTool(cmd: CommandText, opts: cp.SpawnOptions): Promise<cp.ChildProcess>;
+    executeInTerminal(cmd: CommandText, cwd: string, terminalName: string): void;
 }
 
 export interface OdoChannel {
@@ -113,7 +116,21 @@ export class CliChannel implements Cli {
         return result;
     }
 
+    async executeInTerminal(command: CommandText, cwd: string, name: string, env = process.env): Promise<void> {
+        const [cmd, ...params] = command.toString().split(' ');
+        const toolLocation = await ToolsConfig.detect(cmd);
+        const terminal: vscode.Terminal = WindowUtil.createTerminal(name, cwd, env);
+        terminal.sendText(toolLocation === cmd ? command.toString() : toolLocation.concat(' ', ...params), true);
+        terminal.show();
+    }
+
     spawn(cmd: string, params: string[], opts: cp.SpawnOptions = {cwd: undefined, env: process.env}): cp.ChildProcess {
         return cp.spawn(cmd, params, opts);
     }
+
+    async spawnTool(cmd: CommandText, opts: cp.SpawnOptions = {cwd: undefined, env: process.env}): Promise<cp.ChildProcess> {
+        const toolLocation = await ToolsConfig.detect(cmd.command);
+        return cp.spawn(toolLocation, [cmd.parameter, ...cmd.options.map((o)=>o.toString())], opts);
+    }
+
 }
