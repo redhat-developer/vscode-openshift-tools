@@ -15,6 +15,7 @@ import * as etest from '@vscode/test-electron';
 etest.downloadAndUnzipVSCode().then((executable: string) => {
     let vsCodeExecutable;
     if (platform() === 'darwin') {
+        console.log(executable);
         vsCodeExecutable = `'${path.join(
             executable.substring(0, executable.indexOf('.app') + 4),
             'Contents',
