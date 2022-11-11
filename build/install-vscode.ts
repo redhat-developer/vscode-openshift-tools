@@ -14,7 +14,6 @@ import * as etest from '@vscode/test-electron';
 
 etest.downloadAndUnzipVSCode().then((executable: string) => {
     let vsCodeExecutable;
-    let vsCodeTest;
     if (platform() === 'darwin') {
         console.log(executable);
         vsCodeExecutable = `'${path.join(
@@ -25,16 +24,15 @@ etest.downloadAndUnzipVSCode().then((executable: string) => {
             'bin',
             'code',
         )}'`;
-        vsCodeTest = path.resolve(path.join(path.dirname(executable), '..', '..', '..'));
     } else {
         vsCodeExecutable = path.join(path.dirname(executable), 'bin', 'code');
-        vsCodeTest = path.resolve(path.join(path.dirname(executable), '..'));
     }
-
-    const userDataDir = path.join(vsCodeTest, 'user-data');
-    const extDir = path.join(vsCodeTest, 'extensions');
     const [, , vsixName] = process.argv;
     const extensionRootPath = path.resolve(__dirname, '..', '..');
+    const vsCodeTest = path.resolve(path.join(extensionRootPath, '.vscode-test'));
+    const userDataDir = path.join(vsCodeTest, 'user-data');
+    const extDir = path.join(vsCodeTest, 'extensions');
+
     const vsixPath = vsixName.includes('.vsix') ? path.join(extensionRootPath, vsixName) : vsixName;
     console.log('Installin extension: ', vsixPath );
     console.log(`${vsCodeExecutable} --install-extension ${vsixPath} --user-data-dir ${userDataDir} --extensions-dir ${extDir}`);
