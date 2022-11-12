@@ -29,7 +29,6 @@ import { KubernetesObject, Context } from '@kubernetes/client-node';
 import { CliChannel } from './cli';
 import { Command } from './odo/command';
 import { newInstance, Odo3 } from './odo3';
-import { getInstance } from './odo';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
@@ -235,7 +234,6 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     refresh(target?: ExplorerItem): void {
         this.eventEmitter.fire(target);
-        getInstance().clearCache();
     }
 
     dispose(): void {
