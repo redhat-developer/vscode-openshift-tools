@@ -6,10 +6,10 @@ import { Uri, window, extensions, WebviewPanel, ViewColumn } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ExtensionID } from '../../util/constants';
-import * as odo from '../../odo';
 import treeKill = require('tree-kill');
 import { CommandText } from '../../base/command';
 import { ComponentWorkspaceFolder } from '../../odo/workspace';
+import { CliChannel } from '../../cli';
 
 export default class LogViewLoader {
 
@@ -32,7 +32,7 @@ export default class LogViewLoader {
         // TODO: When webview is going to be ready?
         panel.webview.html = LogViewLoader.getWebviewContent(LogViewLoader.extensionPath, `${cmd}`.replace(/\\/g, '\\\\'));
 
-        const process = await odo.getInstance().spawn(`${cmd}`, target.contextPath);
+        const process = await CliChannel.getInstance().spawnTool(cmd, {cwd: target.contextPath});
         process.stdout.on('data', (data) => {
             panel.webview.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
         }).on('close', ()=>{
