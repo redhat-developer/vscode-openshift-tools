@@ -6,10 +6,10 @@
 import { QuickPickItem, window } from 'vscode';
 
 import * as k8s from 'vscode-kubernetes-tools-api';
-import * as Odo from '../odo';
 import { CommandOption, CommandText } from '../base/command';
 import { VsCommandError } from '../vscommand';
 import { Node } from './node';
+import { CliChannel } from '../cli';
 
 export const Command = {
     getResourceList(name: string) {
@@ -24,7 +24,7 @@ function convertItemToQuickPick(item: any): QuickPickItem {
 }
 
 export async function getQuickPicks(cmd: CommandText, errorMessage: string, converter: (item: any) => QuickPickItem = convertItemToQuickPick): Promise<QuickPickItem[]> {
-    const result = await Odo.getInstance().execute(cmd);
+    const result = await CliChannel.getInstance().executeTool(cmd);
     const json = JSON.parse(result.stdout);
     if (json.items.length === 0) {
         throw new VsCommandError(errorMessage);
