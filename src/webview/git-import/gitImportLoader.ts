@@ -53,12 +53,12 @@ export class Command {
                     action: event.action,
                     status: true
                 });
-                vscode.window.showInformationMessage(`Componet ${event.componentName} created successfully`);
+                vscode.window.showInformationMessage(`Component '${event.componentName}' successfully created. Perform actions on it from Components View.`);
             } catch (e) {
-                vscode.window.showErrorMessage(`Componet ${event.componentName} creation failed`);
+                vscode.window.showErrorMessage(`Error occurred while creating Component '${event.componentName}': ${e.message}`);
                 panel.webview.postMessage({
                     action: event.action,
-                    staus: false
+                    status: false
                 });
             }
         } else {
@@ -66,7 +66,7 @@ export class Command {
                 action: event.action,
                 status: true
             });
-            vscode.window.showInformationMessage('Selected Componet added into Workspace');
+            vscode.window.showInformationMessage('Selected Component added to the workspace.');
         }
     }
 }
@@ -83,7 +83,7 @@ async function gitImportMessageListener(event: any): Promise<any> {
             validateDevFilePath(event)
             break;
         case 'parseGitURL':
-            let compDescs: ComponentTypeDescription[];
+            let compDescription: ComponentTypeDescription[];
             let isDevFile = false;
             const gitProvider = getGitProvider(event.parser.host);
             if (gitProvider !== GitProvider.INVALID) {
@@ -92,14 +92,14 @@ async function gitImportMessageListener(event: any): Promise<any> {
                 const response: Response = await service.isDevfilePresent();
                 if (importService.strategies.length === 1) {
                     response.status = true;
-                    const stratergy: DetectedStrategy = importService.strategies[0];
-                    const detectedCustomData = stratergy.detectedCustomData[0];
-                    compDescs = getCompDescription(detectedCustomData.name.toLowerCase(), detectedCustomData.language.toLowerCase());
+                    const strategy: DetectedStrategy = importService.strategies[0];
+                    const detectedCustomData = strategy.detectedCustomData[0];
+                    compDescription = getCompDescription(detectedCustomData.name.toLowerCase(), detectedCustomData.language.toLowerCase());
                 } else if (response.status) {
                     isDevFile = true;
                     const devFileContent = await service.getDevfileContent();
                     const yamlDoc: any = jsYaml.load(devFileContent);
-                    compDescs = getCompDescription(yamlDoc.metadata.projectType.toLowerCase(), yamlDoc.metadata.language.toLowerCase())
+                    compDescription = getCompDescription(yamlDoc.metadata.projectType.toLowerCase(), yamlDoc.metadata.language.toLowerCase())
                 }
                 panel.webview.postMessage({
                     action: event?.action,
@@ -108,8 +108,8 @@ async function gitImportMessageListener(event: any): Promise<any> {
                     name: response.status ? event.parser.name + '-comp' : undefined,
                     error: !response.status,
                     isDevFile: isDevFile,
-                    helpText: response.status ? 'Validated' : 'Rate Limit exceeded',
-                    compDescs: compDescs,
+                    helpText: response.status ? 'The git repo is valid.' : 'Rate limit exceeded',
+                    compDescription: compDescription,
                     parser: event.parser
                 });
                 break;
@@ -201,7 +201,7 @@ function validateGitURL(event: any) {
                 panel.webview.postMessage({
                     action: event.action,
                     error: false,
-                    helpText: 'Validated',
+                    helpText: 'The git repo is valid.',
                     parser: parse,
                     gitURL: event.param
                 });
@@ -209,7 +209,7 @@ function validateGitURL(event: any) {
                 panel.webview.postMessage({
                     action: event.action,
                     error: false,
-                    helpText: 'URL is valid but cannot be reached',
+                    helpText: 'URL is valid but cannot be reached.',
                     parser: parse,
                     gitURL: event.param
                 });
@@ -282,7 +282,7 @@ function showError(event: any, location: string, message: string): void {
     if (message.indexOf('already exists') !== -1) {
         vscode.window.showErrorMessage(`Folder already exists on the selected ${location.substring(0, location.lastIndexOf('\\'))}`);
     } else {
-        vscode.window.showErrorMessage('Error while clone the repository');
+        vscode.window.showErrorMessage('Error occurred while cloning the repository. Please try again.');
     }
 }
 

@@ -73,7 +73,7 @@ button {
     bottom: -3%;
 }
 
-.stratergyContainer {
+.strategyContainer {
     display: flex;
     flex-direction: row;
     border-top: 3px solid;
@@ -90,12 +90,12 @@ button {
     margin-top: 1rem;
 }
 
-.stratergySuccess {
+.strategySuccess {
     border-color: green;
     background-color: darkseagreen !important;
 }
 
-.stratergyWarning {
+.strategyWarning {
     border-color: orange;
     background-color: burlywood !important;
 }
