@@ -59,7 +59,7 @@ export class GitImport extends React.Component<DefaultProps, {
     },
     parentAccordionOpen: boolean,
     statergyAccordionOpen: boolean,
-    compDescs: CompTypeDesc[],
+    compDescription: CompTypeDesc[],
     selectedDesc: CompTypeDesc,
     selectedCard: boolean,
     showLoadScreen: boolean,
@@ -90,7 +90,7 @@ export class GitImport extends React.Component<DefaultProps, {
             statergyAccordionOpen: false,
             componentName: undefined,
             applicationName: undefined,
-            compDescs: [],
+            compDescription: [],
             isDevFile: undefined,
             devFilePath: undefined,
             selectedDesc: undefined,
@@ -112,7 +112,7 @@ export class GitImport extends React.Component<DefaultProps, {
                 this.setState({ showLoadScreen: false, notification: '' });
                 this.setState({
                     applicationName: message.data.appName,
-                    compDescs: message.data.compDescs,
+                    compDescription: message.data.compDescription,
                     gitURL: {
                         value: message.data.gitURL,
                         showError: message.data.error,
@@ -121,8 +121,8 @@ export class GitImport extends React.Component<DefaultProps, {
                     },
                     isDevFile: message.data.isDevFile
                 });
-                if (this.state.compDescs.length === 1) {
-                    this.handleSelectedCard(this.state.compDescs[0]);
+                if (this.state.compDescription.length === 1) {
+                    this.handleSelectedCard(this.state.compDescription[0]);
                 }
                 this.validateComponentName(message.data?.name);
             } else if (message.data.action === 'validateGitURL') {
@@ -147,7 +147,7 @@ export class GitImport extends React.Component<DefaultProps, {
                     this.setState({
                         applicationName: undefined,
                         componentName: undefined,
-                        compDescs: [],
+                        compDescription: [],
                         isDevFile: undefined,
                         devFilePath: undefined
                     });
@@ -193,7 +193,7 @@ export class GitImport extends React.Component<DefaultProps, {
         this.setState({
             applicationName: undefined,
             componentName: undefined,
-            compDescs: [],
+            compDescription: [],
             isDevFile: undefined,
             devFilePath: {
                 value: 'devfile.yaml',
@@ -277,7 +277,7 @@ export class GitImport extends React.Component<DefaultProps, {
     }
 
     handleSelectedCard(compTypeDesc: CompTypeDesc): void {
-        this.state.compDescs.forEach((compDesc) => {
+        this.state.compDescription.forEach((compDesc) => {
             if (compDesc.devfileData.devfile.metadata.name === compTypeDesc.devfileData.devfile.metadata.name) {
                 compTypeDesc.selected = !compTypeDesc.selected;
                 compDesc.selected = compTypeDesc.selected;
@@ -307,7 +307,7 @@ export class GitImport extends React.Component<DefaultProps, {
 
     render(): React.ReactNode {
         const { gitURL, parentAccordionOpen, statergyAccordionOpen, showLoadScreen, notification,
-            applicationName, componentName, compDescs, isDevFile, devFilePath } = this.state;
+            applicationName, componentName, compDescription, isDevFile, devFilePath } = this.state;
         return (
             <div className='mainContainer margin' >
                 <div className='title'>
@@ -410,21 +410,21 @@ export class GitImport extends React.Component<DefaultProps, {
                                         helperText='Optional subdirectory for the source code, used as a context directory for build.' />
                                 </this.AccordionDetails>
                             </this.Accordion>
-                            {compDescs?.length > 0 &&
+                            {compDescription?.length > 0 &&
                                 <>
                                     {isDevFile &&
-                                        <div className='stratergyContainer stratergySuccess'>
+                                        <div className='strategyContainer strategySuccess'>
                                             <CheckCircleIcon color='success' style={{ fontSize: 20 }} />
                                             <Typography variant='body2' style={{ margin: '0 5px' }}>A devfile is detected and recommended to create the component.</Typography>
                                         </div>}
                                     {!isDevFile &&
-                                        <div className='stratergyContainer stratergyWarning'>
+                                        <div className='strategyContainer strategyWarning'>
                                             <ErrorIcon color='warning' style={{ fontSize: 20 }} />
                                             <Typography variant='body2' style={{ margin: '0 5px' }}>There is no devfile.yaml detected in the repository. Please select a devfile from the default devfile registry.</Typography>
                                         </div>}
                                     <div className='cardContainer'>
                                         <div className='devfileGalleryGrid'>
-                                            {compDescs.map((compDescription, key: number) => (
+                                            {compDescription.map((compDescription, key: number) => (
                                                 <CardItem key={key} compDesc={compDescription}
                                                     onCardClick={(compDesc) => this.handleSelectedCard(compDesc)} />
                                             ))}
