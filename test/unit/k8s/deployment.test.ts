@@ -11,6 +11,7 @@ import * as k8s from 'vscode-kubernetes-tools-api';
 import { OdoImpl } from '../../../src/odo';
 import { Progress } from '../../../src/util/progress';
 import { DeploymentConfig } from '../../../src/k8s/deploymentConfig';
+import { CliChannel } from '../../../src/cli';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -153,6 +154,7 @@ suite('K8s/deployment', () => {
         };
 
         setup(() => {
+            // execStub = sandbox.stub(CliChannel.prototype, 'execute').resolves({ stdout: mockData, stderr: undefined, error: undefined });
             execStub.resolves({ error: undefined, stdout: mockData, stderr: '' });
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.resolves({label: 'nodejs-comp-nodejs-app'});
@@ -190,6 +192,8 @@ suite('K8s/deployment', () => {
 
         test('throws error if there is no DeploymentConfig to select', async () => {
             quickPickStub.restore();
+            execStub.restore();
+            execStub = sandbox.stub(CliChannel.prototype, 'execute').resolves({ stdout: mockData, stderr: undefined, error: undefined });
             execStub.resolves({ error: undefined, stdout: noBcData, stderr: '' });
             let checkError: Error;
             try {

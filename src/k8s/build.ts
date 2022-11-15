@@ -5,11 +5,11 @@
 
 import { QuickPickItem, window } from 'vscode';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
-import { OdoImpl, Odo } from '../odo';
 import { Progress } from '../util/progress';
 import * as common from './common';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { CommandOption, CommandText } from '../base/command';
+import { Cli, CliChannel } from '../cli';
 
 export class Build {
 
@@ -56,7 +56,7 @@ export class Build {
       }
   };
 
-    protected static readonly odo: Odo = OdoImpl.Instance;
+    protected static readonly odo: Cli = CliChannel.getInstance();
 
     static getNodeContributor(): ClusterExplorerV1.NodeContributor {
       return {
@@ -97,7 +97,7 @@ export class Build {
         let result: Promise<string> = null;
         if (!buildName) buildName = await common.selectResourceByName(await Build.getBuildConfigNames('You have no BuildConfigs available to start a build'), 'Select a BuildConfig to start a build');
         if (buildName) {
-            result = Progress.execFunctionWithProgress('Starting build', () => Build.odo.execute(Build.command.startBuild(buildName)))
+            result = Progress.execFunctionWithProgress('Starting build', () => Build.odo.executeTool(Build.command.startBuild(buildName)))
                 .then(() => `Build '${buildName}' successfully started`)
                 .catch((err) => Promise.reject(new VsCommandError(`Failed to start build with error '${err}'`, 'Failed to start build')));
         }
@@ -144,7 +144,7 @@ export class Build {
         let result: null | string | Promise<string> | PromiseLike<string> = null;
         const build = await Build.selectBuild(context, 'Select a build to delete');
         if (build) {
-            result = Progress.execFunctionWithProgress('Deleting build', () => Build.odo.execute(Build.command.delete(build)))
+            result = Progress.execFunctionWithProgress('Deleting build', () => Build.odo.executeTool(Build.command.delete(build)))
                 .then(() => `Build '${build}' successfully deleted`)
                 .catch((err) => Promise.reject(new VsCommandError(`Failed to delete build with error '${err}'`, 'Failed to delete build')));
         }

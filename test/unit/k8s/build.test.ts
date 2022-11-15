@@ -8,9 +8,8 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import * as k8s from 'vscode-kubernetes-tools-api';
-import { OdoImpl } from '../../../src/odo';
 import { Build } from '../../../src/k8s/build';
-import { Progress } from '../../../src/util/progress';
+import { CliChannel } from '../../../src/cli';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -62,9 +61,9 @@ suite('K8s/build', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
-        sandbox.stub(Progress, 'execFunctionWithProgress').yields();
+        termStub = sandbox.stub(CliChannel.prototype, 'executeInTerminal');
+        execStub = sandbox.stub(CliChannel.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
+        // sandbox.stub(Progress, 'execFunctionWithProgress').yields();
     });
 
     teardown(() => {
@@ -154,9 +153,8 @@ suite('K8s/build', () => {
             "selfLink": ""
         }
     }`;
-
         setup(() => {
-            execStub.resolves({ error: undefined, stdout: mockData, stderr: '' });
+            execStub.resolves({ stdout: mockData, stderr: undefined, error: undefined });
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.resolves({label: 'nodejs-comp-nodejs-app'});
         });
@@ -165,14 +163,14 @@ suite('K8s/build', () => {
             const result = await Build.startBuild(startBuildCtx);
 
             expect(result).equals(`Build '${startBuildCtx.name}' successfully started`);
-            expect(execStub).calledWith(Build.command.startBuild(startBuildCtx.name));
+            expect(execStub).calledWith(Build.command.startBuild(startBuildCtx.name).toString());
         });
 
         test('works with no context', async () => {
             const result = await Build.startBuild(null);
 
             expect(result).equals(`Build '${startBuildCtx.name}' successfully started`);
-            expect(execStub).calledWith(Build.command.startBuild(startBuildCtx.name));
+            expect(execStub).calledWith(Build.command.startBuild(startBuildCtx.name).toString());
         });
 
         test('returns null when no BuildConfig selected', async () => {
@@ -301,14 +299,14 @@ suite('K8s/build', () => {
             const result = await Build.delete(context);
 
             expect(result).equals(`Build '${context.impl.name}' successfully deleted`);
-            expect(execStub).calledWith(Build.command.delete(context.impl.name));
+            expect(execStub).calledWith(Build.command.delete(context.impl.name).toString());
         });
 
         test('works with no context', async () => {
             const result = await Build.delete(null);
 
             expect(result).equals('Build \'nodejs-copm-nodejs-comp-8\' successfully deleted');
-            expect(execStub).calledWith(Build.command.delete('nodejs-copm-nodejs-comp-8'));
+            expect(execStub).calledWith(Build.command.delete('nodejs-copm-nodejs-comp-8').toString());
         });
 
         test('returns null when no build selected to delete', async () => {
