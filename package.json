@@ -741,17 +741,22 @@
 			{
 				"command": "openshift.componentTypesView.registry.remove",
 				"title": "Remove",
-				"category": "OpenSift"
+				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.componentTypesView.registry.edit",
 				"title": "Edit",
-				"category": "OpenSift"
+				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.componentTypesView.registry.openInBrowser",
 				"title": "Open in Browser",
-				"category": "OpenSift"
+				"category": "OpenShift"
+			},
+            {
+				"command": "openshift.componentTypesView.registry.openInEditor",
+				"title": "Open in Editor",
+				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.welcome",
@@ -1005,6 +1010,10 @@
 					"command": "openshift.componentTypesView.registry.openInBrowser",
 					"when": "false"
 				},
+                {
+                    "command": "openshift.componentTypesView.registry.openInEditor",
+					"when": "false"
+                },
 				{
 					"command": "openshift.resource.load",
 					"when": "false"
@@ -1293,6 +1302,11 @@
 				},
 				{
 					"command": "openshift.componentTypesView.registry.openInBrowser",
+					"when": "view == openshiftComponentTypesView && viewItem == devfileRegistry",
+					"group": "0@0"
+				},
+                {
+					"command": "openshift.componentTypesView.registry.openInEditor",
 					"when": "view == openshiftComponentTypesView && viewItem == devfileRegistry",
 					"group": "0@0"
 				},

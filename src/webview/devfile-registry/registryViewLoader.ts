@@ -10,6 +10,7 @@ import { stringify } from 'yaml';
 import { ComponentTypesView } from '../../registriesView'
 import { vsCommand } from '../../vscommand';
 import { ExtCommandTelemetryEvent } from '../../telemetry';
+import { Registry } from '../../odo/componentType';
 
 let panel: vscode.WebviewPanel;
 
@@ -61,11 +62,12 @@ export default class RegistryViewLoader {
     }
 
     // eslint-disable-next-line @typescript-eslint/require-await
-    static async loadView(title: string): Promise<vscode.WebviewPanel> {
+    static async loadView(title: string, url?: string): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(path.join(RegistryViewLoader.extensionPath, 'out', 'devFileRegistryViewer'));
         if (panel) {
             // If we already have a panel, show it in the target column
             panel.reveal(vscode.ViewColumn.One);
+            panel.title = title;
             getAllComponents('getAllComponents');
         } else {
             panel = vscode.window.createWebviewPanel('devFileRegistryView', title, vscode.ViewColumn.One, {
@@ -80,6 +82,7 @@ export default class RegistryViewLoader {
             });
             panel.webview.onDidReceiveMessage(devfileRegistryViewerMessageListener);
         }
+        getAllComponents('getAllComponents', url);
         return panel;
     }
 
@@ -110,6 +113,11 @@ export default class RegistryViewLoader {
         await RegistryViewLoader.loadView('Devfile Registry');
     }
 
+    @vsCommand('openshift.componentTypesView.registry.openInEditor')
+    public static async openRegistryInEditor(context: Registry): Promise<void> {
+        await RegistryViewLoader.loadView(`Devfile Registry - ${context.Name}`, context.URL);
+    }
+
     @vsCommand('openshift.componentTypesView.registry.closeView')
     static async closeRegistryInWebview(): Promise<void> {
         panel?.dispose();
@@ -122,8 +130,11 @@ export default class RegistryViewLoader {
     }
 }
 
-function getAllComponents(eventActionName: string, error?: string) {
-    const registries = ComponentTypesView.instance.getListOfRegistries();
+function getAllComponents(eventActionName: string, url?: string, error?: string) {
+    let registries = ComponentTypesView.instance.getListOfRegistries();
+    if (url && url.length > 0) {
+        registries = registries.filter((registry: Registry) => registry.URL === url);
+    }
     const componentDescriptions = ComponentTypesView.instance.getCompDescriptions();
     panel?.webview.postMessage(
         {
@@ -140,6 +151,6 @@ ComponentTypesView.instance.subject.subscribe((value: string) => {
         RegistryViewLoader.refresh();
         getAllComponents('getAllComponents');
     } else if (value === 'error') {
-        getAllComponents('getAllComponents', 'Devfile Registry is not accessible');
+        getAllComponents('getAllComponents', undefined, 'Devfile Registry is not accessible');
     }
 });
