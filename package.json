@@ -1329,7 +1329,7 @@
 					},
 					{
 						"id": "showRegistries",
-						"title": "Browse all the Devfile stacks from Devfile registries",
+						"title": "Create Component from Devfile registries webview",
 						"description": "Select a specific devfile registry to create a component directly.\n[Browse Devfile Registries](command:openshift.componentTypesView.registry.openInView)",
 						"media": {
 							"image": "images/walkthrough/showRegistries.gif",
