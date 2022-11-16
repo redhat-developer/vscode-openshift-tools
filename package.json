@@ -753,6 +753,11 @@
 				"title": "Open in Browser",
 				"category": "OpenSift"
 			},
+            {
+				"command": "openshift.componentTypesView.registry.openInEditor",
+				"title": "Open in Editor",
+				"category": "OpenSift"
+			},
 			{
 				"command": "openshift.welcome",
 				"title": "Welcome",
@@ -1005,6 +1010,10 @@
 					"command": "openshift.componentTypesView.registry.openInBrowser",
 					"when": "false"
 				},
+                {
+                    "command": "openshift.componentTypesView.registry.openInEditor",
+					"when": "false"
+                },
 				{
 					"command": "openshift.resource.load",
 					"when": "false"
@@ -1293,6 +1302,11 @@
 				},
 				{
 					"command": "openshift.componentTypesView.registry.openInBrowser",
+					"when": "view == openshiftComponentTypesView && viewItem == devfileRegistry",
+					"group": "0@0"
+				},
+                {
+					"command": "openshift.componentTypesView.registry.openInEditor",
 					"when": "view == openshiftComponentTypesView && viewItem == devfileRegistry",
 					"group": "0@0"
 				},

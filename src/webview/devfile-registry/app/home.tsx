@@ -65,11 +65,17 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                     setError(message.data.errorMessage);
                 } else {
                     setError('');
-                    message.data.registries.map((registry: Registry) => {
-                        if (registry.URL.toLowerCase().indexOf('https://registry.devfile.io') !== -1) {
+                    if (message.data.registries.length === 1) {
+                        message.data.registries.map((registry: Registry) => {
                             registry.state = true;
-                        }
-                    });
+                        });
+                    } else {
+                        message.data.registries.map((registry: Registry) => {
+                            if (registry.URL.toLowerCase().indexOf('https://registry.devfile.io') !== -1) {
+                                registry.state = true;
+                            }
+                        });
+                    }
                     setCompDescriptions(message.data.compDescriptions);
                     setRegistries(message.data.registries);
                     setFilteredcompDescriptions(getFilteredCompDesc(message.data.registries, message.data.compDescriptions, searchValue));
