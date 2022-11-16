@@ -741,22 +741,22 @@
 			{
 				"command": "openshift.componentTypesView.registry.remove",
 				"title": "Remove",
-				"category": "OpenSift"
+				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.componentTypesView.registry.edit",
 				"title": "Edit",
-				"category": "OpenSift"
+				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.componentTypesView.registry.openInBrowser",
 				"title": "Open in Browser",
-				"category": "OpenSift"
+				"category": "OpenShift"
 			},
             {
 				"command": "openshift.componentTypesView.registry.openInEditor",
 				"title": "Open in Editor",
-				"category": "OpenSift"
+				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.welcome",
