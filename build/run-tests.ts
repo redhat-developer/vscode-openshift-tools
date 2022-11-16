@@ -3,10 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-/* eslint-disable import/no-extraneous-dependencies */
-
 import * as path from 'path';
-import { runTests } from 'vscode-test';
+import * as etest from '@vscode/test-electron';
 
 /**
  * Run mocha tests from project's tests folder.
@@ -18,33 +16,16 @@ async function main(): Promise<void> {
     const extensionRootPath = path.resolve(__dirname, '../../');
     const extensionDevelopmentPath = path.resolve(extensionRootPath, extension);
     const extensionTestsPath = path.resolve(extensionRootPath, 'out', 'test', tests);
+    const integrationWorkspacePath = path.resolve(extensionRootPath, 'test', 'fixtures', 'components', 'components.code-workspace');
+    const unitTestWorkspacePath = path.resolve(extensionRootPath, 'test', 'fixtures', 'components', 'empty.code-workspace');
     try {
-        await runTests({
+        await etest.runTests({
             extensionDevelopmentPath,
             extensionTestsPath,
-            launchArgs:
-                tests === 'integration'
-                    ? [
-                          // this is required to create multi root workspace to run tests on
-                          path.resolve(
-                              extensionRootPath,
-                              'test',
-                              'fixtures',
-                              'components',
-                              'components.code-workspace',
-                          ),
-                          '--disable-workspace-trust',
-                      ]
-                    : [
-                          path.resolve(
-                              extensionRootPath,
-                              'test',
-                              'fixtures',
-                              'components',
-                              'empty.code-workspace',
-                          ),
-                          '--disable-workspace-trust'
-                      ],
+            launchArgs: [
+                tests === 'integration' ? integrationWorkspacePath : unitTestWorkspacePath,
+                '--disable-workspace-trust',
+            ],
         });
     } catch (error) {
         // eslint-disable-next-line no-console
@@ -53,4 +34,4 @@ async function main(): Promise<void> {
     }
 }
 
-main();
+void main();

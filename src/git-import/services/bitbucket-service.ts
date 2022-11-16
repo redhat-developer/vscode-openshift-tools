@@ -2,7 +2,8 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import 'whatwg-fetch';
+import { getVscodeModule } from '../../util/credentialManager';
+getVscodeModule('whatwg-fetch');
 import {
     GitSource,
     SecretType,
@@ -14,8 +15,9 @@ import {
     Response
 } from '../types';
 import { BaseService } from './base-service';
-import { Base64 } from 'js-base64';
 import  ParseBitbucketUrl  = require('parse-bitbucket-url');
+
+const Base64:any = getVscodeModule('js-base64');
 
 export class BitbucketService extends BaseService {
     private readonly metadata: RepoMetadata;

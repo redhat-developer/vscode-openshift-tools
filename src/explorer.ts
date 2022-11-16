@@ -15,7 +15,8 @@ import {
     version,
     commands,
     Uri,
-    TreeItemCollapsibleState
+    TreeItemCollapsibleState,
+    ThemeIcon,
 } from 'vscode';
 
 import * as path from 'path';
@@ -28,7 +29,6 @@ import { KubernetesObject, Context } from '@kubernetes/client-node';
 import { CliChannel } from './cli';
 import { Command } from './odo/command';
 import { newInstance, Odo3 } from './odo3';
-import { getInstance } from './odo';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
@@ -118,6 +118,17 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             return element;
         }
 
+        if('label' in element) {
+            return  {
+                contextValue: 'openshift.openConfigFile',
+                label: element.label,
+                collapsibleState: TreeItemCollapsibleState.None,
+                tooltip: 'Default KubeConfig',
+                description: element.description,
+                iconPath: new ThemeIcon('file')
+            };
+        }
+
         // check if element is Context instance
         if ('name' in element && 'cluster' in element && 'user' in element) { // Context instance could be without namespace
             return  {
@@ -164,6 +175,13 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             try {
                 await this.odo3.getNamespaces()
                 result = [this.kubeContext];
+                if (this.kubeContext) {
+                    const homeDir = this.kubeConfig.findHomeDir();
+                    if (homeDir){
+                        const config = path.join(homeDir, '.kube', 'config');
+                        result.unshift({label: 'Default KubeConfig', description: `${config}`})
+                    }
+                }
             } catch (err) {
                 // ignore because ether server is not accessible or user is logged out
             }
@@ -216,7 +234,6 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     refresh(target?: ExplorerItem): void {
         this.eventEmitter.fire(target);
-        getInstance().clearCache();
     }
 
     dispose(): void {
@@ -239,8 +256,15 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         return commands.executeCommand('vscode.open', Uri.parse(OpenShiftExplorer.issueUrl()));
     }
 
+    @vsCommand('openshift.open.configFile')
+    async openConfigFile(context: TreeItem): Promise<void> {
+        if(context.description && typeof context.description === 'string'){
+            await commands.executeCommand('vscode.open', Uri.file(context.description));
+        }
+    }
+
     static issueUrl(): string {
-        const packageJSON: PackageJSON = extensions.getExtension('redhat.vscode-openshift-toolkit')
+        const packageJSON: PackageJSON = extensions.getExtension('redhat.vscode-openshift-connector')
             .packageJSON as PackageJSON;
         const body = [
             `VS Code version: ${version}`,

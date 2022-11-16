@@ -31,32 +31,49 @@ function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
     return coverageRunner;
 }
 
-export function run(): Promise<void> {
-     return new Promise((resolve, reject) => {
-        const testsRoot = paths.resolve(__dirname);
-        const coverageRunner = loadCoverageRunner(testsRoot);
-        glob('**/workspace.test.js', { cwd: testsRoot }, (error, files): void => {
-            if (error) {
-                reject(error);
-            } else {
-                files.forEach((f): Mocha => mocha.addFile(paths.join(testsRoot, f)));
-                let failed = 0;
-                mocha.run(failures => {
-                    if (failures > 0) {
-                        failed = failures;
-                    }
-                }).on('end', () => {
-                    coverageRunner && coverageRunner.reportCoverage();
-                    if (failed > 0) {
-                        reject (`Test failures: ${failed}`);
-                    } else {
-                        resolve();
-                    }
-		            resolve();
-                }).on('fail', () => {
-                    failed++;
-                });
+function createTestFinder(testsRoot: string) {
+    return (pattern: string): Promise<string[]> => {
+        return new Promise((resolve, reject) => {
+            glob(pattern, { cwd: testsRoot }, (error, files): void => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(files);
+                }
+            });
+        });
+    }
+}
+
+export async function run(): Promise<void> {
+    const testsRoot = paths.resolve(__dirname);
+    const coverageRunner = loadCoverageRunner(testsRoot);
+    const testFinder = createTestFinder(testsRoot);
+    const testFiles:string[] = [];
+
+    testFiles.push(...await testFinder('**/extension.test.js'));
+    testFiles.push(...await testFinder('**/workspace.test.js'));
+    testFiles.push(...await testFinder('k8s/*.test.js'));
+    testFiles.push(...await testFinder('util/*.test.js'));
+
+    testFiles.forEach((f) => mocha.addFile(paths.join(testsRoot, f)));
+
+    return new Promise((resolve, reject) => {
+        let failed = 0;
+        mocha.run(failures => {
+            if (failures > 0) {
+                failed = failures;
             }
+        }).on('end', () => {
+            coverageRunner && coverageRunner.reportCoverage();
+            if (failed > 0) {
+                reject (`Test failures: ${failed}`);
+            } else {
+                resolve();
+            }
+            resolve();
+        }).on('fail', () => {
+            failed++;
         });
     });
 }

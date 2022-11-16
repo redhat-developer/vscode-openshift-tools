@@ -23,14 +23,20 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
     if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
         folder = workspace.workspaceFolders
             .filter((value) => {
-                let odoDevfileEnvFile = true;
+                let odoDevfile = true;
                 try {
-                    odoDevfileEnvFile = !fs
-                        .statSync(path.join(value.uri.fsPath, '.odo', 'env', 'env.yaml')).isFile();
+                    odoDevfile = !fs.statSync(path.join(value.uri.fsPath, 'devfile.yaml')).isFile()
                 } catch (ignore) {
                     // ignore errors if file does not exist
                 }
-                return odoDevfileEnvFile;
+                let odoDotDevfile = true;
+                try {
+                    odoDotDevfile = !fs.statSync(path.join(value.uri.fsPath, '.devfile.yaml')).isFile();
+                } catch (ignore) {
+                    // ignore errors if file does not exist
+                }
+                // if there is no devfile.yaml and no .devfile.yaml in the root of workspace folder
+                return !odoDevfile && !odoDotDevfile;
             })
             .map((wsFolder) => ({
                 label: `$(file-directory) ${wsFolder.uri.fsPath}`,

@@ -4,6 +4,10 @@ body {
     }
 }
 
+button {
+    padding: 0;
+}
+
 .margin {
     margin: 3rem;
 }
@@ -28,7 +32,7 @@ body {
 
 .subTitle {
     margin-bottom: 2rem;
-    width: 59rem;
+    max-width: 59rem;
     justify-content: center;
     word-spacing: 5px;
     text-align: justify;
@@ -42,9 +46,11 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--vscode-button-foreground);
+
     &:hover {
         background-color: '#BE0000' !important;
     }
+
     text-transform: none;
 }
 
@@ -67,15 +73,15 @@ body {
     bottom: -3%;
 }
 
-.stratergyContainer {
+.strategyContainer {
     display: flex;
     flex-direction: row;
     border-top: 3px solid;
-    width: 55rem;
+    max-width: 55rem;
     margin-top: 2rem;
     padding-top: 0.5rem;
     padding-left: 1rem;
-    height: 2rem;
+    min-height: 2rem;
 }
 
 .cardContainer {
@@ -84,12 +90,12 @@ body {
     margin-top: 1rem;
 }
 
-.stratergySuccess {
+.strategySuccess {
     border-color: green;
     background-color: darkseagreen !important;
 }
 
-.stratergyWarning {
+.strategyWarning {
     border-color: orange;
     background-color: burlywood !important;
 }
@@ -105,6 +111,14 @@ body {
 
 .MuiOutlinedInput-input {
     padding: 5px 14px !important;
+}
+
+.MuiFormControl-root {
+    border: none;
+    max-width: 50%;
+    &:hover {
+        border: none;
+    }
 }
 
 .MuiAccordionSummary-root {

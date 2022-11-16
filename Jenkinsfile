@@ -14,6 +14,7 @@ node('rhel8'){
   stage('Install requirements') {
     def nodeHome = tool 'nodejs-lts'
     env.PATH="${env.PATH}:${nodeHome}/bin"
+    env.NODE_OPTIONS="--max_old_space_size=16384"
     sh "npm ci"
     sh "npm install -g vsce"
   }
@@ -34,7 +35,7 @@ node('rhel8'){
         sh 'node ./out/build/update-readme.js'
         sh "vsce package -o openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix"
         sh "sha256sum *-ovsx.vsix > openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix.sha256"
-        sh "npm pack && mv vscode-openshift-toolkit-${packageJson.version}.tgz openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}.tgz"
+        sh "npm pack && mv vscode-openshift-connector-${packageJson.version}.tgz openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}.tgz"
         sh "sha256sum *.tgz > openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}.tgz.sha256"
     }
   }
