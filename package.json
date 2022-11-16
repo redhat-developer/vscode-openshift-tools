@@ -1341,7 +1341,7 @@
 					},
 					{
 						"id": "createComponent",
-						"title": "Create a Component using Registry Viewer",
+						"title": "Create a Component using local workspace",
 						"description": "Create a component in the local workspace using the selected starter project and associated `devfile.yaml` configuration. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.component.createFromLocal)",
 						"media": {
 							"image": "images/walkthrough/createComponent.gif",
