@@ -1329,7 +1329,7 @@
 					},
 					{
 						"id": "showRegistries",
-						"title": "Browse all the Devfile stacks from Devfile registries",
+						"title": "Create Component from Devfile registries webview",
 						"description": "Select a specific devfile registry to create a component directly.\n[Browse Devfile Registries](command:openshift.componentTypesView.registry.openInView)",
 						"media": {
 							"image": "images/walkthrough/showRegistries.gif",
@@ -1341,8 +1341,8 @@
 					},
 					{
 						"id": "createComponent",
-						"title": "Create a Component using Registry Viewer",
-						"description": "Create a component in the local workspace using the selected starter project and associated `devfile.yaml` configuration. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.componentType.newComponent)",
+						"title": "Create a Component using local workspace",
+						"description": "Create a component in the local workspace using the selected starter project and associated `devfile.yaml` configuration. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.component.createFromLocal)",
 						"media": {
 							"image": "images/walkthrough/createComponent.gif",
 							"altText": "create component"
