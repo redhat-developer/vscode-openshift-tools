@@ -9,11 +9,14 @@ import { CliChannel } from './cli';
 import { Command as CommonCommand, loadItems } from './k8s/common';
 import { DeploymentConfig } from './k8s/deploymentConfig';
 import { Command as DeploymentCommand } from './k8s/deployment';
+import { ComponentDescription } from './odo/componentTypeDescription';
+import { Command } from './odo/command';
 
 export interface Odo3 {
     getNamespaces(): Promise<KubernetesObject[]>;
-    getDeployments(): Promise<KubernetesObject[]>
-    getDeploymentConfigs(): Promise<KubernetesObject[]>
+    getDeployments(): Promise<KubernetesObject[]>;
+    getDeploymentConfigs(): Promise<KubernetesObject[]>;
+    describeComponent(contextPath: string): Promise<ComponentDescription | undefined>;
 }
 
 export class Odo3Impl implements Odo3 {
@@ -45,6 +48,17 @@ export class Odo3Impl implements Odo3 {
             this.getProjectResources(),
             this.getNamespacesResources()
         ]);
+    }
+
+    public async describeComponent(contextPath: string): Promise<ComponentDescription | undefined> {
+        try {
+            const describeCmdResult = await CliChannel.getInstance().executeTool(
+                Command.describeComponentJson(), {cwd: contextPath}, false
+            );
+            return JSON.parse(describeCmdResult.stdout) as ComponentDescription;
+        } catch(error) {
+            // ignore and return undefined
+        }
     }
 }
 
