@@ -8,7 +8,6 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 import * as k8s from 'vscode-kubernetes-tools-api';
-import { OdoImpl } from '../../../src/odo';
 import { Progress } from '../../../src/util/progress';
 import { DeploymentConfig } from '../../../src/k8s/deploymentConfig';
 import { CliChannel } from '../../../src/cli';
