@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace, WebviewPanel, Progress as VProgress, QuickPickItemButtonEvent, ThemeIcon, QuickInputButton } from 'vscode';
+import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace, WebviewPanel, Progress as VProgress, QuickInputButton, ThemeIcon } from 'vscode';
 import { Command } from '../odo/command';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { CliExitData, CliChannel } from '../cli';
@@ -154,19 +154,50 @@ export class Cluster extends OpenShiftItem {
     }
 
     static async getUrl(): Promise<string | null> {
-        const k8sConfig = new KubeConfigUtils();
         const clusterURl = await Cluster.getUrlFromClipboard();
-        const createUrl: QuickPickItem = { label: '$(plus) Provide new URL...'};
-        const clusterItems = k8sConfig.getServers();
-        const choice = await window.showQuickPick([createUrl, ...clusterItems], {placeHolder: 'Provide Cluster URL to connect', ignoreFocusOut: true});
-        if (!choice) return null;
-        return (choice.label === createUrl.label) ?
-            window.showInputBox({
-                value: clusterURl,
-                ignoreFocusOut: true,
-                prompt: 'Provide new Cluster URL to connect',
-                validateInput: (value: string) => Cluster.validateUrl('Invalid URL provided', value)
-            }) : choice.label;
+        return await Cluster.showQuikPick(clusterURl);
+    }
+
+    private static async showQuikPick(clusterURl: string): Promise<string> {
+        return await new Promise<string | null>((resolve, reject) => {
+            const k8sConfig = new KubeConfigUtils();
+            const addBtn = new quickBtn(new ThemeIcon('plus'), 'Add');
+            const switchBtn = new quickBtn(new ThemeIcon('arrow-swap'), 'Switch');
+            const deleteBtn = new quickBtn(new ThemeIcon('trash'), 'Delete');
+            const createUrl: QuickPickItem = { label: 'Provide new URL...', buttons: [addBtn] };
+            const clusterItems = k8sConfig.getServers();
+            const quickPick = window.createQuickPick();
+            const contextNames: QuickPickItem[] = clusterItems.map((ctx) => ({ label: `${ctx.label}`, buttons: [switchBtn, deleteBtn] }));
+            quickPick.items = [createUrl, ...contextNames];
+            quickPick.onDidTriggerItemButton(async (event) => {
+                if (event.button instanceof quickBtn) {
+                    if (event.button.iconPath.id === 'plus') {
+                        resolve(window.showInputBox({
+                            value: clusterURl,
+                            ignoreFocusOut: true,
+                            prompt: 'Provide new Cluster URL to connect',
+                            validateInput: (value: string) => Cluster.validateUrl('Invalid URL provided', value)
+                        }));
+                    } else if (event.button.iconPath.id === 'arrow-swap') {
+                        resolve(event.item.label);
+                    } else if (event.button.iconPath.id === 'trash') {
+                        await window.showInformationMessage('Are you sure want to delete the Cluster?', 'Yes', 'No')
+                            .then(async answer => {
+                                if (answer === 'Yes') {
+                                    const cluster = k8sConfig.getClusters().filter((kubeConfigCluster) => kubeConfigCluster.server === event.item.label).pop();
+                                    try {
+                                        await k8sConfig.deleteCluster(cluster);
+                                        resolve('');
+                                    } catch (err) {
+                                        reject(null);
+                                    }
+                                }
+                            });
+                    }
+                }
+            });
+            quickPick.show();
+        });
     }
 
     @vsCommand('openshift.explorer.addCluster')

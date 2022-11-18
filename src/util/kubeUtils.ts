@@ -8,6 +8,8 @@ import * as path from 'path';
 import { QuickPickItem } from 'vscode';
 import { KubeConfig, findHomeDir, loadYaml } from '@kubernetes/client-node';
 import { User, Cluster } from '@kubernetes/client-node/dist/config_types';
+import { Odo, OdoImpl } from '../odo';
+import { VsCommandError } from '../vscommand';
 
 function fileExists(file: string): boolean {
     try {
@@ -31,6 +33,18 @@ export class KubeConfigUtils extends KubeConfig {
         // k8s nodejs-client ignores all unknown properties,
         // so cluster object's proxy-url attribute is not present
         // after k8s config loaded
+    }
+
+    protected static getOdoInstance(): Odo {
+        return OdoImpl.Instance;
+    }
+
+    async deleteCluster(cluster: Cluster) {
+        try {
+            await KubeConfigUtils.getOdoInstance().deleteCluster(cluster);
+        } catch (error) {
+            throw new VsCommandError(`Unable to delete the cluster '${cluster.server}'`, 'Failed to delete cluster');
+        }
     }
 
     findHomeDir() {
