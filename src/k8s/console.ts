@@ -6,11 +6,11 @@
 import * as vscode from 'vscode';
 import { Command } from '../odo/command';
 import { KubeConfigUtils } from '../util/kubeUtils';
-import OpenShiftItem from '../openshift/openshiftItem';
 import { vsCommand } from '../vscommand';
+import { CliChannel } from '../cli';
 
-export class Console extends OpenShiftItem {
-
+export class Console {
+    static cli = CliChannel.getInstance()
     static getCurrentProject(): string {
         const k8sConfig = new KubeConfigUtils();
         const project = (k8sConfig.contexts).find((ctx) => ctx.name === k8sConfig.currentContext).namespace;
@@ -19,9 +19,9 @@ export class Console extends OpenShiftItem {
 
     static async fetchOpenshiftConsoleUrl(): Promise<any> {
         try {
-            return await Console.odo.execute(Command.showConsoleUrl());
+            return await Console.cli.executeTool(Command.showConsoleUrl());
         } catch (ignore) {
-            const consoleUrl = await Console.odo.execute(Command.showServerUrl());
+            const consoleUrl = await Console.cli.executeTool(Command.showServerUrl());
             return consoleUrl.stdout;
         }
     }

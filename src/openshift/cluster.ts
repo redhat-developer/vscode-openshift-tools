@@ -28,12 +28,12 @@ class quickBtn implements QuickInputButton {
 
 export class Cluster extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
-
+    private static cli = CliChannel.getInstance();
     @vsCommand('openshift.explorer.logout')
     static async logout(): Promise<string> {
         const value = await window.showWarningMessage('Do you want to logout of cluster?', 'Logout', 'Cancel');
         if (value === 'Logout') {
-            return Cluster.odo.execute(Command.odoLogout())
+            return Cluster.cli.executeTool(Command.odoLogout())
             .catch((error) => Promise.reject(new VsCommandError(`Failed to logout of the current cluster with '${error}'!`, 'Failed to logout of the current cluster')))
             .then(async (result) => {
                 if (result.stderr === '') {
@@ -75,11 +75,11 @@ export class Cluster extends OpenShiftItem {
         let consoleUrl: string;
         try {
             progress.report({increment: 0, message: 'Detecting cluster type'});
-            const getUrlObj = await Cluster.odo.execute(Command.showConsoleUrl());
+            const getUrlObj = await Cluster.cli.executeTool(Command.showConsoleUrl());
             progress.report({increment: 30, message: 'Getting URL'});
             consoleUrl = JSON.parse(getUrlObj.stdout).data.consoleURL;
         } catch (ignore) {
-            const serverUrl = await Cluster.odo.execute(Command.showServerUrl());
+            const serverUrl = await Cluster.cli.executeTool(Command.showServerUrl());
             consoleUrl = `${serverUrl.stdout}/console`;
         }
         return consoleUrl;
@@ -244,7 +244,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     public static async getVersions(): Promise<Versions> {
-        const result = await Cluster.odo.execute(Command.printOcVersionJson(), undefined, false);
+        const result = await Cluster.cli.executeTool(Command.printOcVersionJson(), undefined, false);
         const versions: Versions = {
             'kubernetes_version': undefined,
             'openshift_version': undefined
@@ -378,7 +378,7 @@ export class Cluster extends OpenShiftItem {
         try {
             const result = await Progress.execFunctionWithProgress(
                 `Login to the cluster: ${clusterURL}`,
-                () => Cluster.odo.execute(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd)));
+                () => Cluster.cli.executeTool(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd)));
             await Cluster.save(username, passwd, password, result);
             return await Cluster.loginMessage(clusterURL, result);
         } catch (error) {
@@ -442,7 +442,7 @@ export class Cluster extends OpenShiftItem {
             ocToken = userToken;
         }
         return Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`,
-            () => Cluster.odo.execute(Command.odoLoginWithToken(clusterURL, ocToken.trim()))
+            () => Cluster.cli.executeTool(Command.odoLoginWithToken(clusterURL, ocToken.trim()))
             .then((result) => Cluster.loginMessage(clusterURL, result))
             .catch((error) => Promise.reject(new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(error.message)}'!`, 'Failed to login to cluster')))
         );

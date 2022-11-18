@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { VSCodeSettings } from '@redhat-developer/vscode-redhat-telemetry/lib/vscode/settings';
 import * as cp from 'child_process';
 import * as vscode from 'vscode';
 import { CommandText } from './base/command';
@@ -71,6 +72,8 @@ class OdoChannelImpl implements OdoChannel {
 // to an output channel
 
 export class CliChannel implements Cli {
+
+    private static telemetrySettings = new VSCodeSettings();
     private static instance: CliChannel;
 
     private odoChannel: OdoChannel = new OdoChannelImpl();
@@ -104,12 +107,46 @@ export class CliChannel implements Cli {
         });
     }
 
+    // if (TelemetryConfiguration.getInstance().isEnabled()) {
+    //     this.envVars.put("ODO_TRACKING_CONSENT", "yes");
+    //     this.envVars.put("TELEMETRY_CALLER", "intellij");
+    // } else {
+    //     this.envVars.put("ODO_TRACKING_CONSENT", "no");
+    // }
+
+
+    static createTelemetryEnv(): {[key:string]: string} {
+        const env = {
+            ...process.env,
+            TELEMETRY_CALLER: 'vscode',
+            ODO_TRACKING_CONSENT: 'no',
+        };
+
+        if (CliChannel.telemetrySettings.isTelemetryEnabled()) {
+            env.ODO_TRACKING_CONSENT = process.env.VSCODE_REDHAT_TELEMETRY_DEBUG === 'true' ? 'no' : 'yes';
+        }
+
+        return env;
+    }
+
+    static applyEnv<T extends cp.ProcessEnvOptions>(opts: T, env: {[key:string]: string}): cp.ExecOptions {
+        let optsCopy: cp.ExecOptions;
+        if (opts) {
+            optsCopy = { ...opts };
+            optsCopy.env = opts.env ? {...process.env, ...opts.env, ...env} : env;
+        } else {
+            optsCopy = { env: {...process.env, ...env }}
+        }
+        return optsCopy;
+    }
+
     async executeTool(command: CommandText, opts?: cp.ExecOptions, fail = false): Promise<CliExitData> {
-        const commandActual = `${command}`;
-        const commandPrivacy = `${command.privacyMode(true)}`;
+        const commandActual = command.toString();
+        const commandPrivacy = command.privacyMode(true).toString();
         const [cmd] = commandActual.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
-        const result: CliExitData = await this.execute(toolLocation ? commandActual.replace(cmd, `"${toolLocation}"`) : commandActual, opts);
+        const optsCopy = CliChannel.applyEnv(opts, CliChannel.createTelemetryEnv())
+        const result: CliExitData = await this.execute(toolLocation ? commandActual.replace(cmd, `"${toolLocation}"`) : commandActual, optsCopy);
         if (result.error && fail) {
             throw new VsCommandError(`${result.error.message}`, `Error when running command: ${commandPrivacy}`, result.error);
         };
@@ -119,7 +156,8 @@ export class CliChannel implements Cli {
     async executeInTerminal(command: CommandText, cwd: string, name: string, env = process.env): Promise<void> {
         const [cmd, ...params] = command.toString().split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
-        const terminal: vscode.Terminal = WindowUtil.createTerminal(name, cwd, env);
+        const envWithTelemetry = {...env, ...CliChannel.createTelemetryEnv()};
+        const terminal: vscode.Terminal = WindowUtil.createTerminal(name, cwd, envWithTelemetry);
         terminal.sendText(toolLocation === cmd ? command.toString() : toolLocation.concat(' ', ...params), true);
         terminal.show();
     }
@@ -130,7 +168,8 @@ export class CliChannel implements Cli {
 
     async spawnTool(cmd: CommandText, opts: cp.SpawnOptions = {cwd: undefined, env: process.env}): Promise<cp.ChildProcess> {
         const toolLocation = await ToolsConfig.detect(cmd.command);
-        return cp.spawn(toolLocation, [cmd.parameter, ...cmd.options.map((o)=>o.toString())], opts);
+        const optWithTelemetryEnv = CliChannel.applyEnv(opts, CliChannel.createTelemetryEnv());
+        return cp.spawn(toolLocation, [cmd.parameter, ...cmd.options.map((o)=>o.toString())], optWithTelemetryEnv);
     }
 
 }

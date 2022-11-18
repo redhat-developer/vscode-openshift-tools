@@ -89,8 +89,8 @@ suite('K8s/deployment', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        termStub =  sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined});
+        termStub =  sandbox.stub(CliChannel.prototype, 'executeInTerminal');
+        execStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves({ stdout: '', stderr: undefined, error: undefined});
         sandbox.stub(Progress, 'execFunctionWithProgress').yields();
     });
 

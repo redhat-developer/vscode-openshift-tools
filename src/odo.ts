@@ -12,7 +12,6 @@
 import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFolder, Command as VSCommand } from 'vscode';
 import * as path from 'path';
 import { Subject } from 'rxjs';
-import { ChildProcess } from 'child_process';
 import * as cliInstance from './cli';
 import { WindowUtil } from './util/windowUtils';
 import { ToolsConfig } from './tools';
@@ -314,7 +313,6 @@ export interface Odo {
     getClusterServiceVersion(svc: string): Promise<ClusterServiceVersionKind>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     execute(command: CommandText, cwd?: string, fail?: boolean, addEnv?: any): Promise<cliInstance.CliExitData>;
-    spawn(command: string, cwd?: string): Promise<ChildProcess>;
     executeInTerminal(command: CommandText, cwd?: string, name?: string): Promise<void>;
     requireLogin(): Promise<boolean>;
     clearCache?(): void;
@@ -679,22 +677,16 @@ export class OdoImpl implements Odo {
         }
     }
 
-    public createEnv(): any {
-        const env = {...process.env };
-        env.ODO_DISABLE_TELEMETRY = 'true';
-        return env;
-    }
-
     public async executeInTerminal(command: CommandText, cwd: string = process.cwd(), name = 'OpenShift'): Promise<void> {
         const [cmd] = `${command}`.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
-        const terminal: Terminal = WindowUtil.createTerminal(name, cwd, this.createEnv());
+        const terminal: Terminal = WindowUtil.createTerminal(name, cwd, cliInstance.CliChannel.createTelemetryEnv());
         terminal.sendText(toolLocation === cmd ? `${command}` : `${command}`.replace(cmd, `"${toolLocation}"`), true);
         terminal.show();
     }
 
     public async execute(command: CommandText, cwd?: string, fail = true, addEnv = {}): Promise<cliInstance.CliExitData> {
-        const env = this.createEnv();
+        const env = cliInstance.CliChannel.createTelemetryEnv();
         const commandActual = `${command}`;
         const commandPrivacy = `${command.privacyMode(true)}`;
         const [cmd] = commandActual.split(' ');
@@ -707,16 +699,6 @@ export class OdoImpl implements Odo {
             throw new VsCommandError(`${result.error.message}`, `Error when running command: ${commandPrivacy}`, result.error);
         };
         return result;
-    }
-
-    public async spawn(command: string, cwd?: string): Promise<ChildProcess> {
-        const [tool, ...params] = command.split(' ');
-        const toolLocation = await ToolsConfig.detect(tool);
-        const defaultOptions = {
-            cwd,
-            env: process.env
-        };
-        return OdoImpl.cli.spawn(toolLocation, params, defaultOptions);
     }
 
     public async requireLogin(): Promise<boolean> {

@@ -10,6 +10,7 @@ import * as sinon from 'sinon';
 import { OdoImpl } from '../../../src/odo';
 import { Console } from '../../../src/k8s/console';
 import { KubeConfigUtils } from '../../../src/util/kubeUtils';
+import { CliChannel } from '../../../src/cli';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -17,6 +18,7 @@ chai.use(sinonChai);
 suite('K8s/console', () => {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
+    let cliExecStub: sinon.SinonStub;
     let commandStub: any;
 
     const k8sConfig = new KubeConfigUtils();
@@ -35,6 +37,7 @@ suite('K8s/console', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined});
+        cliExecStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves({ stdout: '', stderr: undefined, error: undefined});
         commandStub = sandbox.stub(vscode.commands, 'executeCommand');
     });
 
@@ -45,7 +48,7 @@ suite('K8s/console', () => {
     suite('BuildConfig', () => {
 
         test('Open the Build Config Url for 4.x cluster', async () => {
-            execStub.onFirstCall().resolves({
+            cliExecStub.onFirstCall().resolves({
                 error: null,
                 stderr: '',
                 stdout: JSON.stringify({
@@ -61,8 +64,8 @@ suite('K8s/console', () => {
         });
 
         test('Open the Build Config Url for 3.x cluster', async () => {
-            execStub.onFirstCall().rejects('error');
-            execStub.onSecondCall().resolves({
+            cliExecStub.onFirstCall().rejects('error');
+            cliExecStub.onSecondCall().resolves({
                 error: null,
                 stderr: '',
                 stdout: 'https://162.165.64.43:8443'
@@ -77,7 +80,7 @@ suite('K8s/console', () => {
     suite('DeploymentConfig', () => {
 
         test('Open the Deployment Config Url for 4.x cluster', async () => {
-            execStub.onFirstCall().resolves({
+            cliExecStub.onFirstCall().resolves({
                 error: null,
                 stderr: '',
                 stdout: JSON.stringify({
@@ -93,8 +96,8 @@ suite('K8s/console', () => {
         });
 
         test('Open the Deployment Config Url for 3.x cluster', async () => {
-            execStub.onFirstCall().rejects('error');
-            execStub.onSecondCall().resolves({
+            cliExecStub.onFirstCall().rejects('error');
+            cliExecStub.onSecondCall().resolves({
                 error: null,
                 stderr: '',
                 stdout: 'https://162.165.64.43:8443'
@@ -109,7 +112,7 @@ suite('K8s/console', () => {
     suite('openImageStream', () => {
 
         test('Open the Image Stream Url for 4.x cluster', async () => {
-            execStub.onFirstCall().resolves({
+            cliExecStub.onFirstCall().resolves({
                 error: null,
                 stderr: '',
                 stdout: JSON.stringify({
@@ -125,8 +128,8 @@ suite('K8s/console', () => {
         });
 
         test('Open the Image Stream Url for 3.x cluster', async () => {
-            execStub.onFirstCall().rejects('error');
-            execStub.onSecondCall().resolves({
+            cliExecStub.onFirstCall().rejects('error');
+            cliExecStub.onSecondCall().resolves({
                 error: null,
                 stderr: '',
                 stdout: 'https://162.165.64.43:8443'
@@ -141,7 +144,7 @@ suite('K8s/console', () => {
     suite('openProject', () => {
 
         test('Open the Project Url for 4.x cluster', async () => {
-            execStub.onFirstCall().resolves({
+            cliExecStub.onFirstCall().resolves({
                 error: null,
                 stderr: '',
                 stdout: JSON.stringify({
@@ -156,8 +159,8 @@ suite('K8s/console', () => {
         });
 
         test('Open the Project Url for 3.x cluster', async () => {
-            execStub.onFirstCall().rejects('error');
-            execStub.onSecondCall().resolves({
+            cliExecStub.onFirstCall().rejects('error');
+            cliExecStub.onSecondCall().resolves({
                 error: null,
                 stderr: '',
                 stdout: 'https://162.165.64.43:8443'
