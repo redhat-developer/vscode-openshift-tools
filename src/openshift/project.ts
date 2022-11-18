@@ -41,7 +41,7 @@ export class Project extends OpenShiftItem {
             await commands.executeCommand('openshift.project.create');
         } else {
             const project = selectedItem as OpenShiftObject;
-            await Project.odo.execute(Command.setActiveProject(project.getName()));
+            await CliChannel.getInstance().executeTool(Command.setActiveProject(project.getName()));
             Project.explorer.refresh();
             message = `Project '${project.getName()}' set as active.`;
         }

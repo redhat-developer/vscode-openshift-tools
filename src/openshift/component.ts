@@ -24,6 +24,7 @@ import { NewComponentCommandProps } from '../telemetry';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
 import LogViewLoader from '../webview/log/LogViewLoader';
 import GitImportLoader from '../webview/git-import/gitImportLoader';
+import { CliChannel } from '../cli';
 
 function createCancelledResult(stepName: string): any {
     const cancelledResult: any = new String('');
@@ -192,7 +193,7 @@ export class Component extends OpenShiftItem {
         const cs = Component.getComponentDevState(component);
         cs.devStatus = ComponentContextState.DEV_STARTING;
         Component.stateChanged.fire(component.contextPath)
-        await Component.odo.execute(Command.deletePreviouslyPushedResouces(component.component.devfileData.devfile.metadata.name), undefined, false);
+        await CliChannel.getInstance().executeTool(Command.deletePreviouslyPushedResouces(component.component.devfileData.devfile.metadata.name), undefined, false);
         const outputEmitter = new EventEmitter<string>();
         let devProcess: ChildProcess;
         try {
@@ -202,7 +203,7 @@ export class Component extends OpenShiftItem {
                     onDidWrite: outputEmitter.event,
                     open: () => {
                         outputEmitter.fire(`Starting ${Command.dev(component.component.devfileData.supportedOdoFeatures.debug).toString()}\r\n`);
-                        void Component.odo.spawn(Command.dev(component.component.devfileData.supportedOdoFeatures.debug).toString(), component.contextPath).then((cp) => {
+                        void CliChannel.getInstance().spawnTool(Command.dev(component.component.devfileData.supportedOdoFeatures.debug), {cwd: component.contextPath}).then((cp) => {
                             devProcess = cp;
                             devProcess.on('spawn', () => {
                                 cs.devTerminal.show();
@@ -492,7 +493,7 @@ export class Component extends OpenShiftItem {
                 } else {
                     progressIndicator.placeholder = 'Loading Starter Projects for selected Component Type'
                     progressIndicator.show();
-                    const descr = await Component.odo.execute(Command.describeCatalogComponent(componentType.name, componentType.registryName));
+                    const descr = await CliChannel.getInstance().executeTool(Command.describeCatalogComponent(componentType.name, componentType.registryName));
                     const starterProjects: StarterProject[] = Component.odo.loadItems<StarterProject>(descr, (data: ComponentTypeDescription[]) => {
                         const dfCompType = data.find((comp) => comp.registry.name === componentType.registryName);
                         return dfCompType.devfileData.devfile.starterProjects
