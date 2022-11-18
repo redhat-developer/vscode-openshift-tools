@@ -373,6 +373,10 @@ export class Command {
         return new CommandText('oc config delete-context', name);
     }
 
+    static deleteCluster(name: string): CommandText {
+        return new CommandText('oc config delete-cluster',`${name}`);
+    }
+
     static getServiceTemplate(project: string, service: string): CommandText {
         return new CommandText('oc get ServiceInstance',
             service, [
