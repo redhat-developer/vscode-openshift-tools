@@ -17,7 +17,6 @@ chai.use(sinonChai);
 
 suite('K8s/console', () => {
     let sandbox: sinon.SinonSandbox;
-    let execStub: sinon.SinonStub;
     let cliExecStub: sinon.SinonStub;
     let commandStub: any;
 
@@ -36,7 +35,6 @@ suite('K8s/console', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined});
         cliExecStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves({ stdout: '', stderr: undefined, error: undefined});
         commandStub = sandbox.stub(vscode.commands, 'executeCommand');
     });
