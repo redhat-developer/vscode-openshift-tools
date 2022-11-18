@@ -8,7 +8,7 @@ import * as path from 'path';
 import { QuickPickItem } from 'vscode';
 import { KubeConfig, findHomeDir, loadYaml } from '@kubernetes/client-node';
 import { User, Cluster, Context } from '@kubernetes/client-node/dist/config_types';
-import { getInstance, Odo } from '../odo';
+import { OdoImpl } from '../odo';
 import { VsCommandError } from '../vscommand';
 
 function fileExists(file: string): boolean {
@@ -22,8 +22,7 @@ function fileExists(file: string): boolean {
 
 export class KubeConfigUtils extends KubeConfig {
 
-    protected static readonly odo: Odo = getInstance();
-
+    public readonly loadingError: any;
     constructor() {
         super();
         try {
@@ -38,10 +37,14 @@ export class KubeConfigUtils extends KubeConfig {
 
     async deleteContext(context: Context) {
         try{
-            await KubeConfigUtils.odo.deleteContext(context);
+            await KubeConfigUtils.getOdoInstance().deleteContext(context);
         } catch(error) {
             throw new VsCommandError(`Unable to delete the context '${context.name}'`, 'Failed to delete context');
         }
+    }
+
+    protected static getOdoInstance() {
+       return OdoImpl.Instance;
     }
 
     findHomeDir() {
