@@ -161,39 +161,45 @@ export class Cluster extends OpenShiftItem {
     private static async showQuikPick(clusterURl: string): Promise<string> {
         return await new Promise<string | null>((resolve, reject) => {
             const k8sConfig = new KubeConfigUtils();
-            const addBtn = new quickBtn(new ThemeIcon('plus'), 'Add');
-            const switchBtn = new quickBtn(new ThemeIcon('arrow-swap'), 'Switch');
             const deleteBtn = new quickBtn(new ThemeIcon('trash'), 'Delete');
-            const createUrl: QuickPickItem = { label: 'Provide new URL...', buttons: [addBtn] };
+            const createUrl: QuickPickItem = { label: '$(plus) Provide new URL...' };
             const clusterItems = k8sConfig.getServers();
             const quickPick = window.createQuickPick();
-            const contextNames: QuickPickItem[] = clusterItems.map((ctx) => ({ label: `${ctx.label}`, buttons: [switchBtn, deleteBtn] }));
+            const contextNames: QuickPickItem[] = clusterItems.map((ctx) => ({ label: `${ctx.label}`, buttons: [deleteBtn] }));
             quickPick.items = [createUrl, ...contextNames];
-            quickPick.onDidTriggerItemButton(async (event) => {
-                if (event.button instanceof quickBtn) {
-                    if (event.button.iconPath.id === 'plus') {
+            let selection: readonly QuickPickItem[] | undefined;
+            quickPick.onDidAccept(() => {
+                if (selection && selection.length > 0) {
+                    const choice = Array.from(selection).pop();
+                    if (choice.label === createUrl.label) {
                         resolve(window.showInputBox({
                             value: clusterURl,
                             ignoreFocusOut: true,
                             prompt: 'Provide new Cluster URL to connect',
                             validateInput: (value: string) => Cluster.validateUrl('Invalid URL provided', value)
                         }));
-                    } else if (event.button.iconPath.id === 'arrow-swap') {
-                        resolve(event.item.label);
-                    } else if (event.button.iconPath.id === 'trash') {
-                        await window.showInformationMessage('Are you sure want to delete the Cluster?', 'Yes', 'No')
-                            .then(async answer => {
-                                if (answer === 'Yes') {
-                                    const cluster = k8sConfig.getClusters().filter((kubeConfigCluster) => kubeConfigCluster.server === event.item.label).pop();
-                                    try {
-                                        await k8sConfig.deleteCluster(cluster);
-                                        resolve('');
-                                    } catch (err) {
-                                        reject(null);
-                                    }
-                                }
-                            });
+                    } else {
+                        resolve(choice.label);
                     }
+                }
+            });
+            quickPick.onDidChangeSelection((selects) => {
+                selection = selects;
+            });
+            quickPick.onDidTriggerItemButton(async (event) => {
+                if (event.button === deleteBtn) {
+                    await window.showInformationMessage('Are you sure want to delete the Cluster?', 'Yes', 'No')
+                        .then(async answer => {
+                            if (answer === 'Yes') {
+                                const cluster = k8sConfig.getClusters().filter((kubeConfigCluster) => kubeConfigCluster.server === event.item.label).pop();
+                                try {
+                                    await CliChannel.getInstance().executeTool(Command.deleteCluster(cluster.name));
+                                    resolve('');
+                                } catch (err) {
+                                    reject(err);
+                                }
+                            }
+                        });
                 }
             });
             quickPick.show();
