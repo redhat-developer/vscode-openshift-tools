@@ -7,7 +7,6 @@ import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { OdoImpl } from '../../../src/odo';
 import { Console } from '../../../src/k8s/console';
 import { KubeConfigUtils } from '../../../src/util/kubeUtils';
 import { CliChannel } from '../../../src/cli';
