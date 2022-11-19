@@ -395,15 +395,15 @@ suite('Openshift/Cluster', () => {
             execStub.onFirstCall().resolves();
         });
 
-        test('changes cluster\'s context', () => {
+        test('changes cluster\'s context', async () => {
             quickPickStub.onFirstCall().resolves(choice);
-            const result = Cluster.manageContext();
+            const result = await Cluster.switchContext();
             expect(result).equals(`Cluster context is changed to: ${choice.label}`);
         });
 
-        test('returns null if OpenShift context is not selected', () => {
+        test('returns null if OpenShift context is not selected', async () => {
             quickPickStub.onFirstCall().resolves(null);
-            const result = Cluster.manageContext();
+            const result = await Cluster.switchContext();
             expect(result).null;
         });
     });
