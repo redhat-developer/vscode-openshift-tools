@@ -105,42 +105,57 @@ export class Cluster extends OpenShiftItem {
         });
     }
 
-    @vsCommand('openshift.explorer.manageContext')
-    static manageContext(): string {
-        const k8sConfig = new KubeConfigUtils();
-        const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
-        const switchBtn = new quickBtn(new ThemeIcon('arrow-swap'),'Switch Context');
-        const deleteBtn = new quickBtn(new ThemeIcon('trash'), 'Delete');
-        const quickPick = window.createQuickPick();
-        const contextNames: QuickPickItem[] = contexts.map((ctx) => ({ label: `${ctx.name}`, buttons: [switchBtn, deleteBtn] }));
-        quickPick.items = contextNames;
-        quickPick.onDidTriggerItemButton(async (event: QuickPickItemButtonEvent<QuickPickItem>) => {
-            if (event.button instanceof quickBtn) {
-                if (event.button.iconPath.id === 'arrow-swap') {
-                    await window.showInformationMessage('Are you sure to switch the context?', 'Yes', 'No')
-                        .then(async answer => {
-                            if (answer === 'Yes') {
-                                await Cluster.odo.execute(Command.setOpenshiftContext(event.item.label));
-                                return `Cluster context is changed to: ${event.item.label}`;
-                            }
-                        });
-                } else if (event.button.iconPath.id === 'trash') {
-                    await window.showInformationMessage('Are you sure you want to delete this cluster information from kubeconfig?', 'Yes', 'No')
-                        .then(async answer => {
-                            if (answer === 'Yes') {
-                                const context = k8sConfig.getContextObject(event.item.label);
-                                const index = contexts.indexOf(context);
-                                if(index > -1) {
-                                    await k8sConfig.deleteContext(context);
-                                    return `Context ${context.name} deleted`;
+    @vsCommand('openshift.explorer.switchContext')
+    static async switchContext(): Promise<string> {
+        return await new Promise<string>((resolve, reject) => {
+            const k8sConfig = new KubeConfigUtils();
+            const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
+            const deleteBtn = new quickBtn(new ThemeIcon('trash'), 'Delete');
+            const quickPick = window.createQuickPick();
+            const contextNames: QuickPickItem[] = contexts.map((ctx) => ({ label: `${ctx.name}`, buttons: [deleteBtn] }));
+            quickPick.items = contextNames;
+            if (contextNames.length === 0) {
+                void window.showInformationMessage('You have no Kubernetes contexts yet, please login to a cluster.', 'Login', 'Cancel')
+                    .then((command: string) => {
+                        if (command === 'Login') {
+                            resolve(Cluster.login(undefined, true));
+                        }
+                        resolve(null);
+                    })
+            } else {
+                let selection: readonly QuickPickItem[] | undefined;
+                quickPick.onDidChangeSelection((selects) => {
+                    selection = selects;
+                });
+                quickPick.onDidAccept(async () => {
+                    if (selection && selection.length > 0) {
+                        const choice = Array.from(selection).pop();
+                        await Cluster.odo.execute(Command.setOpenshiftContext(choice.label));
+                        resolve(`Cluster context is changed to: ${choice.label}`);
+                    }
+                });
+                quickPick.onDidTriggerItemButton(async (event: QuickPickItemButtonEvent<QuickPickItem>) => {
+                    if (event.button === deleteBtn) {
+                        await window.showInformationMessage('Are you sure you want to delete this cluster information from kubeconfig?', 'Yes', 'No')
+                            .then(async answer => {
+                                if (answer === 'Yes') {
+                                    const context = k8sConfig.getContextObject(event.item.label);
+                                    const index = contexts.indexOf(context);
+                                    if (index > -1) {
+                                        try {
+                                            await CliChannel.getInstance().executeTool(Command.deleteContext(context.name));
+                                            resolve(`Context ${context.name} deleted`);
+                                        } catch (err) {
+                                            reject(err);
+                                        }
+                                    }
                                 }
-                            }
-                        });
-                }
+                            });
+                    }
+                });
+                quickPick.show();
             }
         });
-        quickPick.show();
-        return '';
     }
 
     static async getUrl(): Promise<string | null> {
