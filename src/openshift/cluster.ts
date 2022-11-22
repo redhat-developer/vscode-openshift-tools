@@ -155,11 +155,11 @@ export class Cluster extends OpenShiftItem {
 
     static async getUrl(): Promise<string | null> {
         const clusterURl = await Cluster.getUrlFromClipboard();
-        return await Cluster.showQuikPick(clusterURl);
+        return await Cluster.showQuickPick(clusterURl);
     }
 
-    private static async showQuikPick(clusterURl: string): Promise<string> {
-        return await new Promise<string | null>((resolve, reject) => {
+    private static async showQuickPick(clusterURl: string): Promise<string> {
+        return new Promise<string | null>((resolve, reject) => {
             const k8sConfig = new KubeConfigUtils();
             const deleteBtn = new quickBtn(new ThemeIcon('trash'), 'Delete');
             const createUrl: QuickPickItem = { label: '$(plus) Provide new URL...' };
