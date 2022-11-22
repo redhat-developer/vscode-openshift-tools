@@ -107,7 +107,7 @@ export class Cluster extends OpenShiftItem {
 
     @vsCommand('openshift.explorer.switchContext')
     static async switchContext(): Promise<string> {
-        return await new Promise<string>((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
             const k8sConfig = new KubeConfigUtils();
             const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
             const deleteBtn = new quickBtn(new ThemeIcon('trash'), 'Delete');
