@@ -87,7 +87,7 @@
 	"dependencies": {
 		"@kubernetes/client-node": "^0.16.1",
 		"@octokit/rest": "^16.30.1",
-		"@redhat-developer/vscode-redhat-telemetry": "^0.4.2",
+		"@redhat-developer/vscode-redhat-telemetry": "^0.5.2",
 		"binary-search": "^1.3.6",
 		"byline": "^5.0.0",
 		"clsx": "^1.1.1",
@@ -753,7 +753,7 @@
 				"title": "Open in Browser",
 				"category": "OpenShift"
 			},
-            {
+			{
 				"command": "openshift.componentTypesView.registry.openInEditor",
 				"title": "Open in Editor",
 				"category": "OpenShift"
@@ -1010,10 +1010,10 @@
 					"command": "openshift.componentTypesView.registry.openInBrowser",
 					"when": "false"
 				},
-                {
-                    "command": "openshift.componentTypesView.registry.openInEditor",
+				{
+					"command": "openshift.componentTypesView.registry.openInEditor",
 					"when": "false"
-                },
+				},
 				{
 					"command": "openshift.resource.load",
 					"when": "false"
@@ -1305,7 +1305,7 @@
 					"when": "view == openshiftComponentTypesView && viewItem == devfileRegistry",
 					"group": "0@0"
 				},
-                {
+				{
 					"command": "openshift.componentTypesView.registry.openInEditor",
 					"when": "view == openshiftComponentTypesView && viewItem == devfileRegistry",
 					"group": "0@0"
