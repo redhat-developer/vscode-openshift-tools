@@ -46,6 +46,7 @@ export class Command {
                         projectName: event.projectName,
                         applicationName: event.applicationName,
                         compName: event.componentName,
+                        registryName: event.compDesc?.registry.name,
                         devFilePath: !event.devFilePath || event.devFilePath === 'devfile.yaml' || event.devFilePath === 'devfile.yml' ?
                             '' : event.devFilePath
                     }, true);

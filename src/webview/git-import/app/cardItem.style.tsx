@@ -5,7 +5,7 @@
 
 import { Theme, createStyles } from '@material-ui/core/styles';
 
-export default (theme: Theme) =>
+export default (_theme: Theme) =>
     createStyles({
         card: {
             display: 'inline-table',
@@ -43,17 +43,17 @@ export default (theme: Theme) =>
         },
         cardBody: {
             height: 'auto',
+            width: '50%',
             overflow: 'hidden',
             margin: '1.5rem 1rem'
         },
         cardRegistryTitle: {
-            color: 'var(--vscode-textLink-activeForeground)',
             minWidth: '5rem',
             height: '2rem',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             display: 'block',
-            textAlign: 'left',
+            textAlign: 'right',
             textDecoration: 'none',
             textOverflow: 'ellipsis',
             wordBreak: 'break-all',
@@ -62,38 +62,12 @@ export default (theme: Theme) =>
             margin: '1rem'
         },
         badge: {
-            minWidth: '0.5rem',
-            maxWidth: '5rem',
+            height: '1px',
             padding: '0.5rem',
-            minHeight: '2px',
-            maxHeight: '1rem',
             borderRadius: '0.5rem!important',
-            marginLeft: '0.5rem',
             alignItems: 'center',
             color: 'inherit',
-            backgroundColor: 'var(--vscode-badge-background)',
             outline: '0.0625rem solid',
-            outlineColor: 'inherit'
-        },
-        headerBadge: {
-            height: '1px',
-            outline: 'none'
-        },
-        firstBadge: {
-            marginLeft: '0rem'
-        },
-        cardFooterTag: {
-            marginTop: '0.125rem',
-            marginLeft: '1.5rem',
-            marginBottom: '1rem'
-        },
-        text: {
-            textAlign: 'right'
-        },
-        longDescription: {
-            overflow: 'hidden',
-            display: '-webkit-box',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical'
+            outlineColor: '#EE0000'
         }
     });
