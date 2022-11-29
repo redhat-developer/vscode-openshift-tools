@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace, WebviewPanel, Progress as VProgress } from 'vscode';
+import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace, WebviewPanel, Progress as VProgress, QuickPickItemButtonEvent, ThemeIcon, QuickInputButton } from 'vscode';
 import { Command } from '../odo/command';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import { CliExitData, CliChannel } from '../cli';
@@ -22,6 +22,10 @@ interface Versions {
     'kubernetes_version': string;
 }
 
+class quickBtn implements QuickInputButton {
+    constructor(public iconPath: ThemeIcon, public tooltip: string) { }
+}
+
 export class Cluster extends OpenShiftItem {
     public static extensionContext: ExtensionContext;
 
@@ -34,7 +38,7 @@ export class Cluster extends OpenShiftItem {
             .then(async (result) => {
                 if (result.stderr === '') {
                     Cluster.explorer.refresh();
-                    commands.executeCommand('setContext', 'isLoggedIn', false);
+                    void commands.executeCommand('setContext', 'isLoggedIn', false);
                     const logoutInfo = await window.showInformationMessage('Successfully logged out. Do you want to login to a new cluster', 'Yes', 'No');
                     if (logoutInfo === 'Yes') {
                         return Cluster.login(undefined, true);
@@ -103,20 +107,50 @@ export class Cluster extends OpenShiftItem {
 
     @vsCommand('openshift.explorer.switchContext')
     static async switchContext(): Promise<string> {
-        const k8sConfig = new KubeConfigUtils();
-        const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
-        const contextName: QuickPickItem[] = contexts.map((ctx) => ({ label: `${ctx.name}`}));
-        if (contextName.length === 0) {
-            const command = await window.showInformationMessage('You have no Kubernetes contexts yet, please login to a cluster.', 'Login', 'Cancel');
-            if (command === 'Login') {
-                return Cluster.login(undefined, true);
+        return new Promise<string>((resolve, reject) => {
+            const k8sConfig = new KubeConfigUtils();
+            const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
+            const deleteBtn = new quickBtn(new ThemeIcon('trash'), 'Delete');
+            const quickPick = window.createQuickPick();
+            const contextNames: QuickPickItem[] = contexts.map((ctx) => ({ label: `${ctx.name}`, buttons: [deleteBtn] }));
+            quickPick.items = contextNames;
+            if (contextNames.length === 0) {
+                void window.showInformationMessage('You have no Kubernetes contexts yet, please login to a cluster.', 'Login', 'Cancel')
+                    .then((command: string) => {
+                        if (command === 'Login') {
+                            resolve(Cluster.login(undefined, true));
+                        }
+                        resolve(null);
+                    })
+            } else {
+                let selection: readonly QuickPickItem[] | undefined;
+                const hideDisposable = quickPick.onDidHide(() => resolve(null));
+                quickPick.onDidChangeSelection((selects) => {
+                    selection = selects;
+                });
+                quickPick.onDidAccept(() => {
+                    const choice = selection[0];
+                    hideDisposable.dispose();
+                    quickPick.hide();
+                    Cluster.odo.execute(Command.setOpenshiftContext(choice.label))
+                        .then(() => resolve(`Cluster context is changed to: ${choice.label}.`))
+                        .catch(reject);
+                });
+                quickPick.onDidTriggerItemButton(async (event: QuickPickItemButtonEvent<QuickPickItem>) => {
+                    const answer = await window.showInformationMessage(`Do you want to delete '${event.item.label}' Context from Kubernetes configuration?`, 'Yes', 'No');
+                    if (answer === 'Yes') {
+                        const context = k8sConfig.getContextObject(event.item.label);
+                        const index = contexts.indexOf(context);
+                        if (index > -1) {
+                            CliChannel.getInstance().executeTool(Command.deleteContext(context.name))
+                                .then(() => resolve(`Context ${context.name} deleted.`))
+                                .catch(reject);
+                        }
+                    }
+                });
+                quickPick.show();
             }
-            return null;
-        }
-        const choice = await window.showQuickPick(contextName, {placeHolder: 'Select a new OpenShift context'});
-        if (!choice) return null;
-        await Cluster.odo.execute(Command.setOpenshiftContext(choice.label));
-        return `Cluster context is changed to: ${choice.label}`;
+        });
     }
 
     static async getUrl(): Promise<string | null> {

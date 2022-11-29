@@ -369,6 +369,10 @@ export class Command {
         return new CommandText('oc delete', name);
     }
 
+    static deleteContext(name: string): CommandText {
+        return new CommandText('oc config delete-context', name);
+    }
+
     static getServiceTemplate(project: string, service: string): CommandText {
         return new CommandText('oc get ServiceInstance',
             service, [

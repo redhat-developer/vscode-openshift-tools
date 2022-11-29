@@ -19,6 +19,7 @@ function fileExists(file: string): boolean {
 }
 
 export class KubeConfigUtils extends KubeConfig {
+
     public readonly loadingError: any;
     constructor() {
         super();
