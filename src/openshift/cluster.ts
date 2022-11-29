@@ -124,11 +124,13 @@ export class Cluster extends OpenShiftItem {
                     })
             } else {
                 let selection: readonly QuickPickItem[] | undefined;
+                const hideDisposable = quickPick.onDidHide(() => resolve(null));
                 quickPick.onDidChangeSelection((selects) => {
                     selection = selects;
                 });
                 quickPick.onDidAccept(() => {
                     const choice = selection[0];
+                    hideDisposable.dispose();
                     quickPick.hide();
                     Cluster.odo.execute(Command.setOpenshiftContext(choice.label))
                         .then(() => resolve(`Cluster context is changed to: ${choice.label}.`))
