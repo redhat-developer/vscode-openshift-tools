@@ -278,7 +278,8 @@ export class GitImport extends React.Component<DefaultProps, {
 
     handleSelectedCard(compTypeDesc: CompTypeDesc): void {
         this.state.compDescription.forEach((compDesc) => {
-            if (compDesc.devfileData.devfile.metadata.name === compTypeDesc.devfileData.devfile.metadata.name) {
+            if (compDesc.devfileData.devfile.metadata.name === compTypeDesc.devfileData.devfile.metadata.name
+                && compDesc.registry.name === compTypeDesc.registry.name) {
                 compTypeDesc.selected = !compTypeDesc.selected;
                 compDesc.selected = compTypeDesc.selected;
             } else {
@@ -341,7 +342,7 @@ export class GitImport extends React.Component<DefaultProps, {
                                 helperText={gitURL.helpText}>
                             </TextField>
                             {gitURL.helpText !== '' ?
-                                gitURL.helpText === 'Validated' ?
+                                gitURL.helpText.indexOf('valid') !== -1 ?
                                     <CheckCircleIcon color='success' style={{ paddingTop: '1rem' }} /> :
                                     gitURL.helpText.indexOf('but cannot be reached') !== -1 ?
                                         <ErrorIcon color='warning' style={{ paddingTop: '1rem' }} /> :
