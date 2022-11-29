@@ -38,7 +38,7 @@ export class Cluster extends OpenShiftItem {
             .then(async (result) => {
                 if (result.stderr === '') {
                     Cluster.explorer.refresh();
-                    commands.executeCommand('setContext', 'isLoggedIn', false);
+                    void commands.executeCommand('setContext', 'isLoggedIn', false);
                     const logoutInfo = await window.showInformationMessage('Successfully logged out. Do you want to login to a new cluster', 'Yes', 'No');
                     if (logoutInfo === 'Yes') {
                         return Cluster.login(undefined, true);
@@ -127,24 +127,22 @@ export class Cluster extends OpenShiftItem {
                 quickPick.onDidChangeSelection((selects) => {
                     selection = selects;
                 });
-                quickPick.onDidAccept(async () => {
+                quickPick.onDidAccept(() => {
                     const choice = selection[0];
                     quickPick.hide();
-                    await Cluster.odo.execute(Command.setOpenshiftContext(choice.label));
-                    resolve(`Cluster context is changed to: ${choice.label}`);
+                    Cluster.odo.execute(Command.setOpenshiftContext(choice.label))
+                        .then(() => resolve(`Cluster context is changed to: ${choice.label}.`))
+                        .catch(reject);
                 });
                 quickPick.onDidTriggerItemButton(async (event: QuickPickItemButtonEvent<QuickPickItem>) => {
-                    const answer = await window.showInformationMessage('Are you sure you want to delete this cluster information from kubeconfig?', 'Yes', 'No');
+                    const answer = await window.showInformationMessage(`Do you want to delete '${event.item.label}' Context from Kubernetes configuration?`, 'Yes', 'No');
                     if (answer === 'Yes') {
                         const context = k8sConfig.getContextObject(event.item.label);
                         const index = contexts.indexOf(context);
                         if (index > -1) {
-                            try {
-                                await CliChannel.getInstance().executeTool(Command.deleteContext(context.name));
-                                resolve(`Context ${context.name} deleted`);
-                            } catch (err) {
-                                reject(err);
-                            }
+                            CliChannel.getInstance().executeTool(Command.deleteContext(context.name))
+                                .then(() => resolve(`Context ${context.name} deleted.`))
+                                .catch(reject);
                         }
                     }
                 });
