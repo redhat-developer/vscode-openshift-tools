@@ -86,7 +86,7 @@ In the Devfile Registries view, there is an action to `Open Registry View` which
 
 The extension supports a number of commands to interact with OpenShift clusters and resources. The commands are accessible via the command palette (`Cmd+Shift+P` <kbd>⌘⇧P</kbd> on macOS or `Ctrl+Shift+P` <kbd>⌃⇧P</kbd> on Windows and Linux), Visual Studio Code View title buttons and tree context menus.
 
-For more detail information around specific commands and dependences, please read the [extension commands](README.commands.md) guide.
+For more detail information around specific commands and dependencies, please read the [extension commands](README.commands.md) guide.
 ## Release Notes
 
 See the [change log](CHANGELOG.md).
