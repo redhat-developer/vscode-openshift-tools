@@ -24,7 +24,7 @@ export class Oc {
             !(document.fileName.endsWith('.yaml') || document.fileName.endsWith('.json'))
         ) {
             message =
-                '\'OpenShift: Create\' command requires .yaml or .json a file opened in editor.';
+                '\'OpenShift: Create\' command requires a .yaml or a .json file opened in editor.';
         }
 
         if (!message && document.isUntitled) {
