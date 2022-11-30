@@ -168,38 +168,42 @@ export class Cluster extends OpenShiftItem {
             const contextNames: QuickPickItem[] = clusterItems.map((ctx) => ({ label: `${ctx.label}`, buttons: [deleteBtn] }));
             quickPick.items = [createUrl, ...contextNames];
             let selection: readonly QuickPickItem[] | undefined;
+            const hideDisposable = quickPick.onDidHide(() => resolve(null));
             quickPick.onDidAccept(() => {
-                if (selection && selection.length > 0) {
-                    const choice = Array.from(selection).pop();
-                    if (choice.label === createUrl.label) {
-                        resolve(window.showInputBox({
-                            value: clusterURl,
-                            ignoreFocusOut: true,
-                            prompt: 'Provide new Cluster URL to connect',
-                            validateInput: (value: string) => Cluster.validateUrl('Invalid URL provided', value)
-                        }));
-                    } else {
-                        resolve(choice.label);
-                    }
+                const choice = selection[0];
+                hideDisposable.dispose();
+                quickPick.hide();
+                if (choice.label === createUrl.label) {
+                    resolve(window.showInputBox({
+                        value: clusterURl,
+                        ignoreFocusOut: true,
+                        prompt: 'Provide new Cluster URL to connect',
+                        validateInput: (value: string) => Cluster.validateUrl('Invalid URL provided', value)
+                    }));
+                } else {
+                    resolve(choice.label);
                 }
             });
             quickPick.onDidChangeSelection((selects) => {
                 selection = selects;
             });
             quickPick.onDidTriggerItemButton(async (event) => {
-                if (event.button === deleteBtn) {
-                    await window.showInformationMessage('Are you sure want to delete the Cluster?', 'Yes', 'No')
-                        .then(async answer => {
-                            if (answer === 'Yes') {
-                                const cluster = k8sConfig.getClusters().filter((kubeConfigCluster) => kubeConfigCluster.server === event.item.label).pop();
-                                try {
-                                    await CliChannel.getInstance().executeTool(Command.deleteCluster(cluster.name));
-                                    resolve('');
-                                } catch (err) {
-                                    reject(err);
-                                }
-                            }
-                        });
+                const answer = await window.showInformationMessage('Are you sure want to delete the Cluster?', 'Yes', 'No')
+                if (answer === 'Yes') {
+                    const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
+                    const cluster = k8sConfig.getClusters().filter((kubeConfigCluster) => kubeConfigCluster.server === event.item.label).pop();
+                    const context = k8sConfig.getContexts().filter((kubeContext) => kubeContext.cluster === cluster.name).pop();
+                    if (context) {
+                        const index = contexts.indexOf(context);
+                        if (index < 0) {
+                            void window.showErrorMessage(`Unable to delete cluster ${cluster.server} which mapped as current context`);
+                            return;
+                        }
+                        await CliChannel.getInstance().executeTool(Command.deleteContext(context.name));
+                        const user = k8sConfig.getUsers().filter((confUser) => confUser.name === context.user).pop();
+                        await CliChannel.getInstance().executeTool(Command.deleteUser(user.name));
+                        CliChannel.getInstance().executeTool(Command.deleteCluster(cluster.name)).then(() => resolve('')).catch((reject));
+                    }
                 }
             });
             quickPick.show();
