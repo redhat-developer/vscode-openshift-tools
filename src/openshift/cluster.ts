@@ -190,20 +190,15 @@ export class Cluster extends OpenShiftItem {
             quickPick.onDidTriggerItemButton(async (event) => {
                 const answer = await window.showInformationMessage(`Do you want to delete ${event.item.label} Cluster and all the related Contexts and Users form Kubernetes configuration?`, 'Yes', 'No')
                 if (answer === 'Yes') {
-                    const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
-                    const cluster = k8sConfig.getClusters().filter((kubeConfigCluster) => kubeConfigCluster.server === event.item.label).pop();
-                    const context = k8sConfig.getContexts().filter((kubeContext) => kubeContext.cluster === cluster.name).pop();
-                    if (context) {
-                        const index = contexts.indexOf(context);
-                        if (index < 0) {
-                            void window.showErrorMessage(`Unable to delete cluster ${cluster.server} which mapped as current context`);
-                            return;
-                        }
-                        await CliChannel.getInstance().executeTool(Command.deleteContext(context.name));
-                        const user = k8sConfig.getUsers().filter((confUser) => confUser.name === context.user).pop();
-                        await CliChannel.getInstance().executeTool(Command.deleteUser(user.name));
-                        CliChannel.getInstance().executeTool(Command.deleteCluster(cluster.name)).then(() => resolve('')).catch((reject));
-                    }
+                    const cluster = k8sConfig.getClusters().find((kubeConfigCluster) => kubeConfigCluster.server === event.item.label);
+                    const contexts = k8sConfig.getContexts().filter((kubeContext) => kubeContext.cluster === cluster.name);
+                    // find users and remove duplicates
+                    const users = [ ...new Set(contexts.map(context => k8sConfig.getUser(context.user)))];
+
+                    await Promise.all(contexts.map((context) => CliChannel.getInstance().executeTool(Command.deleteContext(context.name))))
+                        .then(() => Promise.all(users.map(user => CliChannel.getInstance().executeTool(Command.deleteUser(user.name)))))
+                        .then(() => CliChannel.getInstance().executeTool(Command.deleteCluster(cluster.name)))
+                        .catch(reject)
                 }
             });
             quickPick.show();
