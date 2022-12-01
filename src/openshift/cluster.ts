@@ -188,7 +188,7 @@ export class Cluster extends OpenShiftItem {
                 selection = selects;
             });
             quickPick.onDidTriggerItemButton(async (event) => {
-                const answer = await window.showInformationMessage('Are you sure want to delete the Cluster?', 'Yes', 'No')
+                const answer = await window.showInformationMessage(`Do you want to delete ${event.item.label} Cluster and all the related Contexts and Users form Kubernetes configuration?`, 'Yes', 'No')
                 if (answer === 'Yes') {
                     const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
                     const cluster = k8sConfig.getClusters().filter((kubeConfigCluster) => kubeConfigCluster.server === event.item.label).pop();
