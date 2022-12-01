@@ -165,7 +165,7 @@ export class Cluster extends OpenShiftItem {
             const createUrl: QuickPickItem = { label: '$(plus) Provide new URL...' };
             const clusterItems = k8sConfig.getServers();
             const quickPick = window.createQuickPick();
-            const contextNames: QuickPickItem[] = clusterItems.map((ctx) => ({ label: `${ctx.label}`, buttons: [deleteBtn] }));
+            const contextNames: QuickPickItem[] = clusterItems.map((ctx) => ({ ...ctx, buttons: ctx.description ? [] : [deleteBtn] }));
             quickPick.items = [createUrl, ...contextNames];
             let selection: readonly QuickPickItem[] | undefined;
             const hideDisposable = quickPick.onDidHide(() => resolve(null));
