@@ -12,7 +12,7 @@ import { DetectedServiceData, DetectedStrategy, detectImportStrategies } from '.
 import { ComponentTypesView } from '../../registriesView';
 import { ComponentTypeDescription } from '../../odo/componentType';
 import { Response } from '../../git-import/types';
-import { Uri, workspace } from 'vscode';
+import { Uri } from 'vscode';
 import { Component } from '../../openshift/component';
 import OpenShiftItem from '../../openshift/openshiftItem';
 import { selectWorkspaceFolder } from '../../util/workspace';
