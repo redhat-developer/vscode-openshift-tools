@@ -119,15 +119,12 @@
 		"yaml": "^1.10.2"
 	},
 	"devDependencies": {
-		"@emotion/react": "^11.7.1",
-		"@emotion/styled": "^11.6.0",
-		"@material-ui/core": "^4.12.3",
-		"@material-ui/icons": "^4.11.3",
-		"@material-ui/lab": "^4.0.0-alpha.60",
+		"@emotion/react": "^11.10.5",
+		"@emotion/styled": "^11.10.5",
 		"@mui/core": "^5.0.0-alpha.54",
 		"@mui/icons-material": "^5.2.5",
 		"@mui/lab": "^5.0.0-alpha.61",
-		"@mui/material": "^5.4.1",
+		"@mui/material": "^5.10.16",
 		"@patternfly/react-core": "^4.198.19",
 		"@rjsf/material-ui": "^3.2.1",
 		"@segment/analytics-next": "^1.17.4",
