@@ -791,7 +791,20 @@
 				"command": "openshift.component.importFromGit",
 				"title": "Import Component from git repository",
 				"category": "OpenShift"
-			}
+			},
+            {
+                "command": "openshift.experimental.mode.enable",
+                "title": "Experimental Features",
+                "category": "OpenShift"
+            },
+            {
+                "command": "openshift.experimental.mode.disable",
+                "title": "✓ Experimental Features",
+                "category": "OpenShift"
+            },
+            {
+                "command": "openshift.component.dev.podman"
+            }
 		],
 		"keybindings": [
 			{
@@ -1086,7 +1099,15 @@
 					"command": "openshift.component.openImportFromGit",
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
-				}
+				},
+                {
+                    "command": "openshift.experimental.mode.enable",
+                    "when": "view == openshiftComponentsView && !config.openshiftToolkit.enableExperimentialMode"
+                },
+                {
+                    "command": "openshift.experimental.mode.disable",
+                    "when": "view == openshiftComponentsView && config.openshiftToolkit.enableExperimentialMode"
+                }
 			],
 			"view/item/context": [
 				{
@@ -1416,7 +1437,12 @@
 					"openshiftToolkit.showWelcomePage": {
 						"type": "boolean",
 						"default": true,
-						"description": "Show Welcome Page when using OpenShift Toolkit Extension"
+						"description": "Show Welcome Page when using OpenShift Toolkit Extension."
+					},
+					"openshiftToolkit.enableExperimentialMode": {
+						"type": "boolean",
+						"default": false,
+						"description": "Show OpenShift Toolkit Experimental Features."
 					},
 					"openshiftToolkit.showChannelOnOutput": {
 						"type": "boolean",
