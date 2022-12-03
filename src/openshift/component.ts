@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import { window, commands, Uri, workspace, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable, EventEmitter, Terminal } from 'vscode';
-import { ChildProcess } from 'child_process';
+import { ChildProcess, SpawnOptions } from 'child_process';
 import * as YAML from 'yaml'
 import OpenShiftItem, { clusterRequired, selectTargetComponent } from './openshiftItem';
 import { OpenShiftComponent } from '../odo';
@@ -68,6 +68,7 @@ interface ComponentDevState {
     debugStatus?: string;
     // deploy state
     deployStatus?: string;
+    runOn?: undefined | 'podman';
 }
 
 interface DevProcessStopRequest extends Disposable {
@@ -135,12 +136,16 @@ export class Component extends OpenShiftItem {
     public static renderStateLabel(folder: ComponentWorkspaceFolder) {
         let label = '';
         const state = Component.getComponentDevState(folder);
+        let runningOnSuffix = '';
+        if (state.runOn) {
+            runningOnSuffix = ` on ${state.runOn}`;
+        }
         if (state.devStatus === ComponentContextState.DEV_STARTING) {
-            label = ' (dev starting)';
+            label = ` (dev starting${runningOnSuffix})`;
         } else if(state.devStatus === ComponentContextState.DEV_RUNNING) {
-            label = ' (dev running)';
+            label = ` (dev running${runningOnSuffix})`;
         } else if(state.devStatus === ComponentContextState.DEV_STOPPING) {
-            label = ' (dev stopping)';
+            label = ` (dev stopping${runningOnSuffix})`;
         }
         return label;
     }
@@ -187,13 +192,21 @@ export class Component extends OpenShiftItem {
         }
     }
 
+    @vsCommand('openshift.component.dev.onPodman')
+    static async devOnPodman(component: ComponentWorkspaceFolder) {
+        return Component.dev(component, 'podman');
+    }
+
     @vsCommand('openshift.component.dev')
     //@clusterRequired() check for user is logged in should be implemented from scratch
-    static async dev(component: ComponentWorkspaceFolder) {
+    static async dev(component: ComponentWorkspaceFolder, runOn?: undefined | 'podman') {
         const cs = Component.getComponentDevState(component);
         cs.devStatus = ComponentContextState.DEV_STARTING;
+        cs.runOn = runOn;
         Component.stateChanged.fire(component.contextPath)
-        await CliChannel.getInstance().executeTool(Command.deletePreviouslyPushedResouces(component.component.devfileData.devfile.metadata.name), undefined, false);
+        if (!runOn) {
+            await CliChannel.getInstance().executeTool(Command.deletePreviouslyPushedResouces(component.component.devfileData.devfile.metadata.name), undefined, false);
+        }
         const outputEmitter = new EventEmitter<string>();
         let devProcess: ChildProcess;
         try {
@@ -203,7 +216,11 @@ export class Component extends OpenShiftItem {
                     onDidWrite: outputEmitter.event,
                     open: () => {
                         outputEmitter.fire(`Starting ${Command.dev(component.component.devfileData.supportedOdoFeatures.debug).toString()}\r\n`);
-                        void CliChannel.getInstance().spawnTool(Command.dev(component.component.devfileData.supportedOdoFeatures.debug), {cwd: component.contextPath}).then((cp) => {
+                        let opt: SpawnOptions = {cwd: component.contextPath};
+                        if (runOn) {
+                            opt = {...opt, env: {ODO_EXPERIMENTAL_MODE: 'true'}}
+                        }
+                        void CliChannel.getInstance().spawnTool(Command.dev(component.component.devfileData.supportedOdoFeatures.debug), opt).then((cp) => {
                             devProcess = cp;
                             devProcess.on('spawn', () => {
                                 cs.devTerminal.show();

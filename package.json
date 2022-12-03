@@ -803,7 +803,9 @@
                 "category": "OpenShift"
             },
             {
-                "command": "openshift.component.dev.podman"
+                "command": "openshift.component.dev.onPodman",
+                "title": "Start Dev on Podman",
+                "category": "OpenShift"
             }
 		],
 		"keybindings": [
@@ -1241,14 +1243,19 @@
 					"group": "c1@1"
 				},
 				{
+					"command": "openshift.component.dev.onPodman",
+					"when": "view == openshiftComponentsView && config.openshiftToolkit.enableExperimentialMode && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
+					"group": "c1@2"
+				},
+				{
 					"command": "openshift.component.exitDevMode",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
-					"group": "c1@2"
+					"group": "c1@3"
 				},
 				{
 					"command": "openshift.component.forceExitDevMode",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-stp.*/",
-					"group": "c1@3"
+					"group": "c1@4"
 				},
 				{
 					"command": "openshift.component.deploy",
