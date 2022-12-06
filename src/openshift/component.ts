@@ -220,7 +220,7 @@ export class Component extends OpenShiftItem {
                         if (runOn) {
                             opt = {...opt, env: {ODO_EXPERIMENTAL_MODE: 'true'}}
                         }
-                        void CliChannel.getInstance().spawnTool(Command.dev(component.component.devfileData.supportedOdoFeatures.debug), opt).then((cp) => {
+                        void CliChannel.getInstance().spawnTool(Command.dev(component.component.devfileData.supportedOdoFeatures.debug, runOn), opt).then((cp) => {
                             devProcess = cp;
                             devProcess.on('spawn', () => {
                                 cs.devTerminal.show();
