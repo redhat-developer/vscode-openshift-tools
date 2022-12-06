@@ -47,7 +47,11 @@ export interface NewComponentCommandProps {
     'use_existing_devfile': boolean;
 }
 
-export type TelemetryProps = Partial<CommonCommandProps & NewComponentCommandProps>;
+export interface DebuggerCommandProps {
+    language: string;
+}
+
+export type TelemetryProps = Partial<CommonCommandProps & NewComponentCommandProps & DebuggerCommandProps>;
 
 export class ExtCommandTelemetryEvent {
     private startTime: number;

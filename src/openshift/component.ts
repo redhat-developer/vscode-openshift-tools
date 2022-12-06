@@ -34,6 +34,14 @@ function createCancelledResult(stepName: string): any {
     return cancelledResult;
 }
 
+function createStartDebuggerResult(language: string, message = '') {
+    const result: any = new String(message);
+    result.properties = {
+        language
+    }
+    return result;
+}
+
 export enum ComponentContextState {
     DEV = 'dev-nrn',
     DEV_STARTING = 'dev-str',
@@ -693,11 +701,11 @@ export class Component extends OpenShiftItem {
                 const result = await debug.startDebugging(workspace.getWorkspaceFolder(Uri.file(component.contextPath)), config);
 
                 if (!result) {
-                    return Promise.reject(new VsCommandError('Debugger session failed to start.'));
+                    return Promise.reject(new VsCommandError('Debugger session failed to start.', undefined, undefined, {language: config.type}));
                 }
-                return 'Debugger session has successfully started.';
+                return createStartDebuggerResult(config.type, 'Debugger session has successfully started.');
             }
-            return 'Component has no ports forwarded.'
+            return createStartDebuggerResult(config.type, 'Component has no ports forwarded.');
     }
 
     // TODO: remove "openshift.component.revealContextInExplorer" command
