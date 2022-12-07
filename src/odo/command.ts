@@ -204,7 +204,7 @@ export class Command {
         username: string,
         passwd: string,
     ): CommandText {
-        return new CommandText('odo login',
+        return new CommandText('oc login',
             clusterURL, [
             new CommandOption('-u', username, true, true),
             new CommandOption('-p', passwd, true, true),
@@ -214,7 +214,7 @@ export class Command {
     }
 
     static odoLoginWithToken(clusterURL: string, ocToken: string): CommandText {
-        return new CommandText('odo login',
+        return new CommandText('oc login',
             clusterURL, [
             new CommandOption('--token', ocToken),
             new CommandOption('--insecure-skip-tls-verify')
