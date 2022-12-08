@@ -30,7 +30,7 @@ export default class LogViewLoader {
         const cmd = cmdFunction();
 
         // TODO: When webview is going to be ready?
-        panel.webview.html = LogViewLoader.getWebviewContent(LogViewLoader.extensionPath, `${cmd}`.replace(/\\/g, '\\\\'));
+        panel.webview.html = LogViewLoader.getWebviewContent(LogViewLoader.extensionPath, `${cmd}`.replace(/\\/g, '\\\\'), panel);
 
         const process = await CliChannel.getInstance().spawnTool(cmd, {cwd: target.contextPath});
         process.stdout.on('data', (data) => {
@@ -51,13 +51,13 @@ export default class LogViewLoader {
         return panel;
     }
 
-    private static getWebviewContent(extensionPath: string, cmdText: string): string {
+    private static getWebviewContent(extensionPath: string, cmdText: string, p: WebviewPanel): string {
         // Local path to main script run in the webview
         const reactAppRootOnDisk = path.join(extensionPath, 'out', 'logViewer');
         const reactAppPathOnDisk = Uri.file(
             path.join(reactAppRootOnDisk, 'logViewer.js'),
         );
-        const reactAppUri = reactAppPathOnDisk.with({ scheme: 'vscode-resource' });
+        const reactAppUri = p.webview.asWebviewUri(reactAppPathOnDisk);
         const htmlString:Buffer = fs.readFileSync(path.join(reactAppRootOnDisk, 'index.html'));
         const meta = `<meta http-equiv="Content-Security-Policy"
         content="connect-src *;
