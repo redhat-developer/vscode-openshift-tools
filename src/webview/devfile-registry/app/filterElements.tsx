@@ -35,18 +35,18 @@ export const FilterElements: React.FC<FilterProps> = ({
             </TextContent>
             {
                 registries.map((registry, index) => (
-                    <FormControlLabel className={filterStyleCSS.checkBoxItem} key={registry.Name + '-' + index}
+                    <FormControlLabel className={filterStyleCSS.checkBoxItem} key={registry.name + '-' + index}
                         control={
-                            <Checkbox id={`${id}-${registry.Name}`}
+                            <Checkbox id={`${id}-${registry.name}`}
                                 className={filterStyleCSS.checkbox}
                                 onChange={onCheckBoxChange}
-                                name={registry.Name}
+                                name={registry.name}
                                 checked={registry.state}
-                                key={registry.Name + '-' + index}
+                                key={registry.name + '-' + index}
                                 color='primary'
                                 size='medium' />
                         }
-                        label={<Tooltip title={registry.URL} arrow><span style={{ fontSize: 'var(--vscode-editor-font-size)' }}>{registry.Name}</span></Tooltip>}
+                        label={<Tooltip title={registry.url} arrow><span style={{ fontSize: 'var(--vscode-editor-font-size)' }}>{registry.name}</span></Tooltip>}
                         labelPlacement='end'
                         style={{ padding: '0px', marginBottom: '0px' }} />
                 ))

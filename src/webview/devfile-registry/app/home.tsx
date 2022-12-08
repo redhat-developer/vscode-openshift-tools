@@ -71,7 +71,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                         });
                     } else {
                         message.data.registries.map((registry: Registry) => {
-                            if (registry.URL.toLowerCase().indexOf('https://registry.devfile.io') !== -1) {
+                            if (registry.url.toLowerCase().indexOf('https://registry.devfile.io') !== -1) {
                                 registry.state = true;
                             }
                         });
@@ -115,7 +115,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                                     const allUncheckedRegistries = filteredRegistries.filter((registry: Registry) => !registry.state);
                                     if (allUncheckedRegistries.length === registries.length) {
                                         allUncheckedRegistries.map((uncheckedRegistry: Registry) => {
-                                            if (uncheckedRegistry.URL.toLowerCase().indexOf('https://registry.devfile.io') !== -1) {
+                                            if (uncheckedRegistry.url.toLowerCase().indexOf('https://registry.devfile.io') !== -1) {
                                                 uncheckedRegistry.state = true;
                                             }
                                         })
@@ -139,7 +139,7 @@ function getFilteredCompDesc(registries: Registry[], compDescriptions: CompTypeD
     const filteredCompDesciptions: CompTypeDesc[] = [];
     registries.map((registry: Registry) => {
         const compDescrs = compDescriptions.filter(function (compDescription: CompTypeDesc) {
-            if (compDescription.registry.name === registry.Name && registry.state) {
+            if (compDescription.registry.name === registry.name && registry.state) {
                 if (searchValue !== '') {
                     return compDescription.devfileData.devfile.metadata.displayName?.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1 ||
                         compDescription.devfileData.devfile.metadata.description?.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1;

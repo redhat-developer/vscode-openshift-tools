@@ -71,9 +71,9 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     // eslint-disable-next-line class-methods-use-this
     getTreeItem(element: ComponentType): TreeItem | Thenable<TreeItem> {
         return {
-            label: element.Name,
+            label: element.name,
             contextValue: ContextType.DEVFILE_REGISTRY,
-            tooltip: `Devfile Registry\nName: ${element.Name}\nURL: ${element.URL}`,
+            tooltip: `Devfile Registry\nName: ${element.name}\nURL: ${element.name}`,
             collapsibleState: TreeItemCollapsibleState.None,
             iconPath: new vscode.ThemeIcon('note')
         };
@@ -87,7 +87,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     removeRegistry(targetRegistry: Registry): void {
         this.registries.splice(
-            this.registries.findIndex((registry) => registry.Name === targetRegistry.Name),
+            this.registries.findIndex((registry) => registry.name === targetRegistry.name),
             1,
         );
         this.refresh(false);
@@ -232,7 +232,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         // ask for registry
         const registries = await ComponentTypesView.instance.getRegistries();
         const regName = await window.showInputBox({
-            value: registryContext?.Name,
+            value: registryContext?.name,
             prompt: registryContext ? 'Edit registry name' : 'Provide registry name to display in the view',
             placeHolder: 'Registry Name',
             validateInput: (value) => {
@@ -243,7 +243,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 if (!validator.matches(trimmedValue, '^[a-zA-Z0-9]+$')) {
                     return 'Registry name can have only alphabet characters and numbers';
                 }
-                if (registries.find((registry) => registry.Name !== registryContext?.Name && registry.Name === value)) {
+                if (registries.find((registry) => registry.name !== registryContext?.name && registry.name === value)) {
                     return `Registry name '${value}' is already used`;
                 }
             },
@@ -253,7 +253,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
         const regURL = await window.showInputBox({
             ignoreFocusOut: true,
-            value: registryContext?.URL,
+            value: registryContext?.url,
             prompt: registryContext ? 'Edit registry URL' : 'Provide registry URL to display in the view',
             placeHolder: 'Registry URL',
             validateInput: (value) => {
@@ -261,7 +261,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 if (!validator.isURL(trimmedValue)) {
                     return 'Entered URL is invalid';
                 }
-                if (registries.find((registry) => registry.Name !== registryContext?.Name && registry.URL === value)) {
+                if (registries.find((registry) => registry.name !== registryContext?.name && registry.url === value)) {
                     return `Registry with entered URL '${value}' already exists`;
                 }
             },
@@ -289,7 +289,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
          */
 
         if (registryContext) {
-            const notChangedRegisty = registries.find((registry) => registry.Name === regName && registry.URL === regURL && registry.secure === (secure === 'Yes'));
+            const notChangedRegisty = registries.find((registry) => registry.name === regName && registry.url === regURL && registry.secure === (secure === 'Yes'));
             if (notChangedRegisty) {
                 return null;
             }
@@ -305,12 +305,12 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     @vsCommand('openshift.componentTypesView.registry.remove')
     public static async removeRegistry(registry: Registry, isEdit?: boolean): Promise<void> {
         const yesNo = isEdit ? 'Yes' : await window.showInformationMessage(
-            `Remove registry '${registry.Name}'?`,
+            `Remove registry '${registry.name}'?`,
             'Yes',
             'No',
         );
         if (yesNo === 'Yes') {
-            await OdoImpl.Instance.removeRegistry(registry.Name);
+            await OdoImpl.Instance.removeRegistry(registry.name);
             ComponentTypesView.instance.removeRegistry(registry);
             if (!isEdit) {
                 ComponentTypesView.instance.getAllComponents();
@@ -325,6 +325,6 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     @vsCommand('openshift.componentTypesView.registry.openInBrowser')
     public static async openRegistryWebSite(registry: Registry): Promise<void> {
-        await commands.executeCommand('vscode.open', Uri.parse(registry.URL));
+        await commands.executeCommand('vscode.open', Uri.parse(registry.url));
     }
 }
