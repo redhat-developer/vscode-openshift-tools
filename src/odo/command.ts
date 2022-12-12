@@ -84,11 +84,11 @@ export class Command {
 
     static deleteProject(name: string): CommandText {
         return new CommandText(
-            'odo project delete',
+            'odo delete namespace',
             name, [
-            new CommandOption('-w'),
-            new CommandOption('-o', 'json', false)
-        ]
+                new CommandOption('-f'),
+                new CommandOption('-w'),
+            ]
         );
     }
 
