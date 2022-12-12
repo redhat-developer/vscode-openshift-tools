@@ -115,7 +115,7 @@ export default class RegistryViewLoader {
 
     @vsCommand('openshift.componentTypesView.registry.openInEditor')
     public static async openRegistryInEditor(context: Registry): Promise<void> {
-        await RegistryViewLoader.loadView(`Devfile Registry - ${context.Name}`, context.URL);
+        await RegistryViewLoader.loadView(`Devfile Registry - ${context.name}`, context.url);
     }
 
     @vsCommand('openshift.componentTypesView.registry.closeView')
@@ -133,7 +133,7 @@ export default class RegistryViewLoader {
 function getAllComponents(eventActionName: string, url?: string, error?: string) {
     let registries = ComponentTypesView.instance.getListOfRegistries();
     if (url && url.length > 0) {
-        registries = registries.filter((registry: Registry) => registry.URL === url);
+        registries = registries.filter((registry: Registry) => registry.url === url);
     }
     const componentDescriptions = ComponentTypesView.instance.getCompDescriptions();
     panel?.webview.postMessage(
