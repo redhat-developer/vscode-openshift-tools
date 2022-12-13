@@ -2,28 +2,8 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/ban-types */
 
-import { workspace } from 'vscode';
-import { CommandOption, CommandText } from '../base/command';
-
-function verbose(_: unknown, key: string, descriptor: TypedPropertyDescriptor<Function>): void {
-    let fnKey: string | undefined;
-    let fn: Function | undefined;
-
-    if (typeof descriptor.value === 'function') {
-        fnKey = 'value';
-        fn = descriptor.value;
-    } else {
-        throw new Error('not supported');
-    }
-
-    descriptor[fnKey] = function(...args: unknown[]): unknown {
-        const v = workspace.getConfiguration('openshiftToolkit').get<number>('outputVerbosityLevel');
-        const command = fn.apply(this, args) as CommandText;
-        return v > 0 ? command.addOption(new CommandOption('-v', `${v}`)) : command;
-    };
-}
+import { CommandOption, CommandText, verbose } from '../base/command';
 
 export class Command {
 
@@ -104,11 +84,11 @@ export class Command {
 
     static deleteProject(name: string): CommandText {
         return new CommandText(
-            'odo project delete',
+            'odo delete namespace',
             name, [
-            new CommandOption('-w'),
-            new CommandOption('-o', 'json', false)
-        ]
+                new CommandOption('-f'),
+                new CommandOption('-w'),
+            ]
         );
     }
 
