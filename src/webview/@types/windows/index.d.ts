@@ -13,6 +13,7 @@ interface VscodeAPI {
 
 interface Window {
     cmdText?: string;
+    startingPage?: string;
     vscodeApi: VscodeAPI;
     acquireVsCodeApi: () => VscodeAPI;
 }

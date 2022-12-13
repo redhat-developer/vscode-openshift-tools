@@ -322,7 +322,7 @@ export default class ClusterViewLoader {
     }
 
     // eslint-disable-next-line @typescript-eslint/require-await
-    static async loadView(title: string): Promise<vscode.WebviewPanel> {
+    static async loadView(title: string, initialPage: 'crc' | 'sandbox' | '' = ''): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'out', 'clusterViewer'));
         if (panel) {
             // If we already have a panel, show it in the target column
@@ -372,5 +372,4 @@ export default class ClusterViewLoader {
             }
         }
     }
-
 }

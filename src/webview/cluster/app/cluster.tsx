@@ -55,6 +55,7 @@ export default function Header() {
     const [showWizard, setShowWizard] = React.useState('');
     const [crcLatest, setCrcLatest] = React.useState('');
     const [crcOpenShift, setCrcOpenShift] = React.useState('');
+    const [showWizard, setShowWizard] = React.useState(window.startingPage);
 
     window.onmessage = (event: any) => {
         if (['crc', 'sandbox'].includes(event.data.param)) {
