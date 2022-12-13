@@ -42,8 +42,7 @@
 		"CodeReady Containers",
 		"devsandbox",
 		"debuggers",
-		"Cloud",
-        "kubernetes-extension-cloud-provider"
+		"Cloud"
 	],
 	"icon": "images/openshift_extension.png",
 	"main": "./out/src/extension",
