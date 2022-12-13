@@ -73,13 +73,16 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return {
             label: element.name,
             contextValue: ContextType.DEVFILE_REGISTRY,
-            tooltip: `Devfile Registry\nName: ${element.name}\nURL: ${element.name}`,
+            tooltip: `Devfile Registry\nName: ${element.name}\nURL: ${element.url}`,
             collapsibleState: TreeItemCollapsibleState.None,
             iconPath: new vscode.ThemeIcon('note')
         };
     }
 
     addRegistry(newRegistry: Registry): void {
+        if(!this.registries){
+            this.registries = [];
+        }
         this.registries.push(newRegistry);
         this.refresh(false);
         this.reveal(newRegistry);
@@ -243,7 +246,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 if (!validator.matches(trimmedValue, '^[a-zA-Z0-9]+$')) {
                     return 'Registry name can have only alphabet characters and numbers';
                 }
-                if (registries.find((registry) => registry.name !== registryContext?.name && registry.name === value)) {
+                if (registries?.find((registry) => registry.name !== registryContext?.name && registry.name === value)) {
                     return `Registry name '${value}' is already used`;
                 }
             },
@@ -261,7 +264,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 if (!validator.isURL(trimmedValue)) {
                     return 'Entered URL is invalid';
                 }
-                if (registries.find((registry) => registry.name !== registryContext?.name && registry.url === value)) {
+                if (registries?.find((registry) => registry.name !== registryContext?.name && registry.url === value)) {
                     return `Registry with entered URL '${value}' already exists`;
                 }
             },
@@ -289,7 +292,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
          */
 
         if (registryContext) {
-            const notChangedRegisty = registries.find((registry) => registry.name === regName && registry.url === regURL && registry.secure === (secure === 'Yes'));
+            const notChangedRegisty = registries?.find((registry) => registry.name === regName && registry.url === regURL && registry.secure === (secure === 'Yes'));
             if (notChangedRegisty) {
                 return null;
             }
