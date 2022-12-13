@@ -2,10 +2,12 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+
 import React from 'react';
+import { makeStyles } from '@mui/styles';
 import CheckBoxOutlineBlankOutlinedIcon from '@mui/icons-material/CheckBoxOutlineBlankOutlined';
 import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
-import { Badge, Card, makeStyles, Typography } from '@material-ui/core';
+import { Badge, Card, Typography } from '@material-ui/core';
 import { CompTypeDesc } from './gitImport';
 import cardItemStyle from './cardItem.style';
 

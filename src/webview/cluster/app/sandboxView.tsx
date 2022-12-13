@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as React from 'react';
 import { Button, CircularProgress, TextField } from '@material-ui/core';
-import { makeStyles, styled } from '@material-ui/core/styles';
+import { makeStyles, styled } from '@mui/styles';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';

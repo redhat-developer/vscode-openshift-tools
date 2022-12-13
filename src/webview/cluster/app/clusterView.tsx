@@ -4,8 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as React from 'react';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
-import { Alert } from '@material-ui/lab';
+import { makeStyles, withStyles } from '@mui/styles';
+import { Alert } from '@mui/lab';
 import { InsertDriveFile, GetApp, VpnKey } from '@material-ui/icons';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';

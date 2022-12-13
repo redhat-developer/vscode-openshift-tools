@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Theme, createStyles } from '@material-ui/core/styles';
+import { Theme } from "@mui/material/styles";
+import { createStyles} from "@mui/styles";
 
 export default (theme: Theme) =>
     createStyles({

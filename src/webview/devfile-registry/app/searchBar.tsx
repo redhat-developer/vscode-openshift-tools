@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { InputAdornment, makeStyles, TextField } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
+import { InputAdornment, TextField } from '@material-ui/core';
 import { SearchRounded } from '@material-ui/icons';
 import { DefaultProps } from './home';
 import React from 'react';

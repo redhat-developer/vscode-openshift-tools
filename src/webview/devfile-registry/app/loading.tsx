@@ -2,8 +2,10 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+
 import React from 'react';
-import { Box, makeStyles, Typography } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
+import { Box, Typography } from '@material-ui/core';
 import LinearProgress from '@mui/material/LinearProgress';
 import loaderStyle from './loading.style';
 

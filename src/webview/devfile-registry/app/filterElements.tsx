@@ -9,7 +9,7 @@ import { DefaultProps } from './home';
 import {
     Registry
 } from './../../../odo/componentType';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles } from '@mui/styles';
 import filterElementsStyle from './filterElements.style';
 import { Checkbox, FormControlLabel } from '@material-ui/core';
 import { Tooltip } from '@mui/material';
