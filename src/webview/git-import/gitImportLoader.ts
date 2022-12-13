@@ -128,8 +128,9 @@ async function gitImportMessageListener(event: any): Promise<any> {
             try {
                 if (childProcess && event.notification !== 'Component created') {
                     forceCancel = true;
-                    treeKill(childProcess.pid);
-                    await deleteDirectory(appendedUri.fsPath);
+                    treeKill(childProcess.pid, async () => {
+                        await deleteDirectory(appendedUri.fsPath);
+                    });
                 } else if (event.notification === 'Component created') {
                     forceCancel = false;
                 }
