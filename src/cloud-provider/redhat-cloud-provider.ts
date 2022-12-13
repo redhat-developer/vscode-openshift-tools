@@ -100,8 +100,7 @@ class RedHatTreeDataProvier implements vscode.TreeDataProvider<RedHatCloudItem> 
 
     @vsCommand('openshift.local.open.setup')
     static async openCrCWizard(): Promise<void> {
-        const webViewPanel: vscode.WebviewPanel = await ClusterViewLoader.loadView('Add OpenShift Cluster');
-        await webViewPanel.webview.postMessage({data: {param:'crc'}});
+        await ClusterViewLoader.loadView('Add OpenShift Cluster', 'crc');
     }
 
     @vsCommand('cloud.redhat.login', false)
@@ -124,7 +123,6 @@ class RedHatTreeDataProvier implements vscode.TreeDataProvider<RedHatCloudItem> 
         {
             return vscode.commands.executeCommand('vscode.open', sandboxStatus.consoleURL);
         }
-
     }
 
     private static async getSandboxSignupStatus() : Promise<SBSignupResponse | undefined> {

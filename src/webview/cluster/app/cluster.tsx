@@ -62,7 +62,7 @@ const vscodeApi = window.vscodeApi;
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function Header() {
     const classes = useStyles();
-    const [showWizard, setShowWizard] = React.useState('');
+    const [showWizard, setShowWizard] = React.useState(window.startingPage);
 
     window.onmessage = (event: any) => {
         if (['crc', 'sandbox'].includes(event.data.param)) {

@@ -13,6 +13,7 @@ import { vsCommand } from '../../vscommand';
 import { createSandboxAPI } from '../../openshift/sandbox';
 import { ExtCommandTelemetryEvent } from '../../telemetry';
 import { Cluster } from '../../openshift/cluster';
+import { init } from 'i18next';
 
 let panel: vscode.WebviewPanel;
 
@@ -299,7 +300,7 @@ export default class ClusterViewLoader {
     }
 
     // eslint-disable-next-line @typescript-eslint/require-await
-    static async loadView(title: string): Promise<vscode.WebviewPanel> {
+    static async loadView(title: string, initialPage: 'crc' | 'sandbox' | '' = ''): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'out', 'clusterViewer'));
         if (panel) {
             // If we already have a panel, show it in the target column
@@ -311,7 +312,7 @@ export default class ClusterViewLoader {
                 retainContextWhenHidden: true
             });
             panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'images/context/cluster-node.png'));
-            panel.webview.html = ClusterViewLoader.getWebviewContent(ClusterViewLoader.extensionPath, panel);
+            panel.webview.html = ClusterViewLoader.getWebviewContent(ClusterViewLoader.extensionPath, panel, initialPage);
             panel.webview.postMessage({action: 'cluster', data: ''});
             panel.onDidDispose(()=> {
                 panel = undefined;
@@ -350,13 +351,14 @@ export default class ClusterViewLoader {
         }
     }
 
-    private static getWebviewContent(extensionPath: string, p: vscode.WebviewPanel): string {
+    private static getWebviewContent(extensionPath: string, p: vscode.WebviewPanel, initialPage: string): string {
         // Local path to main script run in the webview
         const reactAppRootOnDisk = path.join(extensionPath, 'out', 'clusterViewer');
         const reactAppPathOnDisk = vscode.Uri.file(
             path.join(reactAppRootOnDisk, 'clusterViewer.js'),
         );
         const reactAppUri = p.webview.asWebviewUri(reactAppPathOnDisk);
+
         const htmlString:Buffer = fs.readFileSync(path.join(reactAppRootOnDisk, 'index.html'));
         const meta = `<meta http-equiv="Content-Security-Policy"
             content="connect-src *;
@@ -366,6 +368,7 @@ export default class ClusterViewLoader {
             style-src 'self' vscode-resource: 'unsafe-inline';">`;
         return `${htmlString}`
             .replace('%COMMAND%', '')
+            .replace('%INITIAL_PAGE%', initialPage)
             .replace('%PLATFORM%', process.platform)
             .replace('clusterViewer.js',`${reactAppUri}`)
             .replace('%BASE_URL%', `${reactAppUri}`)
