@@ -227,6 +227,7 @@
 		"onView:openshiftProjectExplorer",
 		"onView:extension.vsKubernetesExplorer",
 		"onView:openshiftComponentTypesView",
+        "onView:kubernetes.cloudExplorer",
 		"onCommand:openshift.welcome",
 		"onCommand:openshift.getStarted",
 		"onCommand:openshift.about",
