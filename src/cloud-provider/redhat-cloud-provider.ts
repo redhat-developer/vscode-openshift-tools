@@ -58,8 +58,8 @@ class RedHatTreeDataProvier implements vscode.TreeDataProvider<RedHatCloudItem> 
            title: 'Sign in to Red Hat',
         }
 
-        const signUpItem = new RedHatCloudItem('Sign in to Red Hat');
-        signUpItem.tooltip = 'Sign in to Red Hat';
+        const signUpItem = new RedHatCloudItem('Create Red Hat Account');
+        signUpItem.tooltip = 'Create Red Hat Account';
         signUpItem.iconPath = new vscode.ThemeIcon('add');
         signUpItem.command = {
             command: '_openshift.open.signup',
