@@ -29,8 +29,8 @@ import { VsCommandError } from './vscommand';
 import bs = require('binary-search');
 import { CliExitData } from './cli';
 import { KubeConfigUtils } from './util/kubeUtils';
-import { KubeConfig, loadYaml } from '@kubernetes/client-node';
-import { pathExistsSync, readFileSync } from 'fs-extra';
+import { KubeConfig } from '@kubernetes/client-node';
+import { pathExistsSync } from 'fs-extra';
 import * as fs from 'fs';
 import { ClusterServiceVersionKind } from './k8s/olm/types';
 import { Command as DeploymentCommand } from './k8s/deployment';
@@ -849,11 +849,9 @@ export class OdoImpl implements Odo {
     }
 
     private async loadRegistryFromPreferences() {
-        await this.execute(Command.listRegistries()); // this call is required to init preferences
-        const prefYaml = path.resolve(Platform.getUserHomePath(), '.odo', 'preference.yaml');
-        const yamlData: any = loadYaml(readFileSync(prefYaml, {encoding: 'utf8'}));
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        return yamlData.OdoSettings.RegistryList as Registry[];
+        const cliData = await this.execute(Command.listRegistries());
+        const prefs = JSON.parse(cliData.stdout) as { registries: Registry[]};
+        return prefs.registries;
     }
 
     public getRegistries(): Promise<Registry[]> {
@@ -871,9 +869,9 @@ export class OdoImpl implements Odo {
     public async addRegistry(name: string, url: string, token: string): Promise<Registry> {
         await this.execute(Command.addRegistry(name, url, token));
         return {
-            Name: name,
+            name,
             secure: !!token,
-            URL: url
+            url,
         };
     }
 

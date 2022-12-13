@@ -11,8 +11,8 @@ export interface RegistryList {
 }
 
 export interface Registry {
-    readonly Name: string;
-    readonly URL: string;
+    readonly name: string;
+    readonly url: string;
     readonly secure: boolean;
     state?: boolean;
 }

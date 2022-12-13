@@ -11,6 +11,7 @@ import { vsCommand, VsCommandError } from '../vscommand';
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { KubernetesObject } from '@kubernetes/client-node';
+import { OpenShiftExplorer } from '../explorer';
 
 export class Command {
     static listProjects(): CommandText {
@@ -19,6 +20,10 @@ export class Command {
 
     static setActiveProject(name: string) {
         return new CommandText('oc', `project ${name}`);
+    }
+
+    static deleteProject(name: string) {
+        return new CommandText('oc delete project', name, [new CommandOption('--wait=true')])
     }
 }
 
@@ -65,11 +70,19 @@ export class Project extends OpenShiftItem {
 
         const value = await window.showWarningMessage(`Do you want to delete Project '${project.metadata.name}'?`, 'Yes', 'Cancel');
         if (value === 'Yes') {
-            result = Progress.execFunctionWithProgress(`Deleting Project '${project.metadata.name}'`,
-                () => CliChannel.getInstance().executeTool(new CommandText('oc delete project', project.metadata.name, [new CommandOption('--wait=true')])))
+            result = Progress.execFunctionWithProgress(
+                `Deleting Project '${project.metadata.name}'`,
+                async () => {
+                    // migrate to odo3.ts
+                    const projects = await getOdoInstance().getProjects();
+                    const selectedProject = projects.find((p)=>p.getName() === project.metadata.name);
+                    await getOdoInstance().deleteProject(selectedProject);
+                    OpenShiftExplorer.getInstance().refresh();
+                })
                 .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Project with error '${err}'`,'Failed to delete Project')))
                 .then(() => `Project '${project.metadata.name}' successfully deleted`);
         }
         return result;
     }
+
 }
