@@ -1104,11 +1104,11 @@
 				},
                 {
                     "command": "openshift.experimental.mode.enable",
-                    "when": "view == openshiftComponentsView && !config.openshiftToolkit.enableExperimentialMode"
+                    "when": "view == openshiftComponentsView && !config.openshiftToolkit.experimentalFeatures"
                 },
                 {
                     "command": "openshift.experimental.mode.disable",
-                    "when": "view == openshiftComponentsView && config.openshiftToolkit.enableExperimentialMode"
+                    "when": "view == openshiftComponentsView && config.openshiftToolkit.experimentalFeatures"
                 }
 			],
 			"view/item/context": [
@@ -1244,7 +1244,7 @@
 				},
 				{
 					"command": "openshift.component.dev.onPodman",
-					"when": "view == openshiftComponentsView && config.openshiftToolkit.enableExperimentialMode && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
+					"when": "view == openshiftComponentsView && config.openshiftToolkit.experimentalFeatures && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
 					"group": "c1@2"
 				},
 				{
@@ -1446,11 +1446,6 @@
 						"default": true,
 						"description": "Show Welcome Page when using OpenShift Toolkit Extension."
 					},
-					"openshiftToolkit.enableExperimentialMode": {
-						"type": "boolean",
-						"default": false,
-						"description": "Show OpenShift Toolkit Experimental Features."
-					},
 					"openshiftToolkit.showChannelOnOutput": {
 						"type": "boolean",
 						"default": false,
@@ -1525,7 +1520,26 @@
 						"default": 100000
 					}
 				}
-			}
+			},
+            {
+                "type": "object",
+                "order": 4,
+                "title": "Experimental Features",
+                "properties": {
+                    "openshiftToolkit.experimentalFeatures": {
+                        "order": 1,
+                        "description": "Show OpenShift Toolkit Experimental Features.",
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "openshiftToolkit.devModeRunOnPodman": {
+                        "order": 2,
+                        "description": "Show warning about experimental feature",
+                        "type": "boolean",
+                        "default": true
+                    }
+                }
+            }
 		]
 	},
 	"extensionDependencies": [

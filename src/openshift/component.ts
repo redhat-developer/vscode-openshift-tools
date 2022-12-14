@@ -194,6 +194,27 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.dev.onPodman')
     static async devOnPodman(component: ComponentWorkspaceFolder) {
+        if (workspace.getConfiguration('openshiftToolkit').get('devModeRunOnPodman')) {
+            let choice = 'Cancel';
+            do {
+                const choices = ['About Podman', 'Continue', 'Continue and don\'t ask again'];
+                choice = await window.showWarningMessage(
+                    'The command \'Start Dev on Podman\' is experimental. It requires Podman to be installed and configured. It isn\'t guaranteed to work.',
+                    ...choices);
+                switch (choice) {
+                    case choices[0]: // open link to external site with podman documentation
+                        await commands.executeCommand('vscode.open', Uri.parse('https://docs.podman.io/en/latest/index.html'));
+                        break;
+                    case choices[1]: // continue with execution
+                        break;
+                    case choices[2]: // save request to not show warning again
+                        await workspace.getConfiguration('openshiftToolkit').update('devModeRunOnPodman', false);
+                        break;
+                    default:
+                        return;
+                }
+            } while (choice === 'About Podman')
+        }
         return Component.dev(component, 'podman');
     }
 
