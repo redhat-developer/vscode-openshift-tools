@@ -33,7 +33,7 @@ export class Command {
         ]);
     }
 
-    static deletePreviouslyPushedResouces(name: string): CommandText {
+    static deletePreviouslyPushedResources(name: string): CommandText {
         return new CommandText('oc delete', 'deployment', [
             new CommandOption('-l', `component='${name}'`),
             new CommandOption('--cascade')

@@ -205,7 +205,7 @@ export class Component extends OpenShiftItem {
         cs.runOn = runOn;
         Component.stateChanged.fire(component.contextPath)
         if (!runOn) {
-            await CliChannel.getInstance().executeTool(Command.deletePreviouslyPushedResouces(component.component.devfileData.devfile.metadata.name), undefined, false);
+            await CliChannel.getInstance().executeTool(Command.deletePreviouslyPushedResources(component.component.devfileData.devfile.metadata.name), undefined, false);
         }
         const outputEmitter = new EventEmitter<string>();
         let devProcess: ChildProcess;
