@@ -13,7 +13,6 @@ import { vsCommand } from '../../vscommand';
 import { createSandboxAPI } from '../../openshift/sandbox';
 import { ExtCommandTelemetryEvent } from '../../telemetry';
 import { Cluster } from '../../openshift/cluster';
-import { init } from 'i18next';
 
 let panel: vscode.WebviewPanel;
 
