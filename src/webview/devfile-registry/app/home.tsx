@@ -63,6 +63,9 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
             if (message.data.action === 'getAllComponents') {
                 if (message.data.errorMessage && message.data.errorMessage.length > 0) {
                     setError(message.data.errorMessage);
+                    setCompDescriptions([]);
+                    setRegistries([]);
+                    setFilteredcompDescriptions([]);
                 } else {
                     setError('');
                     if (message.data.registries.length === 1) {
@@ -126,7 +129,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                             />
                         }
                         <HomeItem compDescriptions={filteredcompDescriptions} />
-                        {error?.length > 0 ? <ErrorPage message='Devfiles not downloaded properly' /> : null}
+                        {error?.length > 0 ? <ErrorPage message={error} /> : null}
                     </>
                     :
                     error?.length > 0 ? <ErrorPage message={error} /> : <LoadScreen />
