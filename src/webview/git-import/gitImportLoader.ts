@@ -26,19 +26,27 @@ let panel: vscode.WebviewPanel;
 export class Command {
     @vsCommand('openshift.component.importFromGit')
     static async createComponent(event: any) {
-        const workspacePath = await selectWorkspaceFolder();
-        const appendedUri = Uri.joinPath(workspacePath, event.projectName);
-        //const wsFolderLength = workspace?.workspaceFolders?.length || 0;
+        let alreadyExisits: boolean;
+        let appendedUri: vscode.Uri;
+        do {
+            alreadyExisits = false;
+            const workspacePath = await selectWorkspaceFolder();
+            appendedUri = Uri.joinPath(workspacePath, event.projectName);
+            if (fs.existsSync(appendedUri.fsPath) && fs.readdirSync(appendedUri.fsPath).length > 0) {
+                vscode.window.showErrorMessage(`Folder ${appendedUri.fsPath.substring(appendedUri.fsPath.lastIndexOf('\\') + 1)} already exists
+                    on the selected location: ${appendedUri.fsPath.substring(0, appendedUri.fsPath.lastIndexOf('\\'))}`);
+                alreadyExisits = true;
+            }
+        } while (alreadyExisits);
         panel.webview.postMessage({
             action: 'cloneStarted'
-        })
-        //workspace.updateWorkspaceFolders(wsFolderLength, 0, { uri: appendedUri });
-        workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: appendedUri });
+        });
+        workspace.updateWorkspaceFolders(workspace.workspaceFolders ? workspace.workspaceFolders.length : 0, null, { uri: appendedUri });
         await clone(event, appendedUri.fsPath);
         if (!event.isDevFile) {
             panel.webview.postMessage({
                 action: 'start_create_component'
-            })
+            });
             try {
                 await Component.createFromRootWorkspaceFolder(appendedUri, undefined,
                     {
@@ -243,7 +251,7 @@ function clone(event: any, location: string): Promise<any> {
     const git = gitExtension.getAPI(1).git.path;
     // run 'git clone url location' as external process and return location
     return new Promise((resolve, reject) => cp.exec(`${git} clone ${event.gitURL} ${location}`, (error: cp.ExecException) => error ?
-        showError(event, location, error.message) : resolve(true)));
+        showError(event) : resolve(true)));
 }
 
 function validateComponentName(event: any) {
@@ -275,16 +283,12 @@ function validateDevFilePath(event: any) {
     });
 }
 
-function showError(event: any, location: string, message: string): void {
+function showError(event: any): void {
     panel.webview.postMessage({
         action: event.action,
         status: false
     });
-    if (message.indexOf('already exists') !== -1) {
-        vscode.window.showErrorMessage(`Folder already exists on the selected ${location.substring(0, location.lastIndexOf('\\'))}`);
-    } else {
-        vscode.window.showErrorMessage('Error occurred while cloning the repository. Please try again.');
-    }
+    vscode.window.showErrorMessage('Error occurred while cloning the repository. Please try again.');
 }
 
 function isGitURL(host: string): boolean {
