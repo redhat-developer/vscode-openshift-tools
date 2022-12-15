@@ -132,7 +132,7 @@ export default class RegistryViewLoader {
 
 function getAllComponents(eventActionName: string, url?: string, error?: string) {
     let registries = ComponentTypesView.instance.getListOfRegistries();
-    if (!registries) {
+    if (!registries || registries.length === 0) {
         panel?.webview.postMessage(
             {
                 action: eventActionName,
