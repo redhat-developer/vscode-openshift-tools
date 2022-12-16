@@ -129,7 +129,7 @@ export default function Header() {
                     </CardContent>
                     <div>
                         <CardActions className={classes.cardButton}>
-                            <Tooltip title={list.tooltip} placement='top'>
+                            <Tooltip title={list.tooltip} placement='top' children={
                                 <div>
                                     <a onClick={() => handleView(index)} style={{ textDecoration: 'none' }} href={clusterTypes[index].redirectLink || '#'}>
                                         <Button
@@ -142,7 +142,7 @@ export default function Header() {
                                         </Button>
                                     </a>
                                 </div>
-                            </Tooltip>
+                            } />
                         </CardActions>
                     </div>
                 </Card>
