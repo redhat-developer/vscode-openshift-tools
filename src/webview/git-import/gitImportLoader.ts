@@ -26,18 +26,18 @@ let panel: vscode.WebviewPanel;
 export class Command {
     @vsCommand('openshift.component.importFromGit')
     static async createComponent(event: any) {
-        let alreadyExisits: boolean;
+        let alreadyExist: boolean;
         let appendedUri: vscode.Uri;
         do {
-            alreadyExisits = false;
+            alreadyExist = false;
             const workspacePath = await selectWorkspaceFolder();
             appendedUri = Uri.joinPath(workspacePath, event.projectName);
             if (fs.existsSync(appendedUri.fsPath) && fs.readdirSync(appendedUri.fsPath).length > 0) {
                 vscode.window.showErrorMessage(`Folder ${appendedUri.fsPath.substring(appendedUri.fsPath.lastIndexOf('\\') + 1)} already exists
-                    on the selected location: ${appendedUri.fsPath.substring(0, appendedUri.fsPath.lastIndexOf('\\'))}`);
-                alreadyExisits = true;
+                    at the selected location: ${appendedUri.fsPath.substring(0, appendedUri.fsPath.lastIndexOf('\\'))}`);
+                alreadyExist = true;
             }
-        } while (alreadyExisits);
+        } while (alreadyExist);
         panel.webview.postMessage({
             action: 'cloneStarted'
         });
@@ -288,7 +288,7 @@ function showError(event: any): void {
         action: event.action,
         status: false
     });
-    vscode.window.showErrorMessage('Error occurred while cloning the repository. Please try again.');
+    vscode.window.showErrorMessage('Error occurred while cloning the repository. Please click on Analyze Button and Try again.');
 }
 
 function isGitURL(host: string): boolean {
