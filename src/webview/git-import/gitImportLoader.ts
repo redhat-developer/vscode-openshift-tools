@@ -12,7 +12,6 @@ import { DetectedServiceData, DetectedStrategy, detectImportStrategies } from '.
 import { ComponentTypesView } from '../../registriesView';
 import { ComponentTypeDescription } from '../../odo/componentType';
 import { Response } from '../../git-import/types';
-import { Uri, workspace } from 'vscode';
 import { Component } from '../../openshift/component';
 import OpenShiftItem from '../../openshift/openshiftItem';
 import { selectWorkspaceFolder } from '../../util/workspace';
@@ -27,13 +26,16 @@ export class Command {
     @vsCommand('openshift.component.importFromGit')
     static async createComponent(event: any) {
         let alreadyExist: boolean;
-        let appendedUri: vscode.Uri;
+        let workspacePath,appendedUri: vscode.Uri;
         do {
             alreadyExist = false;
-            const workspacePath = await selectWorkspaceFolder();
-            appendedUri = Uri.joinPath(workspacePath, event.projectName);
-            if (fs.existsSync(appendedUri.fsPath) && fs.readdirSync(appendedUri.fsPath).length > 0) {
-                vscode.window.showErrorMessage(`Folder ${appendedUri.fsPath.substring(appendedUri.fsPath.lastIndexOf('\\') + 1)} already exists
+            workspacePath = await selectWorkspaceFolder();
+            appendedUri = vscode.Uri.joinPath(workspacePath, event.projectName);
+            if (isWorkspaceFolder(workspacePath) && fs.readdirSync(workspacePath.fsPath).length > 0) {
+                vscode.window.showErrorMessage(`Unable to create Component on Workspace Folder: ${workspacePath}, Please select another folder`);
+                alreadyExist = true;
+            } else if (fs.existsSync(appendedUri.fsPath) && fs.readdirSync(appendedUri.fsPath).length > 0) {
+                vscode.window.showErrorMessage(`Folder ${appendedUri.fsPath.substring(appendedUri.fsPath.lastIndexOf('\\') + 1)} already exist
                     at the selected location: ${appendedUri.fsPath.substring(0, appendedUri.fsPath.lastIndexOf('\\'))}`);
                 alreadyExist = true;
             }
@@ -41,7 +43,9 @@ export class Command {
         panel.webview.postMessage({
             action: 'cloneStarted'
         });
-        workspace.updateWorkspaceFolders(workspace.workspaceFolders ? workspace.workspaceFolders.length : 0, null, { uri: appendedUri });
+        if (!isWorkspaceFolder(workspacePath)) {
+            vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: appendedUri });
+        }
         await clone(event, appendedUri.fsPath);
         if (!event.isDevFile) {
             panel.webview.postMessage({
@@ -78,6 +82,20 @@ export class Command {
             vscode.window.showInformationMessage('Selected Component added to the workspace.');
         }
     }
+}
+
+
+function isWorkspaceFolder(uri: vscode.Uri): boolean {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if(workspaceFolders && workspaceFolders.length > 0) {
+        const sameFolder = workspaceFolders.filter(workspaceFolder => workspaceFolder.uri.fsPath === uri.fsPath || uri.fsPath.indexOf(workspaceFolder.uri.fsPath) !== -1);
+        if (sameFolder && sameFolder.length > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    return false;
 }
 
 async function gitImportMessageListener(event: any): Promise<any> {
@@ -271,7 +289,7 @@ function validateDevFilePath(event: any) {
     let validationMessage = OpenShiftItem.emptyName(`Required ${event.param}`, event.param.trim());
     if (!validationMessage) validationMessage = OpenShiftItem.validateFilePath(`Not matches ^[a-z]:((\/|\\\\)[a-zA-Z0-9_ \\-]+)+\\.yaml$`, event.param);
     if (!validationMessage && event.param !== 'devfile.yaml' && event.param !== 'devfile.yml') {
-        const uri = Uri.parse(event.param);
+        const uri = vscode.Uri.parse(event.param);
         const devFileLocation = path.join(uri.fsPath);
         validationMessage = fs.existsSync(devFileLocation) ? null : 'devfile not available on the given path';
     }
