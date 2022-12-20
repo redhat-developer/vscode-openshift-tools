@@ -1,5 +1,32 @@
 # Change Log
 
+## 1.1.0 (December 19, 2022)
+
+* [#2711](https://github.com/redhat-developer/vscode-openshift-tools/issues/2711) Migrate to odo 3.4.0
+* [#2709](https://github.com/redhat-developer/vscode-openshift-tools/issues/2709) Fix the GitHub Readme badge error 
+* [#2705](https://github.com/redhat-developer/vscode-openshift-tools/issues/2705) Devfile Registry View does not show errors for connectivity related issues and stays in 'Loading Registry View' mode forever
+* [#2701](https://github.com/redhat-developer/vscode-openshift-tools/issues/2701) Show and Follow log is not shown when set to open in web view
+* [#2700](https://github.com/redhat-developer/vscode-openshift-tools/issues/2700) Missing word in error message in Import from Git wizard
+* [#2693](https://github.com/redhat-developer/vscode-openshift-tools/issues/2693) Login to cluster does not work
+* [#2690](https://github.com/redhat-developer/vscode-openshift-tools/issues/2690) Support podman workflow using odo
+* [#2689](https://github.com/redhat-developer/vscode-openshift-tools/issues/2689) Update @material-ui/core package
+* [#2688](https://github.com/redhat-developer/vscode-openshift-tools/issues/2688) Update odo to v3.3.0
+* [#2685](https://github.com/redhat-developer/vscode-openshift-tools/issues/2685) OpenShift Local workflow broken in Windows
+* [#2682](https://github.com/redhat-developer/vscode-openshift-tools/issues/2682) Cannot create project with name of previously deleted project
+* [#2676](https://github.com/redhat-developer/vscode-openshift-tools/issues/2676) Enable odo telemetry based on current vscode telemetry opt-in status
+* [#2674](https://github.com/redhat-developer/vscode-openshift-tools/issues/2674) Unable to select devfile registry in git import when multiple devfile registry configured
+* [#2671](https://github.com/redhat-developer/vscode-openshift-tools/issues/2671) Unable to create component from Get started page view
+* [#2667](https://github.com/redhat-developer/vscode-openshift-tools/issues/2667) Support odo 3.2.0 workflow
+* [#2666](https://github.com/redhat-developer/vscode-openshift-tools/issues/2666) Typo: Component name spell error 
+* [#2608](https://github.com/redhat-developer/vscode-openshift-tools/issues/2608) Debug session failed to start
+* [#2598](https://github.com/redhat-developer/vscode-openshift-tools/issues/2598) Manage Kubernetes Context Action
+* [#2579](https://github.com/redhat-developer/vscode-openshift-tools/issues/2579) Add Browse actions in registry view
+* [#2577](https://github.com/redhat-developer/vscode-openshift-tools/issues/2577) Registry view is empty by default when OpenShift extension is opened
+* [#2562](https://github.com/redhat-developer/vscode-openshift-tools/issues/2562) Perform odo v3 migration testing
+* [#2559](https://github.com/redhat-developer/vscode-openshift-tools/issues/2559) Enable telemetry for odo calls if user consents to telemetry request for the extension
+* [#2465](https://github.com/redhat-developer/vscode-openshift-tools/issues/2465) Detect debugger ext for component using devfile's language tags in the registry
+* [#1802](https://github.com/redhat-developer/vscode-openshift-tools/issues/1802) Provide a way to remove clusters from the list
+
 ## 1.0.0 (November 8, 2022)
 
 * [#2651](https://github.com/redhat-developer/vscode-openshift-tools/issues/2651) Add analyze button in git import
