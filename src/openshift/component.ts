@@ -25,6 +25,8 @@ import { ComponentWorkspaceFolder } from '../odo/workspace';
 import LogViewLoader from '../webview/log/LogViewLoader';
 import GitImportLoader from '../webview/git-import/gitImportLoader';
 import { CliChannel } from '../cli';
+import { findPair } from 'yaml/util';
+import { debugPort } from 'process';
 
 function createCancelledResult(stepName: string): any {
     const cancelledResult: any = new String('');
@@ -711,12 +713,27 @@ export class Component extends OpenShiftItem {
     static async startOdoAndConnectDebugger(component: ComponentWorkspaceFolder, config: DebugConfiguration): Promise<string> {
             const componentDescription = await Component.odo.describeComponent(component.contextPath);
             if (componentDescription.devForwardedPorts?.length > 0) {
-                const ports = componentDescription.devForwardedPorts.map((fp) => ({
+                // try to find debug port
+                const debugPortsCandidates:number[] = [];
+                componentDescription.devForwardedPorts.forEach((pf) => {
+                    const devComponent = componentDescription.devfileData.devfile.components.find(item => item.name === pf.containerName);
+                    if (devComponent?.container) {
+                        const candidatePort = devComponent.container.endpoints.find(endpoint => endpoint.targetPort === pf.containerPort);
+                        if (candidatePort.name.startsWith('debug')) {
+                            debugPortsCandidates.push(candidatePort.targetPort);
+                        }
+                    }
+                });
+                const filteredForwardedPorts = debugPortsCandidates.length > 0
+                    ? componentDescription.devForwardedPorts.filter(fp => debugPortsCandidates.includes(fp.containerPort))
+                        : componentDescription.devForwardedPorts;
+                const ports = filteredForwardedPorts.map((fp) => ({
                     label: `${fp.localAddress}:${fp.localPort}`,
                     description: `Forwards to ${fp.containerName}:${fp.containerPort}`,
                     fp
                 }));
-                const port = await window.showQuickPick(ports, {placeHolder: 'Select a URL to open in default browser'});
+
+                const port = ports.length === 1 ? ports[0] : await window.showQuickPick(ports, {placeHolder: 'Select a port to start debugger session'});
 
                 if (!port) return null;
 
