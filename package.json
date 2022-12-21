@@ -125,7 +125,6 @@
 		"@mui/icons-material": "^5.11.0",
 		"@mui/lab": "^5.0.0-alpha.112",
 		"@mui/material": "^5.11.0",
-		"@patternfly/react-core": "^4.198.19",
 		"@rjsf/core": "^5.0.0-beta.14",
 		"@rjsf/material-ui": "^5.0.0-beta.14",
 		"@segment/analytics-next": "^1.17.4",

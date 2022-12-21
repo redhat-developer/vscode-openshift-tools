@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import React, { ChangeEvent } from 'react';
-import { Text, TextContent } from '@patternfly/react-core';
 import { DefaultProps } from './home';
 import {
     Registry
@@ -12,7 +11,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import filterElementsStyle from './filterElements.style';
 import { Checkbox, FormControlLabel } from '@material-ui/core';
-import { Tooltip } from '@mui/material';
+import { Tooltip, Typography } from '@mui/material';
 
 interface FilterProps extends DefaultProps {
     id: string,
@@ -30,9 +29,7 @@ export const FilterElements: React.FC<FilterProps> = ({
     const filterStyleCSS = filterStyle();
     return (
         <div className={filterStyleCSS.filterContainer}>
-            <TextContent>
-                <Text style={{ fontSize: 'var(--vscode-editor-font-size)' }}>Registries:</Text>
-            </TextContent>
+            <Typography style={{ fontSize: 'var(--vscode-editor-font-size)' }}>Registries:</Typography>
             {
                 registries.map((registry, index) => (
                     <FormControlLabel className={filterStyleCSS.checkBoxItem} key={registry.name + '-' + index}
