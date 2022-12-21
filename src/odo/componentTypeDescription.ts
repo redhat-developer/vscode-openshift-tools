@@ -29,12 +29,18 @@ export interface ComponentDescription {
     managedBy: string;
 }
 
+export interface ComponentItem {
+    name: string;
+    container?: Container;
+    kubernetes?: Kubernetes;
+};
+
 export interface Data {
     schemaVersion: string;
     metadata: Metadata;
     parent: Parent;
     starterProjects: StarterProject[];
-    components: Component[];
+    components: ComponentItem[];
     commands: Command[];
     events: Events;
 }
@@ -77,10 +83,14 @@ export interface Remotes {
     origin: string;
 }
 
-export interface Component {
+export interface ContainerItem  {
     name: string;
-    container?: Container;
-    volume?: Volume;
+    container: Container;
+}
+
+export interface KubernetesItem {
+    name: string;
+    kubernetes: Kubernetes;
 }
 
 export interface Container {
