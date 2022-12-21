@@ -25,8 +25,6 @@ import { ComponentWorkspaceFolder } from '../odo/workspace';
 import LogViewLoader from '../webview/log/LogViewLoader';
 import GitImportLoader from '../webview/git-import/gitImportLoader';
 import { CliChannel } from '../cli';
-import { findPair } from 'yaml/util';
-import { debugPort } from 'process';
 
 function createCancelledResult(stepName: string): any {
     const cancelledResult: any = new String('');
