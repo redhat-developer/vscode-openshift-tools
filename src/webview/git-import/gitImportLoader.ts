@@ -22,24 +22,19 @@ import { vsCommand } from '../../vscommand';
 
 let panel: vscode.WebviewPanel;
 
+function filterNotEmptyFolders(folderPath: string) {
+    return fs.readdirSync(folderPath).length > 0;
+}
+
 export class Command {
     @vsCommand('openshift.component.importFromGit')
     static async createComponent(event: any) {
-        let alreadyExist: boolean;
         let workspacePath,appendedUri: vscode.Uri;
-        do {
-            alreadyExist = false;
-            workspacePath = await selectWorkspaceFolder();
-            appendedUri = vscode.Uri.joinPath(workspacePath, event.projectName);
-            if (isWorkspaceFolder(workspacePath) && fs.readdirSync(workspacePath.fsPath).length > 0) {
-                vscode.window.showErrorMessage(`Unable to create Component on Workspace Folder: ${workspacePath}, Please select another folder`);
-                alreadyExist = true;
-            } else if (fs.existsSync(appendedUri.fsPath) && fs.readdirSync(appendedUri.fsPath).length > 0) {
-                vscode.window.showErrorMessage(`Folder ${appendedUri.fsPath.substring(appendedUri.fsPath.lastIndexOf('\\') + 1)} already exist
-                    at the selected location: ${appendedUri.fsPath.substring(0, appendedUri.fsPath.lastIndexOf('\\'))}`);
-                alreadyExist = true;
-            }
-        } while (alreadyExist);
+        workspacePath = await selectWorkspaceFolder(
+            'Select empty workspace folder or add new one where to clone a repository',
+            'Add folder to workspace',
+            'Selected folder is not empty, please select empty one to continue.',
+            filterNotEmptyFolders);
         panel.webview.postMessage({
             action: 'cloneStarted'
         });
@@ -86,16 +81,7 @@ export class Command {
 
 
 function isWorkspaceFolder(uri: vscode.Uri): boolean {
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if(workspaceFolders && workspaceFolders.length > 0) {
-        const sameFolder = workspaceFolders.filter(workspaceFolder => workspaceFolder.uri.fsPath === uri.fsPath || uri.fsPath.indexOf(workspaceFolder.uri.fsPath) !== -1);
-        if (sameFolder && sameFolder.length > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    return false;
+    return !!vscode.workspace.getWorkspaceFolder(uri);
 }
 
 async function gitImportMessageListener(event: any): Promise<any> {
