@@ -43,9 +43,6 @@ export class Command {
         panel.webview.postMessage({
             action: 'cloneStarted'
         });
-        if (!isWorkspaceFolder(workspacePath)) {
-            vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: appendedUri });
-        }
         await clone(event, appendedUri.fsPath);
         if (!event.isDevFile) {
             panel.webview.postMessage({
@@ -80,6 +77,9 @@ export class Command {
                 status: true
             });
             vscode.window.showInformationMessage('Selected Component added to the workspace.');
+        }
+        if (!isWorkspaceFolder(workspacePath)) {
+            vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: appendedUri });
         }
     }
 }
