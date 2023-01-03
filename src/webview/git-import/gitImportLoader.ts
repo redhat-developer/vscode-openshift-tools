@@ -27,11 +27,13 @@ export class Command {
     static async createComponent(event: any) {
         let alreadyExist: boolean;
         let workspacePath,appendedUri: vscode.Uri;
+        let workspaceFolder: vscode.WorkspaceFolder;
         do {
             alreadyExist = false;
             workspacePath = await selectWorkspaceFolder();
             appendedUri = vscode.Uri.joinPath(workspacePath, event.projectName);
-            if (isWorkspaceFolder(workspacePath) && fs.readdirSync(workspacePath.fsPath).length > 0) {
+            workspaceFolder = vscode.workspace.getWorkspaceFolder(workspacePath);
+            if (workspaceFolder && fs.readdirSync(workspacePath.fsPath).length > 0) {
                 vscode.window.showErrorMessage(`Unable to create Component on Workspace Folder: ${workspacePath}, Please select another folder`);
                 alreadyExist = true;
             } else if (fs.existsSync(appendedUri.fsPath) && fs.readdirSync(appendedUri.fsPath).length > 0) {
@@ -78,25 +80,12 @@ export class Command {
             });
             vscode.window.showInformationMessage('Selected Component added to the workspace.');
         }
-        if (!isWorkspaceFolder(workspacePath)) {
+        if (!workspaceFolder) {
             vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: appendedUri });
         }
     }
 }
 
-
-function isWorkspaceFolder(uri: vscode.Uri): boolean {
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if(workspaceFolders && workspaceFolders.length > 0) {
-        const sameFolder = workspaceFolders.filter(workspaceFolder => workspaceFolder.uri.fsPath === uri.fsPath || uri.fsPath.indexOf(workspaceFolder.uri.fsPath) !== -1);
-        if (sameFolder && sameFolder.length > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    return false;
-}
 
 async function gitImportMessageListener(event: any): Promise<any> {
     switch (event?.action) {
@@ -268,7 +257,7 @@ function clone(event: any, location: string): Promise<any> {
     const gitExtension = vscode.extensions.getExtension('vscode.git').exports;
     const git = gitExtension.getAPI(1).git.path;
     // run 'git clone url location' as external process and return location
-    return new Promise((resolve, reject) => cp.exec(`${git} clone ${event.gitURL} ${location}`, (error: cp.ExecException) => error ?
+    return new Promise((resolve, _reject) => cp.exec(`${git} clone ${event.gitURL} ${location}`, (error: cp.ExecException) => error ?
         showError(event) : resolve(true)));
 }
 
@@ -306,7 +295,7 @@ function showError(event: any): void {
         action: event.action,
         status: false
     });
-    vscode.window.showErrorMessage('Error occurred while cloning the repository. Please click on Analyze Button and Try again.');
+    vscode.window.showErrorMessage('An error occurred while cloning the repository. Please click \'Analyze\' button and try again');
 }
 
 function isGitURL(host: string): boolean {
