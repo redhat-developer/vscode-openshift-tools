@@ -11,6 +11,7 @@ export interface DevFileProps extends React.AnchorHTMLAttributes<HTMLAnchorEleme
     compDescription: ComponentTypeDescription;
     hasGitLink: boolean;
     cardItemStyle: any;
+    themeKind: number;
     projectDisplayStyle: any
 }
 

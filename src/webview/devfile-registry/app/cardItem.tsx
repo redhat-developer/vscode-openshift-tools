@@ -12,8 +12,8 @@ import { StarterProject } from '../../../odo/componentTypeDescription';
 import { StarterProjectDisplay } from './starterProjectDisplay';
 import { Badge, Backdrop, Button, Card, CardActions, Modal } from '@material-ui/core';
 import { FileCopy } from '@material-ui/icons';
-import { monokai } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { Tooltip, Typography } from '@mui/material';
+import { qtcreatorLight, monokai } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 export class CardItem extends React.Component<DevFileProps, {
     numOfCall: number,
@@ -21,7 +21,7 @@ export class CardItem extends React.Component<DevFileProps, {
     devFileYAML: string,
     selectedProject: StarterProject,
     copyClicked: boolean
-    hoverProject: null | StarterProject,
+    hoverProject: null | StarterProject
 }> {
 
     constructor(props: DevFileProps) {
@@ -246,7 +246,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                     <Button
                                         id='tooltip-selector'
                                         component='span'
-                                        style={{ cursor: 'pointer' }}
+                                        style={{ cursor: 'pointer', backgroundColor: 'var(--vscode-button-background)' }}
                                         onClick={(): void => this.copyClicked(true)}
                                     >
                                         <FileCopy style={{ color: 'white' }} fontSize='small' />
@@ -254,14 +254,14 @@ export class CardItem extends React.Component<DevFileProps, {
                         </CardActions>
                     </CopyToClipboard>
                     <SyntaxHighlighter language='yaml' useInlineStyles
-                        style={monokai}
+                        style={this.props.themeKind <= 1 ? qtcreatorLight : monokai}
                         wrapLines
                         showLineNumbers
                         lineNumberStyle={{ marginLeft: '-1.5rem' }}
                         customStyle={{ marginLeft: '-1.5rem', backgroundColor: 'inherit' }}
                         codeTagProps={{
                             style: {
-                                fontFamily: 'inherit', color: 'inherit',
+                                fontFamily: 'inherit',
                                 fontStyle: 'inherit', fontWeight: 'inherit'
                             }
                         }}>

@@ -11,7 +11,9 @@ import {
     StatusBarAlignment,
     StatusBarItem,
     env,
-    QuickPickItemKind
+    QuickPickItemKind,
+    ColorTheme,
+    ColorThemeKind
 } from 'vscode';
 import path = require('path');
 import { startTelemetry } from './telemetry';
@@ -87,6 +89,14 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
+
+    let themeKind:ColorThemeKind = window.activeColorTheme.kind;
+    window.onDidChangeActiveColorTheme((editor: ColorTheme) => {
+        if (themeKind !== editor.kind) {
+            themeKind = editor?.kind;
+            void commands.executeCommand('openshift.componentTypesView.registry.setTheme', themeKind);
+        }
+    });
 
     function statusBarFunctions() {
         return commands.registerCommand('openshift.openStatusBar', async () => {

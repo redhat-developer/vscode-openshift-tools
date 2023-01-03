@@ -118,6 +118,13 @@ export default class RegistryViewLoader {
         await RegistryViewLoader.loadView(`Devfile Registry - ${context.name}`, context.url);
     }
 
+    @vsCommand('openshift.componentTypesView.registry.setTheme')
+    static async setTheme(kind: vscode.ColorThemeKind): Promise<void> {
+        if (panel) {
+            panel.webview.postMessage({ action: 'setTheme', themeValue: kind });
+        }
+    }
+
     @vsCommand('openshift.componentTypesView.registry.closeView')
     static async closeRegistryInWebview(): Promise<void> {
         panel?.dispose();
@@ -149,6 +156,7 @@ function getAllComponents(eventActionName: string, url?: string, error?: string)
                 action: eventActionName,
                 compDescriptions: Array.from(componentDescriptions),
                 registries: registries,
+                themeValue: vscode.window.activeColorTheme.kind,
                 errorMessage: error
             }
         );
