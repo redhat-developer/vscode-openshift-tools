@@ -286,7 +286,6 @@
 		"onCommand:clusters.openshift.deployment.openConsole",
 		"onCommand:clusters.openshift.imagestream.openConsole",
 		"onCommand:openshift.componentTypesView.registry.openInView",
-        "onCommand:openshift.componentTypesView.registry.setTheme",
 		"onWalkthrough:openshiftWalkthrough"
 	],
 	"contributes": {

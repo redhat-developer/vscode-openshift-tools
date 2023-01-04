@@ -11,9 +11,7 @@ import {
     StatusBarAlignment,
     StatusBarItem,
     env,
-    QuickPickItemKind,
-    ColorTheme,
-    ColorThemeKind
+    QuickPickItemKind
 } from 'vscode';
 import path = require('path');
 import { startTelemetry } from './telemetry';
@@ -31,7 +29,6 @@ import { WelcomePage } from './welcomePage';
 import { ComponentsTreeDataProvider } from './componentsView';
 
 import fsx = require('fs-extra');
-
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
@@ -89,14 +86,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
-
-    let themeKind:ColorThemeKind = window.activeColorTheme.kind;
-    window.onDidChangeActiveColorTheme((editor: ColorTheme) => {
-        if (themeKind !== editor.kind) {
-            themeKind = editor?.kind;
-            void commands.executeCommand('openshift.componentTypesView.registry.setTheme', themeKind);
-        }
-    });
 
     function statusBarFunctions() {
         return commands.registerCommand('openshift.openStatusBar', async () => {
