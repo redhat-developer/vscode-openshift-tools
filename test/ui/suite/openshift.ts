@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { expect } from 'chai';
-import { ActivityBar, CustomTreeSection, SideBarView, ViewSection, WelcomeContentSection, Workbench } from 'vscode-extension-tester';
+import { ActivityBar, CustomTreeSection, SideBarView, ViewSection, WebView, WelcomeContentSection, Workbench } from 'vscode-extension-tester';
 import { BUTTONS, VIEWS } from '../common/constants';
 
 export function checkOpenshiftView() {
@@ -99,6 +99,15 @@ export function checkOpenshiftView() {
                 await new Promise((res) => { setTimeout(res, 6000); });
                 const registry = await types.findItem(VIEWS.devFileRegistry);
                 expect(registry).not.undefined;
+            });
+
+            it('opens viewer for default devfile registry', async () =>{
+                const registry = await types.getAction('Show View');
+                await registry.click();
+                await new Promise((res) => { setTimeout(res, 500); });
+                const regView = new WebView();
+                await regView.switchToFrame();
+                await new Promise((res) => { setTimeout(res, 5000); });
             });
         });
     });
