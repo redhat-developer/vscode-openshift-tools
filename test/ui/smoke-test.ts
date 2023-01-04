@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import { checkExtension } from './suite/extension';
 import { checkOpenshiftView } from './suite/openshift';
-// import { createComponentTest } from './suite/component';
+import { createComponentTest } from './suite/component';
 
 describe('Extension smoke test', () => {
     const kubeConfig = path.join(process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'], '.kube', 'config');
@@ -31,5 +31,5 @@ describe('Extension smoke test', () => {
 
     checkExtension();
     checkOpenshiftView();
-    // createComponentTest(contextFolder);
+    createComponentTest(contextFolder);
 });

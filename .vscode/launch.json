@@ -76,6 +76,23 @@
             }
         },
         {
+            "name": "Debug UI Tests",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/.bin/extest",
+            "args": [
+                "setup-and-run",
+                "${workspaceFolder}/out/test/ui/public-ui-test.js",
+                "-o",
+                "${workspaceFolder}/test/ui/settings.json",
+                "-m",
+                "--mocha_config",
+                "${workspaceFolder}/test/ui/.mocharc.js"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
             "type": "pwa-chrome",
             "request": "launch",
             "name": "Launch 'Cluster Editor' in Chrome",
