@@ -14,6 +14,16 @@ import { Registry } from '../../odo/componentType';
 
 let panel: vscode.WebviewPanel;
 
+let themeKind: vscode.ColorThemeKind = vscode.window.activeColorTheme.kind;
+vscode.window.onDidChangeActiveColorTheme((editor: vscode.ColorTheme) => {
+    if (themeKind !== editor.kind) {
+        themeKind = editor.kind;
+        if (panel) {
+            panel.webview.postMessage({ action: 'setTheme', themeValue: themeKind });
+        }
+    }
+});
+
 async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
     let starterProject = event.selectedProject;
     switch (event?.action) {
@@ -118,13 +128,6 @@ export default class RegistryViewLoader {
         await RegistryViewLoader.loadView(`Devfile Registry - ${context.name}`, context.url);
     }
 
-    @vsCommand('openshift.componentTypesView.registry.setTheme')
-    static async setTheme(kind: vscode.ColorThemeKind): Promise<void> {
-        if (panel) {
-            panel.webview.postMessage({ action: 'setTheme', themeValue: kind });
-        }
-    }
-
     @vsCommand('openshift.componentTypesView.registry.closeView')
     static async closeRegistryInWebview(): Promise<void> {
         panel?.dispose();
@@ -156,7 +159,7 @@ function getAllComponents(eventActionName: string, url?: string, error?: string)
                 action: eventActionName,
                 compDescriptions: Array.from(componentDescriptions),
                 registries: registries,
-                themeValue: vscode.window.activeColorTheme.kind,
+                themeValue: themeKind,
                 errorMessage: error
             }
         );
