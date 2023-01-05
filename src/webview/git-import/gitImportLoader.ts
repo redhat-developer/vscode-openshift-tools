@@ -309,48 +309,12 @@ function isGitURL(host: string): boolean {
     return ['github.com', 'bitbucket.org', 'gitlab.com'].includes(host);
 }
 
-function deleteFile(dir, file) {
-    return new Promise<void>(function (resolve, reject) {
-        var filePath = path.join(dir, file);
-        fs.lstat(filePath, function (err, stats) {
+function deleteDirectory(dir: string) {
+    return new Promise<void>(function (_resolve, reject) {
+        fs.rmdir(dir, { recursive: true }, err => {
             if (err) {
-                return reject(err);
+                reject(err);
             }
-            if (stats.isDirectory()) {
-                resolve(deleteDirectory(filePath));
-            } else {
-                fs.unlink(filePath, function (err) {
-                    if (err) {
-                        return reject(err);
-                    }
-                    resolve();
-                });
-            }
-        });
-    });
-};
-
-function deleteDirectory(dir) {
-    return new Promise<void>(function (resolve, reject) {
-        fs.access(dir, function (err) {
-            if (err) {
-                return reject(err);
-            }
-            fs.readdir(dir, function (err, files) {
-                if (err) {
-                    return reject(err);
-                }
-                Promise.all(files.map(function (file) {
-                    return deleteFile(dir, file);
-                })).then(function () {
-                    fs.rmdir(dir, function (err) {
-                        if (err) {
-                            return reject(err);
-                        }
-                        resolve();
-                    });
-                }).catch(reject);
-            });
-        });
+        })
     });
 };
