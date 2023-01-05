@@ -19,6 +19,9 @@ import jsYaml = require('js-yaml');
 import GitUrlParse = require('git-url-parse');
 import cp = require('child_process');
 import { vsCommand } from '../../vscommand';
+import * as odo3 from '../../odo3';
+import { ComponentDescription } from '../../odo/componentTypeDescription';
+import { ComponentWorkspaceFolder } from '../../odo/workspace';
 
 let panel: vscode.WebviewPanel;
 
@@ -26,15 +29,19 @@ export class Command {
     @vsCommand('openshift.component.importFromGit')
     static async createComponent(event: any) {
         let alreadyExist: boolean;
-        let workspacePath,appendedUri: vscode.Uri;
+        let workspacePath: vscode.Uri, appendedUri: vscode.Uri;
         let workspaceFolder: vscode.WorkspaceFolder;
         do {
             alreadyExist = false;
             workspacePath = await selectWorkspaceFolder();
+            if (!workspacePath) {
+                return null;
+            }
             appendedUri = vscode.Uri.joinPath(workspacePath, event.projectName);
             workspaceFolder = vscode.workspace.getWorkspaceFolder(workspacePath);
-            if (workspaceFolder && fs.readdirSync(workspacePath.fsPath).length > 0) {
-                vscode.window.showErrorMessage(`Unable to create Component on Workspace Folder: ${workspacePath}, Please select another folder`);
+            const isExistingComponent = await existingComponent(workspacePath);
+            if (isExistingComponent) {
+                vscode.window.showErrorMessage(`Unable to create Component inside an existing Component: ${workspacePath}, Please select another folder`);
                 alreadyExist = true;
             } else if (fs.existsSync(appendedUri.fsPath) && fs.readdirSync(appendedUri.fsPath).length > 0) {
                 vscode.window.showErrorMessage(`Folder ${appendedUri.fsPath.substring(appendedUri.fsPath.lastIndexOf('\\') + 1)} already exist
@@ -85,7 +92,6 @@ export class Command {
         }
     }
 }
-
 
 async function gitImportMessageListener(event: any): Promise<any> {
     switch (event?.action) {
@@ -210,8 +216,8 @@ function validateGitURL(event: any) {
         try {
             const parse = GitUrlParse(event.param);
             const isGitRepo = isGitURL(parse.host);
-            if(!isGitRepo) {
-               throw 'Invalid Git URL';
+            if (!isGitRepo) {
+                throw 'Invalid Git URL';
             }
             if (parse.organization !== '' && parse.name !== '') {
                 panel.webview.postMessage({
@@ -299,6 +305,38 @@ function showError(event: any): void {
 }
 
 function isGitURL(host: string): boolean {
-    return ['github.com','bitbucket.org','gitlab.com'].includes(host);
+    return ['github.com', 'bitbucket.org', 'gitlab.com'].includes(host);
 }
 
+async function existingComponent(uri: vscode.Uri): Promise<boolean> {
+    let worksapceFolder = vscode.workspace.getWorkspaceFolder(uri);
+    if (worksapceFolder?.uri) {
+        const workspaceSubDirs = fs.readdirSync(worksapceFolder.uri.fsPath, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name).map((subDir) => vscode.Uri.joinPath(worksapceFolder.uri, subDir));
+        const components = await getComponents(workspaceSubDirs);
+        if (components?.length > 0) {
+            const sameFolder = components.filter(component => component.contextPath === uri.fsPath || uri.fsPath.indexOf(component.contextPath) !== -1);
+            if (sameFolder && sameFolder.length > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+    return false;
+}
+
+async function getComponents(folders: vscode.Uri[]): Promise<ComponentWorkspaceFolder[]> {
+    const descriptions = folders.map(
+        (folder) => odo3.newInstance().describeComponent(folder.fsPath)
+            .then((component: ComponentDescription) => {
+                return {
+                    contextPath: folder.fsPath,
+                    component
+                }
+            })
+    );
+    const results = await Promise.all(descriptions);
+    return results.filter((compFolder) => !!compFolder.component);
+}
