@@ -4,17 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
 import SyntaxHighlighter from 'react-syntax-highlighter';
-import {
-    Brand,
-    CardBody,
-    CardHeader,
-    CardTitle,
-    TextContent,
-    TextVariants,
-    Text,
-    Tooltip,
-    CardFooter
-} from '@patternfly/react-core';
 import clsx from 'clsx';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { DevFileProps } from './wrapperCardItem';
@@ -24,6 +13,7 @@ import { StarterProjectDisplay } from './starterProjectDisplay';
 import { Badge, Backdrop, Button, Card, CardActions, Modal } from '@material-ui/core';
 import { FileCopy } from '@material-ui/icons';
 import { monokai } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { Tooltip, Typography } from '@mui/material';
 
 export class CardItem extends React.Component<DevFileProps, {
     numOfCall: number,
@@ -140,21 +130,19 @@ export class CardItem extends React.Component<DevFileProps, {
     render(): React.ReactNode {
         const { isExpanded, devFileYAML, selectedProject, hoverProject, copyClicked } = this.state;
         const starterProjectCard = <Card data-testid='dev-page-starterProject' className={this.props.cardItemStyle.starterProjectCard}>
-            <CardHeader className={this.props.cardItemStyle.starterProjectCardHeader}>
-                <TextContent>
-                    <Text component={TextVariants.h6}>
-                        Starter Projects
-                    </Text>
-                </TextContent>
+            <div className={this.props.cardItemStyle.starterProjectCardHeader}>
+                <Typography variant='body1'>
+                    Starter Projects
+                </Typography>
                 <Badge key={this.props.compDescription.devfileData.devfile.metadata.name + '-badge'}
-                    className={clsx(this.props.cardItemStyle.badge, this.props.cardItemStyle.headerBadge)}
+                    className={clsx(this.props.cardItemStyle.badge, this.props.cardItemStyle.subBadge, this.props.cardItemStyle.headerBadge)}
                     overlap='rectangular'
                     variant='standard'
                     showZero={false}>
                     {this.props.compDescription.devfileData.devfile.starterProjects.length}
                 </Badge>
-            </CardHeader>
-            <CardBody>
+            </div>
+            <div>
                 <div className={this.props.cardItemStyle.starterProjectCardBody}>
                     <div
                         data-testid='projects-selector'
@@ -184,11 +172,9 @@ export class CardItem extends React.Component<DevFileProps, {
                                 component='span'
                                 className={this.props.cardItemStyle.button}
                                 onClick={this.createComponent}>
-                                <TextContent>
-                                    <Text component={TextVariants.h6}>
-                                        New Component
-                                    </Text>
-                                </TextContent>
+                                <Typography variant='body2'>
+                                    New Component
+                                </Typography>
                             </Button>
                             {this.props.hasGitLink &&
                                 <><Button
@@ -197,27 +183,23 @@ export class CardItem extends React.Component<DevFileProps, {
                                     component='span'
                                     className={this.props.cardItemStyle.button}
                                     onClick={this.cloneToWorkSpace}>
-                                    <TextContent>
-                                        <Text component={TextVariants.h6}>
-                                            Clone to Workspace
-                                        </Text>
-                                    </TextContent>
+                                    <Typography variant='body2'>
+                                        Clone to Workspace
+                                    </Typography>
                                 </Button><Button
                                     color='default'
                                     variant='contained'
                                     component='span'
                                     className={this.props.cardItemStyle.button}
                                     onClick={this.openInBrowser}>
-                                        <TextContent>
-                                            <Text component={TextVariants.h6}>
-                                                Open in Browser
-                                            </Text>
-                                        </TextContent>
+                                        <Typography variant='body2'>
+                                            Open in Browser
+                                        </Typography>
                                     </Button></>}
                         </CardActions>
                     </div>
                 </div>
-            </CardBody>
+            </div>
         </Card>;
 
         const modalViewCard = <Modal
@@ -235,47 +217,40 @@ export class CardItem extends React.Component<DevFileProps, {
                 width: '100%', height: '100%', marginTop: '5rem', border: '0px'
             }}>
             <Card data-testid='dev-page-yaml' className={this.props.cardItemStyle.yamlCard}>
-                <CardHeader className={this.props.cardItemStyle.yamlCardHeader}>
+                <div className={this.props.cardItemStyle.yamlCardHeader}>
                     <Card data-testid='dev-page-header' className={this.props.cardItemStyle.devPageCard}>
-                        <CardHeader className={this.props.cardItemStyle.devPageCardHeader}>
+                        <div className={this.props.cardItemStyle.devPageCardHeader}>
                             <div className={this.props.cardItemStyle.devPageTitle}>
-                                <Brand
+                                <img
                                     data-testid='icon'
                                     src={this.props.compDescription.devfileData.devfile.metadata.icon}
                                     alt={this.props.compDescription.devfileData.devfile.metadata.icon + ' logo'}
                                     className={this.props.cardItemStyle.cardImage}
                                     style={{ margin: '0rem' }} />
-                                <TextContent style={{ padding: '1rem', margin: '0rem' }}>
-                                    <Text component={TextVariants.h6}>
+                                <div style={{ padding: '1rem', margin: '0rem' }}>
+                                    <Typography variant='subtitle1'>
                                         {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.displayName)}
-                                    </Text>
-                                </TextContent>
+                                    </Typography>
+                                </div>
                             </div>
-                        </CardHeader>
+                        </div>
                         {starterProjectCard}
                     </Card>
-                </CardHeader>
-                <CardBody className={this.props.cardItemStyle.yamlCardBody}>
+                </div>
+                <div className={this.props.cardItemStyle.yamlCardBody}>
                     <CopyToClipboard text={devFileYAML}>
                         <CardActions className={this.props.cardItemStyle.copyButton}
                             onMouseLeave={(): void => this.copyClicked(false)}>
-                            <Button
-                                id='tooltip-selector'
-                                component='span'
-                                style={{ cursor: 'pointer' }}
-                                onClick={(): void => this.copyClicked(true)}
-                            >
-                                <FileCopy style={{ color: 'white' }} fontSize='small' />
-                            </Button>
                             <Tooltip
-                                content={
-
-                                    copyClicked ? 'Copied' : 'Copy'
-                                }
-                                position='bottom'
-                                trigger='mouseenter click'
-                                reference={() => document.getElementById('tooltip-selector')}
-                            />
+                                title={copyClicked ? 'Copied' : 'Copy'} children={
+                                    <Button
+                                        id='tooltip-selector'
+                                        component='span'
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={(): void => this.copyClicked(true)}
+                                    >
+                                        <FileCopy style={{ color: 'white' }} fontSize='small' />
+                                    </Button>} />
                         </CardActions>
                     </CopyToClipboard>
                     <SyntaxHighlighter language='yaml' useInlineStyles
@@ -292,7 +267,7 @@ export class CardItem extends React.Component<DevFileProps, {
                         }}>
                         {devFileYAML}
                     </SyntaxHighlighter>
-                </CardBody>
+                </div>
             </Card>
         </Modal>;
 
@@ -303,67 +278,60 @@ export class CardItem extends React.Component<DevFileProps, {
                     onClick={this.onCardClick}
                     data-testid={`card-${this.props.compDescription.devfileData.devfile.metadata.name.replace(/\.| /g, '')}`}
                 >
-                    <CardHeader className={this.props.cardItemStyle.cardHeader}>
+                    <div className={this.props.cardItemStyle.cardHeader}>
                         <div className={this.props.cardItemStyle.cardHeaderDisplay}>
-                            <Brand
+                            <img
                                 src={this.props.compDescription.devfileData.devfile.metadata.icon}
                                 alt={`${this.props.compDescription.devfileData.devfile.metadata.name} icon`}
                                 className={this.props.cardItemStyle.cardImage} />
                             {this.props.compDescription.registry.name.toLowerCase() !== 'defaultdevfileregistry' &&
-                                <TextContent className={this.props.cardItemStyle.cardRegistryTitle}>
-                                    <Text component={TextVariants.p}>{this.props.compDescription.registry.name}</Text>
-                                </TextContent>}
+                                <div className={this.props.cardItemStyle.cardRegistryTitle}>
+                                    <Typography variant='caption'>{this.props.compDescription.registry.name}</Typography>
+                                </div>}
                         </div>
-                    </CardHeader>
-                    <CardTitle style={{ margin: '1.5rem' }}>
-                        <TextContent>
-                            <Text component={TextVariants.h1}>{this.props.compDescription.devfileData.devfile.metadata.displayName}</Text>
-                        </TextContent>
-                    </CardTitle>
-                    <CardBody className={this.props.cardItemStyle.cardBody}>
+                    </div>
+                    <div style={{ margin: '1.5rem' }}>
+                        <Typography variant='subtitle1'>{this.props.compDescription.devfileData.devfile.metadata.displayName}</Typography>
+                    </div>
+                    <div className={this.props.cardItemStyle.cardBody}>
                         {
                             this.props.compDescription.devfileData.devfile.metadata.version && (
-                                <TextContent>
-                                    <Text component={TextVariants.small}>
-                                        Version: {this.props.compDescription.devfileData.devfile.metadata.version}
-                                    </Text>
-                                </TextContent>
+                                <><Typography variant='caption'>
+                                    Version: {this.props.compDescription.devfileData.devfile.metadata.version}
+                                </Typography><br /></>
                             )
                         }
-                        <TextContent>
-                            <Text component={TextVariants.small}>
-                                Project Type: {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.projectType)}
-                            </Text>
-                        </TextContent>
-                        <TextContent>
-                            <Text component={TextVariants.small}>
-                                Language: {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.language)}
-                            </Text>
-                        </TextContent>
-                        <TextContent>
-                            <Text
-                                component={TextVariants.p}
+                        <Typography variant='caption'>
+                            Project Type: {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.projectType)}
+                        </Typography><br />
+                        <Typography variant='caption'>
+                            Language: {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.language)}
+                        </Typography><br />
+                    </div>
+                    <div className={this.props.cardItemStyle.cardFooterTag}>
+                        <div style={{ height: '4rem' }}>
+                            <Typography variant='caption'
                                 className={this.props.cardItemStyle.longDescription}>
                                 {this.props.compDescription.devfileData.devfile.metadata.description}
-                            </Text>
-                        </TextContent>
-                    </CardBody>
-                    <CardFooter className={this.props.cardItemStyle.cardFooterTag}>
-                        {
-                            this.props.compDescription.devfileData.devfile.metadata.tags?.map((tag: string, index: number) =>
-                                index <= 2 &&
-                                <Badge key={index}
-                                    className={index === 0 ?
-                                        clsx(this.props.cardItemStyle.badge, this.props.cardItemStyle.firstBadge)
-                                        : this.props.cardItemStyle.badge}
-                                    overlap='rectangular'
-                                    variant='standard'
-                                >
-                                    {tag}
-                                </Badge>
-                            )
-                        }
-                    </CardFooter>
+                            </Typography>
+                        </div>
+                        <div>
+                            {
+                                this.props.compDescription.devfileData.devfile.metadata.tags?.map((tag: string, index: number) =>
+                                    index <= 2 &&
+                                    <Badge key={index}
+                                        className={index === 0 ?
+                                            clsx(this.props.cardItemStyle.badge, this.props.cardItemStyle.firstBadge)
+                                            : this.props.cardItemStyle.badge}
+                                        overlap='rectangular'
+                                        variant='standard'
+                                    >
+                                        {tag}
+                                    </Badge>
+                                )
+                            }
+                        </div>
+                    </div>
                 </Card>
                 {
                     devFileYAML.length > 0 && isExpanded &&

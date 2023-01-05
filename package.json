@@ -2,7 +2,7 @@
 	"name": "vscode-openshift-connector",
 	"displayName": "OpenShift Toolkit",
 	"description": "Fast iterative application development on Red Hat OpenShift and Kubernetes",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"license": "MIT",
 	"publisher": "redhat",
 	"author": "Red Hat",
@@ -119,17 +119,14 @@
 		"yaml": "^1.10.2"
 	},
 	"devDependencies": {
-		"@emotion/react": "^11.7.1",
-		"@emotion/styled": "^11.6.0",
-		"@material-ui/core": "^4.12.3",
-		"@material-ui/icons": "^4.11.3",
-		"@material-ui/lab": "^4.0.0-alpha.60",
+		"@emotion/react": "^11.10.5",
+		"@emotion/styled": "^11.10.5",
 		"@mui/core": "^5.0.0-alpha.54",
-		"@mui/icons-material": "^5.2.5",
-		"@mui/lab": "^5.0.0-alpha.61",
-		"@mui/material": "^5.4.1",
-		"@patternfly/react-core": "^4.198.19",
-		"@rjsf/material-ui": "^3.2.1",
+		"@mui/icons-material": "^5.11.0",
+		"@mui/lab": "^5.0.0-alpha.112",
+		"@mui/material": "^5.11.0",
+		"@rjsf/core": "^5.0.0-beta.14",
+		"@rjsf/material-ui": "^5.0.0-beta.14",
 		"@segment/analytics-next": "^1.17.4",
 		"@types/byline": "^4.2.33",
 		"@types/chai": "^4.3.0",
@@ -146,6 +143,7 @@
 		"@types/pify": "^5.0.1",
 		"@types/react": "^17.0.37",
 		"@types/react-dom": "^17.0.11",
+		"@types/react-jsonschema-form": "^1.7.8",
 		"@types/react-lazylog": "^4.5.1",
 		"@types/react-syntax-highlighter": "^13.5.2",
 		"@types/shelljs": "^0.8.9",
@@ -197,6 +195,7 @@
 		"react": "^17.0.2",
 		"react-copy-to-clipboard": "^5.1.0",
 		"react-dom": "^17.0.2",
+		"react-jsonschema-form": "^1.8.1",
 		"react-lazylog": "^4.5.3",
 		"react-loader-spinner": "^4.0.0",
 		"react-phone-input-2": "^2.14.0",
@@ -791,7 +790,22 @@
 				"command": "openshift.component.importFromGit",
 				"title": "Import Component from git repository",
 				"category": "OpenShift"
-			}
+			},
+            {
+                "command": "openshift.experimental.mode.enable",
+                "title": "Experimental Features",
+                "category": "OpenShift"
+            },
+            {
+                "command": "openshift.experimental.mode.disable",
+                "title": "✓ Experimental Features",
+                "category": "OpenShift"
+            },
+            {
+                "command": "openshift.component.dev.onPodman",
+                "title": "Start Dev on Podman",
+                "category": "OpenShift"
+            }
 		],
 		"keybindings": [
 			{
@@ -1086,7 +1100,15 @@
 					"command": "openshift.component.openImportFromGit",
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
-				}
+				},
+                {
+                    "command": "openshift.experimental.mode.enable",
+                    "when": "view == openshiftComponentsView && !config.openshiftToolkit.experimentalFeatures"
+                },
+                {
+                    "command": "openshift.experimental.mode.disable",
+                    "when": "view == openshiftComponentsView && config.openshiftToolkit.experimentalFeatures"
+                }
 			],
 			"view/item/context": [
 				{
@@ -1220,14 +1242,19 @@
 					"group": "c1@1"
 				},
 				{
+					"command": "openshift.component.dev.onPodman",
+					"when": "view == openshiftComponentsView && config.openshiftToolkit.experimentalFeatures && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
+					"group": "c1@2"
+				},
+				{
 					"command": "openshift.component.exitDevMode",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
-					"group": "c1@2"
+					"group": "c1@3"
 				},
 				{
 					"command": "openshift.component.forceExitDevMode",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-stp.*/",
-					"group": "c1@3"
+					"group": "c1@4"
 				},
 				{
 					"command": "openshift.component.deploy",
@@ -1416,7 +1443,7 @@
 					"openshiftToolkit.showWelcomePage": {
 						"type": "boolean",
 						"default": true,
-						"description": "Show Welcome Page when using OpenShift Toolkit Extension"
+						"description": "Show Welcome Page when using OpenShift Toolkit Extension."
 					},
 					"openshiftToolkit.showChannelOnOutput": {
 						"type": "boolean",
@@ -1492,7 +1519,26 @@
 						"default": 100000
 					}
 				}
-			}
+			},
+            {
+                "type": "object",
+                "order": 4,
+                "title": "Experimental Features",
+                "properties": {
+                    "openshiftToolkit.experimentalFeatures": {
+                        "order": 1,
+                        "description": "Show OpenShift Toolkit Experimental Features.",
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "openshiftToolkit.devModeRunOnPodman": {
+                        "order": 2,
+                        "description": "Show warning about experimental feature",
+                        "type": "boolean",
+                        "default": true
+                    }
+                }
+            }
 		]
 	},
 	"extensionDependencies": [

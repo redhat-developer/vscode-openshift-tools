@@ -5,7 +5,7 @@
 
 import * as React from 'react';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
-import { Alert } from '@material-ui/lab';
+import { Alert } from '@mui/lab';
 import { InsertDriveFile, GetApp, VpnKey } from '@material-ui/icons';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
@@ -180,7 +180,7 @@ export default function addClusterView(props) {
         action: 'crcStart',
         data: {
           tool: fileName,
-          options: `start -p "${pullSecretPath}" -c ${cpuSize} -m ${memory} ${nameServerOpt} -o json`
+          options: `start -p '${pullSecretPath}' -c ${cpuSize} -m ${memory} ${nameServerOpt} -o json`
         },
         pullSecret: pullSecretPath,
         crcLoc: fileName,
@@ -303,97 +303,92 @@ export default function addClusterView(props) {
   }
 
   const RunningStatus = ()=> (
-    <Chip label={status.openshiftStatus} size="small"
+    <Chip label={status.openshiftStatus} size='small'
       avatar={<StyledBadge
-      overlap="circle"
+      overlap='circle'
       anchorOrigin={{ vertical: 'top', horizontal: 'left'}}
-      variant="dot"></StyledBadge>}
+      variant='dot'></StyledBadge>}
     />
   )
 
   const StoppedStatus = () => (
-    <Chip label={status.openshiftStatus} size="small" />
+    <Chip label={status.openshiftStatus} size='small' />
   )
 
   const CrcStatusDialog = () => (
     <>
     {(!statusSkeleton && !crcStopProgress && !statusError) && (
-    <Accordion defaultExpanded>
-      <AccordionSummary
-        expandIcon={<ExpandMoreIcon />}
-        aria-controls="panel1c-content"
-        id="panel1c-header"
-      >
-        <div className={classes.column}>
-          <span style={{ marginRight: 10 }}>OpenShift Status</span>
-          {status.openshiftStatus === 'Stopped' ? <StoppedStatus /> : <RunningStatus /> }
-        </div>
-        <div className={classes.column}>
-          <span style={{ marginRight: 10 }}>CRC Version: {status.crcVer}</span>
-        </div>
-        <div className={classes.column}>
-          <span>OpenShift Version: {status.openshiftVer}</span>
-        </div>
-      </AccordionSummary>
-      <AccordionDetails className={classes.details}>
-        <div className={classes.column}>
-          <List dense>
-            <ListItem>
-              <ListItemText primary={<span>OpenShift Local Status: {status.crcStatus}</span>}/>
-            </ListItem>
-            <ListItem>
-              <ListItemText primary={<span>OpenShift Status: {status.openshiftStatus}</span>}/>
-            </ListItem>
-            <ListItem>
-              <ListItemText primary={<span>Disk Usage: {status.diskUsage}</span>}/>
-            </ListItem>
-            <ListItem>
-              <ListItemText primary={<span>Cache Usage: {status.cacheUsage}</span>}/>
-            </ListItem>
-            <ListItem>
-              <ListItemText primary={<span>Cache Directory: {status.cacheDir}</span>}/>
-            </ListItem>
-          </List>
-        </div>
-        <div>
-          <List dense>
-            <ListItem>
-              <ListItemText primary={<span>CRC Version: {status.crcVer}</span>}/>
-            </ListItem>
-            <ListItem>
-              <ListItemText primary={<span>OpenShift Version: {status.openshiftVer}</span>}/>
-            </ListItem>
-          </List>
-        </div>
-        { status.creds?.map((label) => (
-        <div className={classes.helper}>
-            <Button variant="outlined" size="small" className={classes.button} key="admin" onClick={() => {handleCrcLogin(label.adminCredentials, label.url)}}>
-              <ExitToAppIcon fontSize="small"/>Login using {label.adminCredentials.username}
+        <Accordion defaultExpanded children={<><AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls='panel1c-content'
+          id='panel1c-header'
+        >
+          <div className={classes.column}>
+            <span style={{ marginRight: 10 }}>OpenShift Status</span>
+            {status.openshiftStatus === 'Stopped' ? <StoppedStatus /> : <RunningStatus />}
+          </div>
+          <div className={classes.column}>
+            <span style={{ marginRight: 10 }}>CRC Version: {status.crcVer}</span>
+          </div>
+          <div className={classes.column}>
+            <span>OpenShift Version: {status.openshiftVer}</span>
+          </div>
+        </AccordionSummary><AccordionDetails className={classes.details}>
+            <div className={classes.column}>
+              <List dense>
+                <ListItem>
+                  <ListItemText primary={<span>OpenShift Local Status: {status.crcStatus}</span>} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText primary={<span>OpenShift Status: {status.openshiftStatus}</span>} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText primary={<span>Disk Usage: {status.diskUsage}</span>} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText primary={<span>Cache Usage: {status.cacheUsage}</span>} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText primary={<span>Cache Directory: {status.cacheDir}</span>} />
+                </ListItem>
+              </List>
+            </div>
+            <div>
+              <List dense>
+                <ListItem>
+                  <ListItemText primary={<span>CRC Version: {status.crcVer}</span>} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText primary={<span>OpenShift Version: {status.openshiftVer}</span>} />
+                </ListItem>
+              </List>
+            </div>
+            {status.creds?.map((label) => (
+              <div className={classes.helper}>
+                <Button variant='outlined' size='small' className={classes.button} key='admin' onClick={() => { handleCrcLogin(label.adminCredentials, label.url); }}>
+                  <ExitToAppIcon fontSize='small' />Login using {label.adminCredentials.username}
+                </Button>
+                <Button variant='outlined' size='small' className={classes.button} key='developer' onClick={() => { handleCrcLogin(label.developerCredentials, label.url); }}>
+                  <ExitToAppIcon fontSize='small' />Login using {label.developerCredentials.username}
+                </Button>
+              </div>))}
+          </AccordionDetails><Divider /><AccordionActions>
+            {(status.openshiftStatus === 'Stopped') ?
+              (<Button size='small' component='span' className={classes.button} onClick={handleStartProcess} startIcon={<PlayArrowIcon />}>Start Cluster</Button>) :
+              (<Button size='small' component='span' className={classes.button} onClick={handleStopProcess} startIcon={<StopIcon />}>Stop Cluster</Button>)}
+            <Button size='small' component='span' className={classes.button} onClick={handleRefresh} startIcon={<RefreshIcon />}>
+              Refresh Status
             </Button>
-            <Button variant="outlined" size="small" className={classes.button} key="developer" onClick={() => {handleCrcLogin(label.developerCredentials, label.url)}}>
-              <ExitToAppIcon fontSize="small"/>Login using {label.developerCredentials.username}
-            </Button>
-        </div>))}
-      </AccordionDetails>
-      <Divider />
-      <AccordionActions>
-        {(status.openshiftStatus === 'Stopped') ?
-        (<Button size="small" component="span" className={classes.button} onClick={handleStartProcess} startIcon={<PlayArrowIcon />}>Start Cluster</Button>):
-        (<Button size="small" component="span" className={classes.button} onClick={handleStopProcess} startIcon={<StopIcon />}>Stop Cluster</Button>)}
-        <Button size="small" component="span" className={classes.button} onClick={handleRefresh} startIcon={<RefreshIcon />}>
-          Refresh Status
-        </Button>
-        {(status.openshiftStatus !== 'Stopped') && (
-        <div>
-          <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none'}}>
-            <Button size="small" component="span" className={classes.button}>
-              Open Console Dashboard
-            </Button>
-          </a>
-        </div>)}
-      </AccordionActions>
-    </Accordion>
-    )}
+            {(status.openshiftStatus !== 'Stopped') && (
+              <div>
+                <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none' }}>
+                  <Button size='small' component='span' className={classes.button}>
+                    Open Console Dashboard
+                  </Button>
+                </a>
+              </div>)}
+          </AccordionActions></>} />
+      )}
     {(statusSkeleton && !statusError) && (
       <div>
         <Typography paragraph>Refreshing the OpenShift Local status</Typography>
@@ -417,7 +412,7 @@ export default function addClusterView(props) {
       <List>
         <ListItem>
           <ListItemText
-            primary="Starting OpenShift cluster..."
+            primary='Starting OpenShift cluster...'
           />
         </ListItem>
       </List>
@@ -428,7 +423,7 @@ export default function addClusterView(props) {
       <List>
         <ListItem>
           <ListItemText
-            primary="Stopping the OpenShift cluster, this may take a few minutes..."
+            primary='Stopping the OpenShift cluster, this may take a few minutes...'
           />
         </ListItem>
       </List>
@@ -443,9 +438,9 @@ export default function addClusterView(props) {
       <List>
         <ListItem>
           <Alert
-          severity="error"
+          severity='error'
           action={
-            <Button color="inherit" size="small" onClick={handleTryAgain} className={classes.button}>
+            <Button color='inherit' size='small' onClick={handleTryAgain} className={classes.button}>
               Run the process again.
             </Button>
           }
@@ -464,55 +459,49 @@ export default function addClusterView(props) {
               <Typography>Download and open the OpenShift Local file. Opening the file will automatically start a step-by-step installation guide.</Typography>
               <List className={classes.uploadLabel}>
                 <ListItem>
-                  <ListItemAvatar>
-                    <Avatar>
-                      <GetApp />
-                    </Avatar>
-                  </ListItemAvatar>
+                  <ListItemAvatar children={<Avatar>
+                    <GetApp />
+                  </Avatar>} />
                   <ListItemText
-                    primary="Download"
+                    primary='Download'
                     secondary={<span>This will download OpenShift Local {crcLatest}</span>}/>
                     <a href={fetchDownloadBinary()} style={{ textDecoration: 'none'}}>
                       <Button
-                        color="default"
-                        component="span"
+                        color='default'
+                        component='span'
                         className={classes.button}
                       >
                         Download OpenShift Local
                       </Button>
                     </a>
                 </ListItem>
-                <Divider variant="inset" component="li" />
+                <Divider variant='inset' component='li' />
                 <ListItem>
-                  <ListItemAvatar>
-                    <Avatar>
-                      <InsertDriveFile />
-                    </Avatar>
-                  </ListItemAvatar>
+                  <ListItemAvatar children={<Avatar>
+                    <InsertDriveFile />
+                  </Avatar>} />
                   <ListItemText
                     primary={<span>Executable Location<sup style={{color: '#BE0000'}}>*</sup></span>}
                     secondary={<span>Provide the OpenShift Local {crcLatest} executable location</span>} />
                   <div>
                     <input
                     style={{ display: 'none' }}
-                    id="contained-button-file"
-                    type="file"
+                    id='contained-button-file'
+                    type='file'
                     onChange={handleUploadPath}
                     />
-                    <label htmlFor="contained-button-file">
-                      <Tooltip title="This is a required field" placement="left">
-                        <Button variant="contained" component="span" className={classes.button}>
-                          Select Path
-                        </Button>
-                      </Tooltip>
+                    <label htmlFor='contained-button-file'>
+                      <Tooltip title='This is a required field' placement='left' children={<Button variant='contained' component='span' className={classes.button}>
+                        Select Path
+                      </Button>} />
                     </label>
                   </div>
                 </ListItem>
-                <Divider variant="inset" component="li" />
+                <Divider variant='inset' component='li' />
                 {fileName && (
                     <TextField
-                      id="outlined-location"
-                      label="Executable Location"
+                      id='outlined-location'
+                      label='Executable Location'
                       className={classes.textContainer}
                       style= {{ marginTop: '20px', width: '100%' }}
                       fullWidth
@@ -520,8 +509,8 @@ export default function addClusterView(props) {
                       InputProps={{
                         readOnly: true,
                       }}
-                      variant="outlined"
-                      size="small"
+                      variant='outlined'
+                      size='small'
                     />
                   )}
             </List>
@@ -530,35 +519,31 @@ export default function addClusterView(props) {
           return (
             <List>
               <ListItem>
-                <ListItemAvatar>
-                  <Avatar>
-                    <VpnKey />
-                  </Avatar>
-                </ListItemAvatar>
+                <ListItemAvatar children={<Avatar>
+                  <VpnKey />
+                </Avatar>} />
               <ListItemText
                 primary={<span>Provide the pull secret.<sup style={{color: '#BE0000'}}>*</sup></span>}
                 secondary={<span>To pull container images from the registry, a pull secret is necessary. You can download the pull secret from the <a href={crcDefaults.CrcLandingPageURL}>Red Hat OpenShift Local download page</a> and upload it.</span>} />
               <div className={classes.uploadLabel}>
                 <input
                   style={{ display: 'none' }}
-                  id="contained-button-file"
+                  id='contained-button-file'
                   multiple
-                  type="file"
+                  type='file'
                   onChange={handleUploadPullSecret}
                 />
-                <label htmlFor="contained-button-file">
-                  <Tooltip title="This is a required field" placement="left">
-                    <Button variant="contained" className={classes.button} component="span">
+                <label htmlFor='contained-button-file'>
+                    <Tooltip title='This is a required field' placement='left' children={<Button variant='contained' className={classes.button} component='span'>
                       Select Pull Secret file
-                    </Button>
-                  </Tooltip>
+                    </Button>} />
                 </label>
               </div>
             </ListItem>
             {pullSecretPath && (
               <TextField
-                id="outlined-location"
-                label="Pull Secret Location"
+                id='outlined-location'
+                label='Pull Secret Location'
                 className={classes.textContainer}
                 style= {{ marginTop: '20px', width: '100%' }}
                 fullWidth
@@ -566,8 +551,8 @@ export default function addClusterView(props) {
                 InputProps={{
                   readOnly: true,
                 }}
-                variant="outlined"
-                size="small"
+                variant='outlined'
+                size='small'
               />
             )}
           </List>)
@@ -575,34 +560,34 @@ export default function addClusterView(props) {
           return (
             <div>
               <TextField
-                label="CPU cores"
-                type="number"
-                variant="outlined"
-                size="small"
+                label='CPU cores'
+                type='number'
+                variant='outlined'
+                size='small'
                 onChange={handleCpuSize}
                 value={cpuSize}
                 InputProps={{ inputProps: { min: crcDefaults.DefaultCPUs } }}
                 className={classes.textContainer}
               />
               <TextField
-                label="Memory to allocate"
-                type="number"
-                variant="outlined"
-                size="small"
+                label='Memory to allocate'
+                type='number'
+                variant='outlined'
+                size='small'
                 onChange={handleMemory}
                 value={memory}
                 InputProps={{ inputProps: { min: crcDefaults.DefaultMemory } }}
-                helperText="Value in MiB"
+                helperText='Value in MiB'
                 className={classes.textContainer}
               />
               <TextField
-                label="Nameserver"
-                type="string"
-                variant="outlined"
-                size="small"
+                label='Nameserver'
+                type='string'
+                variant='outlined'
+                size='small'
                 onChange={handleNameserver}
                 value={crcNameserver}
-                helperText="IPv4 address of nameserver"
+                helperText='IPv4 address of nameserver'
                 className={classes.textContainer}
               />
             </div>)
@@ -633,40 +618,38 @@ export default function addClusterView(props) {
   const WizardSteps = () => (
     <Paper elevation={3}>
       <blockquote className={classes.blockquoteText}>
-        <Typography variant="body2" component="p" style={{textAlign: 'center'}}>
+        <Typography variant='body2' component='p' style={{textAlign: 'center'}}>
           Install OpenShift {crcOpenShift} on your system using OpenShift Local {crcLatest}.
         </Typography>
       </blockquote>
-      <Stepper activeStep={activeStep} orientation="vertical">
-        {steps.map((label, index) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-            <StepContent>
-              {getStepContent(index)}
-              <div className={classes.actionsContainer}>
-                <div>
-                  { (activeStep !== 0) && (
+      <Stepper activeStep={activeStep} orientation='vertical' children={steps.map((label, index) => (
+        <Step key={label}>
+          <StepLabel>{label}</StepLabel>
+          <StepContent>
+            {getStepContent(index)}
+            <div className={classes.actionsContainer}>
+              <div>
+                {(activeStep !== 0) && (
                   <Button
-                    variant="contained"
+                    variant='contained'
                     onClick={handleBack}
                     className={classes.buttonSecondary}
                   >
                     Back
                   </Button>)}
-                  <Button
-                    variant="contained"
-                    onClick={handleNext}
-                    className={classes.buttonSecondary}
-                    disabled={handleDisabled()}
-                  >
-                    {activeStep === steps.length - 1 ? 'Start Cluster' : 'Next'}
-                  </Button>
-                </div>
+                <Button
+                  variant='contained'
+                  onClick={handleNext}
+                  className={classes.buttonSecondary}
+                  disabled={handleDisabled()}
+                >
+                  {activeStep === steps.length - 1 ? 'Start Cluster' : 'Next'}
+                </Button>
               </div>
-            </StepContent>
-          </Step>
-        ))}
-      </Stepper>
+            </div>
+          </StepContent>
+        </Step>
+      ))} />
     </Paper>
   );
 

@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 import React, { ChangeEvent } from 'react';
 import { makeStyles } from '@material-ui/core';
-import { Gallery } from '@patternfly/react-core';
 import { WrapperCardItem as CardItem } from './wrapperCardItem';
 import { LoadScreen } from './loading';
 import { VSCodeMessage } from '../vsCodeMessage';
@@ -16,6 +15,7 @@ import starterProjectDisplayStyle from './starterProjectDisplay.style';
 import { FilterElements } from './filterElements';
 import { ComponentTypeDescription, Registry } from '../../../odo/componentType';
 import { ErrorPage } from './errorPage';
+import { ImageList, ImageListItem } from '@mui/material';
 
 const useHomeStyles = makeStyles(homeStyle);
 const starterProjectDisplayStyles = makeStyles(starterProjectDisplayStyle);
@@ -40,14 +40,16 @@ const HomeItem: React.FC<HomePageProps> = ({
     const cardItemStyle = useCardItemStyles();
     const projectDisplayStyle = starterProjectDisplayStyles();
     return (
-        <Gallery className={homeStyleClass.devfileGalleryGrid}>
+        <ImageList className={homeStyleClass.devfileGalleryGrid} cols={4}>
             {
                 compDescriptions.map((compDescription: CompTypeDesc, key: number) => (
-                    <CardItem key={key} compDescription={compDescription}
-                        cardItemStyle={cardItemStyle} projectDisplayStyle={projectDisplayStyle} hasGitLink={hasGitLink(compDescription)} />
+                    <ImageListItem key={`imageList-`+key}>
+                        <CardItem key={key} compDescription={compDescription}
+                            cardItemStyle={cardItemStyle} projectDisplayStyle={projectDisplayStyle} hasGitLink={hasGitLink(compDescription)} />
+                    </ImageListItem>
                 ))
             }
-        </Gallery>
+        </ImageList>
     );
 };
 
@@ -63,6 +65,9 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
             if (message.data.action === 'getAllComponents') {
                 if (message.data.errorMessage && message.data.errorMessage.length > 0) {
                     setError(message.data.errorMessage);
+                    setCompDescriptions([]);
+                    setRegistries([]);
+                    setFilteredcompDescriptions([]);
                 } else {
                     setError('');
                     if (message.data.registries.length === 1) {
@@ -126,7 +131,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                             />
                         }
                         <HomeItem compDescriptions={filteredcompDescriptions} />
-                        {error?.length > 0 ? <ErrorPage message='Devfiles not downloaded properly' /> : null}
+                        {error?.length > 0 ? <ErrorPage message={error} /> : null}
                     </>
                     :
                     error?.length > 0 ? <ErrorPage message={error} /> : <LoadScreen />

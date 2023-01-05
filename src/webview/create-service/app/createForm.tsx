@@ -1,6 +1,6 @@
 import 'react-dom';
 import * as React from 'react';
-import Form, { ISubmitEvent } from '@rjsf/core';
+import Form, {ISubmitEvent} from 'react-jsonschema-form';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 export function CreateForm(props) {
@@ -38,9 +38,9 @@ export function CreateForm(props) {
     });
     return <>
         {step === 'ready' && (
-            <h2>Loading ....</h2> 
+            <h2>Loading ....</h2>
         )}
-       
+
         {(step === 'loaded' || step === 'creating') && (
             <div className='form-title'>
                 <h1 className='label'>Create {crdDescription.displayName}</h1>
@@ -48,9 +48,9 @@ export function CreateForm(props) {
                 <Form
                     formData={formData}
                     fields={{
-                        'TitleField': () => <></>, // to supress object editor title 
+                        'TitleField': () => <></>, // to supress object editor title
                         'Labels': () => <></>}} // to suppress Labels field in first release
-                    schema={baseSchema} 
+                    schema={baseSchema}
                     uiSchema={uiSchema}
                     onChange={()=> {changed = true}}
                     onSubmit={onSubmit}
@@ -66,7 +66,7 @@ export function CreateForm(props) {
                         })}}>Cancel</button>
                 </div>
                 </Form>
-            </div>   
+            </div>
         )}
     </>;
 }
