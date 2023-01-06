@@ -3,11 +3,12 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { testDevfileRegistries } from './suite/devfileRegistries';
 import { checkExtension } from './suite/extension';
 import { checkOpenshiftView } from './suite/openshift';
-// import { createComponentTest } from './suite/component';
 
 describe('Extension public-facing UI tests', () => {
     checkExtension();
     checkOpenshiftView();
+    testDevfileRegistries();
 });
