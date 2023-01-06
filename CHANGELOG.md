@@ -1,6 +1,6 @@
 # Change Log
 
-## 1.1.0 (December 19, 2022)
+## 1.1.0 (January 9, 2023)
 
 * [#2711](https://github.com/redhat-developer/vscode-openshift-tools/issues/2711) Migrate to odo 3.4.0
 * [#2709](https://github.com/redhat-developer/vscode-openshift-tools/issues/2709) Fix the GitHub Readme badge error 

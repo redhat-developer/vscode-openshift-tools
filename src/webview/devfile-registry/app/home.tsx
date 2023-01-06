@@ -27,6 +27,7 @@ interface CompTypeDesc extends ComponentTypeDescription {
 
 interface HomePageProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
     compDescriptions: CompTypeDesc[];
+    themeKind: number;
 }
 
 export interface DefaultProps {
@@ -34,7 +35,8 @@ export interface DefaultProps {
 }
 
 const HomeItem: React.FC<HomePageProps> = ({
-    compDescriptions
+    compDescriptions,
+    themeKind
 }: HomePageProps) => {
     const homeStyleClass = useHomeStyles();
     const cardItemStyle = useCardItemStyles();
@@ -45,7 +47,8 @@ const HomeItem: React.FC<HomePageProps> = ({
                 compDescriptions.map((compDescription: CompTypeDesc, key: number) => (
                     <ImageListItem key={`imageList-`+key}>
                         <CardItem key={key} compDescription={compDescription}
-                            cardItemStyle={cardItemStyle} projectDisplayStyle={projectDisplayStyle} hasGitLink={hasGitLink(compDescription)} />
+                        cardItemStyle={cardItemStyle} projectDisplayStyle={projectDisplayStyle} hasGitLink={hasGitLink(compDescription)}
+                        themeKind={themeKind} />
                     </ImageListItem>
                 ))
             }
@@ -59,6 +62,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
     const [registries, setRegistries] = React.useState([]);
     const [searchValue, setSearchValue] = React.useState('');
     const [error, setError] = React.useState('');
+    const [themeKind, setThemeKind] = React.useState(0);
 
     React.useEffect(() => {
         return VSCodeMessage.onMessage((message) => {
@@ -81,6 +85,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                             }
                         });
                     }
+                    setThemeKind(message.data.themeValue);
                     setCompDescriptions(message.data.compDescriptions);
                     setRegistries(message.data.registries);
                     setFilteredcompDescriptions(getFilteredCompDesc(message.data.registries, message.data.compDescriptions, searchValue));
@@ -90,6 +95,8 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                 setFilteredcompDescriptions([]);
                 setCompDescriptions([]);
                 setSearchValue('');
+            } else if(message.data.action === 'setTheme') {
+                setThemeKind(message.data.themeValue);
             }
         });
     });
@@ -130,7 +137,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                                 }}
                             />
                         }
-                        <HomeItem compDescriptions={filteredcompDescriptions} />
+                        <HomeItem compDescriptions={filteredcompDescriptions} themeKind={themeKind} />
                         {error?.length > 0 ? <ErrorPage message={error} /> : null}
                     </>
                     :

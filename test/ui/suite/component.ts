@@ -10,7 +10,7 @@ import { VIEWS, MENUS, BUTTONS, INPUTS, COMPONENTS, NOTIFICATIONS } from '../com
 
 export function createComponentTest(contextFolder: string) {
     describe('Component creation', () => {
-        const cluster = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
+        const cluster = process.env.CLUSTER_URL || 'https://api.ocp2.adapters-crs.ccitredhat.com:6443';
         const clusterName = (/https?:\/\/(.*)/.exec(cluster))[1];
         const user = process.env.CLUSTER_USER || 'developer';
         const password = process.env.CLUSTER_PASSWORD || 'developer';
@@ -47,7 +47,10 @@ export function createComponentTest(contextFolder: string) {
 
         it('Login with credentials', async function() {
             this.timeout(30000);
+            await explorer.expand();
             const content = await explorer.findWelcomeContent();
+            // eslint-disable-next-line no-console, @typescript-eslint/restrict-template-expressions
+            console.log(`content: ${await Promise.all((await content.getButtons()).map(async item => await item.getTitle()))}`);
             const btns = await content.getButtons();
             let loginBtn: WelcomeContentButton;
 

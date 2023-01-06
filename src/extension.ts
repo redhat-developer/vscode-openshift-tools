@@ -30,7 +30,6 @@ import { ComponentsTreeDataProvider } from './componentsView';
 
 import fsx = require('fs-extra');
 
-
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
 export function deactivate(): void {

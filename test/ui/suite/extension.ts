@@ -21,7 +21,7 @@ export function checkExtension() {
             item = await extView.findItem(`@installed ${pjson.displayName}`);
         });
 
-        it('Openshift toolkit is installed', () => {
+        it('Openshift Toolkit is installed', () => {
             expect(item).not.undefined;
         });
 

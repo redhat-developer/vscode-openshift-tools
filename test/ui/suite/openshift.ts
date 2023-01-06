@@ -80,7 +80,7 @@ export function checkOpenshiftView() {
 
             it('shows a button to create a new component', async () => {
                 const btns = await welcome.getButtons();
-                const titles = await Promise.all(btns.map(async item => item.getTitle()));
+                const titles = await Promise.all(btns.map(async item => await item.getTitle()));
 
                 expect(titles).includes(BUTTONS.newComponent);
             });
@@ -94,8 +94,9 @@ export function checkOpenshiftView() {
                 await types.expand();
             });
 
-            it('shows the default devfile registry', async () => {
-                await new Promise((res) => { setTimeout(res, 20000); });
+            it('shows the default devfile registry', async function test() {
+                this.timeout(10000);
+                await new Promise((res) => { setTimeout(res, 6000); });
                 const registry = await types.findItem(VIEWS.devFileRegistry);
                 expect(registry).not.undefined;
             });
