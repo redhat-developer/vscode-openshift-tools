@@ -27,6 +27,11 @@ let childProcess: cp.ChildProcess;
 let appendedUri: vscode.Uri;
 let forceCancel = false;
 
+interface CloneProcess {
+    status: boolean,
+    error: string
+}
+
 export class Command {
     @vsCommand('openshift.component.importFromGit')
     static async createComponent(event: any) {
@@ -35,7 +40,11 @@ export class Command {
         panel?.webview.postMessage({
             action: 'cloneStarted'
         });
-        await clone(event, appendedUri.fsPath);
+        const cloneProcess: CloneProcess = await clone(event.gitURL, appendedUri.fsPath);
+        if (!cloneProcess.status && cloneProcess.error) {
+            showError(event, appendedUri.fsPath, cloneProcess.error);
+            return null;
+        }
         //workspace.updateWorkspaceFolders(workspace.workspaceFolders ? workspace.workspaceFolders.length : 0, null, { uri: appendedUri });
         if (!event.isDevFile) {
             panel.webview.postMessage({
@@ -254,12 +263,12 @@ function getCompDescription(projectType: string, language: string): ComponentTyp
         desc.devfileData.devfile.metadata.language.toLowerCase() === language || desc.devfileData.devfile.metadata.name.toLowerCase() === language);
 }
 
-function clone(event: any, location: string): Promise<any> {
+function clone(url: string, location: string): Promise<CloneProcess> {
     const gitExtension = vscode.extensions.getExtension('vscode.git').exports;
     const git = gitExtension.getAPI(1).git.path;
     // run 'git clone url location' as external process and return location
-    return new Promise((resolve, reject) => (childProcess = cp.exec(`${git} clone ${event.gitURL} ${location}`, (error: cp.ExecException) => error ?
-        showError(event, location, error.message) : resolve(true))));
+    return new Promise((resolve, reject) => (childProcess = cp.exec(`${git} clone ${url} ${location}`, (error: cp.ExecException) => error ?
+        reject({ status: false, error: error.message }) : resolve({ status: true, error: undefined }))));
 }
 
 function validateComponentName(event: any) {
