@@ -186,8 +186,19 @@ export class GitImport extends React.Component<DefaultProps, {
                 helpText: '',
                 showError: false,
                 parser: undefined
-            }
-        })
+            },
+            parentAccordionOpen: false,
+            statergyAccordionOpen: false,
+            componentName: undefined,
+            applicationName: undefined,
+            compDescription: [],
+            isDevFile: undefined,
+            devFilePath: undefined,
+            selectedDesc: undefined,
+            selectedCard: false,
+            showLoadScreen: false,
+            notification: ''
+        });
     }
 
     analyze = (): void => {
