@@ -518,7 +518,7 @@ export class GitImport extends React.Component<DefaultProps, {
                                 <Button variant='contained'
                                     disabled={this.handleCreateBtnDisable()}
                                     className='buttonStyle'
-                                    style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white' }}
+                                    style={{ backgroundColor: this.handleCreateBtnDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: 'white' }}
                                     onClick={() => this.createComponent()}>
                                     Create Component
                                 </Button>
