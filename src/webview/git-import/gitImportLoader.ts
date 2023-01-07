@@ -12,29 +12,40 @@ import { DetectedServiceData, DetectedStrategy, detectImportStrategies } from '.
 import { ComponentTypesView } from '../../registriesView';
 import { ComponentTypeDescription } from '../../odo/componentType';
 import { Response } from '../../git-import/types';
-import { Uri, workspace } from 'vscode';
+import { Uri } from 'vscode';
 import { Component } from '../../openshift/component';
 import OpenShiftItem from '../../openshift/openshiftItem';
 import { selectWorkspaceFolder } from '../../util/workspace';
 import jsYaml = require('js-yaml');
 import GitUrlParse = require('git-url-parse');
+import treeKill = require('tree-kill')
 import cp = require('child_process');
 import { vsCommand } from '../../vscommand';
 
 let panel: vscode.WebviewPanel;
+let childProcess: cp.ChildProcess;
+let appendedUri: vscode.Uri;
+let forceCancel = false;
+
+interface CloneProcess {
+    status: boolean,
+    error: string
+}
 
 export class Command {
     @vsCommand('openshift.component.importFromGit')
     static async createComponent(event: any) {
         const workspacePath = await selectWorkspaceFolder();
-        const appendedUri = Uri.joinPath(workspacePath, event.projectName);
-        //const wsFolderLength = workspace?.workspaceFolders?.length || 0;
-        panel.webview.postMessage({
+        appendedUri = Uri.joinPath(workspacePath, event.projectName);
+        panel?.webview.postMessage({
             action: 'cloneStarted'
-        })
-        //workspace.updateWorkspaceFolders(wsFolderLength, 0, { uri: appendedUri });
-        workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: appendedUri });
-        await clone(event, appendedUri.fsPath);
+        });
+        const cloneProcess: CloneProcess = await clone(event.gitURL, appendedUri.fsPath);
+        if (!cloneProcess.status && cloneProcess.error) {
+            showError(event, appendedUri.fsPath, cloneProcess.error);
+            return null;
+        }
+        //workspace.updateWorkspaceFolders(workspace.workspaceFolders ? workspace.workspaceFolders.length : 0, null, { uri: appendedUri });
         if (!event.isDevFile) {
             panel.webview.postMessage({
                 action: 'start_create_component'
@@ -50,20 +61,22 @@ export class Command {
                         devFilePath: !event.devFilePath || event.devFilePath === 'devfile.yaml' || event.devFilePath === 'devfile.yml' ?
                             '' : event.devFilePath
                     }, true);
-                panel.webview.postMessage({
+                panel?.webview.postMessage({
                     action: event.action,
                     status: true
                 });
                 vscode.window.showInformationMessage(`Component '${event.componentName}' successfully created. Perform actions on it from Components View.`);
             } catch (e) {
-                vscode.window.showErrorMessage(`Error occurred while creating Component '${event.componentName}': ${e.message}`);
-                panel.webview.postMessage({
+                if (!forceCancel) {
+                    vscode.window.showErrorMessage(`Error occurred while creating Component '${event.componentName}': ${e.message}`);
+                }
+                panel?.webview.postMessage({
                     action: event.action,
                     status: false
                 });
             }
         } else {
-            panel.webview.postMessage({
+            panel?.webview.postMessage({
                 action: event.action,
                 status: true
             });
@@ -102,7 +115,7 @@ async function gitImportMessageListener(event: any): Promise<any> {
                     const yamlDoc: any = jsYaml.load(devFileContent);
                     compDescription = getCompDescription(yamlDoc.metadata.projectType.toLowerCase(), yamlDoc.metadata.language.toLowerCase())
                 }
-                panel.webview.postMessage({
+                panel?.webview.postMessage({
                     action: event?.action,
                     gitURL: event.param.value,
                     appName: response.status ? event.parser.name + '-app' : undefined,
@@ -121,7 +134,19 @@ async function gitImportMessageListener(event: any): Promise<any> {
             break;
         }
         case 'close': {
-            panel.dispose();
+            try {
+                if (childProcess && event.notification !== 'Component created') {
+                    forceCancel = true;
+                    treeKill(childProcess.pid, async () => {
+                        await deleteDirectory(appendedUri.fsPath);
+                    });
+                } else if (event.notification === 'Component created') {
+                    forceCancel = false;
+                }
+            } catch (error) {
+                vscode.window.showErrorMessage('Error occurred while killing the repository clone process');
+            }
+            panel?.dispose();
             break;
         }
     }
@@ -178,14 +203,14 @@ export default class GitImportLoader {
 
     static refresh(): void {
         if (panel) {
-            panel.webview.postMessage({ action: 'loadingComponents' });
+            panel?.webview.postMessage({ action: 'loadingComponents' });
         }
     }
 }
 
 function validateGitURL(event: any) {
     if (event.param.trim().length === 0) {
-        panel.webview.postMessage({
+        panel?.webview.postMessage({
             action: event.action,
             error: true,
             helpText: 'Required',
@@ -195,11 +220,11 @@ function validateGitURL(event: any) {
         try {
             const parse = GitUrlParse(event.param);
             const isGitRepo = isGitURL(parse.host);
-            if(!isGitRepo) {
-               throw 'Invalid Git URL';
+            if (!isGitRepo) {
+                throw 'Invalid Git URL';
             }
             if (parse.organization !== '' && parse.name !== '') {
-                panel.webview.postMessage({
+                panel?.webview.postMessage({
                     action: event.action,
                     error: false,
                     helpText: 'The git repo is valid.',
@@ -207,7 +232,7 @@ function validateGitURL(event: any) {
                     gitURL: event.param
                 });
             } else {
-                panel.webview.postMessage({
+                panel?.webview.postMessage({
                     action: event.action,
                     error: false,
                     helpText: 'URL is valid but cannot be reached.',
@@ -216,7 +241,7 @@ function validateGitURL(event: any) {
                 });
             }
         } catch (e) {
-            panel.webview.postMessage({
+            panel?.webview.postMessage({
                 action: event.action,
                 error: true,
                 helpText: 'Invalid Git URL.',
@@ -238,12 +263,12 @@ function getCompDescription(projectType: string, language: string): ComponentTyp
         desc.devfileData.devfile.metadata.language.toLowerCase() === language || desc.devfileData.devfile.metadata.name.toLowerCase() === language);
 }
 
-function clone(event: any, location: string): Promise<any> {
+function clone(url: string, location: string): Promise<CloneProcess> {
     const gitExtension = vscode.extensions.getExtension('vscode.git').exports;
     const git = gitExtension.getAPI(1).git.path;
     // run 'git clone url location' as external process and return location
-    return new Promise((resolve, reject) => cp.exec(`${git} clone ${event.gitURL} ${location}`, (error: cp.ExecException) => error ?
-        showError(event, location, error.message) : resolve(true)));
+    return new Promise((resolve, reject) => (childProcess = cp.exec(`${git} clone ${url} ${location}`, (error: cp.ExecException) => error ?
+        reject({ status: false, error: error.message }) : resolve({ status: true, error: undefined }))));
 }
 
 function validateComponentName(event: any) {
@@ -251,7 +276,7 @@ function validateComponentName(event: any) {
     if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${event.param}.
         Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`, event.param);
     if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${event.param} should be between 2-63 characters`, event.param, 0);
-    panel.webview.postMessage({
+    panel?.webview.postMessage({
         action: event.action,
         error: !validationMessage ? false : true,
         helpText: !validationMessage ? 'A unique name given to the component that will be used to name associated resources.' : validationMessage,
@@ -267,7 +292,7 @@ function validateDevFilePath(event: any) {
         const devFileLocation = path.join(uri.fsPath);
         validationMessage = fs.existsSync(devFileLocation) ? null : 'devfile not available on the given path';
     }
-    panel.webview.postMessage({
+    panel?.webview.postMessage({
         action: event.action,
         error: !validationMessage ? false : true,
         helpText: !validationMessage ? 'Validated' : validationMessage,
@@ -276,18 +301,29 @@ function validateDevFilePath(event: any) {
 }
 
 function showError(event: any, location: string, message: string): void {
-    panel.webview.postMessage({
+    panel?.webview.postMessage({
         action: event.action,
         status: false
     });
-    if (message.indexOf('already exists') !== -1) {
-        vscode.window.showErrorMessage(`Folder already exists on the selected ${location.substring(0, location.lastIndexOf('\\'))}`);
-    } else {
-        vscode.window.showErrorMessage('Error occurred while cloning the repository. Please try again.');
+    if (!forceCancel) {
+        if (message.indexOf('already exists') !== -1) {
+            vscode.window.showErrorMessage(`Folder already exists on the selected ${location.substring(0, location.lastIndexOf('\\'))}`);
+        } else {
+            vscode.window.showErrorMessage('Error occurred while cloning the repository. Please try again.');
+        }
     }
 }
 
 function isGitURL(host: string): boolean {
-    return ['github.com','bitbucket.org','gitlab.com'].includes(host);
+    return ['github.com', 'bitbucket.org', 'gitlab.com'].includes(host);
 }
 
+function deleteDirectory(dir: string) {
+    return new Promise<void>(function (_resolve, reject) {
+        fs.rmdir(dir, { recursive: true }, err => {
+            if (err) {
+                reject(err);
+            }
+        })
+    });
+};
