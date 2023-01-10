@@ -1,8 +1,12 @@
 # Change Log
 
-## 1.1.0 (January 9, 2023)
+## 1.1.0 (January 10, 2023)
 
+* [#2700](https://github.com/redhat-developer/vscode-openshift-tools/issues/2700) Missing word in error message in Import from Git wizard
+* [#2726](https://github.com/redhat-developer/vscode-openshift-tools/issues/2726) Changing git repository field after validation does not invalidate valid state of the form
+* [#2718](https://github.com/redhat-developer/vscode-openshift-tools/issues/2718) Is it possible to change the colors of the YML keys?
 * [#2711](https://github.com/redhat-developer/vscode-openshift-tools/issues/2711) Migrate to odo 3.4.0
+* [#2710](https://github.com/redhat-developer/vscode-openshift-tools/issues/2710) remove patternfly dependencies from OpenShift Toolkit
 * [#2709](https://github.com/redhat-developer/vscode-openshift-tools/issues/2709) Fix the GitHub Readme badge error 
 * [#2705](https://github.com/redhat-developer/vscode-openshift-tools/issues/2705) Devfile Registry View does not show errors for connectivity related issues and stays in 'Loading Registry View' mode forever
 * [#2701](https://github.com/redhat-developer/vscode-openshift-tools/issues/2701) Show and Follow log is not shown when set to open in web view
@@ -13,6 +17,7 @@
 * [#2688](https://github.com/redhat-developer/vscode-openshift-tools/issues/2688) Update odo to v3.3.0
 * [#2685](https://github.com/redhat-developer/vscode-openshift-tools/issues/2685) OpenShift Local workflow broken in Windows
 * [#2682](https://github.com/redhat-developer/vscode-openshift-tools/issues/2682) Cannot create project with name of previously deleted project
+* [#2681](https://github.com/redhat-developer/vscode-openshift-tools/issues/2681) Cancel git clone process if user exists Import from Git workflow
 * [#2676](https://github.com/redhat-developer/vscode-openshift-tools/issues/2676) Enable odo telemetry based on current vscode telemetry opt-in status
 * [#2674](https://github.com/redhat-developer/vscode-openshift-tools/issues/2674) Unable to select devfile registry in git import when multiple devfile registry configured
 * [#2671](https://github.com/redhat-developer/vscode-openshift-tools/issues/2671) Unable to create component from Get started page view
