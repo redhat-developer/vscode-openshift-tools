@@ -12,7 +12,6 @@ import { DetectedServiceData, DetectedStrategy, detectImportStrategies } from '.
 import { ComponentTypesView } from '../../registriesView';
 import { ComponentTypeDescription } from '../../odo/componentType';
 import { Response } from '../../git-import/types';
-import { Uri } from 'vscode';
 import { Component } from '../../openshift/component';
 import OpenShiftItem from '../../openshift/openshiftItem';
 import { selectWorkspaceFolder } from '../../util/workspace';
@@ -21,6 +20,9 @@ import GitUrlParse = require('git-url-parse');
 import treeKill = require('tree-kill')
 import cp = require('child_process');
 import { vsCommand } from '../../vscommand';
+import * as odo3 from '../../odo3';
+import { ComponentDescription } from '../../odo/componentTypeDescription';
+import { ComponentWorkspaceFolder } from '../../odo/workspace';
 
 let panel: vscode.WebviewPanel;
 let childProcess: cp.ChildProcess;
@@ -35,9 +37,28 @@ interface CloneProcess {
 export class Command {
     @vsCommand('openshift.component.importFromGit')
     static async createComponent(event: any) {
-        const workspacePath = await selectWorkspaceFolder();
-        appendedUri = Uri.joinPath(workspacePath, event.projectName);
-        panel?.webview.postMessage({
+        let alreadyExist: boolean;
+        let workspacePath: vscode.Uri, appendedUri: vscode.Uri;
+        let workspaceFolder: vscode.WorkspaceFolder;
+        do {
+            alreadyExist = false;
+            workspacePath = await selectWorkspaceFolder();
+            if (!workspacePath) {
+                return null;
+            }
+            appendedUri = vscode.Uri.joinPath(workspacePath, event.projectName);
+            workspaceFolder = vscode.workspace.getWorkspaceFolder(workspacePath);
+            const isExistingComponent = await existingComponent(workspacePath);
+            if (isExistingComponent) {
+                vscode.window.showErrorMessage(`Unable to create Component inside an existing Component: ${workspacePath}, Please select another folder`);
+                alreadyExist = true;
+            } else if (fs.existsSync(appendedUri.fsPath) && fs.readdirSync(appendedUri.fsPath).length > 0) {
+                vscode.window.showErrorMessage(`Folder ${appendedUri.fsPath.substring(appendedUri.fsPath.lastIndexOf('\\') + 1)} already exist
+                    at the selected location: ${appendedUri.fsPath.substring(0, appendedUri.fsPath.lastIndexOf('\\'))}`);
+                alreadyExist = true;
+            }
+        } while (alreadyExist);
+        panel.webview.postMessage({
             action: 'cloneStarted'
         });
         const cloneProcess: CloneProcess = await clone(event.gitURL, appendedUri.fsPath);
@@ -49,7 +70,7 @@ export class Command {
         if (!event.isDevFile) {
             panel.webview.postMessage({
                 action: 'start_create_component'
-            })
+            });
             try {
                 await Component.createFromRootWorkspaceFolder(appendedUri, undefined,
                     {
@@ -81,6 +102,9 @@ export class Command {
                 status: true
             });
             vscode.window.showInformationMessage('Selected Component added to the workspace.');
+        }
+        if (!workspaceFolder) {
+            vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: appendedUri });
         }
     }
 }
@@ -288,7 +312,7 @@ function validateDevFilePath(event: any) {
     let validationMessage = OpenShiftItem.emptyName(`Required ${event.param}`, event.param.trim());
     if (!validationMessage) validationMessage = OpenShiftItem.validateFilePath(`Not matches ^[a-z]:((\/|\\\\)[a-zA-Z0-9_ \\-]+)+\\.yaml$`, event.param);
     if (!validationMessage && event.param !== 'devfile.yaml' && event.param !== 'devfile.yml') {
-        const uri = Uri.parse(event.param);
+        const uri = vscode.Uri.parse(event.param);
         const devFileLocation = path.join(uri.fsPath);
         validationMessage = fs.existsSync(devFileLocation) ? null : 'devfile not available on the given path';
     }
@@ -318,6 +342,38 @@ function isGitURL(host: string): boolean {
     return ['github.com', 'bitbucket.org', 'gitlab.com'].includes(host);
 }
 
+async function existingComponent(uri: vscode.Uri): Promise<boolean> {
+    let worksapceFolder = vscode.workspace.getWorkspaceFolder(uri);
+    if (worksapceFolder?.uri) {
+        const workspaceSubDirs = fs.readdirSync(worksapceFolder.uri.fsPath, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name).map((subDir) => vscode.Uri.joinPath(worksapceFolder.uri, subDir));
+        const components = await getComponents(workspaceSubDirs);
+        if (components?.length > 0) {
+            const sameFolder = components.filter(component => component.contextPath === uri.fsPath || uri.fsPath.indexOf(component.contextPath) !== -1);
+            if (sameFolder && sameFolder.length > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+    return false;
+}
+
+async function getComponents(folders: vscode.Uri[]): Promise<ComponentWorkspaceFolder[]> {
+    const descriptions = folders.map(
+        (folder) => odo3.newInstance().describeComponent(folder.fsPath)
+            .then((component: ComponentDescription) => {
+                return {
+                    contextPath: folder.fsPath,
+                    component
+                }
+            })
+    );
+    const results = await Promise.all(descriptions);
+    return results.filter((compFolder) => !!compFolder.component);
+}
 function deleteDirectory(dir: string) {
     return new Promise<void>(function (_resolve, reject) {
         fs.rmdir(dir, { recursive: true }, err => {
