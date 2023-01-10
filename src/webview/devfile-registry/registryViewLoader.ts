@@ -14,6 +14,16 @@ import { Registry } from '../../odo/componentType';
 
 let panel: vscode.WebviewPanel;
 
+let themeKind: vscode.ColorThemeKind = vscode.window.activeColorTheme.kind;
+vscode.window.onDidChangeActiveColorTheme((editor: vscode.ColorTheme) => {
+    if (themeKind !== editor.kind) {
+        themeKind = editor.kind;
+        if (panel) {
+            panel.webview.postMessage({ action: 'setTheme', themeValue: themeKind });
+        }
+    }
+});
+
 async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
     let starterProject = event.selectedProject;
     switch (event?.action) {
@@ -132,18 +142,28 @@ export default class RegistryViewLoader {
 
 function getAllComponents(eventActionName: string, url?: string, error?: string) {
     let registries = ComponentTypesView.instance.getListOfRegistries();
-    if (url && url.length > 0) {
-        registries = registries.filter((registry: Registry) => registry.url === url);
-    }
-    const componentDescriptions = ComponentTypesView.instance.getCompDescriptions();
-    panel?.webview.postMessage(
-        {
-            action: eventActionName,
-            compDescriptions: Array.from(componentDescriptions),
-            registries: registries,
-            errorMessage: error
+    if (!registries || registries.length === 0) {
+        panel?.webview.postMessage(
+            {
+                action: eventActionName,
+                errorMessage: 'No Devfile registries configured'
+            }
+        );
+    } else {
+        if (url && url.length > 0) {
+            registries = registries.filter((registry: Registry) => registry.url === url);
         }
-    );
+        const componentDescriptions = ComponentTypesView.instance.getCompDescriptions();
+        panel?.webview.postMessage(
+            {
+                action: eventActionName,
+                compDescriptions: Array.from(componentDescriptions),
+                registries: registries,
+                themeValue: themeKind,
+                errorMessage: error
+            }
+        );
+    }
 }
 
 ComponentTypesView.instance.subject.subscribe((value: string) => {

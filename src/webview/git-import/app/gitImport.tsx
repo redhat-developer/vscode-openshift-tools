@@ -79,6 +79,12 @@ export class GitImport extends React.Component<DefaultProps, {
     }
 
     initalize(close = false) {
+        if (close) {
+            VSCodeMessage.postMessage({
+                action: 'close',
+                notification: this.state.notification
+            });
+        }
         this.state = {
             gitURL: {
                 value: '',
@@ -98,12 +104,6 @@ export class GitImport extends React.Component<DefaultProps, {
             showLoadScreen: false,
             notification: ''
         };
-
-        if (close) {
-            VSCodeMessage.postMessage({
-                action: 'close'
-            })
-        }
     }
 
     componentDidMount(): void {
@@ -169,7 +169,8 @@ export class GitImport extends React.Component<DefaultProps, {
                     }
                 })
             } else if (message.data.action === 'createComponent') {
-                this.setState({ showLoadScreen: false, notification: '' });
+                this.setState({ showLoadScreen: false, notification: 'Component created' });
+                this.initalize(true);
             } else if (message.data.action === 'start_create_component') {
                 this.setState({ showLoadScreen: true, notification: `Create Component ${this.state.componentName.value}` });
             } else if (message.data.action === 'cloneStarted') {
@@ -185,8 +186,19 @@ export class GitImport extends React.Component<DefaultProps, {
                 helpText: '',
                 showError: false,
                 parser: undefined
-            }
-        })
+            },
+            parentAccordionOpen: false,
+            statergyAccordionOpen: false,
+            componentName: undefined,
+            applicationName: undefined,
+            compDescription: [],
+            isDevFile: undefined,
+            devFilePath: undefined,
+            selectedDesc: undefined,
+            selectedCard: false,
+            showLoadScreen: false,
+            notification: ''
+        });
     }
 
     analyze = (): void => {
@@ -518,7 +530,7 @@ export class GitImport extends React.Component<DefaultProps, {
                                 <Button variant='contained'
                                     disabled={this.handleCreateBtnDisable()}
                                     className='buttonStyle'
-                                    style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white' }}
+                                    style={{ backgroundColor: this.handleCreateBtnDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: 'white' }}
                                     onClick={() => this.createComponent()}>
                                     Create Component
                                 </Button>

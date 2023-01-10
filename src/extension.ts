@@ -30,7 +30,6 @@ import { ComponentsTreeDataProvider } from './componentsView';
 
 import fsx = require('fs-extra');
 
-
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
 export function deactivate(): void {
@@ -73,7 +72,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             './oc',
             './registriesView',
             './componentsView',
-            './webview/devfile-registry/registryViewLoader'
+            './webview/devfile-registry/registryViewLoader',
+            './experimental',
         )),
         commands.registerCommand('clusters.openshift.useProject', (context) =>
             commands.executeCommand('extension.vsKubernetesUseNamespace', context),

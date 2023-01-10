@@ -13,7 +13,7 @@ export class Command {
         ]);
     }
 
-    static deletePreviouslyPushedResouces(name: string): CommandText {
+    static deletePreviouslyPushedResources(name: string): CommandText {
         return new CommandText('oc delete', 'deployment', [
             new CommandOption('-l', `component='${name}'`),
             new CommandOption('--cascade')
@@ -32,10 +32,13 @@ export class Command {
         return command;
     }
 
-    static dev(debug: boolean): CommandText {
+    static dev(debug: boolean, runOn?: undefined| 'podman'): CommandText {
         const command = new CommandText('odo', 'dev');
         if (debug) {
             command.addOption(new CommandOption('--debug'));
+        }
+        if (runOn) {
+            command.addOption(new CommandOption('--run-on', 'podman'));
         }
         return command;
     }

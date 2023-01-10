@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import { window, commands, Uri, workspace, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable, EventEmitter, Terminal } from 'vscode';
-import { ChildProcess } from 'child_process';
+import { ChildProcess, SpawnOptions } from 'child_process';
 import * as YAML from 'yaml'
 import OpenShiftItem, { clusterRequired, selectTargetComponent } from './openshiftItem';
 import { OpenShiftComponent } from '../odo';
@@ -68,6 +68,7 @@ interface ComponentDevState {
     debugStatus?: string;
     // deploy state
     deployStatus?: string;
+    runOn?: undefined | 'podman';
 }
 
 interface DevProcessStopRequest extends Disposable {
@@ -135,12 +136,16 @@ export class Component extends OpenShiftItem {
     public static renderStateLabel(folder: ComponentWorkspaceFolder) {
         let label = '';
         const state = Component.getComponentDevState(folder);
+        let runningOnSuffix = '';
+        if (state.runOn) {
+            runningOnSuffix = ` on ${state.runOn}`;
+        }
         if (state.devStatus === ComponentContextState.DEV_STARTING) {
-            label = ' (dev starting)';
+            label = ` (dev starting${runningOnSuffix})`;
         } else if(state.devStatus === ComponentContextState.DEV_RUNNING) {
-            label = ' (dev running)';
+            label = ` (dev running${runningOnSuffix})`;
         } else if(state.devStatus === ComponentContextState.DEV_STOPPING) {
-            label = ' (dev stopping)';
+            label = ` (dev stopping${runningOnSuffix})`;
         }
         return label;
     }
@@ -187,13 +192,42 @@ export class Component extends OpenShiftItem {
         }
     }
 
+    @vsCommand('openshift.component.dev.onPodman')
+    static async devOnPodman(component: ComponentWorkspaceFolder) {
+        if (workspace.getConfiguration('openshiftToolkit').get('devModeRunOnPodman')) {
+            let choice = 'Cancel';
+            do {
+                const choices = ['About Podman', 'Continue', 'Continue and don\'t ask again'];
+                choice = await window.showWarningMessage(
+                    'The command \'Start Dev on Podman\' is experimental. It requires Podman to be installed and configured. It isn\'t guaranteed to work.',
+                    ...choices);
+                switch (choice) {
+                    case choices[0]: // open link to external site with podman documentation
+                        await commands.executeCommand('vscode.open', Uri.parse('https://docs.podman.io/en/latest/index.html'));
+                        break;
+                    case choices[1]: // continue with execution
+                        break;
+                    case choices[2]: // save request to not show warning again
+                        await workspace.getConfiguration('openshiftToolkit').update('devModeRunOnPodman', false);
+                        break;
+                    default:
+                        return;
+                }
+            } while (choice === 'About Podman')
+        }
+        return Component.dev(component, 'podman');
+    }
+
     @vsCommand('openshift.component.dev')
     //@clusterRequired() check for user is logged in should be implemented from scratch
-    static async dev(component: ComponentWorkspaceFolder) {
+    static async dev(component: ComponentWorkspaceFolder, runOn?: undefined | 'podman') {
         const cs = Component.getComponentDevState(component);
         cs.devStatus = ComponentContextState.DEV_STARTING;
+        cs.runOn = runOn;
         Component.stateChanged.fire(component.contextPath)
-        await CliChannel.getInstance().executeTool(Command.deletePreviouslyPushedResouces(component.component.devfileData.devfile.metadata.name), undefined, false);
+        if (!runOn) {
+            await CliChannel.getInstance().executeTool(Command.deletePreviouslyPushedResources(component.component.devfileData.devfile.metadata.name), undefined, false);
+        }
         const outputEmitter = new EventEmitter<string>();
         let devProcess: ChildProcess;
         try {
@@ -203,7 +237,11 @@ export class Component extends OpenShiftItem {
                     onDidWrite: outputEmitter.event,
                     open: () => {
                         outputEmitter.fire(`Starting ${Command.dev(component.component.devfileData.supportedOdoFeatures.debug).toString()}\r\n`);
-                        void CliChannel.getInstance().spawnTool(Command.dev(component.component.devfileData.supportedOdoFeatures.debug), {cwd: component.contextPath}).then((cp) => {
+                        let opt: SpawnOptions = {cwd: component.contextPath};
+                        if (runOn) {
+                            opt = {...opt, env: {ODO_EXPERIMENTAL_MODE: 'true'}}
+                        }
+                        void CliChannel.getInstance().spawnTool(Command.dev(component.component.devfileData.supportedOdoFeatures.debug, runOn), opt).then((cp) => {
                             devProcess = cp;
                             devProcess.on('spawn', () => {
                                 cs.devTerminal.show();
@@ -673,12 +711,27 @@ export class Component extends OpenShiftItem {
     static async startOdoAndConnectDebugger(component: ComponentWorkspaceFolder, config: DebugConfiguration): Promise<string> {
             const componentDescription = await Component.odo.describeComponent(component.contextPath);
             if (componentDescription.devForwardedPorts?.length > 0) {
-                const ports = componentDescription.devForwardedPorts.map((fp) => ({
+                // try to find debug port
+                const debugPortsCandidates:number[] = [];
+                componentDescription.devForwardedPorts.forEach((pf) => {
+                    const devComponent = componentDescription.devfileData.devfile.components.find(item => item.name === pf.containerName);
+                    if (devComponent?.container) {
+                        const candidatePort = devComponent.container.endpoints.find(endpoint => endpoint.targetPort === pf.containerPort);
+                        if (candidatePort.name.startsWith('debug')) {
+                            debugPortsCandidates.push(candidatePort.targetPort);
+                        }
+                    }
+                });
+                const filteredForwardedPorts = debugPortsCandidates.length > 0
+                    ? componentDescription.devForwardedPorts.filter(fp => debugPortsCandidates.includes(fp.containerPort))
+                        : componentDescription.devForwardedPorts;
+                const ports = filteredForwardedPorts.map((fp) => ({
                     label: `${fp.localAddress}:${fp.localPort}`,
                     description: `Forwards to ${fp.containerName}:${fp.containerPort}`,
                     fp
                 }));
-                const port = await window.showQuickPick(ports, {placeHolder: 'Select a URL to open in default browser'});
+
+                const port = ports.length === 1 ? ports[0] : await window.showQuickPick(ports, {placeHolder: 'Select a port to start debugger session'});
 
                 if (!port) return null;
 

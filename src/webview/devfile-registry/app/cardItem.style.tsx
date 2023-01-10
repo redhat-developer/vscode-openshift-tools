@@ -43,8 +43,7 @@ export default (theme: Theme) =>
         cardBody: {
             height: 'auto',
             overflow: 'hidden',
-            marginLeft: '1.5rem',
-            marginRight: '1.5rem'
+            margin: '1.5rem'
         },
         cardRegistryTitle: {
             color: 'var(--vscode-textLink-activeForeground)',
@@ -62,6 +61,7 @@ export default (theme: Theme) =>
             margin: '1rem'
         },
         badge: {
+            marginTop: '1rem',
             minWidth: '0.5rem',
             maxWidth: '5rem',
             padding: '0.5rem',
@@ -75,6 +75,9 @@ export default (theme: Theme) =>
             outline: '0.0625rem solid',
             outlineColor: 'inherit'
         },
+        subBadge: {
+            marginTop: '0'
+        },
         headerBadge: {
             height: '1px',
             outline: 'none'
@@ -83,9 +86,9 @@ export default (theme: Theme) =>
             marginLeft: '0rem'
         },
         cardFooterTag: {
-            marginTop: '0.125rem',
-            marginLeft: '1.5rem',
-            marginBottom: '1rem'
+            display: 'flex',
+            flexDirection: 'column',
+            margin: '1.5rem'
         },
         text: {
             textAlign: 'right'
