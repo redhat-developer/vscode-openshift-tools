@@ -18,6 +18,7 @@ const config: Mocha.MochaOptions = {
     timeout: 60000,
     color: true,
     // grep: 'loads components in workspace',
+    require: ['./helper.js'],
 };
 
 const mocha = new Mocha(config);
@@ -51,6 +52,9 @@ export async function run(): Promise<void> {
     const testFinder = createTestFinder(testsRoot);
     const testFiles:string[] = [];
 
+    // add activation test first
+    testFiles.push(...await testFinder('activation.js'));
+    // everything else after
     testFiles.push(...await testFinder('**/extension.test.js'));
     testFiles.push(...await testFinder('**/workspace.test.js'));
     testFiles.push(...await testFinder('k8s/*.test.js'));

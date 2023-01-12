@@ -56,8 +56,8 @@ suite('openshift toolkit Extension', () => {
     const appItem = new OpenShiftApplication(projectItem, 'app1');
     const fixtureFolder = path.join(__dirname, '..', '..', '..', 'test', 'fixtures').normalize();
     const comp2Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp2'));
-    let activated;
-    setup(async () => {
+
+    setup(() => {
         sandbox = sinon.createSandbox();
         sandbox.stub(vscode.workspace, 'workspaceFolders').value([{
             uri: vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp1')), index: 0, name: 'comp1'
@@ -87,10 +87,6 @@ suite('openshift toolkit Extension', () => {
             }
             return { error: undefined, stdout: '', stderr: ''};
         });
-        if (!activated) {
-            await vscode.commands.executeCommand('openshift.output');
-            activated = true;
-        }
         sandbox.stub(OdoImpl.prototype, '_getClusters').resolves([clusterItem]);
         sandbox.stub(OdoImpl.prototype, '_getProjects').resolves([projectItem]);
         sandbox.stub(OdoImpl.prototype, '_getApplications').resolves([appItem]);
