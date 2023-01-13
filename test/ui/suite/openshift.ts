@@ -86,18 +86,18 @@ export function checkOpenshiftView() {
             });
         });
 
-        describe('Component Registries', () => {
-            let types: CustomTreeSection;
+        describe('Devfile Registries', () => {
+            let registries: CustomTreeSection;
 
             before(async () => {
-                types = await view.getContent().getSection(VIEWS.compRegistries) as CustomTreeSection;
-                await types.expand();
+                registries = await view.getContent().getSection(VIEWS.compRegistries) as CustomTreeSection;
+                await registries.expand();
             });
 
             it('shows the default devfile registry', async function test() {
                 this.timeout(10000);
                 await new Promise((res) => { setTimeout(res, 6000); });
-                const registry = await types.findItem(VIEWS.devFileRegistry);
+                const registry = await registries.findItem(VIEWS.devFileRegistry);
                 expect(registry).not.undefined;
             });
         });
