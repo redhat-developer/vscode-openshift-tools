@@ -32,7 +32,7 @@ export class GithubService extends BaseService {
     this.client = new Octokit({ ...authOpts, baseUrl });
   }
 
-  protected getAuthProvider = (): Octokit.Options => {
+  protected getAuthProvider = () => {
     switch (this.gitsource.secretType) {
       case SecretType.PERSONAL_ACCESS_TOKEN:
       case SecretType.BASIC_AUTH:
@@ -92,7 +92,7 @@ export class GithubService extends BaseService {
 
   getRepoFileList = async (): Promise<RepoFileList> => {
     try {
-      const resp = await this.client.repos.getContents({
+      const resp = await this.client.repos.getContent({
         owner: this.metadata.owner,
         repo: this.metadata.repoName,
         path: this.metadata.contextDir,
@@ -125,7 +125,7 @@ export class GithubService extends BaseService {
 
   isFilePresent = async (path: string): Promise<Response> => {
     try {
-      const resp = await this.client.repos.getContents({
+      const resp = await this.client.repos.getContent({
         owner: this.metadata.owner,
         repo: this.metadata.repoName,
         path,
@@ -140,7 +140,7 @@ export class GithubService extends BaseService {
 
   getFileContent = async (path: string): Promise<string | null> => {
     try {
-      const resp = await this.client.repos.getContents({
+      const resp = await this.client.repos.getContent({
         owner: this.metadata.owner,
         repo: this.metadata.repoName,
         path,
