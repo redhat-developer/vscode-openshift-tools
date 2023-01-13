@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.1.1 (January 12, 2023)
+
+* [#2738](https://github.com/redhat-developer/vscode-openshift-tools/issues/2738) Git repository validation never ends on Mac M1
+* [#2737](https://github.com/redhat-developer/vscode-openshift-tools/issues/2737) VSCode offers to install extension v0.2.9 on Mac M1
+
 ## 1.1.0 (January 10, 2023)
 
 * [#2700](https://github.com/redhat-developer/vscode-openshift-tools/issues/2700) Missing word in error message in Import from Git wizard
