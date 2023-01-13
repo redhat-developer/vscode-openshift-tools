@@ -4,12 +4,13 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { checkAboutCommand } from './suite/command-about';
+import { testDevfileRegistries } from './suite/devfileRegistries';
 import { checkExtension } from './suite/extension';
 import { checkOpenshiftView } from './suite/openshift';
-// import { createComponentTest } from './suite/component';
 
 describe('Extension public-facing UI tests', () => {
     checkExtension();
     checkOpenshiftView();
     checkAboutCommand();
+    testDevfileRegistries();
 });
