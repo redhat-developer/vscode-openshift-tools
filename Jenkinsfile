@@ -58,6 +58,8 @@ node('rhel8'){
     stage('Package darwin-x64') {
         sh "vsce package --target darwin-x64 -o openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-darwin-x64.vsix"
         sh "sha256sum *-darwin-x64.vsix > openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-darwin-x64.vsix.sha256"
+        sh "vsce package --target darwin-arm64 -o openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-darwin-arm64.vsix"
+        sh "sha256sum *-darwin-arm64.vsix > openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-darwin-arm64.vsix.sha256"
     }
   }
 
@@ -88,6 +90,7 @@ node('rhel8'){
       stage("Publish to Marketplace") {
         withCredentials([[$class: 'StringBinding', credentialsId: 'vscode_java_marketplace', variable: 'TOKEN']]) {
           sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-darwin-x64.vsix"
+          sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-darwin-arm64.vsix"
           sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-linux-x64.vsix"
           sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-win32-x64.vsix"
         }
