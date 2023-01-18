@@ -59,7 +59,8 @@ export default function addSandboxView(props): JSX.Element {
         consoleDashboard: '',
         apiEndpoint: '',
         oauthTokenEndpoint: '',
-        errorCode: undefined
+        errorCode: undefined,
+        proxyUrl: ''
     });
 
     const messageListener = (event) => {
@@ -151,7 +152,8 @@ export default function addSandboxView(props): JSX.Element {
                 statusInfo: currentState.statusInfo,
                 apiEndpoint: '',
                 oauthTokenEndpoint: '',
-                errorCode: undefined
+                errorCode: undefined,
+                proxyUrl: ''
             });
             postMessage('sandboxDetectStatus');
         }
@@ -302,7 +304,8 @@ export default function addSandboxView(props): JSX.Element {
                 consoleDashboard: '',
                 apiEndpoint: '',
                 oauthTokenEndpoint: '',
-                errorCode: undefined
+                errorCode: undefined,
+                proxyUrl: ''
             });
         }
 
@@ -379,7 +382,7 @@ export default function addSandboxView(props): JSX.Element {
     const Provisioned = () => {
 
         const handleLoginButton = () => {
-            postMessage('sandboxLoginUsingDataInClipboard', {apiEndpointUrl: currentState.apiEndpoint, oauthRequestTokenUrl: `${currentState.oauthTokenEndpoint}/request`});
+            postMessage('sandboxLoginUsingDataInClipboard', {apiEndpointUrl: currentState.apiEndpoint, oauthRequestTokenUrl: `${currentState.oauthTokenEndpoint}/request`, proxyUrl: currentState.proxyUrl});
         };
 
         return (

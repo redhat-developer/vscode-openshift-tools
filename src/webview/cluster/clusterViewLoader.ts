@@ -109,7 +109,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 } else {
                     if (signupStatus.status.ready) {
                         const oauthInfo = await sandboxAPI.getOauthServerInfo(signupStatus.apiEndpoint);
-                        panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL, apiEndpoint: signupStatus.apiEndpoint, oauthTokenEndpoint: oauthInfo.token_endpoint });
+                        panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL, apiEndpoint: signupStatus.apiEndpoint, oauthTokenEndpoint: oauthInfo.token_endpoint, proxyUrl: signupStatus.proxyURL });
                     } else {
                         // cluster is not ready and the reason is
                         if (signupStatus.status.verificationRequired) {
@@ -173,7 +173,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
         case 'sandboxLoginUsingDataInClipboard':
             const telemetryEventLoginToSandbox = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxLoginUsingDataInClipboard');
             try {
-                const result = await Cluster.loginUsingClipboardToken(event.payload.apiEndpointUrl, event.payload.oauthRequestTokenUrl);
+                const result = await Cluster.loginUsingClipboardToken(event.payload.proxyUrl, (sessionCheck as any).idToken);
                 if (result) vscode.window.showInformationMessage(`${result}`);
                 telemetryEventLoginToSandbox.send();
             } catch (err) {
