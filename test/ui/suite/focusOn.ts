@@ -18,9 +18,7 @@ export function checkFocusOnCommands() {
             view = await (await new ActivityBar().getViewControl('OpenShift')).openView();
             await new Promise(res => setTimeout(res, 4000));
             for(var section of sections){
-                console.log(await (await view.getContent().getSection(section)).getTitle());
                 await (await view.getContent().getSection(section)).collapse();
-                console.log(await (await view.getContent().getSection(section)).isExpanded());
             }
         })
 
