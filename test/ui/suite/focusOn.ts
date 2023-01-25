@@ -4,34 +4,31 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { expect } from 'chai';
-import { ActivityBar, SideBarView, VSBrowser, WebDriver } from 'vscode-extension-tester'
+import { ActivityBar, SideBarView } from 'vscode-extension-tester'
 import { activateCommand } from '../common/command-activator';
 import { VIEWS } from '../common/constants';
 
 export function checkFocusOnCommands() {
     describe('Focus on Commands', () => {
         let view: SideBarView;
-        let driver: WebDriver;
-        const sections = [VIEWS.components, VIEWS.compRegistries, VIEWS.debugSessions, VIEWS.appExplorer];
+        const sections = [VIEWS.appExplorer, VIEWS.components, VIEWS.compRegistries, VIEWS.debugSessions];
 
         before('Open OpenShift View', async function(){
             this.timeout(10000);
             view = await (await new ActivityBar().getViewControl('OpenShift')).openView();
             await new Promise(res => setTimeout(res, 4000));
-            driver = VSBrowser.instance.driver;
+            for(var section of sections){
+                console.log(await (await view.getContent().getSection(section)).getTitle());
+                await (await view.getContent().getSection(section)).collapse();
+                console.log(await (await view.getContent().getSection(section)).isExpanded());
+            }
         })
 
-        sections.forEach(viewSection =>
-            it(`Focus on ${viewSection} view`, async function() {
+        sections.forEach(section =>
+            it(`Focus on ${section} view`, async function() {
                 this.timeout(30000);
-                await activateCommand(`>OpenShift: Focus on ${viewSection} view`);
-
-                const section = await view.getContent().getSection(viewSection);
-                const text = await section.getText();
-                const expectedContent = text.slice(viewSection.length + 1);
-                const actualContent = await driver.switchTo().activeElement().getText();
-
-                expect(actualContent).to.equal(expectedContent);
+                await activateCommand(`>OpenShift: Focus on ${section} view`);
+                expect(await (await view.getContent().getSection(section)).isExpanded()).to.be.true;
             })
         )
     });
