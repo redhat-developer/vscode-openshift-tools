@@ -36,13 +36,7 @@
 		"OpenShift",
 		"Kubernetes",
 		"Red Hat",
-		"kubernetes-extension-cloud-provider",
-		"k8s",
-		"OpenShift Local",
-		"CodeReady Containers",
-		"devsandbox",
-		"debuggers",
-		"Cloud"
+		"devsandbox"
 	],
 	"icon": "images/openshift_extension.png",
 	"main": "./out/src/extension",
