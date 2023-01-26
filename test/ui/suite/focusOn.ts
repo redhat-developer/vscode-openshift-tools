@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { expect } from 'chai';
-import { ActivityBar, SideBarView } from 'vscode-extension-tester'
+import { ActivityBar, SideBarView, VSBrowser } from 'vscode-extension-tester'
 import { activateCommand } from '../common/command-activator';
 import { VIEWS } from '../common/constants';
 
@@ -16,7 +16,10 @@ export function checkFocusOnCommands() {
         before('Open OpenShift View', async function(){
             this.timeout(10000);
             view = await (await new ActivityBar().getViewControl('OpenShift')).openView();
-            await new Promise(res => setTimeout(res, 4000));
+            VSBrowser.instance.driver.wait(async () => !(await view.getContent().hasProgress()),
+            5000,
+            'Progress bar has not been hidden within the timeout'
+            );
             for(const section of sections){
                 await (await view.getContent().getSection(section)).collapse();
             }
@@ -30,4 +33,3 @@ export function checkFocusOnCommands() {
             })
         )
     });
-}
