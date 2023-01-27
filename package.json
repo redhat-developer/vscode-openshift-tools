@@ -829,12 +829,12 @@
 		"views": {
 			"openshiftView": [
 				{
-					"id": "openshiftProjectExplorer",
-					"name": "Application Explorer"
-				},
-				{
 					"id": "openshiftComponentsView",
 					"name": "Components"
+				},
+				{
+					"id": "openshiftProjectExplorer",
+					"name": "Application Explorer"
 				},
 				{
 					"id": "openshiftComponentTypesView",
