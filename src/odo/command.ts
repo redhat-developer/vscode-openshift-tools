@@ -38,7 +38,7 @@ export class Command {
             command.addOption(new CommandOption('--debug'));
         }
         if (runOn) {
-            command.addOption(new CommandOption('--run-on', 'podman'));
+            command.addOption(new CommandOption('--platform', 'podman'));
         }
         return command;
     }
