@@ -23,27 +23,36 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
     if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
         folder = workspace.workspaceFolders
             .filter((value) => {
-                let odoDevfile = true;
+                let emptyWSFolder = false;
                 try {
-                    odoDevfile = !fs.statSync(path.join(value.uri.fsPath, 'devfile.yaml')).isFile()
+                    emptyWSFolder = fs.readdirSync(value.uri.fsPath).length === 0;
                 } catch (ignore) {
                     // ignore errors if file does not exist
                 }
-                let odoDotDevfile = true;
-                try {
-                    odoDotDevfile = !fs.statSync(path.join(value.uri.fsPath, '.devfile.yaml')).isFile();
-                } catch (ignore) {
-                    // ignore errors if file does not exist
+                if (!emptyWSFolder) {
+                    let odoDevfile = true;
+                    try {
+                        odoDevfile = !fs.statSync(path.join(value.uri.fsPath, 'devfile.yaml')).isFile()
+                    } catch (ignore) {
+                        // ignore errors if file does not exist
+                    }
+                    let odoDotDevfile = true;
+                    try {
+                        odoDotDevfile = !fs.statSync(path.join(value.uri.fsPath, '.devfile.yaml')).isFile();
+                    } catch (ignore) {
+                        // ignore errors if file does not exist
+                    }
+                    // if there is no devfile.yaml and no .devfile.yaml in the root of workspace folder
+                    return !odoDevfile && !odoDotDevfile;
                 }
-                // if there is no devfile.yaml and no .devfile.yaml in the root of workspace folder
-                return !odoDevfile && !odoDotDevfile;
+                return emptyWSFolder;
             })
             .map((wsFolder) => ({
                 label: `$(file-directory) ${wsFolder.uri.fsPath}`,
                 uri: wsFolder.uri,
             }));
     }
-    const choice = await window.showQuickPick([AddWorkspaceFolder, ...folder], {
+    const choice = folder?.length === 1 ? folder.pop() : await window.showQuickPick([AddWorkspaceFolder, ...folder], {
         placeHolder: 'Select context folder',
         ignoreFocusOut: true,
     });
