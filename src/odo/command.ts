@@ -32,7 +32,7 @@ export class Command {
         return command;
     }
 
-    static dev(debug: boolean, runOn?: undefined| 'podman'): CommandText {
+    static dev(debug: boolean, runOn?: undefined | 'podman'): CommandText {
         const command = new CommandText('odo', 'dev');
         if (debug) {
             command.addOption(new CommandOption('--debug'));
@@ -89,9 +89,9 @@ export class Command {
         return new CommandText(
             'odo delete namespace',
             name, [
-                new CommandOption('-f'),
-                new CommandOption('-w'),
-            ]
+            new CommandOption('-f'),
+            new CommandOption('-w'),
+        ]
         );
     }
 
@@ -119,7 +119,7 @@ export class Command {
     }
 
     static addRegistry(name: string, url: string, token: string): CommandText {
-        const cTxt =  new CommandText('odo preference add registry', `${name} ${url}`);
+        const cTxt = new CommandText('odo preference add registry', `${name} ${url}`);
         if (token) {
             cTxt.addOption(new CommandOption('--token', token));
         }
@@ -152,6 +152,18 @@ export class Command {
 
     static printOcVersion(): CommandText {
         return new CommandText('oc version');
+    }
+
+    static addHelmRepo(): CommandText {
+       return new CommandText('helm repo add openshift https://charts.openshift.io/');
+    }
+
+    static installHelmChart(name: string, chartName: string, version: string): CommandText {
+        return new CommandText(`helm install ${name} openshift/redhat-${chartName} --version ${version}`);
+    }
+
+    static getHelmIndex(): CommandText {
+        return new CommandText('helm search repo helm-charts', undefined, [new CommandOption('-o', 'json', false)]);
     }
 
     static printOcVersionJson(): CommandText {
@@ -308,7 +320,7 @@ export class Command {
             new CommandOption('--name', name)
         ]
         );
-        if(type !== '') {
+        if (type !== '') {
             cTxt.addOption(new CommandOption('--devfile', type));
         }
         if (registryName) {
@@ -320,7 +332,7 @@ export class Command {
         if (useExistingDevfile && customDevfilePath.length === 0) {
             cTxt.addOption(new CommandOption('--devfile-path', 'devfile.yaml', false));
         }
-        if(customDevfilePath.length > 0) {
+        if (customDevfilePath.length > 0) {
             cTxt.addOption(new CommandOption('--devfile-path', customDevfilePath, false));
         }
         return cTxt;
@@ -357,7 +369,7 @@ export class Command {
     }
 
     static deleteCluster(name: string): CommandText {
-        return new CommandText('oc config delete-cluster',`${name}`);
+        return new CommandText('oc config delete-cluster', `${name}`);
     }
 
     static deleteUser(name: string): CommandText {

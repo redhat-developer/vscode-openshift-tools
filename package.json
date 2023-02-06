@@ -60,12 +60,14 @@
 		"dev:compile:devfile-registry-view": "webpack --mode development --config src/webview/devfile-registry/webpack.config.js",
 		"dev:compile:welcome-view": "webpack --mode development --config src/webview/welcome/webpack.config.js",
 		"dev:compile:git-import-view": "webpack --mode development --config src/webview/git-import/webpack.config.js",
+        "dev:compile:helm-chart-view": "webpack --mode development --config src/webview/helm-chart/webpack.config.js",
 		"dev:run:log-view": "webpack-dev-server --mode development --config src/webview/log/webpack.config.js",
 		"dev:run:describe-view": "webpack-dev-server --mode development --config src/webview/describe/webpack.config.js",
 		"dev:run:cluster-view": "webpack-dev-server --port 9222 --mode development --config src/webview/cluster/webpack.config.js",
 		"dev:run:devfile-registry-view": "webpack-dev-server --port 9222 --mode development --config src/webview/devfile-registry/webpack.config.js",
 		"dev:run:welcome-view": "webpack-dev-server --port 9222 --mode development --config src/webview/welcome/webpack.config.js",
 		"dev:run:git-import-view": "webpack-dev-server --port 9222 --mode development --config src/webview/git-import/webpack.config.js",
+        "dev:run:helm-chart-view": "webpack-dev-server --port 9222 --mode development --config src/webview/helm-chart/webpack.config.js",
 		"dev:run:create-service-view": "webpack-dev-server --mode development --config src/webview/create-service/webpack.config.js",
 		"watch": "tsc -watch -p ./",
 		"clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/logViewer",
@@ -285,6 +287,7 @@
 		"onCommand:clusters.openshift.deployment.openConsole",
 		"onCommand:clusters.openshift.imagestream.openConsole",
 		"onCommand:openshift.componentTypesView.registry.openInView",
+        "onCommand:openshift.componentTypesView.registry.openHelmChartsInView",
 		"onWalkthrough:openshiftWalkthrough"
 	],
 	"contributes": {
@@ -297,6 +300,11 @@
 			{
 				"command": "openshift.oc.about",
 				"title": "Print OKD Client Tool Version",
+				"category": "OpenShift"
+			},
+            {
+				"command": "openshift.oc-helm.about",
+				"title": "Helm Index",
 				"category": "OpenShift"
 			},
 			{
@@ -728,6 +736,15 @@
 					"light": "images/title/light/book.svg"
 				}
 			},
+            {
+				"command": "openshift.componentTypesView.registry.openHelmChartsInView",
+				"title": "Open Helm Charts View",
+				"category": "OpenShift",
+				"icon": {
+					"dark": "images/title/dark/book.svg",
+					"light": "images/title/light/book.svg"
+				}
+			},
 			{
 				"command": "openshift.componentTypesView.registry.add",
 				"title": "Add Registry",
@@ -1020,6 +1037,10 @@
 					"command": "openshift.componentTypesView.registry.openInView",
 					"when": "false"
 				},
+                {
+                    "command": "openshift.componentTypesView.registry.openHelmChartsInView",
+                    "when": "false"
+                },
 				{
 					"command": "openshift.componentTypesView.registry.openInBrowser",
 					"when": "false"
@@ -1051,6 +1072,11 @@
 					"when": "view == openshiftComponentTypesView",
 					"group": "navigation"
 				},
+                {
+                    "command": "openshift.componentTypesView.registry.openHelmChartsInView",
+                    "when": "view == openshiftComponentTypesView",
+					"group": "navigation"
+                },
 				{
 					"command": "openshift.componentTypesView.registry.add",
 					"when": "view == openshiftComponentTypesView",
