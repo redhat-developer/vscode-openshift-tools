@@ -262,6 +262,7 @@
 		"onCommand:openshift.component.debug",
 		"onCommand:openshift.component.debug.palette",
 		"onCommand:openshift.resource.load",
+        "onCommand:openshift.resource.unInstall",
 		"onCommand:openshift.service.create",
 		"onCommand:openshift.service.delete",
 		"onCommand:openshift.component.folder.create",
@@ -400,6 +401,11 @@
 			{
 				"command": "openshift.project.create",
 				"title": "New Project",
+				"category": "OpenShift"
+			},
+            {
+				"command": "openshift.componentTypesView.registry.openHelmChartsInView",
+				"title": "Open Helm Charts",
 				"category": "OpenShift"
 			},
 			{
@@ -736,15 +742,6 @@
 					"light": "images/title/light/book.svg"
 				}
 			},
-            {
-				"command": "openshift.componentTypesView.registry.openHelmChartsInView",
-				"title": "Open Helm Charts View",
-				"category": "OpenShift",
-				"icon": {
-					"dark": "images/title/dark/book.svg",
-					"light": "images/title/light/book.svg"
-				}
-			},
 			{
 				"command": "openshift.componentTypesView.registry.add",
 				"title": "Add Registry",
@@ -792,6 +789,11 @@
 			{
 				"command": "openshift.resource.load",
 				"title": "Load",
+				"category": "OpenShift"
+			},
+            {
+				"command": "openshift.resource.unInstall",
+				"title": "Uninstall",
 				"category": "OpenShift"
 			},
 			{
@@ -1053,6 +1055,10 @@
 					"command": "openshift.resource.load",
 					"when": "false"
 				},
+                {
+					"command": "openshift.resource.unInstall",
+					"when": "false"
+				},
 				{
 					"command": "openshift.resource.openInDeveloperConsole",
 					"when": "false"
@@ -1212,6 +1218,11 @@
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isLoggedIn",
 					"group": "c1"
 				},
+                {
+					"command": "openshift.componentTypesView.registry.openHelmChartsInView",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isLoggedIn",
+					"group": "c2"
+				},
 				{
 					"command": "openshift.explorer.logout",
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isLoggedIn",
@@ -1365,11 +1376,15 @@
 				},
 				{
 					"command": "openshift.resource.load",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject || viewItem == openshift.k8sObject.helm"
+				},
+                {
+					"command": "openshift.resource.unInstall",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject.helm"
 				},
 				{
 					"command": "openshift.resource.openInDeveloperConsole",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject || viewItem == openshift.k8sObject.helm"
 				}
 			]
 		},

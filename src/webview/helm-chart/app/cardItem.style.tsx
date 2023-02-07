@@ -219,10 +219,9 @@ export default (theme: Theme) =>
         },
         starterProjectCardBody: {
             width: 'auto',
-            height: 'fit-content',
             display: 'flex',
             flexDirection: 'row',
-            gap: '8rem',
+            gap: '2rem',
             borderTop: '1px solid',
             borderTopColor: 'inherit',
             paddingTop: '1rem',
@@ -232,7 +231,7 @@ export default (theme: Theme) =>
         starterProjectSelect: {
             width: '40%',
             alignItems: 'center',
-            height: '10rem',
+            height: '6rem',
             marginLeft: '0.5rem',
             overflowX: 'hidden',
             overflowY: 'scroll',

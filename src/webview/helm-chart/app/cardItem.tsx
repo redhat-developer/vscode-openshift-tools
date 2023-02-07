@@ -5,40 +5,59 @@
 import React from 'react';
 import { DevFileProps } from './wrapperCardItem';
 import { Backdrop, Button, Card, Modal, InputLabel } from '@material-ui/core';
-import { CardActions, TextField, Typography } from '@mui/material';
+import { TextField, Typography } from '@mui/material';
 import { VSCodeMessage } from '../vsCodeMessage';
+import { LoadScreen } from './loading';
 import './cardItem.scss';
 
 export class CardItem extends React.Component<DevFileProps, {
-    isExpanded: boolean,
     selectedVersion: any,
     hoverVersion: null | any,
     installChartName: string,
+    installResponse: {
+        loadScreen: boolean,
+        error: boolean
+    }
 }> {
 
     constructor(props: DevFileProps) {
         super(props);
+        this.props.helmEntry.isExpand = false;
         this.state = {
-            isExpanded: false,
             selectedVersion: this.props.helmEntry[0],
             hoverVersion: null,
-            installChartName: ''
+            installChartName: '',
+            installResponse: {
+                loadScreen: false,
+                error: undefined
+            }
         }
     }
 
     onCardClick = (): void => {
-        const isExpanded = !this.state.isExpanded;
-        console.log('Before::: ' + isExpanded);
+        this.props.helmEntry.isExpand = true;
         this.setState({
-            isExpanded: isExpanded
+            selectedVersion: this.props.helmEntry[0],
+            hoverVersion: null,
+            installChartName: '',
+            installResponse: {
+                loadScreen: false,
+                error: undefined
+            }
         });
-        console.log('After::: ' + this.state.isExpanded);
     }
 
-    onCloseClick = (_event: any,reason: string): void => {
+    onCloseClick = (_event: any, reason: string): void => {
         if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+            this.props.helmEntry.isExpand = false;
             this.setState({
-                isExpanded: false
+                selectedVersion: this.props.helmEntry[0],
+                hoverVersion: null,
+                installChartName: '',
+                installResponse: {
+                    loadScreen: false,
+                    error: undefined
+                }
             });
         }
     };
@@ -51,12 +70,30 @@ export class CardItem extends React.Component<DevFileProps, {
                 'chartName': this.state.selectedVersion.name,
                 'version': this.state.selectedVersion.version
             });
-        return;
+        VSCodeMessage.onMessage((message) => {
+            if (message.data.action === 'loadScreen') {
+                this.setState({
+                    installResponse: {
+                        loadScreen: message.data.show,
+                        error: message.data.isError
+                    }
+                });
+                if (message.data.isError === false) {
+                    this.onCloseClick(undefined, 'backdropClick');
+                } else if(message.data.isError) {
+                    this.props.helmEntry.isExpand = message.data.chartName === this.state.selectedVersion.name ? true : false;
+                }
+            }
+        });
     }
 
     textFieldChange = (value: string): void => {
         this.setState({
-            installChartName: value
+            installChartName: value,
+            installResponse: {
+                loadScreen: false,
+                error: undefined
+            }
         })
     }
 
@@ -67,83 +104,87 @@ export class CardItem extends React.Component<DevFileProps, {
     };
 
     handleDisable = (): boolean => {
-        return this.state.installChartName.length === 0;
+        return this.state.installResponse.error || this.state.installChartName.length === 0;
     }
 
     render(): React.ReactNode {
-        const { isExpanded, selectedVersion, installChartName } = this.state;
-        console.log('helmEntry::::', this.props.helmEntry);
-
+        const { selectedVersion, installChartName, installResponse } = this.state;
         const versionCard =
-            <div className={this.props.cardItemStyle.starterProjectCardBody}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem', height: '2rem' }}>
-                        <InputLabel required htmlFor='bootstrap-input'
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className={this.props.cardItemStyle.starterProjectCardBody}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem', height: '2rem' }}>
+                            <InputLabel required htmlFor='bootstrap-input'
+                                style={{
+                                    color: '#EE0000',
+                                    paddingTop: '0.5rem'
+                                }}>
+                                Chart Name:
+                            </InputLabel>
+                            <div>
+                                <TextField
+                                    helperText={installResponse.error ? 'Name already exists' : ''}
+                                    error={installResponse.error}
+                                    id='bootstrap-input'
+                                    value={installChartName}
+                                    sx={{
+                                        input: {
+                                            color: 'var(--vscode-settings-textInputForeground)',
+                                            backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                            width: '10rem'
+                                        }
+                                    }} onChange={(e) => this.textFieldChange(e.target.value)}>
+                                </TextField>
+                            </div>
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem', width: '10rem' }}>
+                        <InputLabel
                             style={{
                                 color: '#EE0000',
                                 paddingTop: '0.5rem'
                             }}>
-                            Install Chart Name:
+                            Version:
                         </InputLabel>
-                        <div>
-                            <TextField
-                                id='bootstrap-input'
-                                value={installChartName}
-                                sx={{
-                                    input: {
-                                        color: 'var(--vscode-settings-textInputForeground)',
-                                        backgroundColor: 'var(--vscode-settings-textInputBackground)',
-                                        width: '10rem'
+                        <div
+                            data-testid='projects-selector'
+                            className={this.props.cardItemStyle.starterProjectSelect}
+                        >
+                            {this.props.helmEntry.map((entry: any) => (
+                                <div
+                                    key={entry.version}
+                                    data-testid={`projects-selector-item-${entry.version}`}
+                                    onMouseDown={(): void => this.setSelectedVersion(entry)}
+                                    className={
+                                        selectedVersion.version === entry.version ? this.props.cardItemStyle.starterProjectSelected : this.props.cardItemStyle.project
                                     }
-                                }} onChange={(e) => this.textFieldChange(e.target.value)}>
-                            </TextField>
+                                >
+                                    {entry.version}
+                                </div>
+                            ))}
                         </div>
                     </div>
-                    <CardActions className={this.props.cardItemStyle.cardButton}>
-                        <Button
-                            disabled={this.handleDisable()}
-                            color='default'
-                            variant='contained'
-                            component='span'
-                            className={this.props.cardItemStyle.button}
-                            onClick={this.clickInstall}
-                            style={{ backgroundColor: this.handleDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000'}}>
-                            <Typography variant='body2'>
-                                Install
-                            </Typography>
-                        </Button>
-                    </CardActions>
+                    <Button
+                        disabled={this.handleDisable()}
+                        color='default'
+                        variant='contained'
+                        component='span'
+                        className={this.props.cardItemStyle.button}
+                        onClick={this.clickInstall}
+                        style={{ backgroundColor: this.handleDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000' }}>
+                        <Typography variant='body2'>
+                            Install
+                        </Typography>
+                    </Button>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem', width: '10rem' }}>
-                    <InputLabel
-                        style={{
-                            color: '#EE0000',
-                            paddingTop: '0.5rem'
-                        }}>
-                        Version:
-                    </InputLabel>
-                    <div
-                        data-testid='projects-selector'
-                        className={this.props.cardItemStyle.starterProjectSelect}
-                    >
-                        {this.props.helmEntry.map((entry: any) => (
-                            <div
-                                key={entry.version}
-                                data-testid={`projects-selector-item-${entry.version}`}
-                                onMouseDown={(): void => this.setSelectedVersion(entry)}
-                                className={
-                                    selectedVersion.version === entry.version ? this.props.cardItemStyle.starterProjectSelected : this.props.cardItemStyle.project
-                                }
-                            >
-                                {entry.version}
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                {
+                    installResponse.loadScreen ?
+                        <LoadScreen title='Installing the Chart' /> : undefined
+                }
             </div>;
 
         const modalViewCard = <Modal
-            open={isExpanded}
+            open={this.props.helmEntry.isExpand}
             className={this.props.cardItemStyle.modal}
             aria-labelledby={`modal-${selectedVersion.name}`}
             onClose={this.onCloseClick}
@@ -173,7 +214,9 @@ export class CardItem extends React.Component<DevFileProps, {
                             </div>
                         </div>
                     </div>
-                    {versionCard}
+                    {
+                        versionCard
+                    }
                 </div>
                 <div className={this.props.cardItemStyle.helmCardBody}>
                     <div className={this.props.cardItemStyle.helmCardDetails}>
@@ -290,7 +333,7 @@ export class CardItem extends React.Component<DevFileProps, {
                     </div>
                 </Card>
                 {
-                    isExpanded &&
+                    this.props.helmEntry.isExpand &&
                     <> {modalViewCard} </>
                 }
             </>

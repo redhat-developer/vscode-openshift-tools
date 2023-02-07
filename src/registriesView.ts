@@ -129,6 +129,11 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return data;
     }
 
+    public async unInstallHelmChart(name: string): Promise<CliExitData> {
+        const data = await getInstance().execute(Command.unInstallHelmChart(name));
+        return data;
+    }
+
     public getAllComponents(): void {
         let isError = false;
         this.compDescriptions.clear();

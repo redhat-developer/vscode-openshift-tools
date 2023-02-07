@@ -82,7 +82,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                         {error?.length > 0 ? <ErrorPage message={error} /> : null}
                     </>
                     :
-                    error?.length > 0 ? <ErrorPage message={error} /> : <LoadScreen />
+                    error?.length > 0 ? <ErrorPage message={error} /> : <LoadScreen title='Loading Helm Charts' />
             }
         </>
     );

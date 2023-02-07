@@ -162,6 +162,10 @@ export class Command {
         return new CommandText(`helm install ${name} openshift/redhat-${chartName} --version ${version}`);
     }
 
+    static unInstallHelmChart(name: string): CommandText {
+        return new CommandText(`helm uninstall ${name}`);
+    }
+
     static getHelmIndex(): CommandText {
         return new CommandText('helm search repo helm-charts', undefined, [new CommandOption('-o', 'json', false)]);
     }

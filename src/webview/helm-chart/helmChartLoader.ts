@@ -9,6 +9,7 @@ import * as YAML from 'yaml'
 import { ExtensionID } from '../../util/constants';
 import { vsCommand } from '../../vscommand';
 import { ComponentTypesView } from '../../registriesView';
+import { OpenShiftExplorer } from '../../explorer';
 
 let panel: vscode.WebviewPanel;
 let helmCharts = [];
@@ -16,8 +17,27 @@ let helmCharts = [];
 async function helmChartMessageListener(event: any): Promise<any> {
     switch (event?.action) {
         case 'install':
-            const response = await ComponentTypesView.instance.installHelmChart(event.name, event.chartName, event.version);
-            console.log(response);
+            try {
+                panel.webview.postMessage({
+                    action: 'loadScreen',
+                    chartName: event.chartName,
+                    show: true
+                });
+                await ComponentTypesView.instance.installHelmChart(event.name, event.chartName, event.version);
+                OpenShiftExplorer.getInstance().refresh();
+                panel.webview.postMessage({
+                    action: 'loadScreen',
+                    show: false,
+                    isError: false
+                });
+            } catch (e) {
+                panel.webview.postMessage({
+                    action: 'loadScreen',
+                    chartName: event.chartName,
+                    show: false,
+                    isError: true
+                });
+            }
             break;
         default:
             panel.webview.postMessage(
@@ -48,7 +68,7 @@ export default class HelmChartLoader {
                 localResourceRoots: [localResourceRoot],
                 retainContextWhenHidden: true
             });
-            panel.iconPath = vscode.Uri.file(path.join(HelmChartLoader.extensionPath, 'images/context/devfile.png'));
+            panel.iconPath = vscode.Uri.file(path.join(HelmChartLoader.extensionPath, 'images/helm/helm.svg'));
             panel.webview.html = HelmChartLoader.getWebviewContent(HelmChartLoader.extensionPath, panel);
             panel.onDidDispose(() => {
                 panel = undefined;
