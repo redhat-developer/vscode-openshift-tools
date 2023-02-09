@@ -9,8 +9,16 @@
 
 .MuiOutlinedInput-input {
     padding: 5px 14px !important;
+    min-width: 86%;
 }
 
+.MuiFormHelperText-root {
+    width: 11rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
 .MuiFormControl-root {
     border: none;
     &:hover {

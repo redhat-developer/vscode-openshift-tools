@@ -7,6 +7,7 @@ import { CardItem } from './cardItem';
 import React, { forwardRef } from 'react';
 
 export interface DevFileProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+    chartName: string;
     helmEntry: any;
     cardItemStyle: any;
     themeKind: number;

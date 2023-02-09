@@ -12,7 +12,7 @@ import { ComponentTypesView } from '../../registriesView';
 import { OpenShiftExplorer } from '../../explorer';
 
 let panel: vscode.WebviewPanel;
-let helmCharts = [];
+let entries: any;
 
 async function helmChartMessageListener(event: any): Promise<any> {
     switch (event?.action) {
@@ -35,7 +35,8 @@ async function helmChartMessageListener(event: any): Promise<any> {
                     action: 'loadScreen',
                     chartName: event.chartName,
                     show: false,
-                    isError: true
+                    isError: true,
+                    error: 'Name already exists'
                 });
             }
             break;
@@ -114,20 +115,18 @@ export default class HelmChartLoader {
 }
 
 async function getHelmCharts(eventName: string): Promise<void> {
-    if (helmCharts.length === 0) {
+    if (!entries) {
         await ComponentTypesView.instance.addHelmRepo();
         const signupResponse = await fetch('https://charts.openshift.io/index.yaml', {
             method: 'GET'
         });
         const yamlResponse = YAML.parse(await signupResponse.text());
-        Object.keys(yamlResponse.entries).forEach((key) => {
-            helmCharts.push(yamlResponse.entries[key].reverse());
-        });
+        entries = yamlResponse.entries;
     }
     panel?.webview.postMessage(
         {
             action: eventName,
-            helmCharts: helmCharts.length > 0 ? helmCharts : [],
+            helmCharts: entries ? entries : undefined,
         }
     );
 }

@@ -12,13 +12,14 @@ import cardItemStyle from './cardItem.style';
 import starterProjectDisplayStyle from './starterProjectDisplay.style';
 import { ErrorPage } from './errorPage';
 import { ImageList, ImageListItem } from '@mui/material';
+import { SearchBar } from './searchBar';
 
 const useHomeStyles = makeStyles(homeStyle);
 const starterProjectDisplayStyles = makeStyles(starterProjectDisplayStyle);
 const useCardItemStyles = makeStyles(cardItemStyle);
 
 interface HomePageProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-    helmEntries: any[];
+    helmEntries: object;
     themeKind: number;
 }
 
@@ -36,9 +37,9 @@ const HomeItem: React.FC<HomePageProps> = ({
     return (
         <ImageList className={homeStyleClass.devfileGalleryGrid} cols={4}>
             {
-                helmEntries.map((helmEntry: any, key: number) => (
-                    <ImageListItem key={`imageList-` + key}>
-                        <CardItem key={key} helmEntry={helmEntry}
+                Object.keys(helmEntries).map((key, index) => (
+                    <ImageListItem key={`imageList-` + index}>
+                        <CardItem key={key} chartName={key} helmEntry={helmEntries[key].reverse()}
                             cardItemStyle={cardItemStyle} projectDisplayStyle={projectDisplayStyle}
                             themeKind={themeKind} />
                     </ImageListItem>
@@ -49,7 +50,9 @@ const HomeItem: React.FC<HomePageProps> = ({
 };
 
 export const Home: React.FC<DefaultProps> = ({ }) => {
-    const [helmCharts, setHelmCharts] = React.useState([]);
+    const [helmCharts, setHelmCharts] = React.useState(undefined);
+    const [filteredHelmCharts, setFilteredHelmCharts] = React.useState(undefined);
+    const [searchValue, setSearchValue] = React.useState('');
     const [error, setError] = React.useState('');
     const [themeKind, setThemeKind] = React.useState(0);
 
@@ -58,15 +61,20 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
             if (message.data.action === 'getHelmCharts') {
                 if (message.data.errorMessage && message.data.errorMessage.length > 0) {
                     setError(message.data.errorMessage);
-                    setHelmCharts([]);
+                    setHelmCharts(undefined);
+                    setSearchValue('');
                 } else {
                     setError('');
+                    setSearchValue('');
                     setThemeKind(message.data.themeValue);
                     setHelmCharts(message.data.helmCharts);
+                    setFilteredHelmCharts(getFilteredCompDesc(message.data.helmCharts, searchValue));
                 }
             } else if (message.data.action === 'loadingComponents') {
                 setError('');
-                setHelmCharts([]);
+                setSearchValue('');
+                setFilteredHelmCharts(undefined);
+                setHelmCharts(undefined);
             } else if (message.data.action === 'setTheme') {
                 setThemeKind(message.data.themeValue);
             }
@@ -76,9 +84,13 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
     return (
         <>
             {
-                helmCharts.length > 0 ?
+                filteredHelmCharts || searchValue.length > 0 ?
                     <>
-                        <HomeItem helmEntries={helmCharts} themeKind={themeKind} />
+                        <SearchBar onSearchBarChange={function (value: string): void {
+                            setSearchValue(value);
+                            setFilteredHelmCharts(getFilteredCompDesc(helmCharts, value));
+                        }} searchBarValue={searchValue} />
+                        <HomeItem helmEntries={filteredHelmCharts} themeKind={themeKind} />
                         {error?.length > 0 ? <ErrorPage message={error} /> : null}
                     </>
                     :
@@ -88,3 +100,20 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
     );
 }
 
+function getFilteredCompDesc(helmCharts: object, searchValue: string): object {
+    if (searchValue === '') {
+        return Object.fromEntries(Object.entries(helmCharts).sort(ascName));
+    }
+    return Object.fromEntries(Object.entries(helmCharts).filter(([key]) => {
+        return key.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1
+    }
+    ).sort(ascName));
+}
+
+function ascName(oldIndex, newIndex) {
+    const oldHelmChart = oldIndex[1];
+    const newHelmChart = newIndex[1];
+    const oldName = oldHelmChart[0].annotations['charts.openshift.io/name'] || oldHelmChart[0].name;
+    const newName = newHelmChart[0].annotations['charts.openshift.io/name'] || newHelmChart[0].name;
+    return oldName.localeCompare(newName);
+}

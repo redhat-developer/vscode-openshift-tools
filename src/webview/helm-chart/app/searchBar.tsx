@@ -25,7 +25,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         <div className={searchBarStyle.searchBar}>
             <TextField
                 className={searchBarStyle.searchBarInput}
-                placeholder='Search registry by name or description'
+                placeholder='Search chart by name'
                 value={searchBarValue}
                 onChange={(e) => {
                     onSearchBarChange(e.target.value);

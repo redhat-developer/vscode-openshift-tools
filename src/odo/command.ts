@@ -159,7 +159,7 @@ export class Command {
     }
 
     static installHelmChart(name: string, chartName: string, version: string): CommandText {
-        return new CommandText(`helm install ${name} openshift/redhat-${chartName} --version ${version}`);
+        return new CommandText(`helm install ${name} openshift/${chartName} --version ${version}`);
     }
 
     static unInstallHelmChart(name: string): CommandText {

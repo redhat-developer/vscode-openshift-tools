@@ -16,20 +16,24 @@ export class CardItem extends React.Component<DevFileProps, {
     installChartName: string,
     installResponse: {
         loadScreen: boolean,
-        error: boolean
+        error: boolean,
+        errorMsg: string,
     }
 }> {
 
     constructor(props: DevFileProps) {
         super(props);
         this.props.helmEntry.isExpand = false;
+        this.props.helmEntry.name = this.props.helmEntry[this.props.helmEntry.length - 1].annotations['charts.openshift.io/name']
+            || this.props.helmEntry[0].name;
         this.state = {
             selectedVersion: this.props.helmEntry[0],
             hoverVersion: null,
             installChartName: '',
             installResponse: {
                 loadScreen: false,
-                error: undefined
+                error: undefined,
+                errorMsg: ''
             }
         }
     }
@@ -42,7 +46,8 @@ export class CardItem extends React.Component<DevFileProps, {
             installChartName: '',
             installResponse: {
                 loadScreen: false,
-                error: undefined
+                error: undefined,
+                errorMsg: ''
             }
         });
     }
@@ -56,35 +61,50 @@ export class CardItem extends React.Component<DevFileProps, {
                 installChartName: '',
                 installResponse: {
                     loadScreen: false,
-                    error: undefined
+                    error: undefined,
+                    errorMsg: ''
                 }
             });
         }
     };
 
     clickInstall = (): void => {
-        VSCodeMessage.postMessage(
-            {
-                'action': 'install',
-                'name': this.state.installChartName,
-                'chartName': this.state.selectedVersion.name,
-                'version': this.state.selectedVersion.version
+        const regx = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$');
+        if (!regx.test(this.state.installChartName)) {
+            this.setState({
+                installResponse: {
+                    loadScreen: false,
+                    error: true,
+                    errorMsg: 'Chart name not matches \n^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
+                }
             });
+        } else {
+            VSCodeMessage.postMessage(
+                {
+                    'action': 'install',
+                    'name': this.state.installChartName,
+                    'chartName': this.props.chartName,
+                    'version': this.state.selectedVersion.version
+                });
+        }
         VSCodeMessage.onMessage((message) => {
             if (message.data.action === 'loadScreen') {
+                console.log('ErrorMsg:::', message.data.errorMsg);
                 this.setState({
                     installResponse: {
                         loadScreen: message.data.show,
-                        error: message.data.isError
+                        error: message.data.isError,
+                        errorMsg: message.data.error || ''
                     }
                 });
                 if (message.data.isError === false) {
                     this.onCloseClick(undefined, 'backdropClick');
-                } else if(message.data.isError) {
+                } else if (message.data.isError) {
                     this.props.helmEntry.isExpand = message.data.chartName === this.state.selectedVersion.name ? true : false;
                 }
             }
         });
+
     }
 
     textFieldChange = (value: string): void => {
@@ -92,7 +112,8 @@ export class CardItem extends React.Component<DevFileProps, {
             installChartName: value,
             installResponse: {
                 loadScreen: false,
-                error: undefined
+                error: undefined,
+                errorMsg: ''
             }
         })
     }
@@ -123,7 +144,7 @@ export class CardItem extends React.Component<DevFileProps, {
                             </InputLabel>
                             <div>
                                 <TextField
-                                    helperText={installResponse.error ? 'Name already exists' : ''}
+                                    helperText={installResponse.errorMsg}
                                     error={installResponse.error}
                                     id='bootstrap-input'
                                     value={installChartName}
@@ -209,7 +230,9 @@ export class CardItem extends React.Component<DevFileProps, {
                                 style={{ margin: '0rem' }} />
                             <div style={{ padding: '1rem', margin: '0rem' }}>
                                 <Typography variant='subtitle1'>
-                                    {capitalizeFirstLetter(selectedVersion.name)}
+                                    {
+                                        capitalizeFirstLetter(this.props.helmEntry.name)
+                                    }
                                 </Typography>
                             </div>
                         </div>
@@ -311,7 +334,11 @@ export class CardItem extends React.Component<DevFileProps, {
                         </div>
                     </div>
                     <div className={this.props.cardItemStyle.cardBody} style={{ margin: '1.5rem', height: '3rem' }}>
-                        <Typography variant='subtitle1'>{capitalizeFirstLetter(selectedVersion.name)}</Typography>
+                        <Typography variant='subtitle1'>
+                            {
+                                capitalizeFirstLetter(this.props.helmEntry.name)
+                            }
+                        </Typography>
                         {
                             selectedVersion.annotations['charts.openshift.io/provider'] && <Typography variant='caption'>Provided by {selectedVersion.annotations['charts.openshift.io/provider']}</Typography>
                         }
@@ -342,7 +369,6 @@ export class CardItem extends React.Component<DevFileProps, {
 }
 
 function capitalizeFirstLetter(value: string): string {
-    value = value.toLowerCase().replace('ibm', 'IBM');
     if (value.indexOf('-') === -1) {
         return value[0].toUpperCase() + value.substring(1);
     }
