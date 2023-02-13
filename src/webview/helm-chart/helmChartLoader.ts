@@ -10,9 +10,10 @@ import { ExtensionID } from '../../util/constants';
 import { vsCommand } from '../../vscommand';
 import { ComponentTypesView } from '../../registriesView';
 import { OpenShiftExplorer } from '../../explorer';
+import { ChartResponse } from './helmChartType';
 
 let panel: vscode.WebviewPanel;
-let entries: any;
+let helmRes: ChartResponse[] = []
 
 async function helmChartMessageListener(event: any): Promise<any> {
     switch (event?.action) {
@@ -106,27 +107,32 @@ export default class HelmChartLoader {
     public static async openHelmChartInWebview(): Promise<void> {
         await HelmChartLoader.loadView('Helm Charts');
     }
-
-    /*static refresh(): void {
-        if (panel) {
-            panel.webview.postMessage({ action: 'loadingComponents' });
-        }
-    }*/
 }
 
 async function getHelmCharts(eventName: string): Promise<void> {
-    if (!entries) {
+    if (helmRes.length === 0) {
         await ComponentTypesView.instance.addHelmRepo();
         const signupResponse = await fetch('https://charts.openshift.io/index.yaml', {
             method: 'GET'
         });
         const yamlResponse = YAML.parse(await signupResponse.text());
-        entries = yamlResponse.entries;
+        const entries = yamlResponse.entries;
+        Object.keys(entries).forEach((key) => {
+            let res: ChartResponse = {
+                chartName: '',
+                chartVersions: [],
+                displayName: ''
+            }
+            res.chartName = key;
+            res.chartVersions = entries[key];
+            res.displayName = res.chartVersions[0].annotations['charts.openshift.io/name'] || res.chartVersions[0].name;
+            helmRes.push(res);
+        })
     }
     panel?.webview.postMessage(
         {
             action: eventName,
-            helmCharts: entries ? entries : undefined,
+            helmRes: helmRes
         }
     );
 }

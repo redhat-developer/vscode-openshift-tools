@@ -13,13 +13,14 @@ import starterProjectDisplayStyle from './starterProjectDisplay.style';
 import { ErrorPage } from './errorPage';
 import { ImageList, ImageListItem } from '@mui/material';
 import { SearchBar } from './searchBar';
+import { ChartResponse } from '../helmChartType';
 
 const useHomeStyles = makeStyles(homeStyle);
 const starterProjectDisplayStyles = makeStyles(starterProjectDisplayStyle);
 const useCardItemStyles = makeStyles(cardItemStyle);
 
 interface HomePageProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-    helmEntries: object;
+    helmEntries: ChartResponse[];
     themeKind: number;
 }
 
@@ -37,9 +38,9 @@ const HomeItem: React.FC<HomePageProps> = ({
     return (
         <ImageList className={homeStyleClass.devfileGalleryGrid} cols={4}>
             {
-                Object.keys(helmEntries).map((key, index) => (
+                helmEntries.map((helmEntry: ChartResponse, index: number) => (
                     <ImageListItem key={`imageList-` + index}>
-                        <CardItem key={key} chartName={key} helmEntry={helmEntries[key].reverse()}
+                        <CardItem key={helmEntry.displayName} helmEntry={helmEntry}
                             cardItemStyle={cardItemStyle} projectDisplayStyle={projectDisplayStyle}
                             themeKind={themeKind} />
                     </ImageListItem>
@@ -50,8 +51,8 @@ const HomeItem: React.FC<HomePageProps> = ({
 };
 
 export const Home: React.FC<DefaultProps> = ({ }) => {
-    const [helmCharts, setHelmCharts] = React.useState(undefined);
-    const [filteredHelmCharts, setFilteredHelmCharts] = React.useState(undefined);
+    const [helmCharts, setHelmCharts] = React.useState([]);
+    const [filteredHelmCharts, setFilteredHelmCharts] = React.useState([]);
     const [searchValue, setSearchValue] = React.useState('');
     const [error, setError] = React.useState('');
     const [themeKind, setThemeKind] = React.useState(0);
@@ -67,8 +68,8 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                     setError('');
                     setSearchValue('');
                     setThemeKind(message.data.themeValue);
-                    setHelmCharts(message.data.helmCharts);
-                    setFilteredHelmCharts(getFilteredCompDesc(message.data.helmCharts, searchValue));
+                    setHelmCharts(message.data.helmRes);
+                    setFilteredHelmCharts(getFilteredCompDesc(message.data.helmRes, searchValue));
                 }
             } else if (message.data.action === 'loadingComponents') {
                 setError('');
@@ -84,7 +85,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
     return (
         <>
             {
-                filteredHelmCharts || searchValue.length > 0 ?
+                filteredHelmCharts.length > 0 || searchValue.length > 0 ?
                     <>
                         <SearchBar onSearchBarChange={function (value: string): void {
                             setSearchValue(value);
@@ -100,20 +101,19 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
     );
 }
 
-function getFilteredCompDesc(helmCharts: object, searchValue: string): object {
-    if (searchValue === '') {
-        return Object.fromEntries(Object.entries(helmCharts).sort(ascName));
-    }
-    return Object.fromEntries(Object.entries(helmCharts).filter(([key]) => {
-        return key.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1
-    }
-    ).sort(ascName));
+function getFilteredCompDesc(helmCharts: ChartResponse[], searchValue: string): ChartResponse[] {
+    const filteredCharts: ChartResponse[] = [];
+    const helmResponse = helmCharts.filter(function (helmChart: ChartResponse) {
+        if (searchValue !== '') {
+            return helmChart.displayName?.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1 ||
+                helmChart.chartVersions[0].name.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1;
+        }
+        return helmChart;
+    });
+    filteredCharts.push(...helmResponse);
+    return filteredCharts.sort(ascName);
 }
 
-function ascName(oldIndex, newIndex) {
-    const oldHelmChart = oldIndex[1];
-    const newHelmChart = newIndex[1];
-    const oldName = oldHelmChart[0].annotations['charts.openshift.io/name'] || oldHelmChart[0].name;
-    const newName = newHelmChart[0].annotations['charts.openshift.io/name'] || newHelmChart[0].name;
-    return oldName.localeCompare(newName);
+function ascName(oldChart: ChartResponse, newChart: ChartResponse) {
+    return oldChart.displayName.localeCompare(newChart.displayName);
 }

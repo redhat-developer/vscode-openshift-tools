@@ -9,11 +9,13 @@ import { TextField, Typography } from '@mui/material';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { LoadScreen } from './loading';
 import './cardItem.scss';
+import { Chart } from '../helmChartType';
 
 export class CardItem extends React.Component<DevFileProps, {
-    selectedVersion: any,
-    hoverVersion: null | any,
-    installChartName: string,
+    displayName: string,
+    versions: Chart[],
+    selectedVersion: Chart,
+    installName: string,
     installResponse: {
         loadScreen: boolean,
         error: boolean,
@@ -24,12 +26,11 @@ export class CardItem extends React.Component<DevFileProps, {
     constructor(props: DevFileProps) {
         super(props);
         this.props.helmEntry.isExpand = false;
-        this.props.helmEntry.name = this.props.helmEntry[this.props.helmEntry.length - 1].annotations['charts.openshift.io/name']
-            || this.props.helmEntry[0].name;
         this.state = {
-            selectedVersion: this.props.helmEntry[0],
-            hoverVersion: null,
-            installChartName: '',
+            displayName: this.props.helmEntry.displayName,
+            versions: this.props.helmEntry.chartVersions.reverse(),
+            selectedVersion: this.props.helmEntry.chartVersions[this.props.helmEntry.chartVersions.length - 1],
+            installName: '',
             installResponse: {
                 loadScreen: false,
                 error: undefined,
@@ -41,9 +42,8 @@ export class CardItem extends React.Component<DevFileProps, {
     onCardClick = (): void => {
         this.props.helmEntry.isExpand = true;
         this.setState({
-            selectedVersion: this.props.helmEntry[0],
-            hoverVersion: null,
-            installChartName: '',
+            selectedVersion: this.state.versions[0],
+            installName: '',
             installResponse: {
                 loadScreen: false,
                 error: undefined,
@@ -56,9 +56,8 @@ export class CardItem extends React.Component<DevFileProps, {
         if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
             this.props.helmEntry.isExpand = false;
             this.setState({
-                selectedVersion: this.props.helmEntry[0],
-                hoverVersion: null,
-                installChartName: '',
+                selectedVersion: this.state.versions[0],
+                installName: '',
                 installResponse: {
                     loadScreen: false,
                     error: undefined,
@@ -70,7 +69,7 @@ export class CardItem extends React.Component<DevFileProps, {
 
     clickInstall = (): void => {
         const regx = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$');
-        if (!regx.test(this.state.installChartName)) {
+        if (!regx.test(this.state.installName)) {
             this.setState({
                 installResponse: {
                     loadScreen: false,
@@ -82,14 +81,13 @@ export class CardItem extends React.Component<DevFileProps, {
             VSCodeMessage.postMessage(
                 {
                     'action': 'install',
-                    'name': this.state.installChartName,
-                    'chartName': this.props.chartName,
+                    'name': this.state.installName,
+                    'chartName': this.props.helmEntry.chartName,
                     'version': this.state.selectedVersion.version
                 });
         }
         VSCodeMessage.onMessage((message) => {
             if (message.data.action === 'loadScreen') {
-                console.log('ErrorMsg:::', message.data.errorMsg);
                 this.setState({
                     installResponse: {
                         loadScreen: message.data.show,
@@ -109,7 +107,7 @@ export class CardItem extends React.Component<DevFileProps, {
 
     textFieldChange = (value: string): void => {
         this.setState({
-            installChartName: value,
+            installName: value,
             installResponse: {
                 loadScreen: false,
                 error: undefined,
@@ -125,11 +123,11 @@ export class CardItem extends React.Component<DevFileProps, {
     };
 
     handleDisable = (): boolean => {
-        return this.state.installResponse.error || this.state.installChartName.length === 0;
+        return this.state.installResponse.error || this.state.installName.length === 0;
     }
 
     render(): React.ReactNode {
-        const { selectedVersion, installChartName, installResponse } = this.state;
+        const { selectedVersion, installName: installChartName, installResponse } = this.state;
         const versionCard =
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div className={this.props.cardItemStyle.starterProjectCardBody}>
@@ -171,16 +169,16 @@ export class CardItem extends React.Component<DevFileProps, {
                             data-testid='projects-selector'
                             className={this.props.cardItemStyle.starterProjectSelect}
                         >
-                            {this.props.helmEntry.map((entry: any) => (
+                            {this.state.versions.map((chart: Chart) => (
                                 <div
-                                    key={entry.version}
-                                    data-testid={`projects-selector-item-${entry.version}`}
-                                    onMouseDown={(): void => this.setSelectedVersion(entry)}
+                                    key={chart.version}
+                                    data-testid={`projects-selector-item-${chart.version}`}
+                                    onMouseDown={(): void => this.setSelectedVersion(chart)}
                                     className={
-                                        selectedVersion.version === entry.version ? this.props.cardItemStyle.starterProjectSelected : this.props.cardItemStyle.project
+                                        selectedVersion.version === chart.version ? this.props.cardItemStyle.starterProjectSelected : this.props.cardItemStyle.project
                                     }
                                 >
-                                    {entry.version}
+                                    {chart.version}
                                 </div>
                             ))}
                         </div>
@@ -224,14 +222,14 @@ export class CardItem extends React.Component<DevFileProps, {
                         <div className={this.props.cardItemStyle.devPageTitle}>
                             <img
                                 data-testid='icon'
-                                src={this.props.helmEntry.icon ? this.props.helmEntry.icon : require('../../../../images/helm/helm.svg').default}
-                                alt={this.props.helmEntry.icon + ' logo'}
+                                src={this.state.selectedVersion.icon ? this.state.selectedVersion.icon : require('../../../../images/helm/helm.svg').default}
+                                alt={this.state.selectedVersion.icon + ' logo'}
                                 className={this.props.cardItemStyle.cardImage}
                                 style={{ margin: '0rem' }} />
                             <div style={{ padding: '1rem', margin: '0rem' }}>
                                 <Typography variant='subtitle1'>
                                     {
-                                        capitalizeFirstLetter(this.props.helmEntry.name)
+                                        capitalizeFirstLetter(this.props.helmEntry.displayName)
                                     }
                                 </Typography>
                             </div>
@@ -336,7 +334,7 @@ export class CardItem extends React.Component<DevFileProps, {
                     <div className={this.props.cardItemStyle.cardBody} style={{ margin: '1.5rem', height: '3rem' }}>
                         <Typography variant='subtitle1'>
                             {
-                                capitalizeFirstLetter(this.props.helmEntry.name)
+                                capitalizeFirstLetter(this.props.helmEntry.displayName)
                             }
                         </Typography>
                         {

@@ -5,10 +5,10 @@
 
 import { CardItem } from './cardItem';
 import React, { forwardRef } from 'react';
+import { ChartResponse } from '../helmChartType';
 
 export interface DevFileProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-    chartName: string;
-    helmEntry: any;
+    helmEntry: ChartResponse;
     cardItemStyle: any;
     themeKind: number;
     projectDisplayStyle: any;
