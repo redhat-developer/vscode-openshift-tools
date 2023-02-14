@@ -301,11 +301,6 @@
 				"title": "Print OKD Client Tool Version",
 				"category": "OpenShift"
 			},
-            {
-				"command": "openshift.oc-helm.about",
-				"title": "Helm Index",
-				"category": "OpenShift"
-			},
 			{
 				"command": "openshift.create",
 				"title": "Create",
