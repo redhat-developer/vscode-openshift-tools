@@ -49,7 +49,7 @@ export async function selectWorkspaceFolder(): Promise<Uri> {
     }
 
     let choice:WorkspaceFolderItem | QuickPickItem;
-    
+
     if (folders.length === 1 && workspace.workspaceFolders.length === 1) {
         choice = folders.pop()
     } else {
