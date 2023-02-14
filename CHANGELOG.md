@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.1.2 (January 25, 2023)
+
+* [#2754](https://github.com/redhat-developer/vscode-openshift-tools/issues/2754) v0.2.9 is latest version available on windows arm64
+* [#2736](https://github.com/redhat-developer/vscode-openshift-tools/issues/2736) Update odo to v3.5.0
+
 ## 1.1.1 (January 12, 2023)
 
 * [#2738](https://github.com/redhat-developer/vscode-openshift-tools/issues/2738) Git repository validation never ends on Mac M1

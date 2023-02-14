@@ -10,9 +10,14 @@
 import express = require('express');
 
 const app = express();
+const appApi = express();
 
 app.get('/', function (req, res) {
     res.send('<b>Registartion server mock</b>');
+});
+
+appApi.get('/', function (req, res) {
+    res.send('<b>API server host mock</b>')
 });
 
 let signupStatus;
@@ -45,7 +50,7 @@ app.route('/api/v1/signup')
         console.log('Signing up for sandbox');
         // TODO: Fill up the URLs
         signupStatus = {
-            apiEndpoint: '',
+            apiEndpoint: 'http://localhost:3001',
             cheDashboardURL: '',
             clusterName: '',
             company: '',
@@ -65,10 +70,10 @@ app.route('/api/v1/signup')
     });
     app.route('/api/v1/signup/verification').put(function(req, res) {
         if (verificationCodeRequestTimeoutError) {
-            setTimeout(()=>res.sendStatus(200), ShortTimeout);
+            setTimeout(()=>res.status(200).send(''), ShortTimeout);
         } else {
             verificationCodeRequestTimeoutError = true;
-            setTimeout(()=>res.sendStatus(200),LongTimeout);
+            setTimeout(()=>res.status(200).send(''), LongTimeout);
         }
     });
     app.route('/api/v1/signup/verification/*').get(function(req, res) {
@@ -76,7 +81,7 @@ app.route('/api/v1/signup')
         if(!validateVerificationCodeRequestTimeoutError) {
             validateVerificationCodeRequestTimeoutError = true;
             // will fail because of timeout
-            setTimeout(()=>res.sendStatus(200),LongTimeout);
+            setTimeout(()=>res.status(200).send(''),LongTimeout);
             return;
         }
         // eslint-disable-next-line no-console
@@ -101,6 +106,11 @@ app.route('/api/v1/signup')
         },ShortTimeout);
         res.sendStatus(200);
     });
+    appApi.route('/.well-known/oauth-authorization-server').get(function(req, res) {
+        res.status(200).send({
+            token_endpoing: 'http://tosome.where'
+        })
+    });
 
 // Use a wildcard for a route
 // app.get('/the*man', function(req, res) {
@@ -111,8 +121,16 @@ app.route('/api/v1/signup')
 app.use(function(req, res, next) {
     res.status(404).send('Sorry, that route doesn\'t exist.');
 });
+appApi.use(function(req, res, next) {
+    res.status(404).send('Sorry, that route doesn\'t exist.');
+});
 
 app.listen(3000, function () {
     // eslint-disable-next-line no-console
     console.log('SandBox Registration Service Mock');
+});
+
+appApi.listen(3001, function () {
+    // eslint-disable-next-line no-console
+    console.log('SandBox API Host Mock');
 });
