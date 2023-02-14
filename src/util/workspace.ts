@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { workspace, QuickPickItem, window, Uri } from 'vscode';
+import { workspace, QuickPickItem, window, Uri, WorkspaceFolder } from 'vscode';
 import { Platform } from './platform';
 
 import path = require('path');
@@ -18,44 +18,47 @@ export const AddWorkspaceFolder: QuickPickItem = {
     description: 'Folder which does not have an OpenShift context',
 };
 
-export async function selectWorkspaceFolder(): Promise<Uri> {
-    let folder: WorkspaceFolderItem[] = [];
-    if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
-        folder = workspace.workspaceFolders
-            .filter((value) => {
-                let emptyWSFolder = false;
-                try {
-                    emptyWSFolder = fs.readdirSync(value.uri.fsPath).length === 0;
-                } catch (ignore) {
-                    // ignore errors if file does not exist
-                }
-                if (!emptyWSFolder) {
-                    let odoDevfile = true;
-                    try {
-                        odoDevfile = !fs.statSync(path.join(value.uri.fsPath, 'devfile.yaml')).isFile()
-                    } catch (ignore) {
-                        // ignore errors if file does not exist
-                    }
-                    let odoDotDevfile = true;
-                    try {
-                        odoDotDevfile = !fs.statSync(path.join(value.uri.fsPath, '.devfile.yaml')).isFile();
-                    } catch (ignore) {
-                        // ignore errors if file does not exist
-                    }
-                    // if there is no devfile.yaml and no .devfile.yaml in the root of workspace folder
-                    return !odoDevfile && !odoDotDevfile;
-                }
-                return emptyWSFolder;
-            })
-            .map((wsFolder) => ({
-                label: `$(file-directory) ${wsFolder.uri.fsPath}`,
-                uri: wsFolder.uri,
-            }));
+function isFile(path: string) {
+    try {
+        return fs.statSync(path).isFile()
+    } catch (ignore) {
+        return false;
     }
-    const choice = folder?.length === 1 ? folder.pop() : await window.showQuickPick([AddWorkspaceFolder, ...folder], {
-        placeHolder: 'Select context folder',
-        ignoreFocusOut: true,
-    });
+}
+
+function isComponent(folder: WorkspaceFolder) {
+    return !isFile(path.join(folder.uri.fsPath, 'devfile.yaml'))
+        && !isFile(path.join(folder.uri.fsPath, '.devfile.yaml'));
+}
+
+function isComponentFilter(wsFolder: WorkspaceFolder) {
+    return isComponent(wsFolder);
+}
+
+function createWorkspaceFolderItem(wsFolder: WorkspaceFolder) {
+    return {
+        label: `$(file-directory) ${wsFolder.uri.fsPath}`,
+        uri: wsFolder.uri,
+    };
+}
+
+export async function selectWorkspaceFolder(): Promise<Uri> {
+    let folders: WorkspaceFolderItem[] = [];
+    if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
+        folders = workspace.workspaceFolders.filter(isComponentFilter).map(createWorkspaceFolderItem);
+    }
+
+    let choice:WorkspaceFolderItem | QuickPickItem;
+    
+    if (folders.length === 1 && workspace.workspaceFolders.length === 1) {
+        choice = folders.pop()
+    } else {
+        choice = await window.showQuickPick(
+            [AddWorkspaceFolder, ...folders],
+            {placeHolder: 'Select context folder', ignoreFocusOut: true}
+        );
+    }
+
     if (!choice) return null;
 
     let workspacePath: Uri;
