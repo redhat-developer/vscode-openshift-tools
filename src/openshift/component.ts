@@ -497,14 +497,12 @@ export class Component extends OpenShiftItem {
         let createStarter: string;
         let componentType: ComponentTypeAdapter;
         let componentTypeCandidates: ComponentTypeAdapter[];
-        if (!useExistingDevfile && (!opts.devFilePath || opts.devFilePath.length === 0)) {
+        if (!useExistingDevfile && (!opts || !opts.devFilePath || opts.devFilePath.length === 0)) {
             const componentTypes = await Component.odo.getComponentTypes();
-            if (!opts.componentTypeName && !opts.projectName) {
-                progressIndicator.busy = true;
-                progressIndicator.placeholder = opts.componentTypeName ? `Checking if '${opts.componentTypeName}' Component type is available` : 'Loading available Component types';
-                progressIndicator.show();
-            }
-            if (opts.componentTypeName) {
+            progressIndicator.busy = true;
+            progressIndicator.placeholder = opts?.componentTypeName ? `Checking if '${opts.componentTypeName}' Component type is available` : 'Loading available Component types';
+            progressIndicator.show();
+            if (opts?.componentTypeName) {
                 componentTypeCandidates = opts.registryName && opts.registryName.length > 0 ? componentTypes.filter(type => type.name === opts.componentTypeName && type.registryName === opts.registryName) : componentTypes.filter(type => type.name === opts.componentTypeName);
                 if (componentTypeCandidates?.length === 0) {
                     componentType = await window.showQuickPick(componentTypes.sort(ascDevfileFirst), { placeHolder: `Cannot find Component type '${opts.componentTypeName}', select one below to use instead`, ignoreFocusOut: true });
@@ -526,7 +524,7 @@ export class Component extends OpenShiftItem {
             const paths = globby.sync(`${globbyPath}*`, { dot: true, onlyFiles: false });
             progressIndicator.hide();
             if (paths.length === 0 && !isGitImportCall) {
-                if (opts.projectName) {
+                if (opts?.projectName) {
                     createStarter = opts.projectName;
                 } else {
                     progressIndicator.placeholder = 'Loading Starter Projects for selected Component Type'
@@ -558,7 +556,7 @@ export class Component extends OpenShiftItem {
             }
         }
 
-        const componentName = opts.compName || await Component.getName(
+        const componentName = opts?.compName || await Component.getName(
             'Name',
             Promise.resolve([]),
             initialNameValue?.trim().length > 0 ? initialNameValue : createStarter
@@ -583,7 +581,7 @@ export class Component extends OpenShiftItem {
                     folder,
                     createStarter,
                     useExistingDevfile,
-                    opts.devFilePath,
+                    opts?.devFilePath,
                     notification
                 )
             );
