@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.1.3 (February 14, 2023)
+
+* [#2757](https://github.com/redhat-developer/vscode-openshift-tools/issues/2757) Quickly create component form the current workspace
+* [#2755](https://github.com/redhat-developer/vscode-openshift-tools/issues/2755) Unknown flag --run-on when use `Start Dev on Podman`
+* [#2745](https://github.com/redhat-developer/vscode-openshift-tools/issues/2745) Update Red Hat Authentication extension to v0.1.0
+* [#2725](https://github.com/redhat-developer/vscode-openshift-tools/issues/2725) Active and disabled 'Create Component' buttons look the same
+* [#2724](https://github.com/redhat-developer/vscode-openshift-tools/issues/2724) Incorrect error 'rate limit is exceeded' in case of connectivity issues
+* [#2035](https://github.com/redhat-developer/vscode-openshift-tools/issues/2035) Check devfile version is 2.0.0 before using it in odo --devfile option
+
 ## 1.1.2 (January 25, 2023)
 
 * [#2754](https://github.com/redhat-developer/vscode-openshift-tools/issues/2754) v0.2.9 is latest version available on windows arm64
