@@ -1,6 +1,6 @@
 # Change Log
 
-## 1.1.3 (February 14, 2023)
+## 1.2.0 (February 14, 2023)
 
 * [#2757](https://github.com/redhat-developer/vscode-openshift-tools/issues/2757) Quickly create component form the current workspace
 * [#2755](https://github.com/redhat-developer/vscode-openshift-tools/issues/2755) Unknown flag --run-on when use `Start Dev on Podman`
