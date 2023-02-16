@@ -85,7 +85,7 @@ node('rhel8'){
 
   if(publishToMarketPlace.equals('true') || publishToOVSX.equals('true')) {
     timeout(time:5, unit:'DAYS') {
-      input message:'Approve deployment?', submitter: 'msuman,degolovi'
+      input message:'Approve deployment?', submitter: 'msuman,degolovi,msivasub'
     }
 
     if(publishToMarketPlace.equals('true')) {
