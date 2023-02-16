@@ -188,6 +188,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
 
     startTelemetry(extensionContext);
 
+    await commands.executeCommand('openshift.show.deploy.dialog');
+
     return {
         verifyBundledBinaries,
     };

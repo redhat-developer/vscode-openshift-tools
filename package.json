@@ -221,6 +221,7 @@
 		"webpack-dev-server": "^4.6.0"
 	},
 	"activationEvents": [
+        "onStartupFinished",
 		"onView:openshiftProjectExplorer",
 		"onView:extension.vsKubernetesExplorer",
 		"onView:openshiftComponentTypesView",
@@ -305,6 +306,11 @@
 			{
 				"command": "clusters.openshift.build.start",
 				"title": "Start Build",
+				"category": "OpenShift"
+			},
+            {
+				"command": "openshift.show.deploy.dialog",
+				"title": "Show Deploy Dialog",
 				"category": "OpenShift"
 			},
 			{
@@ -942,6 +948,10 @@
 					"command": "openshift.service.delete",
 					"when": "view == openshiftProjectExplorer"
 				},
+                {
+                    "command": "openshift.show.deploy.dialog",
+                    "when": "false"
+                },
 				{
 					"command": "clusters.openshift.deploy.dc.showLog",
 					"when": "view == openshiftProjectExplorer"

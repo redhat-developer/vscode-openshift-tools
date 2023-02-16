@@ -42,6 +42,21 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<ComponentWo
         ComponentsTreeDataProvider.instance.refresh();
     }
 
+    @vsCommand('openshift.show.deploy.dialog')
+    public static async checkDevFileOnWorkspace(): Promise<void> {
+        const components = await ComponentsTreeDataProvider.instance.odoWorkspace.getComponents();
+        if (components.length === 0) {
+            return;
+        }
+        const folderString = components.length > 1 ? 'folders' : 'folder';
+        const msg = `The workspace ${folderString} contains devfile.yaml, Do you want to deploy it?`;
+        void vsc.window.showInformationMessage(msg, 'Deploy').then(async (value: string) => {
+            if (value === 'Deploy') {
+                await vsc.commands.executeCommand('clusters.openshift.deploy',components[0]);
+            }
+        });
+    }
+
     @vsCommand('openshift.component.revealInExplorer')
     public static async revealInExplorer(context: ComponentWorkspaceFolder): Promise<void> {
         await vsc.commands.executeCommand('workbench.view.explorer',);
