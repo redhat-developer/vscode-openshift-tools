@@ -1071,11 +1071,6 @@
 					"when": "view == openshiftComponentTypesView",
 					"group": "navigation"
 				},
-                {
-                    "command": "openshift.componentTypesView.registry.openHelmChartsInView",
-                    "when": "view == openshiftComponentTypesView",
-					"group": "navigation"
-                },
 				{
 					"command": "openshift.componentTypesView.registry.add",
 					"when": "view == openshiftComponentTypesView",
