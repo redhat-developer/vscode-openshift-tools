@@ -55,7 +55,7 @@ jobs:
       # Run UI tests
       - name: Run UI Tests
         uses: GabrielBB/xvfb-action@86d97bde4a65fe9b290c0b3fb92c2c4ed0e5302d #v1.6
-	env:
+        env:
             NODE_OPTIONS: --max_old_space_size=16384
         if: runner.os == 'Linux'
         with:
