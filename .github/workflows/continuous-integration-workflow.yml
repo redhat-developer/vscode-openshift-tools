@@ -38,7 +38,7 @@ jobs:
 
       # Run tests
       - name: Build and Test
-        uses: GabrielBB/xvfb-action@v1.0
+        uses: GabrielBB/xvfb-action@fe2609f8182a9ed5aee7d53ff3ed04098a904df2 #v1.0
         env:
             NODE_OPTIONS: --max_old_space_size=16384
         with:
@@ -46,7 +46,7 @@ jobs:
 
       # Upload coverage to codecov.io
       - name: Codecov
-        uses: codecov/codecov-action@v1.0.12
+        uses: codecov/codecov-action@07127fde53bc3ccd346d47ab2f14c390161ad108 #v1.0.12
         if: runner.os == 'Linux'
         with:
           file: ./out/coverage/coverage-final.json
@@ -54,7 +54,7 @@ jobs:
       # UI tests fail under linux
       # Run UI tests
       - name: Run UI Tests
-        uses: GabrielBB/xvfb-action@v1.6
+        uses: GabrielBB/xvfb-action@86d97bde4a65fe9b290c0b3fb92c2c4ed0e5302d #v1.6
         if: runner.os == 'Linux'
         with:
           run: npm run public-ui-test
