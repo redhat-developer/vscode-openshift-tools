@@ -393,7 +393,7 @@ export class Component extends OpenShiftItem {
             .get<boolean>('useWebviewInsteadOfTerminalView');
     }
     static createExperimentalEnv(componentFolder) {
-        return !!Component.getComponentDevState(componentFolder).runOn ? {ODO_EXPERIMENTAL_MODE: 'true'} : {};
+        return Component.getComponentDevState(componentFolder).runOn ? {ODO_EXPERIMENTAL_MODE: 'true'} : {};
     }
 
     @vsCommand('openshift.component.describe', true)
