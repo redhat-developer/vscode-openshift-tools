@@ -80,7 +80,6 @@ export type K8sResourceKind = K8sResourceCommon & {
   data?: { [key: string]: any };
 };
 
-
 export type K8sKind = {
   abbr: string;
   kind: string;
