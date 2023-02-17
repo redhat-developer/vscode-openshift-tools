@@ -1,7 +1,8 @@
 # Change Log
 
-## 1.2.0 (February 15, 2023)
+## 1.2.0 (February 16, 2023)
 
+* [#2771](https://github.com/redhat-developer/vscode-openshift-tools/issues/2771) `Open in Browser` command does not work for components running in dev mode on podman
 * [#2764](https://github.com/redhat-developer/vscode-openshift-tools/issues/2764) Update odo to v3.6.0 release
 * [#2757](https://github.com/redhat-developer/vscode-openshift-tools/issues/2757) Quickly create component form the current workspace
 * [#2755](https://github.com/redhat-developer/vscode-openshift-tools/issues/2755) Unknown flag --run-on when use `Start Dev on Podman`
