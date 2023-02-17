@@ -313,7 +313,7 @@ export interface Odo {
     getClusterServiceVersion(svc: string): Promise<ClusterServiceVersionKind>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     execute(command: CommandText, cwd?: string, fail?: boolean, addEnv?: any): Promise<cliInstance.CliExitData>;
-    executeInTerminal(command: CommandText, cwd?: string, name?: string, ßaddEnv?: any): Promise<void>;
+    executeInTerminal(command: CommandText, cwd?: string, name?: string, addEnv?: any): Promise<void>;
     requireLogin(): Promise<boolean>;
     clearCache?(): void;
     createProject(name: string): Promise<OpenShiftObject>;
