@@ -114,7 +114,6 @@ export class CliChannel implements Cli {
     //     this.envVars.put("ODO_TRACKING_CONSENT", "no");
     // }
 
-
     static createTelemetryEnv(): {[key:string]: string} {
         const env = {
             ...process.env,
