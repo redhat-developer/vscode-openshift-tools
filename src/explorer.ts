@@ -20,6 +20,7 @@ import {
 } from 'vscode';
 
 import * as path from 'path';
+import * as fs from 'fs';
 import { Platform } from './util/platform';
 
 import { WatchUtil, FileContentChangeNotifier } from './util/watch';
@@ -253,7 +254,13 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     @vsCommand('openshift.explorer.reportIssue')
     static async reportIssue(): Promise<unknown> {
-        return commands.executeCommand('vscode.open', Uri.parse(OpenShiftExplorer.issueUrl()));
+        const extensionPath = path.resolve(__dirname, '..', '..');
+        const templatePath = path.join(extensionPath,'resources', 'issueReport.md');
+        const template = fs.readFileSync(templatePath, 'utf-8');
+        return commands.executeCommand('workbench.action.openIssueReporter', {
+            extensionId: 'redhat.vscode-openshift-connector',
+            issueBody: template
+        });
     }
 
     @vsCommand('openshift.open.configFile')
