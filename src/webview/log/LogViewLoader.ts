@@ -17,7 +17,7 @@ export default class LogViewLoader {
         return extensions.getExtension(ExtensionID).extensionPath
     }
 
-    static async loadView(title: string, cmdFunction: () => CommandText, target: ComponentWorkspaceFolder): Promise<WebviewPanel> {
+    static async loadView(title: string, cmdFunction: () => CommandText, target: ComponentWorkspaceFolder, addEnv: any): Promise<WebviewPanel> {
         const localResourceRoot = Uri.file(path.join(LogViewLoader.extensionPath, 'out', 'logViewer'));
 
         const panel = window.createWebviewPanel('logView', title, ViewColumn.One, {
@@ -32,7 +32,7 @@ export default class LogViewLoader {
         // TODO: When webview is going to be ready?
         panel.webview.html = LogViewLoader.getWebviewContent(LogViewLoader.extensionPath, `${cmd}`.replace(/\\/g, '\\\\'), panel);
 
-        const process = await CliChannel.getInstance().spawnTool(cmd, {cwd: target.contextPath});
+        const process = await CliChannel.getInstance().spawnTool(cmd, {cwd: target.contextPath, env: addEnv});
         process.stdout.on('data', (data) => {
             panel.webview.postMessage({action: 'add', data: `${data}`.trim().split('\n')});
         }).on('close', ()=>{

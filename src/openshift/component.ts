@@ -334,7 +334,7 @@ export class Component extends OpenShiftItem {
     @vsCommand('openshift.component.openInBrowser')
     // @clusterRequired()
     static async openInBrowser(component: ComponentWorkspaceFolder): Promise<string | null | undefined> {
-        const componentDescription = await Component.odo.describeComponent(component.contextPath);
+        const componentDescription = await Component.odo.describeComponent(component.contextPath, !!Component.getComponentDevState(component).runOn);
         if (componentDescription.devForwardedPorts?.length === 1) {
             const fp = componentDescription.devForwardedPorts[0];
             await commands.executeCommand('vscode.open', Uri.parse(`http://${fp.localAddress}:${fp.localPort}`));
@@ -392,6 +392,9 @@ export class Component extends OpenShiftItem {
             .getConfiguration('openshiftToolkit')
             .get<boolean>('useWebviewInsteadOfTerminalView');
     }
+    static createExperimentalEnv(componentFolder) {
+        return !!Component.getComponentDevState(componentFolder).runOn ? {ODO_EXPERIMENTAL_MODE: 'true'} : {};
+    }
 
     @vsCommand('openshift.component.describe', true)
     static async describe(componentFolder: ComponentWorkspaceFolder): Promise<string> {
@@ -399,7 +402,8 @@ export class Component extends OpenShiftItem {
         await Component.odo.executeInTerminal(
             command(),
             componentFolder.contextPath,
-            `OpenShift: Describe '${componentFolder.component.devfileData.devfile.metadata.name}' Component`);
+            `OpenShift: Describe '${componentFolder.component.devfileData.devfile.metadata.name}' Component`,
+            Component.createExperimentalEnv(componentFolder));
         return;
     }
 
@@ -407,12 +411,13 @@ export class Component extends OpenShiftItem {
     static log(componentFolder: ComponentWorkspaceFolder): Promise<string> {
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
         if (Component.isUsingWebviewEditor()) {
-            LogViewLoader.loadView(`${componentName} Log`, Command.showLog, componentFolder);
+            LogViewLoader.loadView(`${componentName} Log`, Command.showLog, componentFolder, Component.createExperimentalEnv(componentFolder));
         } else {
             void Component.odo.executeInTerminal(
                 Command.showLog(),
                 componentFolder.contextPath,
-                `OpenShift: Show '${componentName}' Component Log`);
+                `OpenShift: Show '${componentName}' Component Log`,
+                Component.createExperimentalEnv(componentFolder));
         }
         return;
     }
@@ -421,12 +426,13 @@ export class Component extends OpenShiftItem {
     static followLog(componentFolder: ComponentWorkspaceFolder): Promise<string> {
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
         if (Component.isUsingWebviewEditor()) {
-            LogViewLoader.loadView(`${componentName} Follow Log`, Command.showLogAndFollow, componentFolder);
+            LogViewLoader.loadView(`${componentName} Follow Log`, Command.showLogAndFollow, componentFolder, Component.createExperimentalEnv(componentFolder));
         } else {
             void Component.odo.executeInTerminal(
                 Command.showLogAndFollow(),
                 componentFolder.contextPath,
-                `OpenShift: Follow '${componentName}' Component Log`);
+                `OpenShift: Follow '${componentName}' Component Log`,
+                Component.createExperimentalEnv(componentFolder));
         }
         return;
     }
@@ -707,7 +713,7 @@ export class Component extends OpenShiftItem {
     }
 
     static async startOdoAndConnectDebugger(component: ComponentWorkspaceFolder, config: DebugConfiguration): Promise<string> {
-            const componentDescription = await Component.odo.describeComponent(component.contextPath);
+            const componentDescription = await Component.odo.describeComponent(component.contextPath, !!Component.getComponentDevState(component).runOn);
             if (componentDescription.devForwardedPorts?.length > 0) {
                 // try to find debug port
                 const debugPortsCandidates:number[] = [];
