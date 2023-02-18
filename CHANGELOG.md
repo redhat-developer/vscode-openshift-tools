@@ -1,7 +1,8 @@
 # Change Log
 
-## 1.2.0 (February 16, 2023)
+## 1.2.0 (February 17, 2023)
 
+* [#2553](https://github.com/redhat-developer/vscode-openshift-tools/issues/2553) Use 'workbench.action.openIssueReporter' to report issues for the extension
 * [#2771](https://github.com/redhat-developer/vscode-openshift-tools/issues/2771) `Open in Browser` command does not work for components running in dev mode on podman
 * [#2764](https://github.com/redhat-developer/vscode-openshift-tools/issues/2764) Update odo to v3.6.0 release
 * [#2757](https://github.com/redhat-developer/vscode-openshift-tools/issues/2757) Quickly create component form the current workspace
