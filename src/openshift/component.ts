@@ -14,7 +14,7 @@ import { Command } from '../odo/command';
 import { Progress } from '../util/progress';
 import { selectWorkspaceFolder } from '../util/workspace';
 import { vsCommand, VsCommandError } from '../vscommand';
-import { ascDevfileFirst, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, isDevfileComponent } from '../odo/componentType';
+import { ascDevfileFirst, ComponentTypeAdapter, DevfileComponentType, isDevfileComponent } from '../odo/componentType';
 import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
 import path = require('path');
 import globby = require('globby');
@@ -438,7 +438,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.componentType.newComponent')
-    public static async createComponentFromCatalogEntry(context: DevfileComponentType | StarterProject, registryName?: string): Promise<string> {
+    public static async createComponentFromCatalogEntry(context: DevfileComponentType | StarterProject, componentName?: string, registryName?: string): Promise<string> {
         let componentTypeName: string,
             starterProjectName: string;
         if (isDevfileComponent(context)) {
@@ -447,16 +447,15 @@ export class Component extends OpenShiftItem {
             componentTypeName = context.typeName;
             starterProjectName = context.name;
         }
-
-        return Component.createFromLocal(componentTypeName, starterProjectName, registryName);
+        return Component.createFromLocal(componentTypeName, componentName, starterProjectName, registryName);
     }
 
     @vsCommand('openshift.component.createFromLocal')
-    static async createFromLocal(compTypeName?: string, starterProjectName?: string, regName?: string): Promise<string | null> {
+    static async createFromLocal(compTypeName?: string, componentName?:string, starterProjectName?: string, regName?: string): Promise<string | null> {
         const workspacePath = await selectWorkspaceFolder();
         if (!workspacePath) return createCancelledResult('contextFolder');
 
-        return Component.createFromRootWorkspaceFolder(workspacePath, [], { componentTypeName: compTypeName, projectName: starterProjectName, registryName: regName });
+        return Component.createFromRootWorkspaceFolder(workspacePath, [], { componentTypeName: compTypeName, projectName: starterProjectName, registryName: regName, compName: componentName });
     }
 
     @vsCommand('openshift.component.openImportFromGit')
@@ -532,7 +531,7 @@ export class Component extends OpenShiftItem {
             if (paths.length === 0 && !isGitImportCall) {
                 if (opts?.projectName) {
                     createStarter = opts.projectName;
-                } else {
+                } /*else {
                     progressIndicator.placeholder = 'Loading Starter Projects for selected Component Type'
                     progressIndicator.show();
                     const descr = await CliChannel.getInstance().executeTool(Command.describeCatalogComponent(componentType.name, componentType.registryName));
@@ -558,7 +557,7 @@ export class Component extends OpenShiftItem {
                             return createCancelledResult('useStaterProjectRequest');;
                         }
                     }
-                }
+                }*/
             }
         }
 

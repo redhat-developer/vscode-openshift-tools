@@ -10,17 +10,21 @@ import { DevFileProps } from './wrapperCardItem';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { StarterProject } from '../../../odo/componentTypeDescription';
 import { StarterProjectDisplay } from './starterProjectDisplay';
-import { Badge, Backdrop, Button, Card, CardActions, Modal } from '@material-ui/core';
+import { Badge, Button, Card, CardActions } from '@material-ui/core';
 import { FileCopy } from '@material-ui/icons';
-import { Tooltip, Typography } from '@mui/material';
+import { Checkbox, FormControlLabel, FormGroup, Modal, Tooltip, Typography } from '@mui/material';
 import { qtcreatorLight, monokai } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { FormDialog } from './formDialog';
+import { LoadScreen } from './loading';
 
 export class CardItem extends React.Component<DevFileProps, {
     numOfCall: number,
     isExpanded: boolean,
+    isChecked: boolean,
+    isNewComponentClick: boolean;
     devFileYAML: string,
     selectedProject: StarterProject,
-    copyClicked: boolean
+    copyClicked: boolean,
     hoverProject: null | StarterProject
 }> {
 
@@ -29,6 +33,8 @@ export class CardItem extends React.Component<DevFileProps, {
         this.state = {
             numOfCall: 0,
             isExpanded: false,
+            isChecked: true,
+            isNewComponentClick: false,
             devFileYAML: '',
             selectedProject: this.props.compDescription.devfileData.devfile.starterProjects[0],
             copyClicked: false,
@@ -62,25 +68,35 @@ export class CardItem extends React.Component<DevFileProps, {
         }
     };
 
+    checkBoxHandleChange = (): void => {
+        const isChecked = !this.state.isChecked;
+        this.setState({
+            isChecked: isChecked
+        });
+    }
+
     onCloseClick = (event, reason): void => {
         if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
             this.setState({
                 numOfCall: 0,
                 isExpanded: false,
-                devFileYAML: ''
+                devFileYAML: '',
+                isNewComponentClick: false
             });
         }
     };
 
-    createComponent = (): void => {
-        VSCodeMessage.postMessage(
-            {
-                'action': 'createComponent',
-                'devFile': this.props.compDescription.devfileData.devfile,
-                'selectedProject': this.state.selectedProject,
-                'registryName': this.props.compDescription.registry.name
-            });
-        return;
+    handleNewComponentPopUp = (): void => {
+        this.setState({
+            isExpanded: true,
+            isNewComponentClick: false
+        })
+    }
+
+    openNewComponentPopUp = () => {
+        this.setState({
+            isNewComponentClick: true
+        })
     }
 
     cloneToWorkSpace = (): void => {
@@ -128,7 +144,7 @@ export class CardItem extends React.Component<DevFileProps, {
     }
 
     render(): React.ReactNode {
-        const { isExpanded, devFileYAML, selectedProject, hoverProject, copyClicked } = this.state;
+        const { isExpanded, isChecked, isNewComponentClick, devFileYAML, selectedProject, hoverProject, copyClicked } = this.state;
         const starterProjectCard = <Card data-testid='dev-page-starterProject' className={this.props.cardItemStyle.starterProjectCard}>
             <div className={this.props.cardItemStyle.starterProjectCardHeader}>
                 <Typography variant='body1'>
@@ -148,6 +164,7 @@ export class CardItem extends React.Component<DevFileProps, {
                         data-testid='projects-selector'
                         className={this.props.cardItemStyle.starterProjectSelect}
                         onMouseLeave={(): void => this.setCurrentlyHoveredProject(null)}
+                        style={{ opacity: isChecked ? '1' : '0.5', pointerEvents: isChecked ? 'auto' : 'none' }}
                     >
                         {this.props.compDescription.devfileData.devfile.starterProjects.map((project: StarterProject) => (
                             <div
@@ -156,7 +173,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                 onMouseDown={(): void => this.setSelectedProject(project)}
                                 onMouseEnter={(): void => this.setCurrentlyHoveredProject(project)}
                                 className={
-                                    selectedProject.name === project.name ? this.props.cardItemStyle.starterProjectSelected : this.props.cardItemStyle.project
+                                    selectedProject?.name === project.name ? this.props.cardItemStyle.starterProjectSelected : this.props.cardItemStyle.project
                                 }
                             >
                                 {project.name}
@@ -171,11 +188,17 @@ export class CardItem extends React.Component<DevFileProps, {
                                 variant='contained'
                                 component='span'
                                 className={this.props.cardItemStyle.button}
-                                onClick={this.createComponent}>
+                                onClick={this.openNewComponentPopUp}>
                                 <Typography variant='body2'>
                                     New Component
                                 </Typography>
                             </Button>
+                            <FormDialog open={isNewComponentClick} onClose={this.handleNewComponentPopUp}
+                                devFile={this.props.compDescription.devfileData.devfile}
+                                selectedProject={this.state.selectedProject}
+                                registryName={this.props.compDescription.registry.name}
+                                loadStarterProject={isChecked}
+                                style={this.props.cardItemStyle}/>
                             {this.props.hasGitLink &&
                                 <><Button
                                     color='default'
@@ -199,20 +222,18 @@ export class CardItem extends React.Component<DevFileProps, {
                         </CardActions>
                     </div>
                 </div>
+                {this.props.showStatus && <LoadScreen title='Creating component...' />}
             </div>
         </Card>;
 
         const modalViewCard = <Modal
+            keepMounted
             open={isExpanded}
             className={this.props.cardItemStyle.modal}
             aria-labelledby={`modal-${this.props.compDescription.devfileData.devfile.metadata.name}`}
             onClose={this.onCloseClick}
             closeAfterTransition
-            BackdropComponent={Backdrop}
             disableAutoFocus
-            BackdropProps={{
-                timeout: 500,
-            }}
             style={{
                 width: '100%', height: '100%', marginTop: '5rem', border: '0px'
             }}>
@@ -233,6 +254,17 @@ export class CardItem extends React.Component<DevFileProps, {
                                     </Typography>
                                 </div>
                             </div>
+                            <FormGroup style={{ float: 'right' }}>
+                                <FormControlLabel control={
+                                    <Checkbox checked={isChecked}
+                                        onChange={this.checkBoxHandleChange}
+                                        sx={{
+                                            color: 'var(--vscode-checkbox-foreground)',
+                                            '&.Mui-checked': {
+                                                color: 'var(--vscode-checkbox-foreground)',
+                                            },
+                                        }} />} label="Initialize Starter Projects" />
+                            </FormGroup>
                         </div>
                         {starterProjectCard}
                     </Card>

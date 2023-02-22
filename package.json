@@ -432,7 +432,7 @@
 				}
 			},
 			{
-				"command": "openshift.component.createFromLocal",
+				"command": "openshift.componentTypesView.registry.openInView",
 				"title": "New Component",
 				"category": "OpenShift",
 				"icon": {
@@ -849,12 +849,12 @@
 		"viewsWelcome": [
 			{
 				"view": "openshiftProjectExplorer",
-				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[$(git-branch) Import from Git](command:openshift.component.openImportFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
+				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[$(git-branch) Import from Git](command:openshift.component.openImportFromGit)\n[Create Component](command:openshift.componentTypesView.registry.openInView)",
 				"enablement": "openshift.app.explorer.init"
 			},
 			{
 				"view": "openshiftComponentsView",
-				"contents": "You have no OpenShift Components in your workspace yet.\n[$(git-branch) Import from Git](command:openshift.component.openImportFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
+				"contents": "You have no OpenShift Components in your workspace yet.\n[$(git-branch) Import from Git](command:openshift.component.openImportFromGit)\n[Create Component](command:openshift.componentTypesView.registry.openInView)",
 				"enablement": "openshift.component.explorer.init"
 			}
 		],
@@ -1090,7 +1090,7 @@
 					"group": "navigation@4"
 				},
 				{
-					"command": "openshift.component.createFromLocal",
+					"command": "openshift.componentTypesView.registry.openInView",
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
 				},
@@ -1381,7 +1381,7 @@
 					{
 						"id": "createComponent",
 						"title": "Create a Component using local workspace",
-						"description": "Create a component in the local workspace using the selected starter project and associated `devfile.yaml` configuration. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.component.createFromLocal)",
+						"description": "Create a component in the local workspace using the selected starter project and associated `devfile.yaml` configuration. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.componentTypesView.registry.openInView)",
 						"media": {
 							"image": "images/walkthrough/createComponent.gif",
 							"altText": "create component"

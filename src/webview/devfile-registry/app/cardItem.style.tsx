@@ -182,7 +182,13 @@ export default (theme: Theme) =>
         devPageCardHeader: {
             display: 'block',
             height: '3rem',
-            margin: '0.5rem'
+            margin: '0.5rem',
+            width: '60rem'
+        },
+        Checkbox: {
+            color: 'var(--vscode-checkbox-foreground)',
+            backgroundColor: 'var(--vscode-checkbox-background)',
+            borderColor: 'var(--vscode-checkbox-border)'
         },
         starterProjectCard: {
             color: 'var(--vscode-foreground)',

@@ -35,7 +35,7 @@ export function ascDevfileFirst(c1: ComponentType, c2: ComponentType): number {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isDevfileComponent(comp: any): comp is DevfileComponentType {
-    return comp.Registry;
+    return comp?.Registry;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

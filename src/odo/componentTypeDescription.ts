@@ -65,7 +65,7 @@ export interface Kubernetes {
 }
 
 export function isStarterProject(prj: any): prj is StarterProject {
-    return prj.name && (prj.git || prj.zip);
+    return prj.name || prj.git || prj.zip;
 }
 
 export interface StarterProject {

@@ -17,11 +17,12 @@ export const StarterProjectDisplay: React.FC<StarterProjectDisplayProps> = ({
     projectDisplayStyle
 }: StarterProjectDisplayProps) => (
     <div>
-        <Typography data-testid='display-hovered-project-name' className={projectDisplayStyle.displayedName}>
-            {project.name}
-        </Typography>
-        <Typography data-testid='display-hovered-project-description' variant='caption' className={projectDisplayStyle.displayedDescription}>
-            {project.description}
-        </Typography>
+        {project &&
+            <><Typography data-testid='display-hovered-project-name' className={projectDisplayStyle.displayedName}>
+                {project.name}
+            </Typography><Typography data-testid='display-hovered-project-description' variant='caption' className={projectDisplayStyle.displayedDescription}>
+                    {project.description}
+                </Typography></>
+        }
     </div>
 );

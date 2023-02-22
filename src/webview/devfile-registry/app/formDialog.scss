@@ -1,0 +1,47 @@
+/*-----------------------------------------------------------------------------------------------
+ *  Copyright (c) Red Hat, Inc. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE file in the project root for license information.
+ *-----------------------------------------------------------------------------------------------*/
+
+div[role='dialog'] {
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
+}
+
+.dialogInput input[type='text'] {
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border: 1px solid var(--vscode-focusBorder);
+}
+
+button[type='button'] {
+    width: auto;
+    height: 1.5rem;
+    text-align: center;
+    outline: 0.0625rem solid transparent;
+    outline-offset: 0.125rem !important;
+    justify-content: space-between;
+    color: var(--vscode-button-foreground);
+    background-color: var(--vscode-button-background);
+}
+
+button[type='button']:hover {
+    cursor: pointer;
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+.MuiInputBase-root.MuiInput-root.MuiInput-underline::before, .MuiInputBase-root.MuiInput-root.MuiInput-underline::after {
+    border-bottom: 1px solid var(--vscode-focusBorder);
+    transition: none;
+    -webkit-transition: none;
+    transform: none;
+}
+
+.MuiFormHelperText-root {
+    width: 14rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    color: #EE0000 !important;
+}

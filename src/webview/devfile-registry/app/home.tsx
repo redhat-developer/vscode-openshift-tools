@@ -28,6 +28,7 @@ interface CompTypeDesc extends ComponentTypeDescription {
 interface HomePageProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
     compDescriptions: CompTypeDesc[];
     themeKind: number;
+    showStatus: boolean;
 }
 
 export interface DefaultProps {
@@ -36,7 +37,8 @@ export interface DefaultProps {
 
 const HomeItem: React.FC<HomePageProps> = ({
     compDescriptions,
-    themeKind
+    themeKind,
+    showStatus
 }: HomePageProps) => {
     const homeStyleClass = useHomeStyles();
     const cardItemStyle = useCardItemStyles();
@@ -48,7 +50,7 @@ const HomeItem: React.FC<HomePageProps> = ({
                     <ImageListItem key={`imageList-`+key}>
                         <CardItem key={key} compDescription={compDescription}
                         cardItemStyle={cardItemStyle} projectDisplayStyle={projectDisplayStyle} hasGitLink={hasGitLink(compDescription)}
-                        themeKind={themeKind} />
+                        themeKind={themeKind} showStatus={showStatus}/>
                     </ImageListItem>
                 ))
             }
@@ -63,6 +65,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
     const [searchValue, setSearchValue] = React.useState('');
     const [error, setError] = React.useState('');
     const [themeKind, setThemeKind] = React.useState(0);
+    const [showStatus, setShowStatus] = React.useState(false);
 
     React.useEffect(() => {
         return VSCodeMessage.onMessage((message) => {
@@ -97,6 +100,9 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                 setSearchValue('');
             } else if(message.data.action === 'setTheme') {
                 setThemeKind(message.data.themeValue);
+            } else if (message.data.action === 'showStatus') {
+                console.log('Status:::',message.data.flag);
+                setShowStatus(message.data.flag);
             }
         });
     });
@@ -137,11 +143,11 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                                 }}
                             />
                         }
-                        <HomeItem compDescriptions={filteredcompDescriptions} themeKind={themeKind} />
+                        <HomeItem compDescriptions={filteredcompDescriptions} themeKind={themeKind} showStatus={showStatus}/>
                         {error?.length > 0 ? <ErrorPage message={error} /> : null}
                     </>
                     :
-                    error?.length > 0 ? <ErrorPage message={error} /> : <LoadScreen />
+                    error?.length > 0 ? <ErrorPage message={error} /> : <LoadScreen title='Loading Registry View' />
             }
         </>
     );
