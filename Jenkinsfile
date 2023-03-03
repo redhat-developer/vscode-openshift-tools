@@ -44,6 +44,8 @@ node('rhel8'){
     stage('Package win32-x64') {
       sh "vsce package --target win32-x64 -o openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-win32-x64.vsix"
       sh "sha256sum *-win32-x64.vsix > openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-win32-x64.vsix.sha256"
+      sh "vsce package --target win32-arm64 -o openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-win32-arm64.vsix"
+      sh "sha256sum *-win32-arm64.vsix > openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-win32-arm64.vsix.sha256"
     }
   }
 
@@ -83,7 +85,7 @@ node('rhel8'){
 
   if(publishToMarketPlace.equals('true') || publishToOVSX.equals('true')) {
     timeout(time:5, unit:'DAYS') {
-      input message:'Approve deployment?', submitter: 'msuman,degolovi'
+      input message:'Approve deployment?', submitter: 'msuman,degolovi,msivasub'
     }
 
     if(publishToMarketPlace.equals('true')) {
@@ -93,6 +95,7 @@ node('rhel8'){
           sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-darwin-arm64.vsix"
           sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-linux-x64.vsix"
           sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-win32-x64.vsix"
+          sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-win32-arm64.vsix"
         }
 
         stage "Promote the build to stable"

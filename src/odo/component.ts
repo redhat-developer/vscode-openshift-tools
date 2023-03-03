@@ -5,7 +5,6 @@
 
 import { Component } from './config';
 
-
 export const NotAvailable = 'Not available';
 
 export interface ComponentsJson {

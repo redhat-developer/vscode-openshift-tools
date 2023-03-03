@@ -145,7 +145,6 @@ suite('OpenShift/Project', () => {
             warnStub = sandbox.stub<any, any>(vscode.window, 'showWarningMessage').resolves('Yes');
         });
 
-
         // TODO: Fix me
         // test('works with context', async () => {
         //     const result = await Project.del(projectItem);
@@ -167,7 +166,6 @@ suite('OpenShift/Project', () => {
 
             expect(result).null;
         });
-
 
         // TODO: Fix me
         // test('wraps errors in additional info', async () => {

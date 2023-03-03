@@ -34,6 +34,11 @@ interface CloneProcess {
     error: string
 }
 
+enum StatusCode {
+    INTERNAL_SERVER_ERROR = 500,
+    RATE_LIMIT_EXCEEDED = 403
+}
+
 export class Command {
     @vsCommand('openshift.component.importFromGit')
     static async createComponent(event: any) {
@@ -146,7 +151,7 @@ async function gitImportMessageListener(event: any): Promise<any> {
                     name: response.status ? event.parser.name + '-comp' : undefined,
                     error: !response.status,
                     isDevFile: isDevFile,
-                    helpText: response.status ? 'The git repo is valid.' : 'Rate limit exceeded',
+                    helpText: response.status ? 'The git repo is valid.' : getErrorMessage(response.error?.status),
                     compDescription: compDescription,
                     parser: event.parser
                 });
@@ -383,3 +388,23 @@ function deleteDirectory(dir: string) {
         })
     });
 };
+
+function getErrorMessage(statusCode: number): string {
+    let message = '';
+    switch(statusCode){
+        case StatusCode.INTERNAL_SERVER_ERROR: {
+            message = 'Internal Server error'
+            break;
+        }
+        case StatusCode.RATE_LIMIT_EXCEEDED: {
+            message = 'Rate limit exceeded'
+            break;
+        }
+        default: {
+            message = '';
+            break;
+        }
+    }
+    return message;
+}
+

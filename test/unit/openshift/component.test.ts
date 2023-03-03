@@ -344,7 +344,6 @@ suite('OpenShift/Component', () => {
             expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. Perform actions on it from Components View.`);
         });
 
-
     });
 
     suite('unlinkComponent', () => {

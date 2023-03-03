@@ -334,7 +334,7 @@ export class Component extends OpenShiftItem {
     @vsCommand('openshift.component.openInBrowser')
     // @clusterRequired()
     static async openInBrowser(component: ComponentWorkspaceFolder): Promise<string | null | undefined> {
-        const componentDescription = await Component.odo.describeComponent(component.contextPath);
+        const componentDescription = await Component.odo.describeComponent(component.contextPath, !!Component.getComponentDevState(component).runOn);
         if (componentDescription.devForwardedPorts?.length === 1) {
             const fp = componentDescription.devForwardedPorts[0];
             await commands.executeCommand('vscode.open', Uri.parse(`http://${fp.localAddress}:${fp.localPort}`));
@@ -392,6 +392,9 @@ export class Component extends OpenShiftItem {
             .getConfiguration('openshiftToolkit')
             .get<boolean>('useWebviewInsteadOfTerminalView');
     }
+    static createExperimentalEnv(componentFolder) {
+        return Component.getComponentDevState(componentFolder).runOn ? {ODO_EXPERIMENTAL_MODE: 'true'} : {};
+    }
 
     @vsCommand('openshift.component.describe', true)
     static async describe(componentFolder: ComponentWorkspaceFolder): Promise<string> {
@@ -399,7 +402,8 @@ export class Component extends OpenShiftItem {
         await Component.odo.executeInTerminal(
             command(),
             componentFolder.contextPath,
-            `OpenShift: Describe '${componentFolder.component.devfileData.devfile.metadata.name}' Component`);
+            `OpenShift: Describe '${componentFolder.component.devfileData.devfile.metadata.name}' Component`,
+            Component.createExperimentalEnv(componentFolder));
         return;
     }
 
@@ -407,12 +411,13 @@ export class Component extends OpenShiftItem {
     static log(componentFolder: ComponentWorkspaceFolder): Promise<string> {
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
         if (Component.isUsingWebviewEditor()) {
-            LogViewLoader.loadView(`${componentName} Log`, Command.showLog, componentFolder);
+            LogViewLoader.loadView(`${componentName} Log`, Command.showLog, componentFolder, Component.createExperimentalEnv(componentFolder));
         } else {
             void Component.odo.executeInTerminal(
                 Command.showLog(),
                 componentFolder.contextPath,
-                `OpenShift: Show '${componentName}' Component Log`);
+                `OpenShift: Show '${componentName}' Component Log`,
+                Component.createExperimentalEnv(componentFolder));
         }
         return;
     }
@@ -421,12 +426,13 @@ export class Component extends OpenShiftItem {
     static followLog(componentFolder: ComponentWorkspaceFolder): Promise<string> {
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
         if (Component.isUsingWebviewEditor()) {
-            LogViewLoader.loadView(`${componentName} Follow Log`, Command.showLogAndFollow, componentFolder);
+            LogViewLoader.loadView(`${componentName} Follow Log`, Command.showLogAndFollow, componentFolder, Component.createExperimentalEnv(componentFolder));
         } else {
             void Component.odo.executeInTerminal(
                 Command.showLogAndFollow(),
                 componentFolder.contextPath,
-                `OpenShift: Follow '${componentName}' Component Log`);
+                `OpenShift: Follow '${componentName}' Component Log`,
+                Component.createExperimentalEnv(componentFolder));
         }
         return;
     }
@@ -497,14 +503,12 @@ export class Component extends OpenShiftItem {
         let createStarter: string;
         let componentType: ComponentTypeAdapter;
         let componentTypeCandidates: ComponentTypeAdapter[];
-        if (!useExistingDevfile && (!opts.devFilePath || opts.devFilePath.length === 0)) {
+        if (!useExistingDevfile && (!opts || !opts.devFilePath || opts.devFilePath.length === 0)) {
             const componentTypes = await Component.odo.getComponentTypes();
-            if (!opts.componentTypeName && !opts.projectName) {
-                progressIndicator.busy = true;
-                progressIndicator.placeholder = opts.componentTypeName ? `Checking if '${opts.componentTypeName}' Component type is available` : 'Loading available Component types';
-                progressIndicator.show();
-            }
-            if (opts.componentTypeName) {
+            progressIndicator.busy = true;
+            progressIndicator.placeholder = opts?.componentTypeName ? `Checking if '${opts.componentTypeName}' Component type is available` : 'Loading available Component types';
+            progressIndicator.show();
+            if (opts?.componentTypeName) {
                 componentTypeCandidates = opts.registryName && opts.registryName.length > 0 ? componentTypes.filter(type => type.name === opts.componentTypeName && type.registryName === opts.registryName) : componentTypes.filter(type => type.name === opts.componentTypeName);
                 if (componentTypeCandidates?.length === 0) {
                     componentType = await window.showQuickPick(componentTypes.sort(ascDevfileFirst), { placeHolder: `Cannot find Component type '${opts.componentTypeName}', select one below to use instead`, ignoreFocusOut: true });
@@ -526,7 +530,7 @@ export class Component extends OpenShiftItem {
             const paths = globby.sync(`${globbyPath}*`, { dot: true, onlyFiles: false });
             progressIndicator.hide();
             if (paths.length === 0 && !isGitImportCall) {
-                if (opts.projectName) {
+                if (opts?.projectName) {
                     createStarter = opts.projectName;
                 } else {
                     progressIndicator.placeholder = 'Loading Starter Projects for selected Component Type'
@@ -558,7 +562,7 @@ export class Component extends OpenShiftItem {
             }
         }
 
-        const componentName = opts.compName || await Component.getName(
+        const componentName = opts?.compName || await Component.getName(
             'Name',
             Promise.resolve([]),
             initialNameValue?.trim().length > 0 ? initialNameValue : createStarter
@@ -583,7 +587,7 @@ export class Component extends OpenShiftItem {
                     folder,
                     createStarter,
                     useExistingDevfile,
-                    opts.devFilePath,
+                    opts?.devFilePath,
                     notification
                 )
             );
@@ -709,7 +713,7 @@ export class Component extends OpenShiftItem {
     }
 
     static async startOdoAndConnectDebugger(component: ComponentWorkspaceFolder, config: DebugConfiguration): Promise<string> {
-            const componentDescription = await Component.odo.describeComponent(component.contextPath);
+            const componentDescription = await Component.odo.describeComponent(component.contextPath, !!Component.getComponentDevState(component).runOn);
             if (componentDescription.devForwardedPorts?.length > 0) {
                 // try to find debug port
                 const debugPortsCandidates:number[] = [];

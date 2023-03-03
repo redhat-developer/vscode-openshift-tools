@@ -313,7 +313,7 @@ export interface Odo {
     getClusterServiceVersion(svc: string): Promise<ClusterServiceVersionKind>;
     getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     execute(command: CommandText, cwd?: string, fail?: boolean, addEnv?: any): Promise<cliInstance.CliExitData>;
-    executeInTerminal(command: CommandText, cwd?: string, name?: string): Promise<void>;
+    executeInTerminal(command: CommandText, cwd?: string, name?: string, addEnv?: any): Promise<void>;
     requireLogin(): Promise<boolean>;
     clearCache?(): void;
     createProject(name: string): Promise<OpenShiftObject>;
@@ -330,7 +330,7 @@ export interface Odo {
     readonly subject: Subject<OdoEvent>;
     addRegistry(name: string, url: string, token: string): Promise<Registry>;
     removeRegistry(name: string): Promise<void>;
-    describeComponent(contextPath: string): Promise<ComponentDescription | undefined>;
+    describeComponent(contextPath: string, experimental?: boolean): Promise<ComponentDescription | undefined>;
 }
 
 class OdoModel {
@@ -666,10 +666,11 @@ export class OdoImpl implements Odo {
         return services2;
     }
 
-    public async describeComponent(contextPath: string): Promise<ComponentDescription | undefined> {
+    public async describeComponent(contextPath: string, experimental = false): Promise<ComponentDescription | undefined> {
+        const expEnv = experimental ? {ODO_EXPERIMENTAL_MODE: 'true'} : {};
         try {
             const describeCmdResult: cliInstance.CliExitData = await this.execute(
-                Command.describeComponentJson(), contextPath, false
+                Command.describeComponentJson(), contextPath, false, expEnv
             );
             return JSON.parse(describeCmdResult.stdout) as ComponentDescription;
         } catch(error) {
@@ -677,10 +678,10 @@ export class OdoImpl implements Odo {
         }
     }
 
-    public async executeInTerminal(command: CommandText, cwd: string = process.cwd(), name = 'OpenShift'): Promise<void> {
+    public async executeInTerminal(command: CommandText, cwd: string = process.cwd(), name = 'OpenShift', addEnv = {}): Promise<void> {
         const [cmd] = `${command}`.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
-        const terminal: Terminal = WindowUtil.createTerminal(name, cwd, cliInstance.CliChannel.createTelemetryEnv());
+        const terminal: Terminal = WindowUtil.createTerminal(name, cwd, { ...cliInstance.CliChannel.createTelemetryEnv(), ...addEnv });
         terminal.sendText(toolLocation === cmd ? `${command}` : `${command}`.replace(cmd, `"${toolLocation}"`), true);
         terminal.show();
     }
