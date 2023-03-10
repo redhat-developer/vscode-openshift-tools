@@ -4,18 +4,11 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as React from 'react';
-
 import Loader from 'react-loader-spinner';
-import { createStyles, makeStyles, Theme, createMuiTheme, ThemeProvider, withStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import Switch from '@material-ui/core/Switch';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import IconButton from '@material-ui/core/IconButton';
-import { blue } from '@material-ui/core/colors';
+import { createTheme, Theme, ThemeProvider } from '@mui/material/styles';
+import { withStyles, makeStyles, createStyles } from '@mui/styles';
+import { AppBar, Button, FormControlLabel, FormGroup, IconButton, Switch, Toolbar, Typography } from '@mui/material';
+import { blue } from '@mui/material/colors';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -37,7 +30,7 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
-const theme = createMuiTheme({
+const theme = createTheme({
     typography: {
       h6: {
         fontSize: 12,

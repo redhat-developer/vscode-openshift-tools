@@ -4,23 +4,13 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import {
-    Button,
-    Card,
-    CardContent,
-    CardActions,
-    List,
-    ListItem,
-    ListItemText,
-    Tooltip,
-    Typography
-} from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
 import clsx from 'clsx';
 import AddClusterView from './clusterView';
 import AddSandboxView from './sandboxView';
-import clusterStyle from './cluster.style';
+import clusterStyle, { ClusterTheme } from './cluster.style';
 import './images/logo.png';
+import { Card, Typography, CardContent, ListItem, ListItemText, CardActions, Tooltip, Button, List, ThemeProvider } from '@mui/material';
 
 const useStyles = makeStyles(clusterStyle);
 
@@ -105,14 +95,14 @@ export default function Header() {
     const InfrastructureLayout = ({ clusterTypes }) => (
         <>
             {clusterTypes.map((list, index) => (
-                <Card className={classes.cardTransform} key={index}>
+                <Card className='cardTransform' key={index}>
                     <div className={classes.cardHeader}>
-                        <Typography variant='caption' display='block' style={{ fontSize: '1.25em', color: 'white' }}>
+                        <Typography variant='caption' display='block'>
                             {list.heading}
                         </Typography>
                     </div>
-                    <CardContent style={{ height: 240 }}>
-                        <Typography className={index === 2 ? classes.cardImageTableContainer : classes.cardImageContainer}>
+                    <CardContent>
+                        <Typography className={index === 2 ? 'cardImageTableContainer' : 'cardImageContainer'}>
                             {list.imageUrl.map((url: string, index: string | number) => (
                                 <img src={url} key={index} className={classes.image} style={{ marginLeft: '.625rem', marginRight: '.625rem', position: 'relative' }}></img>
                             ))}
@@ -128,15 +118,13 @@ export default function Header() {
                         </div>
                     </CardContent>
                     <div>
-                        <CardActions className={classes.cardButton}>
+                        <CardActions className='cardButton'>
                             <Tooltip title={list.tooltip} placement='top' children={
                                 <div>
                                     <a onClick={() => handleView(index)} style={{ textDecoration: 'none' }} href={clusterTypes[index].redirectLink || '#'}>
                                         <Button
                                             variant='contained'
-                                            color='default'
                                             component='span'
-                                            className={classes.button}
                                         >
                                             {list.buttonText}
                                         </Button>
@@ -151,47 +139,49 @@ export default function Header() {
     );
 
     return (
-        <div className={classes.App}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', margin: '0 auto' }}>
-                <div>
-                    {showWizard?.length > 0 &&
-                        <a onClick={() => moveBack()} className={classes.cardButton} style={{ textDecoration: 'none', cursor: 'pointer'}}>
-                            &#60; Back
-                        </a>
-                    }
+        <ThemeProvider theme={ClusterTheme}>
+            <div className={classes.App}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', margin: '0 auto' }}>
+                    <div>
+                        {showWizard?.length > 0 &&
+                            <a onClick={() => moveBack()} className={classes.cardButton} style={{ textDecoration: 'none', cursor: 'pointer' }}>
+                                &#60; Back
+                            </a>
+                        }
+                    </div>
+                    <div className={classes.iconContainer}>
+                        <img className={classes.image} src='assets/logo.png' alt='redhat-openshift'></img>
+                    </div>
                 </div>
-                <div className={classes.iconContainer}>
-                    <img className={classes.image} src='assets/logo.png' alt='redhat-openshift'></img>
-                </div>
+                {showWizard === 'crc' && (
+                    <div className={classes.rowBody}>
+                        <Card className='cardContent'>
+                            <Typography variant='body2' component='p'>
+                                Red Hat OpenShift Local brings a minimal OpenShift 4 cluster to your local computer.<br></br>You can use this guided workflow to create OpenShift cluster locally. Cluster take approximately 15 minutes to provision.
+                            </Typography>
+                            <AddClusterView vscode={vscodeApi} />
+                        </Card>
+                    </div>
+                )}
+                {showWizard === 'sandbox' && (
+                    <div className={classes.rowBody}>
+                        <Card className='cardContent'>
+                            <Typography variant='body2' component='p'>
+                                The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools. <br></br>Discover the rich capabilities of the full developer experience on OpenShift with the sandbox.
+                            </Typography>
+                            <Button variant='contained' href='https://developers.redhat.com/developer-sandbox' className='sandboxButton'>Learn More</Button>
+                            <Button variant='contained' href='mailto:devsandbox@redhat.com' className='sandboxButton'>Contact Us</Button>
+                            <Button variant='contained' href='https://dn.dev/DevNationSlack' className='sandboxButton'>Connect on Slack</Button>
+                            <AddSandboxView />
+                        </Card>
+                    </div>
+                )}
+                {!showWizard && (
+                    <div className={classes.cardContainer}>
+                        <InfrastructureLayout clusterTypes={clusterTypes}></InfrastructureLayout>
+                    </div>
+                )}
             </div>
-            { showWizard === 'crc' && (
-                <div className={classes.rowBody}>
-                    <Card className={classes.cardContent}>
-                        <Typography variant='body2' component='p' style={{ padding: 20 }}>
-                            Red Hat OpenShift Local brings a minimal OpenShift 4 cluster to your local computer.<br></br>You can use this guided workflow to create OpenShift cluster locally. Cluster take approximately 15 minutes to provision.
-                        </Typography>
-                        <AddClusterView vscode={vscodeApi} />
-                    </Card>
-                </div>
-            )}
-            { showWizard === 'sandbox' && (
-                <div className={classes.rowBody}>
-                    <Card className={classes.cardContent}>
-                        <Typography variant='body2' component='p' style={{ padding: 20 }}>
-                            The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools. <br></br>Discover the rich capabilities of the full developer experience on OpenShift with the sandbox.
-                        </Typography>
-                        <Button variant='outlined' href='https://developers.redhat.com/developer-sandbox' className={classes.sandboxButton} style={{ margin: 15, textTransform: 'none' }}>Learn More</Button>
-                        <Button variant='outlined' href='mailto:devsandbox@redhat.com' className={classes.sandboxButton} style={{ margin: 15, textTransform: 'none' }}>Contact Us</Button>
-                        <Button variant='outlined' href='https://dn.dev/DevNationSlack' className={classes.sandboxButton} style={{ margin: 15, textTransform: 'none' }}>Connect on Slack</Button>
-                        <AddSandboxView />
-                    </Card>
-                </div>
-            )}
-            {!showWizard && (
-                <div className={classes.cardContainer}>
-                    <InfrastructureLayout clusterTypes={clusterTypes}></InfrastructureLayout>
-                </div>
-            )}
-        </div>
+        </ThemeProvider>
     );
 }
