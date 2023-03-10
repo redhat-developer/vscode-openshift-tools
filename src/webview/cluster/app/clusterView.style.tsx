@@ -33,6 +33,18 @@ export const ClusterViewTheme = createTheme({
                 }
             ]
         },
+        MuiTypography: {
+            variants: [
+                {
+                    props: {
+                        variant: 'body2'
+                    },
+                    style: {
+                        color: 'var(--vscode-foreground) !important'
+                    }
+                }
+            ]
+        },
         MuiButton: {
             variants: [
                 {
@@ -83,7 +95,7 @@ export const ClusterViewTheme = createTheme({
                             opacity: 0.4
                         }
                     }
-                }
+                },
             ]
         },
         MuiTextField: {

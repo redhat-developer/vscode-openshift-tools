@@ -483,7 +483,7 @@ export default function addClusterView(props) {
                     onChange={handleUploadPath}
                     />
                     <label htmlFor='contained-button-file'>
-                      <Tooltip title='This is a required field' placement='left' children={<Button variant='contained' component='span' className='button'>
+                      <Tooltip title='This is a required field' placement='left' children={<Button component='span' className='button'>
                         Select Path
                       </Button>} />
                     </label>
@@ -526,7 +526,7 @@ export default function addClusterView(props) {
                   onChange={handleUploadPullSecret}
                 />
                 <label htmlFor='contained-button-file'>
-                    <Tooltip title='This is a required field' placement='left' children={<Button variant='contained' className='button' component='span'>
+                    <Tooltip title='This is a required field' placement='left' children={<Button className='button' component='span'>
                       Select Pull Secret file
                     </Button>} />
                 </label>
@@ -623,14 +623,12 @@ export default function addClusterView(props) {
               <div>
                 {(activeStep !== 0) && (
                   <Button
-                    variant='contained'
                     onClick={handleBack}
                     className='buttonSecondary'
                   >
                     Back
                   </Button>)}
                 <Button
-                  variant='contained'
                   onClick={handleNext}
                   className='buttonSecondary'
                   disabled={handleDisabled()}

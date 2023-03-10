@@ -45,7 +45,7 @@ export const ClusterTheme = createTheme({
                 },
                 {
                     props: {
-                        variant: 'body2',
+                        variant: 'body2'
                     },
                     style: {
                         padding: 20

@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as React from 'react';
 import { Button, CircularProgress, TextField } from '@material-ui/core';
-import { styled } from '@mui/styles';
+import { styled, ThemeProvider } from '@mui/styles';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
@@ -12,6 +12,7 @@ import Tooltip from '@mui/material/Tooltip';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css'
 import './clusterView.scss';
+import { ClusterViewTheme } from './clusterView.style';
 
 const CodeTextField = styled(TextField)({
     verticalAlign: 'middle',
@@ -423,6 +424,7 @@ export default function addSandboxView(props): JSX.Element {
 
     return (
         <>
+        <ThemeProvider theme={ClusterViewTheme}>
             <DetectAuthSession />
             <Login />
             <DetectStatus />
@@ -432,6 +434,7 @@ export default function addSandboxView(props): JSX.Element {
             <WaitingForApproval />
             <WaitingForProvision />
             <Provisioned />
+        </ThemeProvider>
         </>
     )
 }
