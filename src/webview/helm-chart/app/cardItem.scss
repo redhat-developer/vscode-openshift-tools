@@ -1,0 +1,31 @@
+.MuiFormHelperText-root {
+    color: var(--vscode-foreground) !important;
+    margin-left: 0px !important;
+}
+
+.Mui-error {
+    color: #EE0000 !important;
+}
+
+.MuiOutlinedInput-input {
+    padding: 5px 14px !important;
+    min-width: 86%;
+}
+
+.MuiFormHelperText-root {
+    width: 11rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+.MuiFormControl-root {
+    border: none;
+    &:hover {
+        border: none;
+    }
+}
+
+.MuiAccordionSummary-root {
+    padding: 0px !important;
+}

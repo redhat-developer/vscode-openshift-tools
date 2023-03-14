@@ -46,10 +46,11 @@ function migrateFromOdo018(): void {
     }
 }
 
-async function verifyBundledBinaries(): Promise<{ odoPath: string, ocPath: string }> {
+async function verifyBundledBinaries(): Promise<{ odoPath: string, ocPath: string, helmPath: string }> {
     return {
         odoPath: await ToolsConfig.detect('odo'),
         ocPath: await ToolsConfig.detect('oc'),
+        helmPath: await ToolsConfig.detect('helm'),
     };
 }
 
@@ -73,6 +74,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             './registriesView',
             './componentsView',
             './webview/devfile-registry/registryViewLoader',
+            './webview/helm-chart/helmChartLoader',
             './experimental',
         )),
         commands.registerCommand('clusters.openshift.useProject', (context) =>
