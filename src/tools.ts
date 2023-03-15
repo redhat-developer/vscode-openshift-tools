@@ -62,8 +62,12 @@ export class ToolsConfig {
         if (fs.existsSync(location)) {
             const result = await CliChannel.getInstance().execute(`"${location}" version --client`);
             if (result.stdout) {
+                let trimmedText = result.stdout;
+                if(location.indexOf('helm') !== -1) {
+                    trimmedText = result.stdout.substring(0,trimmedText.indexOf(','));
+                }
                 const versionRegExp = /.*([0-9]+\.[0-9]+\.[0-9]+).*/;
-                const toolVersion: string[] = result.stdout.trim().split('\n').filter((value) => {
+                const toolVersion: string[] = trimmedText.trim().split('\n').filter((value) => {
                     return versionRegExp.test(value);
                 }).map((value)=>versionRegExp.exec(value)[1]);
                 if (toolVersion.length) {

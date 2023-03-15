@@ -30,6 +30,7 @@ import { KubernetesObject, Context } from '@kubernetes/client-node';
 import { CliChannel } from './cli';
 import { Command } from './odo/command';
 import { newInstance, Odo3 } from './odo3';
+import { Progress } from './util/progress';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
@@ -152,7 +153,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 }
             }
             return {
-                contextValue: 'openshift.k8sObject',
+                contextValue: element.metadata.labels['helm.sh/chart'] ? 'openshift.k8sObject.helm': 'openshift.k8sObject',
                 label: element.metadata.name,
                 collapsibleState: TreeItemCollapsibleState.None,
                 iconPath: path.resolve(__dirname, '../../images/context/component-node.png'),
@@ -245,6 +246,14 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     @vsCommand('openshift.resource.load')
     public static loadResource(component: KubernetesObject) {
         void commands.executeCommand('extension.vsKubernetesLoad', {namespace: component.metadata.namespace, kindName: `${component.kind}/${component.metadata.name}`});
+    }
+
+    @vsCommand('openshift.resource.unInstall')
+    public static async unInstallHelmChart(component: KubernetesObject) {
+        return Progress.execFunctionWithProgress(`Uninstalling ${component.metadata.name}`, async () => {
+            await CliChannel.getInstance().executeTool(Command.unInstallHelmChart(component.metadata.name));
+            OpenShiftExplorer.getInstance().refresh();
+        });
     }
 
     @vsCommand('openshift.resource.openInConsole')
