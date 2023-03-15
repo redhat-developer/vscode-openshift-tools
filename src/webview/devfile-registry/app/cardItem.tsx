@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import { FileCopy } from '@mui/icons-material';
 import { Badge, Button, Card, CardActions, Modal, ThemeProvider, Tooltip, Typography } from '@mui/material';
-import { CardTheme } from './cardItem.style';
+import { CardTheme } from '../../common/cardItem.style';
 import clsx from 'clsx';
 import React from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -12,7 +12,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter';
 import { monokai, qtcreatorLight } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { StarterProject } from '../../../odo/componentTypeDescription';
 import { VSCodeMessage } from '../vsCodeMessage';
-import { StarterProjectDisplay } from './starterProjectDisplay';
+import { StarterProjectDisplay } from '../../common/starterProjectDisplay';
 import { DevFileProps } from './wrapperCardItem';
 
 export class CardItem extends React.Component<DevFileProps, {
@@ -164,7 +164,7 @@ export class CardItem extends React.Component<DevFileProps, {
                         ))}
                     </div>
                     <div className={this.props.cardItemStyle.display}>
-                        <StarterProjectDisplay project={selectedProject || hoverProject} projectDisplayStyle={this.props.projectDisplayStyle} />
+                        <StarterProjectDisplay project={selectedProject || hoverProject} />
                         <CardActions className={this.props.cardItemStyle.cardButton}>
                             <Button
                                 variant='contained'

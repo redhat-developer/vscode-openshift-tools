@@ -2,21 +2,18 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-
-import { InputAdornment, makeStyles, TextField } from '@material-ui/core';
-import { SearchRounded } from '@material-ui/icons';
-import { DefaultProps } from './home';
-import React from 'react';
+import { SearchRounded } from '@mui/icons-material';
+import { InputAdornment, TextField } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import * as React from 'react';
+import './common.scss';
+import { SearchBarProps } from './propertyTypes';
 import searchBarStyle from './searchBar.style';
 
 const useSearchBarStyle = makeStyles(searchBarStyle);
 
-interface SearchBarProps extends DefaultProps {
-    onSearchBarChange: (value: string) => void;
-    searchBarValue: string;
-}
-
 export const SearchBar: React.FC<SearchBarProps> = ({
+    title,
     onSearchBarChange,
     searchBarValue
 }: SearchBarProps) => {
@@ -25,19 +22,21 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         <div className={searchBarStyle.searchBar}>
             <TextField
                 className={searchBarStyle.searchBarInput}
-                placeholder='Search chart by name'
+                placeholder={title}
                 value={searchBarValue}
                 onChange={(e) => {
                     onSearchBarChange(e.target.value);
                 }}
+                sx={{
+                    '& fieldset': { border: 'none' }
+                }}
                 onClick={(): void => onSearchBarChange('')}
                 InputProps={{
                     startAdornment: (
-                        <InputAdornment position='start' style={{ marginBottom: '0.0625rem', paddingLeft: '0.0625rem' }}>
+                        <InputAdornment position='start' style={{ paddingLeft: '0.0625rem' }}>
                             <SearchRounded />
                         </InputAdornment >
-                    ),
-                    disableUnderline: true
+                    )
                 }}
             />
         </div>

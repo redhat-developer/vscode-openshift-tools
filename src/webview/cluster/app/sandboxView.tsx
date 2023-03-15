@@ -2,15 +2,15 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as React from 'react';
-import { Button, CircularProgress, TextField } from '@material-ui/core';
-import { styled, ThemeProvider } from '@mui/styles';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import { Button, CircularProgress, TextField } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import { styled, ThemeProvider } from '@mui/styles';
+import * as React from 'react';
 import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css'
+import 'react-phone-input-2/lib/style.css';
 import './clusterView.scss';
 import { ClusterViewTheme } from './clusterView.style';
 

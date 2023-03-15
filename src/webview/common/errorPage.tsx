@@ -4,15 +4,11 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { makeStyles } from '@mui/styles';
-import React from 'react';
+import * as React from 'react';
 import errorPageStyle from './errorPage.style';
-import { DefaultProps } from './home';
+import { ErrorProps } from './propertyTypes';
 
 const errorPageStyleClass = makeStyles(errorPageStyle);
-
-interface ErrorProps extends DefaultProps {
-    message: string;
-}
 
 export const ErrorPage: React.FC<ErrorProps> = ({
     message

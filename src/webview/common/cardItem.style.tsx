@@ -23,7 +23,7 @@ export const CardTheme = createTheme({
     }
 });
 
-export default (theme: Theme) =>
+export default (_theme: Theme) =>
     createStyles({
         card: {
             height: 'auto',
@@ -41,6 +41,11 @@ export default (theme: Theme) =>
                 boxShadow: '0 13px 27px -5px hsla(240, 30.1%, 28%, 0.25), 0 8px 16px -8px hsla(0, 0%, 0%, 0.3), 0 -6px 16px -6px hsla(0, 0%, 0%, 0.03)'
             },
             zIndex: 1
+        },
+        helmHomeCard: {
+            height: '20rem',
+            width: '15rem',
+            margin: '1rem'
         },
         cardHeader: {
             display: 'block',
@@ -117,6 +122,51 @@ export default (theme: Theme) =>
             WebkitLineClamp: 3,
             WebkitBoxOrient: 'vertical'
         },
+        detailedDescription: {
+            width: '45rem',
+            wordWrap: 'break-word',
+            display: '-webkit-box',
+            WebkitLineClamp: 20,
+            WebkitBoxOrient: 'vertical',
+            textAlign: 'left'
+        },
+        helmCard: {
+            color: 'var(--vscode-foreground) !important',
+            backgroundColor: 'var(--vscode-editor-background) !important',
+            fontSize: 'var(--vscode-font-size)',
+            fontFamily: 'var(--vscode-font-family)',
+            border: '1px solid',
+            borderColor: 'inherit',
+            height: '37rem',
+            width: '50rem',
+            margin: 'auto',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column'
+        },
+        helmCardHeader: {
+            paddingTop: '1.5rem!important',
+            borderBottom: '1px solid',
+            borderBottomColor: 'inherit',
+            height: 'auto',
+            display: 'flex',
+            flexDirection: 'column'
+        },
+        helmCardBody: {
+            position: 'relative',
+            width: '100%',
+            height: '50rem',
+            margin: '1rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem'
+        },
+        helmCardDetails: {
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '0.5rem',
+            marginRight: '1rem'
+        },
         yamlCard: {
             color: 'var(--vscode-foreground) !important',
             backgroundColor: 'var(--vscode-editor-background) !important',
@@ -164,6 +214,9 @@ export default (theme: Theme) =>
             '&:hover': {
                 cursor: 'pointer',
                 backgroundColor: 'var(--vscode-button-hoverBackground) !important'
+            },
+            '&:disabled': {
+                backgroundColor: 'var(--vscode-button-secondaryBackground) !important'
             },
             textTransform: 'none'
         },

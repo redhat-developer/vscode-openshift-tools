@@ -2,43 +2,28 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import React, { ChangeEvent } from 'react';
-import { makeStyles } from '@mui/styles';
-import { WrapperCardItem as CardItem } from './wrapperCardItem';
-import { LoadScreen } from './loading';
-import { VSCodeMessage } from '../vsCodeMessage';
-import { StarterProject } from '../../../odo/componentTypeDescription';
-import { SearchBar } from './searchBar';
-import cardItemStyle from './cardItem.style';
-import starterProjectDisplayStyle from './starterProjectDisplay.style';
-import { FilterElements } from './filterElements';
-import { ComponentTypeDescription, Registry } from '../../../odo/componentType';
-import { ErrorPage } from './errorPage';
 import { ImageList, ImageListItem, ThemeProvider } from '@mui/material';
-import { HomeTheme } from './home.style';
+import { makeStyles } from '@mui/styles';
+import React, { ChangeEvent } from 'react';
+import { Registry } from '../../../odo/componentType';
+import { StarterProject } from '../../../odo/componentTypeDescription';
+import { ErrorPage } from '../../common/errorPage';
+import { HomeTheme } from '../../common/home.style';
+import { LoadScreen } from '../../common/loading';
+import { CompTypeDesc, DefaultProps, DevfileHomePageProps } from '../../common/propertyTypes';
+import { SearchBar } from '../../common/searchBar';
+import { VSCodeMessage } from '../vsCodeMessage';
+import cardItemStyle from '../../common/cardItem.style';
+import { FilterElements } from './filterElements';
+import { WrapperCardItem as CardItem } from './wrapperCardItem';
 
-const starterProjectDisplayStyles = makeStyles(starterProjectDisplayStyle);
 const useCardItemStyles = makeStyles(cardItemStyle);
 
-interface CompTypeDesc extends ComponentTypeDescription {
-    priority: number;
-}
-
-interface HomePageProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-    compDescriptions: CompTypeDesc[];
-    themeKind: number;
-}
-
-export interface DefaultProps {
-    analytics?: import('@segment/analytics-next').Analytics;
-}
-
-const HomeItem: React.FC<HomePageProps> = ({
+const HomeItem: React.FC<DevfileHomePageProps> = ({
     compDescriptions,
     themeKind
-}: HomePageProps) => {
+}: DevfileHomePageProps) => {
     const cardItemStyle = useCardItemStyles();
-    const projectDisplayStyle = starterProjectDisplayStyles();
     return (
         <ThemeProvider theme={HomeTheme}>
             <ImageList className='devfileGalleryGrid' cols={4}>
@@ -46,7 +31,7 @@ const HomeItem: React.FC<HomePageProps> = ({
                     compDescriptions.map((compDescription: CompTypeDesc, key: number) => (
                         <ImageListItem key={`imageList-` + key}>
                             <CardItem key={key} compDescription={compDescription}
-                                cardItemStyle={cardItemStyle} projectDisplayStyle={projectDisplayStyle} hasGitLink={hasGitLink(compDescription)}
+                                cardItemStyle={cardItemStyle} hasGitLink={hasGitLink(compDescription)}
                                 themeKind={themeKind} />
                         </ImageListItem>
                     ))
@@ -106,7 +91,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
             {
                 filteredcompDescriptions.length > 0 || searchValue.length > 0 ?
                     <>
-                        <SearchBar onSearchBarChange={function (value: string): void {
+                        <SearchBar title='Search registry by name or description' onSearchBarChange={function (value: string): void {
                             setSearchValue(value);
                             setFilteredcompDescriptions(getFilteredCompDesc(registries, compDescriptions, value));
                         }} searchBarValue={searchValue} />
@@ -141,7 +126,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                         {error?.length > 0 ? <ErrorPage message={error} /> : null}
                     </>
                     :
-                    error?.length > 0 ? <ErrorPage message={error} /> : <LoadScreen />
+                    error?.length > 0 ? <ErrorPage message={error} /> : <LoadScreen title='Loading Registry View'/>
             }
         </>
     );
