@@ -16,7 +16,8 @@ const webviews = [
     'helm-chart',
     'log',
     'welcome',
-    'feedback'
+    'feedback',
+    'add-service-binding',
 ];
 
 function kebabToCamel(text) {

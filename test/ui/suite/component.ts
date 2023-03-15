@@ -26,6 +26,7 @@ export function createComponentTest(contextFolder: string) {
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             explorer = await view.getContent().getSection(VIEWS.appExplorer);
             components = await view.getContent().getSection(VIEWS.components);
+            editorView = new EditorView();
         });
 
         beforeEach(async function() {
@@ -177,6 +178,13 @@ export function createComponentTest(contextFolder: string) {
             // `component-name`
             // when `odo dev` has stopped
             await itemExists(compName, components, 60_000);
+        });
+
+        it('Check for \'Bind Service\' button (don\'t click it)', async function() {
+            this.timeout(60000);
+            const component = await itemExists(compName, components);
+            const menu = await component.openContextMenu();
+            expect(await menu.hasItem(MENUS.bindService)).to.be.true;
         });
 
     });

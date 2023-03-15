@@ -89,7 +89,7 @@ export interface Odo {
      */
     getActiveProject(): Promise<string>;
 
-    /*
+    /**
      * Deletes all the odo configuration files associated with the component (`.odo`, `devfile.yaml`) located at the given path.
      *
      * @param componentPath the path to the component

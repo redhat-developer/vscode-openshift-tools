@@ -37,6 +37,13 @@ In addition to generic command's usage data (see above) `Login` command also rep
 * openshift_version - cluster's OpenShift version (if can be accessed by the current user)
 * kubernetes_version - cluster's Kubernetes version
 
+#### Bind Service
+
+In addition to the generic command's usage data (see above), the `Bind Service` context menu option reports events when:
+
+* the wizard to select the service to bind to is opened
+* the wizard to select the service to bind to is submitted
+
 ### Add Cluster Editor
 
 The editor reports selection made on first page:

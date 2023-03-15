@@ -203,6 +203,11 @@ suite('odo commands integration', function () {
         await ODO.execute(Command.setOpenshiftContext(kc.currentContext));
     });
 
+    test('getBindableServices()', async function() {
+        const result = await ODO.execute(Command.getBindableServices());
+        expect(result.stdout.trim()).to.equal('{}');
+    });
+
     test.skip('deletePreviouslyPushedResources()');
     test.skip('listCatalogOperatorBackedServices()');
     test.skip('addHelmRepo()');
@@ -430,6 +435,11 @@ suite('odo commands integration', function () {
             term.dispose();
         });
 
+        test('addBinding()', async function() {
+            const result = await ODO.execute(Command.addBinding('default', 'myservice', 'myservice-binding'), componentLocation, false);
+            expect(result.stderr).to.contain('No bindable service instances found in namespace "default"');
+        });
+
         test('deleteComponentConfiguration', async function() {
             await ODO.execute(Command.deleteComponentConfiguration(), componentLocation);
             try {
@@ -440,4 +450,5 @@ suite('odo commands integration', function () {
             }
         });
     });
+
 });
