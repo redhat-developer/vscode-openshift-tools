@@ -218,7 +218,7 @@
 		"unzip-stream": "^0.3.1",
 		"utf-8-validate": "^5.0.7",
 		"vscode-extension-tester": "^5.2.0",
-		"webpack": "^5.65.0",
+		"webpack": "^5.76.0",
 		"webpack-cli": "^4.9.1",
 		"webpack-dev-server": "^4.6.0"
 	},
