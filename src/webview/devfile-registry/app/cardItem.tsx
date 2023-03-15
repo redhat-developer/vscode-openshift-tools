@@ -2,18 +2,18 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import React from 'react';
-import SyntaxHighlighter from 'react-syntax-highlighter';
+import { FileCopy } from '@mui/icons-material';
+import { Badge, Button, Card, CardActions, Modal, ThemeProvider, Tooltip, Typography } from '@mui/material';
+import { CardTheme } from './cardItem.style';
 import clsx from 'clsx';
+import React from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { DevFileProps } from './wrapperCardItem';
-import { VSCodeMessage } from '../vsCodeMessage';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { monokai, qtcreatorLight } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { StarterProject } from '../../../odo/componentTypeDescription';
+import { VSCodeMessage } from '../vsCodeMessage';
 import { StarterProjectDisplay } from './starterProjectDisplay';
-import { Badge, Backdrop, Button, Card, CardActions, Modal } from '@material-ui/core';
-import { FileCopy } from '@material-ui/icons';
-import { Tooltip, Typography } from '@mui/material';
-import { qtcreatorLight, monokai } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { DevFileProps } from './wrapperCardItem';
 
 export class CardItem extends React.Component<DevFileProps, {
     numOfCall: number,
@@ -167,7 +167,6 @@ export class CardItem extends React.Component<DevFileProps, {
                         <StarterProjectDisplay project={selectedProject || hoverProject} projectDisplayStyle={this.props.projectDisplayStyle} />
                         <CardActions className={this.props.cardItemStyle.cardButton}>
                             <Button
-                                color='default'
                                 variant='contained'
                                 component='span'
                                 className={this.props.cardItemStyle.button}
@@ -178,7 +177,6 @@ export class CardItem extends React.Component<DevFileProps, {
                             </Button>
                             {this.props.hasGitLink &&
                                 <><Button
-                                    color='default'
                                     variant='contained'
                                     component='span'
                                     className={this.props.cardItemStyle.button}
@@ -187,7 +185,6 @@ export class CardItem extends React.Component<DevFileProps, {
                                         Clone to Workspace
                                     </Typography>
                                 </Button><Button
-                                    color='default'
                                     variant='contained'
                                     component='span'
                                     className={this.props.cardItemStyle.button}
@@ -208,15 +205,16 @@ export class CardItem extends React.Component<DevFileProps, {
             aria-labelledby={`modal-${this.props.compDescription.devfileData.devfile.metadata.name}`}
             onClose={this.onCloseClick}
             closeAfterTransition
-            BackdropComponent={Backdrop}
-            disableAutoFocus
-            BackdropProps={{
-                timeout: 500,
+            slotProps={{
+                backdrop: {
+                    timeout: 500
+                }
             }}
             style={{
                 width: '100%', height: '100%', marginTop: '5rem', border: '0px'
             }}>
-            <Card data-testid='dev-page-yaml' className={this.props.cardItemStyle.yamlCard}>
+            <Card data-testid='dev-page-yaml' className={this.props.cardItemStyle.yamlCard}
+                id={`modal-${this.props.compDescription.devfileData.devfile.metadata.name}`}>
                 <div className={this.props.cardItemStyle.yamlCardHeader}>
                     <Card data-testid='dev-page-header' className={this.props.cardItemStyle.devPageCard}>
                         <div className={this.props.cardItemStyle.devPageCardHeader}>
@@ -258,7 +256,7 @@ export class CardItem extends React.Component<DevFileProps, {
                         wrapLines
                         showLineNumbers
                         lineNumberStyle={{ marginLeft: '-1.5rem' }}
-                        customStyle={{ marginLeft: '-1.5rem', backgroundColor: 'inherit' }}
+                        customStyle={{ marginLeft: '-1.5rem', background: 'inherit !important', color: 'inherit' }}
                         codeTagProps={{
                             style: {
                                 fontFamily: 'inherit',
@@ -273,6 +271,7 @@ export class CardItem extends React.Component<DevFileProps, {
 
         return (
             <>
+                <ThemeProvider theme={CardTheme}>
                 <Card
                     className={this.props.cardItemStyle.card}
                     onClick={this.onCardClick}
@@ -339,6 +338,7 @@ export class CardItem extends React.Component<DevFileProps, {
                         {modalViewCard}
                     </>
                 }
+                </ThemeProvider>
             </>
         );
     }

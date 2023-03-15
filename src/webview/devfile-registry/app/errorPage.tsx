@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { makeStyles } from '@material-ui/styles';
-import errorPageStyle from './errorPage.style';
+import { makeStyles } from '@mui/styles';
 import React from 'react';
-import { DefaultProps } from './home'
+import errorPageStyle from './errorPage.style';
+import { DefaultProps } from './home';
 
 const errorPageStyleClass = makeStyles(errorPageStyle);
 
@@ -18,10 +18,10 @@ export const ErrorPage: React.FC<ErrorProps> = ({
     message
 }) => {
 
-    const errorPageCSS = errorPageStyleClass();
+    const errorPageStyle = errorPageStyleClass();
 
     return (
-        <div className={errorPageCSS.error}>
+        <div className={errorPageStyle.error}>
             {message}
         </div>
     );

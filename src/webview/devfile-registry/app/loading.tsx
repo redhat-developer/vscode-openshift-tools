@@ -3,9 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
-import { Box, makeStyles, Typography } from '@material-ui/core';
 import LinearProgress from '@mui/material/LinearProgress';
 import loaderStyle from './loading.style';
+import { Box, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 
 const useLoadingStyle = makeStyles(loaderStyle);
 

@@ -3,17 +3,27 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Theme, createStyles } from '@material-ui/core/styles';
+import { createTheme } from '@mui/material/styles';
 
-export default (_theme: Theme) =>
-    createStyles({
-        devfileGalleryGrid: {
-            margin: '1.5rem 0rem',
-            padding: '0rem 1.5rem',
-            color: 'var(--vscode-foreground)',
-            backgroundColor: 'var(--vscode-editor-background)',
-            fontSize: 'var(--vscode-font-size)',
-            fontFamily: 'var(--vscode-font-family)',
-            zIndex: 0
-        },
-    });
+export const HomeTheme = createTheme({
+    components: {
+        MuiImageList: {
+            variants: [
+                {
+                    props: {
+                        className: 'devfileGalleryGrid'
+                    },
+                    style: {
+                        margin: '1.5rem 0rem',
+                        padding: '0rem 1.5rem',
+                        color: 'var(--vscode-foreground)',
+                        backgroundColor: 'var(--vscode-editor-background)',
+                        fontSize: 'var(--vscode-font-size)',
+                        fontFamily: 'var(--vscode-font-family)',
+                        zIndex: 0
+                    }
+                }
+            ]
+        }
+    }
+});

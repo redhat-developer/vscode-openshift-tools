@@ -3,7 +3,25 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Theme, createStyles } from '@material-ui/core/styles';
+import { createTheme, Theme } from '@mui/material';
+import { createStyles } from '@mui/styles';
+
+export const CardTheme = createTheme({
+    components: {
+        MuiButton: {
+            variants: [
+                {
+                    props: {
+                        variant: 'contained'
+                    },
+                    style: {
+                        textTransform: 'none'
+                    }
+                }
+            ]
+        }
+    }
+});
 
 export default (theme: Theme) =>
     createStyles({
@@ -11,13 +29,13 @@ export default (theme: Theme) =>
             height: 'auto',
             margin: '0.2rem',
             cursor: 'pointer',
-            borderRadius: '1rem',
+            borderRadius: '1rem !important',
             border: '1px solid',
             borderColor: 'inherit',
-            backgroundColor: 'var(--vscode-editor-background)',
-            color: 'var(--vscode-editor-foreground)',
+            backgroundColor: 'var(--vscode-editor-background) !important',
+            color: 'var(--vscode-editor-foreground)  !important',
             transition: 'all ease 200ms',
-            transform: 'scale(0.95)',
+            transform: 'scale(0.95)  !important',
             '&:hover': {
                 transform: 'scale(1)',
                 boxShadow: '0 13px 27px -5px hsla(240, 30.1%, 28%, 0.25), 0 8px 16px -8px hsla(0, 0%, 0%, 0.3), 0 -6px 16px -6px hsla(0, 0%, 0%, 0.03)'
@@ -100,8 +118,8 @@ export default (theme: Theme) =>
             WebkitBoxOrient: 'vertical'
         },
         yamlCard: {
-            color: 'var(--vscode-foreground)',
-            backgroundColor: 'var(--vscode-editor-background)',
+            color: 'var(--vscode-foreground) !important',
+            backgroundColor: 'var(--vscode-editor-background) !important',
             fontSize: 'var(--vscode-font-size)',
             fontFamily: 'var(--vscode-font-family)',
             border: '1px solid',
@@ -109,7 +127,7 @@ export default (theme: Theme) =>
             maxHeight: '40rem',
             width: '65rem',
             margin: 'auto',
-            overflow: 'auto'
+            overflow: 'auto !important'
         },
         yamlCardHeader: {
             padding: '1.5rem!important',
@@ -138,14 +156,14 @@ export default (theme: Theme) =>
             textAlign: 'center',
             outline: '0.0625rem solid transparent',
             outlineOffset: '0.125rem!important',
-            fontSize: 'var(--vscode-font-size)',
-            fontFamily: 'var(--vscode-font-family)',
-            justifyContent: 'space-between',
-            color: 'var(--vscode-button-foreground)',
-            backgroundColor: 'var(--vscode-button-background)',
+            fontSize: 'var(--vscode-font-size) !important',
+            fontFamily: 'var(--vscode-font-family) !important',
+            justifyContent: 'space-between !important',
+            color: 'var(--vscode-button-foreground) !important',
+            backgroundColor: 'var(--vscode-button-background) !important',
             '&:hover': {
                 cursor: 'pointer',
-                backgroundColor: 'var(--vscode-button-hoverBackground)'
+                backgroundColor: 'var(--vscode-button-hoverBackground) !important'
             },
             textTransform: 'none'
         },
@@ -174,10 +192,11 @@ export default (theme: Theme) =>
             height: '3rem'
         },
         devPageCard: {
-            color: 'var(--vscode-foreground)',
-            backgroundColor: 'var(--vscode-editor-background)',
+            color: 'var(--vscode-foreground) !important',
+            backgroundColor: 'var(--vscode-editor-background) !important',
             height: 'auto',
-            width: '65rem'
+            width: '65rem',
+            boxShadow: 'none !important'
         },
         devPageCardHeader: {
             display: 'block',
@@ -185,13 +204,13 @@ export default (theme: Theme) =>
             margin: '0.5rem'
         },
         starterProjectCard: {
-            color: 'var(--vscode-foreground)',
-            backgroundColor: 'var(--vscode-editor-background)',
+            color: 'var(--vscode-foreground) !important',
+            backgroundColor: 'var(--vscode-editor-background) !important',
             fontSize: 'var(--vscode-font-size)',
             fontFamily: 'var(--vscode-font-family)',
             width: '60rem',
             maxHeight: '18rem',
-            overflow: 'auto',
+            overflow: 'auto !important',
             border: '1px solid',
             borderColor: 'inherit'
         },

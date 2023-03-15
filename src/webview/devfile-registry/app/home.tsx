@@ -3,21 +3,20 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import React, { ChangeEvent } from 'react';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
 import { WrapperCardItem as CardItem } from './wrapperCardItem';
 import { LoadScreen } from './loading';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { StarterProject } from '../../../odo/componentTypeDescription';
 import { SearchBar } from './searchBar';
-import homeStyle from './home.style';
 import cardItemStyle from './cardItem.style';
 import starterProjectDisplayStyle from './starterProjectDisplay.style';
 import { FilterElements } from './filterElements';
 import { ComponentTypeDescription, Registry } from '../../../odo/componentType';
 import { ErrorPage } from './errorPage';
-import { ImageList, ImageListItem } from '@mui/material';
+import { ImageList, ImageListItem, ThemeProvider } from '@mui/material';
+import { HomeTheme } from './home.style';
 
-const useHomeStyles = makeStyles(homeStyle);
 const starterProjectDisplayStyles = makeStyles(starterProjectDisplayStyle);
 const useCardItemStyles = makeStyles(cardItemStyle);
 
@@ -38,21 +37,22 @@ const HomeItem: React.FC<HomePageProps> = ({
     compDescriptions,
     themeKind
 }: HomePageProps) => {
-    const homeStyleClass = useHomeStyles();
     const cardItemStyle = useCardItemStyles();
     const projectDisplayStyle = starterProjectDisplayStyles();
     return (
-        <ImageList className={homeStyleClass.devfileGalleryGrid} cols={4}>
-            {
-                compDescriptions.map((compDescription: CompTypeDesc, key: number) => (
-                    <ImageListItem key={`imageList-`+key}>
-                        <CardItem key={key} compDescription={compDescription}
-                        cardItemStyle={cardItemStyle} projectDisplayStyle={projectDisplayStyle} hasGitLink={hasGitLink(compDescription)}
-                        themeKind={themeKind} />
-                    </ImageListItem>
-                ))
-            }
-        </ImageList>
+        <ThemeProvider theme={HomeTheme}>
+            <ImageList className='devfileGalleryGrid' cols={4}>
+                {
+                    compDescriptions.map((compDescription: CompTypeDesc, key: number) => (
+                        <ImageListItem key={`imageList-` + key}>
+                            <CardItem key={key} compDescription={compDescription}
+                                cardItemStyle={cardItemStyle} projectDisplayStyle={projectDisplayStyle} hasGitLink={hasGitLink(compDescription)}
+                                themeKind={themeKind} />
+                        </ImageListItem>
+                    ))
+                }
+            </ImageList>
+        </ThemeProvider>
     );
 };
 
@@ -95,7 +95,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                 setFilteredcompDescriptions([]);
                 setCompDescriptions([]);
                 setSearchValue('');
-            } else if(message.data.action === 'setTheme') {
+            } else if (message.data.action === 'setTheme') {
                 setThemeKind(message.data.themeValue);
             }
         });
