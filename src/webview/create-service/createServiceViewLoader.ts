@@ -14,7 +14,7 @@ export default class CreateServiceViewLoader {
     }
 
     static async loadView(title: string, listenerFactory: (panel: vscode.WebviewPanel) => (event) => Promise<void>): Promise<vscode.WebviewPanel> {
-        const localResourceRoot = vscode.Uri.file(path.join(CreateServiceViewLoader.extensionPath, 'out', 'createServiceView'));
+        const localResourceRoot = vscode.Uri.file(path.join(CreateServiceViewLoader.extensionPath, 'out', 'createServiceViewer'));
 
         let panel: vscode.WebviewPanel = vscode.window.createWebviewPanel('createServiceView', title, vscode.ViewColumn.One, {
             enableScripts: true,
@@ -23,7 +23,7 @@ export default class CreateServiceViewLoader {
         });
 
         panel.iconPath = vscode.Uri.file(path.join(CreateServiceViewLoader.extensionPath, 'images/context/cluster-node.png'));
-        panel.webview.html = await loadWebviewHtml('createServiceView', panel);
+        panel.webview.html = await loadWebviewHtml('createServiceViewer', panel);
         panel.onDidDispose(()=> {
             panel = undefined;
         });

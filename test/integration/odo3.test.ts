@@ -3,13 +3,18 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { fail } from 'assert';
 import { expect } from 'chai';
+import * as fs from 'fs/promises';
+import * as tmp from 'tmp';
+import { promisify } from 'util';
+import { Uri, workspace } from 'vscode';
 import { CommandText } from '../../src/base/command';
 import * as Odo from '../../src/odo';
 import { Command } from '../../src/odo/command';
 import * as Odo3 from '../../src/odo3';
 
-suite('odo 3 integration', () => {
+suite('odo 3 integration', function() {
 
     const clusterUrl = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
     const username = process.env.CLUSTER_USER || 'developer';
@@ -41,6 +46,44 @@ suite('odo 3 integration', () => {
         await odo3.setNamespace('myproject2');
         const exitData = await odo.execute(new CommandText('oc status'));
         expect(exitData.stdout).to.contain('myproject2');
+    });
+
+    suite('service binding', function() {
+        let componentFolder: string;
+
+        setup(async function() {
+            componentFolder = await promisify(tmp.dir)();
+            await odo.createComponentFromFolder(
+                'nodejs',
+                undefined,
+                'component1',
+                Uri.parse(componentFolder),
+                'nodejs-starter',
+            );
+        });
+
+        teardown(async function() {
+            const newWorkspaceFolders = workspace.workspaceFolders.filter((workspaceFolder) => {
+                const fsPath = workspaceFolder.uri.fsPath;
+                return (fsPath !== componentFolder);
+            });
+            workspace.updateWorkspaceFolders(0, workspace.workspaceFolders.length, ...newWorkspaceFolders);
+            await fs.rm(componentFolder, { recursive: true, force: true });
+        });
+
+        test('getBindableServices()', async function() {
+            const bindableServices = await odo3.getBindableServices();
+            expect(bindableServices).to.be.empty;
+        });
+
+        test('addBinding()', async function() {
+            try {
+                await odo3.addBinding(componentFolder, 'myservice', 'default', 'myservice-binding');
+                fail('creating a binding should have failed, since no bindable services are present');
+            } catch (_e: unknown) {
+                // do nothing
+            }
+        });
     });
 
 });

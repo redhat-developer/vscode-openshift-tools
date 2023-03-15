@@ -15,7 +15,7 @@ import { loadWebviewHtml } from '../common-ext/utils';
 let panel: vscode.WebviewPanel;
 
 let themeKind: vscode.ColorThemeKind = vscode.window.activeColorTheme.kind;
-vscode.window.onDidChangeActiveColorTheme((editor: vscode.ColorTheme) => {
+vscode.window.onDidChangeActiveColorTheme(function (editor: vscode.ColorTheme) {
     if (themeKind !== editor.kind) {
         themeKind = editor.kind;
         if (panel) {
