@@ -4,10 +4,13 @@
  *-----------------------------------------------------------------------------------------------*/
 /* eslint-disable @typescript-eslint/ban-types */
 
-import { window, QuickPickItem, commands, workspace } from 'vscode';
+import { pathExists } from 'fs-extra';
+import { join } from 'path';
 import validator from 'validator';
-import { Odo, getInstance, OpenShiftObject, ContextType, OpenShiftApplication, OpenShiftProject } from '../odo';
+import { commands, QuickPickItem, window, workspace } from 'vscode';
 import { OpenShiftExplorer } from '../explorer';
+import { ContextType, getInstance, Odo, OpenShiftApplication, OpenShiftObject, OpenShiftProject } from '../odo';
+import { ComponentWorkspaceFolder } from '../odo/workspace';
 import { VsCommandError } from '../vscommand';
 
 const errorMessage = {
@@ -253,12 +256,69 @@ function selectTargetDecoratorFactory(decorator: (...args:any[]) => Promise<Open
     };
 }
 
+function selectComponentDecoratorFactory(decorator: (...args:any[]) => Promise<ComponentWorkspaceFolder> ) {
+    return function (_target: any, key: string, descriptor: any): void {
+        let fnKey: string | undefined;
+        let fn: Function | undefined;
+
+        if (typeof descriptor.value === 'function') {
+            fnKey = 'value';
+            fn = descriptor.value;
+        } else {
+            throw new Error('not supported');
+        }
+
+       descriptor[fnKey] = async function (...args: any[]): Promise<any> {
+            args[0] = await decorator(args[0]);
+            return fn.apply(this, args);
+        };
+    };
+}
+
 export function selectTargetComponent(appPlaceHolder, cmpPlaceHolder, condition?: (value: OpenShiftObject) => boolean): (_target: any, key: string, descriptor: any) => void {
     return selectTargetDecoratorFactory(async (context) => OpenShiftItem.getOpenShiftCmdData(context, appPlaceHolder, cmpPlaceHolder, condition));
 }
 
 export function selectTargetApplication(appPlaceHolder): (_target: any, key: string, descriptor: any) => void {
     return selectTargetDecoratorFactory(async (context) => OpenShiftItem.getOpenShiftCmdData(context, appPlaceHolder));
+}
+
+export function selectComponent(componentPlaceholder: string) {
+    return selectComponentDecoratorFactory(async () => {
+        const getComponents = async (paths: string[]): Promise<ComponentWorkspaceFolder[]> => {
+            const components: ComponentWorkspaceFolder[] = [];
+            for (const workspacePath of paths) {
+                if (await pathExists(join(workspacePath, 'devfile.yaml'))) {
+                    const description = await getInstance().describeComponent(workspacePath);
+                    components.push({
+                        component: description,
+                        contextPath: workspacePath,
+                    });
+                }
+            }
+            return components;
+        }
+
+        if (!workspace.workspaceFolders) {
+            throw new Error('Please open a folder with a component in it to deploy the component');
+        }
+        const components = await getComponents(workspace.workspaceFolders.map(folder => folder.uri.fsPath));
+        if (components.length === 0) {
+            throw new Error('Please open a folder with a component in it to deploy the component');
+        } else if (components.length === 1) {
+            return components[0];
+        }
+
+        const componentPath = await window.showQuickPick(components.map(component => component.contextPath),
+            {
+                canPickMany: false,
+                title: componentPlaceholder,
+                placeHolder: componentPlaceholder,
+            });
+        const selectedComponent = components.find(component => component.contextPath === componentPath);
+
+        return selectedComponent;
+    });
 }
 
 export function clusterRequired() {

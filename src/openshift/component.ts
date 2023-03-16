@@ -5,26 +5,26 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { window, commands, Uri, workspace, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable, EventEmitter, Terminal } from 'vscode';
 import { ChildProcess, SpawnOptions } from 'child_process';
-import * as YAML from 'yaml'
-import OpenShiftItem, { clusterRequired, selectTargetComponent } from './openshiftItem';
+import { commands, debug, DebugConfiguration, DebugSession, Disposable, EventEmitter, extensions, ProgressLocation, Terminal, Uri, window, workspace } from 'vscode';
+import * as YAML from 'yaml';
 import { OpenShiftComponent } from '../odo';
 import { Command } from '../odo/command';
+import { ascDevfileFirst, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, isDevfileComponent } from '../odo/componentType';
+import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
+import { NewComponentCommandProps } from '../telemetry';
 import { Progress } from '../util/progress';
 import { selectWorkspaceFolder } from '../util/workspace';
 import { vsCommand, VsCommandError } from '../vscommand';
-import { ascDevfileFirst, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, isDevfileComponent } from '../odo/componentType';
-import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
+import OpenShiftItem, { clusterRequired, selectComponent, selectTargetComponent } from './openshiftItem';
 import path = require('path');
 import globby = require('globby');
 import fs = require('fs-extra');
-import { NewComponentCommandProps } from '../telemetry';
 
-import { ComponentWorkspaceFolder } from '../odo/workspace';
-import LogViewLoader from '../webview/log/LogViewLoader';
-import GitImportLoader from '../webview/git-import/gitImportLoader';
 import { CliChannel } from '../cli';
+import { ComponentWorkspaceFolder } from '../odo/workspace';
+import GitImportLoader from '../webview/git-import/gitImportLoader';
+import LogViewLoader from '../webview/log/LogViewLoader';
 
 function createCancelledResult(stepName: string): any {
     const cancelledResult: any = new String('');
@@ -219,6 +219,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.dev')
+    @selectComponent('Please pick a component to run in dev mode')
     //@clusterRequired() check for user is logged in should be implemented from scratch
     static async dev(component: ComponentWorkspaceFolder, runOn?: undefined | 'podman') {
         const cs = Component.getComponentDevState(component);

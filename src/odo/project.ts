@@ -11,6 +11,7 @@ export interface Project {
     metadata: ComponentMetadata;
     spec: any;
     status: {
-        active: boolean;
+        active?: boolean;
+        phase?: string;
     };
 }
