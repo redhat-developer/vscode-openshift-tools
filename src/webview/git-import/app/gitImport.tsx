@@ -197,7 +197,7 @@ export class GitImport extends React.Component<DefaultProps, {
                 });
             } else if (message.data.action === 'cloneStarted') {
                 this.setState({ showLoadScreen: true, notification: 'Cloning the repository' });
-            }  else if (message.data.action === 'cloneCompleted') {
+            } else if (message.data.action === 'cloneCompleted') {
                 this.setState({ showLoadScreen: true, notification: 'Scanning through git repo and recommending the import strategy...' });
                 VSCodeMessage.postMessage({
                     action: 'parseGitURL',
@@ -206,6 +206,10 @@ export class GitImport extends React.Component<DefaultProps, {
                     clonedFolder: this.state.folder.clone,
                     projectName: this.state.gitURL.parser?.name
                 });
+            } else if (message.data.action === 'devfileFailed') {
+                this.setState({ showLoadScreen: false, notification: '' });
+            } else if (message.data.action === 'devfileRegenerated') {
+                this.setState({ showLoadScreen: true, notification: 'Scanning through git repo and recommending the import strategy...' });
             }
         });
     }
@@ -469,7 +473,7 @@ export class GitImport extends React.Component<DefaultProps, {
                                     {!isDevFile &&
                                         <div className='strategyContainer strategyWarning'>
                                             <ErrorIcon color='warning' style={{ fontSize: 20 }} />
-                                            <Typography variant='body2' style={{ margin: '0 5px' }}>There is no devfile.yaml detected in the repository. Please select a devfile from the default devfile registry.</Typography>
+                                            <Typography variant='body2' style={{ margin: '0 5px' }}>Here is the recommended devfile:</Typography>
                                         </div>}
                                     <div className='cardContainer'>
                                         <div className='devfileGalleryGrid'>

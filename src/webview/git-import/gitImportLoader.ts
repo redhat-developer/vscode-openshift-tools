@@ -238,29 +238,33 @@ async function parseGitURL(event: any) {
         });
     } catch (error) {
         if (error.message.toLowerCase().indexOf('failed to parse the devfile') !== -1) {
+            panel?.webview.postMessage({
+                action: 'devfileFailed'
+            });
             const actions: Array<string> = ['Yes', 'Cancel'];
             const devfileRegenerate = await vscode.window.showInformationMessage('Seems you are using Devfile v1. Will you be okay to regenerate it with v2?', ...actions);
             if (devfileRegenerate === 'Yes') {
                 const devFileYamlPath = path.join(clonedFolder.fsPath, 'devfile.yaml');
                 const deleted = deleteFile(devFileYamlPath);
                 if (deleted) {
+                    panel?.webview.postMessage({
+                        action: 'devfileRegenerated'
+                    });
                     parseGitURL(event);
                 } else {
                     closeWithMessage('Failed to delete devfile.yaml, Unable to proceed the component creation', clonedFolder);
                 }
             } else {
-                closeWithMessage('Devfile Version not supported and Unable to proceed the component creation', clonedFolder);
+                closeWithMessage('Devfile version not supported, Unable to proceed the component creation', clonedFolder);
             }
         }
     }
 }
 
-function closeWithMessage(title: string, folder: vscode.Uri) {
+function closeWithMessage(title: string, folderUri: vscode.Uri) {
     vscode.window.showErrorMessage(title);
-    close( {
-        event: {
-            folder: folder
-        }
+    close({
+        folder: folderUri
     });
 }
 
@@ -433,23 +437,4 @@ function isDevfileDetect(uri: vscode.Uri): boolean {
     }
     return false;
 }
-
-/*function getErrorMessage(statusCode: number): string {
-    let message = '';
-    switch (statusCode) {
-        case StatusCode.INTERNAL_SERVER_ERROR: {
-            message = 'Internal Server error'
-            break;
-        }
-        case StatusCode.RATE_LIMIT_EXCEEDED: {
-            message = 'Rate limit exceeded'
-            break;
-        }
-        default: {
-            message = '';
-            break;
-        }
-    }
-    return message;
-}*/
 
