@@ -80,7 +80,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     }
 
     addRegistry(newRegistry: Registry): void {
-        if(!this.registries){
+        if (!this.registries) {
             this.registries = [];
         }
         this.registries.push(newRegistry);
@@ -107,8 +107,10 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return this.registries;
     }
 
-    public async getAnalyze() {
-        await this.odo.getAnalyze();
+    @vsCommand('openshift.component.analyze')
+    public async getAnalyze(currentFolder: Uri): Promise<CliExitData> {
+        const response = await getInstance().execute(Command.analyze(), currentFolder.fsPath);
+        return response;
     }
 
     public getCompDescriptions(): Set<ComponentTypeDescription> {
@@ -142,13 +144,13 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             devFileComponentTypes.forEach((component: DevfileComponentType) => {
                 getInstance().execute(Command.describeCatalogComponent(component.name, component.registry.name)).then((componentDesc: CliExitData) => {
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    const [ component ] = JSON.parse(componentDesc.stdout) as ComponentTypeDescription[];
+                    const [component] = JSON.parse(componentDesc.stdout) as ComponentTypeDescription[];
 
-                        // eslint-disable-next-line max-nested-callbacks
-                        component.devfileData.devfile?.starterProjects?.map((starter: StarterProject) => {
-                            starter.typeName = component.name;
-                        });
-                        this.compDescriptions.add(component);
+                    // eslint-disable-next-line max-nested-callbacks
+                    component.devfileData.devfile?.starterProjects?.map((starter: StarterProject) => {
+                        starter.typeName = component.name;
+                    });
+                    this.compDescriptions.add(component);
 
                     if (devFileComponentTypes.length === this.compDescriptions.size) {
                         this.subject.next('refresh');

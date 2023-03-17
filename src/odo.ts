@@ -326,7 +326,6 @@ export interface Odo {
     getSettingsByContext(context: string): odo.Component;
     loadItems<I>(result: cliInstance.CliExitData, fetch: (data) => I[]): I[];
     getRegistries(): Promise<Registry[]>;
-    getAnalyze();
     readonly subject: Subject<OdoEvent>;
     addRegistry(name: string, url: string, token: string): Promise<Registry>;
     removeRegistry(name: string): Promise<void>;
@@ -857,14 +856,6 @@ export class OdoImpl implements Odo {
 
     public getRegistries(): Promise<Registry[]> {
         return this.loadRegistryFromPreferences();
-    }
-
-    // eslint-disable-next-line @typescript-eslint/require-await
-    public async getAnalyze() {
-        void this.execute(Command.analyze()).then((values) => {
-            // eslint-disable-next-line no-console
-            console.log(values);
-        });
     }
 
     public async addRegistry(name: string, url: string, token: string): Promise<Registry> {

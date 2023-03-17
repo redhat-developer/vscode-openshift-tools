@@ -18,9 +18,9 @@ export const AddWorkspaceFolder: QuickPickItem = {
     description: 'Folder which does not have an OpenShift context',
 };
 
-function isFile(path: string) {
+function isFile(filePath: string) {
     try {
-        return fs.statSync(path).isFile()
+        return fs.statSync(filePath).isFile()
     } catch (ignore) {
         return false;
     }
@@ -42,43 +42,45 @@ function createWorkspaceFolderItem(wsFolder: WorkspaceFolder) {
     };
 }
 
-export async function selectWorkspaceFolder(): Promise<Uri> {
+export async function selectWorkspaceFolder(skipWindowPick = false): Promise<Uri> {
     let folders: WorkspaceFolderItem[] = [];
-    if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
-        folders = workspace.workspaceFolders.filter(isComponentFilter).map(createWorkspaceFolderItem);
-    }
-
     let choice:WorkspaceFolderItem | QuickPickItem;
-
-    if (folders.length === 1 && workspace.workspaceFolders.length === 1) {
-        choice = folders.pop()
-    } else {
-        choice = await window.showQuickPick(
-            [AddWorkspaceFolder, ...folders],
-            {placeHolder: 'Select context folder', ignoreFocusOut: true}
-        );
-    }
-
-    if (!choice) return null;
-
     let workspacePath: Uri;
 
-    if (choice === AddWorkspaceFolder) {
-        const folders = await window.showOpenDialog({
+    if (!skipWindowPick) {
+        if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
+            folders = workspace.workspaceFolders.filter(isComponentFilter).map(createWorkspaceFolderItem);
+        }
+
+        if (folders.length === 1 && workspace.workspaceFolders.length === 1) {
+            choice = folders.pop()
+        } else {
+            choice = await window.showQuickPick(
+                [AddWorkspaceFolder, ...folders],
+                {placeHolder: 'Select context folder', ignoreFocusOut: true}
+            );
+        }
+
+        if (!choice) return null;
+
+    }
+
+    if (choice === AddWorkspaceFolder || skipWindowPick) {
+        const selectedFolders = await window.showOpenDialog({
             canSelectFiles: false,
             canSelectFolders: true,
             canSelectMany: false,
             defaultUri: Uri.file(Platform.getUserHomePath()),
-            openLabel: 'Add context folder for component in workspace.',
+            openLabel: skipWindowPick ? 'Select as Repositroy Destination' : 'Add context folder for component in workspace.',
         });
-        if (!folders) return null;
-        if (fs.existsSync(path.join(folders[0].fsPath, '.odo', 'config.yaml'))) {
-            window.showInformationMessage(
+        if (!selectedFolders) return null;
+        if (fs.existsSync(path.join(selectedFolders[0].fsPath, '.odo', 'config.yaml'))) {
+            void window.showInformationMessage(
                 'The folder selected already contains a component. Please select a different folder.',
             );
-            return selectWorkspaceFolder();
+            return selectWorkspaceFolder(skipWindowPick);
         }
-        [workspacePath] = folders;
+        [workspacePath] = selectedFolders;
     } else if (choice) {
         workspacePath = (choice as WorkspaceFolderItem).uri;
     }

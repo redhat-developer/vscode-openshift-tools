@@ -21,6 +21,7 @@ import { CardItem } from './cardItem';
 import { ComponentTypeDescription } from '../../../odo/componentType';
 import { LoadScreen } from './loading';
 import './gitImport.scss';
+import { Uri } from 'vscode';
 
 export interface DefaultProps {
     analytics?: import('@segment/analytics-next').Analytics;
@@ -45,6 +46,10 @@ export class GitImport extends React.Component<DefaultProps, {
         helpText: string,
     },
     applicationName: string,
+    folder: {
+        root: Uri,
+        clone: Uri
+    }
     gitURL: {
         value: string,
         showError: boolean,
@@ -82,15 +87,20 @@ export class GitImport extends React.Component<DefaultProps, {
         if (close) {
             VSCodeMessage.postMessage({
                 action: 'close',
+                folder: this.state.folder.clone,
                 notification: this.state.notification
             });
         }
         this.state = {
+            folder: {
+                root: undefined,
+                clone: undefined
+            },
             gitURL: {
                 value: '',
                 showError: false,
                 helpText: '',
-                parser: undefined
+                parser: undefined,
             },
             parentAccordionOpen: false,
             statergyAccordionOpen: false,
@@ -137,11 +147,10 @@ export class GitImport extends React.Component<DefaultProps, {
                 });
                 //if valid url then send parse message
                 if (!this.state.gitURL.showError && this.state.gitURL.helpText !== 'URL is valid but cannot be reached') {
-                    this.setState({ showLoadScreen: true, notification: 'Scanning through git repo and recommending the import strategy...' });
                     VSCodeMessage.postMessage({
-                        action: 'parseGitURL',
+                        action: 'selectContextFolder',
                         param: this.state.gitURL,
-                        parser: this.state.gitURL.parser
+                        projectName: this.state.gitURL.parser?.name
                     });
                 } else {
                     this.setState({
@@ -173,14 +182,40 @@ export class GitImport extends React.Component<DefaultProps, {
                 this.initalize(true);
             } else if (message.data.action === 'start_create_component') {
                 this.setState({ showLoadScreen: true, notification: `Create Component ${this.state.componentName.value}` });
+            } else if (message.data.action === 'selectContextFolder') {
+                this.setState({
+                    folder: {
+                        root: message.data.rootFolder,
+                        clone: message.data.selectedFolder
+                    },
+                });
+                VSCodeMessage.postMessage({
+                    action: 'clone',
+                    gitURL: this.state.gitURL.value,
+                    folder: this.state.folder.clone,
+                    projectName: this.state.gitURL.parser?.name
+                });
             } else if (message.data.action === 'cloneStarted') {
                 this.setState({ showLoadScreen: true, notification: 'Cloning the repository' });
+            }  else if (message.data.action === 'cloneCompleted') {
+                this.setState({ showLoadScreen: true, notification: 'Scanning through git repo and recommending the import strategy...' });
+                VSCodeMessage.postMessage({
+                    action: 'parseGitURL',
+                    param: this.state.gitURL,
+                    parser: this.state.gitURL.parser,
+                    clonedFolder: this.state.folder.clone,
+                    projectName: this.state.gitURL.parser?.name
+                });
             }
         });
     }
 
     gitRepoChange = (value: string): void => {
         this.setState({
+            folder: {
+                root: undefined,
+                clone: undefined
+            },
             gitURL: {
                 value: value,
                 helpText: '',
@@ -277,7 +312,8 @@ export class GitImport extends React.Component<DefaultProps, {
             applicationName: this.state.applicationName,
             devFilePath: this.state.devFilePath?.value,
             compDesc: this.state.selectedDesc,
-            isDevFile: this.state.isDevFile
+            isDevFile: this.state.isDevFile,
+            folder: this.state.folder.clone,
         });
     }
 

@@ -6,16 +6,11 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ExtensionID } from '../../util/constants';
-import { GitProvider } from '../../git-import/types/git';
-import { getGitService } from '../../git-import/services';
-import { DetectedServiceData, DetectedStrategy, detectImportStrategies } from '../../git-import/utils';
 import { ComponentTypesView } from '../../registriesView';
-import { ComponentTypeDescription } from '../../odo/componentType';
-import { Response } from '../../git-import/types';
+import { AnalyzeResponse, ComponentTypeDescription } from '../../odo/componentType';
 import { Component } from '../../openshift/component';
 import OpenShiftItem from '../../openshift/openshiftItem';
 import { selectWorkspaceFolder } from '../../util/workspace';
-import jsYaml = require('js-yaml');
 import GitUrlParse = require('git-url-parse');
 import treeKill = require('tree-kill')
 import cp = require('child_process');
@@ -23,10 +18,10 @@ import { vsCommand } from '../../vscommand';
 import * as odo3 from '../../odo3';
 import { ComponentDescription } from '../../odo/componentTypeDescription';
 import { ComponentWorkspaceFolder } from '../../odo/workspace';
+import { CliExitData } from '../../cli';
 
 let panel: vscode.WebviewPanel;
 let childProcess: cp.ChildProcess;
-let appendedUri: vscode.Uri;
 let forceCancel = false;
 
 interface CloneProcess {
@@ -34,50 +29,16 @@ interface CloneProcess {
     error: string
 }
 
-enum StatusCode {
-    INTERNAL_SERVER_ERROR = 500,
-    RATE_LIMIT_EXCEEDED = 403
-}
-
 export class Command {
     @vsCommand('openshift.component.importFromGit')
     static async createComponent(event: any) {
-        let alreadyExist: boolean;
-        let workspacePath: vscode.Uri, appendedUri: vscode.Uri;
-        let workspaceFolder: vscode.WorkspaceFolder;
-        do {
-            alreadyExist = false;
-            workspacePath = await selectWorkspaceFolder();
-            if (!workspacePath) {
-                return null;
-            }
-            appendedUri = vscode.Uri.joinPath(workspacePath, event.projectName);
-            workspaceFolder = vscode.workspace.getWorkspaceFolder(workspacePath);
-            const isExistingComponent = await existingComponent(workspacePath);
-            if (isExistingComponent) {
-                vscode.window.showErrorMessage(`Unable to create Component inside an existing Component: ${workspacePath}, Please select another folder`);
-                alreadyExist = true;
-            } else if (fs.existsSync(appendedUri.fsPath) && fs.readdirSync(appendedUri.fsPath).length > 0) {
-                vscode.window.showErrorMessage(`Folder ${appendedUri.fsPath.substring(appendedUri.fsPath.lastIndexOf('\\') + 1)} already exist
-                    at the selected location: ${appendedUri.fsPath.substring(0, appendedUri.fsPath.lastIndexOf('\\'))}`);
-                alreadyExist = true;
-            }
-        } while (alreadyExist);
-        panel.webview.postMessage({
-            action: 'cloneStarted'
-        });
-        const cloneProcess: CloneProcess = await clone(event.gitURL, appendedUri.fsPath);
-        if (!cloneProcess.status && cloneProcess.error) {
-            showError(event, appendedUri.fsPath, cloneProcess.error);
-            return null;
-        }
-        //workspace.updateWorkspaceFolders(workspace.workspaceFolders ? workspace.workspaceFolders.length : 0, null, { uri: appendedUri });
+        const selctedFolder: vscode.Uri = vscode.Uri.from(event.folder);
         if (!event.isDevFile) {
             panel.webview.postMessage({
                 action: 'start_create_component'
             });
             try {
-                await Component.createFromRootWorkspaceFolder(appendedUri, undefined,
+                await Component.createFromRootWorkspaceFolder(selctedFolder, undefined,
                     {
                         componentTypeName: event.compDesc?.devfileData.devfile.metadata.name,
                         projectName: event.projectName,
@@ -107,9 +68,10 @@ export class Command {
                 status: true
             });
             vscode.window.showInformationMessage('Selected Component added to the workspace.');
-        }
-        if (!workspaceFolder) {
-            vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: appendedUri });
+            const wsFolder = vscode.workspace.getWorkspaceFolder(selctedFolder);
+            if (!wsFolder) {
+                vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: selctedFolder });
+            }
         }
     }
 }
@@ -126,58 +88,59 @@ async function gitImportMessageListener(event: any): Promise<any> {
             validateDevFilePath(event)
             break;
         case 'parseGitURL':
-            let compDescription: ComponentTypeDescription[];
-            let isDevFile = false;
-            const gitProvider = getGitProvider(event.parser.host);
-            if (gitProvider !== GitProvider.INVALID) {
-                const service = getGitService(event.param.value, gitProvider, '', '', undefined, 'devfile.yaml');
-                const importService: DetectedServiceData = await detectImportStrategies(event.param, service);
-                const response: Response = await service.isDevfilePresent();
-                if (importService.strategies.length === 1) {
-                    response.status = true;
-                    const strategy: DetectedStrategy = importService.strategies[0];
-                    const detectedCustomData = strategy.detectedCustomData[0];
-                    compDescription = getCompDescription(detectedCustomData.name.toLowerCase(), detectedCustomData.language.toLowerCase());
-                } else if (response.status) {
-                    isDevFile = true;
-                    const devFileContent = await service.getDevfileContent();
-                    const yamlDoc: any = jsYaml.load(devFileContent);
-                    compDescription = getCompDescription(yamlDoc.metadata.projectType.toLowerCase(), yamlDoc.metadata.language.toLowerCase())
-                }
-                panel?.webview.postMessage({
-                    action: event?.action,
-                    gitURL: event.param.value,
-                    appName: response.status ? event.parser.name + '-app' : undefined,
-                    name: response.status ? event.parser.name + '-comp' : undefined,
-                    error: !response.status,
-                    isDevFile: isDevFile,
-                    helpText: response.status ? 'The git repo is valid.' : getErrorMessage(response.error?.status),
-                    compDescription: compDescription,
-                    parser: event.parser
-                });
-                break;
-            }
+            parseGitURL(event);
             break;
         case 'createComponent': {
             vscode.commands.executeCommand('openshift.component.importFromGit', event);
             break;
         }
         case 'close': {
-            try {
-                if (childProcess && event.notification !== 'Component created') {
-                    forceCancel = true;
-                    treeKill(childProcess.pid, async () => {
-                        await deleteDirectory(appendedUri.fsPath);
-                    });
-                } else if (event.notification === 'Component created') {
-                    forceCancel = false;
-                }
-            } catch (error) {
-                vscode.window.showErrorMessage('Error occurred while killing the repository clone process');
-            }
-            panel?.dispose();
+            close(event);
             break;
         }
+        case 'selectContextFolder': {
+            let alreadyExist: boolean;
+            let workspacePath: vscode.Uri, appendedUri: vscode.Uri;
+            do {
+                alreadyExist = false;
+                workspacePath = await selectWorkspaceFolder(true);
+                if (!workspacePath) {
+                    return null;
+                }
+                appendedUri = vscode.Uri.joinPath(workspacePath, event.projectName);
+                const isExistingComponent = await existingComponent(workspacePath);
+                if (isExistingComponent) {
+                    vscode.window.showErrorMessage(`Unable to create Component inside an existing Component: ${workspacePath}, Please select another folder`);
+                    alreadyExist = true;
+                } else if (fs.existsSync(appendedUri.fsPath) && fs.readdirSync(appendedUri.fsPath).length > 0) {
+                    vscode.window.showErrorMessage(`Folder ${appendedUri.fsPath.substring(appendedUri.fsPath.lastIndexOf('\\') + 1)} already exist
+                    at the selected location: ${appendedUri.fsPath.substring(0, appendedUri.fsPath.lastIndexOf('\\'))}`);
+                    alreadyExist = true;
+                }
+            } while (alreadyExist);
+            panel?.webview.postMessage({
+                action: event?.action,
+                rootFolder: workspacePath,
+                selectedFolder: appendedUri
+            });
+            break;
+        }
+        case 'clone': {
+            panel?.webview.postMessage({
+                action: 'cloneStarted'
+            });
+            const selctedFolder: vscode.Uri = event.folder;
+            const cloneProcess: CloneProcess = await clone(event.gitURL, selctedFolder.fsPath);
+            if (!cloneProcess.status && cloneProcess.error) {
+                showError(event, event.folder.fsPath, cloneProcess.error);
+                return null;
+            }
+            panel?.webview.postMessage({
+                action: 'cloneCompleted'
+            });
+        }
+        default:
+            break;
     }
 }
 
@@ -237,6 +200,70 @@ export default class GitImportLoader {
     }
 }
 
+async function close(event: any) {
+    try {
+        const selctedFolder: vscode.Uri = vscode.Uri.from(event.folder);
+        if (childProcess && event.notification !== 'Component created') {
+            forceCancel = true;
+            treeKill(childProcess.pid, async () => {
+                await deleteDirectory(selctedFolder.fsPath);
+            });
+        } else if (event.notification === 'Component created') {
+            forceCancel = false;
+        }
+    } catch (error) {
+        vscode.window.showErrorMessage('Error occurred while killing the repository clone process');
+    }
+    panel?.dispose();
+}
+
+async function parseGitURL(event: any) {
+    const clonedFolder: vscode.Uri = vscode.Uri.from(event.clonedFolder);
+    const isDevFile = isDevfileDetect(clonedFolder);
+    let analyzeRes: CliExitData;
+    try {
+        analyzeRes = await ComponentTypesView.instance.getAnalyze(clonedFolder);
+        const devfiles: AnalyzeResponse[] = JSON.parse(analyzeRes?.stdout);
+        const compDescription: ComponentTypeDescription[] = getCompDescription(devfiles);
+        panel?.webview.postMessage({
+            action: event?.action,
+            gitURL: event.param.value,
+            appName: event.projectName + '-app',
+            name: event.projectName + '-comp',
+            error: false,
+            isDevFile: isDevFile,
+            helpText: 'The git repo is valid.',
+            compDescription: compDescription,
+            parser: event.parser
+        });
+    } catch (error) {
+        if (error.message.toLowerCase().indexOf('failed to parse the devfile') !== -1) {
+            const actions: Array<string> = ['Yes', 'Cancel'];
+            const devfileRegenerate = await vscode.window.showInformationMessage('Seems you are using Devfile v1. Will you be okay to regenerate it with v2?', ...actions);
+            if (devfileRegenerate === 'Yes') {
+                const devFileYamlPath = path.join(clonedFolder.fsPath, 'devfile.yaml');
+                const deleted = deleteFile(devFileYamlPath);
+                if (deleted) {
+                    parseGitURL(event);
+                } else {
+                    closeWithMessage('Failed to delete devfile.yaml, Unable to proceed the component creation', clonedFolder);
+                }
+            } else {
+                closeWithMessage('Devfile Version not supported and Unable to proceed the component creation', clonedFolder);
+            }
+        }
+    }
+}
+
+function closeWithMessage(title: string, folder: vscode.Uri) {
+    vscode.window.showErrorMessage(title);
+    close( {
+        event: {
+            folder: folder
+        }
+    });
+}
+
 function validateGitURL(event: any) {
     if (event.param.trim().length === 0) {
         panel?.webview.postMessage({
@@ -280,16 +307,10 @@ function validateGitURL(event: any) {
     }
 }
 
-function getGitProvider(host: string): GitProvider {
-    return host.indexOf(GitProvider.GITHUB) !== -1 ? GitProvider.GITHUB :
-        host.indexOf(GitProvider.BITBUCKET) !== -1 ? GitProvider.BITBUCKET :
-            host.indexOf(GitProvider.GITLAB) !== -1 ? GitProvider.GITLAB : GitProvider.INVALID;
-}
-
-function getCompDescription(projectType: string, language: string): ComponentTypeDescription[] {
+function getCompDescription(devfiles: AnalyzeResponse[]): ComponentTypeDescription[] {
     const compDescriptions = ComponentTypesView.instance.getCompDescriptions();
-    return Array.from(compDescriptions).filter((desc) => desc.devfileData.devfile.metadata.projectType.toLowerCase() === projectType ||
-        desc.devfileData.devfile.metadata.language.toLowerCase() === language || desc.devfileData.devfile.metadata.name.toLowerCase() === language);
+    return Array.from(compDescriptions).filter(({ name, version, registry }) => devfiles.some((res) => res.devfile === name &&
+        res.devfileVersion === version && res.devfileRegistry === registry.name));
 }
 
 function clone(url: string, location: string): Promise<CloneProcess> {
@@ -379,6 +400,7 @@ async function getComponents(folders: vscode.Uri[]): Promise<ComponentWorkspaceF
     const results = await Promise.all(descriptions);
     return results.filter((compFolder) => !!compFolder.component);
 }
+
 function deleteDirectory(dir: string) {
     return new Promise<void>(function (_resolve, reject) {
         fs.rmdir(dir, { recursive: true }, err => {
@@ -389,9 +411,32 @@ function deleteDirectory(dir: string) {
     });
 };
 
-function getErrorMessage(statusCode: number): string {
+function deleteFile(file: string) {
+    return new Promise<boolean>(function (resolve, _reject) {
+        try {
+            fs.unlinkSync(file)
+            resolve(true);
+        } catch (err) {
+            resolve(false);
+        }
+    });
+};
+
+function isDevfileDetect(uri: vscode.Uri): boolean {
+    try {
+        if (fs.lstatSync(uri.fsPath).isDirectory()) {
+            const devFileYamlPath = path.join(uri.fsPath, 'devfile.yaml');
+            return fs.existsSync(devFileYamlPath);
+        }
+    } catch (error) {
+        return false;
+    }
+    return false;
+}
+
+/*function getErrorMessage(statusCode: number): string {
     let message = '';
-    switch(statusCode){
+    switch (statusCode) {
         case StatusCode.INTERNAL_SERVER_ERROR: {
             message = 'Internal Server error'
             break;
@@ -406,5 +451,5 @@ function getErrorMessage(statusCode: number): string {
         }
     }
     return message;
-}
+}*/
 
