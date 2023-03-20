@@ -2,19 +2,17 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as React from 'react';
-import { Button, CircularProgress, TextField } from '@material-ui/core';
-import { makeStyles, styled } from '@material-ui/core/styles';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import { Button, CircularProgress, TextField } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import { styled, ThemeProvider } from '@mui/styles';
+import * as React from 'react';
 import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css'
-import * as ClusterViewStyles from './clusterView.style';
+import 'react-phone-input-2/lib/style.css';
 import './clusterView.scss';
-
-const useStyles = makeStyles(ClusterViewStyles.useStyles);
+import { ClusterViewTheme } from './clusterView.style';
 
 const CodeTextField = styled(TextField)({
     verticalAlign: 'middle',
@@ -55,7 +53,6 @@ function ShowProgress(props: {size: number}): JSX.Element {
 }
 
 export default function addSandboxView(props): JSX.Element {
-    const classes = useStyles();
     const [currentState, setCurrentState] = React.useState({
         action: 'sandboxPageDetectAuthSession',
         statusInfo: '',
@@ -121,12 +118,12 @@ export default function addSandboxView(props): JSX.Element {
                             <Button
                                 href='https://red.ht/3MkQ54W'
                                 variant='contained'
-                                className={classes.buttonSecondary}
+                                className='buttonSecondary'
                                 style= {{ marginRight: '10px' }}>
                                     Sign Up
                             </Button>
                             <Button
-                                className={classes.button}
+                                className='button'
                                 disabled={inProgress}
                                 variant='outlined'
                                 onClick={ handleLoginButton }>
@@ -176,7 +173,7 @@ export default function addSandboxView(props): JSX.Element {
                                 <Typography component='p'>
                                     Could not detect Developer Sandbox instance status
                                 </Typography>
-                                <Button style= {{ margin: '20px' }} className={classes.button} variant='contained' onClick={handleTryAgainButton}>Try Again</Button>
+                                <Button style= {{ margin: '20px' }} className='button' variant='contained' onClick={handleTryAgainButton}>Try Again</Button>
                             </>
                         )}
                     </div>
@@ -204,7 +201,7 @@ export default function addSandboxView(props): JSX.Element {
                         <div>
                             <Button
                                 style= {{ margin: '20px' }}
-                                className={classes.button}
+                                className='button'
                                 disabled={inProgress}
                                 variant='outlined'
                                 onClick={handleSignupButton}>Get started in the Sandbox{ inProgress && <ShowProgress size={10}/>}</Button>
@@ -273,7 +270,7 @@ export default function addSandboxView(props): JSX.Element {
                         />
                         <Button
                             style = {{ margin: '20px 10px 20px 10px' }}
-                            className={classes.button}
+                            className='button'
                             size='medium'
                             disabled={inProgress}
                             variant='outlined'
@@ -322,7 +319,7 @@ export default function addSandboxView(props): JSX.Element {
                         />
                         <Button
                             style = {{ margin: '20px 10px 20px 20px' }}
-                            className={classes.button}
+                            className='button'
                             size='medium'
                             disabled={inProgress}
                             variant='outlined'
@@ -331,7 +328,7 @@ export default function addSandboxView(props): JSX.Element {
                         </Button>
                         <Button
                             style = {{ margin: '20px 0px 20px 10px' }}
-                            className={classes.buttonSecondary}
+                            className='buttonSecondary'
                             size='medium'
                             variant='outlined'
                             onClick={ handlRequesteNewCodeRequest }>
@@ -411,13 +408,13 @@ export default function addSandboxView(props): JSX.Element {
                             4. Once successfully logged in, start creating applications and deploy on cluster.
                         </Typography>
                         <Tooltip title='Launch your DevSandbox console in browser' placement='bottom'>
-                            <Button variant='contained' className={classes.button} href={currentState.consoleDashboard}>Open Dashboard</Button>
+                            <Button variant='contained' className='button' href={currentState.consoleDashboard}>Open Dashboard</Button>
                         </Tooltip>
                         <Tooltip title='Copy token from DevSandbox console page in browser' placement='bottom'>
-                            <Button variant='contained' className={classes.button} href={`${currentState.oauthTokenEndpoint}/request`}>Get token</Button>
+                            <Button variant='contained' className='button' href={`${currentState.oauthTokenEndpoint}/request`}>Get token</Button>
                         </Tooltip>
                         <Tooltip title='Login to DevSandbox OpenShift cluster with token from clipboard' placement='bottom'>
-                            <Button variant='contained' className={classes.buttonSecondary} onClick={handleLoginButton}>Login to DevSandbox</Button>
+                            <Button variant='contained' className='buttonSecondary' onClick={handleLoginButton}>Login to DevSandbox</Button>
                         </Tooltip>
                     </div>
                 )}
@@ -427,6 +424,7 @@ export default function addSandboxView(props): JSX.Element {
 
     return (
         <>
+        <ThemeProvider theme={ClusterViewTheme}>
             <DetectAuthSession />
             <Login />
             <DetectStatus />
@@ -436,6 +434,7 @@ export default function addSandboxView(props): JSX.Element {
             <WaitingForApproval />
             <WaitingForProvision />
             <Provisioned />
+        </ThemeProvider>
         </>
     )
 }

@@ -5,7 +5,8 @@
 import React from 'react';
 import CheckBoxOutlineBlankOutlinedIcon from '@mui/icons-material/CheckBoxOutlineBlankOutlined';
 import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
-import { Badge, Card, makeStyles, Typography } from '@material-ui/core';
+import { Badge, Card, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { CompTypeDesc } from './gitImport';
 import cardItemStyle from './cardItem.style';
 

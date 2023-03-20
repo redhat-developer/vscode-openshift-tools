@@ -3,19 +3,15 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
+import { AccordionProps, AccordionSummaryProps, Button, InputLabel, styled, TextField, Typography } from '@mui/material';
+import MuiAccordion from '@mui/material/Accordion';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
+import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import EditIcon from '@mui/icons-material/Edit';
+import ErrorIcon from '@mui/icons-material/Error';
 import UndoIcon from '@mui/icons-material/Undo';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ErrorIcon from '@mui/icons-material/Error';
-//import SearchIcon from '@mui/icons-material/Search';
-import { styled } from '@mui/material/styles';
-import { Button, InputLabel, TextField, Typography } from '@mui/material';
-import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
-import MuiAccordionSummary, {
-    AccordionSummaryProps,
-} from '@mui/material/AccordionSummary';
 import { VSCodeMessage } from './vsCodeMessage';
 import { CardItem } from './cardItem';
 import { ComponentTypeDescription } from '../../../odo/componentType';

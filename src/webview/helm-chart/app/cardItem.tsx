@@ -2,14 +2,15 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import { Button, Card, InputLabel, Modal, TextField, ThemeProvider, Typography } from '@mui/material';
 import React from 'react';
-import { DevFileProps } from './wrapperCardItem';
-import { Backdrop, Button, Card, Modal, InputLabel } from '@material-ui/core';
-import { TextField, Typography } from '@mui/material';
-import { VSCodeMessage } from '../vsCodeMessage';
-import { LoadScreen } from './loading';
-import './cardItem.scss';
+import clsx from 'clsx';
+import { CardTheme } from '../../common/cardItem.style';
+import '../../common/common.scss';
+import { LoadScreen } from '../../common/loading';
 import { Chart } from '../helmChartType';
+import { VSCodeMessage } from '../vsCodeMessage';
+import { DevFileProps } from './wrapperCardItem';
 
 export class CardItem extends React.Component<DevFileProps, {
     displayName: string,
@@ -52,7 +53,7 @@ export class CardItem extends React.Component<DevFileProps, {
         });
     }
 
-    onCloseClick = (_event: any, reason: string): void => {
+    onCloseClick = (event: any, reason: string): void => {
         if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
             this.props.helmEntry.isExpand = false;
             this.setState({
@@ -123,7 +124,7 @@ export class CardItem extends React.Component<DevFileProps, {
     };
 
     handleDisable = (): boolean => {
-        return this.state.installResponse.error || this.state.installName.length === 0;
+        return this.state.installResponse.error || this.state.installName.trim().length === 0;
     }
 
     render(): React.ReactNode {
@@ -136,13 +137,21 @@ export class CardItem extends React.Component<DevFileProps, {
                             <InputLabel required htmlFor='bootstrap-input'
                                 style={{
                                     color: '#EE0000',
-                                    paddingTop: '0.5rem'
+                                    paddingTop: '0.5rem',
+                                    marginLeft: '1rem'
                                 }}>
                                 Chart Name:
                             </InputLabel>
                             <div>
                                 <TextField
                                     helperText={installResponse.errorMsg}
+                                    autoFocus
+                                    focused
+                                    inputProps={{
+                                        style: {
+                                            textAlign: 'left'
+                                        }
+                                    }}
                                     error={installResponse.error}
                                     id='bootstrap-input'
                                     value={installChartName}
@@ -161,7 +170,8 @@ export class CardItem extends React.Component<DevFileProps, {
                         <InputLabel
                             style={{
                                 color: '#EE0000',
-                                paddingTop: '0.5rem'
+                                paddingTop: '0.5rem',
+                                marginLeft: '1rem'
                             }}>
                             Version:
                         </InputLabel>
@@ -185,12 +195,10 @@ export class CardItem extends React.Component<DevFileProps, {
                     </div>
                     <Button
                         disabled={this.handleDisable()}
-                        color='default'
                         variant='contained'
-                        component='span'
                         className={this.props.cardItemStyle.button}
                         onClick={this.clickInstall}
-                        style={{ backgroundColor: this.handleDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000' }}>
+                        style={{ marginLeft: '1rem' }}>
                         <Typography variant='body2'>
                             Install
                         </Typography>
@@ -208,15 +216,16 @@ export class CardItem extends React.Component<DevFileProps, {
             aria-labelledby={`modal-${selectedVersion.name}`}
             onClose={this.onCloseClick}
             closeAfterTransition
-            BackdropComponent={Backdrop}
-            disableAutoFocus
-            BackdropProps={{
-                timeout: 500,
+            slotProps={{
+                backdrop: {
+                    timeout: 500
+                }
             }}
             style={{
                 width: '100%', height: '100%', marginTop: '5rem', border: '0px'
             }}>
-            <Card data-testid='dev-page-yaml' className={this.props.cardItemStyle.helmCard}>
+            <Card data-testid='dev-page-yaml' className={this.props.cardItemStyle.helmCard}
+                id={`modal-${selectedVersion.name}`}>
                 <div className={this.props.cardItemStyle.helmCardHeader}>
                     <div className={this.props.cardItemStyle.devPageCardHeader}>
                         <div className={this.props.cardItemStyle.devPageTitle}>
@@ -318,49 +327,51 @@ export class CardItem extends React.Component<DevFileProps, {
 
         return (
             <>
-                <Card
-                    className={this.props.cardItemStyle.card}
-                    onClick={this.onCardClick}
-                    data-testid={`card-${selectedVersion.name.replace(/\.| /g, '')}`}
-                >
-                    <div className={this.props.cardItemStyle.cardHeader}>
-                        <div className={this.props.cardItemStyle.cardHeaderDisplay}>
-                            <img
-                                src={selectedVersion.icon ? selectedVersion.icon : require('../../../../images/helm/helm.svg').default}
-                                alt={`${selectedVersion.name} icon`}
-                                className={this.props.cardItemStyle.cardImage} />
+                <ThemeProvider theme={CardTheme}>
+                    <Card
+                        className={clsx(this.props.cardItemStyle.card, this.props.cardItemStyle.helmHomeCard)}
+                        onClick={this.onCardClick}
+                        data-testid={`card-${selectedVersion.name.replace(/\.| /g, '')}`}
+                    >
+                        <div className={this.props.cardItemStyle.cardHeader}>
+                            <div className={this.props.cardItemStyle.cardHeaderDisplay}>
+                                <img
+                                    src={selectedVersion.icon ? selectedVersion.icon : require('../../../../images/helm/helm.svg').default}
+                                    alt={`${selectedVersion.name} icon`}
+                                    className={this.props.cardItemStyle.cardImage} />
+                            </div>
                         </div>
-                    </div>
-                    <div className={this.props.cardItemStyle.cardBody} style={{ margin: '1.5rem', height: '3rem' }}>
-                        <Typography variant='subtitle1'>
-                            {
-                                capitalizeFirstLetter(this.props.helmEntry.displayName)
-                            }
-                        </Typography>
-                        {
-                            selectedVersion.annotations['charts.openshift.io/provider'] && <Typography variant='caption'>Provided by {selectedVersion.annotations['charts.openshift.io/provider']}</Typography>
-                        }
-                    </div>
-                    <div className={this.props.cardItemStyle.cardFooterTag}>
-                        {
-                            selectedVersion.version && (
-                                <><Typography variant='caption'>
-                                    Version: {selectedVersion.version}
-                                </Typography><br /></>
-                            )
-                        }
-                        <div style={{ height: '4rem' }}>
-                            <Typography variant='caption'
-                                className={this.props.cardItemStyle.longDescription}>
-                                {selectedVersion.description}
+                        <div className={this.props.cardItemStyle.cardBody} style={{ margin: '1.5rem', height: '3rem' }}>
+                            <Typography variant='subtitle1'>
+                                {
+                                    capitalizeFirstLetter(this.props.helmEntry.displayName)
+                                }
                             </Typography>
+                            {
+                                selectedVersion.annotations['charts.openshift.io/provider'] && <Typography variant='caption'>Provided by {selectedVersion.annotations['charts.openshift.io/provider']}</Typography>
+                            }
                         </div>
-                    </div>
-                </Card>
-                {
-                    this.props.helmEntry.isExpand &&
-                    <> {modalViewCard} </>
-                }
+                        <div className={this.props.cardItemStyle.cardFooterTag}>
+                            {
+                                selectedVersion.version && (
+                                    <><Typography variant='caption'>
+                                        Version: {selectedVersion.version}
+                                    </Typography><br /></>
+                                )
+                            }
+                            <div style={{ height: '4rem' }}>
+                                <Typography variant='caption'
+                                    className={this.props.cardItemStyle.longDescription}>
+                                    {selectedVersion.description}
+                                </Typography>
+                            </div>
+                        </div>
+                    </Card>
+                    {
+                        this.props.helmEntry.isExpand &&
+                        <> {modalViewCard} </>
+                    }
+                </ThemeProvider>
             </>
         );
     }

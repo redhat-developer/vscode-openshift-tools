@@ -3,38 +3,31 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as React from 'react';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { GetApp, InsertDriveFile, VpnKey } from '@mui/icons-material';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import StopIcon from '@mui/icons-material/Stop';
 import { Alert } from '@mui/lab';
-import { InsertDriveFile, GetApp, VpnKey } from '@material-ui/icons';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import PlayArrowIcon from '@material-ui/icons/PlayArrow';
-import RefreshIcon from '@material-ui/icons/Refresh';
-import StopIcon from '@material-ui/icons/Stop';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  AccordionActions,
-  Avatar,
-  Badge,
-  Button,
-  Chip,
-  Divider,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Paper,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
-  TextField,
-  Tooltip,
-  Typography } from '@material-ui/core';
+    Accordion, AccordionActions, AccordionDetails, AccordionSummary, Avatar,
+    Badge,
+    Button,
+    Chip,
+    Divider,
+    LinearProgress,
+    List,
+    ListItem,
+    ListItemAvatar,
+    ListItemText,
+    Paper, Step, StepContent, StepLabel, Stepper, TextField,
+    ThemeProvider,
+    Tooltip,
+    Typography
+} from '@mui/material';
+import { makeStyles, withStyles } from '@mui/styles';
+import * as React from 'react';
 import * as ClusterViewStyles from './clusterView.style';
 
 const prettyBytes = require('pretty-bytes');
@@ -305,7 +298,7 @@ export default function addClusterView(props) {
   const RunningStatus = ()=> (
     <Chip label={status.openshiftStatus} size='small'
       avatar={<StyledBadge
-      overlap='circle'
+      overlap='circular'
       anchorOrigin={{ vertical: 'top', horizontal: 'left'}}
       variant='dot'></StyledBadge>}
     />
@@ -333,7 +326,7 @@ export default function addClusterView(props) {
           <div className={classes.column}>
             <span>OpenShift Version: {status.openshiftVer}</span>
           </div>
-        </AccordionSummary><AccordionDetails className={classes.details}>
+        </AccordionSummary><AccordionDetails className='details'>
             <div className={classes.column}>
               <List dense>
                 <ListItem>
@@ -365,24 +358,24 @@ export default function addClusterView(props) {
             </div>
             {status.creds?.map((label) => (
               <div className={classes.helper}>
-                <Button variant='outlined' size='small' className={classes.button} key='admin' onClick={() => { handleCrcLogin(label.adminCredentials, label.url); }}>
+                <Button variant='outlined' size='small' className='button' key='admin' onClick={() => { handleCrcLogin(label.adminCredentials, label.url); }}>
                   <ExitToAppIcon fontSize='small' />Login using {label.adminCredentials.username}
                 </Button>
-                <Button variant='outlined' size='small' className={classes.button} key='developer' onClick={() => { handleCrcLogin(label.developerCredentials, label.url); }}>
+                <Button variant='outlined' size='small' className='button' key='developer' onClick={() => { handleCrcLogin(label.developerCredentials, label.url); }}>
                   <ExitToAppIcon fontSize='small' />Login using {label.developerCredentials.username}
                 </Button>
               </div>))}
           </AccordionDetails><Divider /><AccordionActions>
             {(status.openshiftStatus === 'Stopped') ?
-              (<Button size='small' component='span' className={classes.button} onClick={handleStartProcess} startIcon={<PlayArrowIcon />}>Start Cluster</Button>) :
-              (<Button size='small' component='span' className={classes.button} onClick={handleStopProcess} startIcon={<StopIcon />}>Stop Cluster</Button>)}
-            <Button size='small' component='span' className={classes.button} onClick={handleRefresh} startIcon={<RefreshIcon />}>
+              (<Button size='small' component='span' className='button' onClick={handleStartProcess} startIcon={<PlayArrowIcon />}>Start Cluster</Button>) :
+              (<Button size='small' component='span' className='button' onClick={handleStopProcess} startIcon={<StopIcon />}>Stop Cluster</Button>)}
+            <Button size='small' component='span' className='button' onClick={handleRefresh} startIcon={<RefreshIcon />}>
               Refresh Status
             </Button>
             {(status.openshiftStatus !== 'Stopped') && (
               <div>
                 <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none' }}>
-                  <Button size='small' component='span' className={classes.button}>
+                  <Button size='small' component='span' className='button'>
                     Open Console Dashboard
                   </Button>
                 </a>
@@ -440,7 +433,7 @@ export default function addClusterView(props) {
           <Alert
           severity='error'
           action={
-            <Button color='inherit' size='small' onClick={handleTryAgain} className={classes.button}>
+            <Button color='inherit' size='small' onClick={handleTryAgain} className='button'>
               Run the process again.
             </Button>
           }
@@ -457,7 +450,7 @@ export default function addClusterView(props) {
           return (
             <div>
               <Typography>Download and open the OpenShift Local file. Opening the file will automatically start a step-by-step installation guide.</Typography>
-              <List className={classes.uploadLabel}>
+              <List className='uploadLabel'>
                 <ListItem>
                   <ListItemAvatar children={<Avatar>
                     <GetApp />
@@ -467,9 +460,8 @@ export default function addClusterView(props) {
                     secondary={<span>This will download OpenShift Local {crcLatest}</span>}/>
                     <a href={fetchDownloadBinary()} style={{ textDecoration: 'none'}}>
                       <Button
-                        color='default'
                         component='span'
-                        className={classes.button}
+                        className='button'
                       >
                         Download OpenShift Local
                       </Button>
@@ -491,7 +483,7 @@ export default function addClusterView(props) {
                     onChange={handleUploadPath}
                     />
                     <label htmlFor='contained-button-file'>
-                      <Tooltip title='This is a required field' placement='left' children={<Button variant='contained' component='span' className={classes.button}>
+                      <Tooltip title='This is a required field' placement='left' children={<Button component='span' className='button'>
                         Select Path
                       </Button>} />
                     </label>
@@ -502,7 +494,7 @@ export default function addClusterView(props) {
                     <TextField
                       id='outlined-location'
                       label='Executable Location'
-                      className={classes.textContainer}
+                      className='textContainer'
                       style= {{ marginTop: '20px', width: '100%' }}
                       fullWidth
                       defaultValue={fileName}
@@ -534,7 +526,7 @@ export default function addClusterView(props) {
                   onChange={handleUploadPullSecret}
                 />
                 <label htmlFor='contained-button-file'>
-                    <Tooltip title='This is a required field' placement='left' children={<Button variant='contained' className={classes.button} component='span'>
+                    <Tooltip title='This is a required field' placement='left' children={<Button className='button' component='span'>
                       Select Pull Secret file
                     </Button>} />
                 </label>
@@ -544,7 +536,7 @@ export default function addClusterView(props) {
               <TextField
                 id='outlined-location'
                 label='Pull Secret Location'
-                className={classes.textContainer}
+                className='textContainer'
                 style= {{ marginTop: '20px', width: '100%' }}
                 fullWidth
                 defaultValue={pullSecretPath}
@@ -567,7 +559,7 @@ export default function addClusterView(props) {
                 onChange={handleCpuSize}
                 value={cpuSize}
                 InputProps={{ inputProps: { min: crcDefaults.DefaultCPUs } }}
-                className={classes.textContainer}
+                className='textContainer'
               />
               <TextField
                 label='Memory to allocate'
@@ -578,7 +570,7 @@ export default function addClusterView(props) {
                 value={memory}
                 InputProps={{ inputProps: { min: crcDefaults.DefaultMemory } }}
                 helperText='Value in MiB'
-                className={classes.textContainer}
+                className='textContainer'
               />
               <TextField
                 label='Nameserver'
@@ -588,7 +580,7 @@ export default function addClusterView(props) {
                 onChange={handleNameserver}
                 value={crcNameserver}
                 helperText='IPv4 address of nameserver'
-                className={classes.textContainer}
+                className='textContainer'
               />
             </div>)
         case 3:
@@ -600,7 +592,7 @@ export default function addClusterView(props) {
                 secondary={<span>Once the setup process is successful, then proceed to start the cluster in Next step.</span>} />
                 <Button
                   onClick={handleCrcSetup}
-                  className={classes.button}>
+                  className='button'>
                   Setup CRC
                 </Button>
               </ListItem>
@@ -631,16 +623,14 @@ export default function addClusterView(props) {
               <div>
                 {(activeStep !== 0) && (
                   <Button
-                    variant='contained'
                     onClick={handleBack}
-                    className={classes.buttonSecondary}
+                    className='buttonSecondary'
                   >
                     Back
                   </Button>)}
                 <Button
-                  variant='contained'
                   onClick={handleNext}
-                  className={classes.buttonSecondary}
+                  className='buttonSecondary'
                   disabled={handleDisabled()}
                 >
                   {activeStep === steps.length - 1 ? 'Start Cluster' : 'Next'}
@@ -654,19 +644,20 @@ export default function addClusterView(props) {
   );
 
   return (
+    <ThemeProvider theme={ClusterViewStyles.ClusterViewTheme}>
     <div>
       {(!settingPresent) && (
         <div className={classes.root}>
           {WizardSteps()}
           {(activeStep === steps.length) && (
           <div>
-            <Paper square elevation={3} className={classes.resetContainer}>
+            <Paper square elevation={3} className='resetContainer'>
               <StartStopLoader />
               <div className={classes.actionsContainer}>
-                <Button onClick={handleBack} className={classes.button} disabled={(crcProgress || crcStopProgress)}>
+                <Button onClick={handleBack} className='button' disabled={(crcProgress || crcStopProgress)}>
                   Back
                 </Button>
-                <Button onClick={handleReset} className={classes.button} disabled={(crcProgress || crcStopProgress)}>
+                <Button onClick={handleReset} className='button' disabled={(crcProgress || crcStopProgress)}>
                   Reset
                 </Button>
               </div>
@@ -676,19 +667,20 @@ export default function addClusterView(props) {
       </div>)}
       {(settingPresent) && (
         <div className={classes.root}>
-          <Paper square elevation={3} className={classes.resetContainer}>
+          <Paper square elevation={3} className='resetContainer'>
             <blockquote className={classes.blockquoteText}>
               <Typography variant='body2'>
                 OpenShift Local configuration is detected in workspace settings. If you need to setup a new OpenShift Local instance, click on Reset and proceed with guided workflow.
               </Typography>
             </blockquote>
             <StartStopLoader />
-            <Button onClick={handleReset} className={classes.button} disabled={(crcProgress || crcStopProgress)}>
+            <Button onClick={handleReset} className='button' disabled={(crcProgress || crcStopProgress)}>
               Reset
             </Button>
           </Paper>
         </div>
       )}
     </div>
+    </ThemeProvider>
   );
 }

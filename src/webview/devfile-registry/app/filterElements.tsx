@@ -3,21 +3,11 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import React, { ChangeEvent } from 'react';
-import { DefaultProps } from './home';
-import {
-    Registry
-} from './../../../odo/componentType';
-import { makeStyles } from '@material-ui/styles';
+import { Checkbox, FormControlLabel, Tooltip, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import React from 'react';
+import { FilterProps } from '../../common/propertyTypes';
 import filterElementsStyle from './filterElements.style';
-import { Checkbox, FormControlLabel } from '@material-ui/core';
-import { Tooltip, Typography } from '@mui/material';
-
-interface FilterProps extends DefaultProps {
-    id: string,
-    registries: Registry[],
-    onCheckBoxChange: (event: ChangeEvent<HTMLInputElement>, checked: boolean) => void;
-}
 
 const filterStyle = makeStyles(filterElementsStyle);
 
@@ -32,10 +22,10 @@ export const FilterElements: React.FC<FilterProps> = ({
             <Typography style={{ fontSize: 'var(--vscode-editor-font-size)' }}>Registries:</Typography>
             {
                 registries.map((registry, index) => (
-                    <FormControlLabel className={filterStyleCSS.checkBoxItem} key={registry.name + '-' + index}
+                    <FormControlLabel className='checkBoxItem' key={registry.name + '-' + index}
                         control={
                             <Checkbox id={`${id}-${registry.name}`}
-                                className={filterStyleCSS.checkbox}
+                                className='checkbox'
                                 onChange={onCheckBoxChange}
                                 name={registry.name}
                                 checked={registry.state}
