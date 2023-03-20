@@ -3,27 +3,49 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Theme, createStyles } from '@material-ui/core/styles';
+import { createTheme, Theme } from '@mui/material';
+import { createStyles } from '@mui/styles';
 
-export default (theme: Theme) =>
+export const CardTheme = createTheme({
+    components: {
+        MuiButton: {
+            variants: [
+                {
+                    props: {
+                        variant: 'contained'
+                    },
+                    style: {
+                        textTransform: 'none'
+                    }
+                }
+            ]
+        }
+    }
+});
+
+export default (_theme: Theme) =>
     createStyles({
         card: {
-            height: '20rem',
-            width: '15rem',
-            margin: '1rem',
+            height: 'auto',
+            margin: '0.2rem',
             cursor: 'pointer',
-            borderRadius: '1rem',
+            borderRadius: '1rem !important',
             border: '1px solid',
             borderColor: 'inherit',
-            backgroundColor: 'var(--vscode-editor-background)',
-            color: 'var(--vscode-editor-foreground)',
+            backgroundColor: 'var(--vscode-editor-background) !important',
+            color: 'var(--vscode-editor-foreground)  !important',
             transition: 'all ease 200ms',
-            transform: 'scale(0.95)',
+            transform: 'scale(0.95)  !important',
             '&:hover': {
                 transform: 'scale(1)',
                 boxShadow: '0 13px 27px -5px hsla(240, 30.1%, 28%, 0.25), 0 8px 16px -8px hsla(0, 0%, 0%, 0.3), 0 -6px 16px -6px hsla(0, 0%, 0%, 0.03)'
             },
             zIndex: 1
+        },
+        helmHomeCard: {
+            height: '20rem',
+            width: '15rem',
+            margin: '1rem'
         },
         cardHeader: {
             display: 'block',
@@ -97,7 +119,7 @@ export default (theme: Theme) =>
         longDescription: {
             overflow: 'hidden',
             display: '-webkit-box',
-            WebkitLineClamp: 2,
+            WebkitLineClamp: 3,
             WebkitBoxOrient: 'vertical'
         },
         detailedDescription: {
@@ -109,8 +131,8 @@ export default (theme: Theme) =>
             textAlign: 'left'
         },
         helmCard: {
-            color: 'var(--vscode-foreground)',
-            backgroundColor: 'var(--vscode-editor-background)',
+            color: 'var(--vscode-foreground) !important',
+            backgroundColor: 'var(--vscode-editor-background) !important',
             fontSize: 'var(--vscode-font-size)',
             fontFamily: 'var(--vscode-font-family)',
             border: '1px solid',
@@ -145,6 +167,30 @@ export default (theme: Theme) =>
             gap: '0.5rem',
             marginRight: '1rem'
         },
+        yamlCard: {
+            color: 'var(--vscode-foreground) !important',
+            backgroundColor: 'var(--vscode-editor-background) !important',
+            fontSize: 'var(--vscode-font-size)',
+            fontFamily: 'var(--vscode-font-family)',
+            border: '1px solid',
+            borderColor: 'inherit',
+            maxHeight: '40rem',
+            width: '65rem',
+            margin: 'auto',
+            overflow: 'auto !important'
+        },
+        yamlCardHeader: {
+            padding: '1.5rem!important',
+            paddingTop: '1.5rem!important',
+            borderBottom: '1px solid',
+            borderBottomColor: 'inherit',
+            height: 'auto'
+        },
+        yamlCardBody: {
+            position: 'relative',
+            width: '100%',
+            height: '50rem'
+        },
         copyButton: {
             display: 'block',
             float: 'right',
@@ -160,14 +206,17 @@ export default (theme: Theme) =>
             textAlign: 'center',
             outline: '0.0625rem solid transparent',
             outlineOffset: '0.125rem!important',
-            fontSize: 'var(--vscode-font-size)',
-            fontFamily: 'var(--vscode-font-family)',
-            justifyContent: 'space-between',
-            color: 'var(--vscode-button-foreground)',
-            backgroundColor: 'var(--vscode-button-background)',
+            fontSize: 'var(--vscode-font-size) !important',
+            fontFamily: 'var(--vscode-font-family) !important',
+            justifyContent: 'space-between !important',
+            color: 'var(--vscode-button-foreground) !important',
+            backgroundColor: 'var(--vscode-button-background) !important',
             '&:hover': {
                 cursor: 'pointer',
-                backgroundColor: 'var(--vscode-button-hoverBackground)'
+                backgroundColor: 'var(--vscode-button-hoverBackground) !important'
+            },
+            '&:disabled': {
+                backgroundColor: 'var(--vscode-button-secondaryBackground) !important'
             },
             textTransform: 'none'
         },
@@ -196,10 +245,11 @@ export default (theme: Theme) =>
             height: '3rem'
         },
         devPageCard: {
-            color: 'var(--vscode-foreground)',
-            backgroundColor: 'var(--vscode-editor-background)',
+            color: 'var(--vscode-foreground) !important',
+            backgroundColor: 'var(--vscode-editor-background) !important',
             height: 'auto',
-            width: '65rem'
+            width: '65rem',
+            boxShadow: 'none !important'
         },
         devPageCardHeader: {
             display: 'block',
@@ -207,31 +257,32 @@ export default (theme: Theme) =>
             margin: '0.5rem'
         },
         starterProjectCard: {
-            color: 'var(--vscode-foreground)',
-            backgroundColor: 'var(--vscode-editor-background)',
+            color: 'var(--vscode-foreground) !important',
+            backgroundColor: 'var(--vscode-editor-background) !important',
             fontSize: 'var(--vscode-font-size)',
             fontFamily: 'var(--vscode-font-family)',
             width: '60rem',
             maxHeight: '18rem',
-            overflow: 'auto',
+            overflow: 'auto !important',
             border: '1px solid',
             borderColor: 'inherit'
+        },
+        starterProjectCardHeader: {
+            display: 'flex',
+            height: '1rem',
+            margin: '0.5rem'
         },
         starterProjectCardBody: {
             width: 'auto',
             display: 'flex',
-            flexDirection: 'row',
-            gap: '2rem',
             borderTop: '1px solid',
             borderTopColor: 'inherit',
-            paddingTop: '1rem',
-            margin: '0.5rem',
-            overflow: 'hidden'
+            paddingTop: '1rem'
         },
         starterProjectSelect: {
             width: '40%',
             alignItems: 'center',
-            height: '6rem',
+            height: '10rem',
             marginLeft: '0.5rem',
             overflowX: 'hidden',
             overflowY: 'scroll',
@@ -245,7 +296,7 @@ export default (theme: Theme) =>
             }
         },
         starterProjectSelected: {
-            width: '80%',
+            width: '95%',
             backgroundColor: 'var(--vscode-list-activeSelectionBackground)',
             color: 'var(--vscode-list-activeSelectionForeground)',
             paddingLeft: '0.5rem',
@@ -256,7 +307,7 @@ export default (theme: Theme) =>
             borderColor: 'var(--vscode-focusBorder)'
         },
         project: {
-            width: '80%',
+            width: '95%',
             paddingLeft: '0.5rem',
             paddingTop: '0.2rem',
             paddingBottom: '0.5rem',
@@ -269,7 +320,7 @@ export default (theme: Theme) =>
             }
         },
         display: {
-            width: '20%',
+            width: '50%',
             alignItems: 'center',
             marginLeft: 'auto',
             marginRight: 'auto',

@@ -1,3 +1,12 @@
+/*-----------------------------------------------------------------------------------------------
+ *  Copyright (c) Red Hat, Inc. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE file in the project root for license information.
+ *-----------------------------------------------------------------------------------------------*/
+input[type='text'] {
+    padding: 10px 0 !important;
+    height: 1rem;
+}
+
 .MuiFormHelperText-root {
     color: var(--vscode-foreground) !important;
     margin-left: 0px !important;

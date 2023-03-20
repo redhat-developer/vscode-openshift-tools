@@ -5,14 +5,9 @@
 
 import * as React from 'react';
 
-// import Loader from 'react-loader-spinner';
-import { createStyles, makeStyles, Theme, createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-// import Switch from '@material-ui/core/Switch';
-// import FormGroup from '@material-ui/core/FormGroup';
-// import FormControlLabel from '@material-ui/core/FormControlLabel';
+import { createTheme, Theme, ThemeProvider } from '@mui/material/styles';
+import { makeStyles, createStyles } from '@mui/styles';
+import { AppBar, Toolbar, Typography } from '@mui/material';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -28,7 +23,7 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
-const theme = createMuiTheme({
+const theme = createTheme({
     typography: {
       h6: {
         fontSize: 12,

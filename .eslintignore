@@ -11,6 +11,7 @@ src/webview/describe
 src/webview/cluster
 src/webview/webpack.config.js
 out
+src/webview/common
 src/webview/create-service
 src/webview/devfile-registry
 src/webview/welcome

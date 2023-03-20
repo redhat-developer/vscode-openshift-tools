@@ -12,7 +12,6 @@ export interface DevFileProps extends React.AnchorHTMLAttributes<HTMLAnchorEleme
     hasGitLink: boolean;
     cardItemStyle: any;
     themeKind: number;
-    projectDisplayStyle: any
 }
 
 export const WrapperCardItem: React.ForwardRefExoticComponent<DevFileProps> = forwardRef((props, ref) => <CardItem {...props} />)

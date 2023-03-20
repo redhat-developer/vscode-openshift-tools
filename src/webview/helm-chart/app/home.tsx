@@ -2,51 +2,40 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import React from 'react';
-import { makeStyles } from '@material-ui/core';
-import { WrapperCardItem as CardItem } from './wrapperCardItem';
-import { LoadScreen } from './loading';
-import { VSCodeMessage } from '../vsCodeMessage';
-import homeStyle from './home.style';
-import cardItemStyle from './cardItem.style';
-import starterProjectDisplayStyle from './starterProjectDisplay.style';
-import { ErrorPage } from './errorPage';
 import { ImageList, ImageListItem } from '@mui/material';
-import { SearchBar } from './searchBar';
+import { makeStyles, ThemeProvider } from '@mui/styles';
+import React from 'react';
+import { ErrorPage } from '../../common/errorPage';
+import { HomeTheme } from '../../common/home.style';
+import { LoadScreen } from '../../common/loading';
+import { DefaultProps, HelmChartHomePageProps } from '../../common/propertyTypes';
+import { SearchBar } from '../../common/searchBar';
 import { ChartResponse } from '../helmChartType';
+import { VSCodeMessage } from '../vsCodeMessage';
+import cardItemStyle from '../../common/cardItem.style';
+import { WrapperCardItem as CardItem } from './wrapperCardItem';
 
-const useHomeStyles = makeStyles(homeStyle);
-const starterProjectDisplayStyles = makeStyles(starterProjectDisplayStyle);
 const useCardItemStyles = makeStyles(cardItemStyle);
 
-interface HomePageProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-    helmEntries: ChartResponse[];
-    themeKind: number;
-}
-
-export interface DefaultProps {
-    analytics?: import('@segment/analytics-next').Analytics;
-}
-
-const HomeItem: React.FC<HomePageProps> = ({
+const HomeItem: React.FC<HelmChartHomePageProps> = ({
     helmEntries,
     themeKind
-}: HomePageProps) => {
-    const homeStyleClass = useHomeStyles();
+}: HelmChartHomePageProps) => {
     const cardItemStyle = useCardItemStyles();
-    const projectDisplayStyle = starterProjectDisplayStyles();
     return (
-        <ImageList className={homeStyleClass.devfileGalleryGrid} cols={4}>
-            {
-                helmEntries.map((helmEntry: ChartResponse, index: number) => (
-                    <ImageListItem key={`imageList-` + index}>
-                        <CardItem key={helmEntry.displayName} helmEntry={helmEntry}
-                            cardItemStyle={cardItemStyle} projectDisplayStyle={projectDisplayStyle}
-                            themeKind={themeKind} />
-                    </ImageListItem>
-                ))
-            }
-        </ImageList>
+        <ThemeProvider theme={HomeTheme}>
+            <ImageList className='devfileGalleryGrid' cols={4}>
+                {
+                    helmEntries.map((helmEntry: ChartResponse, index: number) => (
+                        <ImageListItem key={`imageList-` + index}>
+                            <CardItem key={helmEntry.displayName} helmEntry={helmEntry}
+                                cardItemStyle={cardItemStyle}
+                                themeKind={themeKind} />
+                        </ImageListItem>
+                    ))
+                }
+            </ImageList>
+        </ThemeProvider>
     );
 };
 
@@ -87,7 +76,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
             {
                 filteredHelmCharts.length > 0 || searchValue.length > 0 ?
                     <>
-                        <SearchBar onSearchBarChange={function (value: string): void {
+                        <SearchBar title='Search chart by name' onSearchBarChange={function (value: string): void {
                             setSearchValue(value);
                             setFilteredHelmCharts(getFilteredCompDesc(helmCharts, value));
                         }} searchBarValue={searchValue} />

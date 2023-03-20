@@ -2,9 +2,10 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import React from 'react';
-import { Box, makeStyles, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import LinearProgress from '@mui/material/LinearProgress';
+import { makeStyles } from '@mui/styles';
+import * as React from 'react';
 import loaderStyle from './loading.style';
 
 interface LoadProps extends React.AllHTMLAttributes<HTMLDivElement> {

@@ -3,8 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
-import { Box, Typography } from '@material-ui/core';
-import { CircularProgress } from '@mui/material';
+import { Box, CircularProgress, Typography } from '@mui/material';
 
 interface LoadProps extends React.AllHTMLAttributes<HTMLDivElement> {
     title: string
