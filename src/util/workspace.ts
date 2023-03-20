@@ -18,9 +18,9 @@ export const AddWorkspaceFolder: QuickPickItem = {
     description: 'Folder which does not have an OpenShift context',
 };
 
-function isFile(filePath: string) {
+function isFile(path: string) {
     try {
-        return fs.statSync(filePath).isFile()
+        return fs.statSync(path).isFile()
     } catch (ignore) {
         return false;
     }
