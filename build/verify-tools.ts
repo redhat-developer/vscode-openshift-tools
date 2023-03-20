@@ -54,7 +54,7 @@ async function verifyTools(): Promise<void> {
                 targetFolder,
                 configData[key].platform[OS].dlFileName,
                 configData[key].platform[OS].url,
-                configData[key].platform[OS].sha256sum,
+                configData[key].platform[OS].sha256sum || DownloadUtil.downloadSha256(`${configData[key].platform[OS].url}.sha256`),
             );
         }
     }
