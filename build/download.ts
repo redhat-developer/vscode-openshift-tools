@@ -3,12 +3,17 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable no-unused-expressions */
 import * as fs from 'fs-extra';
-import got, { PlainResponse } from 'got';
-import { promisify } from 'util';
-import { fromEvent } from 'rxjs';
-import { throttleTime } from 'rxjs/operators';
+
+import { PlainResponse } from 'got';
+const { promisify } = require('util');
+const { fromEvent } = require('rxjs');
+const { throttleTime } = require('rxjs/operators');
 const pipeline = promisify(require('stream').pipeline);
+// eslint-disable-next-line import/no-extraneous-dependencies
+const got = require('got');
 
 export class DownloadUtil {
     static async downloadFile(
@@ -38,7 +43,11 @@ export class DownloadUtil {
     }
 
     static async downloadSha256(fromUrl: string): Promise<string> {
-        const request: PlainResponse = await got.get(fromUrl);
-        return typeof request.body === 'string' ? request.body : '';
+        try {
+            const request: PlainResponse = await got.get(fromUrl);
+            return typeof request.body === 'string' ? request.body : '';
+        } catch (error) {
+            return '';
+        }
     }
 }
