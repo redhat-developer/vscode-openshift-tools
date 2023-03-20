@@ -41,13 +41,14 @@ async function downloadFileAndCreateSha256(
     mkdirp.sync(toolsCacheFolder);
     mkdirp.sync(toolsFolder);
     const currentFile = path.join(toolsCacheFolder, platform.dlFileName);
-    if (await isDownloadRequired(currentFile, platform.sha256sum)) {
+    const sha256sum = platform.sha256sum || await DownloadUtil.downloadSha256(`${platform.url}.sha256`);
+    if (await isDownloadRequired(currentFile, sha256sum)) {
         console.log(`Downloading ${platform.url} to ${currentFile}`);
         await DownloadUtil.downloadFile(platform.url, currentFile, (current) =>
             console.log(`${current}%`),
         );
         const currentSHA256 = await hasha.fromFile(currentFile, { algorithm: 'sha256' });
-        if (currentSHA256 === platform.sha256sum) {
+        if (currentSHA256 === sha256sum) {
             console.log(`Download of ${currentFile} has finished and SHA256 is correct`);
         } else {
             throw Error(`${currentFile} is downloaded and SHA256 is not correct`);

@@ -10,20 +10,17 @@
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/odo/v3.8.0/odo-windows-amd64.exe.zip",
-                "sha256sum": "0d33e08aa79638d306dd495ae421f9f7685acdbdcd0cc4f06ffb851c262d5437",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/latest/odo-windows-amd64.exe.zip",
                 "dlFileName": "odo-windows-amd64.exe.zip",
                 "cmdFileName": "odo-windows-amd64.exe"
             },
             "darwin": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/odo/v3.8.0/odo-darwin-amd64.tar.gz",
-                "sha256sum": "cd84feb03533df0ceda3bb2e5590e7c2ec360e85f7c60a447e9ef86214171954",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/odo/latest/odo-darwin-arm64.tar.gz",
                 "dlFileName": "odo-darwin-amd64.tar.gz",
                 "cmdFileName": "odo-darwin-amd64"
             },
             "linux": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/odo/v3.8.0/odo-linux-amd64.tar.gz",
-                "sha256sum": "dc1b9e81bab3185c90e42f42e9066f298310cef5c6371242187cee9d70aa439c",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/odo/latest/odo-linux-amd64.tar.gz",
                 "dlFileName": "odo-linux-amd64.tar.gz",
                 "cmdFileName": "odo"
             }
@@ -71,19 +68,16 @@
         "platform": {
             "win32": {
                 "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/latest/helm-windows-amd64.exe.zip",
-                "sha256sum": "c1796e4ed2d7aa3de5d09c3f586bd45524ce28a6f69745297822e2da8611e9d1",
                 "dlFileName": "helm-windows-amd64.exe.zip",
                 "cmdFileName": "helm-windows-amd64.exe"
             },
             "darwin": {
                 "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/latest/helm-darwin-amd64.tar.gz",
-                "sha256sum": "6f070900b97b12a06b838761a275b9cdf39bb1082612e8085491855cda2bbbbd",
                 "dlFileName": "helm-darwin-amd64.tar.gz",
                 "cmdFileName": "helm-darwin-amd64"
             },
             "linux": {
                 "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/latest/helm-linux-amd64.tar.gz",
-                "sha256sum": "3961f2f8c0ec61383c9efa295bb7c38769cda57847139b59d1ddf8958ee379e2",
                 "dlFileName": "helm-linux-amd64.tar.gz",
                 "cmdFileName": "helm-linux-amd64"
             }
