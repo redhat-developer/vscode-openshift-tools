@@ -107,7 +107,6 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return this.registries;
     }
 
-    @vsCommand('openshift.component.analyze')
     public async getAnalyze(currentFolder: Uri): Promise<CliExitData> {
         const response = await getInstance().execute(Command.analyze(), currentFolder.fsPath);
         return response;
