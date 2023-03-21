@@ -107,11 +107,6 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return this.registries;
     }
 
-    public async getAnalyze(currentFolder: Uri): Promise<CliExitData> {
-        const response = await getInstance().execute(Command.analyze(), currentFolder.fsPath);
-        return response;
-    }
-
     public getCompDescriptions(): Set<ComponentTypeDescription> {
         return this.compDescriptions;
     }

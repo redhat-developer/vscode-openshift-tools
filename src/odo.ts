@@ -19,7 +19,7 @@ import { Platform } from './util/platform';
 import * as odo from './odo/config';
 import { GlyphChars } from './util/constants';
 import { Application } from './odo/application';
-import { ComponentType, ComponentTypeAdapter, Registry, DevfileComponentType } from './odo/componentType';
+import { ComponentType, ComponentTypeAdapter, Registry, DevfileComponentType, AnalyzeResponse } from './odo/componentType';
 import { Project } from './odo/project';
 import { ComponentsJson, NotAvailable } from './odo/component';
 import { Service, ServiceOperatorShortInfo } from './odo/service';
@@ -330,6 +330,7 @@ export interface Odo {
     addRegistry(name: string, url: string, token: string): Promise<Registry>;
     removeRegistry(name: string): Promise<void>;
     describeComponent(contextPath: string, experimental?: boolean): Promise<ComponentDescription | undefined>;
+    analyze(contextPath: string): Promise<AnalyzeResponse[]>;
 }
 
 class OdoModel {
@@ -814,6 +815,12 @@ export class OdoImpl implements Odo {
 
     getSettingsByContext(context: string): odo.Component {
         return OdoImpl.data.getSettingsByContext(context);
+    }
+
+    public async analyze(currentFolderPath: string): Promise<AnalyzeResponse[]> {
+        const cliData: CliExitData = await this.execute(Command.analyze(), currentFolderPath);
+        const parse = JSON.parse(cliData.stdout) as AnalyzeResponse[];
+        return parse;
     }
 
     public loadItems<I>(result: cliInstance.CliExitData, fetch: (data) => I[] = (data): I[] => data.items): I[] {

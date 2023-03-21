@@ -18,7 +18,7 @@ import { vsCommand } from '../../vscommand';
 import * as odo3 from '../../odo3';
 import { ComponentDescription } from '../../odo/componentTypeDescription';
 import { ComponentWorkspaceFolder } from '../../odo/workspace';
-import { CliExitData } from '../../cli';
+import { OdoImpl } from '../../odo';
 
 let panel: vscode.WebviewPanel;
 let childProcess: cp.ChildProcess;
@@ -220,11 +220,10 @@ async function close(event: any) {
 async function parseGitURL(event: any) {
     const clonedFolder: vscode.Uri = vscode.Uri.from(event.clonedFolder);
     const isDevFile = isDevfileDetect(clonedFolder);
-    let analyzeRes: CliExitData;
+    let analyzeRes: AnalyzeResponse[];
     try {
-        analyzeRes = await ComponentTypesView.instance.getAnalyze(clonedFolder);
-        const devfiles: AnalyzeResponse[] = JSON.parse(analyzeRes?.stdout);
-        const compDescription: ComponentTypeDescription[] = getCompDescription(devfiles);
+        analyzeRes = await OdoImpl.Instance.analyze(clonedFolder.fsPath);
+        const compDescription: ComponentTypeDescription[] = getCompDescription(analyzeRes);
         panel?.webview.postMessage({
             action: event?.action,
             gitURL: event.param.value,
