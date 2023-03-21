@@ -3,16 +3,20 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import path = require('path');
 import { checkAboutCommand } from './suite/command-about';
+import { createComponentTest } from './suite/component';
 import { testDevfileRegistries } from './suite/devfileRegistries';
 import { checkExtension } from './suite/extension';
 import { checkFocusOnCommands } from './suite/focusOn';
 import { checkOpenshiftView } from './suite/openshift';
 
 describe('Extension public-facing UI tests', () => {
+    const contextFolder = path.join(__dirname, 'context');
     checkExtension();
     checkOpenshiftView();
     checkAboutCommand();
     testDevfileRegistries();
     checkFocusOnCommands();
+    createComponentTest(contextFolder);
 });

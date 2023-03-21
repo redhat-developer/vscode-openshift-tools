@@ -6,7 +6,7 @@
 import { expect } from 'chai';
 import { ActivityBar, InputBox, SideBarView, TreeItem, ViewSection, VSBrowser, WelcomeContentButton, Workbench } from 'vscode-extension-tester';
 import { itemExists, notificationExists, terminalHasText, waitForInputProgress, waitForInputUpdate } from '../common/conditions';
-import { VIEWS, MENUS, BUTTONS, INPUTS, COMPONENTS, NOTIFICATIONS } from '../common/constants';
+import { BUTTONS, COMPONENTS, INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
 
 export function createComponentTest(contextFolder: string) {
     describe('Component creation', () => {
@@ -166,6 +166,38 @@ export function createComponentTest(contextFolder: string) {
             const menu = await component.openContextMenu();
             await menu.select(MENUS.push);
             await terminalHasText(COMPONENTS.pushSuccess, 120000);
+        });
+
+        it('Create a component from components view', async function () {
+            this.timeout(15_000);
+            const actionButton = await components.getAction('New Component');
+            await actionButton.click();
+
+            // provide component folder
+            const input = await InputBox.create();
+            const componentMessage = await input.getMessage();
+            await input.setText(contextFolder);
+            await input.confirm();
+            await waitForInputUpdate(input, componentMessage);
+
+            // select the go devfile
+            const devfileMessage = await input.getMessage();
+            await input.setText('go/DefaultDevfileRegistry');
+            await input.confirm();
+            await waitForInputUpdate(input, devfileMessage);
+
+            // say YES to starter code
+            await new Promise(res => setTimeout(res, 500));
+            await input.selectQuickPick(INPUTS.yes);
+
+            // provide component name
+            await waitForInputUpdate(input, '');
+            await input.setText(compName);
+            await input.confirm();
+
+            await new Promise(res => setTimeout(res, 5000));
+            const project = await itemExists(projectName, explorer) as TreeItem;
+            await project.expand();
         });
     });
 }
