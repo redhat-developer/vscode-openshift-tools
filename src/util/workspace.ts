@@ -71,12 +71,12 @@ export async function selectWorkspaceFolder(skipWindowPick = false): Promise<Uri
             canSelectFolders: true,
             canSelectMany: false,
             defaultUri: Uri.file(Platform.getUserHomePath()),
-            openLabel: skipWindowPick ? 'Select as Repositroy Destination' : 'Add context folder for component in workspace.',
+            openLabel: skipWindowPick ? 'Select as Repository Destination' : 'Add context folder for component in workspace.',
         });
         if (!selectedFolders) return null;
         if (fs.existsSync(path.join(selectedFolders[0].fsPath, '.odo', 'config.yaml'))) {
             void window.showInformationMessage(
-                'The folder selected already contains a component. Please select a different folder.',
+                'The selected folder already contains a component. Please select a different folder.',
             );
             return selectWorkspaceFolder(skipWindowPick);
         }

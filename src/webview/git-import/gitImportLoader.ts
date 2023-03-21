@@ -110,7 +110,7 @@ async function gitImportMessageListener(event: any): Promise<any> {
                 appendedUri = vscode.Uri.joinPath(workspacePath, event.projectName);
                 const isExistingComponent = await existingComponent(workspacePath);
                 if (isExistingComponent) {
-                    vscode.window.showErrorMessage(`Unable to create Component inside an existing Component: ${workspacePath}, Please select another folder`);
+                    vscode.window.showErrorMessage(`Unable to create new component inside an existing component: ${workspacePath}, Please select another folder to proceed.`);
                     alreadyExist = true;
                 } else if (fs.existsSync(appendedUri.fsPath) && fs.readdirSync(appendedUri.fsPath).length > 0) {
                     vscode.window.showErrorMessage(`Folder ${appendedUri.fsPath.substring(appendedUri.fsPath.lastIndexOf('\\') + 1)} already exist
@@ -242,7 +242,7 @@ async function parseGitURL(event: any) {
                 action: 'devfileFailed'
             });
             const actions: Array<string> = ['Yes', 'Cancel'];
-            const devfileRegenerate = await vscode.window.showInformationMessage('Seems you are using Devfile v1. Will you be okay to regenerate it with v2?', ...actions);
+            const devfileRegenerate = await vscode.window.showInformationMessage('We have detected that the repo contains congifuration based on devfile v1. The extension does not support devfile v1, will you be okay to regenerate a new devfile v2?', ...actions);
             if (devfileRegenerate === 'Yes') {
                 const devFileYamlPath = path.join(clonedFolder.fsPath, 'devfile.yaml');
                 const deleted = deleteFile(devFileYamlPath);
