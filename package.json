@@ -54,6 +54,7 @@
 		"dev:compile:log-view": "webpack --mode development --config src/webview/log/webpack.config.js",
 		"dev:compile:describe-view": "webpack --mode development --config src/webview/describe/webpack.config.js",
 		"dev:compile:cluster-view": "webpack --mode development --config src/webview/cluster/webpack.config.js",
+        "dev:compile:create-component-view": "webpack --mode development --config src/webview/create-component/webpack.config.js",
 		"dev:compile:create-service-view": "webpack --mode development --config src/webview/create-service/webpack.config.js",
 		"dev:compile:devfile-registry-view": "webpack --mode development --config src/webview/devfile-registry/webpack.config.js",
 		"dev:compile:welcome-view": "webpack --mode development --config src/webview/welcome/webpack.config.js",
@@ -66,6 +67,7 @@
 		"dev:run:welcome-view": "webpack-dev-server --port 9222 --mode development --config src/webview/welcome/webpack.config.js",
 		"dev:run:git-import-view": "webpack-dev-server --port 9222 --mode development --config src/webview/git-import/webpack.config.js",
         "dev:run:helm-chart-view": "webpack-dev-server --port 9222 --mode development --config src/webview/helm-chart/webpack.config.js",
+        "dev:run:create-component-view": "webpack-dev-server --mode development --config src/webview/create-component/webpack.config.js",
 		"dev:run:create-service-view": "webpack-dev-server --mode development --config src/webview/create-service/webpack.config.js",
 		"watch": "tsc -watch -p ./",
 		"clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/logViewer",
@@ -445,6 +447,15 @@
 			{
 				"command": "openshift.component.createFromLocal",
 				"title": "New Component",
+				"category": "OpenShift",
+				"icon": {
+					"light": "images/title/light/workspace-new.svg",
+					"dark": "images/title/dark/workspace-new.svg"
+				}
+			},
+            {
+				"command": "openshift.component.createComponentNew",
+				"title": "New Component Workflow",
 				"category": "OpenShift",
 				"icon": {
 					"light": "images/title/light/workspace-new.svg",
@@ -1115,6 +1126,11 @@
 				},
 				{
 					"command": "openshift.component.createFromLocal",
+					"when": "view == openshiftComponentsView",
+					"group": "navigation"
+				},
+                {
+					"command": "openshift.component.createComponentNew",
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
 				},

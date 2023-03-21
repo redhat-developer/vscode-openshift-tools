@@ -25,6 +25,7 @@ import { ComponentWorkspaceFolder } from '../odo/workspace';
 import LogViewLoader from '../webview/log/LogViewLoader';
 import GitImportLoader from '../webview/git-import/gitImportLoader';
 import { CliChannel } from '../cli';
+import CreateComponentLoader from '../webview/create-component/createComponentLoader';
 
 function createCancelledResult(stepName: string): any {
     const cancelledResult: any = new String('');
@@ -457,6 +458,11 @@ export class Component extends OpenShiftItem {
         if (!workspacePath) return createCancelledResult('contextFolder');
 
         return Component.createFromRootWorkspaceFolder(workspacePath, [], { componentTypeName: compTypeName, projectName: starterProjectName, registryName: regName });
+    }
+
+    @vsCommand('openshift.component.createComponentNew')
+    static async createComponent(): Promise<void> {
+        await CreateComponentLoader.loadView('Create Component');
     }
 
     @vsCommand('openshift.component.openImportFromGit')
