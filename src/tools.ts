@@ -36,7 +36,7 @@ export class ToolsConfig {
         ToolsConfig.tools = ToolsConfig.loadMetadata(configData, Platform.OS);
     }
 
-    public static detect(cmd: string): Promise<string> {
+    public static async detect(cmd: string): Promise<string> {
 
         if (ToolsConfig.tools[cmd].location === undefined) {
             const toolCacheLocation = path.resolve(__dirname, '..', 'tools', Platform.OS, ToolsConfig.tools[cmd].cmdFileName);
@@ -47,7 +47,7 @@ export class ToolsConfig {
             }
 
             ToolsConfig.tools[cmd].location =
-                ToolsConfig.selectTool(toolLocations, ToolsConfig.tools[cmd].versionRange).then(
+                await ToolsConfig.selectTool(toolLocations, ToolsConfig.tools[cmd].versionRange).then(
                     (location) => {
                         if (location && Platform.OS !== 'win32') fs.chmodSync(location, 0o765);
                         return location;

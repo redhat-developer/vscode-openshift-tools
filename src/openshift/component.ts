@@ -238,9 +238,6 @@ export class Component extends OpenShiftItem {
                     open: () => {
                         outputEmitter.fire(`Starting ${Command.dev(component.component.devfileData.supportedOdoFeatures.debug).toString()}\r\n`);
                         let opt: SpawnOptions = {cwd: component.contextPath};
-                        if (runOn) {
-                            opt = {...opt, env: {ODO_EXPERIMENTAL_MODE: 'true'}}
-                        }
                         void CliChannel.getInstance().spawnTool(Command.dev(component.component.devfileData.supportedOdoFeatures.debug, runOn), opt).then((cp) => {
                             devProcess = cp;
                             devProcess.on('spawn', () => {
@@ -392,6 +389,7 @@ export class Component extends OpenShiftItem {
             .getConfiguration('openshiftToolkit')
             .get<boolean>('useWebviewInsteadOfTerminalView');
     }
+
     static createExperimentalEnv(componentFolder) {
         return Component.getComponentDevState(componentFolder).runOn ? {ODO_EXPERIMENTAL_MODE: 'true'} : {};
     }
@@ -402,8 +400,7 @@ export class Component extends OpenShiftItem {
         await Component.odo.executeInTerminal(
             command(),
             componentFolder.contextPath,
-            `OpenShift: Describe '${componentFolder.component.devfileData.devfile.metadata.name}' Component`,
-            Component.createExperimentalEnv(componentFolder));
+            `OpenShift: Describe '${componentFolder.component.devfileData.devfile.metadata.name}' Component`);
         return;
     }
 
@@ -416,8 +413,7 @@ export class Component extends OpenShiftItem {
             void Component.odo.executeInTerminal(
                 Command.showLog(),
                 componentFolder.contextPath,
-                `OpenShift: Show '${componentName}' Component Log`,
-                Component.createExperimentalEnv(componentFolder));
+                `OpenShift: Show '${componentName}' Component Log`);
         }
         return;
     }
@@ -426,13 +422,12 @@ export class Component extends OpenShiftItem {
     static followLog(componentFolder: ComponentWorkspaceFolder): Promise<string> {
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
         if (Component.isUsingWebviewEditor()) {
-            LogViewLoader.loadView(`${componentName} Follow Log`, Command.showLogAndFollow, componentFolder, Component.createExperimentalEnv(componentFolder));
+            LogViewLoader.loadView(`${componentName} Follow Log`, Command.showLogAndFollow, componentFolder);
         } else {
             void Component.odo.executeInTerminal(
                 Command.showLogAndFollow(),
                 componentFolder.contextPath,
-                `OpenShift: Follow '${componentName}' Component Log`,
-                Component.createExperimentalEnv(componentFolder));
+                `OpenShift: Follow '${componentName}' Component Log`);
         }
         return;
     }
