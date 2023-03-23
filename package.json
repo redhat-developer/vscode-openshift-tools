@@ -1562,12 +1562,6 @@
                         "description": "Show OpenShift Toolkit Experimental Features.",
                         "type": "boolean",
                         "default": true
-                    },
-                    "openshiftToolkit.devModeRunOnPodman": {
-                        "order": 2,
-                        "description": "Show warning about experimental feature",
-                        "type": "boolean",
-                        "default": true
                     }
                 }
             }
