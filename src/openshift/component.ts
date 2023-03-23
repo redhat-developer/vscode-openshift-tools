@@ -216,7 +216,7 @@ export class Component extends OpenShiftItem {
                     onDidWrite: outputEmitter.event,
                     open: () => {
                         outputEmitter.fire(`Starting ${Command.dev(component.component.devfileData.supportedOdoFeatures.debug).toString()}\r\n`);
-                        let opt: SpawnOptions = {cwd: component.contextPath};
+                        const opt: SpawnOptions = {cwd: component.contextPath};
                         void CliChannel.getInstance().spawnTool(Command.dev(component.component.devfileData.supportedOdoFeatures.debug, runOn), opt).then((cp) => {
                             devProcess = cp;
                             devProcess.on('spawn', () => {
