@@ -1424,6 +1424,18 @@
 							"onCommand:openshift.componentType.newComponent"
 						]
 					},
+                    {
+						"id": "helmChart",
+						"title": "Work with Helm Charts",
+						"description": "Browse the catalog to discover and install Helm Charts.\n[Browse Helm Chart](command:openshift.componentTypesView.registry.openHelmChartsInView)",
+						"media": {
+							"image": "images/walkthrough/helm.gif",
+							"altText": "helm chart"
+						},
+						"completionEvents": [
+							"onCommand:openshift.componentTypesView.registry.openHelmChartsInView"
+						]
+					},
 					{
 						"id": "importFromGit",
 						"title": "Create a Component from git repository",
