@@ -5,6 +5,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as YAML from 'yaml';
 import { ExtensionID } from '../../util/constants';
 import { ComponentTypesView } from '../../registriesView';
 import { AnalyzeResponse, ComponentTypeDescription } from '../../odo/componentType';
@@ -16,10 +17,10 @@ import treeKill = require('tree-kill')
 import cp = require('child_process');
 import { vsCommand } from '../../vscommand';
 import * as odo3 from '../../odo3';
-import { ComponentDescription } from '../../odo/componentTypeDescription';
+import { ComponentDescription, Endpoint } from '../../odo/componentTypeDescription';
 import { ComponentWorkspaceFolder } from '../../odo/workspace';
 import { OdoImpl } from '../../odo';
-
+import { DevfileConverter } from './devfileConverter';
 let panel: vscode.WebviewPanel;
 let childProcess: cp.ChildProcess;
 let forceCancel = false;
@@ -219,22 +220,12 @@ async function close(event: any) {
 
 async function parseGitURL(event: any) {
     const clonedFolder: vscode.Uri = vscode.Uri.from(event.clonedFolder);
-    const isDevFile = isDevfileDetect(clonedFolder);
-    let analyzeRes: AnalyzeResponse[];
+    let isDevFile = isDevfileDetect(clonedFolder);
+    let analyzeRes: AnalyzeResponse[] = [];
+    let compDescriptions: ComponentTypeDescription[] = [];
     try {
         analyzeRes = await OdoImpl.Instance.analyze(clonedFolder.fsPath);
-        const compDescription: ComponentTypeDescription[] = getCompDescription(analyzeRes);
-        panel?.webview.postMessage({
-            action: event?.action,
-            gitURL: event.param.value,
-            appName: event.projectName + '-app',
-            name: event.projectName + '-comp',
-            error: false,
-            isDevFile: isDevFile,
-            helpText: 'The git repo is valid.',
-            compDescription: compDescription,
-            parser: event.parser
-        });
+        compDescriptions = getCompDescription(analyzeRes);
     } catch (error) {
         if (error.message.toLowerCase().indexOf('failed to parse the devfile') !== -1) {
             panel?.webview.postMessage({
@@ -243,20 +234,44 @@ async function parseGitURL(event: any) {
             const actions: Array<string> = ['Yes', 'Cancel'];
             const devfileRegenerate = await vscode.window.showInformationMessage('We have detected that the repo contains congifuration based on devfile v1. The extension does not support devfile v1, will you be okay to regenerate a new devfile v2?', ...actions);
             if (devfileRegenerate === 'Yes') {
-                const devFileYamlPath = path.join(clonedFolder.fsPath, 'devfile.yaml');
-                const deleted = deleteFile(devFileYamlPath);
-                if (deleted) {
-                    panel?.webview.postMessage({
-                        action: 'devfileRegenerated'
-                    });
-                    parseGitURL(event);
-                } else {
-                    closeWithMessage('Failed to delete devfile.yaml, Unable to proceed the component creation', clonedFolder);
+                try {
+                    const devFileV1Path = path.join(clonedFolder.fsPath, 'devfile.yaml');
+                    const file = fs.readFileSync(devFileV1Path, 'utf8');
+                    const devfileV1 = YAML.parse(file.toString());
+                    const deleted = deleteFile(devFileV1Path);
+                    if (deleted) {
+                        analyzeRes = await OdoImpl.Instance.analyze(clonedFolder.fsPath);
+                        compDescriptions = getCompDescription(analyzeRes);
+                        const endPoints = getEndPoints(compDescriptions[0]);
+                        const devfileV2 = await DevfileConverter.getInstance().devfileV1toDevfileV2(devfileV1, endPoints);
+                        const yaml = YAML.stringify(devfileV2, { sortMapEntries: true });
+                        fs.writeFileSync(devFileV1Path, yaml.toString(), 'utf-8');
+                        isDevFile = true;
+                        panel?.webview.postMessage({
+                            action: 'devfileRegenerated'
+                        });
+                    } else {
+                        closeWithMessage('Failed to delete devfile.yaml, Unable to proceed the component creation', clonedFolder);
+                    }
+                } catch (e) {
+                    closeWithMessage('Failed to parse devfile v1, Unable to proceed the component creation', clonedFolder);
                 }
             } else {
                 closeWithMessage('Devfile version not supported, Unable to proceed the component creation', clonedFolder);
             }
         }
+    } finally {
+        panel?.webview.postMessage({
+            action: event?.action,
+            gitURL: event.param.value,
+            appName: event.projectName + '-app',
+            name: event.projectName + '-comp',
+            error: compDescriptions.length > 0 ? false : true,
+            isDevFile: isDevFile,
+            helpText: compDescriptions.length > 0 ? 'The git repo is valid.' : 'Issue on Parsing Git URL/devfile',
+            compDescription: compDescriptions,
+            parser: event.parser
+        });
     }
 }
 
@@ -435,5 +450,9 @@ function isDevfileDetect(uri: vscode.Uri): boolean {
         return false;
     }
     return false;
+}
+
+function getEndPoints(compDescription: ComponentTypeDescription): Endpoint[] {
+    return compDescription.devfileData.devfile.components[0].container.endpoints;
 }
 

@@ -58,14 +58,14 @@
 		"dev:compile:devfile-registry-view": "webpack --mode development --config src/webview/devfile-registry/webpack.config.js",
 		"dev:compile:welcome-view": "webpack --mode development --config src/webview/welcome/webpack.config.js",
 		"dev:compile:git-import-view": "webpack --mode development --config src/webview/git-import/webpack.config.js",
-        "dev:compile:helm-chart-view": "webpack --mode development --config src/webview/helm-chart/webpack.config.js",
+		"dev:compile:helm-chart-view": "webpack --mode development --config src/webview/helm-chart/webpack.config.js",
 		"dev:run:log-view": "webpack-dev-server --mode development --config src/webview/log/webpack.config.js",
 		"dev:run:describe-view": "webpack-dev-server --mode development --config src/webview/describe/webpack.config.js",
 		"dev:run:cluster-view": "webpack-dev-server --port 9222 --mode development --config src/webview/cluster/webpack.config.js",
 		"dev:run:devfile-registry-view": "webpack-dev-server --port 9222 --mode development --config src/webview/devfile-registry/webpack.config.js",
 		"dev:run:welcome-view": "webpack-dev-server --port 9222 --mode development --config src/webview/welcome/webpack.config.js",
 		"dev:run:git-import-view": "webpack-dev-server --port 9222 --mode development --config src/webview/git-import/webpack.config.js",
-        "dev:run:helm-chart-view": "webpack-dev-server --port 9222 --mode development --config src/webview/helm-chart/webpack.config.js",
+		"dev:run:helm-chart-view": "webpack-dev-server --port 9222 --mode development --config src/webview/helm-chart/webpack.config.js",
 		"dev:run:create-service-view": "webpack-dev-server --mode development --config src/webview/create-service/webpack.config.js",
 		"watch": "tsc -watch -p ./",
 		"clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/logViewer",
@@ -82,7 +82,7 @@
 		"coverage:upload": "codecov -f coverage/coverage-final.json",
 		"build": "npm run clean && npm run lint && npm run compile && npm run bundle-tools",
 		"smoke-test": "npm run compile:ext && extest setup-and-run out/test/ui/smoke-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -c max",
-        "public-ui-test": "npm run compile:ext && extest setup-and-run out/test/ui/public-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -c max"
+		"public-ui-test": "npm run compile:ext && extest setup-and-run out/test/ui/public-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -c max"
 	},
 	"dependencies": {
 		"@kubernetes/client-node": "^0.16.1",
@@ -119,6 +119,7 @@
 		"yaml": "^1.10.2"
 	},
 	"devDependencies": {
+		"@devfile/api": "^2.2.0-alpha-1666195451",
 		"@emotion/react": "^11.10.5",
 		"@emotion/styled": "^11.10.5",
 		"@mui/base": "^5.0.0-alpha.120",
@@ -187,7 +188,7 @@
 		"leasot": "^12.0.0",
 		"mocha": "^9.1.3",
 		"mocha-jenkins-reporter": "^0.4.7",
-		"node-sass": "^7.0.3",
+		"node-sass": "^8.0.0",
 		"npm-check-updates": "^16.6.3",
 		"npm-run-all": "^4.1.5",
 		"pify": "^5.0.0",
@@ -262,7 +263,7 @@
 		"onCommand:openshift.component.debug",
 		"onCommand:openshift.component.debug.palette",
 		"onCommand:openshift.resource.load",
-        "onCommand:openshift.resource.unInstall",
+		"onCommand:openshift.resource.unInstall",
 		"onCommand:openshift.service.create",
 		"onCommand:openshift.service.delete",
 		"onCommand:openshift.component.folder.create",
@@ -288,7 +289,7 @@
 		"onCommand:clusters.openshift.deployment.openConsole",
 		"onCommand:clusters.openshift.imagestream.openConsole",
 		"onCommand:openshift.componentTypesView.registry.openInView",
-        "onCommand:openshift.componentTypesView.registry.openHelmChartsInView",
+		"onCommand:openshift.componentTypesView.registry.openHelmChartsInView",
 		"onWalkthrough:openshiftWalkthrough"
 	],
 	"contributes": {
@@ -398,7 +399,7 @@
 				"title": "New Project",
 				"category": "OpenShift"
 			},
-            {
+			{
 				"command": "openshift.componentTypesView.registry.openHelmChartsInView",
 				"title": "Open Helm Charts",
 				"category": "OpenShift"
@@ -786,7 +787,7 @@
 				"title": "Load",
 				"category": "OpenShift"
 			},
-            {
+			{
 				"command": "openshift.resource.unInstall",
 				"title": "Uninstall",
 				"category": "OpenShift"
@@ -805,21 +806,21 @@
 				"title": "Import Component from git repository",
 				"category": "OpenShift"
 			},
-            {
-                "command": "openshift.experimental.mode.enable",
-                "title": "Experimental Features",
-                "category": "OpenShift"
-            },
-            {
-                "command": "openshift.experimental.mode.disable",
-                "title": "✓ Experimental Features",
-                "category": "OpenShift"
-            },
-            {
-                "command": "openshift.component.dev.onPodman",
-                "title": "Start Dev on Podman",
-                "category": "OpenShift"
-            }
+			{
+				"command": "openshift.experimental.mode.enable",
+				"title": "Experimental Features",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.experimental.mode.disable",
+				"title": "✓ Experimental Features",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.component.dev.onPodman",
+				"title": "Start Dev on Podman",
+				"category": "OpenShift"
+			}
 		],
 		"keybindings": [
 			{
@@ -1034,10 +1035,10 @@
 					"command": "openshift.componentTypesView.registry.openInView",
 					"when": "false"
 				},
-                {
-                    "command": "openshift.componentTypesView.registry.openHelmChartsInView",
-                    "when": "false"
-                },
+				{
+					"command": "openshift.componentTypesView.registry.openHelmChartsInView",
+					"when": "false"
+				},
 				{
 					"command": "openshift.componentTypesView.registry.openInBrowser",
 					"when": "false"
@@ -1050,7 +1051,7 @@
 					"command": "openshift.resource.load",
 					"when": "false"
 				},
-                {
+				{
 					"command": "openshift.resource.unInstall",
 					"when": "false"
 				},
@@ -1123,14 +1124,14 @@
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
 				},
-                {
-                    "command": "openshift.experimental.mode.enable",
-                    "when": "view == openshiftComponentsView && !config.openshiftToolkit.experimentalFeatures"
-                },
-                {
-                    "command": "openshift.experimental.mode.disable",
-                    "when": "view == openshiftComponentsView && config.openshiftToolkit.experimentalFeatures"
-                }
+				{
+					"command": "openshift.experimental.mode.enable",
+					"when": "view == openshiftComponentsView && !config.openshiftToolkit.experimentalFeatures"
+				},
+				{
+					"command": "openshift.experimental.mode.disable",
+					"when": "view == openshiftComponentsView && config.openshiftToolkit.experimentalFeatures"
+				}
 			],
 			"view/item/context": [
 				{
@@ -1208,7 +1209,7 @@
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isLoggedIn",
 					"group": "c1"
 				},
-                {
+				{
 					"command": "openshift.componentTypesView.registry.openHelmChartsInView",
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isLoggedIn",
 					"group": "c2"
@@ -1368,7 +1369,7 @@
 					"command": "openshift.resource.load",
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject || viewItem == openshift.k8sObject.helm"
 				},
-                {
+				{
 					"command": "openshift.resource.unInstall",
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject.helm"
 				},
@@ -1551,25 +1552,25 @@
 					}
 				}
 			},
-            {
-                "type": "object",
-                "order": 4,
-                "title": "Experimental Features",
-                "properties": {
-                    "openshiftToolkit.experimentalFeatures": {
-                        "order": 1,
-                        "description": "Show OpenShift Toolkit Experimental Features.",
-                        "type": "boolean",
-                        "default": true
-                    },
-                    "openshiftToolkit.devModeRunOnPodman": {
-                        "order": 2,
-                        "description": "Show warning about experimental feature",
-                        "type": "boolean",
-                        "default": true
-                    }
-                }
-            }
+			{
+				"type": "object",
+				"order": 4,
+				"title": "Experimental Features",
+				"properties": {
+					"openshiftToolkit.experimentalFeatures": {
+						"order": 1,
+						"description": "Show OpenShift Toolkit Experimental Features.",
+						"type": "boolean",
+						"default": true
+					},
+					"openshiftToolkit.devModeRunOnPodman": {
+						"order": 2,
+						"description": "Show warning about experimental feature",
+						"type": "boolean",
+						"default": true
+					}
+				}
+			}
 		]
 	},
 	"extensionDependencies": [
