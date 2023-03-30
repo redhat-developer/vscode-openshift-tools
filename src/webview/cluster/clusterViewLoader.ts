@@ -202,6 +202,28 @@ export default class ClusterViewLoader {
 
     @vsCommand('openshift.explorer.addCluster.openCrcAddClusterPage')
     static async openCrcAddClusterPage() {
+        const toolsJsonPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'src/tools.json'));
+        let crc: string, crcOpenShift: string;
+        try {
+            const content = fs.readFileSync(toolsJsonPath.fsPath, { encoding: 'utf-8' });
+            const json = JSON.parse(content);
+            crc = json.crc.crcVersion;
+            crcOpenShift = json.crc.openshiftVersion;
+        } catch (err) {
+            const telemetryEventLoginToSandbox = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.openCrcAddClusterPage');
+            crc = '',
+            crcOpenShift = '';
+            vscode.window.showErrorMessage(err.message);
+            telemetryEventLoginToSandbox.sendError('Unable to fetch CRC and OpenshiftCRC version');
+        } finally {
+            panel.webview.postMessage(
+                {
+                    action: 'openCrcAddClusterPage',
+                    crc: crc,
+                    openShiftCRC: crcOpenShift
+                });
+        }
+
         // fake command to report crc selection through telemetry
     }
 

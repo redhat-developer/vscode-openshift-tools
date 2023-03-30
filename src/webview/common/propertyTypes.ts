@@ -12,6 +12,12 @@ export interface DefaultProps {
     analytics?: import('@segment/analytics-next').Analytics;
 }
 
+export interface ClusterViewProps extends DefaultProps {
+    vscode: VscodeAPI;
+    crc: string;
+    openshiftCrc: string;
+}
+
 export interface StarterProjectDisplayProps extends DefaultProps {
     project: StarterProject | any;
 }

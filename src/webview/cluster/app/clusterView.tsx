@@ -29,7 +29,7 @@ import {
 import { makeStyles, withStyles } from '@mui/styles';
 import * as React from 'react';
 import * as ClusterViewStyles from './clusterView.style';
-
+import { ClusterViewProps } from '../../common/propertyTypes';
 const prettyBytes = require('pretty-bytes');
 
 const useStyles = makeStyles(ClusterViewStyles.useStyles);
@@ -50,10 +50,8 @@ function getSteps() {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export default function addClusterView(props) {
+export default function addClusterView(props: ClusterViewProps) {
   const classes = useStyles();
-  const crcLatest = '2.10.1';
-  const crcOpenShift = '4.11.7';
   const [fileName, setBinaryPath] = React.useState('');
   const [pullSecretPath, setSecret] = React.useState('');
   const [cpuSize, setCpuSize] = React.useState(crcDefaults.DefaultCPUs);
@@ -292,7 +290,7 @@ export default function addClusterView(props) {
     if (platform === 'darwin') crcBundle = 'crc-macos-amd64.pkg';
     if (platform === 'win32') crcBundle = 'crc-windows-installer.zip';
     if (platform === 'linux') crcBundle = 'crc-linux-amd64.tar.xz';
-    return `${crcDefaults.DefaultCrcUrlBase}/${crcLatest}/${crcBundle}`;
+    return `${crcDefaults.DefaultCrcUrlBase}/${props.crc}/${crcBundle}`;
   }
 
   const RunningStatus = ()=> (
@@ -457,7 +455,7 @@ export default function addClusterView(props) {
                   </Avatar>} />
                   <ListItemText
                     primary='Download'
-                    secondary={<span>This will download OpenShift Local {crcLatest}</span>}/>
+                    secondary={<span>This will download OpenShift Local {props.crc}</span>}/>
                     <a href={fetchDownloadBinary()} style={{ textDecoration: 'none'}}>
                       <Button
                         component='span'
@@ -474,7 +472,7 @@ export default function addClusterView(props) {
                   </Avatar>} />
                   <ListItemText
                     primary={<span>Executable Location<sup style={{color: '#BE0000'}}>*</sup></span>}
-                    secondary={<span>Provide the OpenShift Local {crcLatest} executable location</span>} />
+                    secondary={<span>Provide the OpenShift Local {props.crc} executable location</span>} />
                   <div>
                     <input
                     style={{ display: 'none' }}
@@ -600,7 +598,7 @@ export default function addClusterView(props) {
         case 4:
           return (
             <Typography>
-              Start the cluster. This will create a minimal OpenShift {crcOpenShift} cluster on your computer.
+              Start the cluster. This will create a minimal OpenShift {props.openshiftCrc} cluster on your computer.
             </Typography>)
         default:
           return 'Unknown step';
@@ -611,7 +609,7 @@ export default function addClusterView(props) {
     <Paper elevation={3}>
       <blockquote className={classes.blockquoteText}>
         <Typography variant='body2' component='p' style={{textAlign: 'center'}}>
-          Install OpenShift {crcOpenShift} on your system using OpenShift Local {crcLatest}.
+          Install OpenShift {props.openshiftCrc} on your system using OpenShift Local {props.crc}.
         </Typography>
       </blockquote>
       <Stepper activeStep={activeStep} orientation='vertical' children={steps.map((label, index) => (

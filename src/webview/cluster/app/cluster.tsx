@@ -53,10 +53,15 @@ const vscodeApi = window.vscodeApi;
 export default function Header() {
     const classes = useStyles();
     const [showWizard, setShowWizard] = React.useState('');
+    const [crcLatest, setCrcLatest] = React.useState('');
+    const [crcOpenShift, setCrcOpenShift] = React.useState('');
 
     window.onmessage = (event: any) => {
         if (['crc', 'sandbox'].includes(event.data.param)) {
             setShowWizard(event.data.param);
+        } else if (event.data.action === 'openCrcAddClusterPage') {
+            setCrcLatest(event.data.crc);
+            setCrcOpenShift(event.data.openShiftCRC);
         }
     }
 
@@ -159,7 +164,7 @@ export default function Header() {
                             <Typography variant='body2' component='p'>
                                 Red Hat OpenShift Local brings a minimal OpenShift 4 cluster to your local computer.<br></br>You can use this guided workflow to create OpenShift cluster locally. Cluster take approximately 15 minutes to provision.
                             </Typography>
-                            <AddClusterView vscode={vscodeApi} />
+                            <AddClusterView vscode={vscodeApi} crc={crcLatest} openshiftCrc={crcOpenShift}/>
                         </Card>
                     </div>
                 )}
