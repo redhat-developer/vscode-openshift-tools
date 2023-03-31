@@ -21,15 +21,14 @@ jobs:
                   echo "LATEST_OPENSHIFT_RELEASE=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .name | cut -d'-' -f2)" >> $GITHUB_ENV
             - name: Find existing PR for CRC version
               run: |
-                  PR_URL=$(gh pr --repo ${{ github.repository }} list --state all --search "update crc ${{env.LATEST_TOOL_RELEASE}}" --json url)
-                  echo "PR_Length=$(echo ${PR_URL} | jq '. | length')" >> $GITHUB_ENV
+                  echo "PR_EXISTS=$(gh pr --repo ${{ github.repository }} list --state all --search "update crc ${{env.LATEST_TOOL_RELEASE}} in:title" --json url | jq length)" >> $GITHUB_ENV
             - name: Update src/tools.json with latest crc version
-              if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_CRC_VERSION) && (env.PR_Length == 0) }}
+              if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_CRC_VERSION) && (env.PR_EXISTS == 0) }}
               run: |
                   jq --indent 4 '.crc.crcVersion = "${{ env.LATEST_TOOL_RELEASE }}"' src/tools.json | jq --indent 4 '.crc.openshiftVersion = "^${{ env.LATEST_OPENSHIFT_RELEASE }}"'  > src/tools.json.new
                   mv src/tools.json.new src/tools.json
             - name: Create pull request
-              if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_CRC_VERSION) && (env.PR_Length == 0) }}
+              if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_CRC_VERSION) && (env.PR_EXISTS == 0) }}
               run: |
                   git config --global user.email "openshifttools-bot@users.noreply.github.com"
                   git config --global user.name "openshifttools-bot"
