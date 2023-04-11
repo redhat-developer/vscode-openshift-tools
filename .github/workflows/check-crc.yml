@@ -16,7 +16,6 @@ jobs:
             - name: Get latest CRC version
               run: |
                   echo "REPO_CRC_VERSION=$(cat src/tools.json | jq -r .crc.crcVersion)" >> $GITHUB_ENV
-                  echo "REPO_OPENSHIFT_VERSION=$(cat src/tools.json | jq -r .crc.openshiftVersion)" >> $GITHUB_ENV
                   LATEST_TOOL_RELEASE_RESP=$(gh release --repo ${{ env.TOOL_REPO }} view --json tagName,name,url)
                   echo "LATEST_TOOL_RELEASE=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .tagName | sed 's|v||')" >> $GITHUB_ENV
                   echo "LATEST_TOOL_URL=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .url)" >> $GITHUB_ENV
