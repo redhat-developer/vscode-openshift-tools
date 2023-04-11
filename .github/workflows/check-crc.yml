@@ -1,0 +1,39 @@
+name: check-crc
+
+on:
+    schedule:
+        - cron: "0 8 * * *"
+
+jobs:
+    check-crc-repo:
+        runs-on: ubuntu-latest
+        env:
+            TOOL_REPO: crc-org/crc
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        steps:
+            - name: Check Out Code
+              uses: actions/checkout@v2
+            - name: Get latest CRC version
+              run: |
+                  echo "REPO_CRC_VERSION=$(cat src/tools.json | jq -r .crc.crcVersion)" >> $GITHUB_ENV
+                  LATEST_TOOL_RELEASE_RESP=$(gh release --repo ${{ env.TOOL_REPO }} view --json tagName,name,url)
+                  echo "LATEST_TOOL_RELEASE=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .tagName | sed 's|v||')" >> $GITHUB_ENV
+                  echo "LATEST_TOOL_URL=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .url)" >> $GITHUB_ENV
+                  echo "LATEST_OPENSHIFT_RELEASE=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .name | cut -d'-' -f2)" >> $GITHUB_ENV
+            - name: Find existing PR for CRC version
+              run: |
+                  echo "PR_EXISTS=$(gh pr --repo ${{ github.repository }} list --state all --search "update crc ${{env.LATEST_TOOL_RELEASE}} in:title" --json url | jq length)" >> $GITHUB_ENV
+            - name: Update src/tools.json with latest crc version
+              if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_CRC_VERSION) && (env.PR_EXISTS == 0) }}
+              run: |
+                  jq --indent 4 '.crc.crcVersion = "${{ env.LATEST_TOOL_RELEASE }}"' src/tools.json | jq --indent 4 '.crc.openshiftVersion = "^${{ env.LATEST_OPENSHIFT_RELEASE }}"'  > src/tools.json.new
+                  mv src/tools.json.new src/tools.json
+            - name: Create pull request
+              if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_CRC_VERSION) && (env.PR_EXISTS == 0) }}
+              run: |
+                  git config --global user.email "openshifttools-bot@users.noreply.github.com"
+                  git config --global user.name "openshifttools-bot"
+                  git checkout -b "crc-${{ env.LATEST_TOOL_RELEASE }}"
+                  git commit -am "Update crc to ${{ env.LATEST_TOOL_RELEASE }}"
+                  git push origin "crc-${{ env.LATEST_TOOL_RELEASE }}"
+                  gh pr create --title "Update crc to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${{ env.LATEST_TOOL_URL }}"
