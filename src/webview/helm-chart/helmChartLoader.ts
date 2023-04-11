@@ -112,6 +112,7 @@ export default class HelmChartLoader {
 async function getHelmCharts(eventName: string): Promise<void> {
     if (helmRes.length === 0) {
         await ComponentTypesView.instance.addHelmRepo();
+        await ComponentTypesView.instance.updateHelmRepo();
         const signupResponse = await fetch('https://charts.openshift.io/index.yaml', {
             method: 'GET'
         });
