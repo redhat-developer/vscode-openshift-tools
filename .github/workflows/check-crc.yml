@@ -26,7 +26,7 @@ jobs:
             - name: Update src/tools.json with latest crc version
               if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_CRC_VERSION) && (env.PR_EXISTS == 0) }}
               run: |
-                  jq --indent 4 '.crc.crcVersion = "${{ env.LATEST_TOOL_RELEASE }}"' src/tools.json | jq --indent 4 '.crc.openshiftVersion = "^${{ env.LATEST_OPENSHIFT_RELEASE }}"'  > src/tools.json.new
+                  jq --indent 4 '.crc.crcVersion = "${{ env.LATEST_TOOL_RELEASE }}"' src/tools.json | jq --indent 4 '.crc.openshiftVersion = "${{ env.LATEST_OPENSHIFT_RELEASE }}"'  > src/tools.json.new
                   mv src/tools.json.new src/tools.json
             - name: Create pull request
               if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_CRC_VERSION) && (env.PR_EXISTS == 0) }}
