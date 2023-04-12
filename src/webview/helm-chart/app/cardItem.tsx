@@ -166,7 +166,7 @@ export class CardItem extends React.Component<DevFileProps, {
                             </div>
                         </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem', width: '10rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem', width: '11rem', maxWidth: '15rem' }}>
                         <InputLabel
                             style={{
                                 color: '#EE0000',
@@ -184,6 +184,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                     key={chart.version}
                                     data-testid={`projects-selector-item-${chart.version}`}
                                     onMouseDown={(): void => this.setSelectedVersion(chart)}
+                                    style={{width: '3rem', maxWidth: '6rem'}}
                                     className={
                                         selectedVersion.version === chart.version ? this.props.cardItemStyle.starterProjectSelected : this.props.cardItemStyle.project
                                     }
