@@ -3,19 +3,20 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window, commands, env, QuickPickItem, ExtensionContext, Terminal, Uri, workspace, WebviewPanel, Progress as VProgress, QuickInputButton, ThemeIcon, QuickPickItemButtonEvent } from 'vscode';
-import { Command } from '../odo/command';
-import OpenShiftItem, { clusterRequired } from './openshiftItem';
-import { CliExitData, CliChannel } from '../cli';
-import { TokenStore } from '../util/credentialManager';
-import { KubeConfigUtils } from '../util/kubeUtils';
-import { Filters } from '../util/filters';
-import { Progress } from '../util/progress';
-import { Platform } from '../util/platform';
-import { WindowUtil } from '../util/windowUtils';
-import { vsCommand, VsCommandError } from '../vscommand';
-import ClusterViewLoader from '../webview/cluster/clusterViewLoader';
 import { KubernetesObject } from '@kubernetes/client-node';
+import { ExtensionContext, QuickInputButton, QuickPickItem, QuickPickItemButtonEvent, Terminal, ThemeIcon, Uri, Progress as VProgress, WebviewPanel, commands, env, window, workspace } from 'vscode';
+import { CliChannel, CliExitData } from '../cli';
+import { Command } from '../odo/command';
+import { TokenStore } from '../util/credentialManager';
+import { Filters } from '../util/filters';
+import { KubeConfigUtils } from '../util/kubeUtils';
+import { Platform } from '../util/platform';
+import { Progress } from '../util/progress';
+import { WindowUtil } from '../util/windowUtils';
+import { VsCommandError, vsCommand } from '../vscommand';
+import ClusterViewLoader from '../webview/cluster/clusterViewLoader';
+import OpenShiftItem, { clusterRequired } from './openshiftItem';
+import fetch = require('make-fetch-happen');
 
 interface Versions {
     'openshift_version':  string;
@@ -275,9 +276,60 @@ export class Cluster extends OpenShiftItem {
 
         if (response !== 'Yes') return null;
 
-        const clusterURL = await Cluster.getUrl();
+        let clusterIsUp = false;
+        let clusterURL: string;
 
-        if (!clusterURL) return null;
+        do {
+            clusterURL = await Cluster.getUrl();
+
+            if (!clusterURL) return null;
+
+            try {
+                await fetch(`${clusterURL}/api`, {
+                    // disable cert checking. crc uses a self-signed cert,
+                    // which means this request will always fail on crc unless cert checking is disabled
+                    strictSSL: false
+                });
+                // since the fetch didn't throw an exception,
+                // a route to the cluster is available,
+                // so it's running
+                clusterIsUp = true;
+            } catch (e) {
+                const clusterURLObj = new URL(clusterURL);
+                if (clusterURLObj.hostname === 'api.crc.testing') {
+                    const startCrc = 'Start OpenShift Local';
+                    const promptResponse = await window.showWarningMessage(
+                        'The cluster appears to be a OpenShift Local cluster, but it isn\'t running',
+                        'Use a different cluster',
+                        startCrc,
+                    );
+                    if (promptResponse === startCrc){
+                        await commands.executeCommand('openshift.explorer.addCluster', 'crc');
+                        // no point in continuing with the wizard,
+                        // it will take the cluster a few minutes to stabilize
+                        return null;
+                    }
+                } else if (/api\.sandbox-.*openshiftapps\.com/.test(clusterURLObj.hostname)) {
+                    const devSandboxSignup = 'Sign up for OpenShift Dev Sandbox';
+                    const promptResponse = await window.showWarningMessage(
+                        'The cluster appears to be a OpenShift Dev Sandbox cluster, but it isn\'t running',
+                        'Use a different cluster',
+                        devSandboxSignup,
+                    );
+                    if (promptResponse === devSandboxSignup){
+                        await commands.executeCommand('openshift.explorer.addCluster', 'sandbox');
+                        // no point in continuing with the wizard,
+                        // the user needs to sign up for the service
+                        return null;
+                    }
+                } else {
+                    void window.showWarningMessage(
+                        'Unable to contact the cluster. Is it running and accessible?',
+                    );
+                }
+
+            }
+        } while (!clusterIsUp);
 
         const loginActions = [
             {
