@@ -4,33 +4,33 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import {
-    TreeDataProvider,
-    TreeItem,
+    Disposable,
     Event,
     EventEmitter,
-    Disposable,
+    ThemeIcon,
+    TreeDataProvider,
+    TreeItem,
+    TreeItemCollapsibleState,
     TreeView,
-    window,
+    Uri,
+    commands,
     extensions,
     version,
-    commands,
-    Uri,
-    TreeItemCollapsibleState,
-    ThemeIcon,
+    window,
 } from 'vscode';
 
-import * as path from 'path';
 import * as fs from 'fs';
+import * as path from 'path';
 import { Platform } from './util/platform';
 
-import { WatchUtil, FileContentChangeNotifier } from './util/watch';
-import { KubeConfigUtils } from './util/kubeUtils';
-import { vsCommand } from './vscommand';
-import { KubernetesObject, Context } from '@kubernetes/client-node';
+import { Context, KubernetesObject } from '@kubernetes/client-node';
 import { CliChannel } from './cli';
 import { Command } from './odo/command';
-import { newInstance, Odo3 } from './odo3';
+import { Odo3, newInstance } from './odo3';
+import { KubeConfigUtils } from './util/kubeUtils';
 import { Progress } from './util/progress';
+import { FileContentChangeNotifier, WatchUtil } from './util/watch';
+import { vsCommand } from './vscommand';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
@@ -199,22 +199,25 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             //   * example is sandbox context created when login to sandbox first time
             // (3) there is namespace set in context and namespace exists in the cluster
             // (4) there is namespace set in context and namespace does not exist in the cluster
-            const pOrNs = await this.odo3.getNamespaces();
+            const namespaces = await this.odo3.getNamespaces();
             if (this.kubeContext.namespace) {
-                if (pOrNs.find(item => item?.metadata.name === this.kubeContext.namespace)) {
+                if (namespaces.find(item => item?.metadata.name === this.kubeContext.namespace)) {
                     result = [{
                         kind: 'project',
                         metadata: {
                             name: this.kubeContext.namespace,
                         },
                     } as KubernetesObject]
+                } else if (namespaces.length >= 1) {
+                    // switch to first accessible namespace
+                    await this.odo3.setNamespace(namespaces[0].metadata.name);
                 } else {
                     result = [CREATE_OR_SET_PROJECT_ITEM]
                 }
             } else {
                 // get list of projects or namespaces
                 // find default namespace
-                if (pOrNs.find(item => item?.metadata.name === 'default')) {
+                if (namespaces.find(item => item?.metadata.name === 'default')) {
                     result = [{
                         kind: 'project',
                         metadata: {
