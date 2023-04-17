@@ -28,7 +28,7 @@ jobs:
 
       # Set up Node
       - name: Use Node.js ${{ matrix.node }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
 
@@ -64,7 +64,7 @@ jobs:
 
       # Archiving integration tests artifacts
       - name: Upload test artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure() && runner.os == 'Linux'
         with:
           name: artifacts-${{ matrix.os }}
