@@ -460,4 +460,8 @@ export class Command {
     static analyze(): CommandText {
         return new CommandText('odo analyze -o json');
     }
+
+    static setNamespace(namespace: string) {
+        return new CommandText('odo set namespace', namespace);
+    }
 }

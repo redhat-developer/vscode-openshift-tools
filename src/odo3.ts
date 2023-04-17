@@ -7,15 +7,18 @@ import { KubernetesObject } from '@kubernetes/client-node';
 import { CommandText } from './base/command';
 import { CliChannel } from './cli';
 import { Command as CommonCommand, loadItems } from './k8s/common';
-import { DeploymentConfig } from './k8s/deploymentConfig';
 import { Command as DeploymentCommand } from './k8s/deployment';
-import { ComponentDescription } from './odo/componentTypeDescription';
+import { DeploymentConfig } from './k8s/deploymentConfig';
 import { Command } from './odo/command';
+import { ComponentDescription } from './odo/componentTypeDescription';
 
 export interface Odo3 {
     getNamespaces(): Promise<KubernetesObject[]>;
     getDeployments(): Promise<KubernetesObject[]>;
     getDeploymentConfigs(): Promise<KubernetesObject[]>;
+
+    setNamespace(newNamespace: string): Promise<void>;
+
     describeComponent(contextPath: string): Promise<ComponentDescription | undefined>;
 }
 
@@ -48,6 +51,12 @@ export class Odo3Impl implements Odo3 {
             this.getProjectResources(),
             this.getNamespacesResources()
         ]);
+    }
+
+    async setNamespace(newNamespace: string): Promise<void> {
+        await CliChannel.getInstance().executeTool(
+            Command.setNamespace(newNamespace), undefined, true
+        );
     }
 
     public async describeComponent(contextPath: string): Promise<ComponentDescription | undefined> {
