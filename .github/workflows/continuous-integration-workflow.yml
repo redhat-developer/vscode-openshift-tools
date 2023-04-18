@@ -24,11 +24,11 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Set up Node
       - name: Use Node.js ${{ matrix.node }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
 
@@ -38,7 +38,7 @@ jobs:
 
       # Run tests
       - name: Build and Test
-        uses: GabrielBB/xvfb-action@fe2609f8182a9ed5aee7d53ff3ed04098a904df2 #v1.0
+        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 #v1.0.1
         env:
             NODE_OPTIONS: --max_old_space_size=16384
         with:
@@ -46,7 +46,7 @@ jobs:
 
       # Upload coverage to codecov.io
       - name: Codecov
-        uses: codecov/codecov-action@07127fde53bc3ccd346d47ab2f14c390161ad108 #v1.0.12
+        uses: codecov/codecov-action@40a12dcee2df644d47232dde008099a3e9e4f865 #v3.1.2
         if: runner.os == 'Linux'
         with:
           file: ./out/coverage/coverage-final.json
@@ -54,7 +54,7 @@ jobs:
       # UI tests fail under linux
       # Run UI tests
       - name: Run UI Tests
-        uses: GabrielBB/xvfb-action@86d97bde4a65fe9b290c0b3fb92c2c4ed0e5302d #v1.6
+        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 #v1.0.1
         env:
             NODE_OPTIONS: --max_old_space_size=16384
         if: runner.os == 'Linux'
@@ -64,7 +64,7 @@ jobs:
 
       # Archiving integration tests artifacts
       - name: Upload test artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure() && runner.os == 'Linux'
         with:
           name: artifacts-${{ matrix.os }}
