@@ -209,8 +209,8 @@ export default function addClusterView(props: ClusterViewProps) {
   };
 
   const handleDisabled = () => {
-    return (activeStep === 1 && fileName === '')
-        || (activeStep === 2 && pullSecretPath === '');
+    return (activeStep === 0  && fileName === '')
+        || (activeStep === 1 && pullSecretPath === '');
   };
 
   const handleStopProcess = () => {
