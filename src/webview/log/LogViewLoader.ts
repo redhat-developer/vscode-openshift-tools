@@ -17,7 +17,7 @@ export default class LogViewLoader {
         return extensions.getExtension(ExtensionID).extensionPath
     }
 
-    static async loadView(title: string, cmdFunction: () => CommandText, target: ComponentWorkspaceFolder, addEnv: any): Promise<WebviewPanel> {
+    static async loadView(title: string, cmd: CommandText, target: ComponentWorkspaceFolder, addEnv: any = {}): Promise<WebviewPanel> {
         const localResourceRoot = Uri.file(path.join(LogViewLoader.extensionPath, 'out', 'logViewer'));
 
         const panel = window.createWebviewPanel('logView', title, ViewColumn.One, {
@@ -26,8 +26,6 @@ export default class LogViewLoader {
             retainContextWhenHidden: true
         });
         panel.iconPath = Uri.file(path.join(LogViewLoader.extensionPath, "images/context/cluster-node.png"));
-
-        const cmd = cmdFunction();
 
         // TODO: When webview is going to be ready?
         panel.webview.html = LogViewLoader.getWebviewContent(LogViewLoader.extensionPath, `${cmd}`.replace(/\\/g, '\\\\'), panel);

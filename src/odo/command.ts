@@ -158,6 +158,10 @@ export class Command {
        return new CommandText('helm repo add openshift https://charts.openshift.io/');
     }
 
+    static updateHelmRepo(): CommandText {
+        return new CommandText('helm repo update');
+     }
+
     static installHelmChart(name: string, chartName: string, version: string): CommandText {
         return new CommandText(`helm install ${name} openshift/${chartName} --version ${version}`);
     }
@@ -288,17 +292,23 @@ export class Command {
             new CommandOption('--details'),
             new CommandOption('--devfile', component),
             new CommandOption('--devfile-registry', registry),
-            new CommandOption('-o', 'json', false)
+            new CommandOption('-o', 'json', false),
         ]
         );
     }
 
-    static showLog(): CommandText {
-        return new CommandText('odo', 'logs', [new CommandOption('--dev')]);
+    static showLog(platform?: string): CommandText {
+        const result = new CommandText('odo', 'logs', [
+            new CommandOption('--dev'),
+        ]);
+        if (platform) {
+            result.addOption(new CommandOption('--platform', platform));
+        }
+        return result;
     }
 
-    static showLogAndFollow(): CommandText {
-        return Command.showLog().addOption(new CommandOption('--follow'));
+    static showLogAndFollow(platform?: string): CommandText {
+        return Command.showLog(platform).addOption(new CommandOption('--follow'));
     }
 
     static listComponentPorts(project: string, app: string, component: string): CommandText {
@@ -307,8 +317,7 @@ export class Command {
             new CommandOption('--namespace', project),
             // see https://kubernetes.io/docs/reference/kubectl/jsonpath/ for examples
             new CommandOption('-o', 'jsonpath="{range .spec.ports[*]}{.port}{\',\'}{end}"', false)
-        ]
-        );
+        ]);
     }
 
     @verbose

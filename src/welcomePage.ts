@@ -8,12 +8,17 @@ import WelcomeViewLoader from './webview/welcome/welcomeViewLoader';
 
 export class WelcomePage {
 
-    @vsCommand('openshift.welcome')
     static async createOrShow(): Promise<void> {
         if (vscode.workspace.getConfiguration('openshiftToolkit').get('showWelcomePage')) {
-            await WelcomeViewLoader.loadView('Welcome - OpenShift Toolkit');
+            await WelcomePage.createOrShowNoCheck();
         }
     }
+
+    @vsCommand('openshift.welcome')
+    static async createOrShowNoCheck(): Promise<void> {
+        await WelcomeViewLoader.loadView('Welcome - OpenShift Toolkit');
+    }
+
 
     @vsCommand('openshift.getStarted')
     static async showGetStarted(): Promise<void> {

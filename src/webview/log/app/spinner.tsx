@@ -5,18 +5,18 @@
 
 import * as React from 'react';
 import Loader from 'react-loader-spinner';
-import { createTheme, Theme, ThemeProvider } from '@mui/material/styles';
+import { createTheme, ThemeProvider, useTheme } from '@mui/material/styles';
 import { withStyles, makeStyles, createStyles } from '@mui/styles';
 import { AppBar, Button, FormControlLabel, FormGroup, IconButton, Switch, Toolbar, Typography } from '@mui/material';
 import { blue } from '@mui/material/colors';
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
   createStyles({
     root: {
       flexGrow: 1
     },
     menuButton: {
-      marginRight: theme.spacing(2),
+      marginRight: useTheme().spacing(2),
     },
     title: {
       flexGrow: 1,

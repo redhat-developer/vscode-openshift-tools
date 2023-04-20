@@ -124,6 +124,11 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return response;
     }
 
+    public async updateHelmRepo(): Promise<CliExitData> {
+        const response = await getInstance().execute(Command.updateHelmRepo());
+        return response;
+    }
+
     public async installHelmChart(name: string, chartName: string, version: string): Promise<CliExitData> {
         const data = await getInstance().execute(Command.installHelmChart(name, chartName, version));
         return data;

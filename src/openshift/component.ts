@@ -35,6 +35,14 @@ function createCancelledResult(stepName: string): any {
     return cancelledResult;
 }
 
+function createStartDebuggerResult(language: string, message = '') {
+    const result: any = new String(message);
+    result.properties = {
+        language
+    }
+    return result;
+}
+
 export enum ComponentContextState {
     DEV = 'dev-nrn',
     DEV_STARTING = 'dev-str',
@@ -195,27 +203,6 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.dev.onPodman')
     static async devOnPodman(component: ComponentWorkspaceFolder) {
-        if (workspace.getConfiguration('openshiftToolkit').get('devModeRunOnPodman')) {
-            let choice = 'Cancel';
-            do {
-                const choices = ['About Podman', 'Continue', 'Continue and don\'t ask again'];
-                choice = await window.showWarningMessage(
-                    'The command \'Start Dev on Podman\' is experimental. It requires Podman to be installed and configured. It isn\'t guaranteed to work.',
-                    ...choices);
-                switch (choice) {
-                    case choices[0]: // open link to external site with podman documentation
-                        await commands.executeCommand('vscode.open', Uri.parse('https://docs.podman.io/en/latest/index.html'));
-                        break;
-                    case choices[1]: // continue with execution
-                        break;
-                    case choices[2]: // save request to not show warning again
-                        await workspace.getConfiguration('openshiftToolkit').update('devModeRunOnPodman', false);
-                        break;
-                    default:
-                        return;
-                }
-            } while (choice === 'About Podman')
-        }
         return Component.dev(component, 'podman');
     }
 
@@ -238,10 +225,7 @@ export class Component extends OpenShiftItem {
                     onDidWrite: outputEmitter.event,
                     open: () => {
                         outputEmitter.fire(`Starting ${Command.dev(component.component.devfileData.supportedOdoFeatures.debug).toString()}\r\n`);
-                        let opt: SpawnOptions = {cwd: component.contextPath};
-                        if (runOn) {
-                            opt = {...opt, env: {ODO_EXPERIMENTAL_MODE: 'true'}}
-                        }
+                        const opt: SpawnOptions = {cwd: component.contextPath};
                         void CliChannel.getInstance().spawnTool(Command.dev(component.component.devfileData.supportedOdoFeatures.debug, runOn), opt).then((cp) => {
                             devProcess = cp;
                             devProcess.on('spawn', () => {
@@ -393,8 +377,13 @@ export class Component extends OpenShiftItem {
             .getConfiguration('openshiftToolkit')
             .get<boolean>('useWebviewInsteadOfTerminalView');
     }
-    static createExperimentalEnv(componentFolder) {
+
+    static createExperimentalEnv(componentFolder: ComponentWorkspaceFolder) {
         return Component.getComponentDevState(componentFolder).runOn ? {ODO_EXPERIMENTAL_MODE: 'true'} : {};
+    }
+
+    static getDevPlatform(componentFolder: ComponentWorkspaceFolder): string {
+        return Component.getComponentDevState(componentFolder).runOn;
     }
 
     @vsCommand('openshift.component.describe', true)
@@ -403,22 +392,21 @@ export class Component extends OpenShiftItem {
         await Component.odo.executeInTerminal(
             command(),
             componentFolder.contextPath,
-            `OpenShift: Describe '${componentFolder.component.devfileData.devfile.metadata.name}' Component`,
-            Component.createExperimentalEnv(componentFolder));
+            `OpenShift: Describe '${componentFolder.component.devfileData.devfile.metadata.name}' Component`);
         return;
     }
 
     @vsCommand('openshift.component.log', true)
     static log(componentFolder: ComponentWorkspaceFolder): Promise<string> {
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
+        const showLogCmd = Command.showLog(Component.getDevPlatform(componentFolder));
         if (Component.isUsingWebviewEditor()) {
-            LogViewLoader.loadView(`${componentName} Log`, Command.showLog, componentFolder, Component.createExperimentalEnv(componentFolder));
+            LogViewLoader.loadView(`${componentName} Log`, showLogCmd, componentFolder);
         } else {
             void Component.odo.executeInTerminal(
-                Command.showLog(),
+                showLogCmd,
                 componentFolder.contextPath,
-                `OpenShift: Show '${componentName}' Component Log`,
-                Component.createExperimentalEnv(componentFolder));
+                `OpenShift: Show '${componentName}' Component Log`);
         }
         return;
     }
@@ -426,14 +414,14 @@ export class Component extends OpenShiftItem {
     @vsCommand('openshift.component.followLog', true)
     static followLog(componentFolder: ComponentWorkspaceFolder): Promise<string> {
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
+        const showLogCmd = Command.showLogAndFollow(Component.getDevPlatform(componentFolder));
         if (Component.isUsingWebviewEditor()) {
-            LogViewLoader.loadView(`${componentName} Follow Log`, Command.showLogAndFollow, componentFolder, Component.createExperimentalEnv(componentFolder));
+            LogViewLoader.loadView(`${componentName} Follow Log`, showLogCmd, componentFolder);
         } else {
             void Component.odo.executeInTerminal(
-                Command.showLogAndFollow(),
+                showLogCmd,
                 componentFolder.contextPath,
-                `OpenShift: Follow '${componentName}' Component Log`,
-                Component.createExperimentalEnv(componentFolder));
+                `OpenShift: Follow '${componentName}' Component Log`);
         }
         return;
     }
@@ -756,11 +744,11 @@ export class Component extends OpenShiftItem {
                 const result = await debug.startDebugging(workspace.getWorkspaceFolder(Uri.file(component.contextPath)), config);
 
                 if (!result) {
-                    return Promise.reject(new VsCommandError('Debugger session failed to start.'));
+                    return Promise.reject(new VsCommandError('Debugger session failed to start.', undefined, undefined, {language: config.type}));
                 }
-                return 'Debugger session has successfully started.';
+                return createStartDebuggerResult(config.type, 'Debugger session has successfully started.');
             }
-            return 'Component has no ports forwarded.'
+            return createStartDebuggerResult(config.type, 'Component has no ports forwarded.');
     }
 
     // TODO: remove "openshift.component.revealContextInExplorer" command
