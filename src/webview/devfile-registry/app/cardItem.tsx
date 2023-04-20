@@ -19,7 +19,7 @@ export class CardItem extends React.Component<DevFileProps, {
     numOfCall: number,
     isExpanded: boolean,
     devFileYAML: string,
-    selectedProject: StarterProject,
+    selectedProject: null | StarterProject,
     copyClicked: boolean
     hoverProject: null | StarterProject
 }> {
@@ -30,7 +30,7 @@ export class CardItem extends React.Component<DevFileProps, {
             numOfCall: 0,
             isExpanded: false,
             devFileYAML: '',
-            selectedProject: this.props.compDescription.devfileData.devfile.starterProjects[0],
+            selectedProject: this.props.compDescription.devfileData.devfile.starterProjects ? this.props.compDescription.devfileData.devfile.starterProjects[0] : null,
             copyClicked: false,
             hoverProject: null
         };
@@ -49,7 +49,7 @@ export class CardItem extends React.Component<DevFileProps, {
                         numOfCall,
                         isExpanded,
                         devFileYAML,
-                        selectedProject: this.props.compDescription.devfileData.devfile.starterProjects[0]
+                        selectedProject: this.props.compDescription.devfileData.devfile.starterProjects ? this.props.compDescription.devfileData.devfile.starterProjects[0] : null,
                     });
                 }
             });
@@ -139,7 +139,7 @@ export class CardItem extends React.Component<DevFileProps, {
                     overlap='rectangular'
                     variant='standard'
                     showZero={false}>
-                    {this.props.compDescription.devfileData.devfile.starterProjects.length}
+                    {this.props.compDescription.devfileData.devfile.starterProjects?.length}
                 </Badge>
             </div>
             <div>
@@ -149,14 +149,14 @@ export class CardItem extends React.Component<DevFileProps, {
                         className={this.props.cardItemStyle.starterProjectSelect}
                         onMouseLeave={(): void => this.setCurrentlyHoveredProject(null)}
                     >
-                        {this.props.compDescription.devfileData.devfile.starterProjects.map((project: StarterProject) => (
+                        {this.props.compDescription.devfileData.devfile.starterProjects?.map((project: StarterProject) => (
                             <div
                                 key={project.name}
                                 data-testid={`projects-selector-item-${project.name}`}
                                 onMouseDown={(): void => this.setSelectedProject(project)}
                                 onMouseEnter={(): void => this.setCurrentlyHoveredProject(project)}
                                 className={
-                                    selectedProject.name === project.name ? this.props.cardItemStyle.starterProjectSelected : this.props.cardItemStyle.project
+                                    selectedProject?.name === project?.name ? this.props.cardItemStyle.starterProjectSelected : this.props.cardItemStyle.project
                                 }
                             >
                                 {project.name}
@@ -232,7 +232,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                 </div>
                             </div>
                         </div>
-                        {starterProjectCard}
+                        {this.props.compDescription.devfileData.devfile.starterProjects && starterProjectCard}
                     </Card>
                 </div>
                 <div className={this.props.cardItemStyle.yamlCardBody}>
