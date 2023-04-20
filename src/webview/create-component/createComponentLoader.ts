@@ -7,7 +7,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { ExtensionID } from '../../util/constants';
 import OpenShiftItem from '../../openshift/openshiftItem';
-import { selectWorkspaceFolders } from '../../util/workspace';
+import { selectWorkspaceFolder, selectWorkspaceFolders } from '../../util/workspace';
+import { ComponentTypesView } from '../../registriesView';
 
 let panel: vscode.WebviewPanel;
 
@@ -17,12 +18,20 @@ async function createComponentMessageListener(event: any): Promise<any> {
             validateComponentName(event)
             break;
         case 'selectFolder':
-            const workspaceFolderItems = selectWorkspaceFolders();
+            const workspaceFolderItems = event.noWSFolder ? await selectWorkspaceFolder(true, 'Select Component Folder') : selectWorkspaceFolders();
             panel?.webview.postMessage({
                 action: event.action,
-                wsFolderItems: workspaceFolderItems
+                wsFolderItems: event.noWSFolder ? [workspaceFolderItems] : workspaceFolderItems
             });
             break;
+        case 'getAllComponents':
+            const componentDescriptions = ComponentTypesView.instance.getCompDescriptions();
+            panel?.webview.postMessage(
+                {
+                    action: event.action,
+                    compDescriptions: Array.from(componentDescriptions)
+                }
+            );
         default:
             break
     }

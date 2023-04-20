@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
-import { QuickPickItem, Uri } from 'vscode';
-import { Button, InputLabel, MenuItem, TextField, Typography } from '@mui/material';
+import { Uri } from 'vscode';
+import { Button, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { VSCodeMessage } from './vsCodeMessage';
 import { ComponentTypeDescription } from '../../../odo/componentType';
 import { DefaultProps } from '../../common/propertyTypes';
@@ -12,10 +12,6 @@ import './component.scss';
 
 export interface CompTypeDesc extends ComponentTypeDescription {
     selected: boolean;
-}
-
-interface WorkspaceFolderItem extends QuickPickItem {
-    uri: Uri;
 }
 
 declare module 'react' {
@@ -32,8 +28,9 @@ export class CreateComponent extends React.Component<DefaultProps, {
         error?: boolean,
         helpText?: string,
     },
-    wsFolderItems?: WorkspaceFolderItem[],
-    wsFolderPath: string
+    wsFolderItems?: Uri[],
+    wsFolderPath: string,
+
 }> {
 
     constructor(props: DefaultProps | Readonly<DefaultProps>) {
@@ -49,6 +46,9 @@ export class CreateComponent extends React.Component<DefaultProps, {
         }
         VSCodeMessage.postMessage({
             action: 'selectFolder'
+        });
+        VSCodeMessage.postMessage({
+            action: 'getAllComponents'
         });
     }
 
@@ -86,7 +86,7 @@ export class CreateComponent extends React.Component<DefaultProps, {
                 });
             } else if (message.data.action === 'selectFolder') {
                 if (message.data.wsFolderItems.length > 0) {
-                    this.setState({ wsFolderPath: message.data.wsFolderItems[0].uri.fsPath });
+                    this.setState({ wsFolderPath: message.data.wsFolderItems[0].fsPath });
                 }
                 this.setState({
                     wsFolderItems: message.data.wsFolderItems
@@ -103,17 +103,22 @@ export class CreateComponent extends React.Component<DefaultProps, {
 
     selectFolder = (): void => {
         VSCodeMessage.postMessage({
-            action: 'selectFolder'
-        })
+            action: 'selectFolder',
+            noWSFolder: true
+        });
     }
 
     handleWsFolderDropDownChange = (event: any): void => {
         if (event.target.value === 'New Folder') {
-
+            VSCodeMessage.postMessage({
+                action: 'selectFolder',
+                noWSFolder: true
+            });
+        } else {
+            this.setState({
+                wsFolderPath: event.target.value
+            });
         }
-        this.setState({
-            wsFolderPath: event.target.value
-        })
     }
 
     handleCreateBtnDisable(): boolean {
@@ -160,14 +165,14 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                     color: '#EE0000',
                                     marginTop: '1rem'
                                 }}>
-                                Select Folder for adding component
+                                Folder for component
                             </InputLabel>
                             <div style={{ display: 'flex', flexDirection: 'row', gap: '2rem' }}>
                                 {wsFolderItems && <TextField
                                     variant='standard'
                                     onChange={(e) => this.handleWsFolderDropDownChange(e)}
                                     value={wsFolderPath}
-                                    disabled={wsFolderItems?.length <= 1}
+                                    disabled={wsFolderItems?.length == 0}
                                     id='bootstrap-input'
                                     select
                                     sx={{
@@ -177,17 +182,17 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                         }
                                     }}
                                     style={{ width: '30%', paddingTop: '10px' }}>
-                                    {...wsFolderItems?.map((wsFolderItem: WorkspaceFolderItem) => (
-                                        <MenuItem key={wsFolderItem.uri.fsPath} value={wsFolderItem.uri.fsPath}>
-                                            {wsFolderItem.uri.fsPath}
-                                        </MenuItem>
-                                    ))}
                                     <MenuItem key='New Folder' value='New Folder'>
                                         New Folder
                                     </MenuItem>
+                                    {...wsFolderItems?.map((wsFolderItem: Uri) => (
+                                        <MenuItem key={wsFolderItem.fsPath} value={wsFolderItem.fsPath}>
+                                            {wsFolderItem.fsPath}
+                                        </MenuItem>
+                                    ))}
                                 </TextField>
                                 }
-                                { wsFolderItems?.length === 0 && <Button variant='contained'
+                                {wsFolderItems?.length === 0 && <Button variant='contained'
                                     className='buttonStyle'
                                     style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white' }}
                                     onClick={() => this.selectFolder()}>
@@ -195,6 +200,19 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                 </Button>
                                 }
                             </div>
+                        </div>
+                        <div style={{ marginTop: '10px', marginBottom: '10px' }}>
+                            <Select
+                                autoWidth
+                                label='Age'
+                            >
+                                <MenuItem value=''>
+                                    <em>None</em>
+                                </MenuItem>
+                                <MenuItem value={10}>Twenty</MenuItem>
+                                <MenuItem value={21}>Twenty one</MenuItem>
+                                <MenuItem value={22}>Twenty one and a half</MenuItem>
+                            </Select>
                         </div>
                         <div style={{ marginTop: '10px', marginBottom: '10px' }}>
                             <Button variant='contained'

@@ -42,14 +42,15 @@ function createWorkspaceFolderItem(wsFolder: WorkspaceFolder) {
     };
 }
 
-export function selectWorkspaceFolders(): WorkspaceFolderItem[] {
+export function selectWorkspaceFolders(): Uri[] {
+    const workspacePaths: Uri[] = [];
     if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
-        return workspace.workspaceFolders.filter(isComponentFilter).map(createWorkspaceFolderItem);
+        workspace.workspaceFolders.filter(isComponentFilter).map(createWorkspaceFolderItem).map((workSpaceItem) => workspacePaths.push(workSpaceItem.uri));
     }
-    return [];
+    return workspacePaths;
 }
 
-export async function selectWorkspaceFolder(skipWindowPick = false): Promise<Uri> {
+export async function selectWorkspaceFolder(skipWindowPick = false, label?: string): Promise<Uri> {
     let folders: WorkspaceFolderItem[] = [];
     let choice:WorkspaceFolderItem | QuickPickItem;
     let workspacePath: Uri;
@@ -78,7 +79,7 @@ export async function selectWorkspaceFolder(skipWindowPick = false): Promise<Uri
             canSelectFolders: true,
             canSelectMany: false,
             defaultUri: Uri.file(Platform.getUserHomePath()),
-            openLabel: skipWindowPick ? 'Select as Repository Destination' : 'Add context folder for component in workspace.',
+            openLabel: label || 'Add context folder for component in workspace.',
         });
         if (!selectedFolders) return null;
         if (fs.existsSync(path.join(selectedFolders[0].fsPath, '.odo', 'config.yaml'))) {

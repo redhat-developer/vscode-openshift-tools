@@ -104,7 +104,7 @@ async function gitImportMessageListener(event: any): Promise<any> {
             let workspacePath: vscode.Uri, appendedUri: vscode.Uri;
             do {
                 alreadyExist = false;
-                workspacePath = await selectWorkspaceFolder(true);
+                workspacePath = await selectWorkspaceFolder(true, 'Select as Repository Destination');
                 if (!workspacePath) {
                     return null;
                 }
