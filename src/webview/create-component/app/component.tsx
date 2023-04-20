@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
-import { Button, InputLabel, TextField, Typography } from '@mui/material';
+import { QuickPickItem, Uri } from 'vscode';
+import { Button, InputLabel, MenuItem, TextField, Typography } from '@mui/material';
 import { VSCodeMessage } from './vsCodeMessage';
 import { ComponentTypeDescription } from '../../../odo/componentType';
 import { DefaultProps } from '../../common/propertyTypes';
@@ -11,6 +12,10 @@ import './component.scss';
 
 export interface CompTypeDesc extends ComponentTypeDescription {
     selected: boolean;
+}
+
+interface WorkspaceFolderItem extends QuickPickItem {
+    uri: Uri;
 }
 
 declare module 'react' {
@@ -22,22 +27,29 @@ declare module 'react' {
 }
 
 export class CreateComponent extends React.Component<DefaultProps, {
-    componentName: {
-        value: string,
-        error: boolean,
-        helpText: string,
-    }
+    component: {
+        name?: string,
+        error?: boolean,
+        helpText?: string,
+    },
+    wsFolderItems?: WorkspaceFolderItem[],
+    wsFolderPath: string
 }> {
 
     constructor(props: DefaultProps | Readonly<DefaultProps>) {
         super(props);
         this.state = {
-            componentName: {
-                value: '',
+            component: {
+                name: '',
                 error: false,
-                helpText: ''
-            }
+                helpText: '',
+            },
+            wsFolderItems: undefined,
+            wsFolderPath: ''
         }
+        VSCodeMessage.postMessage({
+            action: 'selectFolder'
+        });
     }
 
     validateComponentName = (value: string): void => {
@@ -52,11 +64,13 @@ export class CreateComponent extends React.Component<DefaultProps, {
 
         }
         this.state = {
-            componentName: {
-                value: '',
+            component: {
+                name: '',
                 error: false,
-                helpText: ''
-            }
+                helpText: '',
+            },
+            wsFolderItems: undefined,
+            wsFolderPath: ''
         };
     }
 
@@ -64,11 +78,18 @@ export class CreateComponent extends React.Component<DefaultProps, {
         VSCodeMessage.onMessage((message) => {
             if (message.data.action === 'validateComponentName') {
                 this.setState({
-                    componentName: {
-                        value: message.data.componentName,
+                    component: {
+                        name: message.data.componentName,
                         error: message.data.error,
                         helpText: message.data.helpText,
                     }
+                });
+            } else if (message.data.action === 'selectFolder') {
+                if (message.data.wsFolderItems.length > 0) {
+                    this.setState({ wsFolderPath: message.data.wsFolderItems[0].uri.fsPath });
+                }
+                this.setState({
+                    wsFolderItems: message.data.wsFolderItems
                 });
             }
         });
@@ -86,12 +107,21 @@ export class CreateComponent extends React.Component<DefaultProps, {
         })
     }
 
+    handleWsFolderDropDownChange = (event: any): void => {
+        if (event.target.value === 'New Folder') {
+
+        }
+        this.setState({
+            wsFolderPath: event.target.value
+        })
+    }
+
     handleCreateBtnDisable(): boolean {
         return true;
     }
 
     render(): React.ReactNode {
-        const { componentName } = this.state;
+        const { component, wsFolderItems, wsFolderPath } = this.state;
         return (
             <div className='mainContainer margin' >
                 <div className='title'>
@@ -111,8 +141,8 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                 Component Name
                             </InputLabel>
                             <TextField
-                                defaultValue={componentName.value}
-                                error={componentName.error}
+                                defaultValue={component.name}
+                                error={component.error}
                                 onChange={(e) => this.validateComponentName(e.target.value)}
                                 id='bootstrap-input'
                                 sx={{
@@ -122,7 +152,7 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                     }
                                 }}
                                 style={{ width: '30%', paddingTop: '10px' }}
-                                helperText={componentName.helpText} />
+                                helperText={component.helpText} />
                         </div>
                         <div style={{ marginTop: '10px', marginBottom: '10px' }}>
                             <InputLabel required htmlFor='bootstrap-input'
@@ -130,14 +160,41 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                     color: '#EE0000',
                                     marginTop: '1rem'
                                 }}>
-                                Select folder for component
+                                Select Folder for adding component
                             </InputLabel>
-                            <Button variant='contained'
-                                className='buttonStyle'
-                                style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white' }}
-                                onClick={() => this.selectFolder()}>
-                                Create Component
-                            </Button>
+                            <div style={{ display: 'flex', flexDirection: 'row', gap: '2rem' }}>
+                                {wsFolderItems && <TextField
+                                    variant='standard'
+                                    onChange={(e) => this.handleWsFolderDropDownChange(e)}
+                                    value={wsFolderPath}
+                                    disabled={wsFolderItems?.length <= 1}
+                                    id='bootstrap-input'
+                                    select
+                                    sx={{
+                                        input: {
+                                            color: 'var(--vscode-settings-textInputForeground)',
+                                            backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                        }
+                                    }}
+                                    style={{ width: '30%', paddingTop: '10px' }}>
+                                    {...wsFolderItems?.map((wsFolderItem: WorkspaceFolderItem) => (
+                                        <MenuItem key={wsFolderItem.uri.fsPath} value={wsFolderItem.uri.fsPath}>
+                                            {wsFolderItem.uri.fsPath}
+                                        </MenuItem>
+                                    ))}
+                                    <MenuItem key='New Folder' value='New Folder'>
+                                        New Folder
+                                    </MenuItem>
+                                </TextField>
+                                }
+                                { wsFolderItems?.length === 0 && <Button variant='contained'
+                                    className='buttonStyle'
+                                    style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white' }}
+                                    onClick={() => this.selectFolder()}>
+                                    Select Folder
+                                </Button>
+                                }
+                            </div>
                         </div>
                         <div style={{ marginTop: '10px', marginBottom: '10px' }}>
                             <Button variant='contained'

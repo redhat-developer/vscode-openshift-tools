@@ -42,6 +42,13 @@ function createWorkspaceFolderItem(wsFolder: WorkspaceFolder) {
     };
 }
 
+export function selectWorkspaceFolders(): WorkspaceFolderItem[] {
+    if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
+        return workspace.workspaceFolders.filter(isComponentFilter).map(createWorkspaceFolderItem);
+    }
+    return [];
+}
+
 export async function selectWorkspaceFolder(): Promise<Uri> {
     let folders: WorkspaceFolderItem[] = [];
     if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {

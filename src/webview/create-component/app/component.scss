@@ -113,6 +113,25 @@ button {
     padding: 5px 14px !important;
 }
 
+.MuiOutlinedInput-input:disabled {
+    -webkit-text-fill-color: white !important;
+}
+
+.MuiSelect-select, .MuiMenu-paper {
+    background-color: var(--vscode-dropdown-background) !important;
+    color: var(--vscode-dropdown-foreground) !important;
+    border: 0.5px solid var(--vscode-dropdown-border) !important;
+}
+
+.MuiMenuItem-root {
+    background-color: var(--vscode-dropdown-background) !important;
+    color: var(--vscode-dropdown-foreground) !important;
+}
+
+.MuiMenuItem-root:hover {
+    background-color: var(--vscode-button-hoverBackground) !important;
+}
+
 .MuiFormControl-root {
     border: none;
     max-width: 50%;
