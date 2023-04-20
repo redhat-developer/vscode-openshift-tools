@@ -107,10 +107,6 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return this.registries;
     }
 
-    public async getAnalyze() {
-        await this.odo.getAnalyze();
-    }
-
     public getCompDescriptions(): Set<ComponentTypeDescription> {
         return this.compDescriptions;
     }
