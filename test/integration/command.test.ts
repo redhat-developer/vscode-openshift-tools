@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { CommandText } from '../../src/base/command';
-import { Command } from '../../src/odo/command';
-import { getInstance } from '../../src/odo';
 import { KubeConfig } from '@kubernetes/client-node';
 import * as tmp from 'tmp';
 import { extensions } from 'vscode';
+import { CommandText } from '../../src/base/command';
+import { getInstance } from '../../src/odo';
+import { Command } from '../../src/odo/command';
 import cp = require('child_process');
 
 const ODO = getInstance();
@@ -45,19 +45,6 @@ suite('odo commands integration', () => {
         return ODO.execute(
             Command.listProjects()
         )
-    });
-
-    test('listApplications()', () => {
-        // test is assuming your current context is aready pointing to test cluster
-        return ODO.execute(
-            new CommandText('odo project get -o json')
-        ).then(result => {
-            return JSON.parse(result.stdout).metadata.name;
-        }).then(project => {
-            return ODO.execute(
-                Command.listApplications(project)
-            );
-        });
     });
 
     test('createProject()', ()=> {

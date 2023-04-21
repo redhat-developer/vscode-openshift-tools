@@ -3,20 +3,20 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as _ from 'lodash';
-import OpenShiftItem from '../openshift/openshiftItem';
-import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
-import * as common from './common';
-import { ClusterServiceVersionKind, CRDDescription, CustomResourceDefinitionKind } from './olm/types';
-import { TreeItem, WebviewPanel, window } from 'vscode';
-import { vsCommand, VsCommandError } from '../vscommand';
-import CreateServiceViewLoader from '../webview/create-service/createServiceViewLoader';
-import { DEFAULT_K8S_SCHEMA, getUISchema, randomString, generateDefaults } from './utils';
 import { loadYaml } from '@kubernetes/client-node';
 import { JSONSchema7 } from 'json-schema';
-import { getInstance, OpenShiftObject } from '../odo';
+import * as _ from 'lodash';
+import { TreeItem, WebviewPanel, window } from 'vscode';
+import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { CommandText } from '../base/command';
+import { OpenShiftApplication, OpenShiftObject, getInstance } from '../odo';
+import OpenShiftItem from '../openshift/openshiftItem';
 import { getOpenAPISchemaFor } from '../util/swagger';
+import { VsCommandError, vsCommand } from '../vscommand';
+import CreateServiceViewLoader from '../webview/create-service/createServiceViewLoader';
+import * as common from './common';
+import { CRDDescription, ClusterServiceVersionKind, CustomResourceDefinitionKind } from './olm/types';
+import { DEFAULT_K8S_SCHEMA, generateDefaults, getUISchema, randomString } from './utils';
 
 class CsvNode implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorerExtensionNode {
 
@@ -109,7 +109,10 @@ export class ClusterServiceVersion extends OpenShiftItem {
     static async createNewService(crdOwnedNode: K8sCrdNode): Promise<void> {
         const projects = await getInstance().getProjects();
         const apps = await getInstance().getApplications(projects[0]);
-        const app = apps.find(item => item.getName() === 'app');
+        let app = apps.find(item => item.getName() === 'app');
+        if (app === undefined) {
+            app = new OpenShiftApplication(projects[0], 'app');
+        }
         return ClusterServiceVersion.createNewServiceFromDescriptor(crdOwnedNode.impl.crdDescription, crdOwnedNode.impl.csv, app);
     }
 

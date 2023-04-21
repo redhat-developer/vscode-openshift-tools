@@ -71,14 +71,11 @@ export class Command {
         );
     }
 
-    @verbose
-    static listApplications(project: string): CommandText {
+    static getDeployments(): CommandText {
         return new CommandText(
-            'odo application list',
-            undefined, [
-            new CommandOption('--project', project),
-            new CommandOption('-o', 'json', false)
-        ]
+            'oc get deployment',
+            undefined,
+            [new CommandOption('-o', 'json')]
         );
     }
 

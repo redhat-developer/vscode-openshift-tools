@@ -4,12 +4,12 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { window } from 'vscode';
-import OpenShiftItem, { clusterRequired } from './openshiftItem';
+import { ClusterServiceVersionKind } from '../k8s/olm/types';
 import { OpenShiftObject } from '../odo';
+import { ServiceOperatorShortInfo } from '../odo/service';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
-import { ServiceOperatorShortInfo } from '../odo/service';
-import { ClusterServiceVersionKind } from '../k8s/olm/types';
+import OpenShiftItem, { clusterRequired } from './openshiftItem';
 
 import { ClusterServiceVersion } from '../k8s/csv';
 
@@ -42,7 +42,7 @@ export class Service extends OpenShiftItem {
         await ClusterServiceVersion.createNewServiceFromDescriptor(selectedCrd.target, csv, application);
     }
 
-    @vsCommand('openshift.service.delete', true)
+    @vsCommand('openshift.service.delete')
     @clusterRequired()
     static async del(treeItem: OpenShiftObject): Promise<string> {
         let service = treeItem;

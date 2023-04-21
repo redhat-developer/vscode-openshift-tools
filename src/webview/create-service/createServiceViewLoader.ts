@@ -2,16 +2,10 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as vscode from 'vscode';
-import * as path from 'path';
 import * as fs from 'fs';
-// import { spawn, ChildProcess } from 'child_process';
+import * as path from 'path';
+import * as vscode from 'vscode';
 import { ExtensionID } from '../../util/constants';
-// import { WindowUtil } from '../../util/windowUtils';
-// import { CliChannel } from '../../cli';
-// import { vsCommand } from '../../vscommand';
-
-// const channel: vscode.OutputChannel = vscode.window.createOutputChannel('CRC Logs');
 
 export default class CreateServiceViewLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -31,6 +25,21 @@ export default class CreateServiceViewLoader {
 
         panel.iconPath = vscode.Uri.file(path.join(CreateServiceViewLoader.extensionPath, 'images/context/cluster-node.png'));
         panel.webview.html = CreateServiceViewLoader.getWebviewContent(CreateServiceViewLoader.extensionPath, panel);
+
+        // set theme
+        void panel.webview.postMessage({
+            action: 'setTheme',
+            themeValue: vscode.window.activeColorTheme.kind,
+        });
+        const colorThemeDisposable = vscode.window.onDidChangeActiveColorTheme(async function (colorTheme: vscode.ColorTheme) {
+            await panel.webview.postMessage({ action: 'setTheme', themeValue: colorTheme.kind });
+        });
+
+        panel.onDidDispose(() => {
+            colorThemeDisposable.dispose();
+            panel = undefined;
+        });
+
         panel.onDidDispose(()=> {
             panel = undefined;
         });

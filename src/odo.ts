@@ -9,32 +9,31 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
 
-import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFolder, Command as VSCommand } from 'vscode';
+import { KubeConfig, KubernetesObject } from '@kubernetes/client-node';
+import * as fs from 'fs';
+import { pathExistsSync } from 'fs-extra';
 import * as path from 'path';
 import { Subject } from 'rxjs';
-import * as cliInstance from './cli';
-import { WindowUtil } from './util/windowUtils';
-import { ToolsConfig } from './tools';
-import { Platform } from './util/platform';
-import * as odo from './odo/config';
-import { GlyphChars } from './util/constants';
-import { Application } from './odo/application';
-import { ComponentType, ComponentTypeAdapter, Registry, DevfileComponentType, AnalyzeResponse } from './odo/componentType';
-import { Project } from './odo/project';
-import { ComponentsJson, NotAvailable } from './odo/component';
-import { Service, ServiceOperatorShortInfo } from './odo/service';
+import { ProviderResult, QuickPickItem, Terminal, TreeItemCollapsibleState, Uri, Command as VSCommand, WorkspaceFolder, commands, window, workspace } from 'vscode';
 import { CommandText } from './base/command';
+import * as cliInstance from './cli';
+import { CliExitData } from './cli';
+import { Command as DeploymentCommand } from './k8s/deployment';
+import { ClusterServiceVersionKind } from './k8s/olm/types';
 import { Command } from './odo/command';
+import { ComponentsJson, NotAvailable } from './odo/component';
+import { AnalyzeResponse, ComponentType, ComponentTypeAdapter, DevfileComponentType, Registry } from './odo/componentType';
+import { ComponentDescription } from './odo/componentTypeDescription';
+import * as odo from './odo/config';
+import { Project } from './odo/project';
+import { Service, ServiceOperatorShortInfo } from './odo/service';
+import { ToolsConfig } from './tools';
+import { GlyphChars } from './util/constants';
+import { KubeConfigUtils } from './util/kubeUtils';
+import { Platform } from './util/platform';
+import { WindowUtil } from './util/windowUtils';
 import { VsCommandError } from './vscommand';
 import bs = require('binary-search');
-import { CliExitData } from './cli';
-import { KubeConfigUtils } from './util/kubeUtils';
-import { KubeConfig } from '@kubernetes/client-node';
-import { pathExistsSync } from 'fs-extra';
-import * as fs from 'fs';
-import { ClusterServiceVersionKind } from './k8s/olm/types';
-import { Command as DeploymentCommand } from './k8s/deployment';
-import { ComponentDescription } from './odo/componentTypeDescription';
 
 const tempfile = require('tmp');
 const {Collapsed} = TreeItemCollapsibleState;
@@ -504,16 +503,18 @@ export class OdoImpl implements Odo {
     }
 
     async getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]> {
-        let applications = OdoImpl.data.getChildrenByParent(project);
+        let applications = await OdoImpl.data.getChildrenByParent(project);
         if (!applications) {
-            applications = OdoImpl.data.setParentToChildren(project, this._getApplications(project));
+            applications = await OdoImpl.data.setParentToChildren(project, this._getApplications(project));
         }
         return applications;
     }
 
     public async _getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listApplications(project.getName()));
-        let apps: string[] = this.loadItems<Application>(result).map((value) => value.metadata.name);
+        const result: cliInstance.CliExitData = await this.execute(Command.getDeployments());
+        let apps: string[] = this.loadItems<KubernetesObject>(result) //
+            .filter(value => value.metadata?.labels?.['http://app.kubernetes.io/part-of']) //
+            .map((value) => value.metadata?.labels?.['http://app.kubernetes.io/part-of']);
         apps = [...new Set(apps)]; // remove duplicates form array
         // extract apps from local not yet deployed components
         OdoImpl.data.getSettings().forEach((component) => {
@@ -795,7 +796,11 @@ export class OdoImpl implements Odo {
         const tempJsonFile = tempfile.fileSync({postfix: '.json'});
         fs.writeFileSync(tempJsonFile.name, jsonString);
         // call oc create -f path/to/file until odo does support creating services without component
-        await this.execute(Command.createServiceCommand(tempJsonFile.name));
+        try {
+            await this.execute(Command.createServiceCommand(tempJsonFile.name));
+        } catch (e) {
+            void window.showErrorMessage(`${e}`);
+        }
         return this.insertAndReveal(new OpenShiftService(application, `${formData.kind}/${formData.metadata.name}`));
     }
 
