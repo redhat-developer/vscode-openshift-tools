@@ -63,11 +63,21 @@ export function createVSCodeTheme(paletteMode: PaletteMode): Theme {
                                 '--vscode-editor-inactiveSelectionBackground',
                             ),
                         },
-                    },
+                    }
                 ],
             },
             MuiTypography: {
                 variants: [
+                    {
+                        props: {
+                            variant: 'h4',
+                        },
+                        style: {
+                            fontSize: '1em',
+                            fontWeight: '650',
+                            color: computedStyle.getPropertyValue('--vscode-foreground'),
+                        },
+                    },
                     {
                         props: {
                             variant: 'h5',
@@ -146,6 +156,20 @@ export function createVSCodeTheme(paletteMode: PaletteMode): Theme {
                     },
                 },
             },
+            MuiPaper: {
+                variants: [
+                    {
+                        props: {
+                            variant: 'elevation',
+                        },
+                        style: {
+                            backgroundColor: computedStyle.getPropertyValue(
+                                '--vscode-tab-border',
+                            ),
+                        },
+                    },
+                ]
+            }
         },
     });
 }

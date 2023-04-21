@@ -5,8 +5,8 @@
 
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
-import { CreateForm } from './createForm';
+import { CreateService } from './createForm';
 
 ReactDOM.render((
-  <CreateForm />
+  <CreateService />
 ), document.getElementById('root'));

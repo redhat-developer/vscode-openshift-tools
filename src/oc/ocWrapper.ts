@@ -315,6 +315,23 @@ export class Oc {
     }
 
     /**
+     * Returns true if the current user can access CRDs and false otherwise.
+     *
+     * @returns true if the current user can access CRDs and false otherwise
+     */
+    public async canIGetCRDs(): Promise<boolean> {
+        try {
+            await CliChannel.getInstance().executeTool(
+                new CommandText('oc', 'auth can-i get CustomResourceDefinition'),
+            );
+            return true;
+        } catch (e) {
+            // do nothing
+        }
+        return false;
+    }
+
+    /**
      * Returns the oc command to list all resources of the given type in the given (or current) namespace
      *
      * @param resourceType the resource type to get

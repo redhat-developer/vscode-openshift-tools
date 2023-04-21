@@ -21,7 +21,4 @@
         "common/*.tsx",
         "common/*.ts"
     ],
-    "exclude": [
-        "*/*.ts"
-    ]
 }
