@@ -243,4 +243,19 @@ suite('./oc/ocWrapper.ts', function () {
 
     });
 
+    test('canIGetCRDs()', async function() {
+        let expected = false;
+        try {
+            // alternative method of checking if CRDs are accessible: try to get a crd
+            await Oc.Instance.getKubernetesObject('CustomResourceDefinition', 'bindablekinds.binding.operators.coreos.com');
+            expected = true;
+        } catch (e) {
+            // do nothing
+        }
+
+        const actual: boolean = await Oc.Instance.canIGetCRDs();
+
+        expect(actual).to.equal(expected);
+    });
+
 });
