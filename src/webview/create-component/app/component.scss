@@ -117,10 +117,24 @@ button {
     -webkit-text-fill-color: white !important;
 }
 
-.MuiSelect-select, .MuiMenu-paper {
+.MuiSelect-select, .MuiMenu-paper, .MuiAutocomplete-inputRoot {
     background-color: var(--vscode-dropdown-background) !important;
     color: var(--vscode-dropdown-foreground) !important;
     border: 0.5px solid var(--vscode-dropdown-border) !important;
+
+}
+
+.MuiInputBase-input {
+    padding-left: 8px !important;
+}
+
+.MuiAutocomplete-input {
+    padding-left: 0px !important;
+}
+
+.MuiAutocomplete-inputRoot {
+    width: 75% !important;
+    height: 3rem !important;
 }
 
 .MuiMenuItem-root {

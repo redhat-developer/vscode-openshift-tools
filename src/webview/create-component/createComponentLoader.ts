@@ -9,6 +9,7 @@ import { ExtensionID } from '../../util/constants';
 import OpenShiftItem from '../../openshift/openshiftItem';
 import { selectWorkspaceFolder, selectWorkspaceFolders } from '../../util/workspace';
 import { ComponentTypesView } from '../../registriesView';
+import { CompTypeDesc } from '../common/propertyTypes';
 
 let panel: vscode.WebviewPanel;
 
@@ -25,13 +26,34 @@ async function createComponentMessageListener(event: any): Promise<any> {
             });
             break;
         case 'getAllComponents':
-            const componentDescriptions = ComponentTypesView.instance.getCompDescriptions();
+            const componentDescriptions = Array.from(ComponentTypesView.instance.getCompDescriptions()).map((compDescription: CompTypeDesc) => {
+                if (compDescription.devfileData.devfile.metadata.name === 'java-quarkus') {
+                    compDescription.priority = 3;
+                } else if (compDescription.devfileData.devfile.metadata.name === 'nodejs') {
+                    compDescription.priority = 2;
+                } else if (compDescription.devfileData.devfile.metadata.name.indexOf('python') !== -1) {
+                    compDescription.priority = 1;
+                } else {
+                    compDescription.priority = -1;
+                }
+                return compDescription;
+            });
             panel?.webview.postMessage(
                 {
                     action: event.action,
-                    compDescriptions: Array.from(componentDescriptions)
+                    compDescriptions: componentDescriptions
                 }
             );
+            break;
+        case 'createComponent':
+            const folderPathUri = vscode.Uri.parse(event.folderPath);
+            vscode.commands.executeCommand('openshift.component.createFromRootWorkspaceFolder', folderPathUri, undefined, {
+                componentTypeName: event.componentTypeName,
+                projectName: event.projectName,
+                registryName: event.registryName,
+                compName: event.componentName
+            })
+            break;
         default:
             break
     }

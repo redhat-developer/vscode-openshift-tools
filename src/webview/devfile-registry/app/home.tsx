@@ -16,6 +16,7 @@ import { VSCodeMessage } from '../vsCodeMessage';
 import cardItemStyle from '../../common/cardItem.style';
 import { FilterElements } from './filterElements';
 import { WrapperCardItem as CardItem } from './wrapperCardItem';
+import {ascName} from '../../common/util';
 
 const useCardItemStyles = makeStyles(cardItemStyle);
 
@@ -166,12 +167,5 @@ function hasGitLink(compDescription: CompTypeDesc): boolean {
         hasGit = starterPro.git ? hasGit : false;
     });
     return hasGit;
-}
-
-function ascName(oldCompDesc: CompTypeDesc, newCompDesc: CompTypeDesc): number {
-    if (oldCompDesc.priority < 0 && newCompDesc.priority < 0) {
-        return oldCompDesc.devfileData.devfile.metadata.name.localeCompare(newCompDesc.devfileData.devfile.metadata.name);
-    }
-    return newCompDesc.priority - oldCompDesc.priority;
 }
 
