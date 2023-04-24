@@ -455,15 +455,6 @@
 					"dark": "images/title/dark/workspace-new.svg"
 				}
 			},
-            {
-				"command": "openshift.component.createComponentNew",
-				"title": "New Component Workflow",
-				"category": "OpenShift",
-				"icon": {
-					"light": "images/title/light/workspace-new.svg",
-					"dark": "images/title/dark/workspace-new.svg"
-				}
-			},
 			{
 				"command": "openshift.component.createFromRootWorkspaceFolder",
 				"title": "New OpenShift Component",
@@ -686,11 +677,6 @@
 			{
 				"command": "openshift.componentType.cloneStarterProjectRepository",
 				"title": "Clone to Workspace",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.componentType.newComponent",
-				"title": "New Component",
 				"category": "OpenShift"
 			},
 			{
@@ -1052,10 +1038,6 @@
 					"when": "false"
 				},
 				{
-					"command": "openshift.componentType.newComponent",
-					"when": "false"
-				},
-				{
 					"command": "openshift.component.revealContextInExplorer",
 					"when": "false"
 				},
@@ -1156,11 +1138,6 @@
 				},
 				{
 					"command": "openshift.component.createFromLocal",
-					"when": "view == openshiftComponentsView",
-					"group": "navigation"
-				},
-                {
-					"command": "openshift.component.createComponentNew",
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
 				},
@@ -1466,7 +1443,7 @@
 							"altText": "create component"
 						},
 						"completionEvents": [
-							"onCommand:openshift.componentType.newComponent"
+							"onCommand:openshift.component.createFromLocal"
 						]
 					},
                     {

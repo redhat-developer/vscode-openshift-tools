@@ -49,7 +49,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     readonly odo: Odo = getInstance();
     private registries: Registry[];
-    private readonly compDescriptions: Set<ComponentTypeDescription> = new Set<ComponentTypeDescription>();
+    private compDescriptions: Set<ComponentTypeDescription> = new Set<ComponentTypeDescription>();
     public subject: Subject<string> = new Subject<string>();
 
     createTreeView(id: string): TreeView<ComponentType> {
@@ -138,6 +138,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     public getAllComponents(): void {
         let isError = false;
         this.compDescriptions.clear();
+        const compDescs: Set<ComponentTypeDescription> = new Set<ComponentTypeDescription>();
         void getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
             await this.getRegistries();
             devFileComponentTypes.forEach((component: DevfileComponentType) => {
@@ -149,9 +150,10 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                         component.devfileData.devfile?.starterProjects?.map((starter: StarterProject) => {
                             starter.typeName = component.name;
                         });
-                        this.compDescriptions.add(component);
+                        compDescs.add(component);
 
-                    if (devFileComponentTypes.length === this.compDescriptions.size) {
+                    if (devFileComponentTypes.length === compDescs.size) {
+                        this.compDescriptions = compDescs;
                         this.subject.next('refresh');
                     }
                 }).catch(() => {

@@ -76,8 +76,8 @@ export class CardItem extends React.Component<DevFileProps, {
         VSCodeMessage.postMessage(
             {
                 'action': 'createComponent',
-                'devFile': this.props.compDescription.devfileData.devfile,
-                'selectedProject': this.state.selectedProject,
+                'compDescription': this.props.compDescription,
+                'selectedProject': this.state.selectedProject.name,
                 'registryName': this.props.compDescription.registry.name
             });
         return;

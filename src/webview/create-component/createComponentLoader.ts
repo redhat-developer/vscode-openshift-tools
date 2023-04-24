@@ -15,8 +15,11 @@ let panel: vscode.WebviewPanel;
 
 async function createComponentMessageListener(event: any): Promise<any> {
     switch (event?.action) {
-        case 'validateComponentName':
-            validateComponentName(event)
+        case 'validateCompName':
+            validateName(event)
+            break;
+        case 'validateAppName':
+            validateName(event)
             break;
         case 'selectFolder':
             const workspaceFolderItems = event.noWSFolder ? await selectWorkspaceFolder(true, 'Select Component Folder') : selectWorkspaceFolders();
@@ -26,18 +29,7 @@ async function createComponentMessageListener(event: any): Promise<any> {
             });
             break;
         case 'getAllComponents':
-            const componentDescriptions = Array.from(ComponentTypesView.instance.getCompDescriptions()).map((compDescription: CompTypeDesc) => {
-                if (compDescription.devfileData.devfile.metadata.name === 'java-quarkus') {
-                    compDescription.priority = 3;
-                } else if (compDescription.devfileData.devfile.metadata.name === 'nodejs') {
-                    compDescription.priority = 2;
-                } else if (compDescription.devfileData.devfile.metadata.name.indexOf('python') !== -1) {
-                    compDescription.priority = 1;
-                } else {
-                    compDescription.priority = -1;
-                }
-                return compDescription;
-            });
+            const componentDescriptions: CompTypeDesc[] = await getComponents();
             panel?.webview.postMessage(
                 {
                     action: event.action,
@@ -46,14 +38,30 @@ async function createComponentMessageListener(event: any): Promise<any> {
             );
             break;
         case 'createComponent':
-            const folderPathUri = vscode.Uri.parse(event.folderPath);
-            vscode.commands.executeCommand('openshift.component.createFromRootWorkspaceFolder', folderPathUri, undefined, {
+            panel?.webview.postMessage(
+                {
+                    action: 'createComponent',
+                    showLoadScreen: true
+                }
+            );
+            const folderPathUri = vscode.Uri.from(event.folderPath);
+            await vscode.commands.executeCommand('openshift.component.createFromRootWorkspaceFolder', folderPathUri, undefined, {
                 componentTypeName: event.componentTypeName,
                 projectName: event.projectName,
                 registryName: event.registryName,
-                compName: event.componentName
-            })
+                compName: event.componentName,
+                applicationName: event.appName
+            });
+            panel?.webview.postMessage(
+                {
+                    action: 'createComponent',
+                    showLoadScreen: false
+                }
+            );
+        case 'close': {
+            panel?.dispose();
             break;
+        }
         default:
             break
     }
@@ -64,7 +72,7 @@ export default class CreateComponentLoader {
         return vscode.extensions.getExtension(ExtensionID).extensionPath
     }
 
-    static async loadView(title: string): Promise<vscode.WebviewPanel> {
+    static async loadView(title: string, component: CompTypeDesc, starterProjectName: string): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(path.join(CreateComponentLoader.extensionPath, 'out', 'componentViewer'));
         if (panel) {
             panel.reveal(vscode.ViewColumn.One);
@@ -80,6 +88,13 @@ export default class CreateComponentLoader {
                 panel = undefined;
             });
             panel.webview.onDidReceiveMessage(createComponentMessageListener);
+        }
+        if (component && starterProjectName) {
+            panel?.webview.postMessage({
+                action: 'InputFromDevFile',
+                selectedComponent: component,
+                selectedPro: starterProjectName
+            });
         }
         return panel;
     }
@@ -113,15 +128,32 @@ export default class CreateComponentLoader {
     }
 }
 
-function validateComponentName(event: any) {
-    let validationMessage = OpenShiftItem.emptyName(`Required ${event.compName}`, event.compName.trim());
-    if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${event.compName}.
-        Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`, event.compName);
-    if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${event.compName} should be between 2-63 characters`, event.compName, 0);
+function validateName(event: any) {
+    let validationMessage = event.action !== 'validateAppName' ? OpenShiftItem.emptyName(`Required ${event.name}`, event.name.trim()) : null;
+    if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${event.name}.
+        Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`, event.name);
+    if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${event.name} should be between 2-63 characters`, event.name, 0);
     panel?.webview.postMessage({
         action: event.action,
         error: !validationMessage ? false : true,
-        helpText: !validationMessage ? 'A unique name given to the component that will be used to name associated resources.' : validationMessage,
-        componentName: event.compName
+        helpText: !validationMessage ? event.action === 'validateAppName' ? 'Appended with \'-app\' if not endswith app' : 'A unique name given to the component that will be used to name associated resources.' : validationMessage,
+        name: event.name
     });
+}
+
+async function getComponents(): Promise<CompTypeDesc[]> {
+    const componentDescs = ComponentTypesView.instance.getCompDescriptions();
+    const componentDescriptions = Array.from(componentDescs).map((compDescription: CompTypeDesc) => {
+        if (compDescription.devfileData.devfile.metadata.name === 'java-quarkus') {
+            compDescription.priority = 3;
+        } else if (compDescription.devfileData.devfile.metadata.name === 'nodejs') {
+            compDescription.priority = 2;
+        } else if (compDescription.devfileData.devfile.metadata.name.indexOf('python') !== -1) {
+            compDescription.priority = 1;
+        } else {
+            compDescription.priority = -1;
+        }
+        return compDescription;
+    });
+    return componentDescriptions;
 }

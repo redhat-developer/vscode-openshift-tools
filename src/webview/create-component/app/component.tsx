@@ -8,6 +8,7 @@ import { Autocomplete, Box, Button, InputLabel, MenuItem, Switch, TextField, Typ
 import { VSCodeMessage } from './vsCodeMessage';
 import { DefaultProps, CompTypeDesc } from '../../common/propertyTypes';
 import { ascName } from '../../common/util';
+import { LoadScreen } from '../../common/loading';
 import './component.scss';
 
 declare module 'react' {
@@ -19,32 +20,46 @@ declare module 'react' {
 }
 
 export class CreateComponent extends React.Component<DefaultProps, {
+    application: {
+        name: string,
+        error?: boolean,
+        helpText?: string
+    },
     component: {
         name?: string,
         error?: boolean,
-        helpText?: string,
+        helpText?: string
     },
     wsFolderItems?: Uri[],
-    wsFolderPath: string,
+    wsFolderPath: Uri,
     compDescriptions: CompTypeDesc[],
     selectedComponentDesc?: CompTypeDesc
     incudeStarterProject: boolean,
-    selectedStarterProject: string
+    selectedStarterProject: string,
+    showLoadScreen: boolean,
+    autoSelectDisable: boolean
 }> {
 
     constructor(props: DefaultProps | Readonly<DefaultProps>) {
         super(props);
         this.state = {
+            application: {
+                name: '',
+                error: false,
+                helpText: ''
+            },
             component: {
                 name: '',
                 error: false,
-                helpText: '',
+                helpText: ''
             },
-            wsFolderItems: undefined,
-            wsFolderPath: '',
-            compDescriptions: undefined,
+            wsFolderItems: [],
+            wsFolderPath: undefined,
+            compDescriptions: [],
             incudeStarterProject: true,
-            selectedStarterProject: ''
+            selectedStarterProject: '',
+            showLoadScreen: false,
+            autoSelectDisable: false
         }
         VSCodeMessage.postMessage({
             action: 'selectFolder'
@@ -54,52 +69,70 @@ export class CreateComponent extends React.Component<DefaultProps, {
         });
     }
 
-    validateComponentName = (value: string): void => {
+    validateName = (value: string, place: string): void => {
         VSCodeMessage.postMessage({
-            action: 'validateComponentName',
-            compName: value
+            action: `validate${place}Name`,
+            name: value
         })
     }
 
-    initalize(close = false) {
-        if (close) {
-
-        }
-        this.state = {
-            component: {
-                name: '',
-                error: false,
-                helpText: '',
-            },
-            wsFolderItems: undefined,
-            wsFolderPath: '',
-            compDescriptions: undefined,
-            incudeStarterProject: true,
-            selectedStarterProject: ''
-        };
+    cancel = (): void => {
+        VSCodeMessage.postMessage({
+            action: 'close'
+        });
     }
 
     componentDidMount(): void {
         VSCodeMessage.onMessage((message) => {
-            if (message.data.action === 'validateComponentName') {
+            if (message.data.action === 'validateCompName') {
                 this.setState({
                     component: {
-                        name: message.data.componentName,
+                        name: message.data.name,
+                        error: message.data.error,
+                        helpText: message.data.helpText,
+                    },
+                    application: {
+                        name: !message.data.error ? message.data.name + '-app' : ''
+                    }
+                });
+            } else if (message.data.action === 'validateAppName') {
+                this.setState({
+                    application: {
+                        name: message.data.name,
                         error: message.data.error,
                         helpText: message.data.helpText,
                     }
                 });
             } else if (message.data.action === 'selectFolder') {
-                if (message.data.wsFolderItems.length > 0) {
-                    this.setState({ wsFolderPath: message.data.wsFolderItems[0].fsPath });
+                if (message.data.wsFolderItems === null || message.data.wsFolderItems[0] === null) {
+                    VSCodeMessage.postMessage('close');
+                } else {
+                    if (message.data.wsFolderItems.length > 0) {
+                        this.setState({ wsFolderPath: message.data.wsFolderItems[0] });
+                    }
+                    this.setState({
+                        wsFolderItems: message.data.wsFolderItems
+                    });
                 }
-                this.setState({
-                    wsFolderItems: message.data.wsFolderItems
-                });
             } else if (message.data.action === 'getAllComponents') {
+                if (message.data.compDescriptions.length === 0) {
+                    VSCodeMessage.postMessage({
+                        action: 'getAllComponents'
+                    })
+                } else {
+                    this.setState({
+                        compDescriptions: message.data.compDescriptions
+                    });
+                }
+            } else if (message.data.action === 'createComponent') {
+                this.setState({ showLoadScreen: message.data.showLoadScreen });
+            } else if (message.data.action === 'InputFromDevFile') {
                 this.setState({
-                    compDescriptions: message.data.compDescriptions
-                });
+                    compDescriptions: [message.data.selectedComponent],
+                    selectedComponentDesc: message.data.selectedComponent,
+                    selectedStarterProject: message.data.selectedPro,
+                    autoSelectDisable: true
+                })
             }
         });
     }
@@ -111,7 +144,8 @@ export class CreateComponent extends React.Component<DefaultProps, {
             componentTypeName: this.state.selectedComponentDesc.devfileData.devfile.metadata.name,
             projectName: this.state.selectedStarterProject.length > 0 ? this.state.selectedStarterProject : undefined,
             registryName: this.state.selectedComponentDesc.registry.name,
-            componentName: this.state.component.name
+            componentName: this.state.component.name,
+            appName: this.state.application.name.endsWith('-app') ? this.state.application.name : this.state.application.name + '-app'
         });
     }
 
@@ -149,7 +183,7 @@ export class CreateComponent extends React.Component<DefaultProps, {
     }
 
     handleCreateBtnDisable(): boolean {
-        return !this.state.component || this.state.component.name.length === 0 || this.state.component.error || this.state.wsFolderPath.length === 0 ||
+        return !this.state.component || this.state.component.name.length === 0 || this.state.component.error || this.state.application.error || !this.state.wsFolderPath ||
             !this.state.selectedComponentDesc
     }
 
@@ -175,198 +209,216 @@ export class CreateComponent extends React.Component<DefaultProps, {
     });
 
     render(): React.ReactNode {
-        const { component, wsFolderItems, wsFolderPath, compDescriptions, selectedComponentDesc } = this.state;
-        const optionList = compDescriptions?.sort(ascName);
+        const { application, autoSelectDisable, component, wsFolderItems, wsFolderPath, compDescriptions, selectedComponentDesc, selectedStarterProject, showLoadScreen } = this.state;
+        const optionList = compDescriptions.sort(ascName);
         return (
-            <div className='mainContainer margin' >
-                <div className='title'>
-                    <Typography variant='h5'>Create Component</Typography>
-                </div>
-                <div className='subTitle'>
-                    <Typography>Create a component in the local workspace using the selected starter project and associated `devfile.yaml` configuration. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component.</Typography>
-                </div>
-                <div className='formContainer'>
-                    <div className='form'>
-                        <div style={{ marginTop: '10px', marginBottom: '10px' }}>
-                            <InputLabel required htmlFor='bootstrap-input'
-                                style={{
-                                    color: '#EE0000',
-                                    marginTop: '1rem'
-                                }}>
-                                Component Name
-                            </InputLabel>
-                            <TextField
-                                defaultValue={component.name}
-                                error={component.error}
-                                onChange={(e) => this.validateComponentName(e.target.value)}
-                                id='bootstrap-input'
-                                sx={{
-                                    input: {
-                                        color: 'var(--vscode-settings-textInputForeground)',
-                                        backgroundColor: 'var(--vscode-settings-textInputBackground)'
-                                    }
-                                }}
-                                style={{ width: '30%', paddingTop: '10px' }}
-                                helperText={component.helpText} />
-                        </div>
-                        <div style={{ marginTop: '10px', marginBottom: '10px' }}>
-                            <InputLabel required htmlFor='bootstrap-input'
-                                style={{
-                                    color: '#EE0000',
-                                    marginTop: '1rem'
-                                }}>
-                                Folder for component
-                            </InputLabel>
-                            <div style={{ display: 'flex', flexDirection: 'row', gap: '2rem' }}>
-                                {wsFolderItems && <TextField
-                                    variant='standard'
-                                    onChange={(e) => this.handleWsFolderDropDownChange(e)}
-                                    value={wsFolderPath}
-                                    disabled={wsFolderItems?.length == 0}
-                                    id='bootstrap-input'
-                                    select
-                                    sx={{
-                                        input: {
-                                            color: 'var(--vscode-settings-textInputForeground)',
-                                            backgroundColor: 'var(--vscode-settings-textInputBackground)'
+            <>
+                {compDescriptions.length === 0 ? <LoadScreen title={'Loading the devfiles'} /> :
+                    showLoadScreen ?
+                        <LoadScreen title={'Creating the component ' + component.name} /> :
+                        <div className='mainContainer margin'>
+                            <div className='title'>
+                                <Typography variant='h5'>Create Component</Typography>
+                            </div>
+                            <div className='subTitle'>
+                                <Typography>Create a component in the local workspace using the selected starter project and associated `devfile.yaml` configuration. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component.</Typography>
+                            </div>
+                            <div className='formContainer'>
+                                <div className='form'>
+                                    <div style={{ marginTop: '10px', marginBottom: '10px' }}>
+                                        <InputLabel required htmlFor='bootstrap-input'
+                                            style={{
+                                                color: '#EE0000',
+                                                marginTop: '1rem'
+                                            }}>
+                                            Component Name
+                                        </InputLabel>
+                                        <TextField
+                                            defaultValue={component.name}
+                                            error={component.error}
+                                            onChange={(e) => this.validateName(e.target.value, 'Comp')}
+                                            id='bootstrap-input'
+                                            sx={{
+                                                input: {
+                                                    color: 'var(--vscode-settings-textInputForeground)',
+                                                    backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                                }
+                                            }}
+                                            style={{ width: '30%', paddingTop: '10px' }}
+                                            helperText={component.helpText} />
+                                        <InputLabel htmlFor='bootstrap-input'
+                                            style={{
+                                                color: '#EE0000',
+                                                marginTop: '1rem'
+                                            }}>
+                                            Application Name
+                                        </InputLabel>
+                                        <TextField
+                                            value={application.name}
+                                            error={application.error}
+                                            onChange={(e) => this.validateName(e.target.value, 'App')}
+                                            id='bootstrap-input'
+                                            sx={{
+                                                input: {
+                                                    color: 'var(--vscode-settings-textInputForeground)',
+                                                    backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                                }
+                                            }}
+                                            style={{ width: '30%', paddingTop: '10px' }}
+                                            helperText={application.helpText} />
+                                        <InputLabel required htmlFor='bootstrap-input'
+                                            style={{
+                                                color: '#EE0000',
+                                                marginTop: '1rem'
+                                            }}>
+                                            Folder for component
+                                        </InputLabel>
+                                        <div style={{ display: 'flex', flexDirection: 'row', gap: '2rem' }}>
+                                            {wsFolderItems.length > 0 && <TextField
+                                                variant='standard'
+                                                onChange={(e) => this.handleWsFolderDropDownChange(e)}
+                                                value={wsFolderPath.fsPath ? wsFolderPath.fsPath : ''}
+                                                disabled={wsFolderItems?.length == 0 || autoSelectDisable}
+                                                id='bootstrap-input'
+                                                select
+                                                sx={{
+                                                    input: {
+                                                        color: 'var(--vscode-settings-textInputForeground)',
+                                                        backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                                    }
+                                                }}
+                                                style={{ width: '30%', paddingTop: '10px' }}>
+                                                <MenuItem key='New Folder' value='New Folder'>
+                                                    New Folder
+                                                </MenuItem>
+                                                {...wsFolderItems?.map((wsFolderItem: Uri) => (
+                                                    <MenuItem key={wsFolderItem.fsPath} value={wsFolderItem.fsPath}>
+                                                        {wsFolderItem.fsPath}
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>}
+                                            {wsFolderItems?.length === 0 && <Button variant='contained'
+                                                className='buttonStyle'
+                                                style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white' }}
+                                                onClick={() => this.selectFolder()}>
+                                                Select Folder
+                                            </Button>}
+                                        </div>
+                                        {compDescriptions && <>
+                                            <InputLabel required htmlFor='bootstrap-input'
+                                                style={{
+                                                    color: '#EE0000',
+                                                    marginTop: '1rem'
+                                                }}>
+                                                Devfiles
+                                            </InputLabel><Autocomplete
+                                                id='grouped-components'
+                                                options={optionList}
+                                                disabled={autoSelectDisable}
+                                                autoHighlight
+                                                fullWidth
+                                                disableClearable
+                                                groupBy={(option) => option.devfileData.devfile.metadata.language}
+                                                getOptionLabel={(option) => option.devfileData.devfile.metadata.displayName + '/' + option.registry.name}
+                                                renderOption={(props, option) => (
+                                                    <Box component='li' sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
+                                                        <img
+                                                            loading='lazy'
+                                                            width='20'
+                                                            src={option.devfileData.devfile.metadata.icon}
+                                                            alt='' />
+                                                        {option.devfileData.devfile.metadata.displayName} / {option.registry.name}
+                                                    </Box>
+                                                )}
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        sx={{
+                                                            input: {
+                                                                color: 'var(--vscode-settings-textInputForeground)',
+                                                                backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                                            }
+                                                        }}
+                                                        style={{ paddingTop: '10px' }}
+                                                        {...params}
+                                                        inputProps={{
+                                                            ...params.inputProps
+                                                        }} />
+                                                )}
+                                                renderGroup={(params) => (
+                                                    <li key={params.key}>
+                                                        <this.GroupHeader>{params.group}</this.GroupHeader>
+                                                        <this.GroupItems>{params.children}</this.GroupItems>
+                                                    </li>
+                                                )}
+                                                onChange={(e, v) => this.handleDevFileChange(e, v)} />
+                                        </>}
+                                        {selectedComponentDesc && selectedComponentDesc.starterProjects?.length > 0 &&
+                                            <div style={{ marginTop: '10px', marginBottom: '10px' }}>
+                                                <InputLabel htmlFor='bootstrap-input'
+                                                    style={{
+                                                        color: '#EE0000',
+                                                        marginTop: '1rem'
+                                                    }}>
+                                                    Add Starter Project
+                                                    <Switch defaultChecked size='small' sx={{
+                                                        margin: '0 1rem'
+                                                    }}
+                                                        onChange={(e) => this.includeStarterProject(e)} />
+                                                </InputLabel>
+                                                {this.state.incudeStarterProject && <Autocomplete
+                                                    id='grouped-starterProjects'
+                                                    disabled={selectedComponentDesc.starterProjects.length === 1}
+                                                    value={selectedStarterProject}
+                                                    options={selectedComponentDesc.starterProjects}
+                                                    autoHighlight
+                                                    fullWidth
+                                                    disableClearable
+                                                    getOptionLabel={(option) => option}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            sx={{
+                                                                input: {
+                                                                    color: 'var(--vscode-settings-textInputForeground)',
+                                                                    backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                                                }
+                                                            }}
+                                                            style={{ paddingTop: '10px' }}
+                                                            {...params}
+                                                            inputProps={{
+                                                                ...params.inputProps
+                                                            }} />
+                                                    )}
+                                                    renderGroup={(params) => (
+                                                        <li key={params.key}>
+                                                            <this.GroupHeader>{params.group}</this.GroupHeader>
+                                                            <this.GroupItems>{params.children}</this.GroupItems>
+                                                        </li>
+                                                    )}
+                                                    onChange={(e, v) => this.handleStarterProjectChange(e, v)} />}
+                                            </div>
                                         }
-                                    }}
-                                    style={{ width: '30%', paddingTop: '10px' }}>
-                                    <MenuItem key='New Folder' value='New Folder'>
-                                        New Folder
-                                    </MenuItem>
-                                    {...wsFolderItems?.map((wsFolderItem: Uri) => (
-                                        <MenuItem key={wsFolderItem.fsPath} value={wsFolderItem.fsPath}>
-                                            {wsFolderItem.fsPath}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-                                }
-                                {wsFolderItems?.length === 0 && <Button variant='contained'
-                                    className='buttonStyle'
-                                    style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white' }}
-                                    onClick={() => this.selectFolder()}>
-                                    Select Folder
-                                </Button>
-                                }
+                                        <div style={{ marginTop: '2rem' }}>
+                                            <Button variant='contained'
+                                                disabled={this.handleCreateBtnDisable()}
+                                                className='buttonStyle'
+                                                style={{ backgroundColor: this.handleCreateBtnDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: 'white' }}
+                                                onClick={() => this.createComponent()}>
+                                                Create Component
+                                            </Button>
+                                            <Button
+                                                variant='outlined'
+                                                className='buttonStyle'
+                                                style={{ textTransform: 'none', marginLeft: '1rem', color: '#EE0000 !important' }}
+                                                onClick={() => this.cancel()}>
+                                                Cancel
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        {compDescriptions && <div style={{ marginTop: '10px', marginBottom: '10px' }}>
-                            <InputLabel required htmlFor='bootstrap-input'
-                                style={{
-                                    color: '#EE0000',
-                                    marginTop: '1rem'
-                                }}>
-                                Devfiles
-                            </InputLabel>
-                            <Autocomplete
-                                id='grouped-demo'
-                                options={optionList}
-                                autoHighlight
-                                fullWidth
-                                groupBy={(option) => option.devfileData.devfile.metadata.language}
-                                getOptionLabel={(option) => option.devfileData.devfile.metadata.displayName + '/' + option.registry.name}
-                                renderOption={(props, option) => (
-                                    <Box component='li' sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
-                                        <img
-                                            loading='lazy'
-                                            width='20'
-                                            src={option.devfileData.devfile.metadata.icon}
-                                            alt=''
-                                        />
-                                        {option.devfileData.devfile.metadata.displayName} / {option.registry.name}
-                                    </Box>
-                                )}
-                                renderInput={(params) => (
-                                    <TextField
-                                        sx={{
-                                            input: {
-                                                color: 'var(--vscode-settings-textInputForeground)',
-                                                backgroundColor: 'var(--vscode-settings-textInputBackground)'
-                                            }
-                                        }}
-                                        style={{ paddingTop: '10px' }}
-                                        {...params}
-                                        inputProps={{
-                                            ...params.inputProps
-                                        }}
-                                    />
-                                )}
-                                renderGroup={(params) => (
-                                    <li key={params.key}>
-                                        <this.GroupHeader>{params.group}</this.GroupHeader>
-                                        <this.GroupItems>{params.children}</this.GroupItems>
-                                    </li>
-                                )}
-                                onChange={(e, v) => this.handleDevFileChange(e, v)}
-                            />
-                        </div>
-                        }
-                        {selectedComponentDesc && selectedComponentDesc.starterProjects?.length > 0 && <div style={{ marginTop: '10px', marginBottom: '10px' }}>
-                            <InputLabel htmlFor='bootstrap-input'
-                                style={{
-                                    color: '#EE0000',
-                                    marginTop: '1rem'
-                                }}>
-                                Add Starter Project
-                                <Switch defaultChecked size='small' sx={{
-                                    margin: '0 1rem'
-                                }}
-                                    onChange={(e) => this.includeStarterProject(e)} />
-                            </InputLabel>
-                            {this.state.incudeStarterProject && <Autocomplete
-                                id='grouped-demo'
-                                disabled={selectedComponentDesc.starterProjects.length === 1}
-                                value={selectedComponentDesc.starterProjects[0]}
-                                options={selectedComponentDesc.starterProjects}
-                                autoHighlight
-                                fullWidth
-                                getOptionLabel={(option) => option}
-                                renderInput={(params) => (
-                                    <TextField
-                                        sx={{
-                                            input: {
-                                                color: 'var(--vscode-settings-textInputForeground)',
-                                                backgroundColor: 'var(--vscode-settings-textInputBackground)'
-                                            }
-                                        }}
-                                        style={{ paddingTop: '10px' }}
-                                        {...params}
-                                        inputProps={{
-                                            ...params.inputProps
-                                        }}
-                                    />
-                                )}
-                                renderGroup={(params) => (
-                                    <li key={params.key}>
-                                        <this.GroupHeader>{params.group}</this.GroupHeader>
-                                        <this.GroupItems>{params.children}</this.GroupItems>
-                                    </li>
-                                )}
-                                onChange={(e, v) => this.handleStarterProjectChange(e, v)}
-                            />
-                            }
-                        </div>
-                        }
-                        <div style={{ marginTop: '10px', marginBottom: '10px' }}>
-                            <Button variant='contained'
-                                disabled={this.handleCreateBtnDisable()}
-                                className='buttonStyle'
-                                style={{ backgroundColor: this.handleCreateBtnDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: 'white' }}
-                                onClick={() => this.createComponent()}>
-                                Create Component
-                            </Button>
-                            <Button
-                                variant='outlined'
-                                className='buttonStyle'
-                                style={{ textTransform: 'none', marginLeft: '1rem', color: '#EE0000 !important' }}
-                                onClick={() => this.initalize(true)}>
-                                Cancel
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                }
+            </>
         )
     }
 }
