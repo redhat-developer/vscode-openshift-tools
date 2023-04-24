@@ -73,22 +73,19 @@ export default class CreateComponentLoader {
     }
 
     static async loadView(title: string, component: CompTypeDesc, starterProjectName: string): Promise<vscode.WebviewPanel> {
+        const webViewTitle = component ?  `${title}-${component.devfileData.devfile.metadata.displayName}` : title;
         const localResourceRoot = vscode.Uri.file(path.join(CreateComponentLoader.extensionPath, 'out', 'componentViewer'));
-        if (panel) {
-            panel.reveal(vscode.ViewColumn.One);
-        } else {
-            panel = vscode.window.createWebviewPanel('CreateComponentView', title, vscode.ViewColumn.One, {
-                enableScripts: true,
-                localResourceRoots: [localResourceRoot],
-                retainContextWhenHidden: true
-            });
-            panel.iconPath = vscode.Uri.file(path.join(CreateComponentLoader.extensionPath, 'images/gitImport/git.svg'));
-            panel.webview.html = CreateComponentLoader.getWebviewContent(CreateComponentLoader.extensionPath, panel);
-            panel.onDidDispose(() => {
-                panel = undefined;
-            });
-            panel.webview.onDidReceiveMessage(createComponentMessageListener);
-        }
+        panel = vscode.window.createWebviewPanel('CreateComponentView', webViewTitle, vscode.ViewColumn.One, {
+            enableScripts: true,
+            localResourceRoots: [localResourceRoot],
+            retainContextWhenHidden: true
+        });
+        panel.iconPath = vscode.Uri.file(path.join(CreateComponentLoader.extensionPath, 'images/gitImport/git.svg'));
+        panel.webview.html = CreateComponentLoader.getWebviewContent(CreateComponentLoader.extensionPath, panel);
+        panel.onDidDispose(() => {
+            panel = undefined;
+        });
+        panel.webview.onDidReceiveMessage(createComponentMessageListener);
         if (component && starterProjectName) {
             panel?.webview.postMessage({
                 action: 'InputFromDevFile',

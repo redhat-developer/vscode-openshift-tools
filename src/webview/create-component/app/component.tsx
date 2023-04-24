@@ -128,7 +128,6 @@ export class CreateComponent extends React.Component<DefaultProps, {
                 this.setState({ showLoadScreen: message.data.showLoadScreen });
             } else if (message.data.action === 'InputFromDevFile') {
                 this.setState({
-                    compDescriptions: [message.data.selectedComponent],
                     selectedComponentDesc: message.data.selectedComponent,
                     selectedStarterProject: message.data.selectedPro,
                     autoSelectDisable: true
@@ -211,6 +210,9 @@ export class CreateComponent extends React.Component<DefaultProps, {
     render(): React.ReactNode {
         const { application, autoSelectDisable, component, wsFolderItems, wsFolderPath, compDescriptions, selectedComponentDesc, selectedStarterProject, showLoadScreen } = this.state;
         const optionList = compDescriptions.sort(ascName);
+        const filterList = selectedComponentDesc ? optionList.filter((value) => value.devfileData.devfile.metadata.name === selectedComponentDesc.devfileData.devfile.metadata.name &&
+            value.registry.name === selectedComponentDesc.registry.name) : [];
+        const getInputValue = filterList.length > 0 ? filterList[0].devfileData.devfile.metadata.displayName + '/' + filterList[0].registry.name : ''
         return (
             <>
                 {compDescriptions.length === 0 ? <LoadScreen title={'Loading the devfiles'} /> :
@@ -314,6 +316,7 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                             </InputLabel><Autocomplete
                                                 id='grouped-components'
                                                 options={optionList}
+                                                inputValue={getInputValue}
                                                 disabled={autoSelectDisable}
                                                 autoHighlight
                                                 fullWidth
@@ -367,7 +370,7 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                                 </InputLabel>
                                                 {this.state.incudeStarterProject && <Autocomplete
                                                     id='grouped-starterProjects'
-                                                    disabled={selectedComponentDesc.starterProjects.length === 1}
+                                                    disabled={selectedComponentDesc.starterProjects.length === 1 || autoSelectDisable}
                                                     value={selectedStarterProject}
                                                     options={selectedComponentDesc.starterProjects}
                                                     autoHighlight

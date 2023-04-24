@@ -427,7 +427,7 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.createFromLocal')
     static async createComponent(component: CompTypeDesc, starterProjectName: string): Promise<void> {
-        await CreateComponentLoader.loadView('Create Component', component, starterProjectName);
+        await CreateComponentLoader.loadView('Create component', component, starterProjectName);
     }
 
     @vsCommand('openshift.component.openImportFromGit')
