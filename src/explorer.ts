@@ -133,6 +133,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
         // check if element is Context instance
         if ('name' in element && 'cluster' in element && 'user' in element) { // Context instance could be without namespace
+            void commands.executeCommand('setContext', 'isLoggedIn', true);
             return  {
                 contextValue: 'openshift.k8sContext',
                 label: this.kubeConfig.getCluster(element.cluster).server,
