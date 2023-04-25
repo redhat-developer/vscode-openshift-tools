@@ -89,6 +89,28 @@
                 "--mocha_config",
                 "${workspaceFolder}/test/ui/.mocharc.js"
             ],
+            "preLaunchTask": "npm: watch",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "env": {
+                "NODE_OPTIONS": "--max_old_space_size=4096"
+            }
+        },
+        {
+            "name": "Debug UI Tests (Fast)",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/.bin/extest",
+            "args": [
+                "run-tests",
+                "${workspaceFolder}/out/test/ui/public-ui-test.js",
+                "-o",
+                "${workspaceFolder}/test/ui/settings.json",
+                "-m",
+                "--mocha_config",
+                "${workspaceFolder}/test/ui/.mocharc.js"
+            ],
+            "preLaunchTask": "npm: watch",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen"
         },
