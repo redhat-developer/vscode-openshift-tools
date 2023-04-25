@@ -39,6 +39,7 @@ export class Command {
         }
         if (runOn) {
             command.addOption(new CommandOption('--platform', 'podman'));
+            command.addOption(new CommandOption('--forward-localhost'));
         }
         return command;
     }
