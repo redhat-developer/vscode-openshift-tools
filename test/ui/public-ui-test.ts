@@ -7,6 +7,7 @@ import { checkAboutCommand } from './suite/command-about';
 import { testDevfileRegistries } from './suite/devfileRegistries';
 import { checkExtension } from './suite/extension';
 import { checkFocusOnCommands } from './suite/focusOn';
+import { testImportFromGit } from './suite/import-from-git';
 import { checkOpenshiftView } from './suite/openshift';
 
 describe('Extension public-facing UI tests', () => {
@@ -15,4 +16,5 @@ describe('Extension public-facing UI tests', () => {
     checkAboutCommand();
     testDevfileRegistries();
     checkFocusOnCommands();
+    testImportFromGit();
 });
