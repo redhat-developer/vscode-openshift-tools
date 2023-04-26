@@ -1,5 +1,25 @@
 # Change Log
 
+## 1.3.0 (April 26, 2023)
+
+* [#2132](https://github.com/redhat-developer/vscode-openshift-tools/issues/2132) Add Helm Charts UI in extension
+* [#2180](https://github.com/redhat-developer/vscode-openshift-tools/issues/2180) Namespace non existent should be handled
+* [#2658](https://github.com/redhat-developer/vscode-openshift-tools/issues/2658) Fix npm install warnings for packages and their dependencies
+* [#2788](https://github.com/redhat-developer/vscode-openshift-tools/issues/2788) Add Helm Workflow information in Walkthrough
+* [#2790](https://github.com/redhat-developer/vscode-openshift-tools/issues/2790) Use odo analyze command to detect devfiles in Import From Git workflow
+* [#2801](https://github.com/redhat-developer/vscode-openshift-tools/pull/2801) Hide commands that require selecting a component
+* [#2806](https://github.com/redhat-developer/vscode-openshift-tools/issues/2806) Update the CRC version to latest in OpenShift Toolkit
+* [#2809](https://github.com/redhat-developer/vscode-openshift-tools/issues/2809) Add reference of podman keyword in the extension keywords section
+* [#2812](https://github.com/redhat-developer/vscode-openshift-tools/issues/2812) 'Show Logs' and 'Follow logs' commands doesn't work when dev is running on podman
+* [#2823](https://github.com/redhat-developer/vscode-openshift-tools/issues/2823) Trying to load a helm chart fails
+* [#2830](https://github.com/redhat-developer/vscode-openshift-tools/issues/2830) Changing the show/follow log output to webview based editor results in empty page
+* [#2836](https://github.com/redhat-developer/vscode-openshift-tools/pull/2836) updated Node.js 16 in GH workflow actions
+* [#2839](https://github.com/redhat-developer/vscode-openshift-tools/pull/2839) disable next button until user selects the installed location of local CRC
+* [#2843](https://github.com/redhat-developer/vscode-openshift-tools/pull/2843) added null check for starter project
+* [#2845](https://github.com/redhat-developer/vscode-openshift-tools/issues/2845) Helm charts view is loading indefinitely
+* [#2848](https://github.com/redhat-developer/vscode-openshift-tools/issues/2848) Helm Charts doesn't appear in context menu until you switch namespaces
+* [#2852](https://github.com/redhat-developer/vscode-openshift-tools/issues/2852) Add --forward-localhost on podman dev
+
 ## 1.2.0 (February 17, 2023)
 
 * [#2553](https://github.com/redhat-developer/vscode-openshift-tools/issues/2553) Use 'workbench.action.openIssueReporter' to report issues for the extension
