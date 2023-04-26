@@ -3,16 +3,15 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { OdoImpl, ContextType } from '../../../src/odo';
+import * as sinonChai from 'sinon-chai';
+import * as vscode from 'vscode';
 import { CommandText } from '../../../src/base/command';
+import { OdoImpl } from '../../../src/odo';
 import { Command } from '../../../src/odo/command';
-import { TestItem } from './testOSItem';
+import { Project as OdoProject } from '../../../src/odo/project';
 import { Project } from '../../../src/openshift/project';
-import OpenShiftItem from '../../../src/openshift/openshiftItem';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -21,20 +20,15 @@ suite('OpenShift/Project', () => {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
 
-    let cluster: TestItem;
-    let projectItem: TestItem;
-    let appItem: TestItem;
+    let projectItem: OdoProject;
     const errorMessage = 'ERROR MESSAGE';
 
     setup(() => {
-        cluster = new TestItem(null, 'cluster', ContextType.CLUSTER);
-        projectItem = new TestItem(cluster, 'project', ContextType.PROJECT);
-        appItem = new TestItem(projectItem, 'app', ContextType.APPLICATION);
+        projectItem = { name: 'project', active: true };
         sandbox = sinon.createSandbox();
-        sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
+        sandbox.stub(OdoImpl.prototype, 'getActiveCluster').resolves('cluster');
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
-        sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
     });
 
     teardown(() => {
@@ -45,15 +39,14 @@ suite('OpenShift/Project', () => {
         let inputStub: sinon.SinonStub;
 
         setup(() => {
-            inputStub = sandbox.stub(vscode.window, 'showInputBox').resolves(projectItem.getName());
+            inputStub = sandbox.stub(vscode.window, 'showInputBox').resolves(projectItem.name);
         });
 
         test('works with valid inputs', async () => {
-            sandbox.stub(OdoImpl.Instance.subject, 'next');
             const result = await Project.create();
 
-            expect(result).equals(`Project '${projectItem.getName()}' successfully created`);
-            expect(execStub).calledWith(Command.createProject(projectItem.getName()));
+            expect(result).equals(`Project '${projectItem.name}' successfully created`);
+            expect(execStub).calledWith(Command.createProject(projectItem.name));
         });
 
         test('returns null with no project name selected', async () => {
@@ -80,7 +73,6 @@ suite('OpenShift/Project', () => {
                 result = await options.validateInput('goodvalue');
                 return Promise.resolve('goodvalue');
             });
-            sandbox.stub(OdoImpl.Instance.subject, 'next');
             await Project.create();
 
             expect(result).is.undefined;
@@ -105,7 +97,6 @@ suite('OpenShift/Project', () => {
                 result = await options.validateInput('name&name');
                 return Promise.resolve('projectNameValidatorTest');
             });
-            sandbox.stub(OdoImpl.Instance.subject,'next');
             await Project.create();
 
             expect(result).equals('Not a valid Project name. Please enter name that starts with an alphanumeric character, use lower case alphanumeric characters or \'-\' and end with an alphanumeric character');
@@ -118,7 +109,6 @@ suite('OpenShift/Project', () => {
                 result = await options.validateInput('project');
                 return Promise.resolve('project');
             });
-            sandbox.stub(OdoImpl.Instance.subject, 'next');
             await Project.create();
 
             expect(result).equals('This name is already used, please enter different name.');
@@ -131,7 +121,6 @@ suite('OpenShift/Project', () => {
                 result = await options.validateInput('n123456789012345678901234567890123456789012345678901234567890123');
                 return Promise.resolve('projectLongNameValidatorTest');
             });
-            sandbox.stub(OdoImpl.Instance.subject,'next');
             await Project.create();
 
             expect(result).equals('Project name should be between 2-63 characters');
@@ -156,8 +145,8 @@ suite('OpenShift/Project', () => {
         test('works without context', async () => {
             const result = await Project.del(null);
 
-            expect(result).equals(`Project '${projectItem.getName()}' successfully deleted`);
-            expect(`${execStub.getCall(0).args[0]}`).equals(`${Command.deleteProject(projectItem.getName())}`);
+            expect(result).equals(`Project '${projectItem.name}' successfully deleted`);
+            expect(`${execStub.getCall(0).args[0]}`).equals(`${Command.deleteProject(projectItem.name)}`);
         });
 
         test('returns null when cancelled', async () => {
@@ -182,10 +171,12 @@ suite('OpenShift/Project', () => {
     suite('set', () => {
 
         test('makes selected project active', async () => {
-            sandbox.stub(vscode.window, 'showQuickPick').resolves(projectItem);
+            sandbox.stub(vscode.window, 'showQuickPick').resolves({
+                label: projectItem.name,
+            });
             const result = await Project.set();
-            expect(execStub).calledWith(new CommandText('odo project set', projectItem.getName()));
-            expect(result).equals(`Project '${projectItem.getName()}' set as active.`);
+            expect(execStub).calledWith(new CommandText('odo project set', projectItem.name));
+            expect(result).equals(`Project '${projectItem.name}' set as active.`);
         });
 
         test('exits without action if project selection was canceled', async () => {

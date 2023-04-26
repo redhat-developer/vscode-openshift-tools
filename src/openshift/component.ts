@@ -9,7 +9,6 @@ import { ChildProcess, SpawnOptions } from 'child_process';
 import * as fs from 'fs/promises';
 import { DebugConfiguration, DebugSession, Disposable, EventEmitter, ProgressLocation, Terminal, Uri, commands, debug, extensions, window, workspace } from 'vscode';
 import * as YAML from 'yaml';
-import { OpenShiftComponent } from '../odo';
 import { Command } from '../odo/command';
 import { ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, ascDevfileFirst, isDevfileComponent } from '../odo/componentType';
 import { StarterProject, isStarterProject } from '../odo/componentTypeDescription';
@@ -18,6 +17,7 @@ import { Progress } from '../util/progress';
 import { selectWorkspaceFolder } from '../util/workspace';
 import { VsCommandError, vsCommand } from '../vscommand';
 import OpenShiftItem from './openshiftItem';
+
 import path = require('path');
 import globby = require('globby');
 
@@ -439,7 +439,7 @@ export class Component extends OpenShiftItem {
         compName?: string,
         registryName?: string
         devFilePath?: string
-    }, isGitImportCall = false, notification = true): Promise<string | null> {
+    }, isGitImportCall = false): Promise<string | null> {
         let useExistingDevfile = false;
         const devFileLocation = path.join(folder.fsPath, 'devfile.yaml');
         try {
@@ -547,8 +547,7 @@ export class Component extends OpenShiftItem {
                     folder,
                     createStarter,
                     useExistingDevfile,
-                    opts?.devFilePath,
-                    notification
+                    opts?.devFilePath
                 )
             );
 
@@ -717,9 +716,8 @@ export class Component extends OpenShiftItem {
             return createStartDebuggerResult(config.type, 'Component has no ports forwarded.');
     }
 
-    // TODO: remove "openshift.component.revealContextInExplorer" command
     @vsCommand('openshift.component.revealContextInExplorer')
-    public static async revealContextInExplorer(context: OpenShiftComponent): Promise<void> {
+    public static async revealContextInExplorer(context: ComponentWorkspaceFolder): Promise<void> {
         await commands.executeCommand('workbench.view.explorer');
         await commands.executeCommand('revealInExplorer', context.contextPath);
     }

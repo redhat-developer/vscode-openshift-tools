@@ -3,18 +3,18 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Component } from './config';
-
-export const NotAvailable = 'Not available';
-
 export interface ComponentsJson {
-    kind: string;
-	apiVersion: string;
-	metadata: {
-		creationTimestamp: string;
-    },
-    // eslint-disable-next-line camelcase
-    otherComponents: Component[];
-    // eslint-disable-next-line camelcase
-    devfileComponents: Component[];
+    // list is not present when there are no components
+    // i.e. if there are no components the JSON is `{}`
+    components?: Component[]
+}
+
+export interface Component {
+    name: string,
+    managedBy: string,
+    managedByVersion: string,
+    runningIn: Map<string, boolean>,
+    projectType: string,
+    runningOn: string,
+    platform: string,
 }

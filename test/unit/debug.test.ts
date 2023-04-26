@@ -5,10 +5,10 @@
 
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
-import { DebugSession, TreeItem, debug, Disposable } from 'vscode';
+import { DebugSession, Disposable, TreeItem, debug } from 'vscode';
 import { DebugSessionsView } from '../../src/debug';
+import { ContextType } from '../../src/odo';
 import { TestItem } from './openshift/testOSItem';
-import { ContextType, OdoImpl } from '../../src/odo';
 import sinon = require('sinon');
 
 const {expect} = chai;
@@ -51,7 +51,6 @@ suite('Debug Sessions View', () => {
             stopEmitter = cb;
             return new Disposable(()=> { return; });
         });
-        sandbox.stub(OdoImpl.prototype, 'getOpenShiftObjectByContext').returns(componentItem);
         view = new DebugSessionsView();
     });
 

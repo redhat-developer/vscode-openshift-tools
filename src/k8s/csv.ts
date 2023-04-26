@@ -3,20 +3,20 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as _ from 'lodash';
-import OpenShiftItem from '../openshift/openshiftItem';
-import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
-import * as common from './common';
-import { ClusterServiceVersionKind, CRDDescription, CustomResourceDefinitionKind } from './olm/types';
-import { TreeItem, WebviewPanel, window } from 'vscode';
-import { vsCommand, VsCommandError } from '../vscommand';
-import CreateServiceViewLoader from '../webview/create-service/createServiceViewLoader';
-import { DEFAULT_K8S_SCHEMA, getUISchema, randomString, generateDefaults } from './utils';
 import { loadYaml } from '@kubernetes/client-node';
 import { JSONSchema7 } from 'json-schema';
-import { getInstance, OpenShiftObject } from '../odo';
-import { CommandText } from '../base/command';
+import * as _ from 'lodash';
+import { TreeItem, WebviewPanel, window } from 'vscode';
+import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
+import { getInstance } from '../odo';
+import { Command } from '../odo/command';
+import OpenShiftItem from '../openshift/openshiftItem';
 import { getOpenAPISchemaFor } from '../util/swagger';
+import { VsCommandError, vsCommand } from '../vscommand';
+import CreateServiceViewLoader from '../webview/create-service/createServiceViewLoader';
+import * as common from './common';
+import { CRDDescription, ClusterServiceVersionKind, CustomResourceDefinitionKind } from './olm/types';
+import { DEFAULT_K8S_SCHEMA, generateDefaults, getUISchema, randomString } from './utils';
 
 class CsvNode implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorerExtensionNode {
 
@@ -53,8 +53,6 @@ export class ClusterServiceVersion extends OpenShiftItem {
         getCsv: (csvName: string): string => `get csv ${csvName}`,
         getCrd: (crdName: string): string => `get crd ${crdName}`,
         getCreateCommand: (file: string): string => `create -f ${file}`,
-        getCurrentUserName: (): CommandText => new CommandText('oc whoami'),
-        getCurrentUserToken: (): CommandText => new CommandText('oc whoami -t'),
     };
 
     public static getNodeContributor(): ClusterExplorerV1.NodeContributor {
@@ -71,7 +69,7 @@ export class ClusterServiceVersion extends OpenShiftItem {
         };
     }
 
-    static createFormMessageListener(app: OpenShiftObject, panel: WebviewPanel) {
+    static createFormMessageListener(panel: WebviewPanel) {
         return async (event: any) => {
             if (event.command === 'cancel') {
                 if (event.changed === true) {
@@ -85,14 +83,13 @@ export class ClusterServiceVersion extends OpenShiftItem {
             if (event.command === 'create') {
                 // add waiting for Deployment to be created using wait --for=condition
                 // no need to wait until it is available
-                const clusters = await getInstance().getClusters();
-                if (clusters.length === 0) {
+                if (!await getInstance().getActiveCluster()) {
                     // could be expired session
                     return;
                 }
 
                 try {
-                    await OpenShiftItem.odo.createService(app, event.formData);
+                    await OpenShiftItem.odo.createService(event.formData);
                     window.showInformationMessage(`Service ${event.formData.metadata.name} successfully created.` );
                     panel.dispose();
                 } catch (err) {
@@ -103,23 +100,18 @@ export class ClusterServiceVersion extends OpenShiftItem {
         }
     }
 
-    // oc delete Database database1
-
     @vsCommand('clusters.openshift.csv.create')
     static async createNewService(crdOwnedNode: K8sCrdNode): Promise<void> {
-        const projects = await getInstance().getProjects();
-        const apps = await getInstance().getApplications(projects[0]);
-        const app = apps.find(item => item.getName() === 'app');
-        return ClusterServiceVersion.createNewServiceFromDescriptor(crdOwnedNode.impl.crdDescription, crdOwnedNode.impl.csv, app);
+        return ClusterServiceVersion.createNewServiceFromDescriptor(crdOwnedNode.impl.crdDescription, crdOwnedNode.impl.csv);
     }
 
     static async getAuthToken(): Promise<string> {
-        const gcuCmd = this.command.getCurrentUserName();
+        const gcuCmd = Command.getCurrentUserName();
         const gcuExecRes = await this.odo.execute(gcuCmd, undefined, false);
         if (gcuExecRes.error) {
             throw new VsCommandError(gcuExecRes.stderr, `Cannot get current user name. '${gcuCmd}' returned non zero error code.`);
         }
-        const gcutCmd = this.command.getCurrentUserToken();
+        const gcutCmd = Command.getCurrentUserToken();
         const gcutExecRes = await this.odo.execute(gcutCmd, undefined, false);
         if (gcutExecRes.error) {
             throw new VsCommandError(gcuExecRes.stderr, `Cannot get current user name. '${gcutCmd}' returned non zero error code.`);
@@ -127,7 +119,7 @@ export class ClusterServiceVersion extends OpenShiftItem {
         return gcutExecRes.stdout.trim();
     }
 
-    static async createNewServiceFromDescriptor(crdDescription: CRDDescription, csv: ClusterServiceVersionKind, application: OpenShiftObject): Promise<void> {
+    static async createNewServiceFromDescriptor(crdDescription: CRDDescription, csv: ClusterServiceVersionKind): Promise<void> {
         const getCrdCmd = ClusterServiceVersion.command.getCrd(crdDescription.name);
         let crdResource: CustomResourceDefinitionKind;
         let apiVersion: string;
@@ -142,9 +134,9 @@ export class ClusterServiceVersion extends OpenShiftItem {
             openAPIV3SchemaAll = crdResource.spec.versions.find((version) => version.name === crdDescription.version).schema.openAPIV3Schema;
             apiVersion = `${crdResource.spec.group}/${crdDescription.version}`;
         } else {
-            const clusters = await this.odo.getClusters();
+            const activeCluster = await this.odo.getActiveCluster();
             const token = await this.getAuthToken();
-            openAPIV3SchemaAll = await getOpenAPISchemaFor(clusters[0].getName(), token, crdDescription.kind, crdDescription.version);
+            openAPIV3SchemaAll = await getOpenAPISchemaFor(activeCluster, token, crdDescription.kind, crdDescription.version);
             const gvk = _.find(openAPIV3SchemaAll['x-kubernetes-group-version-kind'], ({ group, version, kind }) =>
                 crdDescription.version === version && crdDescription.kind === kind && group);
                 apiVersion = `${gvk.group}/${gvk.version}`;
@@ -163,7 +155,7 @@ export class ClusterServiceVersion extends OpenShiftItem {
             crdDescription
         );
 
-        const panel = await CreateServiceViewLoader.loadView('Create Service', ClusterServiceVersion.createFormMessageListener.bind(undefined, application));
+        const panel = await CreateServiceViewLoader.loadView('Create Service', ClusterServiceVersion.createFormMessageListener.bind(undefined));
 
         panel.webview.onDidReceiveMessage(async (event)=> {
             if(event.command === 'ready') {

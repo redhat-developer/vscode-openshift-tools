@@ -1,9 +1,11 @@
 {
 	"folders": [
 		{
+			"name": "comp1",
 			"path": "comp1"
 		},
 		{
+			"name": "comp2",
 			"path": "comp2"
 		}
 	]

@@ -3,18 +3,17 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { OdoImpl, ContextType } from '../../../src/odo';
+import * as sinonChai from 'sinon-chai';
+import * as vscode from 'vscode';
+import { CliExitData } from '../../../src/cli';
+import { OpenShiftExplorer } from '../../../src/explorer';
+import { ContextType, OdoImpl } from '../../../src/odo';
 import { Command } from '../../../src/odo/command';
 import { Cluster } from '../../../src/openshift/cluster';
-import { OpenShiftExplorer } from '../../../src/explorer';
-import { CliExitData } from '../../../src/cli';
+import { TokenStore, getVscodeModule } from '../../../src/util/credentialManager';
 import { TestItem } from './testOSItem';
-import OpenShiftItem from '../../../src/openshift/openshiftItem';
-import { getVscodeModule, TokenStore } from '../../../src/util/credentialManager';
 import pq = require('proxyquire');
 
 const {expect} = chai;
@@ -51,8 +50,6 @@ suite('Openshift/Cluster', () => {
     const testUser = 'user';
     const password = 'password';
     const token = 'token';
-    const projectItem = new TestItem(null, 'project', ContextType.PROJECT);
-    const appItem = new TestItem(projectItem, 'application', ContextType.APPLICATION);
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -63,7 +60,6 @@ suite('Openshift/Cluster', () => {
         infoStub = sandbox.stub<any, any>(vscode.window, 'showInformationMessage').resolves('Yes');
         quickPickStub = sandbox.stub(vscode.window, 'showQuickPick').resolves({label: 'Credentials', description: 'Log in to the given server using credentials'});
         loginStub = sandbox.stub(OdoImpl.prototype, 'requireLogin').resolves(true);
-        sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
     });
 
     teardown(() => {
@@ -426,13 +422,13 @@ suite('Openshift/Cluster', () => {
         });
 
         test('opens URL from first cluster label', () => {
-            sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
+            sandbox.stub(OdoImpl.prototype, 'getActiveCluster').resolves(cluster.getName());
             clusterMock.openshiftConsole();
             openStub.calledOnceWith('http://localhost');
         });
 
         test('shows error message if node label is not URL', () => {
-            sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([cluster]);
+            sandbox.stub(OdoImpl.prototype, 'getActiveCluster').resolves(cluster.getName());
             const errMsgStub = sandbox.stub(vscode.window, 'showErrorMessage');
             clusterMock.openshiftConsole();
             errMsgStub.calledOnceWith('localhost', undefined);

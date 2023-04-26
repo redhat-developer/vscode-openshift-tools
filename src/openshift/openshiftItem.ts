@@ -5,17 +5,10 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 import validator from 'validator';
-import { QuickPickItem, commands, window, workspace } from 'vscode';
+import { QuickPickItem, commands, window } from 'vscode';
 import { OpenShiftExplorer } from '../explorer';
-import { ContextType, Odo, OpenShiftApplication, OpenShiftObject, OpenShiftProject, getInstance } from '../odo';
-import { VsCommandError } from '../vscommand';
-
-const errorMessage = {
-    Project: 'You need at least one Project available. Please create new OpenShift Project and try again.',
-    Application: 'You need at least one Application available. Please create new OpenShift Application and try again.',
-    Component: 'You need at least one Component available. Please create new OpenShift Component and try again.',
-    Service: 'You need at least one Service available. Please create new OpenShift Service and try again.'
-};
+import { Odo, OpenShiftObject, getInstance } from '../odo';
+import { Project } from '../odo/project';
 
 export class QuickPickCommand implements QuickPickItem {
     constructor (public label: string,
@@ -27,10 +20,6 @@ export class QuickPickCommand implements QuickPickItem {
         public getName?: () => string
     ) {
     }
-}
-
-function isCommand(item: QuickPickItem | QuickPickCommand): item is QuickPickCommand {
-    return !!(item as any).command;
 }
 
 export default class OpenShiftItem {
@@ -65,27 +54,28 @@ export default class OpenShiftItem {
         });
     }
 
-    static async getProjectName(message: string, data: Promise<Array<OpenShiftObject>>, offset?: string, defaultValue = ''): Promise<string> {
-      return window.showInputBox({
-          value: defaultValue,
-          prompt: `Provide ${message}`,
-          ignoreFocusOut: true,
-          validateInput: async (value: string) => {
-              let validationMessage = OpenShiftItem.emptyName(`Empty ${message}`, value.trim());
-              if (!validationMessage) validationMessage = OpenShiftItem.validateRFC1123DNSLabel(`Not a valid ${message}. Please enter name that starts with an alphanumeric character, use lower case alphanumeric characters or '-' and end with an alphanumeric character`, value);
-              if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${message} should be between 2-63 characters`, value, offset ? offset.length : 0);
-              if (!validationMessage) {
-                  try {
-                      const existingResources = await data;
-                      validationMessage = OpenShiftItem.validateUniqueName(existingResources, value);
-                  } catch (err) {
-                      //ignore to keep other validation to work
-                  }
-              }
-              return validationMessage;
-          }
-      });
-  }
+    static async getProjectName(message: string, data: Promise<Array<Project>>, offset?: string, defaultValue = ''): Promise<string> {
+        return window.showInputBox({
+            value: defaultValue,
+            prompt: `Provide ${message}`,
+            ignoreFocusOut: true,
+            validateInput: async (value: string) => {
+                let validationMessage = OpenShiftItem.emptyName(`Empty ${message}`, value.trim());
+                if (!validationMessage) validationMessage = OpenShiftItem.validateRFC1123DNSLabel(`Not a valid ${message}. Please enter name that starts with an alphanumeric character, use lower case alphanumeric characters or '-' and end with an alphanumeric character`, value);
+                if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${message} should be between 2-63 characters`, value, offset ? offset.length : 0);
+                if (!validationMessage) {
+                    try {
+                        const existingProjects = await data;
+                        const existingProject =  existingProjects.find((item) => item.name === value);
+                        validationMessage = existingProject && 'This name is already used, please enter different name.';
+                    } catch (err) {
+                        //ignore to keep other validation to work
+                    }
+                }
+                return validationMessage;
+            }
+        });
+    }
 
     static emptyName(message: string, value: string): string | null {
         return validator.isEmpty(value) ? message : null;
@@ -126,131 +116,6 @@ export default class OpenShiftItem {
         return tokenRegex ? tokenRegex[1] : null;
     }
 
-    static async getApplicationNames(project: OpenShiftObject, createCommand = false): Promise<Array<OpenShiftObject | QuickPickCommand>> {
-        if (project.getParent()) {
-            const applicationList = await OpenShiftItem.odo.getApplications(project);
-            if (applicationList.length === 0 && !createCommand) {
-                throw new VsCommandError(errorMessage.Component);
-            }
-            if (createCommand) {
-                return [
-                    new QuickPickCommand(
-                        '$(plus) Create new Application...',
-                        async () => OpenShiftItem.getName('Application name', Promise.resolve(applicationList))
-                    ),
-                    ...applicationList
-                ];
-            }
-            return applicationList;
-        }
-        return [
-            new QuickPickCommand(
-                '$(plus) Create new Application...',
-                async () => OpenShiftItem.getName('Application name', Promise.resolve([]))
-            )
-        ];
-    }
-
-    static async getComponentNames(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]> {
-        const applicationList: Array<OpenShiftObject> = await OpenShiftItem.odo.getComponents(application, condition);
-        if (applicationList.length === 0) {
-            throw new VsCommandError(errorMessage.Component);
-        }
-        return applicationList;
-    }
-
-    static async getOpenShiftCmdData<T extends OpenShiftObject>(treeItem: T, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean,
-    proName?: string, appName?: string): Promise<T | null> {
-        let context: OpenShiftObject | QuickPickCommand = treeItem;
-        let project: OpenShiftObject;
-        if (!context) {
-
-            const clusters = await this.odo.getClusters();
-            if (clusters.length) { // connected to cluster because odo version printed out server url
-                const projects = await this.odo.getProjects();
-                context = projects.find((prj:OpenShiftProject)=>prj.active);
-                if (!context) {
-                    throw new VsCommandError(errorMessage.Project)
-                }
-                // first try to get target component out of active editor
-                const currentEditorFile = window?.activeTextEditor?.document?.uri;
-                if (currentEditorFile) {
-                    const contextFolder = workspace.getWorkspaceFolder(currentEditorFile);
-                    if (contextFolder) {
-                        const oso = this.odo.getOpenShiftObjectByContext(contextFolder.uri.fsPath);
-                        if (!oso) {
-                            const applications = await this.odo.getApplications(context);
-                            const settings = this.odo.getSettingsByContext(contextFolder.uri.fsPath);
-                            if (settings) {
-                                const app = applications.find((a) => a.getName() === settings.spec.app);
-                                if(app) {
-                                    await this.odo.getComponents(app);
-                                    context = this.odo.getOpenShiftObjectByContext(contextFolder.uri.fsPath);
-                                }
-                            }
-                        } else if (context?.getName() === oso?.getParent()?.getParent()?.getName()) {
-                            context = oso;
-                        }
-                    }
-                }
-            } else { // cluster is not accessible or user not logged in
-                const projectName = proName || await OpenShiftItem.getName('Project Name', Promise.resolve([]))
-                    if (projectName) {
-                        context = new OpenShiftProject(undefined, projectName, true);
-                    } else {
-                        context = null;
-                    }
-            }
-        }
-        if (context && !isCommand(context) && context.contextValue === ContextType.PROJECT && appPlaceholder ) {
-            project = context;
-            const applicationList = await OpenShiftItem.getApplicationNames(project, appPlaceholder.includes('create') && compPlaceholder === undefined);
-            if ( applicationList.length === 1 && isCommand(applicationList[0])) {
-                context = applicationList[0];
-            } else {
-                context = await window.showQuickPick<OpenShiftObject | QuickPickCommand>(applicationList, {placeHolder: appPlaceholder, ignoreFocusOut: true});
-            }
-            if (context && isCommand(context)) {
-                const newAppName = appName || 'app';
-                if (newAppName) {
-                    context = new OpenShiftApplication(project, newAppName);
-                } else {
-                    context = null;
-                }
-            }
-        }
-        if (context && !isCommand(context) && context.contextValue === ContextType.APPLICATION && compPlaceholder) {
-            context = await window.showQuickPick(OpenShiftItem.getComponentNames(context, condition), {placeHolder: compPlaceholder, ignoreFocusOut: true});
-        }
-        return context as T;
-    }
-}
-
-function selectTargetDecoratorFactory(decorator: (...args:any[]) => Promise<OpenShiftObject> ) {
-    return function (_target: any, key: string, descriptor: any): void {
-        let fnKey: string | undefined;
-        let fn: Function | undefined;
-
-        if (typeof descriptor.value === 'function') {
-            fnKey = 'value';
-            fn = descriptor.value;
-        } else {
-            throw new Error('not supported');
-        }
-
-        descriptor[fnKey] = async function (...args: any[]): Promise<any> {
-            args[0] = await decorator(args[0]);
-            return fn.apply(this, args);
-        };
-    };
-}
-
-export function selectTargetComponent(appPlaceHolder, cmpPlaceHolder, condition?: (value: OpenShiftObject) => boolean): (_target: any, key: string, descriptor: any) => void {
-    return selectTargetDecoratorFactory(async (context) => OpenShiftItem.getOpenShiftCmdData(context, appPlaceHolder, cmpPlaceHolder, condition));
-}
-
-export function selectTargetApplication(appPlaceHolder): (_target: any, key: string, descriptor: any) => void {
-    return selectTargetDecoratorFactory(async (context) => OpenShiftItem.getOpenShiftCmdData(context, appPlaceHolder));
 }
 
 export function clusterRequired() {
@@ -266,18 +131,18 @@ export function clusterRequired() {
         }
 
         descriptor[fnKey] = async function (...args: any[]): Promise<any> {
-            let clusters = await getInstance().getClusters();
-            if (clusters.length === 0) {
+            let activeCluster = await getInstance().getActiveCluster();
+            if (!activeCluster) {
                 const lOrC = await window.showInformationMessage('Login in to a Cluster to run this command.', 'Login', 'Cancel');
-                if(lOrC === 'Login') {
+                if (lOrC === 'Login') {
                     const loginResult = await commands.executeCommand('openshift.explorer.login');
                     if (typeof loginResult === 'string') {
                         window.showInformationMessage(loginResult);
                     }
-                    clusters = await getInstance().getClusters();
+                    activeCluster = await getInstance().getActiveCluster();
                 }
             }
-            if (clusters.length) {
+            if (activeCluster) {
                 return fn.apply(this, args);
             }
         };

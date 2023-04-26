@@ -11,20 +11,20 @@ import * as Odo3 from '../../src/odo3';
 
 suite('odo 3 integration', () => {
 
-    const clusterUrl = process.env.CLUSTER_URL || 'https://192.168.42.80:8443';
+    const clusterUrl = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
     const username = process.env.CLUSTER_USER || 'developer';
     const password = process.env.CLUSTER_PASSWORD || 'developer';
 
     const odo = Odo.getInstance();
     const odo3 = Odo3.newInstance();
 
-    let project1: Odo.OpenShiftObject;
-    let project2: Odo.OpenShiftObject;
+    const project1 = 'myproject1';
+    const project2 = 'myproject2';
 
     setup(async function() {
         await odo.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
-        project1 = await odo.createProject('myproject1');
-        project2 = await odo.createProject('myproject2');
+        await odo.createProject(project1);
+        await odo.createProject(project2);
     });
 
     teardown(async function() {

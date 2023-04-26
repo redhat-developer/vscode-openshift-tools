@@ -7,19 +7,17 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import { commands, Uri } from 'vscode';
 import { OpenShiftExplorer } from '../../src/explorer';
-import { OdoImpl, ContextType } from '../../src/odo';
-import { TestItem } from './openshift/testOSItem';
+import { OdoImpl } from '../../src/odo';
 import sinon = require('sinon');
 
 const {expect} = chai;
 chai.use(sinonChai);
 
 suite('OpenShift Application Explorer', () => {
-    const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
     const sandbox = sinon.createSandbox();
 
     setup(() => {
-        sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([clusterItem]);
+        sandbox.stub(OdoImpl.prototype, 'getActiveCluster').resolves('cluster');
     });
 
     teardown(() => {

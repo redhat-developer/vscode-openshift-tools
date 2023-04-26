@@ -3,331 +3,291 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
-import * as path from 'path';
-import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
+import { V1Deployment } from '@kubernetes/client-node';
+import { expect } from 'chai';
+import * as fs from 'fs/promises';
+import * as _ from 'lodash';
+import { suite, suiteSetup } from 'mocha';
 import * as tmp from 'tmp';
-import { Uri, commands, extensions, window } from 'vscode';
+import { promisify } from 'util';
+import { Uri, window, workspace } from 'vscode';
+import * as YAML from 'yaml';
 import { CommandText } from '../../src/base/command';
-import * as odo from '../../src/odo';
+import * as Odo from '../../src/odo';
 import { Command } from '../../src/odo/command';
-import { ComponentTypeAdapter } from '../../src/odo/componentType';
-import { Cluster } from '../../src/openshift/cluster';
-import { AddWorkspaceFolder } from '../../src/util/workspace';
-import cp = require('child_process');
+import { Project } from '../../src/odo/project';
 
-import fs = require('fs-extra');
-
-const { expect } = chai;
-chai.use(sinonChai);
-
-suite('odo integration', () => {
-    const clusterUrl = process.env.CLUSTER_URL || 'https://192.168.42.80:8443';
+suite('odo integration', function () {
+    const clusterUrl = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
     const username = process.env.CLUSTER_USER || 'developer';
     const password = process.env.CLUSTER_PASSWORD || 'developer';
-    let openshiftVersion;
 
-    const oi: odo.Odo = odo.getInstance();
-    const sb: sinon.SinonSandbox = sinon.createSandbox();
-    const projectName = `project${Math.round(Math.random() * 1000)}`;
-    const componentName = 'component1';
-    const appName = 'app1';
-    const nodeJsExGitUrl = 'https://github.com/sclorg/nodejs-ex.git';
-    let project: odo.OpenShiftObject;
-    let existingApp: odo.OpenShiftObject;
-    let component: odo.OpenShiftObject;
-    let componentFromGit: odo.OpenShiftObject;
-    let componentFromBinary: odo.OpenShiftObject;
-    let service: odo.OpenShiftObject;
-    let linkedComp1: odo.OpenShiftObject;
-    let linkedComp2: odo.OpenShiftObject;
-    let url1: odo.OpenShiftObject;
-    let url2: odo.OpenShiftObject;
-    let storage: odo.OpenShiftObject;
+    const odo: Odo.Odo = Odo.getInstance();
 
-    async function clone(repositoryURL: string, location: string): Promise<void> {
-        const gitExtension = extensions.getExtension('vscode.git').exports;
-        const git = gitExtension.getAPI(1).git.path;
-        // run 'git clone url location' as external process and return location
-        return new Promise((resolve, reject) => cp.exec(`${git} clone ${repositoryURL} ${location}`, (error: cp.ExecException) => error ? reject(error) : resolve()));
-    }
-
-    async function createProject(projectNameParam: string): Promise<odo.OpenShiftObject> {
-        sb.stub(window, 'showInputBox')
-            .onFirstCall()
-            .resolves(projectNameParam);
-        await commands.executeCommand('openshift.project.create', oi.getClusters()[0]);
-        const projects = await oi.getProjects();
-        const result = projects.find((prj) => prj.getName() === projectNameParam);
-        return result;
-    }
-
-    async function createLocalComponent(
-        projectParam: odo.OpenShiftObject,
-        appNameParam: string,
-        componentNameParam: string,
-        gitUrl: string,
-        dirNameParam: string = tmp.dirSync().name,
-    ): Promise<odo.OpenShiftObject> {
-        const applications = await oi.getApplications(projectParam);
-        existingApp = applications.find((item) => item.getName() === appNameParam);
-        if (!existingApp) {
-            existingApp = new odo.OpenShiftApplication(project, appNameParam);
+    suiteSetup(async function () {
+        try {
+            await odo.execute(Command.odoLogout());
+        } catch (e) {
+            // do nothing
         }
-        await clone(gitUrl, dirNameParam);
-        const sqpStub = sb.stub(window, 'showQuickPick');
-        sqpStub.onFirstCall().resolves(AddWorkspaceFolder);
-        sb.stub(window, 'showOpenDialog').resolves([Uri.file(dirNameParam)]);
-        sb.stub(window, 'showInputBox').resolves(componentNameParam);
-        sqpStub
-            .onSecondCall()
-            .resolves(new ComponentTypeAdapter('nodejs', 'latest', '', 'nodejs'));
-
-        await commands.executeCommand('openshift.component.create', existingApp);
-        const components = await oi.getComponents(existingApp);
-        return components.find((item) => item.getName() === componentNameParam);
-    }
-
-    async function createGitComponent(
-        projectParam: odo.OpenShiftObject,
-        appNameParam: string,
-        componentNameParam: string,
-        gitUrl: string,
-        dirNameParam: string = tmp.dirSync().name,
-    ): Promise<odo.OpenShiftObject> {
-        const applications = await oi.getApplications(projectParam);
-        existingApp = applications.find((item) => item.getName() === appNameParam);
-        if (!existingApp) {
-            existingApp = new odo.OpenShiftApplication(project, appNameParam);
-        }
-        sb.stub(window, 'showQuickPick')
-            .onFirstCall()
-            .resolves(AddWorkspaceFolder)
-            .onSecondCall()
-            .resolves({ label: 'master' })
-            .onThirdCall()
-            .resolves(new ComponentTypeAdapter('nodejs', 'latest', '', 'nodejs'));
-        sb.stub(window, 'showOpenDialog').resolves([Uri.file(dirNameParam)]);
-        sb.stub(window, 'showInputBox')
-            .onFirstCall()
-            .resolves(gitUrl)
-            .onSecondCall()
-            .resolves(componentNameParam);
-
-        await commands.executeCommand('openshift.component.createFromGit', existingApp);
-        const components = await oi.getComponents(existingApp);
-        return components.find((item) => item.getName() === componentNameParam);
-    }
-
-    async function createBinaryComponent(
-        projectParam: odo.OpenShiftObject,
-        appNameParam: string,
-        componentNameParam: string,
-        binaryFilePath: string,
-        dirNameParam: string = tmp.dirSync().name,
-    ): Promise<odo.OpenShiftObject> {
-        const applications = await oi.getApplications(projectParam);
-        const binaryFileInContextFolder = path.join(dirNameParam, path.basename(binaryFilePath));
-        const templateName = openshiftVersion < '4.5.0' ? 'wildfly' : 'java';
-
-        fs.copyFileSync(binaryFilePath, binaryFileInContextFolder);
-        existingApp = applications.find((item) => item.getName() === appNameParam);
-        if (!existingApp) {
-            existingApp = new odo.OpenShiftApplication(project, appNameParam);
-        }
-        sb.stub(window, 'showQuickPick')
-            .onFirstCall()
-            .resolves(AddWorkspaceFolder)
-            .onSecondCall()
-            .resolves({ label: 'sample.war', description: binaryFileInContextFolder })
-            .onThirdCall()
-            .resolves(
-                new ComponentTypeAdapter(templateName, 'latest', '', 'java'),
-            );
-        sb.stub(window, 'showOpenDialog').resolves([Uri.file(dirNameParam)]);
-        sb.stub(window, 'showInputBox').resolves(componentNameParam);
-
-        await commands.executeCommand('openshift.component.createFromBinary', existingApp);
-        const components = await oi.getComponents(existingApp);
-        return components.find((item) => item.getName() === componentNameParam);
-    }
-
-    setup(async () => {
-        if (!project) {
-            await oi.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
-        }
-        if (!openshiftVersion) {
-            const version = await oi.execute(new CommandText('oc version'));
-            const match = /Server Version:\s*(\d+\.\d+\.\d+).*/.exec(version.stdout);
-            if (match && match.length > 1) {
-                openshiftVersion = match[1];
-            } else {
-                openshiftVersion = '4.5.0';
-            }
-        }
+        await odo.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
     });
 
-    teardown(() => {
-        sb.restore();
+    suiteTeardown(async function () {
+        // ensure projects are cleaned up
+        try {
+            await odo.execute(Command.deleteProject('my-test-project-1'));
+        } catch (e) {
+            // do nothing
+        }
+        try {
+            await odo.execute(Command.deleteProject('my-test-project-2'));
+        } catch (e) {
+            // do nothing
+        }
+
+        await odo.execute(Command.odoLogout());
     });
 
-    suite('create', () => {
-        test('project', async () => {
-            project = await createProject(projectName);
-            expect(project).not.undefined;
-        });
-
-        test('component from local folder', async () => {
-            component = await createLocalComponent(project, appName, componentName, nodeJsExGitUrl);
-            expect(component).not.undefined;
-        });
-
-        test('component from git', async () => {
-            componentFromGit = await createGitComponent(
-                project,
-                appName,
-                `${componentName}-from-git`,
-                nodeJsExGitUrl,
-            );
-            expect(componentFromGit).not.undefined;
-        });
-
-        test('component from binary', async () => {
-            componentFromBinary = await createBinaryComponent(
-                project,
-                appName,
-                `${componentName}-from-binary`,
-                path.resolve(
-                    __dirname,
-                    '..',
-                    '..',
-                    '..',
-                    'test',
-                    'fixtures',
-                    'components',
-                    'sample.war',
-                ),
-            );
-            expect(componentFromBinary).not.undefined;
-        });
-
-        test('describe component', async () => {
-            await oi.execute(Command.describeComponent(), component.contextPath.fsPath);
-        });
-
-        test('start/stop debugger', async () => {
-            const errMessStub = sb.stub(window, 'showErrorMessage');
-            await commands.executeCommand('openshift.component.debug', component);
-            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
-        });
-
-        test('delete storage', async () => {
-            sb.stub<any, any>(window, 'showWarningMessage').resolves('Yes');
-            const errMessStub = sb.stub(window, 'showErrorMessage');
-            await commands.executeCommand('openshift.storage.delete', storage);
-            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
-        });
-
-        test('delete url', async () => {
-            sb.stub<any, any>(window, 'showWarningMessage').resolves('Yes');
-            const errMessStub = sb.stub(window, 'showErrorMessage');
-            await commands.executeCommand('openshift.url.delete', url1);
-            await commands.executeCommand('openshift.url.delete', url2);
-            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
-        });
-
-        test('delete component', async () => {
-            sb.stub<any, any>(window, 'showWarningMessage').resolves('Yes');
-            const errMessStub = sb.stub(window, 'showErrorMessage');
-            if (component) {
-                await commands.executeCommand('openshift.component.delete', component);
-            }
-            if (componentFromGit) {
-                await commands.executeCommand('openshift.component.delete', componentFromGit);
-            }
-            if (componentFromBinary) {
-                await commands.executeCommand('openshift.component.delete', componentFromBinary);
-            }
-            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
+    suite('clusters', function () {
+        test('getActiveCluster()', async function () {
+            const activeCluster = await odo.getActiveCluster();
+            expect(activeCluster).to.equal(clusterUrl);
         });
     });
 
-    suite('linking components', () => {
-        test('create comp1', async () => {
-            linkedComp1 = await createLocalComponent(
-                project,
-                appName,
-                `${componentName}1`,
-                nodeJsExGitUrl,
-            );
+    suite('projects', function () {
+        const project1 = 'my-test-project-1';
+        const project2 = 'my-test-project-2';
+
+        suiteSetup(async function () {
+            try {
+                await odo.execute(Command.deleteProject(project1));
+            } catch (e) {
+                // do nothing
+            }
+            try {
+                await odo.execute(Command.deleteProject(project2));
+            } catch (e) {
+                // do nothing
+            }
+            await odo.createProject(project1);
+            await odo.createProject(project2);
         });
 
-        test('create comp2', async () => {
-            linkedComp2 = await createLocalComponent(
-                project,
-                appName,
-                `${componentName}2`,
-                nodeJsExGitUrl,
-            );
+        suiteTeardown(async function () {
+            await odo.deleteProject(project1);
+            await odo.deleteProject(project2);
         });
 
-        test('link components comp1 and comp2', async () => {
-            sb.stub(window, 'showQuickPick')
-                .onFirstCall()
-                .resolves(linkedComp2);
-            await commands.executeCommand('openshift.component.linkComponent', linkedComp1);
+        test('getProjects()', async function () {
+            const projects: Project[] = await odo.getProjects();
+            expect(projects).length.to.be.greaterThanOrEqual(2);
+            const projectNames = projects.map((project) => project.name);
+            expect(projectNames).to.contain(project1);
+            expect(projectNames).to.contain(project2);
         });
 
-        test('link component comp2 and service1', async function() {
-            if (openshiftVersion >= '4.5.0') this.skip();
-            sb.stub(window, 'showQuickPick')
-                .onFirstCall()
-                .resolves(service);
-            await commands.executeCommand('openshift.component.linkService', linkedComp2);
+        test('getActiveProject()', async function () {
+            const activeProject = await odo.getActiveProject();
+            // creating a project switches to it, so we expect the active project to be the last one we created, project2
+            expect(activeProject).to.equal(project2);
         });
 
-        test('unlink components', async () => {
-            const errMessStub = sb.stub(window, 'showErrorMessage');
-            sb.stub<any, any>(window, 'showQuickPick')
-                .onFirstCall()
-                .resolves(linkedComp2.getName())
-                .onSecondCall()
-                .resolves('8080');
-            await commands.executeCommand(
-                'openshift.component.unlinkComponent.palette',
-                linkedComp1,
-            );
-            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
-        });
-
-        test('unlink component and service', async function() {
-            if (openshiftVersion >= '4.5.0') this.skip();
-            const errMessStub = sb.stub(window, 'showErrorMessage');
-            sb.stub<any, any>(window, 'showQuickPick')
-                .onFirstCall()
-                .resolves(service.getName());
-            await commands.executeCommand('openshift.component.unlinkService.palette', linkedComp2);
-            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
-        });
-
-        test('delete application', async () => {
-            sb.stub<any, any>(window, 'showWarningMessage').resolves('Yes');
-            await commands.executeCommand('openshift.app.delete', existingApp);
-            const applications = await oi.getApplications(project);
-            expect(applications).is.empty;
-        });
-
-        test('delete project', async () => {
-            await oi.deleteProject(project);
-        });
-
-        test('about()', () => {
-            Cluster.about();
-        });
-
-        test('logout', async () => {
-            await oi.execute(Command.odoLogout());
+        test('deleteProject()', async function () {
+            const project3 = 'my-test-project-3';
+            await odo.createProject(project3);
+            await odo.deleteProject(project3);
+            const projects = await odo.getProjects();
+            const projectNames = projects.map((project) => project.name);
+            expect(projectNames).to.not.contain(project3);
         });
     });
+
+    suite('components', function () {
+        const project1 = 'my-test-project-1';
+
+        let tmpFolder1: Uri;
+        let tmpFolder2: Uri;
+
+        suiteSetup(async function () {
+            await odo.createProject(project1);
+            tmpFolder1 = Uri.parse(await promisify(tmp.dir)());
+            tmpFolder2 = Uri.parse(await promisify(tmp.dir)());
+            await odo.createComponentFromFolder(
+                'nodejs',
+                undefined,
+                'component1',
+                tmpFolder1,
+                'nodejs-starter',
+            );
+            await odo.createComponentFromFolder(
+                'go',
+                undefined,
+                'component2',
+                tmpFolder2,
+                'go-starter',
+            );
+        });
+
+        suiteTeardown(async function () {
+            const newWorkspaceFolders = workspace.workspaceFolders.filter((workspaceFolder) => {
+                const fsPath = workspaceFolder.uri.fsPath;
+                return (fsPath !== tmpFolder1.fsPath && fsPath !== tmpFolder2.fsPath);
+            });
+            workspace.updateWorkspaceFolders(0, workspace.workspaceFolders.length, ...newWorkspaceFolders);
+            await fs.rm(tmpFolder1.fsPath, { force: true, recursive: true });
+            await fs.rm(tmpFolder2.fsPath, { force: true, recursive: true });
+            await odo.deleteProject(project1);
+        });
+
+        test('describeComponent()', async function () {
+            const componentDescription1 = await odo.describeComponent(tmpFolder1.fsPath);
+            expect(componentDescription1).to.exist;
+            expect(componentDescription1.managedBy).to.equal('odo');
+            const componentDescription2 = await odo.describeComponent(tmpFolder2.fsPath);
+            expect(componentDescription2).to.exist;
+            expect(componentDescription2.managedBy).to.equal('odo');
+        });
+
+        test('analyze()', async function () {
+            const analysis1 = await odo.analyze(tmpFolder1.fsPath);
+            expect(analysis1).to.exist;
+            expect(analysis1[0].devfile).to.equal('nodejs');
+            const analysis2 = await odo.analyze(tmpFolder2.fsPath);
+            expect(analysis2).to.exist;
+            expect(analysis2[0].devfile).to.equal('go');
+        });
+    });
+
+    suite('services', function () {
+        const serviceName = 'my-test-service';
+        const projectName = `my-test-project${_.random(100)}`;
+
+        // taken from https://docs.openshift.com/container-platform/3.11/dev_guide/deployments/kubernetes_deployments.html
+        const serviceFileYaml = //
+            'apiVersion: apps/v1\n' + //
+            'kind: Deployment\n' + //
+            'metadata:\n' + //
+            `  name: ${serviceName}\n` + //
+            'spec:\n' + //
+            '  replicas: 1\n' + //
+            '  selector:\n' + //
+            '    matchLabels:\n' + //
+            '      app: hello-openshift\n' + //
+            '  template:\n' + //
+            '    metadata:\n' + //
+            '      labels:\n' + //
+            '        app: hello-openshift\n' + //
+            '    spec:\n' + //
+            '      containers:\n' + //
+            '      - name: hello-openshift\n' + //
+            '        image: openshift/hello-openshift:latest\n' + //
+            '        ports:\n' + //
+            '        - containerPort: 80\n';
+
+        suiteSetup(async function () {
+            try {
+                await odo.execute(Command.deleteProject(projectName));
+            } catch (e) {
+                // do nothing
+            }
+            await odo.createProject(projectName);
+        });
+
+        suiteTeardown(async function () {
+            await odo.execute(Command.deleteProject(projectName));
+        });
+
+        test('createService()', async function () {
+            await odo.createService(YAML.parse(serviceFileYaml));
+            const deploymentsOutput = await odo.execute(Command.getDeployments(projectName));
+            const deployments: V1Deployment[] = JSON.parse(deploymentsOutput.stdout).items;
+            const deploymentNames = deployments.map((deployment) => deployment.metadata.name);
+            expect(deploymentNames).to.contain(serviceName);
+        });
+
+        test('loadItems()', async function () {
+            const deploymentsOutput = await odo.execute(Command.getDeployments(projectName));
+            const deployments = odo.loadItems<V1Deployment>(
+                deploymentsOutput,
+                (data) => data.items,
+            );
+            const deploymentNames = deployments.map((deployment) => deployment.metadata.name);
+            expect(deploymentNames).to.contain(serviceName);
+        });
+    });
+
+    suite('registries', function () {
+        const TEST_REGISTRY = 'TestRegistry';
+
+        suiteSetup(async function () {
+            const registries = await odo.getRegistries();
+            if (registries.find((registry) => registry.name === TEST_REGISTRY)) {
+                await odo.removeRegistry(TEST_REGISTRY);
+            }
+        });
+
+        suiteTeardown(async function () {
+            try {
+                await odo.execute(Command.removeRegistry(TEST_REGISTRY));
+            } catch (e) {
+                // do nothing, it's probably already deleted
+            }
+        });
+
+        test('getRegistries()', async function () {
+            const registries = await odo.getRegistries();
+            expect(registries).to.be.of.length(1);
+            const registryNames = registries.map((registry) => registry.name);
+            expect(registryNames).to.contain('DefaultDevfileRegistry');
+        });
+
+        test('addRegistry()', async function () {
+            await odo.addRegistry(TEST_REGISTRY, 'https://example.org', undefined);
+            const registries = await odo.getRegistries();
+            expect(registries).to.be.of.length(2);
+            const registryNames = registries.map((registry) => registry.name);
+            expect(registryNames).to.contain(TEST_REGISTRY);
+        });
+
+        test('removeRegistry()', async function () {
+            await odo.removeRegistry(TEST_REGISTRY);
+            const registries = await odo.getRegistries();
+            expect(registries).to.be.of.length(1);
+            const registryNames = registries.map((registry) => registry.name);
+            expect(registryNames).to.not.contain(TEST_REGISTRY);
+        });
+    });
+
+    suite('require login', function () {
+        suiteTeardown(async function () {
+            await odo.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
+        });
+
+        test('requireLogin()', async function () {
+            expect(await odo.requireLogin()).to.be.false;
+            await odo.execute(Command.odoLogout());
+            expect(await odo.requireLogin()).to.be.true;
+        });
+    });
+
+    suite('component types (devfiles)', function () {
+        test('getComponentTypes()', async function () {
+            const componentTypes = await odo.getComponentTypes();
+            expect(componentTypes).to.not.be.empty;
+        });
+
+        test('getCompTypesJson()', async function () {
+            const componentTypes = await odo.getCompTypesJson();
+            expect(componentTypes).to.not.be.empty;
+        });
+    });
+
+    test('executeInTerminal()', async function () {
+        const numTerminals = window.terminals.length;
+        await odo.executeInTerminal(new CommandText('odo', 'version'));
+        expect(window.terminals).length(numTerminals + 1);
+    });
+
 });

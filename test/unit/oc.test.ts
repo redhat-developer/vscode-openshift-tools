@@ -9,9 +9,9 @@ import * as sinonChai from 'sinon-chai';
 import { window } from 'vscode';
 import { CliChannel } from '../../src/cli';
 import { Oc } from '../../src/oc';
-import { ContextType, getInstance } from '../../src/odo';
+import { getInstance } from '../../src/odo';
+import { Project } from '../../src/odo/project';
 import { ToolsConfig } from '../../src/tools';
-import { TestItem } from './openshift/testOSItem';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -22,8 +22,7 @@ suite('Oc', function() {
     let warnStub: sinon.SinonStub<[string, import('vscode').MessageOptions, ...import('vscode').MessageItem[]], Thenable<import('vscode').MessageItem>>;
     let execStub: sinon.SinonStub;
     let getActiveProjectStub: sinon.SinonStub;
-    const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
-    const projectItem = new TestItem(clusterItem, 'my-project', ContextType.PROJECT);
+    const projectItem: Project = { name: 'my-project', active: true };
 
     const sampleYaml = `
         # manifests.yaml
@@ -47,7 +46,7 @@ suite('Oc', function() {
         execStub = sandbox.stub(CliChannel.prototype, 'execute');
         getActiveProjectStub = sandbox.stub(getInstance(), 'getActiveProject').resolves('my-project');
         detectOrDownloadStub = sandbox.stub(ToolsConfig, 'detect').resolves('path');
-        sandbox.stub(getInstance(), 'getClusters').resolves([clusterItem]);
+        sandbox.stub(getInstance(), 'getActiveCluster').resolves('cluster');
         sandbox.stub(getInstance(), 'getProjects').resolves([projectItem]);
     });
 
