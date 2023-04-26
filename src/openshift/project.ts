@@ -3,15 +3,15 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { KubernetesObject } from '@kubernetes/client-node';
 import { commands, window } from 'vscode';
-import OpenShiftItem from './openshiftItem';
-import { OpenShiftObject, getInstance as getOdoInstance } from '../odo';
-import { Progress } from '../util/progress';
-import { vsCommand, VsCommandError } from '../vscommand';
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
-import { KubernetesObject } from '@kubernetes/client-node';
 import { OpenShiftExplorer } from '../explorer';
+import { getInstance as getOdoInstance } from '../odo';
+import { Progress } from '../util/progress';
+import { VsCommandError, vsCommand } from '../vscommand';
+import OpenShiftItem from './openshiftItem';
 
 export class Command {
     static listProjects(): CommandText {
@@ -36,19 +36,24 @@ export class Project extends OpenShiftItem {
             label: 'Create new Project',
             description: 'Create new Project and make it active'
         };
-        const projectsAndCommand = getOdoInstance().getProjects()
-            .then((projects: (OpenShiftObject)[]) => {
-                return [createNewProject, ...projects];
-            });
-        const selectedItem = await window.showQuickPick(projectsAndCommand, {placeHolder: 'Select Project to activate or create new one'});
+        const projectsAndCreateNew = getOdoInstance()
+            .getProjects() //
+            .then((projects) => [
+                createNewProject,
+                ...projects.map((project) => ({
+                    label: project.name,
+                    description: project.active ? 'Currently active': '',
+                })),
+            ]);
+        const selectedItem = await window.showQuickPick(projectsAndCreateNew, {placeHolder: 'Select Project to activate or create new one'});
         if (!selectedItem) return null;
         if (selectedItem === createNewProject) {
             await commands.executeCommand('openshift.project.create');
         } else {
-            const project = selectedItem as OpenShiftObject;
-            await CliChannel.getInstance().executeTool(Command.setActiveProject(project.getName()));
+            const projectName = selectedItem.label;
+            await CliChannel.getInstance().executeTool(Command.setActiveProject(projectName));
             Project.explorer.refresh();
-            message = `Project '${project.getName()}' set as active.`;
+            message = `Project '${projectName}' set as active.`;
         }
         return message;
     }
@@ -75,8 +80,8 @@ export class Project extends OpenShiftItem {
                 async () => {
                     // migrate to odo3.ts
                     const projects = await getOdoInstance().getProjects();
-                    const selectedProject = projects.find((p)=>p.getName() === project.metadata.name);
-                    await getOdoInstance().deleteProject(selectedProject);
+                    const selectedProject = projects.find(p => p.name === project.metadata.name);
+                    await getOdoInstance().deleteProject(selectedProject.name);
                     OpenShiftExplorer.getInstance().refresh();
                 })
                 .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Project with error '${err}'`,'Failed to delete Project')))

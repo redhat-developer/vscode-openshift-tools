@@ -15,7 +15,6 @@ import { CliChannel, CliExitData } from '../../src/cli';
 import * as odo from '../../src/odo';
 import { ToolsConfig } from '../../src/tools';
 import { WindowUtil } from '../../src/util/windowUtils';
-import { TestItem } from './openshift/testOSItem';
 import jsYaml = require('js-yaml');
 
 const {expect} = chai;
@@ -48,7 +47,6 @@ suite('odo', () => {
             showChannelOnOutput: false
         });
         sandbox.stub(ToolsConfig, 'getVersion').resolves('0.0.15');
-        odoCli.clearCache();
     });
 
     teardown(() => {
@@ -130,8 +128,6 @@ suite('odo', () => {
 
     suite('item listings', () => {
         let execStub: sinon.SinonStub; let yamlStub: sinon.SinonStub;
-        const project = new TestItem(null, 'project', odo.ContextType.PROJECT);
-        const app = new TestItem(project, 'app', odo.ContextType.APPLICATION);
 
         setup(() => {
             execStub = sandbox.stub(odoCli, 'execute');
@@ -167,7 +163,7 @@ suite('odo', () => {
             const result = await odoCli.getProjects();
 
             expect(result.length).equals(1);
-            expect(result[0].getName()).equals('project1');
+            expect(result[0].name).equals('project1');
         });
 
         test('getProjects returns empty list if no projects present', async () => {
@@ -189,107 +185,12 @@ suite('odo', () => {
 
         test('getProjects returns empty list if an error occurs', async () => {
             const errorStub = sandbox.stub(window, 'showErrorMessage');
-            sandbox.stub(odoCli, 'getClusters').resolves([new TestItem(undefined, 'cluster', odo.ContextType.CLUSTER)]);
+            sandbox.stub(odoCli, 'getActiveCluster').resolves('https://localhost:8080');
             execStub.rejects(errorMessage);
             const result = await odoCli.getProjects();
 
             expect(result).empty;
             expect(errorStub).calledOnceWith(`Cannot retrieve projects for current cluster. Error: ${errorMessage}`);
-        });
-
-        test('getApplications returns applications for a project', async () => {
-            const activeApps = [{ name: 'app1', project: 'project1' }, { name: 'app2', project: 'project1'}];
-            yamlStub.returns({ ActiveApplications: activeApps });
-            execStub.returns({
-                error: undefined,
-                stdout: JSON.stringify({
-                        items: [
-                            {
-                                metadata: {
-                                    name: 'app1',
-                                    namespace: 'project'
-                                }
-                            }
-                        ]
-                    }
-                ),
-                stderr: ''
-            });
-            const result = await odoCli.getApplications(project);
-
-            expect(result.length).equals(1);
-            expect(result[0].getName()).equals('app1');
-        });
-
-        test('getApplications returns empty list if no odo apps are present', async () => {
-            const activeApps = [{ name: 'app1', project: 'project1' }, { name: 'app2', project: 'project1'}];
-            yamlStub.returns({ ActiveApplications: activeApps });
-            execStub.returns({
-                error: undefined,
-                stdout: JSON.stringify({
-                        items: []
-                    }
-                ),
-                stderr: ''
-            });
-            const result = await odoCli.getApplications(project);
-
-            expect(result).length(0);
-        });
-
-        test('getComponents returns components list for an application', async () => {
-            const activeApps = [{ name: 'app1', project: 'project1' }, { name: 'app2', project: 'project1'}];
-            yamlStub.returns({ ActiveApplications: activeApps });
-            execStub.returns({
-                error: undefined,
-                stdout: JSON.stringify({
-                        items: [
-                            {
-                                metadata: {
-                                    name: 'component1',
-                                    namespace: 'project'
-                                }
-                            }
-                        ]
-                    }
-                ),
-                stderr: ''
-            });
-            const result = await odoCli.getApplications(project);
-
-            expect(result).length(1);
-            expect(result[0].getName()).equals('component1');
-        });
-
-        test('getApplicationChildren returns both components and services for an application', async () => {
-            execStub.onFirstCall().resolves({error: undefined, stdout: JSON.stringify({
-                otherComponents: [],
-                devfileComponents: [
-                    {
-                        metadata: {
-                            name: 'component1',
-                            namespace: 'project'
-                        },
-                        spec: {
-                            source: 'https://',
-                            sourceType: 'git'
-                        }
-                    }
-                ]
-            }), stderr: ''});
-            const stdout = JSON.stringify({
-                kind: 'ServiceList',
-                items: [{
-                    metadata: {
-                        name: 'service1'
-                    }
-                }]
-            });
-            execStub.onSecondCall().resolves({error: undefined, stdout, stderr: ''});
-            const result = await odoCli.getApplicationChildren(app);
-
-            expect(result[0].getName()).deep.equals('component1');
-            expect(result[1].getName()).deep.equals('service1');
         });
     });
 
@@ -381,8 +282,8 @@ suite('odo', () => {
                 stdout: odoVersionOutLoggedIn.join('\n'),
                 stderr: ''
             });
-            const cluster: odo.OpenShiftObject[] = await odo.getInstance().getClusters();
-            expect(cluster[0].getName()).equals(clusterUrl);
+            const cluster: string = await odo.getInstance().getActiveCluster();
+            expect(cluster).equals(clusterUrl);
         });
 
         test('extension uses odo version to determine if login is required', async () => {

@@ -41,7 +41,7 @@
 		"debuggers",
 		"K8s",
 		"Cloud",
-        "podman"
+		"podman"
 	],
 	"icon": "images/openshift_extension.png",
 	"main": "./out/src/extension",
@@ -69,7 +69,7 @@
 		"dev:run:helm-chart-view": "webpack-dev-server --port 9222 --mode development --config src/webview/helm-chart/webpack.config.js",
 		"dev:run:create-service-view": "webpack-dev-server --mode development --config src/webview/create-service/webpack.config.js",
 		"watch": "tsc -watch -p ./",
-		"clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/logViewer",
+		"clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/*Viewer",
 		"lint": "eslint . --ext .ts --quiet",
 		"lint-fix": "eslint . --ext .ts --fix",
 		"lint-nic": "eslint . --ext .ts --no-inline-config",
@@ -77,6 +77,7 @@
 		"todo": "leasot **/*.ts --ignore node_modules -x",
 		"test": "npm run vscode:prepublish && node ./out/build/run-tests.js unit",
 		"test-integration": "npm run vscode:prepublish && node ./out/build/run-tests.js integration",
+		"test-integration:coverage": "npm run vscode:prepublish && npm run test:instrument && node ./out/build/run-tests.js integration",
 		"test:instrument": "shx rm -rf out/src-orig && shx mv out/src out/src-orig && istanbul instrument --complete-copy --embed-source --output out/src out/src-orig",
 		"test:coverage": "npm run build && npm run test:instrument && node ./out/build/install-vscode.js redhat.vscode-redhat-account && node ./out/build/run-tests.js unit",
 		"update-deps": "ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
@@ -144,6 +145,7 @@
 		"@types/mocha": "^9.0.0",
 		"@types/node": "^16.11.12",
 		"@types/pify": "^5.0.1",
+		"@types/proxyquire": "^1.3.28",
 		"@types/react": "^17.0.37",
 		"@types/react-copy-to-clipboard": "^5.0.4",
 		"@types/react-dom": "^17.0.11",
@@ -1079,6 +1081,10 @@
 				{
 					"command": "openshift.component.deleteSourceFolder",
 					"when": "false"
+				},
+				{
+					"command": "openshift.component.openInBrowser",
+					"when": "false"
 				}
 			],
 			"view/title": [
@@ -1437,7 +1443,7 @@
 							"onCommand:openshift.componentType.newComponent"
 						]
 					},
-                    {
+					{
 						"id": "helmChart",
 						"title": "Work with Helm Charts",
 						"description": "Browse the catalog to discover and install Helm Charts.\n[Browse Helm Chart](command:openshift.componentTypesView.registry.openHelmChartsInView)",

@@ -17,7 +17,6 @@ const config: Mocha.MochaOptions = {
     ui: 'tdd',
     timeout: 120000,
     color: true,
-    // grep: 'project|component from binary'
 };
 
 const mocha = new Mocha(config);
@@ -26,29 +25,43 @@ function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
     let coverageRunner: CoverageRunner;
     const coverConfigPath = paths.join(testsRoot, '..', '..', '..', 'coverconfig.json');
     if (!process.env.OST_DISABLE_COVERAGE && fs.existsSync(coverConfigPath)) {
-        coverageRunner = new CoverageRunner(JSON.parse(fs.readFileSync(coverConfigPath, 'utf-8')) as TestRunnerOptions, testsRoot);
+        coverageRunner = new CoverageRunner(
+            JSON.parse(fs.readFileSync(coverConfigPath, 'utf-8')) as TestRunnerOptions,
+            testsRoot,
+        );
     }
     return coverageRunner;
 }
 
-export function run(): Promise<void> {
-     return new Promise((resolve, reject) => {
-        const testsRoot = paths.resolve(__dirname);
-        const coverageRunner = loadCoverageRunner(testsRoot);
-        glob('**/odo*.test.js', { cwd: testsRoot }, (error, files): void => {
+async function collectTests(testsRoot: string): Promise<string[]> {
+    const files = await new Promise<string[]>((resolve, reject) => {
+        glob('**.test.js', { cwd: testsRoot }, (error, files): void => {
             if (error) {
                 reject(error);
             } else {
-                files.forEach((f): Mocha => mocha.addFile(paths.join(testsRoot, f)));
-                mocha.run(failures => {
-                    if (failures > 0) {
-                        reject(new Error(`${failures} tests failed.`));
-                    }
-                }).on('end', () => {
-                    coverageRunner && coverageRunner.reportCoverage();
-                    resolve();
-                });
+                resolve(files);
             }
         });
     });
+    return files;
+}
+
+export async function run(): Promise<void> {
+    const testsRoot = paths.resolve(__dirname);
+    const coverageRunner = loadCoverageRunner(testsRoot);
+    const testFiles = await collectTests(testsRoot);
+    const numFailures = await new Promise<number>((resolve, reject) => {
+        testFiles.forEach((f): Mocha => mocha.addFile(paths.join(testsRoot, f)));
+        try {
+            mocha.run((failures) => {
+                resolve(failures);
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
+    coverageRunner && coverageRunner.reportCoverage();
+    if (numFailures) {
+        throw new Error(`${numFailures} tests failed`);
+    }
 }
