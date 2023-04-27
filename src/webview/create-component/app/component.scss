@@ -111,17 +111,12 @@ button {
 
 .MuiOutlinedInput-input {
     padding: 5px 14px !important;
-}
-
-.MuiOutlinedInput-input:disabled, .Mui-disabled {
-    -webkit-text-fill-color: white !important;
+    border: 0.5px solid var(--vscode-dropdown-border) !important;
 }
 
 .MuiSelect-select, .MuiMenu-paper, .MuiAutocomplete-inputRoot {
     background-color: var(--vscode-dropdown-background) !important;
     color: var(--vscode-dropdown-foreground) !important;
-    border: 0.5px solid var(--vscode-dropdown-border) !important;
-
 }
 
 .MuiInputBase-input {

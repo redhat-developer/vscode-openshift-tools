@@ -13,6 +13,16 @@ import { CompTypeDesc } from '../common/propertyTypes';
 
 let panel: vscode.WebviewPanel;
 
+let themeKind: vscode.ColorThemeKind = vscode.window.activeColorTheme.kind;
+vscode.window.onDidChangeActiveColorTheme((editor: vscode.ColorTheme) => {
+    if (themeKind !== editor.kind) {
+        themeKind = editor.kind;
+        if (panel) {
+            panel.webview.postMessage({ action: 'setTheme', themeValue: themeKind });
+        }
+    }
+});
+
 async function createComponentMessageListener(event: any): Promise<any> {
     switch (event?.action) {
         case 'validateCompName':
@@ -33,7 +43,8 @@ async function createComponentMessageListener(event: any): Promise<any> {
             panel?.webview.postMessage(
                 {
                     action: event.action,
-                    compDescriptions: componentDescriptions
+                    compDescriptions: componentDescriptions,
+                    themeValue: themeKind
                 }
             );
             break;

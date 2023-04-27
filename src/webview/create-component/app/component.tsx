@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
 import { Uri } from 'vscode';
-import { Autocomplete, Box, Button, InputLabel, MenuItem, Switch, TextField, Typography, darken, lighten, styled } from '@mui/material';
+import { Autocomplete, Box, Button, InputLabel, Switch, TextField, Typography, darken, lighten, styled } from '@mui/material';
 import { VSCodeMessage } from './vsCodeMessage';
 import { DefaultProps, CompTypeDesc } from '../../common/propertyTypes';
 import { ascName } from '../../common/util';
@@ -37,7 +37,8 @@ export class CreateComponent extends React.Component<DefaultProps, {
     incudeStarterProject: boolean,
     selectedStarterProject: string,
     showLoadScreen: boolean,
-    autoSelectDisable: boolean
+    autoSelectDisable: boolean,
+    themeKind: number
 }> {
 
     constructor(props: DefaultProps | Readonly<DefaultProps>) {
@@ -59,7 +60,8 @@ export class CreateComponent extends React.Component<DefaultProps, {
             incudeStarterProject: true,
             selectedStarterProject: '',
             showLoadScreen: false,
-            autoSelectDisable: false
+            autoSelectDisable: false,
+            themeKind: 0
         }
         VSCodeMessage.postMessage({
             action: 'selectFolder'
@@ -121,7 +123,8 @@ export class CreateComponent extends React.Component<DefaultProps, {
                     })
                 } else {
                     this.setState({
-                        compDescriptions: message.data.compDescriptions
+                        compDescriptions: message.data.compDescriptions,
+                        themeKind: message.data.themeValue
                     });
                 }
             } else if (message.data.action === 'createComponent') {
@@ -131,6 +134,10 @@ export class CreateComponent extends React.Component<DefaultProps, {
                     selectedComponentDesc: message.data.selectedComponent,
                     selectedStarterProject: message.data.selectedPro,
                     autoSelectDisable: true
+                })
+            } else if (message.data.action === 'setTheme') {
+                this.setState({
+                    themeKind: message.data.themeValue
                 })
             }
         });
@@ -155,15 +162,16 @@ export class CreateComponent extends React.Component<DefaultProps, {
         });
     }
 
-    handleWsFolderDropDownChange = (event: any): void => {
-        if (event.target.value === 'New Folder') {
+    handleWsFolderDropDownChange = (event: any, value: Uri | string): void => {
+        console.log('Value:::',value);
+        if (typeof value === 'string' && value === 'New Folder') {
             VSCodeMessage.postMessage({
                 action: 'selectFolder',
                 noWSFolder: true
             });
-        } else {
+        } else if (typeof value === 'object') {
             this.setState({
-                wsFolderPath: event.target.value
+                wsFolderPath: value
             });
         }
     }
@@ -208,11 +216,15 @@ export class CreateComponent extends React.Component<DefaultProps, {
     });
 
     render(): React.ReactNode {
-        const { application, autoSelectDisable, component, wsFolderItems, wsFolderPath, compDescriptions, selectedComponentDesc, selectedStarterProject, showLoadScreen } = this.state;
+        const { application, autoSelectDisable, component, wsFolderItems, compDescriptions, selectedComponentDesc, selectedStarterProject, showLoadScreen, themeKind, wsFolderPath } = this.state;
         const optionList = compDescriptions.sort(ascName);
         const filterList = selectedComponentDesc ? optionList.filter((value) => value.devfileData.devfile.metadata.name === selectedComponentDesc.devfileData.devfile.metadata.name &&
             value.registry.name === selectedComponentDesc.registry.name) : [];
         const getInputValue = filterList.length > 0 ? filterList[0].devfileData.devfile.metadata.displayName + '/' + filterList[0].registry.name : ''
+        const folderDropDownItems: any[] = [];
+        folderDropDownItems.push('New Folder');
+        folderDropDownItems.push(...wsFolderItems);
+        console.log(folderDropDownItems);
         return (
             <>
                 {compDescriptions.length === 0 ? <LoadScreen title={'Loading the devfiles'} /> :
@@ -243,7 +255,11 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                             sx={{
                                                 input: {
                                                     color: 'var(--vscode-settings-textInputForeground)',
-                                                    backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                                    backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                                    WebkitTextFillColor: themeKind <= 1 ? 'black' : 'white',
+                                                    '&:disabled': {
+                                                        WebkitTextFillColor: themeKind <= 1 ? 'black' : 'white'
+                                                    }
                                                 }
                                             }}
                                             style={{ width: '30%', paddingTop: '10px' }}
@@ -263,7 +279,11 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                             sx={{
                                                 input: {
                                                     color: 'var(--vscode-settings-textInputForeground)',
-                                                    backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                                    backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                                    WebkitTextFillColor: themeKind <= 1 ? 'black' : 'white',
+                                                    '&:disabled': {
+                                                        WebkitTextFillColor: themeKind <= 1 ? 'black' : 'white'
+                                                    }
                                                 }
                                             }}
                                             style={{ width: '30%', paddingTop: '10px' }}
@@ -276,29 +296,42 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                             Folder for component
                                         </InputLabel>
                                         <div style={{ display: 'flex', flexDirection: 'row', gap: '2rem' }}>
-                                            {wsFolderItems.length > 0 && <TextField
-                                                variant='standard'
-                                                onChange={(e) => this.handleWsFolderDropDownChange(e)}
-                                                value={wsFolderPath.fsPath ? wsFolderPath.fsPath : ''}
-                                                disabled={wsFolderItems?.length == 0 || autoSelectDisable}
-                                                id='bootstrap-input'
-                                                select
-                                                sx={{
-                                                    input: {
-                                                        color: 'var(--vscode-settings-textInputForeground)',
-                                                        backgroundColor: 'var(--vscode-settings-textInputBackground)'
-                                                    }
-                                                }}
-                                                style={{ width: '30%', paddingTop: '10px' }}>
-                                                <MenuItem key='New Folder' value='New Folder'>
-                                                    New Folder
-                                                </MenuItem>
-                                                {...wsFolderItems?.map((wsFolderItem: Uri) => (
-                                                    <MenuItem key={wsFolderItem.fsPath} value={wsFolderItem.fsPath}>
-                                                        {wsFolderItem.fsPath}
-                                                    </MenuItem>
-                                                ))}
-                                            </TextField>}
+                                            {wsFolderItems.length > 0 &&
+                                                <Autocomplete
+                                                    id='grouped-folder'
+                                                    options={folderDropDownItems}
+                                                    autoHighlight
+                                                    fullWidth
+                                                    disableClearable
+                                                    disabled={wsFolderItems?.length <= 1 || autoSelectDisable}
+                                                    value={wsFolderPath.fsPath ? wsFolderPath.fsPath : ''}
+                                                    getOptionLabel={(option) => option.fsPath ? option.fsPath : option}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            sx={{
+                                                                input: {
+                                                                    color: 'var(--vscode-settings-textInputForeground)',
+                                                                    backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                                                    WebkitTextFillColor: themeKind <= 1 ? 'black' : 'white',
+                                                                    '&:disabled': {
+                                                                        WebkitTextFillColor: themeKind <= 1 ? 'black' : 'white'
+                                                                    }
+                                                                }
+                                                            }}
+                                                            style={{ paddingTop: '10px' }}
+                                                            {...params}
+                                                            inputProps={{
+                                                                ...params.inputProps
+                                                            }} />
+                                                    )}
+                                                    renderGroup={(params) => (
+                                                        <li key={params.key}>
+                                                            <this.GroupHeader>{params.group}</this.GroupHeader>
+                                                            <this.GroupItems>{params.children}</this.GroupItems>
+                                                        </li>
+                                                    )}
+                                                    onChange={(e, v) => this.handleWsFolderDropDownChange(e, v)} />
+                                            }
                                             {wsFolderItems?.length === 0 && <Button variant='contained'
                                                 className='buttonStyle'
                                                 style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white' }}
@@ -338,7 +371,11 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                                         sx={{
                                                             input: {
                                                                 color: 'var(--vscode-settings-textInputForeground)',
-                                                                backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                                                WebkitTextFillColor: themeKind <= 1 ? 'black' : 'white',
+                                                                '&:disabled': {
+                                                                    WebkitTextFillColor: themeKind <= 1 ? 'black' : 'white'
+                                                                }
                                                             }
                                                         }}
                                                         style={{ paddingTop: '10px' }}
@@ -382,7 +419,11 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                                             sx={{
                                                                 input: {
                                                                     color: 'var(--vscode-settings-textInputForeground)',
-                                                                    backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                                                    backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                                                    WebkitTextFillColor: themeKind <= 1 ? 'black' : 'white',
+                                                                    '&:disabled': {
+                                                                        WebkitTextFillColor: themeKind <= 1 ? 'black' : 'white'
+                                                                    }
                                                                 }
                                                             }}
                                                             style={{ paddingTop: '10px' }}
