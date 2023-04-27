@@ -39,6 +39,7 @@ export class Command {
         }
         if (runOn) {
             command.addOption(new CommandOption('--platform', 'podman'));
+            command.addOption(new CommandOption('--forward-localhost'));
         }
         return command;
     }
@@ -459,5 +460,9 @@ export class Command {
 
     static analyze(): CommandText {
         return new CommandText('odo analyze -o json');
+    }
+
+    static setNamespace(namespace: string) {
+        return new CommandText('odo set namespace', namespace);
     }
 }

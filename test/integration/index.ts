@@ -6,7 +6,7 @@
 import * as fs from 'fs';
 import * as glob from 'glob';
 import * as paths from 'path';
-import { TestRunnerOptions, CoverageRunner } from '../coverage';
+import { CoverageRunner, TestRunnerOptions } from '../coverage';
 
 require('source-map-support').install();
 
@@ -35,7 +35,7 @@ export function run(): Promise<void> {
      return new Promise((resolve, reject) => {
         const testsRoot = paths.resolve(__dirname);
         const coverageRunner = loadCoverageRunner(testsRoot);
-        glob('**/odo.test.js', { cwd: testsRoot }, (error, files): void => {
+        glob('**/odo*.test.js', { cwd: testsRoot }, (error, files): void => {
             if (error) {
                 reject(error);
             } else {
