@@ -29,7 +29,7 @@ export class CreateComponent extends React.Component<DefaultProps, {
     wsFolderPath: Uri,
     compDescriptions: CompTypeDesc[],
     selectedComponentDesc?: CompTypeDesc
-    incudeStarterProject: boolean,
+    includeStarterProject: boolean,
     selectedStarterProject: string,
     showLoadScreen: boolean,
     autoSelectDisable: boolean,
@@ -47,7 +47,7 @@ export class CreateComponent extends React.Component<DefaultProps, {
             wsFolderItems: [],
             wsFolderPath: undefined,
             compDescriptions: [],
-            incudeStarterProject: true,
+            includeStarterProject: true,
             selectedStarterProject: '',
             showLoadScreen: false,
             autoSelectDisable: false,
@@ -173,7 +173,7 @@ export class CreateComponent extends React.Component<DefaultProps, {
 
     includeStarterProject = (e: React.ChangeEvent<HTMLInputElement>): void => {
         this.setState({
-            incudeStarterProject: e.target.checked
+            includeStarterProject: e.target.checked
         })
     }
 
@@ -227,7 +227,7 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                             defaultValue={component.name}
                                             error={component.error}
                                             onChange={(e) => this.validateName(e.target.value, 'Comp')}
-                                            id='bootstrap-input'
+                                            id='component-textField'
                                             sx={{
                                                 input: {
                                                     color: 'var(--vscode-settings-textInputForeground)',
@@ -292,7 +292,7 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                             </Button>}
                                         </div>
                                         {compDescriptions && <>
-                                            <InputLabel required htmlFor='bootstrap-input'
+                                            <InputLabel required htmlFor='grouped-components'
                                                 style={{
                                                     color: '#EE0000',
                                                     marginTop: '1rem'
@@ -346,7 +346,7 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                         </>}
                                         {selectedComponentDesc && selectedComponentDesc.starterProjects?.length > 0 &&
                                             <div style={{ marginTop: '10px', marginBottom: '10px' }}>
-                                                <InputLabel htmlFor='bootstrap-input'
+                                                <InputLabel htmlFor='grouped-starterProjects'
                                                     style={{
                                                         color: '#EE0000',
                                                         marginTop: '1rem'
@@ -357,7 +357,7 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                                     }}
                                                         onChange={(e) => this.includeStarterProject(e)} />
                                                 </InputLabel>
-                                                {this.state.incudeStarterProject && <Autocomplete
+                                                {this.state.includeStarterProject && <Autocomplete
                                                     id='grouped-starterProjects'
                                                     disabled={selectedComponentDesc.starterProjects.length === 1 || autoSelectDisable}
                                                     value={selectedStarterProject}

@@ -88,7 +88,7 @@ export default class CreateComponentLoader {
             localResourceRoots: [localResourceRoot],
             retainContextWhenHidden: true
         });
-        panel.iconPath = vscode.Uri.file(path.join(CreateComponentLoader.extensionPath, 'images/gitImport/git.svg'));
+        panel.iconPath = vscode.Uri.file(path.join(CreateComponentLoader.extensionPath, 'images/title/dark/workspace-new.svg'));
         panel.webview.html = CreateComponentLoader.getWebviewContent(CreateComponentLoader.extensionPath, panel);
         panel.onDidDispose(() => {
             panel = undefined;
