@@ -20,11 +20,6 @@ declare module 'react' {
 }
 
 export class CreateComponent extends React.Component<DefaultProps, {
-    application: {
-        name: string,
-        error?: boolean,
-        helpText?: string
-    },
     component: {
         name?: string,
         error?: boolean,
@@ -44,11 +39,6 @@ export class CreateComponent extends React.Component<DefaultProps, {
     constructor(props: DefaultProps | Readonly<DefaultProps>) {
         super(props);
         this.state = {
-            application: {
-                name: '',
-                error: false,
-                helpText: ''
-            },
             component: {
                 name: '',
                 error: false,
@@ -89,17 +79,6 @@ export class CreateComponent extends React.Component<DefaultProps, {
             if (message.data.action === 'validateCompName') {
                 this.setState({
                     component: {
-                        name: message.data.name,
-                        error: message.data.error,
-                        helpText: message.data.helpText,
-                    },
-                    application: {
-                        name: !message.data.error ? message.data.name + '-app' : ''
-                    }
-                });
-            } else if (message.data.action === 'validateAppName') {
-                this.setState({
-                    application: {
                         name: message.data.name,
                         error: message.data.error,
                         helpText: message.data.helpText,
@@ -150,8 +129,7 @@ export class CreateComponent extends React.Component<DefaultProps, {
             componentTypeName: this.state.selectedComponentDesc.devfileData.devfile.metadata.name,
             projectName: this.state.selectedStarterProject.length > 0 ? this.state.selectedStarterProject : undefined,
             registryName: this.state.selectedComponentDesc.registry.name,
-            componentName: this.state.component.name,
-            appName: this.state.application.name.endsWith('-app') ? this.state.application.name : this.state.application.name + '-app'
+            componentName: this.state.component.name
         });
     }
 
@@ -163,7 +141,6 @@ export class CreateComponent extends React.Component<DefaultProps, {
     }
 
     handleWsFolderDropDownChange = (event: any, value: Uri | string): void => {
-        console.log('Value:::',value);
         if (typeof value === 'string' && value === 'New Folder') {
             VSCodeMessage.postMessage({
                 action: 'selectFolder',
@@ -190,7 +167,7 @@ export class CreateComponent extends React.Component<DefaultProps, {
     }
 
     handleCreateBtnDisable(): boolean {
-        return !this.state.component || this.state.component.name.length === 0 || this.state.component.error || this.state.application.error || !this.state.wsFolderPath ||
+        return !this.state.component || this.state.component.name.length === 0 || this.state.component.error || !this.state.wsFolderPath ||
             !this.state.selectedComponentDesc
     }
 
@@ -216,7 +193,7 @@ export class CreateComponent extends React.Component<DefaultProps, {
     });
 
     render(): React.ReactNode {
-        const { application, autoSelectDisable, component, wsFolderItems, compDescriptions, selectedComponentDesc, selectedStarterProject, showLoadScreen, themeKind, wsFolderPath } = this.state;
+        const { autoSelectDisable, component, wsFolderItems, compDescriptions, selectedComponentDesc, selectedStarterProject, showLoadScreen, themeKind, wsFolderPath } = this.state;
         const optionList = compDescriptions.sort(ascName);
         const filterList = selectedComponentDesc ? optionList.filter((value) => value.devfileData.devfile.metadata.name === selectedComponentDesc.devfileData.devfile.metadata.name &&
             value.registry.name === selectedComponentDesc.registry.name) : [];
@@ -224,7 +201,6 @@ export class CreateComponent extends React.Component<DefaultProps, {
         const folderDropDownItems: any[] = [];
         folderDropDownItems.push('New Folder');
         folderDropDownItems.push(...wsFolderItems);
-        console.log(folderDropDownItems);
         return (
             <>
                 {compDescriptions.length === 0 ? <LoadScreen title={'Loading the devfiles'} /> :
@@ -264,30 +240,6 @@ export class CreateComponent extends React.Component<DefaultProps, {
                                             }}
                                             style={{ width: '30%', paddingTop: '10px' }}
                                             helperText={component.helpText} />
-                                        <InputLabel htmlFor='bootstrap-input'
-                                            style={{
-                                                color: '#EE0000',
-                                                marginTop: '1rem'
-                                            }}>
-                                            Application Name
-                                        </InputLabel>
-                                        <TextField
-                                            value={application.name}
-                                            error={application.error}
-                                            onChange={(e) => this.validateName(e.target.value, 'App')}
-                                            id='bootstrap-input'
-                                            sx={{
-                                                input: {
-                                                    color: 'var(--vscode-settings-textInputForeground)',
-                                                    backgroundColor: 'var(--vscode-settings-textInputBackground)',
-                                                    WebkitTextFillColor: themeKind <= 1 ? 'black' : 'white',
-                                                    '&:disabled': {
-                                                        WebkitTextFillColor: themeKind <= 1 ? 'black' : 'white'
-                                                    }
-                                                }
-                                            }}
-                                            style={{ width: '30%', paddingTop: '10px' }}
-                                            helperText={application.helpText} />
                                         <InputLabel required htmlFor='bootstrap-input'
                                             style={{
                                                 color: '#EE0000',

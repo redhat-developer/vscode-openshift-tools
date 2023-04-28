@@ -26,10 +26,7 @@ vscode.window.onDidChangeActiveColorTheme((editor: vscode.ColorTheme) => {
 async function createComponentMessageListener(event: any): Promise<any> {
     switch (event?.action) {
         case 'validateCompName':
-            validateName(event)
-            break;
-        case 'validateAppName':
-            validateName(event)
+            validateComponentName(event)
             break;
         case 'selectFolder':
             const workspaceFolderItems = event.noWSFolder ? await selectWorkspaceFolder(true, 'Select Component Folder') : selectWorkspaceFolders();
@@ -136,15 +133,15 @@ export default class CreateComponentLoader {
     }
 }
 
-function validateName(event: any) {
-    let validationMessage = event.action !== 'validateAppName' ? OpenShiftItem.emptyName(`Required ${event.name}`, event.name.trim()) : null;
+function validateComponentName(event: any) {
+    let validationMessage = OpenShiftItem.emptyName(`Required ${event.name}`, event.name.trim());
     if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${event.name}.
         Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`, event.name);
     if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${event.name} should be between 2-63 characters`, event.name, 0);
     panel?.webview.postMessage({
         action: event.action,
         error: !validationMessage ? false : true,
-        helpText: !validationMessage ? event.action === 'validateAppName' ? 'Appended with \'-app\' if not endswith app' : 'A unique name given to the component that will be used to name associated resources.' : validationMessage,
+        helpText: !validationMessage ? 'A unique name given to the component that will be used to name associated resources.' : validationMessage,
         name: event.name
     });
 }
