@@ -11,7 +11,8 @@ import {
     StatusBarAlignment,
     StatusBarItem,
     env,
-    QuickPickItemKind
+    QuickPickItemKind,
+    authentication
 } from 'vscode';
 import path = require('path');
 import { startTelemetry } from './telemetry';
@@ -88,6 +89,9 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
+
+    // activate "Sign in with Red Hat ..."
+    void authentication.getSession('redhat-account-auth', ['openid'], { silent: false });
 
     function statusBarFunctions() {
         return commands.registerCommand('openshift.openStatusBar', async () => {
