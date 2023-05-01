@@ -4,13 +4,15 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { window } from 'vscode';
-import { CliChannel } from './cli';
+import { getInstance } from './odo';
+import { Command } from './odo/command';
+import { clusterRequired } from './openshift/openshiftItem';
 import { ToolsConfig } from './tools';
-import OpenShiftItem, { clusterRequired } from './openshift/openshiftItem';
 import { vsCommand } from './vscommand';
-import { OpenShiftProject } from './odo';
 
 export class Oc {
+
+    private static odo = getInstance();
 
     @vsCommand('openshift.create')
     @clusterRequired()
@@ -19,10 +21,8 @@ export class Oc {
         const pleaseSave = 'Please save your changes before executing \'OpenShift: Create\' command.';
         let message: string;
 
-        if (
-            !document ||
-            !(document.fileName.endsWith('.yaml') || document.fileName.endsWith('.json'))
-        ) {
+        if (!document
+            || !(document.fileName.endsWith('.yaml') || document.fileName.endsWith('.json'))) {
             message =
                 '\'OpenShift: Create\' command requires a .yaml or a .json file opened in editor.';
         }
@@ -41,6 +41,12 @@ export class Oc {
             }
         }
 
+        const activeProject = await Oc.odo.getActiveProject();
+
+        if (!message && !activeProject) {
+            message = '\'OpenShift: Create\' requires setting a project as active, and none is currently set.';
+        }
+
         let toolLocation: string;
         if (!message) {
             toolLocation = await ToolsConfig.detect('oc');
@@ -51,17 +57,10 @@ export class Oc {
 
         if (message) {
             void window.showWarningMessage(message);
-        } else {
-            const project = await OpenShiftItem.getOpenShiftCmdData<OpenShiftProject>(undefined);
-            if (!project) return null;
-            const result = await CliChannel.getInstance().execute(
-                `${toolLocation} create -f ${document.fileName} --namespace ${project.getName()}`,
-            );
-            if (result.error) {
-                throw result.error;
-            } else {
-                return 'Resources were successfully created.';
-            }
+            return null;
         }
+
+        await Oc.odo.execute(Command.ocCreate(document.fileName, activeProject));
+        return 'Resources were successfully created.';
     }
 }

@@ -238,7 +238,7 @@ function selectTargetDecoratorFactory(decorator: (...args:any[]) => Promise<Open
             throw new Error('not supported');
         }
 
-       descriptor[fnKey] = async function (...args: any[]): Promise<any> {
+        descriptor[fnKey] = async function (...args: any[]): Promise<any> {
             args[0] = await decorator(args[0]);
             return fn.apply(this, args);
         };
@@ -265,8 +265,8 @@ export function clusterRequired() {
             throw new Error('not supported');
         }
 
-       descriptor[fnKey] = async function (...args: any[]): Promise<any> {
-            let clusters = await getInstance().getProjects();
+        descriptor[fnKey] = async function (...args: any[]): Promise<any> {
+            let clusters = await getInstance().getClusters();
             if (clusters.length === 0) {
                 const lOrC = await window.showInformationMessage('Login in to a Cluster to run this command.', 'Login', 'Cancel');
                 if(lOrC === 'Login') {
@@ -280,7 +280,6 @@ export function clusterRequired() {
             if (clusters.length) {
                 return fn.apply(this, args);
             }
-            return;
         };
     };
 }

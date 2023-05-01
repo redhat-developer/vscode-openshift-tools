@@ -326,6 +326,13 @@ export interface Odo {
     removeRegistry(name: string): Promise<void>;
     describeComponent(contextPath: string, experimental?: boolean): Promise<ComponentDescription | undefined>;
     analyze(contextPath: string): Promise<AnalyzeResponse[]>;
+
+    /**
+     * Returns the active project or null if no project is active
+     *
+     * @returns the active project or null if no project is active
+     */
+    getActiveProject(): Promise<string>;
 }
 
 class OdoModel {
@@ -469,13 +476,13 @@ export class OdoImpl implements Odo {
                 return new OpenShiftCluster(value.substr(value.indexOf(':')+1).trim());
             });
         if (clusters.length === 0) {
-          const projects = await this.execute(
-            Command.listProjects(), process.cwd(), false
-          );
-          if (!projects.error) {
-            clusters.push(new OpenShiftCluster(new KubeConfigUtils().getCurrentCluster().server));
-            void commands.executeCommand('setContext', 'isLoggedIn', true);
-          }
+            try {
+                await this._listProjects();
+                clusters.push(new OpenShiftCluster(new KubeConfigUtils().getCurrentCluster().server));
+                void commands.executeCommand('setContext', 'isLoggedIn', true);
+            } catch (e) {
+                // ignored
+            }
         }
         return clusters;
     }
@@ -490,12 +497,13 @@ export class OdoImpl implements Odo {
     }
 
     public async _getProjects(cluster: OpenShiftObject): Promise<OpenShiftObject[]> {
-        return this.execute(Command.listProjects()).then((result) => {
-            return this.loadItems<Project>(result).map((item) => new OpenShiftProject(cluster, item.metadata.name, item.status.active) );
-        }).catch((error) => {
+        try {
+            const projects = await this._listProjects();
+            return projects.map((project) => new OpenShiftProject(cluster, project.name, project.active));
+        } catch (error) {
             void window.showErrorMessage(`Cannot retrieve projects for current cluster. Error: ${error}`);
             return [];
-        });
+        }
     }
 
     async getApplications(project: OpenShiftObject): Promise<OpenShiftObject[]> {
@@ -756,7 +764,7 @@ export class OdoImpl implements Odo {
         const tempJsonFile = tempfile.fileSync({postfix: '.json'});
         fs.writeFileSync(tempJsonFile.name, jsonString);
         // call oc create -f path/to/file until odo does support creating services without component
-        await this.execute(Command.createServiceCommand(tempJsonFile.name));
+        await this.execute(Command.ocCreate(tempJsonFile.name));
         return this.insertAndReveal(new OpenShiftService(application, `${formData.kind}/${formData.metadata.name}`));
     }
 
@@ -831,6 +839,24 @@ export class OdoImpl implements Odo {
 
     public async removeRegistry(name: string): Promise<void> {
         await this.execute(Command.removeRegistry(name));
+    }
+
+    public async getActiveProject(): Promise<string> {
+        const projects = await this._listProjects();
+        if (!projects.length) {
+            return null;
+        }
+        const activeProject = projects.find(project => project.active);
+        return activeProject ? activeProject.name : null;
+    }
+
+    private async _listProjects(): Promise<Project[]> {
+        const response = await this.execute(Command.listProjects());
+        const responseObj = JSON.parse(response.stdout);
+        if (!responseObj?.namespaces) {
+            return [];
+        }
+        return responseObj.namespaces as Project[];
     }
 }
 
