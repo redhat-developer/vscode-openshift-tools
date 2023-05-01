@@ -259,7 +259,6 @@
 		"onCommand:openshift.component.log.palette",
 		"onCommand:openshift.component.followLog",
 		"onCommand:openshift.component.followLog.palette",
-		"onCommand:openshift.component.delete",
 		"onCommand:openshift.componentTypesView.registry.closeView",
 		"onCommand:openshift.component.debug",
 		"onCommand:openshift.component.debug.palette",
@@ -289,6 +288,8 @@
 		"onCommand:clusters.openshift.imagestream.openConsole",
 		"onCommand:openshift.componentTypesView.registry.openInView",
 		"onCommand:openshift.componentTypesView.registry.openHelmChartsInView",
+		"onCommand:openshift.component.deleteConfigurationFiles",
+		"onCommand:openshift.component.deleteSourceFolder",
 		"onWalkthrough:openshiftWalkthrough"
 	],
 	"contributes": {
@@ -457,11 +458,6 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.component.delete.palette",
-				"title": "Delete Component",
-				"category": "OpenShift"
-			},
-			{
 				"command": "openshift.component.dev",
 				"title": "Start Dev",
 				"category": "OpenShift"
@@ -534,11 +530,6 @@
 			{
 				"command": "openshift.open.developerConsole.palette",
 				"title": "Open Console Dashboard for Current Cluster",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.delete",
-				"title": "Delete",
 				"category": "OpenShift"
 			},
 			{
@@ -804,6 +795,16 @@
 				"command": "openshift.component.dev.onPodman",
 				"title": "Start Dev on Podman",
 				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.component.deleteConfigurationFiles",
+				"title": "Delete Component Configuration",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.component.deleteSourceFolder",
+				"title": "Delete Source Code Folder",
+				"category": "OpenShift"
 			}
 		],
 		"keybindings": [
@@ -933,10 +934,6 @@
 				},
 				{
 					"command": "openshift.component.debug",
-					"when": "view == openshiftProjectExplorer"
-				},
-				{
-					"command": "openshift.component.delete",
 					"when": "view == openshiftProjectExplorer"
 				},
 				{
@@ -1073,6 +1070,14 @@
 				},
 				{
 					"command": "openshift.component.importFromGit",
+					"when": "false"
+				},
+				{
+					"command": "openshift.component.deleteConfigurationFiles",
+					"when": "false"
+				},
+				{
+					"command": "openshift.component.deleteSourceFolder",
 					"when": "false"
 				}
 			],
@@ -1258,6 +1263,16 @@
 					"group": "c3@3"
 				},
 				{
+					"command": "openshift.component.deleteConfigurationFiles",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*/",
+					"group": "c3@4"
+				},
+				{
+					"command": "openshift.component.deleteSourceFolder",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*/",
+					"group": "c3@5"
+				},
+				{
 					"command": "openshift.component.debug",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.deb-nrn.*/ && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
 					"group": "c4@5"
@@ -1266,11 +1281,6 @@
 					"command": "openshift.component.revealContextInExplorer",
 					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift\\.component.*/ || viewItem == componentNotPushed",
 					"group": "c5@1"
-				},
-				{
-					"command": "openshift.component.delete",
-					"when": "view == openshiftProjectExplorer && viewItem == componentNoContext || viewItem == component || viewItem == componentNotPushed || viewItem == componentOther",
-					"group": "c6@1"
 				},
 				{
 					"command": "openshift.component.dev",

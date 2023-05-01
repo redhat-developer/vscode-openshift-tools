@@ -18,7 +18,6 @@ import { ProviderResult, QuickPickItem, Terminal, TreeItemCollapsibleState, Uri,
 import { CommandText } from './base/command';
 import * as cliInstance from './cli';
 import { CliExitData } from './cli';
-import { Command as DeploymentCommand } from './k8s/deployment';
 import { Application } from './odo/application';
 import { Command } from './odo/command';
 import { ComponentsJson, NotAvailable } from './odo/component';
@@ -315,7 +314,6 @@ export interface Odo {
     createProject(name: string): Promise<OpenShiftObject>;
     deleteProject(project: OpenShiftObject): Promise<OpenShiftObject>;
     createComponentFromFolder(type: string, registryName: string, name: string, path: Uri, starterName?: string, useExistingDevfile?: boolean, customDevfilePath?: string, notification?: boolean): Promise<OpenShiftObject>;
-    deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     createService(application: OpenShiftObject, formData: any): Promise<OpenShiftObject>;
     getOpenShiftObjectByContext(context: string): OpenShiftObject;
     getSettingsByContext(context: string): odo.Component;
@@ -333,6 +331,13 @@ export interface Odo {
      * @returns the active project or null if no project is active
      */
     getActiveProject(): Promise<string>;
+
+    /*
+     * Deletes all the odo configuration files associated with the component (`.odo`, `devfile.yaml`) located at the given path.
+     *
+     * @param componentPath the path to the component
+     */
+    deleteComponentConfiguration(componentPath: string): Promise<void>;
 }
 
 class OdoModel {
@@ -722,39 +727,6 @@ export class OdoImpl implements Odo {
         return null;
     }
 
-    public async deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject> {
-        const app = component.getParent();
-        if (component.contextValue === ContextType.COMPONENT_NO_CONTEXT) {
-            await this.execute(
-                Command.deleteComponentNoContext(
-                    app.getParent().getName(),
-                    app.getName(),
-                    component.getName()
-                ),
-                component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()
-            );
-        } else if (component.contextValue === ContextType.COMPONENT_OTHER) {
-            await this.execute(
-                DeploymentCommand.delete(
-                    component.getName(),
-                ),
-                component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()
-            );
-        } else {
-            await this.execute(
-                Command.deleteComponent(
-                    app.getParent().getName(),
-                    app.getName(),
-                    component.getName(),
-                    !!component.contextPath
-                ),
-                component.contextPath ? component.contextPath.fsPath : Platform.getUserHomePath()
-            );
-        }
-        await this.deleteAndRefresh(component);
-        return component;
-    }
-
     public async createService(application: OpenShiftObject, formData: any): Promise<OpenShiftObject> {
         formData.metadata.labels = {
             app: application.getName(),
@@ -857,6 +829,10 @@ export class OdoImpl implements Odo {
             return [];
         }
         return responseObj.namespaces as Project[];
+    }
+
+    public async deleteComponentConfiguration(componentPath: string): Promise<void> {
+        await this.execute(Command.deleteComponentConfiguration(), componentPath);
     }
 }
 

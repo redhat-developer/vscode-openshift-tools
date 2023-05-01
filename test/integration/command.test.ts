@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { CommandText } from '../../src/base/command';
-import { Command } from '../../src/odo/command';
-import { getInstance } from '../../src/odo';
 import { KubeConfig } from '@kubernetes/client-node';
 import * as tmp from 'tmp';
 import { extensions } from 'vscode';
+import { CommandText } from '../../src/base/command';
+import { getInstance } from '../../src/odo';
+import { Command } from '../../src/odo/command';
 import cp = require('child_process');
 
 const ODO = getInstance();
@@ -208,9 +208,6 @@ suite('odo commands integration', () => {
         });
         test('deleteComponentUrl', async () => {
             await ODO.execute(Command.deleteComponentUrl(newUrlName),componentLocation);
-        });
-        test('deleteComponent', async () => {
-            await ODO.execute(Command.deleteComponent(project, newAppName, newNodeJsComponent, true), componentLocation);
         });
     });
 });
