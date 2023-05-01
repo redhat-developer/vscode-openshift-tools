@@ -3,23 +3,23 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
-import * as vscode from 'vscode';
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
+import * as path from 'path';
 import * as sinon from 'sinon';
-import { TestItem } from './testOSItem';
-import { OdoImpl, ContextType } from '../../../src/odo';
+import * as sinonChai from 'sinon-chai';
+import * as vscode from 'vscode';
+import { ContextType, OdoImpl } from '../../../src/odo';
 import { Command } from '../../../src/odo/command';
-import { Progress } from '../../../src/util/progress';
-import * as Util from '../../../src/util/async';
-import OpenShiftItem from '../../../src/openshift/openshiftItem';
 import { ComponentTypeAdapter } from '../../../src/odo/componentType';
+import OpenShiftItem from '../../../src/openshift/openshiftItem';
+import * as Util from '../../../src/util/async';
+import { Platform } from '../../../src/util/platform';
+import { Progress } from '../../../src/util/progress';
 import { AddWorkspaceFolder } from '../../../src/util/workspace';
+import { TestItem } from './testOSItem';
 import pq = require('proxyquire');
 
 import fs = require('fs-extra');
-import { Platform } from '../../../src/util/platform';
 
 const { expect } = chai;
 chai.use(sinonChai);
@@ -37,7 +37,6 @@ suite('OpenShift/Component', () => {
     const projectItem = new TestItem(clusterItem, 'myproject', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'app1', ContextType.APPLICATION);
     const componentItem = new TestItem(appItem, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', 'nodejs');
-    const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
     const errorMessage = 'FATAL ERROR';
     let getApps: sinon.SinonStub;
     let Component: any;
@@ -49,14 +48,12 @@ suite('OpenShift/Component', () => {
         Component = pq('../../../src/openshift/component', {}).Component;
         termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
-        sandbox.stub(OdoImpl.prototype, 'getServices');
         sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([clusterItem]);
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
         sandbox.stub(OdoImpl.prototype, 'getApplications').resolves([]);
         sandbox.stub(Util, 'wait').resolves();
         getApps = sandbox.stub(OpenShiftItem, 'getApplicationNames').resolves([appItem]);
         sandbox.stub(OpenShiftItem, 'getComponentNames').resolves([componentItem]);
-        sandbox.stub(OpenShiftItem, 'getServiceNames').resolves([serviceItem]);
         commandStub = sandbox.stub(vscode.commands, 'executeCommand').resolves();
         sandbox.stub()
     });

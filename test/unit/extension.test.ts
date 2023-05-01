@@ -9,16 +9,16 @@
 //
 
 import * as assert from 'assert';
-import * as vscode from 'vscode';
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { OdoImpl, OpenShiftApplication, OpenShiftProject, OpenShiftCluster } from '../../src/odo';
+import * as sinonChai from 'sinon-chai';
+import * as vscode from 'vscode';
+import { CommandText } from '../../src/base/command';
+import { OdoImpl, OpenShiftApplication, OpenShiftCluster, OpenShiftProject } from '../../src/odo';
 import { Progress } from '../../src/util/progress';
 import path = require('path');
 
 import packagejson = require('../../package.json');
-import { CommandText } from '../../src/base/command';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -102,11 +102,10 @@ suite('openshift toolkit Extension', () => {
 		assert.ok(vscode.extensions.getExtension('redhat.vscode-openshift-connector'));
 	});
 
-    test('should register all extension commands declared commands in package descriptor', async () => {
-        return vscode.commands.getCommands(true).then((commands) => {
-            packagejson.contributes.commands.forEach((value)=> {
-                expect(commands.includes(value.command), `Command '${value.command}' handler is not registered during activation`).true;
-            });
+    test('should register all extension commands declared commands in package descriptor', async function() {
+        const commands = await vscode.commands.getCommands(true);
+        packagejson.contributes.commands.forEach((value)=> {
+            expect(commands.includes(value.command), `Command '${value.command}' handler is not registered during activation`).true;
         });
     });
 

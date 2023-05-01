@@ -3,18 +3,18 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as sinon from 'sinon';
 import * as chai from 'chai';
+import * as path from 'path';
+import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as tmp from 'tmp';
-import * as path from 'path';
-import { Uri, window, commands, extensions } from 'vscode';
-import * as odo from '../../src/odo';
-import { Cluster } from '../../src/openshift/cluster';
+import { Uri, commands, extensions, window } from 'vscode';
 import { CommandText } from '../../src/base/command';
+import * as odo from '../../src/odo';
 import { Command } from '../../src/odo/command';
-import { AddWorkspaceFolder } from '../../src/util/workspace';
 import { ComponentTypeAdapter } from '../../src/odo/componentType';
+import { Cluster } from '../../src/openshift/cluster';
+import { AddWorkspaceFolder } from '../../src/util/workspace';
 import cp = require('child_process');
 
 import fs = require('fs-extra');
@@ -153,22 +153,6 @@ suite('odo integration', () => {
         return components.find((item) => item.getName() === componentNameParam);
     }
 
-    async function createService(
-        appParam: odo.OpenShiftObject,
-        name: string,
-        template: string,
-    ): Promise<odo.OpenShiftObject> {
-        sb.stub<any, any>(window, 'showQuickPick')
-            .onFirstCall()
-            .resolves(template)
-            .onSecondCall()
-            .resolves('default');
-        sb.stub(window, 'showInputBox').resolves(name);
-        await commands.executeCommand('openshift.service.create', appParam);
-        const services = await oi.getServices(appParam);
-        return services.find((item) => item.getName() === name);
-    }
-
     setup(async () => {
         if (!project) {
             await oi.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
@@ -228,26 +212,8 @@ suite('odo integration', () => {
             expect(componentFromBinary).not.undefined;
         });
 
-        test('create service', async function() {
-            if (openshiftVersion >= '4.5.0') this.skip();
-            const errMessStub = sb.stub(window, 'showErrorMessage');
-            service = await createService(
-                existingApp,
-                'mongodb-persistent-instance',
-                'mongodb-persistent',
-            );
-            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
-            expect(service).is.not.undefined;
-        });
-
         test('describe component', async () => {
             await oi.execute(Command.describeComponent(), component.contextPath.fsPath);
-        });
-
-        test('describe service', async function() {
-            if (openshiftVersion >= '4.5.0') this.skip();
-            await commands.executeCommand('openshift.service.describe', service);
-            await oi.execute(Command.describeService('mongodb-persistent'));
         });
 
         test('start/stop debugger', async () => {
@@ -286,13 +252,6 @@ suite('odo integration', () => {
             expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
         });
 
-        test('delete service', async function() {
-            if (openshiftVersion >= '4.5.0') this.skip();
-            sb.stub<any, any>(window, 'showWarningMessage').resolves('Yes');
-            const errMessStub = sb.stub(window, 'showErrorMessage');
-            await commands.executeCommand('openshift.service.delete', service);
-            expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
-        });
     });
 
     suite('linking components', () => {
@@ -312,11 +271,6 @@ suite('odo integration', () => {
                 `${componentName}2`,
                 nodeJsExGitUrl,
             );
-        });
-
-        test('create service1 from mongodb-persistent', async function() {
-            if (openshiftVersion >= '4.5.0') this.skip();
-            service = await createService(existingApp, 'service1', 'mongodb-persistent');
         });
 
         test('link components comp1 and comp2', async () => {

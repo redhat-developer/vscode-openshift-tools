@@ -4,10 +4,10 @@
  *-----------------------------------------------------------------------------------------------*/
 /* eslint-disable @typescript-eslint/ban-types */
 
-import { window, QuickPickItem, commands, workspace } from 'vscode';
 import validator from 'validator';
-import { Odo, getInstance, OpenShiftObject, ContextType, OpenShiftApplication, OpenShiftProject } from '../odo';
+import { QuickPickItem, commands, window, workspace } from 'vscode';
 import { OpenShiftExplorer } from '../explorer';
+import { ContextType, Odo, OpenShiftApplication, OpenShiftObject, OpenShiftProject, getInstance } from '../odo';
 import { VsCommandError } from '../vscommand';
 
 const errorMessage = {
@@ -157,14 +157,6 @@ export default class OpenShiftItem {
             throw new VsCommandError(errorMessage.Component);
         }
         return applicationList;
-    }
-
-    static async getServiceNames(application: OpenShiftObject): Promise<OpenShiftObject[]> {
-        const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(application);
-        if (serviceList.length === 0) {
-            throw new VsCommandError(errorMessage.Service);
-        }
-        return serviceList;
     }
 
     static async getOpenShiftCmdData<T extends OpenShiftObject>(treeItem: T, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean,

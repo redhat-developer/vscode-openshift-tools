@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { fail } from 'assert';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
-import { fail } from 'assert';
+import { ContextType, OdoImpl } from '../../../src/odo';
 import OpenShiftItem from '../../../src/openshift/openshiftItem';
-import { OdoImpl, ContextType } from '../../../src/odo';
 import { wait } from '../../../src/util/async';
 import { TestItem } from './testOSItem';
 import sinon = require('sinon');
@@ -22,7 +22,6 @@ suite('OpenShiftItem', () => {
     const projectItem = new TestItem(clusterItem, 'project', ContextType.PROJECT);
     const appItem = new TestItem(projectItem, 'application', ContextType.APPLICATION);
     const componentItem = new TestItem(appItem, 'component', ContextType.COMPONENT);
-    const serviceItem = new TestItem(appItem, 'service', ContextType.SERVICE);
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -102,24 +101,4 @@ suite('OpenShiftItem', () => {
         });
     });
 
-    suite('getServiceNames', ()=> {
-
-        test('returns an array of service names for the application if there is at least one component', async ()=> {
-            sandbox.stub(OdoImpl.prototype, 'getServices').resolves([serviceItem]);
-            const serviceNames = await OpenShiftItem.getServiceNames(appItem);
-            expect(serviceNames[0].getName()).equals('service');
-
-        });
-
-        test('throws error if there are no components available', async ()=> {
-            sandbox.stub(OdoImpl.prototype, 'getServices').resolves([]);
-            try {
-                await OpenShiftItem.getServiceNames(appItem);
-            } catch (err) {
-                expect(err.message).equals('You need at least one Service available. Please create new OpenShift Service and try again.');
-                return;
-            }
-            fail('should throw error in case components array is empty');
-        });
-    });
 });

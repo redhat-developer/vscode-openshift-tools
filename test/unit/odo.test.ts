@@ -3,21 +3,20 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as sinon from 'sinon';
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
-import { window, workspace } from 'vscode';
 import { ExecException } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import { TestItem } from './openshift/testOSItem';
-import { WindowUtil } from '../../src/util/windowUtils';
-import { ToolsConfig } from '../../src/tools';
-import { CliExitData, CliChannel } from '../../src/cli';
-import * as odo from '../../src/odo';
-import * as verbose from '../../src/odo/command';
-import jsYaml = require('js-yaml');
+import * as sinon from 'sinon';
+import * as sinonChai from 'sinon-chai';
+import { window, workspace } from 'vscode';
 import { CommandText } from '../../src/base/command';
+import { CliChannel, CliExitData } from '../../src/cli';
+import * as odo from '../../src/odo';
+import { ToolsConfig } from '../../src/tools';
+import { WindowUtil } from '../../src/util/windowUtils';
+import { TestItem } from './openshift/testOSItem';
+import jsYaml = require('js-yaml');
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -260,88 +259,6 @@ suite('odo', () => {
 
             expect(result).length(1);
             expect(result[0].getName()).equals('component1');
-        });
-
-        test('getServices returns services for an application', async () => {
-            const services = ['service1', 'service2', 'service3'];
-            // eslint-disable-next-line @typescript-eslint/require-await
-            execStub.callsFake(async (cmd: string, cwd: string)=> {
-                if (`${cmd}`.includes('odo service list')) {
-                    return {
-                        error: null,
-                        stderr: '',
-                        stdout: JSON.stringify({
-                            kind: 'ServiceList',
-                            items: [{
-                                metadata: {
-                                    name: 'service1'
-                                }, spec: {
-                                }
-                            }, {
-                                metadata: {
-                                    name: 'service2'
-                                }, spec: {
-                                }
-                            }, {
-                                metadata: {
-                                    name: 'service3'
-                                }, spec: {
-                                }
-                            }]
-                        }),
-                        cwd
-                    };
-                }
-
-                if(`${cmd}`.includes('odo list')) {
-                    return {
-                        error: undefined,
-                        stdout: `
-                            {
-                                "kind": "List",
-                                "apiVersion": "odo.openshift.io/v1alpha1",
-                                "metadata": {},
-                                "otherComponents": [],
-                                "devfileComponents": []
-                            }`,
-                        stderr: '',
-                        cwd};
-                }
-
-                if (`${cmd}`.includes('list --app')) {
-                    return { error: undefined, stdout: `
-                    {
-                        "kind": "List",
-                        "apiVersion": "odo.openshift.io/v1alpha1",
-                        "metadata": {},
-                        "otherComponents": [],
-                        "devfileComponents": []
-                      }`, stderr: '', cwd}
-                }
-                return { error: undefined, stdout: '', stderr: ''};
-            });
-            const result = await odoCli.getServices(app);
-
-            expect(execStub).calledWith(verbose.Command.listServiceInstances(project.getName(), app.getName()));
-            expect(result.length).equals(3);
-            for (let i = 0; i < result.length; i+=1) {
-                expect(result[i].getName()).equals(services[i]);
-            }
-        });
-
-        test('getServices returns an empty list if an error occurs', async () => {
-            execStub.onFirstCall().resolves({error: undefined, stdout: `
-              {
-                "kind": "List",
-                "apiVersion": "odo.openshift.io/v1alpha1",
-                "metadata": {},
-                "otherComponents": [],
-                "devfileComponents": []
-              }`, stderr: ''});
-            execStub.onSecondCall().rejects(errorMessage);
-            const result = await odoCli.getServices(app);
-
-            expect(result).empty;
         });
 
         test('getApplicationChildren returns both components and services for an application', async () => {
