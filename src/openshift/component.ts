@@ -5,26 +5,26 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { window, commands, Uri, workspace, debug, DebugConfiguration, extensions, ProgressLocation, DebugSession, Disposable, EventEmitter, Terminal } from 'vscode';
 import { ChildProcess, SpawnOptions } from 'child_process';
-import * as YAML from 'yaml'
-import OpenShiftItem, { clusterRequired, selectTargetComponent } from './openshiftItem';
+import * as fs from 'fs/promises';
+import { DebugConfiguration, DebugSession, Disposable, EventEmitter, ProgressLocation, Terminal, Uri, commands, debug, extensions, window, workspace } from 'vscode';
+import * as YAML from 'yaml';
 import { OpenShiftComponent } from '../odo';
 import { Command } from '../odo/command';
+import { ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, ascDevfileFirst, isDevfileComponent } from '../odo/componentType';
+import { StarterProject, isStarterProject } from '../odo/componentTypeDescription';
+import { NewComponentCommandProps } from '../telemetry';
 import { Progress } from '../util/progress';
 import { selectWorkspaceFolder } from '../util/workspace';
-import { vsCommand, VsCommandError } from '../vscommand';
-import { ascDevfileFirst, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, isDevfileComponent } from '../odo/componentType';
-import { isStarterProject, StarterProject } from '../odo/componentTypeDescription';
+import { VsCommandError, vsCommand } from '../vscommand';
+import OpenShiftItem from './openshiftItem';
 import path = require('path');
 import globby = require('globby');
-import fs = require('fs-extra');
-import { NewComponentCommandProps } from '../telemetry';
 
-import { ComponentWorkspaceFolder } from '../odo/workspace';
-import LogViewLoader from '../webview/log/LogViewLoader';
-import GitImportLoader from '../webview/git-import/gitImportLoader';
 import { CliChannel } from '../cli';
+import { ComponentWorkspaceFolder } from '../odo/workspace';
+import GitImportLoader from '../webview/git-import/gitImportLoader';
+import LogViewLoader from '../webview/log/LogViewLoader';
 
 function createCancelledResult(stepName: string): any {
     const cancelledResult: any = new String('');
@@ -338,39 +338,6 @@ export class Component extends OpenShiftItem {
         return 'No forwarded ports available for component yet. Pleas wait and try again.';
     }
 
-    static async delete(component: OpenShiftComponent) {
-        await Component.odo.deleteComponent(component);
-        commands.executeCommand('openshift.componentsView.refresh');
-    }
-
-    static async deleteOther(component: OpenShiftComponent) {
-        await Component.odo.deleteComponent(component);
-    }
-
-    @vsCommand('openshift.component.delete', true)
-    @clusterRequired()
-    @selectTargetComponent(
-        'From which Application you want to delete Component',
-        'Select Component to delete'
-    )
-    static async del(component: OpenShiftComponent): Promise<string> {
-        if (!component) return null;
-        const name: string = component.getName();
-        const value = await window.showWarningMessage(`Do you want to delete Component '${name}'?`, 'Yes', 'Cancel');
-
-        if (value === 'Yes') {
-            return Progress.execFunctionWithProgress(`Deleting the Component '${component.getName()} '`, async () => {
-                if (component.isOdoManaged()) {
-                    await Component.delete(component);
-                } else {
-                    await Component.deleteOther(component);
-                }
-            })
-                .then(() => `Component '${name}' successfully deleted`)
-                .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Component with error '${err}'`, 'Failed to delete Component with error')));
-        }
-    }
-
     static isUsingWebviewEditor(): boolean {
         return workspace
             .getConfiguration('openshiftToolkit')
@@ -475,11 +442,16 @@ export class Component extends OpenShiftItem {
     }, isGitImportCall = false, notification = true): Promise<string | null> {
         let useExistingDevfile = false;
         const devFileLocation = path.join(folder.fsPath, 'devfile.yaml');
-        useExistingDevfile = fs.existsSync(devFileLocation);
+        try {
+            await fs.access(devFileLocation);
+            useExistingDevfile = true;
+        } catch (_e) {
+            // do not use existing devfile
+        }
 
         let initialNameValue: string;
         if (useExistingDevfile) {
-            const file = fs.readFileSync(devFileLocation, 'utf8');
+            const file = await fs.readFile(devFileLocation, 'utf8');
             const devfileYaml = YAML.parse(file.toString());
             if (devfileYaml && devfileYaml.metadata && devfileYaml.metadata.name) {
                 initialNameValue = devfileYaml.metadata.name;
@@ -780,5 +752,36 @@ export class Component extends OpenShiftItem {
             Command.undeploy(context.component.devfileData.devfile.metadata.name),
             context.contextPath,
             `OpenShift: Undeploying '${context.component.devfileData.devfile.metadata.name}' Component`);
+    }
+
+    @vsCommand('openshift.component.deleteConfigurationFiles')
+    public static async deleteConfigurationFiles(context: ComponentWorkspaceFolder): Promise<void> {
+        const DELETE_CONFIGURATION = 'Delete Configuration';
+        const CANCEL = 'Cancel';
+        const response = await window.showWarningMessage(`Are you sure you want to delete the configuration for the component ${context.contextPath}?\nOpenShift Toolkit will no longer recognize the project as a component.`, DELETE_CONFIGURATION, CANCEL);
+        if (response === DELETE_CONFIGURATION) {
+            await Component.odo.deleteComponentConfiguration(context.contextPath);
+            void commands.executeCommand('openshift.componentsView.refresh');
+        }
+    }
+
+    @vsCommand('openshift.component.deleteSourceFolder')
+    public static async deleteSourceFolder(context: ComponentWorkspaceFolder): Promise<void> {
+        const DELETE_SOURCE_FOLDER = 'Delete Source Folder';
+        const CANCEL = 'Cancel';
+        const response = await window.showWarningMessage(`Are you sure you want to delete the folder containing the source code for ${context.contextPath}?`, DELETE_SOURCE_FOLDER, CANCEL);
+        if (response === DELETE_SOURCE_FOLDER) {
+            await fs.rm(context.contextPath, { force: true, recursive: true });
+            let workspaceFolderToRmIndex = -1;
+            for (let i = 0; i < workspace.workspaceFolders.length; i++) {
+                if (workspace.workspaceFolders[i].uri.fsPath === context.contextPath) {
+                    workspaceFolderToRmIndex = i;
+                    break;
+                }
+            }
+            if (workspaceFolderToRmIndex !== -1) {
+                workspace.updateWorkspaceFolders(workspaceFolderToRmIndex, 1);
+            }
+        }
     }
 }

@@ -251,7 +251,6 @@ suite('odo integration', () => {
             }
             expect(errMessStub, errMessStub.args[0]?.toString()).has.not.been.called;
         });
-
     });
 
     suite('linking components', () => {

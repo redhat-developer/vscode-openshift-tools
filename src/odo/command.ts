@@ -227,31 +227,6 @@ export class Command {
         );
     }
 
-    static deleteComponent(project: string, app: string, component: string, context: boolean): CommandText {
-        const ct = new CommandText('odo delete',
-            context ? undefined : component, [ // if there is not context name is required
-            new CommandOption('-f'),
-        ]
-        );
-        if (!context) { // if there is no context state app and project name
-            ct.addOption(new CommandOption('--app', app))
-                .addOption(new CommandOption('--project', project))
-        } else {
-            ct.addOption(new CommandOption('--all'));
-        }
-        return ct;
-    }
-
-    static deleteComponentNoContext(project: string, app: string, component: string): CommandText {
-        return new CommandText('oc delete',
-            'deployment', [
-            new CommandOption('-n', project),
-            new CommandOption('-l', `component=${component},app=${app}`),
-            new CommandOption('--wait=true'),
-        ]
-        );
-    }
-
     static deleteDeploymentByName(project: string, name: string): CommandText {
         return new CommandText('oc delete deployment',
             name, [
@@ -465,5 +440,12 @@ export class Command {
 
     static setNamespace(namespace: string) {
         return new CommandText('odo set namespace', namespace);
+    }
+
+    static deleteComponentConfiguration(): CommandText {
+        return new CommandText('odo delete component', undefined, [
+            new CommandOption('--files'),
+            new CommandOption('-f'),
+        ]);
     }
 }
