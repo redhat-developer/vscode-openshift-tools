@@ -9,32 +9,31 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
 
-import { ProviderResult, TreeItemCollapsibleState, window, Terminal, Uri, commands, QuickPickItem, workspace, WorkspaceFolder, Command as VSCommand } from 'vscode';
+import { KubeConfig } from '@kubernetes/client-node';
+import * as fs from 'fs';
+import { pathExistsSync } from 'fs-extra';
 import * as path from 'path';
 import { Subject } from 'rxjs';
-import * as cliInstance from './cli';
-import { WindowUtil } from './util/windowUtils';
-import { ToolsConfig } from './tools';
-import { Platform } from './util/platform';
-import * as odo from './odo/config';
-import { GlyphChars } from './util/constants';
-import { Application } from './odo/application';
-import { ComponentType, ComponentTypeAdapter, Registry, DevfileComponentType, AnalyzeResponse } from './odo/componentType';
-import { Project } from './odo/project';
-import { ComponentsJson, NotAvailable } from './odo/component';
-import { Service, ServiceOperatorShortInfo } from './odo/service';
+import { ProviderResult, QuickPickItem, Terminal, TreeItemCollapsibleState, Uri, Command as VSCommand, WorkspaceFolder, commands, window, workspace } from 'vscode';
 import { CommandText } from './base/command';
+import * as cliInstance from './cli';
+import { CliExitData } from './cli';
+import { Command as DeploymentCommand } from './k8s/deployment';
+import { Application } from './odo/application';
 import { Command } from './odo/command';
+import { ComponentsJson, NotAvailable } from './odo/component';
+import { AnalyzeResponse, ComponentType, ComponentTypeAdapter, DevfileComponentType, Registry } from './odo/componentType';
+import { ComponentDescription } from './odo/componentTypeDescription';
+import * as odo from './odo/config';
+import { Project } from './odo/project';
+import { Service } from './odo/service';
+import { ToolsConfig } from './tools';
+import { GlyphChars } from './util/constants';
+import { KubeConfigUtils } from './util/kubeUtils';
+import { Platform } from './util/platform';
+import { WindowUtil } from './util/windowUtils';
 import { VsCommandError } from './vscommand';
 import bs = require('binary-search');
-import { CliExitData } from './cli';
-import { KubeConfigUtils } from './util/kubeUtils';
-import { KubeConfig } from '@kubernetes/client-node';
-import { pathExistsSync } from 'fs-extra';
-import * as fs from 'fs';
-import { ClusterServiceVersionKind } from './k8s/olm/types';
-import { Command as DeploymentCommand } from './k8s/deployment';
-import { ComponentDescription } from './odo/componentTypeDescription';
 
 const tempfile = require('tmp');
 const {Collapsed} = TreeItemCollapsibleState;
@@ -309,9 +308,6 @@ export interface Odo {
     getComponents(application: OpenShiftObject, condition?: (value: OpenShiftObject) => boolean): Promise<OpenShiftObject[]>;
     getCompTypesJson():Promise<DevfileComponentType[]>;
     getComponentTypes(): Promise<ComponentTypeAdapter[]>;
-    getServiceOperators(): Promise<ServiceOperatorShortInfo[]>;
-    getClusterServiceVersion(svc: string): Promise<ClusterServiceVersionKind>;
-    getServices(application: OpenShiftObject): Promise<OpenShiftObject[]>;
     execute(command: CommandText, cwd?: string, fail?: boolean, addEnv?: any): Promise<cliInstance.CliExitData>;
     executeInTerminal(command: CommandText, cwd?: string, name?: string, addEnv?: any): Promise<void>;
     requireLogin(): Promise<boolean>;
@@ -321,7 +317,6 @@ export interface Odo {
     createComponentFromFolder(type: string, registryName: string, name: string, path: Uri, starterName?: string, useExistingDevfile?: boolean, customDevfilePath?: string, notification?: boolean): Promise<OpenShiftObject>;
     deleteComponent(component: OpenShiftObject): Promise<OpenShiftObject>;
     createService(application: OpenShiftObject, formData: any): Promise<OpenShiftObject>;
-    deleteService(service: OpenShiftObject): Promise<OpenShiftObject>;
     getOpenShiftObjectByContext(context: string): OpenShiftObject;
     getSettingsByContext(context: string): odo.Component;
     loadItems<I>(result: cliInstance.CliExitData, fetch: (data) => I[]): I[];
@@ -614,40 +609,6 @@ export class OdoImpl implements Odo {
         return devfileItems;
     }
 
-    public async getServiceOperators(): Promise<ServiceOperatorShortInfo[]> {
-        // TODO: error reporting does not look right
-        let items: ServiceOperatorShortInfo[];
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogOperatorBackedServices(), Platform.getUserHomePath(), false);
-        try {
-            const sbos = result.stdout ? result.stdout.split('\n') : [];
-            items = sbos.map((sbo) => {
-                const props = sbo.split('\t');
-                return {
-                    name: props[0],
-                    displayName: props[2],
-                    version: props[1],
-                    description: props[3],
-                    ownsCrds: !!props[4]
-                };
-            }).filter((csv)=>csv.ownsCrds);
-        } catch (err) {
-            throw new VsCommandError(JSON.parse(result.stderr).message, 'Error when parsing command\'s stdout output');
-        }
-        if (items.length === 0) {
-            throw new VsCommandError('No deployable services found.');
-        }
-        return items;
-    }
-
-    public async getClusterServiceVersion(operatorName: string): Promise<ClusterServiceVersionKind> {
-        const result: cliInstance.CliExitData = await this.execute(Command.getClusterServiceVersionJson(operatorName), Platform.getUserHomePath());
-        return JSON.parse(result.stdout)
-    }
-
-    async getServices(application: OpenShiftObject): Promise<OpenShiftObject[]> {
-        return (await this.getApplicationChildren(application)).filter((value) => value.contextValue === ContextType.SERVICE);
-    }
-
     public async _getServices(application: OpenShiftObject): Promise<OpenShiftObject[]> {
         const appName: string = application.getName();
         const projName: string = application.getParent().getName();
@@ -797,12 +758,6 @@ export class OdoImpl implements Odo {
         // call oc create -f path/to/file until odo does support creating services without component
         await this.execute(Command.createServiceCommand(tempJsonFile.name));
         return this.insertAndReveal(new OpenShiftService(application, `${formData.kind}/${formData.metadata.name}`));
-    }
-
-    public async deleteService(service: OpenShiftObject): Promise<OpenShiftObject> {
-        await this.execute(Command.deleteService(service.getName()), Platform.getUserHomePath());
-        await this.deleteAndRefresh(service);
-        return service;
     }
 
     clearCache(): void {

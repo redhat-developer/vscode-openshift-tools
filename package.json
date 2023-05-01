@@ -265,8 +265,6 @@
 		"onCommand:openshift.component.debug.palette",
 		"onCommand:openshift.resource.load",
 		"onCommand:openshift.resource.unInstall",
-		"onCommand:openshift.service.create",
-		"onCommand:openshift.service.delete",
 		"onCommand:openshift.component.folder.create",
 		"onCommand:openshift.explorer.reportIssue",
 		"onCommand:openshift.explorer.switchContext",
@@ -551,21 +549,6 @@
 			{
 				"command": "openshift.component.debug.palette",
 				"title": "Debug Component",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.service.create",
-				"title": "New Service",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.service.delete",
-				"title": "Delete",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.service.delete.palette",
-				"title": "Delete Service",
 				"category": "OpenShift"
 			},
 			{
@@ -957,10 +940,6 @@
 					"when": "view == openshiftProjectExplorer"
 				},
 				{
-					"command": "openshift.service.delete",
-					"when": "view == openshiftProjectExplorer"
-				},
-				{
 					"command": "clusters.openshift.deploy.dc.showLog",
 					"when": "view == openshiftProjectExplorer"
 				},
@@ -1332,11 +1311,6 @@
 					"command": "openshift.component.openInBrowser",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
 					"group": "c3@4"
-				},
-				{
-					"command": "openshift.service.delete",
-					"when": "view == openshiftProjectExplorer && viewItem == service",
-					"group": "s2"
 				},
 				{
 					"command": "clusters.openshift.useProject",
