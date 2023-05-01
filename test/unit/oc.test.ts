@@ -3,28 +3,27 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window } from 'vscode';
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
+import * as sinonChai from 'sinon-chai';
+import { window } from 'vscode';
+import { CliChannel } from '../../src/cli';
 import { Oc } from '../../src/oc';
-import { ContextType, OdoImpl } from '../../src/odo';
+import { ContextType, getInstance } from '../../src/odo';
 import { ToolsConfig } from '../../src/tools';
 import { TestItem } from './openshift/testOSItem';
-import { CliChannel } from '../../src/cli';
-import OpenShiftItem from '../../src/openshift/openshiftItem';
 
 const {expect} = chai;
 chai.use(sinonChai);
 
-suite('Oc', () => {
+suite('Oc', function() {
     let sandbox: sinon.SinonSandbox;
     let detectOrDownloadStub: sinon.SinonStub<[string], Promise<string>>;
     let warnStub: sinon.SinonStub<[string, import('vscode').MessageOptions, ...import('vscode').MessageItem[]], Thenable<import('vscode').MessageItem>>;
     let execStub: sinon.SinonStub;
-    let quickPickStub: sinon.SinonStub;
+    let getActiveProjectStub: sinon.SinonStub;
     const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
-    const projectItem = new TestItem(clusterItem, 'myproject', ContextType.PROJECT);
+    const projectItem = new TestItem(clusterItem, 'my-project', ContextType.PROJECT);
 
     const sampleYaml = `
         # manifests.yaml
@@ -42,26 +41,26 @@ suite('Oc', () => {
         },
     };
 
-    setup(()=> {
+    setup(function() {
         sandbox = sinon.createSandbox();
         warnStub = sandbox.stub(window, 'showWarningMessage');
         execStub = sandbox.stub(CliChannel.prototype, 'execute');
-        quickPickStub = sandbox.stub(window, 'showQuickPick');
+        getActiveProjectStub = sandbox.stub(getInstance(), 'getActiveProject').resolves('my-project');
         detectOrDownloadStub = sandbox.stub(ToolsConfig, 'detect').resolves('path');
-        sandbox.stub(OdoImpl.prototype, 'getClusters').resolves([clusterItem]);
-        sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
+        sandbox.stub(getInstance(), 'getClusters').resolves([clusterItem]);
+        sandbox.stub(getInstance(), 'getProjects').resolves([projectItem]);
     });
 
-    teardown(() => {
+    teardown(function() {
         sandbox.restore();
     });
 
-    test('show warning message if file is not json or yaml', async () => {
+    test('show warning message if file is not json or yaml', async function() {
         await Oc.create();
         expect(warnStub).is.calledOnce;
     });
 
-    test('show warning message if file is untitled', async () => {
+    test('show warning message if file is untitled', async function() {
         sandbox.stub(window, 'activeTextEditor').value({
             document: {
                 fileName: 'manifests.yaml',
@@ -73,7 +72,7 @@ suite('Oc', () => {
         expect(warnStub).is.calledOnce;
     });
 
-    test('show warning message if oc command not found', async () => {
+    test('show warning message if oc command not found', async function() {
         sandbox.stub(window, 'activeTextEditor').value({
             document: {
                 fileName: 'manifests.yaml',
@@ -84,14 +83,13 @@ suite('Oc', () => {
         expect(warnStub).is.calledOnce;
     });
 
-    test('Save the file if user click on Save button', async () => {
+    test('Save the file if user click on Save button', async function() {
         execStub.resolves({
             error: undefined,
             stderr: '',
             stdout: 'imagestream.image.openshift.io/spring-petclinic created\ndeploymentconfig.apps.openshift.io/spring-petclinic created'
         });
         sandbox.stub<any, any>(window, 'showInformationMessage').resolves('Save');
-        quickPickStub.onFirstCall().resolves(projectItem);
         sandbox.stub(window, 'activeTextEditor').value({
             document: {
                 fileName: 'manifests.yaml',
@@ -103,7 +101,7 @@ suite('Oc', () => {
         expect(result).equals('Resources were successfully created.');
     });
 
-    test('show warning message if file content is changed', async () => {
+    test('show warning message if file content is changed', async function() {
         const infoMsg = sandbox.stub(window, 'showInformationMessage').resolves(undefined);
         sandbox.stub(window, 'activeTextEditor').value({
             document: {
@@ -116,39 +114,33 @@ suite('Oc', () => {
         expect(infoMsg).is.calledOnce;
     });
 
-    test('Creates an OpenShift resource using `.json` or `.yaml` file location from an active editor', async () => {
+    test('Creates an OpenShift resource using `.json` or `.yaml` file location from an active editor', async function() {
         execStub.resolves({
             error: undefined,
             stderr: '',
             stdout: 'imagestream.image.openshift.io/spring-petclinic created\ndeploymentconfig.apps.openshift.io/spring-petclinic created'
         });
         sandbox.stub(window, 'activeTextEditor').value(TextEditorMock);
-        quickPickStub.onFirstCall().resolves(projectItem);
         const result = await Oc.create();
         expect(result).equals('Resources were successfully created.');
     });
 
-    test('errors when fail to create resource', async () => {
+    test('errors when fail to create resource', async function() {
         let savedErr: any;
-        execStub.resolves({
-            error: 'error',
-            stderr: '',
-            stdout: ''
-        });
+        execStub.rejects('error');
         sandbox.stub(window, 'activeTextEditor').value(TextEditorMock);
-        quickPickStub.onFirstCall().resolves(projectItem);
         try {
             await Oc.create();
         } catch (err) {
             savedErr = err;
         }
-        expect(savedErr).equals('error');
+        expect(savedErr === 'error');
     });
 
-    test('errors when there is no active project', async () => {
-        sandbox.stub(OpenShiftItem, 'getOpenShiftCmdData').resolves(null);
+    test('errors when there is no active project', async function() {
+        getActiveProjectStub.resetBehavior();
+        getActiveProjectStub.resolves(undefined);
         sandbox.stub(window, 'activeTextEditor').value(TextEditorMock);
-        quickPickStub.onFirstCall().resolves(projectItem);
         expect(await Oc.create()).null;
     });
 

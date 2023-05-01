@@ -44,13 +44,16 @@ export class Command {
         return command;
     }
 
-    static createServiceCommand(fileName: string): CommandText {
-        return new CommandText(
+    static ocCreate(fileName: string, namespace?: string): CommandText {
+        const cmd =  new CommandText(
             'oc create',
-            undefined, [
-            new CommandOption('-f', fileName)
-        ]
+            undefined,
+            [ new CommandOption('-f', fileName), ]
         );
+        if (namespace) {
+            cmd.addOption(new CommandOption('--namespace', namespace));
+        }
+        return cmd;
     }
 
     static printCatalogComponentImageStreamRefJson(name: string, namespace: string): CommandText {
@@ -64,11 +67,9 @@ export class Command {
     }
 
     static listProjects(): CommandText {
-        return new CommandText('oc',
-            'get project', [
+        return new CommandText('odo', 'list project', [
             new CommandOption('-o', 'json', false)
-        ]
-        );
+        ]);
     }
 
     @verbose
