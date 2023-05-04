@@ -6,6 +6,7 @@
 import * as esbuild from 'esbuild';
 import { sassPlugin } from 'esbuild-sass-plugin';
 import * as fs from 'fs/promises';
+import svgr from 'esbuild-plugin-svgr';
 
 const webviews = [
     'cluster',
@@ -18,6 +19,7 @@ const webviews = [
     'welcome',
     'feedback',
     'add-service-binding',
+    'openshift-terminal',
 ];
 
 function kebabToCamel(text) {
@@ -37,10 +39,12 @@ await Promise.all([
             sourcemap: true,
             loader: {
                 '.png': 'file',
-                '.svg': 'file',
             },
             plugins: [
                 sassPlugin(),
+                svgr({
+                    plugins: ['@svgr/plugin-jsx']
+                }),
             ]
         })
     ),

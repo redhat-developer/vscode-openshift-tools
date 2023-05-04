@@ -88,8 +88,9 @@
                 "-o",
                 "${workspaceFolder}/test/ui/settings.json",
                 "-m",
-                "--mocha_config",
                 "${workspaceFolder}/test/ui/.mocharc.js",
+                "-c",
+                "max",
                 "-e",
                 "./test-resources/extensions",
                 "-i"

@@ -7,7 +7,7 @@ import { ActivityBar, By, CustomTreeSection, SideBarView, ViewSection, WelcomeCo
 import { BUTTONS, VIEWS } from '../common/constants';
 
 export function checkOpenshiftView() {
-    describe('OpenShift View', () => {
+    describe('OpenShift View', function() {
         let view: SideBarView;
 
         before(async function context() {
@@ -37,11 +37,11 @@ export function checkOpenshiftView() {
             }
         });
 
-        describe('Application Explorer', () => {
+        describe('Application Explorer', function () {
             let explorer: ViewSection;
             let welcome: WelcomeContentSection;
 
-            before(async () => {
+            before(async function() {
                 explorer = await view.getContent().getSection(VIEWS.appExplorer);
                 await explorer.expand();
                 welcome = await explorer.findWelcomeContent();
@@ -51,14 +51,15 @@ export function checkOpenshiftView() {
                 }
             });
 
-            it('shows welcome content when not logged in', async () => {
+            it('shows welcome content when not logged in', async function() {
                 expect(welcome).not.undefined;
                 const description = (await welcome.getTextSections()).join('');
                 expect(description).not.empty;
             });
 
-            it('shows buttons for basic actions when logged out', async () => {
+            it('shows buttons for basic actions when logged out', async function() {
                 const btns = await welcome.getButtons();
+                await Promise.all(btns.map(async btn => btn.wait(5_000)));
                 const titles = await Promise.all(btns.map(async btn => btn.getTitle()));
                 const expected = [BUTTONS.login, BUTTONS.kubeContext, BUTTONS.addCluster];
 
@@ -67,39 +68,40 @@ export function checkOpenshiftView() {
                 }
             });
 
-            it('shows more actions on hover', async () => {
+            it('shows more actions on hover', async function() {
                 const actions = await explorer.getActions();
                 expect(actions).length.above(3);
             });
         });
 
-        describe('Components', () => {
+        describe('Components', function() {
             let section: ViewSection;
             let welcome: WelcomeContentSection;
 
-            before(async () => {
+            before(async function() {
                 section = await view.getContent().getSection(VIEWS.components);
                 await section.expand();
                 welcome = await section.findWelcomeContent();
             });
 
-            it('shows welcome content when not logged in', async () => {
+            it('shows welcome content when not logged in', async function() {
                 expect(welcome).not.undefined;
                 expect((await welcome.getTextSections()).join('')).not.empty;
             });
 
-            it('shows a button to create a new component', async () => {
+            it('shows a button to create a new component', async function() {
                 const btns = await welcome.getButtons();
+                await Promise.all(btns.map(async btn => btn.wait(5_000)));
                 const titles = await Promise.all(btns.map(async item => await item.getTitle()));
 
                 expect(titles).includes(BUTTONS.newComponent);
             });
         });
 
-        describe('Devfile Registries', () => {
+        describe('Devfile Registries', function() {
             let registries: CustomTreeSection;
 
-            before(async () => {
+            before(async function() {
                 registries = await view.getContent().getSection(VIEWS.compRegistries) as CustomTreeSection;
                 await registries.expand();
             });
