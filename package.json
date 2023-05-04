@@ -96,6 +96,9 @@
 		"unzip-stream": "^0.3.1",
 		"validator": "^13.7.0",
 		"vscode-kubernetes-tools-api": "^1.3.0",
+		"xterm": "^5.1.0",
+		"xterm-addon-serialize": "^0.9.0",
+		"xterm-headless": "^5.1.0",
 		"yaml": "^2.2.2"
 	},
 	"devDependencies": {
@@ -108,12 +111,14 @@
 		"@rjsf/core": "^5.0.0-beta.14",
 		"@rjsf/material-ui": "^5.0.0-beta.14",
 		"@segment/analytics-next": "^1.17.4",
+		"@svgr/plugin-jsx": "^8.0.1",
 		"@types/chai": "^4.3.0",
 		"@types/express": "^4.17.13",
 		"@types/fs-extra": "^9.0.13",
 		"@types/js-base64": "^3.3.1",
 		"@types/lodash": "^4.14.177",
 		"@types/make-fetch-happen": "^9.0.1",
+		"@types/minipass": "^3.3.5",
 		"@types/mkdirp": "^1.0.2",
 		"@types/mocha": "^9.0.0",
 		"@types/node": "^16.11.12",
@@ -141,6 +146,7 @@
 		"codecov": "^3.8.2",
 		"css-loader": "^6.5.1",
 		"esbuild": "^0.17.19",
+		"esbuild-plugin-svgr": "^2.0.0",
 		"esbuild-sass-plugin": "^2.9.0",
 		"eslint": "8.4.1",
 		"eslint-config-prettier": "^8.3.0",
@@ -185,13 +191,18 @@
 		"tslint": "^5.20.1",
 		"typescript": "^4.5.2",
 		"utf-8-validate": "^5.0.7",
-		"vscode-extension-tester": "^5.2.0"
+		"vscode-extension-tester": "^5.2.0",
+		"xterm-addon-fit": "^0.7.0",
+		"xterm-addon-web-links": "^0.8.0",
+		"xterm-addon-webgl": "^0.14.0"
 	},
 	"activationEvents": [
 		"onView:openshiftProjectExplorer",
 		"onView:extension.vsKubernetesExplorer",
 		"onView:openshiftComponentTypesView",
 		"onView:kubernetes.cloudExplorer",
+		"onView:openShiftTerminalPanel",
+		"onView:openshiftView",
 		"onCommand:openshift.welcome",
 		"onCommand:openshift.getStarted",
 		"onCommand:openshift.about",
@@ -813,6 +824,13 @@
 					"title": "OpenShift",
 					"icon": "images/openshift_view.svg"
 				}
+			],
+			"panel": [
+				{
+					"icon": "images/openshift_view.svg",
+					"id": "openShiftTerminalPanel",
+					"title": "OpenShift Terminal"
+				}
 			]
 		},
 		"views": {
@@ -832,6 +850,13 @@
 				{
 					"id": "openshiftDebugView",
 					"name": "Debug Sessions"
+				}
+			],
+			"openShiftTerminalPanel": [
+				{
+					"id": "openShiftTerminalView",
+					"name": "OpenShift Terminal",
+					"type": "webview"
 				}
 			]
 		},
@@ -1151,16 +1176,16 @@
 				}
 			],
 			"view/item/context": [
-                {
-                    "command": "openshift.sandbox.signup",
-                    "category": "1@1",
-                    "when": "viewItem == openshift.sandbox.status.none"
-                },
-                {
-                    "command": "openshift.sandbox.open.dashboard",
-                    "category": "1@1",
-                    "when": "viewItem == openshift.sandbox.status.ready"
-                },
+				{
+					"command": "openshift.sandbox.signup",
+					"category": "1@1",
+					"when": "viewItem == openshift.sandbox.status.none"
+				},
+				{
+					"command": "openshift.sandbox.open.dashboard",
+					"category": "1@1",
+					"when": "viewItem == openshift.sandbox.status.ready"
+				},
 				{
 					"command": "clusters.openshift.csv.create",
 					"group": "1@1",
@@ -1308,7 +1333,7 @@
 				},
 				{
 					"command": "openshift.component.exitDevMode",
-					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-(?:str)|(?:run).*/",
 					"group": "c1@3"
 				},
 				{

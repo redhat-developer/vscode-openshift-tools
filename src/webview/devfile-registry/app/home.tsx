@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { Container, ImageListItem, ThemeProvider, styled } from '@mui/material';
+import { Container, ImageListItem, ThemeProvider, createTheme, styled } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import React from 'react';
 import { Registry } from '../../../odo/componentType';
@@ -50,9 +50,42 @@ const HomeItem: React.FC<DevfileHomePageProps> = ({
     themeKind
 }: DevfileHomePageProps) => {
     const cardItemStyle = useCardItemStyles();
+    // represents the Material UI theme currently being used by this webview
+    const theme = React.useMemo(
+        () => {
+            const computedStyle = window.getComputedStyle(document.body);
+            return createTheme({
+                palette: {
+                    mode: themeKind === 1 ? 'light' : 'dark',
+                    primary: {
+                        main: computedStyle.getPropertyValue('--vscode-button-background'),
+                    },
+                    error: {
+                        main: computedStyle.getPropertyValue('--vscode-editorError-foreground'),
+                    },
+                    warning: {
+                        main: computedStyle.getPropertyValue('--vscode-editorWarning-foreground'),
+                    },
+                    info: {
+                        main: computedStyle.getPropertyValue('--vscode-editorInfo-foreground'),
+                    },
+                    success: {
+                        main: computedStyle.getPropertyValue('--vscode-debugIcon-startForeground'),
+                    },
+                },
+                typography: {
+                    allVariants: {
+                        fontFamily: computedStyle.getPropertyValue('--vscode-font-family'),
+                    },
+                },
+            });
+        },
+        [themeKind],
+    );
     return (
         <ThemeProvider theme={HomeTheme}>
             <ImageGalleryList className='devfileGalleryGrid' style={{ margin: '1rem' }}>
+                <ThemeProvider theme={theme}>
                 {
                     compDescriptions.map((compDescription: CompTypeDesc, key: number) => (
                         <ImageListItem key={`imageList-` + key}>
@@ -62,6 +95,7 @@ const HomeItem: React.FC<DevfileHomePageProps> = ({
                         </ImageListItem>
                     ))
                 }
+                </ThemeProvider>
             </ImageGalleryList>
         </ThemeProvider>
     );

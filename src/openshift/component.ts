@@ -5,10 +5,9 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { ChildProcess, SpawnOptions } from 'child_process';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { DebugConfiguration, DebugSession, Disposable, EventEmitter, ProgressLocation, Terminal, Uri, commands, debug, extensions, window, workspace } from 'vscode';
+import { DebugConfiguration, DebugSession, Disposable, EventEmitter, ProgressLocation, Uri, commands, debug, extensions, window, workspace } from 'vscode';
 import * as YAML from 'yaml';
 import { CliChannel } from '../cli';
 import { Command } from '../odo/command';
@@ -24,6 +23,7 @@ import AddServiceBindingViewLoader, { ServiceBindingFormResponse } from '../webv
 import DescribeViewLoader from '../webview/describe/describeViewLoader';
 import GitImportLoader from '../webview/git-import/gitImportLoader';
 import LogViewLoader from '../webview/log/LogViewLoader';
+import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 
 function createCancelledResult(stepName: string): any {
@@ -67,8 +67,7 @@ export class ComponentStateRegex {
 
 interface ComponentDevState {
     // dev state
-    devTerminal?: Terminal;
-    devProcess?: ChildProcess;
+    devTerminal?: OpenShiftTerminalApi;
     devStatus?: string;
     contextValue?: string;
     devProcessStopRequest?: DevProcessStopRequest;
@@ -160,7 +159,7 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.showDevTerminal')
     static showDevTerminal(context: ComponentWorkspaceFolder) {
-        Component.componentStates.get(context.contextPath)?.devTerminal.show();
+        Component.componentStates.get(context.contextPath)?.devTerminal.focusTerminal();
     }
 
     static devModeExitTimeout(): number {
@@ -169,33 +168,36 @@ export class Component extends OpenShiftItem {
             .get<number>('stopDevModeTimeout');
     }
 
-    private static exitDevelopmentMode(devProcess: ChildProcess) : DevProcessStopRequest {
-        let sigAbortSent = false;
-        let devCleaningTimeout = setTimeout( () => {
-            void window.showWarningMessage('Exiting development mode is taking to long.', 'Keep waiting', 'Force exit')
-                .then((action) => {
-                    if (!devCleaningTimeout) {
-                        void window.showInformationMessage('The warning message has expired and requested action cannot be executed.');
-                    } else {
-                        if (action === 'Keep waiting') {
-                            devCleaningTimeout.refresh();
-                        } else if (action === 'Force exit') {
-                            sigAbortSent = true;
-                            devProcess.kill('SIGABRT');
+    private static exitDevelopmentMode(componentContextPath: string) : DevProcessStopRequest {
+        const componentState = Component.componentStates.get(componentContextPath);
+        if (componentState) {
+            let sigAbortSent = false;
+            let devCleaningTimeout = setTimeout( () => {
+                void window.showWarningMessage('Exiting development mode is taking too long.', 'Keep waiting', 'Force exit')
+                    .then((action) => {
+                        if (!devCleaningTimeout) {
+                            void window.showInformationMessage('The warning message has expired and requested action cannot be executed.');
+                        } else {
+                            if (action === 'Keep waiting') {
+                                devCleaningTimeout.refresh();
+                            } else if (action === 'Force exit') {
+                                sigAbortSent = true;
+                                componentState.devTerminal.forceKill();
+                            }
                         }
-                    }
-                });
-        }, Component.devModeExitTimeout());
-        return {
-            dispose: () => {
-                clearTimeout(devCleaningTimeout);
-                devCleaningTimeout = undefined;
-            },
-            // test devProcess.signalCode approach and switch back to Disposable
-            isSigabrtSent: () => sigAbortSent,
-            sendSigabrt: () => {
-                sigAbortSent = true;
-                devProcess.kill('SIGABRT');
+                    });
+            }, Component.devModeExitTimeout());
+            return {
+                dispose: () => {
+                    clearTimeout(devCleaningTimeout);
+                    devCleaningTimeout = undefined;
+                },
+                // test devProcess.signalCode approach and switch back to Disposable
+                isSigabrtSent: () => sigAbortSent,
+                sendSigabrt: () => {
+                    sigAbortSent = true;
+                    componentState.devTerminal.forceKill();
+                }
             }
         }
     }
@@ -285,81 +287,35 @@ export class Component extends OpenShiftItem {
         if (!runOn) {
             await CliChannel.getInstance().executeTool(Command.deletePreviouslyPushedResources(component.component.devfileData.devfile.metadata.name), undefined, false);
         }
-        const outputEmitter = new EventEmitter<string>();
-        let devProcess: ChildProcess;
         try {
-            cs.devTerminal = window.createTerminal({
-                name: component.contextPath,
-                pty: {
-                    onDidWrite: outputEmitter.event,
-                    open: () => {
-                        outputEmitter.fire(`Starting ${Command.dev(component.component.devfileData.supportedOdoFeatures.debug).toString()}\r\n`);
-                        const opt: SpawnOptions = {cwd: component.contextPath};
-                        void CliChannel.getInstance().spawnTool(Command.dev(component.component.devfileData.supportedOdoFeatures.debug, runOn), opt).then((cp) => {
-                            devProcess = cp;
-                            devProcess.on('spawn', () => {
-                                cs.devTerminal.show();
-                                cs.devProcess = devProcess;
-                                cs.devStatus = ComponentContextState.DEV_RUNNING;
-                                Component.stateChanged.fire(component.contextPath)
-                            });
-                            devProcess.on('error', (err)=> {
-                                void window.showErrorMessage(err.message);
-                                cs.devStatus = ComponentContextState.DEV;
-                                Component.stateChanged.fire(component.contextPath)
-                            })
-                            devProcess.stdout.on('data', (chunk) => {
-                                // TODO: test on macos (see https://github.com/redhat-developer/vscode-openshift-tools/issues/2607)
-                                // it seems 'spawn' event is not firing on macos
-                                if(cs.devStatus === ComponentContextState.DEV_STARTING) {
-                                    cs.devStatus = ComponentContextState.DEV_RUNNING;
-                                    Component.stateChanged.fire(component.contextPath)
-                                }
-                                outputEmitter.fire(`${chunk}`.replaceAll('\n', '\r\n'));
-                            });
-                            devProcess.stderr.on('data', (chunk) => {
-                                if (!cs.devProcessStopRequest?.isSigabrtSent()) {
-                                    outputEmitter.fire(`\x1b[31m${chunk}\x1b[0m`.replaceAll('\n', '\r\n'));
-                                }
-                            });
-                            devProcess.on('exit', () => {
-                                if (cs.devProcessStopRequest) {
-                                    cs.devProcessStopRequest.dispose();
-                                    cs.devProcessStopRequest = undefined;
-                                }
-
-                                outputEmitter.fire('\r\nPress any key to close this terminal\r\n');
-
-                                cs.devStatus = ComponentContextState.DEV;
-                                cs.devProcess = undefined;
-                                Component.stateChanged.fire(component.contextPath)
-                            });
-                        });
+            cs.devTerminal = await OpenShiftTerminalManager.getInstance().createTerminal(
+                Command.dev(component.component.devfileData.supportedOdoFeatures.debug, runOn),
+                `odo dev: ${component.component.devfileData.devfile.metadata.name}`,
+                component.contextPath,
+                process.env,
+                true,
+                {
+                    onExit() {
+                        if (cs.devProcessStopRequest) {
+                            cs.devProcessStopRequest.dispose();
+                            cs.devProcessStopRequest = undefined;
+                        }
+                        cs.devStatus = ComponentContextState.DEV;
+                        Component.stateChanged.fire(component.contextPath);
                     },
-                    close: () => {
-                        if (cs.devProcess && cs.devProcess.exitCode === null && !cs.devProcessStopRequest) { // if process is still running and user closed terminal
+                    onText(text: string) {
+                        if (cs.devStatus === ComponentContextState.DEV_STARTING && text.includes('[p]')) {
+                            cs.devStatus = ComponentContextState.DEV_RUNNING;
+                            Component.stateChanged.fire(component.contextPath);
+                        }
+                        if (text.includes('^C')) {
                             cs.devStatus = ComponentContextState.DEV_STOPPING;
-                            Component.stateChanged.fire(component.contextPath)
-                            cs.devProcess.kill('SIGINT');
-                            cs.devProcessStopRequest = Component.exitDevelopmentMode(cs.devProcess);
+                            cs.devProcessStopRequest = Component.exitDevelopmentMode(component.contextPath);
+                            Component.stateChanged.fire(component.contextPath);
                         }
-                        cs.devTerminal = undefined;
-                    },
-                    handleInput: ((data: string) => {
-                        if (cs.devStatus !== ComponentContextState.DEV_STARTING) {
-                            if(!cs.devProcess) { // if any key pressed after odo process ends
-                                cs.devTerminal.dispose();
-                            } else if (!cs.devProcessStopRequest && data.charCodeAt(0) === 3) { // ctrl+C processed only once when there is no cleaning process
-                                outputEmitter.fire('^C\r\n');
-                                cs.devStatus = ComponentContextState.DEV_STOPPING;
-                                Component.stateChanged.fire(component.contextPath);
-                                cs.devProcess.kill('SIGINT');
-                                cs.devProcessStopRequest = Component.exitDevelopmentMode(cs.devProcess);
-                            }
-                        }
-                    })
+                    }
                 },
-            });
+            );
         } catch (err) {
             void window.showErrorMessage(err.toString());
         }
@@ -367,20 +323,23 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.exitDevMode')
     @clusterRequired()
-    static async exitDevMode(component: ComponentWorkspaceFolder): Promise<void> {
+    static exitDevMode(component: ComponentWorkspaceFolder): Promise<void> {
         const componentState = Component.componentStates.get(component.contextPath)
         if (componentState) {
-            componentState.devTerminal.show();
+            componentState.devTerminal.focusTerminal();
+            componentState.devTerminal.sendText('\u0003');
         }
-        await commands.executeCommand('workbench.action.terminal.sendSequence', {text: '\u0003'});
+        return;
     }
 
     @vsCommand('openshift.component.forceExitDevMode')
     @clusterRequired()
     static forceExitDevMode(component: ComponentWorkspaceFolder): Promise<void> {
         const componentState = Component.componentStates.get(component.contextPath)
-        if (componentState.devProcess && componentState.devProcess.exitCode === null) {
-            componentState.devProcessStopRequest.sendSigabrt();
+        if (componentState && componentState.devTerminal) {
+            componentState.devTerminal.focusTerminal();
+            componentState.devTerminal.forceKill();
+            Component.stateChanged.fire(component.contextPath)
         }
         return;
     }
@@ -423,16 +382,16 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.describe', true)
-    static describe(componentFolder: ComponentWorkspaceFolder): Promise<string> {
+    static describe(componentFolder: ComponentWorkspaceFolder): Promise<void> {
         const command = Command.describeComponent();
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
         if (Component.isUsingWebviewEditor()) {
-            DescribeViewLoader.loadView(`${componentName} Description`, command, componentFolder);
+            void DescribeViewLoader.loadView(`${componentName} Description`, command, componentFolder);
         } else {
-            void Component.odo.executeInTerminal(
+            void CliChannel.getInstance().executeInTerminal(
                 command,
                 componentFolder.contextPath,
-                `OpenShift: Describe '${componentName}' Component`);
+                `Describe '${componentFolder.component.devfileData.devfile.metadata.name}' Component`);
         }
         return;
     }
@@ -444,10 +403,10 @@ export class Component extends OpenShiftItem {
         if (Component.isUsingWebviewEditor()) {
             LogViewLoader.loadView(`${componentName} Log`, showLogCmd, componentFolder);
         } else {
-            void Component.odo.executeInTerminal(
+            void CliChannel.getInstance().executeInTerminal(
                 showLogCmd,
                 componentFolder.contextPath,
-                `OpenShift: Show '${componentName}' Component Log`);
+                `Show '${componentName}' Component Log`);
         }
         return;
     }
@@ -459,10 +418,10 @@ export class Component extends OpenShiftItem {
         if (Component.isUsingWebviewEditor()) {
             LogViewLoader.loadView(`${componentName} Follow Log`, showLogCmd, componentFolder);
         } else {
-            void Component.odo.executeInTerminal(
+            void CliChannel.getInstance().executeInTerminal(
                 showLogCmd,
                 componentFolder.contextPath,
-                `OpenShift: Follow '${componentName}' Component Log`);
+                `Follow '${componentName}' Component Log`);
         }
         return;
     }
@@ -807,10 +766,10 @@ export class Component extends OpenShiftItem {
         // const cs = Component.getComponentDevState(context);
         // cs.deployStatus = ComponentContextState.DEP_RUNNING;
         // Component.stateChanged.fire(context.contextPath);
-        void Component.odo.executeInTerminal(
+        void CliChannel.getInstance().executeInTerminal(
             Command.deploy(),
             context.contextPath,
-            `OpenShift: Deploying '${context.component.devfileData.devfile.metadata.name}' Component`);
+            `Deploying '${context.component.devfileData.devfile.metadata.name}' Component`);
     }
 
     @vsCommand('openshift.component.undeploy')
@@ -822,10 +781,10 @@ export class Component extends OpenShiftItem {
         // const cs = Component.getComponentDevState(context);
         // cs.deployStatus = ComponentContextState.DEP;
         // Component.stateChanged.fire(context.contextPath);
-        void Component.odo.executeInTerminal(
+        void CliChannel.getInstance().executeInTerminal(
             Command.undeploy(context.component.devfileData.devfile.metadata.name),
             context.contextPath,
-            `OpenShift: Undeploying '${context.component.devfileData.devfile.metadata.name}' Component`);
+            `Undeploying '${context.component.devfileData.devfile.metadata.name}' Component`);
     }
 
     @vsCommand('openshift.component.deleteConfigurationFiles')
