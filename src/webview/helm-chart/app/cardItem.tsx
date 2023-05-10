@@ -2,11 +2,11 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { Button, Card, InputLabel, Modal, TextField, ThemeProvider, Typography } from '@mui/material';
+import { Autocomplete, Badge, Button, Card, InputLabel, Modal, TextField, ThemeProvider, Typography, darken, lighten, styled } from '@mui/material';
 import React from 'react';
 import clsx from 'clsx';
 import { CardTheme } from '../../common/cardItem.style';
-import '../../common/common.scss';
+import '../app/cardItem.scss';
 import { LoadScreen } from '../../common/loading';
 import { Chart } from '../helmChartType';
 import { VSCodeMessage } from '../vsCodeMessage';
@@ -41,6 +41,7 @@ export class CardItem extends React.Component<DevFileProps, {
     }
 
     onCardClick = (): void => {
+        console.log('Props:::', this.props.themeKind);
         this.props.helmEntry.isExpand = true;
         this.setState({
             selectedVersion: this.state.versions[0],
@@ -117,9 +118,10 @@ export class CardItem extends React.Component<DevFileProps, {
         })
     }
 
-    setSelectedVersion = (version: any): void => {
+    setSelectedVersion = (event: any, value: Chart): void => {
+        console.log('Value:::: ', value);
         this.setState({
-            selectedVersion: version
+            selectedVersion: value
         });
     };
 
@@ -127,88 +129,151 @@ export class CardItem extends React.Component<DevFileProps, {
         return this.state.installResponse.error || this.state.installName.trim().length === 0;
     }
 
+    GroupHeader = styled('div')(({ theme }) => ({
+        position: 'sticky',
+        top: '-8px',
+        padding: '4px 10px',
+        color: theme.palette.primary.main,
+        backgroundColor:
+            theme.palette.mode === 'light'
+                ? lighten(theme.palette.primary.light, 0.85)
+                : darken(theme.palette.primary.main, 0.8),
+    }));
+
+    GroupItems = styled('ul')({
+        padding: 0,
+    });
+
     render(): React.ReactNode {
         const { selectedVersion, installName: installChartName, installResponse } = this.state;
         const versionCard =
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div className={this.props.cardItemStyle.starterProjectCardBody}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem', height: '2rem' }}>
+            <div className={this.props.cardItemStyle.helmCardBody} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ height: 'auto', display: 'flex', flexDirection: 'row', gap: '2rem', width: '100%' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: '5rem', maxHeight: '10rem', width: '70%' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
                             <InputLabel required htmlFor='bootstrap-input'
                                 style={{
-                                    color: '#EE0000',
+                                    color: 'var(--vscode-foreground)',
                                     paddingTop: '0.5rem',
                                     marginLeft: '1rem'
                                 }}>
                                 Chart Name:
                             </InputLabel>
-                            <div>
-                                <TextField
-                                    helperText={installResponse.errorMsg}
-                                    autoFocus
-                                    focused
-                                    inputProps={{
-                                        style: {
-                                            textAlign: 'left'
-                                        }
-                                    }}
-                                    error={installResponse.error}
-                                    id='bootstrap-input'
-                                    value={installChartName}
-                                    sx={{
-                                        input: {
-                                            color: 'var(--vscode-settings-textInputForeground)',
-                                            backgroundColor: 'var(--vscode-settings-textInputBackground)',
-                                            width: '10rem'
-                                        }
-                                    }} onChange={(e) => this.textFieldChange(e.target.value)}>
-                                </TextField>
-                            </div>
-                        </div>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem', width: '11rem', maxWidth: '15rem' }}>
-                        <InputLabel
-                            style={{
-                                color: '#EE0000',
-                                paddingTop: '0.5rem',
-                                marginLeft: '1rem'
-                            }}>
-                            Version:
-                        </InputLabel>
-                        <div
-                            data-testid='projects-selector'
-                            className={this.props.cardItemStyle.starterProjectSelect}
-                        >
-                            {this.state.versions.map((chart: Chart) => (
-                                <div
-                                    key={chart.version}
-                                    data-testid={`projects-selector-item-${chart.version}`}
-                                    onMouseDown={(): void => this.setSelectedVersion(chart)}
-                                    style={{width: '3rem', maxWidth: '6rem'}}
-                                    className={
-                                        selectedVersion.version === chart.version ? this.props.cardItemStyle.starterProjectSelected : this.props.cardItemStyle.project
+                            <TextField
+                                className={this.props.cardItemStyle.helmInputBox}
+                                helperText={installResponse.errorMsg}
+                                inputProps={{
+                                    style: {
+                                        textAlign: 'left'
                                     }
-                                >
-                                    {chart.version}
-                                </div>
-                            ))}
+                                }}
+                                error={installResponse.error}
+                                id='bootstrap-input'
+                                value={installChartName}
+                                sx={{
+                                    input: {
+                                        WebkitTextFillColor: this.props.themeKind <= 1 ? 'black' : 'white',
+                                        '&:disabled': {
+                                            WebkitTextFillColor: this.props.themeKind <= 1 ? 'black' : 'white'
+                                        }
+                                    }
+                                }} onChange={(e) => this.textFieldChange(e.target.value)}>
+                            </TextField>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
+                            <InputLabel
+                                style={{
+                                    color: 'var(--vscode-foreground)',
+                                    paddingTop: '0.5rem',
+                                    marginLeft: '1rem'
+                                }}>
+                                Version:
+                            </InputLabel>
+                            <Autocomplete
+                                id='grouped-folder'
+                                options={this.state.versions}
+                                autoHighlight
+                                fullWidth
+                                disableClearable
+                                disabled={this.state.versions?.length <= 1}
+                                value={selectedVersion}
+                                getOptionLabel={(option) => option.appVersion || option.version}
+                                renderInput={(params) => (
+                                    <TextField
+                                        sx={{
+                                            input: {
+                                                WebkitTextFillColor: this.props.themeKind <= 1 ? 'black' : 'white',
+                                                '&:disabled': {
+                                                    WebkitTextFillColor: this.props.themeKind <= 1 ? 'black' : 'white'
+                                                },
+                                                padding: '0.5rem !important'
+                                            }
+                                        }}
+                                        style={{ paddingTop: '10px', marginLeft: '0.5rem' }}
+                                        {...params}
+                                        inputProps={{
+                                            ...params.inputProps
+                                        }} />
+                                )}
+                                renderGroup={(params) => (
+                                    <li key={params.key}>
+                                        <this.GroupHeader>{params.group}</this.GroupHeader>
+                                        <this.GroupItems>{params.children}</this.GroupItems>
+                                    </li>
+                                )}
+                                onChange={(e, v) => this.setSelectedVersion(e, v)} />
                         </div>
                     </div>
-                    <Button
-                        disabled={this.handleDisable()}
-                        variant='contained'
-                        className={this.props.cardItemStyle.button}
-                        onClick={this.clickInstall}
-                        style={{ marginLeft: '1rem' }}>
-                        <Typography variant='body2'>
-                            Install
-                        </Typography>
-                    </Button>
+                    <div style={{ width: '50%', minHeight: '5rem', maxHeight: '10rem' }}>
+                        {selectedVersion.description && <div className={this.props.cardItemStyle.helmCardDetails}>
+                            <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
+                                <p className={this.props.cardItemStyle.helmCardDetailItem}>Description</p>
+                                <p className={this.props.cardItemStyle.helmCardDetailItemValue}>
+                                    {selectedVersion.description}
+                                </p>
+                            </Typography>
+                        </div>
+                        }
+                        <div className={this.props.cardItemStyle.helmCardDetails} style={{ height: '4rem' }}>
+                            <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
+                                <p className={this.props.cardItemStyle.helmCardDetailItem}>Product Version</p>
+                                <p className={this.props.cardItemStyle.helmCardDetailItemValue}>{selectedVersion.appVersion || selectedVersion.version}</p>
+                            </Typography>
+                        </div>
+                        {
+                            selectedVersion.annotations['charts.openshift.io/supportURL'] &&
+                            <div className={this.props.cardItemStyle.helmCardDetails} style={{ height: '4rem' }}>
+                                <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
+                                    <p className={this.props.cardItemStyle.helmCardDetailItem}>Home Page</p>
+                                    <a className={this.props.cardItemStyle.helmCardDetailItemValue} href={selectedVersion.annotations['charts.openshift.io/supportURL']}>{selectedVersion.annotations['charts.openshift.io/supportURL']}</a>
+                                </Typography>
+                            </div>
+                        }
+                        <div className={this.props.cardItemStyle.helmCardDetails} style={{ height: '4rem' }}>
+                            <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
+                                <p className={this.props.cardItemStyle.helmCardDetailItem}>Repository</p>
+                                <p className={this.props.cardItemStyle.helmCardDetailItemValue}>OpenShift Helm Charts</p>
+                            </Typography>
+                        </div>
+                        {selectedVersion.maintainers &&
+                            <div className={this.props.cardItemStyle.helmCardDetails} style={{ height: '4rem' }}>
+                                <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
+                                    <p className={this.props.cardItemStyle.helmCardDetailItem}>Maintainers</p>
+                                    <p className={this.props.cardItemStyle.helmCardDetailItemValue}>{selectedVersion.maintainers[0].name}</p>
+                                </Typography>
+                            </div>
+                        }
+                        {
+                            selectedVersion.annotations['charts.openshift.io/supportURL'] &&
+                            <div className={this.props.cardItemStyle.helmCardDetails} style={{ height: '4rem' }}>
+                                <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
+                                    <p className={this.props.cardItemStyle.helmCardDetailItem}>Support</p>
+                                    <a className={this.props.cardItemStyle.helmCardDetailItemValue} href={selectedVersion.annotations['charts.openshift.io/supportURL']}>Get Support</a>
+                                </Typography>
+                            </div>
+                        }
+                    </div>
                 </div>
-                {
-                    installResponse.loadScreen ?
-                        <LoadScreen title='Installing the Chart' /> : undefined
-                }
             </div>;
 
         const modalViewCard = <Modal
@@ -229,100 +294,47 @@ export class CardItem extends React.Component<DevFileProps, {
                 id={`modal-${selectedVersion.name}`}>
                 <div className={this.props.cardItemStyle.helmCardHeader}>
                     <div className={this.props.cardItemStyle.devPageCardHeader}>
-                        <div className={this.props.cardItemStyle.devPageTitle}>
-                            <img
-                                data-testid='icon'
-                                src={this.state.selectedVersion.icon ? this.state.selectedVersion.icon : require('../../../../images/helm/helm.svg').default}
-                                alt={this.state.selectedVersion.icon + ' logo'}
-                                className={this.props.cardItemStyle.cardImage}
-                                style={{ margin: '0rem' }} />
-                            <div style={{ padding: '1rem', margin: '0rem' }}>
-                                <Typography variant='subtitle1'>
-                                    {
-                                        capitalizeFirstLetter(this.props.helmEntry.displayName)
-                                    }
+                        <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+                            <div className={this.props.cardItemStyle.devPageTitle} style={{ width: '50%', gap: '2rem' }}>
+                                <img
+                                    data-testid='icon'
+                                    src={this.state.selectedVersion.icon ? this.state.selectedVersion.icon : require('../../../../images/helm/helm.svg').default}
+                                    alt={this.state.selectedVersion.icon + ' logo'}
+                                    className={this.props.cardItemStyle.cardImage}
+                                    style={{ margin: '0rem' }} />
+                                <div style={{ margin: '0rem' }}>
+                                    <Typography variant='subtitle1'>
+                                        {
+                                            capitalizeFirstLetter(this.props.helmEntry.displayName)
+                                        }
+                                    </Typography>
+                                </div>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'row', gap: '15rem' }}>
+                                <Typography variant='body1'>
+                                    Provider: {selectedVersion.annotations['charts.openshift.io/providerType']}
                                 </Typography>
+                                <Button
+                                    disabled={this.handleDisable()}
+                                    variant='contained'
+                                    className={this.props.cardItemStyle.button}
+                                    onClick={this.clickInstall}
+                                    style={{ marginLeft: '1rem', float: 'right' }}>
+                                    <Typography variant='body2'>
+                                        Install
+                                    </Typography>
+                                </Button>
                             </div>
                         </div>
                     </div>
-                    {
-                        versionCard
-                    }
                 </div>
-                <div className={this.props.cardItemStyle.helmCardBody}>
-                    <div className={this.props.cardItemStyle.helmCardDetails}>
-                        <Typography variant='body2'>
-                            Latest Chart Version:
-                        </Typography>
-                        <Typography variant='caption'>
-                            {selectedVersion.version}
-                        </Typography>
-                    </div>
-                    <div className={this.props.cardItemStyle.helmCardDetails}>
-                        <Typography variant='body2'>
-                            Description:
-                        </Typography>
-                        <Typography variant='caption' className={this.props.cardItemStyle.detailedDescription}>
-                            {selectedVersion.description ? selectedVersion.description : 'N/A'}
-                        </Typography>
-                    </div>
-                    <div className={this.props.cardItemStyle.helmCardDetails}>
-                        <Typography variant='body2'>
-                            Product Version:
-                        </Typography>
-                        <Typography variant='caption'>
-                            {selectedVersion.appVersion}
-                        </Typography>
-                    </div>
-                    <div className={this.props.cardItemStyle.helmCardDetails}>
-                        <Typography variant='body2'>
-                            Provider:
-                        </Typography>
-                        <Typography variant='caption'>
-                            {selectedVersion.annotations['charts.openshift.io/providerType']}
-                        </Typography>
-                    </div>
-                    <div className={this.props.cardItemStyle.helmCardDetails}>
-                        <Typography variant='body2'>
-                            Home Page:
-                        </Typography>
-                        <Typography variant='caption'>
-                            {
-                                selectedVersion.annotations['charts.openshift.io/supportURL'] ?
-                                    <a href={selectedVersion.annotations['charts.openshift.io/supportURL']}>{selectedVersion.annotations['charts.openshift.io/supportURL']}</a> :
-                                    'N/A'
-                            }
-                        </Typography>
-                    </div>
-                    <div className={this.props.cardItemStyle.helmCardDetails}>
-                        <Typography variant='body2'>
-                            Repository:
-                        </Typography>
-                        <Typography variant='caption'>
-                            OpenShift Helm Charts
-                        </Typography>
-                    </div>
-                    <div className={this.props.cardItemStyle.helmCardDetails}>
-                        <Typography variant='body2'>
-                            Maintainers:
-                        </Typography>
-                        <Typography variant='caption'>
-                            {selectedVersion.maintainers ? selectedVersion.maintainers[0].name : 'N/A'}
-                        </Typography>
-                    </div>
-                    <div className={this.props.cardItemStyle.helmCardDetails}>
-                        <Typography variant='body2'>
-                            Support:
-                        </Typography>
-                        <Typography variant='caption'>
-                            {
-                                selectedVersion.annotations['charts.openshift.io/supportURL'] ?
-                                    <a href={selectedVersion.annotations['charts.openshift.io/supportURL']}>Get Support</a> :
-                                    'N/A'
-                            }
-                        </Typography>
-                    </div>
-                </div>
+                {
+                    versionCard
+                }
+                {
+                    installResponse.loadScreen ?
+                        <LoadScreen title='Installing the Chart' /> : undefined
+                }
             </Card>
         </Modal>;
 
@@ -335,14 +347,23 @@ export class CardItem extends React.Component<DevFileProps, {
                         data-testid={`card-${selectedVersion.name.replace(/\.| /g, '')}`}
                     >
                         <div className={this.props.cardItemStyle.cardHeader}>
-                            <div className={this.props.cardItemStyle.cardHeaderDisplay}>
+                            <div className={this.props.cardItemStyle.cardHeaderDisplay} style={{ flexDirection: 'row' }}>
                                 <img
                                     src={selectedVersion.icon ? selectedVersion.icon : require('../../../../images/helm/helm.svg').default}
                                     alt={`${selectedVersion.name} icon`}
-                                    className={this.props.cardItemStyle.cardImage} />
+                                    className={this.props.cardItemStyle.cardImage} style={{ margin: '0.5rem', width: '2.5rem', height: '2.5rem' }} />
+                                {selectedVersion.version && <Badge key={`key-` + selectedVersion.version}
+                                    className={this.props.cardItemStyle.badge}
+                                    overlap='rectangular'
+                                    variant='standard'
+                                    style={{ float: 'right', margin: '0.5rem' }}
+                                >
+                                    {selectedVersion.version.split('-')[0]}
+                                </Badge>
+                                }
                             </div>
                         </div>
-                        <div className={this.props.cardItemStyle.cardBody} style={{ margin: '1.5rem', height: '3rem' }}>
+                        <div className={this.props.cardItemStyle.cardBody} style={{ margin: '1rem', height: '3rem' }}>
                             <Typography variant='subtitle1'>
                                 {
                                     capitalizeFirstLetter(this.props.helmEntry.displayName)
@@ -352,15 +373,8 @@ export class CardItem extends React.Component<DevFileProps, {
                                 selectedVersion.annotations['charts.openshift.io/provider'] && <Typography variant='caption'>Provided by {selectedVersion.annotations['charts.openshift.io/provider']}</Typography>
                             }
                         </div>
-                        <div className={this.props.cardItemStyle.cardFooterTag}>
-                            {
-                                selectedVersion.version && (
-                                    <><Typography variant='caption'>
-                                        Version: {selectedVersion.version}
-                                    </Typography><br /></>
-                                )
-                            }
-                            <div style={{ height: '4rem' }}>
+                        <div className={this.props.cardItemStyle.cardFooterTag} style={{ margin: '1rem' }}>
+                            <div style={{ height: 'auto' }}>
                                 <Typography variant='caption'
                                     className={this.props.cardItemStyle.longDescription}>
                                     {selectedVersion.description}

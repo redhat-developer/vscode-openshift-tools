@@ -14,7 +14,17 @@ import { OpenShiftExplorer } from '../../explorer';
 import { ChartResponse } from './helmChartType';
 
 let panel: vscode.WebviewPanel;
-let helmRes: ChartResponse[] = []
+let helmRes: ChartResponse[] = [];
+let themeKind: vscode.ColorThemeKind = vscode.window.activeColorTheme.kind;
+
+vscode.window.onDidChangeActiveColorTheme((editor: vscode.ColorTheme) => {
+    if (themeKind !== editor.kind) {
+        themeKind = editor.kind;
+        if (panel) {
+            panel.webview.postMessage({ action: 'setTheme', themeValue: themeKind });
+        }
+    }
+});
 
 async function helmChartMessageListener(event: any): Promise<any> {
     switch (event?.action) {
@@ -134,7 +144,8 @@ async function getHelmCharts(eventName: string): Promise<void> {
     panel?.webview.postMessage(
         {
             action: eventName,
-            helmRes: helmRes
+            helmRes: helmRes,
+            themeValue: themeKind,
         }
     );
 }

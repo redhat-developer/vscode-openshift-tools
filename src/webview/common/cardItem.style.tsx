@@ -43,9 +43,9 @@ export default (_theme: Theme) =>
             zIndex: 1
         },
         helmHomeCard: {
-            height: '20rem',
-            width: '15rem',
-            margin: '1rem'
+            height: '13rem',
+            width: '10rem',
+            margin: '0.5rem'
         },
         cardHeader: {
             display: 'block',
@@ -123,12 +123,12 @@ export default (_theme: Theme) =>
             WebkitBoxOrient: 'vertical'
         },
         detailedDescription: {
-            width: '45rem',
+            width: '27rem',
             wordWrap: 'break-word',
             display: '-webkit-box',
             WebkitLineClamp: 20,
             WebkitBoxOrient: 'vertical',
-            textAlign: 'left'
+            textAlign: 'justify'
         },
         helmCard: {
             color: 'var(--vscode-foreground) !important',
@@ -137,10 +137,9 @@ export default (_theme: Theme) =>
             fontFamily: 'var(--vscode-font-family)',
             border: '1px solid',
             borderColor: 'inherit',
-            height: '37rem',
-            width: '50rem',
+            height: 'auto',
+            width: '60rem',
             margin: 'auto',
-            overflowY: 'auto',
             display: 'flex',
             flexDirection: 'column'
         },
@@ -155,17 +154,29 @@ export default (_theme: Theme) =>
         helmCardBody: {
             position: 'relative',
             width: '100%',
-            height: '50rem',
-            margin: '1rem',
+            height: '20rem',
             display: 'flex',
+            overflowY: 'auto',
             flexDirection: 'column',
             gap: '1rem'
+        },
+        helmInputBox: {
+            margin: '1rem !important',
+            border: '0.5px solid !important'
         },
         helmCardDetails: {
             display: 'flex',
             flexDirection: 'row',
-            gap: '0.5rem',
-            marginRight: '1rem'
+            gap: '0.5rem'
+        },
+        helmCardDetailItemValue: {
+            textIndent: '10%',
+            marginRight: '0.5rem'
+        },
+        helmCardDetailItem: {
+            backgroundColor: '#EE0000',
+            width: 'fit-content',
+            color: 'var(--vscode-settings-textInputForeground)' 
         },
         yamlCard: {
             color: 'var(--vscode-foreground) !important',
