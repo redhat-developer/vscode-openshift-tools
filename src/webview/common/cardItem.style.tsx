@@ -170,11 +170,10 @@ export default (_theme: Theme) =>
             gap: '0.5rem'
         },
         helmCardDetailItemValue: {
-            textIndent: '10%',
             marginRight: '0.5rem'
         },
         helmCardDetailItem: {
-            backgroundColor: '#EE0000',
+            borderBottom: '3px solid #EE0000',
             width: 'fit-content',
             color: 'var(--vscode-settings-textInputForeground)' 
         },

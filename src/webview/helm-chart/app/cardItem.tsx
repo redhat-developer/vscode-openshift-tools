@@ -227,7 +227,7 @@ export class CardItem extends React.Component<DevFileProps, {
                     <div style={{ width: '50%', minHeight: '5rem', maxHeight: '10rem' }}>
                         {selectedVersion.description && <div className={this.props.cardItemStyle.helmCardDetails}>
                             <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
-                                <p className={this.props.cardItemStyle.helmCardDetailItem}>Description</p>
+                                <p className={this.props.cardItemStyle.helmCardDetailItem}>Description:</p>
                                 <p className={this.props.cardItemStyle.helmCardDetailItemValue}>
                                     {selectedVersion.description}
                                 </p>
@@ -236,7 +236,7 @@ export class CardItem extends React.Component<DevFileProps, {
                         }
                         <div className={this.props.cardItemStyle.helmCardDetails} style={{ height: '4rem' }}>
                             <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
-                                <p className={this.props.cardItemStyle.helmCardDetailItem}>Product Version</p>
+                                <p className={this.props.cardItemStyle.helmCardDetailItem}>Product Version:</p>
                                 <p className={this.props.cardItemStyle.helmCardDetailItemValue}>{selectedVersion.appVersion || selectedVersion.version}</p>
                             </Typography>
                         </div>
@@ -244,21 +244,21 @@ export class CardItem extends React.Component<DevFileProps, {
                             selectedVersion.annotations['charts.openshift.io/supportURL'] &&
                             <div className={this.props.cardItemStyle.helmCardDetails} style={{ height: '4rem' }}>
                                 <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
-                                    <p className={this.props.cardItemStyle.helmCardDetailItem}>Home Page</p>
+                                    <p className={this.props.cardItemStyle.helmCardDetailItem}>Home Page:</p>
                                     <a className={this.props.cardItemStyle.helmCardDetailItemValue} href={selectedVersion.annotations['charts.openshift.io/supportURL']}>{selectedVersion.annotations['charts.openshift.io/supportURL']}</a>
                                 </Typography>
                             </div>
                         }
                         <div className={this.props.cardItemStyle.helmCardDetails} style={{ height: '4rem' }}>
                             <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
-                                <p className={this.props.cardItemStyle.helmCardDetailItem}>Repository</p>
+                                <p className={this.props.cardItemStyle.helmCardDetailItem}>Repository:</p>
                                 <p className={this.props.cardItemStyle.helmCardDetailItemValue}>OpenShift Helm Charts</p>
                             </Typography>
                         </div>
                         {selectedVersion.maintainers &&
                             <div className={this.props.cardItemStyle.helmCardDetails} style={{ height: '4rem' }}>
                                 <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
-                                    <p className={this.props.cardItemStyle.helmCardDetailItem}>Maintainers</p>
+                                    <p className={this.props.cardItemStyle.helmCardDetailItem}>Maintainers:</p>
                                     <p className={this.props.cardItemStyle.helmCardDetailItemValue}>{selectedVersion.maintainers[0].name}</p>
                                 </Typography>
                             </div>
@@ -267,7 +267,7 @@ export class CardItem extends React.Component<DevFileProps, {
                             selectedVersion.annotations['charts.openshift.io/supportURL'] &&
                             <div className={this.props.cardItemStyle.helmCardDetails} style={{ height: '4rem' }}>
                                 <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
-                                    <p className={this.props.cardItemStyle.helmCardDetailItem}>Support</p>
+                                    <p className={this.props.cardItemStyle.helmCardDetailItem}>Support:</p>
                                     <a className={this.props.cardItemStyle.helmCardDetailItemValue} href={selectedVersion.annotations['charts.openshift.io/supportURL']}>Get Support</a>
                                 </Typography>
                             </div>
