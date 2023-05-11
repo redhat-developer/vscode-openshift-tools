@@ -21,7 +21,7 @@ export const LoadScreen: React.FC<LoadProps> = ({
     const isInstall = title.indexOf('Install') !== -1;
     return (
         <div className={isInstall ? '' : loadingStyle.loading}>
-            <div style={{ width : isInstall ? '48rem' : '30rem' }}>
+            <div style={{ width : isInstall ? 'auto' : '30rem' }}>
                 <Box sx={{ color: '#EE0000' }}>
                     <LinearProgress color='inherit' sx={{ height: isInstall ? '0.5rem' : '1rem' }} />
                 </Box>

@@ -3,21 +3,26 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
- .MuiAutocomplete-inputRoot {
-   background-color: var(--vscode-dropdown-background) !important;
-   border-color: var(--vscode-dropdown-border) !important;
-   color: var(--vscode-dropdown-foreground) !important;
-   border: 0.5px solid;
-   width: 60% !important;
-   margin: 0.5rem !important;
- }
+.MuiAutocomplete-inputRoot {
+    background-color: var(--vscode-dropdown-background) !important;
+    border-color: var(--vscode-dropdown-border) !important;
+    color: var(--vscode-dropdown-foreground) !important;
+    border: 0.5px solid;
+    width: 60% !important;
+    margin: 0.5rem !important;
+}
 
- .MuiInputBase-root {
-   background-color: var(--vscode-settings-textInputBackground) !important;
-   border-color: var(--vscode-settings-textInputBorder) !important;
-   color: var(--vscode-settings-textInputForeground) !important;
- }
+.MuiAutocomplete-inputRoot:disabled {
+    background-color: var(--vscode-list-inactiveSelectionBackground) !important;
+    color: var(--vscode-list-inactiveSelectionForeground) !important;
+}
 
- .MuiSvgIcon-root {
+.MuiInputBase-root {
+    background-color: var(--vscode-settings-textInputBackground) !important;
+    border-color: var(--vscode-settings-textInputBorder) !important;
+    color: var(--vscode-settings-textInputForeground) !important;
+}
+
+.MuiSvgIcon-root {
     color: whitesmoke;
- }
+}

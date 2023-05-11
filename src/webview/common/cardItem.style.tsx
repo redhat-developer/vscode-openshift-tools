@@ -151,6 +151,12 @@ export default (_theme: Theme) =>
             display: 'flex',
             flexDirection: 'column'
         },
+        helmHeaderProvider: {
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '0.5rem',
+            width: '15rem'
+        },
         helmCardBody: {
             position: 'relative',
             width: '100%',
@@ -175,7 +181,23 @@ export default (_theme: Theme) =>
         helmCardDetailItem: {
             borderBottom: '3px solid #EE0000',
             width: 'fit-content',
-            color: 'var(--vscode-settings-textInputForeground)' 
+            color: 'var(--vscode-settings-textInputForeground)'
+        },
+        helmInstallBtn: {
+            textAlign: 'center',
+            overflow: 'hidden',
+            '&:hover': {
+                cursor: 'pointer',
+                backgroundColor: '#BE0000 !important'
+            },
+            textTransform: 'none',
+            width: 'auto',
+            height: '2rem',
+            outline: '0.0625rem solid transparent',
+            outlineOffset: '0.125rem!important',
+            fontSize: 'var(--vscode-font-size) !important',
+            fontFamily: 'var(--vscode-font-family) !important',
+            justifyContent: 'space-between !important'
         },
         yamlCard: {
             color: 'var(--vscode-foreground) !important',

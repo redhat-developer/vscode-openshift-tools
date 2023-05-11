@@ -41,7 +41,6 @@ export class CardItem extends React.Component<DevFileProps, {
     }
 
     onCardClick = (): void => {
-        console.log('Props:::', this.props.themeKind);
         this.props.helmEntry.isExpand = true;
         this.setState({
             selectedVersion: this.state.versions[0],
@@ -149,38 +148,40 @@ export class CardItem extends React.Component<DevFileProps, {
         const versionCard =
             <div className={this.props.cardItemStyle.helmCardBody} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ height: 'auto', display: 'flex', flexDirection: 'row', gap: '2rem', width: '100%' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: '5rem', maxHeight: '10rem', width: '70%' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '5rem', maxHeight: '10rem', width: '70%' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', marginTop: '1rem' }}>
                             <InputLabel required htmlFor='bootstrap-input'
                                 style={{
                                     color: 'var(--vscode-foreground)',
-                                    paddingTop: '0.5rem',
-                                    marginLeft: '1rem'
+                                    marginLeft: '20px'
                                 }}>
                                 Chart Name:
                             </InputLabel>
                             <TextField
+                                autoFocus
                                 className={this.props.cardItemStyle.helmInputBox}
-                                helperText={installResponse.errorMsg}
-                                inputProps={{
-                                    style: {
-                                        textAlign: 'left'
-                                    }
-                                }}
-                                error={installResponse.error}
-                                id='bootstrap-input'
                                 value={installChartName}
+                                onChange={(e) => this.textFieldChange(e.target.value)}
                                 sx={{
+                                    '& fieldset': { border: 'none' },
                                     input: {
                                         WebkitTextFillColor: this.props.themeKind <= 1 ? 'black' : 'white',
                                         '&:disabled': {
                                             WebkitTextFillColor: this.props.themeKind <= 1 ? 'black' : 'white'
                                         }
                                     }
-                                }} onChange={(e) => this.textFieldChange(e.target.value)}>
-                            </TextField>
+                                }}
+                                onClick={() => this.textFieldChange('')}
+                                InputProps={{
+                                    style: {
+                                        textAlign: 'center',
+                                        paddingLeft: '5px',
+                                        cursor: 'text'
+                                    }
+                                }}
+                            />
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <InputLabel
                                 style={{
                                     color: 'var(--vscode-foreground)',
@@ -206,10 +207,10 @@ export class CardItem extends React.Component<DevFileProps, {
                                                 '&:disabled': {
                                                     WebkitTextFillColor: this.props.themeKind <= 1 ? 'black' : 'white'
                                                 },
-                                                padding: '0.5rem !important'
+                                                paddingLeft: '5px !important'
                                             }
                                         }}
-                                        style={{ paddingTop: '10px', marginLeft: '0.5rem' }}
+                                        style={{ marginLeft: '10px' }}
                                         {...params}
                                         inputProps={{
                                             ...params.inputProps
@@ -227,47 +228,41 @@ export class CardItem extends React.Component<DevFileProps, {
                     <div style={{ width: '50%', minHeight: '5rem', maxHeight: '10rem' }}>
                         {selectedVersion.description && <div className={this.props.cardItemStyle.helmCardDetails}>
                             <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
-                                <p className={this.props.cardItemStyle.helmCardDetailItem}>Description:</p>
+                                <p className={this.props.cardItemStyle.helmCardDetailItem}>Description</p>
                                 <p className={this.props.cardItemStyle.helmCardDetailItemValue}>
                                     {selectedVersion.description}
                                 </p>
                             </Typography>
                         </div>
                         }
-                        <div className={this.props.cardItemStyle.helmCardDetails} style={{ height: '4rem' }}>
+                        <div className={this.props.cardItemStyle.helmCardDetails}>
                             <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
-                                <p className={this.props.cardItemStyle.helmCardDetailItem}>Product Version:</p>
+                                <p className={this.props.cardItemStyle.helmCardDetailItem}>Product Version</p>
                                 <p className={this.props.cardItemStyle.helmCardDetailItemValue}>{selectedVersion.appVersion || selectedVersion.version}</p>
                             </Typography>
                         </div>
                         {
                             selectedVersion.annotations['charts.openshift.io/supportURL'] &&
-                            <div className={this.props.cardItemStyle.helmCardDetails} style={{ height: '4rem' }}>
+                            <div className={this.props.cardItemStyle.helmCardDetails}>
                                 <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
-                                    <p className={this.props.cardItemStyle.helmCardDetailItem}>Home Page:</p>
+                                    <p className={this.props.cardItemStyle.helmCardDetailItem}>Home Page</p>
                                     <a className={this.props.cardItemStyle.helmCardDetailItemValue} href={selectedVersion.annotations['charts.openshift.io/supportURL']}>{selectedVersion.annotations['charts.openshift.io/supportURL']}</a>
                                 </Typography>
                             </div>
                         }
-                        <div className={this.props.cardItemStyle.helmCardDetails} style={{ height: '4rem' }}>
-                            <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
-                                <p className={this.props.cardItemStyle.helmCardDetailItem}>Repository:</p>
-                                <p className={this.props.cardItemStyle.helmCardDetailItemValue}>OpenShift Helm Charts</p>
-                            </Typography>
-                        </div>
                         {selectedVersion.maintainers &&
-                            <div className={this.props.cardItemStyle.helmCardDetails} style={{ height: '4rem' }}>
+                            <div className={this.props.cardItemStyle.helmCardDetails}>
                                 <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
-                                    <p className={this.props.cardItemStyle.helmCardDetailItem}>Maintainers:</p>
+                                    <p className={this.props.cardItemStyle.helmCardDetailItem}>Maintainers</p>
                                     <p className={this.props.cardItemStyle.helmCardDetailItemValue}>{selectedVersion.maintainers[0].name}</p>
                                 </Typography>
                             </div>
                         }
                         {
                             selectedVersion.annotations['charts.openshift.io/supportURL'] &&
-                            <div className={this.props.cardItemStyle.helmCardDetails} style={{ height: '4rem' }}>
+                            <div className={this.props.cardItemStyle.helmCardDetails}>
                                 <Typography variant='body2' className={this.props.cardItemStyle.detailedDescription}>
-                                    <p className={this.props.cardItemStyle.helmCardDetailItem}>Support:</p>
+                                    <p className={this.props.cardItemStyle.helmCardDetailItem}>Support</p>
                                     <a className={this.props.cardItemStyle.helmCardDetailItemValue} href={selectedVersion.annotations['charts.openshift.io/supportURL']}>Get Support</a>
                                 </Typography>
                             </div>
@@ -311,15 +306,18 @@ export class CardItem extends React.Component<DevFileProps, {
                                 </div>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'row', gap: '15rem' }}>
-                                <Typography variant='body1'>
-                                    Provider: {selectedVersion.annotations['charts.openshift.io/providerType']}
-                                </Typography>
+                                {
+                                    selectedVersion.annotations['charts.openshift.io/providerType'] &&
+                                    <div className={this.props.cardItemStyle.helmHeaderProvider}>
+                                        <Typography variant='body1' style={{ margin: '0 1rem' }}>Provided by {(selectedVersion.annotations['charts.openshift.io/providerType'])}</Typography>
+                                    </div>
+                                }
                                 <Button
                                     disabled={this.handleDisable()}
-                                    variant='contained'
-                                    className={this.props.cardItemStyle.button}
+                                    variant='outlined'
+                                    className={this.props.cardItemStyle.helmInstallBtn}
                                     onClick={this.clickInstall}
-                                    style={{ marginLeft: '1rem', float: 'right' }}>
+                                    style={{ right: '0', backgroundColor: this.handleDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: this.props.themeKind <= 1 ? 'black' : 'white' }}>
                                     <Typography variant='body2'>
                                         Install
                                     </Typography>
