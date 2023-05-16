@@ -10,7 +10,7 @@ import { checkFocusOnCommands } from './suite/focusOn';
 import { testImportFromGit } from './suite/import-from-git';
 import { checkOpenshiftView } from './suite/openshift';
 
-describe('Extension public-facing UI tests', () => {
+describe('Extension public-facing UI tests', function() {
     checkExtension();
     checkOpenshiftView();
     checkAboutCommand();
