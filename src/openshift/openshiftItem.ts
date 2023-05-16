@@ -4,10 +4,10 @@
  *-----------------------------------------------------------------------------------------------*/
 /* eslint-disable @typescript-eslint/ban-types */
 
-import { window, QuickPickItem, commands, workspace } from 'vscode';
 import validator from 'validator';
-import { Odo, getInstance, OpenShiftObject, ContextType, OpenShiftApplication, OpenShiftProject } from '../odo';
+import { QuickPickItem, commands, window, workspace } from 'vscode';
 import { OpenShiftExplorer } from '../explorer';
+import { ContextType, Odo, OpenShiftApplication, OpenShiftObject, OpenShiftProject, getInstance } from '../odo';
 import { VsCommandError } from '../vscommand';
 
 const errorMessage = {
@@ -159,14 +159,6 @@ export default class OpenShiftItem {
         return applicationList;
     }
 
-    static async getServiceNames(application: OpenShiftObject): Promise<OpenShiftObject[]> {
-        const serviceList: Array<OpenShiftObject> = await OpenShiftItem.odo.getServices(application);
-        if (serviceList.length === 0) {
-            throw new VsCommandError(errorMessage.Service);
-        }
-        return serviceList;
-    }
-
     static async getOpenShiftCmdData<T extends OpenShiftObject>(treeItem: T, appPlaceholder?: string, compPlaceholder?: string, condition?: (value: OpenShiftObject) => boolean,
     proName?: string, appName?: string): Promise<T | null> {
         let context: OpenShiftObject | QuickPickCommand = treeItem;
@@ -246,7 +238,7 @@ function selectTargetDecoratorFactory(decorator: (...args:any[]) => Promise<Open
             throw new Error('not supported');
         }
 
-       descriptor[fnKey] = async function (...args: any[]): Promise<any> {
+        descriptor[fnKey] = async function (...args: any[]): Promise<any> {
             args[0] = await decorator(args[0]);
             return fn.apply(this, args);
         };
@@ -273,8 +265,8 @@ export function clusterRequired() {
             throw new Error('not supported');
         }
 
-       descriptor[fnKey] = async function (...args: any[]): Promise<any> {
-            let clusters = await getInstance().getProjects();
+        descriptor[fnKey] = async function (...args: any[]): Promise<any> {
+            let clusters = await getInstance().getClusters();
             if (clusters.length === 0) {
                 const lOrC = await window.showInformationMessage('Login in to a Cluster to run this command.', 'Login', 'Cancel');
                 if(lOrC === 'Login') {
@@ -288,7 +280,6 @@ export function clusterRequired() {
             if (clusters.length) {
                 return fn.apply(this, args);
             }
-            return;
         };
     };
 }

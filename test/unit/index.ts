@@ -6,7 +6,7 @@
 import * as fs from 'fs';
 import * as glob from 'glob';
 import * as paths from 'path';
-import { TestRunnerOptions, CoverageRunner } from '../coverage';
+import { CoverageRunner, TestRunnerOptions } from '../coverage';
 
 require('source-map-support').install();
 
@@ -55,8 +55,10 @@ export async function run(): Promise<void> {
     // add activation test first
     testFiles.push(...await testFinder('activation.js'));
     // everything else after
+    testFiles.push(...await testFinder('oc.test.js'));
     testFiles.push(...await testFinder('**/extension.test.js'));
     testFiles.push(...await testFinder('**/workspace.test.js'));
+    testFiles.push(...await testFinder('openshift/component.test.js'));
     testFiles.push(...await testFinder('k8s/*.test.js'));
     testFiles.push(...await testFinder('util/*.test.js'));
 
@@ -64,20 +66,24 @@ export async function run(): Promise<void> {
 
     return new Promise((resolve, reject) => {
         let failed = 0;
-        mocha.run(failures => {
-            if (failures > 0) {
-                failed = failures;
-            }
-        }).on('end', () => {
-            coverageRunner && coverageRunner.reportCoverage();
-            if (failed > 0) {
-                reject (`Test failures: ${failed}`);
-            } else {
+        try {
+            mocha.run(failures => {
+                if (failures > 0) {
+                    failed = failures;
+                }
+            }).on('end', () => {
+                coverageRunner && coverageRunner.reportCoverage();
+                if (failed > 0) {
+                    reject (`Test failures: ${failed}`);
+                } else {
+                    resolve();
+                }
                 resolve();
-            }
-            resolve();
-        }).on('fail', () => {
-            failed++;
-        });
+            }).on('fail', () => {
+                failed++;
+            });
+        } catch (e) {
+            reject(e);
+        }
     });
 }

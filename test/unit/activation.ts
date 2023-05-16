@@ -5,8 +5,8 @@
 /* eslint-disable no-console */
 import * as vscode from 'vscode';
 
-suite('Extension activation', () => {
-    test('Extension is activated', async () => {
+suite('Extension activation', function() {
+    test('Extension is activated', async function() {
         await vscode.commands.executeCommand('openshift.output');
     });
 });

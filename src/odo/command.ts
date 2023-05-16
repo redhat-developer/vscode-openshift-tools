@@ -44,13 +44,16 @@ export class Command {
         return command;
     }
 
-    static createServiceCommand(fileName: string): CommandText {
-        return new CommandText(
+    static ocCreate(fileName: string, namespace?: string): CommandText {
+        const cmd =  new CommandText(
             'oc create',
-            undefined, [
-            new CommandOption('-f', fileName)
-        ]
+            undefined,
+            [ new CommandOption('-f', fileName), ]
         );
+        if (namespace) {
+            cmd.addOption(new CommandOption('--namespace', namespace));
+        }
+        return cmd;
     }
 
     static printCatalogComponentImageStreamRefJson(name: string, namespace: string): CommandText {
@@ -64,11 +67,9 @@ export class Command {
     }
 
     static listProjects(): CommandText {
-        return new CommandText('oc',
-            'get project', [
+        return new CommandText('odo', 'list project', [
             new CommandOption('-o', 'json', false)
-        ]
-        );
+        ]);
     }
 
     @verbose
@@ -222,31 +223,6 @@ export class Command {
             clusterURL, [
             new CommandOption('--token', ocToken),
             new CommandOption('--insecure-skip-tls-verify')
-        ]
-        );
-    }
-
-    static deleteComponent(project: string, app: string, component: string, context: boolean): CommandText {
-        const ct = new CommandText('odo delete',
-            context ? undefined : component, [ // if there is not context name is required
-            new CommandOption('-f'),
-        ]
-        );
-        if (!context) { // if there is no context state app and project name
-            ct.addOption(new CommandOption('--app', app))
-                .addOption(new CommandOption('--project', project))
-        } else {
-            ct.addOption(new CommandOption('--all'));
-        }
-        return ct;
-    }
-
-    static deleteComponentNoContext(project: string, app: string, component: string): CommandText {
-        return new CommandText('oc delete',
-            'deployment', [
-            new CommandOption('-n', project),
-            new CommandOption('-l', `component=${component},app=${app}`),
-            new CommandOption('--wait=true'),
         ]
         );
     }
@@ -464,5 +440,12 @@ export class Command {
 
     static setNamespace(namespace: string) {
         return new CommandText('odo set namespace', namespace);
+    }
+
+    static deleteComponentConfiguration(): CommandText {
+        return new CommandText('odo delete component', undefined, [
+            new CommandOption('--files'),
+            new CommandOption('-f'),
+        ]);
     }
 }

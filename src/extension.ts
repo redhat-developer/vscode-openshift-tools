@@ -3,30 +3,31 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
 import {
     ExtensionContext,
-    commands,
-    workspace,
-    window,
+    QuickPickItemKind,
     StatusBarAlignment,
     StatusBarItem,
+    authentication,
+    commands,
     env,
-    QuickPickItemKind
+    window,
+    workspace
 } from 'vscode';
-import path = require('path');
-import { startTelemetry } from './telemetry';
+import { ComponentsTreeDataProvider } from './componentsView';
+import { DebugSessionsView } from './debug';
 import { OpenShiftExplorer } from './explorer';
+import { extendClusterExplorer } from './k8s/clusterExplorer';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
-import { Platform } from './util/platform';
-import { TokenStore } from './util/credentialManager';
-import { registerCommands } from './vscommand';
-import { ToolsConfig } from './tools';
-import { extendClusterExplorer } from './k8s/clusterExplorer';
-import { DebugSessionsView } from './debug';
 import { ComponentTypesView } from './registriesView';
+import { startTelemetry } from './telemetry';
+import { ToolsConfig } from './tools';
+import { TokenStore } from './util/credentialManager';
+import { Platform } from './util/platform';
+import { registerCommands } from './vscommand';
 import { WelcomePage } from './welcomePage';
-import { ComponentsTreeDataProvider } from './componentsView';
 
 import fsx = require('fs-extra');
 
@@ -68,7 +69,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             './k8s/route',
             './openshift/project',
             './openshift/cluster',
-            './openshift/service',
             './k8s/console',
             './oc',
             './registriesView',
@@ -88,6 +88,9 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
+
+    // activate "Sign in with Red Hat ..."
+    void authentication.getSession('redhat-account-auth', ['openid'], { silent: false });
 
     function statusBarFunctions() {
         return commands.registerCommand('openshift.openStatusBar', async () => {
