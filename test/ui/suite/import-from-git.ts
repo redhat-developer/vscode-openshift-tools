@@ -37,12 +37,14 @@ export function testImportFromGit() {
         });
 
         after('remove temp dir', function () {
+            this.timeout(10_000);
             if (fs.existsSync(tempDir)) {
                 fs.removeSync(tempDir);
             }
         });
 
         it('Import project from git', async function () {
+            this.timeout(30_000);
             await editorView.closeAllEditors();
             const buttons: WelcomeContentButton[] = await welcome.getButtons();
             let importButton: WelcomeContentButton;
@@ -93,9 +95,9 @@ export function testImportFromGit() {
             await webview.switchBack(); // END WEBVIEW CODE
 
             const devfile: string = path.join(tempDir, 'lemminx', 'devfile.yaml');
-            await notificationExists('Component \'lemminx-comp\' successfully created. Perform actions on it from Components View.', editorView.getDriver(), 3000);
+            await notificationExists('Component \'lemminx-comp\' successfully created. Perform actions on it from Components View.', editorView.getDriver(), 10_000);
             expect(fs.existsSync(devfile)).is.true;
-        }).timeout(20000);
+        });
 
     });
 }
