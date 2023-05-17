@@ -46,7 +46,7 @@ const HomeItem: React.FC<HelmChartHomePageProps> = ({
     const cardItemStyle = useCardItemStyles();
     return (
         <ThemeProvider theme={HomeTheme}>
-            <ImageGalleryList className='devfileGalleryGrid'>
+            <ImageGalleryList className='devfileGalleryGrid' style={{margin: '1rem'}}>
                 {
                     helmEntries.map((helmEntry: ChartResponse, index: number) => (
                         <ImageListItem key={`imageList-` + index}>

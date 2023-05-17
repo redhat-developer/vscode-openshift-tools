@@ -44,7 +44,7 @@ export default (_theme: Theme) =>
         },
         helmHomeCard: {
             height: '13rem',
-            width: '10rem',
+            width: '11rem',
             margin: '0.5rem'
         },
         cardHeader: {
@@ -128,7 +128,8 @@ export default (_theme: Theme) =>
             display: '-webkit-box',
             WebkitLineClamp: 20,
             WebkitBoxOrient: 'vertical',
-            textAlign: 'justify'
+            textAlign: 'justify',
+            margin: '1rem 0'
         },
         helmCard: {
             color: 'var(--vscode-foreground) !important',
@@ -176,10 +177,9 @@ export default (_theme: Theme) =>
             gap: '0.5rem'
         },
         helmCardDetailItemValue: {
-            marginRight: '0.5rem'
+            margin: '0.5rem'
         },
         helmCardDetailItem: {
-            borderBottom: '3px solid #EE0000',
             width: 'fit-content',
             color: 'var(--vscode-settings-textInputForeground)'
         },
