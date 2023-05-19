@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
 import { VSCodeMessage } from './vsCodeMessage';
-import { Icon, Stack, Typography } from '@mui/material';
+import { Checkbox, FormControlLabel, Icon, Stack, Typography } from '@mui/material';
 import HelpIcon from '@mui/icons-material/Help';
 import ChatIcon from '@mui/icons-material/Chat';
 import BugReportIcon from '@mui/icons-material/BugReport';
@@ -19,13 +19,15 @@ export interface DefaultProps {
 }
 
 export class Welcome extends React.Component<DefaultProps, {
-    lastRelease: string
+    lastRelease: string,
+    isChecked: boolean
 }> {
 
     constructor(props) {
         super(props);
         this.state = {
-            lastRelease: ''
+            lastRelease: '',
+            isChecked: true
         }
     }
 
@@ -33,6 +35,8 @@ export class Welcome extends React.Component<DefaultProps, {
         VSCodeMessage.onMessage((message) => {
             if (message.data.action === 'getOpenShiftVersion') {
                 this.setState({ lastRelease: message.data.param })
+            } else if (message.data.action === 'getShowWelcomePageConfig') {
+                this.setState({ isChecked: message.data.param })
             }
         });
     }
@@ -63,6 +67,15 @@ export class Welcome extends React.Component<DefaultProps, {
     openDevfileRegistry = (): void => {
         VSCodeMessage.postMessage({
             'action': 'openDevfileRegistry'
+        });
+        return;
+    }
+
+    updateShowWelcomePageConfig = e => {
+        this.setState({ isChecked: e.target.checked })
+        VSCodeMessage.postMessage({
+            'action': 'updateShowWelcomePageConfig',
+            'param': e.target.checked
         });
         return;
     }
@@ -216,7 +229,7 @@ export class Welcome extends React.Component<DefaultProps, {
     </footer>
 
     render(): React.ReactNode {
-        const { lastRelease } = this.state;
+        const { lastRelease, isChecked } = this.state;
         return <>
             <header className='header__logo'>
                 <img className='image__logo' src={require('../../../../images/title/logo.svg').default} />
@@ -373,6 +386,10 @@ export class Welcome extends React.Component<DefaultProps, {
                     </section>
                     {this.footer}
                 </div>
+            </div>
+            <div className='header__logo'>
+                <FormControlLabel control={<Checkbox checked={isChecked} onChange={this.updateShowWelcomePageConfig} sx={{ color: 'var(--vscode-foreground)', '&.Mui-checked': { color: 'var(--vscode-foreground)' } }} />}
+                    label={<Typography variant='h3' style={{ fontSize: 12 }}>Show welcome page when using OpenShift Toolkit extension</Typography>} />
             </div>
             <ScrollToTop smooth style={{ background: '#EE0000' }} color='#FFFFFF' />
         </>;

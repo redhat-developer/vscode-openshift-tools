@@ -6,6 +6,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ExtensionID } from '../../util/constants';
+import sendTelemetry, { WelcomePageProps } from '../../telemetry';
 const request = require('request');
 
 let panel: vscode.WebviewPanel;
@@ -41,6 +42,21 @@ async function welcomeViewerMessageListener(event: any): Promise<any> {
             break;
         case 'openDevfileRegistry':
             await vscode.commands.executeCommand('openshift.componentTypesView.registry.openInView');
+            break;
+        case 'getShowWelcomePageConfig':
+            panel.webview.postMessage({
+                'action': 'getShowWelcomePageConfig',
+                'param': vscode.workspace.getConfiguration('openshiftToolkit').get('showWelcomePage')
+            });
+        case 'updateShowWelcomePageConfig':
+            const checkboxValue: boolean = event.param;
+            let telemetryProps: WelcomePageProps = {
+                showWelcomePage: checkboxValue
+            };
+            sendTelemetry('welcomePage', telemetryProps);
+            if (checkboxValue != vscode.workspace.getConfiguration('openshiftToolkit').get('showWelcomePage')) {
+                return vscode.workspace.getConfiguration().update('openshiftToolkit.showWelcomePage', checkboxValue, vscode.ConfigurationTarget.Global);
+            }
             break;
         default:
             panel.webview.postMessage(

@@ -1500,7 +1500,7 @@
 					"openshiftToolkit.showWelcomePage": {
 						"type": "boolean",
 						"default": true,
-						"description": "Show Welcome Page when using OpenShift Toolkit Extension."
+						"description": "Show welcome page when using OpenShift Toolkit extension."
 					},
 					"openshiftToolkit.showChannelOnOutput": {
 						"type": "boolean",

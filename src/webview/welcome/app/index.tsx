@@ -10,6 +10,11 @@ import { VSCodeMessage } from './vsCodeMessage';
 VSCodeMessage.postMessage({
     'action': 'getOpenShiftVersion'
 })
+
+VSCodeMessage.postMessage({
+    'action': 'getShowWelcomePageConfig'
+});
+
 ReactDOM.render(
     <Welcome />,
     document.getElementById('root'),
