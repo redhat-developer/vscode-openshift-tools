@@ -26,31 +26,38 @@ vscode.window.onDidChangeActiveColorTheme((editor: vscode.ColorTheme) => {
     }
 });
 
+export class HelmCommand {
+    @vsCommand('openshift.componentTypesView.registry.helmChart.install')
+    static async installHelmChart(event: any) {
+        try {
+            panel.webview.postMessage({
+                action: 'loadScreen',
+                chartName: event.chartName,
+                show: true
+            });
+            await ComponentTypesView.instance.installHelmChart(event.name, event.chartName, event.version);
+            OpenShiftExplorer.getInstance().refresh();
+            panel.webview.postMessage({
+                action: 'loadScreen',
+                show: false,
+                isError: false
+            });
+        } catch (e) {
+            panel.webview.postMessage({
+                action: 'loadScreen',
+                chartName: event.chartName,
+                show: false,
+                isError: true,
+                error: 'Name already exists'
+            });
+        }
+    }
+}
+
 async function helmChartMessageListener(event: any): Promise<any> {
     switch (event?.action) {
         case 'install':
-            try {
-                panel.webview.postMessage({
-                    action: 'loadScreen',
-                    chartName: event.chartName,
-                    show: true
-                });
-                await ComponentTypesView.instance.installHelmChart(event.name, event.chartName, event.version);
-                OpenShiftExplorer.getInstance().refresh();
-                panel.webview.postMessage({
-                    action: 'loadScreen',
-                    show: false,
-                    isError: false
-                });
-            } catch (e) {
-                panel.webview.postMessage({
-                    action: 'loadScreen',
-                    chartName: event.chartName,
-                    show: false,
-                    isError: true,
-                    error: 'Name already exists'
-                });
-            }
+            vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.install', event);
             break;
         default:
             panel.webview.postMessage(
