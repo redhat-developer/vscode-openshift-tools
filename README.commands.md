@@ -8,11 +8,13 @@
 
 #### Commands in OpenShift Application Explorer View
 
+* Show the `Default kubeconfig` file and open the file in the editor.
 * `Log in to cluster` - Log in to your cluster and save login for subsequent use.
     * Credentials : Log in to the given cluster with the given credentials.
     * Token : Login using bearer token for authentication to the API server.
 * `Open Console Dashboard` - Open the OpenShift Developer Console in default browser.
 * `New Project` - Create new Project inside the OpenShift Cluster.
+* `Open Helm Charts` - Browse the catalog to discover and install Helm Charts on cluster.
 * `Log out` - Log out of the current OpenShift Cluster.
 * `About` - Provide the information about the OpenShift tools.
 * `Show Output Channel` - Show commands running under the hood and their output.
@@ -33,7 +35,8 @@ Actions available in Components View
 
 Commands available in context for the compenent
 
-   * `Start Dev` - The application has been built and deployed to the cluster and the application is port-forwarded for local accessibility. The extension will watch for changes in the current directory and rebuild the application when changes are detected.
+   * `Start Dev` - The application has been built and deployed to the OpenShift/Kubernetes cluster and the application is port-forwarded for local accessibility. The extension will watch for changes in the current directory and rebuild the application when changes are detected.
+   * `Start Dev on Podman` - Run the above start dev workflow for applications deployed on Podman.
    * `Stop Dev` - Stop the dev command workflow and resources are cleaned, hence the application is not running on the cluster
    * `Show Dev Terminal` - Directly opens the VSCode terminal where the dev command is running.
    * `Describe` - Describe the given Component in terminal window or inside a webview editor.
@@ -44,6 +47,7 @@ Commands available in context for the compenent
    * `Undeploy` - Undeploys a Component from the cluster. The component still resides in the local config.
    * `Debug` - Start the component in debug mode
    * `Reveal in Explorer` - Show Component's context folder in Explorer view
+   * `Delete Component Configuration` - Remove the devfile.yaml file from component folder and also from component view.
 
 **NOTE:** Currently we support creation of one component per folder. Multiple components from a folder might be supported in
 future releases.
@@ -73,7 +77,7 @@ OpenShift Toolkit extension provides ```Use Project``` command to switch between
 
 ### Extensions
 
-When installing the extension directly from the VSCode marketplace all the dependencies are installed automatically. For disconnected environments,before installing the extension download and install dependencies in the order listed below:
+When installing the extension directly from the VSCode marketplace all the dependencies are installed automatically. For Disconnected Environments, before installing the extension, please download and install dependencies in the order listed below:
 
 * [Red Hat Authentication](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-redhat-account)
 * [YAML Extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)
@@ -83,7 +87,7 @@ When installing the extension directly from the VSCode marketplace all the depen
 
 This extension uses two CLI tools to interact with OpenShift cluster:
 * OKD CLI client tool - [oc](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.9.5/)
-* odo - [odo](https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/v3.0.0/)
+* odo - [odo](https://odo.dev/docs/introduction)
 
 > `oc` and `odo` tools for Windows, Linux and macOS are included into extension package. Once the extension is installed, it is ready to use.
 
@@ -91,3 +95,4 @@ Follow the links below for additional information:
 
 * [Understanding odo](https://odo.dev/)
 * [Devfile ecosystem](https://devfile.io/)
+* [Red Hat Developer Sandbox](https://developers.redhat.com/developer-sandbox)

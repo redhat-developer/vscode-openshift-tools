@@ -21,12 +21,13 @@
 The OpenShift Toolkit extends Visual Studio Code to provide all of the power and convenience of IDEs for developing cloud-native Kubernetes applications, without leaving the comfort of your IDE. For a developer to run the local code on an OpenShift instance, test & debug it and deploy it on production without worrying about the complexities around different K8s tools.
 
 OpenShift Toolkit extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:
- - Developers can easily create, deploy and live debug container applications running on OpenShift.
- - Create [devfile](https://devfile.io) based components directly from _Devfile Registries View_
- - Deploy git repositories directly on OpenShift through _Import from Git_ guided workflow
+ - Developers can easily create, deploy and live debug container applications running on OpenShift, podman and Hybrid cloud.
+ - Browse & Install [Helm Charts](https://helm.sh/) on to the cluster directly from IDE.
+ - Create [devfile](https://devfile.io) based components directly from _Devfile Registries View_.
+ - Deploy git repositories directly on OpenShift through _Import from Git_ guided workflow.
  - Developers can view and edit Resources YAML manifests, and view logs for pods, deployments, and deployment configs.
- - Run local instance of OpenShift 4.11.7 using [OpenShift Local](https://crc.dev/crc/) directly from IDE
- - Connect & Provision free [Developer Sandbox for Red Hat OpenShift](https://developers.redhat.com/developer-sandbox) instance from IDE
+ - Run local instance of OpenShift 4.x using [OpenShift Local](https://crc.dev/crc/) directly from IDE
+ - Connect & Provision free [Developer Sandbox for Red Hat OpenShift](https://developers.redhat.com/developer-sandbox) instance without leaving the IDE
 
 ![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/create-component-demo.gif)
 ## Getting Started
@@ -51,7 +52,7 @@ The extension provides users with multiple ways to provision an instance of Open
 
 <pre>Red Hat OpenShift Developer Sandbox</pre>
 
-The extension allows users free access to the [Developer Sandbox for Red Hat OpenShift](https://developers.redhat.com/developer-sandbox/get-started). From `Add Cluster View`, users can provision and connect to dev sandbox instance using the guided workflow. The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools.
+The extension allows users FREE access to the [Developer Sandbox for Red Hat OpenShift](https://developers.redhat.com/developer-sandbox/get-started). From `Add Cluster View`, users can provision and connect to dev sandbox instance using the guided workflow. The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools.
 
 <pre>Local instance of OpenShift</pre>
 
@@ -82,6 +83,12 @@ Users can directly deploy the git repo code on top of OpenShift/Kubernetes clust
 In the Devfile Registries view, there is an action to `Open Registry View` which opens a webview to browse devfile stacks consisting of supported registries. Users can create components directly from any selected stack and deploy on OpenShift
 
 ![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/walkthrough/showRegistries.gif)
+
+### **Install Helm Charts on cluster**
+
+Browse the catalog to discover and install [Helm Charts](https://helm.sh/) on cluster, directly from VSCode.
+
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/walkthrough/helm.gif)
 ##  Commands and Features
 
 The extension supports a number of commands to interact with OpenShift clusters and resources. The commands are accessible via the command palette (`Cmd+Shift+P` <kbd>⌘⇧P</kbd> on macOS or `Ctrl+Shift+P` <kbd>⌃⇧P</kbd> on Windows and Linux), Visual Studio Code View title buttons and tree context menus.
@@ -112,5 +119,5 @@ MIT, See [LICENSE](LICENSE) for more information.
 
 ## Data and telemetry
 
-The Red Hat OpenShift Toolkit for Visual Studio Code collects anonymous [usage data](USAGE_DATA.md) and sends it to Red Hat servers to help improve our products and services. Read our [privacy statement](https://developers.redhat.com/article/tool-data-collection) to learn more. This extension respects the `redhat.telemetry.enabled` setting which you can learn more about at https://github.com/redhat-developer/vscode-redhat-telemetry#how-to-disable-telemetry-reporting. 
+The Red Hat OpenShift Toolkit for Visual Studio Code collects anonymous [usage data](USAGE_DATA.md) and sends it to Red Hat servers to help improve our products and services. Read our [privacy statement](https://developers.redhat.com/article/tool-data-collection) to learn more. This extension respects the `redhat.telemetry.enabled` setting which you can learn more about at https://github.com/redhat-developer/vscode-redhat-telemetry#how-to-disable-telemetry-reporting.
 Note that this extension also abides by Visual Studio Code's telemetry level: if `telemetry.telemetryLevel` is set to off, then no telemetry events will be sent to Red Hat, even if `redhat.telemetry.enabled` is set to true. If `telemetry.telemetryLevel` is set to `error` or `crash`, only events containing an error or errors property will be sent to Red Hat.
