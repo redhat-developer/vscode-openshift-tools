@@ -123,7 +123,7 @@ export default (_theme: Theme) =>
             WebkitBoxOrient: 'vertical'
         },
         detailedDescription: {
-            width: '27rem',
+            width: '28rem',
             wordWrap: 'break-word',
             display: '-webkit-box',
             WebkitLineClamp: 20,
@@ -139,7 +139,7 @@ export default (_theme: Theme) =>
             border: '1px solid',
             borderColor: 'inherit',
             height: 'auto',
-            width: 'fit-content',
+            width: '64rem',
             margin: 'auto',
             display: 'flex',
             flexDirection: 'column'

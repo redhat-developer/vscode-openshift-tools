@@ -147,8 +147,8 @@ export class CardItem extends React.Component<DevFileProps, {
         const { selectedVersion, installName: installChartName, installResponse } = this.state;
         const versionCard =
             <div className={this.props.cardItemStyle.helmCardBody} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ height: 'auto', display: 'flex', flexDirection: 'row', gap: '2rem' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ height: 'auto', display: 'flex', flexDirection: 'row', gap: '2rem', width: '100%' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', marginTop: '1rem' }}>
                             <InputLabel required htmlFor='bootstrap-input'
                                 style={{
