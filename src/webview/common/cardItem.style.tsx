@@ -129,7 +129,7 @@ export default (_theme: Theme) =>
             WebkitLineClamp: 20,
             WebkitBoxOrient: 'vertical',
             textAlign: 'justify',
-            margin: '1rem 0'
+            margin: '1rem 0.5rem 0 1rem'
         },
         helmCard: {
             color: 'var(--vscode-foreground) !important',
@@ -139,7 +139,7 @@ export default (_theme: Theme) =>
             border: '1px solid',
             borderColor: 'inherit',
             height: 'auto',
-            width: '60rem',
+            width: 'fit-content',
             margin: 'auto',
             display: 'flex',
             flexDirection: 'column'
@@ -177,7 +177,7 @@ export default (_theme: Theme) =>
             gap: '0.5rem'
         },
         helmCardDetailItemValue: {
-            margin: '0.5rem'
+            margin: '0.5rem 0 !important'
         },
         helmCardDetailItem: {
             width: 'fit-content',

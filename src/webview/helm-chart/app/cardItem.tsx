@@ -147,8 +147,8 @@ export class CardItem extends React.Component<DevFileProps, {
         const { selectedVersion, installName: installChartName, installResponse } = this.state;
         const versionCard =
             <div className={this.props.cardItemStyle.helmCardBody} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ height: 'auto', display: 'flex', flexDirection: 'row', gap: '2rem', width: '100%' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '5rem', maxHeight: '10rem', width: '70%' }}>
+                <div style={{ height: 'auto', display: 'flex', flexDirection: 'row', gap: '2rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', marginTop: '1rem' }}>
                             <InputLabel required htmlFor='bootstrap-input'
                                 style={{
@@ -225,7 +225,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                 onChange={(e, v) => this.setSelectedVersion(e, v)} />
                         </div>
                     </div>
-                    <div style={{ width: '50%', minHeight: '5rem', maxHeight: '10rem' }}>
+                    <div>
                         {selectedVersion.description &&
                             <div className={this.props.cardItemStyle.detailedDescription}>
                                 <Typography variant='body1' className={this.props.cardItemStyle.helmCardDetailItem}>Description</Typography>
@@ -237,7 +237,7 @@ export class CardItem extends React.Component<DevFileProps, {
                         {
                             selectedVersion.annotations['charts.openshift.io/providerType'] &&
                             <div className={this.props.cardItemStyle.detailedDescription}>
-                                <Typography variant='body1' className={this.props.cardItemStyle.helmCardDetailItem}>Source</Typography>
+                                <Typography variant='body1' className={this.props.cardItemStyle.helmCardDetailItem}>Provider</Typography>
                                 <Typography variant='body2' className={this.props.cardItemStyle.helmCardDetailItemValue}>
                                     {capitalizeFirstLetter(selectedVersion.annotations['charts.openshift.io/providerType'])}
                                 </Typography>
@@ -297,8 +297,8 @@ export class CardItem extends React.Component<DevFileProps, {
                 id={`modal-${selectedVersion.name}`}>
                 <div className={this.props.cardItemStyle.helmCardHeader}>
                     <div className={this.props.cardItemStyle.devPageCardHeader}>
-                        <div style={{ display: 'flex', flexDirection: 'row', width: '100%', position: 'fixed' }}>
-                            <div className={this.props.cardItemStyle.devPageTitle} style={{ width: '70%', gap: '2rem' }}>
+                        <div style={{ display: 'inline-flex', flexDirection: 'row', width: '100%' }}>
+                            <div className={this.props.cardItemStyle.devPageTitle} style={{ gap: '2rem', width: '50%' }}>
                                 <img
                                     data-testid='icon'
                                     src={this.state.selectedVersion.icon ? this.state.selectedVersion.icon : require('../../../../images/helm/helm.svg').default}
@@ -313,13 +313,13 @@ export class CardItem extends React.Component<DevFileProps, {
                                     </Typography>
                                 </div>
                             </div>
-                            <div>
+                            <div style={{ width: '50%' }}>
                                 <Button
                                     disabled={this.handleDisable()}
                                     variant='outlined'
                                     className={this.props.cardItemStyle.helmInstallBtn}
                                     onClick={this.clickInstall}
-                                    style={{ right: '0', backgroundColor: this.handleDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: this.props.themeKind <= 1 ? 'black' : 'white' }}>
+                                    style={{ float: 'right', backgroundColor: this.handleDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: this.props.themeKind <= 1 ? 'black' : 'white' }}>
                                     <Typography variant='body2'>
                                         Install
                                     </Typography>
@@ -363,7 +363,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                 }
                             </div>
                         </div>
-                        <div className={this.props.cardItemStyle.cardBody} style={{ margin: '1rem', height: 'auto'}}>
+                        <div className={this.props.cardItemStyle.cardBody} style={{ margin: '1rem', height: 'auto' }}>
                             <Typography variant='subtitle1'>
                                 {
                                     capitalizeFirstLetter(this.props.helmEntry.displayName)
