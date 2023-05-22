@@ -41,7 +41,8 @@ export class HelmCommand {
             panel.webview.postMessage({
                 action: 'loadScreen',
                 show: false,
-                isError: false
+                isError: false,
+                isInstalled: true
             });
         } catch (e) {
             panel.webview.postMessage({

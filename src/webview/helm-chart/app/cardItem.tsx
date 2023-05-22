@@ -3,14 +3,15 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { Autocomplete, Badge, Button, Card, InputLabel, Modal, TextField, ThemeProvider, Typography, darken, lighten, styled } from '@mui/material';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import React from 'react';
 import clsx from 'clsx';
 import { CardTheme } from '../../common/cardItem.style';
 import '../app/cardItem.scss';
-import { LoadScreen } from '../../common/loading';
 import { Chart } from '../helmChartType';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { DevFileProps } from './wrapperCardItem';
+import { LoadScreen } from '../../common/loading';
 
 export class CardItem extends React.Component<DevFileProps, {
     displayName: string,
@@ -21,6 +22,7 @@ export class CardItem extends React.Component<DevFileProps, {
         loadScreen: boolean,
         error: boolean,
         errorMsg: string,
+        installed?: boolean
     }
 }> {
 
@@ -98,12 +100,11 @@ export class CardItem extends React.Component<DevFileProps, {
                     installResponse: {
                         loadScreen: message.data.show,
                         error: message.data.isError,
-                        errorMsg: message.data.error || ''
+                        errorMsg: message.data.error || '',
+                        installed: message.data.isInstalled
                     }
                 });
-                if (message.data.isError === false) {
-                    this.onCloseClick(undefined, 'backdropClick');
-                } else if (message.data.isError) {
+                if (message.data.isError) {
                     this.props.helmEntry.isExpand = message.data.chartName === this.state.selectedVersion.name ? true : false;
                 }
             }
@@ -318,27 +319,31 @@ export class CardItem extends React.Component<DevFileProps, {
                                     </Typography>
                                 </div>
                             </div>
-                            <div style={{ width: '50%' }}>
-                                <Button
-                                    disabled={this.handleDisable()}
-                                    variant='outlined'
-                                    className={this.props.cardItemStyle.helmInstallBtn}
-                                    onClick={this.clickInstall}
-                                    style={{ float: 'right', backgroundColor: this.handleDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: this.props.themeKind <= 1 ? 'black' : 'white' }}>
-                                    <Typography variant='body2'>
-                                        Install
-                                    </Typography>
-                                </Button>
+                            <div style={{ width: '50%', display: 'flex', flexDirection: 'row' }}>
+                                <div style={{ width: '85%'}}>
+                                    {
+                                        installResponse.loadScreen && <LoadScreen title='Installation in Progress' type='circle' />
+                                    }
+                                </div>
+                                <div style={{float: 'right'}}>
+                                    <Button
+                                        disabled={this.handleDisable() || installResponse.installed}
+                                        variant='outlined'
+                                        className={this.props.cardItemStyle.helmInstallBtn}
+                                        onClick={this.clickInstall}
+                                        style={{ float: 'right', backgroundColor: this.handleDisable() || installResponse.installed ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: this.props.themeKind <= 1 ? 'black' : 'white' }}
+                                        startIcon={installResponse.installed ? <CheckCircleOutlineIcon /> : undefined}>
+                                        <Typography variant='body2'>
+                                            {!installResponse.installed ? 'Install' : 'Installed'}
+                                        </Typography>
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 {
                     versionCard
-                }
-                {
-                    installResponse.loadScreen ?
-                        <LoadScreen title='Installing the Chart' /> : undefined
                 }
             </Card>
         </Modal>;
