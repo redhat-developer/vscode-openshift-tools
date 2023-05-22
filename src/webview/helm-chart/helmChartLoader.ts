@@ -12,35 +12,62 @@ import { vsCommand } from '../../vscommand';
 import { ComponentTypesView } from '../../registriesView';
 import { OpenShiftExplorer } from '../../explorer';
 import { ChartResponse } from './helmChartType';
+import { ExtCommandTelemetryEvent } from '../../telemetry';
 
 let panel: vscode.WebviewPanel;
-let helmRes: ChartResponse[] = []
+let helmRes: ChartResponse[] = [];
+let themeKind: vscode.ColorThemeKind = vscode.window.activeColorTheme.kind;
+
+vscode.window.onDidChangeActiveColorTheme((editor: vscode.ColorTheme) => {
+    if (themeKind !== editor.kind) {
+        themeKind = editor.kind;
+        if (panel) {
+            panel.webview.postMessage({ action: 'setTheme', themeValue: themeKind });
+        }
+    }
+});
+
+export class HelmCommand {
+    @vsCommand('openshift.componentTypesView.registry.helmChart.install')
+    static async installHelmChart(event: any) {
+        try {
+            panel.webview.postMessage({
+                action: 'loadScreen',
+                chartName: event.chartName,
+                show: true
+            });
+            await ComponentTypesView.instance.installHelmChart(event.name, event.chartName, event.version);
+            OpenShiftExplorer.getInstance().refresh();
+            panel.webview.postMessage({
+                action: 'loadScreen',
+                show: false,
+                isError: false
+            });
+        } catch (e) {
+            panel.webview.postMessage({
+                action: 'loadScreen',
+                chartName: event.chartName,
+                show: false,
+                isError: true,
+                error: 'Name already exists'
+            });
+        }
+    }
+
+    @vsCommand('openshift.componentTypesView.registry.helmChart.open')
+    static async openedHelmChart(chartName: any) {
+        const openedHelmChart = new ExtCommandTelemetryEvent('openshift.componentTypesView.registry.helmChart.open');
+        openedHelmChart.send(chartName);
+    }
+}
 
 async function helmChartMessageListener(event: any): Promise<any> {
     switch (event?.action) {
         case 'install':
-            try {
-                panel.webview.postMessage({
-                    action: 'loadScreen',
-                    chartName: event.chartName,
-                    show: true
-                });
-                await ComponentTypesView.instance.installHelmChart(event.name, event.chartName, event.version);
-                OpenShiftExplorer.getInstance().refresh();
-                panel.webview.postMessage({
-                    action: 'loadScreen',
-                    show: false,
-                    isError: false
-                });
-            } catch (e) {
-                panel.webview.postMessage({
-                    action: 'loadScreen',
-                    chartName: event.chartName,
-                    show: false,
-                    isError: true,
-                    error: 'Name already exists'
-                });
-            }
+            vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.install', event);
+            break;
+        case 'openChart':
+            vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.open', event.chartName);
             break;
         default:
             panel.webview.postMessage(
@@ -134,7 +161,8 @@ async function getHelmCharts(eventName: string): Promise<void> {
     panel?.webview.postMessage(
         {
             action: eventName,
-            helmRes: helmRes
+            helmRes: helmRes,
+            themeValue: themeKind,
         }
     );
 }

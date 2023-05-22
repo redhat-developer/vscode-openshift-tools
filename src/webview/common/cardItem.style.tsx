@@ -43,9 +43,9 @@ export default (_theme: Theme) =>
             zIndex: 1
         },
         helmHomeCard: {
-            height: '20rem',
-            width: '15rem',
-            margin: '1rem'
+            height: '13rem',
+            width: '11rem',
+            margin: '0.5rem'
         },
         cardHeader: {
             display: 'block',
@@ -123,12 +123,13 @@ export default (_theme: Theme) =>
             WebkitBoxOrient: 'vertical'
         },
         detailedDescription: {
-            width: '45rem',
+            width: '28rem',
             wordWrap: 'break-word',
             display: '-webkit-box',
             WebkitLineClamp: 20,
             WebkitBoxOrient: 'vertical',
-            textAlign: 'left'
+            textAlign: 'justify',
+            margin: '1rem 0.5rem 0 1rem'
         },
         helmCard: {
             color: 'var(--vscode-foreground) !important',
@@ -137,10 +138,9 @@ export default (_theme: Theme) =>
             fontFamily: 'var(--vscode-font-family)',
             border: '1px solid',
             borderColor: 'inherit',
-            height: '37rem',
-            width: '50rem',
+            height: 'auto',
+            width: '64rem',
             margin: 'auto',
-            overflowY: 'auto',
             display: 'flex',
             flexDirection: 'column'
         },
@@ -152,20 +152,52 @@ export default (_theme: Theme) =>
             display: 'flex',
             flexDirection: 'column'
         },
+        helmHeaderProvider: {
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '0.5rem',
+            width: '15rem'
+        },
         helmCardBody: {
             position: 'relative',
             width: '100%',
-            height: '50rem',
-            margin: '1rem',
+            height: '20rem',
             display: 'flex',
+            overflowY: 'auto',
             flexDirection: 'column',
             gap: '1rem'
+        },
+        helmInputBox: {
+            margin: '1rem !important',
+            border: '0.5px solid !important'
         },
         helmCardDetails: {
             display: 'flex',
             flexDirection: 'row',
-            gap: '0.5rem',
-            marginRight: '1rem'
+            gap: '0.5rem'
+        },
+        helmCardDetailItemValue: {
+            margin: '0.5rem 0 !important'
+        },
+        helmCardDetailItem: {
+            width: 'fit-content',
+            color: 'var(--vscode-settings-textInputForeground)'
+        },
+        helmInstallBtn: {
+            textAlign: 'center',
+            overflow: 'hidden',
+            '&:hover': {
+                cursor: 'pointer',
+                backgroundColor: '#BE0000 !important'
+            },
+            textTransform: 'none',
+            width: 'auto',
+            height: '2rem',
+            outline: '0.0625rem solid transparent',
+            outlineOffset: '0.125rem!important',
+            fontSize: 'var(--vscode-font-size) !important',
+            fontFamily: 'var(--vscode-font-family) !important',
+            justifyContent: 'space-between !important'
         },
         yamlCard: {
             color: 'var(--vscode-foreground) !important',
