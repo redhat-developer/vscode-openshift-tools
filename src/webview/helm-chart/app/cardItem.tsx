@@ -51,6 +51,11 @@ export class CardItem extends React.Component<DevFileProps, {
                 errorMsg: ''
             }
         });
+        VSCodeMessage.postMessage(
+            {
+                'action': 'openChart',
+                'chartName': this.state.displayName
+            });
     }
 
     onCloseClick = (event: any, reason: string): void => {

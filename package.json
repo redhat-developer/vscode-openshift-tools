@@ -410,6 +410,11 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.componentTypesView.registry.helmChart.open",
+				"title": "Open Helm Charts",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.project.delete",
 				"title": "Delete",
 				"category": "OpenShift"
@@ -1051,6 +1056,10 @@
 				},
 				{
 					"command": "openshift.componentTypesView.registry.helmChart.install",
+					"when": "false"
+				},
+				{
+					"command": "openshift.componentTypesView.registry.helmChart.open",
 					"when": "false"
 				},
 				{

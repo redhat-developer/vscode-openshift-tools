@@ -12,6 +12,7 @@ import { vsCommand } from '../../vscommand';
 import { ComponentTypesView } from '../../registriesView';
 import { OpenShiftExplorer } from '../../explorer';
 import { ChartResponse } from './helmChartType';
+import { ExtCommandTelemetryEvent } from '../../telemetry';
 
 let panel: vscode.WebviewPanel;
 let helmRes: ChartResponse[] = [];
@@ -52,12 +53,21 @@ export class HelmCommand {
             });
         }
     }
+
+    @vsCommand('openshift.componentTypesView.registry.helmChart.open')
+    static async openedHelmChart(chartName: any) {
+        const openedHelmChart = new ExtCommandTelemetryEvent('openshift.componentTypesView.registry.helmChart.open');
+        openedHelmChart.send(chartName);
+    }
 }
 
 async function helmChartMessageListener(event: any): Promise<any> {
     switch (event?.action) {
         case 'install':
             vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.install', event);
+            break;
+        case 'openChart':
+            vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.open', event.chartName);
             break;
         default:
             panel.webview.postMessage(
