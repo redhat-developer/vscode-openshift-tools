@@ -3,11 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as fsxt from 'fs-extra';
-import { EventEmitter } from 'events';
-
-import byline = require('byline');
 
 export class WatchUtil {
     static watchFileForContextChange(
@@ -31,20 +29,6 @@ export class WatchUtil {
         return { watcher, emitter };
     }
 
-    static grep(fileLocation: string, rx: RegExp): Promise<string> {
-        return new Promise<string>((resolve, reject) => {
-            const fileStream = fs.createReadStream(fileLocation, { encoding: 'utf8' });
-            byline(fileStream)
-                .on('data', (line: string) => {
-                    if (rx.test(line)) {
-                        fileStream.close();
-                        resolve(line);
-                    }
-                })
-                .on('error', reject)
-                .on('end', resolve);
-        });
-    }
 }
 
 export interface FileContentChangeNotifier {

@@ -400,7 +400,7 @@ suite('OpenShift/Component', function() {
             expect(warningStub).calledWith('Debug command currently supports local components with Java, Node.Js and Python component types.');
         });
 
-        function mockComponent(startDebugging: sinon.SinonStub<any[], any>, waitPort: sinon.SinonStub<any[], any>, exitCode = 0) {
+        function mockComponent(startDebugging: sinon.SinonStub<any[], any>, exitCode = 0) {
             return pq('../../../src/openshift/component', {
                 vscode: {
                     debug: {
@@ -428,13 +428,11 @@ suite('OpenShift/Component', function() {
                         },
                     }),
                 },
-                'wait-port': waitPort,
             }).Component as typeof openShiftComponent.Component;
         }
         test('starts java debugger for devfile component with java in builder image', async () => {
             const startDebugging = sandbox.stub().resolves(true);
-            const waitPort = sandbox.stub().resolves(true);
-            Component = mockComponent(startDebugging, waitPort);
+            Component = mockComponent(startDebugging);
 
             const devfileComponentItem2: ComponentWorkspaceFolder = {
                 contextPath: comp1Folder,
@@ -450,8 +448,7 @@ suite('OpenShift/Component', function() {
 
         test('starts python debugger for devfile component with python in builder image', async () => {
             const startDebugging = sandbox.stub().resolves(true);
-            const waitPort = sandbox.stub().resolves(true)
-            Component = mockComponent(startDebugging, waitPort);
+            Component = mockComponent(startDebugging);
 
             const devfileComponentItem2: ComponentWorkspaceFolder = {
                 contextPath: comp1Folder,
@@ -467,8 +464,7 @@ suite('OpenShift/Component', function() {
 
         test('throws error if debug.startDebugging fails to start debug session and returns \'false\'', async () => {
             const startDebugging = sandbox.stub().resolves(false);
-            const waitPort = sandbox.stub().resolves(true)
-            Component = mockComponent(startDebugging, waitPort);
+            Component = mockComponent(startDebugging);
 
             const devfileComponentItem2: ComponentWorkspaceFolder = {
                 contextPath: comp1Folder,
@@ -489,8 +485,7 @@ suite('OpenShift/Component', function() {
 
         test('throws error if odo port-forwarding command fails', async () => {
             const startDebugging = sandbox.stub().resolves(false);
-            const waitPort = sandbox.stub().resolves(true)
-            Component = mockComponent(startDebugging, waitPort, 1);
+            Component = mockComponent(startDebugging, 1);
 
             const devfileComponentItem2: ComponentWorkspaceFolder = {
                 contextPath: comp1Folder,

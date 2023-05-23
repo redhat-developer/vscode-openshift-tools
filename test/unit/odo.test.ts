@@ -15,7 +15,6 @@ import { CliChannel, CliExitData } from '../../src/cli';
 import * as odo from '../../src/odo';
 import { ToolsConfig } from '../../src/tools';
 import { WindowUtil } from '../../src/util/windowUtils';
-import jsYaml = require('js-yaml');
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -127,17 +126,14 @@ suite('odo', () => {
     });
 
     suite('item listings', () => {
-        let execStub: sinon.SinonStub; let yamlStub: sinon.SinonStub;
+        let execStub: sinon.SinonStub;
 
         setup(() => {
             execStub = sandbox.stub(odoCli, 'execute');
-            yamlStub = sandbox.stub<any, any>(jsYaml, 'safeLoad');
             sandbox.stub(fs, 'readFileSync');
         });
 
         test('getProjects returns projects under a given cluster', async () => {
-            const activeProjs = [{ name: 'project1' }, { name: 'project2'}];
-            yamlStub.returns({ ActiveApplications: activeProjs });
             execStub.onFirstCall().resolves({
                 error: undefined,
                 stdout: 'Server: https://172.17.185.52:8443',
