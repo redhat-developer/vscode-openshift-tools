@@ -1,4 +1,14 @@
 # Change Log
+## 1.4.0 (May 23, 2023)
+
+* [#2798](https://github.com/redhat-developer/vscode-openshift-tools/issues/2798) Auto generation of tools.json file with updated cli version and sha256 checksums
+* [#709](https://github.com/redhat-developer/vscode-openshift-tools/issues/709) Improve `Login to Cluster` command while checking if the cluster is started
+* [#2861](https://github.com/redhat-developer/vscode-openshift-tools/pull/2861) Add 'Sign in with Red Hat' item to Accounts menu when extension activated
+* [#2864](https://github.com/redhat-developer/vscode-openshift-tools/issues/2864) Fix 'OpenShift: Create' action with one project available
+* [#2870](https://github.com/redhat-developer/vscode-openshift-tools/pull/2870) Support odo 3.10.0 workflow
+* [#2869](https://github.com/redhat-developer/vscode-openshift-tools/issues/2869) New Improved Helm Chart workflow
+* [#2891](https://github.com/redhat-developer/vscode-openshift-tools/issues/2891) Remove Experimental Features check from Components View
+* [#2799](https://github.com/redhat-developer/vscode-openshift-tools/issues/2799) Integration tests to verify cli tool commands used in extension works with new version released
 
 ## 1.3.0 (April 26, 2023)
 
