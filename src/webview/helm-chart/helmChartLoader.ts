@@ -13,6 +13,7 @@ import { ComponentTypesView } from '../../registriesView';
 import { OpenShiftExplorer } from '../../explorer';
 import { ChartResponse } from './helmChartType';
 import { ExtCommandTelemetryEvent } from '../../telemetry';
+import { Progress } from '../../util/progress';
 
 let panel: vscode.WebviewPanel;
 let helmRes: ChartResponse[] = [];
@@ -36,7 +37,9 @@ export class HelmCommand {
                 chartName: event.chartName,
                 show: true
             });
-            await ComponentTypesView.instance.installHelmChart(event.name, event.chartName, event.version);
+            await Progress.execFunctionWithProgress(
+                `Installing the chart '${event.name}'`,
+                async () => await ComponentTypesView.instance.installHelmChart(event.name, event.chartName, event.version));
             OpenShiftExplorer.getInstance().refresh();
             panel.webview.postMessage({
                 action: 'loadScreen',
