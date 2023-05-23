@@ -37,6 +37,7 @@ export class HelmCommand {
                 show: true
             });
             await ComponentTypesView.instance.installHelmChart(event.name, event.chartName, event.version);
+            vscode.window.showInformationMessage(`Helm Chart: ${event.name} is successfully installed and will be reflected in the tree view.`);
             OpenShiftExplorer.getInstance().refresh();
             panel.webview.postMessage({
                 action: 'loadScreen',
@@ -45,6 +46,7 @@ export class HelmCommand {
                 isInstalled: true
             });
         } catch (e) {
+            vscode.window.showErrorMessage(`Installation failed: ${e.message.substring(e.message.indexOf('INSTALLATION FAILED:') + 'INSTALLATION FAILED:'.length)}`);
             panel.webview.postMessage({
                 action: 'loadScreen',
                 chartName: event.chartName,
