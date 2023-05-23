@@ -795,16 +795,6 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.experimental.mode.enable",
-				"title": "Experimental Features",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.experimental.mode.disable",
-				"title": "✓ Experimental Features",
-				"category": "OpenShift"
-			},
-			{
 				"command": "openshift.component.dev.onPodman",
 				"title": "Start Dev on Podman",
 				"category": "OpenShift"
@@ -1161,14 +1151,6 @@
 					"command": "openshift.component.openImportFromGit",
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
-				},
-				{
-					"command": "openshift.experimental.mode.enable",
-					"when": "view == openshiftComponentsView && !config.openshiftToolkit.experimentalFeatures"
-				},
-				{
-					"command": "openshift.experimental.mode.disable",
-					"when": "view == openshiftComponentsView && config.openshiftToolkit.experimentalFeatures"
 				}
 			],
 			"view/item/context": [
@@ -1314,7 +1296,7 @@
 				},
 				{
 					"command": "openshift.component.dev.onPodman",
-					"when": "view == openshiftComponentsView && config.openshiftToolkit.experimentalFeatures && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
 					"group": "c1@2"
 				},
 				{
@@ -1599,25 +1581,6 @@
 						"description": "Controls timeout (im milliseconds) for requests to OpenShift Sandbox Registration Service. Increase timeout value in case of unexpected errors in OpenShift Sandbox Provisioning workflow.",
 						"type": "number",
 						"default": 100000
-					}
-				}
-			},
-			{
-				"type": "object",
-				"order": 4,
-				"title": "Experimental Features",
-				"properties": {
-					"openshiftToolkit.experimentalFeatures": {
-						"order": 1,
-						"description": "Show OpenShift Toolkit Experimental Features.",
-						"type": "boolean",
-						"default": true
-					},
-					"openshiftToolkit.devModeRunOnPodman": {
-						"order": 2,
-						"description": "Show warning about experimental feature",
-						"type": "boolean",
-						"default": true
 					}
 				}
 			}
