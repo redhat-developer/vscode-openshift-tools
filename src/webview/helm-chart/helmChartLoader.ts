@@ -13,7 +13,6 @@ import { ComponentTypesView } from '../../registriesView';
 import { OpenShiftExplorer } from '../../explorer';
 import { ChartResponse } from './helmChartType';
 import { ExtCommandTelemetryEvent } from '../../telemetry';
-import { Progress } from '../../util/progress';
 
 let panel: vscode.WebviewPanel;
 let helmRes: ChartResponse[] = [];
@@ -37,9 +36,8 @@ export class HelmCommand {
                 chartName: event.chartName,
                 show: true
             });
-            await Progress.execFunctionWithProgress(
-                `Installing the chart '${event.name}'`,
-                async () => await ComponentTypesView.instance.installHelmChart(event.name, event.chartName, event.version));
+            await ComponentTypesView.instance.installHelmChart(event.name, event.chartName, event.version);
+            vscode.window.showInformationMessage(`Helm Chart: ${event.name} is successfully installed and will be reflected in the tree view.`);
             OpenShiftExplorer.getInstance().refresh();
             panel.webview.postMessage({
                 action: 'loadScreen',
@@ -48,6 +46,7 @@ export class HelmCommand {
                 isInstalled: true
             });
         } catch (e) {
+            vscode.window.showErrorMessage(e.message.substring(e.message.indexOf('INSTALLATION FAILED:')));
             panel.webview.postMessage({
                 action: 'loadScreen',
                 chartName: event.chartName,
