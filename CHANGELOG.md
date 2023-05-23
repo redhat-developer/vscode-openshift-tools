@@ -1,7 +1,7 @@
 # Change Log
 ## 1.4.0 (May 23, 2023)
 
-* [#2798](https://github.com/redhat-developer/vscode-openshift-tools/issues/2798) Generation of tools.json file with updated cli tool version and sha256 checksums for new release
+* [#2798](https://github.com/redhat-developer/vscode-openshift-tools/issues/2798) Auto generation of tools.json file with updated cli version and sha256 checksums
 * [#709](https://github.com/redhat-developer/vscode-openshift-tools/issues/709) Improve `Login to Cluster` command while checking if the cluster is started
 * [#2861](https://github.com/redhat-developer/vscode-openshift-tools/pull/2861) Add 'Sign in with Red Hat' item to Accounts menu when extension activated
 * [#2864](https://github.com/redhat-developer/vscode-openshift-tools/issues/2864) Fix 'OpenShift: Create' action with one project available
