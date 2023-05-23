@@ -5,7 +5,7 @@
 * [#709](https://github.com/redhat-developer/vscode-openshift-tools/issues/709) Login to Cluster command should check if cluster is started
 * [#2861](https://github.com/redhat-developer/vscode-openshift-tools/pull/2861) Add 'Sign in with Red Hat' item to Accounts menu when extension activated
 * [#2864](https://github.com/redhat-developer/vscode-openshift-tools/issues/2864) 'OpenShift: Create' fails with "You need at least one project available"
-* [#2870](https://github.com/redhat-developer/vscode-openshift-tools/pull/2870) Bump ODO 3.10.0
+* [#2870](https://github.com/redhat-developer/vscode-openshift-tools/pull/2870) Support odo 3.10.0 workflow
 * [#2869](https://github.com/redhat-developer/vscode-openshift-tools/issues/2869) New Improved Helm Chart workflow
 * [#2891](https://github.com/redhat-developer/vscode-openshift-tools/issues/2891) Remove Experimental Features check from Components View
 * [#2799](https://github.com/redhat-developer/vscode-openshift-tools/issues/2799) Integration tests to verify cli tool commands used in extension works with new version released
