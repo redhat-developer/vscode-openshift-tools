@@ -46,7 +46,7 @@ export class HelmCommand {
                 isInstalled: true
             });
         } catch (e) {
-            vscode.window.showErrorMessage(e.message.substring(e.message.indexOf('INSTALLATION FAILED:')));
+            vscode.window.showErrorMessage(`Installation failed: ${e.message.substring(e.message.indexOf('INSTALLATION FAILED:') + 'INSTALLATION FAILED:'.length)}`);
             panel.webview.postMessage({
                 action: 'loadScreen',
                 chartName: event.chartName,
