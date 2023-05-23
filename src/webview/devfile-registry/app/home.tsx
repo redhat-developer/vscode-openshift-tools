@@ -60,12 +60,13 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                 } else {
                     setError('');
                     if (message.data.registries.length === 1) {
-                        message.data.registries.map((registry: Registry) => {
+                        message.data.registries.forEach((registry: Registry) => {
                             registry.state = true;
                         });
                     } else {
-                        message.data.registries.map((registry: Registry) => {
-                            if (registry.url.toLowerCase().indexOf('https://registry.devfile.io') !== -1) {
+                        message.data.registries.forEach((registry: Registry) => {
+                            const devfileUrl = new URL(registry.url);
+                            if (devfileUrl.hostname.toLowerCase() === 'registry.devfile.io') {
                                 registry.state = true;
                             }
                         });
@@ -111,8 +112,9 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                                     });
                                     const allUncheckedRegistries = filteredRegistries.filter((registry: Registry) => !registry.state);
                                     if (allUncheckedRegistries.length === registries.length) {
-                                        allUncheckedRegistries.map((uncheckedRegistry: Registry) => {
-                                            if (uncheckedRegistry.url.toLowerCase().indexOf('https://registry.devfile.io') !== -1) {
+                                        allUncheckedRegistries.forEach((uncheckedRegistry: Registry) => {
+                                            const registryUrl = new URL(uncheckedRegistry.url);
+                                            if (registryUrl.hostname.toLowerCase() === 'registry.devfile.io') {
                                                 uncheckedRegistry.state = true;
                                             }
                                         })
