@@ -7,24 +7,21 @@
 
 import { ChildProcess, SpawnOptions } from 'child_process';
 import * as fs from 'fs/promises';
+import * as path from 'path';
 import { DebugConfiguration, DebugSession, Disposable, EventEmitter, ProgressLocation, Terminal, Uri, commands, debug, extensions, window, workspace } from 'vscode';
 import * as YAML from 'yaml';
+import { CliChannel } from '../cli';
 import { Command } from '../odo/command';
 import { ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, ascDevfileFirst, isDevfileComponent } from '../odo/componentType';
 import { StarterProject, isStarterProject } from '../odo/componentTypeDescription';
+import { ComponentWorkspaceFolder } from '../odo/workspace';
 import { NewComponentCommandProps } from '../telemetry';
 import { Progress } from '../util/progress';
 import { selectWorkspaceFolder } from '../util/workspace';
 import { VsCommandError, vsCommand } from '../vscommand';
-import OpenShiftItem from './openshiftItem';
-
-import path = require('path');
-import globby = require('globby');
-
-import { CliChannel } from '../cli';
-import { ComponentWorkspaceFolder } from '../odo/workspace';
 import GitImportLoader from '../webview/git-import/gitImportLoader';
 import LogViewLoader from '../webview/log/LogViewLoader';
+import OpenShiftItem from './openshiftItem';
 
 function createCancelledResult(stepName: string): any {
     const cancelledResult: any = new String('');
@@ -486,10 +483,10 @@ export class Component extends OpenShiftItem {
 
             progressIndicator.placeholder = 'Checking if provided context folder is empty'
             progressIndicator.show();
-            const globbyPath = `${folder.fsPath.replace('\\', '/')}/`;
-            const paths = globby.sync(`${globbyPath}*`, { dot: true, onlyFiles: false });
+            const workspacePath = `${folder.fsPath.replaceAll('\\', '/')}/`;
+            const dirIsEmpty = (await fs.readdir(workspacePath)).length === 0;
             progressIndicator.hide();
-            if (paths.length === 0 && !isGitImportCall) {
+            if (dirIsEmpty && !isGitImportCall) {
                 if (opts?.projectName) {
                     createStarter = opts.projectName;
                 } else {
