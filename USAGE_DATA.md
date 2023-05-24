@@ -63,6 +63,9 @@ As a user goes through Sandbox provisioning workflow the editor reports outcome 
 * Validation of a verification code (identifier: `openshift.explorer.addCluster.sandboxValidateVerificationCode`)
 * Login into Sandbox cluster (identifier: `openshift.explorer.addCluster.sandboxLoginUsingDataInClipboard`)
 
+### Openshift Welcome Page
+The welcome page reports when the user unchecks/checks the show welcome page option.
+
 Each telemetry event includes:
 * Unique step identifier
 * Error text in case of step's failure

@@ -72,3 +72,7 @@ export class ExtCommandTelemetryEvent {
         this.send({error})
     }
 }
+
+export interface WelcomePageProps {
+    showWelcomePage: boolean;
+}
