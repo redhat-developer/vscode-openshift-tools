@@ -8,7 +8,10 @@ There are only a few guidelines that we need contributors to follow.
 ## First Time Setup
 1. Install prerequisites:
    * latest [Visual Studio Code](https://code.visualstudio.com/)
-   * [Node.js](https://nodejs.org/) v4.0.0 or higher
+   * [Node.js](https://nodejs.org/) v16.17.0 or higher
+     * It is recommended to set up `nvm` to manage different versions of node, which can be installed by following the instructions [here](https://github.com/nvm-sh/nvm#installing-and-updating).
+     * To use the current recommended version for this project (in`./nvmrc`), run `nvm use`.
+
 2. Fork and clone the repository
 3. `cd vscode-openshift-tools`
 4. Install the dependencies:
@@ -18,22 +21,36 @@ There are only a few guidelines that we need contributors to follow.
 	```
 5. Open the folder in VS Code
 
-## Run the extension locally
+## Run and debug the extension locally
 
-1. Install `vsce` - A command line tool you'll use to publish extensions to the Extension Marketplace.
-    ```bash
-    $ npm install -g vsce
-    ```
-2. From root folder, run the below command.
-    ```bash
-    $ vsce package
-    ```
-3. `openshift-toolkit-<version>.vsix` file is created. Install it by following the instructions [here](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix).
+1. Build with the following command at least once before running in debug mode:
 
+   ```bash
+   $ npm run build
+   ```
 
+   * This downloads the `oc` and `odo` binaries and compiles webviews.
+2. The extension can now be launched with the `Extension` launch option in the Run and Debug tab (`Ctrl+Shift+D`) in VS Code.
+   * Note: breakpoints in webview code will not work
+3. After making any changes, consider the following before relaunching the extension to ensure the changes are recompiled:
+   * Changes made to webviews in `src/webview/$WEBVIEW_NAME/app` can be compiled with the corresponding command:
+
+      ```bash
+      $ npm run dev:compile:$WEBVIEW_NAME
+      ```
+
+     * The list of commands to build the webviews can be found in `package.json` or by running `npm run`
+   * Changes in version of one of the required tools in `src/tools.json`, run:
+
+      ```bash
+      $ npm run bundle-tools
+      ```
+
+   * Any other changes should be recompiled automatically by the VS Code prelaunch task.
+     * The launch will be prevented if there are compilation errors.
 4. Once the extension is installed and reloaded, there will be an OpenShift Icon on the View Container, on the lines of snap mentioned below.
 
-![View Container OpenShift](https://github.com/redhat-developer/vscode-openshift-tools/blob/master/images/view-container-icon.png)
+![View Container OpenShift](images/view-container-icon.png)
 
 ## Running the Integration Test Suite
 
