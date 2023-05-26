@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "module": "esnext",
+        "moduleResolution": "node",
+        "target": "es6",
+        "jsx": "react",
+        "typeRoots": [
+            "../../node_modules/@types",
+            "@types"
+        ],
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "noEmit": true
+    },
+    "include": [
+        "*/app/**/*.ts",
+        "*/app/**/*.tsx",
+    ],
+    "exclude": [
+        "*/*.ts"
+    ]
+}

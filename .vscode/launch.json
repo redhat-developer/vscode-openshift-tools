@@ -16,7 +16,7 @@
             "outFiles": [
                 "${workspaceFolder}/out/src/**/*.js"
             ],
-            "preLaunchTask": "npm: watch",
+            "preLaunchTask": "compile",
             "env": {
                 "VSCODE_REDHAT_TELEMETRY_DEBUG":"true"
             }
@@ -31,9 +31,10 @@
                 "--extensionTestsPath=${workspaceFolder}/out/test/unit"
             ],
             "outFiles": [
-                "${workspaceFolder}/out/test/unit/**/*.js"
+                "${workspaceFolder}/out/**/*.js"
             ],
-            "preLaunchTask": "npm: watch",
+            "sourceMaps": true,
+            "preLaunchTask": "compile",
             "env": {
                 "OST_DISABLE_COVERAGE": "yes",
                 "VSCODE_REDHAT_TELEMETRY_DEBUG":"true"
@@ -68,8 +69,9 @@
                 "--extensionTestsPath=${workspaceFolder}/out/test/integration"
             ],
             "outFiles": [
-                "${workspaceFolder}/out/test/integration/**/*.js"
+                "${workspaceFolder}/out/**/*.js"
             ],
+            "sourceMaps": true,
             "preLaunchTask": "instrument",
             "env": {
                 "VSCODE_REDHAT_TELEMETRY_DEBUG":"true"
@@ -89,7 +91,11 @@
                 "--mocha_config",
                 "${workspaceFolder}/test/ui/.mocharc.js"
             ],
-            "preLaunchTask": "npm: watch",
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ],
+            "sourceMaps": true,
+            "preLaunchTask": "compile",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "env": {
@@ -110,7 +116,11 @@
                 "--mocha_config",
                 "${workspaceFolder}/test/ui/.mocharc.js"
             ],
-            "preLaunchTask": "npm: watch",
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ],
+            "sourceMaps": true,
+            "preLaunchTask": "compile",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen"
         },
@@ -123,12 +133,12 @@
             "trace": true
         },
         {
-              "type": "pwa-chrome",
-              "request": "launch",
-              "name": "Launch 'Devfile Registry viewer' in Chrome",
-              "file": "${workspaceFolder}/out/devFileRegistryViewer/index.html",
-              "webRoot": "${workspaceFolder}",
-              "trace": true
+            "type": "pwa-chrome",
+            "request": "launch",
+            "name": "Launch 'Devfile Registry viewer' in Chrome",
+            "file": "${workspaceFolder}/out/devFileRegistryViewer/index.html",
+            "webRoot": "${workspaceFolder}",
+            "trace": true
         }
     ]
 }

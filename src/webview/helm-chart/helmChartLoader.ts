@@ -2,17 +2,17 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as vscode from 'vscode';
 import * as path from 'path';
-import * as fs from 'fs';
-import * as YAML from 'yaml'
-import fetch = require('make-fetch-happen');
+import * as vscode from 'vscode';
+import * as YAML from 'yaml';
+import { OpenShiftExplorer } from '../../explorer';
+import { ComponentTypesView } from '../../registriesView';
+import { ExtCommandTelemetryEvent } from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { vsCommand } from '../../vscommand';
-import { ComponentTypesView } from '../../registriesView';
-import { OpenShiftExplorer } from '../../explorer';
+import { loadWebviewHtml } from '../common-ext/utils';
 import { ChartResponse } from './helmChartType';
-import { ExtCommandTelemetryEvent } from '../../telemetry';
+import fetch = require('make-fetch-happen');
 
 let panel: vscode.WebviewPanel;
 let helmRes: ChartResponse[] = [];
@@ -102,7 +102,7 @@ export default class HelmChartLoader {
                 retainContextWhenHidden: true
             });
             panel.iconPath = vscode.Uri.file(path.join(HelmChartLoader.extensionPath, 'images/helm/helm.svg'));
-            panel.webview.html = HelmChartLoader.getWebviewContent(HelmChartLoader.extensionPath, panel);
+            panel.webview.html = await loadWebviewHtml('helmChartViewer', panel);
             panel.onDidDispose(() => {
                 panel = undefined;
             });
@@ -110,28 +110,6 @@ export default class HelmChartLoader {
         }
         getHelmCharts('getHelmCharts');
         return panel;
-    }
-
-    private static getWebviewContent(extensionPath: string, p: vscode.WebviewPanel): string {
-        // Local path to main script run in the webview
-        const reactAppRootOnDisk = path.join(extensionPath, 'out', 'helmChartViewer');
-        const reactAppPathOnDisk = vscode.Uri.file(
-            path.join(reactAppRootOnDisk, 'helmChartViewer.js'),
-        );
-        const reactAppUri = p.webview.asWebviewUri(reactAppPathOnDisk);
-        const htmlString: Buffer = fs.readFileSync(path.join(reactAppRootOnDisk, 'index.html'));
-        const meta = `<meta http-equiv="Content-Security-Policy"
-            content="connect-src *;
-            default-src 'none';
-            img-src ${p.webview.cspSource} https: 'self' data:;
-            script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;
-            style-src 'self' vscode-resource: 'unsafe-inline';">`;
-        return `${htmlString}`
-            .replace('%COMMAND%', '')
-            .replace('%PLATFORM%', process.platform)
-            .replace('helmChartViewer.js', `${reactAppUri}`)
-            .replace('%BASE_URL%', `${reactAppUri}`)
-            .replace('<!-- meta http-equiv="Content-Security-Policy" -->', meta);
     }
 
     @vsCommand('openshift.componentTypesView.registry.openHelmChartsInView')

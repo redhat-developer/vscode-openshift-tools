@@ -17,6 +17,7 @@ import { ComponentTypesView } from '../../registriesView';
 import { ExtensionID } from '../../util/constants';
 import { selectWorkspaceFolder } from '../../util/workspace';
 import { vsCommand } from '../../vscommand';
+import { loadWebviewHtml } from '../common-ext/utils';
 import { DevfileConverter } from './devfileConverter';
 import GitUrlParse = require('git-url-parse');
 import treeKill = require('tree-kill')
@@ -163,35 +164,13 @@ export default class GitImportLoader {
                 retainContextWhenHidden: true
             });
             panel.iconPath = vscode.Uri.file(path.join(GitImportLoader.extensionPath, 'images/gitImport/git.svg'));
-            panel.webview.html = GitImportLoader.getWebviewContent(GitImportLoader.extensionPath, panel);
+            panel.webview.html = await loadWebviewHtml('gitImportViewer', panel);
             panel.onDidDispose(() => {
                 panel = undefined;
             });
             panel.webview.onDidReceiveMessage(gitImportMessageListener);
         }
         return panel;
-    }
-
-    private static getWebviewContent(extensionPath: string, p: vscode.WebviewPanel): string {
-        // Local path to main script run in the webview
-        const reactAppRootOnDisk = path.join(extensionPath, 'out', 'gitImportViewer');
-        const reactAppPathOnDisk = vscode.Uri.file(
-            path.join(reactAppRootOnDisk, 'gitImportViewer.js'),
-        );
-        const reactAppUri = p.webview.asWebviewUri(reactAppPathOnDisk);
-        const htmlString: Buffer = fs.readFileSync(path.join(reactAppRootOnDisk, 'index.html'));
-        const meta = `<meta http-equiv="Content-Security-Policy"
-            content="connect-src *;
-            default-src 'none';
-            img-src ${p.webview.cspSource} https: 'self' data:;
-            script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;
-            style-src 'self' vscode-resource: 'unsafe-inline';">`;
-        return `${htmlString}`
-            .replace('%COMMAND%', '')
-            .replace('%PLATFORM%', process.platform)
-            .replace('gitImportViewer.js', `${reactAppUri}`)
-            .replace('%BASE_URL%', `${reactAppUri}`)
-            .replace('<!-- meta http-equiv="Content-Security-Policy" -->', meta);
     }
 
     static refresh(): void {
