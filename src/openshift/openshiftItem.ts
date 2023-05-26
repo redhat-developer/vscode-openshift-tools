@@ -4,6 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 /* eslint-disable @typescript-eslint/ban-types */
 
+import * as path from 'path';
 import validator from 'validator';
 import { QuickPickItem, commands, window } from 'vscode';
 import { OpenShiftExplorer } from '../explorer';
@@ -94,8 +95,8 @@ export default class OpenShiftItem {
     }
 
     static validateFilePath(message: string, value: string): string | null {
-        const regx = new RegExp(/(^[a-z]:((\/|\\)[a-zA-Z0-9_ \\-]+)+|(devfile))\.(yaml|yml)$/,'gi');
-        return regx.test(value) ? null : message;
+        const proposedPath = path.parse(value);
+        return /^devfile\.ya?ml$/i.test(proposedPath.base) ? null : message;
     }
 
     static validateRFC1123DNSLabel(message: string, value: string): string | null {
