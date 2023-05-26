@@ -32,6 +32,7 @@
         "src/webview/devfile-registry/app",
         "src/webview/welcome/app",
         "src/webview/git-import/app",
-        "src/webview/helm-chart/app"
+        "src/webview/helm-chart/app",
+        "src/webview/survey/app"
     ]
 }

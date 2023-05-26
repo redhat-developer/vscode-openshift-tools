@@ -17,4 +17,5 @@ src/webview/devfile-registry
 src/webview/welcome
 src/webview/git-import
 src/webview/helm-chart
+src/webview/survey
 test/sandbox-registration

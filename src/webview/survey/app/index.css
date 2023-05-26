@@ -1,0 +1,54 @@
+.sd-root-modern,
+.sd-container-modern,
+.sd-title.sd-container-modern__title {
+    background-Color: var(--vscode-editor-background) !important;
+    color: var(--vscode-editor-foreground) !important;
+    font-family: var(--vscode-editor-font-family) !important;
+    font-size: var(--vscode-editor-font-size) !important;
+    font-weight: var(--vscode-editor-font-weight) !important;
+}
+
+.sd-header__text .sd-title {
+    color: #EE0000 !important;
+}
+
+.sd-title.sd-container-modern__title {
+    box-shadow: 0px 2px 0px var(--sjs-primary-backcolor, #ee0000) !important;
+}
+
+.sd-progress,
+.sd-progress__bar {
+    background-color: var(--sjs-border-light, var(--border-light, #EE0000)) !important;
+}
+
+.sd-rating__item:focus-within {
+    border-color: var(--sjs-primary-backcolor, var(--primary, #EE0000)) !important;
+
+}
+
+.sd-rating__item--selected {
+    background-color: var(--sjs-primary-backcolor, var(--primary, #EE0000)) !important;
+    border-color: var(--sjs-primary-backcolor, var(--primary, #EE0000)) !important;
+}
+
+.sd-boolean__control:focus~.sd-boolean__switch {
+    box-shadow: inset 0 0 0 2px var(--sjs-primary-backcolor, var(--primary, #fff)) !important;
+}
+
+.sd-boolean__thumb,
+.sd-btn {
+    color: var(--sjs-primary-backcolor, var(--primary, #EE0000)) !important;
+}
+
+.sd-btn--action {
+    background-color: var(--sjs-primary-backcolor, var(--primary, #EE0000)) !important;
+    color: var(--sjs-primary-backcolor, var(--primary, var(--vscode-button-foreground))) !important;
+}
+
+.sv-logo--left {
+    width: 5rem !important;
+}
+
+.sd-description {
+    color: var(--vscode-descriptionForeground) !important;
+}

@@ -61,6 +61,7 @@
 		"dev:compile:welcome-view": "webpack --mode development --config src/webview/welcome/webpack.config.js",
 		"dev:compile:git-import-view": "webpack --mode development --config src/webview/git-import/webpack.config.js",
 		"dev:compile:helm-chart-view": "webpack --mode development --config src/webview/helm-chart/webpack.config.js",
+		"dev:compile:survey-view": "webpack --mode development --config src/webview/survey/webpack.config.js",
 		"dev:run:log-view": "webpack-dev-server --mode development --config src/webview/log/webpack.config.js",
 		"dev:run:describe-view": "webpack-dev-server --mode development --config src/webview/describe/webpack.config.js",
 		"dev:run:cluster-view": "webpack-dev-server --port 9222 --mode development --config src/webview/cluster/webpack.config.js",
@@ -68,6 +69,7 @@
 		"dev:run:welcome-view": "webpack-dev-server --port 9222 --mode development --config src/webview/welcome/webpack.config.js",
 		"dev:run:git-import-view": "webpack-dev-server --port 9222 --mode development --config src/webview/git-import/webpack.config.js",
 		"dev:run:helm-chart-view": "webpack-dev-server --port 9222 --mode development --config src/webview/helm-chart/webpack.config.js",
+		"dev:run:survey-view": "webpack-dev-server --port 9222 --mode development --config src/webview/survey/webpack.config.js",
 		"dev:run:create-service-view": "webpack-dev-server --mode development --config src/webview/create-service/webpack.config.js",
 		"watch": "tsc -watch -p ./",
 		"clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/*Viewer",
@@ -138,6 +140,7 @@
 		"@types/collections": "^5.1.2",
 		"@types/express": "^4.17.13",
 		"@types/fs-extra": "^9.0.13",
+		"@types/google-spreadsheet": "^3.3.2",
 		"@types/js-base64": "^3.3.1",
 		"@types/js-yaml": "^4.0.5",
 		"@types/lodash": "^4.14.177",
@@ -184,6 +187,7 @@
 		"express": "^4.17.2",
 		"file-loader": "^6.2.0",
 		"glob": "^7.2.0",
+		"google-spreadsheet": "^3.3.0",
 		"got": "^11.8.5",
 		"handlebars": "^4.7.7",
 		"hasha": "5.2.2",
@@ -218,6 +222,7 @@
 		"sinon-chai": "^3.7.0",
 		"source-map-support": "^0.5.21",
 		"style-loader": "^3.3.1",
+		"survey-react-ui": "^1.9.89",
 		"targz": "^1.0.1",
 		"ts-loader": "^9.2.6",
 		"tslint": "^5.20.1",
@@ -391,6 +396,15 @@
 			{
 				"command": "openshift.explorer.reportIssue",
 				"title": "Report Extension Issue on GitHub",
+				"category": "OpenShift",
+				"icon": {
+					"dark": "images/title/dark/icon-issue.svg",
+					"light": "images/title/light/icon-issue.svg"
+				}
+			},
+			{
+				"command": "openshift.show.survey",
+				"title": "Survey Extension",
 				"category": "OpenShift",
 				"icon": {
 					"dark": "images/title/dark/icon-issue.svg",
@@ -1141,6 +1155,11 @@
 					"command": "openshift.explorer.reportIssue",
 					"when": "view == openshiftProjectExplorer",
 					"group": "navigation@4"
+				},
+				{
+					"command": "openshift.show.survey",
+					"when": "view == openshiftProjectExplorer",
+					"group": "navigation@5"
 				},
 				{
 					"command": "openshift.component.createFromLocal",
