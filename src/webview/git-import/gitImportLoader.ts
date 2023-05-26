@@ -2,25 +2,25 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as vscode from 'vscode';
-import * as path from 'path';
 import * as fs from 'fs';
+import * as path from 'path';
+import * as vscode from 'vscode';
 import * as YAML from 'yaml';
-import { ExtensionID } from '../../util/constants';
-import { ComponentTypesView } from '../../registriesView';
+import { OdoImpl } from '../../odo';
 import { AnalyzeResponse, ComponentTypeDescription } from '../../odo/componentType';
+import { ComponentDescription, Endpoint } from '../../odo/componentTypeDescription';
+import { ComponentWorkspaceFolder } from '../../odo/workspace';
+import * as odo3 from '../../odo3';
 import { Component } from '../../openshift/component';
 import OpenShiftItem from '../../openshift/openshiftItem';
+import { ComponentTypesView } from '../../registriesView';
+import { ExtensionID } from '../../util/constants';
 import { selectWorkspaceFolder } from '../../util/workspace';
+import { vsCommand } from '../../vscommand';
+import { DevfileConverter } from './devfileConverter';
 import GitUrlParse = require('git-url-parse');
 import treeKill = require('tree-kill')
 import cp = require('child_process');
-import { vsCommand } from '../../vscommand';
-import * as odo3 from '../../odo3';
-import { ComponentDescription, Endpoint } from '../../odo/componentTypeDescription';
-import { ComponentWorkspaceFolder } from '../../odo/workspace';
-import { OdoImpl } from '../../odo';
-import { DevfileConverter } from './devfileConverter';
 let panel: vscode.WebviewPanel;
 let childProcess: cp.ChildProcess;
 let forceCancel = false;
@@ -354,7 +354,7 @@ function validateComponentName(event: any) {
 
 function validateDevFilePath(event: any) {
     let validationMessage = OpenShiftItem.emptyName(`Required ${event.param}`, event.param.trim());
-    if (!validationMessage) validationMessage = OpenShiftItem.validateFilePath(`Not matches ^[a-z]:((\/|\\\\)[a-zA-Z0-9_ \\-]+)+\\.yaml$`, event.param);
+    if (!validationMessage) validationMessage = OpenShiftItem.validateFilePath(`Devfile must be called devfile.yaml (or devfile.yml) for the tooling to recognize it`, event.param);
     if (!validationMessage && event.param !== 'devfile.yaml' && event.param !== 'devfile.yml') {
         const uri = vscode.Uri.parse(event.param);
         const devFileLocation = path.join(uri.fsPath);
