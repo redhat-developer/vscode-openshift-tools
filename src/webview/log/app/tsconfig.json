@@ -19,7 +19,8 @@
             "../../../../node_modules/@types",
             "../../@types"
         ],
-        "allowSyntheticDefaultImports": true
+        "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true
     },
     "exclude": [
         "node_modules"

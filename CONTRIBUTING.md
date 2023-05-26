@@ -29,17 +29,10 @@ There are only a few guidelines that we need contributors to follow.
    $ npm run build
    ```
 
-   * This downloads the `oc` and `odo` binaries and compiles webviews.
+   * This downloads the `oc` and `odo` binaries and compiles the code.
 2. The extension can now be launched with the `Extension` launch option in the Run and Debug tab (`Ctrl+Shift+D`) in VS Code.
    * Note: breakpoints in webview code will not work
 3. After making any changes, consider the following before relaunching the extension to ensure the changes are recompiled:
-   * Changes made to webviews in `src/webview/$WEBVIEW_NAME/app` can be compiled with the corresponding command:
-
-      ```bash
-      $ npm run dev:compile:$WEBVIEW_NAME
-      ```
-
-     * The list of commands to build the webviews can be found in `package.json` or by running `npm run`
    * Changes in version of one of the required tools in `src/tools.json`, run:
 
       ```bash

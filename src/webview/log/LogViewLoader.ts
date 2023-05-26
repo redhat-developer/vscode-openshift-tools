@@ -2,14 +2,14 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { Uri, window, extensions, WebviewPanel, ViewColumn } from 'vscode';
 import * as path from 'path';
-import * as fs from 'fs';
-import { ExtensionID } from '../../util/constants';
-import treeKill = require('tree-kill');
+import { Uri, ViewColumn, WebviewPanel, extensions, window } from 'vscode';
 import { CommandText } from '../../base/command';
-import { ComponentWorkspaceFolder } from '../../odo/workspace';
 import { CliChannel } from '../../cli';
+import { ComponentWorkspaceFolder } from '../../odo/workspace';
+import { ExtensionID } from '../../util/constants';
+import { loadWebviewHtml } from '../common-ext/utils';
+import treeKill = require('tree-kill');
 
 export default class LogViewLoader {
 
@@ -28,7 +28,7 @@ export default class LogViewLoader {
         panel.iconPath = Uri.file(path.join(LogViewLoader.extensionPath, "images/context/cluster-node.png"));
 
         // TODO: When webview is going to be ready?
-        panel.webview.html = LogViewLoader.getWebviewContent(LogViewLoader.extensionPath, `${cmd}`.replace(/\\/g, '\\\\'), panel);
+        panel.webview.html = await loadWebviewHtml('logViewer', panel, new Map([['%COMMAND%', `${cmd}`.replace(/\\/g, '\\\\')]]));
 
         const process = await CliChannel.getInstance().spawnTool(cmd, {cwd: target.contextPath, env: addEnv});
         process.stdout.on('data', (data) => {
@@ -49,23 +49,4 @@ export default class LogViewLoader {
         return panel;
     }
 
-    private static getWebviewContent(extensionPath: string, cmdText: string, p: WebviewPanel): string {
-        // Local path to main script run in the webview
-        const reactAppRootOnDisk = path.join(extensionPath, 'out', 'logViewer');
-        const reactAppPathOnDisk = Uri.file(
-            path.join(reactAppRootOnDisk, 'logViewer.js'),
-        );
-        const reactAppUri = p.webview.asWebviewUri(reactAppPathOnDisk);
-        const htmlString:Buffer = fs.readFileSync(path.join(reactAppRootOnDisk, 'index.html'));
-        const meta = `<meta http-equiv="Content-Security-Policy"
-        content="connect-src *;
-            default-src 'none';
-            img-src https:;
-            script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;
-            style-src vscode-resource: 'unsafe-inline';">`;
-        return `${htmlString}`
-            .replace('%COMMAND%', cmdText)
-            .replace('logViewer.js',`${reactAppUri}`)
-            .replace('<!-- meta http-equiv="Content-Security-Policy" -->', meta);
-    }
 }

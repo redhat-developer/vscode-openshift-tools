@@ -1,17 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <% if (production) { %>
-            <base href="%BASE_URL%" />
-        <% } %>
+        <base href="%BASE_URL%" />
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Config View</title>
         <!-- meta http-equiv="Content-Security-Policy" -->
-
-        <% if (!production) { %>
-        <script src="./devstub.js"></script>
-        <% } %>
         <script>
             window.vscodeApi = acquireVsCodeApi();
         </script>
@@ -55,5 +49,7 @@
     </head>
     <body>
         <div class="box" id="root"></div>
+        <script src="%SCRIPT%" ></script>
+        <link rel="stylesheet" href="%STYLE%"></link>
     </body>
 </html>

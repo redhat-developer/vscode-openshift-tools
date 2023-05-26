@@ -4,24 +4,13 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "type": "npm",
-            "script": "watch",
-            "problemMatcher": "$tsc-watch",
-            "isBackground": true,
-            "presentation": {
-                "reveal": "never"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
             "label": "compile",
-            "type": "typescript",
+            "type": "npm",
+            "script": "compile",
             "problemMatcher": "$tsc",
-            "group": "build",
-            "tsconfig": "tsconfig.json"
+            "presentation": {
+                "reveal": "silent",
+            },
         },
         {
             "label": "instrument",

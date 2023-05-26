@@ -64,17 +64,17 @@
             p {
                 color: var(--vscode-input-foreground) !important;
             }
-            
+
             .has-error .form-control {
-                border-color: var(--vscode-inputValidation-errorBorder) !important; 
+                border-color: var(--vscode-inputValidation-errorBorder) !important;
             }
-            
+
             .text-danger {
-                color: var(--vscode-inputValidation-errorBorder) !important; 
+                color: var(--vscode-inputValidation-errorBorder) !important;
             }
 
             .has-error .control-label {
-                color: var(--vscode-inputValidation-errorBorder) !important; 
+                color: var(--vscode-inputValidation-errorBorder) !important;
             }
 
             .control-label {
@@ -107,7 +107,7 @@
                 margin-left: 10px;
                 margin-right: 10px;
                 padding-left: 10px !important;
-                padding-right: 10px !important; 
+                padding-right: 10px !important;
             }
 
             .array-item-remove {
@@ -140,5 +140,7 @@
     </head>
     <body onload="window.vscodeApi.postMessage({command: 'ready'})">
         <div class="box" id="root"></div>
+        <script src="%SCRIPT%" ></script>
+        <link rel="stylesheet" href="%STYLE%"></link>
     </body>
 </html>
