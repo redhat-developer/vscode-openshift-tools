@@ -86,15 +86,14 @@ node('rhel8'){
     timeout(time:5, unit:'DAYS') {
       input message:'Approve deployment?', submitter: 'msuman,degolovi,msivasub'
     }
+    def platforms = ["darwin-x64", "darwin-arm64", "linux-x64", "win32-x64", "win32-arm64"]
 
     if(publishToMarketPlace.equals('true')) {
       stage("Publish to Marketplace") {
         withCredentials([[$class: 'StringBinding', credentialsId: 'vscode_java_marketplace', variable: 'TOKEN']]) {
-          sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-darwin-x64.vsix"
-          sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-darwin-arm64.vsix"
-          sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-linux-x64.vsix"
-          sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-win32-x64.vsix"
-          sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-win32-arm64.vsix"
+          for(platform in platforms){
+            sh "vsce publish -p ${TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-${platform}.vsix"
+          }
         }
 
         stage "Promote the build to stable"
@@ -114,7 +113,9 @@ node('rhel8'){
       stage("Publish to OVSX") {
         sh "npm install -g ovsx"
         withCredentials([[$class: 'StringBinding', credentialsId: 'open-vsx-access-token', variable: 'OVSX_TOKEN']]) {
-          sh "ovsx publish -p ${OVSX_TOKEN} openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix"
+          for(platform in platforms){
+            sh "ovsx publish -p ${OVSX_TOKEN} --packagePath openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-${platform}.vsix"
+          }
         }
       }
     }
