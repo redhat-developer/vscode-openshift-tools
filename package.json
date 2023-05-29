@@ -829,6 +829,13 @@
 					"title": "OpenShift",
 					"icon": "images/openshift_view.svg"
 				}
+			],
+			"panel": [
+				{
+					"id": "pretendView",
+					"title": "Pretend",
+					"icon": "images/openshift_view.svg"
+				}
 			]
 		},
 		"views": {
@@ -848,6 +855,12 @@
 				{
 					"id": "openshiftDebugView",
 					"name": "Debug Sessions"
+				}
+			],
+			"pretendView": [
+				{
+					"id": "my-pretend-view",
+					"name": "Pretend View"
 				}
 			]
 		},

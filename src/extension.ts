@@ -5,10 +5,14 @@
 
 import * as path from 'path';
 import {
+    CancellationToken,
     ExtensionContext,
     QuickPickItemKind,
     StatusBarAlignment,
     StatusBarItem,
+    WebviewView,
+    WebviewViewProvider,
+    WebviewViewResolveContext,
     authentication,
     commands,
     env,
@@ -35,6 +39,28 @@ import fsx = require('fs-extra');
 // this method is called when your extension is deactivated
 export function deactivate(): void {
     // intentionally left blank
+}
+
+class MyPretendWebview implements WebviewViewProvider {
+    private static INSTANCE = new MyPretendWebview();
+    static getInstance() {
+        return MyPretendWebview.INSTANCE;
+    }
+    resolveWebviewView(
+        webviewView: WebviewView,
+        context: WebviewViewResolveContext<unknown>,
+        token: CancellationToken,
+    ): void | Thenable<void> {
+        webviewView.webview.html =
+            '<html>' + //
+            '    <head>' + //
+            '        <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Config View</title>' + //
+            '    </head>' + //
+            '    <body>' + //
+            '        <h1>hi mom</h1>' + //
+            '    </body>' + //
+            '</html>';
+    }
 }
 
 function migrateFromOdo018(): void {
@@ -85,6 +111,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
         ...Component.init(),
         ComponentTypesView.instance.createTreeView('openshiftComponentTypesView'),
         ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
+        window.registerWebviewViewProvider('my-pretend-view', MyPretendWebview.getInstance())
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
 
