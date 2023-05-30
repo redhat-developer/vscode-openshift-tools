@@ -17,8 +17,8 @@ export function testImportFromGit() {
 
         before(async function () {
             this.timeout(20000);
-            const view: SideBarView = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
-            editorView = (new Workbench().getEditorView());
+            const view: SideBarView = await (await (await new ActivityBar().wait(5_000)).getViewControl(VIEWS.openshift)).openView();
+            editorView = await ((await new Workbench().wait(5_000)).getEditorView().wait(5_000));
             await new Promise(res => setTimeout(res, 5000));
             await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
 

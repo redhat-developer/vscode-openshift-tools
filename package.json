@@ -67,8 +67,8 @@
 		"update-deps": "ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
 		"coverage:upload": "codecov -f coverage/coverage-final.json",
 		"build": "npm run clean && npm run lint && npm run compile && npm run bundle-tools",
-		"smoke-test": "npm run compile && extest setup-and-run out/test/ui/smoke-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -c max",
-		"public-ui-test": "npm run compile && extest setup-and-run out/test/ui/public-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -c max"
+		"smoke-test": "extest setup-and-run out/test/ui/smoke-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c max -i",
+		"public-ui-test": "extest setup-and-run out/test/ui/public-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c max -i"
 	},
 	"dependencies": {
 		"@kubernetes/client-node": "^0.16.1",
