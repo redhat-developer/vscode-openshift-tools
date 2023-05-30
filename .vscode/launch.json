@@ -89,7 +89,10 @@
                 "${workspaceFolder}/test/ui/settings.json",
                 "-m",
                 "--mocha_config",
-                "${workspaceFolder}/test/ui/.mocharc.js"
+                "${workspaceFolder}/test/ui/.mocharc.js",
+                "-e",
+                "./test-resources/extensions",
+                "-i"
             ],
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"
@@ -114,7 +117,9 @@
                 "${workspaceFolder}/test/ui/settings.json",
                 "-m",
                 "--mocha_config",
-                "${workspaceFolder}/test/ui/.mocharc.js"
+                "${workspaceFolder}/test/ui/.mocharc.js",
+                "-e",
+                "./test-resources/extensions"
             ],
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"

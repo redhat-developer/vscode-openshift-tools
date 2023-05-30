@@ -10,6 +10,8 @@ import { checkFocusOnCommands } from './suite/focusOn';
 import { testImportFromGit } from './suite/import-from-git';
 import { checkOpenshiftView } from './suite/openshift';
 
+require('source-map-support').install();
+
 describe('Extension public-facing UI tests', function() {
     checkExtension();
     checkOpenshiftView();
