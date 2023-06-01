@@ -6,6 +6,7 @@ export const json = {
                 {
                     "type": "rating",
                     "name": "Satisfaction",
+                    "isRequried": true,
                     "title": "Overall, how satisfied or dissatisfied are you with the extension?",
                     "rateDisplayMode": "smileys",
                     "scaleColorMode": "colored",
@@ -66,15 +67,18 @@ export const json = {
                     "type": "text",
                     "name": "Best feature",
                     "title": "What do you like best about the extension?"
-                }
+                },
+                {
+                    "type": "text",
+                    "name": "contact",
+                    "title": "Share your contact information if you'd like us to answer you:",
+                    "placeholder": "Enter email address, phone number or leave blank for anonymous feedback"
+                },
             ]
         }
     ],
     "showProgressBar": "top",
     "progressBarType": "questions",
     "widthMode": "static",
-    "width": "864px",
-    "surveyId": "be37f308-5344-4f81-9586-938c4e57f264",
-    "surveyPostId": "90238cd2-3de3-430f-b3b4-dc6fc3344e33",
-    "surveyShowDataSaving": true
+    "width": "864px"
 };

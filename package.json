@@ -380,12 +380,9 @@
 			},
 			{
 				"command": "openshift.show.survey",
-				"title": "Survey Extension",
+				"title": "Share your feedback",
 				"category": "OpenShift",
-				"icon": {
-					"dark": "images/title/dark/icon-issue.svg",
-					"light": "images/title/light/icon-issue.svg"
-				}
+				"icon": "$(feedback)"
 			},
 			{
 				"command": "openshift.project.create",
