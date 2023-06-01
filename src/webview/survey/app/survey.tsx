@@ -10,6 +10,8 @@ import { DefaultProps } from '../../common/propertyTypes';
 import { json } from '../json';
 import { VSCodeMessage } from './vsCodeMessage';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import OpenShiftExtensionIcon from '../../../../images/openshift_icon.png';
+import MicrosoftIcon from '../../../../images/welcome/microsoft.svg';
 import 'survey-core/defaultV2.css';
 import './survey.css'
 
@@ -28,7 +30,7 @@ export const SurveyComponent: React.FC<DefaultProps> = ({ }) => {
         <div className='parentContainer'>
             <div className='headerContainer'>
                 <header className='header__logo' style={{ width: '50%' }}>
-                    <img className='image__logo' src={require('../../../../images/title/logo.svg').default} />
+                    <img className='image__logo' src={OpenShiftExtensionIcon} />
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <label style={{ display: 'flex', flexDirection: 'row', textAlign: 'center' }}>
                             <Typography variant='h4' className='highlight'>OpenShift</Typography>
@@ -51,7 +53,7 @@ export const SurveyComponent: React.FC<DefaultProps> = ({ }) => {
                             <div className='section__header-hint section__footer'>
                                 <Stack direction='row' alignItems='center' gap={1}>
                                     <Icon fontSize='small'>
-                                        <img src={require('../../../../images/welcome/microsoft.svg').default} />
+                                        <img src={MicrosoftIcon} />
                                     </Icon>
                                     <Typography variant='body2' className='footerText'>Rate us on Marketplace</Typography>
                                 </Stack>

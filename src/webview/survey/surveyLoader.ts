@@ -4,8 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as fs from 'fs';
 import { ExtensionID } from '../../util/constants';
+import { loadWebviewHtml } from '../common-ext/utils';
 
 let panel: vscode.WebviewPanel;
 
@@ -24,7 +24,7 @@ export default class SurveyLoader {
     }
 
     // eslint-disable-next-line @typescript-eslint/require-await
-    static async loadView(title: string, url?: string): Promise<vscode.WebviewPanel> {
+    static async loadView(title: string): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(path.join(SurveyLoader.extensionPath, 'out', 'surveyViewer'));
         if (panel) {
             // If we already have a panel, show it in the target column
@@ -37,34 +37,12 @@ export default class SurveyLoader {
                 retainContextWhenHidden: true
             });
             panel.iconPath = vscode.Uri.file(path.join(SurveyLoader.extensionPath, 'images/openshift_extension.png'));
-            panel.webview.html = SurveyLoader.getWebviewContent(SurveyLoader.extensionPath, panel);
+            panel.webview.html = await loadWebviewHtml('surveyViewer', panel);
             panel.onDidDispose(() => {
                 panel = undefined;
             });
             panel.webview.onDidReceiveMessage(surveyMessageListener);
         }
         return panel;
-    }
-
-    private static getWebviewContent(extensionPath: string, p: vscode.WebviewPanel): string {
-        // Local path to main script run in the webview
-        const reactAppRootOnDisk = path.join(extensionPath, 'out', 'surveyViewer');
-        const reactAppPathOnDisk = vscode.Uri.file(
-            path.join(reactAppRootOnDisk, 'surveyViewer.js'),
-        );
-        const reactAppUri = p.webview.asWebviewUri(reactAppPathOnDisk);
-        const htmlString: Buffer = fs.readFileSync(path.join(reactAppRootOnDisk, 'index.html'));
-        const meta = `<meta http-equiv="Content-Security-Policy"
-            content="connect-src *;
-            default-src 'none';
-            img-src ${p.webview.cspSource} https: 'self' data:;
-            script-src 'unsafe-eval' 'unsafe-inline' vscode-resource:;
-            style-src 'self' vscode-resource: 'unsafe-inline';">`;
-        return `${htmlString}`
-            .replace('%COMMAND%', '')
-            .replace('%PLATFORM%', process.platform)
-            .replace('surveyViewer.js', `${reactAppUri}`)
-            .replace('%BASE_URL%', `${reactAppUri}`)
-            .replace('<!-- meta http-equiv="Content-Security-Policy" -->', meta);
     }
 }
