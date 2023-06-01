@@ -9,7 +9,7 @@ import clsx from 'clsx';
 import AddClusterView from './clusterView';
 import AddSandboxView from './sandboxView';
 import clusterStyle, { ClusterTheme } from './cluster.style';
-import './images/logo.png';
+import OpenShiftLogo from './images/logo.png';
 import { Card, Typography, CardContent, ListItem, ListItemText, CardActions, Tooltip, Button, List, ThemeProvider } from '@mui/material';
 
 const useStyles = makeStyles(clusterStyle);
@@ -155,7 +155,7 @@ export default function Header() {
                         }
                     </div>
                     <div className={classes.iconContainer}>
-                        <img className={classes.image} src='assets/logo.png' alt='redhat-openshift'></img>
+                        <img className={classes.image} src={OpenShiftLogo} alt='redhat-openshift'></img>
                     </div>
                 </div>
                 {showWizard === 'crc' && (

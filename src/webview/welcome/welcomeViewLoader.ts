@@ -2,11 +2,11 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as vscode from 'vscode';
 import * as path from 'path';
-import * as fs from 'fs';
-import { ExtensionID } from '../../util/constants';
+import * as vscode from 'vscode';
 import sendTelemetry, { WelcomePageProps } from '../../telemetry';
+import { ExtensionID } from '../../util/constants';
+import { loadWebviewHtml } from '../common-ext/utils';
 const request = require('request');
 
 let panel: vscode.WebviewPanel;
@@ -88,7 +88,7 @@ export default class WelcomeViewLoader {
                 retainContextWhenHidden: true
             });
             panel.iconPath = vscode.Uri.file(path.join(WelcomeViewLoader.extensionPath, 'images/openshift_extension.png'));
-            panel.webview.html = WelcomeViewLoader.getWebviewContent(WelcomeViewLoader.extensionPath, panel);
+            panel.webview.html = await loadWebviewHtml('welcomeViewer', panel);
             panel.onDidDispose(() => {
                 panel = undefined;
             });
@@ -97,25 +97,4 @@ export default class WelcomeViewLoader {
         return panel;
     }
 
-    private static getWebviewContent(extensionPath: string, p: vscode.WebviewPanel): string {
-        // Local path to main script run in the webview
-        const reactAppRootOnDisk = path.join(extensionPath, 'out', 'welcomeViewer');
-        const reactAppPathOnDisk = vscode.Uri.file(
-            path.join(reactAppRootOnDisk, 'welcomeViewer.js'),
-        );
-        const reactAppUri = p.webview.asWebviewUri(reactAppPathOnDisk);
-        const htmlString: Buffer = fs.readFileSync(path.join(reactAppRootOnDisk, 'index.html'));
-        const meta = `<meta http-equiv="Content-Security-Policy"
-            content="connect-src *;
-            default-src 'none';
-            img-src ${p.webview.cspSource} https: 'self' data:;
-            script-src ${p.webview.cspSource} 'unsafe-eval' 'unsafe-inline' vscode-resource:;
-            style-src 'self' vscode-resource: 'unsafe-inline';">`;
-        return `${htmlString}`
-            .replace('%COMMAND%', '')
-            .replace('%PLATFORM%', process.platform)
-            .replace('welcomeViewer.js', `${reactAppUri}`)
-            .replace('%BASE_URL%', `${reactAppUri}`)
-            .replace('<!-- meta http-equiv="Content-Security-Policy" -->', meta);
-    }
 }

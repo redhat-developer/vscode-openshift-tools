@@ -12,6 +12,7 @@ import { Chart } from '../helmChartType';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { DevFileProps } from './wrapperCardItem';
 import { LoadScreen } from '../../common/loading';
+import HelmIcon from '../../../../images/helm/helm.svg';
 
 export class CardItem extends React.Component<DevFileProps, {
     displayName: string,
@@ -307,7 +308,7 @@ export class CardItem extends React.Component<DevFileProps, {
                             <div className={this.props.cardItemStyle.devPageTitle} style={{ gap: '2rem', width: '50%' }}>
                                 <img
                                     data-testid='icon'
-                                    src={this.state.selectedVersion.icon ? this.state.selectedVersion.icon : require('../../../../images/helm/helm.svg').default}
+                                    src={this.state.selectedVersion.icon ? this.state.selectedVersion.icon : HelmIcon}
                                     alt={this.state.selectedVersion.icon + ' logo'}
                                     className={this.props.cardItemStyle.cardImage}
                                     style={{ margin: '0rem' }} />
@@ -359,7 +360,7 @@ export class CardItem extends React.Component<DevFileProps, {
                         <div className={this.props.cardItemStyle.cardHeader}>
                             <div className={this.props.cardItemStyle.cardHeaderDisplay} style={{ flexDirection: 'row' }}>
                                 <img
-                                    src={selectedVersion.icon ? selectedVersion.icon : require('../../../../images/helm/helm.svg').default}
+                                    src={selectedVersion.icon ? selectedVersion.icon : HelmIcon}
                                     alt={`${selectedVersion.name} icon`}
                                     className={this.props.cardItemStyle.cardImage} style={{ margin: '0.5rem', width: '2.5rem', height: '2.5rem' }} />
                                 {selectedVersion.version && <Badge key={`key-` + selectedVersion.version}

@@ -13,6 +13,14 @@ import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import LaptopMacIcon from '@mui/icons-material/LaptopMac';
 import ScrollToTop from 'react-scroll-to-top';
 import './welcome.scss';
+import OpenShiftExtensionIcon from '../../../../images/openshift_extension.png';
+import OdoLogo from '../../../../images/welcome/odo.png';
+import MicrosoftLogo from '../../../../images/welcome/microsoft.svg';
+import OpenShiftLogo from '../../../../images/title/logo.svg';
+import DevfileBranding from '../../../../images/welcome/devfile.png';
+import ComponentBranding from '../../../../images/welcome/component.png';
+import CloudBranding from '../../../../images/welcome/cloud.svg';
+import OpenShiftBranding from '../../../../images/welcome/OpenShift-Branding-box.png';
 
 export interface DefaultProps {
     analytics?: import('@segment/analytics-next').Analytics;
@@ -112,7 +120,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <Icon fontSize='large'>
-                                            <img src={require('../../../../images/openshift_extension.png').default} />
+                                            <img src={OpenShiftExtensionIcon} />
                                         </Icon>
                                         <Typography variant='h6' className='footerText'>Developer Sandbox for Red Hat OpenShift</Typography>
                                     </Stack>
@@ -128,7 +136,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <Icon fontSize='large'>
-                                            <img src={require('../../../../images/welcome/odo.png').default} />
+                                            <img src={OdoLogo} />
                                         </Icon>
                                         <Typography variant='h6' className='footerText'>odo</Typography>
                                     </Stack>
@@ -215,7 +223,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
                                         <Icon fontSize='large'>
-                                            <img src={require('../../../../images/welcome/microsoft.svg').default} />
+                                            <img src={MicrosoftLogo} />
                                         </Icon>
                                         <Typography variant='h6' className='footerText'>View in Marketplace</Typography>
                                     </Stack>
@@ -232,7 +240,7 @@ export class Welcome extends React.Component<DefaultProps, {
         const { lastRelease, isChecked } = this.state;
         return <>
             <header className='header__logo'>
-                <img className='image__logo' src={require('../../../../images/title/logo.svg').default} />
+                <img className='image__logo' src={OpenShiftLogo} />
                 <label style={{ display: 'flex', flexDirection: 'row', textAlign: 'center' }}><Typography variant='h1' className='highlight'>OpenShift</Typography><Typography variant='h1' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Toolkit</Typography></label>
             </header>
             <div className='container' id='con'>
@@ -271,7 +279,7 @@ export class Welcome extends React.Component<DefaultProps, {
                         <div className='section__brand__preview'>
                             <img
                                 className='brand'
-                                src={require('../../../../images/welcome/OpenShift-Branding-box.png').default}
+                                src={OpenShiftBranding}
                                 loading='lazy' />
                         </div>
                     </section>
@@ -306,7 +314,7 @@ export class Welcome extends React.Component<DefaultProps, {
                         </div>
                         <div className='section__brand__preview'
                             style={{ margin: '0rem' }}>
-                            <img className='content__image__preview' src={require('../../../../images/welcome/cloud.svg').default} />
+                            <img className='content__image__preview' src={CloudBranding} />
                         </div>
                     </section>
                     <section className='section--settings'>
@@ -335,7 +343,7 @@ export class Welcome extends React.Component<DefaultProps, {
                         </div>
                         <div className='section__brand__preview'
                             style={{ margin: '0rem' }}>
-                            <img className='content__image__preview' src={require('../../../../images/welcome/component.png').default} />
+                            <img className='content__image__preview' src={ComponentBranding} />
                         </div>
                     </section>
                     <section className='section--settings'>
@@ -351,7 +359,7 @@ export class Welcome extends React.Component<DefaultProps, {
                         </div>
                         <div className='section__brand__preview'
                             style={{ margin: '0rem' }}>
-                            <img className='content__image__preview' src={require('../../../../images/welcome/devfile.png').default} />
+                            <img className='content__image__preview' src={DevfileBranding} />
                         </div>
                     </section>
                     <section className='section--settings' style={{ gap: '3rem' }}>
