@@ -5,15 +5,9 @@
 
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { FeedbackComponent } from './feedback';
 import './index.css';
 
-ReactDOM.render(
-    <Router>
-        <Routes>
-            <Route path="/index.html" element={<FeedbackComponent />} />
-        </Routes>
-    </Router>,
+ReactDOM.render(<FeedbackComponent />,
     document.getElementById('root'),
 );

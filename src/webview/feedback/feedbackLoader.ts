@@ -10,7 +10,6 @@ import sendTelemetry from '../../telemetry';
 
 let panel: vscode.WebviewPanel | undefined;
 
-// eslint-disable-next-line @typescript-eslint/require-await
 async function feedbackMessageListener(event: any): Promise<any> {
     switch (event?.action) {
         case 'postFeedback':
@@ -24,12 +23,10 @@ async function feedbackMessageListener(event: any): Promise<any> {
 }
 
 export default class FeedbackLoader {
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    static get extensionPath() {
+    static get extensionPath(): string | undefined {
         return vscode.extensions.getExtension(ExtensionID)?.extensionPath;
     }
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     static async loadView(title: string): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(path.join(FeedbackLoader.extensionPath || '', 'out', 'feedbackViewer'));
         if (panel) {
