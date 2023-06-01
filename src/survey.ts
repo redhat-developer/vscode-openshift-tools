@@ -9,7 +9,7 @@ export class Survey {
 
     @vsCommand('openshift.show.survey')
     static async openSurvey(): Promise<void> {
-        await SurveyLoader.loadView('Survey');
+        await SurveyLoader.loadView('Feedback');
     }
 
 }

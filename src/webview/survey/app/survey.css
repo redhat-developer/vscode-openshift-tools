@@ -1,0 +1,58 @@
+.parentContainer {
+    display: flex;
+    flex-direction: column;
+    background-Color: var(--vscode-editor-background) !important;
+    color: var(--vscode-editor-foreground) !important;
+    font-family: var(--vscode-editor-font-family) !important;
+    font-size: var(--vscode-editor-font-size) !important;
+    font-weight: var(--vscode-editor-font-weight) !important;
+}
+
+.header__logo {
+    margin-top: 1rem;
+    margin-left: 1rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    gap: 3px;
+}
+
+.image__logo {
+    height: 32px;
+    width: 40px;
+}
+
+.highlight {
+    color: #EE0000;
+    display: inline;
+}
+
+.foreGroundColor {
+    color: var(--vscode-foreground);
+    font-weight: normal;
+}
+
+.headerContainer {
+    display: flex;
+    flex-direction: row;
+}
+
+.section__header-hint {
+    width: 550px;
+    justify-content: center;
+    word-spacing: 5px;
+    text-align: justify;
+    color: var(--vscode-foreground);
+    font-weight: normal;
+    font-family: var(--vscode-font-family);
+    font-size: 14px;
+}
+
+.section__footer {
+    width: fit-content;
+    word-spacing: 0px;
+}
+
+.footerText:hover {
+    border-bottom: 3px solid #EE0000 !important;
+}

@@ -52,3 +52,32 @@
 .sd-description {
     color: var(--vscode-descriptionForeground) !important;
 }
+
+.sd-element__title span {
+    background-Color: var(--vscode-editor-background) !important;
+    color: var(--vscode-editor-foreground) !important;
+    font-size: var(--vscode-editor-font-size) !important;
+    font-weight: var(--vscode-editor-font-weight) !important;
+}
+
+.svc-logic-question-value,
+.sd-element--with-frame {
+    background-color: transparent !important;
+}
+
+.sd-rating__item-text.sd-rating__item-text {
+    border: none !important;
+}
+
+.sd-rating__item-smiley {
+    background-color: #ffd700 !important;
+    fill: black !important;
+}
+
+a:link {
+    text-decoration: none !important;
+}
+
+a:focus {
+    box-shadow: none !important;
+}

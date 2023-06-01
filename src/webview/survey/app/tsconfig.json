@@ -4,17 +4,25 @@
         "moduleResolution": "node",
         "target": "es6",
         "outDir": "helmChartViewer",
-        "lib": ["es6", "dom"],
+        "lib": [
+            "es6",
+            "dom"
+        ],
         "jsx": "react",
         "sourceMap": true,
         "noUnusedLocals": true,
         // "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         "experimentalDecorators": true,
-        "typeRoots": ["../../../../node_modules/@types", "../../@types"],
+        "typeRoots": [
+            "../../../../node_modules/@types",
+            "../../@types"
+        ],
         "baseUrl": ".",
         "resolveJsonModule": true,
         "esModuleInterop": true
     },
-    "exclude": ["node_modules"]
+    "exclude": [
+        "node_modules"
+    ]
 }

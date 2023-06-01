@@ -6,18 +6,13 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ExtensionID } from '../../util/constants';
-import { GoogleSpreadsheet } from 'google-spreadsheet';
-import { ExtCommandTelemetryEvent } from '../../telemetry';
-const creds = require('../../../client-secret.json');
 
 let panel: vscode.WebviewPanel;
-let doc: GoogleSpreadsheet;
-accessSpreadSheet();
 
 async function surveyMessageListener(event: any): Promise<any> {
     switch (event?.action) {
         case 'postSurvey':
-            postSurveyData(event);
+            // code for post the survey
             break;
     }
 }
@@ -36,7 +31,7 @@ export default class SurveyLoader {
             panel.reveal(vscode.ViewColumn.One);
             panel.title = title;
         } else {
-            panel = vscode.window.createWebviewPanel('OpenShift Toolkit Survey', title, vscode.ViewColumn.One, {
+            panel = vscode.window.createWebviewPanel('OpenShift Toolkit - Feedback', title, vscode.ViewColumn.One, {
                 enableScripts: true,
                 localResourceRoots: [localResourceRoot],
                 retainContextWhenHidden: true
@@ -71,24 +66,5 @@ export default class SurveyLoader {
             .replace('surveyViewer.js', `${reactAppUri}`)
             .replace('%BASE_URL%', `${reactAppUri}`)
             .replace('<!-- meta http-equiv="Content-Security-Policy" -->', meta);
-    }
-}
-
-async function postSurveyData(event: any) {
-    if (doc) {
-        const postSurvey = new ExtCommandTelemetryEvent('openshift.survey.postData');
-        const sheet = doc.sheetsByIndex[0];
-        await sheet.addRow(event.data);
-        postSurvey.send();
-    }
-}
-
-async function accessSpreadSheet() {
-    doc = new GoogleSpreadsheet('1koSspGMihgBw4ooyxirJmC0j-6_Yx9Q9zgSGhj2enK0');
-    await doc.useServiceAccountAuth(creds);
-    await doc.loadInfo();
-    if (!doc.title) {
-        const surveyFailedAccessSpreadSheet = new ExtCommandTelemetryEvent('openshift.survey.accessSpreadSheet');
-        surveyFailedAccessSpreadSheet.send({ error: 'Unable to access the survey spreadsheet on cloud' });
     }
 }

@@ -1,21 +1,16 @@
 export const json = {
-    "title": "OpenShift Toolkit Survey",
-    "description": "Your opinion matters to us!",
-    "logo": "https://upload.wikimedia.org/wikipedia/commons/3/3a/OpenShift-LogoType.svg",
-    "logoFit": "cover",
-    "logoPosition": "left",
-    "logoHeight": "100px",
     "pages": [
         {
-            "name": "page1",
+            "name": "Feedback Page",
             "elements": [
                 {
                     "type": "rating",
                     "name": "Satisfaction",
                     "title": "Overall, how satisfied or dissatisfied are you with the extension?",
+                    "rateDisplayMode": "smileys",
+                    "scaleColorMode": "colored",
                     "minRateDescription": "Extremely dissatisfied",
-                    "maxRateDescription": "Extremely satisfied",
-                    "default": 5
+                    "maxRateDescription": "Extremely satisfied"
                 },
                 {
                     "type": "comment",
@@ -30,6 +25,8 @@ export const json = {
                     "type": "rating",
                     "name": "Recommendation",
                     "title": "How likely is it that you would recommend the OpenShift Toolkit extension  to a friend or colleague?",
+                    "rateDisplayMode": "smileys",
+                    "scaleColorMode": "colored",
                     "minRateDescription": "Not at all!",
                     "maxRateDescription": "Extremely!"
                 },
@@ -54,12 +51,7 @@ export const json = {
                     "titleLocation": "hidden",
                     "hideNumber": true,
                     "placeholder": "Please specify the similar extension..."
-                }
-            ]
-        },
-        {
-            "name": "page2",
-            "elements": [
+                },
                 {
                     "type": "text",
                     "name": "Frustrating feature",
