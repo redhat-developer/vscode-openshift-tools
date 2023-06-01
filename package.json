@@ -379,7 +379,7 @@
 				}
 			},
 			{
-				"command": "openshift.show.survey",
+				"command": "openshift.show.feedback",
 				"title": "Share your feedback",
 				"category": "OpenShift",
 				"icon": "$(feedback)"
@@ -1130,7 +1130,7 @@
 					"group": "navigation@4"
 				},
 				{
-					"command": "openshift.show.survey",
+					"command": "openshift.show.feedback",
 					"when": "view == openshiftProjectExplorer",
 					"group": "navigation@5"
 				},

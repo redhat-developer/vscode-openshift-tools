@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { vsCommand } from './vscommand';
-import SurveyLoader from './webview/survey/surveyLoader';
+import FeedbackLoader from './webview/feedback/feedbackLoader';
 
-export class Survey {
+export class Feedback {
 
-    @vsCommand('openshift.show.survey')
-    static async openSurvey(): Promise<void> {
-        await SurveyLoader.loadView('Feedback');
+    @vsCommand('openshift.show.feedback')
+    static async openFeedbackWindow(): Promise<void> {
+        await FeedbackLoader.loadView('Feedback');
     }
 
 }

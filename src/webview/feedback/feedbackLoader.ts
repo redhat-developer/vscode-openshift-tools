@@ -10,9 +10,10 @@ import sendTelemetry from '../../telemetry';
 
 let panel: vscode.WebviewPanel | undefined;
 
-async function surveyMessageListener(event: any): Promise<any> {
+// eslint-disable-next-line @typescript-eslint/require-await
+async function feedbackMessageListener(event: any): Promise<any> {
     switch (event?.action) {
-        case 'postSurvey':
+        case 'postFeedback':
             if (Object.keys(event.data).length > 0) {
                 sendTelemetry('feedback', event.data);
             }
@@ -22,7 +23,7 @@ async function surveyMessageListener(event: any): Promise<any> {
     }
 }
 
-export default class SurveyLoader {
+export default class FeedbackLoader {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     static get extensionPath() {
         return vscode.extensions.getExtension(ExtensionID)?.extensionPath;
@@ -30,7 +31,7 @@ export default class SurveyLoader {
 
     // eslint-disable-next-line @typescript-eslint/require-await
     static async loadView(title: string): Promise<vscode.WebviewPanel> {
-        const localResourceRoot = vscode.Uri.file(path.join(SurveyLoader.extensionPath || '', 'out', 'surveyViewer'));
+        const localResourceRoot = vscode.Uri.file(path.join(FeedbackLoader.extensionPath || '', 'out', 'feedbackViewer'));
         if (panel) {
             // If we already have a panel, show it in the target column
             panel.reveal(vscode.ViewColumn.One);
@@ -41,12 +42,12 @@ export default class SurveyLoader {
                 localResourceRoots: [localResourceRoot],
                 retainContextWhenHidden: true
             });
-            panel.iconPath = vscode.Uri.file(path.join(SurveyLoader.extensionPath || '', 'images/openshift_extension.png'));
-            panel.webview.html = await loadWebviewHtml('surveyViewer', panel);
+            panel.iconPath = vscode.Uri.file(path.join(FeedbackLoader.extensionPath || '', 'images/openshift_extension.png'));
+            panel.webview.html = await loadWebviewHtml('feedbackViewer', panel);
             panel.onDidDispose(() => {
                 panel = undefined;
             });
-            panel.webview.onDidReceiveMessage(surveyMessageListener);
+            panel.webview.onDidReceiveMessage(feedbackMessageListener);
         }
         return panel;
     }

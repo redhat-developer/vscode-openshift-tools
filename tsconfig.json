@@ -33,7 +33,7 @@
         "src/webview/welcome/app",
         "src/webview/git-import/app",
         "src/webview/helm-chart/app",
-        "src/webview/survey/app",
+        "src/webview/feedback/app",
         "src/webview/common"
     ]
 }

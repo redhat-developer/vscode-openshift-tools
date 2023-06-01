@@ -3,7 +3,7 @@
         "module": "esnext",
         "moduleResolution": "node",
         "target": "es6",
-        "outDir": "surveyViewer",
+        "outDir": "feedbackViewer",
         "lib": ["es6", "dom"],
         "jsx": "react",
         "sourceMap": true,

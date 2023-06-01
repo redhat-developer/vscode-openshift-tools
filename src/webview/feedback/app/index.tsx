@@ -6,13 +6,13 @@
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { SurveyComponent } from './survey';
+import { FeedbackComponent } from './feedback';
 import './index.css';
 
 ReactDOM.render(
     <Router>
         <Routes>
-            <Route path="/index.html" element={<SurveyComponent />} />
+            <Route path="/index.html" element={<FeedbackComponent />} />
         </Routes>
     </Router>,
     document.getElementById('root'),

@@ -4,8 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
 import { Icon, Stack, Typography } from '@mui/material';
-import { Model } from "survey-core";
-import { Survey } from "survey-react-ui";
+import { Model } from 'survey-core';
+import { Survey } from 'survey-react-ui';
 import { DefaultProps } from '../../common/propertyTypes';
 import { json } from '../json';
 import { VSCodeMessage } from './vsCodeMessage';
@@ -13,15 +13,17 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import OpenShiftExtensionIcon from '../../../../images/openshift_icon.png';
 import MicrosoftIcon from '../../../../images/welcome/microsoft.svg';
 import 'survey-core/defaultV2.css';
-import './survey.css'
+import './feedback.css'
 
-export const SurveyComponent: React.FC<DefaultProps> = ({ }) => {
+// eslint-disable-next-line no-empty-pattern
+export const FeedbackComponent: React.FC<DefaultProps> = ({ }) => {
 
-    const survey = new Model(json);
-    survey.onComplete.add((sender, options) => {
+    const feedbackModal = new Model(json);
+    feedbackModal.onComplete.add((sender, options) => {
         options.showSaveInProgress();
         VSCodeMessage.postMessage({
-            action: 'postSurvey',
+            action: 'postFeedback',
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             data: sender.data
         });
         options.showSaveSuccess();
@@ -62,7 +64,7 @@ export const SurveyComponent: React.FC<DefaultProps> = ({ }) => {
                     </label>
                 </div>
             </div>
-            <Survey model={survey} />
+            <Survey model={feedbackModal} />
         </div>
     );
 }
