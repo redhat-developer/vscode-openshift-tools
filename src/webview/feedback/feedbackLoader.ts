@@ -13,9 +13,7 @@ let panel: vscode.WebviewPanel | undefined;
 async function feedbackMessageListener(event: any): Promise<any> {
     switch (event?.action) {
         case 'postFeedback':
-            if (Object.keys(event.data).length > 0) {
-                sendTelemetry('feedback', event.data);
-            }
+            sendTelemetry('feedback', event.data);
             break;
         default:
             break;

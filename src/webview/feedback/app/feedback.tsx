@@ -15,19 +15,26 @@ import MicrosoftIcon from '../../../../images/welcome/microsoft.svg';
 import 'survey-core/defaultV2.css';
 import './feedback.css'
 
-// eslint-disable-next-line no-empty-pattern
 export const FeedbackComponent: React.FC<DefaultProps> = ({ }) => {
 
     const feedbackModal = new Model(json);
+
     feedbackModal.onComplete.add((sender, options) => {
         options.showSaveInProgress();
         VSCodeMessage.postMessage({
             action: 'postFeedback',
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             data: sender.data
         });
         options.showSaveSuccess();
     });
+
+    feedbackModal.onValueChanged.add((feedbackModal, _question) => {
+        feedbackModal.showNavigationButtons = true;
+    });
+
+    feedbackModal.completeText = 'Submit';
+    feedbackModal.showNavigationButtons = false;
+
     return (
         <div className='parentContainer'>
             <div className='headerContainer'>
