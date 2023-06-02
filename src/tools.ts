@@ -4,11 +4,12 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
-import * as vscode from 'vscode';
 import { which } from 'shelljs';
-import { Platform } from './util/platform';
+import * as vscode from 'vscode';
 import { CliChannel } from './cli';
+import { Platform } from './util/platform';
 import semver = require('semver');
 
 import configData = require('./tools.json');
@@ -39,8 +40,15 @@ export class ToolsConfig {
     public static async detect(cmd: string): Promise<string> {
 
         if (ToolsConfig.tools[cmd].location === undefined) {
-            const toolCacheLocation = path.resolve(__dirname, '..', 'tools', Platform.OS, ToolsConfig.tools[cmd].cmdFileName);
-            const toolLocations: string[] = [toolCacheLocation];
+            let toolCacheLocation = path.resolve(__dirname, '..', 'tools', Platform.OS, ToolsConfig.tools[cmd].cmdFileName);
+            let toolLocations: string[] = [toolCacheLocation];
+            if (process.env.REMOTE_CONTAINERS === 'true') {
+                const openShiftToolsFolder = path.join(os.homedir(), '.local', 'state', 'vs-openshift-tools');
+                if (fs.existsSync(path.join(openShiftToolsFolder, 'tools', cmd))) {
+                    toolLocations = [path.join(openShiftToolsFolder, 'tools', cmd, cmd)];
+                    toolCacheLocation = path.join(openShiftToolsFolder, 'tools-cache');
+                }
+            }
             if (vscode.workspace.getConfiguration('openshiftToolkit').get('searchForToolsInPath')) {
                 const whichLocation = which(cmd);
                 toolLocations.unshift(whichLocation && whichLocation.stdout);
