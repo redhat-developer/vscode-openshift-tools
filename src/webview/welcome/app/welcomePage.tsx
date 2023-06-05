@@ -372,10 +372,10 @@ export class Welcome extends React.Component<DefaultProps, {
                         </div>
                         <section className='sticky-section-content'>
                             <div className='sticky-section-exten'>
-                                <p className='section__header-hint sticky-section-hint'>Allows developers to easily create, deploy and live debug container applications running on OpenShift &#38; Kubernetes. Thus enhancing the development inner loop workflow through One-click actions right from IDE.</p>
+                                <p className='section__header-hint sticky-section-hint'>Allows developers to easily <p className='highlight'>create, deploy and live debug</p> container applications running on OpenShift &#38; Kubernetes. Thus enhancing the development inner loop workflow through One-click actions right from IDE.</p>
                             </div>
                             <div className='sticky-section-exten'>
-                                <p className='section__header-hint sticky-section-hint'>Allows developers to Push code fast and often. Spend less time maintaining your deployment infrastructure and more time coding. Immediately have your application running each time you compile.</p>
+                                <p className='section__header-hint sticky-section-hint'>Allows developers to <p className='highlight'>Push code fast and often.</p> Spend less time maintaining your deployment infrastructure and more time coding. Immediately have your application running each time you compile.</p>
                             </div>
                             <div className='sticky-section-exten'>
                                 <p className='section__header-hint sticky-section-hint'>Allows support for importing devfile templates to set up specific applications quickly. This helps to deploy them all, big and small. Deploy a simple Node.JS application or even a complex Operator-backed service.</p>
@@ -384,7 +384,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                 <p className='section__header-hint sticky-section-hint'>Allows to Run your tests directly on the cluster. Debug and test remote applications deployed directly from your IDE to OpenShift. No more having to exit your IDE to push your application.</p>
                             </div>
                             <div className='sticky-section-exten'>
-                                <p className='section__header-hint sticky-section-hint'>Allows to connect &#38; provision free OpenShift cluster  from IDE, using a guided workflow. This workflow allows you to either Run OpenShift locally or provision a free 30 days Developer Sandbox.</p>
+                                <p className='section__header-hint sticky-section-hint'>Allows to connect &#38; <p className='highlight'>provision free OpenShift cluster</p> from IDE, using a guided workflow. This workflow allows you to either Run OpenShift locally or provision a free 30 days Developer Sandbox.</p>
                             </div>
                             <div className='sticky-section-exten'>
                                 <p className='section__header-hint sticky-section-hint'>Allows Monitoring through view and stream logs from your deployments, pods and containers for Kubernetes resources, with One Click from IDE.
