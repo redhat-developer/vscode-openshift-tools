@@ -145,7 +145,6 @@ export default (_theme: Theme) =>
             flexDirection: 'column'
         },
         helmCardHeader: {
-            paddingTop: '1.5rem!important',
             borderBottom: '1px solid',
             borderBottomColor: 'inherit',
             height: 'auto',
