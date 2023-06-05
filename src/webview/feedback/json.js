@@ -55,7 +55,7 @@ export const json = {
                     'visibleIf': '{Used-similar-extension} = true',
                     'titleLocation': 'hidden',
                     'hideNumber': true,
-                    'placeholder': 'Please specify the similar extension...'
+                    'placeholder': 'Please mention the similar extension name/URL.'
                 },
                 {
                     'type': 'text',
