@@ -60,7 +60,7 @@ export const json = {
                 {
                     'type': 'text',
                     'name': 'Frustrating feature',
-                    'title': 'What, if anything, do you find frustrating or unappealing about the extension ?'
+                    'title': 'What, if anything, do you find frustrating or challenging about the extension workflow?
                 },
                 {
                     'type': 'text',
