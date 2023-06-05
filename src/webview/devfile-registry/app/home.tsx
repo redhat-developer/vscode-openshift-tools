@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { ImageList, ImageListItem, ThemeProvider } from '@mui/material';
+import { ImageListItem, ThemeProvider, styled } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import React, { ChangeEvent } from 'react';
 import { Registry } from '../../../odo/componentType';
@@ -19,6 +19,28 @@ import { WrapperCardItem as CardItem } from './wrapperCardItem';
 
 const useCardItemStyles = makeStyles(cardItemStyle);
 
+const ImageGalleryList = styled('ul')(({ theme }) => ({
+    display: 'grid',
+    padding: 0,
+    margin: theme.spacing(0, 4),
+    gap: 1,
+    [theme.breakpoints.up('xs')]: {
+        gridTemplateColumns: 'repeat(1, 1fr)'
+    },
+    [theme.breakpoints.up('sm')]: {
+        gridTemplateColumns: 'repeat(2, 1fr)'
+    },
+    [theme.breakpoints.up('md')]: {
+        gridTemplateColumns: 'repeat(3, 1fr)'
+    },
+    [theme.breakpoints.up('lg')]: {
+        gridTemplateColumns: 'repeat(4, 1fr)'
+    },
+    [theme.breakpoints.up('xl')]: {
+        gridTemplateColumns: 'repeat(8, 1fr)'
+    },
+}));
+
 const HomeItem: React.FC<DevfileHomePageProps> = ({
     compDescriptions,
     themeKind
@@ -26,7 +48,7 @@ const HomeItem: React.FC<DevfileHomePageProps> = ({
     const cardItemStyle = useCardItemStyles();
     return (
         <ThemeProvider theme={HomeTheme}>
-            <ImageList className='devfileGalleryGrid' cols={4}>
+            <ImageGalleryList className='devfileGalleryGrid' style={{margin: '1rem'}}>
                 {
                     compDescriptions.map((compDescription: CompTypeDesc, key: number) => (
                         <ImageListItem key={`imageList-` + key}>
@@ -36,7 +58,7 @@ const HomeItem: React.FC<DevfileHomePageProps> = ({
                         </ImageListItem>
                     ))
                 }
-            </ImageList>
+            </ImageGalleryList>
         </ThemeProvider>
     );
 };
