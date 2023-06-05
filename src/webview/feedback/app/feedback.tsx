@@ -50,7 +50,7 @@ export const FeedbackComponent: React.FC<DefaultProps> = ({ }) => {
                 </header>
                 <div style={{ width: '50%' }}>
                     <label style={{ display: 'flex', flexDirection: 'row', gap: '1rem', textAlign: 'center', float: 'right', margin: '1rem' }}>
-                        <a href='https://github.com/redhat-developer/vscode-openshift-tools'>
+                        <a href='https://github.com/redhat-developer/vscode-openshift-tools/issues'>
                             <div className='section__header-hint section__footer'>
                                 <Stack direction='row' alignItems='center' gap={1}>
                                     <GitHubIcon style={{ fontSize: 25 }} />

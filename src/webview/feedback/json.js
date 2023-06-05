@@ -12,8 +12,8 @@ export const json = {
                     'name': 'Satisfaction',
                     'isRequried': true,
                     'title': 'Overall, how satisfied or dissatisfied are you with the extension?',
-                    'rateDisplayMode': 'smileys',
-                    'scaleColorMode': 'colored',
+                    'autoGenerate': false,
+                    'rateCount': 5,
                     'minRateDescription': 'Extremely dissatisfied',
                     'maxRateDescription': 'Extremely satisfied'
                 },
@@ -29,9 +29,9 @@ export const json = {
                 {
                     'type': 'rating',
                     'name': 'Recommendation',
-                    'title': 'How likely is it that you would recommend the OpenShift Toolkit extension  to a friend or colleague?',
-                    'rateDisplayMode': 'smileys',
-                    'scaleColorMode': 'colored',
+                    'title': 'How likely is it that you would recommend the OpenShift Toolkit extension to a friend or colleague?',
+                    'autoGenerate': false,
+                    'rateCount': 5,
                     'minRateDescription': 'Not at all!',
                     'maxRateDescription': 'Extremely!'
                 },
@@ -60,7 +60,7 @@ export const json = {
                 {
                     'type': 'text',
                     'name': 'Frustrating feature',
-                    'title': 'What, if anything, do you find frustrating or challenging about the extension workflow?
+                    'title': 'What, if anything, do you find frustrating or challenging about the extension workflow?'
                 },
                 {
                     'type': 'text',
