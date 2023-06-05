@@ -47,7 +47,7 @@ export const json = {
                 {
                     'type': 'boolean',
                     'name': 'Used-similar-extension',
-                    'title': 'Have you used similar extension before?'
+                    'title': 'Have you used any similar extension for cloud-native development ?'
                 },
                 {
                     'type': 'text',
