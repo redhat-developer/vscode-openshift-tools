@@ -77,7 +77,7 @@ export const json = {
                     'name': 'contact',
                     'hideNumber': true,
                     'title': 'Share your contact information if you\'d like us to answer you:',
-                    'placeholder': 'Enter email address, phone number or leave blank for anonymous feedback'
+                    'placeholder': 'Provide email address or leave blank for anonymous feedback'
                 },
             ]
         }
