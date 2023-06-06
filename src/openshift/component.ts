@@ -93,12 +93,12 @@ export class Component extends OpenShiftItem {
         return [
             debug.onDidStartDebugSession((session) => {
                 if (session.configuration.contextPath) {
-                    Component.debugSessions.set(session.configuration.contextPath.fsPath, session);
+                    Component.debugSessions.set(session.configuration.contextPath, session);
                 }
             }),
             debug.onDidTerminateDebugSession((session) => {
                 if (session.configuration.contextPath) {
-                    Component.debugSessions.delete(session.configuration.contextPath.fsPath);
+                    Component.debugSessions.delete(session.configuration.contextPath);
                 }
             })
         ];
@@ -571,6 +571,7 @@ export class Component extends OpenShiftItem {
     @vsCommand('openshift.component.debug', true)
     static async debug(component: ComponentWorkspaceFolder): Promise<string | null> {
         if (!component) return null;
+        if (Component.debugSessions.get(component.contextPath)) return Component.startDebugger(component);
         return Progress.execFunctionWithProgress(`Starting debugger session for the component '${component.component.devfileData.devfile.metadata.name}'.`, () => Component.startDebugger(component));
     }
 
