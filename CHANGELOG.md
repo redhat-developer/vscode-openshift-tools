@@ -1,4 +1,12 @@
 # Change Log
+## 1.5.0 (June 06, 2023)
+
+* [#2799](https://github.com/redhat-developer/vscode-openshift-tools/issues/2799) Added additional test cases for improving the test coverage
+* [#2921](https://github.com/redhat-developer/vscode-openshift-tools/issues/2921) Support odo 3.11.0 workflow
+* [#2928](https://github.com/redhat-developer/vscode-openshift-tools/pull/2928) Add support for crc 2.20.0 running OpenShift 4.13
+* [#2930](https://github.com/redhat-developer/vscode-openshift-tools/issues/2930) UI fixes on welcome page
+* [#2931](https://github.com/redhat-developer/vscode-openshift-tools/issues/2931) UI fixes on Helm chart view
+
 ## 1.4.0 (May 23, 2023)
 
 * [#2798](https://github.com/redhat-developer/vscode-openshift-tools/issues/2798) Auto generation of tools.json file with updated cli version and sha256 checksums

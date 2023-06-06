@@ -26,7 +26,8 @@ export const CardTheme = createTheme({
 export default (_theme: Theme) =>
     createStyles({
         card: {
-            height: 'auto',
+            height: '22rem',
+            width: '16rem',
             margin: '0.2rem',
             cursor: 'pointer',
             borderRadius: '1rem !important',
@@ -145,7 +146,6 @@ export default (_theme: Theme) =>
             flexDirection: 'column'
         },
         helmCardHeader: {
-            paddingTop: '1.5rem!important',
             borderBottom: '1px solid',
             borderBottomColor: 'inherit',
             height: 'auto',

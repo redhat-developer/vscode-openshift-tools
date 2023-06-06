@@ -7,7 +7,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import React from 'react';
 import clsx from 'clsx';
 import { CardTheme } from '../../common/cardItem.style';
-import '../app/cardItem.scss';
+import '../../common/cardItem.scss';
 import { Chart } from '../helmChartType';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { DevFileProps } from './wrapperCardItem';
@@ -312,7 +312,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                     alt={this.state.selectedVersion.icon + ' logo'}
                                     className={this.props.cardItemStyle.cardImage}
                                     style={{ margin: '0rem' }} />
-                                <div style={{ margin: '0rem' }}>
+                                <div style={{ marginTop: '0.6rem' }}>
                                     <Typography variant='subtitle1'>
                                         {
                                             capitalizeFirstLetter(this.props.helmEntry.displayName)
@@ -326,7 +326,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                         installResponse.loadScreen && <LoadScreen title='Installation in Progress' type='circle' />
                                     }
                                 </div>
-                                <div style={{float: 'right'}}>
+                                <div style={{float: 'right', marginTop: '0.5rem'}}>
                                     <Button
                                         disabled={this.handleDisable() || installResponse.installed}
                                         variant='outlined'

@@ -114,7 +114,36 @@ section {
 .sticky-section-content .sticky-section-exten {
     top: 0;
     width: 100%;
-    height: 16vh;
+}
+
+@media screen and (min-width: 120px) and (max-width: 400px) {
+    .sticky-section-content .sticky-section-exten{
+        height: 8vh !important;
+    }
+
+    .sticky-section {
+        height: 50vh !important;
+    }
+}
+
+@media only screen and (min-width: 440px) and (max-width: 1080px) {
+    .sticky-section-content .sticky-section-exten{
+        height: 10vh !important;
+    }
+
+    .sticky-section {
+        height: 65vh !important;
+    }
+}
+
+@media only screen and (min-width: 1080px)  and (max-width: 2500px)  {
+    .sticky-section-content .sticky-section-exten{
+        height: 12vh !important;
+    }
+
+    .sticky-section {
+        height: 65vh !important;
+    }
 }
 
 .sticky-content-section {
@@ -209,6 +238,7 @@ section {
 
 .sticky-section-hint {
     width: 53.125rem;
+    word-spacing: 2px !important;
 }
 
 .section__footer {
@@ -264,7 +294,6 @@ section {
 .sticky-section {
     display: flex;
     flex-direction: row;
-    height: 70vh;
     margin-left: 10rem;
     top: 0%;
     background: inherit;
@@ -444,4 +473,8 @@ li {
     border: 2px solid #EE0000;
     border-radius: 50%;
     margin-top: 5px;
+}
+
+b {
+    font-weight: bold !important;
 }
