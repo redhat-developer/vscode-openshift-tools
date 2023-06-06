@@ -76,6 +76,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
             './componentsView',
             './webview/devfile-registry/registryViewLoader',
             './webview/helm-chart/helmChartLoader',
+            './feedback'
         )),
         commands.registerCommand('clusters.openshift.useProject', (context) =>
             commands.executeCommand('extension.vsKubernetesUseNamespace', context),

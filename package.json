@@ -201,6 +201,7 @@
 		"sinon-chai": "^3.7.0",
 		"source-map-support": "^0.5.21",
 		"style-loader": "^3.3.1",
+		"survey-react-ui": "^1.9.89",
 		"targz": "^1.0.1",
 		"ts-loader": "^9.2.6",
 		"tslint": "^5.20.1",
@@ -376,6 +377,12 @@
 					"dark": "images/title/dark/icon-issue.svg",
 					"light": "images/title/light/icon-issue.svg"
 				}
+			},
+			{
+				"command": "openshift.show.feedback",
+				"title": "Share your feedback",
+				"category": "OpenShift",
+				"icon": "$(feedback)"
 			},
 			{
 				"command": "openshift.project.create",
@@ -1121,6 +1128,11 @@
 					"command": "openshift.explorer.reportIssue",
 					"when": "view == openshiftProjectExplorer",
 					"group": "navigation@4"
+				},
+				{
+					"command": "openshift.show.feedback",
+					"when": "view == openshiftProjectExplorer",
+					"group": "navigation@5"
 				},
 				{
 					"command": "openshift.component.createFromLocal",

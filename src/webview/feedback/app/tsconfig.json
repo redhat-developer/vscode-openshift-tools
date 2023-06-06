@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "module": "esnext",
+        "moduleResolution": "node",
+        "target": "es6",
+        "outDir": "feedbackViewer",
+        "lib": ["es6", "dom"],
+        "jsx": "react",
+        "sourceMap": true,
+        "noUnusedLocals": true,
+        // "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "experimentalDecorators": true,
+        "typeRoots": ["../../../../node_modules/@types", "../../@types"],
+        "baseUrl": ".",
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true
+    },
+    "exclude": ["node_modules"]
+}
