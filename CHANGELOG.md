@@ -1,5 +1,5 @@
 # Change Log
-## 1.5.0 (Jun 06, 2023)
+## 1.5.0 (June 06, 2023)
 
 * [#2799](https://github.com/redhat-developer/vscode-openshift-tools/issues/2799) Added additional test cases for improving the test coverage
 * [#2921](https://github.com/redhat-developer/vscode-openshift-tools/issues/2921) Support odo 3.11.0 workflow
