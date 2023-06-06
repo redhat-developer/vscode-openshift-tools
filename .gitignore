@@ -10,3 +10,4 @@ dist/
 public/
 test-resources/
 .DS_Store
+vscode*
