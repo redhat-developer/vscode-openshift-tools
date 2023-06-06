@@ -1251,12 +1251,12 @@
 				},
 				{
 					"command": "openshift.component.deleteConfigurationFiles",
-					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*/",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
 					"group": "c3@4"
 				},
 				{
 					"command": "openshift.component.deleteSourceFolder",
-					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*/",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
 					"group": "c3@5"
 				},
 				{
