@@ -9,7 +9,7 @@ export class Feedback {
 
     @vsCommand('openshift.show.feedback')
     static async openFeedbackWindow(): Promise<void> {
-        await FeedbackLoader.loadView('Feedback');
+        await FeedbackLoader.loadView('Share Feedback');
     }
 
 }
