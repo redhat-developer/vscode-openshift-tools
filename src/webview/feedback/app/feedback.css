@@ -20,6 +20,7 @@
 .image__logo {
     height: 48px;
     width: 54px;
+    object-fit: contain;
 }
 
 .highlight {
@@ -35,6 +36,17 @@
 .headerContainer {
     display: flex;
     flex-direction: row;
+    border-bottom: 3px solid #EE0000;
+}
+
+.captionHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    justify-content: center;
+    margin: auto;
+    margin-top: 1rem;
+    word-spacing: 2px;
 }
 
 .section__header-hint {

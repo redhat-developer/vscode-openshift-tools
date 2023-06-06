@@ -82,8 +82,7 @@ export const json = {
             ]
         }
     ],
-    'showProgressBar': 'top',
-    'progressBarType': 'questions',
     'widthMode': 'static',
-    'width': '864px'
+    'width': '864px',
+    'focusFirstQuestionAutomatic': false
 };

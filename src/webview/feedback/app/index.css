@@ -56,7 +56,6 @@
 .sd-element__title span {
     background-color: var(--vscode-editor-background) !important;
     color: var(--vscode-editor-foreground) !important;
-    font-size: var(--vscode-editor-font-size) !important;
     font-weight: var(--vscode-editor-font-weight) !important;
 }
 
@@ -80,4 +79,5 @@ a:link {
 
 a:focus {
     box-shadow: none !important;
+    outline: 0 !important;
 }

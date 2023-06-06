@@ -28,8 +28,12 @@ export const FeedbackComponent: React.FC<DefaultProps> = ({ }) => {
         options.showSaveSuccess();
     });
 
-    feedbackModal.onValueChanged.add((feedbackModal, _question) => {
-        feedbackModal.showNavigationButtons = true;
+    feedbackModal.onValueChanged.add((sender, _options) => {
+        if (Object.keys(sender.getAllValues()).length > 0) {
+            sender.showNavigationButtons = true;
+        } else {
+            sender.showNavigationButtons = false;
+        }
     });
 
     feedbackModal.completeText = 'Submit';
@@ -45,7 +49,7 @@ export const FeedbackComponent: React.FC<DefaultProps> = ({ }) => {
                             <Typography variant='h4' className='highlight'>OpenShift</Typography>
                             <Typography variant='h4' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Toolkit</Typography>
                         </label>
-                        <Typography variant='caption' style={{ marginTop: '2px' }} className='foreGroundColor'>Your opinion matters to us!</Typography>
+                        <Typography variant='h6' style={{ marginTop: '2px' }} className='foreGroundColor'>Your opinion matters to us!</Typography>
                     </div>
                 </header>
                 <div style={{ width: '50%' }}>
@@ -58,7 +62,7 @@ export const FeedbackComponent: React.FC<DefaultProps> = ({ }) => {
                                 </Stack>
                             </div>
                         </a>
-                        <a href='https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector&ssr=false#review-details' style={{ marginTop: '2px' }}>
+                        <a href='https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector&ssr=false#review-details'>
                             <div className='section__header-hint section__footer'>
                                 <Stack direction='row' alignItems='center' gap={1}>
                                     <Icon fontSize='small'>
@@ -70,6 +74,10 @@ export const FeedbackComponent: React.FC<DefaultProps> = ({ }) => {
                         </a>
                     </label>
                 </div>
+            </div>
+            <div className='captionHeader'>
+                <Typography variant='subtitle2' className='foreGroundColor'>The Red Hat OpenShift Toolkit extension team would like to learn from your experience to improve the extension workflow.</Typography>
+                <Typography variant='subtitle2' className='foreGroundColor'>This survey will take about 3 minutes. Your feedback is extremely valuable and will directly impact the product moving forward.</Typography>
             </div>
             <Survey model={feedbackModal} />
         </div>
