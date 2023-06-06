@@ -469,7 +469,7 @@ export class GitImport extends React.Component<DefaultProps, {
                                     {!isDevFile &&
                                         <div className='strategyContainer strategyWarning'>
                                             <ErrorIcon color='warning' style={{ fontSize: 20 }} />
-                                            <Typography variant='body2' style={{ margin: '0 5px' }}>Here is the recommended devfile:</Typography>
+                                            <Typography variant='body2' style={{ margin: '0 5px' }}> {compDescription?.length > 1 ? 'Please select a devfile that corresponds to the language/framework that you are using' : 'Here is the recommended devfile:'} </Typography>
                                         </div>}
                                     <div className='cardContainer'>
                                         <div className='devfileGalleryGrid'>

@@ -238,6 +238,8 @@ async function parseGitURL(event: any) {
             } else {
                 closeWithMessage('Devfile version not supported, Unable to proceed the component creation', clonedFolder);
             }
+        } else {
+            compDescriptions = getCompDescription(analyzeRes);
         }
     } finally {
         panel?.webview.postMessage({
@@ -306,6 +308,9 @@ function validateGitURL(event: any) {
 
 function getCompDescription(devfiles: AnalyzeResponse[]): ComponentTypeDescription[] {
     const compDescriptions = ComponentTypesView.instance.getCompDescriptions();
+    if (devfiles.length === 0) {
+        return Array.from(compDescriptions);
+    }
     return Array.from(compDescriptions).filter(({ name, version, registry }) => devfiles.some((res) => res.devfile === name &&
         res.devfileVersion === version && res.devfileRegistry === registry.name));
 }
