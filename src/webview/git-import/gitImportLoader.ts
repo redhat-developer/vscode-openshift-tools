@@ -217,7 +217,7 @@ async function parseGitURL(event: any) {
                     const devFileV1Path = path.join(clonedFolder.fsPath, 'devfile.yaml');
                     const file = fs.readFileSync(devFileV1Path, 'utf8');
                     const devfileV1 = YAML.parse(file.toString());
-                    const deleted = deleteFile(devFileV1Path);
+                    const deleted = await deleteFile(devFileV1Path);
                     if (deleted) {
                         analyzeRes = await OdoImpl.Instance.analyze(clonedFolder.fsPath);
                         compDescriptions = getCompDescription(analyzeRes);
@@ -413,7 +413,7 @@ function deleteDirectory(dir: string) {
     });
 };
 
-function deleteFile(file: string) {
+function deleteFile(file: string): Promise<boolean> {
     return new Promise<boolean>(function (resolve, _reject) {
         try {
             fs.unlinkSync(file)
