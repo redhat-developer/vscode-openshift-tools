@@ -77,7 +77,7 @@ export const FeedbackComponent: React.FC<DefaultProps> = ({ }) => {
             </div>
             <div className='captionHeader'>
                 <Typography variant='subtitle2' className='foreGroundColor'>The Red Hat OpenShift Toolkit extension team would like to learn from your experience to improve the extension workflow.</Typography>
-                <Typography variant='subtitle2' className='foreGroundColor'>This survey will take about 3 minutes. Your feedback is extremely valuable and will directly impact the product moving forward.</Typography>
+                <Typography variant='subtitle2' className='foreGroundColor'>This survey will take about 2 minutes. Your feedback is extremely valuable and will directly impact the product moving forward.</Typography>
             </div>
             <Survey model={feedbackModal} />
         </div>
