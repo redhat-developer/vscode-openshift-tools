@@ -14,6 +14,7 @@ import { StarterProject } from '../../../odo/componentTypeDescription';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { StarterProjectDisplay } from '../../common/starterProjectDisplay';
 import { DevFileProps } from './wrapperCardItem';
+import '../../common/cardItem.scss';
 
 export class CardItem extends React.Component<DevFileProps, {
     numOfCall: number,

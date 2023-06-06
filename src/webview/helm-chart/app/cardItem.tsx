@@ -7,7 +7,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import React from 'react';
 import clsx from 'clsx';
 import { CardTheme } from '../../common/cardItem.style';
-import '../app/cardItem.scss';
+import '../../common/cardItem.scss';
 import { Chart } from '../helmChartType';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { DevFileProps } from './wrapperCardItem';
