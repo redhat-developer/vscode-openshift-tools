@@ -16,7 +16,7 @@ import path = require('path');
 import fs = require('fs-extra');
 import configData = require('../src/tools.json');
 
-interface PlatformData {
+export interface PlatformData {
     url: string;
     sha256sum: string;
     dlFileName: string;
@@ -24,7 +24,7 @@ interface PlatformData {
     filePrefix: string;
 }
 
-async function isDownloadRequired(filePath: string, sha256: string): Promise<boolean> {
+export async function isDownloadRequired(filePath: string, sha256: string): Promise<boolean> {
     let result = true;
     if (fs.existsSync(filePath)) {
         const fileSha256 = await hasha.fromFile(filePath, { algorithm: 'sha256' });
@@ -33,7 +33,20 @@ async function isDownloadRequired(filePath: string, sha256: string): Promise<boo
     return result;
 }
 
-async function downloadFileAndCreateSha256(
+async function extractTool(toolsFolder: string, platform: PlatformData, currentFile: string): Promise<void> {
+    let toolLocation = toolsFolder;
+    if (process.env.REMOTE_CONTAINERS === undefined) {
+        toolLocation = path.join(toolsFolder, platform.cmdFileName);
+    }
+    console.log(`Extracting ${currentFile} to ${toolLocation}`);
+    if (!currentFile.endsWith('.exe') && currentFile.includes('.')) {
+        await Archive.extract(currentFile, toolsFolder, platform.cmdFileName, platform.filePrefix);
+    } else {
+        fs.copyFileSync(currentFile, toolLocation);
+    }
+}
+
+export async function downloadFileAndCreateSha256(
     toolsCacheFolder: string,
     toolsFolder: string,
     platform: PlatformData,
@@ -52,19 +65,19 @@ async function downloadFileAndCreateSha256(
         } else {
             throw Error(`${currentFile} is downloaded and SHA256 is not correct`);
         }
+        if (process.env.REMOTE_CONTAINERS === 'true') {
+            await extractTool(toolsFolder, platform, currentFile);
+        }
     } else {
         console.log('Previously downloaded archive SHA256 is correct');
     }
-    console.log(`Extracting ${currentFile} to ${path.join(toolsFolder, platform.cmdFileName)}`);
-    // this is temp workaround for tar.gz content issue https://github.com/openshift/odo/issues/3668
-    if (!currentFile.endsWith('.exe') && currentFile.includes('.')) {
-        await Archive.extract(currentFile, toolsFolder, platform.cmdFileName, platform.filePrefix);
-    } else {
-        fs.copyFileSync(currentFile, path.join(toolsFolder, platform.cmdFileName));
-    }
+    if (process.env.REMOTE_CONTAINERS === undefined) await extractTool(toolsFolder, platform, currentFile);
 }
 
 async function bundleTools(): Promise<void> {
+    if (process.env.REMOTE_CONTAINERS === 'true') {
+        return;
+    }
     const outFolder = path.resolve('.', 'out');
     const toolsCacheFolder = path.join(outFolder, 'tools-cache');
     let currentPlatform = process.env.TARGET;

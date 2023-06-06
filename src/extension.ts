@@ -18,6 +18,7 @@ import {
 import { ComponentsTreeDataProvider } from './componentsView';
 import { DebugSessionsView } from './debug';
 import { OpenShiftExplorer } from './explorer';
+import { verifyBinariesInRemoteContainer } from './installToolsInRemote';
 import { extendClusterExplorer } from './k8s/clusterExplorer';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
@@ -191,6 +192,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     void ComponentTypesView.instance.getAllComponents();
 
     startTelemetry(extensionContext);
+    await verifyBinariesInRemoteContainer();
 
     return {
         verifyBundledBinaries,
