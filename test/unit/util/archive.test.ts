@@ -4,9 +4,9 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import { Archive } from '../../../build/archive';
+import * as sinonChai from 'sinon-chai';
+import { Archive } from '../../../src/downloadBinaries/archive';
 
 import targz = require('targz');
 import fs = require('fs-extra');

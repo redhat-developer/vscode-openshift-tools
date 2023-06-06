@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 /* tslint:disable no-require-imports */
 import * as fs from 'fs';
-import * as glob from 'glob';
+import { glob } from 'glob';
 import * as paths from 'path';
 import { CoverageRunner, TestRunnerOptions } from '../coverage';
 

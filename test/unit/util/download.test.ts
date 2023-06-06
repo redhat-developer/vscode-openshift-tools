@@ -4,10 +4,11 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
-import * as sinon from 'sinon';
-import * as path from 'path';
 import { EventEmitter } from 'events';
+import * as path from 'path';
+import * as sinon from 'sinon';
+import * as sinonChai from 'sinon-chai';
+import type { DownloadUtil as DownloadUtilType } from '../../../src/downloadBinaries/download';
 import { wait } from '../../../src/util/async';
 
 import pq = require('proxyquire');
@@ -17,7 +18,7 @@ const {expect} = chai;
 chai.use(sinonChai);
 
 suite('Download Util', () => {
-    let progressMock;
+    let progressMock: typeof DownloadUtilType;
     const sandbox: sinon.SinonSandbox = sinon.createSandbox();
     let requestEmitter: any;
     let streamEmitter: EventEmitter;
@@ -26,7 +27,7 @@ suite('Download Util', () => {
         requestEmitter = new EventEmitter();
         streamEmitter = new EventEmitter();
         requestEmitter.pipe = (): any => streamEmitter;
-        progressMock = pq('../../../build/download', {
+        progressMock = pq('../../../src/downloadBinaries/download', {
             got: {
                 stream: (): any => requestEmitter
             },
@@ -41,7 +42,7 @@ suite('Download Util', () => {
                     cb(null);
                 }
             }
-        }).DownloadUtil;
+        }).DownloadUtil as typeof DownloadUtilType;
     });
 
     teardown(() => {

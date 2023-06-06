@@ -3,16 +3,15 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable no-unused-expressions */
 import * as fs from 'fs-extra';
+import type { Got } from 'got/dist/source';
+import { fromEvent } from 'rxjs';
+import { throttleTime } from 'rxjs/operators';
+import { promisify } from 'util';
 
-const { promisify } = require('util');
-const { fromEvent } = require('rxjs');
-const { throttleTime } = require('rxjs/operators');
-const pipeline = promisify(require('stream').pipeline);
-// eslint-disable-next-line import/no-extraneous-dependencies
-const got = require('got');
+// need to use `require`, since we replace these imports in the unit tests
+import got = require('got');
+import stream = require('stream');
 
 export class DownloadUtil {
     static async downloadFile(
@@ -21,7 +20,7 @@ export class DownloadUtil {
         progressCb?: (current: number, increment: number) => void,
         throttle = 250,
     ): Promise<void> {
-        const dls = got.stream(fromUrl);
+        const dls = (got as unknown as Got).stream(fromUrl);
         if (progressCb) {
             let previous = 0;
             // Process progress event from 'got'
@@ -38,6 +37,6 @@ export class DownloadUtil {
             });
         }
         // Pipe url to file
-        await pipeline(dls, fs.createWriteStream(toFile));
+        await promisify(stream.pipeline)(dls, fs.createWriteStream(toFile));
     }
 }

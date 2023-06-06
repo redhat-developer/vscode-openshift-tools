@@ -10,13 +10,13 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 
 import { exit } from 'shelljs';
+import { DownloadUtil } from '../src/downloadBinaries/download';
 import hasha = require('hasha');
 import mkdirp = require('mkdirp');
 import fs = require('fs-extra');
 import path = require('path');
 import cp = require('child_process');
 import os = require('os');
-import { DownloadUtil } from './download';
 import configData = require('../src/tools.json');
 
 /**
