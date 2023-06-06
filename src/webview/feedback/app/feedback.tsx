@@ -65,7 +65,9 @@ export const FeedbackComponent: React.FC<DefaultProps> = ({ }) => {
                         <a href='https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector&ssr=false#review-details'>
                             <div className='section__header-hint section__footer'>
                                 <Stack direction='row' alignItems='center' gap={1}>
-                                    <Icon fontSize='small'>
+                                    <Icon sx={{
+                                        fontSize: 23
+                                    }}>
                                         <img src={MicrosoftIcon} />
                                     </Icon>
                                     <Typography variant='body2' className='footerText'>Rate us on Marketplace</Typography>
