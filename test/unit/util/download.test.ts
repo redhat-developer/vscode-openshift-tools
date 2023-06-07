@@ -8,7 +8,7 @@ import { EventEmitter } from 'events';
 import * as path from 'path';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
-import type { DownloadUtil as DownloadUtilType } from '../../../src/downloadBinaries/download';
+import type { DownloadUtil as DownloadUtilType } from '../../../src/downloadUtil/download';
 import { wait } from '../../../src/util/async';
 
 import pq = require('proxyquire');
