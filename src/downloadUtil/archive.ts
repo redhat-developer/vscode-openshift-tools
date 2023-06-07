@@ -4,12 +4,12 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as fs from 'fs';
+import * as path from 'path';
+import type { Headers } from 'tar-fs';
+import * as targz from 'targz';
+import * as unzipm from 'unzip-stream';
+import { promisify } from 'util';
 import * as zlib from 'zlib';
-
-import targz = require('targz');
-import unzipm = require('unzip-stream');
-import pify = require('pify');
-import path = require('path');
 
 export class Archive {
     static extract(
@@ -54,11 +54,11 @@ export class Archive {
         fileName: string,
         prefix: string,
     ): Promise<void> {
-        return pify(targz.decompress)({
+        return promisify(targz.decompress)({
             src: zipFile,
             dest: extractTo,
             tar: {
-                map: (header: { name: string }): { name: string } => {
+                map: (header: Headers): Headers => {
                     const result = header;
                     if (prefix && header.name.startsWith(prefix)) {
                         result.name = header.name.substring(prefix.length);
