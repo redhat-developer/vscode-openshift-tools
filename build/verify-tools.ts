@@ -10,7 +10,7 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 
 import { exit } from 'shelljs';
-import { DownloadUtil } from '../src/downloadBinaries/download';
+import { DownloadUtil } from '../src/downloadUtil/download';
 import hasha = require('hasha');
 import mkdirp = require('mkdirp');
 import fs = require('fs-extra');

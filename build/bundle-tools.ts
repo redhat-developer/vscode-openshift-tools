@@ -9,7 +9,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { exit } from 'process';
-import { downloadFileAndCreateSha256 } from '../src/downloadBinaries/downloadBinaries';
+import { downloadFileAndCreateSha256 } from '../src/downloadUtil/downloadBinaries';
 import * as configData from '../src/tools.json';
 
 async function bundleTools(): Promise<void> {

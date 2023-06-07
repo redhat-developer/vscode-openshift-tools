@@ -7,7 +7,7 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as shell from 'shelljs';
-import { downloadFileAndCreateSha256 } from './downloadBinaries/downloadBinaries';
+import { downloadFileAndCreateSha256 } from './downloadUtil/downloadBinaries';
 import configData = require('./tools.json');
 import fs = require('fs-extra');
 
