@@ -10,6 +10,7 @@
 * [#2799](https://github.com/redhat-developer/vscode-openshift-tools/issues/2799) Added additional test cases for improving the test coverage
 * [#2927](https://github.com/redhat-developer/vscode-openshift-tools/issues/2927) Improve Delete component workflow
 * [#2939](https://github.com/redhat-developer/vscode-openshift-tools/issues/2939) Improve import from git workflow
+* [#2948](https://github.com/redhat-developer/vscode-openshift-tools/issues/2948) Fix running vsix locally with bundled binaries
 
 ## 1.4.0 (May 23, 2023)
 
