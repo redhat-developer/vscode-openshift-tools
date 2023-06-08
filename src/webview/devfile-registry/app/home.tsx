@@ -28,17 +28,20 @@ const ImageGalleryList = styled('ul')(({ theme }) => ({
         gridTemplateColumns: 'repeat(1, 1fr)'
     },
     [theme.breakpoints.up('sm')]: {
-        gridTemplateColumns: 'repeat(2, 1fr)'
+        gridTemplateColumns: 'repeat(1, 1fr)'
+    },
+    [theme.breakpoints.between('sm','md')]: {
+        gridTemplateColumns: 'repeat(1, 1fr)'
     },
     [theme.breakpoints.up('md')]: {
-        gridTemplateColumns: 'repeat(3, 1fr)'
+        gridTemplateColumns: 'repeat(2, 1fr)'
     },
     [theme.breakpoints.up('lg')]: {
-        gridTemplateColumns: 'repeat(4, 1fr)'
+        gridTemplateColumns: 'repeat(3, 1fr)'
     },
     [theme.breakpoints.up('xl')]: {
-        gridTemplateColumns: 'repeat(8, 1fr)'
-    },
+        gridTemplateColumns: 'repeat(4, 1fr)'
+    }
 }));
 
 const HomeItem: React.FC<DevfileHomePageProps> = ({
@@ -127,7 +130,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                                     const state: boolean = (target as HTMLInputElement).checked;
                                     const value: string = (target as HTMLInputElement).name;
                                     const filteredRegistries = registries.map((filteredRegistry) => {
-                                        if (filteredRegistry.Name === value) {
+                                        if (filteredRegistry.name === value) {
                                             filteredRegistry.state = state;
                                         }
                                         return filteredRegistry;

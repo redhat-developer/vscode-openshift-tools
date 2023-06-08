@@ -321,12 +321,12 @@ export class CardItem extends React.Component<DevFileProps, {
                                 </div>
                             </div>
                             <div style={{ width: '50%', display: 'flex', flexDirection: 'row' }}>
-                                <div style={{ width: '85%'}}>
+                                <div style={{ width: '85%' }}>
                                     {
                                         installResponse.loadScreen && <LoadScreen title='Installation in Progress' type='circle' />
                                     }
                                 </div>
-                                <div style={{float: 'right', marginTop: '0.5rem'}}>
+                                <div style={{ float: 'right', marginTop: '0.5rem' }}>
                                     <Button
                                         disabled={this.handleDisable() || installResponse.installed}
                                         variant='outlined'
@@ -358,7 +358,7 @@ export class CardItem extends React.Component<DevFileProps, {
                         data-testid={`card-${selectedVersion.name.replace(/\.| /g, '')}`}
                     >
                         <div className={this.props.cardItemStyle.cardHeader}>
-                            <div className={this.props.cardItemStyle.cardHeaderDisplay} style={{ flexDirection: 'row' }}>
+                            <div className={this.props.cardItemStyle.helmcardHeaderDisplay} style={{ flexDirection: 'row' }}>
                                 <img
                                     src={selectedVersion.icon ? selectedVersion.icon : HelmIcon}
                                     alt={`${selectedVersion.name} icon`}
@@ -384,10 +384,10 @@ export class CardItem extends React.Component<DevFileProps, {
                                 selectedVersion.annotations['charts.openshift.io/provider'] && <Typography variant='caption'>Provided by {selectedVersion.annotations['charts.openshift.io/provider']}</Typography>
                             }
                         </div>
-                        <div className={this.props.cardItemStyle.cardFooterTag} style={{ margin: '1rem' }}>
+                        <div className={this.props.cardItemStyle.helmcardFooterTag} style={{ margin: '1rem' }}>
                             <div style={{ height: 'auto' }}>
                                 <Typography variant='caption'
-                                    className={this.props.cardItemStyle.longDescription}>
+                                    className={this.props.cardItemStyle.longDescription} style={{ 'WebkitLineClamp': 3 }}>
                                     {selectedVersion.description}
                                 </Typography>
                             </div>

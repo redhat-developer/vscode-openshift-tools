@@ -26,8 +26,8 @@ export const CardTheme = createTheme({
 export default (_theme: Theme) =>
     createStyles({
         card: {
-            height: '22rem',
-            width: '16rem',
+            height: '15rem',
+            width: '22rem',
             margin: '0.2rem',
             cursor: 'pointer',
             borderRadius: '1rem !important',
@@ -53,21 +53,31 @@ export default (_theme: Theme) =>
             height: '3rem',
             margin: '0.5rem'
         },
-        cardHeaderDisplay: {
+        helmcardHeaderDisplay: {
             display: 'flex',
             justifyContent: 'space-between'
         },
+        cardHeaderDisplay: {
+            display: 'flex',
+            margin: '0.5rem',
+            height: '10rem',
+            maxHeight: '16rem',
+            flexDirection: 'row',
+            gap: '1rem'
+        },
         cardImage: {
-            width: 'auto',
-            height: 'auto',
-            margin: '1rem',
-            maxWidth: '6rem',
-            maxHeight: '3rem'
+            width: '8rem',
+            objectFit: 'contain'
         },
         cardBody: {
             height: 'auto',
             overflow: 'hidden',
             margin: '1.5rem'
+        },
+        cardHeaderTitle: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem'
         },
         cardRegistryTitle: {
             color: 'var(--vscode-textLink-activeForeground)',
@@ -81,8 +91,9 @@ export default (_theme: Theme) =>
             textOverflow: 'ellipsis',
             wordBreak: 'break-all',
             float: 'right',
-            paddingTop: '0.5rem',
-            margin: '1rem'
+            margin: '1rem',
+            position: 'absolute',
+            right: 0
         },
         badge: {
             marginTop: '1rem',
@@ -109,10 +120,15 @@ export default (_theme: Theme) =>
         firstBadge: {
             marginLeft: '0rem'
         },
-        cardFooterTag: {
+        helmcardFooterTag: {
             display: 'flex',
             flexDirection: 'column',
             margin: '1.5rem'
+        },
+        cardFooterTag: {
+            display: 'flex',
+            flexDirection: 'row',
+            marginLeft: '0.5rem'
         },
         text: {
             textAlign: 'right'
@@ -120,7 +136,7 @@ export default (_theme: Theme) =>
         longDescription: {
             overflow: 'hidden',
             display: '-webkit-box',
-            WebkitLineClamp: 3,
+            WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical'
         },
         detailedDescription: {
