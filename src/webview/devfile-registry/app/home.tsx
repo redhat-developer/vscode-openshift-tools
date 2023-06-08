@@ -130,7 +130,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                                     const state: boolean = (target as HTMLInputElement).checked;
                                     const value: string = (target as HTMLInputElement).name;
                                     const filteredRegistries = registries.map((filteredRegistry) => {
-                                        if (filteredRegistry.name === value) {
+                                        if (filteredRegistry.Name === value) {
                                             filteredRegistry.state = state;
                                         }
                                         return filteredRegistry;
