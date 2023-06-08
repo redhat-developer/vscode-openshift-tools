@@ -19,7 +19,7 @@ export const FilterElements: React.FC<FilterProps> = ({
     const filterStyleCSS = filterStyle();
     return (
         <div className={filterStyleCSS.filterContainer}>
-            <Typography style={{ fontSize: 'var(--vscode-editor-font-size)' }}>Registries:</Typography>
+            <Typography style={{ fontSize: 'var(--vscode-editor-font-size)', padding: '0.5rem' }}>Registries:</Typography>
             {
                 registries.map((registry, index) => (
                     <FormControlLabel className='checkBoxItem' key={registry.name + '-' + index}
