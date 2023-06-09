@@ -45,7 +45,7 @@ export default (_theme: Theme) =>
             fontFamily: 'inherit',
             fontSize: 'inherit',
             margin: '1rem',
-            padding: '0rem 1.5rem',
-            height: '2rem'
+            height: '2rem',
+            justifyContent: 'center'
         }
     });
