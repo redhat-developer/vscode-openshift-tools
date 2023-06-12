@@ -16,7 +16,7 @@ import {
     workspace
 } from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
-import { REDHAT_CLOUD_PROVIDER } from './cloud-provider/redhat-cloud-provider';
+import { REDHAT_CLOUD_PROVIDER } from './cloudProvider/redhatCloudProvider';
 import { ComponentsTreeDataProvider } from './componentsView';
 import { DebugSessionsView } from './debug';
 import { OpenShiftExplorer } from './explorer';
@@ -58,12 +58,11 @@ async function verifyBundledBinaries(): Promise<{ odoPath: string, ocPath: strin
     };
 }
 
-async function registerCloudProvider(): Promise<void> {
-    const cloudProvider = await k8s.extension.cloudExplorer.v1
+async function registerKubernetesCloudProvider(): Promise<void> {
+    const cloudProvider = await k8s.extension.cloudExplorer.v1;
     if (cloudProvider.available) {
-        cloudProvider.api.registerCloudProvider(REDHAT_CLOUD_PROVIDER)
+        cloudProvider.api.registerCloudProvider(REDHAT_CLOUD_PROVIDER);
     }
-
 }
 
 export async function activate(extensionContext: ExtensionContext): Promise<unknown> {
@@ -201,7 +200,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
 
     await ComponentTypesView.instance.getAllComponents();
 
-    await registerCloudProvider();
+    await registerKubernetesCloudProvider();
 
     startTelemetry(extensionContext);
     await verifyBinariesInRemoteContainer();

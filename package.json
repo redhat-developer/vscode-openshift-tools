@@ -215,7 +215,7 @@
 		"onView:openshiftProjectExplorer",
 		"onView:extension.vsKubernetesExplorer",
 		"onView:openshiftComponentTypesView",
-        "onView:kubernetes.cloudExplorer",
+		"onView:kubernetes.cloudExplorer",
 		"onCommand:openshift.welcome",
 		"onCommand:openshift.getStarted",
 		"onCommand:openshift.about",
@@ -800,12 +800,12 @@
 			},
 			{
 				"command": "openshift.sandbox.open.dashboard",
-				"title": "Open Console",
+				"title": "Open Developer Console",
 				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.sandbox.signup",
-				"title": "Signup for Sandbox",
+				"title": "Provision OpenShift Developer Sandbox",
 				"category": "OpenShift"
 			}
 		],
