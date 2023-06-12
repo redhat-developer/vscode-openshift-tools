@@ -82,7 +82,7 @@ export function checkOpenshiftView() {
                 const btns = await welcome.getButtons();
                 const titles = await Promise.all(btns.map(async item => await item.getTitle()));
 
-                expect(titles).includes(BUTTONS.newComponent || BUTTONS.newComponent);
+                expect(titles).includes(BUTTONS.newComponent || BUTTONS.gitImport);
             });
         });
 
