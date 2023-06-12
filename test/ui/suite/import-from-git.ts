@@ -83,7 +83,7 @@ export function testImportFromGit() {
             elements = await webview.findWebElements(By.xpath('//p[contains(text(),"Here is the recommended devfile")]'));
             expect(elements).length.greaterThan(0);
 
-            elements = await webview.findWebElements(By.xpath('//div[@data-testid = "card-java-maven"]'));
+            elements = await webview.findWebElements(By.xpath('//div[@data-testid = "card-java-springboot"]'));
             expect(elements).length.greaterThan(0);
 
             elements  = await webview.findWebElements(By.xpath('//button[contains(text(),"Create Component")]'));
