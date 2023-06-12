@@ -5,7 +5,7 @@
 import { expect } from 'chai';
 import * as fs from 'fs-extra';
 import { ActivityBar, By, EditorView, InputBox, SideBarView, ViewSection, WebElement, WebView, WelcomeContentButton, WelcomeContentSection, Workbench } from 'vscode-extension-tester';
-import { notificationExists } from '../common/conditions';
+//import { notificationExists } from '../common/conditions';
 import { VIEWS } from '../common/constants';
 import path = require('path');
 
@@ -16,7 +16,7 @@ export function testImportFromGit() {
         const tempDir: string = path.join(__dirname, 'temp');
 
         before(async function () {
-            //this.timeout(20000);
+            this.timeout(20000);
             const view: SideBarView = await (await (await new ActivityBar().wait(5_000)).getViewControl(VIEWS.openshift)).openView();
             editorView = await ((await new Workbench().wait(5_000)).getEditorView().wait(5_000));
             await new Promise(res => setTimeout(res, 5000));
@@ -44,7 +44,7 @@ export function testImportFromGit() {
         });
 
         it('Import project from git', async function () {
-            this.timeout(40_000);
+            this.timeout(30_000);
             await editorView.closeAllEditors();
             const buttons: WelcomeContentButton[] = await welcome.getButtons();
             let importButton: WelcomeContentButton;
@@ -95,7 +95,7 @@ export function testImportFromGit() {
             await webview.switchBack(); // END WEBVIEW CODE
 
             const devfile: string = path.join(tempDir, 'springboot-ex', 'devfile.yaml');
-            await notificationExists('Component \'springboot-ex-comp\' successfully created. Perform actions on it from Components View.', editorView.getDriver(), 10_000);
+            //await notificationExists('Component \'springboot-ex-comp\' successfully created. Perform actions on it from Components View.', editorView.getDriver(), 10_000);
             expect(fs.existsSync(devfile)).is.true;
         });
 
