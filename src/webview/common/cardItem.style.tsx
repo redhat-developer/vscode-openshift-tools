@@ -67,7 +67,8 @@ export default (_theme: Theme) =>
         },
         cardImage: {
             width: '8rem',
-            objectFit: 'contain'
+            objectFit: 'contain',
+            maxHeight: '80% !important'
         },
         cardBody: {
             height: 'auto',
@@ -98,17 +99,14 @@ export default (_theme: Theme) =>
         badge: {
             marginTop: '1rem',
             minWidth: '0.5rem',
-            maxWidth: '5rem',
             padding: '0.5rem',
             minHeight: '2px',
             maxHeight: '1rem',
             borderRadius: '0.5rem!important',
             marginLeft: '0.5rem',
             alignItems: 'center',
-            color: 'inherit',
-            backgroundColor: 'var(--vscode-badge-background)',
-            outline: '0.0625rem solid',
-            outlineColor: 'inherit'
+            color: 'var(--vscode-button-foreground)',
+            backgroundColor: 'var(--vscode-button-background)'
         },
         subBadge: {
             marginTop: '0'
@@ -225,7 +223,8 @@ export default (_theme: Theme) =>
             maxHeight: '40rem',
             width: '65rem',
             margin: 'auto',
-            overflow: 'auto !important'
+            overflowY: 'auto !important' as any,
+            overflowX: 'hidden !important' as any,
         },
         yamlCardHeader: {
             padding: '1.5rem!important',

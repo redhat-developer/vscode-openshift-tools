@@ -362,7 +362,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                 <img
                                     src={selectedVersion.icon ? selectedVersion.icon : HelmIcon}
                                     alt={`${selectedVersion.name} icon`}
-                                    className={this.props.cardItemStyle.cardImage} style={{ margin: '0.5rem', width: '2.5rem', height: '2.5rem' }} />
+                                    style={{ margin: '0.5rem', width: '2.5rem', height: '2.5rem', objectFit: 'contain' }} />
                                 {selectedVersion.version && <Badge key={`key-` + selectedVersion.version}
                                     className={this.props.cardItemStyle.badge}
                                     overlap='rectangular'

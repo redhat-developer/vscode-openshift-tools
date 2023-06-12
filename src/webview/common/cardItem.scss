@@ -19,10 +19,10 @@
 
 .MuiInputBase-root {
     background-color: var(--vscode-settings-textInputBackground) !important;
-    border-color: var(--vscode-settings-textInputBorder) !important;
+    border: 0.5px solid var(--vscode-settings-textInputBorder) !important;
     color: var(--vscode-settings-textInputForeground) !important;
 }
 
 .MuiSvgIcon-root {
-    color: whitesmoke;
+    color: var(--vscode-settings-textInputForeground) !important;
 }

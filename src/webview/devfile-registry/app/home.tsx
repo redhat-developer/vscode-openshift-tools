@@ -91,9 +91,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                     } else {
                         message.data.registries.forEach((registry: Registry) => {
                             const devfileUrl = new URL(registry.url);
-                            if (devfileUrl.hostname.toLowerCase() === 'registry.devfile.io') {
-                                registry.state = true;
-                            }
+                            registry.state = devfileUrl.hostname.toLowerCase() === 'registry.devfile.io' ? true : false;
                         });
                     }
                     setThemeKind(message.data.themeValue);
