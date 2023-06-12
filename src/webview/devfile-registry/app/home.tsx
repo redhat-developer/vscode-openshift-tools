@@ -51,7 +51,7 @@ const HomeItem: React.FC<DevfileHomePageProps> = ({
     const cardItemStyle = useCardItemStyles();
     return (
         <ThemeProvider theme={HomeTheme}>
-            <ImageGalleryList className='devfileGalleryGrid' style={{margin: '1rem'}}>
+            <ImageGalleryList className='devfileGalleryGrid' style={{ margin: '1rem' }}>
                 {
                     compDescriptions.map((compDescription: CompTypeDesc, key: number) => (
                         <ImageListItem key={`imageList-` + key}>
@@ -129,13 +129,14 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                                     const target: EventTarget = event.target;
                                     const state: boolean = (target as HTMLInputElement).checked;
                                     const value: string = (target as HTMLInputElement).name;
-                                    const filteredRegistries = registries.map((filteredRegistry) => {
-                                        if (filteredRegistry.Name === value) {
+                                    const filteredRegistries = registries.map((filteredRegistry: Registry) => {
+                                        if (filteredRegistry.name === value) {
                                             filteredRegistry.state = state;
                                         }
                                         return filteredRegistry;
                                     });
-                                    const allUncheckedRegistries = filteredRegistries.filter((registry: Registry) => !registry.state);
+                                    setRegistries(filteredRegistries);
+                                    const allUncheckedRegistries = registries.filter((registry: Registry) => !registry.state);
                                     if (allUncheckedRegistries.length === registries.length) {
                                         allUncheckedRegistries.forEach((uncheckedRegistry: Registry) => {
                                             const registryUrl = new URL(uncheckedRegistry.url);
@@ -143,9 +144,9 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                                                 uncheckedRegistry.state = true;
                                             }
                                         })
+                                        setRegistries(allUncheckedRegistries);
                                     }
-                                    setRegistries(filteredRegistries);
-                                    setFilteredcompDescriptions(getFilteredCompDesc(filteredRegistries, compDescriptions, searchValue));
+                                    setFilteredcompDescriptions(getFilteredCompDesc(registries, compDescriptions, searchValue));
                                 }}
                             />
                         }
@@ -153,7 +154,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                         {error?.length > 0 ? <ErrorPage message={error} /> : null}
                     </>
                     :
-                    error?.length > 0 ? <ErrorPage message={error} /> : <LoadScreen title='Loading Registry View'/>
+                    error?.length > 0 ? <ErrorPage message={error} /> : <LoadScreen title='Loading Registry View' />
             }
         </>
     );
