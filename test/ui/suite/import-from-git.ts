@@ -65,7 +65,7 @@ export function testImportFromGit() {
 
             elements = await webview.findWebElements(By.xpath('//input[@id="bootstrap-input"]'));
             const importTextBox = elements[0];
-            await importTextBox.sendKeys('https://github.com/eclipse/lemminx');
+            await importTextBox.sendKeys('https://github.com/odo-devfiles/springboot-ex');
 
             elements  = await webview.findWebElements(By.xpath('//button[contains(text(),"Analyze")]'));
             const analyzeButton = elements[0];
@@ -94,8 +94,8 @@ export function testImportFromGit() {
 
             await webview.switchBack(); // END WEBVIEW CODE
 
-            const devfile: string = path.join(tempDir, 'lemminx', 'devfile.yaml');
-            await notificationExists('Component \'lemminx-comp\' successfully created. Perform actions on it from Components View.', editorView.getDriver(), 10_000);
+            const devfile: string = path.join(tempDir, 'springboot-ex', 'devfile.yaml');
+            await notificationExists('Component \'springboot-ex-comp\' successfully created. Perform actions on it from Components View.', editorView.getDriver(), 10_000);
             expect(fs.existsSync(devfile)).is.true;
         });
 

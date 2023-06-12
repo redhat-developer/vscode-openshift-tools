@@ -20,6 +20,7 @@ export const BUTTONS = {
     kubeContext: 'Select Kubernetes Context',
     addCluster: 'Add OpenShift Cluster',
     newComponent: 'Create Component',
+    gitImport: 'Import from Git'
 };
 
 export const INPUTS = {
