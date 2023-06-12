@@ -15,6 +15,7 @@ import { VSCodeMessage } from '../vsCodeMessage';
 import { StarterProjectDisplay } from '../../common/starterProjectDisplay';
 import { DevFileProps } from './wrapperCardItem';
 import '../../common/cardItem.scss';
+import { isDefaultDevfileRegistry } from './home';
 
 export class CardItem extends React.Component<DevFileProps, {
     numOfCall: number,
@@ -303,7 +304,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                     </Typography>
                                 </div>
                             </div>
-                            {this.props.compDescription.registry.name.toLowerCase() !== 'defaultdevfileregistry' &&
+                            { !isDefaultDevfileRegistry(this.props.compDescription.registry.url.toString()) &&
                                 <Badge key={`badge-${this.props.compDescription.registry.name}`}
                                     className={this.props.cardItemStyle.cardRegistryTitle}
                                     overlap='rectangular'

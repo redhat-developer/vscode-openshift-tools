@@ -202,5 +202,5 @@ function ascName(oldCompDesc: CompTypeDesc, newCompDesc: CompTypeDesc): number {
 }
 
 export function isDefaultDevfileRegistry(registryURL: string): boolean {
-    return registryURL?.toLowerCase() === 'registry.devfile.io';
+    return registryURL?.toLowerCase().indexOf('registry.devfile.io') !== -1;
 }
