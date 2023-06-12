@@ -387,7 +387,7 @@ export class CardItem extends React.Component<DevFileProps, {
                         <div className={this.props.cardItemStyle.helmcardFooterTag} style={{ margin: '1rem' }}>
                             <div style={{ height: 'auto' }}>
                                 <Typography variant='caption'
-                                    className={this.props.cardItemStyle.longDescription} style={{ 'WebkitLineClamp': 3 }}>
+                                    className={this.props.cardItemStyle.longDescription}>
                                     {selectedVersion.description}
                                 </Typography>
                             </div>

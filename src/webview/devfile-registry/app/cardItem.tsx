@@ -224,7 +224,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                     data-testid='icon'
                                     src={this.props.compDescription.devfileData.devfile.metadata.icon}
                                     alt={this.props.compDescription.devfileData.devfile.metadata.icon + ' logo'} />
-                                <div style={{margin: '1rem'}}>
+                                <div style={{ margin: '1rem' }}>
                                     <Typography variant='subtitle1'>
                                         {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.displayName)}
                                     </Typography>
@@ -282,17 +282,19 @@ export class CardItem extends React.Component<DevFileProps, {
                                 alt={`${this.props.compDescription.devfileData.devfile.metadata.name} icon`}
                                 className={this.props.cardItemStyle.cardImage} />
                             <div className={this.props.cardItemStyle.cardHeaderTitle}>
-                                <Typography variant='h5'>{this.props.compDescription.devfileData.devfile.metadata.displayName}</Typography>
-                                {
-                                    this.props.compDescription.devfileData.devfile.metadata.version && (
-                                        <Typography variant='body2'>
-                                            Version: {this.props.compDescription.devfileData.devfile.metadata.version}
-                                        </Typography>
-                                    )
-                                }
-                                <Typography variant='body2'>
-                                    Language: {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.language)}
-                                </Typography>
+                                <Typography variant='h6' style={{ maxWidth: '8rem' }}>{this.props.compDescription.devfileData.devfile.metadata.displayName}</Typography>
+                                <div style={{display: 'flex', flexDirection: 'row', gap: '0.5rem'}}>
+                                    {
+                                        this.props.compDescription.devfileData.devfile.metadata.version && (
+                                            <><Typography variant='body2'>
+                                                Version: {this.props.compDescription.devfileData.devfile.metadata.version}
+                                            </Typography><Typography variant='body2'>|</Typography></>
+                                        )
+                                    }
+                                    <Typography variant='body2'>
+                                        Language: {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.language)}
+                                    </Typography>
+                                </div>
                                 <div>
                                     <Typography variant='body2'
                                         className={this.props.cardItemStyle.longDescription}>
@@ -300,6 +302,10 @@ export class CardItem extends React.Component<DevFileProps, {
                                     </Typography>
                                 </div>
                             </div>
+                            {this.props.compDescription.registry.name.toLowerCase() !== 'defaultdevfileregistry' &&
+                                <div className={this.props.cardItemStyle.cardRegistryTitle}>
+                                    <Typography variant='body1'>{this.props.compDescription.registry.name}</Typography>
+                                </div>}
                         </div>
                         <div className={this.props.cardItemStyle.cardFooterTag}>
                             <div>
@@ -318,10 +324,6 @@ export class CardItem extends React.Component<DevFileProps, {
                                     )
                                 }
                             </div>
-                            {this.props.compDescription.registry.name.toLowerCase() !== 'defaultdevfileregistry' &&
-                                <div className={this.props.cardItemStyle.cardRegistryTitle}>
-                                    <Typography variant='body1'>{this.props.compDescription.registry.name}</Typography>
-                                </div>}
                         </div>
                     </Card>
                     {

@@ -91,7 +91,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                     } else {
                         message.data.registries.forEach((registry: Registry) => {
                             const devfileUrl = new URL(registry.url);
-                            registry.state = devfileUrl.hostname.toLowerCase() === 'registry.devfile.io' ? true : false;
+                            registry.state = isDefaultDevfileRegistry(devfileUrl.hostname) ? true : false;
                         });
                     }
                     setThemeKind(message.data.themeValue);
@@ -138,7 +138,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                                     if (allUncheckedRegistries.length === registries.length) {
                                         allUncheckedRegistries.forEach((uncheckedRegistry: Registry) => {
                                             const registryUrl = new URL(uncheckedRegistry.url);
-                                            if (registryUrl.hostname.toLowerCase() === 'registry.devfile.io') {
+                                            if (isDefaultDevfileRegistry(registryUrl.hostname)) {
                                                 uncheckedRegistry.state = true;
                                             }
                                         })
@@ -201,3 +201,6 @@ function ascName(oldCompDesc: CompTypeDesc, newCompDesc: CompTypeDesc): number {
     return newCompDesc.priority - oldCompDesc.priority;
 }
 
+export function isDefaultDevfileRegistry(registryURL: string): boolean {
+    return registryURL?.toLowerCase() === 'registry.devfile.io';
+}

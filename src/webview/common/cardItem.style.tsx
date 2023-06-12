@@ -26,8 +26,8 @@ export const CardTheme = createTheme({
 export default (_theme: Theme) =>
     createStyles({
         card: {
-            height: '15rem',
-            width: '22rem',
+            height: '16rem',
+            width: '24rem',
             margin: '0.2rem',
             cursor: 'pointer',
             borderRadius: '1rem !important',
@@ -60,15 +60,15 @@ export default (_theme: Theme) =>
         cardHeaderDisplay: {
             display: 'flex',
             margin: '0.5rem',
-            height: '10rem',
+            height: '11rem',
             maxHeight: '16rem',
             flexDirection: 'row',
             gap: '1rem'
         },
         cardImage: {
-            width: '8rem',
+            width: '7rem',
             objectFit: 'contain',
-            maxHeight: '80% !important'
+            maxHeight: '70% !important'
         },
         cardBody: {
             height: 'auto',
@@ -92,7 +92,6 @@ export default (_theme: Theme) =>
             textOverflow: 'ellipsis',
             wordBreak: 'break-all',
             float: 'right',
-            margin: '1rem',
             position: 'absolute',
             right: 0
         },
@@ -134,7 +133,7 @@ export default (_theme: Theme) =>
         longDescription: {
             overflow: 'hidden',
             display: '-webkit-box',
-            WebkitLineClamp: 2,
+            WebkitLineClamp: 3,
             WebkitBoxOrient: 'vertical'
         },
         detailedDescription: {

@@ -135,35 +135,40 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return data;
     }
 
-    public getAllComponents(): void {
-        let isError = false;
-        this.compDescriptions.clear();
-        void getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
-            await this.getRegistries();
-            devFileComponentTypes.forEach((component: DevfileComponentType) => {
-                getInstance().execute(Command.describeCatalogComponent(component.name, component.registry.name)).then((componentDesc: CliExitData) => {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    const [ component ] = JSON.parse(componentDesc.stdout) as ComponentTypeDescription[];
+    public async getAllComponents(): Promise<void> {
+        return new Promise<void>((resolve) => {
+            let isError = false;
+            this.compDescriptions.clear();
+            void getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
+                await this.getRegistries();
+                devFileComponentTypes.forEach((component: DevfileComponentType) => {
+                    getInstance().execute(Command.describeCatalogComponent(component.name, component.registry.name)).then((componentDesc: CliExitData) => {
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                        const [ component ] = JSON.parse(componentDesc.stdout) as ComponentTypeDescription[];
 
-                        // eslint-disable-next-line max-nested-callbacks
-                        component.devfileData.devfile?.starterProjects?.map((starter: StarterProject) => {
-                            starter.typeName = component.name;
-                        });
-                        this.compDescriptions.add(component);
+                            // eslint-disable-next-line max-nested-callbacks
+                            component.devfileData.devfile?.starterProjects?.map((starter: StarterProject) => {
+                                starter.typeName = component.name;
+                            });
+                            this.compDescriptions.add(component);
 
-                    if (devFileComponentTypes.length === this.compDescriptions.size) {
-                        this.subject.next('refresh');
-                    }
-                }).catch(() => {
-                    isError = true;
-                }).finally(() => {
-                    if (isError && !this.subject.closed) {
-                        this.subject.next('refresh');
-                    }
+                        if (devFileComponentTypes.length === this.compDescriptions.size) {
+                            this.subject.next('refresh');
+                            resolve();
+                        }
+                    }).catch(() => {
+                        isError = true;
+                    }).finally(() => {
+                        if (isError && !this.subject.closed) {
+                            this.subject.next('refresh');
+                            resolve();
+                        }
+                    });
                 });
+            }).catch(() => {
+                this.subject.next('error');
+                resolve();
             });
-        }).catch(() => {
-            this.subject.next('error');
         });
     }
 
@@ -318,7 +323,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         const newRegistry = await OdoImpl.Instance.addRegistry(regName, regURL, token);
         ComponentTypesView.instance.addRegistry(newRegistry);
 
-        ComponentTypesView.instance.getAllComponents();
+        await ComponentTypesView.instance.getAllComponents();
     }
 
     @vsCommand('openshift.componentTypesView.registry.remove')
@@ -332,7 +337,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             await OdoImpl.Instance.removeRegistry(registry.name);
             ComponentTypesView.instance.removeRegistry(registry);
             if (!isEdit) {
-                ComponentTypesView.instance.getAllComponents();
+                await ComponentTypesView.instance.getAllComponents();
             }
         }
     }
