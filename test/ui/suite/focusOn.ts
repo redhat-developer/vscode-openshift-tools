@@ -16,7 +16,7 @@ export function checkFocusOnCommands() {
         before('Open OpenShift View', async function(){
             this.timeout(10000);
             view = await (await new ActivityBar().getViewControl('OpenShift')).openView();
-            VSBrowser.instance.driver.wait(async () => !(await view.getContent().hasProgress()),
+            await VSBrowser.instance.driver.wait(async () => !(await view.getContent().hasProgress()),
             5000,
             'Progress bar has not been hidden within the timeout'
             );

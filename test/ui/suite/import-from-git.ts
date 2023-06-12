@@ -5,7 +5,7 @@
 import { expect } from 'chai';
 import * as fs from 'fs-extra';
 import { ActivityBar, By, EditorView, InputBox, SideBarView, ViewSection, WebElement, WebView, WelcomeContentButton, WelcomeContentSection, Workbench } from 'vscode-extension-tester';
-//import { notificationExists } from '../common/conditions';
+import { notificationExists } from '../common/conditions';
 import { VIEWS } from '../common/constants';
 import path = require('path');
 
@@ -95,7 +95,7 @@ export function testImportFromGit() {
             await webview.switchBack(); // END WEBVIEW CODE
 
             const devfile: string = path.join(tempDir, 'springboot-ex', 'devfile.yaml');
-            //await notificationExists('Component \'springboot-ex-comp\' successfully created. Perform actions on it from Components View.', editorView.getDriver(), 10_000);
+            await notificationExists('Component \'springboot-ex-comp\' successfully created. Perform actions on it from Components View.', editorView.getDriver(), 10_000);
             expect(fs.existsSync(devfile)).is.true;
         });
 
