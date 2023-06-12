@@ -76,7 +76,7 @@ export function testImportFromGit() {
             const fileDialog = await InputBox.create();
             await fileDialog.setText(tempDir);
             await fileDialog.confirm();
-            await new Promise(res => setTimeout(res, 10000)); // wait for clone operation to complete
+            await new Promise(res => setTimeout(res, 5000)); // wait for clone operation to complete
 
             await webview.switchToFrame(); // START WEBVIEW CODE
 
