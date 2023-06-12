@@ -283,12 +283,13 @@ export class CardItem extends React.Component<DevFileProps, {
                                 className={this.props.cardItemStyle.cardImage} />
                             <div className={this.props.cardItemStyle.cardHeaderTitle}>
                                 <Typography variant='h6' style={{ maxWidth: '8rem' }}>{this.props.compDescription.devfileData.devfile.metadata.displayName}</Typography>
-                                <div style={{display: 'flex', flexDirection: 'row', gap: '0.5rem'}}>
+                                <div style={{ display: 'flex', flexDirection: 'row', gap: '3px' }}>
                                     {
                                         this.props.compDescription.devfileData.devfile.metadata.version && (
                                             <><Typography variant='body2'>
                                                 Version: {this.props.compDescription.devfileData.devfile.metadata.version}
-                                            </Typography><Typography variant='body2'>|</Typography></>
+                                            </Typography>
+                                                <Typography variant='body2'>|</Typography></>
                                         )
                                     }
                                     <Typography variant='body2'>
@@ -303,9 +304,15 @@ export class CardItem extends React.Component<DevFileProps, {
                                 </div>
                             </div>
                             {this.props.compDescription.registry.name.toLowerCase() !== 'defaultdevfileregistry' &&
-                                <div className={this.props.cardItemStyle.cardRegistryTitle}>
-                                    <Typography variant='body1'>{this.props.compDescription.registry.name}</Typography>
-                                </div>}
+                                <Badge key={`badge-${this.props.compDescription.registry.name}`}
+                                    className={this.props.cardItemStyle.cardRegistryTitle}
+                                    overlap='rectangular'
+                                    variant='dot'
+                                    style={{backgroundColor: 'var(--vscode-badge-background)', color: 'var(--vscode-badge-foreground)'}}
+                                >
+                                    {this.props.compDescription.registry.name}
+                                </Badge>
+                            }
                         </div>
                         <div className={this.props.cardItemStyle.cardFooterTag}>
                             <div>

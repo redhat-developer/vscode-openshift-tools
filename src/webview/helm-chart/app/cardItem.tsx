@@ -310,8 +310,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                     data-testid='icon'
                                     src={this.state.selectedVersion.icon ? this.state.selectedVersion.icon : HelmIcon}
                                     alt={this.state.selectedVersion.icon + ' logo'}
-                                    className={this.props.cardItemStyle.cardImage}
-                                    style={{ margin: '0rem' }} />
+                                    className={this.props.cardItemStyle.yamlCardImage} />
                                 <div style={{ marginTop: '0.6rem' }}>
                                     <Typography variant='subtitle1'>
                                         {

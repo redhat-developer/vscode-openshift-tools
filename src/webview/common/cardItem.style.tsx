@@ -63,12 +63,20 @@ export default (_theme: Theme) =>
             height: '11rem',
             maxHeight: '16rem',
             flexDirection: 'row',
-            gap: '1rem'
+            gap: '0.5rem'
         },
         cardImage: {
-            width: '7rem',
+            width: '6rem',
             objectFit: 'contain',
-            maxHeight: '70% !important'
+            maxHeight: '60% !important'
+        },
+        yamlCardImage: {
+            width: 'auto',
+            height: 'auto',
+            maxWidth: '6rem',
+            maxHeight: '3rem',
+            margin: 0,
+            objectFit: 'contain'
         },
         cardBody: {
             height: 'auto',
@@ -81,19 +89,20 @@ export default (_theme: Theme) =>
             gap: '0.5rem'
         },
         cardRegistryTitle: {
-            color: 'var(--vscode-textLink-activeForeground)',
-            minWidth: '5rem',
-            height: '2rem',
+            maxWidth: '5rem',
+            height: '1.2rem',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
-            display: 'block',
-            textAlign: 'left',
+            textAlign: 'center',
             textDecoration: 'none',
             textOverflow: 'ellipsis',
             wordBreak: 'break-all',
             float: 'right',
-            position: 'absolute',
-            right: 0
+            position: 'absolute !important' as any,
+            right: 0,
+            padding: '0 0.5rem',
+            margin: '0 0.5rem',
+            borderRadius: '0.8rem',
         },
         badge: {
             marginTop: '1rem',
@@ -101,7 +110,7 @@ export default (_theme: Theme) =>
             padding: '0.5rem',
             minHeight: '2px',
             maxHeight: '1rem',
-            borderRadius: '0.5rem!important',
+            borderRadius: '0.5rem',
             marginLeft: '0.5rem',
             alignItems: 'center',
             color: 'var(--vscode-button-foreground)',
