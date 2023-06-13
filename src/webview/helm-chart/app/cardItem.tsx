@@ -310,8 +310,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                     data-testid='icon'
                                     src={this.state.selectedVersion.icon ? this.state.selectedVersion.icon : HelmIcon}
                                     alt={this.state.selectedVersion.icon + ' logo'}
-                                    className={this.props.cardItemStyle.cardImage}
-                                    style={{ margin: '0rem' }} />
+                                    className={this.props.cardItemStyle.yamlCardImage} />
                                 <div style={{ marginTop: '0.6rem' }}>
                                     <Typography variant='subtitle1'>
                                         {
@@ -321,12 +320,12 @@ export class CardItem extends React.Component<DevFileProps, {
                                 </div>
                             </div>
                             <div style={{ width: '50%', display: 'flex', flexDirection: 'row' }}>
-                                <div style={{ width: '85%'}}>
+                                <div style={{ width: '85%' }}>
                                     {
                                         installResponse.loadScreen && <LoadScreen title='Installation in Progress' type='circle' />
                                     }
                                 </div>
-                                <div style={{float: 'right', marginTop: '0.5rem'}}>
+                                <div style={{ float: 'right', marginTop: '0.5rem' }}>
                                     <Button
                                         disabled={this.handleDisable() || installResponse.installed}
                                         variant='outlined'
@@ -358,11 +357,11 @@ export class CardItem extends React.Component<DevFileProps, {
                         data-testid={`card-${selectedVersion.name.replace(/\.| /g, '')}`}
                     >
                         <div className={this.props.cardItemStyle.cardHeader}>
-                            <div className={this.props.cardItemStyle.cardHeaderDisplay} style={{ flexDirection: 'row' }}>
+                            <div className={this.props.cardItemStyle.helmcardHeaderDisplay} style={{ flexDirection: 'row' }}>
                                 <img
                                     src={selectedVersion.icon ? selectedVersion.icon : HelmIcon}
                                     alt={`${selectedVersion.name} icon`}
-                                    className={this.props.cardItemStyle.cardImage} style={{ margin: '0.5rem', width: '2.5rem', height: '2.5rem' }} />
+                                    style={{ margin: '0.5rem', width: '2.5rem', height: '2.5rem', objectFit: 'contain' }} />
                                 {selectedVersion.version && <Badge key={`key-` + selectedVersion.version}
                                     className={this.props.cardItemStyle.badge}
                                     overlap='rectangular'
@@ -384,7 +383,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                 selectedVersion.annotations['charts.openshift.io/provider'] && <Typography variant='caption'>Provided by {selectedVersion.annotations['charts.openshift.io/provider']}</Typography>
                             }
                         </div>
-                        <div className={this.props.cardItemStyle.cardFooterTag} style={{ margin: '1rem' }}>
+                        <div className={this.props.cardItemStyle.helmcardFooterTag} style={{ margin: '1rem' }}>
                             <div style={{ height: 'auto' }}>
                                 <Typography variant='caption'
                                     className={this.props.cardItemStyle.longDescription}>
