@@ -53,6 +53,7 @@
 		"compile:ext": "tsc -b ./",
 		"compile:checkWebviews": "tsc -p ./src/webview -noEmit",
 		"compile:webviews": "node ./build/esbuild.mjs",
+        "watch": "tsc -watch -p ./",
 		"clean": "shx rm -rf out/build out/coverage out/src out/test out/tools out/test-resources out/*Viewer",
 		"lint": "eslint . --ext .ts --quiet",
 		"lint-fix": "eslint . --ext .ts --fix",
