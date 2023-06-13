@@ -117,7 +117,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                         <SearchBar title='Search registry by name or description' onSearchBarChange={function (value: string): void {
                             setSearchValue(value);
                             setFilteredcompDescriptions(getFilteredCompDesc(registries, compDescriptions, value));
-                        }} searchBarValue={searchValue} />
+                        }} searchBarValue={searchValue} resultCount={filteredcompDescriptions.length}/>
                         {
                             registries.length > 1 &&
                             <FilterElements id='registry'

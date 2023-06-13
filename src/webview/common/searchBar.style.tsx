@@ -14,7 +14,10 @@ export default (_theme: Theme) =>
             paddingTop: '1rem',
             paddingRight: '1rem',
             marginLeft: '8rem',
-            marginRight: '8rem!important'
+            justifyContent: 'center',
+            marginRight: '8rem!important',
+            flexDirection: 'row',
+            gap: '0.5rem'
         },
 
         searchBarInput: {
