@@ -190,7 +190,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<any>
     updateStatusBarItem(crcStatusItem, 'Stop CRC');
     extendClusterExplorer();
 
-    void ComponentTypesView.instance.getAllComponents();
+    await ComponentTypesView.instance.getAllComponents();
 
     startTelemetry(extensionContext);
     await verifyBinariesInRemoteContainer();

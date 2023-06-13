@@ -26,8 +26,8 @@ export const CardTheme = createTheme({
 export default (_theme: Theme) =>
     createStyles({
         card: {
-            height: '22rem',
-            width: '16rem',
+            height: '16rem',
+            width: '24rem',
             margin: '0.2rem',
             cursor: 'pointer',
             borderRadius: '1rem !important',
@@ -53,51 +53,68 @@ export default (_theme: Theme) =>
             height: '3rem',
             margin: '0.5rem'
         },
-        cardHeaderDisplay: {
+        helmcardHeaderDisplay: {
             display: 'flex',
             justifyContent: 'space-between'
         },
+        cardHeaderDisplay: {
+            display: 'flex',
+            margin: '0.5rem',
+            height: '11rem',
+            maxHeight: '16rem',
+            flexDirection: 'row',
+            gap: '0.5rem'
+        },
         cardImage: {
+            width: '6rem',
+            objectFit: 'contain',
+            maxHeight: '60% !important'
+        },
+        yamlCardImage: {
             width: 'auto',
             height: 'auto',
-            margin: '1rem',
             maxWidth: '6rem',
-            maxHeight: '3rem'
+            maxHeight: '3rem',
+            margin: 0,
+            objectFit: 'contain'
         },
         cardBody: {
             height: 'auto',
             overflow: 'hidden',
             margin: '1.5rem'
         },
+        cardHeaderTitle: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem'
+        },
         cardRegistryTitle: {
-            color: 'var(--vscode-textLink-activeForeground)',
-            minWidth: '5rem',
-            height: '2rem',
+            maxWidth: '5rem',
+            height: '1.2rem',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
-            display: 'block',
-            textAlign: 'left',
+            textAlign: 'center',
             textDecoration: 'none',
             textOverflow: 'ellipsis',
             wordBreak: 'break-all',
             float: 'right',
-            paddingTop: '0.5rem',
-            margin: '1rem'
+            position: 'absolute !important' as any,
+            right: 0,
+            padding: '0 0.5rem',
+            margin: '0 0.5rem',
+            borderRadius: '0.8rem',
         },
         badge: {
             marginTop: '1rem',
             minWidth: '0.5rem',
-            maxWidth: '5rem',
             padding: '0.5rem',
             minHeight: '2px',
             maxHeight: '1rem',
-            borderRadius: '0.5rem!important',
+            borderRadius: '0.5rem',
             marginLeft: '0.5rem',
             alignItems: 'center',
-            color: 'inherit',
-            backgroundColor: 'var(--vscode-badge-background)',
-            outline: '0.0625rem solid',
-            outlineColor: 'inherit'
+            color: 'var(--vscode-button-foreground)',
+            backgroundColor: 'var(--vscode-button-background)'
         },
         subBadge: {
             marginTop: '0'
@@ -109,10 +126,15 @@ export default (_theme: Theme) =>
         firstBadge: {
             marginLeft: '0rem'
         },
-        cardFooterTag: {
+        helmcardFooterTag: {
             display: 'flex',
             flexDirection: 'column',
             margin: '1.5rem'
+        },
+        cardFooterTag: {
+            display: 'flex',
+            flexDirection: 'row',
+            marginLeft: '0.5rem'
         },
         text: {
             textAlign: 'right'
@@ -209,7 +231,8 @@ export default (_theme: Theme) =>
             maxHeight: '40rem',
             width: '65rem',
             margin: 'auto',
-            overflow: 'auto !important'
+            overflowY: 'auto !important' as any,
+            overflowX: 'hidden !important' as any,
         },
         yamlCardHeader: {
             padding: '1.5rem!important',

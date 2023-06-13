@@ -15,6 +15,7 @@ import { VSCodeMessage } from '../vsCodeMessage';
 import { StarterProjectDisplay } from '../../common/starterProjectDisplay';
 import { DevFileProps } from './wrapperCardItem';
 import '../../common/cardItem.scss';
+import { isDefaultDevfileRegistry } from './home';
 
 export class CardItem extends React.Component<DevFileProps, {
     numOfCall: number,
@@ -223,14 +224,10 @@ export class CardItem extends React.Component<DevFileProps, {
                                 <img
                                     data-testid='icon'
                                     src={this.props.compDescription.devfileData.devfile.metadata.icon}
-                                    alt={this.props.compDescription.devfileData.devfile.metadata.icon + ' logo'}
-                                    className={this.props.cardItemStyle.cardImage}
-                                    style={{ margin: '0rem' }} />
-                                <div style={{ padding: '1rem', margin: '0rem' }}>
-                                    <Typography variant='subtitle1'>
-                                        {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.displayName)}
-                                    </Typography>
-                                </div>
+                                    alt={this.props.compDescription.devfileData.devfile.metadata.icon + ' logo'} />
+                                <Typography variant='subtitle1' style={{ margin: '1rem' }}>
+                                    {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.displayName)}
+                                </Typography>
                             </div>
                         </div>
                         {this.props.compDescription.devfileData.devfile.starterProjects && starterProjectCard}
@@ -273,49 +270,50 @@ export class CardItem extends React.Component<DevFileProps, {
         return (
             <>
                 <ThemeProvider theme={CardTheme}>
-                <Card
-                    className={this.props.cardItemStyle.card}
-                    onClick={this.onCardClick}
-                    data-testid={`card-${this.props.compDescription.devfileData.devfile.metadata.name.replace(/\.| /g, '')}`}
-                >
-                    <div className={this.props.cardItemStyle.cardHeader}>
+                    <Card
+                        className={this.props.cardItemStyle.card}
+                        onClick={this.onCardClick}
+                        data-testid={`card-${this.props.compDescription.devfileData.devfile.metadata.name.replace(/\.| /g, '')}`}
+                    >
                         <div className={this.props.cardItemStyle.cardHeaderDisplay}>
                             <img
                                 src={this.props.compDescription.devfileData.devfile.metadata.icon}
                                 alt={`${this.props.compDescription.devfileData.devfile.metadata.name} icon`}
                                 className={this.props.cardItemStyle.cardImage} />
-                            {this.props.compDescription.registry.name.toLowerCase() !== 'defaultdevfileregistry' &&
-                                <div className={this.props.cardItemStyle.cardRegistryTitle}>
-                                    <Typography variant='caption'>{this.props.compDescription.registry.name}</Typography>
-                                </div>}
+                            <div className={this.props.cardItemStyle.cardHeaderTitle}>
+                                <Typography variant='h6' style={{ maxWidth: '8rem' }}>{this.props.compDescription.devfileData.devfile.metadata.displayName}</Typography>
+                                <div style={{ display: 'flex', flexDirection: 'row', gap: '3px' }}>
+                                    {
+                                        this.props.compDescription.devfileData.devfile.metadata.version && (
+                                            <><Typography variant='body2'>
+                                                Version: {this.props.compDescription.devfileData.devfile.metadata.version}
+                                            </Typography>
+                                                <Typography variant='body2'>|</Typography></>
+                                        )
+                                    }
+                                    <Typography variant='body2'>
+                                        Language: {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.language)}
+                                    </Typography>
+                                </div>
+                                <div>
+                                    <Typography variant='body2'
+                                        className={this.props.cardItemStyle.longDescription}>
+                                        {this.props.compDescription.devfileData.devfile.metadata.description}
+                                    </Typography>
+                                </div>
+                            </div>
+                            {!isDefaultDevfileRegistry(this.props.compDescription.registry.url.toString()) &&
+                                <Badge key={`badge-${this.props.compDescription.registry.name}`}
+                                    className={this.props.cardItemStyle.cardRegistryTitle}
+                                    overlap='rectangular'
+                                    variant='dot'
+                                    style={{ backgroundColor: 'var(--vscode-badge-background)', color: 'var(--vscode-badge-foreground)' }}
+                                >
+                                    {this.props.compDescription.registry.name}
+                                </Badge>
+                            }
                         </div>
-                    </div>
-                    <div style={{ margin: '1.5rem' }}>
-                        <Typography variant='subtitle1'>{this.props.compDescription.devfileData.devfile.metadata.displayName}</Typography>
-                    </div>
-                    <div className={this.props.cardItemStyle.cardBody}>
-                        {
-                            this.props.compDescription.devfileData.devfile.metadata.version && (
-                                <><Typography variant='caption'>
-                                    Version: {this.props.compDescription.devfileData.devfile.metadata.version}
-                                </Typography><br /></>
-                            )
-                        }
-                        <Typography variant='caption'>
-                            Project Type: {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.projectType)}
-                        </Typography><br />
-                        <Typography variant='caption'>
-                            Language: {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.language)}
-                        </Typography><br />
-                    </div>
-                    <div className={this.props.cardItemStyle.cardFooterTag}>
-                        <div style={{ height: '4rem' }}>
-                            <Typography variant='caption'
-                                className={this.props.cardItemStyle.longDescription}>
-                                {this.props.compDescription.devfileData.devfile.metadata.description}
-                            </Typography>
-                        </div>
-                        <div>
+                        <div className={this.props.cardItemStyle.cardFooterTag}>
                             {
                                 this.props.compDescription.devfileData.devfile.metadata.tags?.map((tag: string, index: number) =>
                                     index <= 2 &&
@@ -331,14 +329,13 @@ export class CardItem extends React.Component<DevFileProps, {
                                 )
                             }
                         </div>
-                    </div>
-                </Card>
-                {
-                    devFileYAML.length > 0 && isExpanded &&
-                    <>
-                        {modalViewCard}
-                    </>
-                }
+                    </Card>
+                    {
+                        devFileYAML.length > 0 && isExpanded &&
+                        <>
+                            {modalViewCard}
+                        </>
+                    }
                 </ThemeProvider>
             </>
         );

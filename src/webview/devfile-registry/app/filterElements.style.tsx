@@ -26,7 +26,9 @@ export const FilterTheme = createTheme({
                         className: 'checkbox'
                     },
                     style: {
-                        color: 'var(--vscode-focusBorder)',
+                        backgroundColor: 'var(--vscode-checkbox-background) !important',
+                        color: 'var(--vscode-checkbox-foreground) !important',
+                        borderColor: 'var(--vscode-checkbox-border) !important',
                         '&.Mui-checked': {
                             color: 'primary',
                         }

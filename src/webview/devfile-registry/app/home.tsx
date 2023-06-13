@@ -28,17 +28,20 @@ const ImageGalleryList = styled('ul')(({ theme }) => ({
         gridTemplateColumns: 'repeat(1, 1fr)'
     },
     [theme.breakpoints.up('sm')]: {
-        gridTemplateColumns: 'repeat(2, 1fr)'
+        gridTemplateColumns: 'repeat(1, 1fr)'
+    },
+    [theme.breakpoints.between('sm','md')]: {
+        gridTemplateColumns: 'repeat(1, 1fr)'
     },
     [theme.breakpoints.up('md')]: {
-        gridTemplateColumns: 'repeat(3, 1fr)'
+        gridTemplateColumns: 'repeat(2, 1fr)'
     },
     [theme.breakpoints.up('lg')]: {
-        gridTemplateColumns: 'repeat(4, 1fr)'
+        gridTemplateColumns: 'repeat(3, 1fr)'
     },
     [theme.breakpoints.up('xl')]: {
-        gridTemplateColumns: 'repeat(8, 1fr)'
-    },
+        gridTemplateColumns: 'repeat(4, 1fr)'
+    }
 }));
 
 const HomeItem: React.FC<DevfileHomePageProps> = ({
@@ -88,9 +91,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                     } else {
                         message.data.registries.forEach((registry: Registry) => {
                             const devfileUrl = new URL(registry.url);
-                            if (devfileUrl.hostname.toLowerCase() === 'registry.devfile.io') {
-                                registry.state = true;
-                            }
+                            registry.state = isDefaultDevfileRegistry(devfileUrl.hostname) ? true : false;
                         });
                     }
                     setThemeKind(message.data.themeValue);
@@ -137,7 +138,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                                     if (allUncheckedRegistries.length === registries.length) {
                                         allUncheckedRegistries.forEach((uncheckedRegistry: Registry) => {
                                             const registryUrl = new URL(uncheckedRegistry.url);
-                                            if (registryUrl.hostname.toLowerCase() === 'registry.devfile.io') {
+                                            if (isDefaultDevfileRegistry(registryUrl.hostname)) {
                                                 uncheckedRegistry.state = true;
                                             }
                                         })
@@ -200,3 +201,6 @@ function ascName(oldCompDesc: CompTypeDesc, newCompDesc: CompTypeDesc): number {
     return newCompDesc.priority - oldCompDesc.priority;
 }
 
+export function isDefaultDevfileRegistry(registryURL: string): boolean {
+    return registryURL?.toLowerCase().indexOf('registry.devfile.io') !== -1;
+}
