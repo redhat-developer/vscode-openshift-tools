@@ -225,11 +225,9 @@ export class CardItem extends React.Component<DevFileProps, {
                                     data-testid='icon'
                                     src={this.props.compDescription.devfileData.devfile.metadata.icon}
                                     alt={this.props.compDescription.devfileData.devfile.metadata.icon + ' logo'} />
-                                <div style={{ margin: '1rem' }}>
-                                    <Typography variant='subtitle1'>
-                                        {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.displayName)}
-                                    </Typography>
-                                </div>
+                                <Typography variant='subtitle1' style={{ margin: '1rem' }}>
+                                    {capitalizeFirstLetter(this.props.compDescription.devfileData.devfile.metadata.displayName)}
+                                </Typography>
                             </div>
                         </div>
                         {this.props.compDescription.devfileData.devfile.starterProjects && starterProjectCard}
@@ -304,34 +302,32 @@ export class CardItem extends React.Component<DevFileProps, {
                                     </Typography>
                                 </div>
                             </div>
-                            { !isDefaultDevfileRegistry(this.props.compDescription.registry.url.toString()) &&
+                            {!isDefaultDevfileRegistry(this.props.compDescription.registry.url.toString()) &&
                                 <Badge key={`badge-${this.props.compDescription.registry.name}`}
                                     className={this.props.cardItemStyle.cardRegistryTitle}
                                     overlap='rectangular'
                                     variant='dot'
-                                    style={{backgroundColor: 'var(--vscode-badge-background)', color: 'var(--vscode-badge-foreground)'}}
+                                    style={{ backgroundColor: 'var(--vscode-badge-background)', color: 'var(--vscode-badge-foreground)' }}
                                 >
                                     {this.props.compDescription.registry.name}
                                 </Badge>
                             }
                         </div>
                         <div className={this.props.cardItemStyle.cardFooterTag}>
-                            <div>
-                                {
-                                    this.props.compDescription.devfileData.devfile.metadata.tags?.map((tag: string, index: number) =>
-                                        index <= 2 &&
-                                        <Badge key={index}
-                                            className={index === 0 ?
-                                                clsx(this.props.cardItemStyle.badge, this.props.cardItemStyle.firstBadge)
-                                                : this.props.cardItemStyle.badge}
-                                            overlap='rectangular'
-                                            variant='standard'
-                                        >
-                                            {tag}
-                                        </Badge>
-                                    )
-                                }
-                            </div>
+                            {
+                                this.props.compDescription.devfileData.devfile.metadata.tags?.map((tag: string, index: number) =>
+                                    index <= 2 &&
+                                    <Badge key={index}
+                                        className={index === 0 ?
+                                            clsx(this.props.cardItemStyle.badge, this.props.cardItemStyle.firstBadge)
+                                            : this.props.cardItemStyle.badge}
+                                        overlap='rectangular'
+                                        variant='standard'
+                                    >
+                                        {tag}
+                                    </Badge>
+                                )
+                            }
                         </div>
                     </Card>
                     {
