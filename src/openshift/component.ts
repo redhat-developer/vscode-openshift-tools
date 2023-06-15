@@ -22,6 +22,7 @@ import { VsCommandError, vsCommand } from '../vscommand';
 import GitImportLoader from '../webview/git-import/gitImportLoader';
 import LogViewLoader from '../webview/log/LogViewLoader';
 import OpenShiftItem from './openshiftItem';
+import DescribeViewLoader from '../webview/describe/describeViewLoader';
 
 function createCancelledResult(stepName: string): any {
     const cancelledResult: any = new String('');
@@ -350,12 +351,17 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.describe', true)
-    static async describe(componentFolder: ComponentWorkspaceFolder): Promise<string> {
-        const command = Command.describeComponent;
-        await Component.odo.executeInTerminal(
-            command(),
-            componentFolder.contextPath,
-            `OpenShift: Describe '${componentFolder.component.devfileData.devfile.metadata.name}' Component`);
+    static describe(componentFolder: ComponentWorkspaceFolder): Promise<string> {
+        const command = Command.describeComponent();
+        const componentName = componentFolder.component.devfileData.devfile.metadata.name;
+        if (Component.isUsingWebviewEditor()) {
+            DescribeViewLoader.loadView(`${componentName} Description`, command, componentFolder);
+        } else {
+            void Component.odo.executeInTerminal(
+                command,
+                componentFolder.contextPath,
+                `OpenShift: Describe '${componentName}' Component`);
+        }
         return;
     }
 

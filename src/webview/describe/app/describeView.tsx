@@ -5,11 +5,11 @@
 
 import * as React from 'react';
 
-import { createTheme, Theme, ThemeProvider } from '@mui/material/styles';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { makeStyles, createStyles } from '@mui/styles';
 import { AppBar, Toolbar, Typography } from '@mui/material';
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
   createStyles({
     root: {
       flexGrow: 1

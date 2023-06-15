@@ -6,7 +6,7 @@ import * as path from 'path';
 import { Uri, ViewColumn, WebviewPanel, extensions, window } from 'vscode';
 import { CommandText } from '../../base/command';
 import { CliChannel } from '../../cli';
-import { OpenShiftObject } from '../../odo';
+import { ComponentWorkspaceFolder } from '../../odo/workspace';
 import { ExtensionID } from '../../util/constants';
 import { loadWebviewHtml } from '../common-ext/utils';
 
@@ -16,7 +16,7 @@ export default class DescribeViewLoader {
         return extensions.getExtension(ExtensionID).extensionPath
     }
 
-    static async loadView(title: string, cmdFunction: (prj, app, comp) => CommandText, target: OpenShiftObject): Promise<WebviewPanel> {
+    static async loadView(title: string, cmd: CommandText, target: ComponentWorkspaceFolder): Promise<WebviewPanel> {
         const localResourceRoot = Uri.file(path.join(DescribeViewLoader.extensionPath, 'out', 'describeViewer'));
 
         const panel = window.createWebviewPanel('describeView', title, ViewColumn.One, {
@@ -26,15 +26,11 @@ export default class DescribeViewLoader {
         });
         panel.iconPath = Uri.file(path.join(DescribeViewLoader.extensionPath, "images/context/cluster-node.png"));
 
-        const cmd = cmdFunction(target.getParent().getParent().getName(), target.getParent().getName(), target.getName());
-
         // TODO: When webview is going to be ready?
         panel.webview.html = await loadWebviewHtml('describeViewer', panel, new Map([['%COMMAND%', `${cmd}`]]));
 
-        const process = await CliChannel.getInstance().spawnTool(cmd, {cwd: target.contextPath.fsPath});
-        process.stdout.on('data', (data) => {
-            panel.webview.postMessage({action: 'describe', data: `${data}`.trim().split('\n')});
-        });
+        const result = await CliChannel.getInstance().executeTool(cmd, {cwd: target.contextPath});
+        panel.webview.postMessage({action: 'describe', data: `${result.stdout}`.trim().split('\n')});
         return panel;
     }
 
