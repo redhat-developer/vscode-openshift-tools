@@ -11,12 +11,9 @@ export default (_theme: Theme) =>
 
         searchBar: {
             display: 'flex',
-            paddingTop: '1rem',
-            paddingRight: '1rem',
-            marginLeft: '8rem',
             justifyContent: 'center',
-            marginRight: '8rem!important',
             flexDirection: 'row',
+            alignItems: 'center',
             gap: '0.5rem'
         },
 
