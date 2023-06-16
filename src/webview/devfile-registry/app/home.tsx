@@ -7,13 +7,13 @@ import { makeStyles } from '@mui/styles';
 import React, { ChangeEvent } from 'react';
 import { Registry } from '../../../odo/componentType';
 import { StarterProject } from '../../../odo/componentTypeDescription';
+import cardItemStyle from '../../common/cardItem.style';
 import { ErrorPage } from '../../common/errorPage';
 import { HomeTheme } from '../../common/home.style';
 import { LoadScreen } from '../../common/loading';
 import { CompTypeDesc, DefaultProps, DevfileHomePageProps } from '../../common/propertyTypes';
 import { SearchBar } from '../../common/searchBar';
 import { VSCodeMessage } from '../vsCodeMessage';
-import cardItemStyle from '../../common/cardItem.style';
 import { FilterElements } from './filterElements';
 import { WrapperCardItem as CardItem } from './wrapperCardItem';
 
@@ -90,8 +90,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                         });
                     } else {
                         message.data.registries.forEach((registry: Registry) => {
-                            const devfileUrl = new URL(registry.url);
-                            registry.state = isDefaultDevfileRegistry(devfileUrl.hostname) ? true : false;
+                            registry.state = isDefaultDevfileRegistry(registry.url);
                         });
                     }
                     setThemeKind(message.data.themeValue);
@@ -137,8 +136,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                                     const allUncheckedRegistries = registries.filter((registry: Registry) => !registry.state);
                                     if (allUncheckedRegistries.length === registries.length) {
                                         allUncheckedRegistries.forEach((uncheckedRegistry: Registry) => {
-                                            const registryUrl = new URL(uncheckedRegistry.url);
-                                            if (isDefaultDevfileRegistry(registryUrl.hostname)) {
+                                            if (isDefaultDevfileRegistry(uncheckedRegistry.url)) {
                                                 uncheckedRegistry.state = true;
                                             }
                                         })
@@ -201,6 +199,7 @@ function ascName(oldCompDesc: CompTypeDesc, newCompDesc: CompTypeDesc): number {
     return newCompDesc.priority - oldCompDesc.priority;
 }
 
-export function isDefaultDevfileRegistry(registryURL: string): boolean {
-    return registryURL?.toLowerCase().indexOf('registry.devfile.io') !== -1;
+export function isDefaultDevfileRegistry(registryUrl: string): boolean {
+    const url = new URL(registryUrl);
+    return url.hostname.toLowerCase() === 'registry.devfile.io';
 }
