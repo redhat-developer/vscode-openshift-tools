@@ -4,16 +4,14 @@
  *-----------------------------------------------------------------------------------------------*/
 /* eslint-disable no-console */
 
+import * as testElectron from '@vscode/test-electron';
 import { platform } from 'os';
 
 import cp = require('child_process');
 import path = require('path');
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import * as testElectron from '@vscode/test-electron';
-
 void testElectron.downloadAndUnzipVSCode().then((executable: string) => {
-    let vsCodeExecutable;
+    let vsCodeExecutable: string;
     if (platform() === 'darwin') {
         console.log(executable);
         vsCodeExecutable = `'${path.join(
@@ -27,12 +25,18 @@ void testElectron.downloadAndUnzipVSCode().then((executable: string) => {
     } else {
         vsCodeExecutable = path.join(path.dirname(executable), 'bin', 'code');
     }
-    const [, , vsixName] = process.argv;
+
+    // Install extensions that openshift-toolkit depends on
+    const extensionsToInstall = [
+        'redhat.vscode-redhat-account'
+    ];
+
     const extensionRootPath = path.resolve(__dirname, '..', '..');
     const vsCodeTest = path.resolve(path.join(extensionRootPath, '.vscode-test'));
     const userDataDir = path.join(vsCodeTest, 'user-data');
     const extDir = path.join(vsCodeTest, 'extensions');
-    const vsixPath = vsixName.includes('.vsix') ? path.join(extensionRootPath, vsixName) : vsixName;
-    console.log('Installin extension: ', vsixPath );
-    cp.execSync(`${vsCodeExecutable} --install-extension ${vsixPath} --user-data-dir ${userDataDir} --extensions-dir ${extDir}`);
+    for (const extension of extensionsToInstall) {
+        console.log('Installing extension: ', extension );
+        cp.execSync(`${vsCodeExecutable} --install-extension ${extension} --user-data-dir ${userDataDir} --extensions-dir ${extDir}`);
+    }
 });
