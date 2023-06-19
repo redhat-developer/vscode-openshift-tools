@@ -132,18 +132,18 @@ export function clusterRequired() {
         }
 
         descriptor[fnKey] = async function (...args: any[]): Promise<any> {
-            let activeCluster = await getInstance().getActiveCluster();
-            if (!activeCluster) {
+            let hasActiveCluster = await getInstance().canCreatePod();
+            if (!hasActiveCluster) {
                 const lOrC = await window.showInformationMessage('Login in to a Cluster to run this command.', 'Login', 'Cancel');
                 if (lOrC === 'Login') {
                     const loginResult = await commands.executeCommand('openshift.explorer.login');
                     if (typeof loginResult === 'string') {
                         window.showInformationMessage(loginResult);
                     }
-                    activeCluster = await getInstance().getActiveCluster();
+                    hasActiveCluster = await getInstance().canCreatePod();
                 }
             }
-            if (activeCluster) {
+            if (hasActiveCluster) {
                 return fn.apply(this, args);
             }
         };

@@ -71,6 +71,7 @@ export interface Odo {
     removeRegistry(name: string): Promise<void>;
     describeComponent(contextPath: string, experimental?: boolean): Promise<ComponentDescription | undefined>;
     analyze(contextPath: string): Promise<AnalyzeResponse[]>;
+    canCreatePod(): Promise<boolean>;
 
     /**
      * Returns the URL of the API of the current active cluster,
@@ -97,7 +98,6 @@ export interface Odo {
 }
 
 export class OdoImpl implements Odo {
-
     private static cli: cliInstance.Cli = cliInstance.CliChannel.getInstance();
 
     private static instance: Odo;
@@ -340,6 +340,18 @@ export class OdoImpl implements Odo {
 
     public async deleteComponentConfiguration(componentPath: string): Promise<void> {
         await this.execute(Command.deleteComponentConfiguration(), componentPath);
+    }
+
+    public async canCreatePod(): Promise<boolean> {
+        try {
+            const result: cliInstance.CliExitData = await this.execute(Command.canCreatePod());
+            if (result.stdout === 'yes') {
+                return true;
+            }
+        } catch {
+            //ignore
+        }
+        return false;
     }
 }
 
