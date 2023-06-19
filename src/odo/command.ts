@@ -311,4 +311,8 @@ export class Command {
             new CommandOption('-f'),
         ]);
     }
+
+    static canCreatePod(): CommandText {
+        return new CommandText('oc auth can-i create pod');
+    }
 }
