@@ -372,5 +372,4 @@ export default class ClusterViewLoader {
             }
         }
     }
-
 }
