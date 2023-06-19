@@ -26,7 +26,7 @@ class DescribeResource extends React.Component {
                 <DescribeView />
             </div>
             <div className="row content">
-                {React.createElement(Describe, {enableSearch: true, text: window.cmdText })}
+                {React.createElement(Describe, {enableSearch: true, text: window.cmdText, selectableLines: true})}
             </div>
         </div>;
     }

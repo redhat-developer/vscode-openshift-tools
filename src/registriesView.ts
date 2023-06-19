@@ -286,7 +286,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 if (!validator.isURL(trimmedValue)) {
                     return 'Entered URL is invalid';
                 }
-                if (registries?.find((registry) => registry.name !== registryContext?.name && registry.url === value)) {
+                if (registries?.find((registry) => registry.name !== registryContext?.name && new URL(registry.url).hostname === new URL(value).hostname)) {
                     return `Registry with entered URL '${value}' already exists`;
                 }
             },
