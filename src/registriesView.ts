@@ -334,7 +334,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                     ComponentTypesView.instance.refresh(false);
                 })
             }
-        } catch (reson) {
+        } catch (error: unknown) {
             void vscode.window.showErrorMessage(`Invalid registry URL ${regURL}`);
         }
     }
