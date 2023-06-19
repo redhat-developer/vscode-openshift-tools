@@ -4,6 +4,23 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "watch",
+            "type": "npm",
+            "script": "watch",
+            "isBackground": true,
+            "problemMatcher": {
+                "background": {
+                    "beginsPattern": "\\[[^\\]]+\\] File change detected. Compiling...",
+                    "endsPattern": "\\[[^\\]]+\\] Compilation complete. Found (?:no|some) errors. Watching for file changes.",
+                    "activeOnStart": false,
+                },
+                "base": "$tsc-watch",
+            },
+            "presentation": {
+                "reveal": "silent",
+            },
+        },
+        {
             "label": "compile",
             "type": "npm",
             "script": "compile",
