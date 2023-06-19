@@ -26,6 +26,8 @@ import validator from 'validator';
 import { Command } from './odo/command';
 import { CliExitData } from './cli';
 import { Subject } from 'rxjs';
+import fetch = require('make-fetch-happen');
+import { Progress } from './util/progress';
 
 type ComponentType = Registry;
 
@@ -80,11 +82,10 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     }
 
     addRegistry(newRegistry: Registry): void {
-        if(!this.registries){
+        if (!this.registries) {
             this.registries = [];
         }
         this.registries.push(newRegistry);
-        this.refresh(false);
         this.reveal(newRegistry);
     }
 
@@ -144,13 +145,13 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 devFileComponentTypes.forEach((component: DevfileComponentType) => {
                     getInstance().execute(Command.describeCatalogComponent(component.name, component.registry.name)).then((componentDesc: CliExitData) => {
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                        const [ component ] = JSON.parse(componentDesc.stdout) as ComponentTypeDescription[];
+                        const [component] = JSON.parse(componentDesc.stdout) as ComponentTypeDescription[];
 
-                            // eslint-disable-next-line max-nested-callbacks
-                            component.devfileData.devfile?.starterProjects?.map((starter: StarterProject) => {
-                                starter.typeName = component.name;
-                            });
-                            this.compDescriptions.add(component);
+                        // eslint-disable-next-line max-nested-callbacks
+                        component.devfileData.devfile?.starterProjects?.map((starter: StarterProject) => {
+                            starter.typeName = component.name;
+                        });
+                        this.compDescriptions.add(component);
 
                         if (devFileComponentTypes.length === this.compDescriptions.size) {
                             this.subject.next('refresh');
@@ -320,10 +321,22 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             await vscode.commands.executeCommand('openshift.componentTypesView.registry.remove', registryContext, true);
         }
 
-        const newRegistry = await OdoImpl.Instance.addRegistry(regName, regURL, token);
-        ComponentTypesView.instance.addRegistry(newRegistry);
-
-        await ComponentTypesView.instance.getAllComponents();
+        try {
+            const response = await fetch(regURL, {
+                method: 'GET',
+            });
+            const componentTypes = JSON.parse(await response.text()) as DevfileComponentType[];
+            if (componentTypes.length > 0) {
+                void Progress.execFunctionWithProgress('Devfile registry is updating',async () => {
+                    const newRegistry = await OdoImpl.Instance.addRegistry(regName, regURL, token);
+                    ComponentTypesView.instance.addRegistry(newRegistry);
+                    await ComponentTypesView.instance.getAllComponents();
+                    ComponentTypesView.instance.refresh(false);
+                })
+            }
+        } catch (error: unknown) {
+            void vscode.window.showErrorMessage(`Invalid registry URL ${regURL}`);
+        }
     }
 
     @vsCommand('openshift.componentTypesView.registry.remove')
