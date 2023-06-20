@@ -27,12 +27,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         </InputAdornment> : undefined;
     return (
         <Container maxWidth='md'>
-            <div className={searchBarStyle.searchBar}>
-                <div style={{
-                    display: 'flex', borderRadius: '1rem', height: '5rem', width: '80%', alignItems: 'center',
-                    boxSizing: 'border-box',
-                    backgroundColor: 'var(--vscode-editorSuggestWidget-background)', padding: '1rem', paddingLeft: 0, marginTop: '1rem'
-                }}>
+            <div className={searchBarStyle.searchBarContainer}>
+                <div className={searchBarStyle.searchBarOverlay}>
                     <TextField
                         className={searchBarStyle.searchBarInput}
                         placeholder={title}
