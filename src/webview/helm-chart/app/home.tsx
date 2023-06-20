@@ -101,7 +101,7 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                         <SearchBar title='Search chart by name' onSearchBarChange={function (value: string): void {
                             setSearchValue(value);
                             setFilteredHelmCharts(getFilteredCompDesc(helmCharts, value));
-                        }} searchBarValue={searchValue} />
+                        }} searchBarValue={searchValue} resultCount={filteredHelmCharts.length}/>
                         <HomeItem helmEntries={filteredHelmCharts} themeKind={themeKind} />
                         {error?.length > 0 ? <ErrorPage message={error} /> : null}
                     </>

@@ -26,6 +26,7 @@ export interface SearchBarProps extends DefaultProps {
     title: string,
     onSearchBarChange: (value: string) => void;
     searchBarValue: string;
+    resultCount: number;
 }
 
 export interface FilterProps extends DefaultProps {
