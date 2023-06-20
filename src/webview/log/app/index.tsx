@@ -36,7 +36,7 @@ class LogView extends React.Component {
                     <Spinner toggleAutoScroll={this.toggleAutoScroll} />
                 </div>
                 <div className="row content">
-                    {React.createElement(Log, {enableSearch: true, text: window.cmdText, follow: this.state.autoScroll, stream: true})}
+                    {React.createElement(Log, {enableSearch: true, text: window.cmdText, follow: this.state.autoScroll, stream: true, selectableLines: true})}
                 </div>
             </LogViewContext.Provider>
         </div>;

@@ -194,7 +194,7 @@ export class Command {
     }
 
     static describeComponent(): CommandText {
-        return new CommandText('odo describe component');
+        return new CommandText('odo', 'describe component');
     }
 
     static describeComponentJson(): CommandText {
