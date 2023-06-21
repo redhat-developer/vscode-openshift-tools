@@ -21,7 +21,7 @@ export const FilterElements: React.FC<FilterProps> = ({
         PaperProps: {
             style: {
                 maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-                width: 250,
+                width: 'auto',
             },
         },
     };
