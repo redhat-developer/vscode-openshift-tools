@@ -17,26 +17,11 @@ export default (_theme: Theme) =>
             gap: '0.5rem'
         },
 
-        searchBarOverlay: {
-            display: 'flex',
-            borderRadius: '1rem',
-            height: '5rem',
-            width: '80%',
-            alignItems: 'center',
-            boxSizing: 'border-box',
-            backgroundColor: 'var(--vscode-editorSuggestWidget-background)',
-            padding: '1rem',
-            paddingLeft: 0,
-            marginTop: '1rem'
-        },
-
         searchBarInput: {
             flex: '1 1 0%',
-            width: '100%',
-            height: '2rem',
+            width: '80%',
             borderRadius: '1rem',
             backgroundColor: '#ffffff',
-            marginLeft: '1.5rem!important',
             padding: '0.0625rem'
         }
     });

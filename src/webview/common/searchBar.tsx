@@ -28,33 +28,30 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     return (
         <Container maxWidth='md'>
             <div className={searchBarStyle.searchBarContainer}>
-                <div className={searchBarStyle.searchBarOverlay}>
-                    <TextField
-                        className={searchBarStyle.searchBarInput}
-                        placeholder={title}
-                        value={searchBarValue}
-                        onChange={(e) => {
-                            onSearchBarChange(e.target.value);
-                        }}
-                        sx={{
-                            '& fieldset': { border: 'none' }
-                        }}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position='start'>
-                                    <SearchRounded />
-                                </InputAdornment >
-                            ),
-                            endAdornment: (icon)
-                        }}
-                        style={{
-                            border: 'none',
-                            borderRadius: '1rem',
-                            height: '2rem'
-                        }}
-                    />
-                </div>
-                <Typography variant='caption' style={{ paddingTop: '1.5rem', fontSize: '0.7rem' }}>
+                <TextField
+                    className={searchBarStyle.searchBarInput}
+                    placeholder={title}
+                    value={searchBarValue}
+                    onChange={(e) => {
+                        onSearchBarChange(e.target.value);
+                    }}
+                    sx={{
+                        '& fieldset': { border: 'none' }
+                    }}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position='start'>
+                                <SearchRounded />
+                            </InputAdornment >
+                        ),
+                        endAdornment: (icon)
+                    }}
+                    style={{
+                        border: 'none',
+                        borderRadius: '1rem'
+                    }}
+                />
+                <Typography variant='caption' style={{ paddingTop: '0.2rem', fontSize: '0.7rem' }}>
                     {resultCount > 0 ? `1-${resultCount} of ${resultCount}` : 'No results found'}
                 </Typography>
             </div>

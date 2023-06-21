@@ -2,11 +2,11 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { ImageListItem, styled } from '@mui/material';
+import { Container, ImageListItem, styled } from '@mui/material';
 import { makeStyles, ThemeProvider } from '@mui/styles';
 import React from 'react';
 import { ErrorPage } from '../../common/errorPage';
-import { HomeTheme } from '../../common/home.style';
+import homeStyle, { HomeTheme } from '../../common/home.style';
 import { LoadScreen } from '../../common/loading';
 import { DefaultProps, HelmChartHomePageProps } from '../../common/propertyTypes';
 import { SearchBar } from '../../common/searchBar';
@@ -16,6 +16,7 @@ import cardItemStyle from '../../common/cardItem.style';
 import { WrapperCardItem as CardItem } from './wrapperCardItem';
 
 const useCardItemStyles = makeStyles(cardItemStyle);
+const useHomeStyles = makeStyles(homeStyle);
 
 const ImageGalleryList = styled('ul')(({ theme }) => ({
     display: 'grid',
@@ -46,7 +47,7 @@ const HomeItem: React.FC<HelmChartHomePageProps> = ({
     const cardItemStyle = useCardItemStyles();
     return (
         <ThemeProvider theme={HomeTheme}>
-            <ImageGalleryList className='devfileGalleryGrid' style={{margin: '1rem'}}>
+            <ImageGalleryList className='devfileGalleryGrid' style={{ margin: '1rem' }}>
                 {
                     helmEntries.map((helmEntry: ChartResponse, index: number) => (
                         <ImageListItem key={`imageList-` + index}>
@@ -93,17 +94,24 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
         });
     });
 
+    const homeStyle = useHomeStyles();
+
     return (
         <>
             {
                 filteredHelmCharts.length > 0 || searchValue.length > 0 ?
                     <>
-                        <SearchBar title='Search chart by name' onSearchBarChange={function (value: string): void {
-                            setSearchValue(value);
-                            setFilteredHelmCharts(getFilteredCompDesc(helmCharts, value));
-                        }} searchBarValue={searchValue} resultCount={filteredHelmCharts.length}/>
+                        <Container maxWidth='md'>
+                            <div className={homeStyle.topContainer}>
+                                <SearchBar title='Search chart by name' onSearchBarChange={function (value: string): void {
+                                    setSearchValue(value);
+                                    setFilteredHelmCharts(getFilteredCompDesc(helmCharts, value));
+                                }} searchBarValue={searchValue} resultCount={filteredHelmCharts.length} />
+                            </div>
+                        </Container>
                         <HomeItem helmEntries={filteredHelmCharts} themeKind={themeKind} />
                         {error?.length > 0 ? <ErrorPage message={error} /> : null}
+
                     </>
                     :
                     error?.length > 0 ? <ErrorPage message={error} /> : <LoadScreen title='Loading Helm Charts' />

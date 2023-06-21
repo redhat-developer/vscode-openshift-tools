@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { createTheme } from '@mui/material/styles';
+import { Theme, createTheme } from '@mui/material/styles';
+import { createStyles } from '@mui/styles';
 
 export const HomeTheme = createTheme({
     components: {
@@ -27,3 +28,18 @@ export const HomeTheme = createTheme({
         }
     }
 });
+
+export default (_theme: Theme) =>
+    createStyles({
+        topContainer: {
+            display: 'flex',
+            borderRadius: '1rem',
+            height: '5rem',
+            alignItems: 'center',
+            boxSizing: 'border-box',
+            backgroundColor: 'var(--vscode-editorSuggestWidget-background)',
+            padding: '1rem',
+            paddingLeft: 0,
+            margin: '1rem 0 0 0'
+        }
+    });

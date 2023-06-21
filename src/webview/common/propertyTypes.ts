@@ -32,7 +32,7 @@ export interface SearchBarProps extends DefaultProps {
 export interface FilterProps extends DefaultProps {
     id: string,
     registries?: Registry[],
-    onCheckBoxChange: (event: ChangeEvent<HTMLInputElement>, checked: boolean) => void;
+    onCheckBoxChange: (value: string | string[]) => void;
 }
 
 export interface ErrorProps extends DefaultProps {
