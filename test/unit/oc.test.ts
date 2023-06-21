@@ -48,6 +48,7 @@ suite('Oc', function() {
         detectOrDownloadStub = sandbox.stub(ToolsConfig, 'detect').resolves('path');
         sandbox.stub(getInstance(), 'getActiveCluster').resolves('cluster');
         sandbox.stub(getInstance(), 'getProjects').resolves([projectItem]);
+        sandbox.stub(getInstance(), 'canCreatePod').resolves(true);
     });
 
     teardown(function() {
