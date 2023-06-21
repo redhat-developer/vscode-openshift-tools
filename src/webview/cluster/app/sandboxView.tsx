@@ -7,7 +7,7 @@ import { Button, CircularProgress, TextField } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import { styled, ThemeProvider } from '@mui/styles';
+import { ThemeProvider, styled } from '@mui/styles';
 import * as React from 'react';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
@@ -382,6 +382,9 @@ export default function addSandboxView(props): JSX.Element {
             postMessage('sandboxLoginUsingDataInClipboard', {apiEndpointUrl: currentState.apiEndpoint, oauthRequestTokenUrl: `${currentState.oauthTokenEndpoint}/request`});
         };
 
+        const invalidToken = currentState.errorCode === 'invalidToken';
+        const loginSandboxTitle = !invalidToken ? 'Login to DevSandbox OpenShift cluster with token from clipboard' : 'Token in clipboard is invalid. Select the Get Token option and copy to clipboard';
+
         return (
             <>
                 {( currentState.action === 'sandboxPageProvisioned' ) && (
@@ -410,11 +413,11 @@ export default function addSandboxView(props): JSX.Element {
                         <Tooltip title='Launch your DevSandbox console in browser' placement='bottom'>
                             <Button variant='contained' className='button' href={currentState.consoleDashboard}>Open Dashboard</Button>
                         </Tooltip>
-                        <Tooltip title='Copy token from DevSandbox console page in browser' placement='bottom'>
+                        <Tooltip title='Open the DevSandbox console page and copy the login token' placement='bottom'>
                             <Button variant='contained' className='button' href={`${currentState.oauthTokenEndpoint}/request`}>Get token</Button>
                         </Tooltip>
-                        <Tooltip title='Login to DevSandbox OpenShift cluster with token from clipboard' placement='bottom'>
-                            <Button variant='contained' className='buttonSecondary' onClick={handleLoginButton}>Login to DevSandbox</Button>
+                        <Tooltip title={loginSandboxTitle} placement='bottom'>
+                            <div style={{ display: 'inline-block', margin: '8px 0px 8px 0px' }}><Button variant='contained' className='buttonRed' disabled={invalidToken} onClick={handleLoginButton}>Login to DevSandbox</Button></div>
                         </Tooltip>
                     </div>
                 )}
