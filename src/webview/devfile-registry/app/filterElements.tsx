@@ -7,7 +7,7 @@ import { Checkbox, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInpu
 import React from 'react';
 import { FilterProps } from '../../common/propertyTypes';
 import { Registry } from '../../../odo/componentType';
-import { isDefaultDevfileRegistry } from 'home';
+import { isDefaultDevfileRegistry } from './home';
 
 export const FilterElements: React.FC<FilterProps> = ({
     id,
