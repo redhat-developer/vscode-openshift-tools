@@ -45,11 +45,11 @@ export function testDevfileRegistries() {
             await input.setText('stageRegistry');
             await input.confirm();
             // insert staging devfile registry url
-            await input.setText('https://stage.registry.devfile.io');
+            await input.setText('https://registry.stage.devfile.io');
             await input.confirm();
             // pick unsecured registry
             await input.selectQuickPick('No');
-            await new Promise((res) => { setTimeout(res, 2000); });
+            await new Promise((res) => { setTimeout(res, 5000); });
             // check registry exists
             await registrySection.expand();
             const stageRegistry = await (registrySection as CustomTreeSection).findItem('stageRegistry');
@@ -67,11 +67,11 @@ export function testDevfileRegistries() {
             await input.setText('editedRegistry');
             await input.confirm();
             // insert staging devfile registry url
-            await input.setText('https://stage.registry.devfile.io');
+            await input.setText('https://registry.stage.devfile.io');
             await input.confirm();
             // pick unsecured registry
             await input.selectQuickPick('No');
-            await new Promise((res) => { setTimeout(res, 2000); });
+            await new Promise((res) => { setTimeout(res, 5000); });
             // check registry exists
             await registrySection.expand();
             const editedRegistry = await (registrySection as CustomTreeSection).findItem('editedRegistry');
