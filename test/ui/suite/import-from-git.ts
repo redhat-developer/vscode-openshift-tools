@@ -65,6 +65,7 @@ export function testImportFromGit() {
 
             elements = await webview.findWebElements(By.xpath('//input[@id="bootstrap-input"]'));
             const importTextBox = elements[0];
+            await importTextBox.click();
             await importTextBox.sendKeys('https://github.com/eclipse/lemminx');
 
             elements  = await webview.findWebElements(By.xpath('//button[contains(text(),"Analyze")]'));
@@ -80,13 +81,14 @@ export function testImportFromGit() {
 
             await webview.switchToFrame(); // START WEBVIEW CODE
 
-            elements = await webview.findWebElements(By.xpath('//p[contains(text(),"Here is the recommended devfile")]'));
+            // https://stackoverflow.com/a/3655588
+            elements = await webview.findWebElements(By.xpath('//p[text()[contains(.,\'Here is the recommended devfile:\')]]'));
             expect(elements).length.greaterThan(0);
 
             elements = await webview.findWebElements(By.xpath('//div[@data-testid = "card-java-maven"]'));
             expect(elements).length.greaterThan(0);
 
-            elements  = await webview.findWebElements(By.xpath('//button[contains(text(),"Create Component")]'));
+            elements  = await webview.findWebElements(By.xpath('//button[text()[contains(.,\'Create Component\')]]'));
             expect(elements).length.greaterThan(0);
             const createButton = elements[0];
             expect(await createButton.isEnabled()).is.true;
