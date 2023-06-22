@@ -21,7 +21,7 @@ import { selectWorkspaceFolder } from '../util/workspace';
 import { VsCommandError, vsCommand } from '../vscommand';
 import GitImportLoader from '../webview/git-import/gitImportLoader';
 import LogViewLoader from '../webview/log/LogViewLoader';
-import OpenShiftItem from './openshiftItem';
+import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import DescribeViewLoader from '../webview/describe/describeViewLoader';
 
 function createCancelledResult(stepName: string): any {
@@ -204,7 +204,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.dev')
-    //@clusterRequired() check for user is logged in should be implemented from scratch
+    @clusterRequired()
     static async dev(component: ComponentWorkspaceFolder, runOn?: undefined | 'podman') {
         const cs = Component.getComponentDevState(component);
         cs.devStatus = ComponentContextState.DEV_STARTING;
@@ -294,7 +294,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.exitDevMode')
-    //  @clusterRequired()
+    @clusterRequired()
     static async exitDevMode(component: ComponentWorkspaceFolder): Promise<void> {
         const componentState = Component.componentStates.get(component.contextPath)
         if (componentState) {
@@ -304,7 +304,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.forceExitDevMode')
-    // @clusterRequired()
+    @clusterRequired()
     static forceExitDevMode(component: ComponentWorkspaceFolder): Promise<void> {
         const componentState = Component.componentStates.get(component.contextPath)
         if (componentState.devProcess && componentState.devProcess.exitCode === null) {
@@ -314,7 +314,7 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.openInBrowser')
-    // @clusterRequired()
+    @clusterRequired()
     static async openInBrowser(component: ComponentWorkspaceFolder): Promise<string | null | undefined> {
         const componentDescription = await Component.odo.describeComponent(component.contextPath, !!Component.getComponentDevState(component).runOn);
         if (componentDescription.devForwardedPorts?.length === 1) {

@@ -131,6 +131,7 @@ suite('odo integration', function () {
         });
 
         suiteTeardown(async function () {
+            await odo.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
             const newWorkspaceFolders = workspace.workspaceFolders.filter((workspaceFolder) => {
                 const fsPath = workspaceFolder.uri.fsPath;
                 return (fsPath !== tmpFolder1.fsPath && fsPath !== tmpFolder2.fsPath);
@@ -157,6 +158,16 @@ suite('odo integration', function () {
             const analysis2 = await odo.analyze(tmpFolder2.fsPath);
             expect(analysis2).to.exist;
             expect(analysis2[0].devfile).to.equal('go');
+        });
+
+        test('canCreatePod()', async function () {
+            const canCreatePod1 = await odo.canCreatePod();
+            expect(canCreatePod1).to.exist;
+            expect(canCreatePod1).to.equal(true);
+            await odo.execute(Command.odoLogout());
+            const canCreatePod2 = await odo.canCreatePod();
+            expect(canCreatePod2).to.exist;
+            expect(canCreatePod2).to.equal(false);
         });
     });
 
