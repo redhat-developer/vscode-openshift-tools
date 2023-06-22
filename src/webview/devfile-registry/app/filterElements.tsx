@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Checkbox, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Select, SelectChangeEvent } from '@mui/material';
+import { Checkbox, FormControl, ListItemText, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import React from 'react';
 import { FilterProps } from '../../common/propertyTypes';
 import { Registry } from '../../../odo/componentType';
@@ -20,8 +20,7 @@ export const FilterElements: React.FC<FilterProps> = ({
     const MenuProps = {
         PaperProps: {
             style: {
-                maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-                width: 'auto',
+                maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP
             },
         },
     };
@@ -43,16 +42,14 @@ export const FilterElements: React.FC<FilterProps> = ({
     };
 
     return (
-        <FormControl sx={{ margin: '2rem 0 2rem 2rem', width: 400 }}>
-            <InputLabel id='multiple-checkbox-label'>All Devfiles</InputLabel>
+        <FormControl sx={{ margin: '2rem 0 2rem 2rem', width: 300 }}>
             <Select
-                labelId='multiple-checkbox-label'
                 id='multiple-checkbox'
+                autoWidth
                 multiple
                 value={registryName}
                 onChange={handleChange}
-                input={<OutlinedInput label='All Devfiles' />}
-                renderValue={(selected) => selected.join(', ')}
+                renderValue={() => ['All Devfiles']}
                 MenuProps={MenuProps}
                 sx={{
                     '& fieldset': { border: 'none' }
