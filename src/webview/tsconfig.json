@@ -2,6 +2,7 @@
     "compilerOptions": {
         "module": "esnext",
         "moduleResolution": "node",
+        "outDir": "../../out/webview",
         "target": "es6",
         "jsx": "react",
         "typeRoots": [
@@ -10,7 +11,8 @@
         ],
         "skipLibCheck": true,
         "esModuleInterop": true,
-        "noEmit": true
+        "noEmit": true,
+        "incremental": true,
     },
     "include": [
         "*/app/**/*.ts",
