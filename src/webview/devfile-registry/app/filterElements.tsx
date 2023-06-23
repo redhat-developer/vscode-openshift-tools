@@ -15,16 +15,6 @@ export const FilterElements: React.FC<FilterProps> = ({
     onCheckBoxChange
 }: FilterProps) => {
 
-    const ITEM_HEIGHT = 48;
-    const ITEM_PADDING_TOP = 8;
-    const MenuProps = {
-        PaperProps: {
-            style: {
-                maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP
-            },
-        },
-    };
-
     const [registryName, setRegistryName] = React.useState<string[]>(getRegistryNames(registries));
 
     const handleChange = (event: SelectChangeEvent<typeof registryName>) => {
@@ -50,7 +40,6 @@ export const FilterElements: React.FC<FilterProps> = ({
                 value={registryName}
                 onChange={handleChange}
                 renderValue={() => ['All Devfiles']}
-                MenuProps={MenuProps}
                 sx={{
                     '& fieldset': { border: 'none' }
                 }}
@@ -61,7 +50,6 @@ export const FilterElements: React.FC<FilterProps> = ({
                 {registries.map((registry, index) => (
                     <MenuItem key={registry.name} value={registry.name}>
                         <Checkbox id={`${id}-${registry.name}`}
-                            className='checkbox'
                             name={registry.name}
                             checked={registry.state}
                             key={registry.name + '-' + index}
