@@ -315,4 +315,9 @@ export class Command {
     static canCreatePod(): CommandText {
         return new CommandText('oc auth can-i create pod');
     }
+
+    static isOpenshiftCluster(): CommandText {
+        return new CommandText('oc api-resources | grep openshift');
+    }
+
 }
