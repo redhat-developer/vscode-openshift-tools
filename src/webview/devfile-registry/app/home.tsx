@@ -2,14 +2,14 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { ImageListItem, ThemeProvider, styled } from '@mui/material';
+import { Container, ImageListItem, ThemeProvider, styled } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import React, { ChangeEvent } from 'react';
+import React from 'react';
 import { Registry } from '../../../odo/componentType';
 import { StarterProject } from '../../../odo/componentTypeDescription';
 import cardItemStyle from '../../common/cardItem.style';
 import { ErrorPage } from '../../common/errorPage';
-import { HomeTheme } from '../../common/home.style';
+import homeStyle, { HomeTheme } from '../../common/home.style';
 import { LoadScreen } from '../../common/loading';
 import { CompTypeDesc, DefaultProps, DevfileHomePageProps } from '../../common/propertyTypes';
 import { SearchBar } from '../../common/searchBar';
@@ -18,6 +18,7 @@ import { FilterElements } from './filterElements';
 import { WrapperCardItem as CardItem } from './wrapperCardItem';
 
 const useCardItemStyles = makeStyles(cardItemStyle);
+const useHomeStyles = makeStyles(homeStyle);
 
 const ImageGalleryList = styled('ul')(({ theme }) => ({
     display: 'grid',
@@ -30,7 +31,7 @@ const ImageGalleryList = styled('ul')(({ theme }) => ({
     [theme.breakpoints.up('sm')]: {
         gridTemplateColumns: 'repeat(1, 1fr)'
     },
-    [theme.breakpoints.between('sm','md')]: {
+    [theme.breakpoints.between('sm', 'md')]: {
         gridTemplateColumns: 'repeat(1, 1fr)'
     },
     [theme.breakpoints.up('md')]: {
@@ -73,7 +74,6 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
     const [searchValue, setSearchValue] = React.useState('');
     const [error, setError] = React.useState('');
     const [themeKind, setThemeKind] = React.useState(0);
-
     React.useEffect(() => {
         return VSCodeMessage.onMessage((message) => {
             if (message.data.action === 'getAllComponents') {
@@ -84,15 +84,9 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
                     setFilteredcompDescriptions([]);
                 } else {
                     setError('');
-                    if (message.data.registries.length === 1) {
-                        message.data.registries.forEach((registry: Registry) => {
-                            registry.state = true;
-                        });
-                    } else {
-                        message.data.registries.forEach((registry: Registry) => {
-                            registry.state = isDefaultDevfileRegistry(registry.url);
-                        });
-                    }
+                    message.data.registries.forEach((registry: Registry) => {
+                        registry.state = true;
+                    });
                     setThemeKind(message.data.themeValue);
                     setCompDescriptions(message.data.compDescriptions);
                     setRegistries(message.data.registries);
@@ -109,43 +103,40 @@ export const Home: React.FC<DefaultProps> = ({ }) => {
         });
     });
 
+    const homeStyle = useHomeStyles();
+
     return (
         <>
             {
                 filteredcompDescriptions.length > 0 || searchValue.length > 0 ?
                     <>
-                        <SearchBar title='Search registry by name or description' onSearchBarChange={function (value: string): void {
-                            setSearchValue(value);
-                            setFilteredcompDescriptions(getFilteredCompDesc(registries, compDescriptions, value));
-                        }} searchBarValue={searchValue} resultCount={filteredcompDescriptions.length}/>
-                        {
-                            registries.length > 1 &&
-                            <FilterElements id='registry'
-                                registries={registries}
-                                onCheckBoxChange={function (event: ChangeEvent<HTMLInputElement>, _checked: boolean): void {
-                                    const target: EventTarget = event.target;
-                                    const state: boolean = (target as HTMLInputElement).checked;
-                                    const value: string = (target as HTMLInputElement).name;
-                                    const filteredRegistries = registries.map((filteredRegistry: Registry) => {
-                                        if (filteredRegistry.name === value) {
-                                            filteredRegistry.state = state;
-                                        }
-                                        return filteredRegistry;
-                                    });
-                                    setRegistries(filteredRegistries);
-                                    const allUncheckedRegistries = registries.filter((registry: Registry) => !registry.state);
-                                    if (allUncheckedRegistries.length === registries.length) {
-                                        allUncheckedRegistries.forEach((uncheckedRegistry: Registry) => {
-                                            if (isDefaultDevfileRegistry(uncheckedRegistry.url)) {
-                                                uncheckedRegistry.state = true;
+                        <Container maxWidth='md'>
+                            <div className={homeStyle.topContainer}>
+                                {
+                                    registries.length > 1 &&
+                                    <FilterElements id='registry'
+                                        registries={registries}
+                                        onCheckBoxChange={function (values: string | string[]): void {
+                                            if (Array.isArray(values)) {
+                                                const filteredRegistries = values.length === 0 ? registries.filter((registry: Registry) => {
+                                                    registry.state = isDefaultDevfileRegistry(registry.url) ? true : false;
+                                                    return registry;
+                                                }) : registries.filter((registry: Registry) => {
+                                                    registry.state = values.includes(registry.name) ? true : false;
+                                                    return registry;
+                                                });
+                                                setRegistries(filteredRegistries);
+                                                setFilteredcompDescriptions(getFilteredCompDesc(filteredRegistries, compDescriptions, searchValue));
                                             }
-                                        })
-                                        setRegistries(allUncheckedRegistries);
-                                    }
-                                    setFilteredcompDescriptions(getFilteredCompDesc(registries, compDescriptions, searchValue));
-                                }}
-                            />
-                        }
+                                        }}
+                                    />
+                                }
+                                <SearchBar title='Search registry by name or description' onSearchBarChange={function (value: string): void {
+                                    setSearchValue(value);
+                                    setFilteredcompDescriptions(getFilteredCompDesc(registries, compDescriptions, value));
+                                }} searchBarValue={searchValue} resultCount={filteredcompDescriptions.length} />
+                            </div>
+                        </Container>
                         <HomeItem compDescriptions={filteredcompDescriptions} themeKind={themeKind} />
                         {error?.length > 0 ? <ErrorPage message={error} /> : null}
                     </>

@@ -3,43 +3,70 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Checkbox, Container, FormControlLabel, Tooltip, Typography } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import { Checkbox, FormControl, ListItemText, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import React from 'react';
 import { FilterProps } from '../../common/propertyTypes';
-import filterElementsStyle from './filterElements.style';
-
-const filterStyle = makeStyles(filterElementsStyle);
+import { Registry } from '../../../odo/componentType';
+import { isDefaultDevfileRegistry } from './home';
 
 export const FilterElements: React.FC<FilterProps> = ({
     id,
     registries,
     onCheckBoxChange
 }: FilterProps) => {
-    const filterStyleCSS = filterStyle();
+
+    const [registryName, setRegistryName] = React.useState<string[]>(getRegistryNames(registries));
+
+    const handleChange = (event: SelectChangeEvent<typeof registryName>) => {
+        const {
+            target: { value },
+        } = event;
+        if (value === '' || value.length === 0) {
+            setRegistryName(getDefaultRegistryName(registries));
+        } else {
+            setRegistryName(
+                typeof value === 'string' ? value.split(',') : value,
+            );
+        }
+        onCheckBoxChange(event.target.value);
+    };
+
     return (
-        <Container maxWidth='md'>
-            <div className={filterStyleCSS.filterContainer}>
-                <Typography style={{ fontSize: 'var(--vscode-editor-font-size)', padding: '0.5rem' }}>Registries:</Typography>
-                {
-                    registries.map((registry, index) => (
-                        <FormControlLabel className='checkBoxItem' key={registry.name + '-' + index}
-                            control={
-                                <Checkbox id={`${id}-${registry.name}`}
-                                    className='checkbox'
-                                    onChange={onCheckBoxChange}
-                                    name={registry.name}
-                                    checked={registry.state}
-                                    key={registry.name + '-' + index}
-                                    color='primary'
-                                    size='medium' />
-                            }
-                            label={<Tooltip title={registry.url} arrow><span style={{ fontSize: 'var(--vscode-editor-font-size)' }}>{registry.name}</span></Tooltip>}
-                            labelPlacement='end'
-                            style={{ padding: '0px', marginBottom: '0px' }} />
-                    ))
-                }
-            </div>
-        </Container>
+        <FormControl sx={{ margin: '2rem 0 2rem 2rem', width: 300 }}>
+            <Select
+                id='multiple-checkbox'
+                autoWidth
+                multiple
+                value={registryName}
+                onChange={handleChange}
+                renderValue={() => ['All Devfiles']}
+                sx={{
+                    '& fieldset': { border: 'none' }
+                }}
+                style={{
+                    border: 'none'
+                }}
+            >
+                {registries.map((registry, index) => (
+                    <MenuItem key={registry.name} value={registry.name}>
+                        <Checkbox id={`${id}-${registry.name}`}
+                            name={registry.name}
+                            checked={registry.state}
+                            key={registry.name + '-' + index}
+                            color='primary'
+                            size='medium' />
+                        <ListItemText primary={registry.name} />
+                    </MenuItem>
+                ))}
+            </Select>
+        </FormControl>
     );
+}
+
+function getRegistryNames(registries: Registry[]): string[] {
+    return registries.filter((registry) => registry.state).map((registry) => registry.name);
+}
+
+function getDefaultRegistryName(registries: Registry[]): string[] {
+    return registries.filter((registry) => { if (isDefaultDevfileRegistry(registry.url)) return registry }).map((registry) => registry.name);
 }

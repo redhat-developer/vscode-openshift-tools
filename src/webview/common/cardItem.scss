@@ -17,9 +17,22 @@
     color: var(--vscode-list-inactiveSelectionForeground) !important;
 }
 
-.MuiInputBase-root {
+.MuiInputBase-root,
+.MuiMenu-list {
     background-color: var(--vscode-settings-textInputBackground) !important;
     border: 0.5px solid var(--vscode-settings-textInputBorder) !important;
+    color: var(--vscode-settings-textInputForeground) !important;
+}
+
+.Mui-selected {
+    background-color: transparent !important;
+}
+
+.MuiMenuItem-root:hover {
+    background-color: var(--vscode-editorSuggestWidget-selectedBackground) !important;
+}
+
+.MuiInputLabel-root {
     color: var(--vscode-settings-textInputForeground) !important;
 }
 
