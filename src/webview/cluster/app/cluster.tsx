@@ -3,14 +3,15 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as React from 'react';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import { Button, Card, CardActions, CardContent, List, ListItem, ListItemText, ThemeProvider, Tooltip, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import clsx from 'clsx';
-import AddClusterView from './clusterView';
-import AddSandboxView from './sandboxView';
+import * as React from 'react';
 import clusterStyle, { ClusterTheme } from './cluster.style';
+import AddClusterView from './clusterView';
 import OpenShiftLogo from './images/logo.png';
-import { Card, Typography, CardContent, ListItem, ListItemText, CardActions, Tooltip, Button, List, ThemeProvider } from '@mui/material';
+import AddSandboxView from './sandboxView';
 
 const useStyles = makeStyles(clusterStyle);
 
@@ -147,11 +148,11 @@ export default function Header() {
         <ThemeProvider theme={ClusterTheme}>
             <div className={classes.App}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', margin: '0 auto' }}>
-                    <div>
+                    <div className={classes.backButtonContainer}>
                         {showWizard?.length > 0 &&
-                            <a onClick={() => moveBack()} className={classes.cardButton} style={{ textDecoration: 'none', cursor: 'pointer' }}>
-                                &#60; Back
-                            </a>
+                            <Button variant='text' onClick={() => moveBack()} color='info' margin-top='20px' margin-left='20px' startIcon={<ArrowBackRoundedIcon />}>
+                                Back
+                            </Button>
                         }
                     </div>
                     <div className={classes.iconContainer}>
