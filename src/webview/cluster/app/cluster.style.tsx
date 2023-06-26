@@ -8,6 +8,11 @@ import { createStyles } from '@mui/styles';
 
 const theme = createTheme();
 export const ClusterTheme = createTheme({
+    palette: {
+        info: {
+          main: '#c1c1c1',
+        }
+    },
     components: {
         MuiTypography: {
             variants: [
@@ -152,6 +157,11 @@ export default (theme: Theme) =>
             height: 60,
             marginBottom: '3em',
             marginTop: '2em'
+        },
+        backButtonContainer: {
+            position: 'relative',
+            marginTop: '3em',
+            marginLeft: '3em'
         },
         App: {
             textAlign: 'center'
