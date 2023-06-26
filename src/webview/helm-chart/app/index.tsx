@@ -3,16 +3,11 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as ReactDOM from 'react-dom';
 import * as React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import * as ReactDOM from 'react-dom';
 import { Home } from './home';
 
 ReactDOM.render(
-    <Router>
-        <Routes>
-            <Route path="/index.html" element={<Home />} />
-        </Routes>
-    </Router>,
+    <Home />,
     document.getElementById('root'),
 );
