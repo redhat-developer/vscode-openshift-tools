@@ -16,7 +16,7 @@
             "outFiles": [
                 "${workspaceFolder}/out/src/**/*.js"
             ],
-            "preLaunchTask": "compile",
+            "preLaunchTask": "watch",
             "env": {
                 "VSCODE_REDHAT_TELEMETRY_DEBUG":"true"
             }

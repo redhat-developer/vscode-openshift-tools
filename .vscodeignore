@@ -32,3 +32,4 @@ header.js
 .eslintignore
 *.tgz
 *.sha256
+**.tsbuildinfo
