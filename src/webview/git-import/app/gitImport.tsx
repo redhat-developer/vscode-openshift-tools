@@ -136,7 +136,7 @@ export class GitImport extends React.Component<DefaultProps, {
                 this.setState({ showLoadScreen: false, notification: '' });
                 this.setState({
                     gitURL: {
-                        value: message.data.gitURL,
+                        value: this.getTrimmedURL(message.data.gitURL),
                         showError: message.data.error,
                         helpText: message.data.helpText,
                         parser: message.data.parser
@@ -218,7 +218,7 @@ export class GitImport extends React.Component<DefaultProps, {
                 clone: undefined
             },
             gitURL: {
-                value: this.getTrimmedURL(value),
+                value: value,
                 helpText: '',
                 showError: false,
                 parser: undefined
@@ -257,7 +257,7 @@ export class GitImport extends React.Component<DefaultProps, {
         this.setState({ showLoadScreen: true, notification: 'Validating the repo URL...' });
         VSCodeMessage.postMessage({
             action: 'validateGitURL',
-            param: this.state.gitURL.value
+            param: this.getTrimmedURL(this.state.gitURL.value)
         });
     }
 
