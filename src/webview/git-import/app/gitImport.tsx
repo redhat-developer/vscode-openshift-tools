@@ -18,6 +18,7 @@ import { ComponentTypeDescription } from '../../../odo/componentType';
 import { LoadScreen } from './loading';
 import './gitImport.scss';
 import { Uri } from 'vscode';
+const gitUrlParse = require('../git-parse');
 
 export interface DefaultProps {
     analytics?: import('@segment/analytics-next').Analytics;
@@ -217,7 +218,7 @@ export class GitImport extends React.Component<DefaultProps, {
                 clone: undefined
             },
             gitURL: {
-                value: value,
+                value: this.getTrimmedURL(value),
                 helpText: '',
                 showError: false,
                 parser: undefined
@@ -234,6 +235,11 @@ export class GitImport extends React.Component<DefaultProps, {
             showLoadScreen: false,
             notification: ''
         });
+    }
+
+    getTrimmedURL = (value: string): string => {
+        const parsedURL = gitUrlParse(value);
+        return `${parsedURL.protocol}://${parsedURL.source}/${parsedURL.full_name}`;
     }
 
     analyze = (): void => {

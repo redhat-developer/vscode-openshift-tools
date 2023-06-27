@@ -19,7 +19,7 @@ import { selectWorkspaceFolder } from '../../util/workspace';
 import { vsCommand } from '../../vscommand';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { DevfileConverter } from './devfileConverter';
-import GitUrlParse = require('git-url-parse');
+const gitUrlParse = require('./git-parse');
 import treeKill = require('tree-kill')
 import cp = require('child_process');
 let panel: vscode.WebviewPanel;
@@ -273,7 +273,7 @@ function validateGitURL(event: any) {
         });
     } else {
         try {
-            const parse = GitUrlParse(event.param);
+            const parse = gitUrlParse(event.param);
             const isGitRepo = isGitURL(parse.host);
             if (!isGitRepo) {
                 throw 'Invalid Git URL';
