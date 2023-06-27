@@ -19,7 +19,7 @@ import { selectWorkspaceFolder } from '../../util/workspace';
 import { vsCommand } from '../../vscommand';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { DevfileConverter } from './devfileConverter';
-const gitUrlParse = require('./git-parse');
+import { gitUrlParse } from './gitParse';
 import treeKill = require('tree-kill')
 import cp = require('child_process');
 let panel: vscode.WebviewPanel;

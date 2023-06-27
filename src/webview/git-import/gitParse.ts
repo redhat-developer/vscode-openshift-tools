@@ -37,7 +37,7 @@ const gitUp = require('git-up');
  *  - `git_suffix` (Boolean): Whether to add the `.git` suffix or not.
  *
  */
-function gitUrlParse(url) {
+export function gitUrlParse(url) {
 
     if (typeof url !== 'string') {
         throw new Error('The url must be a string.');
@@ -314,5 +314,3 @@ function buildPath(obj) {
 
   }
 }
-
-module.exports = gitUrlParse;

@@ -16,9 +16,9 @@ import { VSCodeMessage } from './vsCodeMessage';
 import { CardItem } from './cardItem';
 import { ComponentTypeDescription } from '../../../odo/componentType';
 import { LoadScreen } from './loading';
+import { gitUrlParse } from '../gitParse';
 import './gitImport.scss';
 import { Uri } from 'vscode';
-const gitUrlParse = require('../git-parse');
 
 export interface DefaultProps {
     analytics?: import('@segment/analytics-next').Analytics;
