@@ -28,7 +28,7 @@ let forceCancel = false;
 
 interface CloneProcess {
     status: boolean,
-    error: string
+    error: string | undefined
 }
 
 export class Command {
@@ -134,12 +134,13 @@ async function gitImportMessageListener(event: any): Promise<any> {
             const selctedFolder: vscode.Uri = event.folder;
             const cloneProcess: CloneProcess = await clone(event.gitURL, selctedFolder.fsPath);
             if (!cloneProcess.status && cloneProcess.error) {
-                showError(event, event.folder.fsPath, cloneProcess.error);
+                showError(event.folder.fsPath, cloneProcess.error);
                 return null;
+            } else {
+                panel?.webview.postMessage({
+                    action: 'cloneCompleted'
+                });
             }
-            panel?.webview.postMessage({
-                action: 'cloneCompleted'
-            });
         }
         default:
             break;
@@ -249,7 +250,7 @@ async function parseGitURL(event: any) {
             name: event.projectName + '-comp',
             error: compDescriptions.length > 0 ? false : true,
             isDevFile: isDevFile,
-            helpText: compDescriptions.length > 0 ? 'The git repo is valid.' : 'Issue on Parsing Git URL/devfile',
+            helpText: compDescriptions.length > 0 ? 'The git repo URL is valid.' : 'Issue on Parsing Git URL/devfile',
             compDescription: compDescriptions,
             parser: event.parser
         });
@@ -282,7 +283,7 @@ function validateGitURL(event: any) {
                 panel?.webview.postMessage({
                     action: event.action,
                     error: false,
-                    helpText: 'The git repo is valid.',
+                    helpText: 'The git repo URL is valid.',
                     parser: parse,
                     gitURL: event.param
                 });
@@ -319,8 +320,11 @@ function clone(url: string, location: string): Promise<CloneProcess> {
     const gitExtension = vscode.extensions.getExtension('vscode.git').exports;
     const git = gitExtension.getAPI(1).git.path;
     // run 'git clone url location' as external process and return location
-    return new Promise((resolve, reject) => (childProcess = cp.exec(`${git} clone ${url} ${location}`, (error: cp.ExecException) => error ?
-        reject({ status: false, error: error.message }) : resolve({ status: true, error: undefined }))));
+    return new Promise((resolve, reject) => (childProcess = cp.exec(`${git} clone ${url} ${location}`,
+        (error: cp.ExecException) => {
+            error ? resolve({ status: false, error: error.message }) : resolve({ status: true, error: undefined });
+        }
+    )));
 }
 
 function validateComponentName(event: any) {
@@ -352,17 +356,15 @@ function validateDevFilePath(event: any) {
     });
 }
 
-function showError(event: any, location: string, message: string): void {
+function showError(location: string, message: string): void {
+    const permissonDeniedIndex = message.toLowerCase().indexOf('permission denied');
+    const errorMsg = permissonDeniedIndex !== -1 ? message.substring(permissonDeniedIndex) : 'Error occurred while cloning the repository. Please try again.';
     panel?.webview.postMessage({
-        action: event.action,
-        status: false
+        action: 'cloneError',
+        error: errorMsg
     });
     if (!forceCancel) {
-        if (message.indexOf('already exists') !== -1) {
-            vscode.window.showErrorMessage(`Folder already exists on the selected ${location.substring(0, location.lastIndexOf('\\'))}`);
-        } else {
-            vscode.window.showErrorMessage('Error occurred while cloning the repository. Please try again.');
-        }
+        vscode.window.showErrorMessage(errorMsg);
     }
 }
 

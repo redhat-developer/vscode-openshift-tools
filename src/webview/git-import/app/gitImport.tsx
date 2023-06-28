@@ -194,7 +194,9 @@ export class GitImport extends React.Component<DefaultProps, {
                 });
             } else if (message.data.action === 'cloneStarted') {
                 this.setState({ showLoadScreen: true, notification: 'Cloning the repository' });
-            } else if (message.data.action === 'cloneCompleted') {
+            }  else if (message.data.action === 'cloneError') {
+                this.setState({ showLoadScreen: false, notification: message.data.error });
+            }  else if (message.data.action === 'cloneCompleted') {
                 this.setState({ showLoadScreen: true, notification: 'Scanning through git repo and recommending the import strategy...' });
                 VSCodeMessage.postMessage({
                     action: 'parseGitURL',
@@ -207,6 +209,8 @@ export class GitImport extends React.Component<DefaultProps, {
                 this.setState({ showLoadScreen: false, notification: '' });
             } else if (message.data.action === 'devfileRegenerated') {
                 this.setState({ showLoadScreen: true, notification: 'Scanning through git repo and recommending the import strategy...' });
+            } else if (message.data.action === 'close') {
+                this.initalize(true);
             }
         });
     }
@@ -239,7 +243,7 @@ export class GitImport extends React.Component<DefaultProps, {
 
     getTrimmedURL = (value: string): string => {
         const parsedURL = gitUrlParse(value);
-        return `${parsedURL.protocol}://${parsedURL.source}/${parsedURL.full_name}`;
+        return gitUrlParse.stringify(parsedURL, '');
     }
 
     analyze = (): void => {

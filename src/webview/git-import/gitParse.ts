@@ -283,7 +283,7 @@ gitUrlParse.stringify = function (obj, type) {
                 ? `${obj.user}@` : '';
             return `${type}://${auth}${obj.resource}${port}/${buildPath(obj)}${maybeGitSuffix}`;
         default:
-            return obj.href;
+            return obj.git_suffix ? obj.href : `${obj.protocol}://${obj.source}/${obj.full_name}`;
     }
 };
 
