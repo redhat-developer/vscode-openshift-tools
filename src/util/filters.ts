@@ -12,7 +12,10 @@ export class Filters {
 
     static readonly passwordRegex = /-p\s+'([^']+)'/;
 
+    static readonly passwordAssignRegex = /-p='([^']+)'/;
+
     static filterPassword(value: string): string {
-        return value ? value.replace(Filters.passwordRegex, '-p **********') : value;
+        if (!value) return value;
+        return value.match(Filters.passwordRegex) != null ? value.replace(Filters.passwordRegex, '-p **********') : value.replace(Filters.passwordAssignRegex, '-p=\'**********\'');
     }
 }

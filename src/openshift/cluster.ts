@@ -430,7 +430,7 @@ export class Cluster extends OpenShiftItem {
         try {
             const result = await Progress.execFunctionWithProgress(
                 `Login to the cluster: ${clusterURL}`,
-                () => Cluster.cli.executeTool(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd)));
+                () => Cluster.cli.executeTool(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd), undefined, true));
             await Cluster.save(username, passwd, password, result);
             return await Cluster.loginMessage(clusterURL, result);
         } catch (error) {
