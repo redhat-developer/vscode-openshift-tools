@@ -1211,7 +1211,7 @@
 				},
 				{
 					"command": "openshift.open.developerConsole",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isOpenshiftCluster",
 					"group": "c0"
 				},
 				{
@@ -1385,7 +1385,7 @@
 				},
 				{
 					"command": "openshift.resource.openInDeveloperConsole",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject || viewItem == openshift.k8sObject.helm"
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject && isOpenshiftCluster || openshift.k8sObject.helm && isOpenshiftCluster"
 				}
 			]
 		},
