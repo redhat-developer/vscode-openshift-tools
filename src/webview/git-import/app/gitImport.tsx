@@ -16,6 +16,7 @@ import { VSCodeMessage } from './vsCodeMessage';
 import { CardItem } from './cardItem';
 import { ComponentTypeDescription } from '../../../odo/componentType';
 import { LoadScreen } from './loading';
+import { gitUrlParse } from '../gitParse';
 import './gitImport.scss';
 import { Uri } from 'vscode';
 
@@ -135,7 +136,7 @@ export class GitImport extends React.Component<DefaultProps, {
                 this.setState({ showLoadScreen: false, notification: '' });
                 this.setState({
                     gitURL: {
-                        value: message.data.gitURL,
+                        value: this.getTrimmedURL(message.data.gitURL),
                         showError: message.data.error,
                         helpText: message.data.helpText,
                         parser: message.data.parser
@@ -193,7 +194,9 @@ export class GitImport extends React.Component<DefaultProps, {
                 });
             } else if (message.data.action === 'cloneStarted') {
                 this.setState({ showLoadScreen: true, notification: 'Cloning the repository' });
-            } else if (message.data.action === 'cloneCompleted') {
+            }  else if (message.data.action === 'cloneError') {
+                this.setState({ showLoadScreen: false, notification: message.data.error });
+            }  else if (message.data.action === 'cloneCompleted') {
                 this.setState({ showLoadScreen: true, notification: 'Scanning through git repo and recommending the import strategy...' });
                 VSCodeMessage.postMessage({
                     action: 'parseGitURL',
@@ -206,6 +209,8 @@ export class GitImport extends React.Component<DefaultProps, {
                 this.setState({ showLoadScreen: false, notification: '' });
             } else if (message.data.action === 'devfileRegenerated') {
                 this.setState({ showLoadScreen: true, notification: 'Scanning through git repo and recommending the import strategy...' });
+            } else if (message.data.action === 'close') {
+                this.initalize(true);
             }
         });
     }
@@ -236,6 +241,11 @@ export class GitImport extends React.Component<DefaultProps, {
         });
     }
 
+    getTrimmedURL = (value: string): string => {
+        const parsedURL = gitUrlParse(value);
+        return gitUrlParse.stringify(parsedURL, '');
+    }
+
     analyze = (): void => {
         this.setState({
             applicationName: undefined,
@@ -251,7 +261,7 @@ export class GitImport extends React.Component<DefaultProps, {
         this.setState({ showLoadScreen: true, notification: 'Validating the repo URL...' });
         VSCodeMessage.postMessage({
             action: 'validateGitURL',
-            param: this.state.gitURL.value
+            param: this.getTrimmedURL(this.state.gitURL.value)
         });
     }
 
