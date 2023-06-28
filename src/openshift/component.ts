@@ -23,6 +23,7 @@ import GitImportLoader from '../webview/git-import/gitImportLoader';
 import LogViewLoader from '../webview/log/LogViewLoader';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import DescribeViewLoader from '../webview/describe/describeViewLoader';
+import CreateComponentLoader from '../webview/create-component/createComponentLoader';
 
 function createCancelledResult(stepName: string): any {
     const cancelledResult: any = new String('');
@@ -420,6 +421,11 @@ export class Component extends OpenShiftItem {
     @vsCommand('openshift.component.openImportFromGit')
     static async importFromGit(): Promise<void> {
         await GitImportLoader.loadView('Git Import');
+    }
+
+    @vsCommand('openshift.component.openCreateComponent')
+    static async createComponent(): Promise<void> {
+        await CreateComponentLoader.loadView('Create Component');
     }
 
     /**
