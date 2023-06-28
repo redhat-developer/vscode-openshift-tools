@@ -110,7 +110,12 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 } else {
                     if (signupStatus.status.ready) {
                         const oauthInfo = await sandboxAPI.getOauthServerInfo(signupStatus.apiEndpoint);
-                        panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL, apiEndpoint: signupStatus.apiEndpoint, oauthTokenEndpoint: oauthInfo.token_endpoint });
+                        let errCode = '';
+                        if (!Cluster.validateLoginToken(await vscode.env.clipboard.readText())) {
+                            errCode = 'invalidToken';
+                        }
+                        panel.webview.postMessage({ action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL, apiEndpoint: signupStatus.apiEndpoint, oauthTokenEndpoint: oauthInfo.token_endpoint, errorCode: errCode });
+                        pollClipboard(signupStatus);
                     } else {
                         // cluster is not ready and the reason is
                         if (signupStatus.status.verificationRequired) {
@@ -182,6 +187,22 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 telemetryEventLoginToSandbox.sendError('Login into Sandbox Cluster failed.');
             }
             break;
+    }
+}
+
+async function pollClipboard(signupStatus) {
+    const oauthInfo = await sandboxAPI.getOauthServerInfo(signupStatus.apiEndpoint);
+    while (panel) {
+        const previousContent = await vscode.env.clipboard.readText();
+        await new Promise(r => setTimeout(r, 500));
+        const currentContent = await vscode.env.clipboard.readText();
+        if (previousContent && previousContent !== currentContent) {
+            let errCode = '';
+            if (!Cluster.validateLoginToken(currentContent)){
+                errCode = 'invalidToken';
+            }
+            panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL, apiEndpoint: signupStatus.apiEndpoint, oauthTokenEndpoint: oauthInfo.token_endpoint, errorCode: errCode});
+        }
     }
 }
 

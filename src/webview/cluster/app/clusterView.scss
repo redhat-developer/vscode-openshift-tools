@@ -79,3 +79,27 @@
 .buttonSecondary:disabled {
     opacity: 0.4 !important;
 }
+
+.buttonRed {
+    white-space: nowrap !important;
+    display: inline-block !important;
+    margin-top: 8px !important;
+    margin-right: 8px !important;
+    background-color: #EE0000 !important;
+    color: var(--vscode-button-foreground) !important;
+}
+
+.buttonRed:hover {
+    color: var(--vscode-button-foreground) !important;
+    background-color: #BE0000 !important;
+    cursor: pointer !important;
+}
+
+.buttonRed:focus {
+    background-color: #BE0000 !important;
+    cursor: pointer !important;
+}
+
+.buttonRed:disabled {
+    opacity: 0.4 !important;
+}

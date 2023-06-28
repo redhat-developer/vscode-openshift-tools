@@ -500,6 +500,11 @@ export class Cluster extends OpenShiftItem {
         );
     }
 
+    static validateLoginToken(token: string): boolean {
+        const sha256Regex = new RegExp('^sha256~([A-Za-z0-9_]+)');
+        return sha256Regex.test(token);
+    }
+
     @vsCommand('openshift.explorer.login.clipboard')
     static async loginUsingClipboardToken(apiEndpointUrl: string, oauthRequestTokenUrl: string): Promise<string | null> {
         const clipboard = await Cluster.readFromClipboard();
