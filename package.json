@@ -214,6 +214,7 @@
 		"onCommand:openshift.project.delete.palette",
 		"onCommand:openshift.component.createFromLocal",
 		"onCommand:openshift.component.openImportFromGit",
+		"onCommand:openshift.component.openCreateComponent",
 		"onCommand:openshift.component.createFromRootWorkspaceFolder",
 		"onCommand:openshift.component.describe",
 		"onCommand:openshift.component.openInBrowser",
@@ -423,6 +424,15 @@
 			{
 				"command": "openshift.component.createFromLocal",
 				"title": "New Component",
+				"category": "OpenShift",
+				"icon": {
+					"light": "images/title/light/workspace-new.svg",
+					"dark": "images/title/dark/workspace-new.svg"
+				}
+			},
+			{
+				"command": "openshift.component.openCreateComponent",
+				"title": "Create Component",
 				"category": "OpenShift",
 				"icon": {
 					"light": "images/title/light/workspace-new.svg",
@@ -1226,6 +1236,11 @@
 					"command": "openshift.Serverless.refresh",
 					"when": "view == openshiftServerlessFunctionsView",
 					"group": "navigation@1"
+				},
+				{
+					"command": "openshift.component.openCreateComponent",
+					"when": "view == openshiftComponentsView",
+					"group": "navigation"
 				}
 			],
 			"view/item/context": [
