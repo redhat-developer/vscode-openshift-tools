@@ -9,7 +9,7 @@ import * as pjson from '../../../package.json';
 import { VIEWS } from '../common/constants';
 
 export function checkExtension() {
-    describe('Extensions view check', () => {
+    describe('Extensions view check', function () {
         let extView: ExtensionsViewSection;
         let item: ExtensionsViewItem;
 
@@ -21,11 +21,11 @@ export function checkExtension() {
             item = await extView.findItem(`@installed ${pjson.displayName}`);
         });
 
-        it('Openshift Toolkit is installed', () => {
+        it('Openshift Toolkit is installed', function () {
             expect(item).not.undefined;
         });
 
-        it('Openshift toolkit has the correct attributes', async () => {
+        it('Openshift toolkit has the correct attributes', async function () {
             const version = await item.getVersion();
             const author = await item.getAuthor();
             const desc = await item.getDescription();
