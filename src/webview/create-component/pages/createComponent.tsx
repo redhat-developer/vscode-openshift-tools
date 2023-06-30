@@ -10,6 +10,7 @@ import OptionCard from '../../common/optionCard';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import {DevfileSearch} from '../../common/devfileSearch';
 
 const useCreateComponentStyles = makeStyles(createComponentStyle);
 
@@ -20,8 +21,42 @@ interface VSCodeMessage {
     componentName?: string;
 }
 
-export default function CreateComponent() {
+function SelectStrategy() {
     const createComponentStyle = useCreateComponentStyles();
+    return (
+        <>
+            <div className={createComponentStyle.headerContainer}>
+                <Typography variant="h5">Create Component</Typography>
+            </div>
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: '4em',
+                    justifyContent: 'center',
+                }}
+            >
+                <OptionCard
+                    title="From Existing Local Codebase"
+                    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor."
+                    icon={FolderOpenIcon}
+                />
+                <OptionCard
+                    title="From Existing Remote Git Repository"
+                    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor."
+                    icon={GitHubIcon}
+                />
+                <OptionCard
+                    title="From Template Project"
+                    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor."
+                    icon={ConstructionIcon}
+                />
+            </div>
+        </>
+    );
+}
+
+export default function CreateComponent() {
     const [theme, setTheme] = React.useState<Theme>(createVscodeTheme('light'));
 
     const respondToMessage = function (message: MessageEvent<VSCodeMessage>) {
@@ -39,16 +74,8 @@ export default function CreateComponent() {
 
     return (
         <ThemeProvider theme={theme}>
-            <div className={createComponentStyle.headerContainer}>
-                <Typography variant='h5'>
-                    Create Component
-                </Typography>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'row', gap: '4em', justifyContent: 'center' }}>
-                <OptionCard title="From Existing Local Codebase" description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor." icon={FolderOpenIcon} />
-                <OptionCard title="From Existing Remote Git Repository" description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor." icon={GitHubIcon} />
-                <OptionCard title="From Template Project" description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor." icon={ConstructionIcon} />
-            </div>
+            <DevfileSearch isTemplateSearch={true} setSelected={() => {}} titleText='Select Devfile' />
+            {false && <SelectStrategy />}
         </ThemeProvider>
     );
 }
