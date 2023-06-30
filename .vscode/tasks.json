@@ -17,7 +17,7 @@
                 "base": "$tsc-watch",
             },
             "presentation": {
-                "reveal": "silent",
+                "reveal": "never",
             },
         },
         {
