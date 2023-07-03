@@ -10,6 +10,7 @@ import { QuickPickItem, commands, window } from 'vscode';
 import { OpenShiftExplorer } from '../explorer';
 import { Odo, OpenShiftObject, getInstance } from '../odo';
 import { Project } from '../odo/project';
+import { ServerlessFunctionView } from '../serveressFunction/serverlessFunctionView';
 
 export class QuickPickCommand implements QuickPickItem {
     constructor (public label: string,
@@ -27,6 +28,8 @@ export default class OpenShiftItem {
     protected static readonly odo: Odo = getInstance();
 
     protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
+
+    protected static readonly serverlessView: ServerlessFunctionView = ServerlessFunctionView.getInstance();
 
     static validateUniqueName(data: Array<OpenShiftObject>, value: string): string {
         const openshiftObject =  data.find((item) => item.getName() === value);

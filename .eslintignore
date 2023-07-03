@@ -18,4 +18,5 @@ src/webview/welcome
 src/webview/git-import
 src/webview/helm-chart
 src/webview/feedback
+src/webview/serverless-function
 test/sandbox-registration

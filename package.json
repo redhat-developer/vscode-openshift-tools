@@ -783,6 +783,12 @@
 				"command": "openshift.sandbox.signup",
 				"title": "Provision OpenShift Developer Sandbox",
 				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.createFunction",
+				"title": "Create Function",
+				"category": "OpenShift",
+				"icon": "$(plus)"
 			}
 		],
 		"keybindings": [
@@ -819,6 +825,10 @@
 				{
 					"id": "openshiftComponentTypesView",
 					"name": "Devfile Registries"
+				},
+				{
+					"id": "openshiftServerlessFunctionsView",
+					"name": "Serverless Functions"
 				},
 				{
 					"id": "openshiftDebugView",
@@ -1131,6 +1141,11 @@
 					"command": "openshift.component.openImportFromGit",
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
+				},
+				{
+					"command": "openshift.Serverless.createFunction",
+					"when": "view == openshiftServerlessFunctionsView && isLoggedIn",
+					"group": "navigation@0"
 				}
 			],
 			"view/item/context": [
@@ -1216,7 +1231,7 @@
 				},
 				{
 					"command": "openshift.project.create",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isLoggedIn",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext",
 					"group": "c1"
 				},
 				{

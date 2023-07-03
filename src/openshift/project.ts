@@ -53,6 +53,7 @@ export class Project extends OpenShiftItem {
             const projectName = selectedItem.label;
             await CliChannel.getInstance().executeTool(Command.setActiveProject(projectName));
             Project.explorer.refresh();
+            Project.serverlessView.refresh();
             message = `Project '${projectName}' set as active.`;
         }
         return message;

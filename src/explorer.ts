@@ -199,35 +199,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             //   * example is sandbox context created when login to sandbox first time
             // (3) there is namespace set in context and namespace exists in the cluster
             // (4) there is namespace set in context and namespace does not exist in the cluster
-            const namespaces = await this.odo3.getNamespaces();
-            if (this.kubeContext.namespace) {
-                if (namespaces.find(item => item?.metadata.name === this.kubeContext.namespace)) {
-                    result = [{
-                        kind: 'project',
-                        metadata: {
-                            name: this.kubeContext.namespace,
-                        },
-                    } as KubernetesObject]
-                } else if (namespaces.length >= 1) {
-                    // switch to first accessible namespace
-                    await this.odo3.setNamespace(namespaces[0].metadata.name);
-                } else {
-                    result = [CREATE_OR_SET_PROJECT_ITEM]
-                }
-            } else {
-                // get list of projects or namespaces
-                // find default namespace
-                if (namespaces.find(item => item?.metadata.name === 'default')) {
-                    result = [{
-                        kind: 'project',
-                        metadata: {
-                            name: 'default',
-                        },
-                    } as KubernetesObject]
-                } else {
-                    result = [CREATE_OR_SET_PROJECT_ITEM]
-                }
-            }
+            result = await this.getProjects();
         } else {
             result = [...await this.odo3.getDeploymentConfigs(), ...await this.odo3.getDeployments()];
         }
@@ -241,6 +213,40 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
         if (!element) {
             await commands.executeCommand('setContext', 'openshift.app.explorer.init', result.length === 0);
+        }
+        return result;
+    }
+
+    public async getProjects(): Promise<ExplorerItem[]> {
+        let result: ExplorerItem[] = [];
+        const namespaces = await this.odo3.getNamespaces();
+        if (this.kubeContext.namespace) {
+            if (namespaces.find(item => item?.metadata.name === this.kubeContext.namespace)) {
+                result = [{
+                    kind: 'project',
+                    metadata: {
+                        name: this.kubeContext.namespace,
+                    },
+                } as KubernetesObject];
+            } else if (namespaces.length >= 1) {
+                // switch to first accessible namespace
+                await this.odo3.setNamespace(namespaces[0].metadata.name);
+            } else {
+                result = [CREATE_OR_SET_PROJECT_ITEM];
+            }
+        } else {
+            // get list of projects or namespaces
+            // find default namespace
+            if (namespaces.find(item => item?.metadata.name === 'default')) {
+                result = [{
+                    kind: 'project',
+                    metadata: {
+                        name: 'default',
+                    },
+                } as KubernetesObject];
+            } else {
+                result = [CREATE_OR_SET_PROJECT_ITEM];
+            }
         }
         return result;
     }

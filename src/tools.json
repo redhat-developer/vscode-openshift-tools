@@ -59,6 +59,75 @@
             }
         }
     },
+    "kn": {
+        "description": "Knative CLI tool",
+        "vendor": "Red Hat, Inc.",
+        "name": "kn",
+        "version": "1.10.0",
+        "versionRange": "1.10.0",
+        "versionRangeLabel": "v1.10.0",
+        "dlFileName": "kn",
+        "cmdFileName": "kn",
+        "filePrefix": "",
+        "cheksumURL": "https://github.com/knative/client/releases/download/knative-v1.10.0/checksums.txt",
+        "platform": {
+            "win32": {
+                "url": "https://github.com/knative/client/releases/download/knative-v1.10.0/kn-windows-amd64.exe",
+                "sha256sum": "2358ccae34d1d8a2100539ea8df93551bcd5e0135334e6ff396a44e7bd1194d9",
+                "dlFileName": "kn-windows-amd64.exe",
+                "cmdFileName": "kn.exe"
+            },
+            "darwin": {
+                "url": "https://github.com/knative/client/releases/download/knative-v1.10.0/kn-darwin-amd64",
+                "sha256sum": "8b128e9c64942c1f732db114b3a8575cccec5b3916f9df0ec0c7b6b3c0b898f6",
+                "dlFileName": "kn-darwin-amd64"
+            },
+            "darwin-arm64": {
+                "url": "https://github.com/knative/client/releases/download/knative-v1.10.0/kn-darwin-arm64",
+                "sha256sum": "f4a65baafc68204fed510403160306ab3f6d2ac069c09505cf41e7a3b515036a",
+                "dlFileName": "kn-darwin-arm64"
+            },
+            "linux": {
+                "url": "https://github.com/knative/client/releases/download/knative-v1.10.0/kn-linux-amd64",
+                "sha256sum": "fc45d60e7567095bde670f604e11396398ab339d3a4a9107c8ad861c94db525d",
+                "dlFileName": "kn-linux-amd64"
+            }
+        }
+    },
+    "func": {
+        "description": "Function CLI tool",
+        "vendor": "Red Hat, Inc.",
+        "name": "func",
+        "version": "1.10.0",
+        "versionRange": "1.10.0",
+        "versionRangeLabel": "v1.10.0",
+        "dlFileName": "func",
+        "cmdFileName": "func",
+        "filePrefix": "",
+        "platform": {
+            "win32": {
+                "url": "https://github.com/knative/func/releases/download/knative-v1.10.0/func_windows_amd64.exe",
+                "sha256sum": "0d1ac065f67b2461c709a1cdbd477d26eb57a53635892d1726b945fc9e582409",
+                "dlFileName": "func_windows_amd64.exe",
+                "cmdFileName": "func.exe"
+            },
+            "darwin": {
+                "url": "https://github.com/knative/func/releases/download/knative-v1.10.0/func_darwin_amd64",
+                "sha256sum": "de953a9167f28af5c1f0acfe67e2c851e999aa1f6efed5a326083ba569cc2381",
+                "dlFileName": "func_darwin_amd64"
+            },
+            "darwin-arm64": {
+                "url": "https://github.com/knative/func/releases/download/knative-v1.10.0/func_darwin_arm64",
+                "sha256sum": "740bef3723a30861149e86ea0505e32be74112bafa892a8d0a86d2526c41cf71",
+                "dlFileName": "func_darwin_arm64"
+            },
+            "linux": {
+                "url": "https://github.com/knative/func/releases/download/knative-v1.10.0/func_linux_amd64",
+                "sha256sum": "5069e5fb8d1b3742c4df8e8bbbeb7737f3bf7aab175bd8e76a900b86bc28239a",
+                "dlFileName": "func_linux_amd64"
+            }
+        }
+    },
     "helm": {
         "description": "oc helm CLI",
         "vendor": "Red Hat, Inc.",
