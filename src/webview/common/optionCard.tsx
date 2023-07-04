@@ -7,6 +7,8 @@ import * as React from 'react';
 
 
 interface OptionCardProps {
+    pageId: string;
+    setCurrentView: any;
     title: string;
     description: string;
     icon: any;
@@ -14,12 +16,8 @@ interface OptionCardProps {
 
 export default function OptionCard(props: OptionCardProps) {
 
-    function handleCreateClick() {
-        // do nothing for now
-    };
-
     return (
-        <Card variant="outlined">
+        <Card variant='outlined'>
             <div style={{ display: 'flex', height: '10em', alignItems: 'center', gap: '2em', marginTop: '1em'}}>
                 <props.icon sx={{ width: '30px', height: '30px', marginLeft: '1.5em', color: 'var(--vscode-editor-foreground)'}}/>
                 <Typography variant='h6'>
@@ -32,7 +30,7 @@ export default function OptionCard(props: OptionCardProps) {
                 </Typography>
             </CardContent>
             <CardActions sx={{ justifyContent: 'center', height: '5em' }}>
-                <Button variant='text' onClick={handleCreateClick} size='large' sx={{ marginBottom: '1em' }}>
+                <Button variant='text' onClick={() => {props.setCurrentView(props.pageId)}} size='large' sx={{ marginBottom: '1em' }}>
                     CREATE
                 </Button>
             </CardActions>

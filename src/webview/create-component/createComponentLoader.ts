@@ -75,6 +75,15 @@ export default class CreateComponentLoader {
                     data: CreateComponentLoader.getDevfileRegistries()
                 });
             }
+            /**
+             * The panel requested the list of workspace folders. Respond with this list.
+             */
+            case 'getWorkspaceFolders': {
+                void CreateComponentLoader.panel.webview.postMessage({
+                    action: 'workspaceFolders',
+                    data: vscode.workspace.workspaceFolders,
+                });
+            }
         }
     }
 
