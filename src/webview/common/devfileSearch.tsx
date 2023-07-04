@@ -199,6 +199,7 @@ export type DevfileSearchProps = {
     titleText: string;
     isTemplateSearch: boolean;
     setSelected?: ((devfile: string) => void) | ((templateProject: string) => void);
+    setCurrentView: any;
 };
 
 export function DevfileSearch(props: DevfileSearchProps) {
@@ -316,7 +317,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
                         </Stack>
                     </Stack>
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Button variant="outlined">Back</Button>
+                        <Button variant="outlined" onClick={() => {props.setCurrentView('home')}}>Back</Button>
                         <DevfileExplanation />
                     </Stack>
                 </Stack>

@@ -77,17 +77,51 @@ export const createVscodeTheme = (paletteMode: PaletteMode): Theme => {
                         }
                     }
                 ]
-            }
+            },
+            MuiTextField: {
+                variants: [
+                    {
+                        props: {
+                            variant: 'outlined'
+                        },
+                        style: {
+                            id: 'outlined-basic',
+                            width: '100%',
+                            color: computedStyle.getPropertyValue('--vscode-editor-foreground'),
+                            marginBottom: '1em'
+                        }
+                    }
+                ]
+            },
+            MuiAccordion: {
+                variants: [
+                    {
+                        props: {
+                            className: 'accordion'
+                        },
+                        style: {
+                            width: '100%',
+                            color: computedStyle.getPropertyValue('--vscode-editor-foreground'),
+                            backgroundColor: computedStyle.getPropertyValue('--vscode-editor-background')
+                        }
+                    }
+                ]
+            },
         },
     });
 };
 
 export default (_theme: Theme) =>
     createStyles({
+        pageContainer: {
+            marginLeft: '10em',
+            marginRight: '10em'
+        },
+        inputContainer: {
+            marginRight: '5em'
+        },
         headerContainer: {
             position: 'relative',
-            marginTop: '5em',
-            marginBottom: '5em',
-            marginLeft: '10em'
+            marginTop: '5em'
         },
     });
