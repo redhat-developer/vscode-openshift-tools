@@ -116,7 +116,8 @@ export interface Volume {
 }
 
 export interface Command {
-    exec: Exec;
+    exec?: Exec;
+    composite?: Composite;
     id: string;
 }
 
@@ -126,6 +127,11 @@ export interface Exec {
     workingDir: string;
     group?: Group;
     hotReloadCapable?: boolean;
+}
+
+export type Composite = {
+    commands: string[];
+    group: Group;
 }
 
 export interface Group {
