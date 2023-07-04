@@ -23,8 +23,8 @@ export function DevfileListItem(props: DevfileListItemProps) {
             paddingX={1}
             spacing={3}
         >
-            <Box sx={{display: 'flex', width: '6em', height: '6em', bgcolor: 'white', alignItems: 'center', justifyContent:'center', borderRadius: '4px' }}>
-                <img src={props.devfile.logoUrl} style={{ maxWidth: '5em', maxHeight: '5em' }} />
+            <Box sx={{display: 'flex', width: '7em', height: '7em', bgcolor: 'white', alignItems: 'center', justifyContent:'center', borderRadius: '4px' }}>
+                <img src={props.devfile.logoUrl} style={{ maxWidth: '6em', maxHeight: '6em' }} />
             </Box>
             <Stack
                 direction="column"

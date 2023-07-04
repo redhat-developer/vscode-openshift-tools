@@ -8,7 +8,6 @@ import {
     Box,
     Button,
     Checkbox,
-    CircularProgress,
     Container,
     Divider,
     FormControl,
@@ -23,7 +22,7 @@ import {
     Select,
     Stack,
     TextField,
-    Typography,
+    Typography
 } from '@mui/material';
 import * as React from 'react';
 import SyntaxHighlighter from 'react-syntax-highlighter';
@@ -31,6 +30,7 @@ import { monokai } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { Devfile, DevfileRegistry } from '../common/devfile';
 import { DevfileExplanation } from './devfileExplanation';
 import { DevfileListItem } from './devfileListItem';
+import { LoadScreen } from './loading';
 
 type Message = {
     action: string;
@@ -241,10 +241,14 @@ export function DevfileSearch(props: DevfileSearchProps) {
 
     React.useEffect(() => {
         window.vscodeApi.postMessage({ action: 'getDevfileRegistries' });
-    }, [])
+    }, []);
+
+    React.useEffect(() => {
+        setCurrentPage(_ => 1);
+    }, [registryEnabled]);
 
     if (!devfileRegistries) {
-        return <CircularProgress />;
+        return <LoadScreen title='Retrieving list of Devfiles' />;
     }
 
     const activeRegistries = registryEnabled //
@@ -283,7 +287,8 @@ export function DevfileSearch(props: DevfileSearchProps) {
                                 setCurrentPage={setCurrentPage}
                                 numPages={Math.floor(devfiles.length / ITEMS_PER_PAGE) + (devfiles.length % ITEMS_PER_PAGE > 0.0001 ? 1 : 0)}
                             />
-                            <Stack direction="column" sx={{ flexGrow: '1' }} spacing={2}>
+                            {/* 320px is the approximate combined of the top bar and bottom bar in the devfile search view */}
+                            <Stack direction="column" sx={{ height: 'calc(100vh - 320px)', overflow: 'scroll' }} spacing={2}>
                                 {devfiles
                                     .slice(
                                         (currentPage - 1) * ITEMS_PER_PAGE,
@@ -308,8 +313,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
                                         );
                                     })}
                             </Stack>
-                            <Box flexGrow="1"></Box>
-                            <Typography align="center">
+                            <Typography align="center" flexGrow='1'>
                                 Showing items {(currentPage - 1) * ITEMS_PER_PAGE + 1} -{' '}
                                 {Math.min(currentPage * ITEMS_PER_PAGE, devfiles.length)}
                                 {' '}of {devfiles.length}
