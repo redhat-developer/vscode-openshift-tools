@@ -789,6 +789,12 @@
 				"title": "Create Function",
 				"category": "OpenShift",
 				"icon": "$(plus)"
+			},
+			{
+				"command": "openshift.Serverless.refresh",
+				"title": "Create Function",
+				"category": "OpenShift",
+				"icon": "$(plus)"
 			}
 		],
 		"keybindings": [
@@ -1144,7 +1150,7 @@
 				},
 				{
 					"command": "openshift.Serverless.createFunction",
-					"when": "view == openshiftServerlessFunctionsView && isLoggedIn",
+					"when": "view == openshiftServerlessFunctionsView",
 					"group": "navigation@0"
 				}
 			],

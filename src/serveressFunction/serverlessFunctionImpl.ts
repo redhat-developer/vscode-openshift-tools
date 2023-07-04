@@ -7,23 +7,39 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import { parse } from 'yaml';
 import { CommandText } from '../base/command';
-import { CliChannel } from '../cli';
+import { CliChannel, CliExitData } from '../cli';
 import { loadItems } from '../k8s/common';
 import { DeploymentConfig } from '../k8s/deploymentConfig';
 import { Uri, workspace } from 'vscode';
-import { FunctionContent, FunctionObject } from './types';
+import { FunctionContent, FunctionObject, FunctionStatus } from './types';
+import { ServerlessFunctionView } from './serverlessFunctionView';
+import { Command } from './commands';
 
 export interface ServerlessFunction {
     getLocalFunctions(): Promise<FunctionObject[]>;
-    getDeployedFunctions(): Promise<FunctionObject[]>;
+    createFunction(language: string, template: string, location: string): Promise<CliExitData>;
 }
 
 export class ServerlessFunctionImpl implements ServerlessFunction {
+
+    private static instance: ServerlessFunction;
+
+    public static get Instance(): ServerlessFunction {
+        if (!ServerlessFunctionImpl.instance) {
+            ServerlessFunctionImpl.instance = new ServerlessFunctionImpl();
+        }
+        return ServerlessFunctionImpl.instance;
+    }
 
     private async getListItems<T>(command: CommandText, fail = false) {
         const listCliExitData = await CliChannel.getInstance().executeTool(command, undefined, fail);
         const result = loadItems<T>(listCliExitData.stdout);
         return result;
+    }
+
+    private async execute(command: CommandText, fail = false): Promise<CliExitData> {
+        const listCliExitData = await CliChannel.getInstance().executeTool(command, undefined, fail);
+        return listCliExitData;
     }
 
     private async getFuncYamlContent(dir: string): Promise<FunctionContent> {
@@ -37,12 +53,19 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         return funcData;
     }
 
-    async getDeployedFunctions(): Promise<FunctionObject[]> {
+    private async getDeployedFunctions(): Promise<FunctionObject[]> {
         //set context value to deploy
         return this.getListItems<FunctionObject>(DeploymentConfig.command.getDeploymentFunctions());
     }
 
+    async createFunction(language: string, template: string, location: string): Promise<CliExitData> {
+        return await this.execute(Command.createFunction(language, template, location));
+    }
+
     async getLocalFunctions(): Promise<FunctionObject[]> {
+        const deployedFunctions = await this.getDeployedFunctions();
+        // eslint-disable-next-line no-console
+        console.log(deployedFunctions);
         const folders: Uri[] = [];
         const functionList: FunctionObject[] = [];
         if (workspace.workspaceFolders) {
@@ -53,9 +76,11 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
                 }
             }
         }
-        //const getCurrentNamespace: string = await activeNamespace();
+        const currentNamespace: string = ServerlessFunctionView.getInstance().getCurrentNameSpace();
+        // eslint-disable-next-line no-console
+        console.log(currentNamespace);
         for (const folderUri of folders) {
-            const funcStatus = 'local';
+            const funcStatus = FunctionStatus.LOCALONLY;
             const funcData: FunctionContent = await this.getFuncYamlContent(folderUri.fsPath);
             /*if (
                 functionTreeView.has(funcData?.name) &&
@@ -74,16 +99,16 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
                     : undefined;
                 functionTreeView.set(funcData?.name, this.createFunctionNodeImpl(func, funcData, folderUri, funcStatus, url));
               }*/
-              const functionNode: FunctionObject = {
+            const functionNode: FunctionObject = {
                 name: funcData.name,
                 context: funcStatus
-              }
-              functionList.push(functionNode);
+            }
+            functionList.push(functionNode);
         }
         return functionList;
     }
 }
 
-export function newInstance(): ServerlessFunction {
-    return new ServerlessFunctionImpl();
+export function serverlessInstance(): ServerlessFunction {
+    return ServerlessFunctionImpl.Instance;
 }

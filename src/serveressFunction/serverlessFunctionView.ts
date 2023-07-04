@@ -6,6 +6,7 @@ import {
     Disposable,
     Event,
     EventEmitter,
+    ThemeIcon,
     TreeDataProvider,
     TreeItem,
     TreeItemCollapsibleState,
@@ -19,8 +20,7 @@ import { Platform } from '../util/platform';
 import { Context, KubernetesObject } from '@kubernetes/client-node';
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { FileContentChangeNotifier, WatchUtil } from '../util/watch';
-import { OpenShiftExplorer } from '../explorer';
-import { ServerlessFunction, newInstance } from './serverlessFunctionImpl';
+import { ServerlessFunction, serverlessInstance } from './serverlessFunctionImpl';
 import { FunctionContextType, FunctionObject, FunctionStatus } from './types';
 import { vsCommand } from '../vscommand';
 import ServerlessFunctionLoader from '../webview/serverless-function/serverlessFunctionLoader';
@@ -37,6 +37,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     private fsw: FileContentChangeNotifier;
     private kubeContext: Context;
     private kubeConfig: KubeConfigUtils;
+    private currentNameSpace: string;
 
     private eventEmitter: EventEmitter<ExplorerItem | undefined> =
         new EventEmitter<ExplorerItem | undefined>();
@@ -44,7 +45,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     readonly onDidChangeTreeData: Event<ExplorerItem | undefined> = this
         .eventEmitter.event;
 
-    private serverlessFunction: ServerlessFunction = newInstance();
+    private serverlessFunction: ServerlessFunction = serverlessInstance();
 
     private constructor() {
         try {
@@ -89,7 +90,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
                 return {
                     label: element.metadata.name,
                     collapsibleState: TreeItemCollapsibleState.Collapsed,
-                    iconPath: path.resolve(__dirname, '../../../images/context/project-node.png')
+                    iconPath: new ThemeIcon('project')
                 }
             }
         } else if ('context' in element) {
@@ -97,7 +98,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
             return {
                 label: functionObj.name,
                 collapsibleState: TreeItemCollapsibleState.None,
-                iconPath: path.resolve(__dirname, '../../../images/context/component-node.png'),
+                iconPath: new ThemeIcon('symbol-function'),
                 description: this.getDescription(functionObj.context),
                 tooltip: this.getTooltip(functionObj),
                 contextValue: FunctionContextType.LOCAlFUNCTIONS
@@ -115,10 +116,24 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
             'Local Only' : context === FunctionStatus.CLUSTERONLY ? 'Cluster Only' : '';
     }
 
+    setCurrentNameSpace(value: string) {
+        this.currentNameSpace = value;
+    }
+
+    public getCurrentNameSpace(): string {
+        return this.currentNameSpace;
+    }
+
     async getChildren(element?: ExplorerItem): Promise<ExplorerItem[]> {
         let result: ExplorerItem[] = [];
         if (!element) {
-            result = await OpenShiftExplorer.getInstance().getProjects();
+            result = [{
+                kind: 'project',
+                metadata: {
+                    name: this.kubeContext.namespace,
+                },
+            } as KubernetesObject];
+            this.setCurrentNameSpace(this.kubeContext.namespace);
         } else if ('kind' in element) {
             if (element.kind === 'project') {
                 //result = [...await this.serverlessFunction.getDeployedFunctions()]

@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
 import { Uri } from 'vscode';
-import { Autocomplete, Button, InputLabel, TextField, Typography, darken, lighten, styled } from '@mui/material';
+import { Button, FormControl, InputLabel, MenuItem, OutlinedInput, Select, SelectChangeEvent, TextField, Typography, darken, lighten, styled } from '@mui/material';
 import { VSCodeMessage } from './vsCodeMessage';
 import { DefaultProps } from '../../common/propertyTypes';
 import './home.scss';
@@ -27,9 +27,7 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
     template?: string,
     wsFolderItems?: Uri[],
     wsFolderPath: Uri,
-    showLoadScreen: boolean,
-    autoSelectDisable: boolean,
-    themeKind: number
+    showLoadScreen: boolean
 }> {
 
     constructor(props: DefaultProps | Readonly<DefaultProps>) {
@@ -44,9 +42,7 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
             template: '',
             wsFolderItems: [],
             wsFolderPath: undefined,
-            showLoadScreen: false,
-            autoSelectDisable: false,
-            themeKind: 0
+            showLoadScreen: false
         }
         VSCodeMessage.postMessage({
             action: 'selectFolder'
@@ -98,7 +94,8 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
         });
     }
 
-    handleWsFolderDropDownChange = (_event: any, value: Uri | string): void => {
+    handleWsFolderDropDownChange = (e: SelectChangeEvent): void => {
+        const value = e.target.value;
         if (typeof value === 'string' && value === 'New Folder') {
             VSCodeMessage.postMessage({
                 action: 'selectFolder',
@@ -112,18 +109,17 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
     }
 
     convert = (value: string): string => {
-        console.log('Value:::', value);
         return value.replace('/\s+/g', '').toLowerCase();
     }
 
-    handleAutocompleteChange = (_e: React.SyntheticEvent<Element, Event>, value: string, isLang: boolean): void => {
+    handleDropDownChange = (e: SelectChangeEvent, isLang: boolean): void => {
         if (isLang) {
             this.setState({
-                language: this.convert(value)
+                language: e.target.value
             });
         } else {
             this.setState({
-                template: this.convert(value)
+                template: e.target.value
             });
         }
     }
@@ -137,8 +133,8 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
             action: 'createFunction',
             folderPath: this.state.wsFolderPath,
             name: this.state.functionData.name,
-            language: this.state.language,
-            template: this.state.template
+            language: this.convert(this.state.language),
+            template: this.convert(this.state.template)
         });
     }
 
@@ -158,12 +154,11 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
     });
 
     render(): React.ReactNode {
-        const { autoSelectDisable, wsFolderItems, themeKind, wsFolderPath, functionData } = this.state;
+        const { wsFolderItems, wsFolderPath, functionData, language, template } = this.state;
         const languages = ['Go', 'Node', 'Python', 'Quarkus', 'Rust', 'Spring Boot', 'TypeScript'];
         const templates = ['Cloud Events', 'Http'];
-        const folderDropDownItems: any[] = [];
-        folderDropDownItems.push('New Folder');
-        folderDropDownItems.push(...wsFolderItems);
+        const folders: any[] = ['New Folder'];
+        folders.push(...wsFolderItems);
         return (
             <>
                 <div className='mainContainer margin'>
@@ -175,160 +170,114 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
                     </div>
                     <div className='formContainer'>
                         <div className='form'>
-                            <div style={{ marginTop: '10px', marginBottom: '10px' }}>
-                                <InputLabel required htmlFor='bootstrap-input'
-                                    style={{
-                                        color: '#EE0000',
-                                        marginTop: '1rem'
-                                    }}>
-                                    Name
-                                </InputLabel>
+                            <FormControl sx={{ m: 1 }}>
                                 <TextField
+                                    label='Name'
+                                    type='string'
+                                    variant='outlined'
+                                    required
                                     defaultValue={functionData.name}
                                     error={functionData.error}
                                     onChange={(e) => this.validateName(e.target.value)}
-                                    id='component-textField'
+                                    id='function-name'
                                     sx={{
                                         input: {
                                             color: 'var(--vscode-settings-textInputForeground)',
                                             backgroundColor: 'var(--vscode-settings-textInputBackground)'
                                         }
                                     }}
-                                    style={{ paddingTop: '10px' }}
                                     helperText={functionData.helpText}
                                 />
-                                <InputLabel required htmlFor='grouped-languages'
-                                    style={{
-                                        color: '#EE0000',
-                                        marginTop: '1rem'
-                                    }}>
-                                    Language
-                                </InputLabel>
-                                <Autocomplete
-                                    id='grouped-languages'
-                                    options={languages}
-                                    disabled={autoSelectDisable}
-                                    autoHighlight
-                                    fullWidth
-                                    disableClearable
-                                    renderInput={(params) => (
-                                        <TextField
-                                            sx={{
-                                                input: {
-                                                    color: 'var(--vscode-settings-textInputForeground)',
-                                                    backgroundColor: 'var(--vscode-settings-textInputBackground)'
-                                                }
-                                            }}
-                                            style={{ paddingTop: '10px' }}
-                                            {...params}
-                                            inputProps={{
-                                                ...params.inputProps
-                                            }} />
-                                    )}
-                                    renderGroup={(params) => (
-                                        <li key={params.key}>
-                                            <this.GroupItems>{params.children}</this.GroupItems>
-                                        </li>
-                                    )}
-                                    onChange={(e, v,) => this.handleAutocompleteChange(e, v, true)} />
-                                <InputLabel required htmlFor='grouped-templates'
-                                    style={{
-                                        color: '#EE0000',
-                                        marginTop: '1rem'
-                                    }}>
-                                    Tempate
-                                </InputLabel>
-                                <Autocomplete
-                                    id='grouped-templates'
-                                    options={templates}
-                                    disabled={autoSelectDisable}
-                                    autoHighlight
-                                    fullWidth
-                                    disableClearable
-                                    renderInput={(params) => (
-                                        <TextField
-                                            sx={{
-                                                input: {
-                                                    color: 'var(--vscode-settings-textInputForeground)',
-                                                    backgroundColor: 'var(--vscode-settings-textInputBackground)'
-                                                }
-                                            }}
-                                            style={{ paddingTop: '10px' }}
-                                            {...params}
-                                            inputProps={{
-                                                ...params.inputProps
-                                            }} />
-                                    )}
-                                    renderGroup={(params) => (
-                                        <li key={params.key}>
-                                            <this.GroupHeader>{params.group}</this.GroupHeader>
-                                            <this.GroupItems>{params.children}</this.GroupItems>
-                                        </li>
-                                    )}
-                                    onChange={(e, v) => this.handleAutocompleteChange(e, v, false)} />
+                            </FormControl>
+                            <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem' }}>
+                                <FormControl sx={{ m: 1, width: 250 }}>
+                                    <InputLabel id='language-dropdown' required>Language</InputLabel>
+                                    <Select
+                                        labelId='language-dropdown'
+                                        id='language-name'
+                                        value={language}
+                                        onChange={(e) => this.handleDropDownChange(e, true)}
+                                        input={<OutlinedInput label='Language' />}
+                                    >
+                                        {languages.map((language) => (
+                                            <MenuItem
+                                                key={language}
+                                                value={language}
+                                            >
+                                                {language}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                <FormControl sx={{ m: 1, width: 150 }}>
+                                    <InputLabel id='template-dropdown' required>Template</InputLabel>
+                                    <Select
+                                        labelId='template-dropdown'
+                                        id='template-name'
+                                        value={template}
+                                        onChange={(e) => this.handleDropDownChange(e, false)}
+                                        input={<OutlinedInput label='Template' />}
+                                        autoWidth
+                                    >
+                                        {templates.map((template) => (
+                                            <MenuItem
+                                                key={template}
+                                                value={template}
+                                            >
+                                                {template}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
                                 {wsFolderItems.length > 0 &&
-                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <InputLabel htmlFor='grouped-folder'
-                                            style={{
-                                                color: '#EE0000',
-                                                marginTop: '1rem'
-                                            }}>
-                                            Select Folder
-                                        </InputLabel>
-                                        <Autocomplete
-                                            id='grouped-folder'
-                                            options={folderDropDownItems}
-                                            autoHighlight
-                                            fullWidth
-                                            disableClearable
-                                            value={wsFolderPath.fsPath ? wsFolderPath.fsPath : ''}
-                                            getOptionLabel={(option) => option.fsPath ? option.fsPath : option}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    sx={{
-                                                        input: {
-                                                            color: 'var(--vscode-settings-textInputForeground)',
-                                                            backgroundColor: 'var(--vscode-settings-textInputBackground)'
-                                                        }
-                                                    }}
-                                                    style={{ paddingTop: '10px' }}
-                                                    {...params}
-                                                    inputProps={{
-                                                        ...params.inputProps
-                                                    }} />
-                                            )}
-                                            renderGroup={(params) => (
-                                                <li key={params.key}>
-                                                    <this.GroupItems>{params.children}</this.GroupItems>
-                                                </li>
-                                            )}
-                                            onChange={(e, v) => this.handleWsFolderDropDownChange(e, v)} />
-                                    </div>
+                                    <FormControl sx={{ m: 1, width: 320 }}>
+                                        <InputLabel id='folder-dropdown' required>Folder</InputLabel>
+                                        <Select
+                                            labelId='folder-dropdown'
+                                            id='folder-path'
+                                            onChange={(e) => this.handleWsFolderDropDownChange(e)}
+                                            input={<OutlinedInput label='Folder' />}
+                                            value={wsFolderPath ? wsFolderPath.fsPath : ''}
+                                            autoWidth
+                                        >
+                                            {folders.map((folder: Uri | string) => (
+                                                <MenuItem
+                                                    key={typeof folder === 'string' ? folder : folder.fsPath}
+                                                    value={typeof folder === 'string' ? folder : folder.fsPath}
+                                                >
+                                                    {typeof folder === 'string' ? folder : folder.fsPath}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
                                 }
                                 {
-                                    wsFolderItems?.length === 0 && <Button variant='contained'
+                                wsFolderItems?.length === 0 &&
+                                <FormControl sx={{ m: 1, width: 120 }}>
+                                    <Button variant='contained'
                                         className='buttonStyle'
-                                        style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white', marginTop: '1rem' }}
+                                        style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white', marginTop: '0.5rem' }}
                                         onClick={() => this.selectFolder()}>
                                         Select Folder
                                     </Button>
-                                }
-                                <div style={{ marginTop: '2rem' }}>
-                                    <Button variant='contained'
-                                        disabled={this.handleCreateBtnDisable()}
-                                        className='buttonStyle'
-                                        style={{ backgroundColor: this.handleCreateBtnDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: 'white' }}
-                                        onClick={() => this.createFunction()}>
-                                        Create
-                                    </Button>
-                                    <Button
-                                        variant='outlined'
-                                        className='buttonStyle'
-                                        style={{ textTransform: 'none', marginLeft: '1rem', color: '#EE0000 !important' }}
-                                        onClick={() => this.cancel()}>
-                                        Cancel
-                                    </Button>
-                                </div>
+                                </FormControl>
+                            }
+                            </div>
+                            <div style={{ marginTop: '2rem' }}>
+                                <Button variant='contained'
+                                    disabled={this.handleCreateBtnDisable()}
+                                    className='buttonStyle'
+                                    style={{ backgroundColor: this.handleCreateBtnDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: 'white' }}
+                                    onClick={() => this.createFunction()}>
+                                    Create
+                                </Button>
+                                <Button
+                                    variant='outlined'
+                                    className='buttonStyle'
+                                    style={{ textTransform: 'none', marginLeft: '1rem', color: '#EE0000 !important' }}
+                                    onClick={() => this.cancel()}>
+                                    Cancel
+                                </Button>
                             </div>
                         </div>
                     </div>
