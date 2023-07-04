@@ -1,17 +1,11 @@
+/*-----------------------------------------------------------------------------------------------
+ *  Copyright (c) Red Hat, Inc. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE file in the project root for license information.
+ *-----------------------------------------------------------------------------------------------*/
 import { Check, Close } from '@mui/icons-material';
 import { Box, Button, Chip, Stack, Typography } from '@mui/material';
 import * as React from 'react';
-
-export type Devfile = {
-    name: string;
-    description: string;
-    logoUrl: string;
-    supportsDebug: boolean;
-    supportsDeploy: boolean;
-    tags: string[];
-    sampleProjects: string[];
-    yaml: string;
-}
+import {Devfile} from '../common/devfile';
 
 export type DevfileListItemProps = {
     devfile: Devfile;
@@ -29,7 +23,9 @@ export function DevfileListItem(props: DevfileListItemProps) {
             paddingX={1}
             spacing={3}
         >
-            <img src={props.devfile.logoUrl} style={{ maxWidth: '6em', maxHeight: '6em' }} />
+            <Box sx={{display: 'flex', width: '6em', height: '6em', bgcolor: 'white', alignItems: 'center', justifyContent:'center', borderRadius: '4px' }}>
+                <img src={props.devfile.logoUrl} style={{ maxWidth: '5em', maxHeight: '5em' }} />
+            </Box>
             <Stack
                 direction="column"
                 spacing={1}
@@ -60,9 +56,13 @@ export function DevfileListItem(props: DevfileListItemProps) {
                         icon={props.devfile.supportsDeploy ? <Check /> : <Close />}
                         color={props.devfile.supportsDeploy ? 'success' : 'error'}
                     />
-                    {props.devfile.tags.map((tag) => {
+                    {props.devfile.tags.map((tag, i) => {
+                        if (i >= 4) {
+                            return;
+                        }
                         return <Chip size="small" label={tag} key={tag} />;
                     })}
+                    {props.devfile.tags.length > 4 && <Chip size="small" label='...' key='ellipsis' />}
                 </Stack>
             </Stack>
             <Box sx={{ flexGrow: '1' }} />

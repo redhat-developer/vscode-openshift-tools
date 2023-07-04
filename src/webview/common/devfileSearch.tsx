@@ -1,9 +1,14 @@
+/*-----------------------------------------------------------------------------------------------
+ *  Copyright (c) Red Hat, Inc. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE file in the project root for license information.
+ *-----------------------------------------------------------------------------------------------*/
 import { Search } from '@mui/icons-material';
 import {
     Alert,
     Box,
     Button,
     Checkbox,
+    CircularProgress,
     Container,
     Divider,
     FormControl,
@@ -18,15 +23,22 @@ import {
     Select,
     Stack,
     TextField,
-    Typography
+    Typography,
 } from '@mui/material';
 import * as React from 'react';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { monokai } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { Devfile, DevfileRegistry } from '../common/devfile';
 import { DevfileExplanation } from './devfileExplanation';
-import { Devfile, DevfileListItem } from './devfileListItem';
+import { DevfileListItem } from './devfileListItem';
+
+type Message = {
+    action: string;
+    data: any;
+}
 
 function SearchBar(props: {
+    setSearchText: React.Dispatch<React.SetStateAction<string>>
     numPages: number;
     currentPage: number;
     setCurrentPage: (i: number) => void;
@@ -44,6 +56,7 @@ function SearchBar(props: {
                     ),
                 }}
                 sx={{ flexGrow: '1' }}
+                onChange={(event) => { props.setSearchText(event.target.value.toLowerCase()) }}
             />
             <Pagination
                 count={props.numPages}
@@ -56,41 +69,36 @@ function SearchBar(props: {
     );
 }
 
-function RegistriesPicker(props: { registries: string[] }) {
-    const [registryEnabled, setRegistryEnabled] = React.useState(() => {
-        const enabled = new Map();
-        for (let registry of props.registries) {
-            enabled.set(registry, true);
-        }
-        return enabled;
-    });
+function RegistriesPicker(props: { registryEnabled: { registryName: string, enabled: boolean }[], setRegistryEnabled: React.Dispatch<React.SetStateAction<{ registryName: string, enabled: boolean }[]>> }) {
 
-    function onCheckboxClick(registry) {
-        return function (_e: never, checked: boolean) {
-            setRegistryEnabled((currentRegistryEnabled) => {
-                const newMap = new Map(currentRegistryEnabled);
-                newMap.set(registry, checked);
-                return newMap;
-            });
-        };
+    function onCheckboxClick(clickedRegistry: string, checked: boolean) {
+        const updatedList = [...props.registryEnabled] //
+                .filter((entry) => entry.registryName !== clickedRegistry);
+        updatedList.push({
+            registryName: clickedRegistry,
+            enabled: checked,
+        });
+        props.setRegistryEnabled(updatedList);
     }
 
     return (
         <Stack direction="column" spacing={1} marginY={2}>
-            <Typography variant="body2" marginBottom={1}>Devfile Registries</Typography>
+            <Typography variant="body2" marginBottom={1}>
+                Devfile Registries
+            </Typography>
             <FormGroup>
-                {props.registries.map((registry) => {
+                {props.registryEnabled.map((registry) => {
                     return (
                         <FormControlLabel
                             control={
                                 <Checkbox
-                                    disabled={registry === 'DefaultDevfileRegistry'}
-                                    checked={registryEnabled.get(registry)}
-                                    onChange={onCheckboxClick(registry)}
+                                    disabled={registry.registryName === 'DefaultDevfileRegistry'}
+                                    checked={registry.enabled}
+                                    onChange={(_e, checked) => onCheckboxClick(registry.registryName, checked)}
                                 />
                             }
-                            label={registry}
-                            key={registry}
+                            label={registry.registryName}
+                            key={registry.registryName}
                         />
                     );
                 })}
@@ -99,10 +107,10 @@ function RegistriesPicker(props: { registries: string[] }) {
     );
 }
 
-function SelectTemplateProject(props: {
+const SelectTemplateProject = React.forwardRef((props: {
     devfile: Devfile;
     setSelectedProject: (projectName: string) => void;
-}) {
+}, ref) => {
     const [selectedTemplateProject, setSelectedTemplateProject] = React.useState('');
     const [isInteracted, setInteracted] = React.useState(false);
 
@@ -185,7 +193,7 @@ function SelectTemplateProject(props: {
             </Stack>
         </Paper>
     );
-}
+});
 
 export type DevfileSearchProps = {
     titleText: string;
@@ -198,88 +206,57 @@ export function DevfileSearch(props: DevfileSearchProps) {
 
     const [selectedDevfile, setSelectedDevfile] = React.useState('');
     const [currentPage, setCurrentPage] = React.useState(1);
+    const [devfileRegistries, setDevfileRegistries] = React.useState<DevfileRegistry[]>([]);
+    const [registryEnabled, setRegistryEnabled] = React.useState<{registryName: string, enabled: boolean}[]>([]);
+    const [searchText, setSearchText] = React.useState('');
 
-    const dummyDevfile: Devfile = {
-        name: 'Go Runtime',
-        description:
-            'Go (version 1.18.x) is an open source programming language that makes it easy to build simple, reliable, and efficient software. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.',
-        supportsDebug: true,
-        supportsDeploy: false,
-        tags: ['Go', 'Hugo'],
-        logoUrl:
-            'https://raw.githubusercontent.com/devfile-samples/devfile-stack-icons/main/golang.svg',
-        sampleProjects: ['hugo-sample', 'go-backend-sample'],
-        yaml: `schemaVersion: 2.1.0
-metadata:
-  name: go
-  displayName: Go Runtime
-  description: Go (version 1.18.x) is an open source programming language that makes it easy to build simple, reliable, and efficient software.
-  icon: https://raw.githubusercontent.com/devfile-samples/devfile-stack-icons/main/golang.svg
-  tags:
-    - Go
-  projectType: Go
-  language: Go
-  provider: Red Hat
-  version: 1.0.2
-starterProjects:
-  - name: go-starter
-    description: A Go project with a simple HTTP server
-    git:
-      checkoutFrom:
-        revision: main
-      remotes:
-        origin: https://github.com/devfile-samples/devfile-stack-go.git
-components:
-  - container:
-      endpoints:
-        - name: http-go
-          targetPort: 8080
-      image: registry.access.redhat.com/ubi9/go-toolset:1.18.10-4
-      args: ["tail", "-f", "/dev/null"]
-      memoryLimit: 1024Mi
-      mountSources: true
-    name: runtime
-commands:
-  - exec:
-      env:
-        - name: GOPATH
-          value: \${PROJECT_SOURCE}/.go
-        - name: GOCACHE
-          value: \${PROJECT_SOURCE}/.cache
-      commandLine: go build main.go
-      component: runtime
-      group:
-        isDefault: true
-        kind: build
-      workingDir: \${PROJECT_SOURCE}
-    id: build
-  - exec:
-      commandLine: ./main
-      component: runtime
-      group:
-        isDefault: true
-        kind: run
-      workingDir: \${PROJECT_SOURCE}
-    id: run
-        `,
-    };
+    function respondToMessage(messageEvent: MessageEvent) {
+        const message = messageEvent.data as Message;
+        switch (message.action) {
+            case 'devfileRegistries': {
+                setDevfileRegistries(_devfileRegistries => message.data);
+            }
+        }
+    }
 
-    const [devfiles, _setDevfiles] = React.useState<Devfile[]>([
-        dummyDevfile,
-        dummyDevfile,
-        dummyDevfile,
-        dummyDevfile,
-        dummyDevfile,
-        dummyDevfile,
-        dummyDevfile,
-        dummyDevfile,
-        dummyDevfile,
-        dummyDevfile,
-        dummyDevfile,
-        dummyDevfile,
-        dummyDevfile,
-        dummyDevfile,
-    ]);
+    React.useEffect(() => {
+        const enabledArray = [];
+        for (let registry of devfileRegistries) {
+            enabledArray.push({
+                registryName: registry.name,
+                enabled: true,
+            })
+        }
+        console.log('Ran "update registry enabled" effect');
+        setRegistryEnabled((_) => enabledArray);
+    }, [devfileRegistries.length]);
+
+    React.useEffect(() => {
+        window.addEventListener('message', respondToMessage);
+        return () => {
+            window.removeEventListener('message', respondToMessage);
+        };
+    }, []);
+
+    React.useEffect(() => {
+        window.vscodeApi.postMessage({ action: 'getDevfileRegistries' });
+    }, [])
+
+    if (!devfileRegistries) {
+        return <CircularProgress />;
+    }
+
+    const activeRegistries = registryEnabled //
+            .filter(entry => entry.enabled) //
+            .map(entry => entry.registryName);
+    const devfiles: Devfile[] = devfileRegistries //
+            .filter((devfileRegistry) => activeRegistries.includes(devfileRegistry.name)) //
+            .flatMap((devfileRegistry) => devfileRegistry.devfiles) //
+            .filter((devfile) => {
+                return devfile.name.toLowerCase().includes(searchText)
+                || devfile.tags.find((tag) => tag.toLowerCase().includes(searchText));
+            });
+    devfiles.sort((a, b) => a.name < b.name ? -1 : 1);
 
     return (
         <>
@@ -290,7 +267,8 @@ commands:
                     </Typography>
                     <Stack direction="row" flexGrow="1" spacing={2}>
                         <RegistriesPicker
-                            registries={['DefaultDevfileRegistry', 'MyCustomRegistry']}
+                            registryEnabled={registryEnabled}
+                            setRegistryEnabled={setRegistryEnabled}
                         />
                         <Divider orientation="vertical" />
                         <Stack
@@ -299,9 +277,10 @@ commands:
                             spacing={3}
                         >
                             <SearchBar
+                                setSearchText={setSearchText}
                                 currentPage={currentPage}
                                 setCurrentPage={setCurrentPage}
-                                numPages={Math.floor(devfiles.length / ITEMS_PER_PAGE) + 1}
+                                numPages={Math.floor(devfiles.length / ITEMS_PER_PAGE) + (devfiles.length % ITEMS_PER_PAGE > 0.0001 ? 1 : 0)}
                             />
                             <Stack direction="column" sx={{ flexGrow: '1' }} spacing={2}>
                                 {devfiles
@@ -323,13 +302,17 @@ commands:
                                                         }
                                                     }}
                                                 />
-                                                <Divider />
+                                                <Divider key={`${devfile.name}-divider`} />
                                             </>
                                         );
                                     })}
                             </Stack>
-                            <Box flexGrow='1'></Box>
-                            <Typography align='center'>Showing items {(currentPage - 1) * ITEMS_PER_PAGE + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, devfiles.length)}</Typography>
+                            <Box flexGrow="1"></Box>
+                            <Typography align="center">
+                                Showing items {(currentPage - 1) * ITEMS_PER_PAGE + 1} -{' '}
+                                {Math.min(currentPage * ITEMS_PER_PAGE, devfiles.length)}
+                                {' '}of {devfiles.length}
+                            </Typography>
                         </Stack>
                     </Stack>
                     <Stack direction="row" justifyContent="space-between" alignItems="center">

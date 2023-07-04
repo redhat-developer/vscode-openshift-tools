@@ -72,6 +72,10 @@ export default function CreateComponent() {
         };
     }, []);
 
+    React.useEffect(() => {
+        window.vscodeApi.postMessage({ action: 'init' });
+    });
+
     return (
         <ThemeProvider theme={theme}>
             <DevfileSearch isTemplateSearch={true} setSelected={() => {}} titleText='Select Devfile' />
