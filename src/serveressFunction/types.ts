@@ -24,6 +24,24 @@ export interface FunctionObject {
     context: string
 }
 
+export interface ImageAndBuild {
+    image?: string;
+    builder?: string;
+    autoGenerateImage?: boolean;
+}
+
+export interface ClusterVersion {
+    items: [
+      {
+        status: {
+          desired: {
+            version: string;
+          };
+        };
+      },
+    ];
+  }
+
 // eslint-disable-next-line no-shadow
 export enum FunctionContextType {
     NONE = 'none',
@@ -46,4 +64,5 @@ export enum FunctionStatus {
     CLUSTERONLY = 'clusterOnly',
     LOCALONLY = 'localOnly',
     CLUSTERLOCALBOTH = 'clusterLocalBoth',
+    NONE = 'none'
 }

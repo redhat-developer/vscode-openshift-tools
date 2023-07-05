@@ -5,15 +5,15 @@
 
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { parse } from 'yaml';
 import { CommandText } from '../base/command';
 import { CliChannel, CliExitData } from '../cli';
 import { loadItems } from '../k8s/common';
 import { DeploymentConfig } from '../k8s/deploymentConfig';
 import { Uri, workspace } from 'vscode';
 import { FunctionContent, FunctionObject, FunctionStatus } from './types';
-import { ServerlessFunctionView } from './serverlessFunctionView';
-import { Command } from './commands';
+import { ServerlessFunctionView } from './view';
+import { Command, Utils } from './commands';
+import { OdoImpl } from '../odo';
 
 export interface ServerlessFunction {
     getLocalFunctions(): Promise<FunctionObject[]>;
@@ -37,29 +37,13 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         return result;
     }
 
-    private async execute(command: CommandText, fail = false): Promise<CliExitData> {
-        const listCliExitData = await CliChannel.getInstance().executeTool(command, undefined, fail);
-        return listCliExitData;
-    }
-
-    private async getFuncYamlContent(dir: string): Promise<FunctionContent> {
-        let funcData: FunctionContent;
-        try {
-            const funcYaml: string = await fs.readFile(path.join(dir, 'func.yaml'), 'utf-8');
-            funcData = parse(funcYaml) as FunctionContent;
-        } catch (error) {
-            // ignore
-        }
-        return funcData;
-    }
-
     private async getDeployedFunctions(): Promise<FunctionObject[]> {
         //set context value to deploy
         return this.getListItems<FunctionObject>(DeploymentConfig.command.getDeploymentFunctions());
     }
 
     async createFunction(language: string, template: string, location: string): Promise<CliExitData> {
-        return await this.execute(Command.createFunction(language, template, location));
+        return await OdoImpl.Instance.execute(Command.createFunction(language, template, location));
     }
 
     async getLocalFunctions(): Promise<FunctionObject[]> {
@@ -81,7 +65,7 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         console.log(currentNamespace);
         for (const folderUri of folders) {
             const funcStatus = FunctionStatus.LOCALONLY;
-            const funcData: FunctionContent = await this.getFuncYamlContent(folderUri.fsPath);
+            const funcData: FunctionContent = await Utils.getFuncYamlContent(folderUri.fsPath);
             /*if (
                 functionTreeView.has(funcData?.name) &&
                 (!funcData?.deploy?.namespace || getCurrentNamespace === funcData?.deploy?.namespace)
@@ -101,6 +85,8 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
               }*/
             const functionNode: FunctionObject = {
                 name: funcData.name,
+                runtime: funcData.runtime,
+                url: folderUri.fsPath,
                 context: funcStatus
             }
             functionList.push(functionNode);

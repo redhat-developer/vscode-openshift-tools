@@ -342,10 +342,7 @@
 				"command": "openshift.explorer.refresh",
 				"title": "Refresh Application Explorer View",
 				"category": "OpenShift",
-				"icon": {
-					"dark": "images/title/dark/icon-refresh.svg",
-					"light": "images/title/light/icon-refresh.svg"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "openshift.explorer.reportIssue",
@@ -614,10 +611,7 @@
 				"command": "openshift.componentTypesView.refresh",
 				"title": "Refresh Components Types View",
 				"category": "OpenShift",
-				"icon": {
-					"dark": "images/title/dark/icon-refresh.svg",
-					"light": "images/title/light/icon-refresh.svg"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "openshift.componentType.openStarterProjectRepository",
@@ -677,10 +671,7 @@
 				"command": "openshift.componentsView.refresh",
 				"title": "Refresh Components View",
 				"category": "OpenShift",
-				"icon": {
-					"dark": "images/title/dark/icon-refresh.svg",
-					"light": "images/title/light/icon-refresh.svg"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "openshift.componentTypesView.registry.openInView",
@@ -792,9 +783,14 @@
 			},
 			{
 				"command": "openshift.Serverless.refresh",
-				"title": "Create Function",
+				"title": "Refresh Serverless Function View",
 				"category": "OpenShift",
-				"icon": "$(plus)"
+				"icon": "$(refresh)"
+			},
+			{
+				"command": "openshift.Serverless.build",
+				"title": "Build",
+				"category": "OpenShift"
 			}
 		],
 		"keybindings": [
@@ -1152,6 +1148,11 @@
 					"command": "openshift.Serverless.createFunction",
 					"when": "view == openshiftServerlessFunctionsView",
 					"group": "navigation@0"
+				},
+				{
+					"command": "openshift.Serverless.refresh",
+					"when": "view == openshiftServerlessFunctionsView",
+					"group": "navigation@1"
 				}
 			],
 			"view/item/context": [
@@ -1407,6 +1408,10 @@
 				{
 					"command": "openshift.resource.openInDeveloperConsole",
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject && isOpenshiftCluster || openshift.k8sObject.helm && isOpenshiftCluster"
+				},
+				{
+					"command": "openshift.Serverless.build",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localDeployFunctions|localFunctionsEnablement|notConnectedLocalFunctions|notConnectedLocalFunctionsEnablement)$/"
 				}
 			]
 		},

@@ -2,6 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+
 import {
     Disposable,
     Event,
@@ -20,10 +21,11 @@ import { Platform } from '../util/platform';
 import { Context, KubernetesObject } from '@kubernetes/client-node';
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { FileContentChangeNotifier, WatchUtil } from '../util/watch';
-import { ServerlessFunction, serverlessInstance } from './serverlessFunctionImpl';
+import { ServerlessFunction, serverlessInstance } from './functionImpl';
 import { FunctionContextType, FunctionObject, FunctionStatus } from './types';
 import { vsCommand } from '../vscommand';
 import ServerlessFunctionLoader from '../webview/serverless-function/serverlessFunctionLoader';
+import { BuildAndDeploy } from './build-deploy';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
@@ -52,7 +54,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
             this.kubeConfig = new KubeConfigUtils();
             this.kubeContext = this.kubeConfig.getContextObject(this.kubeConfig.currentContext);
         } catch (err) {
-            // ignore config loading error and let odo report it on first call
+            // ignore config loading error
         }
         try {
             this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
@@ -89,26 +91,29 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
             if (element.kind === 'project') {
                 return {
                     label: element.metadata.name,
-                    collapsibleState: TreeItemCollapsibleState.Collapsed,
+                    collapsibleState: TreeItemCollapsibleState.Expanded,
                     iconPath: new ThemeIcon('project')
                 }
             }
         } else if ('context' in element) {
             const functionObj: FunctionObject = element;
-            return {
+            const explorerItem: ExplorerItem = {
                 label: functionObj.name,
-                collapsibleState: TreeItemCollapsibleState.None,
-                iconPath: new ThemeIcon('symbol-function'),
-                description: this.getDescription(functionObj.context),
-                tooltip: this.getTooltip(functionObj),
-                contextValue: FunctionContextType.LOCAlFUNCTIONS
+                collapsibleState: TreeItemCollapsibleState.None
             }
+            if (functionObj.context !== FunctionStatus.NONE) {
+                explorerItem.iconPath = new ThemeIcon('symbol-function'),
+                    explorerItem.description = this.getDescription(functionObj.context),
+                    explorerItem.tooltip = this.getTooltip(functionObj),
+                    explorerItem.contextValue = FunctionContextType.LOCAlFUNCTIONS
+            }
+            return explorerItem;
         }
 
     }
 
     getTooltip(functionObj: FunctionObject): string {
-        return `Name: ${functionObj.name}\nRuntime: ${functionObj.runtime}\nTemplate: undefind\nContext: ${functionObj.url}`;
+        return `Name: ${functionObj.name}\nRuntime: ${functionObj.runtime}\nContext: ${functionObj.url}`;
     }
 
     getDescription(context: string): string {
@@ -136,8 +141,14 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
             this.setCurrentNameSpace(this.kubeContext.namespace);
         } else if ('kind' in element) {
             if (element.kind === 'project') {
-                //result = [...await this.serverlessFunction.getDeployedFunctions()]
                 result = [...await this.serverlessFunction.getLocalFunctions()]
+                if (result.length === 0) {
+                    const functionNode: FunctionObject = {
+                        name: 'No Available Functions',
+                        context: FunctionStatus.NONE
+                    }
+                    result = [functionNode]
+                }
             }
         }
         return result;
@@ -155,5 +166,15 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     @vsCommand('openshift.Serverless.createFunction')
     static async openServerlessFunction(): Promise<void> {
         await ServerlessFunctionLoader.loadView('Create Function');
+    }
+
+    @vsCommand('openshift.Serverless.refresh')
+    static refresh() {
+        ServerlessFunctionView.getInstance().refresh();
+    }
+
+    @vsCommand('openshift.Serverless.build')
+    static buildFunction(context: FunctionObject) {
+        void BuildAndDeploy.getInstance().initBuildFunction(context);
     }
 }

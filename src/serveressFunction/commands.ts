@@ -3,7 +3,24 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
+import * as fs from 'fs-extra';
+import { parse } from 'yaml';
 import { CommandText, CommandOption } from '../base/command';
+import { ClusterVersion, FunctionContent } from './types';
+
+export class Utils {
+    static async getFuncYamlContent(dir: string): Promise<FunctionContent> {
+        let funcData: FunctionContent;
+        try {
+            const funcYaml: string = await fs.readFile(path.join(dir, 'func.yaml'), 'utf-8');
+            funcData = parse(funcYaml) as FunctionContent;
+        } catch (error) {
+            // ignore
+        }
+        return funcData;
+    }
+}
 
 export class Command {
 
@@ -14,4 +31,21 @@ export class Command {
         ]);
     }
 
+    static buildFunction(location: string, image: string, clusterVersion: ClusterVersion | null): CommandText {
+        const commandText = new CommandText('func build', undefined, [
+            new CommandOption('-p', location),
+            new CommandOption('-i', image),
+            new CommandOption('-v')
+        ]);
+        if (clusterVersion) {
+            commandText.addOption(new CommandOption('-r',''))
+        }
+        return commandText
+    }
+
+    static getClusterVersion(): CommandText {
+        return new CommandText('oc get clusterversion', undefined, [
+            new CommandOption('-o', 'josn')
+        ]);
+    }
 }

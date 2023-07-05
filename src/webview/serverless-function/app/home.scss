@@ -118,8 +118,16 @@ button {
     }
 }
 
-.MuiSvgIcon-root {
+.MuiSvgIcon-root, .MuiStepLabel-label {
     color: var(--vscode-settings-textInputForeground) !important;
+}
+
+.Mui-disabled {
+    -webkit-text-fill-color: var(--vscode-settings-textInputForeground) !important;
+}
+
+.Mui-active {
+    color: var(--vscode-button-hoverBackground) !important;
 }
 
 .MuiOutlinedInput-input {

@@ -9,7 +9,9 @@ import { loadWebviewHtml } from '../common-ext/utils';
 import { validateName } from '../common/utils';
 import { selectWorkspaceFolder, selectWorkspaceFolders } from '../../util/workspace';
 import { Progress } from '../../util/progress';
-import { serverlessInstance } from '../../serveressFunction/serverlessFunctionImpl';
+import { serverlessInstance } from '../../serveressFunction/functionImpl';
+import { CliExitData } from '../../cli';
+import { BuildAndDeploy } from '../../serveressFunction/build-deploy';
 
 let panel: vscode.WebviewPanel;
 
@@ -32,18 +34,69 @@ async function gitImportMessageListener(event: any): Promise<any> {
             });
             break;
         case 'createFunction':
-            Progress.execFunctionWithProgress(
+            const selctedFolder: vscode.Uri = vscode.Uri.file(path.join(event.folderPath.fsPath, event.name));
+            let response: CliExitData;
+            await Progress.execFunctionWithProgress(
                 `Creating function '${event.name}'`,
                 async () => {
-                    const selctedFolder: vscode.Uri = vscode.Uri.file(path.join(event.folderPath.fsPath, event.name));
-                    const response = await serverlessInstance().createFunction(event.language, event.template, selctedFolder.fsPath);
-                    if (response.stderr.toLowerCase().indexOf('created') !== -1) {
-                        const wsFolder = vscode.workspace.getWorkspaceFolder(selctedFolder);
-                        if (!wsFolder) {
-                            vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: selctedFolder });
-                        }
-                    }
+                    response = await serverlessInstance().createFunction(event.language, event.template, selctedFolder.fsPath);
                 });
+            if (response && response.error) {
+                vscode.window.showErrorMessage(`Error while creating the function ${event.name}`);
+                panel.webview.postMessage({
+                    action: event.action,
+                    name: event.name,
+                    path: selctedFolder,
+                    success: false
+                })
+            } else {
+                panel.webview.postMessage({
+                    action: event.action,
+                    name: event.name,
+                    path: selctedFolder,
+                    success: true
+                });
+            }
+            break;
+        case 'getImage':
+            const folderPath: vscode.Uri = vscode.Uri.from(event.path);
+            const images = await BuildAndDeploy.getInstance().getImages(event.name, folderPath);
+            panel.webview.postMessage({
+                action: event.action,
+                path: folderPath,
+                images: images
+            });
+            break;
+        case 'buildFunction':
+            let buildResponse: CliExitData;
+            const functionPath: vscode.Uri = vscode.Uri.from(event.folderPath);
+            await Progress.execFunctionWithProgress(
+                `Building function '${event.name}'`,
+                async () => {
+                    buildResponse = await BuildAndDeploy.getInstance().buildFunction(functionPath.fsPath, event.image)
+                });
+            if (buildResponse &&  buildResponse.error) {
+                vscode.window.showErrorMessage(`Error while building the function ${event.name}`);
+                panel.webview.postMessage({
+                    action: event.action,
+                    success: false
+                })
+            } else {
+                panel.webview.postMessage({
+                    action: event.action,
+                    success: true
+                });
+            }
+            break;
+        case 'finish':
+            const result = await vscode.window.showInformationMessage('Are you sure to skip all other steps?', 'Yes', 'Cancel');
+            if (result === 'Yes') {
+                const wsFolder = vscode.workspace.getWorkspaceFolder(selctedFolder);
+                if (!wsFolder) {
+                    vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: selctedFolder });
+                }
+                panel.dispose();
+            }
             break;
         default:
             break;
