@@ -53,7 +53,7 @@ export const createVscodeTheme = (paletteMode: PaletteMode): Theme => {
                             variant: 'h5'
                         },
                         style: {
-                            fontSize: '35px',
+                            fontSize: '2.3em',
                             fontWeight: '650',
                             color: computedStyle.getPropertyValue('--vscode-editor-foreground')
                         }
@@ -63,7 +63,7 @@ export const createVscodeTheme = (paletteMode: PaletteMode): Theme => {
                             variant: 'h6'
                         },
                         style: {
-                            fontSize: '25px',
+                            fontSize: '1.5em',
                             fontWeight: '600',
                             color: computedStyle.getPropertyValue('--vscode-editor-foreground')
                         }
@@ -98,6 +98,20 @@ export const createVscodeTheme = (paletteMode: PaletteMode): Theme => {
                     {
                         props: {
                             className: 'accordion'
+                        },
+                        style: {
+                            width: '100%',
+                            color: computedStyle.getPropertyValue('--vscode-editor-foreground'),
+                            backgroundColor: computedStyle.getPropertyValue('--vscode-editor-background')
+                        }
+                    }
+                ]
+            },
+            MuiSelect: {
+                variants: [
+                    {
+                        props: {
+                            className: 'selectFolder'
                         },
                         style: {
                             width: '100%',
