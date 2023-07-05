@@ -43,21 +43,18 @@ function SelectStrategy({ setCurrentView }) {
                     pageId='fromLocalCodeBase'
                     setCurrentView={setCurrentView}
                     title='From Existing Local Codebase'
-                    description='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.'
                     icon={FolderOpenIcon}
                 />
                 <OptionCard
                     pageId='fromExistingGitRepo'
                     setCurrentView={setCurrentView}
                     title='From Existing Remote Git Repository'
-                    description='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.'
                     icon={GitHubIcon}
                 />
                 <OptionCard
                     pageId='devfileSearch'
                     setCurrentView={setCurrentView}
                     title='From Template Project'
-                    description='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.'
                     icon={ConstructionIcon}
                 />
             </div>
