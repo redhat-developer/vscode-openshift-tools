@@ -11,6 +11,7 @@ import { ComponentTypesView } from '../../registriesView';
 import { ExtensionID } from '../../util/constants';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { Devfile, DevfileRegistry } from '../common/devfile';
+import OpenShiftItem from '../../openshift/openshiftItem';
 
 type Message = {
     action: string;
@@ -65,6 +66,7 @@ export default class CreateComponentLoader {
                     action: 'setTheme',
                     themeValue: vscode.window.activeColorTheme.kind,
                 });
+                break;
             }
             /**
              * The panel requested the list of devfile registries with their devfiles. Respond with this list.
@@ -74,6 +76,7 @@ export default class CreateComponentLoader {
                     action: 'devfileRegistries',
                     data: CreateComponentLoader.getDevfileRegistries()
                 });
+                break;
             }
             /**
              * The panel requested the list of workspace folders. Respond with this list.
@@ -83,6 +86,14 @@ export default class CreateComponentLoader {
                     action: 'workspaceFolders',
                     data: vscode.workspace.workspaceFolders,
                 });
+                break;
+            }
+            /**
+             * The panel requested to validate the entered component name. Respond with error status and message.
+             */
+            case 'validateComponentName': {
+                CreateComponentLoader.validateComponentName(message.data);
+                break;
             }
         }
     }
@@ -120,4 +131,14 @@ export default class CreateComponentLoader {
         return devfileRegistries;
     }
 
+    static validateComponentName(data: string) {
+        let validationMessage = OpenShiftItem.emptyName(`Please enter a component name.`, data);
+        if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid component name.
+            Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`, data);
+        if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`Component name should be between 2-63 characters`, data, 0);
+        void CreateComponentLoader.panel.webview.postMessage({
+            action: 'validatedComponentName',
+            data: validationMessage,
+        });
+    }
 }
