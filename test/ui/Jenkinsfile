@@ -19,9 +19,9 @@ node('rhel8') {
                 junit 'report.xml'
             }
         }
-        stage('UI smoke test') {
+        stage('cluster-dependent UI tests') {
             wrap([$class: 'Xvnc']) {
-                sh "npm run smoke-test"
+                sh "npm run cluster-ui-test"
                 junit 'report.xml'
             }
         }
