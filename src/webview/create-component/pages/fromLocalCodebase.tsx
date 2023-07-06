@@ -14,7 +14,7 @@ export function FromLocalCodebase({ setCurrentView }) {
     const [workspaceFolders, setWorkspaceFolders] = React.useState<Uri[]>([]);
     const [componentName, setComponentName] = React.useState('');
     const [projectFolder, setProjectFolder] = React.useState('');
-    //const [recommendedDevfile, setRecommendedDevfile] = React.useState<Devfile>();
+    const [recommendedDevfile, setRecommendedDevfile] = React.useState<Devfile>();
     const [showRecommendedDevfile, setShowRecommendedDevfile] = React.useState(false);
     const [isComponentNameInvalid, setIsComponentNameInvalid] = React.useState(true);
     const [validationMessage, setValidationMessage] = React.useState('Please enter a component name.');
@@ -26,9 +26,14 @@ export function FromLocalCodebase({ setCurrentView }) {
                 setWorkspaceFolders(_workspaceFolders => message.data);
                 break;
             }
-            //case 'recommendedDevfile': {
-            //setRecommendedDevfile(_recommendedDevfile => message.data);
-            // }
+            case 'recommendedDevfile': {
+                const devfile: Devfile = {
+                    ...message.data,
+                };
+                setRecommendedDevfile(devfile);
+                setShowRecommendedDevfile(true);
+                break;
+            }
             case 'validatedComponentName': {
                 if (message.data) {
                     setIsComponentNameInvalid(true);
@@ -61,9 +66,8 @@ export function FromLocalCodebase({ setCurrentView }) {
     function handleNext() {
         window.vscodeApi.postMessage({
             action: 'getRecommendedDevfile',
-            param: projectFolder
+            data: projectFolder
         });
-        setShowRecommendedDevfile(true);
     };
 
     function handleSelectFolder() {
@@ -127,7 +131,7 @@ export function FromLocalCodebase({ setCurrentView }) {
                 ) : (
                     <div>
                         <Divider variant="middle" sx={{ marginTop: '2em' }} />
-                        <RecommendedDevfile recommendedDevfile={dummyDevfile} componentName={componentName} setCurrentView={setCurrentView} setShowRecommendedDevfile={setShowRecommendedDevfile} />
+                        <RecommendedDevfile recommendedDevfile={recommendedDevfile} componentName={componentName} setCurrentView={setCurrentView} setShowRecommendedDevfile={setShowRecommendedDevfile} />
                     </div>
                 )}
             </div>
@@ -137,9 +141,9 @@ export function FromLocalCodebase({ setCurrentView }) {
 
 type RecommendedDevfileProps = {
     recommendedDevfile: Devfile;
+    componentName: string;
     setCurrentView: any;
     setShowRecommendedDevfile: any;
-    componentName: string;
 };
 
 function RecommendedDevfile(props: RecommendedDevfileProps) {
@@ -147,7 +151,7 @@ function RecommendedDevfile(props: RecommendedDevfileProps) {
         <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', marginTop: '1.5em', justifyContent: 'space-between' }}>
                 <Typography variant='h6'>
-                    Recommended Devfile
+                    Recommended Devfile for {props.componentName}
                 </Typography>
                 <DevfileRecommendationInfo />
             </div>
@@ -159,81 +163,10 @@ function RecommendedDevfile(props: RecommendedDevfileProps) {
                 <Button variant='text' onClick={() => { props.setCurrentView('devfileSearch') }}>
                     SELECT A DIFFERENT DEVFILE
                 </Button>
-                <Button variant='contained' onClick={() => {
-                    window.vscodeApi.postMessage({
-                        action: 'createComponentTest',
-                        param: props.componentName
-                    });
-                }}>
+                <Button variant='contained'>
                     CREATE COMPONENT
                 </Button>
             </div >
         </div >
     );
 }
-
-
-const dummyDevfile: Devfile = {
-    name: 'Go Runtime',
-    description:
-        'Go (version 1.18.x) is an open source programming language that makes it easy to build simple, reliable, and efficient software. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.',
-    supportsDebug: true,
-    supportsDeploy: false,
-    tags: ['Go', 'Hugo'],
-    logoUrl:
-        'https://raw.githubusercontent.com/devfile-samples/devfile-stack-icons/main/golang.svg',
-    sampleProjects: ['hugo-sample', 'go-backend-sample'],
-    yaml: `schemaVersion: 2.1.0
-metadata:
-name: go
-displayName: Go Runtime
-description: Go (version 1.18.x) is an open source programming language that makes it easy to build simple, reliable, and efficient software.
-icon: https://raw.githubusercontent.com/devfile-samples/devfile-stack-icons/main/golang.svg
-tags:
-- Go
-projectType: Go
-language: Go
-provider: Red Hat
-version: 1.0.2
-starterProjects:
-- name: go-starter
-description: A Go project with a simple HTTP server
-git:
-  checkoutFrom:
-    revision: main
-  remotes:
-    origin: https://github.com/devfile-samples/devfile-stack-go.git
-components:
-- container:
-  endpoints:
-    - name: http-go
-      targetPort: 8080
-  image: registry.access.redhat.com/ubi9/go-toolset:1.18.10-4
-  args: ["tail", "-f", "/dev/null"]
-  memoryLimit: 1024Mi
-  mountSources: true
-name: runtime
-commands:
-- exec:
-  env:
-    - name: GOPATH
-      value: \${PROJECT_SOURCE}/.go
-    - name: GOCACHE
-      value: \${PROJECT_SOURCE}/.cache
-  commandLine: go build main.go
-  component: runtime
-  group:
-    isDefault: true
-    kind: build
-  workingDir: \${PROJECT_SOURCE}
-id: build
-- exec:
-  commandLine: ./main
-  component: runtime
-  group:
-    isDefault: true
-    kind: run
-  workingDir: \${PROJECT_SOURCE}
-id: run
-    `,
-};
