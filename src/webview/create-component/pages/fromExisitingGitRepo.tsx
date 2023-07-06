@@ -1,13 +1,8 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Accordion, AccordionDetails, AccordionSummary, Button, TextField, Typography } from "@mui/material";
-import { makeStyles } from '@mui/styles';
 import * as React from 'react';
-import createComponentStyle from "../../common/createComponent.style";
-
-const useCreateComponentStyles = makeStyles(createComponentStyle);
 
 export function FromExistingGitRepo({ setCurrentView }) {
-    const createComponentStyle = useCreateComponentStyles();
 
     function handleNext() {
         // nothing
@@ -15,7 +10,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
 
     return (
         <>
-            <div className={createComponentStyle.headerContainer}>
+            <div style={{ position: 'relative', marginTop: '5em' }}>
                 <Typography variant='h5'>
                     Existing Remote Git Repository
                 </Typography>
