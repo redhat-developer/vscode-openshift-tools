@@ -24,8 +24,7 @@ import { FileContentChangeNotifier, WatchUtil } from '../util/watch';
 import { ServerlessFunction, serverlessInstance } from './functionImpl';
 import { FunctionContextType, FunctionObject, FunctionStatus } from './types';
 import { vsCommand } from '../vscommand';
-import ServerlessFunctionLoader from '../webview/serverless-function/serverlessFunctionLoader';
-import { BuildAndDeploy } from './build-deploy';
+import ServerlessFunctionViewLoader from '../webview/serverless-function/serverlessFunctionLoader';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
@@ -113,7 +112,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     }
 
     getTooltip(functionObj: FunctionObject): string {
-        return `Name: ${functionObj.name}\nRuntime: ${functionObj.runtime}\nContext: ${functionObj.url}`;
+        return `Name: ${functionObj.name}\nRuntime: ${functionObj.runtime}\nContext: ${functionObj.folderURI.fsPath}`;
     }
 
     getDescription(context: string): string {
@@ -165,16 +164,16 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     @vsCommand('openshift.Serverless.createFunction')
     static async openServerlessFunction(): Promise<void> {
-        await ServerlessFunctionLoader.loadView('Create Function');
+        await ServerlessFunctionViewLoader.loadView('Serverless Function - Create');
     }
 
     @vsCommand('openshift.Serverless.refresh')
-    static refresh() {
-        ServerlessFunctionView.getInstance().refresh();
+    static refresh(target?:ExplorerItem) {
+        ServerlessFunctionView.getInstance().refresh(target);
     }
 
     @vsCommand('openshift.Serverless.build')
-    static buildFunction(context: FunctionObject) {
-        void BuildAndDeploy.getInstance().initBuildFunction(context);
+    static async buildFunction(context: FunctionObject) {
+        await ServerlessFunctionViewLoader.loadView('Serverless Function - Build', context.folderURI.fsPath, context.name, 1);
     }
 }

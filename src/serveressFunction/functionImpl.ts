@@ -5,10 +5,7 @@
 
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { CommandText } from '../base/command';
-import { CliChannel, CliExitData } from '../cli';
-import { loadItems } from '../k8s/common';
-import { DeploymentConfig } from '../k8s/deploymentConfig';
+import { CliExitData } from '../cli';
 import { Uri, workspace } from 'vscode';
 import { FunctionContent, FunctionObject, FunctionStatus } from './types';
 import { ServerlessFunctionView } from './view';
@@ -24,6 +21,8 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
 
     private static instance: ServerlessFunction;
 
+    private static functionPath: Uri = undefined;
+
     public static get Instance(): ServerlessFunction {
         if (!ServerlessFunctionImpl.instance) {
             ServerlessFunctionImpl.instance = new ServerlessFunctionImpl();
@@ -31,7 +30,7 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         return ServerlessFunctionImpl.instance;
     }
 
-    private async getListItems<T>(command: CommandText, fail = false) {
+    /*private async getListItems<T>(command: CommandText, fail = false) {
         const listCliExitData = await CliChannel.getInstance().executeTool(command, undefined, fail);
         const result = loadItems<T>(listCliExitData.stdout);
         return result;
@@ -40,16 +39,15 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
     private async getDeployedFunctions(): Promise<FunctionObject[]> {
         //set context value to deploy
         return this.getListItems<FunctionObject>(DeploymentConfig.command.getDeploymentFunctions());
-    }
+    }*/
 
     async createFunction(language: string, template: string, location: string): Promise<CliExitData> {
+        ServerlessFunctionImpl.functionPath = Uri.parse(location);
         return await OdoImpl.Instance.execute(Command.createFunction(language, template, location));
     }
 
     async getLocalFunctions(): Promise<FunctionObject[]> {
-        const deployedFunctions = await this.getDeployedFunctions();
-        // eslint-disable-next-line no-console
-        console.log(deployedFunctions);
+        //const deployedFunctions = await this.getDeployedFunctions();
         const folders: Uri[] = [];
         const functionList: FunctionObject[] = [];
         if (workspace.workspaceFolders) {
@@ -59,6 +57,12 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
                     folders.push(wf.uri);
                 }
             }
+        }
+        if(ServerlessFunctionImpl.functionPath) {
+            if (fs.existsSync(path.join(ServerlessFunctionImpl.functionPath.fsPath, 'func.yaml'))) {
+                folders.push(ServerlessFunctionImpl.functionPath);
+            }
+            ServerlessFunctionImpl.functionPath = undefined;
         }
         const currentNamespace: string = ServerlessFunctionView.getInstance().getCurrentNameSpace();
         // eslint-disable-next-line no-console
@@ -86,7 +90,7 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
             const functionNode: FunctionObject = {
                 name: funcData.name,
                 runtime: funcData.runtime,
-                url: folderUri.fsPath,
+                folderURI: folderUri,
                 context: funcStatus
             }
             functionList.push(functionNode);

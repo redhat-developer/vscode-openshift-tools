@@ -58,12 +58,6 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
         })
     }
 
-    cancel = (): void => {
-        VSCodeMessage.postMessage({
-            action: 'close'
-        });
-    }
-
     componentDidMount(): void {
         VSCodeMessage.onMessage((message) => {
             if (message.data.action === 'validateName') {
@@ -251,13 +245,6 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         style={{ backgroundColor: this.handleCreateBtnDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: 'white' }}
                         onClick={() => this.createFunction()}>
                         Create
-                    </Button>
-                    <Button
-                        variant='outlined'
-                        className='buttonStyle'
-                        style={{ textTransform: 'none', marginLeft: '1rem', color: '#EE0000 !important' }}
-                        onClick={() => this.cancel()}>
-                        Cancel
                     </Button>
                 </div>
             </>

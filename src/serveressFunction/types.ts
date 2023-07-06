@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { Uri } from 'vscode';
+
 export interface FunctionContent {
     name?: string;
     deploy?: {
@@ -19,7 +21,7 @@ export interface FunctionObject {
     name: string;
     namespace?: string;
     runtime?: string;
-    url?: string;
+    folderURI?: Uri;
     ready?: string;
     context: string
 }

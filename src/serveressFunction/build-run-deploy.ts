@@ -8,7 +8,8 @@ import { ClusterVersion, FunctionContent, FunctionObject, ImageAndBuild } from '
 import { Command, Utils } from './commands';
 import { Platform } from '../util/platform';
 import { OdoImpl } from '../odo';
-import { CliExitData } from '../cli';
+import { CliChannel } from '../cli';
+import { ChildProcess } from 'child_process';
 
 export class BuildAndDeploy {
 
@@ -39,17 +40,21 @@ export class BuildAndDeploy {
         if (!context) {
             return null;
         }
-        const uri = Uri.parse(context.url);
+        const uri = context.folderURI;
         const imageAndBuildModel = await this.getFunctionImageInteractively(uri);
         if (!imageAndBuildModel) {
             return null;
         }
-        await this.buildFunction(uri.fsPath,imageAndBuildModel.image);
+        await this.buildFunction(context.name, uri.fsPath, imageAndBuildModel.image);
     }
 
-    public async buildFunction(path: string, image: string): Promise<CliExitData> {
+    public async buildFunction(functionName: string, functionPath: string, buildImage: string): Promise<void> {
         const clusterVersion: ClusterVersion | null = await this.checkOpenShiftCluster();
-        return await OdoImpl.Instance.execute(Command.buildFunction(path, image, clusterVersion));
+        await OdoImpl.Instance.executeInTerminal(Command.buildFunction(functionPath, buildImage, clusterVersion), undefined, `OpenShift: Build Function '${functionName}'`);
+    }
+
+    public async runFunction(path: string, runBuild: boolean): Promise<ChildProcess> {
+        return await CliChannel.getInstance().spawnTool(Command.runFunction(path, runBuild));
     }
 
     private async getFunctionImageInteractively(selectedFolderPick: Uri,

@@ -10,12 +10,13 @@ import { DefaultProps } from '../../common/propertyTypes';
 import './home.scss';
 import { CreateFunction } from './createFunction';
 import { BuildFunction } from './buildFunction';
+import { RunFunction } from './runFunction';
 import { DeployFunction } from './deployFunction';
 
 export class ServerlessFunction extends React.Component<DefaultProps, {
     activeStep: number,
     functionName: string,
-    path: Uri
+    locationUri: Uri
 }> {
 
     constructor(props: DefaultProps | Readonly<DefaultProps>) {
@@ -23,7 +24,7 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
         this.state = {
             activeStep: 0,
             functionName: '',
-            path: undefined
+            locationUri: undefined
         }
     }
 
@@ -38,16 +39,14 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
             if (message.data.action == 'createFunction') {
                 const stepCount = message.data.success ? this.state.activeStep + 1 : this.state.activeStep;
                 this.setState({
-                    activeStep: stepCount
-                });
-                this.setState({
+                    activeStep: stepCount,
                     functionName: message.data.name,
-                    path: message.data.path
-                })
+                    locationUri: message.data.path
+                });
                 VSCodeMessage.postMessage({
                     action: 'getImage',
                     name: message.data.name,
-                    path: message.data.path
+                    folderPath: message.data.path
                 });
             } else if (message.data.action == 'buildFunction') {
                 const stepCount = message.data.success ? this.state.activeStep + 1 : this.state.activeStep;
@@ -65,14 +64,17 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
     handleCreateSubmit = (name: string, language: string, template: string, location: Uri): void => {
         VSCodeMessage.postMessage({
             action: 'createFunction',
-            folderPath: location,
             name: name,
+            folderPath: location,
             language: language,
             template: template
         });
     }
 
     handleBuildSubmit = (image: string, location: Uri): void => {
+        this.setState({
+            locationUri: location
+        })
         VSCodeMessage.postMessage({
             action: 'buildFunction',
             name: this.state.functionName,
@@ -81,21 +83,39 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
         });
     }
 
+    handleRunSubmit = (folderPath: Uri, build: boolean): void => {
+        VSCodeMessage.postMessage({
+            action: 'runFunction',
+            name: this.state.functionName,
+            folderPath: folderPath,
+            runBuild: build
+        });
+    }
+
+    handleSkip = (stepCount: number) => {
+        this.setState({
+            activeStep: stepCount + 1
+        })
+    }
+
     handleStep = (step: number) => {
         switch (step) {
             case 0:
                 return <CreateFunction onCreateSubmit={this.handleCreateSubmit} />;
             case 1:
                 return <BuildFunction onBuildSubmit={this.handleBuildSubmit}
-                    name={this.state.functionName} />
+                    name={this.state.functionName} />;
             case 2:
+                return <RunFunction folderPath={this.state.locationUri} onRunSubmit={this.handleRunSubmit}
+                    name={this.state.functionName} skip={this.handleSkip} />;
+            case 3:
                 return <DeployFunction />
         }
     }
 
     render(): React.ReactNode {
         const { activeStep } = this.state;
-        const steps = ['Create', 'Build', 'Deploy'];
+        const steps = ['Create', 'Build', 'Run', 'Deploy'];
         return (
             <>
                 <div className='mainContainer margin'>

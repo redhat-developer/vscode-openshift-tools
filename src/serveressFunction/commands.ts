@@ -43,6 +43,14 @@ export class Command {
         return commandText
     }
 
+    static runFunction(location: string, runBuild: boolean): CommandText {
+        const commandText = new CommandText('func run', undefined, [
+            new CommandOption('-p', location),
+            new CommandOption('-b', runBuild.toString())
+        ]);
+        return commandText;
+    }
+
     static getClusterVersion(): CommandText {
         return new CommandText('oc get clusterversion', undefined, [
             new CommandOption('-o', 'josn')

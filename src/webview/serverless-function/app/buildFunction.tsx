@@ -9,14 +9,6 @@ import { VSCodeMessage } from './vsCodeMessage';
 import { BuildFunctionPageProps } from '../../common/propertyTypes';
 import './home.scss';
 
-declare module 'react' {
-    interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
-        // extends React's HTMLAttributes
-        directory?: string;        // remember to make these attributes optional....
-        webkitdirectory?: string;
-    }
-}
-
 export class BuildFunction extends React.Component<BuildFunctionPageProps, {
     images: string[],
     selectedImage: string,
@@ -35,9 +27,9 @@ export class BuildFunction extends React.Component<BuildFunctionPageProps, {
     componentDidMount(): void {
         VSCodeMessage.onMessage((message) => {
             if (message.data.action === 'getImage') {
-                console.log('images:::', message.data.images);
                 this.setState({
                     images: message.data.images,
+                    selectedImage: message.data.images[0],
                     path: message.data.path
                 })
             }
@@ -56,7 +48,8 @@ export class BuildFunction extends React.Component<BuildFunctionPageProps, {
 
     finish = (): void => {
         VSCodeMessage.postMessage({
-            action: 'finish'
+            action: 'finish',
+            folderPath: this.state.path
         });
     }
 
@@ -82,11 +75,12 @@ export class BuildFunction extends React.Component<BuildFunctionPageProps, {
                         />
                     </FormControl>
                     <FormControl sx={{ margin: '2rem 0 0 2rem', width: 350 }}>
-                        <InputLabel id='image-dropdown' required>Select Build Image</InputLabel>
+                        <InputLabel id='image-dropdown' required>Build Image</InputLabel>
                         <Select
                             labelId='image-dropdown'
                             id='image-name'
                             value={selectedImage}
+                            disabled={images.length === 1}
                             onChange={(e) => this.handleDropDownChange(e)}
                             input={<OutlinedInput label='Language' />}
                             fullWidth

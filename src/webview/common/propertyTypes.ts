@@ -62,3 +62,10 @@ export interface BuildFunctionPageProps extends DefaultProps {
     name: string,
     onBuildSubmit: (image: string, location: Uri) => void;
 }
+
+export interface RunFunctionPageProps extends DefaultProps {
+    name: string,
+    folderPath: Uri,
+    skip:(stepCount: number) => void;
+    onRunSubmit: (folderPath: Uri, build: boolean) => void;
+}
