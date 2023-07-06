@@ -20,8 +20,6 @@ import { Command } from '../../src/odo/command';
 const ODO = getInstance();
 const kc = new KubeConfig();
 
-kc.loadFromDefault();
-
 const newProjectName = `project${Math.round(Math.random() * 1000)}`;
 
 // tests are assuming your current context is already pointing to test cluster on which you can create and delete namespaces
@@ -44,6 +42,7 @@ suite('odo commands integration', function () {
                 password,
             ),
         );
+        kc.loadFromDefault();
     });
 
     suite('login/logout', function() {
