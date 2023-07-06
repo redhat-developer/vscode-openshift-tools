@@ -12,6 +12,7 @@ import { ExtensionID } from '../../util/constants';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { Devfile, DevfileRegistry } from '../common/devfile';
 import OpenShiftItem from '../../openshift/openshiftItem';
+import { selectWorkspaceFolder } from '../../util/workspace';
 
 type Message = {
     action: string;
@@ -82,10 +83,13 @@ export default class CreateComponentLoader {
              * The panel requested the list of workspace folders. Respond with this list.
              */
             case 'getWorkspaceFolders': {
-                void CreateComponentLoader.panel.webview.postMessage({
-                    action: 'workspaceFolders',
-                    data: vscode.workspace.workspaceFolders,
-                });
+                if (vscode.workspace.workspaceFolders !== undefined) {
+                    const workspaceFolderUris: Uri[] = vscode.workspace.workspaceFolders.map(wsFolder => wsFolder.uri);
+                    void CreateComponentLoader.panel.webview.postMessage({
+                        action: 'workspaceFolders',
+                        data: workspaceFolderUris
+                    });
+                }
                 break;
             }
             /**
@@ -93,6 +97,21 @@ export default class CreateComponentLoader {
              */
             case 'validateComponentName': {
                 CreateComponentLoader.validateComponentName(message.data);
+                break;
+            }
+            case 'selectProjectFolder': {
+                const workspaceUri: vscode.Uri  = await selectWorkspaceFolder(true);
+                vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: workspaceUri });
+
+                void CreateComponentLoader.panel.webview.postMessage({
+                    action: 'selectedProjectFolder',
+                    data: workspaceUri,
+                });
+
+                void CreateComponentLoader.panel.webview.postMessage({
+                    action: 'workspaceFolders',
+                    data: vscode.workspace.workspaceFolders? vscode.workspace.workspaceFolders.map(wsFolder => wsFolder.uri) : workspaceUri
+                });
                 break;
             }
         }

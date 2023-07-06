@@ -1,13 +1,9 @@
 import { Button, Divider, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
-import { makeStyles } from '@mui/styles';
 import * as React from 'react';
-import { WorkspaceFolder } from 'vscode';
-import createComponentStyle from "../../common/createComponent.style";
+import { Uri } from 'vscode';
 import { Devfile } from '../../common/devfile';
 import { DevfileListItem } from '../../common/devfileListItem';
 import { DevfileRecommendationInfo } from '../../common/devfileRecommendationInfo';
-
-const useCreateComponentStyles = makeStyles(createComponentStyle);
 
 type Message = {
     action: string;
@@ -15,9 +11,7 @@ type Message = {
 }
 
 export function FromLocalCodebase({ setCurrentView }) {
-    const createComponentStyle = useCreateComponentStyles();
-
-    const [workspaceFolders, setWorkspaceFolders] = React.useState<WorkspaceFolder[]>([]);
+    const [workspaceFolders, setWorkspaceFolders] = React.useState<Uri[]>([]);
     const [componentName, setComponentName] = React.useState('');
     const [projectFolder, setProjectFolder] = React.useState('');
     //const [recommendedDevfile, setRecommendedDevfile] = React.useState<Devfile>();
@@ -44,6 +38,12 @@ export function FromLocalCodebase({ setCurrentView }) {
                 }
                 break;
             }
+            case 'selectedProjectFolder': {
+                if (message.data) {
+                    setProjectFolder(message.data.path);
+                }
+                break;
+            }
         }
     }
 
@@ -67,12 +67,12 @@ export function FromLocalCodebase({ setCurrentView }) {
     };
 
     function handleSelectFolder() {
-        // nothing
+        window.vscodeApi.postMessage({ action: 'selectProjectFolder' });
     }
 
     return (
         <>
-            <div className={createComponentStyle.headerContainer}>
+            <div style={{ position: 'relative', marginTop: '5em' }}>
                 <Typography variant='h5'>
                     From Existing Local Codebase
                 </Typography>
@@ -103,15 +103,17 @@ export function FromLocalCodebase({ setCurrentView }) {
                             value={projectFolder}
                             label="Folder"
                             onChange={(e) => { setProjectFolder(e.target.value as string) }}
+                            disabled={showRecommendedDevfile}
                             sx={{ width: '100%' }} >
-                            {workspaceFolders.map((folderPath) => (
-                                <MenuItem key={folderPath.uri.path} value={folderPath.uri.path}>
-                                    {folderPath.uri.path}
+                            {workspaceFolders.map((uri) => (
+                                <MenuItem key={uri.path} value={uri.path}>
+                                    {uri.path}
                                 </MenuItem>
                             ))}
                         </Select>
                     </FormControl>
-                    <Button variant='contained' onClick={handleSelectFolder} sx={{ height: '4em', width: '10%' }} > SELECT FOLDER </Button>
+                    {!showRecommendedDevfile &&
+                        <Button variant='contained' onClick={handleSelectFolder} sx={{ height: '4em', width: '10%' }} > SELECT FOLDER </Button>}
                 </div>
                 {!showRecommendedDevfile ? (
                     <div style={{ display: 'flex', flexDirection: 'row', gap: '1em', marginTop: '1em' }}>
