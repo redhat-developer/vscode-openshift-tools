@@ -1,4 +1,4 @@
-import { Button, Divider, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
+import { Button, Divider, FormControl, FormHelperText, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import * as React from 'react';
 import { Uri } from 'vscode';
 import { Devfile } from '../../common/devfile';
@@ -18,6 +18,7 @@ export function FromLocalCodebase({ setCurrentView }) {
     const [showRecommendedDevfile, setShowRecommendedDevfile] = React.useState(false);
     const [isComponentNameInvalid, setIsComponentNameInvalid] = React.useState(true);
     const [validationMessage, setValidationMessage] = React.useState('Please enter a component name.');
+    const [isDevfileExistsInFolder, setIsDevfileExistsInFolder] = React.useState(false);
 
     function respondToMessage(messageEvent: MessageEvent) {
         const message = messageEvent.data as Message;
@@ -49,6 +50,10 @@ export function FromLocalCodebase({ setCurrentView }) {
                 }
                 break;
             }
+            case 'devfileExists': {
+                setIsDevfileExistsInFolder(message.data);
+                break;
+            }
         }
     }
 
@@ -58,10 +63,6 @@ export function FromLocalCodebase({ setCurrentView }) {
             window.removeEventListener('message', respondToMessage);
         };
     }, []);
-
-    React.useEffect(() => {
-        window.vscodeApi.postMessage({ action: 'getWorkspaceFolders' });
-    }, [])
 
     function handleNext() {
         window.vscodeApi.postMessage({
@@ -99,7 +100,7 @@ export function FromLocalCodebase({ setCurrentView }) {
                     />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'row', gap: '1em', marginTop: '1em' }}>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth error={isDevfileExistsInFolder} >
                         <InputLabel id="project-path-label">Folder</InputLabel>
                         <Select
                             className='selectFolder'
@@ -107,14 +108,18 @@ export function FromLocalCodebase({ setCurrentView }) {
                             value={projectFolder}
                             label="Folder"
                             onChange={(e) => { setProjectFolder(e.target.value as string) }}
-                            disabled={showRecommendedDevfile}
+                            disabled={showRecommendedDevfile || workspaceFolders.length === 0}
                             sx={{ width: '100%' }} >
-                            {workspaceFolders.map((uri) => (
+                            {workspaceFolders.length !== 0 && workspaceFolders.map((uri) => (
                                 <MenuItem key={uri.path} value={uri.path}>
                                     {uri.path}
                                 </MenuItem>
                             ))}
                         </Select>
+                        {isDevfileExistsInFolder &&
+                            <FormHelperText>A devfile already exists in this project, please select another folder.</FormHelperText>}
+                        {workspaceFolders.length === 0 &&
+                            <FormHelperText>There are no projects in the workspace, select folder or open a folder in the workspace.</FormHelperText>}
                     </FormControl>
                     {!showRecommendedDevfile &&
                         <Button variant='contained' onClick={handleSelectFolder} sx={{ height: '4em', width: '10%' }} > SELECT FOLDER </Button>}
@@ -124,7 +129,7 @@ export function FromLocalCodebase({ setCurrentView }) {
                         <Button variant='text' onClick={() => { setCurrentView('home') }}>
                             BACK
                         </Button>
-                        <Button variant='contained' disabled={isComponentNameInvalid || projectFolder.length === 0} onClick={handleNext}>
+                        <Button variant='contained' disabled={isComponentNameInvalid || projectFolder.length === 0 || isDevfileExistsInFolder} onClick={handleNext}>
                             NEXT
                         </Button>
                     </div>

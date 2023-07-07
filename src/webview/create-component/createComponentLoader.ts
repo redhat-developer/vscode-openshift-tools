@@ -2,26 +2,21 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { Uri, ViewColumn, WebviewPanel, extensions, window } from 'vscode';
 import * as YAML from 'yaml';
+import { OdoImpl } from '../../odo';
 import { AnalyzeResponse, ComponentTypeDescription, Registry } from '../../odo/componentType';
+import { Endpoint } from '../../odo/componentTypeDescription';
+import OpenShiftItem from '../../openshift/openshiftItem';
 import { ComponentTypesView } from '../../registriesView';
 import { ExtensionID } from '../../util/constants';
+import { selectWorkspaceFolder } from '../../util/workspace';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { Devfile, DevfileRegistry } from '../common/devfile';
-import OpenShiftItem from '../../openshift/openshiftItem';
-import { selectWorkspaceFolder } from '../../util/workspace';
-import { OdoImpl } from '../../odo';
 import { DevfileConverter } from '../git-import/devfileConverter';
-import treeKill = require('tree-kill')
-import cp = require('child_process');
-import { Endpoint } from '../../odo/componentTypeDescription';
-
-let panel: vscode.WebviewPanel;
-let childProcess: cp.ChildProcess;
 
 type Message = {
     action: string;
@@ -93,7 +88,8 @@ export default class CreateComponentLoader {
              */
             case 'getWorkspaceFolders': {
                 if (vscode.workspace.workspaceFolders !== undefined) {
-                    const workspaceFolderUris: Uri[] = vscode.workspace.workspaceFolders.map(wsFolder => wsFolder.uri);
+                    let workspaceFolderUris: Uri[] = vscode.workspace.workspaceFolders.map(wsFolder => wsFolder.uri);
+                    workspaceFolderUris.filter((uri) => !isDevfileExists(uri));
                     void CreateComponentLoader.panel.webview.postMessage({
                         action: 'workspaceFolders',
                         data: workspaceFolderUris
@@ -110,10 +106,14 @@ export default class CreateComponentLoader {
             }
             case 'selectProjectFolder': {
                 const workspaceUri: vscode.Uri = await selectWorkspaceFolder(true);
-                vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: workspaceUri });
+                const isDevfileExist: boolean = await isDevfileExists(workspaceUri);
+                void CreateComponentLoader.panel.webview.postMessage({
+                    action: 'devfileExists',
+                    data: isDevfileExist
+                });
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'workspaceFolders',
-                    data: vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.map(wsFolder => wsFolder.uri) : workspaceUri
+                    data: vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.map(wsFolder => wsFolder.uri) : [workspaceUri]
                 });
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'selectedProjectFolder',
@@ -122,6 +122,10 @@ export default class CreateComponentLoader {
                 break;
             }
             case 'getRecommendedDevfile': {
+                void CreateComponentLoader.panel.webview.postMessage({
+                    action: 'devfileExists',
+                    data: await isDevfileExists(Uri.file(message.data))
+                });
                 CreateComponentLoader.getRecommendedDevfile(Uri.file(message.data));
                 break;
             }
@@ -184,11 +188,11 @@ export default class CreateComponentLoader {
                     action: 'devfileFailed'
                 });
                 const actions: Array<string> = ['Yes', 'Cancel'];
-                const devfileRegenerate = await vscode.window.showInformationMessage('We have detected that the repo contains congifuration based on devfile v1. The extension does not support devfile v1, will you be okay to regenerate a new devfile v2?', ...actions);
+                const devfileRegenerate = await vscode.window.showInformationMessage('We have detected that the repo contains configuration based on devfile v1. The extension does not support devfile v1, will you be okay to regenerate a new devfile v2?', ...actions);
                 if (devfileRegenerate === 'Yes') {
                     try {
                         const devFileV1Path = path.join(uri.fsPath, 'devfile.yaml');
-                        const file = fs.readFileSync(devFileV1Path, 'utf8');
+                        const file = fs.readFile(devFileV1Path, 'utf8');
                         const devfileV1 = YAML.parse(file.toString());
                         const deleted = await deleteFile(devFileV1Path);
                         if (deleted) {
@@ -197,18 +201,18 @@ export default class CreateComponentLoader {
                             const endPoints = getEndPoints(compDescriptions[0]);
                             const devfileV2 = await DevfileConverter.getInstance().devfileV1toDevfileV2(devfileV1, endPoints);
                             const yaml = YAML.stringify(devfileV2, { sortMapEntries: true });
-                            fs.writeFileSync(devFileV1Path, yaml.toString(), 'utf-8');
+                            fs.writeFile(devFileV1Path, yaml.toString(), 'utf-8');
                             CreateComponentLoader.panel?.webview.postMessage({
                                 action: 'devfileRegenerated'
                             });
                         } else {
-                            closeWithMessage('Failed to delete devfile.yaml, Unable to proceed the component creation', uri);
+                            vscode.window.showErrorMessage('Failed to delete devfile.yaml, Unable to proceed the component creation');
                         }
                     } catch (e) {
-                        closeWithMessage('Failed to parse devfile v1, Unable to proceed the component creation', uri);
+                        vscode.window.showErrorMessage('Failed to parse devfile v1, Unable to proceed the component creation');
                     }
                 } else {
-                    closeWithMessage('Devfile version not supported, Unable to proceed the component creation', uri);
+                    vscode.window.showErrorMessage('Devfile version not supported, Unable to proceed the component creation');
                 }
             } else {
                 compDescriptions = getCompDescription(analyzeRes);
@@ -222,39 +226,7 @@ export default class CreateComponentLoader {
             });
         }
     }
-
 }
-
-function closeWithMessage(title: string, folderUri: vscode.Uri) {
-    vscode.window.showErrorMessage(title);
-    close({
-        folder: folderUri
-    });
-}
-
-async function close(event: any) {
-    try {
-        const selctedFolder: vscode.Uri = vscode.Uri.from(event.folder);
-        if (childProcess && event.notification !== 'Component created') {
-            treeKill(childProcess.pid, async () => {
-                await deleteDirectory(selctedFolder.fsPath);
-            });
-        }
-    } catch (error) {
-        vscode.window.showErrorMessage('Error occurred while killing the repository clone process');
-    }
-    panel?.dispose();
-}
-
-function deleteDirectory(dir: string) {
-    return new Promise<void>(function (_resolve, reject) {
-        fs.rmdir(dir, { recursive: true }, err => {
-            if (err) {
-                reject(err);
-            }
-        })
-    });
-};
 
 function getCompDescription(devfiles: AnalyzeResponse[]): ComponentTypeDescription[] {
     const compDescriptions = ComponentTypesView.instance.getCompDescriptions();
@@ -268,7 +240,7 @@ function getCompDescription(devfiles: AnalyzeResponse[]): ComponentTypeDescripti
 function deleteFile(file: string): Promise<boolean> {
     return new Promise<boolean>(function (resolve, _reject) {
         try {
-            fs.unlinkSync(file)
+            fs.unlink(file)
             resolve(true);
         } catch (err) {
             resolve(false);
@@ -278,4 +250,16 @@ function deleteFile(file: string): Promise<boolean> {
 
 function getEndPoints(compDescription: ComponentTypeDescription): Endpoint[] {
     return compDescription.devfileData.devfile.components[0].container.endpoints;
+}
+
+async function isDevfileExists(uri: vscode.Uri): Promise<boolean> {
+    if ((await fs.stat(uri.fsPath)).isDirectory()) {
+        const devFileYamlPath = path.join(uri.fsPath, 'devfile.yaml');
+        try {
+            await fs.access(devFileYamlPath);
+            return true;
+        } catch {
+            return false;
+        }
+    }
 }
