@@ -3,14 +3,18 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { StarterProject } from "../../odo/componentTypeDescription";
+
 export type Devfile = {
     name: string;
+    id: string;
+    registryName: string;
     description: string;
     logoUrl: string;
     supportsDebug: boolean;
     supportsDeploy: boolean;
     tags: string[];
-    sampleProjects: string[];
+    starterProjects: StarterProject[];
     yaml: string;
 }
 
@@ -19,3 +23,9 @@ export type DevfileRegistry = {
     url: string;
     devfiles: Devfile[];
 }
+
+export type TemplateProjectIdentifier = {
+    devfileId: string;
+    registryName: string;
+    templateProjectName: string;
+};
