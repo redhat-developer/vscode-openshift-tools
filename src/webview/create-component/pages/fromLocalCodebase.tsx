@@ -71,10 +71,6 @@ export function FromLocalCodebase({ setCurrentView }) {
         });
     };
 
-    function handleSelectFolder() {
-        window.vscodeApi.postMessage({ action: 'selectProjectFolder' });
-    }
-
     return (
         <>
             <div style={{ position: 'relative', marginTop: '5em' }}>
@@ -122,7 +118,7 @@ export function FromLocalCodebase({ setCurrentView }) {
                             <FormHelperText>There are no projects in the workspace, select folder or open a folder in the workspace.</FormHelperText>}
                     </FormControl>
                     {!showRecommendedDevfile &&
-                        <Button variant='contained' onClick={handleSelectFolder} sx={{ height: '4em', width: '10%' }} > SELECT FOLDER </Button>}
+                        <Button variant='contained' onClick={() => {window.vscodeApi.postMessage({ action: 'selectProjectFolder' })}} sx={{ height: '4em', width: '10%' }} > SELECT FOLDER </Button>}
                 </div>
                 {!showRecommendedDevfile ? (
                     <div style={{ display: 'flex', flexDirection: 'row', gap: '1em', marginTop: '1em' }}>
