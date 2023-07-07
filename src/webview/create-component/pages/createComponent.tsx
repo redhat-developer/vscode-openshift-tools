@@ -137,7 +137,7 @@ const createVscodeTheme = (paletteMode: PaletteMode): Theme => {
                             variant: 'outlined'
                         },
                         style: {
-                            maxWidth: '35em',
+                            width: '35em',
                             backgroundColor: computedStyle.getPropertyValue('--vscode-editor-inactiveSelectionBackground')
                         }
                     }
