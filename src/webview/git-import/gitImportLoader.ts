@@ -219,7 +219,7 @@ async function parseGitURL(event: any) {
                 action: 'devfileFailed'
             });
             const actions: Array<string> = ['Yes', 'Cancel'];
-            const devfileRegenerate = await vscode.window.showInformationMessage('We have detected that the repo contains congifuration based on devfile v1. The extension does not support devfile v1, will you be okay to regenerate a new devfile v2?', ...actions);
+            const devfileRegenerate = await vscode.window.showInformationMessage('We have detected that the repo contains configuration based on devfile v1. The extension does not support devfile v1, will you be okay to regenerate a new devfile v2?', ...actions);
             if (devfileRegenerate === 'Yes') {
                 try {
                     const devFileV1Path = path.join(clonedFolder.fsPath, 'devfile.yaml');
