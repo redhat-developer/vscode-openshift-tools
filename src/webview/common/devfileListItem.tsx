@@ -5,7 +5,7 @@
 import { Check, Close } from '@mui/icons-material';
 import { Box, Button, Chip, Stack, Typography } from '@mui/material';
 import * as React from 'react';
-import {Devfile} from '../common/devfile';
+import { Devfile } from '../common/devfile';
 
 export type DevfileListItemProps = {
     devfile: Devfile;
@@ -23,7 +23,17 @@ export function DevfileListItem(props: DevfileListItemProps) {
             paddingX={1}
             spacing={3}
         >
-            <Box sx={{display: 'flex', width: '7em', height: '7em', bgcolor: 'white', alignItems: 'center', justifyContent:'center', borderRadius: '4px' }}>
+            <Box
+                sx={{
+                    display: 'flex',
+                    width: '7em',
+                    height: '7em',
+                    bgcolor: 'white',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '4px',
+                }}
+            >
                 <img src={props.devfile.logoUrl} style={{ maxWidth: '6em', maxHeight: '6em' }} />
             </Box>
             <Stack
@@ -31,12 +41,17 @@ export function DevfileListItem(props: DevfileListItemProps) {
                 spacing={1}
                 sx={{ flexShrink: '5', minWidth: '0', maxWidth: '35rem' }}
             >
-                <Typography
-                    variant="body1"
-                    sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-                >
-                    {props.devfile.name}
-                </Typography>
+                <Stack direction="row" spacing={2} alignItems="center">
+                    <Typography
+                        variant="body1"
+                        sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                    >
+                        {props.devfile.name}
+                    </Typography>
+                    <Typography variant="body2" fontStyle="italic">
+                        from {props.devfile.registryName}
+                    </Typography>
+                </Stack>
                 <Typography
                     variant="body2"
                     sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
@@ -62,7 +77,9 @@ export function DevfileListItem(props: DevfileListItemProps) {
                         }
                         return <Chip size="small" label={tag} key={tag} />;
                     })}
-                    {props.devfile.tags.length > 4 && <Chip size="small" label='...' key='ellipsis' />}
+                    {props.devfile.tags.length > 4 && (
+                        <Chip size="small" label="..." key="ellipsis" />
+                    )}
                 </Stack>
             </Stack>
             <Box sx={{ flexGrow: '1' }} />

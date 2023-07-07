@@ -96,6 +96,17 @@ export interface Odo {
      * @param componentPath the path to the component
      */
     deleteComponentConfiguration(componentPath: string): Promise<void>;
+
+    /**
+     * Create a component from the given devfile template project.
+     *
+     * @param componentPath the folder in which to create the project
+     * @param componentName the name of the component
+     * @param devfileName the name of the devfile to use
+     * @param registryName the name of the devfile registry that the devfile comes from
+     * @param templateProjectName the template project from the devfile to use
+     */
+    createComponentFromTemplateProject(componentPath: string, componentName: string, devfileName: string, registryName: string, templateProjectName: string): Promise<void>;
 }
 
 export class OdoImpl implements Odo {
@@ -243,6 +254,10 @@ export class OdoImpl implements Odo {
         if (!workspace.workspaceFolders || !wsFolder) {
             workspace.updateWorkspaceFolders(workspace.workspaceFolders? workspace.workspaceFolders.length : 0 , null, { uri: location });
         }
+    }
+
+    public async createComponentFromTemplateProject(componentPath: string, componentName: string, devfileName: string, registryName: string, templateProjectName: string): Promise<void> {
+        await this.execute(Command.createLocalComponent(devfileName, registryName, componentName, templateProjectName), componentPath);
     }
 
     public async createService(formData: any): Promise<void> {

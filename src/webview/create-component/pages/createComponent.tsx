@@ -7,10 +7,10 @@ import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { PaletteMode, Theme, ThemeProvider, Typography, createTheme } from '@mui/material';
 import * as React from 'react';
-import { DevfileSearch } from '../../common/devfileSearch';
 import OptionCard from '../../common/optionCard';
 import { FromExistingGitRepo } from './fromExisitingGitRepo';
 import { FromLocalCodebase } from './fromLocalCodebase';
+import { FromTemplateProject } from './fromTemplateProject';
 
 interface VSCodeMessage {
     action: string;
@@ -90,7 +90,7 @@ export default function CreateComponent() {
                     <FromExistingGitRepo setCurrentView={setCurrentView} />
                 </div>;
             case 'devfileSearch':
-                return <DevfileSearch isTemplateSearch={true} setSelected={() => { }} titleText='Select Devfile' setCurrentView={setCurrentView} />;
+                return <FromTemplateProject goHome={() => { setCurrentView((_) => "home"); }} />;
         }
     };
 
@@ -108,6 +108,10 @@ const createVscodeTheme = (paletteMode: PaletteMode): Theme => {
     return createTheme({
         palette: {
             mode: paletteMode,
+            text: {
+                primary: computedStyle.getPropertyValue('--vscode-foreground'),
+                secondary: computedStyle.getPropertyValue('--vscode-descriptionForeground'),
+            },
             primary: {
                 main: computedStyle.getPropertyValue('--vscode-button-background'),
             },
@@ -152,7 +156,7 @@ const createVscodeTheme = (paletteMode: PaletteMode): Theme => {
                         style: {
                             fontSize: '2.3em',
                             fontWeight: '650',
-                            color: computedStyle.getPropertyValue('--vscode-editor-foreground')
+                            color: computedStyle.getPropertyValue('--vscode-foreground')
                         }
                     },
                     {
@@ -162,7 +166,7 @@ const createVscodeTheme = (paletteMode: PaletteMode): Theme => {
                         style: {
                             fontSize: '1.5em',
                             fontWeight: '600',
-                            color: computedStyle.getPropertyValue('--vscode-editor-foreground')
+                            color: computedStyle.getPropertyValue('--vscode-foreground')
                         }
                     },
                     {
@@ -170,24 +174,17 @@ const createVscodeTheme = (paletteMode: PaletteMode): Theme => {
                             variant: 'body1'
                         },
                         style: {
-                            color: computedStyle.getPropertyValue('--vscode-editor-foreground')
+                            color: computedStyle.getPropertyValue('--vscode-foreground')
                         }
-                    }
-                ]
-            },
-            MuiTextField: {
-                variants: [
+                    },
                     {
                         props: {
-                            variant: 'outlined'
+                            variant: 'body2'
                         },
                         style: {
-                            id: 'outlined-basic',
-                            width: '100%',
-                            color: computedStyle.getPropertyValue('--vscode-editor-foreground'),
-                            marginBottom: '1em'
+                            color: computedStyle.getPropertyValue('--vscode-descriptionForeground')
                         }
-                    }
+                    },
                 ]
             },
             MuiAccordion: {
@@ -218,6 +215,13 @@ const createVscodeTheme = (paletteMode: PaletteMode): Theme => {
                     }
                 ]
             },
+            MuiButton: {
+                defaultProps: {
+                    style: {
+                        whiteSpace: 'nowrap'
+                    }
+                }
+            }
         },
     });
 };

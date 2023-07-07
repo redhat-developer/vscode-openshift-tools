@@ -1,4 +1,4 @@
-import { Button, Divider, FormControl, FormHelperText, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
+import { Button, Divider, FormControl, FormHelperText, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
 import * as React from 'react';
 import { Uri } from 'vscode';
 import { Devfile } from '../../common/devfile';
@@ -78,23 +78,22 @@ export function FromLocalCodebase({ setCurrentView }) {
                     From Existing Local Codebase
                 </Typography>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <div style={{ marginTop: '2em' }}>
-                    <TextField
-                        id='componentName'
-                        variant='outlined'
-                        label='Component Name'
-                        error={isComponentNameInvalid}
-                        helperText={isComponentNameInvalid && validationMessage}
-                        onChange={(e) => {
-                            window.vscodeApi.postMessage({
-                                action: 'validateComponentName',
-                                data: e.target.value
-                            });
-                            setComponentName(e.target.value);
-                        }}
-                    />
-                </div>
+            <Stack direction='column' spacing={2} marginTop={3}>
+                <TextField
+                    sx={{ flexGrow: 1 }}
+                    id='componentName'
+                    variant='outlined'
+                    label='Component Name'
+                    error={isComponentNameInvalid}
+                    helperText={isComponentNameInvalid && validationMessage}
+                    onChange={(e) => {
+                        window.vscodeApi.postMessage({
+                            action: 'validateComponentName',
+                            data: e.target.value
+                        });
+                        setComponentName(e.target.value);
+                    }}
+                />
                 <div style={{ display: 'flex', flexDirection: 'row', gap: '1em', marginTop: '1em' }}>
                     <FormControl fullWidth error={isDevfileExistsInFolder} >
                         <InputLabel id="project-path-label">Folder</InputLabel>
@@ -135,7 +134,7 @@ export function FromLocalCodebase({ setCurrentView }) {
                         <RecommendedDevfile recommendedDevfile={recommendedDevfile} componentName={componentName} setCurrentView={setCurrentView} setShowRecommendedDevfile={setShowRecommendedDevfile} />
                     </div>
                 )}
-            </div>
+            </Stack>
         </>
     );
 }
