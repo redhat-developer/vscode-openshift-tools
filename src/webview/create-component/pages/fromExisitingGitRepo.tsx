@@ -1,5 +1,5 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Accordion, AccordionDetails, AccordionSummary, Button, TextField, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Button, Stack, TextField, Typography } from "@mui/material";
 import * as React from 'react';
 
 export function FromExistingGitRepo({ setCurrentView }) {
@@ -15,25 +15,29 @@ export function FromExistingGitRepo({ setCurrentView }) {
                     Existing Remote Git Repository
                 </Typography>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <Stack direction='column' spacing={2}>
                 <div style={{ marginTop: '2em' }}>
-                    <TextField variant='outlined' label='Link to Git Repository' />
+                    <TextField variant='outlined' label='Link to Git Repository' fullWidth />
                 </div>
                 <Accordion className='accordion'>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography>Advanced Options</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <TextField
-                            id='outlined'
-                            label='Git Reference'
-                            helperText='Branch, tag, or commit to checkout'>
-                        </TextField>
-                        <TextField
-                            id='outlined'
-                            label='Context Directory'
-                            helperText='Subdirectory for the source code, used as a context directory for building the component'>
-                        </TextField>
+                        <Stack direction='row' spacing={2} width='100%'>
+                            <TextField
+                                fullWidth
+                                id='outlined'
+                                label='Git Reference'
+                                helperText='Branch, tag, or commit to checkout'>
+                            </TextField>
+                            <TextField
+                                fullWidth
+                                id='outlined'
+                                label='Context Directory'
+                                helperText='Subdirectory for the source code, used as a context directory for building the component'>
+                            </TextField>
+                        </Stack>
                     </AccordionDetails>
                 </Accordion>
                 <div style={{ display: 'flex', flexDirection: 'row', gap: '1em', marginTop: '2em' }}>
@@ -44,7 +48,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                         NEXT
                     </Button>
                 </div>
-            </div>
+            </Stack>
         </>
     );
 }

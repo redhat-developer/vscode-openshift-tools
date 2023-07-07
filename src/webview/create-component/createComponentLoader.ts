@@ -15,34 +15,39 @@ import { ComponentTypesView } from '../../registriesView';
 import { ExtensionID } from '../../util/constants';
 import { selectWorkspaceFolder } from '../../util/workspace';
 import { loadWebviewHtml } from '../common-ext/utils';
-import { Devfile, DevfileRegistry } from '../common/devfile';
+import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
 import { DevfileConverter } from '../git-import/devfileConverter';
 
 type Message = {
     action: string;
     data: any;
-}
+};
 
 export default class CreateComponentLoader {
-
     static panel: WebviewPanel;
 
     static get extensionPath() {
-        return extensions.getExtension(ExtensionID).extensionPath
+        return extensions.getExtension(ExtensionID).extensionPath;
     }
 
     static async loadView(title: string): Promise<WebviewPanel> {
-        const localResourceRoot = Uri.file(path.join(CreateComponentLoader.extensionPath, 'out', 'createComponentViewer'));
+        const localResourceRoot = Uri.file(
+            path.join(CreateComponentLoader.extensionPath, 'out', 'createComponentViewer'),
+        );
 
         let panel = window.createWebviewPanel('createComponentView', title, ViewColumn.One, {
             enableScripts: true,
             localResourceRoots: [localResourceRoot],
-            retainContextWhenHidden: true
+            retainContextWhenHidden: true,
         });
 
-        const messageHandlerDisposable = panel.webview.onDidReceiveMessage(CreateComponentLoader.messageHandler);
+        const messageHandlerDisposable = panel.webview.onDidReceiveMessage(
+            CreateComponentLoader.messageHandler,
+        );
 
-        const colorThemeDisposable = vscode.window.onDidChangeActiveColorTheme(async function (colorTheme: vscode.ColorTheme) {
+        const colorThemeDisposable = vscode.window.onDidChangeActiveColorTheme(async function (
+            colorTheme: vscode.ColorTheme,
+        ) {
             await panel.webview.postMessage({ action: 'setTheme', themeValue: colorTheme.kind });
         });
 
@@ -52,7 +57,9 @@ export default class CreateComponentLoader {
             panel = undefined;
         });
 
-        panel.iconPath = Uri.file(path.join(CreateComponentLoader.extensionPath, 'images/context/cluster-node.png'));
+        panel.iconPath = Uri.file(
+            path.join(CreateComponentLoader.extensionPath, 'images/context/cluster-node.png'),
+        );
         panel.webview.html = await loadWebviewHtml('createComponentViewer', panel);
         CreateComponentLoader.panel = panel;
         return panel;
@@ -79,7 +86,7 @@ export default class CreateComponentLoader {
             case 'getDevfileRegistries': {
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'devfileRegistries',
-                    data: CreateComponentLoader.getDevfileRegistries()
+                    data: CreateComponentLoader.getDevfileRegistries(),
                 });
                 break;
             }
@@ -88,11 +95,13 @@ export default class CreateComponentLoader {
              */
             case 'getWorkspaceFolders': {
                 if (vscode.workspace.workspaceFolders !== undefined) {
-                    let workspaceFolderUris: Uri[] = vscode.workspace.workspaceFolders.map(wsFolder => wsFolder.uri);
+                    let workspaceFolderUris: Uri[] = vscode.workspace.workspaceFolders.map(
+                        (wsFolder) => wsFolder.uri,
+                    );
                     workspaceFolderUris.filter((uri) => !isDevfileExists(uri));
                     void CreateComponentLoader.panel.webview.postMessage({
                         action: 'workspaceFolders',
-                        data: workspaceFolderUris
+                        data: workspaceFolderUris,
                     });
                 }
                 break;
@@ -109,11 +118,13 @@ export default class CreateComponentLoader {
                 const isDevfileExist: boolean = await isDevfileExists(workspaceUri);
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'devfileExists',
-                    data: isDevfileExist
+                    data: isDevfileExist,
                 });
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'workspaceFolders',
-                    data: vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.map(wsFolder => wsFolder.uri) : [workspaceUri]
+                    data: vscode.workspace.workspaceFolders
+                        ? vscode.workspace.workspaceFolders.map((wsFolder) => wsFolder.uri)
+                        : [workspaceUri],
                 });
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'selectedProjectFolder',
@@ -121,12 +132,105 @@ export default class CreateComponentLoader {
                 });
                 break;
             }
+            case 'selectProjectFolderNewProject': {
+                const workspaceUri: vscode.Uri = await selectWorkspaceFolder(true);
+                void CreateComponentLoader.panel.webview.postMessage({
+                    action: 'selectedProjectFolder',
+                    data: workspaceUri.fsPath,
+                });
+                break;
+            }
             case 'getRecommendedDevfile': {
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'devfileExists',
-                    data: await isDevfileExists(Uri.file(message.data))
+                    data: await isDevfileExists(Uri.file(message.data)),
                 });
                 CreateComponentLoader.getRecommendedDevfile(Uri.file(message.data));
+                break;
+            }
+            case 'isValidProjectFolder': {
+                const { folder, componentName } = message.data;
+                let projectFolderExists = false;
+                try {
+
+                    const stats = await fs.stat(folder);
+                    projectFolderExists = stats.isDirectory();
+                } catch (_) {
+                    // do nothing
+                }
+
+                let projectFolderWritable = false;
+                if (projectFolderExists) {
+                    try {
+                        await fs.access(folder, fs.constants.W_OK);
+                        projectFolderWritable = true;
+                    } catch (_) {
+                        // do nothing
+                    }
+                }
+
+                const childFolder = path.join(folder, componentName);
+                let childFolderExists = false;
+                if (projectFolderExists && projectFolderWritable) {
+                    try {
+                        await fs.access(childFolder);
+                        childFolderExists = true;
+                    } catch (_) {
+                        // do nothing
+                    }
+                }
+
+                let validationMessage = '';
+                if (!projectFolderExists) {
+                    validationMessage = `Project folder ${folder} doesn't exist`;
+                } else if (!projectFolderWritable) {
+                    validationMessage = `Project folder ${folder} is not writable`;
+                } else if (childFolderExists) {
+                    validationMessage = `There is already a folder ${componentName} in ${folder}`;
+                } else {
+                    validationMessage = `Project will be created in ${childFolder}`;
+                }
+
+                void CreateComponentLoader.panel.webview.postMessage({
+                    action: 'isValidProjectFolder',
+                    data: {
+                        valid: projectFolderExists && projectFolderWritable && !childFolderExists,
+                        message: validationMessage,
+                    },
+                });
+                break;
+            }
+            case 'createComponentFromTemplateProject': {
+                const { projectFolder, componentName } = message.data;
+                const templateProject: TemplateProjectIdentifier = message.data.templateProject;
+                const componentFolder = path.join(projectFolder, componentName);
+                try {
+                    await fs.mkdir(componentFolder);
+                    await OdoImpl.Instance.createComponentFromTemplateProject(
+                        componentFolder,
+                        componentName,
+                        templateProject.devfileId,
+                        templateProject.registryName,
+                        templateProject.templateProjectName,
+                    );
+                    CreateComponentLoader.panel.dispose();
+                    const ADD_TO_WORKSPACE = 'Add to workspace';
+                    const selection = await vscode.window.showInformationMessage(
+                        `Component '${componentName} was created.`,
+                        ADD_TO_WORKSPACE,
+                    );
+                    if (selection === ADD_TO_WORKSPACE) {
+                        vscode.workspace.updateWorkspaceFolders(
+                            vscode.workspace.workspaceFolders
+                                ? vscode.workspace.workspaceFolders.length
+                                : 0,
+                            null,
+                            { uri: Uri.file(componentFolder) },
+                        );
+                    }
+                } catch (e) {
+                    void vscode.window.showErrorMessage(e);
+                }
                 break;
             }
         }
@@ -147,29 +251,61 @@ export default class CreateComponentLoader {
 
         const components = ComponentTypesView.instance.getCompDescriptions();
         for (const component of components) {
-            const devfileRegistry = devfileRegistries.find((devfileRegistry) => devfileRegistry.url === component.registry.url.toString());
+            const devfileRegistry = devfileRegistries.find(
+                (devfileRegistry) => devfileRegistry.url === component.registry.url.toString(),
+            );
+
             devfileRegistry.devfiles.push({
                 description: component.description,
+                registryName: devfileRegistry.name,
                 logoUrl: component.devfileData.devfile.metadata.icon,
                 name: component.displayName,
-                sampleProjects: component.starterProjects,
+                id: component.name,
+                starterProjects: component.devfileData.devfile.starterProjects,
                 tags: component.tags,
                 yaml: YAML.stringify(component.devfileData.devfile),
-                supportsDebug: Boolean(component.devfileData.devfile.commands?.find((command) => command.exec?.group?.kind === 'debug'))
-                    || Boolean(component.devfileData.devfile.commands?.find((command) => command.composite?.group?.kind === 'debug')),
-                supportsDeploy: Boolean(component.devfileData.devfile.commands?.find((command) => command.exec?.group?.kind === 'deploy'))
-                    || Boolean(component.devfileData.devfile.commands?.find((command) => command.composite?.group?.kind === 'deploy'))
+                supportsDebug:
+                    Boolean(
+                        component.devfileData.devfile.commands?.find(
+                            (command) => command.exec?.group?.kind === 'debug',
+                        ),
+                    ) ||
+                    Boolean(
+                        component.devfileData.devfile.commands?.find(
+                            (command) => command.composite?.group?.kind === 'debug',
+                        ),
+                    ),
+                supportsDeploy:
+                    Boolean(
+                        component.devfileData.devfile.commands?.find(
+                            (command) => command.exec?.group?.kind === 'deploy',
+                        ),
+                    ) ||
+                    Boolean(
+                        component.devfileData.devfile.commands?.find(
+                            (command) => command.composite?.group?.kind === 'deploy',
+                        ),
+                    ),
             } as Devfile);
         }
-        devfileRegistries.sort((a, b) => a.name < b.name ? -1 : 1);
+        devfileRegistries.sort((a, b) => (a.name < b.name ? -1 : 1));
         return devfileRegistries;
     }
 
     static validateComponentName(data: string) {
         let validationMessage = OpenShiftItem.emptyName(`Please enter a component name.`, data);
-        if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid component name.
-            Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`, data);
-        if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`Component name should be between 2-63 characters`, data, 0);
+        if (!validationMessage)
+            validationMessage = OpenShiftItem.validateMatches(
+                `Not a valid component name.
+            Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`,
+                data,
+            );
+        if (!validationMessage)
+            validationMessage = OpenShiftItem.lengthName(
+                `Component name should be between 2-63 characters`,
+                data,
+                0,
+            );
         void CreateComponentLoader.panel.webview.postMessage({
             action: 'validatedComponentName',
             data: validationMessage,
@@ -185,10 +321,13 @@ export default class CreateComponentLoader {
         } catch (error) {
             if (error.message.toLowerCase().indexOf('failed to parse the devfile') !== -1) {
                 CreateComponentLoader.panel?.webview.postMessage({
-                    action: 'devfileFailed'
+                    action: 'devfileFailed',
                 });
                 const actions: Array<string> = ['Yes', 'Cancel'];
-                const devfileRegenerate = await vscode.window.showInformationMessage('We have detected that the repo contains configuration based on devfile v1. The extension does not support devfile v1, will you be okay to regenerate a new devfile v2?', ...actions);
+                const devfileRegenerate = await vscode.window.showInformationMessage(
+                    'We have detected that the repo contains configuration based on devfile v1. The extension does not support devfile v1, will you be okay to regenerate a new devfile v2?',
+                    ...actions,
+                );
                 if (devfileRegenerate === 'Yes') {
                     try {
                         const devFileV1Path = path.join(uri.fsPath, 'devfile.yaml');
@@ -198,28 +337,39 @@ export default class CreateComponentLoader {
                         analyzeRes = await OdoImpl.Instance.analyze(uri.fsPath);
                         compDescriptions = getCompDescription(analyzeRes);
                         const endPoints = getEndPoints(compDescriptions[0]);
-                        const devfileV2 = await DevfileConverter.getInstance().devfileV1toDevfileV2(devfileV1, endPoints);
+                        const devfileV2 = await DevfileConverter.getInstance().devfileV1toDevfileV2(
+                            devfileV1,
+                            endPoints,
+                        );
                         const yaml = YAML.stringify(devfileV2, { sortMapEntries: true });
                         await fs.writeFile(devFileV1Path, yaml.toString(), 'utf-8');
                         CreateComponentLoader.panel?.webview.postMessage({
-                            action: 'devfileRegenerated'
+                            action: 'devfileRegenerated',
                         });
                     } catch (e) {
-                        vscode.window.showErrorMessage('Failed to parse devfile v1, Unable to proceed the component creation');
+                        vscode.window.showErrorMessage(
+                            'Failed to parse devfile v1, Unable to proceed the component creation',
+                        );
                     }
                 } else {
-                    vscode.window.showErrorMessage('Devfile version not supported, Unable to proceed the component creation');
+                    vscode.window.showErrorMessage(
+                        'Devfile version not supported, Unable to proceed the component creation',
+                    );
                 }
             } else {
                 compDescriptions = getCompDescription(analyzeRes);
             }
         } finally {
             const devfileRegistry: DevfileRegistry[] = CreateComponentLoader.getDevfileRegistries();
-            const allDevfiles: Devfile[] = devfileRegistry.map((registry) => registry.devfiles).flat();
-            const devfile: Devfile = allDevfiles.find((devfile) => devfile.name === compDescriptions[0].displayName);
+            const allDevfiles: Devfile[] = devfileRegistry
+                .map((registry) => registry.devfiles)
+                .flat();
+            const devfile: Devfile = allDevfiles.find(
+                (devfile) => devfile.name === compDescriptions[0].displayName,
+            );
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'recommendedDevfile',
-                data: devfile
+                data: devfile,
             });
         }
     }
@@ -230,8 +380,14 @@ function getCompDescription(devfiles: AnalyzeResponse[]): ComponentTypeDescripti
     if (devfiles.length === 0) {
         return Array.from(compDescriptions);
     }
-    return Array.from(compDescriptions).filter(({ name, version, registry }) => devfiles.some((res) => res.devfile === name &&
-        res.devfileVersion === version && res.devfileRegistry === registry.name));
+    return Array.from(compDescriptions).filter(({ name, version, registry }) =>
+        devfiles.some(
+            (res) =>
+                res.devfile === name &&
+                res.devfileVersion === version &&
+                res.devfileRegistry === registry.name,
+        ),
+    );
 }
 
 function getEndPoints(compDescription: ComponentTypeDescription): Endpoint[] {
