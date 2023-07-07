@@ -192,22 +192,18 @@ export default class CreateComponentLoader {
                 if (devfileRegenerate === 'Yes') {
                     try {
                         const devFileV1Path = path.join(uri.fsPath, 'devfile.yaml');
-                        const file = fs.readFile(devFileV1Path, 'utf8');
+                        const file = await fs.readFile(devFileV1Path, 'utf8');
                         const devfileV1 = YAML.parse(file.toString());
-                        const deleted = await deleteFile(devFileV1Path);
-                        if (deleted) {
-                            analyzeRes = await OdoImpl.Instance.analyze(uri.fsPath);
-                            compDescriptions = getCompDescription(analyzeRes);
-                            const endPoints = getEndPoints(compDescriptions[0]);
-                            const devfileV2 = await DevfileConverter.getInstance().devfileV1toDevfileV2(devfileV1, endPoints);
-                            const yaml = YAML.stringify(devfileV2, { sortMapEntries: true });
-                            fs.writeFile(devFileV1Path, yaml.toString(), 'utf-8');
-                            CreateComponentLoader.panel?.webview.postMessage({
-                                action: 'devfileRegenerated'
-                            });
-                        } else {
-                            vscode.window.showErrorMessage('Failed to delete devfile.yaml, Unable to proceed the component creation');
-                        }
+                        await fs.unlink(devFileV1Path);
+                        analyzeRes = await OdoImpl.Instance.analyze(uri.fsPath);
+                        compDescriptions = getCompDescription(analyzeRes);
+                        const endPoints = getEndPoints(compDescriptions[0]);
+                        const devfileV2 = await DevfileConverter.getInstance().devfileV1toDevfileV2(devfileV1, endPoints);
+                        const yaml = YAML.stringify(devfileV2, { sortMapEntries: true });
+                        await fs.writeFile(devFileV1Path, yaml.toString(), 'utf-8');
+                        CreateComponentLoader.panel?.webview.postMessage({
+                            action: 'devfileRegenerated'
+                        });
                     } catch (e) {
                         vscode.window.showErrorMessage('Failed to parse devfile v1, Unable to proceed the component creation');
                     }
@@ -219,7 +215,8 @@ export default class CreateComponentLoader {
             }
         } finally {
             const devfileRegistry: DevfileRegistry[] = CreateComponentLoader.getDevfileRegistries();
-            const devfile: Devfile = devfileRegistry[0].devfiles.find((devfile) => devfile.name === compDescriptions[0].displayName);
+            const allDevfiles: Devfile[] = devfileRegistry.map((registry) => registry.devfiles).flat();
+            const devfile: Devfile = allDevfiles.find((devfile) => devfile.name === compDescriptions[0].displayName);
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'recommendedDevfile',
                 data: devfile
@@ -236,17 +233,6 @@ function getCompDescription(devfiles: AnalyzeResponse[]): ComponentTypeDescripti
     return Array.from(compDescriptions).filter(({ name, version, registry }) => devfiles.some((res) => res.devfile === name &&
         res.devfileVersion === version && res.devfileRegistry === registry.name));
 }
-
-function deleteFile(file: string): Promise<boolean> {
-    return new Promise<boolean>(function (resolve, _reject) {
-        try {
-            fs.unlink(file)
-            resolve(true);
-        } catch (err) {
-            resolve(false);
-        }
-    });
-};
 
 function getEndPoints(compDescription: ComponentTypeDescription): Endpoint[] {
     return compDescription.devfileData.devfile.components[0].container.endpoints;
