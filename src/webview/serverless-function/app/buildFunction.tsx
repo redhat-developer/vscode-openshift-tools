@@ -7,6 +7,7 @@ import { Uri } from 'vscode';
 import { Button, FormControl, InputLabel, MenuItem, OutlinedInput, Select, SelectChangeEvent, TextField } from '@mui/material';
 import { VSCodeMessage } from './vsCodeMessage';
 import { BuildFunctionPageProps } from '../../common/propertyTypes';
+import { LoadModal } from './modal';
 import './home.scss';
 
 export class BuildFunction extends React.Component<BuildFunctionPageProps, {
@@ -57,8 +58,9 @@ export class BuildFunction extends React.Component<BuildFunctionPageProps, {
         const { images, selectedImage, path } = this.state;
         return (
             <>
+                <LoadModal show={this.props.loadScreen} />
                 <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem' }}>
-                    <FormControl sx={{ margin: '2rem 0 0 2rem',  width: 350 }}>
+                    <FormControl sx={{ margin: '2rem 0 0 2rem', width: 350 }}>
                         <TextField
                             label='Name'
                             type='string'
@@ -108,7 +110,7 @@ export class BuildFunction extends React.Component<BuildFunctionPageProps, {
                         variant='outlined'
                         className='buttonStyle'
                         style={{ textTransform: 'none', marginLeft: '1rem', color: '#EE0000 !important' }}
-                    onClick={() => this.finish()}
+                        onClick={() => this.finish()}
                     >
                         Finish
                     </Button>

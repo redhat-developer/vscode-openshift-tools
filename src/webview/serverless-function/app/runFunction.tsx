@@ -5,25 +5,25 @@
 
 import React from 'react';
 import { RunFunctionPageProps } from '../../common/propertyTypes';
-import { Button, FormControl, InputLabel, MenuItem, OutlinedInput, Select, SelectChangeEvent, TextField } from '@mui/material';
+import { Button, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, SelectChangeEvent, TextField } from '@mui/material';
 import { VSCodeMessage } from './vsCodeMessage';
 
 export class RunFunction extends React.Component<RunFunctionPageProps, {
-    runBuild: boolean,
+    runBuild: string,
     showStop: boolean
 }> {
 
     constructor(props: RunFunctionPageProps | Readonly<RunFunctionPageProps>) {
         super(props);
         this.state = {
-            runBuild: false,
+            runBuild: 'false',
             showStop: false
         }
     }
 
-    handleDropDownChange = (e: SelectChangeEvent): void => {
+    handleRadioButtonChange = (e: SelectChangeEvent): void => {
         this.setState({
-            runBuild: e.target.value === 'Yes' ? true : false
+            runBuild: e.target.value
         });
     }
 
@@ -50,17 +50,17 @@ export class RunFunction extends React.Component<RunFunctionPageProps, {
         VSCodeMessage.onMessage((message) => {
             if (message.data.action == 'runFunction') {
                 this.setState({
-                    showStop: message.data.success ? true : false
+                    showStop: message.data.success
                 });
-            } else if(message.data.action == 'stopRunFunction' && message.data.success) {
-                this.props.skip(2);
             }
+            /*else if (message.data.action == 'stopRunFunction' && message.data.success) {
+                this.props.skip(2);
+            }*/
         })
     }
 
     render(): React.ReactNode {
         const { showStop } = this.state;
-        const builOptions = ['Yes', 'No'];
         return (
             <>
                 <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem' }}>
@@ -81,34 +81,39 @@ export class RunFunction extends React.Component<RunFunctionPageProps, {
                         />
                     </FormControl>
                     <FormControl sx={{ margin: '2rem 0 0 2rem', width: 350 }}>
-                        <InputLabel id='build-dropdown' required>Build</InputLabel>
-                        <Select
-                            labelId='build-dropdown'
-                            id='build-name'
-                            defaultValue={'No'}
-                            onChange={(e) => this.handleDropDownChange(e)}
-                            input={<OutlinedInput label='Language' />}
-                            fullWidth
+                        <FormLabel id='build-checkbox-form'>Run with Build</FormLabel>
+                        <RadioGroup
+                            row
+                            aria-labelledby='build-checkbox-form'
+                            name='build-checkbox'
+                            value={this.state.runBuild}
+                            onChange={(e) => this.handleRadioButtonChange(e)}
                         >
-                            {builOptions.map((builOption) => (
-                                <MenuItem
-                                    key={builOption}
-                                    value={builOption}
-                                >
-                                    {builOption}
-                                </MenuItem>
-                            ))}
-                        </Select>
+                            <FormControlLabel value='true' control={<Radio />} label='Yes' disabled={showStop} />
+                            <FormControlLabel value='false' control={<Radio />} label='No' disabled={showStop} />
+                        </RadioGroup>
                     </FormControl>
                 </div>
                 <div style={{ marginTop: '2rem' }}>
                     {!showStop &&
-                        <Button variant='contained'
+                        <><Button variant='contained'
                             className='buttonStyle'
                             style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white' }}
                             onClick={() => this.buildFunction()}>
                             Run
-                        </Button>
+                        </Button><Button
+                            variant='outlined'
+                            className='buttonStyle'
+                            style={{ textTransform: 'none', marginLeft: '1rem', color: '#EE0000 !important' }}
+                            onClick={() => this.props.skip(2)}>
+                                skip
+                            </Button><Button
+                                variant='outlined'
+                                className='buttonStyle'
+                                style={{ textTransform: 'none', marginLeft: '1rem', color: '#EE0000 !important' }}
+                                onClick={() => this.finish()}>
+                                Finish
+                            </Button></>
                     }
                     {showStop &&
                         <Button variant='contained'
@@ -118,20 +123,6 @@ export class RunFunction extends React.Component<RunFunctionPageProps, {
                             Stop
                         </Button>
                     }
-                    <Button
-                        variant='outlined'
-                        className='buttonStyle'
-                        style={{ textTransform: 'none', marginLeft: '1rem', color: '#EE0000 !important' }}
-                        onClick={() => this.props.skip(2)}>
-                        skip
-                    </Button>
-                    <Button
-                        variant='outlined'
-                        className='buttonStyle'
-                        style={{ textTransform: 'none', marginLeft: '1rem', color: '#EE0000 !important' }}
-                        onClick={() => this.finish()}>
-                        Finish
-                    </Button>
                 </div>
             </>
         )

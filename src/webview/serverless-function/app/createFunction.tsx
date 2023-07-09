@@ -8,6 +8,7 @@ import { Button, FormControl, InputLabel, MenuItem, OutlinedInput, Select, Selec
 import { VSCodeMessage } from './vsCodeMessage';
 import { CreateFunctionPageProps } from '../../common/propertyTypes';
 import './home.scss';
+import { LoadModal } from './modal';
 
 declare module 'react' {
     interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
@@ -135,7 +136,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
 
     createFunction = (): void => {
         this.props.onCreateSubmit(this.state.functionData.name,
-            this.convert(this.state.language),this.convert(this.state.template),this.state.wsFolderPath)
+            this.convert(this.state.language), this.convert(this.state.template), this.state.wsFolderPath)
     }
 
     render(): React.ReactNode {
@@ -145,6 +146,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
         folders.push(...wsFolderItems);
         return (
             <>
+                <LoadModal show={this.props.loadScreen} />
                 <FormControl sx={{ margin: '2rem 0 0 2rem' }}>
                     <TextField
                         label='Name'

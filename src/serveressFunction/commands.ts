@@ -32,21 +32,21 @@ export class Command {
     }
 
     static buildFunction(location: string, image: string, clusterVersion: ClusterVersion | null): CommandText {
-        const commandText = new CommandText('func build', undefined, [
+        const commandText = new CommandText('func', 'build', [
             new CommandOption('-p', location),
             new CommandOption('-i', image),
             new CommandOption('-v')
         ]);
         if (clusterVersion) {
-            commandText.addOption(new CommandOption('-r',''))
+            commandText.addOption(new CommandOption('-r', ''))
         }
         return commandText
     }
 
-    static runFunction(location: string, runBuild: boolean): CommandText {
-        const commandText = new CommandText('func run', undefined, [
+    static runFunction(location: string, runBuild: string): CommandText {
+        const commandText = new CommandText('func', 'run', [
             new CommandOption('-p', location),
-            new CommandOption('-b', runBuild.toString())
+            new CommandOption('-b', runBuild)
         ]);
         return commandText;
     }

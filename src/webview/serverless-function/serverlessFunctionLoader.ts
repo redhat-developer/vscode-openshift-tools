@@ -6,20 +6,26 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { ExtensionID } from '../../util/constants';
 import { loadWebviewHtml } from '../common-ext/utils';
-import { CliExitData } from '../../cli';
+import { CliChannel, CliExitData } from '../../cli';
 import { BuildAndDeploy } from '../../serveressFunction/build-run-deploy';
 import { serverlessInstance } from '../../serveressFunction/functionImpl';
 import { Progress } from '../../util/progress';
 import { selectWorkspaceFolder, selectWorkspaceFolders } from '../../util/workspace';
 import { validateName } from '../common/utils';
-import { ChildProcess } from 'child_process';
+import { ChildProcess, SpawnOptions } from 'child_process';
+import { ClusterVersion } from '../../serveressFunction/types';
+import { Command } from '../../serveressFunction/commands';
+
+interface OverridePanel extends vscode.WebviewPanel {
+    contextPath?: vscode.Uri;
+}
 
 export interface ServiceBindingFormResponse {
     selectedService: string;
     bindingName: string;
 }
 
-async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any): Promise<any> {
+async function gitImportMessageListener(panel: OverridePanel, event: any): Promise<any> {
     let response: CliExitData | undefined = undefined;
     const eventName = event.action;
     const functionName = event.name;
@@ -44,12 +50,20 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
         case 'createFunction':
             const selctedFolder: vscode.Uri = vscode.Uri.file(path.join(functionPath.fsPath, functionName));
             panel.title = `Serverless Function - Create - ${functionName}`;
+            await panel.webview.postMessage({
+                action: 'loadScreen',
+                show: true
+            });
             await Progress.execFunctionWithProgress(
                 `Creating function '${functionName}'`,
                 async () => {
                     response = await serverlessInstance().createFunction(event.language, event.template, selctedFolder.fsPath);
                 });
             if (response && response.error) {
+                await panel.webview.postMessage({
+                    action: 'loadScreen',
+                    show: false
+                })
                 vscode.window.showErrorMessage(`Error while creating the function ${functionName}`);
                 panel.webview.postMessage({
                     action: eventName,
@@ -58,6 +72,13 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
                     success: false
                 })
             } else {
+                panel.contextPath = selctedFolder;
+                ServerlessFunctionViewLoader.views.delete('//new')
+                ServerlessFunctionViewLoader.views.set(selctedFolder.fsPath, panel);
+                await panel.webview.postMessage({
+                    action: 'loadScreen',
+                    show: false
+                })
                 panel.webview.postMessage({
                     action: eventName,
                     name: functionName,
@@ -77,32 +98,135 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
             });
             break;
         case 'buildFunction':
-            BuildAndDeploy.getInstance().buildFunction(functionName, functionPath.fsPath, event.image).then(() => {
-                panel.webview.postMessage({
-                    action: eventName,
-                    success: true
-                })
-            }).catch(() => {
-                vscode.window.showErrorMessage(`Error while building the function ${functionName}`);
-                panel.webview.postMessage({
-                    action: eventName,
-                    success: false
-                });
+            await panel.webview.postMessage({
+                action: 'loadScreen',
+                show: true
             });
+            const outputEmitter = new vscode.EventEmitter<string>();
+            let devProcess: ChildProcess;
+            let processError = false;
+            const clusterVersion: ClusterVersion | null = await BuildAndDeploy.getInstance().checkOpenShiftCluster();
+            try {
+                let terminal = vscode.window.createTerminal({
+                    name: `Build ${functionName}`,
+                    pty: {
+                        onDidWrite: outputEmitter.event,
+                        open: () => {
+                            outputEmitter.fire(`Start Building ${functionName} \r\n`);
+                            const opt: SpawnOptions = { cwd: functionPath.fsPath };
+                            void CliChannel.getInstance().spawnTool(Command.buildFunction(functionPath.fsPath, event.image, clusterVersion), opt).then((cp) => {
+                                devProcess = cp;
+                                devProcess.on('spawn', () => {
+                                    terminal.show();
+                                });
+                                devProcess.on('error', async (err) => {
+                                    processError = true;
+                                    void vscode.window.showErrorMessage(err.message);
+                                });
+                                devProcess.stdout.on('data', (chunk) => {
+                                    outputEmitter.fire(`${chunk as string}`.replaceAll('\n', '\r\n'));
+                                });
+                                devProcess.stderr.on('data', async (errChunk) => {
+                                    processError = true;
+                                    outputEmitter.fire(`\x1b[31m${errChunk as string}\x1b[0m`.replaceAll('\n', '\r\n'));
+                                });
+                                devProcess.on('exit', async () => {
+                                    await panel.webview.postMessage({
+                                        action: 'loadScreen',
+                                        show: false
+                                    });
+                                    await panel.webview.postMessage({
+                                        action: eventName,
+                                        success: processError ? false : true
+                                    });
+                                    outputEmitter.fire('\r\nPress any key to close this terminal\r\n');
+                                });
+                            });
+                        },
+                        close: () => {
+                            if (devProcess && devProcess.exitCode === null) { // if process is still running and user closed terminal
+                                devProcess.kill('SIGINT');
+                            }
+                            terminal = undefined;
+                        },
+                        handleInput: ((data: string) => {
+                            if (!devProcess) {
+                                terminal.dispose();
+                            } else {
+                                outputEmitter.fire('^C\r\n');
+                                devProcess.kill('SIGINT');
+                                terminal.dispose()
+                            }
+                        })
+                    },
+                });
+            } catch (err) {
+                void vscode.window.showErrorMessage(err.message);
+            }
             break;
         case 'runFunction':
             try {
-                const childProcess = await BuildAndDeploy.getInstance().runFunction(functionPath.fsPath, event.runBuild);
-                ServerlessFunctionViewLoader.processMap.set(`run-${functionPath.fsPath}`, childProcess);
-                panel.webview.postMessage({
-                    action: eventName,
-                    success: true
+                const outputEmitter = new vscode.EventEmitter<string>();
+                let runProcess: ChildProcess;
+                let showStop = true;
+                let terminal = vscode.window.createTerminal({
+                    name: `Run ${functionName}`,
+                    pty: {
+                        onDidWrite: outputEmitter.event,
+                        open: () => {
+                            outputEmitter.fire(`Running ${functionName} \r\n`);
+                            const opt: SpawnOptions = { cwd: functionPath.fsPath };
+                            void CliChannel.getInstance().spawnTool(Command.runFunction(functionPath.fsPath, event.runBuild), opt).then((cp) => {
+                                runProcess = cp;
+                                runProcess.on('spawn', async () => {
+                                    terminal.show();
+                                    ServerlessFunctionViewLoader.processMap.set(`run-${functionPath.fsPath}`, runProcess);
+                                    await panel.webview.postMessage({
+                                        action: eventName,
+                                        success: showStop
+                                    });
+                                });
+                                runProcess.on('error', async (err) => {
+                                    showStop = false;
+                                    void vscode.window.showErrorMessage(err.message);
+                                });
+                                runProcess.stdout.on('data', (chunk) => {
+                                    outputEmitter.fire(`${chunk as string}`.replaceAll('\n', '\r\n'));
+                                });
+                                runProcess.stderr.on('data', async (errChunk) => {
+                                    showStop = false;
+                                    outputEmitter.fire(`\x1b[31m${errChunk as string}\x1b[0m`.replaceAll('\n', '\r\n'));
+                                });
+                                runProcess.on('exit', async () => {
+                                    await panel.webview.postMessage({
+                                        action: eventName,
+                                        success: showStop
+                                    });
+                                    outputEmitter.fire('\r\nPress any key to close this terminal\r\n');
+                                });
+                            });
+                        },
+                        close: () => {
+                            if (runProcess && runProcess.exitCode === null) { // if process is still running and user closed terminal
+                                runProcess.kill('SIGINT');
+                                ServerlessFunctionViewLoader.processMap.delete(`run-${functionPath.fsPath}`);
+                            }
+                            terminal = undefined;
+                        },
+                        handleInput: ((data: string) => {
+                            if (!devProcess) {
+                                terminal.dispose();
+                            } else {
+                                outputEmitter.fire('^C\r\n');
+                                runProcess.kill('SIGINT');
+                                ServerlessFunctionViewLoader.processMap.delete(`run-${functionPath.fsPath}`);
+                                terminal.dispose()
+                            }
+                        })
+                    },
                 });
-            } catch (error) {
-                panel.webview.postMessage({
-                    action: eventName,
-                    success: false
-                });
+            } catch (err) {
+                void vscode.window.showErrorMessage(err.message);
             }
             break;
         case 'stopRunFunction':
@@ -110,6 +234,7 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
                 const child_process = ServerlessFunctionViewLoader.processMap.get(`run-${functionPath.fsPath}`);
                 if (child_process) {
                     child_process.kill('SIGTERM');
+                    ServerlessFunctionViewLoader.processMap.delete(`run-${functionPath.fsPath}`);
                 }
                 panel.webview.postMessage({
                     action: eventName,
@@ -138,13 +263,13 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
     }
 }
 
-function processStep(panel: vscode.WebviewPanel, folderPath: string, name: string, stepCount: number) {
+function processStep(panel: vscode.WebviewPanel, folderPath: vscode.Uri, name: string, stepCount: number) {
     switch (stepCount) {
         case 1:
             panel.webview.postMessage({
                 action: 'createFunction',
                 name: name,
-                path: vscode.Uri.parse(folderPath),
+                path: folderPath,
                 success: true
             });
             break;
@@ -155,7 +280,7 @@ function processStep(panel: vscode.WebviewPanel, folderPath: string, name: strin
 
 export default class ServerlessFunctionViewLoader {
 
-    private static views: Map<string, vscode.WebviewPanel> = new Map();
+    public static views: Map<string, OverridePanel> = new Map();
 
     public static processMap: Map<string, ChildProcess> = new Map();
 
@@ -174,15 +299,17 @@ export default class ServerlessFunctionViewLoader {
      */
     static async loadView(
         title: string,
-        contextPath = 'new',
+        contextPath?: vscode.Uri,
         name = '',
         stepCount = 0
-    ): Promise<vscode.WebviewPanel | null> {
+    ): Promise<OverridePanel | null> {
 
-        if (ServerlessFunctionViewLoader.views.get(contextPath)) {
+        const pathString = contextPath ? contextPath.fsPath : 'new'
+
+        if (ServerlessFunctionViewLoader.views.get(pathString)) {
             // the event handling for the panel should already be set up,
             // no need to handle it
-            const panel = ServerlessFunctionViewLoader.views.get(contextPath);
+            const panel = ServerlessFunctionViewLoader.views.get(pathString);
             panel.reveal(vscode.ViewColumn.One);
             return null;
         }
@@ -192,15 +319,18 @@ export default class ServerlessFunctionViewLoader {
 
     private static async createView(
         title: string,
-        contextPath: string,
+        contextPath: vscode.Uri,
         name: string,
         stepCount: number,
-    ): Promise<vscode.WebviewPanel> {
+    ): Promise<OverridePanel> {
+
+        contextPath = contextPath ? contextPath : vscode.Uri.parse('new');
+
         const localResourceRoot = vscode.Uri.file(
             path.join(ServerlessFunctionViewLoader.extensionPath, 'out', 'serverlessFunctionViewer'),
         );
 
-        let panel: vscode.WebviewPanel = vscode.window.createWebviewPanel(
+        let panel: OverridePanel = vscode.window.createWebviewPanel(
             'serverlessFunctionView',
             title,
             vscode.ViewColumn.One,
@@ -210,6 +340,8 @@ export default class ServerlessFunctionViewLoader {
                 retainContextWhenHidden: true,
             },
         );
+
+        panel.contextPath = contextPath;
 
         panel.iconPath = vscode.Uri.file(
             path.join(ServerlessFunctionViewLoader.extensionPath, 'images/context/cluster-node.png'),
@@ -221,10 +353,16 @@ export default class ServerlessFunctionViewLoader {
         panel.webview.onDidReceiveMessage((e) => gitImportMessageListener(panel, e));
 
         panel.onDidDispose(() => {
+            ServerlessFunctionViewLoader.views.delete(contextPath.fsPath);
+            const folderPath: vscode.Uri = panel.contextPath;
+            const addedWSPath = typeof folderPath === 'string' ? vscode.Uri.parse(folderPath) : vscode.Uri.from(folderPath);
+            const wsFolder = vscode.workspace.getWorkspaceFolder(addedWSPath);
+            if (!wsFolder) {
+                vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: addedWSPath });
+            }
             panel = undefined;
-            ServerlessFunctionViewLoader.views.delete(contextPath);
         });
-        ServerlessFunctionViewLoader.views.set(contextPath, panel);
+        ServerlessFunctionViewLoader.views.set(contextPath.fsPath, panel);
         processStep(panel, contextPath, name, stepCount);
         return Promise.resolve(panel);
     }

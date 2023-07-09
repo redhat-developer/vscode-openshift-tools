@@ -86,12 +86,15 @@ button {
     color: #EE0000 !important;
 }
 
-.MuiSelect-select, .MuiMenu-paper, .MuiAutocomplete-inputRoot {
+.MuiSelect-select,
+.MuiMenu-paper,
+.MuiAutocomplete-inputRoot {
     background-color: var(--vscode-dropdown-background) !important;
     color: var(--vscode-dropdown-foreground) !important;
 }
 
-.MuiInputLabel-root {
+.MuiInputLabel-root,
+.MuiFormLabel-root {
     background-color: transparent;
     color: var(--vscode-settings-textInputForeground) !important;
 }
@@ -113,13 +116,19 @@ button {
 .MuiFormControl-root {
     border: none;
     max-width: 45%;
+
     &:hover {
         border: none;
     }
 }
 
-.MuiSvgIcon-root, .MuiStepLabel-label {
+.MuiSvgIcon-root,
+.MuiStepLabel-label {
     color: var(--vscode-settings-textInputForeground) !important;
+}
+
+.MuiCircularProgress-svg {
+    color: #EE0000 !important;
 }
 
 .Mui-disabled {

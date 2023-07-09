@@ -24,15 +24,15 @@ export interface StarterProjectDisplayProps extends DefaultProps {
 }
 
 export interface SearchBarProps extends DefaultProps {
-    title: string,
+    title: string;
     onSearchBarChange: (value: string) => void;
     searchBarValue: string;
     resultCount: number;
 }
 
 export interface FilterProps extends DefaultProps {
-    id: string,
-    registries?: Registry[],
+    id: string;
+    registries?: Registry[];
     onCheckBoxChange: (value: string | string[]) => void;
 }
 
@@ -55,17 +55,23 @@ export interface HelmChartHomePageProps extends React.AnchorHTMLAttributes<HTMLA
 }
 
 export interface CreateFunctionPageProps extends DefaultProps {
+    loadScreen: boolean;
     onCreateSubmit: (name: string, language: string, template: string, location: Uri) => void;
 }
 
 export interface BuildFunctionPageProps extends DefaultProps {
-    name: string,
+    name: string;
+    loadScreen: boolean;
     onBuildSubmit: (image: string, location: Uri) => void;
 }
 
+export interface ModalProp extends DefaultProps {
+    show: boolean;
+}
+
 export interface RunFunctionPageProps extends DefaultProps {
-    name: string,
-    folderPath: Uri,
-    skip:(stepCount: number) => void;
-    onRunSubmit: (folderPath: Uri, build: boolean) => void;
+    name: string;
+    folderPath: Uri;
+    skip: (stepCount: number) => void;
+    onRunSubmit: (folderPath: Uri, build: string) => void;
 }

@@ -4,6 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import {
+    Command,
     Disposable,
     Event,
     EventEmitter,
@@ -12,7 +13,9 @@ import {
     TreeItem,
     TreeItemCollapsibleState,
     TreeView,
+    Uri,
     window,
+    workspace,
 } from 'vscode';
 
 import * as path from 'path';
@@ -104,11 +107,16 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
                 explorerItem.iconPath = new ThemeIcon('symbol-function'),
                     explorerItem.description = this.getDescription(functionObj.context),
                     explorerItem.tooltip = this.getTooltip(functionObj),
-                    explorerItem.contextValue = FunctionContextType.LOCAlFUNCTIONS
+                    explorerItem.contextValue = FunctionContextType.LOCAlFUNCTIONS,
+                    explorerItem.command = this.getCommand(functionObj);
             }
             return explorerItem;
         }
 
+    }
+
+    getCommand(functionObj: FunctionObject): Command {
+        return { command: 'openshift.Serverless.openFunction', title: 'Open Function', arguments: [functionObj] };
     }
 
     getTooltip(functionObj: FunctionObject): string {
@@ -168,12 +176,30 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     }
 
     @vsCommand('openshift.Serverless.refresh')
-    static refresh(target?:ExplorerItem) {
+    static refresh(target?: ExplorerItem) {
         ServerlessFunctionView.getInstance().refresh(target);
     }
 
     @vsCommand('openshift.Serverless.build')
     static async buildFunction(context: FunctionObject) {
-        await ServerlessFunctionViewLoader.loadView('Serverless Function - Build', context.folderURI.fsPath, context.name, 1);
+        await ServerlessFunctionViewLoader.loadView('Serverless Function - Build', context.folderURI, context.name, 1);
+    }
+
+    @vsCommand('openshift.Serverless.openFunction')
+    static openFunction(context: FunctionObject) {
+        if (!context) {
+            return null;
+        }
+        const uriPath = Uri.file(path.join(context.folderURI.fsPath, 'func.yaml'));
+        workspace.openTextDocument(uriPath).then(
+            (doc) => {
+                if (doc) {
+                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                    window.showTextDocument(doc, { preserveFocus: true, preview: true });
+                }
+            },
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            (err) => window.showErrorMessage(`Error loading document: ${err}`),
+        );
     }
 }

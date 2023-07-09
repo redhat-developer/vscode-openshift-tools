@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Uri, window } from 'vscode';
+import { EventEmitter, Uri, window } from 'vscode';
 import { ClusterVersion, FunctionContent, FunctionObject, ImageAndBuild } from './types';
 import { Command, Utils } from './commands';
 import { Platform } from '../util/platform';
 import { OdoImpl } from '../odo';
 import { CliChannel } from '../cli';
-import { ChildProcess } from 'child_process';
+import { ChildProcess, SpawnOptions } from 'child_process';
 
 export class BuildAndDeploy {
 
@@ -24,7 +24,7 @@ export class BuildAndDeploy {
         return BuildAndDeploy.instance;
     }
 
-    private async checkOpenShiftCluster(): Promise<ClusterVersion> {
+    public async checkOpenShiftCluster(): Promise<ClusterVersion> {
         try {
             const result = await OdoImpl.Instance.execute(Command.getClusterVersion());
             if (result?.stdout?.trim()) {
@@ -50,10 +50,57 @@ export class BuildAndDeploy {
 
     public async buildFunction(functionName: string, functionPath: string, buildImage: string): Promise<void> {
         const clusterVersion: ClusterVersion | null = await this.checkOpenShiftCluster();
-        await OdoImpl.Instance.executeInTerminal(Command.buildFunction(functionPath, buildImage, clusterVersion), undefined, `OpenShift: Build Function '${functionName}'`);
+        const outputEmitter = new EventEmitter<string>();
+        let devProcess: ChildProcess;
+        try {
+            let terminal = window.createTerminal({
+                name: `Build ${functionName}`,
+                pty: {
+                    onDidWrite: outputEmitter.event,
+                    open: () => {
+                        outputEmitter.fire(`Start Building ${functionName} \r\n`);
+                        const opt: SpawnOptions = { cwd: functionPath };
+                        void CliChannel.getInstance().spawnTool(Command.buildFunction(functionPath, buildImage, clusterVersion), opt).then((cp) => {
+                            devProcess = cp;
+                            devProcess.on('spawn', () => {
+                                terminal.show();
+                            });
+                            devProcess.on('error', (err) => {
+                                void window.showErrorMessage(err.message);
+                            })
+                            devProcess.stdout.on('data', (chunk) => {
+                                outputEmitter.fire(`${chunk as string}`.replaceAll('\n', '\r\n'));
+                            });
+                            devProcess.stderr.on('data', (errChunk) => {
+                                outputEmitter.fire(`\x1b[31m${errChunk as string}\x1b[0m`.replaceAll('\n', '\r\n'));
+                            });
+                            devProcess.on('exit', () => {
+                                outputEmitter.fire('\r\nPress any key to close this terminal\r\n');
+                            });
+                        });
+                    },
+                    close: () => {
+                        if (devProcess && devProcess.exitCode === null) { // if process is still running and user closed terminal
+                            devProcess.kill('SIGINT');
+                        }
+                        terminal = undefined;
+                    },
+                    handleInput: ((data: string) => {
+                        if (!devProcess) { // if any key pressed after odo process ends
+                            terminal.dispose();
+                        } else if (data.charCodeAt(0) === 3) { // ctrl+C processed only once when there is no cleaning process
+                            outputEmitter.fire('^C\r\n');
+                            devProcess.kill('SIGINT');
+                        }
+                    })
+                },
+            });
+        } catch (err) {
+            //ignore
+        }
     }
 
-    public async runFunction(path: string, runBuild: boolean): Promise<ChildProcess> {
+    public async runFunction(path: string, runBuild: string): Promise<ChildProcess> {
         return await CliChannel.getInstance().spawnTool(Command.runFunction(path, runBuild));
     }
 

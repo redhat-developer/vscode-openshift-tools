@@ -16,7 +16,8 @@ import { DeployFunction } from './deployFunction';
 export class ServerlessFunction extends React.Component<DefaultProps, {
     activeStep: number,
     functionName: string,
-    locationUri: Uri
+    locationUri: Uri,
+    showLoadScreen: boolean
 }> {
 
     constructor(props: DefaultProps | Readonly<DefaultProps>) {
@@ -24,7 +25,8 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
         this.state = {
             activeStep: 0,
             functionName: '',
-            locationUri: undefined
+            locationUri: undefined,
+            showLoadScreen: false
         }
     }
 
@@ -53,6 +55,8 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
                 this.setState({
                     activeStep: stepCount
                 });
+            } else if (message.data.action == 'loadScreen') {
+                this.setState({ showLoadScreen: message.data.show })
             }
         });
     }
@@ -83,7 +87,7 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
         });
     }
 
-    handleRunSubmit = (folderPath: Uri, build: boolean): void => {
+    handleRunSubmit = (folderPath: Uri, build: string): void => {
         VSCodeMessage.postMessage({
             action: 'runFunction',
             name: this.state.functionName,
@@ -101,10 +105,10 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
     handleStep = (step: number) => {
         switch (step) {
             case 0:
-                return <CreateFunction onCreateSubmit={this.handleCreateSubmit} />;
+                return <CreateFunction onCreateSubmit={this.handleCreateSubmit} loadScreen={this.state.showLoadScreen} />;
             case 1:
                 return <BuildFunction onBuildSubmit={this.handleBuildSubmit}
-                    name={this.state.functionName} />;
+                    name={this.state.functionName} loadScreen={this.state.showLoadScreen} />;
             case 2:
                 return <RunFunction folderPath={this.state.locationUri} onRunSubmit={this.handleRunSubmit}
                     name={this.state.functionName} skip={this.handleSkip} />;
@@ -115,7 +119,7 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
 
     render(): React.ReactNode {
         const { activeStep } = this.state;
-        const steps = ['Create', 'Build', 'Run', 'Deploy'];
+        const steps = ['Create', 'Build', 'Run'];
         return (
             <>
                 <div className='mainContainer margin'>

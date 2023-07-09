@@ -776,6 +776,11 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.Serverless.openFunction",
+				"title": "Open Function",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.Serverless.createFunction",
 				"title": "Create Function",
 				"category": "OpenShift",
