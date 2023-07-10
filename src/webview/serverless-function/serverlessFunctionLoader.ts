@@ -137,6 +137,8 @@ async function gitImportMessageListener(panel: OverridePanel, event: any): Promi
                                     });
                                     await panel.webview.postMessage({
                                         action: eventName,
+                                        name: functionName,
+                                        path: functionPath,
                                         success: processError ? false : true
                                     });
                                     outputEmitter.fire('\r\nPress any key to close this terminal\r\n');
