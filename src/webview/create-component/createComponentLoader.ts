@@ -4,6 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import * as tmp from 'tmp';
+import { promisify } from 'util';
 import * as vscode from 'vscode';
 import { Uri, ViewColumn, WebviewPanel, extensions, window } from 'vscode';
 import * as YAML from 'yaml';
@@ -18,6 +20,13 @@ import { VsCommandError } from '../../vscommand';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
 import { DevfileConverter } from '../git-import/devfileConverter';
+import { gitUrlParse } from '../git-import/gitParse';
+import cp = require('child_process');
+
+interface CloneProcess {
+    status: boolean,
+    error: string | undefined
+}
 
 type Message = {
     action: string;
@@ -240,6 +249,20 @@ export default class CreateComponentLoader {
                 break;
             }
             /**
+             * The panel requested to get the receommended devfile given the selected project.
+             */
+            case 'getRecommendedDevfileFromGit': {
+                const tmpFolder: vscode.Uri = Uri.parse(await promisify(tmp.dir)());
+                const cloneProcess: CloneProcess = await clone(message.data.gitURL, tmpFolder.fsPath);
+                if (!cloneProcess.status && cloneProcess.error) {
+                    void CreateComponentLoader.panel.webview.postMessage({
+                        action: 'cloneFailed'
+                    });
+                }
+                CreateComponentLoader.getRecommendedDevfile(Uri.file(message.data));
+                break;
+            }
+            /**
              * The panel requested to create component.
              */
             case 'createComponent': {
@@ -261,6 +284,13 @@ export default class CreateComponentLoader {
                     }
                     throw err;
                 }
+            }
+            /**
+             * The panel requested to validate the git repository URL.
+             */
+            case 'validateGitURL': {
+                validateGitURL(message);
+                break;
             }
         }
     }
@@ -439,4 +469,64 @@ async function isDevfileExists(uri: vscode.Uri): Promise<boolean> {
             return false;
         }
     }
+}
+
+function validateGitURL(event: any) {
+    if (event.data.trim().length === 0) {
+        CreateComponentLoader.panel?.webview.postMessage({
+            action: event.action,
+            data: {
+                isValid: false,
+                helpText: 'Please enter a Git URL.'
+            }
+        });
+    } else {
+        try {
+            const parse = gitUrlParse(event.data);
+            const isGitRepo = isGitURL(parse.host);
+            if (!isGitRepo) {
+                throw 'Invalid Git URL';
+            }
+            if (parse.organization !== '' && parse.name !== '') {
+                CreateComponentLoader.panel?.webview.postMessage({
+                    action: event.action,
+                    data: {
+                        isValid: true,
+                        helpText: 'The git repo URL is valid.'
+                    }
+                });
+            } else {
+                CreateComponentLoader.panel?.webview.postMessage({
+                    action: event.action,
+                    data: {
+                        isValid: true,
+                        helpText: 'URL is valid but cannot be reached.'
+                    }
+                });
+            }
+        } catch (e) {
+            CreateComponentLoader.panel?.webview.postMessage({
+                action: event.action,
+                data: {
+                    isValid: false,
+                    helpText: 'Invalid Git URL.'
+                }
+            });
+        }
+    }
+}
+
+function isGitURL(host: string): boolean {
+    return ['github.com', 'bitbucket.org', 'gitlab.com'].includes(host);
+}
+
+function clone(url: string, location: string): Promise<CloneProcess> {
+    const gitExtension = vscode.extensions.getExtension('vscode.git').exports;
+    const git = gitExtension.getAPI(1).git.path;
+    // run 'git clone url location' as external process and return location
+    return new Promise((resolve, reject) => (cp.exec(`${git} clone ${url} ${location}`,
+        (error: cp.ExecException) => {
+            error ? resolve({ status: false, error: error.message }) : resolve({ status: true, error: undefined });
+        }
+    )));
 }
