@@ -79,17 +79,20 @@
             "darwin": {
                 "url": "https://github.com/knative/func/releases/download/knative-v1.10.0/func_darwin_amd64",
                 "sha256sum": "de953a9167f28af5c1f0acfe67e2c851e999aa1f6efed5a326083ba569cc2381",
-                "dlFileName": "func_darwin_amd64"
+                "dlFileName": "func_darwin_amd64",
+                "cmdFileName": "func"
             },
             "darwin-arm64": {
                 "url": "https://github.com/knative/func/releases/download/knative-v1.10.0/func_darwin_arm64",
                 "sha256sum": "740bef3723a30861149e86ea0505e32be74112bafa892a8d0a86d2526c41cf71",
-                "dlFileName": "func_darwin_arm64"
+                "dlFileName": "func_darwin_arm64",
+                "cmdFileName": "func"
             },
             "linux": {
                 "url": "https://github.com/knative/func/releases/download/knative-v1.10.0/func_linux_amd64",
                 "sha256sum": "5069e5fb8d1b3742c4df8e8bbbeb7737f3bf7aab175bd8e76a900b86bc28239a",
-                "dlFileName": "func_linux_amd64"
+                "dlFileName": "func_linux_amd64",
+                "cmdFileName": "func"
             }
         }
     },
