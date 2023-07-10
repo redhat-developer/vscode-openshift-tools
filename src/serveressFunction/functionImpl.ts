@@ -11,6 +11,7 @@ import { FunctionContent, FunctionObject, FunctionStatus } from './types';
 import { ServerlessFunctionView } from './view';
 import { Command, Utils } from './commands';
 import { OdoImpl } from '../odo';
+import { BuildAndDeploy } from './build-run-deploy';
 
 export interface ServerlessFunction {
     getLocalFunctions(): Promise<FunctionObject[]>;
@@ -91,11 +92,17 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
                 name: funcData.name,
                 runtime: funcData.runtime,
                 folderURI: folderUri,
-                context: funcStatus
+                context: funcStatus,
+                hasImage: await this.checkImage(folderUri)
             }
             functionList.push(functionNode);
         }
         return functionList;
+    }
+
+    async checkImage(folderUri: Uri): Promise<boolean> {
+        const yamlContent = await Utils.getFuncYamlContent(folderUri.fsPath);
+        return BuildAndDeploy.imageRegex.test(yamlContent?.image);
     }
 }
 

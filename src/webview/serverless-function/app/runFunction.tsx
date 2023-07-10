@@ -5,25 +5,25 @@
 
 import React from 'react';
 import { RunFunctionPageProps } from '../../common/propertyTypes';
-import { Button, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, SelectChangeEvent, TextField } from '@mui/material';
+import { Button, FormControl, FormControlLabel, Switch, TextField } from '@mui/material';
 import { VSCodeMessage } from './vsCodeMessage';
 
 export class RunFunction extends React.Component<RunFunctionPageProps, {
-    runBuild: string,
+    runBuild: boolean,
     showStop: boolean
 }> {
 
     constructor(props: RunFunctionPageProps | Readonly<RunFunctionPageProps>) {
         super(props);
         this.state = {
-            runBuild: 'false',
+            runBuild: true,
             showStop: false
         }
     }
 
-    handleRadioButtonChange = (e: SelectChangeEvent): void => {
+    handleSwitchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         this.setState({
-            runBuild: e.target.value
+            runBuild: e.target.checked
         });
     }
 
@@ -60,60 +60,40 @@ export class RunFunction extends React.Component<RunFunctionPageProps, {
     }
 
     render(): React.ReactNode {
-        const { showStop } = this.state;
+        const { showStop, runBuild } = this.state;
         return (
             <>
-                <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem' }}>
-                    <FormControl sx={{ margin: '2rem 0 0 2rem', width: 350 }}>
-                        <TextField
-                            label='Name'
-                            type='string'
-                            variant='outlined'
-                            disabled
-                            defaultValue={this.props.name}
-                            id='build-function-name'
-                            sx={{
-                                input: {
-                                    color: 'var(--vscode-settings-textInputForeground)',
-                                    backgroundColor: 'var(--vscode-settings-textInputBackground)'
-                                }
-                            }}
-                        />
-                    </FormControl>
-                    <FormControl sx={{ margin: '2rem 0 0 2rem', width: 350 }}>
-                        <FormLabel id='build-checkbox-form'>Run with Build</FormLabel>
-                        <RadioGroup
-                            row
-                            aria-labelledby='build-checkbox-form'
-                            name='build-checkbox'
-                            value={this.state.runBuild}
-                            onChange={(e) => this.handleRadioButtonChange(e)}
-                        >
-                            <FormControlLabel value='true' control={<Radio />} label='Yes' disabled={showStop} />
-                            <FormControlLabel value='false' control={<Radio />} label='No' disabled={showStop} />
-                        </RadioGroup>
-                    </FormControl>
-                </div>
-                <div style={{ marginTop: '2rem' }}>
+                <FormControl sx={{ margin: '2rem 0 0 2rem', width: 350 }}>
+                    <TextField
+                        label='Name'
+                        type='string'
+                        variant='outlined'
+                        disabled
+                        defaultValue={this.props.name}
+                        id='build-function-name'
+                        sx={{
+                            input: {
+                                color: 'var(--vscode-settings-textInputForeground)',
+                                backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                            }
+                        }}
+                    />
+                </FormControl>
+                <FormControlLabel sx={{ margin: '2rem 0 0 2rem', width: 350 }}
+                    control={
+                        <Switch checked={runBuild} onChange={(e) => this.handleSwitchChange(e)} />
+                    }
+                    label='Run with build'
+                />
+                <FormControl sx={{ margin: '2rem 0 0 2rem', width: 100, flexDirection: 'row' }}>
                     {!showStop &&
                         <><Button variant='contained'
                             className='buttonStyle'
                             style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white' }}
                             onClick={() => this.buildFunction()}>
                             Run
-                        </Button><Button
-                            variant='outlined'
-                            className='buttonStyle'
-                            style={{ textTransform: 'none', marginLeft: '1rem', color: '#EE0000 !important' }}
-                            onClick={() => this.props.skip(2)}>
-                                skip
-                            </Button><Button
-                                variant='outlined'
-                                className='buttonStyle'
-                                style={{ textTransform: 'none', marginLeft: '1rem', color: '#EE0000 !important' }}
-                                onClick={() => this.finish()}>
-                                Finish
-                            </Button></>
+                        </Button>
+                            </>
                     }
                     {showStop &&
                         <Button variant='contained'
@@ -123,7 +103,7 @@ export class RunFunction extends React.Component<RunFunctionPageProps, {
                             Stop
                         </Button>
                     }
-                </div>
+                </FormControl>
             </>
         )
     }

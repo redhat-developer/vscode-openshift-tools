@@ -107,12 +107,19 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
                 explorerItem.iconPath = new ThemeIcon('symbol-function'),
                     explorerItem.description = this.getDescription(functionObj.context),
                     explorerItem.tooltip = this.getTooltip(functionObj),
-                    explorerItem.contextValue = FunctionContextType.LOCAlFUNCTIONS,
+                    explorerItem.contextValue = this.getContext(functionObj),
                     explorerItem.command = this.getCommand(functionObj);
             }
             return explorerItem;
         }
 
+    }
+
+    getContext(functionObj: FunctionObject): string {
+        if (functionObj.hasImage) {
+            return FunctionContextType.LOCAlFUNCTIONSWithBuild
+        }
+        return FunctionContextType.LOCAlFUNCTIONS
     }
 
     getCommand(functionObj: FunctionObject): Command {
@@ -183,6 +190,11 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     @vsCommand('openshift.Serverless.build')
     static async buildFunction(context: FunctionObject) {
         await ServerlessFunctionViewLoader.loadView('Serverless Function - Build', context.folderURI, context.name, 1);
+    }
+
+    @vsCommand('openshift.Serverless.run')
+    static async runFunction(context: FunctionObject) {
+        await ServerlessFunctionViewLoader.loadView('Serverless Function - Run', context.folderURI, context.name, 2);
     }
 
     @vsCommand('openshift.Serverless.openFunction')

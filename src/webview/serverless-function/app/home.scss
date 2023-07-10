@@ -17,7 +17,7 @@ button {
 .form {
     display: flex;
     flex-direction: column;
-    font-family: var(--vscode-font-family);
+    font-family: var(--vscode-font-family) !important;
 }
 
 .title {
@@ -27,13 +27,10 @@ button {
 
 .subTitle {
     margin-bottom: 2rem;
-    max-width: 59rem;
-    justify-content: center;
-    word-spacing: 5px;
-    text-align: justify;
+    width: auto;
+    word-spacing: 2px;
+    text-align: left;
     color: var(--vscode-foreground);
-    font-weight: normal;
-    font-size: 14px;
 }
 
 .buttonStyle {
@@ -76,9 +73,13 @@ button {
     background-color: burlywood !important;
 }
 
+.MuiTypography-root {
+    font-family: var(--vscode-font-family) !important;
+}
+
 .MuiFormHelperText-root {
-    width: 13rem;
     color: var(--vscode-foreground) !important;
+    font-family: var(--vscode-font-family) !important;
     margin-left: 0px !important;
 }
 
@@ -115,11 +116,15 @@ button {
 
 .MuiFormControl-root {
     border: none;
-    max-width: 45%;
+    max-width: 70%;
 
     &:hover {
         border: none;
     }
+}
+
+.MuiFormControl-fullWidth {
+    max-width: 100% !important;
 }
 
 .MuiSvgIcon-root,
@@ -140,5 +145,6 @@ button {
 }
 
 .MuiOutlinedInput-input {
-    height: 1rem !important;
+    height: 14px !important;
+    min-height: unset !important;
 }

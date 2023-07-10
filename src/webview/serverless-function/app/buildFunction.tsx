@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
 import { Uri } from 'vscode';
-import { Button, FormControl, InputLabel, MenuItem, OutlinedInput, Select, SelectChangeEvent, TextField } from '@mui/material';
+import { Autocomplete, Button, FormControl, SelectChangeEvent, TextField, createFilterOptions } from '@mui/material';
 import { VSCodeMessage } from './vsCodeMessage';
 import { BuildFunctionPageProps } from '../../common/propertyTypes';
 import { LoadModal } from './modal';
@@ -13,7 +13,9 @@ import './home.scss';
 export class BuildFunction extends React.Component<BuildFunctionPageProps, {
     images: string[],
     selectedImage: string,
-    path: Uri
+    path: Uri,
+    error: boolean,
+    helpText: string
 }> {
 
     constructor(props: BuildFunctionPageProps | Readonly<BuildFunctionPageProps>) {
@@ -21,7 +23,9 @@ export class BuildFunction extends React.Component<BuildFunctionPageProps, {
         this.state = {
             images: [],
             selectedImage: '',
-            path: undefined
+            path: undefined,
+            error: false,
+            helpText: ''
         }
     }
 
@@ -55,54 +59,88 @@ export class BuildFunction extends React.Component<BuildFunctionPageProps, {
     }
 
     render(): React.ReactNode {
-        const { images, selectedImage, path } = this.state;
+        const { images, selectedImage, path, error, helpText } = this.state;
+        const filter = createFilterOptions<string>();
+        const imageRegex = RegExp('[^/]+\\.[^/.]+\\/([^/.]+)(?:\\/[\\w\\s._-]*([\\w\\s._-]))*(?::[a-z0-9\\.-]+)?$');
         return (
             <>
                 <LoadModal show={this.props.loadScreen} />
-                <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem' }}>
-                    <FormControl sx={{ margin: '2rem 0 0 2rem', width: 350 }}>
-                        <TextField
-                            label='Name'
-                            type='string'
-                            variant='outlined'
-                            disabled
-                            defaultValue={this.props.name}
-                            id='build-function-name'
-                            sx={{
-                                input: {
-                                    color: 'var(--vscode-settings-textInputForeground)',
-                                    backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                <FormControl sx={{ margin: '2rem 0 0 2rem', width: 350 }}>
+                    <TextField
+                        label='Name'
+                        type='string'
+                        variant='outlined'
+                        disabled
+                        defaultValue={this.props.name}
+                        id='build-function-name'
+                        sx={{
+                            input: {
+                                color: 'var(--vscode-settings-textInputForeground)',
+                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                maxWidth: '100% !important'
+                            }
+                        }}
+                    />
+                </FormControl>
+                <FormControl sx={{ margin: '2rem 0 0 2rem', width: 'auto' }}>
+                    <Autocomplete
+                        value={selectedImage}
+                        onChange={(_event, newValue: string) => {
+                            if (newValue) {
+                                const value = newValue.replace('Add', '').trim();
+                                if (!imageRegex.test(value)) {
+                                    this.setState({
+                                        error: true,
+                                        selectedImage: '',
+                                        helpText: 'Provide full image name in the form [registry]/[namespace]/[name]:[tag]'
+                                    });
+                                } else {
+                                    if (!images.includes(value)) {
+                                        images.push(value);
+                                    }
+                                    this.setState({
+                                        error: false,
+                                        helpText: '',
+                                        selectedImage: value
+                                    });
                                 }
-                            }}
-                        />
-                    </FormControl>
-                    <FormControl sx={{ margin: '2rem 0 0 2rem', width: 350 }}>
-                        <InputLabel id='image-dropdown' required>Build Image</InputLabel>
-                        <Select
-                            labelId='image-dropdown'
-                            id='image-name'
-                            value={selectedImage}
-                            disabled={images.length === 1}
-                            onChange={(e) => this.handleDropDownChange(e)}
-                            input={<OutlinedInput label='Language' />}
-                            fullWidth
-                        >
-                            {images.map((image) => (
-                                <MenuItem
-                                    key={image}
-                                    value={image}
-                                >
-                                    {image}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </div>
-                <div style={{ marginTop: '2rem' }}>
+                            }
+                        }}
+                        filterOptions={(options, params) => {
+                            const filtered = filter(options, params);
+
+                            const { inputValue } = params;
+                            // Suggest the creation of a new value
+                            const isExisting = options.some((option) => inputValue === option);
+                            if (inputValue !== '' && !isExisting) {
+                                filtered.push(`Add ${inputValue}`);
+                            }
+
+                            return filtered;
+                        }}
+                        id='image-dropdown'
+                        options={images}
+                        getOptionLabel={(option) => {
+                            // Value selected with enter, right from the input
+                            if (typeof option === 'string') {
+                                return option;
+                            }
+                            // Regular option
+                            return option;
+                        }}
+                        renderOption={(props, option) => <li {...props}>{option}</li>}
+                        clearOnBlur
+                        fullWidth
+                        renderInput={(params) => (
+                            <TextField {...params} label='Build Image' error={error} helperText={helpText} />
+                        )}
+                    />
+                </FormControl>
+                <FormControl sx={{ margin: '2rem 0 0 2rem', width: 100, flexDirection: 'row' }}>
                     <Button variant='contained'
-                        disabled={selectedImage.length === 0 || !path}
+                        disabled={selectedImage.length === 0 || !path || error || helpText.length > 0}
                         className='buttonStyle'
-                        style={{ backgroundColor: selectedImage.length === 0 || !path ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: 'white' }}
+                        style={{ backgroundColor: selectedImage.length === 0 || !path || error || helpText.length > 0 ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: 'white' }}
                         onClick={() => this.buildFunction()}>
                         Build
                     </Button>
@@ -114,7 +152,7 @@ export class BuildFunction extends React.Component<BuildFunctionPageProps, {
                     >
                         Finish
                     </Button>
-                </div>
+                </FormControl>
             </>
         )
     }

@@ -149,7 +149,7 @@ async function gitImportMessageListener(panel: OverridePanel, event: any): Promi
                             }
                             terminal = undefined;
                         },
-                        handleInput: ((data: string) => {
+                        handleInput: ((_data: string) => {
                             if (!devProcess) {
                                 terminal.dispose();
                             } else {
@@ -213,7 +213,9 @@ async function gitImportMessageListener(panel: OverridePanel, event: any): Promi
                             }
                             terminal = undefined;
                         },
-                        handleInput: ((data: string) => {
+                        handleInput: ((_data: string) => {
+                            const devProcess = ServerlessFunctionViewLoader.processMap.get(`run-${functionPath.fsPath}`);;
+                            console.log(devProcess);
                             if (!devProcess) {
                                 terminal.dispose();
                             } else {
@@ -233,7 +235,7 @@ async function gitImportMessageListener(panel: OverridePanel, event: any): Promi
             try {
                 const child_process = ServerlessFunctionViewLoader.processMap.get(`run-${functionPath.fsPath}`);
                 if (child_process) {
-                    child_process.kill('SIGTERM');
+                    child_process.kill('SIGINT');
                     ServerlessFunctionViewLoader.processMap.delete(`run-${functionPath.fsPath}`);
                 }
                 panel.webview.postMessage({
@@ -253,6 +255,7 @@ async function gitImportMessageListener(panel: OverridePanel, event: any): Promi
                 const addedWSPath = vscode.Uri.from(functionPath);
                 const wsFolder = vscode.workspace.getWorkspaceFolder(addedWSPath);
                 if (!wsFolder) {
+                    void vscode.window.showInformationMessage('The Created function was added into workspace');
                     vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: addedWSPath });
                 }
                 panel.dispose();
@@ -264,18 +267,12 @@ async function gitImportMessageListener(panel: OverridePanel, event: any): Promi
 }
 
 function processStep(panel: vscode.WebviewPanel, folderPath: vscode.Uri, name: string, stepCount: number) {
-    switch (stepCount) {
-        case 1:
-            panel.webview.postMessage({
-                action: 'createFunction',
-                name: name,
-                path: folderPath,
-                success: true
-            });
-            break;
-        default:
-            break;
-    }
+    panel.webview.postMessage({
+        action: 'skip',
+        name: name,
+        path: folderPath,
+        stepCount: stepCount
+    });
 }
 
 export default class ServerlessFunctionViewLoader {
@@ -354,11 +351,12 @@ export default class ServerlessFunctionViewLoader {
 
         panel.onDidDispose(() => {
             ServerlessFunctionViewLoader.views.delete(contextPath.fsPath);
-            const folderPath: vscode.Uri = panel.contextPath;
-            const addedWSPath = typeof folderPath === 'string' ? vscode.Uri.parse(folderPath) : vscode.Uri.from(folderPath);
-            const wsFolder = vscode.workspace.getWorkspaceFolder(addedWSPath);
-            if (!wsFolder) {
-                vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: addedWSPath });
+            const addedWSPath: vscode.Uri = panel.contextPath;
+            if (addedWSPath.fsPath !== '\\new') {
+                const wsFolder = vscode.workspace.getWorkspaceFolder(addedWSPath);
+                if (!wsFolder) {
+                    vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: addedWSPath });
+                }
             }
             panel = undefined;
         });

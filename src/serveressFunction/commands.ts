@@ -43,10 +43,10 @@ export class Command {
         return commandText
     }
 
-    static runFunction(location: string, runBuild: string): CommandText {
+    static runFunction(location: string, runBuild: boolean): CommandText {
         const commandText = new CommandText('func', 'run', [
             new CommandOption('-p', location),
-            new CommandOption('-b', runBuild)
+            new CommandOption('-b', runBuild.toString())
         ]);
         return commandText;
     }

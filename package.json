@@ -796,6 +796,11 @@
 				"command": "openshift.Serverless.build",
 				"title": "Build",
 				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.run",
+				"title": "Run",
+				"category": "OpenShift"
 			}
 		],
 		"keybindings": [
@@ -1416,7 +1421,11 @@
 				},
 				{
 					"command": "openshift.Serverless.build",
-					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localDeployFunctions|localFunctionsEnablement|notConnectedLocalFunctions|notConnectedLocalFunctionsEnablement)$/"
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild)$/"
+				},
+				{
+					"command": "openshift.Serverless.run",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild)$/"
 				}
 			]
 		},

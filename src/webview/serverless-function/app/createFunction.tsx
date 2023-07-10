@@ -121,7 +121,8 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                 })
             }
             this.setState({
-                language: e.target.value
+                language: e.target.value,
+                template: ''
             });
         } else {
             this.setState({
@@ -131,7 +132,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
     }
 
     handleCreateBtnDisable(): boolean {
-        return !this.state.functionData || this.state.functionData.name.length === 0 || this.state.functionData.error || !this.state.wsFolderPath
+        return !this.state.functionData || this.state.functionData.name.length === 0 || this.state.functionData.error || !this.state.wsFolderPath || this.state.language.length === 0 || this.state.template.length === 0;
     }
 
     createFunction = (): void => {
@@ -167,7 +168,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                     />
                 </FormControl>
                 <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem' }}>
-                    <FormControl sx={{ margin: '2rem 0 0 2rem', width: 250 }}>
+                    <FormControl sx={{ margin: '2rem 0 0 2rem', width: 150 }}>
                         <InputLabel id='language-dropdown' required>Language</InputLabel>
                         <Select
                             labelId='language-dropdown'
@@ -191,10 +192,10 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         <Select
                             labelId='template-dropdown'
                             id='template-name'
+                            disabled={language.length === 0}
                             value={template}
                             onChange={(e) => this.handleDropDownChange(e, false)}
                             input={<OutlinedInput label='Template' />}
-                            autoWidth
                         >
                             {templates.map((template) => (
                                 <MenuItem
@@ -207,7 +208,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         </Select>
                     </FormControl>
                     {wsFolderItems.length > 0 &&
-                        <FormControl sx={{ margin: '2rem 0 0 2rem', width: 320 }}>
+                        <FormControl sx={{ margin: '2rem 0 0 2rem', width: 'auto' }}>
                             <InputLabel id='folder-dropdown' required>Folder</InputLabel>
                             <Select
                                 labelId='folder-dropdown'
@@ -215,7 +216,6 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                                 onChange={(e) => this.handleWsFolderDropDownChange(e)}
                                 input={<OutlinedInput label='Folder' />}
                                 value={wsFolderPath ? wsFolderPath.fsPath : ''}
-                                autoWidth
                             >
                                 {folders.map((folder: Uri | string) => (
                                     <MenuItem
@@ -240,7 +240,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         </FormControl>
                     }
                 </div>
-                <div style={{ marginTop: '2rem' }}>
+                <FormControl sx={{ margin: '2rem 0 0 2rem', width: 100 }}>
                     <Button variant='contained'
                         disabled={this.handleCreateBtnDisable()}
                         className='buttonStyle'
@@ -248,7 +248,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         onClick={() => this.createFunction()}>
                         Create
                     </Button>
-                </div>
+                </FormControl>
             </>
         )
     }

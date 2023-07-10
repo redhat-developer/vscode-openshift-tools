@@ -37,7 +37,7 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
     }
 
     componentDidMount(): void {
-        VSCodeMessage.onMessage((message) => {
+        VSCodeMessage.onMessage(async (message) => {
             if (message.data.action == 'createFunction') {
                 const stepCount = message.data.success ? this.state.activeStep + 1 : this.state.activeStep;
                 this.setState({
@@ -53,10 +53,25 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
             } else if (message.data.action == 'buildFunction') {
                 const stepCount = message.data.success ? this.state.activeStep + 1 : this.state.activeStep;
                 this.setState({
-                    activeStep: stepCount
+                    activeStep: stepCount,
+                    functionName: message.data.name,
+                    locationUri: message.data.path
                 });
             } else if (message.data.action == 'loadScreen') {
                 this.setState({ showLoadScreen: message.data.show })
+            } else if (message.data.action == 'skip') {
+                if (message.data.stepCount > 0) {
+                    VSCodeMessage.postMessage({
+                        action: 'getImage',
+                        name: message.data.name,
+                        folderPath: message.data.path
+                    });
+                };
+                this.setState({
+                    activeStep: message.data.stepCount,
+                    functionName: message.data.name,
+                    locationUri: message.data.path
+                });
             }
         });
     }
@@ -87,7 +102,7 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
         });
     }
 
-    handleRunSubmit = (folderPath: Uri, build: string): void => {
+    handleRunSubmit = (folderPath: Uri, build: boolean): void => {
         VSCodeMessage.postMessage({
             action: 'runFunction',
             name: this.state.functionName,
@@ -121,26 +136,24 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
         const { activeStep } = this.state;
         const steps = ['Create', 'Build', 'Run'];
         return (
-            <>
-                <div className='mainContainer margin'>
-                    <div className='title'>
-                        <Typography variant='h5'>Serverless Function</Typography>
-                    </div>
-                    <div className='subTitle'>
-                        <Typography>Function lifecycle management includes creating, building, and deploying a function. Optionally, you can also test a deployed function by invoking it. You can do all of these operations on OpenShift Serverless using the kn func tool.</Typography>
-                    </div>
-                    <Stepper activeStep={activeStep}>
-                        {steps.map(label => (
-                            <Step key={label}>
-                                <StepLabel>{label}</StepLabel>
-                            </Step>
-                        ))}
-                    </Stepper>
-                    {
-                        this.handleStep(activeStep)
-                    }
+            <div className='mainContainer margin'>
+                <div className='title'>
+                    <Typography variant='h5'>Serverless Function</Typography>
                 </div>
-            </>
+                <div className='subTitle'>
+                    <Typography>Function lifecycle management includes creating, building, and deploying a function. Optionally, you can also test a deployed function by invoking it. You can do all of these operations on OpenShift Serverless using the kn func tool.</Typography>
+                </div>
+                <Stepper activeStep={activeStep}>
+                    {steps.map(label => (
+                        <Step key={label}>
+                            <StepLabel>{label}</StepLabel>
+                        </Step>
+                    ))}
+                </Stepper>
+                {
+                    this.handleStep(activeStep)
+                }
+            </div>
         )
     }
 }

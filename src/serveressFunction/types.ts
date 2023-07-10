@@ -23,7 +23,8 @@ export interface FunctionObject {
     runtime?: string;
     folderURI?: Uri;
     ready?: string;
-    context: string
+    context: string;
+    hasImage?: boolean;
 }
 
 export interface ImageAndBuild {
@@ -53,7 +54,7 @@ export enum FunctionContextType {
     FAILNAMESPACENODE = 'failNamespaceNode',
     NAMESPACENODE = 'namespaceNode',
     LOCAlFUNCTIONS = 'localFunctions',
-    LOCAlFUNCTIONSENABLEMENT = 'localFunctionsEnablement',
+    LOCAlFUNCTIONSWithBuild = 'localFunctionsWithBuild',
     NOTCONNECTEDLOCALFUNCTIONS = 'notConnectedLocalFunctions',
     NOTCONNECTEDLOCALFUNCTIONSENABLEMENT = 'notConnectedLocalFunctionsEnablement',
     ACTIVECOMMAND = 'activecommand',

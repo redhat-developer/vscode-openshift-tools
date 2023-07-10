@@ -73,5 +73,5 @@ export interface RunFunctionPageProps extends DefaultProps {
     name: string;
     folderPath: Uri;
     skip: (stepCount: number) => void;
-    onRunSubmit: (folderPath: Uri, build: string) => void;
+    onRunSubmit: (folderPath: Uri, build: boolean) => void;
 }

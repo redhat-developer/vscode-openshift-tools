@@ -15,7 +15,7 @@ export class BuildAndDeploy {
 
     private static instance: BuildAndDeploy;
 
-    private imageRegex = RegExp('[^/]+\\.[^/.]+\\/([^/.]+)(?:\\/[\\w\\s._-]*([\\w\\s._-]))*(?::[a-z0-9\\.-]+)?$');
+    public static imageRegex = RegExp('[^/]+\\.[^/.]+\\/([^/.]+)(?:\\/[\\w\\s._-]*([\\w\\s._-]))*(?::[a-z0-9\\.-]+)?$');
 
     static getInstance(): BuildAndDeploy {
         if (!BuildAndDeploy.instance) {
@@ -100,7 +100,7 @@ export class BuildAndDeploy {
         }
     }
 
-    public async runFunction(path: string, runBuild: string): Promise<ChildProcess> {
+    public async runFunction(path: string, runBuild: boolean): Promise<ChildProcess> {
         return await CliChannel.getInstance().spawnTool(Command.runFunction(path, runBuild));
     }
 
@@ -118,7 +118,7 @@ export class BuildAndDeploy {
         imageList.push(defaultQuayImage);
         imageList.push(defaultDockerImage);
         const yamlContent = await Utils.getFuncYamlContent(folder.fsPath);
-        if (yamlContent?.image && this.imageRegex.test(yamlContent.image)) {
+        if (yamlContent?.image && BuildAndDeploy.imageRegex.test(yamlContent.image)) {
             imageList = [];
             imageList.push(yamlContent.image);
         }
@@ -133,7 +133,7 @@ export class BuildAndDeploy {
             prompt: promptMessage,
             value: defaultImage,
             validateInput: (value: string) => {
-                if (!this.imageRegex.test(value)) {
+                if (!BuildAndDeploy.imageRegex.test(value)) {
                     return inputValidMessage;
                 }
                 return null;
@@ -143,7 +143,7 @@ export class BuildAndDeploy {
 
     private async getImageAndBuildStrategy(yamlContent: FunctionContent, forceImageStrategyPicker: boolean): Promise<ImageAndBuild> {
         const imageList: string[] = [];
-        if (yamlContent?.image && this.imageRegex.test(yamlContent.image)) {
+        if (yamlContent?.image && BuildAndDeploy.imageRegex.test(yamlContent.image)) {
             imageList.push(yamlContent.image);
         }
 
