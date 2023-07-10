@@ -14,6 +14,7 @@ import OpenShiftItem from '../../openshift/openshiftItem';
 import { ComponentTypesView } from '../../registriesView';
 import { ExtensionID } from '../../util/constants';
 import { selectWorkspaceFolder } from '../../util/workspace';
+import { VsCommandError } from '../../vscommand';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
 import { DevfileConverter } from '../git-import/devfileConverter';
@@ -113,12 +114,14 @@ export default class CreateComponentLoader {
                 CreateComponentLoader.validateComponentName(message.data);
                 break;
             }
+            /**
+             * The panel requested to select a project folder.
+             */
             case 'selectProjectFolder': {
                 const workspaceUri: vscode.Uri = await selectWorkspaceFolder(true);
-                const isDevfileExist: boolean = await isDevfileExists(workspaceUri);
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'devfileExists',
-                    data: isDevfileExist,
+                    data: await isDevfileExists(workspaceUri)
                 });
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'workspaceFolders',
@@ -140,6 +143,9 @@ export default class CreateComponentLoader {
                 });
                 break;
             }
+            /**
+             * The panel requested to get the receommended devfile given the selected project.
+             */
             case 'getRecommendedDevfile': {
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'devfileExists',
@@ -232,6 +238,29 @@ export default class CreateComponentLoader {
                     void vscode.window.showErrorMessage(e);
                 }
                 break;
+            }
+            /**
+             * The panel requested to create component.
+             */
+            case 'createComponent': {
+                const projectUri = Uri.file(message.data.path);
+                const componentName: string = message.data.componentName;
+                try {
+                    await OdoImpl.Instance.createComponentFromFolder(getDevfileType(message.data.devfileDisplayName), undefined, componentName, projectUri);
+                    CreateComponentLoader.panel.dispose();
+                    vscode.commands.executeCommand('openshift.componentsView.refresh');
+                    window.showInformationMessage(`Component '${componentName}' was successfully created. Perform actions on it from Components View.`);
+                    vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: projectUri });
+                    break;
+                } catch (err) {
+                    if (err instanceof VsCommandError) {
+                        throw new VsCommandError(
+                            `Error occurred while creating Component '${componentName}': ${err.message}`,
+                            `Error occurred while creating Component: ${err.telemetryMessage}`, err,
+                        );
+                    }
+                    throw err;
+                }
             }
         }
     }
@@ -388,6 +417,12 @@ function getCompDescription(devfiles: AnalyzeResponse[]): ComponentTypeDescripti
                 res.devfileRegistry === registry.name,
         ),
     );
+}
+
+function getDevfileType(devfileDisplayName: string): string {
+    const compDescriptions: Set<ComponentTypeDescription> = ComponentTypesView.instance.getCompDescriptions();
+    const devfileDescription: ComponentTypeDescription = Array.from(compDescriptions).find((description) => description.displayName === devfileDisplayName);
+    return devfileDescription.name;
 }
 
 function getEndPoints(compDescription: ComponentTypeDescription): Endpoint[] {

@@ -1,4 +1,4 @@
-import { Button, Divider, FormControl, FormHelperText, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
+import { Button, CircularProgress, Divider, FormControl, FormHelperText, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
 import * as React from 'react';
 import { Uri } from 'vscode';
 import { Devfile } from '../../common/devfile';
@@ -19,6 +19,7 @@ export function FromLocalCodebase({ setCurrentView }) {
     const [isComponentNameInvalid, setIsComponentNameInvalid] = React.useState(true);
     const [validationMessage, setValidationMessage] = React.useState('Please enter a component name.');
     const [isDevfileExistsInFolder, setIsDevfileExistsInFolder] = React.useState(false);
+    const [isLoading, setIsLoading] = React.useState(false);
 
     function respondToMessage(messageEvent: MessageEvent) {
         const message = messageEvent.data as Message;
@@ -33,6 +34,7 @@ export function FromLocalCodebase({ setCurrentView }) {
                 };
                 setRecommendedDevfile(devfile);
                 setShowRecommendedDevfile(true);
+                setIsLoading(false);
                 break;
             }
             case 'validatedComponentName': {
@@ -68,6 +70,18 @@ export function FromLocalCodebase({ setCurrentView }) {
         window.vscodeApi.postMessage({
             action: 'getRecommendedDevfile',
             data: projectFolder
+        });
+        setIsLoading(true);
+    };
+
+    function handleCreateComponent() {
+        window.vscodeApi.postMessage({
+            action: 'createComponent',
+            data: {
+                devfileDisplayName: recommendedDevfile.name,
+                componentName: componentName,
+                path: projectFolder
+            }
         });
     };
 
@@ -117,56 +131,52 @@ export function FromLocalCodebase({ setCurrentView }) {
                             <FormHelperText>There are no projects in the workspace, select folder or open a folder in the workspace.</FormHelperText>}
                     </FormControl>
                     {!showRecommendedDevfile &&
-                        <Button variant='contained' onClick={() => {window.vscodeApi.postMessage({ action: 'selectProjectFolder' })}} sx={{ height: '4em', width: '10%' }} > SELECT FOLDER </Button>}
+                        <Button variant='contained' onClick={() => { window.vscodeApi.postMessage({ action: 'selectProjectFolder' }) }} sx={{ height: '4em', width: '10%' }} > SELECT FOLDER </Button>}
                 </div>
                 {!showRecommendedDevfile ? (
-                    <div style={{ display: 'flex', flexDirection: 'row', gap: '1em', marginTop: '1em' }}>
-                        <Button variant='text' onClick={() => { setCurrentView('home') }}>
-                            BACK
-                        </Button>
-                        <Button variant='contained' disabled={isComponentNameInvalid || projectFolder.length === 0 || isDevfileExistsInFolder} onClick={handleNext}>
-                            NEXT
-                        </Button>
-                    </div>
+                    <>
+                        <div style={{ display: 'flex', flexDirection: 'row', gap: '1em', marginTop: '1em' }}>
+                            <Button variant='text' onClick={() => { setCurrentView('home') }}>
+                                BACK
+                            </Button>
+                            <Button variant='contained' disabled={isComponentNameInvalid || projectFolder.length === 0 || isDevfileExistsInFolder} onClick={handleNext}>
+                                NEXT
+                            </Button>
+                        </div>
+                        {isLoading &&
+                            <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignSelf: 'center', gap: '2em'}}>
+                                <Divider variant="middle" sx={{ marginTop: '2em' }} />
+                                <CircularProgress />
+                                Scanning for recommended devfile.
+                            </div>
+                        }
+                    </>
                 ) : (
                     <div>
                         <Divider variant="middle" sx={{ marginTop: '2em' }} />
-                        <RecommendedDevfile recommendedDevfile={recommendedDevfile} componentName={componentName} setCurrentView={setCurrentView} setShowRecommendedDevfile={setShowRecommendedDevfile} />
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ display: 'flex', marginTop: '1.5em', justifyContent: 'space-between' }}>
+                                <Typography variant='h6'>
+                                    Recommended Devfile for {componentName}
+                                </Typography>
+                                <DevfileRecommendationInfo />
+                            </div>
+                            <DevfileListItem devfile={recommendedDevfile} />
+                            <div style={{ display: 'flex', gap: '1em', marginTop: '1.5em', justifyContent: 'flex-end' }}>
+                                <Button variant='text' onClick={() => { setShowRecommendedDevfile(false) }} sx={{ marginRight: 'auto' }}>
+                                    BACK
+                                </Button>
+                                <Button variant='text' onClick={() => { setCurrentView('devfileSearch') }}>
+                                    SELECT A DIFFERENT DEVFILE
+                                </Button>
+                                <Button variant='contained' onClick={handleCreateComponent}>
+                                    CREATE COMPONENT
+                                </Button>
+                            </div >
+                        </div >
                     </div>
                 )}
             </Stack>
         </>
-    );
-}
-
-type RecommendedDevfileProps = {
-    recommendedDevfile: Devfile;
-    componentName: string;
-    setCurrentView: any;
-    setShowRecommendedDevfile: any;
-};
-
-function RecommendedDevfile(props: RecommendedDevfileProps) {
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', marginTop: '1.5em', justifyContent: 'space-between' }}>
-                <Typography variant='h6'>
-                    Recommended Devfile for {props.componentName}
-                </Typography>
-                <DevfileRecommendationInfo />
-            </div>
-            <DevfileListItem devfile={props.recommendedDevfile} />
-            <div style={{ display: 'flex', gap: '1em', marginTop: '1.5em', justifyContent: 'flex-end' }}>
-                <Button variant='text' onClick={() => { props.setShowRecommendedDevfile(false) }} sx={{ marginRight: 'auto' }}>
-                    BACK
-                </Button>
-                <Button variant='text' onClick={() => { props.setCurrentView('devfileSearch') }}>
-                    SELECT A DIFFERENT DEVFILE
-                </Button>
-                <Button variant='contained'>
-                    CREATE COMPONENT
-                </Button>
-            </div >
-        </div >
     );
 }
