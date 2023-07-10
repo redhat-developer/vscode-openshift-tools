@@ -69,7 +69,7 @@ export class ToolsConfig {
         let detectedVersion: string;
         if (fs.existsSync(location)) {
             let result = await CliChannel.getInstance().execute(`"${location}" version --client`);
-            if (result.stderr.indexOf('unknown flag: --client') !== -1) {
+            if (result.stderr && result.stderr.indexOf('unknown flag: --client') !== -1) {
                 result = await CliChannel.getInstance().execute(`"${location}" version`);
             }
             if (result.stdout) {
