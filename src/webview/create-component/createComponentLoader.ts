@@ -22,6 +22,7 @@ import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/d
 import { DevfileConverter } from '../git-import/devfileConverter';
 import { gitUrlParse } from '../git-import/gitParse';
 import cp = require('child_process');
+import fsExtra = require('fs-extra');
 
 interface CloneProcess {
     status: boolean,
@@ -127,7 +128,7 @@ export default class CreateComponentLoader {
              * The panel requested to select a project folder.
              */
             case 'selectProjectFolder': {
-                const workspaceUri: vscode.Uri = await selectWorkspaceFolder(true);
+                const workspaceUri: Uri = await selectWorkspaceFolder(true);
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'devfileExists',
                     data: await isDevfileExists(workspaceUri)
@@ -140,7 +141,7 @@ export default class CreateComponentLoader {
                 });
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'selectedProjectFolder',
-                    data: workspaceUri,
+                    data: workspaceUri.fsPath,
                 });
                 break;
             }
@@ -252,21 +253,31 @@ export default class CreateComponentLoader {
              * The panel requested to get the receommended devfile given the selected project.
              */
             case 'getRecommendedDevfileFromGit': {
-                const tmpFolder: vscode.Uri = Uri.parse(await promisify(tmp.dir)());
-                const cloneProcess: CloneProcess = await clone(message.data.gitURL, tmpFolder.fsPath);
+                const tmpFolder: Uri = Uri.parse(await promisify(tmp.dir)());
+                const cloneProcess: CloneProcess = await clone(message.data, tmpFolder.fsPath);
                 if (!cloneProcess.status && cloneProcess.error) {
                     void CreateComponentLoader.panel.webview.postMessage({
-                        action: 'cloneFailed'
+                        action: 'cloneFailed',
                     });
                 }
-                CreateComponentLoader.getRecommendedDevfile(Uri.file(message.data));
+                CreateComponentLoader.getRecommendedDevfile(tmpFolder);
                 break;
             }
             /**
              * The panel requested to create component.
              */
             case 'createComponent': {
-                const projectUri = Uri.file(message.data.path);
+                let projectUri: Uri;
+                if (message.data.path) {
+                    // path of project in local codebase
+                    projectUri = Uri.file(message.data.path);
+                } else if (message.data.gitDestinationPath) {
+                    // move the cloned git repo to selected project path
+                    await fsExtra.copy(message.data.tmpDirUri.fsPath, message.data.gitDestinationPath);
+                    await fs.rm(message.data.tmpDirUri.fsPath, { force: true, recursive: true });
+                    projectUri = Uri.file(message.data.gitDestinationPath);
+                }
+
                 const componentName: string = message.data.componentName;
                 try {
                     await OdoImpl.Instance.createComponentFromFolder(getDevfileType(message.data.devfileDisplayName), undefined, componentName, projectUri);
@@ -290,6 +301,13 @@ export default class CreateComponentLoader {
              */
             case 'validateGitURL': {
                 validateGitURL(message);
+                break;
+            }
+            /**
+             * The panel requested to validate a folder path.
+             */
+            case 'validateFolderPath': {
+                await validateFolderPath(message.data);
                 break;
             }
         }
@@ -428,7 +446,10 @@ export default class CreateComponentLoader {
             );
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'recommendedDevfile',
-                data: devfile,
+                data: {
+                    devfile: devfile,
+                    tmpDir: uri
+                }
             });
         }
     }
@@ -529,4 +550,24 @@ function clone(url: string, location: string): Promise<CloneProcess> {
             error ? resolve({ status: false, error: error.message }) : resolve({ status: true, error: undefined });
         }
     )));
+}
+
+async function validateFolderPath(path: string) {
+    let isValid: boolean = true;
+    let helpText: string = '';
+    if ((await fs.stat(path)).isDirectory()) {
+        try {
+            await fs.access(path);
+        } catch {
+            isValid = false;
+            helpText = 'Please enter a valid directory path.';
+        }
+        CreateComponentLoader.panel?.webview.postMessage({
+            action: 'validatedFolderPath',
+            data: {
+                isValid: isValid,
+                helpText: helpText
+            }
+        });
+    }
 }

@@ -1,6 +1,7 @@
-import { Button, CircularProgress, Divider, FormControl, FormHelperText, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
+import { Button, CircularProgress, Divider, FormControl, FormHelperText, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
 import * as React from 'react';
 import { Uri } from 'vscode';
+import { ComponentNameInput } from '../../common/componentNameInput';
 import { Devfile } from '../../common/devfile';
 import { DevfileListItem } from '../../common/devfileListItem';
 import { DevfileRecommendationInfo } from '../../common/devfileRecommendationInfo';
@@ -10,7 +11,7 @@ type Message = {
     data: any;
 }
 
-type ComponentNameState = {
+export type ComponentNameState = {
     name: string
     isValid: boolean;
     helpText: string;
@@ -46,21 +47,18 @@ export function FromLocalCodebase({ setCurrentView }) {
                 break;
             }
             case 'recommendedDevfile': {
-                const devfile: Devfile = {
-                    ...message.data,
-                };
-                setRecommendedDevfile((prevState) => ({...prevState, devfile: devfile}));
-                setRecommendedDevfile((prevState) => ({...prevState, showRecommendation: true}));
-                setRecommendedDevfile((prevState) => ({...prevState, isLoading: false}));
+                setRecommendedDevfile((prevState) => ({ ...prevState, devfile: message.data.devfile }));
+                setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: true }));
+                setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: false }));
                 break;
             }
             case 'validatedComponentName': {
                 if (message.data) {
-                    setComponentName((prevState) => ({...prevState, isValid: false}));
-                    setComponentName((prevState) => ({...prevState, helpText: message.data}));
+                    setComponentName((prevState) => ({ ...prevState, isValid: false }));
+                    setComponentName((prevState) => ({ ...prevState, helpText: message.data }));
 
                 } else {
-                    setComponentName((prevState) => ({...prevState, isValid: true}));
+                    setComponentName((prevState) => ({ ...prevState, isValid: true }));
                 }
                 break;
             }
@@ -71,7 +69,7 @@ export function FromLocalCodebase({ setCurrentView }) {
                 break;
             }
             case 'devfileExists': {
-                setRecommendedDevfile((prevState) => ({...prevState, isDevfileExistsInFolder: message.data}));
+                setRecommendedDevfile((prevState) => ({ ...prevState, isDevfileExistsInFolder: message.data }));
                 break;
             }
         }
@@ -89,7 +87,7 @@ export function FromLocalCodebase({ setCurrentView }) {
             action: 'getRecommendedDevfile',
             data: projectFolder
         });
-        setRecommendedDevfile((prevState) => ({...prevState, isLoading: true}));
+        setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: true }));
     };
 
     function handleCreateComponent() {
@@ -111,21 +109,8 @@ export function FromLocalCodebase({ setCurrentView }) {
                 </Typography>
             </div>
             <Stack direction='column' spacing={2} marginTop={3}>
-                    <TextField
-                        id='componentName'
-                        variant='outlined'
-                        label='Component Name'
-                        error={!componentName.isValid}
-                        helperText={!componentName.isValid && componentName.helpText}
-                        onChange={(e) => {
-                            window.vscodeApi.postMessage({
-                                action: 'validateComponentName',
-                                data: e.target.value
-                            });
-                            setComponentName((prevState) => ({...prevState, name: e.target.value}));
-                        }}
-                    />
-                <div style={{ display: 'flex', flexDirection: 'row', gap: '1em', marginTop: '1em' }}>
+                <ComponentNameInput componentName={componentName} setComponentName={setComponentName} ></ComponentNameInput>
+                <Stack direction='row' spacing={1} marginTop={1}>
                     <FormControl fullWidth error={recommendedDevfile.isDevfileExistsInFolder} >
                         <InputLabel id="project-path-label">Folder</InputLabel>
                         <Select
@@ -149,38 +134,38 @@ export function FromLocalCodebase({ setCurrentView }) {
                     </FormControl>
                     {!recommendedDevfile.showRecommendation &&
                         <Button variant='contained' onClick={() => { window.vscodeApi.postMessage({ action: 'selectProjectFolder' }) }} sx={{ height: '4em', width: '10%' }} > SELECT FOLDER </Button>}
-                </div>
+                </Stack>
                 {!recommendedDevfile.showRecommendation ? (
                     <>
-                        <div style={{ display: 'flex', flexDirection: 'row', gap: '1em', marginTop: '1em' }}>
+                        <Stack direction='row' spacing={1} marginTop={1}>
                             <Button variant='text' onClick={() => { setCurrentView('home') }}>
                                 BACK
                             </Button>
                             <Button variant='contained' disabled={!componentName.isValid || projectFolder.length === 0 || recommendedDevfile.isDevfileExistsInFolder} onClick={handleNext}>
                                 NEXT
                             </Button>
-                        </div>
+                        </Stack>
                         {recommendedDevfile.isLoading &&
-                            <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignSelf: 'center', gap: '2em'}}>
+                            <Stack direction='column' spacing={2} alignItems='center'>
                                 <Divider variant="middle" sx={{ marginTop: '2em' }} />
                                 <CircularProgress />
                                 Scanning for recommended devfile.
-                            </div>
+                            </Stack>
                         }
                     </>
                 ) : (
-                    <div>
+                    <>
                         <Divider variant="middle" sx={{ marginTop: '2em' }} />
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ display: 'flex', marginTop: '1.5em', justifyContent: 'space-between' }}>
+                        <Stack direction='column'>
+                            <Stack direction='row' justifyContent='space-between' marginTop={1}>
                                 <Typography variant='h6'>
                                     Recommended Devfile
                                 </Typography>
                                 <DevfileRecommendationInfo />
-                            </div>
+                            </Stack>
                             <DevfileListItem devfile={recommendedDevfile.devfile} />
-                            <div style={{ display: 'flex', gap: '1em', marginTop: '1.5em', justifyContent: 'flex-end' }}>
-                                <Button variant='text' onClick={() => { setRecommendedDevfile((prevState) => ({...prevState, showRecommendation: false})) }} sx={{ marginRight: 'auto' }}>
+                            <Stack direction='row' justifyContent='flex-end' marginTop={1}>
+                                <Button variant='text' onClick={() => { setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: false })) }} sx={{ marginRight: 'auto' }}>
                                     BACK
                                 </Button>
                                 <Button variant='text' onClick={() => { setCurrentView('devfileSearch') }}>
@@ -189,9 +174,9 @@ export function FromLocalCodebase({ setCurrentView }) {
                                 <Button variant='contained' onClick={handleCreateComponent}>
                                     CREATE COMPONENT
                                 </Button>
-                            </div >
-                        </div >
-                    </div>
+                            </Stack >
+                        </Stack >
+                    </>
                 )}
             </Stack>
         </>
