@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { expect } from 'chai';
-import { ActivityBar, CustomTreeSection, SideBarView, ViewSection, WelcomeContentSection, Workbench } from 'vscode-extension-tester';
+import { ActivityBar, By, CustomTreeSection, SideBarView, ViewSection, WelcomeContentSection, Workbench, waitForAttributeValue } from 'vscode-extension-tester';
 import { BUTTONS, VIEWS } from '../common/constants';
 
 export function checkOpenshiftView() {
@@ -11,19 +11,29 @@ export function checkOpenshiftView() {
         let view: SideBarView;
 
         before(async function context() {
-            this.timeout(10000);
+            this.timeout(10_000);
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             await new Promise(res => setTimeout(res, 5000));
             await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
         });
 
-        it('Displays all view sections', async () => {
+        it('Displays all view sections', async function () {
+            this.timeout(10_000);
             const expected = [VIEWS.appExplorer, VIEWS.components, VIEWS.compRegistries, VIEWS.debugSessions];
             const content = view.getContent();
             for (const sectionTitle of expected) {
                 const section = await content.getSection(sectionTitle);
                 expect(await section.getTitle()).to.eq(sectionTitle);
-                await section.collapse();
+                try {
+                    await section.collapse();
+                } catch {
+                    if(await section.isExpanded()){
+                        const mainPanel = await section.findElement(By.className('pane-header'));
+                        const arrowPanel = await section.findElement(By.className('codicon'));
+                        await arrowPanel.click();
+                        await section.getDriver().wait(waitForAttributeValue(mainPanel, 'aria-expanded', 'false'), 2_000);
+                    }
+                }
             }
         });
 
@@ -95,8 +105,8 @@ export function checkOpenshiftView() {
             });
 
             it('shows the default devfile registry', async function test() {
-                this.timeout(10000);
-                await new Promise((res) => { setTimeout(res, 6000); });
+                this.timeout(10_000);
+                await new Promise((res) => { setTimeout(res, 6_000); });
                 const registry = await registries.findItem(VIEWS.devFileRegistry);
                 expect(registry).not.undefined;
             });
