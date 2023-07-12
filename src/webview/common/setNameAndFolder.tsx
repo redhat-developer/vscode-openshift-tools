@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import {
-    Alert,
     Button,
     Container,
     FormControl,
@@ -11,7 +10,7 @@ import {
     Paper,
     Stack,
     TextField,
-    Typography
+    Typography,
 } from '@mui/material';
 import * as React from 'react';
 import 'react-dom';
@@ -24,10 +23,10 @@ type Message = {
 };
 
 type SetNameAndFolderProps = {
-    goBack: () => void,
-    createComponent: (projectFolder: string, componentName: string) => void,
-    devfile: Devfile,
-    templateProject: string,
+    goBack: () => void;
+    createComponent: (projectFolder: string, componentName: string) => void;
+    devfile: Devfile;
+    templateProject: string;
 };
 
 export function SetNameAndFolder(props: SetNameAndFolderProps) {
@@ -83,7 +82,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                         <Stack margin={2} spacing={2}>
                             <DevfileListItem devfile={props.devfile} />
                             {/* padding here is to match the padding build into the devfile list component */}
-                            <Stack direction='row' alignItems='center' spacing={1} paddingX={1}>
+                            <Stack direction="row" alignItems="center" spacing={1} paddingX={1}>
                                 <Typography variant="body1">Project:</Typography>
                                 <code>{props.templateProject}</code>
                             </Stack>
@@ -137,6 +136,11 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                                 Select Folder
                             </Button>
                         </Stack>
+                        {!isComponentNameValid(componentName) && (
+                            <FormHelperText>
+                                The project will be created in a new subfolder under this folder
+                            </FormHelperText>
+                        )}
                         {componentParentFolder && isComponentNameValid(componentName) && (
                             <FormHelperText>{folderFieldErrorMessage}</FormHelperText>
                         )}
@@ -146,25 +150,15 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                         <Button variant="text" onClick={props.goBack}>
                             Use Different Template Project
                         </Button>
-                        {!isComponentNameValid(componentName) || !isFolderFieldValid ? (
-                            <Alert severity="error">
-                                Please set a valid{' '}
-                                {!isComponentNameValid(componentName) && ' component name '}
-                                {!isComponentNameValid(componentName) &&
-                                    !isFolderFieldValid &&
-                                    ' and '}
-                                {!isFolderFieldValid && 'folder'}.
-                            </Alert>
-                        ) : (
-                            <Button
-                                variant="contained"
-                                onClick={() => {
-                                    props.createComponent(componentParentFolder, componentName);
-                                }}
-                            >
-                                Create Component
-                            </Button>
-                        )}
+                        <Button
+                            variant="contained"
+                            onClick={() => {
+                                props.createComponent(componentParentFolder, componentName);
+                            }}
+                            disabled={!isComponentNameValid(componentName) || !isFolderFieldValid}
+                        >
+                            Create Component
+                        </Button>
                     </Stack>
                 </Stack>
             </Stack>
