@@ -4,11 +4,11 @@
  *-----------------------------------------------------------------------------------------------*/
 import { TextField } from '@mui/material';
 import * as React from 'react';
-import { ComponentNameState } from '../create-component/pages/fromLocalCodebase';
 
 export type ComponentNameInputProps = {
-    componentName: ComponentNameState;
-    setComponentName: React.Dispatch<React.SetStateAction<ComponentNameState>>;
+    isComponentNameFieldValid: boolean,
+    componentNameErrorMessage: string,
+    setComponentName: React.Dispatch<React.SetStateAction<string>>
 };
 
 export function ComponentNameInput(props: ComponentNameInputProps) {
@@ -17,14 +17,14 @@ export function ComponentNameInput(props: ComponentNameInputProps) {
             id='componentName'
             variant='outlined'
             label='Component Name'
-            error={!props.componentName.isValid}
-            helperText={props.componentName.helpText}
+            error={!props.isComponentNameFieldValid}
+            helperText={props.componentNameErrorMessage}
             onChange={(e) => {
                 window.vscodeApi.postMessage({
                     action: 'validateComponentName',
                     data: e.target.value
                 });
-                props.setComponentName((prevState) => ({ ...prevState, name: e.target.value }));
+                props.setComponentName(e.target.value as string);
             }}
         />
     );
