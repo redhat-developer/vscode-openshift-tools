@@ -2,10 +2,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Accordion, AccordionDetails, AccordionSummary, Button, CircularProgress, Divider, Stack, TextField, Typography } from "@mui/material";
 import * as React from 'react';
 import { Uri } from 'vscode';
-import { ComponentNameInput } from '../../common/componentNameInput';
 import { Devfile } from '../../common/devfile';
 import { DevfileListItem } from '../../common/devfileListItem';
 import { DevfileRecommendationInfo } from '../../common/devfileRecommendationInfo';
+import { SetNameAndFolder } from '../../common/setNameAndFolder';
 
 type Message = {
     action: string;
@@ -19,20 +19,8 @@ type RecommendedDevfileState = {
     isDevfileExistsInRepo: boolean;
 }
 
-type ComponentNameState = {
-    name: string
-    isValid: boolean;
-    helpText: string;
-}
-
 type GitURLState = {
     url: string
-    isValid: boolean;
-    helpText: string;
-}
-
-type ProjectPathState = {
-    path: string
     isValid: boolean;
     helpText: string;
 }
@@ -51,17 +39,6 @@ export function FromExistingGitRepo({ setCurrentView }) {
         isLoading: false,
         isDevfileExistsInRepo: false
     });
-    const [componentName, setComponentName] = React.useState<ComponentNameState>({
-        name: '',
-        isValid: true,
-        helpText: 'Please enter a component name.'
-    });
-
-    const [projectFolder, setProjectFolder] = React.useState<ProjectPathState>({
-        path: '',
-        isValid: false,
-        helpText: 'Please enter a folder path or select a folder.'
-    });
 
     function respondToMessage(messageEvent: MessageEvent) {
         const message = messageEvent.data as Message;
@@ -78,28 +55,8 @@ export function FromExistingGitRepo({ setCurrentView }) {
                 setGitURL((prevState) => ({ ...prevState, helpText: message.data.helpText }));
                 break;
             }
-            case 'validatedComponentName': {
-                if (message.data) {
-                    setComponentName((prevState) => ({ ...prevState, isValid: false }));
-                    setComponentName((prevState) => ({ ...prevState, validationMessage: message.data }));
-                } else {
-                    setComponentName((prevState) => ({ ...prevState, isValid: true }));
-                    setComponentName((prevState) => ({ ...prevState, helpText: '' }));
-                }
-                break;
-            }
-            case 'selectedProjectFolder': {
-                if (message.data) {
-                    setProjectFolder((prevState) => ({ ...prevState, path: message.data, isValid: true }));
-                }
-                break;
-            }
             case 'devfileExists': {
                 setRecommendedDevfile((prevState) => ({ ...prevState, isDevfileExistsInRepo: message.data }));
-                break;
-            }
-            case 'validatedFolderPath': {
-                setProjectFolder((prevState) => ({ ...prevState, isValid: message.data.isValid, helpText: message.data.helpText }));
                 break;
             }
         }
@@ -120,17 +77,17 @@ export function FromExistingGitRepo({ setCurrentView }) {
         setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: true }));
     };
 
-    function handleCreateComponent() {
+    function createComponentFromGitRepo(projectFolder: string, componentName: string) {
         window.vscodeApi.postMessage({
             action: 'createComponent',
             data: {
                 devfileDisplayName: recommendedDevfile.devfile.name,
-                componentName: componentName.name,
+                componentName: componentName,
                 tmpDirUri: tmpDir,
-                gitDestinationPath: projectFolder.path
+                gitDestinationPath: projectFolder
             }
         });
-    };
+    }
 
     return (
         <>
@@ -181,13 +138,16 @@ export function FromExistingGitRepo({ setCurrentView }) {
                         {!recommendedDevfile.showRecommendation ? (
                             <>
                                 <Stack direction='row' spacing={2} marginTop={2}>
-                                    <Button variant='text' onClick={() => { setCurrentView('home') }}>
+                                    <Button
+                                        variant='text'
+                                        onClick={() => { setCurrentView('home') }}
+                                        disabled={recommendedDevfile.isLoading}>
                                         BACK
                                     </Button>
                                     <Button
                                         variant='contained'
                                         onClick={handleNext}
-                                        disabled={gitURL.url.length === 0 || !gitURL.isValid}>
+                                        disabled={gitURL.url.length === 0 || !gitURL.isValid || recommendedDevfile.isLoading}>
                                         NEXT
                                     </Button>
                                 </Stack>
@@ -228,43 +188,13 @@ export function FromExistingGitRepo({ setCurrentView }) {
                     </Stack>
                 </>
             ) : (
-                <Stack direction='column'>
-                    <div style={{ position: 'relative', marginTop: '5em' }}>
-                        <Typography variant='h5'>
-                            Select Name and Folder
-                        </Typography>
-                    </div>
-                    <div style={{ marginTop: '2em', marginBottom: '2em' }}>
-                        <DevfileListItem devfile={recommendedDevfile.devfile} />
-                    </div>
-                    <ComponentNameInput componentName={componentName} setComponentName={setComponentName} ></ComponentNameInput>
-                    <Stack direction='row' spacing={2}>
-                        <TextField fullWidth
-                            className='selectFolder'
-                            value={projectFolder.path}
-                            label="Folder"
-                            onChange={(e) => {
-                                window.vscodeApi.postMessage({
-                                    action: 'validateFolderPath',
-                                    data: e.target.value
-                                });
-                                setProjectFolder((prevState) => ({ ...prevState, path: e.target.value as string }))
-                            }}
-                            error={!projectFolder.isValid}
-                            helperText={!projectFolder.isValid && projectFolder.helpText}
-                            sx={{ width: '100%' }} >
-                        </TextField>
-                        <Button variant='contained' onClick={() => { window.vscodeApi.postMessage({ action: 'selectProjectFolder' }) }} sx={{ height: '4em', width: '10%' }} > SELECT FOLDER </Button>
-                    </Stack>
-                    <Stack direction='row' spacing={1} justifyContent='space-between'>
-                        <Button variant='text' onClick={() => { setShowConfirmationPage(false) }} sx={{ marginRight: 'auto' }}>
-                            BACK
-                        </Button>
-                        <Button variant='contained' onClick={handleCreateComponent}>
-                            CREATE COMPONENT
-                        </Button>
-                    </Stack >
-                </Stack>
+                <SetNameAndFolder
+                    goBack={() => {
+                        setShowConfirmationPage(false);
+                    }}
+                    createComponent={createComponentFromGitRepo}
+                    devfile={recommendedDevfile.devfile}
+                />
             )}
         </>
     );

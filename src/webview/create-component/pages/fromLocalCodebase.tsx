@@ -27,11 +27,10 @@ type RecommendedDevfileState = {
 export function FromLocalCodebase({ setCurrentView }) {
     const [workspaceFolders, setWorkspaceFolders] = React.useState<Uri[]>([]);
     const [projectFolder, setProjectFolder] = React.useState('');
-    const [componentName, setComponentName] = React.useState<ComponentNameState>({
-        name: '',
-        isValid: true,
-        helpText: 'Please enter a component name.'
-    });
+    const [componentName, setComponentName] = React.useState('');
+    const [isComponentNameFieldValid, setComponentNameFieldValid] = React.useState(true);
+    const [componentNameErrorMessage, setComponentNameErrorMessage] = React.useState('Please enter a component name.');
+
     const [recommendedDevfile, setRecommendedDevfile] = React.useState<RecommendedDevfileState>({
         devfile: undefined,
         showRecommendation: false,
@@ -54,11 +53,11 @@ export function FromLocalCodebase({ setCurrentView }) {
             }
             case 'validatedComponentName': {
                 if (message.data) {
-                    setComponentName((prevState) => ({ ...prevState, isValid: false }));
-                    setComponentName((prevState) => ({ ...prevState, helpText: message.data }));
+                    setComponentNameFieldValid(false);
+                    setComponentNameErrorMessage(message.data);
                 } else {
-                    setComponentName((prevState) => ({ ...prevState, isValid: true }));
-                    setComponentName((prevState) => ({ ...prevState, helpText: '' }));
+                    setComponentNameFieldValid(true);
+                    setComponentNameErrorMessage('');
                 }
                 break;
             }
@@ -93,7 +92,7 @@ export function FromLocalCodebase({ setCurrentView }) {
             action: 'createComponent',
             data: {
                 devfileDisplayName: recommendedDevfile.devfile.name,
-                componentName: componentName.name,
+                componentName: componentName,
                 path: projectFolder
             }
         });
@@ -107,8 +106,12 @@ export function FromLocalCodebase({ setCurrentView }) {
                 </Typography>
             </div>
             <Stack direction='column' spacing={2} marginTop={4}>
-                <ComponentNameInput componentName={componentName} setComponentName={setComponentName} ></ComponentNameInput>
-                <Stack direction='row' marginTop={1}>
+                <ComponentNameInput
+                    isComponentNameFieldValid={isComponentNameFieldValid}
+                    componentNameErrorMessage={componentNameErrorMessage}
+                    setComponentName={setComponentName}
+                />
+                <Stack direction='row' spacing={1} marginTop={1}>
                     <FormControl fullWidth error={recommendedDevfile.isDevfileExistsInFolder} >
                         <InputLabel id="project-path-label">Folder</InputLabel>
                         <Select fullWidth
@@ -130,7 +133,18 @@ export function FromLocalCodebase({ setCurrentView }) {
                             <FormHelperText>There are no projects in the workspace, select folder or open a folder in the workspace.</FormHelperText>}
                     </FormControl>
                     {!recommendedDevfile.showRecommendation &&
-                        <Button variant='contained' onClick={() => { window.vscodeApi.postMessage({ action: 'selectProjectFolder' }) }} sx={{ height: '4em', width: '10%' }} > SELECT FOLDER </Button>}
+                        <Button
+                            variant="outlined"
+                            sx={{ whiteSpace: 'nowrap', height: '4em'}}
+                            onClick={(e) => {
+                                window['vscodeApi'].postMessage({
+                                    action: 'selectProjectFolder',
+                                });
+                            }}
+                        >
+                            Select Folder
+                        </Button>
+                    }
                 </Stack>
                 {!recommendedDevfile.showRecommendation ? (
                     <>
@@ -138,7 +152,7 @@ export function FromLocalCodebase({ setCurrentView }) {
                             <Button variant='text' onClick={() => { setCurrentView('home') }}>
                                 BACK
                             </Button>
-                            <Button variant='contained' disabled={!componentName.isValid || projectFolder.length === 0 || recommendedDevfile.isDevfileExistsInFolder} onClick={handleNext}>
+                            <Button variant='contained' disabled={!isComponentNameFieldValid || projectFolder.length === 0 || recommendedDevfile.isDevfileExistsInFolder} onClick={handleNext}>
                                 NEXT
                             </Button>
                         </Stack>
