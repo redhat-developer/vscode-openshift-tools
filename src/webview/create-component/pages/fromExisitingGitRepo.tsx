@@ -40,7 +40,7 @@ type ProjectPathState = {
 export function FromExistingGitRepo({ setCurrentView }) {
     const [gitURL, setGitURL] = React.useState<GitURLState>({
         url: '',
-        isValid: false,
+        isValid: true,
         helpText: 'Please enter a Git URL.'
     });
     const [showConfirmationPage, setShowConfirmationPage] = React.useState(false);
@@ -53,7 +53,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
     });
     const [componentName, setComponentName] = React.useState<ComponentNameState>({
         name: '',
-        isValid: false,
+        isValid: true,
         helpText: 'Please enter a component name.'
     });
 
@@ -82,9 +82,9 @@ export function FromExistingGitRepo({ setCurrentView }) {
                 if (message.data) {
                     setComponentName((prevState) => ({ ...prevState, isValid: false }));
                     setComponentName((prevState) => ({ ...prevState, validationMessage: message.data }));
-
                 } else {
                     setComponentName((prevState) => ({ ...prevState, isValid: true }));
+                    setComponentName((prevState) => ({ ...prevState, helpText: '' }));
                 }
                 break;
             }
@@ -141,14 +141,14 @@ export function FromExistingGitRepo({ setCurrentView }) {
                             Existing Remote Git Repository
                         </Typography>
                     </div>
-                    <Stack direction='column' spacing={2} marginTop={2}>
+                    <Stack direction='column' spacing={2} marginTop={4}>
                         <TextField fullWidth
                             variant='outlined'
                             label='Link to Git Repository'
                             value={gitURL.url}
                             disabled={recommendedDevfile.showRecommendation}
                             error={!gitURL.isValid}
-                            helperText={!gitURL.isValid && gitURL.helpText}
+                            helperText={gitURL.helpText}
                             onChange={(e) => {
                                 window.vscodeApi.postMessage({
                                     action: 'validateGitURL',
@@ -162,18 +162,20 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                 <Typography>Advanced Options</Typography>
                             </AccordionSummary>
                             <AccordionDetails>
-                                <TextField fullWidth
-                                    id='outlined'
-                                    disabled={recommendedDevfile.showRecommendation}
-                                    label='Git Reference'
-                                    helperText='Branch, tag, or commit to checkout'>
-                                </TextField>
-                                <TextField fullWidth
-                                    id='outlined'
-                                    disabled={recommendedDevfile.showRecommendation}
-                                    label='Context Directory'
-                                    helperText='Subdirectory for the source code, used as a context directory for building the component'>
-                                </TextField>
+                                <Stack direction='column' spacing={2}>
+                                    <TextField fullWidth
+                                        id='outlined'
+                                        disabled={recommendedDevfile.showRecommendation}
+                                        label='Git Reference'
+                                        helperText='Branch, tag, or commit to checkout'>
+                                    </TextField>
+                                    <TextField fullWidth
+                                        id='outlined'
+                                        disabled={recommendedDevfile.showRecommendation}
+                                        label='Context Directory'
+                                        helperText='Subdirectory for the source code, used as a context directory for building the component'>
+                                    </TextField>
+                                </Stack>
                             </AccordionDetails>
                         </Accordion>
                         {!recommendedDevfile.showRecommendation ? (
@@ -182,15 +184,19 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                     <Button variant='text' onClick={() => { setCurrentView('home') }}>
                                         BACK
                                     </Button>
-                                    <Button variant='contained' onClick={handleNext}>
+                                    <Button
+                                        variant='contained'
+                                        onClick={handleNext}
+                                        disabled={gitURL.url.length === 0 || !gitURL.isValid}>
                                         NEXT
                                     </Button>
                                 </Stack>
                                 {recommendedDevfile.isLoading &&
                                     <Stack direction='column' spacing={2} alignItems='center'>
-                                        <Divider variant="middle" sx={{ marginTop: '2em' }} />
                                         <CircularProgress />
-                                        Cloning git repository and scanning for recommended devfile.
+                                        <Typography variant='body2'>
+                                            Cloning git repository and scanning for recommended devfile.
+                                        </Typography>
                                     </Stack>
                                 }
                             </>
@@ -205,7 +211,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                         <DevfileRecommendationInfo />
                                     </Stack>
                                     <DevfileListItem devfile={recommendedDevfile.devfile} />
-                                    <Stack direction='row' justifyContent='flex-end' marginTop={1}>
+                                    <Stack direction='row' justifyContent='flex-end' marginTop={2} spacing={1}>
                                         <Button variant='text' onClick={() => { setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: false })) }} sx={{ marginRight: 'auto' }}>
                                             BACK
                                         </Button>
@@ -232,7 +238,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                         <DevfileListItem devfile={recommendedDevfile.devfile} />
                     </div>
                     <ComponentNameInput componentName={componentName} setComponentName={setComponentName} ></ComponentNameInput>
-                    <Stack direction='column' spacing={2}>
+                    <Stack direction='row' spacing={2}>
                         <TextField fullWidth
                             className='selectFolder'
                             value={projectFolder.path}

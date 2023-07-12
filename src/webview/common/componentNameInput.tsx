@@ -13,21 +13,19 @@ export type ComponentNameInputProps = {
 
 export function ComponentNameInput(props: ComponentNameInputProps) {
     return (
-        <div style={{ marginTop: '2em' }}>
-            <TextField
-                id='componentName'
-                variant='outlined'
-                label='Component Name'
-                error={!props.componentName.isValid}
-                helperText={!props.componentName.isValid && props.componentName.helpText}
-                onChange={(e) => {
-                    window.vscodeApi.postMessage({
-                        action: 'validateComponentName',
-                        data: e.target.value
-                    });
-                    props.setComponentName((prevState) => ({ ...prevState, name: e.target.value }));
-                }}
-            />
-        </div>
+        <TextField fullWidth
+            id='componentName'
+            variant='outlined'
+            label='Component Name'
+            error={!props.componentName.isValid}
+            helperText={props.componentName.helpText}
+            onChange={(e) => {
+                window.vscodeApi.postMessage({
+                    action: 'validateComponentName',
+                    data: e.target.value
+                });
+                props.setComponentName((prevState) => ({ ...prevState, name: e.target.value }));
+            }}
+        />
     );
 }
