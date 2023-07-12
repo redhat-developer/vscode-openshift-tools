@@ -264,7 +264,7 @@ export default class CreateComponentLoader {
                 break;
             }
             /**
-             * The panel requested to create component.
+             * The panel requested to create component from local codebase or git repo.
              */
             case 'createComponent': {
                 let projectUri: Uri;

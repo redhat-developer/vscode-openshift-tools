@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 import {
     Button,
-    Container,
     FormControl,
     FormHelperText,
     Paper,
@@ -16,6 +15,7 @@ import * as React from 'react';
 import 'react-dom';
 import { Devfile } from './devfile';
 import { DevfileListItem } from './devfileListItem';
+import { ComponentNameInput } from './componentNameInput';
 
 type Message = {
     action: string;
@@ -26,12 +26,13 @@ type SetNameAndFolderProps = {
     goBack: () => void;
     createComponent: (projectFolder: string, componentName: string) => void;
     devfile: Devfile;
-    templateProject: string;
+    templateProject?: string;
 };
 
 export function SetNameAndFolder(props: SetNameAndFolderProps) {
     const [componentName, setComponentName] = React.useState('');
-    const [isComponentNameFieldInteracted, setComponentNameFieldInteracted] = React.useState(false);
+    const [isComponentNameFieldValid, setComponentNameFieldValid] = React.useState(true);
+    const [componentNameErrorMessage, setComponentNameErrorMessage] = React.useState('Please enter a component name.');
 
     const [componentParentFolder, setComponentParentFolder] = React.useState('');
     const [isFolderFieldValid, setFolderFieldValid] = React.useState('');
@@ -48,6 +49,16 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
             }
             case 'selectedProjectFolder': {
                 setComponentParentFolder(message.data);
+                break;
+            }
+            case 'validatedComponentName': {
+                if (message.data) {
+                    setComponentNameFieldValid(false);
+                    setComponentNameErrorMessage(message.data);
+                } else {
+                    setComponentNameFieldValid(true);
+                    setComponentNameErrorMessage('');
+                }
                 break;
             }
         }
@@ -71,101 +82,83 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
     }, []);
 
     return (
-        <Container sx={{ paddingY: '16px' }}>
-            <Stack direction="column" spacing={3}>
-                <Typography variant="h5" alignSelf="center">
+        <Stack direction="column" spacing={3}>
+            <div style={{ position: 'relative', marginTop: '5em' }}>
+                <Typography variant='h5'>
                     Set Component Name and Folder
                 </Typography>
+            </div>
 
-                <Stack direction="column" spacing={3}>
-                    <Paper elevation={4}>
-                        <Stack margin={2} spacing={2}>
-                            <DevfileListItem devfile={props.devfile} />
-                            {/* padding here is to match the padding build into the devfile list component */}
+            <Stack direction="column" spacing={2} marginTop={2}>
+                <Paper elevation={4}>
+                    <Stack margin={2} spacing={2}>
+                        <DevfileListItem devfile={props.devfile} />
+                        {/* padding here is to match the padding build into the devfile list component */}
+                        {props.templateProject &&
                             <Stack direction="row" alignItems="center" spacing={1} paddingX={1}>
                                 <Typography variant="body1">Project:</Typography>
                                 <code>{props.templateProject}</code>
                             </Stack>
-                        </Stack>
-                    </Paper>
-                    <FormControl>
+                        }
+                    </Stack>
+                </Paper>
+                <ComponentNameInput
+                    isComponentNameFieldValid={isComponentNameFieldValid}
+                    componentNameErrorMessage={componentNameErrorMessage}
+                    setComponentName={setComponentName}
+                />
+                <FormControl fullWidth>
+                    <Stack direction="row" spacing={2}>
                         <TextField
                             fullWidth
                             variant="outlined"
-                            label="Component Name"
+                            label="Project Folder Path"
                             onChange={(e) => {
-                                setComponentName((_) => e.target.value);
+                                setComponentParentFolder((_) => e.target.value);
                             }}
-                            error={
-                                isComponentNameFieldInteracted &&
-                                !isComponentNameValid(componentName)
-                            }
                             onClick={(e) => {
-                                setComponentNameFieldInteracted((_) => true);
+                                setFolderFieldInteracted((_) => true);
                             }}
-                            value={componentName}
+                            error={isFolderFieldInteracted && !isFolderFieldValid}
+                            value={componentParentFolder}
                         />
-                        <FormHelperText>
-                            Can only contain letters, numbers, and dashes (<code>-</code>).
-                        </FormHelperText>
-                    </FormControl>
-                    <FormControl fullWidth>
-                        <Stack direction="row" spacing={2}>
-                            <TextField
-                                fullWidth
-                                variant="outlined"
-                                label="Project Folder Path"
-                                onChange={(e) => {
-                                    setComponentParentFolder((_) => e.target.value);
-                                }}
-                                onClick={(e) => {
-                                    setFolderFieldInteracted((_) => true);
-                                }}
-                                error={isFolderFieldInteracted && !isFolderFieldValid}
-                                value={componentParentFolder}
-                            />
-                            <Button
-                                variant="outlined"
-                                sx={{ whiteSpace: 'nowrap' }}
-                                onClick={(e) => {
-                                    window['vscodeApi'].postMessage({
-                                        action: 'selectProjectFolderNewProject',
-                                    });
-                                }}
-                            >
-                                Select Folder
-                            </Button>
-                        </Stack>
-                        {!isComponentNameValid(componentName) && (
-                            <FormHelperText>
-                                The project will be created in a new subfolder under this folder
-                            </FormHelperText>
-                        )}
-                        {componentParentFolder && isComponentNameValid(componentName) && (
-                            <FormHelperText>{folderFieldErrorMessage}</FormHelperText>
-                        )}
-                    </FormControl>
-
-                    <Stack direction="row" justifyContent="space-between">
-                        <Button variant="text" onClick={props.goBack}>
-                            Use Different Template Project
-                        </Button>
                         <Button
-                            variant="contained"
-                            onClick={() => {
-                                props.createComponent(componentParentFolder, componentName);
+                            variant="outlined"
+                            sx={{ whiteSpace: 'nowrap' }}
+                            onClick={(e) => {
+                                window['vscodeApi'].postMessage({
+                                    action: 'selectProjectFolderNewProject',
+                                });
                             }}
-                            disabled={!isComponentNameValid(componentName) || !isFolderFieldValid}
                         >
-                            Create Component
+                            Select Folder
                         </Button>
                     </Stack>
+                    {!isComponentNameFieldValid && (
+                        <FormHelperText>
+                            The project will be created in a new subfolder under this folder
+                        </FormHelperText>
+                    )}
+                    {componentParentFolder && isComponentNameFieldValid && (
+                        <FormHelperText>{folderFieldErrorMessage}</FormHelperText>
+                    )}
+                </FormControl>
+
+                <Stack direction="row" justifyContent="space-between">
+                    <Button variant="text" onClick={props.goBack}>
+                        {props.templateProject ? ('Use Different Template Project') : ('Back')}
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={() => {
+                            props.createComponent(componentParentFolder, componentName);
+                        }}
+                        disabled={!isComponentNameFieldValid || !isFolderFieldValid}
+                    >
+                        Create Component
+                    </Button>
                 </Stack>
             </Stack>
-        </Container>
+        </Stack>
     );
-}
-
-function isComponentNameValid(name: string) {
-    return /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/.test(name);
 }
