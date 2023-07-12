@@ -2,9 +2,8 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { Launch, Search } from '@mui/icons-material';
+import { Close, Launch, Search } from '@mui/icons-material';
 import {
-    Alert,
     Box,
     Button,
     Checkbox,
@@ -13,8 +12,11 @@ import {
     FormControl,
     FormControlLabel,
     FormGroup,
+    FormHelperText,
+    IconButton,
     InputAdornment,
     InputLabel,
+    Link,
     MenuItem,
     Modal,
     Pagination,
@@ -22,8 +24,7 @@ import {
     Select,
     Stack,
     TextField,
-    Typography,
-    Link,
+    Typography
 } from '@mui/material';
 import * as React from 'react';
 import SyntaxHighlighter from 'react-syntax-highlighter';
@@ -38,15 +39,16 @@ type Message = {
     data: any;
 };
 
-function LinkButton(props: { href: string; children }) {
+function LinkButton(props: { href: string; disabled: boolean; children }) {
     return (
-        <Link href={props.href} underline="none">
+        <Link href={props.disabled ? undefined : props.href} underline="none">
             <Button
                 variant="text"
                 onClick={(e) => {
                     e.preventDefault();
                 }}
                 endIcon={<Launch />}
+                disabled={props.disabled}
             >
                 {props.children}
             </Button>
@@ -137,6 +139,7 @@ const SelectTemplateProject = React.forwardRef(
         props: {
             devfile: Devfile;
             setSelectedProject: (projectName: string) => void;
+            closeModal: () => void;
         },
         ref,
     ) => {
@@ -156,7 +159,12 @@ const SelectTemplateProject = React.forwardRef(
                 }}
             >
                 <Stack direction="column" spacing={3}>
-                    <DevfileListItem devfile={props.devfile} />
+                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                        <DevfileListItem devfile={props.devfile} />
+                        <IconButton onClick={props.closeModal}>
+                            <Close />
+                        </IconButton>
+                    </Stack>
                     <FormControl fullWidth>
                         <InputLabel id="template-select-label">Template Project</InputLabel>
                         <Select
@@ -180,32 +188,33 @@ const SelectTemplateProject = React.forwardRef(
                                 );
                             })}
                         </Select>
+                        {isInteracted && !selectedTemplateProject && (
+                            <FormHelperText>Select a template project</FormHelperText>
+                        )}
                     </FormControl>
                     <Stack direction="row-reverse" spacing={2}>
-                        {selectedTemplateProject ? (
-                            <>
-                                <Button
-                                    variant="contained"
-                                    onClick={() => {
-                                        props.setSelectedProject(selectedTemplateProject);
-                                    }}
-                                >
-                                    Next
-                                </Button>
-                                <LinkButton
-                                    href={
-                                        props.devfile.starterProjects.find(
-                                            (starterProject) =>
-                                                starterProject.name === selectedTemplateProject,
-                                        ).git.remotes.origin
-                                    }
-                                >
-                                    Open Project in Browser
-                                </LinkButton>
-                            </>
-                        ) : (
-                            <Alert severity="error">Select a template project</Alert>
-                        )}
+                        <Button
+                            variant="contained"
+                            onClick={() => {
+                                props.setSelectedProject(selectedTemplateProject);
+                            }}
+                            disabled={!selectedTemplateProject}
+                        >
+                            Next
+                        </Button>
+                        <LinkButton
+                            href={
+                                !selectedTemplateProject
+                                    ? undefined
+                                    : props.devfile.starterProjects.find(
+                                          (starterProject) =>
+                                              starterProject.name === selectedTemplateProject,
+                                      ).git.remotes.origin
+                            }
+                            disabled={!selectedTemplateProject}
+                        >
+                            Open Project in Browser
+                        </LinkButton>
                     </Stack>
                     <Box
                         maxHeight="400px"
@@ -418,6 +427,9 @@ export function DevfileSearch(props: DevfileSearchProps) {
                             registryName: selectedDevfile.registryName,
                             templateProjectName: projectName,
                         });
+                    }}
+                    closeModal={() => {
+                        setSelectedDevfile((_) => undefined);
                     }}
                 />
             </Modal>
