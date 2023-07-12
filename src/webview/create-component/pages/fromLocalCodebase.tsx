@@ -29,7 +29,7 @@ export function FromLocalCodebase({ setCurrentView }) {
     const [projectFolder, setProjectFolder] = React.useState('');
     const [componentName, setComponentName] = React.useState<ComponentNameState>({
         name: '',
-        isValid: false,
+        isValid: true,
         helpText: 'Please enter a component name.'
     });
     const [recommendedDevfile, setRecommendedDevfile] = React.useState<RecommendedDevfileState>({
@@ -56,16 +56,14 @@ export function FromLocalCodebase({ setCurrentView }) {
                 if (message.data) {
                     setComponentName((prevState) => ({ ...prevState, isValid: false }));
                     setComponentName((prevState) => ({ ...prevState, helpText: message.data }));
-
                 } else {
                     setComponentName((prevState) => ({ ...prevState, isValid: true }));
+                    setComponentName((prevState) => ({ ...prevState, helpText: '' }));
                 }
                 break;
             }
             case 'selectedProjectFolder': {
-                if (message.data) {
-                    setProjectFolder(message.data.path);
-                }
+                setProjectFolder(message.data);
                 break;
             }
             case 'devfileExists': {
@@ -108,19 +106,18 @@ export function FromLocalCodebase({ setCurrentView }) {
                     From Existing Local Codebase
                 </Typography>
             </div>
-            <Stack direction='column' spacing={2} marginTop={3}>
+            <Stack direction='column' spacing={2} marginTop={4}>
                 <ComponentNameInput componentName={componentName} setComponentName={setComponentName} ></ComponentNameInput>
-                <Stack direction='row' spacing={1} marginTop={1}>
+                <Stack direction='row' marginTop={1}>
                     <FormControl fullWidth error={recommendedDevfile.isDevfileExistsInFolder} >
                         <InputLabel id="project-path-label">Folder</InputLabel>
-                        <Select
+                        <Select fullWidth
                             className='selectFolder'
                             labelId="project-path-label"
                             value={projectFolder}
                             label="Folder"
                             onChange={(e) => { setProjectFolder(e.target.value as string) }}
-                            disabled={recommendedDevfile.showRecommendation || workspaceFolders.length === 0}
-                            sx={{ width: '100%' }} >
+                            disabled={recommendedDevfile.showRecommendation || workspaceFolders.length === 0} >
                             {workspaceFolders.length !== 0 && workspaceFolders.map((uri) => (
                                 <MenuItem key={uri.path} value={uri.path}>
                                     {uri.path}
@@ -137,7 +134,7 @@ export function FromLocalCodebase({ setCurrentView }) {
                 </Stack>
                 {!recommendedDevfile.showRecommendation ? (
                     <>
-                        <Stack direction='row' spacing={1} marginTop={1}>
+                        <Stack direction='row' spacing={1} marginTop={2}>
                             <Button variant='text' onClick={() => { setCurrentView('home') }}>
                                 BACK
                             </Button>
@@ -146,10 +143,12 @@ export function FromLocalCodebase({ setCurrentView }) {
                             </Button>
                         </Stack>
                         {recommendedDevfile.isLoading &&
-                            <Stack direction='column' spacing={2} alignItems='center'>
+                            <Stack direction='column' spacing={3} alignItems='center'>
                                 <Divider variant="middle" sx={{ marginTop: '2em' }} />
                                 <CircularProgress />
-                                Scanning for recommended devfile.
+                                <Typography variant='body2'>
+                                    Scanning for recommended devfile.
+                                </Typography>
                             </Stack>
                         }
                     </>
@@ -164,7 +163,7 @@ export function FromLocalCodebase({ setCurrentView }) {
                                 <DevfileRecommendationInfo />
                             </Stack>
                             <DevfileListItem devfile={recommendedDevfile.devfile} />
-                            <Stack direction='row' justifyContent='flex-end' marginTop={1}>
+                            <Stack direction='row' justifyContent='flex-end' spacing={1} marginTop={2}>
                                 <Button variant='text' onClick={() => { setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: false })) }} sx={{ marginRight: 'auto' }}>
                                     BACK
                                 </Button>
