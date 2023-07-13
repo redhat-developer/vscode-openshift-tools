@@ -86,7 +86,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
 
     return (
         <Stack direction="column" spacing={3}>
-            <div style={{ position: 'relative', marginTop: '5em' }}>
+            <div style={{ position: 'relative' }}>
                 <Typography variant='h5'>
                     Set Component Name and Folder
                 </Typography>

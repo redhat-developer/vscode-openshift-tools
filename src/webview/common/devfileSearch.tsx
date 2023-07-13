@@ -7,7 +7,6 @@ import {
     Box,
     Button,
     Checkbox,
-    Container,
     Divider,
     FormControl,
     FormControlLabel,
@@ -339,77 +338,68 @@ export function DevfileSearch(props: DevfileSearchProps) {
 
     return (
         <>
-            <Container sx={{ height: '100%', paddingY: '16px' }}>
-                <Stack direction="column" height="100%" spacing={3}>
-                    <Typography variant="h5" alignSelf="center">
-                        {props.titleText}
-                    </Typography>
-                    <Stack direction="row" flexGrow="1" spacing={2}>
-                        <RegistriesPicker
-                            registryEnabled={registryEnabled}
-                            setRegistryEnabled={setRegistryEnabled}
+            <Stack direction="column" height="100%" spacing={3}>
+                <Typography variant="h5">{props.titleText}</Typography>
+                <Stack direction="row" flexGrow="1" spacing={2}>
+                    <RegistriesPicker
+                        registryEnabled={registryEnabled}
+                        setRegistryEnabled={setRegistryEnabled}
+                    />
+                    <Divider orientation="vertical" />
+                    <Stack direction="column" sx={{ flexGrow: '1', height: '100%' }} spacing={3}>
+                        <SearchBar
+                            setSearchText={setSearchText}
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                            numPages={
+                                Math.floor(devfiles.length / ITEMS_PER_PAGE) +
+                                (devfiles.length % ITEMS_PER_PAGE > 0.0001 ? 1 : 0)
+                            }
                         />
-                        <Divider orientation="vertical" />
+                        {/* 320px is the approximate combined height of the top bar and bottom bar in the devfile search view */}
+                        {/* 5em is the padding at the top of the page */}
                         <Stack
                             direction="column"
-                            sx={{ flexGrow: '1', height: '100%' }}
-                            spacing={3}
+                            sx={{ height: 'calc(100vh - 320px - 5em)', overflow: 'scroll' }}
+                            spacing={2}
+                            divider={<Divider />}
                         >
-                            <SearchBar
-                                setSearchText={setSearchText}
-                                currentPage={currentPage}
-                                setCurrentPage={setCurrentPage}
-                                numPages={
-                                    Math.floor(devfiles.length / ITEMS_PER_PAGE) +
-                                    (devfiles.length % ITEMS_PER_PAGE > 0.0001 ? 1 : 0)
-                                }
-                            />
-                            {/* 320px is the approximate combined of the top bar and bottom bar in the devfile search view */}
-                            <Stack
-                                direction="column"
-                                sx={{ height: 'calc(100vh - 320px)', overflow: 'scroll' }}
-                                spacing={2}
-                            >
-                                {devfiles
-                                    .slice(
-                                        (currentPage - 1) * ITEMS_PER_PAGE,
-                                        Math.min(currentPage * ITEMS_PER_PAGE, devfiles.length),
-                                    )
-                                    .map((devfile) => {
-                                        return (
-                                            <>
-                                                <DevfileListItem
-                                                    key={devfile.name}
-                                                    devfile={devfile}
-                                                    buttonCallback={() => {
-                                                        setSelectedDevfile(devfile);
-                                                    }}
-                                                />
-                                                <Divider key={`${devfile.name}-divider`} />
-                                            </>
-                                        );
-                                    })}
-                            </Stack>
-                            <Typography align="center" flexGrow="1">
-                                Showing items {(currentPage - 1) * ITEMS_PER_PAGE + 1} -{' '}
-                                {Math.min(currentPage * ITEMS_PER_PAGE, devfiles.length)} of{' '}
-                                {devfiles.length}
-                            </Typography>
+                            {devfiles
+                                .slice(
+                                    (currentPage - 1) * ITEMS_PER_PAGE,
+                                    Math.min(currentPage * ITEMS_PER_PAGE, devfiles.length),
+                                )
+                                .map((devfile) => {
+                                    return (
+                                        <DevfileListItem
+                                            key={devfile.name}
+                                            devfile={devfile}
+                                            buttonCallback={() => {
+                                                setSelectedDevfile(devfile);
+                                            }}
+                                        />
+                                    );
+                                })}
                         </Stack>
-                    </Stack>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Button
-                            variant="text"
-                            onClick={(_) => {
-                                props.goBack();
-                            }}
-                        >
-                            Back
-                        </Button>
-                        <DevfileExplanation />
+                        <Typography align="center" flexGrow="1">
+                            Showing items {(currentPage - 1) * ITEMS_PER_PAGE + 1} -{' '}
+                            {Math.min(currentPage * ITEMS_PER_PAGE, devfiles.length)} of{' '}
+                            {devfiles.length}
+                        </Typography>
                     </Stack>
                 </Stack>
-            </Container>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Button
+                        variant="text"
+                        onClick={(_) => {
+                            props.goBack();
+                        }}
+                    >
+                        Back
+                    </Button>
+                    <DevfileExplanation />
+                </Stack>
+            </Stack>
             <Modal
                 onClose={() => {
                     setSelectedDevfile(undefined);

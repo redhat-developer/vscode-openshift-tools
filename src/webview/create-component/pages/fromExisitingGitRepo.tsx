@@ -98,7 +98,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
         case 'fromGitRepo':
             return (
                 <>
-                    <div style={{ position: 'relative', marginTop: '5em' }}>
+                    <div style={{ position: 'relative' }}>
                         <Typography variant='h5'>
                             Existing Remote Git Repository
                         </Typography>
