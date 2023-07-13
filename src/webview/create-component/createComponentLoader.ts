@@ -129,15 +129,15 @@ export default class CreateComponentLoader {
              */
             case 'selectProjectFolder': {
                 const workspaceUri: Uri = await selectWorkspaceFolder(true);
+                let workspaceFolderUris: Uri[] = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.map((wsFolder) => wsFolder.uri) : [];
+                workspaceFolderUris.push(workspaceUri);
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'devfileExists',
                     data: await isDevfileExists(workspaceUri)
                 });
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'workspaceFolders',
-                    data: vscode.workspace.workspaceFolders
-                        ? vscode.workspace.workspaceFolders.map((wsFolder) => wsFolder.uri)
-                        : [workspaceUri],
+                    data: workspaceFolderUris
                 });
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'selectedProjectFolder',
@@ -268,17 +268,20 @@ export default class CreateComponentLoader {
              */
             case 'createComponent': {
                 let projectUri: Uri;
+                const componentName: string = message.data.componentName;
+
                 if (message.data.path) {
                     // path of project in local codebase
                     projectUri = Uri.file(message.data.path);
                 } else if (message.data.gitDestinationPath) {
                     // move the cloned git repo to selected project path
-                    await fsExtra.copy(message.data.tmpDirUri.fsPath, message.data.gitDestinationPath);
+                    const newProjectPath: string = path.join(message.data.gitDestinationPath, componentName);
+                    await fs.mkdir(newProjectPath);
+                    await fsExtra.copy(message.data.tmpDirUri.fsPath, newProjectPath);
                     await fs.rm(message.data.tmpDirUri.fsPath, { force: true, recursive: true });
-                    projectUri = Uri.file(message.data.gitDestinationPath);
+                    projectUri = Uri.file(newProjectPath);
                 }
 
-                const componentName: string = message.data.componentName;
                 try {
                     await OdoImpl.Instance.createComponentFromFolder(getDevfileType(message.data.devfileDisplayName), undefined, componentName, projectUri);
                     CreateComponentLoader.panel.dispose();
