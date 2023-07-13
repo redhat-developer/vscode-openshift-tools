@@ -86,6 +86,13 @@ suite('openshift toolkit Extension', () => {
                     "devfileComponents": []
                   }`, stderr: ''}
             }
+            if (`${cmd}`.includes('all')) {
+                return {
+                    error: undefined,
+                    stdout: '{ "items": [] }',
+                    stderr: ''
+                };
+            }
             return { error: undefined, stdout: '', stderr: ''};
         });
         sandbox.stub(OdoImpl.prototype, 'getActiveCluster').resolves('cluster');
