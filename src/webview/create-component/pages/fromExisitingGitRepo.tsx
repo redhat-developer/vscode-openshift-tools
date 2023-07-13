@@ -6,6 +6,7 @@ import { Devfile } from '../../common/devfile';
 import { DevfileListItem } from '../../common/devfileListItem';
 import { DevfileRecommendationInfo } from '../../common/devfileRecommendationInfo';
 import { SetNameAndFolder } from '../../common/setNameAndFolder';
+import { DevfileSearch } from '../../common/devfileSearch';
 
 type Message = {
     action: string;
@@ -25,13 +26,16 @@ type GitURLState = {
     helpText: string;
 }
 
+type CurrentPage = 'fromGitRepo' | 'setNameAndFolder' | 'selectDifferentDevfile';
+
 export function FromExistingGitRepo({ setCurrentView }) {
+    const [currentPage, setCurrentPage] = React.useState<CurrentPage>('fromGitRepo');
     const [gitURL, setGitURL] = React.useState<GitURLState>({
         url: '',
         isValid: true,
         helpText: 'Please enter a Git URL.'
     });
-    const [showConfirmationPage, setShowConfirmationPage] = React.useState(false);
+
     const [tmpDir, setTmpDir] = React.useState<Uri>();
     const [recommendedDevfile, setRecommendedDevfile] = React.useState<RecommendedDevfileState>({
         devfile: undefined,
@@ -39,6 +43,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
         isLoading: false,
         isDevfileExistsInRepo: false
     });
+    const [selectedDevfile, setSelectedDevfile] = React.useState<Devfile>();
 
     function respondToMessage(messageEvent: MessageEvent) {
         const message = messageEvent.data as Message;
@@ -81,7 +86,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
         window.vscodeApi.postMessage({
             action: 'createComponent',
             data: {
-                devfileDisplayName: recommendedDevfile.devfile.name,
+                devfileDisplayName: selectedDevfile ? (selectedDevfile.name) : (recommendedDevfile.devfile.name),
                 componentName: componentName,
                 tmpDirUri: tmpDir,
                 gitDestinationPath: projectFolder
@@ -89,9 +94,9 @@ export function FromExistingGitRepo({ setCurrentView }) {
         });
     }
 
-    return (
-        <>
-            {!showConfirmationPage ? (
+    switch (currentPage) {
+        case 'fromGitRepo':
+            return (
                 <>
                     <div style={{ position: 'relative', marginTop: '5em' }}>
                         <Typography variant='h5'>
@@ -103,7 +108,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                             variant='outlined'
                             label='Link to Git Repository'
                             value={gitURL.url}
-                            disabled={recommendedDevfile.showRecommendation}
+                            disabled={recommendedDevfile.showRecommendation || recommendedDevfile.isLoading}
                             error={!gitURL.isValid}
                             helperText={gitURL.helpText}
                             onChange={(e) => {
@@ -166,19 +171,25 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                 <Stack direction='column'>
                                     <Stack direction='row' justifyContent='space-between' marginTop={1}>
                                         <Typography variant='h6'>
-                                            Recommended Devfile
+                                            {selectedDevfile ? ('Selected Devfile') : ('Recommended Devfile')}
                                         </Typography>
                                         <DevfileRecommendationInfo />
                                     </Stack>
-                                    <DevfileListItem devfile={recommendedDevfile.devfile} />
+                                    <DevfileListItem devfile={selectedDevfile ? (selectedDevfile) : (recommendedDevfile.devfile)} />
                                     <Stack direction='row' justifyContent='flex-end' marginTop={2} spacing={1}>
-                                        <Button variant='text' onClick={() => { setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: false })) }} sx={{ marginRight: 'auto' }}>
+                                        <Button
+                                            variant='text'
+                                            onClick={() => {
+                                                setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: false }));
+                                                setSelectedDevfile(undefined);
+                                            }}
+                                            sx={{ marginRight: 'auto' }}>
                                             BACK
                                         </Button>
-                                        <Button variant='text' onClick={() => { setCurrentView('devfileSearch') }}>
+                                        <Button variant='text' onClick={() => { setCurrentPage('selectDifferentDevfile') }}>
                                             SELECT A DIFFERENT DEVFILE
                                         </Button>
-                                        <Button variant='contained' onClick={() => { setShowConfirmationPage(true) }}>
+                                        <Button variant='contained' onClick={() => { setCurrentPage('setNameAndFolder') }}>
                                             CONTINUE WITH THIS DEVFILE
                                         </Button>
                                     </Stack >
@@ -187,15 +198,33 @@ export function FromExistingGitRepo({ setCurrentView }) {
                         )}
                     </Stack>
                 </>
-            ) : (
+            );
+        case 'setNameAndFolder':
+            return (
                 <SetNameAndFolder
                     goBack={() => {
-                        setShowConfirmationPage(false);
+                        setCurrentPage('fromGitRepo')
                     }}
                     createComponent={createComponentFromGitRepo}
-                    devfile={recommendedDevfile.devfile}
+                    devfile={selectedDevfile ? (selectedDevfile) : (recommendedDevfile.devfile)}
                 />
-            )}
-        </>
-    );
+            );
+        case 'selectDifferentDevfile':
+            return (
+                <>
+                    {!selectedDevfile ? (
+                        <DevfileSearch
+                            titleText="Select Different Devfile"
+                            goBack={() => {
+                                setCurrentPage('fromGitRepo')
+                            }}
+                            setSelectedDevfile={setSelectedDevfile}
+                        />
+                    ) : (
+                        setCurrentPage('fromGitRepo')
+                    )
+                    }
+                </>
+            );
+    }
 }

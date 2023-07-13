@@ -2,6 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import LoadingButton from '@mui/lab/LoadingButton';
 import {
     Button,
     FormControl,
@@ -13,9 +14,9 @@ import {
 } from '@mui/material';
 import * as React from 'react';
 import 'react-dom';
+import { ComponentNameInput } from './componentNameInput';
 import { Devfile } from './devfile';
 import { DevfileListItem } from './devfileListItem';
-import { ComponentNameInput } from './componentNameInput';
 
 type Message = {
     action: string;
@@ -38,6 +39,8 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
     const [isFolderFieldValid, setFolderFieldValid] = React.useState('');
     const [folderFieldErrorMessage, setFolderFieldErrorMessage] = React.useState('');
     const [isFolderFieldInteracted, setFolderFieldInteracted] = React.useState(false);
+
+    const [isLoading, setLoading] = React.useState(false);
 
     function respondToMessage(messageEvent: MessageEvent) {
         const message = messageEvent.data as Message;
@@ -105,6 +108,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                 <ComponentNameInput
                     isComponentNameFieldValid={isComponentNameFieldValid}
                     componentNameErrorMessage={componentNameErrorMessage}
+                    componentName={componentName}
                     setComponentName={setComponentName}
                 />
                 <FormControl fullWidth>
@@ -148,15 +152,17 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                     <Button variant="text" onClick={props.goBack}>
                         {props.templateProject ? ('Use Different Template Project') : ('Back')}
                     </Button>
-                    <Button
+                    <LoadingButton
                         variant="contained"
                         onClick={() => {
                             props.createComponent(componentParentFolder, componentName);
+                            setLoading(true);
                         }}
-                        disabled={!isComponentNameFieldValid || !isFolderFieldValid}
+                        disabled={!isComponentNameFieldValid || !isFolderFieldValid || isLoading}
+                        loading={isLoading}
                     >
                         Create Component
-                    </Button>
+                    </LoadingButton>
                 </Stack>
             </Stack>
         </Stack>
