@@ -79,6 +79,10 @@ export function FromLocalCodebase({ setCurrentView }) {
         };
     }, []);
 
+    React.useEffect(() => {
+        window.vscodeApi.postMessage({ action: 'getWorkspaceFolders' });
+    }, []);
+
     function handleNext() {
         window.vscodeApi.postMessage({
             action: 'getRecommendedDevfile',
@@ -135,7 +139,7 @@ export function FromLocalCodebase({ setCurrentView }) {
                     {!recommendedDevfile.showRecommendation &&
                         <Button
                             variant="outlined"
-                            sx={{ whiteSpace: 'nowrap', height: '4em'}}
+                            sx={{ whiteSpace: 'nowrap', height: '4em' }}
                             onClick={(e) => {
                                 window['vscodeApi'].postMessage({
                                     action: 'selectProjectFolder',
@@ -152,7 +156,10 @@ export function FromLocalCodebase({ setCurrentView }) {
                             <Button variant='text' onClick={() => { setCurrentView('home') }}>
                                 BACK
                             </Button>
-                            <Button variant='contained' disabled={!isComponentNameFieldValid || projectFolder.length === 0 || recommendedDevfile.isDevfileExistsInFolder} onClick={handleNext}>
+                            <Button
+                                variant='contained'
+                                disabled={!isComponentNameFieldValid || componentName.length === 0 || projectFolder.length === 0 || recommendedDevfile.isDevfileExistsInFolder}
+                                onClick={handleNext}>
                                 NEXT
                             </Button>
                         </Stack>
