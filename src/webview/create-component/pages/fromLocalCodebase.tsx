@@ -115,7 +115,7 @@ export function FromLocalCodebase({ setCurrentView }) {
         case 'fromLocalCodeBase':
             return (
                 <>
-                    <div style={{ position: 'relative', marginTop: '5em' }}>
+                    <div style={{ position: 'relative' }}>
                         <Typography variant='h5'>
                             From Existing Local Codebase
                         </Typography>

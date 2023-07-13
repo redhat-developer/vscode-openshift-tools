@@ -5,7 +5,7 @@
 import ConstructionIcon from '@mui/icons-material/Construction';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import { PaletteMode, Theme, ThemeProvider, Typography, createTheme } from '@mui/material';
+import { Container, PaletteMode, Theme, ThemeProvider, Typography, createTheme } from '@mui/material';
 import * as React from 'react';
 import OptionCard from '../../common/optionCard';
 import { FromExistingGitRepo } from './fromExisitingGitRepo';
@@ -22,7 +22,7 @@ interface VSCodeMessage {
 function SelectStrategy({ setCurrentView }) {
     return (
         <>
-            <div style={{ position: 'relative', marginTop: '5em' }}>
+            <div style={{ position: 'relative' }}>
                 <Typography variant='h5'>Create Component</Typography>
             </div>
             <div
@@ -96,9 +96,9 @@ export default function CreateComponent() {
 
     return (
         <ThemeProvider theme={theme}>
-            <div style={{ marginLeft: '10em', marginRight: '10em' }}>
+            <Container maxWidth='lg' sx={{ height: '100%', paddingTop: '5em', paddingBottom: '16px'}}>
                 {renderComponent()}
-            </div>
+            </Container>
         </ThemeProvider>
     );
 }
