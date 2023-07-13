@@ -8,6 +8,7 @@ import * as React from 'react';
 export type ComponentNameInputProps = {
     isComponentNameFieldValid: boolean,
     componentNameErrorMessage: string,
+    componentName: string,
     setComponentName: React.Dispatch<React.SetStateAction<string>>
 };
 
@@ -17,6 +18,7 @@ export function ComponentNameInput(props: ComponentNameInputProps) {
             id='componentName'
             variant='outlined'
             label='Component Name'
+            value={props.componentName}
             error={!props.isComponentNameFieldValid}
             helperText={props.componentNameErrorMessage}
             onChange={(e) => {
