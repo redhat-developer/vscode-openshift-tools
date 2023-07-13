@@ -88,7 +88,7 @@
 		"make-fetch-happen": "^9.1.0",
 		"mkdirp": "^1.0.4",
 		"rxjs": "^7.4.0",
-		"semver": "^7.3.5",
+		"semver": "^7.5.2",
 		"stacktrace-parser": "^0.1.10",
 		"targz": "^1.0.1",
 		"tmp": "^0.2.1",
