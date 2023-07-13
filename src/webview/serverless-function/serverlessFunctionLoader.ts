@@ -73,7 +73,7 @@ async function gitImportMessageListener(panel: OverridePanel, event: any): Promi
                 })
             } else {
                 panel.contextPath = selctedFolder;
-                ServerlessFunctionViewLoader.views.delete('//new')
+                ServerlessFunctionViewLoader.views.delete(path.join(path.sep, 'new'))
                 ServerlessFunctionViewLoader.views.set(selctedFolder.fsPath, panel);
                 await panel.webview.postMessage({
                     action: 'loadScreen',
@@ -128,6 +128,7 @@ async function gitImportMessageListener(panel: OverridePanel, event: any): Promi
                                 });
                                 devProcess.stderr.on('data', async (errChunk) => {
                                     processError = true;
+                                    void vscode.window.showErrorMessage(`${errChunk as string}`.replaceAll('\n', '\r\n'));
                                     outputEmitter.fire(`\x1b[31m${errChunk as string}\x1b[0m`.replaceAll('\n', '\r\n'));
                                 });
                                 devProcess.on('exit', async () => {
@@ -197,6 +198,7 @@ async function gitImportMessageListener(panel: OverridePanel, event: any): Promi
                                 });
                                 runProcess.stderr.on('data', async (errChunk) => {
                                     showStop = false;
+                                    void vscode.window.showErrorMessage(`${errChunk as string}`.replaceAll('\n', '\r\n'));
                                     outputEmitter.fire(`\x1b[31m${errChunk as string}\x1b[0m`.replaceAll('\n', '\r\n'));
                                 });
                                 runProcess.on('exit', async () => {
@@ -354,7 +356,7 @@ export default class ServerlessFunctionViewLoader {
         panel.onDidDispose(() => {
             ServerlessFunctionViewLoader.views.delete(contextPath.fsPath);
             const addedWSPath: vscode.Uri = panel.contextPath;
-            if (addedWSPath.fsPath !== '\\new') {
+            if (addedWSPath.fsPath !== path.join(path.sep, 'new')) {
                 const wsFolder = vscode.workspace.getWorkspaceFolder(addedWSPath);
                 if (!wsFolder) {
                     vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: addedWSPath });
