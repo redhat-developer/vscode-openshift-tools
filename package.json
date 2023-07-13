@@ -69,7 +69,7 @@
 		"update-deps": "ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
 		"coverage:upload": "codecov -f coverage/coverage-final.json",
 		"build": "npm run clean && npm run lint && npm run compile && npm run bundle-tools",
-		"smoke-test": "extest setup-and-run out/test/ui/smoke-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c max -i",
+		"cluster-ui-test": "extest setup-and-run out/test/ui/cluster-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c max -i",
 		"public-ui-test": "extest setup-and-run out/test/ui/public-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c max -i"
 	},
 	"dependencies": {
@@ -88,7 +88,7 @@
 		"make-fetch-happen": "^9.1.0",
 		"mkdirp": "^1.0.4",
 		"rxjs": "^7.4.0",
-		"semver": "^7.3.5",
+		"semver": "^7.5.2",
 		"stacktrace-parser": "^0.1.10",
 		"targz": "^1.0.1",
 		"tmp": "^0.2.1",
@@ -438,6 +438,11 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.component.binding.add",
+				"title": "Bind Service",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.component.exitDevMode",
 				"title": "Stop Dev",
 				"category": "OpenShift"
@@ -506,6 +511,10 @@
 				"command": "openshift.open.developerConsole.palette",
 				"title": "Open Console Dashboard for Current Cluster",
 				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.open.operatorBackedServiceCatalog",
+				"title": "Open Operator Backed Service Catalog"
 			},
 			{
 				"command": "openshift.component.debug",
@@ -933,6 +942,10 @@
 					"when": "view == openshiftProjectExplorer"
 				},
 				{
+					"command": "openshift.open.operatorBackedServiceCatalog",
+					"when": "false"
+				},
+				{
 					"command": "openshift.component.debug",
 					"when": "view == openshiftProjectExplorer"
 				},
@@ -1090,6 +1103,10 @@
 				},
 				{
 					"command": "openshift.component.openInBrowser",
+					"when": "false"
+				},
+				{
+					"command": "openshift.component.binding.add",
 					"when": "false"
 				}
 			],
@@ -1340,6 +1357,11 @@
 					"command": "openshift.component.undeploy",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dep-nrn.*/ || viewItem =~ /openshift\\.component.*\\.dep-run.*/",
 					"group": "c2@1"
+				},
+				{
+					"command": "openshift.component.binding.add",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
+					"group": "c2@2"
 				},
 				{
 					"command": "openshift.component.showDevTerminal",

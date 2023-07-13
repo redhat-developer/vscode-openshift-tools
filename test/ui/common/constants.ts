@@ -34,13 +34,14 @@ export const INPUTS = {
 export const MENUS = {
     newProject: 'New Project',
     delete: 'Delete',
-    push: 'Push',
+    bindService: 'Bind Service',
+    startDev: 'Start Dev',
 };
 
 export const COMPONENTS = {
-    nodejsDevfile: 'nodejs (devfile)',
+    nodejsDevfile: 'nodejs/DefaultDevfileRegistry',
     devfileComponent: (name: string) => `${name} (devfile)`,
-    pushSuccess: 'Changes successfully pushed',
+    devStarted: 'Ctrl+c',
 };
 
 export const NOTIFICATIONS = {

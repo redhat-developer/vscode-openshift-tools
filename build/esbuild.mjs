@@ -17,7 +17,8 @@ const webviews = [
     'log',
     'welcome',
     'feedback',
-    'serverless-function'
+    'serverless-function',
+    'add-service-binding',
 ];
 
 function kebabToCamel(text) {

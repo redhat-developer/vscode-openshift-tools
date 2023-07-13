@@ -20,8 +20,6 @@ import { Command } from '../../src/odo/command';
 const ODO = getInstance();
 const kc = new KubeConfig();
 
-kc.loadFromDefault();
-
 const newProjectName = `project${Math.round(Math.random() * 1000)}`;
 
 // tests are assuming your current context is already pointing to test cluster on which you can create and delete namespaces
@@ -44,6 +42,7 @@ suite('odo commands integration', function () {
                 password,
             ),
         );
+        kc.loadFromDefault();
     });
 
     suite('login/logout', function() {
@@ -202,6 +201,11 @@ suite('odo commands integration', function () {
 
     test('setOpenShiftContext', async function () {
         await ODO.execute(Command.setOpenshiftContext(kc.currentContext));
+    });
+
+    test('getBindableServices()', async function() {
+        const result = await ODO.execute(Command.getBindableServices());
+        expect(result.stdout.trim()).to.equal('{}');
     });
 
     test.skip('deletePreviouslyPushedResources()');
@@ -431,6 +435,11 @@ suite('odo commands integration', function () {
             term.dispose();
         });
 
+        test('addBinding()', async function() {
+            const result = await ODO.execute(Command.addBinding('default', 'myservice', 'myservice-binding'), componentLocation, false);
+            expect(result.stderr).to.contain('No bindable service instances found in namespace "default"');
+        });
+
         test('deleteComponentConfiguration', async function() {
             await ODO.execute(Command.deleteComponentConfiguration(), componentLocation);
             try {
@@ -441,4 +450,5 @@ suite('odo commands integration', function () {
             }
         });
     });
+
 });

@@ -4,33 +4,39 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { expect } from 'chai';
-import { ActivityBar, InputBox, SideBarView, TreeItem, ViewSection, VSBrowser, WelcomeContentButton, Workbench } from 'vscode-extension-tester';
-import { itemExists, notificationExists, terminalHasText, waitForInputProgress, waitForInputUpdate } from '../common/conditions';
-import { VIEWS, MENUS, BUTTONS, INPUTS, COMPONENTS, NOTIFICATIONS } from '../common/constants';
+import { ActivityBar, EditorView, InputBox, SideBarView, TerminalView, TreeItem, ViewSection, VSBrowser, WelcomeContentButton, Workbench } from 'vscode-extension-tester';
+import { itemExists, notificationExists, terminalHasText, waitForInputUpdate } from '../common/conditions';
+import { BUTTONS, COMPONENTS, INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
 
 export function createComponentTest(contextFolder: string) {
-    describe('Component creation', () => {
-        const cluster = process.env.CLUSTER_URL || 'https://api.ocp2.adapters-crs.ccitredhat.com:6443';
-        const clusterName = (/https?:\/\/(.*)/.exec(cluster))[1];
+    describe('Component creation', function() {
+        const cluster = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
+        const clusterName = cluster;
         const user = process.env.CLUSTER_USER || 'developer';
         const password = process.env.CLUSTER_PASSWORD || 'developer';
         let view: SideBarView;
         let explorer: ViewSection;
         let components: ViewSection;
+        let editorView: EditorView;
 
         const projectName = `project${Math.floor(Math.random() * 100)}`
-        const appName = `app${Math.floor(Math.random() * 100)}`;
         const compName = `comp${Math.floor(Math.random() * 100)}`;
 
-        before(async () => {
+        before(async function () {
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             explorer = await view.getContent().getSection(VIEWS.appExplorer);
             components = await view.getContent().getSection(VIEWS.components);
+            editorView = new EditorView();
         });
 
-        beforeEach(async () => {
+        beforeEach(async function() {
             const center = await new Workbench().openNotificationsCenter();
             await center.clearAllNotifications();
+        });
+
+        afterEach(async function() {
+            editorView = new EditorView();
+            await editorView.closeAllEditors();
         });
 
         after(async function() {
@@ -46,7 +52,7 @@ export function createComponentTest(contextFolder: string) {
         });
 
         it('Login with credentials', async function() {
-            this.timeout(30000);
+            this.timeout(30_000);
             await explorer.expand();
             const content = await explorer.findWelcomeContent();
             // eslint-disable-next-line no-console, @typescript-eslint/restrict-template-expressions
@@ -118,32 +124,21 @@ export function createComponentTest(contextFolder: string) {
         });
 
         it('Create a new component from scratch', async function() {
-            this.timeout(60000);
-            const newComponent = (await (await components.findWelcomeContent()).getButtons())[0];
+            this.timeout(120_000);
+            const newComponent = (await (await components.findWelcomeContent()).getButtons())[1];
             await newComponent.click();
 
-            // provide application name
+            // wait for input quick pick to appear
             const input = await InputBox.create();
-            const appMessage = await input.getMessage();
-            await input.setText(appName);
-            await input.confirm();
 
             // select to add new context folder
-            await waitForInputUpdate(input, appMessage);
             await input.selectQuickPick(INPUTS.newFolderQuickPick);
 
             // select the context folder
             await input.setText(contextFolder);
             await input.confirm();
 
-            // provide component name
-            await waitForInputUpdate(input, '');
-            await input.setText(compName);
-            await input.confirm();
-
             // select nodejs devfile template
-            await waitForInputProgress(input, true);
-            await waitForInputProgress(input, false, 20000);
             await new Promise(res => setTimeout(res, 500));
             await input.setText(COMPONENTS.nodejsDevfile);
             await input.confirm();
@@ -151,21 +146,46 @@ export function createComponentTest(contextFolder: string) {
             // select yes for starter project
             await new Promise(res => setTimeout(res, 500));
             await input.selectQuickPick(INPUTS.yes);
+
+            // provide component name
+            await new Promise(res => setTimeout(res, 500));
+            await input.setText(compName);
+            await input.confirm();
+
             await new Promise(res => setTimeout(res, 5000));
             const project = await itemExists(projectName, explorer) as TreeItem;
             await project.expand();
 
-            const app = await itemExists(appName, explorer) as TreeItem;
-            await app.expand();
-            await itemExists(COMPONENTS.devfileComponent(compName), explorer);
+            await itemExists(compName, components, 30_000);
         });
 
-        it('Push the component', async function() {
-            this.timeout(150000);
-            const component = await itemExists(COMPONENTS.devfileComponent(compName), explorer);
+        it('Start the component in dev mode', async function() {
+            this.timeout(180000);
+            const component = await itemExists(compName, components, 30_000);
+
             const menu = await component.openContextMenu();
-            await menu.select(MENUS.push);
-            await terminalHasText(COMPONENTS.pushSuccess, 120000);
+            await menu.select(MENUS.startDev);
+            await terminalHasText(COMPONENTS.devStarted, 60_000);
+
+            const term = new TerminalView();
+            await term.killTerminal();
+
+            // wait for component to stop running.
+            // the component name changes to
+            // `component-name (stopping)`
+            // while `odo dev` is stopping
+            // then it returns to
+            // `component-name`
+            // when `odo dev` has stopped
+            await itemExists(compName, components, 60_000);
         });
+
+        it('Check for \'Bind Service\' button (don\'t click it)', async function() {
+            this.timeout(60000);
+            const component = await itemExists(compName, components);
+            const menu = await component.openContextMenu();
+            expect(await menu.hasItem(MENUS.bindService)).to.be.true;
+        });
+
     });
 }

@@ -3,27 +3,27 @@
         "description": "odo CLI",
         "vendor": "Red Hat, Inc.",
         "name": "odo",
-        "version": "3.11.0",
-        "versionRange": "^3.11.0",
-        "versionRangeLabel": "version >= 3.11.0",
+        "version": "3.12.0",
+        "versionRange": "^3.12.0",
+        "versionRangeLabel": "version >= 3.12.0",
         "dlFileName": "odo",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/odo/v3.11.0/odo-windows-amd64.exe.zip",
-                "sha256sum": "d56fc3591d1cac464a253999c198093cec72ce7c0675d60b6750d200169553f7",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/odo/v3.12.0/odo-windows-amd64.exe.zip",
+                "sha256sum": "3a96e70018fe02cb1359ed9eae5e5391fb79b06a1017990c05944241f6cda596",
                 "dlFileName": "odo-windows-amd64.exe.zip",
                 "cmdFileName": "odo-windows-amd64.exe"
             },
             "darwin": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/odo/v3.11.0/odo-darwin-amd64.tar.gz",
-                "sha256sum": "ec43f0e0ec6e30d97a6524f1b413193a2eb44c1f140d6755ff4c37ba04252e9d",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/odo/v3.12.0/odo-darwin-amd64.tar.gz",
+                "sha256sum": "4e66790b8e270af14fd76d3231ea69ef8e51b57ea36af40ebdda52c0504d2122",
                 "dlFileName": "odo-darwin-amd64.tar.gz",
                 "cmdFileName": "odo-darwin-amd64"
             },
             "linux": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/odo/v3.11.0/odo-linux-amd64.tar.gz",
-                "sha256sum": "81bdbe0efcc9362de2a794fe31819c94074ae0af0a8322d420a1e1d4d264b92e",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/odo/v3.12.0/odo-linux-amd64.tar.gz",
+                "sha256sum": "07a5b815310f5a270d9db330a0befd25a80c6206f080949df885f4b6c95e29fa",
                 "dlFileName": "odo-linux-amd64.tar.gz",
                 "cmdFileName": "odo"
             }
@@ -130,7 +130,7 @@
         "description": "crc openshift container",
         "vendor": "Red Hat, Inc.",
         "name": "crc",
-        "crcVersion": "2.22.1",
+        "crcVersion": "2.23.0",
         "openshiftVersion": "4.13.3"
     }
 }

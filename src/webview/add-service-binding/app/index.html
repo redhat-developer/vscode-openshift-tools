@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <base href="%BASE_URL%" />
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Add Service Binding</title>
+        <!-- meta http-equiv="Content-Security-Policy" -->
+        <script>
+            if (typeof acquireVsCodeApi !== 'undefined') {
+                window.vscodeApi = acquireVsCodeApi();
+            }
+        </script>
+        <style>
+            html, body {
+                overflow: visible;
+                background-color: var(--vscode-editor-background) !important;
+                color: var(--vscode-editor-foreground)
+            }
+
+            .box {
+                display: flex;
+                flex-flow: column;
+            }
+
+        </style>
+    </head>
+    <body onload="window.vscodeApi.postMessage({command: 'ready'})">
+        <div class="box" id="root"></div>
+        <script src="%SCRIPT%" ></script>
+    </body>
+</html>

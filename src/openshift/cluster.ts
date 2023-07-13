@@ -6,6 +6,7 @@
 import { KubernetesObject } from '@kubernetes/client-node';
 import { ExtensionContext, QuickInputButton, QuickPickItem, QuickPickItemButtonEvent, Terminal, ThemeIcon, Uri, Progress as VProgress, WebviewPanel, commands, env, window, workspace } from 'vscode';
 import { CliChannel, CliExitData } from '../cli';
+import { getInstance } from '../odo';
 import { Command } from '../odo/command';
 import { TokenStore } from '../util/credentialManager';
 import { Filters } from '../util/filters';
@@ -95,6 +96,20 @@ export class Cluster extends OpenShiftItem {
             const consoleUrl = await Cluster.getConsoleUrl(progress);
             progress.report({increment: 100, message: 'Starting default browser'});
             return commands.executeCommand('vscode.open', Uri.parse(consoleUrl));
+        });
+    }
+
+    @vsCommand('openshift.open.operatorBackedServiceCatalog')
+    @clusterRequired()
+    static async openOpenshiftConsoleTopography(): Promise<void> {
+        return Progress.execFunctionWithProgress('Opening Operator Backed Service Catalog', async (progress) => {
+            const [consoleUrl, namespace] = await Promise.all([
+                Cluster.getConsoleUrl(progress),
+                getInstance().getActiveProject()
+            ]);
+            progress.report({increment: 100, message: 'Starting default browser'});
+            // eg. https://console-openshift-console.apps-crc.testing/catalog/ns/default?catalogType=OperatorBackedService
+            return commands.executeCommand('vscode.open', Uri.parse(`${consoleUrl}/catalog/ns/${namespace}?catalogType=OperatorBackedService`));
         });
     }
 

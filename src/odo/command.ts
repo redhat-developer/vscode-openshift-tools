@@ -320,4 +320,20 @@ export class Command {
         return new CommandText('oc api-resources | grep openshift');
     }
 
+    static addBinding(serviceNamespace: string, serviceName: string, bindingName: string): CommandText {
+        return new CommandText('odo add binding',
+            undefined,
+            [
+                new CommandOption('--service-namespace', serviceNamespace, false),
+                new CommandOption('--service', serviceName, false),
+                new CommandOption('--name', bindingName, false),
+            ]
+        )
+    }
+
+    static getBindableServices(): CommandText {
+        return new CommandText('odo list service',
+            undefined,
+            [new CommandOption('-o json')]);
+    }
 }
