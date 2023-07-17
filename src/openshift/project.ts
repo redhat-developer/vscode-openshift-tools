@@ -14,16 +14,16 @@ import { VsCommandError, vsCommand } from '../vscommand';
 import OpenShiftItem from './openshiftItem';
 
 export class Command {
-    static listProjects(): CommandText {
-        return new CommandText('oc', 'get projects', [new CommandOption('-o', 'jsonpath="{range .items[*]}{.metadata.name}{\'\\n\'}{end}')]);
-    }
-
     static setActiveProject(name: string) {
         return new CommandText('oc', `project ${name}`);
     }
 
     static deleteProject(name: string) {
         return new CommandText('oc delete project', name, [new CommandOption('--wait=true')])
+    }
+
+    static getAll(namespace: string) {
+        return new CommandText('oc', 'get all', [new CommandOption('--namespace', namespace), new CommandOption('-o', 'json')]);
     }
 }
 
@@ -74,7 +74,9 @@ export class Project extends OpenShiftItem {
     static async del(project: KubernetesObject): Promise<string> {
         let result: Promise<string> = null;
 
-        const value = await window.showWarningMessage(`Do you want to delete Project '${project.metadata.name}'?`, 'Yes', 'Cancel');
+        const isProjectEmpty = JSON.parse((await getOdoInstance().execute(Command.getAll(project.metadata.name))).stdout).items.length === 0;
+
+        const value = await window.showWarningMessage(`Do you want to delete Project '${project.metadata.name}'${!isProjectEmpty ? ' and all its contents' : ''}?`, 'Yes', 'Cancel');
         if (value === 'Yes') {
             result = Progress.execFunctionWithProgress(
                 `Deleting Project '${project.metadata.name}'`,

@@ -8,6 +8,9 @@
             "es6",
             "dom"
         ],
+        "typeRoots": [
+            "./src/@types"
+        ],
         "sourceMap": true,
         "rootDir": ".",
         /* Strict Type-Checking Option */
@@ -36,6 +39,7 @@
         "src/webview/helm-chart/app",
         "src/webview/feedback/app",
         "src/webview/serverless-function/app",
+        "src/webview/openshift-terminal/app",
         "src/webview/common"
     ]
 }
