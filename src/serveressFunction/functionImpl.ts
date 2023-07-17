@@ -5,24 +5,24 @@
 
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { CliExitData } from '../cli';
 import { Uri, workspace } from 'vscode';
 import { FunctionContent, FunctionObject, FunctionStatus } from './types';
 import { ServerlessFunctionView } from './view';
-import { Command, Utils } from './commands';
+import { ServerlessCommand, Utils } from './commands';
 import { OdoImpl } from '../odo';
 import { BuildAndDeploy } from './build-run-deploy';
+import { stringify } from 'yaml';
+import { CliExitData } from '../cli';
+import * as cp from 'child_process';
 
 export interface ServerlessFunction {
     getLocalFunctions(): Promise<FunctionObject[]>;
-    createFunction(language: string, template: string, location: string): Promise<CliExitData>;
+    createFunction(language: string, template: string, location: string, image: string): Promise<CliExitData>;
 }
 
 export class ServerlessFunctionImpl implements ServerlessFunction {
 
     private static instance: ServerlessFunction;
-
-    private static functionPath: Uri = undefined;
 
     public static get Instance(): ServerlessFunction {
         if (!ServerlessFunctionImpl.instance) {
@@ -42,9 +42,35 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         return this.getListItems<FunctionObject>(DeploymentConfig.command.getDeploymentFunctions());
     }*/
 
-    async createFunction(language: string, template: string, location: string): Promise<CliExitData> {
-        ServerlessFunctionImpl.functionPath = Uri.parse(location);
-        return await OdoImpl.Instance.execute(Command.createFunction(language, template, location));
+    async createFunction(language: string, template: string, location: string, image: string): Promise<CliExitData> {
+        let funnctionResponse: CliExitData;
+        try {
+            const response = await OdoImpl.Instance.execute(ServerlessCommand.createFunction(language, template, location));
+            if (response && !response.error) {
+                const yamlContent = await Utils.getFuncYamlContent(location);
+                if (yamlContent) {
+                    yamlContent.image = image;
+                    fs.rmSync(path.join(location, 'func.yaml'));
+                    fs.writeFileSync(path.join(location, 'func.yaml'), stringify(yamlContent), 'utf-8');
+                    funnctionResponse = {
+                        error: undefined,
+                        stderr: '',
+                        stdout: 'Success'
+                    };
+                }
+            } else {
+                fs.rmdirSync(location);
+                funnctionResponse = response;
+            }
+        } catch (err) {
+            fs.rmdirSync(location);
+            funnctionResponse = {
+                error: err as cp.ExecException,
+                stderr: '',
+                stdout: ''
+            }
+        }
+        return funnctionResponse;
     }
 
     async getLocalFunctions(): Promise<FunctionObject[]> {
@@ -58,12 +84,6 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
                     folders.push(wf.uri);
                 }
             }
-        }
-        if(ServerlessFunctionImpl.functionPath) {
-            if (fs.existsSync(path.join(ServerlessFunctionImpl.functionPath.fsPath, 'func.yaml'))) {
-                folders.push(ServerlessFunctionImpl.functionPath);
-            }
-            ServerlessFunctionImpl.functionPath = undefined;
         }
         const currentNamespace: string = ServerlessFunctionView.getInstance().getCurrentNameSpace();
         // eslint-disable-next-line no-console
@@ -93,7 +113,8 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
                 runtime: funcData.runtime,
                 folderURI: folderUri,
                 context: funcStatus,
-                hasImage: await this.checkImage(folderUri)
+                hasImage: await this.checkImage(folderUri),
+                isRunning: BuildAndDeploy.getInstance().checkRunning(folderUri.fsPath)
             }
             functionList.push(functionNode);
         }

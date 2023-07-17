@@ -22,7 +22,7 @@ export class Utils {
     }
 }
 
-export class Command {
+export class ServerlessCommand {
 
     static createFunction(language: string, template: string, location: string): CommandText {
         return new CommandText(`func create ${location}`, undefined, [

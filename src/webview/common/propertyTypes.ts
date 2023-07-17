@@ -56,7 +56,7 @@ export interface HelmChartHomePageProps extends React.AnchorHTMLAttributes<HTMLA
 
 export interface CreateFunctionPageProps extends DefaultProps {
     loadScreen: boolean;
-    onCreateSubmit: (name: string, language: string, template: string, location: Uri) => void;
+    onCreateSubmit: (name: string, language: string, template: string, location: Uri, image: string) => void;
 }
 
 export interface BuildFunctionPageProps extends DefaultProps {

@@ -807,8 +807,18 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.Serverless.buildAndRun",
+				"title": "Build and Run",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.Serverless.run",
 				"title": "Run",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.stopRun",
+				"title": "Stop",
 				"category": "OpenShift"
 			}
 		],
@@ -1446,8 +1456,16 @@
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild)$/"
 				},
 				{
+					"command": "openshift.Serverless.buildAndRun",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild)$/"
+				},
+				{
 					"command": "openshift.Serverless.run",
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild)$/"
+				},
+				{
+					"command": "openshift.Serverless.stopRun",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(running)$/"
 				}
 			]
 		},

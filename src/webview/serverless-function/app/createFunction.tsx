@@ -4,19 +4,11 @@
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
 import { Uri } from 'vscode';
-import { Button, FormControl, InputLabel, MenuItem, OutlinedInput, Select, SelectChangeEvent, TextField } from '@mui/material';
+import { Autocomplete, Button, FormControl, InputLabel, MenuItem, OutlinedInput, Select, SelectChangeEvent, TextField, createFilterOptions } from '@mui/material';
 import { VSCodeMessage } from './vsCodeMessage';
 import { CreateFunctionPageProps } from '../../common/propertyTypes';
 import './home.scss';
 import { LoadModal } from './modal';
-
-declare module 'react' {
-    interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
-        // extends React's HTMLAttributes
-        directory?: string;        // remember to make these attributes optional....
-        webkitdirectory?: string;
-    }
-}
 
 export class CreateFunction extends React.Component<CreateFunctionPageProps, {
     functionData: {
@@ -24,12 +16,18 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
         error?: boolean,
         helpText?: string
     },
-    templates?: string[],
-    language?: string,
-    template?: string,
-    wsFolderItems?: Uri[],
+    imageData: {
+        name?: string,
+        error?: boolean,
+        helpText?: string
+    },
+    images: string[],
+    templates: string[],
+    language: string,
+    template: string,
+    wsFolderItems: Uri[],
     wsFolderPath: Uri,
-    showLoadScreen: boolean
+    showLoadScreen: boolean,
 }> {
 
     constructor(props: CreateFunctionPageProps | Readonly<CreateFunctionPageProps>) {
@@ -40,6 +38,12 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                 error: false,
                 helpText: ''
             },
+            imageData: {
+                name: '',
+                error: false,
+                helpText: ''
+            },
+            images: [],
             templates: [],
             language: '',
             template: '',
@@ -67,7 +71,13 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         name: message.data.name,
                         error: message.data.error,
                         helpText: message.data.helpText,
-                    }
+                    },
+                    imageData: {
+                        name: '',
+                        error: false,
+                        helpText: ''
+                    },
+                    images: message.data.images
                 });
             } else if (message.data.action === 'selectFolder') {
                 if (message.data.wsFolderItems === null || message.data.wsFolderItems[0] === null) {
@@ -132,19 +142,23 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
     }
 
     handleCreateBtnDisable(): boolean {
-        return !this.state.functionData || this.state.functionData.name.length === 0 || this.state.functionData.error || !this.state.wsFolderPath || this.state.language.length === 0 || this.state.template.length === 0;
+        return !this.state.functionData || this.state.functionData.name.length === 0 || this.state.functionData.error
+            || !this.state.imageData || this.state.imageData.name.length === 0 || this.state.imageData.error
+            || !this.state.wsFolderPath || this.state.language.length === 0 || this.state.template.length === 0;
     }
 
     createFunction = (): void => {
         this.props.onCreateSubmit(this.state.functionData.name,
-            this.convert(this.state.language), this.convert(this.state.template), this.state.wsFolderPath)
+            this.convert(this.state.language), this.convert(this.state.template), this.state.wsFolderPath, this.state.imageData.name)
     }
 
     render(): React.ReactNode {
-        const { wsFolderItems, wsFolderPath, functionData, templates, language, template } = this.state;
+        const { wsFolderItems, wsFolderPath, functionData, templates, language, template, images, imageData } = this.state;
         const languages = ['Go', 'Node', 'Python', 'Quarkus', 'Rust', 'Spring Boot', 'TypeScript'];
         const folders: any[] = ['New Folder'];
         folders.push(...wsFolderItems);
+        const filter = createFilterOptions<string>();
+        const imageRegex = RegExp('[^/]+\\.[^/.]+\\/([^/.]+)(?:\\/[\\w\\s._-]*([\\w\\s._-]))*(?::[a-z0-9\\.-]+)?$');
         return (
             <>
                 <LoadModal show={this.props.loadScreen} />
@@ -165,6 +179,65 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                             }
                         }}
                         helperText={functionData.helpText}
+                    />
+                </FormControl>
+                <FormControl sx={{ margin: '2rem 0 0 2rem', width: 'auto' }}>
+                    <Autocomplete
+                        value={imageData.name}
+                        disabled={functionData.error || functionData.name.length === 0}
+                        onChange={(_event, newValue: string) => {
+                            if (newValue) {
+                                const value = newValue.replace('Add', '').trim();
+                                if (!imageRegex.test(value)) {
+                                    this.setState({
+                                        imageData: {
+                                            name: '',
+                                            error: true,
+                                            helpText: 'Provide full image name in the form [registry]/[namespace]/[name]:[tag]'
+                                        }
+                                    });
+                                } else {
+                                    if (!images.includes(value)) {
+                                        images.push(value);
+                                    }
+                                    this.setState({
+                                        imageData: {
+                                            name: value,
+                                            error: false,
+                                            helpText: ''
+                                        }
+                                    });
+                                }
+                            }
+                        }}
+                        filterOptions={(options, params) => {
+                            const filtered = filter(options, params);
+
+                            const { inputValue } = params;
+                            // Suggest the creation of a new value
+                            const isExisting = options.some((option) => inputValue === option);
+                            if (inputValue !== '' && !isExisting) {
+                                filtered.push(`Add ${inputValue}`);
+                            }
+
+                            return filtered;
+                        }}
+                        id='image-dropdown'
+                        options={images}
+                        getOptionLabel={(option) => {
+                            // Value selected with enter, right from the input
+                            if (typeof option === 'string') {
+                                return option;
+                            }
+                            // Regular option
+                            return option;
+                        }}
+                        renderOption={(props, option) => <li {...props}>{option}</li>}
+                        clearOnBlur
+                        fullWidth
+                        renderInput={(params) => (
+                            <TextField {...params} label='Build Image' error={imageData.error} helperText={imageData.helpText} />
+                        )}
                     />
                 </FormControl>
                 <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem' }}>

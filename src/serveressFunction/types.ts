@@ -25,6 +25,7 @@ export interface FunctionObject {
     ready?: string;
     context: string;
     hasImage?: boolean;
+    isRunning?: boolean;
 }
 
 export interface ImageAndBuild {
@@ -55,6 +56,7 @@ export enum FunctionContextType {
     NAMESPACENODE = 'namespaceNode',
     LOCAlFUNCTIONS = 'localFunctions',
     LOCAlFUNCTIONSWithBuild = 'localFunctionsWithBuild',
+    RUNNING = 'running',
     NOTCONNECTEDLOCALFUNCTIONS = 'notConnectedLocalFunctions',
     NOTCONNECTEDLOCALFUNCTIONSENABLEMENT = 'notConnectedLocalFunctionsEnablement',
     ACTIVECOMMAND = 'activecommand',

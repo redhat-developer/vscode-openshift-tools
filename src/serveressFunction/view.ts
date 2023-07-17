@@ -26,8 +26,9 @@ import { KubeConfigUtils } from '../util/kubeUtils';
 import { FileContentChangeNotifier, WatchUtil } from '../util/watch';
 import { ServerlessFunction, serverlessInstance } from './functionImpl';
 import { FunctionContextType, FunctionObject, FunctionStatus } from './types';
-import { vsCommand } from '../vscommand';
 import ServerlessFunctionViewLoader from '../webview/serverless-function/serverlessFunctionLoader';
+import { BuildAndDeploy } from './build-run-deploy';
+import { vsCommand } from '../vscommand';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
@@ -117,9 +118,12 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     getContext(functionObj: FunctionObject): string {
         if (functionObj.hasImage) {
-            return FunctionContextType.LOCAlFUNCTIONSWithBuild
+            if(BuildAndDeploy.getInstance().checkRunning(functionObj.folderURI.fsPath)) {
+                return FunctionContextType.RUNNING;
+            }
+            return FunctionContextType.LOCAlFUNCTIONSWithBuild;
         }
-        return FunctionContextType.LOCAlFUNCTIONS
+        return FunctionContextType.LOCAlFUNCTIONS;
     }
 
     getCommand(functionObj: FunctionObject): Command {
@@ -189,12 +193,22 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     @vsCommand('openshift.Serverless.build')
     static async buildFunction(context: FunctionObject) {
-        await ServerlessFunctionViewLoader.loadView('Serverless Function - Build', context.folderURI, context.name, 1);
+        await BuildAndDeploy.getInstance().buildFunction(context.name, context.folderURI);
+    }
+
+    @vsCommand('openshift.Serverless.buildAndRun')
+    static buildAndRunFunction(context: FunctionObject) {
+        BuildAndDeploy.getInstance().runFunction(context, true);
     }
 
     @vsCommand('openshift.Serverless.run')
-    static async runFunction(context: FunctionObject) {
-        await ServerlessFunctionViewLoader.loadView('Serverless Function - Run', context.folderURI, context.name, 2);
+    static runFunction(context: FunctionObject) {
+        BuildAndDeploy.getInstance().runFunction(context);
+    }
+
+    @vsCommand('openshift.Serverless.stopRun')
+    static stopRunFunction(context: FunctionObject) {
+        BuildAndDeploy.getInstance().stopFunction(context);
     }
 
     @vsCommand('openshift.Serverless.openFunction')

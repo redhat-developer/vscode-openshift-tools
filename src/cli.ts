@@ -157,7 +157,7 @@ export class CliChannel implements Cli {
         const toolLocation = await ToolsConfig.detect(cmd);
         const envWithTelemetry = {...env, ...CliChannel.createTelemetryEnv()};
         const terminal: vscode.Terminal = WindowUtil.createTerminal(name, cwd, envWithTelemetry);
-        terminal.sendText(toolLocation === cmd ? command.toString() : toolLocation.concat(' ', ...params), true);
+        terminal.sendText(toolLocation === cmd  ? command.toString() : toolLocation.concat(' ', ...params.join(' ')), true);
         terminal.show();
     }
 
