@@ -2,27 +2,27 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import * as cp from 'child_process';
+import * as fse from 'fs-extra';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
-import { Uri, ViewColumn, WebviewPanel, extensions, window } from 'vscode';
+import { extensions, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
 import * as YAML from 'yaml';
 import { OdoImpl } from '../../odo';
-import { AnalyzeResponse, ComponentTypeDescription, Registry } from '../../odo/componentType';
+import { AnalyzeResponse, ComponentTypeDescription } from '../../odo/componentType';
 import { Endpoint } from '../../odo/componentTypeDescription';
-import OpenShiftItem from '../../openshift/openshiftItem';
 import { ComponentTypesView } from '../../registriesView';
 import { ExtensionID } from '../../util/constants';
+import { DevfileConverter } from '../../util/devfileConverter';
+import { gitUrlParse } from '../../util/gitParse';
 import { selectWorkspaceFolder } from '../../util/workspace';
 import { VsCommandError } from '../../vscommand';
+import { getDevfileRegistries, isValidProjectFolder, validateComponentName } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
-import { DevfileConverter } from '../git-import/devfileConverter';
-import { gitUrlParse } from '../git-import/gitParse';
-import cp = require('child_process');
-import fsExtra = require('fs-extra');
 
 interface CloneProcess {
     status: boolean,
@@ -97,7 +97,7 @@ export default class CreateComponentLoader {
             case 'getDevfileRegistries': {
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'devfileRegistries',
-                    data: CreateComponentLoader.getDevfileRegistries(),
+                    data: getDevfileRegistries(),
                 });
                 break;
             }
@@ -121,7 +121,11 @@ export default class CreateComponentLoader {
              * The panel requested to validate the entered component name. Respond with error status and message.
              */
             case 'validateComponentName': {
-                CreateComponentLoader.validateComponentName(message.data);
+                const validationMessage = validateComponentName(message.data);
+                void CreateComponentLoader.panel.webview.postMessage({
+                    action: 'validatedComponentName',
+                    data: validationMessage,
+                });
                 break;
             }
             /**
@@ -145,6 +149,11 @@ export default class CreateComponentLoader {
                 });
                 break;
             }
+
+            /**
+             * The panel request to select a project folder from the
+             * 'template project' workflow
+             */
             case 'selectProjectFolderNewProject': {
                 const workspaceUri: vscode.Uri = await selectWorkspaceFolder(true);
                 void CreateComponentLoader.panel.webview.postMessage({
@@ -166,53 +175,10 @@ export default class CreateComponentLoader {
             }
             case 'isValidProjectFolder': {
                 const { folder, componentName } = message.data;
-                let projectFolderExists = false;
-                try {
-
-                    const stats = await fs.stat(folder);
-                    projectFolderExists = stats.isDirectory();
-                } catch (_) {
-                    // do nothing
-                }
-
-                let projectFolderWritable = false;
-                if (projectFolderExists) {
-                    try {
-                        await fs.access(folder, fs.constants.W_OK);
-                        projectFolderWritable = true;
-                    } catch (_) {
-                        // do nothing
-                    }
-                }
-
-                const childFolder = path.join(folder, componentName);
-                let childFolderExists = false;
-                if (projectFolderExists && projectFolderWritable) {
-                    try {
-                        await fs.access(childFolder);
-                        childFolderExists = true;
-                    } catch (_) {
-                        // do nothing
-                    }
-                }
-
-                let validationMessage = '';
-                if (!projectFolderExists) {
-                    validationMessage = `Project folder ${folder} doesn't exist`;
-                } else if (!projectFolderWritable) {
-                    validationMessage = `Project folder ${folder} is not writable`;
-                } else if (childFolderExists) {
-                    validationMessage = `There is already a folder ${componentName} in ${folder}`;
-                } else {
-                    validationMessage = `Project will be created in ${childFolder}`;
-                }
-
+                const validationResult = await isValidProjectFolder(folder, componentName);
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'isValidProjectFolder',
-                    data: {
-                        valid: projectFolderExists && projectFolderWritable && !childFolderExists,
-                        message: validationMessage,
-                    },
+                    data: validationResult,
                 });
                 break;
             }
@@ -277,7 +243,7 @@ export default class CreateComponentLoader {
                     // move the cloned git repo to selected project path
                     const newProjectPath: string = path.join(message.data.gitDestinationPath, componentName);
                     await fs.mkdir(newProjectPath);
-                    await fsExtra.copy(message.data.tmpDirUri.fsPath, newProjectPath);
+                    await fse.copy(message.data.tmpDirUri.fsPath, newProjectPath);
                     await fs.rm(message.data.tmpDirUri.fsPath, { force: true, recursive: true });
                     projectUri = Uri.file(newProjectPath);
                 }
@@ -316,81 +282,7 @@ export default class CreateComponentLoader {
         }
     }
 
-    static getDevfileRegistries(): DevfileRegistry[] {
-        const registries = ComponentTypesView.instance.getListOfRegistries();
-        if (!registries || registries.length === 0) {
-            throw new Error('No Devfile registries available. Default registry is missing');
-        }
-        const devfileRegistries = registries.map((registry: Registry) => {
-            return {
-                devfiles: [],
-                name: registry.name,
-                url: registry.url,
-            } as DevfileRegistry;
-        });
 
-        const components = ComponentTypesView.instance.getCompDescriptions();
-        for (const component of components) {
-            const devfileRegistry = devfileRegistries.find(
-                (devfileRegistry) => devfileRegistry.url === component.registry.url.toString(),
-            );
-
-            devfileRegistry.devfiles.push({
-                description: component.description,
-                registryName: devfileRegistry.name,
-                logoUrl: component.devfileData.devfile.metadata.icon,
-                name: component.displayName,
-                id: component.name,
-                starterProjects: component.devfileData.devfile.starterProjects,
-                tags: component.tags,
-                yaml: YAML.stringify(component.devfileData.devfile),
-                supportsDebug:
-                    Boolean(
-                        component.devfileData.devfile.commands?.find(
-                            (command) => command.exec?.group?.kind === 'debug',
-                        ),
-                    ) ||
-                    Boolean(
-                        component.devfileData.devfile.commands?.find(
-                            (command) => command.composite?.group?.kind === 'debug',
-                        ),
-                    ),
-                supportsDeploy:
-                    Boolean(
-                        component.devfileData.devfile.commands?.find(
-                            (command) => command.exec?.group?.kind === 'deploy',
-                        ),
-                    ) ||
-                    Boolean(
-                        component.devfileData.devfile.commands?.find(
-                            (command) => command.composite?.group?.kind === 'deploy',
-                        ),
-                    ),
-            } as Devfile);
-        }
-        devfileRegistries.sort((a, b) => (a.name < b.name ? -1 : 1));
-        return devfileRegistries;
-    }
-
-    static validateComponentName(data: string) {
-        let validationMessage = OpenShiftItem.emptyName(`Please enter a component name.`, data);
-        if (!validationMessage)
-            validationMessage = OpenShiftItem.validateMatches(
-                `Not a valid component name.
-            Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`,
-                data,
-            );
-        if (!validationMessage)
-            validationMessage = OpenShiftItem.lengthName(
-                `Component name should be between 2-63 characters`,
-                data,
-                0,
-            );
-        void CreateComponentLoader.panel.webview.postMessage({
-            action: 'validatedComponentName',
-            data: validationMessage,
-        });
-    }
 
     static async getRecommendedDevfile(uri: Uri) {
         let analyzeRes: AnalyzeResponse[] = [];
@@ -417,7 +309,7 @@ export default class CreateComponentLoader {
                         analyzeRes = await OdoImpl.Instance.analyze(uri.fsPath);
                         compDescriptions = getCompDescription(analyzeRes);
                         const endPoints = getEndPoints(compDescriptions[0]);
-                        const devfileV2 = await DevfileConverter.getInstance().devfileV1toDevfileV2(
+                        const devfileV2 = DevfileConverter.getInstance().devfileV1toDevfileV2(
                             devfileV1,
                             endPoints,
                         );
@@ -440,10 +332,9 @@ export default class CreateComponentLoader {
                 compDescriptions = getCompDescription(analyzeRes);
             }
         } finally {
-            const devfileRegistry: DevfileRegistry[] = CreateComponentLoader.getDevfileRegistries();
+            const devfileRegistry: DevfileRegistry[] = getDevfileRegistries();
             const allDevfiles: Devfile[] = devfileRegistry
-                .map((registry) => registry.devfiles)
-                .flat();
+                .flatMap((registry) => registry.devfiles);
             const devfile: Devfile = allDevfiles.find(
                 (devfile) => devfile.name === compDescriptions[0].displayName,
             );

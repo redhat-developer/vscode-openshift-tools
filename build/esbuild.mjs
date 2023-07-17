@@ -13,7 +13,6 @@ const webviews = [
     'create-component',
     'describe',
     'devfile-registry',
-    'git-import',
     'helm-chart',
     'log',
     'welcome',

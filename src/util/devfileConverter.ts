@@ -10,10 +10,10 @@ import {
     V220DevfileComponentsItemsContainerEnv,
     V220DevfileComponentsItemsContainerVolumeMounts, V220DevfileMetadata, V220DevfileProjects
 } from '@devfile/api';
-import { Data, Endpoint, Metadata } from '../../odo/componentTypeDescription';
-import { DevfileV1, MetadataV1, ProjectV1, ComponentV1, DevfileCommandV1, EnvV1, DevfileVolumeV1, EndpointV1 } from './devfileV1Type';
+import { Data, Endpoint, Metadata } from '../odo/componentTypeDescription';
+import { ComponentV1, DevfileCommandV1, DevfileV1, DevfileVolumeV1, EndpointV1, EnvV1, MetadataV1, ProjectV1 } from './devfileV1Type';
 
-export type DevfileMetadataLike = V220DevfileMetadata & {};
+export type DevfileMetadataLike = V220DevfileMetadata & object;
 
 export type DevfileMetadata = DevfileMetadataLike & Required<Pick<DevfileMetadataLike, 'name'>>;
 
@@ -26,12 +26,33 @@ export type Devfile = DevfileLike &
         metadata?: DevfileMetadata;
     };
 
+function setGroup(name: string): any {
+    let kindVal = undefined;
+    if (name && name.trim().length > 0) {
+        if (name.indexOf('run') !== -1) {
+            kindVal = 'run'
+        } else if (name.indexOf('install') !== -1) {
+            kindVal = 'build'
+        } else if (name.indexOf('debug') !== -1) {
+            kindVal = 'debug'
+        } else if (name.indexOf('test') !== -1) {
+            kindVal = 'test'
+        }
+        if (kindVal) {
+            return {
+                isDefault: true,
+                kind: kindVal
+            };
+        }
+    }
+    return undefined;
+}
+
 export class DevfileConverter {
 
     static instance: DevfileConverter;
 
     public readonly VSCODE_LAUNCH_JSON = '.vscode/launch.json';
-
 
     public static getInstance(): DevfileConverter {
         if (!DevfileConverter.instance) {
@@ -40,7 +61,7 @@ export class DevfileConverter {
         return DevfileConverter.instance;
     }
 
-    async devfileV1toDevfileV2(devfileV1: DevfileV1, endPoints: Endpoint[]): Promise<Data> {
+    devfileV1toDevfileV2(devfileV1: DevfileV1, endPoints: Endpoint[]): Data {
         const devfileV2: Devfile = {
             schemaVersion: '2.1.0',
             metadata: this.metadataV1toMetadataV2(devfileV1.metadata),
@@ -70,7 +91,7 @@ export class DevfileConverter {
         if (devfileV1.attributes) {
             Object.assign(devfileV2.metadata.attributes, {});
             Object.keys(devfileV1.attributes).forEach(attributeName => {
-                devfileV2.metadata.attributes![attributeName] = devfileV1.attributes![attributeName];
+                devfileV2.metadata.attributes[attributeName] = devfileV1.attributes[attributeName];
             });
         }
 
@@ -80,7 +101,7 @@ export class DevfileConverter {
             devfileV2.attributes[this.VSCODE_LAUNCH_JSON] = launchCommand.actions[0].referenceContent;
         }*/
 
-        let content = JSON.stringify(devfileV2);
+        const content = JSON.stringify(devfileV2);
         return JSON.parse(content);
     }
 
@@ -122,7 +143,7 @@ export class DevfileConverter {
             // names should not use .
             .replace(/\./g, '-')
             // trim '-' character from start or end
-            .replace(/^\-+|\-+$/g, '')
+            .replace(/^-+|-+$/g, '')
             .toLowerCase();
 
         const devfileV2Project: any = {
@@ -209,7 +230,7 @@ export class DevfileConverter {
         } else if (componentV1.type === 'openshift') {
             devfileV2Component.openshift = {};
             devfileV2Component.openshift.inlined = JSON.stringify(componentV1);
-        } else if (componentV1.type == 'chePlugin' || componentV1.type == 'cheEditor') {
+        } else if (componentV1.type === 'chePlugin' || componentV1.type === 'cheEditor') {
             // components are processed as inline attributes
             return undefined;
         }
@@ -234,7 +255,7 @@ export class DevfileConverter {
                 devfileV2Command.id = devfileV2Command.id.substring(0, 63);
             }
             // trim '-' character from start or end
-            devfileV2Command.id = devfileV2Command.id.replace(/^\-+|\-+$/g, '');
+            devfileV2Command.id = devfileV2Command.id.replace(/^-+|-+$/g, '');
         }
         if (commandV1.actions && commandV1.actions[0].type === 'exec') {
             devfileV2Command.exec = {};
@@ -315,7 +336,7 @@ export class DevfileConverter {
                         // names should not use _
                         .replace(/_/g, '-')
                         // trim '-' character from start or end
-                        .replace(/^\-+|\-+$/g, '')
+                        .replace(/^-+|-+$/g, '')
                         .toLowerCase();
 
                     endpoint.name = endpointName;
@@ -326,11 +347,11 @@ export class DevfileConverter {
                 if (endpointV1.attributes) {
                     endpoint.attributes = endpointV1.attributes;
 
-                    if (endpoint.attributes['type'] === 'ide') {
-                        endpoint.attributes['type'] = 'main';
+                    if (endpoint.attributes.type === 'ide') {
+                        endpoint.attributes.type = 'main';
                     }
 
-                    if (endpointV1.attributes['public'] !== undefined && endpointV1.attributes['public'] === 'false') {
+                    if (endpointV1.attributes.public !== undefined && endpointV1.attributes.public === 'false') {
                         endpoint.exposure = 'internal';
                     }
                 }
@@ -341,26 +362,3 @@ export class DevfileConverter {
         return undefined;
     }
 }
-
-function setGroup(name: string): any {
-    let kindVal = undefined;
-    if (name && name.trim().length > 0) {
-        if (name.indexOf('run') !== -1) {
-            kindVal = 'run'
-        } else if (name.indexOf('install') !== -1) {
-            kindVal = 'build'
-        } else if (name.indexOf('debug') !== -1) {
-            kindVal = 'debug'
-        } else if (name.indexOf('test') !== -1) {
-            kindVal = 'test'
-        }
-        if (kindVal) {
-            return {
-                isDefault: true,
-                kind: kindVal
-            };
-        }
-    }
-    return undefined;
-}
-
