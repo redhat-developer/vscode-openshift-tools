@@ -23,7 +23,7 @@ import {
     Select,
     Stack,
     TextField,
-    Typography
+    Typography,
 } from '@mui/material';
 import * as React from 'react';
 import SyntaxHighlighter from 'react-syntax-highlighter';
@@ -90,18 +90,23 @@ function SearchBar(props: {
 }
 
 function RegistriesPicker(props: {
-    registryEnabled: { registryName: string; enabled: boolean }[];
+    registryEnabled: { registryName: string; registryUrl: string; enabled: boolean }[];
     setRegistryEnabled: React.Dispatch<
-        React.SetStateAction<{ registryName: string; enabled: boolean }[]>
+        React.SetStateAction<{ registryName: string; registryUrl: string; enabled: boolean }[]>
     >;
 }) {
     function onCheckboxClick(clickedRegistry: string, checked: boolean) {
+        const prevVal = props.registryEnabled.find(
+            (entry) => entry.registryName === clickedRegistry,
+        );
         const updatedList = [...props.registryEnabled] //
             .filter((entry) => entry.registryName !== clickedRegistry);
         updatedList.push({
             registryName: clickedRegistry,
+            registryUrl: prevVal.registryUrl,
             enabled: checked,
         });
+        updatedList.sort((regA, regB) => regA.registryName.localeCompare(regB.registryName));
         props.setRegistryEnabled(updatedList);
     }
 
@@ -116,7 +121,9 @@ function RegistriesPicker(props: {
                         <FormControlLabel
                             control={
                                 <Checkbox
-                                    disabled={registry.registryName === 'DefaultDevfileRegistry'}
+                                    disabled={
+                                        registry.registryUrl === 'https://registry.devfile.io'
+                                    }
                                     checked={registry.enabled}
                                     onChange={(_e, checked) =>
                                         onCheckboxClick(registry.registryName, checked)
@@ -264,7 +271,7 @@ export type DevfileSearchProps = {
     /**
      * The function to step backwards in the UI.
      */
-    goBack: () => void;
+    goBack?: () => void;
 };
 
 export function DevfileSearch(props: DevfileSearchProps) {
@@ -274,7 +281,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
     const [currentPage, setCurrentPage] = React.useState(1);
     const [devfileRegistries, setDevfileRegistries] = React.useState<DevfileRegistry[]>([]);
     const [registryEnabled, setRegistryEnabled] = React.useState<
-        { registryName: string; enabled: boolean }[]
+        { registryName: string; registryUrl: string; enabled: boolean }[]
     >([]);
     const [searchText, setSearchText] = React.useState('');
 
@@ -292,6 +299,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
         for (let registry of devfileRegistries) {
             enabledArray.push({
                 registryName: registry.name,
+                registryUrl: registry.url,
                 enabled: true,
             });
         }
@@ -325,6 +333,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
     const activeRegistries = registryEnabled //
         .filter((entry) => entry.enabled) //
         .map((entry) => entry.registryName);
+
     const devfiles: Devfile[] = devfileRegistries //
         .filter((devfileRegistry) => activeRegistries.includes(devfileRegistry.name)) //
         .flatMap((devfileRegistry) => devfileRegistry.devfiles) //
@@ -341,11 +350,15 @@ export function DevfileSearch(props: DevfileSearchProps) {
             <Stack direction="column" height="100%" spacing={3}>
                 <Typography variant="h5">{props.titleText}</Typography>
                 <Stack direction="row" flexGrow="1" spacing={2}>
-                    <RegistriesPicker
-                        registryEnabled={registryEnabled}
-                        setRegistryEnabled={setRegistryEnabled}
-                    />
-                    <Divider orientation="vertical" />
+                    {devfileRegistries.length > 1 && (
+                        <>
+                            <RegistriesPicker
+                                registryEnabled={registryEnabled}
+                                setRegistryEnabled={setRegistryEnabled}
+                            />
+                            <Divider orientation="vertical" />
+                        </>
+                    )}
                     <Stack direction="column" sx={{ flexGrow: '1', height: '100%' }} spacing={3}>
                         <SearchBar
                             setSearchText={setSearchText}
@@ -372,7 +385,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
                                 .map((devfile) => {
                                     return (
                                         <DevfileListItem
-                                            key={devfile.name}
+                                            key={`${devfile.registryName}-${devfile.name}`}
                                             devfile={devfile}
                                             buttonCallback={() => {
                                                 setSelectedDevfile(devfile);
@@ -388,16 +401,18 @@ export function DevfileSearch(props: DevfileSearchProps) {
                         </Typography>
                     </Stack>
                 </Stack>
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Button
-                        variant="text"
-                        onClick={(_) => {
-                            props.goBack();
-                        }}
-                    >
-                        Back
-                    </Button>
+                <Stack direction="row-reverse" justifyContent="space-between" alignItems="center">
                     <DevfileExplanation />
+                    {props.goBack && (
+                        <Button
+                            variant="text"
+                            onClick={(_) => {
+                                props.goBack();
+                            }}
+                        >
+                            Back
+                        </Button>
+                    )}
                 </Stack>
             </Stack>
             <Modal

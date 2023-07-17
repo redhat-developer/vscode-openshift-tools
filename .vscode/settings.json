@@ -8,6 +8,9 @@
     },
     // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
     "typescript.tsc.autoDetect": "off",
+    // Use the workspace's tsserver installation
+    "typescript.tsdk": "./node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
     "debug.node.autoAttach": "off",
     "eslint.enable": true
 }

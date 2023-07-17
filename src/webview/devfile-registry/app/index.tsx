@@ -5,9 +5,9 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Home } from './home';
+import { DevfileRegistry } from './devfileRegistry';
 
 ReactDOM.render(
-    <Home/>,
+    <DevfileRegistry/>,
     document.getElementById('root'),
 );

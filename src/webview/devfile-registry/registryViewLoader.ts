@@ -2,84 +2,124 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { stringify } from 'yaml';
+import { OdoImpl } from '../../odo';
 import { Registry } from '../../odo/componentType';
 import { ComponentTypesView } from '../../registriesView';
-import { ExtCommandTelemetryEvent } from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
+import { selectWorkspaceFolder } from '../../util/workspace';
 import { vsCommand } from '../../vscommand';
+import { getDevfileRegistries, isValidProjectFolder, validateComponentName } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml } from '../common-ext/utils';
+import { TemplateProjectIdentifier } from '../common/devfile';
 
 let panel: vscode.WebviewPanel;
 
-let themeKind: vscode.ColorThemeKind = vscode.window.activeColorTheme.kind;
 vscode.window.onDidChangeActiveColorTheme(function (editor: vscode.ColorTheme) {
-    if (themeKind !== editor.kind) {
-        themeKind = editor.kind;
-        if (panel) {
-            panel.webview.postMessage({ action: 'setTheme', themeValue: themeKind });
-        }
+    if (panel) {
+        void panel.webview.postMessage({
+            action: 'setTheme',
+            themeValue: vscode.window.activeColorTheme.kind,
+        });
     }
 });
 
 async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
-    let starterProject = event.selectedProject;
     switch (event?.action) {
-        case 'getAllComponents':
-            getAllComponents(event.action);
-            break;
-        case 'getYAML':
-            const yaml = stringify(event.data, { indent: 4 });
-            panel.webview.postMessage(
-                {
-                    action: event.action,
-                    devYAML: yaml
-                }
-            );
-            break;
-        case 'createComponent':
-            const registryName = event.registryName;
-            vscode.commands.executeCommand('openshift.componentType.newComponent', starterProject, registryName);
-            break;
-        case 'cloneToWorkSpace':
-            vscode.commands.executeCommand('openshift.componentType.cloneStarterProjectRepository', starterProject);
-            break;
-        case 'openInBrowser':
-            vscode.commands.executeCommand('openshift.componentType.openStarterProjectRepository', starterProject);
-            break;
-        case 'telemeteryCopyEvent':
-            const devFileName = event.devFileName;
-            const telemetryEventCopyDevFile = new ExtCommandTelemetryEvent('openshift.registryView.starterProjects.copyDevFile');
-            telemetryEventCopyDevFile.send({
-                component_type: devFileName
+        case 'init':
+            void panel.webview.postMessage({
+                action: 'setTheme',
+                themeValue: vscode.window.activeColorTheme.kind,
             })
             break;
-        default:
-            panel.webview.postMessage(
-                {
-                    error: 'Invalid command'
-                }
-            );
+        case 'getDevfileRegistries':
+            RegistryViewLoader.sendUpdatedRegistries();
             break;
+        case 'createComponentFromTemplateProject': {
+            const { projectFolder, componentName } = event.data;
+            const templateProject: TemplateProjectIdentifier = event.data.templateProject;
+            const componentFolder = path.join(projectFolder, componentName);
+            try {
+                await fs.mkdir(componentFolder);
+                await OdoImpl.Instance.createComponentFromTemplateProject(
+                    componentFolder,
+                    componentName,
+                    templateProject.devfileId,
+                    templateProject.registryName,
+                    templateProject.templateProjectName,
+                );
+                panel.dispose();
+                const ADD_TO_WORKSPACE = 'Add to workspace';
+                const selection = await vscode.window.showInformationMessage(
+                    `Component '${componentName} was created.`,
+                    ADD_TO_WORKSPACE,
+                );
+                if (selection === ADD_TO_WORKSPACE) {
+                    vscode.workspace.updateWorkspaceFolders(
+                        vscode.workspace.workspaceFolders
+                            ? vscode.workspace.workspaceFolders.length
+                            : 0,
+                        null,
+                        { uri: vscode.Uri.file(componentFolder) },
+                    );
+                }
+            } catch (e) {
+                void vscode.window.showErrorMessage(e);
+            }
+            break;
+        }
+        case 'validateComponentName': {
+            const validationMessage = validateComponentName(event.data);
+            void panel.webview.postMessage({
+                action: 'validatedComponentName',
+                data: validationMessage,
+            });
+            break;
+        }
+        case 'selectProjectFolderNewProject': {
+            const workspaceUri: vscode.Uri = await selectWorkspaceFolder(true);
+            void panel.webview.postMessage({
+                action: 'selectedProjectFolder',
+                data: workspaceUri.fsPath,
+            });
+            break;
+        }
+        case 'isValidProjectFolder': {
+            const { folder, componentName } = event.data;
+            const validationResult = await isValidProjectFolder(folder, componentName);
+            void panel.webview.postMessage({
+                action: 'isValidProjectFolder',
+                data: validationResult,
+            });
+            break;
+        }
+        default: {
+            void vscode.window.showErrorMessage(`OpenShift: Unexpected message in registry view loader ${event?.action}`);
+        }
     }
 }
 export default class RegistryViewLoader {
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+
+    static url: string;
+
     static get extensionPath() {
         return vscode.extensions.getExtension(ExtensionID).extensionPath
     }
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     static async loadView(title: string, url?: string): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(path.join(RegistryViewLoader.extensionPath, 'out', 'devfileRegistryViewer'));
         if (panel) {
+            if (RegistryViewLoader.url !== url) {
+                RegistryViewLoader.url = url;
+
+            }
             // If we already have a panel, show it in the target column
             panel.reveal(vscode.ViewColumn.One);
             panel.title = title;
-            getAllComponents('getAllComponents');
         } else {
+            RegistryViewLoader.url = url;
             panel = vscode.window.createWebviewPanel('devFileRegistryView', title, vscode.ViewColumn.One, {
                 enableScripts: true,
                 localResourceRoots: [localResourceRoot],
@@ -87,12 +127,12 @@ export default class RegistryViewLoader {
             });
             panel.iconPath = vscode.Uri.file(path.join(RegistryViewLoader.extensionPath, 'images/context/devfile.png'));
             panel.webview.html = await loadWebviewHtml('devfileRegistryViewer', panel);
+            const messageDisposable = panel.webview.onDidReceiveMessage(devfileRegistryViewerMessageListener);
             panel.onDidDispose(() => {
+                messageDisposable.dispose();
                 panel = undefined;
             });
-            panel.webview.onDidReceiveMessage(devfileRegistryViewerMessageListener);
         }
-        getAllComponents('getAllComponents', url);
         return panel;
     }
 
@@ -106,49 +146,27 @@ export default class RegistryViewLoader {
         await RegistryViewLoader.loadView(`Devfile Registry - ${context.name}`, context.url);
     }
 
+    // eslint-disable-next-line @typescript-eslint/require-await
     @vsCommand('openshift.componentTypesView.registry.closeView')
     static async closeRegistryInWebview(): Promise<void> {
         panel?.dispose();
     }
 
-    static refresh(): void {
+    static sendUpdatedRegistries() {
         if (panel) {
-            panel.webview.postMessage({ action: 'loadingComponents' });
+            let registries = getDevfileRegistries();
+            if (RegistryViewLoader.url) {
+                registries = registries.filter((devfileRegistry) => devfileRegistry.url === RegistryViewLoader.url);
+            }
+            void panel.webview.postMessage({
+                action: 'devfileRegistries',
+                data: registries,
+            });
         }
     }
+
 }
 
-function getAllComponents(eventActionName: string, url?: string, error?: string) {
-    let registries = ComponentTypesView.instance.getListOfRegistries();
-    if (!registries || registries.length === 0) {
-        panel?.webview.postMessage(
-            {
-                action: eventActionName,
-                errorMessage: 'No Devfile registries configured'
-            }
-        );
-    } else {
-        if (url && url.length > 0) {
-            registries = registries.filter((registry: Registry) => registry.url === url);
-        }
-        const componentDescriptions = ComponentTypesView.instance.getCompDescriptions();
-        panel?.webview.postMessage(
-            {
-                action: eventActionName,
-                compDescriptions: Array.from(componentDescriptions),
-                registries: registries,
-                themeValue: themeKind,
-                errorMessage: error
-            }
-        );
-    }
-}
-
-ComponentTypesView.instance.subject.subscribe((value: string) => {
-    if (value === 'refresh') {
-        RegistryViewLoader.refresh();
-        getAllComponents('getAllComponents');
-    } else if (value === 'error') {
-        getAllComponents('getAllComponents', undefined, 'Devfile Registry is not accessible');
-    }
+ComponentTypesView.instance.subject.subscribe(() => {
+    RegistryViewLoader.sendUpdatedRegistries();
 });
