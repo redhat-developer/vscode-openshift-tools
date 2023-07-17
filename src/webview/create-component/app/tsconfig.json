@@ -14,10 +14,6 @@
         // "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         "experimentalDecorators": true,
-        "typeRoots": [
-            "../../../../node_modules/@types",
-            "../../@types"
-        ],
         "baseUrl": ".",
         "resolveJsonModule": true,
         "esModuleInterop": true,

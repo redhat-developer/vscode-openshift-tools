@@ -4,14 +4,15 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as React from 'react';
 import 'react-dom';
-import { Devfile, TemplateProjectIdentifier } from '../../common/devfile';
-import { DevfileSearch } from '../../common/devfileSearch';
-import { SetNameAndFolder } from '../../common/setNameAndFolder';
+import { Devfile, TemplateProjectIdentifier } from './devfile';
+import { DevfileSearch } from './devfileSearch';
+import { SetNameAndFolder } from './setNameAndFolder';
 
 type CurrentPage = 'selectTemplateProject' | 'setNameAndFolder';
 
 type FromTemplateProjectProps = {
-    goHome: () => void;
+    titleText: string
+    goHome?: () => void;
 };
 
 export function FromTemplateProject(props: FromTemplateProjectProps) {
@@ -26,7 +27,7 @@ export function FromTemplateProject(props: FromTemplateProjectProps) {
     }
 
     function createComponentFromTemplateProject(projectFolder: string, componentName: string) {
-        window['vscodeApi'].postMessage({
+        window.vscodeApi.postMessage({
             action: 'createComponentFromTemplateProject',
             data: {
                 templateProject: selectedTemplateProject,
@@ -42,7 +43,7 @@ export function FromTemplateProject(props: FromTemplateProjectProps) {
                 <DevfileSearch
                     setSelectedDevfile={setSelectedDevfile}
                     setSelectedTemplateProject={setSelectedProjectAndAdvance}
-                    titleText="Select Template Project from Devfile"
+                    titleText={props.titleText}
                     goBack={props.goHome}
                 />
             );

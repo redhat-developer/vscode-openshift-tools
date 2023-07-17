@@ -211,8 +211,6 @@
 		"onCommand:openshift.project.create",
 		"onCommand:openshift.project.delete",
 		"onCommand:openshift.project.delete.palette",
-		"onCommand:openshift.component.createFromLocal",
-		"onCommand:openshift.component.openImportFromGit",
 		"onCommand:openshift.component.openCreateComponent",
 		"onCommand:openshift.component.createFromRootWorkspaceFolder",
 		"onCommand:openshift.component.describe",
@@ -412,24 +410,6 @@
 				"command": "openshift.project.set.palette",
 				"title": "Set Active Project",
 				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.openImportFromGit",
-				"title": "Import from Git",
-				"category": "OpenShift",
-				"icon": {
-					"light": "images/title/light/git-branch.svg",
-					"dark": "images/title/dark/git-branch.svg"
-				}
-			},
-			{
-				"command": "openshift.component.createFromLocal",
-				"title": "New Component",
-				"category": "OpenShift",
-				"icon": {
-					"light": "images/title/light/workspace-new.svg",
-					"dark": "images/title/dark/workspace-new.svg"
-				}
 			},
 			{
 				"command": "openshift.component.openCreateComponent",
@@ -765,11 +745,6 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.component.importFromGit",
-				"title": "Import Component from git repository",
-				"category": "OpenShift"
-			},
-			{
 				"command": "openshift.component.dev.onPodman",
 				"title": "Start Dev on Podman",
 				"category": "OpenShift"
@@ -839,12 +814,12 @@
 		"viewsWelcome": [
 			{
 				"view": "openshiftProjectExplorer",
-				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[$(git-branch) Import from Git](command:openshift.component.openImportFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
+				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)",
 				"enablement": "openshift.app.explorer.init"
 			},
 			{
 				"view": "openshiftComponentsView",
-				"contents": "You have no OpenShift Components in your workspace yet.\n[$(git-branch) Import from Git](command:openshift.component.openImportFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
+				"contents": "You have no OpenShift Components in your workspace yet.\n[Create Component](command:openshift.component.openCreateComponent)",
 				"enablement": "openshift.component.explorer.init"
 			}
 		],
@@ -1065,10 +1040,6 @@
 					"when": "false"
 				},
 				{
-					"command": "openshift.component.importFromGit",
-					"when": "false"
-				},
-				{
 					"command": "openshift.component.deleteConfigurationFiles",
 					"when": "false"
 				},
@@ -1133,32 +1104,22 @@
 					"group": "navigation@5"
 				},
 				{
-					"command": "openshift.component.createFromLocal",
-					"when": "view == openshiftComponentsView",
-					"group": "navigation"
-				},
-				{
-					"command": "openshift.component.openImportFromGit",
-					"when": "view == openshiftComponentsView",
-					"group": "navigation"
-				},
-				{
 					"command": "openshift.component.openCreateComponent",
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
 				}
 			],
 			"view/item/context": [
-                {
-                    "command": "openshift.sandbox.signup",
-                    "category": "1@1",
-                    "when": "viewItem == openshift.sandbox.status.none"
-                },
-                {
-                    "command": "openshift.sandbox.open.dashboard",
-                    "category": "1@1",
-                    "when": "viewItem == openshift.sandbox.status.ready"
-                },
+				{
+					"command": "openshift.sandbox.signup",
+					"category": "1@1",
+					"when": "viewItem == openshift.sandbox.status.none"
+				},
+				{
+					"command": "openshift.sandbox.open.dashboard",
+					"category": "1@1",
+					"when": "viewItem == openshift.sandbox.status.ready"
+				},
 				{
 					"command": "clusters.openshift.csv.create",
 					"group": "1@1",
@@ -1440,7 +1401,7 @@
 					{
 						"id": "createComponent",
 						"title": "Create a Component using local workspace",
-						"description": "Create a component in the local workspace using the selected starter project and associated `devfile.yaml` configuration. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.component.createFromLocal)",
+						"description": "Create a component in the local workspace using the selected starter project and associated `devfile.yaml` configuration. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.component.openCreateComponent)",
 						"media": {
 							"image": "images/walkthrough/createComponent.gif",
 							"altText": "create component"
@@ -1459,18 +1420,6 @@
 						},
 						"completionEvents": [
 							"onCommand:openshift.componentTypesView.registry.openHelmChartsInView"
-						]
-					},
-					{
-						"id": "importFromGit",
-						"title": "Create a Component from git repository",
-						"description": "Create a component directly from git repository. The guided workflow will detect the repository and recommend the deployment `devfile` for it. Users can also provide their own custom devfile. \n[Import from Git](command:openshift.component.openImportFromGit)",
-						"media": {
-							"image": "images/walkthrough/git-import-walkthrough.gif",
-							"altText": "create component from git"
-						},
-						"completionEvents": [
-							"onCommand:openshift.component.openImportFromGit"
 						]
 					},
 					{
