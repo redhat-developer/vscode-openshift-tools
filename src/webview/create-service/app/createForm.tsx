@@ -1,7 +1,8 @@
-import 'react-dom';
-import * as React from 'react';
-import Form, {ISubmitEvent} from 'react-jsonschema-form';
+import Form, { IChangeEvent } from '@rjsf/core';
+import Validator from '@rjsf/validator-ajv8';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import * as React from 'react';
+import 'react-dom';
 
 export function CreateForm(props) {
     console.log('creating form again');
@@ -12,7 +13,7 @@ export function CreateForm(props) {
     const [crdDescription, setCrdDescription] = React.useState({} as any);
     const [step, setStep] = React.useState('ready');
 
-    const onSubmit = (e: ISubmitEvent<any>): void => {
+    const onSubmit = (e: IChangeEvent): void => {
         // disable Create button while service is created
         // extension should send message back to unlock the button in case of failure
         // or close the editor in case of success
@@ -57,6 +58,7 @@ export function CreateForm(props) {
                     liveValidate
                     disabled={step === 'creating'}
                     showErrorList={false}
+                    validator={Validator}
                 ><div>
                     <button type="submit" className="btn btn-submit" disabled={step === 'creating'}>Create</button>
                     <button type="button" className="btn btn-submit" disabled={step === 'creating'}onClick={() => {
