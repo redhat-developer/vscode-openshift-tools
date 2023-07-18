@@ -26,18 +26,14 @@ function isFile(path: string) {
     }
 }
 
-function isComponent(folder: WorkspaceFolder) {
+function isComponentorFunction(folder: WorkspaceFolder) {
     return !isFile(path.join(folder.uri.fsPath, 'devfile.yaml'))
-        && !isFile(path.join(folder.uri.fsPath, '.devfile.yaml'));
+        && !isFile(path.join(folder.uri.fsPath, '.devfile.yaml'))
+        && !isFile(path.join(folder.uri.fsPath, 'func.yaml'));
 }
 
-function isFunction(folder: WorkspaceFolder) {
-    return !isFile(path.join(folder.uri.fsPath, 'func.yaml'))
-        && !isFile(path.join(folder.uri.fsPath, '.func.yaml'));
-}
-
-function isComponentFilter(wsFolder: WorkspaceFolder) {
-    return isComponent(wsFolder);
+function componentAndFuctionFilter(wsFolder: WorkspaceFolder) {
+    return isComponentorFunction(wsFolder);
 }
 
 function createWorkspaceFolderItem(wsFolder: WorkspaceFolder) {
@@ -50,7 +46,7 @@ function createWorkspaceFolderItem(wsFolder: WorkspaceFolder) {
 export function selectWorkspaceFolders(): Uri[] {
     const workspacePaths: Uri[] = [];
     if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
-        workspace.workspaceFolders.filter(isComponentFilter && isFunction).map(createWorkspaceFolderItem).map((workSpaceItem) => workspacePaths.push(workSpaceItem.uri));
+        workspace.workspaceFolders.filter(componentAndFuctionFilter).map(createWorkspaceFolderItem).map((workSpaceItem) => workspacePaths.push(workSpaceItem.uri));
     }
     return workspacePaths;
 }
@@ -62,7 +58,7 @@ export async function selectWorkspaceFolder(skipWindowPick = false, label?: stri
 
     if (!skipWindowPick) {
         if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
-            folders = workspace.workspaceFolders.filter(isComponentFilter && isFunction).map(createWorkspaceFolderItem);
+            folders = workspace.workspaceFolders.filter(componentAndFuctionFilter).map(createWorkspaceFolderItem);
         }
 
         if (folders.length === 1 && workspace.workspaceFolders.length === 1) {
