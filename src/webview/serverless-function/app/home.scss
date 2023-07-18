@@ -88,8 +88,11 @@ button {
 }
 
 .MuiSelect-select,
-.MuiMenu-paper,
 .MuiAutocomplete-inputRoot {
+    color: var(--vscode-dropdown-foreground) !important;
+}
+
+.MuiMenu-paper {
     background-color: var(--vscode-dropdown-background) !important;
     color: var(--vscode-dropdown-foreground) !important;
 }
@@ -121,6 +124,14 @@ button {
     &:hover {
         border: none;
     }
+}
+
+.MuiOutlinedInput-notchedOutline {
+    border-color: var(--vscode-settings-textInputForeground) !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-radius: 0.5rem !important;
 }
 
 .MuiFormControl-fullWidth {

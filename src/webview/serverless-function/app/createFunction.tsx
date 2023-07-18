@@ -164,7 +164,6 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                 <LoadModal show={this.props.loadScreen} />
                 <FormControl sx={{ margin: '2rem 0 0 2rem' }}>
                     <TextField
-                        label='Name'
                         type='string'
                         variant='outlined'
                         required
@@ -172,10 +171,15 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         error={functionData.error}
                         onChange={(e) => this.validateName(e.target.value)}
                         id='function-name'
+                        placeholder='Function Name *'
                         sx={{
                             input: {
                                 color: 'var(--vscode-settings-textInputForeground)',
-                                backgroundColor: 'var(--vscode-settings-textInputBackground)'
+                                height: '5px !important',
+                                '&::placeholder': {
+                                    color: 'var(--vscode-settings-textInputForeground) !important',
+                                    opacity: '1 !important'
+                                }
                             }
                         }}
                         helperText={functionData.helpText}
@@ -236,7 +240,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         clearOnBlur
                         fullWidth
                         renderInput={(params) => (
-                            <TextField {...params} label='Build Image' error={imageData.error} helperText={imageData.helpText} />
+                            <TextField {...params} label='Build Image *' error={imageData.error} helperText={imageData.helpText} />
                         )}
                     />
                 </FormControl>
