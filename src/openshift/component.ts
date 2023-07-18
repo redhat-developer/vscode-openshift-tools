@@ -204,7 +204,7 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.dev.onPodman')
     static async devOnPodman(component: ComponentWorkspaceFolder) {
-        return Component.dev(component, 'podman');
+        return Component.devRunOn(component, 'podman');
     }
 
     @vsCommand('openshift.component.binding.add')
@@ -279,7 +279,11 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.dev')
     @clusterRequired()
-    static async dev(component: ComponentWorkspaceFolder, runOn?: undefined | 'podman') {
+    static async dev(component: ComponentWorkspaceFolder) {
+        return Component.devRunOn(component, undefined);
+    }
+
+    static async devRunOn(component: ComponentWorkspaceFolder, runOn?: undefined | 'podman') {
         const cs = Component.getComponentDevState(component);
         cs.devStatus = ComponentContextState.DEV_STARTING;
         cs.runOn = runOn;
