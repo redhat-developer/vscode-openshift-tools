@@ -1,5 +1,5 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Accordion, AccordionDetails, AccordionSummary, Button, CircularProgress, Divider, Stack, TextField, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Button, CircularProgress, Divider, Stack, TextField, Typography } from "@mui/material";
 import * as React from 'react';
 import { Uri } from 'vscode';
 import { Devfile } from '../../common/devfile';
@@ -35,6 +35,9 @@ export function FromExistingGitRepo({ setCurrentView }) {
         isValid: true,
         helpText: 'Please enter a Git URL.'
     });
+    const [branchOption, setBranchOption] = React.useState<string>(undefined);
+    const [contextDirOption, setContextDirOption] = React.useState<string>(undefined);
+    const [cloneFailed, setCloneFailed] = React.useState(false);
 
     const [tmpDir, setTmpDir] = React.useState<Uri>();
     const [recommendedDevfile, setRecommendedDevfile] = React.useState<RecommendedDevfileState>({
@@ -43,7 +46,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
         isLoading: false,
         isDevfileExistsInRepo: false
     });
-    const [selectedDevfile, setSelectedDevfile] = React.useState<Devfile>();
+    const [selectedDevfile, setSelectedDevfile] = React.useState<Devfile>(undefined);
 
     function respondToMessage(messageEvent: MessageEvent) {
         const message = messageEvent.data as Message;
@@ -64,6 +67,10 @@ export function FromExistingGitRepo({ setCurrentView }) {
                 setRecommendedDevfile((prevState) => ({ ...prevState, isDevfileExistsInRepo: message.data }));
                 break;
             }
+            case 'cloneFailed': {
+                setCloneFailed(true);
+                break;
+            }
         }
     }
 
@@ -77,7 +84,11 @@ export function FromExistingGitRepo({ setCurrentView }) {
     function handleNext() {
         window.vscodeApi.postMessage({
             action: 'getRecommendedDevfileFromGit',
-            data: gitURL.url
+            data: {
+                url: gitURL.url,
+                branch: branchOption,
+                contextDir: contextDirOption
+            }
         });
         setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: true }));
     };
@@ -127,43 +138,83 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                 <Stack direction='column' spacing={2}>
                                     <TextField fullWidth
                                         id='outlined'
-                                        disabled={recommendedDevfile.showRecommendation}
+                                        value={branchOption}
+                                        disabled={recommendedDevfile.showRecommendation || recommendedDevfile.isLoading}
                                         label='Git Reference'
-                                        helperText='Branch, tag, or commit to checkout'>
+                                        helperText='Branch, tag, or commit to checkout'
+                                        onChange={(e) => {
+                                            setBranchOption(e.target.value);
+                                        }}>
                                     </TextField>
                                     <TextField fullWidth
                                         id='outlined'
-                                        disabled={recommendedDevfile.showRecommendation}
+                                        value={contextDirOption}
+                                        disabled={true}
                                         label='Context Directory'
-                                        helperText='Subdirectory for the source code, used as a context directory for building the component'>
+                                        helperText='Subdirectory for the source code, used as a context directory for building the component'
+                                        onChange={(e) => {
+                                            setContextDirOption(e.target.value);
+                                        }}>
                                     </TextField>
                                 </Stack>
                             </AccordionDetails>
                         </Accordion>
                         {!recommendedDevfile.showRecommendation ? (
                             <>
-                                <Stack direction='row' spacing={2} marginTop={2}>
-                                    <Button
-                                        variant='text'
-                                        onClick={() => { setCurrentView('home') }}
-                                        disabled={recommendedDevfile.isLoading}>
-                                        BACK
-                                    </Button>
-                                    <Button
-                                        variant='contained'
-                                        onClick={handleNext}
-                                        disabled={gitURL.url.length === 0 || !gitURL.isValid || recommendedDevfile.isLoading}>
-                                        NEXT
-                                    </Button>
-                                </Stack>
-                                {recommendedDevfile.isLoading &&
-                                    <Stack direction='column' spacing={2} alignItems='center'>
-                                        <CircularProgress />
-                                        <Typography variant='body2'>
-                                            Cloning git repository and scanning for recommended devfile.
-                                        </Typography>
-                                    </Stack>
-                                }
+                                {!cloneFailed ? (
+                                    <>
+                                        <Stack direction='row' spacing={2} marginTop={2}>
+                                            <Button
+                                                variant='text'
+                                                onClick={() => { setCurrentView('home') }}
+                                                disabled={recommendedDevfile.isLoading}>
+                                                BACK
+                                            </Button>
+                                            <Button
+                                                variant='contained'
+                                                onClick={handleNext}
+                                                disabled={gitURL.url.length === 0 || !gitURL.isValid || recommendedDevfile.isLoading}>
+                                                NEXT
+                                            </Button>
+                                        </Stack>
+                                        {recommendedDevfile.isLoading &&
+                                            <Stack direction='column' spacing={2} alignItems='center'>
+                                                <CircularProgress />
+                                                <Typography variant='body2'>
+                                                    Cloning git repository and scanning for recommended devfile.
+                                                </Typography>
+                                            </Stack>
+                                        }
+                                    </>
+                                ) : (
+                                    <Stack direction='column' spacing={2} marginTop={2}>
+                                        <Alert severity="error">
+                                            Failed to clone project and detect a suitable devfile. Please try again or manually select a devfile.
+                                        </Alert>
+                                        <Stack direction='row' justifyContent='flex-end' marginTop={2} spacing={1}>
+                                            <Button
+                                                variant='text'
+                                                onClick={() => {
+                                                    setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: false }));
+                                                    setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: false }));
+                                                    setSelectedDevfile(undefined);
+                                                    setCloneFailed(false);
+                                                }}
+                                                sx={{ marginRight: 'auto' }}>
+                                                BACK
+                                            </Button>
+                                            <Button
+                                                variant='text'
+                                                onClick={() => {
+                                                    setCloneFailed(false);
+                                                    setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: true }));
+                                                    setCurrentPage('selectDifferentDevfile');
+                                                }}>
+                                                SELECT A DIFFERENT DEVFILE
+                                            </Button>
+                                        </Stack >
+                                    </Stack >
+                                )}
                             </>
                         ) : (
                             <>
@@ -182,11 +233,17 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                             onClick={() => {
                                                 setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: false }));
                                                 setSelectedDevfile(undefined);
+                                                setCloneFailed(false);
                                             }}
                                             sx={{ marginRight: 'auto' }}>
                                             BACK
                                         </Button>
-                                        <Button variant='text' onClick={() => { setCurrentPage('selectDifferentDevfile') }}>
+                                        <Button
+                                            variant='text'
+                                            onClick={() => {
+                                                setSelectedDevfile(undefined);
+                                                setCurrentPage('selectDifferentDevfile');
+                                            }}>
                                             SELECT A DIFFERENT DEVFILE
                                         </Button>
                                         <Button variant='contained' onClick={() => { setCurrentPage('setNameAndFolder') }}>
