@@ -44,7 +44,7 @@ export function FromLocalCodebase({ setCurrentView }) {
         isDevfileExistsInFolder: false
     });
 
-    const [selectedDevfile, setSelectedDevfile] = React.useState<Devfile>();
+    const [selectedDevfile, setSelectedDevfile] = React.useState<Devfile>(undefined);
 
     function respondToMessage(messageEvent: MessageEvent) {
         const message = messageEvent.data as Message;
@@ -198,15 +198,20 @@ export function FromLocalCodebase({ setCurrentView }) {
                                     <DevfileListItem devfile={selectedDevfile ? (selectedDevfile) : (recommendedDevfile.devfile)} />
                                     <Stack direction='row' justifyContent='flex-end' spacing={1} marginTop={2}>
                                         <Button
-                                        variant='text'
-                                        onClick={() => {
-                                            setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: false }));
-                                            setSelectedDevfile(undefined);
-                                         }}
-                                        sx={{ marginRight: 'auto' }}>
+                                            variant='text'
+                                            onClick={() => {
+                                                setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: false }));
+                                                setSelectedDevfile(undefined);
+                                            }}
+                                            sx={{ marginRight: 'auto' }}>
                                             BACK
                                         </Button>
-                                        <Button variant='text' onClick={() => { setCurrentPage('selectDifferentDevfile') }}>
+                                        <Button
+                                            variant='text'
+                                            onClick={() => {
+                                                setSelectedDevfile(undefined);
+                                                setCurrentPage('selectDifferentDevfile');
+                                            }}>
                                             SELECT A DIFFERENT DEVFILE
                                         </Button>
                                         <LoadingButton variant='contained' disabled={isLoading} loading={isLoading} onClick={handleCreateComponent}>
