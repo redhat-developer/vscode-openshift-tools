@@ -220,11 +220,15 @@ export default class CreateComponentLoader {
              */
             case 'getRecommendedDevfileFromGit': {
                 const tmpFolder: Uri = Uri.parse(await promisify(tmp.dir)());
-                const cloneProcess: CloneProcess = await clone(message.data, tmpFolder.fsPath);
+                const cloneProcess: CloneProcess = await clone(message.data.url, tmpFolder.fsPath, message.data.branch);
                 if (!cloneProcess.status && cloneProcess.error) {
                     void CreateComponentLoader.panel.webview.postMessage({
                         action: 'cloneFailed',
                     });
+                    vscode.window.showErrorMessage(
+                        'Cloning git project failed with message:\n' + cloneProcess.error,
+                    );
+                    break;
                 }
                 CreateComponentLoader.getRecommendedDevfile(tmpFolder);
                 break;
@@ -435,11 +439,13 @@ function isGitURL(host: string): boolean {
     return ['github.com', 'bitbucket.org', 'gitlab.com'].includes(host);
 }
 
-function clone(url: string, location: string): Promise<CloneProcess> {
+function clone(url: string, location: string, branch?: string): Promise<CloneProcess> {
     const gitExtension = vscode.extensions.getExtension('vscode.git').exports;
     const git = gitExtension.getAPI(1).git.path;
+    let command: string = `${git} clone ${url} ${location}`;
+    command = branch ? command + ` --branch ${branch}` : command;
     // run 'git clone url location' as external process and return location
-    return new Promise((resolve, reject) => (cp.exec(`${git} clone ${url} ${location}`,
+    return new Promise((resolve, reject) => (cp.exec(command,
         (error: cp.ExecException) => {
             error ? resolve({ status: false, error: error.message }) : resolve({ status: true, error: undefined });
         }
