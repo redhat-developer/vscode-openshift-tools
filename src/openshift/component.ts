@@ -204,7 +204,16 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.dev.onPodman')
     static async devOnPodman(component: ComponentWorkspaceFolder) {
-        return Component.devRunOn(component, 'podman');
+        if (await Component.odo.isPodmanPresent()) {
+            return Component.devRunOn(component, 'podman');
+        }
+        void window.showErrorMessage('Podman is not present in the system, please install podman on your machine and try again.', 'Install podman')
+            .then(async (result) => {
+                if (result === 'Install podman') {
+                    await commands.executeCommand('vscode.open', Uri.parse('https://podman.io/'));
+                }
+            });
+        return;
     }
 
     @vsCommand('openshift.component.binding.add')
