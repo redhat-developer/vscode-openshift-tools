@@ -18,6 +18,7 @@ type RecommendedDevfileState = {
     showRecommendation: boolean;
     isLoading: boolean;
     isDevfileExistsInRepo: boolean;
+    noRecommendation: boolean;
 }
 
 type GitURLState = {
@@ -36,7 +37,6 @@ export function FromExistingGitRepo({ setCurrentView }) {
         helpText: 'Please enter a Git URL.'
     });
     const [branchOption, setBranchOption] = React.useState<string>(undefined);
-    const [contextDirOption, setContextDirOption] = React.useState<string>(undefined);
     const [cloneFailed, setCloneFailed] = React.useState(false);
 
     const [tmpDir, setTmpDir] = React.useState<Uri>();
@@ -44,7 +44,8 @@ export function FromExistingGitRepo({ setCurrentView }) {
         devfile: undefined,
         showRecommendation: false,
         isLoading: false,
-        isDevfileExistsInRepo: false
+        isDevfileExistsInRepo: false,
+        noRecommendation: false
     });
     const [selectedDevfile, setSelectedDevfile] = React.useState<Devfile>(undefined);
 
@@ -52,6 +53,11 @@ export function FromExistingGitRepo({ setCurrentView }) {
         const message = messageEvent.data as Message;
         switch (message.action) {
             case 'recommendedDevfile': {
+                if (!message.data.devfile) {
+                    setCloneFailed(true);
+                    setRecommendedDevfile((prevState) => ({ ...prevState, noRecommendation: true }));
+                    break;
+                }
                 setRecommendedDevfile((prevState) => ({ ...prevState, devfile: message.data.devfile }));
                 setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: true }));
                 setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: false }));
@@ -86,8 +92,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
             action: 'getRecommendedDevfileFromGit',
             data: {
                 url: gitURL.url,
-                branch: branchOption,
-                contextDir: contextDirOption
+                branch: branchOption
             }
         });
         setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: true }));
@@ -135,28 +140,16 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                 <Typography>Advanced Options</Typography>
                             </AccordionSummary>
                             <AccordionDetails>
-                                <Stack direction='column' spacing={2}>
-                                    <TextField fullWidth
-                                        id='outlined'
-                                        value={branchOption}
-                                        disabled={recommendedDevfile.showRecommendation || recommendedDevfile.isLoading}
-                                        label='Git Reference'
-                                        helperText='Branch, tag, or commit to checkout'
-                                        onChange={(e) => {
-                                            setBranchOption(e.target.value);
-                                        }}>
-                                    </TextField>
-                                    <TextField fullWidth
-                                        id='outlined'
-                                        value={contextDirOption}
-                                        disabled={true}
-                                        label='Context Directory'
-                                        helperText='Subdirectory for the source code, used as a context directory for building the component'
-                                        onChange={(e) => {
-                                            setContextDirOption(e.target.value);
-                                        }}>
-                                    </TextField>
-                                </Stack>
+                                <TextField fullWidth
+                                    id='outlined'
+                                    value={branchOption}
+                                    disabled={recommendedDevfile.showRecommendation || recommendedDevfile.isLoading}
+                                    label='Git Reference'
+                                    helperText='Branch, tag, or commit to checkout'
+                                    onChange={(e) => {
+                                        setBranchOption(e.target.value);
+                                    }}>
+                                </TextField>
                             </AccordionDetails>
                         </Accordion>
                         {!recommendedDevfile.showRecommendation ? (
@@ -189,7 +182,11 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                 ) : (
                                     <Stack direction='column' spacing={2} marginTop={2}>
                                         <Alert severity="error">
-                                            Failed to clone project and detect a suitable devfile. Please try again or manually select a devfile.
+                                            {recommendedDevfile.noRecommendation ? (
+                                                'Unable to detect a suitable devfile. Please try again or manually select a devfile.'
+                                            ) : (
+                                                'Failed to clone project. Please try again or manually select a devfile.'
+                                            )}
                                         </Alert>
                                         <Stack direction='row' justifyContent='flex-end' marginTop={2} spacing={1}>
                                             <Button
@@ -231,9 +228,10 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                         <Button
                                             variant='text'
                                             onClick={() => {
-                                                setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: false }));
+                                                setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: false }));
                                                 setSelectedDevfile(undefined);
                                                 setCloneFailed(false);
+                                                setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: false }));
                                             }}
                                             sx={{ marginRight: 'auto' }}>
                                             BACK
