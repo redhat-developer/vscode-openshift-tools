@@ -332,16 +332,14 @@ export default class CreateComponentLoader {
                         'Devfile version not supported, Unable to proceed the component creation',
                     );
                 }
-            } else {
-                compDescriptions = getCompDescription(analyzeRes);
             }
         } finally {
             const devfileRegistry: DevfileRegistry[] = getDevfileRegistries();
             const allDevfiles: Devfile[] = devfileRegistry
                 .flatMap((registry) => registry.devfiles);
-            const devfile: Devfile = allDevfiles.find(
+            const devfile: Devfile = compDescriptions.length !== 0 ? allDevfiles.find(
                 (devfile) => devfile.name === compDescriptions[0].displayName,
-            );
+            ) : undefined;
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'recommendedDevfile',
                 data: {
