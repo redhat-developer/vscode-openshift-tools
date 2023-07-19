@@ -70,6 +70,7 @@ export interface Odo {
     describeComponent(contextPath: string, experimental?: boolean): Promise<ComponentDescription | undefined>;
     analyze(contextPath: string): Promise<AnalyzeResponse[]>;
     canCreatePod(): Promise<boolean>;
+    isPodmanPresent(): Promise<boolean>;
 
     /**
      * Returns the URL of the API of the current active cluster,
@@ -336,6 +337,18 @@ export class OdoImpl implements Odo {
         try {
             const result: cliInstance.CliExitData = await this.execute(Command.canCreatePod());
             if (result.stdout === 'yes') {
+                return true;
+            }
+        } catch {
+            //ignore
+        }
+        return false;
+    }
+
+    public async isPodmanPresent(): Promise<boolean> {
+        try {
+            const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersionJson());
+            if ('podman' in JSON.parse(result.stdout)) {
                 return true;
             }
         } catch {

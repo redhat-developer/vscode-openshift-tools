@@ -160,6 +160,10 @@ export class Command {
         return new CommandText('odo version');
     }
 
+    static printOdoVersionJson(): CommandText {
+        return new CommandText('odo version -o json');
+    }
+
     static odoLogout(): CommandText {
         return new CommandText('odo logout');
     }
