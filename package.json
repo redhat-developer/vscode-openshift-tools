@@ -1143,7 +1143,32 @@
 				{
 					"command": "openshift.component.binding.add",
 					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.openFunction",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.refresh",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.build",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.buildAndRun",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.run",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.stopRun",
+					"when": "false"
 				}
+
 			],
 			"view/title": [
 				{

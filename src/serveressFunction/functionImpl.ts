@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { Uri, workspace } from 'vscode';
+import { Uri, window, workspace } from 'vscode';
 import { FunctionContent, FunctionObject, FunctionStatus } from './types';
 import { ServerlessFunctionView } from './view';
 import { ServerlessCommand, Utils } from './commands';
@@ -14,6 +14,7 @@ import { BuildAndDeploy } from './build-run-deploy';
 import { stringify } from 'yaml';
 import { CliExitData } from '../cli';
 import * as cp from 'child_process';
+import { VsCommandError } from '../vscommand';
 
 export interface ServerlessFunction {
     getLocalFunctions(): Promise<FunctionObject[]>;
@@ -63,6 +64,9 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
                 funnctionResponse = response;
             }
         } catch (err) {
+            if (err instanceof VsCommandError) {
+                void window.showErrorMessage(err.message);
+            }
             fs.rmdirSync(location);
             funnctionResponse = {
                 error: err as cp.ExecException,

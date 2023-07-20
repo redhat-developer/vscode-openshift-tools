@@ -11,7 +11,6 @@ import { CreateFunction } from './createFunction';
 import './home.scss';
 
 export class ServerlessFunction extends React.Component<DefaultProps, {
-    showLoadScreen: boolean
 }> {
 
     constructor(props: DefaultProps | Readonly<DefaultProps>) {
@@ -19,14 +18,6 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
         this.state = {
             showLoadScreen: false
         }
-    }
-
-    componentDidMount(): void {
-        VSCodeMessage.onMessage(async (message) => {
-            if (message.data.action == 'loadScreen') {
-                this.setState({ showLoadScreen: message.data.show })
-            }
-        });
     }
 
     handleCreateSubmit = (name: string, language: string, template: string, location: Uri, image: string): void => {
@@ -47,9 +38,9 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
                     <Typography variant='h5'>Serverless Function</Typography>
                 </div>
                 <div className='subTitle'>
-                    <Typography>Function lifecycle management includes creating, building, and deploying a function. Optionally, you can also test a deployed function by invoking it. You can do all of these operations on OpenShift Serverless using the kn func tool.</Typography>
+                    <Typography>The OpenShift Serverless Functions support enables developers to create, build, run, invoke and deploy serverless functions on OpenShift, providing a seamless development experience with the latest kn and func CLI tool integrated.</Typography>
                 </div>
-                <CreateFunction onCreateSubmit={this.handleCreateSubmit} loadScreen={this.state.showLoadScreen} />
+                <CreateFunction onCreateSubmit={this.handleCreateSubmit} />
             </div>
         )
     }

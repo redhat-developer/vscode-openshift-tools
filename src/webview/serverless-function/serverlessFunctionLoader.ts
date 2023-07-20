@@ -39,7 +39,7 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
             });
             break;
         case 'selectFolder':
-            const workspaceFolderItems = event.noWSFolder ? await selectWorkspaceFolder(true, 'Select Function Folder') : selectWorkspaceFolders();
+            const workspaceFolderItems = event.noWSFolder ? await selectWorkspaceFolder(true, 'Select Function Folder', functionName) : selectWorkspaceFolders();
             panel?.webview.postMessage({
                 action: eventName,
                 wsFolderItems: event.noWSFolder ? [workspaceFolderItems] : workspaceFolderItems
@@ -48,18 +48,10 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
         case 'createFunction':
             const selctedFolder: vscode.Uri = vscode.Uri.file(path.join(functionPath.fsPath, functionName));
             panel.title = `Serverless Function - Create - ${functionName}`;
-            await panel.webview.postMessage({
-                action: 'loadScreen',
-                show: true
-            });
             await Progress.execFunctionWithProgress(
                 `Creating function '${functionName}'`,
                 async () => {
                     response = await serverlessInstance().createFunction(event.language, event.template, selctedFolder.fsPath, event.selectedImage);
-                    await panel.webview.postMessage({
-                        action: 'loadScreen',
-                        show: false
-                    });
                 });
             if (response && response.error) {
                 void vscode.window.showErrorMessage(`Error while creating the function ${functionName}`);

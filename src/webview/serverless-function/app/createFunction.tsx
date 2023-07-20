@@ -4,11 +4,10 @@
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
 import { Uri } from 'vscode';
-import { Autocomplete, Button, FormControl, InputLabel, MenuItem, OutlinedInput, Select, SelectChangeEvent, TextField, createFilterOptions } from '@mui/material';
+import { Autocomplete, Button, FormControl, TextField, createFilterOptions } from '@mui/material';
 import { VSCodeMessage } from './vsCodeMessage';
 import { CreateFunctionPageProps } from '../../common/propertyTypes';
 import './home.scss';
-import { LoadModal } from './modal';
 
 export class CreateFunction extends React.Component<CreateFunctionPageProps, {
     functionData: {
@@ -97,12 +96,13 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
     selectFolder = (): void => {
         VSCodeMessage.postMessage({
             action: 'selectFolder',
-            noWSFolder: true
+            noWSFolder: true,
+            name: this.state.functionData.name
         });
     }
 
-    handleWsFolderDropDownChange = (e: SelectChangeEvent): void => {
-        const value = e.target.value;
+    handleWsFolderDropDownChange = (_e: any, value: Uri | string): void => {
+        console.log('VAlue:::', value);
         if (typeof value === 'string' && value === 'New Folder') {
             VSCodeMessage.postMessage({
                 action: 'selectFolder',
@@ -119,9 +119,9 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
         return value.replace('/\s+/g', '').toLowerCase();
     }
 
-    handleDropDownChange = (e: SelectChangeEvent, isLang: boolean): void => {
+    handleDropDownChange = (_event: any, value: string, isLang = false): void => {
         if (isLang) {
-            if (e.target.value !== 'Python') {
+            if (value !== 'Python') {
                 this.setState({
                     templates: ['Cloud Events', 'HTTP']
                 });
@@ -131,12 +131,12 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                 })
             }
             this.setState({
-                language: e.target.value,
+                language: value,
                 template: ''
             });
         } else {
             this.setState({
-                template: e.target.value
+                template: value
             });
         }
     }
@@ -161,8 +161,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
         const imageRegex = RegExp('[^/]+\\.[^/.]+\\/([^/.]+)(?:\\/[\\w\\s._-]*([\\w\\s._-]))*(?::[a-z0-9\\.-]+)?$');
         return (
             <>
-                <LoadModal show={this.props.loadScreen} />
-                <FormControl sx={{ margin: '2rem 0 0 2rem' }}>
+                <FormControl sx={{ margin: '2rem 0 0 2rem', width: 'auto', flexFlow: 'column', gap: '1rem' }}>
                     <TextField
                         type='string'
                         variant='outlined'
@@ -175,7 +174,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         sx={{
                             input: {
                                 color: 'var(--vscode-settings-textInputForeground)',
-                                height: '5px !important',
+                                height: '7px !important',
                                 '&::placeholder': {
                                     color: 'var(--vscode-settings-textInputForeground) !important',
                                     opacity: '1 !important'
@@ -184,14 +183,12 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         }}
                         helperText={functionData.helpText}
                     />
-                </FormControl>
-                <FormControl sx={{ margin: '2rem 0 0 2rem', width: 'auto' }}>
+
                     <Autocomplete
-                        value={imageData.name}
-                        disabled={functionData.error || functionData.name.length === 0}
+                        defaultValue={imageData.name}
                         onChange={(_event, newValue: string) => {
                             if (newValue) {
-                                const value = newValue.replace('Add', '').trim();
+                                let value = newValue.replace('Add', '').trim();
                                 if (!imageRegex.test(value)) {
                                     this.setState({
                                         imageData: {
@@ -220,7 +217,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                             const { inputValue } = params;
                             // Suggest the creation of a new value
                             const isExisting = options.some((option) => inputValue === option);
-                            if (inputValue !== '' && !isExisting) {
+                            if (inputValue !== '' && !isExisting && !inputValue.startsWith('Add')) {
                                 filtered.push(`Add ${inputValue}`);
                             }
 
@@ -228,95 +225,69 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         }}
                         id='image-dropdown'
                         options={images}
-                        getOptionLabel={(option) => {
-                            // Value selected with enter, right from the input
-                            if (typeof option === 'string') {
-                                return option;
-                            }
-                            // Regular option
-                            return option;
-                        }}
                         renderOption={(props, option) => <li {...props}>{option}</li>}
                         clearOnBlur
+                        disableClearable
                         fullWidth
                         renderInput={(params) => (
-                            <TextField {...params} label='Build Image *' error={imageData.error} helperText={imageData.helpText} />
+                            <TextField {...params} placeholder='Build Image *' error={imageData.error} helperText={imageData.helpText} />
                         )}
                     />
-                </FormControl>
-                <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem' }}>
-                    <FormControl sx={{ margin: '2rem 0 0 2rem', width: 150 }}>
-                        <InputLabel id='language-dropdown' required>Language</InputLabel>
-                        <Select
-                            labelId='language-dropdown'
-                            id='language-name'
-                            value={language}
-                            onChange={(e) => this.handleDropDownChange(e, true)}
-                            input={<OutlinedInput label='Language' />}
-                        >
-                            {languages.map((language) => (
-                                <MenuItem
-                                    key={language}
-                                    value={language}
-                                >
-                                    {language}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                    <FormControl sx={{ margin: '2rem 0 0 2rem', width: 150 }}>
-                        <InputLabel id='template-dropdown' required>Template</InputLabel>
-                        <Select
-                            labelId='template-dropdown'
-                            id='template-name'
-                            disabled={language.length === 0}
+
+                    <Autocomplete
+                        value={language}
+                        id='language-dropdown'
+                        options={languages}
+                        onChange={(e, v) => this.handleDropDownChange(e, v, true)}
+                        renderOption={(props, option) => <li {...props}>{option}</li>}
+                        fullWidth
+                        disableClearable
+                        renderInput={(params) => (
+                            <TextField {...params} placeholder='Language *' />
+                        )}
+                    />
+
+                    {language?.length > 0 &&
+                        <Autocomplete
                             value={template}
-                            onChange={(e) => this.handleDropDownChange(e, false)}
-                            input={<OutlinedInput label='Template' />}
-                        >
-                            {templates.map((template) => (
-                                <MenuItem
-                                    key={template}
-                                    value={template}
-                                >
-                                    {template}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                            id='template-dropdown'
+                            options={templates}
+                            onChange={(e, v) => this.handleDropDownChange(e, v)}
+                            renderOption={(props, option) => <li {...props}>{option}</li>}
+                            fullWidth
+                            disableClearable
+                            renderInput={(params) => (
+                                <TextField {...params} placeholder='Template *' />
+                            )}
+                        />
+                    }
+                </FormControl>
+                <FormControl style={{ margin: '2rem 0 0 2rem', width: 'auto', flexFlow: 'row', gap: '0.5rem' }}>
                     {wsFolderItems.length > 0 &&
-                        <FormControl sx={{ margin: '2rem 0 0 2rem', width: 'auto' }}>
-                            <InputLabel id='folder-dropdown' required>Folder</InputLabel>
-                            <Select
-                                labelId='folder-dropdown'
-                                id='folder-path'
-                                onChange={(e) => this.handleWsFolderDropDownChange(e)}
-                                input={<OutlinedInput label='Folder' />}
-                                value={wsFolderPath ? wsFolderPath.fsPath : ''}
-                            >
-                                {folders.map((folder: Uri | string) => (
-                                    <MenuItem
-                                        key={typeof folder === 'string' ? folder : folder.fsPath}
-                                        value={typeof folder === 'string' ? folder : folder.fsPath}
-                                    >
-                                        {typeof folder === 'string' ? folder : folder.fsPath}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                        <Autocomplete
+                            value={wsFolderPath ? wsFolderPath.fsPath : ''}
+                            id='folder-dropdown'
+                            options={folders}
+                            onChange={(e, v) => this.handleWsFolderDropDownChange(e, v)}
+                            renderOption={(props, option) => <li {...props}>{typeof option === 'string' ? option : option.fsPath}</li>}
+                            fullWidth
+                            disableClearable
+                            renderInput={(params) => (
+                                <TextField {...params} placeholder='Select Folder *' />
+                            )}
+                        />
                     }
                     {
                         wsFolderItems?.length === 0 &&
-                        <FormControl sx={{ margin: '2rem 0 0 2rem', width: 120 }}>
-                            <Button variant='contained'
-                                className='buttonStyle'
-                                style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white', marginTop: '0.5rem' }}
-                                onClick={() => this.selectFolder()}>
-                                Select Folder
-                            </Button>
-                        </FormControl>
+                        <Button variant='contained'
+                            className='buttonStyle'
+                            disabled={functionData?.name.length === 0}
+                            style={{ backgroundColor: functionData?.name.length !== 0 ? '#EE0000' : 'var(--vscode-button-secondaryBackground)', textTransform: 'none', color: 'white', marginTop: '0.5rem' }}
+                            onClick={() => this.selectFolder()}>
+                            Select Folder
+                        </Button>
                     }
-                </div>
+                </FormControl>
                 <FormControl sx={{ margin: '2rem 0 0 2rem', width: 100 }}>
                     <Button variant='contained'
                         disabled={this.handleCreateBtnDisable()}

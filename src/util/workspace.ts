@@ -51,7 +51,7 @@ export function selectWorkspaceFolders(): Uri[] {
     return workspacePaths;
 }
 
-export async function selectWorkspaceFolder(skipWindowPick = false, label?: string): Promise<Uri> {
+export async function selectWorkspaceFolder(skipWindowPick = false, label?: string, folderName?: string): Promise<Uri> {
     let folders: WorkspaceFolderItem[] = [];
     let choice:WorkspaceFolderItem | QuickPickItem;
     let workspacePath: Uri;
@@ -88,6 +88,11 @@ export async function selectWorkspaceFolder(skipWindowPick = false, label?: stri
                 'The selected folder already contains a component. Please select a different folder.',
             );
             return selectWorkspaceFolder(skipWindowPick);
+        } else if(folderName && fs.existsSync(path.join(selectedFolders[0].fsPath, folderName))) {
+            void window.showInformationMessage(
+                `The folder ${folderName} already exists,  Please select a different folder.`,
+            );
+            return selectWorkspaceFolder(skipWindowPick, label, folderName);
         }
         [workspacePath] = selectedFolders;
     } else if (choice) {
