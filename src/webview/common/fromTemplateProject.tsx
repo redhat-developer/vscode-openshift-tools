@@ -57,6 +57,7 @@ export function FromTemplateProject(props: FromTemplateProjectProps) {
                     createComponent={createComponent}
                     devfile={selectedDevfile}
                     templateProject={selectedTemplateProject.templateProjectName}
+                    initialComponentName={selectedTemplateProject.templateProjectName}
                 />
             );
     }

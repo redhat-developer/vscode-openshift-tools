@@ -3,11 +3,19 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import {
-    PaletteMode,
-    Theme,
-    createTheme
-} from '@mui/material';
+import { createTheme, PaletteMode, Theme } from '@mui/material';
+
+// in order to add custom named colours for use in Material UI's `color` prop,
+// you need to use module augmentation.
+// see https://mui.com/material-ui/customization/palette/#typescript
+declare module '@mui/material/styles' {
+    interface Palette {
+        textSecondary: Palette['primary'];
+    }
+    interface PaletteOptions {
+        textSecondary?: PaletteOptions['primary'];
+    }
+}
 
 export function createVSCodeTheme(paletteMode: PaletteMode): Theme {
     const computedStyle = window.getComputedStyle(document.body);
@@ -33,6 +41,9 @@ export function createVSCodeTheme(paletteMode: PaletteMode): Theme {
             success: {
                 main: computedStyle.getPropertyValue('--vscode-debugIcon-startForeground'),
             },
+            textSecondary: {
+                main: computedStyle.getPropertyValue('--vscode-descriptionForeground'),
+            },
         },
         typography: {
             allVariants: {
@@ -44,90 +55,96 @@ export function createVSCodeTheme(paletteMode: PaletteMode): Theme {
                 variants: [
                     {
                         props: {
-                            variant: 'outlined'
+                            variant: 'outlined',
                         },
                         style: {
                             width: '35em',
-                            backgroundColor: computedStyle.getPropertyValue('--vscode-editor-inactiveSelectionBackground')
-                        }
-                    }
-                ]
+                            backgroundColor: computedStyle.getPropertyValue(
+                                '--vscode-editor-inactiveSelectionBackground',
+                            ),
+                        },
+                    },
+                ],
             },
             MuiTypography: {
                 variants: [
                     {
                         props: {
-                            variant: 'h5'
+                            variant: 'h5',
                         },
                         style: {
                             fontSize: '2.3em',
                             fontWeight: '650',
-                            color: computedStyle.getPropertyValue('--vscode-foreground')
-                        }
+                            color: computedStyle.getPropertyValue('--vscode-foreground'),
+                        },
                     },
                     {
                         props: {
-                            variant: 'h6'
+                            variant: 'h6',
                         },
                         style: {
                             fontSize: '1.5em',
                             fontWeight: '600',
-                            color: computedStyle.getPropertyValue('--vscode-foreground')
-                        }
+                            color: computedStyle.getPropertyValue('--vscode-foreground'),
+                        },
                     },
                     {
                         props: {
-                            variant: 'body1'
+                            variant: 'body1',
                         },
                         style: {
-                            color: computedStyle.getPropertyValue('--vscode-foreground')
-                        }
+                            color: computedStyle.getPropertyValue('--vscode-foreground'),
+                        },
                     },
                     {
                         props: {
-                            variant: 'body2'
+                            variant: 'body2',
                         },
                         style: {
-                            color: computedStyle.getPropertyValue('--vscode-descriptionForeground')
-                        }
+                            color: computedStyle.getPropertyValue('--vscode-descriptionForeground'),
+                        },
                     },
-                ]
+                ],
             },
             MuiAccordion: {
                 variants: [
                     {
                         props: {
-                            className: 'accordion'
+                            className: 'accordion',
                         },
                         style: {
                             width: '100%',
                             color: computedStyle.getPropertyValue('--vscode-editor-foreground'),
-                            backgroundColor: computedStyle.getPropertyValue('--vscode-editor-background')
-                        }
-                    }
-                ]
+                            backgroundColor: computedStyle.getPropertyValue(
+                                '--vscode-editor-background',
+                            ),
+                        },
+                    },
+                ],
             },
             MuiSelect: {
                 variants: [
                     {
                         props: {
-                            className: 'selectFolder'
+                            className: 'selectFolder',
                         },
                         style: {
                             width: '100%',
                             color: computedStyle.getPropertyValue('--vscode-editor-foreground'),
-                            backgroundColor: computedStyle.getPropertyValue('--vscode-editor-background')
-                        }
-                    }
-                ]
+                            backgroundColor: computedStyle.getPropertyValue(
+                                '--vscode-editor-background',
+                            ),
+                        },
+                    },
+                ],
             },
             MuiButton: {
                 defaultProps: {
                     style: {
-                        whiteSpace: 'nowrap'
-                    }
-                }
-            }
+                        whiteSpace: 'nowrap',
+                    },
+                },
+            },
         },
     });
 }

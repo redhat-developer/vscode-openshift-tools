@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { Close, Launch, Search } from '@mui/icons-material';
+import { Close, FileCopy, Launch, Search } from '@mui/icons-material';
 import {
     Box,
     Button,
@@ -23,15 +23,27 @@ import {
     Select,
     Stack,
     TextField,
+    Tooltip,
     Typography,
+    useMediaQuery,
 } from '@mui/material';
 import * as React from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { monokai } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
 import { DevfileExplanation } from './devfileExplanation';
 import { DevfileListItem } from './devfileListItem';
 import { LoadScreen } from './loading';
+
+// in order to add custom named colours for use in Material UI's `color` prop,
+// you need to use module augmentation.
+// see https://mui.com/material-ui/customization/palette/#typescript
+declare module '@mui/material/SvgIcon' {
+    interface SvgIconPropsColorOverrides {
+        textSecondary: true;
+    }
+}
 
 type Message = {
     action: string;
@@ -56,24 +68,33 @@ function LinkButton(props: { href: string; disabled: boolean; children }) {
 }
 
 function SearchBar(props: {
+    searchText: string;
     setSearchText: React.Dispatch<React.SetStateAction<string>>;
     numPages: number;
     currentPage: number;
     setCurrentPage: (i: number) => void;
 }) {
     return (
-        <Stack direction="row" alignItems="center">
+        <Stack direction="row" alignItems="center" width="100%" justifyContent="space-between">
             <TextField
                 variant="filled"
                 label="Search Devfiles"
                 InputProps={{
                     startAdornment: (
                         <InputAdornment position="start">
-                            <Search />
+                            <Search color="textSecondary" />
+                        </InputAdornment>
+                    ),
+                    endAdornment: (
+                        <InputAdornment position="end">
+                            <IconButton onClick={() => props.setSearchText('')}>
+                                <Close color="textSecondary" />
+                            </IconButton>
                         </InputAdornment>
                     ),
                 }}
-                sx={{ flexGrow: '1' }}
+                value={props.searchText}
+                sx={{ flexGrow: '1', maxWidth: '450px' }}
                 onChange={(event) => {
                     props.setSearchText(event.target.value.toLowerCase());
                 }}
@@ -151,6 +172,33 @@ const SelectTemplateProject = React.forwardRef(
     ) => {
         const [selectedTemplateProject, setSelectedTemplateProject] = React.useState('');
         const [isInteracted, setInteracted] = React.useState(false);
+        const [isYamlCopied, setYamlCopied] = React.useState(false);
+
+        const isWideEnough = useMediaQuery('(min-width: 900px)');
+
+        React.useEffect(() => {
+            if (props.devfile.starterProjects && props.devfile.starterProjects.length === 1) {
+                setSelectedTemplateProject((_) => props.devfile.starterProjects[0].name);
+            }
+        }, []);
+
+        const starterProjects = props.devfile.starterProjects ? props.devfile.starterProjects : [];
+        let helperText = '';
+        switch (starterProjects.length) {
+            case 0:
+                helperText = 'No available starter projects for this Devfile';
+                break;
+            case 1:
+                helperText = 'Only one starter project is available for this Devfile';
+                break;
+            default:
+                if (isInteracted && !selectedTemplateProject) {
+                    helperText = 'Select a template project';
+                }
+                break;
+        }
+
+        const isError = !starterProjects.length || (isInteracted && !selectedTemplateProject);
 
         return (
             <Paper
@@ -159,16 +207,22 @@ const SelectTemplateProject = React.forwardRef(
                     position: 'absolute',
                     top: '50%',
                     left: '50%',
-                    width: '900px',
+                    width: isWideEnough ? '900px' : 'calc(100vw - 48px)',
+                    maxHeight: 'calc(100vh - 48px)',
                     transform: 'translate(-50%, -50%)',
                     padding: 2,
                 }}
             >
-                <Stack direction="column" spacing={3}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                <Stack direction="column" spacing={2}>
+                    <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="flex-start"
+                        marginBottom={1}
+                    >
                         <DevfileListItem devfile={props.devfile} />
                         <IconButton onClick={props.closeModal}>
-                            <Close />
+                            <Close color="textSecondary" />
                         </IconButton>
                     </Stack>
                     <FormControl fullWidth>
@@ -181,12 +235,13 @@ const SelectTemplateProject = React.forwardRef(
                             onClick={(_e) => {
                                 setInteracted(true);
                             }}
-                            error={isInteracted && !selectedTemplateProject}
+                            disabled={starterProjects.length < 2}
+                            error={isError}
                             sx={{ flexGrow: '1' }}
                             label="Template Project"
                             labelId="template-select-label"
                         >
-                            {props.devfile.starterProjects.map((sampleProject) => {
+                            {starterProjects.map((sampleProject) => {
                                 return (
                                     <MenuItem value={sampleProject.name} key={sampleProject.name}>
                                         {sampleProject.name}
@@ -194,40 +249,62 @@ const SelectTemplateProject = React.forwardRef(
                                 );
                             })}
                         </Select>
-                        {isInteracted && !selectedTemplateProject && (
-                            <FormHelperText>Select a template project</FormHelperText>
-                        )}
+                        <Stack direction="row" justifyContent="space-between">
+                            <FormHelperText error={isError}>{helperText}</FormHelperText>
+                            <Stack direction="row" marginTop={1} spacing={2}>
+                                <LinkButton
+                                    href={
+                                        !selectedTemplateProject
+                                            ? undefined
+                                            : starterProjects.find(
+                                                  (starterProject) =>
+                                                      starterProject.name ===
+                                                      selectedTemplateProject,
+                                              ).git.remotes.origin
+                                    }
+                                    disabled={!selectedTemplateProject}
+                                >
+                                    Open Project in Browser
+                                </LinkButton>
+                                <Button
+                                    variant="contained"
+                                    onClick={() => {
+                                        props.setSelectedProject(selectedTemplateProject);
+                                    }}
+                                    disabled={!selectedTemplateProject}
+                                >
+                                    Next
+                                </Button>
+                            </Stack>
+                        </Stack>
                     </FormControl>
-                    <Stack direction="row-reverse" spacing={2}>
-                        <Button
-                            variant="contained"
-                            onClick={() => {
-                                props.setSelectedProject(selectedTemplateProject);
-                            }}
-                            disabled={!selectedTemplateProject}
-                        >
-                            Next
-                        </Button>
-                        <LinkButton
-                            href={
-                                !selectedTemplateProject
-                                    ? undefined
-                                    : props.devfile.starterProjects.find(
-                                          (starterProject) =>
-                                              starterProject.name === selectedTemplateProject,
-                                      ).git.remotes.origin
-                            }
-                            disabled={!selectedTemplateProject}
-                        >
-                            Open Project in Browser
-                        </LinkButton>
-                    </Stack>
                     <Box
                         maxHeight="400px"
                         width="100%"
                         overflow="scroll"
                         style={{ background: 'rgba(127, 127, 127, 8%)', borderRadius: '4px' }}
                     >
+                        {/* paddingRight is x4 to account for the padding on the parent absolutely positioned paper and the width of the scroll bar */}
+                        <Box position="absolute" paddingTop={1} paddingRight={4} right="0px">
+                            <CopyToClipboard
+                                text={props.devfile.yaml}
+                                onCopy={() => {
+                                    setYamlCopied((_) => true);
+                                }}
+                            >
+                                <Tooltip
+                                    title={isYamlCopied ? 'Copied!' : 'Copy to clipboard'}
+                                    onMouseLeave={(e) => {
+                                        setTimeout(() => setYamlCopied((_) => false), 200);
+                                    }}
+                                    arrow
+                                >
+                                    <IconButton>
+                                        <FileCopy color="textSecondary" />
+                                    </IconButton>
+                                </Tooltip>
+                            </CopyToClipboard>
+                        </Box>
                         <SyntaxHighlighter
                             language="yaml"
                             style={monokai}
@@ -361,6 +438,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
                     )}
                     <Stack direction="column" sx={{ flexGrow: '1', height: '100%' }} spacing={3}>
                         <SearchBar
+                            searchText={searchText}
                             setSearchText={setSearchText}
                             currentPage={currentPage}
                             setCurrentPage={setCurrentPage}
@@ -376,6 +454,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
                             sx={{ height: 'calc(100vh - 320px - 5em)', overflow: 'scroll' }}
                             spacing={2}
                             divider={<Divider />}
+                            width="100%"
                         >
                             {devfiles
                                 .slice(

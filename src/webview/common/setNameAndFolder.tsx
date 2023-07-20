@@ -9,7 +9,7 @@ import {
     Paper,
     Stack,
     TextField,
-    Typography
+    Typography,
 } from '@mui/material';
 import * as React from 'react';
 import 'react-dom';
@@ -28,12 +28,15 @@ type SetNameAndFolderProps = {
     createComponent: (projectFolder: string, componentName: string) => void;
     devfile: Devfile;
     templateProject?: string;
+    initialComponentName?: string;
 };
 
 export function SetNameAndFolder(props: SetNameAndFolderProps) {
-    const [componentName, setComponentName] = React.useState('');
+    const [componentName, setComponentName] = React.useState(props.initialComponentName);
     const [isComponentNameFieldValid, setComponentNameFieldValid] = React.useState(true);
-    const [componentNameErrorMessage, setComponentNameErrorMessage] = React.useState('Please enter a component name.');
+    const [componentNameErrorMessage, setComponentNameErrorMessage] = React.useState(
+        'Please enter a component name.',
+    );
 
     const [componentParentFolder, setComponentParentFolder] = React.useState('');
     const [isFolderFieldValid, setFolderFieldValid] = React.useState(false);
@@ -91,12 +94,19 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
         };
     }, []);
 
+    React.useEffect(() => {
+        if (props.initialComponentName) {
+            window.vscodeApi.postMessage({
+                action: 'validateComponentName',
+                data: props.initialComponentName,
+            });
+        }
+    }, []);
+
     return (
         <Stack direction="column" spacing={3}>
             <div style={{ position: 'relative' }}>
-                <Typography variant='h5'>
-                    Set Component Name and Folder
-                </Typography>
+                <Typography variant="h5">Set Component Name and Folder</Typography>
             </div>
 
             <Stack direction="column" spacing={2} marginTop={2}>
@@ -104,12 +114,12 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                     <Stack margin={2} spacing={2}>
                         <DevfileListItem devfile={props.devfile} />
                         {/* padding here is to match the padding build into the devfile list component */}
-                        {props.templateProject &&
+                        {props.templateProject && (
                             <Stack direction="row" alignItems="center" spacing={1} paddingX={1}>
                                 <Typography variant="body1">Project:</Typography>
                                 <code>{props.templateProject}</code>
                             </Stack>
-                        }
+                        )}
                     </Stack>
                 </Paper>
                 <ComponentNameInput
@@ -157,7 +167,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
 
                 <Stack direction="row" justifyContent="space-between">
                     <Button variant="text" onClick={props.goBack}>
-                        {props.templateProject ? ('Use Different Template Project') : ('Back')}
+                        {props.templateProject ? 'Use Different Template Project' : 'Back'}
                     </Button>
                     <CreateComponentButton
                         componentName={componentName}
@@ -166,9 +176,12 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                         isFolderFieldValid={isFolderFieldValid}
                         isLoading={isLoading}
                         createComponent={props.createComponent}
-                        setLoading={setLoading} />
+                        setLoading={setLoading}
+                    />
                 </Stack>
-                <CreateComponentErrorAlert createComponentErrorMessage={createComponentErrorMessage} />
+                <CreateComponentErrorAlert
+                    createComponentErrorMessage={createComponentErrorMessage}
+                />
             </Stack>
         </Stack>
     );
