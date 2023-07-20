@@ -41,6 +41,10 @@ export default class CreateComponentLoader {
     }
 
     static async loadView(title: string): Promise<WebviewPanel> {
+        if (CreateComponentLoader.panel) {
+            CreateComponentLoader.panel.reveal();
+            return;
+        }
         const localResourceRoot = Uri.file(
             path.join(CreateComponentLoader.extensionPath, 'out', 'createComponentViewer'),
         );
@@ -64,7 +68,7 @@ export default class CreateComponentLoader {
         panel.onDidDispose(() => {
             colorThemeDisposable.dispose();
             messageHandlerDisposable.dispose();
-            panel = undefined;
+            CreateComponentLoader.panel = undefined;
         });
 
         panel.iconPath = Uri.file(

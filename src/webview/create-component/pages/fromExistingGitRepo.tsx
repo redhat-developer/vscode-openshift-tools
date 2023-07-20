@@ -264,6 +264,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                     }}
                     createComponent={createComponentFromGitRepo}
                     devfile={selectedDevfile ? (selectedDevfile) : (recommendedDevfile.devfile)}
+                    initialComponentName={gitURL.url.substring(gitURL.url.lastIndexOf('/') + 1)}
                 />
             );
         case 'selectDifferentDevfile':

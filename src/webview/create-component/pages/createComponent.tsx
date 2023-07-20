@@ -7,11 +7,11 @@ import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { Container, Theme, ThemeProvider, Typography } from '@mui/material';
 import * as React from 'react';
+import { FromTemplateProject } from '../../common/fromTemplateProject';
 import OptionCard from '../../common/optionCard';
 import { createVSCodeTheme } from '../../common/vscode-theme';
-import { FromExistingGitRepo } from './fromExisitingGitRepo';
+import { FromExistingGitRepo } from './fromExistingGitRepo';
 import { FromLocalCodebase } from './fromLocalCodebase';
-import { FromTemplateProject } from '../../common/fromTemplateProject';
 
 interface VSCodeMessage {
     action: string;
@@ -112,8 +112,12 @@ export default function CreateComponent() {
     return (
         <ThemeProvider theme={theme}>
             <Container
-                maxWidth="lg"
-                sx={{ height: '100%', paddingTop: '5em', paddingBottom: '16px' }}
+                maxWidth='lg'
+                sx={{
+                    height: '100%',
+                    paddingTop: '5em',
+                    paddingBottom: '16px',
+                }}
             >
                 {renderComponent()}
             </Container>
