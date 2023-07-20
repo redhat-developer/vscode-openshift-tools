@@ -46,20 +46,29 @@ export default (_theme: Theme) =>
         helmHomeCard: {
             height: '13rem',
             width: '11rem',
-            margin: '0.5rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1rem',
-            padding: '1rem',
+            margin: '0.5rem'
+        },
+        cardHeader: {
+            display: 'block',
+            height: '3rem',
+            margin: '0.5rem'
         },
         helmcardHeaderDisplay: {
             display: 'flex',
             justifyContent: 'space-between'
         },
+        cardHeaderDisplay: {
+            display: 'flex',
+            margin: '0.5rem',
+            height: '11rem',
+            maxHeight: '16rem',
+            flexDirection: 'row',
+            gap: '0.5rem'
+        },
         cardImage: {
-            maxWidth: '6rem',
+            width: '6rem',
             objectFit: 'contain',
-            maxHeight: '6rem'
+            maxHeight: '60% !important'
         },
         yamlCardImage: {
             width: 'auto',
@@ -68,6 +77,16 @@ export default (_theme: Theme) =>
             maxHeight: '3rem',
             margin: 0,
             objectFit: 'contain'
+        },
+        cardBody: {
+            height: 'auto',
+            overflow: 'hidden',
+            margin: '1.5rem'
+        },
+        cardHeaderTitle: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem'
         },
         cardRegistryTitle: {
             maxWidth: '5rem',
@@ -86,11 +105,13 @@ export default (_theme: Theme) =>
             borderRadius: '0.8rem',
         },
         badge: {
+            marginTop: '1rem',
             minWidth: '0.5rem',
             padding: '0.5rem',
             minHeight: '2px',
             maxHeight: '1rem',
             borderRadius: '0.5rem',
+            marginLeft: '0.5rem',
             alignItems: 'center',
             color: 'var(--vscode-button-foreground)',
             backgroundColor: 'var(--vscode-button-background)'
@@ -101,6 +122,19 @@ export default (_theme: Theme) =>
         headerBadge: {
             height: '1px',
             outline: 'none'
+        },
+        firstBadge: {
+            marginLeft: '0rem'
+        },
+        helmcardFooterTag: {
+            display: 'flex',
+            flexDirection: 'column',
+            margin: '1.5rem'
+        },
+        cardFooterTag: {
+            display: 'flex',
+            flexDirection: 'row',
+            marginLeft: '0.5rem'
         },
         text: {
             textAlign: 'right'

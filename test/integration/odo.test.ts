@@ -10,8 +10,9 @@ import * as _ from 'lodash';
 import { suite, suiteSetup } from 'mocha';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
-import { Uri, workspace } from 'vscode';
+import { Uri, window, workspace } from 'vscode';
 import * as YAML from 'yaml';
+import { CommandText } from '../../src/base/command';
 import * as Odo from '../../src/odo';
 import { Command } from '../../src/odo/command';
 import { Project } from '../../src/odo/project';
@@ -292,6 +293,12 @@ suite('odo integration', function () {
             const componentTypes = await odo.getCompTypesJson();
             expect(componentTypes).to.not.be.empty;
         });
+    });
+
+    test('executeInTerminal()', async function () {
+        const numTerminals = window.terminals.length;
+        await odo.executeInTerminal(new CommandText('odo', 'version'));
+        expect(window.terminals).length(numTerminals + 1);
     });
 
 });

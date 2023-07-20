@@ -9,7 +9,6 @@ import * as path from 'path';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
-import { CliChannel } from '../../../src/cli';
 import { ContextType, OdoImpl } from '../../../src/odo';
 import { Command } from '../../../src/odo/command';
 import { ComponentTypeAdapter } from '../../../src/odo/componentType';
@@ -47,7 +46,7 @@ suite('OpenShift/Component', function() {
         sandbox = sinon.createSandbox();
         sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
         Component = pq('../../../src/openshift/component', {}).Component;
-        termStub = sandbox.stub(CliChannel.prototype, 'executeInTerminal');
+        termStub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
         sandbox.stub(OdoImpl.prototype, 'getActiveCluster').resolves('cluster');
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);

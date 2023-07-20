@@ -7,7 +7,7 @@ import * as chai from 'chai';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
-import { CliChannel, CliExitData } from '../../../src/cli';
+import { CliExitData } from '../../../src/cli';
 import { OpenShiftExplorer } from '../../../src/explorer';
 import { ContextType, OdoImpl } from '../../../src/odo';
 import { Command } from '../../../src/odo/command';
@@ -367,7 +367,7 @@ suite('Openshift/Cluster', () => {
 
     suite('about', () => {
         test('calls the proper odo command in terminal', () => {
-            const stub = sandbox.stub(CliChannel.prototype, 'executeInTerminal');
+            const stub = sandbox.stub(OdoImpl.prototype, 'executeInTerminal');
             void Cluster.about();
 
             expect(stub).calledOnceWith(Command.printOdoVersion());

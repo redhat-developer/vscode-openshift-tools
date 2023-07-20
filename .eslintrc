@@ -16,10 +16,7 @@
   "parserOptions": {
     "ecmaVersion": 2018,
     "comment": true,
-    "project": [
-      "./tsconfig.json",
-      "./src/webview/tsconfig.json"
-    ],
+    "project": "./tsconfig.json",
     "sourceType": "module"
   },
   "plugins": [
@@ -109,19 +106,13 @@
   },
   "overrides": [
     {
-      "files": ["*.test.ts"],
-      "rules": {
-        "no-unused-expressions": "off",
-        "@typescript-eslint/unbound-method" : "off",
-        "max-nested-callbacks" : "off",
-        "@typescript-eslint/no-unsafe-assignment": 1
-      }
-    },
-    {
-      "files": ["./src/@types/**.d.ts"],
-      "rules": {
-        "header/header": "off"
-      }
+        "files": ["*.test.ts"],
+        "rules": {
+            "no-unused-expressions": "off",
+            "@typescript-eslint/unbound-method" : "off",
+            "max-nested-callbacks" : "off",
+            "@typescript-eslint/no-unsafe-assignment": 1
+        }
     }
   ]
 }
