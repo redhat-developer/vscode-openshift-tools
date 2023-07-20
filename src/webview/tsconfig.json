@@ -17,6 +17,8 @@
     "include": [
         "*/app/**/*.ts",
         "*/app/**/*.tsx",
+        "common/*.tsx",
+        "common/*.ts"
     ],
     "exclude": [
         "*/*.ts"
