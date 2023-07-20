@@ -5,10 +5,10 @@
 
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { Uri, WebviewPanel, WebviewView, extensions } from 'vscode';
+import { Uri, WebviewPanel, extensions } from 'vscode';
 import { ExtensionID } from '../../util/constants';
 
-export async function loadWebviewHtml(webviewName: string, webviewPanel: WebviewPanel | WebviewView, additionalInjections?: Map<string, string>): Promise<string> {
+export async function loadWebviewHtml(webviewName: string, webviewPanel: WebviewPanel, additionalInjections?: Map<string, string>): Promise<string> {
 
     const extensionPath = extensions.getExtension(ExtensionID).extensionPath;
 

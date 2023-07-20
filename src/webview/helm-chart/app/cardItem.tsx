@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { Autocomplete, Badge, Button, Card, InputLabel, Modal, SvgIcon, TextField, ThemeProvider, Typography, darken, lighten, styled } from '@mui/material';
+import { Autocomplete, Badge, Button, Card, InputLabel, Modal, TextField, ThemeProvider, Typography, darken, lighten, styled } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import React from 'react';
 import clsx from 'clsx';
@@ -304,44 +304,40 @@ export class CardItem extends React.Component<DevFileProps, {
                 id={`modal-${selectedVersion.name}`}>
                 <div className={this.props.cardItemStyle.helmCardHeader}>
                     <div className={this.props.cardItemStyle.devPageCardHeader}>
-                        <div style={{ display: 'inline-flex', flexDirection: 'row', width: '100%', gap: '2rem', alignItems: 'center' }}>
-                                {
-                                    this.state.selectedVersion.icon ?
-                                        <img
-                                            data-testid='icon'
-                                            src={this.state.selectedVersion.icon}
-                                            alt={this.state.selectedVersion.icon + ' logo'}
-                                            style={{ margin: '0', width: '4rem', height: '3rem', objectFit: 'contain', objectPosition: 'left' }} />
-                                        :
-                                        <SvgIcon
-                                            component={HelmIcon}
-                                            fontSize='large'
-                                            style={{ margin: '0', fontSize: '3rem' }} />
-                                }
-                            <div style={{ margin: '0rem', flexGrow: '1' }}>
-                                <Typography variant='subtitle1'>
-                                    {
-                                        capitalizeFirstLetter(this.props.helmEntry.displayName)
-                                    }
-                                </Typography>
-                            </div>
-                            <div>
-                                {
-                                    installResponse.loadScreen && <LoadScreen title='Installation in Progress' type='circle' />
-                                }
-                            </div>
-                            <div>
-                                <Button
-                                    disabled={this.handleDisable() || installResponse.installed}
-                                    variant='outlined'
-                                    className={this.props.cardItemStyle.helmInstallBtn}
-                                    onClick={this.clickInstall}
-                                    style={{ float: 'right', backgroundColor: this.handleDisable() || installResponse.installed ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: this.props.themeKind <= 1 ? 'black' : 'white' }}
-                                    startIcon={installResponse.installed ? <CheckCircleOutlineIcon /> : undefined}>
-                                    <Typography variant='body2'>
-                                        {!installResponse.installed ? 'Install' : 'Installed'}
+                        <div style={{ display: 'inline-flex', flexDirection: 'row', width: '100%' }}>
+                            <div className={this.props.cardItemStyle.devPageTitle} style={{ gap: '2rem', width: '50%' }}>
+                                <img
+                                    data-testid='icon'
+                                    src={this.state.selectedVersion.icon ? this.state.selectedVersion.icon : HelmIcon}
+                                    alt={this.state.selectedVersion.icon + ' logo'}
+                                    className={this.props.cardItemStyle.yamlCardImage} />
+                                <div style={{ marginTop: '0.6rem' }}>
+                                    <Typography variant='subtitle1'>
+                                        {
+                                            capitalizeFirstLetter(this.props.helmEntry.displayName)
+                                        }
                                     </Typography>
-                                </Button>
+                                </div>
+                            </div>
+                            <div style={{ width: '50%', display: 'flex', flexDirection: 'row' }}>
+                                <div style={{ width: '85%' }}>
+                                    {
+                                        installResponse.loadScreen && <LoadScreen title='Installation in Progress' type='circle' />
+                                    }
+                                </div>
+                                <div style={{ float: 'right', marginTop: '0.5rem' }}>
+                                    <Button
+                                        disabled={this.handleDisable() || installResponse.installed}
+                                        variant='outlined'
+                                        className={this.props.cardItemStyle.helmInstallBtn}
+                                        onClick={this.clickInstall}
+                                        style={{ float: 'right', backgroundColor: this.handleDisable() || installResponse.installed ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: this.props.themeKind <= 1 ? 'black' : 'white' }}
+                                        startIcon={installResponse.installed ? <CheckCircleOutlineIcon /> : undefined}>
+                                        <Typography variant='body2'>
+                                            {!installResponse.installed ? 'Install' : 'Installed'}
+                                        </Typography>
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -360,26 +356,24 @@ export class CardItem extends React.Component<DevFileProps, {
                         onClick={this.onCardClick}
                         data-testid={`card-${selectedVersion.name.replace(/\.| /g, '')}`}
                     >
-                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                            {selectedVersion.icon ?
+                        <div className={this.props.cardItemStyle.cardHeader}>
+                            <div className={this.props.cardItemStyle.helmcardHeaderDisplay} style={{ flexDirection: 'row' }}>
                                 <img
-                                    src={selectedVersion.icon}
+                                    src={selectedVersion.icon ? selectedVersion.icon : HelmIcon}
                                     alt={`${selectedVersion.name} icon`}
-                                    style={{ width: '4rem', height: '3rem', objectFit: 'contain', objectPosition: 'left'}}/>
-                                :
-                                <SvgIcon component={HelmIcon} style={{ fontSize: '3rem' }} />
-                            }
-                            {selectedVersion.version && <Badge key={`key-` + selectedVersion.version}
-                                className={this.props.cardItemStyle.badge}
-                                overlap='rectangular'
-                                variant='standard'
-                                style={{ float: 'right' }}
-                            >
-                                {selectedVersion.version.split('-')[0]}
-                            </Badge>
-                            }
+                                    style={{ margin: '0.5rem', width: '2.5rem', height: '2.5rem', objectFit: 'contain' }} />
+                                {selectedVersion.version && <Badge key={`key-` + selectedVersion.version}
+                                    className={this.props.cardItemStyle.badge}
+                                    overlap='rectangular'
+                                    variant='standard'
+                                    style={{ float: 'right', margin: '0.5rem' }}
+                                >
+                                    {selectedVersion.version.split('-')[0]}
+                                </Badge>
+                                }
+                            </div>
                         </div>
-                        <div className={this.props.cardItemStyle.cardBody} style={{ height: 'auto' }}>
+                        <div className={this.props.cardItemStyle.cardBody} style={{ margin: '1rem', height: 'auto' }}>
                             <Typography variant='subtitle1'>
                                 {
                                     capitalizeFirstLetter(this.props.helmEntry.displayName)
@@ -389,11 +383,13 @@ export class CardItem extends React.Component<DevFileProps, {
                                 selectedVersion.annotations['charts.openshift.io/provider'] && <Typography variant='caption'>Provided by {selectedVersion.annotations['charts.openshift.io/provider']}</Typography>
                             }
                         </div>
-                        <div style={{ height: 'auto' }}>
-                            <Typography variant='caption'
-                                className={this.props.cardItemStyle.longDescription}>
-                                {selectedVersion.description}
-                            </Typography>
+                        <div className={this.props.cardItemStyle.helmcardFooterTag} style={{ margin: '1rem' }}>
+                            <div style={{ height: 'auto' }}>
+                                <Typography variant='caption'
+                                    className={this.props.cardItemStyle.longDescription}>
+                                    {selectedVersion.description}
+                                </Typography>
+                            </div>
                         </div>
                     </Card>
                     {

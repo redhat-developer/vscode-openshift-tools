@@ -8,9 +8,6 @@
             "es6",
             "dom"
         ],
-        "typeRoots": [
-            "./src/@types"
-        ],
         "sourceMap": true,
         "rootDir": ".",
         /* Strict Type-Checking Option */
@@ -38,7 +35,6 @@
         "src/webview/git-import/app",
         "src/webview/helm-chart/app",
         "src/webview/feedback/app",
-        "src/webview/openshift-terminal/app",
         "src/webview/common"
     ]
 }
