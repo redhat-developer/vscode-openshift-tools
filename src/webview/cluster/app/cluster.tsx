@@ -37,13 +37,15 @@ const clusterTypes = [
         tooltip: 'Launch your Developer Sandbox for Red Hat OpenShift'
     },
     {
-        heading: 'Deploy it in your public cloud',
-        description: 'Run OpenShift clusters on your own by installing from another cloud provider.',
-        smallInfo: 'This includes Azure Red Hat Openshift, Red Hat OpenShift on IBM Cloud, Red Hat OpenShift Service on AWS, Google Cloud, AWS (x86_64), Azure.',
-        imageUrl: ['https://www.openshift.com/hubfs/images/logos/logo_aws.svg', 'https://www.openshift.com/hubfs/images/logos/logo-try-cloud.svg', 'https://www.openshift.com/hubfs/images/logos/logo_google_cloud.svg'],
-        urlAlt: 'public cloud',
-        redirectLink: 'https://console.redhat.com/openshift/create',
-        buttonText: 'Try it in your cloud',
+        heading: 'Red Hat OpenShift Service on AWS',
+        description: 'Get started with Red Hat OpenShift Service on AWS (ROSA)',
+        smallInfo: 'ROSA allows you to deploy fully operational and managed Red Hat OpenShift clusters while leveraging the full breadth and depth of AWS.',
+        imageUrl: ['https://www.redhat.com/rhdc/managed-files/Red-Hat-AWS-logo-lockup_2.svg'],
+        urlAlt: 'rosa',
+        redirectLink: 'https://cloud.redhat.com/learn/getting-started-red-hat-openshift-service-aws-rosa',
+        redirectLinkSecondary: 'https://console.redhat.com/openshift/create/rosa/getstarted',
+        buttonText: 'Start Learning',
+        buttonTextSecondary: 'Create a ROSA cluster',
         tooltip: 'For complete installation, follow the official documentation.'
     }
 ];
@@ -135,6 +137,17 @@ export default function Header() {
                                             {list.buttonText}
                                         </Button>
                                     </a>
+                                    {list.buttonTextSecondary &&
+                                        <a onClick={() => handleView(index)} style={{ textDecoration: 'none' }} href={clusterTypes[index].redirectLinkSecondary || '#'}>
+                                            <Button
+                                                variant='contained'
+                                                component='span'
+                                                sx={{ marginTop: '.5em' }}
+                                            >
+                                                {list.buttonTextSecondary}
+                                            </Button>
+                                        </a>
+                                    }
                                 </div>
                             } />
                         </CardActions>
@@ -165,7 +178,7 @@ export default function Header() {
                             <Typography variant='body2' component='p'>
                                 Red Hat OpenShift Local brings a minimal OpenShift 4 cluster to your local computer.<br></br>You can use this guided workflow to create OpenShift cluster locally. Cluster take approximately 15 minutes to provision.
                             </Typography>
-                            <AddClusterView vscode={vscodeApi} crc={crcLatest} openshiftCrc={crcOpenShift}/>
+                            <AddClusterView vscode={vscodeApi} crc={crcLatest} openshiftCrc={crcOpenShift} />
                         </Card>
                     </div>
                 )}
