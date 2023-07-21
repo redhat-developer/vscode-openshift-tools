@@ -19,7 +19,6 @@ import { ExtensionID } from '../../util/constants';
 import { DevfileConverter } from '../../util/devfileConverter';
 import { gitUrlParse } from '../../util/gitParse';
 import { selectWorkspaceFolder } from '../../util/workspace';
-import { VsCommandError } from '../../vscommand';
 import { getDevfileRegistries, isValidProjectFolder, validateComponentName } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
@@ -182,39 +181,6 @@ export default class CreateComponentLoader {
                 });
                 break;
             }
-            case 'createComponentFromTemplateProject': {
-                const { projectFolder, componentName } = message.data;
-                const templateProject: TemplateProjectIdentifier = message.data.templateProject;
-                const componentFolder = path.join(projectFolder, componentName);
-                try {
-                    await fs.mkdir(componentFolder);
-                    await OdoImpl.Instance.createComponentFromTemplateProject(
-                        componentFolder,
-                        componentName,
-                        templateProject.devfileId,
-                        templateProject.registryName,
-                        templateProject.templateProjectName,
-                    );
-                    CreateComponentLoader.panel.dispose();
-                    const ADD_TO_WORKSPACE = 'Add to workspace';
-                    const selection = await vscode.window.showInformationMessage(
-                        `Component '${componentName} was created.`,
-                        ADD_TO_WORKSPACE,
-                    );
-                    if (selection === ADD_TO_WORKSPACE) {
-                        vscode.workspace.updateWorkspaceFolders(
-                            vscode.workspace.workspaceFolders
-                                ? vscode.workspace.workspaceFolders.length
-                                : 0,
-                            null,
-                            { uri: Uri.file(componentFolder) },
-                        );
-                    }
-                } catch (e) {
-                    void vscode.window.showErrorMessage(e);
-                }
-                break;
-            }
             /**
              * The panel requested to get the receommended devfile given the selected project.
              */
@@ -237,36 +203,62 @@ export default class CreateComponentLoader {
              * The panel requested to create component from local codebase or git repo.
              */
             case 'createComponent': {
-                let projectUri: Uri;
                 const componentName: string = message.data.componentName;
-
-                if (message.data.path) {
-                    // path of project in local codebase
-                    projectUri = Uri.file(message.data.path);
-                } else if (message.data.gitDestinationPath) {
-                    // move the cloned git repo to selected project path
-                    const newProjectPath: string = path.join(message.data.gitDestinationPath, componentName);
-                    await fs.mkdir(newProjectPath);
-                    await fse.copy(message.data.tmpDirUri.fsPath, newProjectPath);
-                    await fs.rm(message.data.tmpDirUri.fsPath, { force: true, recursive: true });
-                    projectUri = Uri.file(newProjectPath);
-                }
-
+                let componentFolder: string;
                 try {
-                    await OdoImpl.Instance.createComponentFromFolder(getDevfileType(message.data.devfileDisplayName), undefined, componentName, projectUri);
-                    CreateComponentLoader.panel.dispose();
-                    vscode.commands.executeCommand('openshift.componentsView.refresh');
-                    window.showInformationMessage(`Component '${componentName}' was successfully created. Perform actions on it from Components View.`);
-                    vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0, null, { uri: projectUri });
-                    break;
-                } catch (err) {
-                    if (err instanceof VsCommandError) {
-                        throw new VsCommandError(
-                            `Error occurred while creating Component '${componentName}': ${err.message}`,
-                            `Error occurred while creating Component: ${err.telemetryMessage}`, err,
+                    if (message.data.isFromTemplateProject) {
+                        // from template project
+                        const { projectFolder } = message.data;
+                        const templateProject: TemplateProjectIdentifier = message.data.templateProject;
+                        const componentFolder = path.join(projectFolder, componentName);
+                        await fs.mkdir(componentFolder);
+                        await OdoImpl.Instance.createComponentFromTemplateProject(
+                            componentFolder,
+                            componentName,
+                            templateProject.devfileId,
+                            templateProject.registryName,
+                            templateProject.templateProjectName,
                         );
+                    } else {
+                        // from local codebase or existing git repo
+                        if (message.data.path) {
+                            // path of project in local codebase
+                            componentFolder = message.data.path;
+                        } else if (message.data.gitDestinationPath) {
+                            // move the cloned git repo to selected project path
+                            componentFolder = path.join(message.data.gitDestinationPath, componentName);
+                            await fs.mkdir(componentFolder);
+                            await fse.copy(message.data.tmpDirUri.fsPath, componentFolder);
+                            await fs.rm(message.data.tmpDirUri.fsPath, { force: true, recursive: true });
+                        }
+                        await OdoImpl.Instance.createComponentFromLocation(getDevfileType(message.data.devfileDisplayName), componentName, Uri.file(componentFolder));
                     }
-                    throw err;
+                    CreateComponentLoader.panel.dispose();
+                    if (vscode.workspace.workspaceFolders?.some(folder => folder.uri.path === componentFolder)) {
+                        vscode.commands.executeCommand('openshift.componentsView.refresh');
+                        vscode.window.showInformationMessage(`Component '${componentName}' was successfully created. Perform actions on it from Components View.`);
+                    } else {
+                        const ADD_TO_WORKSPACE = 'Add to workspace';
+                        const selection = await vscode.window.showInformationMessage(
+                            `Component '${componentName}' was successfully created.`,
+                            ADD_TO_WORKSPACE,
+                        );
+                        if (selection === ADD_TO_WORKSPACE) {
+                            vscode.workspace.updateWorkspaceFolders(
+                                vscode.workspace.workspaceFolders
+                                    ? vscode.workspace.workspaceFolders.length
+                                    : 0,
+                                null,
+                                { uri: Uri.file(componentFolder) },
+                            );
+                        }
+                    }
+                } catch (err) {
+                    void vscode.window.showErrorMessage(err);
+                    void CreateComponentLoader.panel.webview.postMessage({
+                        action: 'createComponentFailed',
+                        data: err.message,
+                    });
                 }
             }
             /**
@@ -285,8 +277,6 @@ export default class CreateComponentLoader {
             }
         }
     }
-
-
 
     static async getRecommendedDevfile(uri: Uri) {
         let analyzeRes: AnalyzeResponse[] = [];
