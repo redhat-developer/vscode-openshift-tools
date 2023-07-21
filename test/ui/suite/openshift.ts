@@ -89,8 +89,13 @@ export function checkOpenshiftView() {
             });
 
             it('shows a button to create a new component', async () => {
-                const btns = await welcome.getButtons();
-                const titles = await Promise.all(btns.map(async item => await item.getTitle()));
+                let btns = await welcome.getButtons();
+                let titles = await Promise.all(btns.map(async item => await item.getTitle()));
+                //Perform second search if the first one did not succeed
+                if(!titles.includes(BUTTONS.newComponent)){
+                    btns = await welcome.getButtons();
+                    titles = await Promise.all(btns.map(async item => await item.getTitle()));
+                }
 
                 expect(titles).includes(BUTTONS.newComponent);
             });

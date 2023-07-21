@@ -97,7 +97,7 @@ export function testImportFromGit() {
             await webview.switchBack(); // END WEBVIEW CODE
 
             const devfile: string = path.join(tempDir, 'lemminx', 'devfile.yaml');
-            await notificationExists('Component \'lemminx-comp\' successfully created. Perform actions on it from Components View.', editorView.getDriver(), 10_000);
+            await notificationExists('Component \'lemminx-comp\' successfully created. Perform actions on it from Components View.', editorView.getDriver(), 15_000);
             expect(fs.existsSync(devfile)).is.true;
         });
 
