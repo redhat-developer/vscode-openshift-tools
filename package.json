@@ -818,6 +818,11 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.Serverless.deploy",
+				"title": "Deploy",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.Serverless.buildAndRun",
 				"title": "Build and Run",
 				"category": "OpenShift"
@@ -1154,6 +1159,10 @@
 				},
 				{
 					"command": "openshift.Serverless.build",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.deploy",
 					"when": "false"
 				},
 				{
@@ -1504,6 +1513,10 @@
 				{
 					"command": "openshift.Serverless.build",
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild)$/"
+				},
+				{
+					"command": "openshift.Serverless.deploy",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild)$/"
 				},
 				{
 					"command": "openshift.Serverless.buildAndRun",

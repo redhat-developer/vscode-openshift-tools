@@ -211,6 +211,11 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
         BuildAndDeploy.getInstance().stopFunction(context);
     }
 
+    @vsCommand('openshift.Serverless.deploy')
+    static deployFunction(context: FunctionObject) {
+        BuildAndDeploy.getInstance().deployFunction(context);
+    }
+
     @vsCommand('openshift.Serverless.openFunction')
     static openFunction(context: FunctionObject) {
         if (!context) {

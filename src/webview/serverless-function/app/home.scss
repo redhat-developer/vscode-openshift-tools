@@ -46,6 +46,18 @@ button {
     text-transform: none;
 }
 
+.MuiButton-root.Mui-disabled {
+    -webkit-text-fill-color: white !important;
+}
+
+.labelStyle {
+    text-align: center;
+    text-transform: none;
+    height: 2.5rem !important;
+    background-color: var(--vscode-button-background) !important;
+    border: 1px solid var(--vscode-settings-textInputForeground);
+}
+
 .strategyContainer {
     display: flex;
     flex-direction: row;
@@ -104,8 +116,9 @@ button {
 }
 
 .MuiAutocomplete-inputRoot {
-    width: 70%;
-    height: 3rem !important;
+    padding: 0 !important;
+    padding-left: 5px !important;
+    height: 2.5rem !important;
 }
 
 .MuiMenuItem-root {
@@ -130,10 +143,6 @@ button {
     border-color: var(--vscode-settings-textInputForeground) !important;
 }
 
-.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-    border-radius: 0.5rem !important;
-}
-
 .MuiFormControl-fullWidth {
     max-width: 100% !important;
 }
@@ -147,6 +156,10 @@ button {
     color: #EE0000 !important;
 }
 
+.MuiOutlinedInput-root.Mui-disabled {
+    border: 0px solid var(--vscode-tab-unfocusedActiveBorder) !important;
+}
+
 .Mui-disabled {
     -webkit-text-fill-color: var(--vscode-settings-textInputForeground) !important;
 }
@@ -156,6 +169,5 @@ button {
 }
 
 .MuiOutlinedInput-input {
-    height: 14px !important;
-    min-height: unset !important;
+    width: 70% !important;
 }

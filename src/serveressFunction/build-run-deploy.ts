@@ -10,13 +10,14 @@ import { Platform } from '../util/platform';
 import { OdoImpl } from '../odo';
 import { CliChannel } from '../cli';
 import { ChildProcess, SpawnOptions } from 'child_process';
+import { ServerlessFunctionView } from './view';
 
 export class BuildAndDeploy {
 
     private static instance: BuildAndDeploy;
 
     private buildTerminalMap: Map<string, Terminal> = new Map<string, Terminal>();
-    public  runTerminalMap: Map<string, Terminal> = new Map<string, Terminal>();
+    public runTerminalMap: Map<string, Terminal> = new Map<string, Terminal>();
     private buildEmiterMap: Map<string, EventEmitter<string>> = new Map<string, EventEmitter<string>>();
     private buildPrcessMap: Map<Terminal, ChildProcess> = new Map<Terminal, ChildProcess>();
 
@@ -160,7 +161,7 @@ export class BuildAndDeploy {
                         });
                         runProcess.stdout.on('data', (chunk) => {
                             outputEmitter.fire(`${chunk as string}`.replaceAll('\n', '\r\n'));
-                            void commands.executeCommand('openshift.Serverless.refresh',context);
+                            void commands.executeCommand('openshift.Serverless.refresh', context);
                         });
                         runProcess.stderr.on('data', (errChunk) => {
                             outputEmitter.fire(`\x1b[31m${errChunk as string}\x1b[0m`.replaceAll('\n', '\r\n'));
@@ -176,7 +177,7 @@ export class BuildAndDeploy {
                     }
                     this.runTerminalMap.delete(`run-${context.folderURI.fsPath}`);
                     terminal = undefined;
-                    void commands.executeCommand('openshift.Serverless.refresh',context);
+                    void commands.executeCommand('openshift.Serverless.refresh', context);
                 },
                 handleInput: ((_data: string) => {
                     if (!runProcess) {
@@ -196,6 +197,25 @@ export class BuildAndDeploy {
         const terminal = this.runTerminalMap.get(`run-${context.folderURI.fsPath}`);
         if (terminal) {
             terminal.sendText('^C\r\n');
+        }
+    }
+
+    public async deployFunction(context: FunctionObject) {
+        const currentNamespace: string = ServerlessFunctionView.getInstance().getCurrentNameSpace();
+        const yamlContent = await Utils.getFuncYamlContent(context.folderURI.fsPath);
+        if (yamlContent) {
+            const depyedNamespace = yamlContent.deploy?.namespace;
+            if (depyedNamespace && depyedNamespace !== currentNamespace) {
+                const response = await window.showInformationMessage(`Function namespace (declared in func.yaml) is different from the current active namespace. Deploy function ${context.name} to namespace ${depyedNamespace}?`,
+                    'Ok',
+                    'Cancel');
+                if(response === 'Cancel') {
+                    return;
+                }
+                if (!yamlContent.image || !BuildAndDeploy.imageRegex.test(yamlContent.image)) {
+                    void window.showErrorMessage(`Function ${context.name} has invalid imaage`)
+                }
+            }
         }
     }
 

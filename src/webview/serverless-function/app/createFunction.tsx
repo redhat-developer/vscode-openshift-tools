@@ -9,6 +9,7 @@ import { VSCodeMessage } from './vsCodeMessage';
 import { CreateFunctionPageProps } from '../../common/propertyTypes';
 import './home.scss';
 
+
 export class CreateFunction extends React.Component<CreateFunctionPageProps, {
     functionData: {
         name?: string,
@@ -40,7 +41,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
             imageData: {
                 name: '',
                 error: false,
-                helpText: ''
+                helpText: `Image name should be in the form of '[registry]/[namespace]/[name]:[tag]'`
             },
             images: [],
             templates: [],
@@ -161,40 +162,51 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
         const imageRegex = RegExp('[^/]+\\.[^/.]+\\/([^/.]+)(?:\\/[\\w\\s._-]*([\\w\\s._-]))*(?::[a-z0-9\\.-]+)?$');
         return (
             <>
-                <FormControl sx={{ margin: '2rem 0 0 2rem', width: 'auto', flexFlow: 'column', gap: '1rem' }}>
+                <FormControl sx={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
+                    <FormControl sx={{ width: 180 }}>
+                        <Button variant='contained'
+                            disabled={true}
+                            className='labelStyle'>
+                            Function Name*
+                        </Button>
+                    </FormControl>
                     <TextField
                         type='string'
                         variant='outlined'
                         required
+                        autoFocus
+                        fullWidth
                         defaultValue={functionData.name}
                         error={functionData.error}
                         onChange={(e) => this.validateName(e.target.value)}
                         id='function-name'
-                        placeholder='Function Name *'
+                        placeholder='Provide name of the function to be created'
                         sx={{
                             input: {
                                 color: 'var(--vscode-settings-textInputForeground)',
                                 height: '7px !important',
-                                '&::placeholder': {
-                                    color: 'var(--vscode-settings-textInputForeground) !important',
-                                    opacity: '1 !important'
-                                }
                             }
                         }}
-                        helperText={functionData.helpText}
-                    />
-
+                        helperText={functionData.helpText} />
+                </FormControl>
+                <FormControl sx={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
+                    <FormControl sx={{ width: 180 }}>
+                        <Button variant='contained'
+                            disabled={true}
+                            className='labelStyle'>
+                            Build Image *
+                        </Button>
+                    </FormControl>
                     <Autocomplete
                         defaultValue={imageData.name}
-                        onChange={(_event, newValue: string) => {
-                            if (newValue) {
-                                let value = newValue.replace('Add', '').trim();
+                        onChange={(_event, value: string) => {
+                            if (value) {
                                 if (!imageRegex.test(value)) {
                                     this.setState({
                                         imageData: {
                                             name: '',
                                             error: true,
-                                            helpText: 'Provide full image name in the form [registry]/[namespace]/[name]:[tag]'
+                                            helpText: `Image name should be in the form of '[registry]/[namespace]/[name]:[tag]'`
                                         }
                                     });
                                 } else {
@@ -217,8 +229,8 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                             const { inputValue } = params;
                             // Suggest the creation of a new value
                             const isExisting = options.some((option) => inputValue === option);
-                            if (inputValue !== '' && !isExisting && !inputValue.startsWith('Add')) {
-                                filtered.push(`Add ${inputValue}`);
+                            if (inputValue !== '' && !isExisting) {
+                                filtered.push(`${inputValue}`);
                             }
 
                             return filtered;
@@ -230,10 +242,19 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         disableClearable
                         fullWidth
                         renderInput={(params) => (
-                            <TextField {...params} placeholder='Build Image *' error={imageData.error} helperText={imageData.helpText} />
+                            <TextField {...params}
+                                placeholder='Provide image name (podman, docker, quay)' error={imageData.error} helperText={imageData.helpText} />
                         )}
                     />
-
+                </FormControl>
+                <FormControl sx={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
+                    <FormControl sx={{ width: 180 }}>
+                        <Button variant='contained'
+                            disabled={true}
+                            className='labelStyle'>
+                            Language *
+                        </Button>
+                    </FormControl>
                     <Autocomplete
                         value={language}
                         id='language-dropdown'
@@ -243,50 +264,53 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         fullWidth
                         disableClearable
                         renderInput={(params) => (
-                            <TextField {...params} placeholder='Language *' />
+                            <TextField {...params} placeholder='Select the language' />
                         )}
                     />
-
-                    {language?.length > 0 &&
-                        <Autocomplete
-                            value={template}
-                            id='template-dropdown'
-                            options={templates}
-                            onChange={(e, v) => this.handleDropDownChange(e, v)}
-                            renderOption={(props, option) => <li {...props}>{option}</li>}
-                            fullWidth
-                            disableClearable
-                            renderInput={(params) => (
-                                <TextField {...params} placeholder='Template *' />
-                            )}
-                        />
-                    }
                 </FormControl>
-                <FormControl style={{ margin: '2rem 0 0 2rem', width: 'auto', flexFlow: 'row', gap: '0.5rem' }}>
-                    {wsFolderItems.length > 0 &&
-                        <Autocomplete
-                            value={wsFolderPath ? wsFolderPath.fsPath : ''}
-                            id='folder-dropdown'
-                            options={folders}
-                            onChange={(e, v) => this.handleWsFolderDropDownChange(e, v)}
-                            renderOption={(props, option) => <li {...props}>{typeof option === 'string' ? option : option.fsPath}</li>}
-                            fullWidth
-                            disableClearable
-                            renderInput={(params) => (
-                                <TextField {...params} placeholder='Select Folder *' />
-                            )}
-                        />
-                    }
-                    {
-                        wsFolderItems?.length === 0 &&
+                <FormControl sx={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
+                    <FormControl sx={{ width: 180 }}>
                         <Button variant='contained'
-                            className='buttonStyle'
-                            disabled={functionData?.name.length === 0}
-                            style={{ backgroundColor: functionData?.name.length !== 0 ? '#EE0000' : 'var(--vscode-button-secondaryBackground)', textTransform: 'none', color: 'white', marginTop: '0.5rem' }}
-                            onClick={() => this.selectFolder()}>
-                            Select Folder
+                            disabled={true}
+                            className='labelStyle'>
+                            Template *
                         </Button>
-                    }
+                    </FormControl>
+
+                    <Autocomplete
+                        value={template}
+                        id='template-dropdown'
+                        options={templates}
+                        disabled={language?.length === 0}
+                        onChange={(e, v) => this.handleDropDownChange(e, v)}
+                        renderOption={(props, option) => <li {...props}>{option}</li>}
+                        fullWidth
+                        disableClearable
+                        renderInput={(params) => (
+                            <TextField {...params} placeholder='Select the template based on the language selected' />
+                        )}
+                    />
+                </FormControl>
+                <FormControl style={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
+                    <FormControl sx={{ width: 180 }}>
+                        <Button variant='contained'
+                            disabled={true}
+                            className='labelStyle'>
+                            Folder *
+                        </Button>
+                    </FormControl>
+                    <Autocomplete
+                        value={wsFolderPath ? wsFolderPath.fsPath : ''}
+                        id='folder-dropdown'
+                        options={folders}
+                        onChange={(e, v) => this.handleWsFolderDropDownChange(e, v)}
+                        renderOption={(props, option) => <li {...props}>{typeof option === 'string' ? option : option.fsPath}</li>}
+                        fullWidth
+                        disableClearable
+                        renderInput={(params) => (
+                            <TextField {...params} placeholder='Provide the folder to add the function files' />
+                        )}
+                    />
                 </FormControl>
                 <FormControl sx={{ margin: '2rem 0 0 2rem', width: 100 }}>
                     <Button variant='contained'
