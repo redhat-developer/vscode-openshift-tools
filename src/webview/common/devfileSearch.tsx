@@ -483,7 +483,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
                     <DevfileExplanation />
                     {props.goBack && (
                         <Button
-                            variant="outlined"
+                            variant="contained"
                             onClick={(_) => {
                                 props.goBack();
                             }}

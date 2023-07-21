@@ -158,7 +158,7 @@ export function FromLocalCodebase({ setCurrentView }) {
                             </FormControl>
                             {!recommendedDevfile.showRecommendation &&
                                 <Button
-                                    variant="outlined"
+                                    variant="contained"
                                     sx={{ whiteSpace: 'nowrap', height: '4em' }}
                                     onClick={(e) => {
                                         window['vscodeApi'].postMessage({
@@ -173,7 +173,7 @@ export function FromLocalCodebase({ setCurrentView }) {
                         {!recommendedDevfile.showRecommendation ? (
                             <>
                                 <Stack direction='row' spacing={1} marginTop={2}>
-                                    <Button variant='text' onClick={() => { setCurrentView('home') }}>
+                                    <Button variant='contained' onClick={() => { setCurrentView('home') }}>
                                         BACK
                                     </Button>
                                     <Button
@@ -206,7 +206,7 @@ export function FromLocalCodebase({ setCurrentView }) {
                                     <DevfileListItem devfile={selectedDevfile ? (selectedDevfile) : (recommendedDevfile.devfile)} />
                                     <Stack direction='row' justifyContent='flex-end' spacing={1} marginTop={2}>
                                         <Button
-                                            variant='text'
+                                            variant='contained'
                                             onClick={() => {
                                                 setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: false }));
                                                 setSelectedDevfile(undefined);
@@ -215,7 +215,7 @@ export function FromLocalCodebase({ setCurrentView }) {
                                             BACK
                                         </Button>
                                         <Button
-                                            variant='text'
+                                            variant='contained'
                                             onClick={() => {
                                                 setSelectedDevfile(undefined);
                                                 setCurrentPage('selectDifferentDevfile');

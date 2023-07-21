@@ -159,7 +159,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                     <>
                                         <Stack direction='row' spacing={2} marginTop={2}>
                                             <Button
-                                                variant='text'
+                                                variant='contained'
                                                 onClick={() => { setCurrentView('home') }}
                                                 disabled={recommendedDevfile.isLoading}>
                                                 BACK
@@ -191,7 +191,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                         </Alert>
                                         <Stack direction='row' justifyContent='flex-end' marginTop={2} spacing={1}>
                                             <Button
-                                                variant='text'
+                                                variant='contained'
                                                 onClick={() => {
                                                     setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: false }));
                                                     setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: false }));
@@ -202,7 +202,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                 BACK
                                             </Button>
                                             <Button
-                                                variant='text'
+                                                variant='contained'
                                                 disabled={cloneFailed}
                                                 onClick={() => {
                                                     setCloneFailed(false);
@@ -228,7 +228,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                     <DevfileListItem devfile={selectedDevfile ? (selectedDevfile) : (recommendedDevfile.devfile)} />
                                     <Stack direction='row' justifyContent='flex-end' marginTop={2} spacing={1}>
                                         <Button
-                                            variant='text'
+                                            variant='contained'
                                             onClick={() => {
                                                 setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: false }));
                                                 setSelectedDevfile(undefined);
@@ -239,7 +239,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                             BACK
                                         </Button>
                                         <Button
-                                            variant='text'
+                                            variant='contained'
                                             onClick={() => {
                                                 setSelectedDevfile(undefined);
                                                 setCurrentPage('selectDifferentDevfile');

@@ -144,7 +144,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                             value={componentParentFolder}
                         />
                         <Button
-                            variant="outlined"
+                            variant="contained"
                             sx={{ whiteSpace: 'nowrap' }}
                             onClick={(e) => {
                                 window['vscodeApi'].postMessage({
@@ -166,7 +166,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                 </FormControl>
 
                 <Stack direction="row" justifyContent="space-between">
-                    <Button variant="text" onClick={props.goBack}>
+                    <Button variant="contained" onClick={props.goBack}>
                         {props.templateProject ? 'Use Different Template Project' : 'Back'}
                     </Button>
                     <CreateComponentButton
