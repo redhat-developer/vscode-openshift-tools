@@ -84,7 +84,7 @@ export function DevfileListItem(props: DevfileListItemProps) {
             </Stack>
             <Box sx={{ flexGrow: '1' }} />
             {props.buttonCallback ? (
-                <Button variant="outlined" onClick={props.buttonCallback}>
+                <Button variant="contained" onClick={props.buttonCallback}>
                     Use Devfile
                 </Button>
             ) : (

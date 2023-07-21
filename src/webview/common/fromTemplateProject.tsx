@@ -26,13 +26,14 @@ export function FromTemplateProject(props: FromTemplateProjectProps) {
         setCurrentPage((_) => 'setNameAndFolder');
     }
 
-    function createComponentFromTemplateProject(projectFolder: string, componentName: string) {
+    function createComponent(projectFolder: string, componentName: string) {
         window.vscodeApi.postMessage({
-            action: 'createComponentFromTemplateProject',
+            action: 'createComponent',
             data: {
                 templateProject: selectedTemplateProject,
                 projectFolder,
                 componentName,
+                isFromTemplateProject: true,
             },
         });
     }
@@ -53,7 +54,7 @@ export function FromTemplateProject(props: FromTemplateProjectProps) {
                     goBack={() => {
                         setCurrentPage('selectTemplateProject');
                     }}
-                    createComponent={createComponentFromTemplateProject}
+                    createComponent={createComponent}
                     devfile={selectedDevfile}
                     templateProject={selectedTemplateProject.templateProjectName}
                 />

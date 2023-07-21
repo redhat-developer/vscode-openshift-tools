@@ -2,7 +2,6 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import LoadingButton from '@mui/lab/LoadingButton';
 import {
     Button,
     FormControl,
@@ -10,11 +9,12 @@ import {
     Paper,
     Stack,
     TextField,
-    Typography,
+    Typography
 } from '@mui/material';
 import * as React from 'react';
 import 'react-dom';
 import { ComponentNameInput } from './componentNameInput';
+import { CreateComponentButton, CreateComponentErrorAlert } from './createComponentButton';
 import { Devfile } from './devfile';
 import { DevfileListItem } from './devfileListItem';
 
@@ -36,11 +36,13 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
     const [componentNameErrorMessage, setComponentNameErrorMessage] = React.useState('Please enter a component name.');
 
     const [componentParentFolder, setComponentParentFolder] = React.useState('');
-    const [isFolderFieldValid, setFolderFieldValid] = React.useState('');
+    const [isFolderFieldValid, setFolderFieldValid] = React.useState(false);
     const [folderFieldErrorMessage, setFolderFieldErrorMessage] = React.useState('');
     const [isFolderFieldInteracted, setFolderFieldInteracted] = React.useState(false);
 
     const [isLoading, setLoading] = React.useState(false);
+
+    const [createComponentErrorMessage, setCreateComponentErrorMessage] = React.useState('');
 
     function respondToMessage(messageEvent: MessageEvent) {
         const message = messageEvent.data as Message;
@@ -62,6 +64,11 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                     setComponentNameFieldValid(true);
                     setComponentNameErrorMessage('');
                 }
+                break;
+            }
+            case 'createComponentFailed': {
+                setLoading(false);
+                setCreateComponentErrorMessage(message.data);
                 break;
             }
         }
@@ -152,18 +159,16 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                     <Button variant="text" onClick={props.goBack}>
                         {props.templateProject ? ('Use Different Template Project') : ('Back')}
                     </Button>
-                    <LoadingButton
-                        variant="contained"
-                        onClick={() => {
-                            props.createComponent(componentParentFolder, componentName);
-                            setLoading(true);
-                        }}
-                        disabled={!isComponentNameFieldValid || !isFolderFieldValid || isLoading}
-                        loading={isLoading}
-                    >
-                        Create Component
-                    </LoadingButton>
+                    <CreateComponentButton
+                        componentName={componentName}
+                        componentParentFolder={componentParentFolder}
+                        isComponentNameFieldValid={isComponentNameFieldValid}
+                        isFolderFieldValid={isFolderFieldValid}
+                        isLoading={isLoading}
+                        createComponent={props.createComponent}
+                        setLoading={setLoading} />
                 </Stack>
+                <CreateComponentErrorAlert createComponentErrorMessage={createComponentErrorMessage} />
             </Stack>
         </Stack>
     );

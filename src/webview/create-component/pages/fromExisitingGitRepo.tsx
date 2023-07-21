@@ -105,7 +105,8 @@ export function FromExistingGitRepo({ setCurrentView }) {
                 devfileDisplayName: selectedDevfile ? (selectedDevfile.name) : (recommendedDevfile.devfile.name),
                 componentName: componentName,
                 tmpDirUri: tmpDir,
-                gitDestinationPath: projectFolder
+                gitDestinationPath: projectFolder,
+                isFromTemplateProject: false,
             }
         });
     }
@@ -202,6 +203,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                             </Button>
                                             <Button
                                                 variant='text'
+                                                disabled={cloneFailed}
                                                 onClick={() => {
                                                     setCloneFailed(false);
                                                     setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: true }));

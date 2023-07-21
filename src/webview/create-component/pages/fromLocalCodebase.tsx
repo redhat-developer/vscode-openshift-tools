@@ -1,8 +1,8 @@
-import LoadingButton from '@mui/lab/LoadingButton';
 import { Button, CircularProgress, Divider, FormControl, FormHelperText, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
 import * as React from 'react';
 import { Uri } from 'vscode';
 import { ComponentNameInput } from '../../common/componentNameInput';
+import { CreateComponentButton, CreateComponentErrorAlert } from '../../common/createComponentButton';
 import { Devfile } from '../../common/devfile';
 import { DevfileListItem } from '../../common/devfileListItem';
 import { DevfileRecommendationInfo } from '../../common/devfileRecommendationInfo';
@@ -46,6 +46,8 @@ export function FromLocalCodebase({ setCurrentView }) {
 
     const [selectedDevfile, setSelectedDevfile] = React.useState<Devfile>(undefined);
 
+    const [createComponentErrorMessage, setCreateComponentErrorMessage] = React.useState('');
+
     function respondToMessage(messageEvent: MessageEvent) {
         const message = messageEvent.data as Message;
         switch (message.action) {
@@ -77,6 +79,11 @@ export function FromLocalCodebase({ setCurrentView }) {
                 setRecommendedDevfile((prevState) => ({ ...prevState, isDevfileExistsInFolder: message.data }));
                 break;
             }
+            case 'createComponentFailed': {
+                setLoading(false);
+                setCreateComponentErrorMessage(message.data);
+                break;
+            }
         }
     }
 
@@ -99,13 +106,14 @@ export function FromLocalCodebase({ setCurrentView }) {
         setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: true }));
     };
 
-    function handleCreateComponent() {
+    function createComponentFromLocalCodebase(projectFolder: string, componentName: string) {
         window.vscodeApi.postMessage({
             action: 'createComponent',
             data: {
                 devfileDisplayName: selectedDevfile ? (selectedDevfile.name) : (recommendedDevfile.devfile.name),
                 componentName: componentName,
-                path: projectFolder
+                path: projectFolder,
+                isFromTemplateProject: false,
             }
         });
         setLoading(true);
@@ -214,10 +222,16 @@ export function FromLocalCodebase({ setCurrentView }) {
                                             }}>
                                             SELECT A DIFFERENT DEVFILE
                                         </Button>
-                                        <LoadingButton variant='contained' disabled={isLoading} loading={isLoading} onClick={handleCreateComponent}>
-                                            CREATE COMPONENT
-                                        </LoadingButton>
+                                        <CreateComponentButton
+                                            componentName={componentName}
+                                            componentParentFolder={projectFolder}
+                                            isComponentNameFieldValid={isComponentNameFieldValid}
+                                            isFolderFieldValid={true}
+                                            isLoading={isLoading}
+                                            createComponent={createComponentFromLocalCodebase}
+                                            setLoading={setLoading} />
                                     </Stack >
+                                    <CreateComponentErrorAlert createComponentErrorMessage={createComponentErrorMessage} />
                                 </Stack >
                             </>
                         )}
