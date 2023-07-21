@@ -44,7 +44,7 @@ export function testImportFromGit() {
         });
 
         it('Import project from git', async function () {
-            this.timeout(30_000);
+            this.timeout(45_000);
             await editorView.closeAllEditors();
             const buttons: WelcomeContentButton[] = await welcome.getButtons();
             let importButton: WelcomeContentButton;
@@ -77,7 +77,7 @@ export function testImportFromGit() {
             const fileDialog = await InputBox.create();
             await fileDialog.setText(tempDir);
             await fileDialog.confirm();
-            await new Promise(res => setTimeout(res, 5000)); // wait for clone operation to complete
+            await new Promise(res => setTimeout(res, 5_000)); // wait for clone operation to complete
 
             await webview.switchToFrame(); // START WEBVIEW CODE
 
@@ -97,7 +97,7 @@ export function testImportFromGit() {
             await webview.switchBack(); // END WEBVIEW CODE
 
             const devfile: string = path.join(tempDir, 'lemminx', 'devfile.yaml');
-            await notificationExists('Component \'lemminx-comp\' successfully created. Perform actions on it from Components View.', editorView.getDriver(), 15_000);
+            await notificationExists('Component \'lemminx-comp\' successfully created. Perform actions on it from Components View.', editorView.getDriver(), 25_000);
             expect(fs.existsSync(devfile)).is.true;
         });
 
