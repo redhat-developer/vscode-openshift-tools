@@ -97,10 +97,14 @@ export function testImportFromGit() {
             await webview.switchBack(); // END WEBVIEW CODE
 
             const devfile: string = path.join(tempDir, 'lemminx', 'devfile.yaml');
+            //Try-catch block that ensures that the project really was not imported istead of failing on timeout error
             try {
+                //Wait for successfull notification
                 await notificationExists('Component \'lemminx-comp\' successfully created. Perform actions on it from Components View.', editorView.getDriver(), 30_000);
-            } catch(e) {
+            } catch {
+                //Check that project was not imported
                 if(!fs.existsSync(devfile)){
+                    //try to wait a little more for notification
                     await notificationExists('Component \'lemminx-comp\' successfully created. Perform actions on it from Components View.', editorView.getDriver(), 5_000);
                 }
 
