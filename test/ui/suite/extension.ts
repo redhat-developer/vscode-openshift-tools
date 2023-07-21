@@ -14,7 +14,7 @@ export function checkExtension() {
         let item: ExtensionsViewItem;
 
         before(async function () {
-            this.timeout(15000);
+            this.timeout(15_000);
             const btn = await new ActivityBar().getViewControl(VIEWS.extensions);
             await btn.openView();
             extView = await new SideBarView().getContent().getSection(VIEWS.installed) as ExtensionsViewSection;
@@ -25,10 +25,21 @@ export function checkExtension() {
             expect(item).not.undefined;
         });
 
-        it('Openshift toolkit has the correct attributes', async () => {
-            const version = await item.getVersion();
-            const author = await item.getAuthor();
-            const desc = await item.getDescription();
+        it('Openshift toolkit has the correct attributes', async function() {
+            this.timeout(10_000)
+            let version: string;
+            let author: string;
+            let desc: string;
+            try{
+                version = await item.getVersion();
+                author = await item.getAuthor();
+                desc = await item.getDescription();
+            } catch {
+                await new Promise(res => setTimeout(res, 5_000));
+                version = await item.getVersion();
+                author = await item.getAuthor();
+                desc = await item.getDescription();
+            }
 
             expect(version).equals(pjson.version);
             expect(author).equals(pjson.author);
