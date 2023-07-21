@@ -37,18 +37,21 @@ function SelectStrategy({ setCurrentView }) {
             >
                 <OptionCard
                     pageId="fromLocalCodeBase"
+                    description="Create component from an existing codebase on your local machine."
                     setCurrentView={setCurrentView}
                     title="From Existing Local Codebase"
                     icon={FolderOpenIcon}
                 />
                 <OptionCard
                     pageId="fromExistingGitRepo"
+                    description="Create component by importing code from an existing Git repository."
                     setCurrentView={setCurrentView}
                     title="From Existing Remote Git Repository"
                     icon={GitHubIcon}
                 />
                 <OptionCard
                     pageId="devfileSearch"
+                    description="Create component by selecting a devfile and template project."
                     setCurrentView={setCurrentView}
                     title="From Template Project"
                     icon={ConstructionIcon}
