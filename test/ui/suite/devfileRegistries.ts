@@ -15,21 +15,21 @@ export function testDevfileRegistries() {
         let driver: WebDriver;
 
         before(async function context() {
-            this.timeout(10000);
+            this.timeout(10_000);
             driver = VSBrowser.instance.driver;
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
-            await new Promise(res => setTimeout(res, 5000));
+            await new Promise(res => setTimeout(res, 5_000));
             await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
             registrySection = await view.getContent().getSection(VIEWS.compRegistries);
         });
 
         it('registry actions are available', async function test() {
-            this.timeout(5000);
+            this.timeout(5_000);
             expect(await Promise.all((await registrySection.getActions()).map(async item => await item.getLabel()))).to.has.members(['Add Registry', 'Open Registry View', 'Refresh Components Types View']);
         });
 
         it('default Devfile registry is present', async function test() {
-            this.timeout(5000);
+            this.timeout(5_000);
             await registrySection.expand();
             const registry = await registrySection.findItem(VIEWS.devFileRegistry);
             expect(registry).not.undefined;
@@ -37,7 +37,7 @@ export function testDevfileRegistries() {
         });
 
         it('add new Devfile registry', async function test() {
-            this.timeout(10000);
+            this.timeout(20_000);
             const addAction = await registrySection.getAction('Add Registry');
             await addAction.click();
             const input = await InputBox.create();
@@ -49,15 +49,20 @@ export function testDevfileRegistries() {
             await input.confirm();
             // pick unsecured registry
             await input.selectQuickPick('No');
-            await new Promise((res) => { setTimeout(res, 5000); });
+            await new Promise((res) => { setTimeout(res, 5_000); });
             // check registry exists
             await registrySection.expand();
-            const stageRegistry = await (registrySection as CustomTreeSection).findItem('stageRegistry');
+            let stageRegistry = await (registrySection as CustomTreeSection).findItem('stageRegistry');
+            //If statement for greater timeout in cases where loading takes more time than expected
+            if(stageRegistry === undefined) {
+                await new Promise((res) => { setTimeout(res, 10_000); });
+                stageRegistry = await (registrySection as CustomTreeSection).findItem('stageRegistry');
+            }
             expect(stageRegistry).not.undefined;
         });
 
         it('edit existing Devfile registry', async function test() {
-            this.timeout(10000);
+            this.timeout(20_000);
             await registrySection.expand();
             const stageRegistry = await (registrySection as CustomTreeSection).findItem('stageRegistry');
             const menu = await stageRegistry.openContextMenu();
@@ -71,15 +76,20 @@ export function testDevfileRegistries() {
             await input.confirm();
             // pick unsecured registry
             await input.selectQuickPick('No');
-            await new Promise((res) => { setTimeout(res, 5000); });
+            await new Promise((res) => { setTimeout(res, 5_000); });
             // check registry exists
             await registrySection.expand();
-            const editedRegistry = await (registrySection as CustomTreeSection).findItem('editedRegistry');
+            let editedRegistry = await (registrySection as CustomTreeSection).findItem('editedRegistry');
+            //If statement for greater timeout in cases where loading takes more time than expected
+            if(editedRegistry === undefined) {
+                await new Promise((res) => { setTimeout(res, 10_000); });
+                editedRegistry = await (registrySection as CustomTreeSection).findItem('editedRegistry');
+            }
             expect(editedRegistry).not.undefined;
         });
 
         it('remove Devfile registry', async function test() {
-            this.timeout(10000);
+            this.timeout(10_000);
             await registrySection.expand();
             let stageRegistry = await registrySection.findItem('editedRegistry');
             const menu = await stageRegistry.openContextMenu();
@@ -87,13 +97,13 @@ export function testDevfileRegistries() {
             // find and confirm notification about registry deletion
             const notification = await notificationExists('Remove registry \'editedRegistry\'?', driver);
             await notification.takeAction('Yes');
-            await new Promise((res) => { setTimeout(res, 2000); });
+            await new Promise((res) => { setTimeout(res, 2_000); });
             stageRegistry = await registrySection.findItem('editedRegistry');
             expect(stageRegistry).is.undefined;
         });
 
         it('open Devfile registry view from Section action', async function test() {
-            this.timeout(10000);
+            this.timeout(10_000);
             await (await registrySection.getAction('Open Registry View')).click();
             // open editor tab by title
             const editorView = new EditorView();
@@ -102,13 +112,13 @@ export function testDevfileRegistries() {
         });
 
         it('open Devfile registry view from item\'s context menu and verify the content of the registry', async function test() {
-            this.timeout(10000);
+            this.timeout(10_000);
             await new EditorView().closeAllEditors();
             const devfileRegistry = await registrySection.findItem('DefaultDevfileRegistry');
             await devfileRegistry.select();
             const menu = await devfileRegistry.openContextMenu();
             await (await menu.getItem('Open in Editor')).select();
-            await new Promise((res) => { setTimeout(res, 3000); });
+            await new Promise((res) => { setTimeout(res, 3_000); });
             // check opened editor tab by title
             const editorView = new EditorView();
             const editor = await editorView.openEditor('Devfile Registry - DefaultDevfileRegistry');
@@ -120,7 +130,7 @@ export function testDevfileRegistries() {
         });
 
         after(async function context() {
-            this.timeout(10000);
+            this.timeout(10_000);
             await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
             await new EditorView().closeAllEditors();
         });
