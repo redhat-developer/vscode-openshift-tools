@@ -10,7 +10,8 @@ import * as esbuild from 'esbuild';
 import { sassPlugin } from 'esbuild-sass-plugin';
 import * as fs from 'node:fs/promises';
 import process from 'node:process';
-import * as cp from 'node:child_process'
+import * as cp from 'node:child_process';
+import svgr from 'esbuild-plugin-svgr';
 
 // This script runs tsc and esbuild in parallel when there are filesystem changes.
 // It outputs predictable markers for the beginning and ending of the compilation,
@@ -46,7 +47,12 @@ await Promise.all(
                 '.png': 'file',
                 '.svg': 'file',
             },
-            plugins: [sassPlugin()],
+            plugins: [
+                sassPlugin(),
+                svgr({
+                    plugins: ['@svgr/plugin-jsx']
+                }),
+            ],
         });
         contexts.push(ctx);
     }),
