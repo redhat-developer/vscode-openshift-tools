@@ -15,6 +15,7 @@ import { OdoImpl } from '../../odo';
 import { AnalyzeResponse, ComponentTypeDescription } from '../../odo/componentType';
 import { Endpoint } from '../../odo/componentTypeDescription';
 import { ComponentTypesView } from '../../registriesView';
+import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { DevfileConverter } from '../../util/devfileConverter';
 import { gitUrlParse } from '../../util/gitParse';
@@ -66,6 +67,7 @@ export default class CreateComponentLoader {
         });
 
         panel.onDidDispose(() => {
+            sendTelemetry('newComponentClosed');
             colorThemeDisposable.dispose();
             messageHandlerDisposable.dispose();
             CreateComponentLoader.panel = undefined;
@@ -214,7 +216,7 @@ export default class CreateComponentLoader {
                         // from template project
                         const { projectFolder } = message.data;
                         const templateProject: TemplateProjectIdentifier = message.data.templateProject;
-                        const componentFolder = path.join(projectFolder, componentName);
+                        componentFolder = path.join(projectFolder, componentName);
                         await fs.mkdir(componentFolder);
                         await OdoImpl.Instance.createComponentFromTemplateProject(
                             componentFolder,
@@ -223,19 +225,25 @@ export default class CreateComponentLoader {
                             templateProject.registryName,
                             templateProject.templateProjectName,
                         );
+                        await sendTelemetry('newComponentCreated', { strategy: 'fromTemplateProject', component_type: templateProject.devfileId, starter_project: templateProject.templateProjectName});
                     } else {
+                        let strategy: string;
                         // from local codebase or existing git repo
                         if (message.data.path) {
                             // path of project in local codebase
+                            strategy = 'fromLocalCodebase';
                             componentFolder = message.data.path;
                         } else if (message.data.gitDestinationPath) {
                             // move the cloned git repo to selected project path
+                            strategy = 'fromGitRepo';
                             componentFolder = path.join(message.data.gitDestinationPath, componentName);
                             await fs.mkdir(componentFolder);
                             await fse.copy(message.data.tmpDirUri.fsPath, componentFolder);
                             await fs.rm(message.data.tmpDirUri.fsPath, { force: true, recursive: true });
                         }
-                        await OdoImpl.Instance.createComponentFromLocation(getDevfileType(message.data.devfileDisplayName), componentName, Uri.file(componentFolder));
+                        const devfileType = getDevfileType(message.data.devfileDisplayName);
+                        await OdoImpl.Instance.createComponentFromLocation(devfileType, componentName, Uri.file(componentFolder));
+                        await sendTelemetry('newComponentCreated', { strategy, component_type: devfileType});
                     }
                     CreateComponentLoader.panel.dispose();
                     if (vscode.workspace.workspaceFolders?.some(folder => folder.uri.path === componentFolder)) {
@@ -258,6 +266,7 @@ export default class CreateComponentLoader {
                         }
                     }
                 } catch (err) {
+                    await sendTelemetry('newComponentCreationFailed', { error: JSON.stringify(err) });
                     void vscode.window.showErrorMessage(err);
                     void CreateComponentLoader.panel.webview.postMessage({
                         action: 'createComponentFailed',
@@ -383,7 +392,7 @@ async function isDevfileExists(uri: vscode.Uri): Promise<boolean> {
 }
 
 function validateGitURL(event: any) {
-    if (event.data.trim().length === 0) {
+    if ((typeof event.data) === 'string' && (event.data as string).trim().length === 0) {
         CreateComponentLoader.panel?.webview.postMessage({
             action: event.action,
             data: {
