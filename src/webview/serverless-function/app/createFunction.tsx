@@ -14,6 +14,8 @@ import QuarkusIcon from '../../../../images/serverlessfunctions/quarkus.svg';
 import RustIcon from '../../../../images/serverlessfunctions/rust.svg';
 import SpringBootIcon from '../../../../images/serverlessfunctions/spring boot.svg';
 import TypeScriptIcon from '../../../../images/serverlessfunctions/typescript.svg';
+import AddIcon from '@mui/icons-material/Add';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import './home.scss';
 
 export class CreateFunction extends React.Component<CreateFunctionPageProps, {
@@ -109,7 +111,6 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
     }
 
     handleWsFolderDropDownChange = (_e: any, value: Uri | string): void => {
-        console.log('VAlue:::', value);
         if (typeof value === 'string' && value === 'New Folder') {
             VSCodeMessage.postMessage({
                 action: 'selectFolder',
@@ -187,11 +188,10 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
         folders.push(...wsFolderItems);
         const filter = createFilterOptions<string>();
         const imageRegex = RegExp('[^/]+\\.[^/.]+\\/([^/.]+)(?:\\/[\\w\\s._-]*([\\w\\s._-]))*(?::[a-z0-9\\.-]+)?$');
-
         return (
             <>
                 <FormControl sx={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
-                    <FormControl sx={{ width: 190 }}>
+                    <FormControl sx={{ width: 200 }}>
                         <Button variant='contained'
                             disabled={true}
                             className='labelStyle'>
@@ -218,7 +218,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         helperText={functionData.helpText} />
                 </FormControl>
                 <FormControl sx={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
-                    <FormControl sx={{ width: 190 }}>
+                    <FormControl sx={{ width: 200 }}>
                         <Button variant='contained'
                             disabled={true}
                             className='labelStyle'>
@@ -284,7 +284,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                     />
                 </FormControl>
                 <FormControl sx={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
-                    <FormControl sx={{ width: 190 }}>
+                    <FormControl sx={{ width: 200 }}>
                         <Button variant='contained'
                             disabled={true}
                             className='labelStyle'>
@@ -320,7 +320,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                     />
                 </FormControl>
                 <FormControl sx={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
-                    <FormControl sx={{ width: 190 }}>
+                    <FormControl sx={{ width: 200 }}>
                         <Button variant='contained'
                             disabled={true}
                             className='labelStyle'>
@@ -351,7 +351,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                     />
                 </FormControl>
                 <FormControl style={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 1.2 }}>
-                    <FormControl sx={{ width: 190 }}>
+                    <FormControl sx={{ width: 200 }}>
                         <Button variant='contained'
                             disabled={true}
                             className='labelStyle'>
@@ -371,7 +371,24 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                                 {children}
                             </Paper>
                         )}
-                        renderOption={(props, option) => <li {...props}>{typeof option === 'string' ? option : option.fsPath}</li>}
+                        getOptionLabel={(option: string | Uri) => typeof option === 'string' ? option : option.fsPath}
+                        renderOption={(props, option) =>
+                            <li {...props}>
+                                <Stack direction='row' alignItems='center' gap={1}>
+                                    {
+                                        typeof option === 'string' ?
+                                        <>
+                                        <AddIcon />
+                                        <Typography variant='body1'>{option}</Typography>
+                                        </> :
+                                        <>
+                                        <FolderOpenIcon />
+                                        <Typography variant='body1'>{option.fsPath}</Typography>
+                                        </>
+                                    }
+                                </Stack>
+                            </li>
+                        }
                         fullWidth
                         disableClearable
                         renderInput={(params) => (
@@ -379,7 +396,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         )}
                     />
                 </FormControl>
-                <FormControl sx={{ margin: '2rem 0 0 2rem', width: 100 }}>
+                <FormControl sx={{ margin: '2rem 0 2rem 2rem', width: 650 }}>
                     <Button variant='contained'
                         disabled={this.handleCreateBtnDisable()}
                         className='buttonStyle'

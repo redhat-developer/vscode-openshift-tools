@@ -1515,10 +1515,6 @@
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild)$/"
 				},
 				{
-					"command": "openshift.Serverless.deploy",
-					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild)$/"
-				},
-				{
 					"command": "openshift.Serverless.buildAndRun",
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild)$/"
 				},

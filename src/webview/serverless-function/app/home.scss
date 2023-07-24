@@ -39,7 +39,7 @@ button {
     text-overflow: ellipsis;
     color: var(--vscode-button-foreground);
     width: 3rem;
-
+    height: 2.5rem !important;
     &:hover {
         background-color: '#BE0000' !important;
     }

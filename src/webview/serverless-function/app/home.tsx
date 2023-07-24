@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as React from 'react';
 import { Uri } from 'vscode';
-import { Typography } from '@mui/material';
+import { Box, Container, Typography } from '@mui/material';
 import { VSCodeMessage } from './vsCodeMessage';
 import { DefaultProps } from '../../common/propertyTypes';
 import { CreateFunction } from './createFunction';
@@ -40,7 +40,20 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
                 <div className='subTitle'>
                     <Typography>The OpenShift Serverless Functions enables developers to easily create, build, run, invoke and deploy stateless, event-driven functions as Knative Services through the guided workflow via the extension</Typography>
                 </div>
-                <CreateFunction onCreateSubmit={this.handleCreateSubmit} />
+                <Container maxWidth='md' sx={{
+                    border: '1px groove var(--vscode-activityBar-activeBorder)',
+                    borderRadius: '1rem', margin: 'auto', backgroundColor: '#101418',
+                    color: '#99CCF3'
+                }}>
+                    <Box
+                        display="flex"
+                        alignItems="center"
+                        maxWidth={'md'}
+                        flexDirection={'column'}
+                    >
+                        <CreateFunction onCreateSubmit={this.handleCreateSubmit} />
+                    </Box>
+                </Container>
             </div>
         )
     }
