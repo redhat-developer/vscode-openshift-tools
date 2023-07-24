@@ -90,7 +90,7 @@ export async function selectWorkspaceFolder(skipWindowPick = false, label?: stri
             return selectWorkspaceFolder(skipWindowPick);
         } else if(folderName && fs.existsSync(path.join(selectedFolders[0].fsPath, folderName))) {
             void window.showInformationMessage(
-                `The folder ${folderName} already exists,  Please select a different folder.`,
+                `The folder ${folderName} already exists. Please select a different folder.`,
             );
             return selectWorkspaceFolder(skipWindowPick, label, folderName);
         }

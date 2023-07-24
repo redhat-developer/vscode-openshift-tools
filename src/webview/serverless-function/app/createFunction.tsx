@@ -2,13 +2,19 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import React from 'react';
+import React, { FunctionComponent, SVGAttributes } from 'react';
 import { Uri } from 'vscode';
-import { Autocomplete, Button, FormControl, TextField, createFilterOptions } from '@mui/material';
+import { Autocomplete, Button, FormControl, Paper, Stack, SvgIcon, TextField, Typography, createFilterOptions } from '@mui/material';
 import { VSCodeMessage } from './vsCodeMessage';
 import { CreateFunctionPageProps } from '../../common/propertyTypes';
+import GoIcon from '../../../../images/serverlessfunctions/go.svg';
+import NodeIcon from '../../../../images/serverlessfunctions/node.svg';
+import PythonIcon from '../../../../images/serverlessfunctions/python.svg';
+import QuarkusIcon from '../../../../images/serverlessfunctions/quarkus.svg';
+import RustIcon from '../../../../images/serverlessfunctions/rust.svg';
+import SpringBootIcon from '../../../../images/serverlessfunctions/spring boot.svg';
+import TypeScriptIcon from '../../../../images/serverlessfunctions/typescript.svg';
 import './home.scss';
-
 
 export class CreateFunction extends React.Component<CreateFunctionPageProps, {
     functionData: {
@@ -153,6 +159,27 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
             this.convert(this.state.language), this.convert(this.state.template), this.state.wsFolderPath, this.state.imageData.name)
     }
 
+    getIcon = (option: string): FunctionComponent<SVGAttributes<SVGElement>> => {
+        switch (option.toLowerCase()) {
+            case 'go':
+                return GoIcon;
+            case 'node':
+                return NodeIcon;
+            case 'python':
+                return PythonIcon;
+            case 'quarkus':
+                return QuarkusIcon;
+            case 'spring boot':
+                return SpringBootIcon;
+            case 'rust':
+                return RustIcon;
+            case 'typescript':
+                return TypeScriptIcon;
+            default:
+                return undefined;
+        }
+    }
+
     render(): React.ReactNode {
         const { wsFolderItems, wsFolderPath, functionData, templates, language, template, images, imageData } = this.state;
         const languages = ['Go', 'Node', 'Python', 'Quarkus', 'Rust', 'Spring Boot', 'TypeScript'];
@@ -160,14 +187,15 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
         folders.push(...wsFolderItems);
         const filter = createFilterOptions<string>();
         const imageRegex = RegExp('[^/]+\\.[^/.]+\\/([^/.]+)(?:\\/[\\w\\s._-]*([\\w\\s._-]))*(?::[a-z0-9\\.-]+)?$');
+
         return (
             <>
                 <FormControl sx={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
-                    <FormControl sx={{ width: 180 }}>
+                    <FormControl sx={{ width: 190 }}>
                         <Button variant='contained'
                             disabled={true}
                             className='labelStyle'>
-                            Function Name*
+                            Function Name *
                         </Button>
                     </FormControl>
                     <TextField
@@ -190,7 +218,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         helperText={functionData.helpText} />
                 </FormControl>
                 <FormControl sx={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
-                    <FormControl sx={{ width: 180 }}>
+                    <FormControl sx={{ width: 190 }}>
                         <Button variant='contained'
                             disabled={true}
                             className='labelStyle'>
@@ -235,6 +263,14 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
 
                             return filtered;
                         }}
+                        PaperComponent={({ children }) => (
+                            <Paper sx={{
+                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                color: 'var(--vscode-settings-textInputForeground)'
+                            }}>
+                                {children}
+                            </Paper>
+                        )}
                         id='image-dropdown'
                         options={images}
                         renderOption={(props, option) => <li {...props}>{option}</li>}
@@ -243,12 +279,12 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         fullWidth
                         renderInput={(params) => (
                             <TextField {...params}
-                                placeholder='Provide image name (podman, docker, quay)' error={imageData.error} helperText={imageData.helpText} />
+                                placeholder='Provide full image name (podman, docker, quay)' error={imageData.error} helperText={imageData.helpText} />
                         )}
                     />
                 </FormControl>
                 <FormControl sx={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
-                    <FormControl sx={{ width: 180 }}>
+                    <FormControl sx={{ width: 190 }}>
                         <Button variant='contained'
                             disabled={true}
                             className='labelStyle'>
@@ -260,16 +296,31 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         id='language-dropdown'
                         options={languages}
                         onChange={(e, v) => this.handleDropDownChange(e, v, true)}
-                        renderOption={(props, option) => <li {...props}>{option}</li>}
+                        PaperComponent={({ children }) => (
+                            <Paper sx={{
+                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                color: 'var(--vscode-settings-textInputForeground)'
+                            }}>
+                                {children}
+                            </Paper>
+                        )}
+                        renderOption={(params, option) =>
+                            <li {...params}>
+                                <Stack direction='row' alignItems='center' gap={1}>
+                                    <SvgIcon component={this.getIcon(option)} inheritViewBox />
+                                    <Typography variant='body1'>{option}</Typography>
+                                </Stack>
+                            </li>
+                        }
                         fullWidth
                         disableClearable
                         renderInput={(params) => (
-                            <TextField {...params} placeholder='Select the language' />
+                            <TextField {...params} placeholder='Select the Language Runtime' />
                         )}
                     />
                 </FormControl>
                 <FormControl sx={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
-                    <FormControl sx={{ width: 180 }}>
+                    <FormControl sx={{ width: 190 }}>
                         <Button variant='contained'
                             disabled={true}
                             className='labelStyle'>
@@ -283,16 +334,24 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         options={templates}
                         disabled={language?.length === 0}
                         onChange={(e, v) => this.handleDropDownChange(e, v)}
+                        PaperComponent={({ children }) => (
+                            <Paper sx={{
+                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                color: 'var(--vscode-settings-textInputForeground)'
+                            }}>
+                                {children}
+                            </Paper>
+                        )}
                         renderOption={(props, option) => <li {...props}>{option}</li>}
                         fullWidth
                         disableClearable
                         renderInput={(params) => (
-                            <TextField {...params} placeholder='Select the template based on the language selected' />
+                            <TextField {...params} placeholder='Select the Function template' />
                         )}
                     />
                 </FormControl>
-                <FormControl style={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
-                    <FormControl sx={{ width: 180 }}>
+                <FormControl style={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 1.2 }}>
+                    <FormControl sx={{ width: 190 }}>
                         <Button variant='contained'
                             disabled={true}
                             className='labelStyle'>
@@ -304,11 +363,19 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         id='folder-dropdown'
                         options={folders}
                         onChange={(e, v) => this.handleWsFolderDropDownChange(e, v)}
+                        PaperComponent={({ children }) => (
+                            <Paper sx={{
+                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                color: 'var(--vscode-settings-textInputForeground)'
+                            }}>
+                                {children}
+                            </Paper>
+                        )}
                         renderOption={(props, option) => <li {...props}>{typeof option === 'string' ? option : option.fsPath}</li>}
                         fullWidth
                         disableClearable
                         renderInput={(params) => (
-                            <TextField {...params} placeholder='Provide the folder to add the function files' />
+                            <TextField {...params} placeholder='Select the folder to initialise the function at that path' />
                         )}
                     />
                 </FormControl>

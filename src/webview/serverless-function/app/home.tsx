@@ -38,7 +38,7 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
                     <Typography variant='h5'>Serverless Function</Typography>
                 </div>
                 <div className='subTitle'>
-                    <Typography>The OpenShift Serverless Functions support enables developers to create, build, run, invoke and deploy serverless functions on OpenShift, providing a seamless development experience with the latest kn and func CLI tool integrated.</Typography>
+                    <Typography>The OpenShift Serverless Functions enables developers to easily create, build, run, invoke and deploy stateless, event-driven functions as Knative Services through the guided workflow via the extension</Typography>
                 </div>
                 <CreateFunction onCreateSubmit={this.handleCreateSubmit} />
             </div>
